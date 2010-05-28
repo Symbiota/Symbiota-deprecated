@@ -1,0 +1,324 @@
+/*
+colors:
+tan side bar: #CCCC99;
+blue lines: #669999;
+red: #990000
+*/
+
+body{
+	margin:	8px;
+	background-color: #FFFFFF;
+	color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+/*Main table framework*/
+#maintable{
+	border-spacing: 0px;
+	width:		650px; 
+	height:		400px;
+}
+
+#maintable td{
+	padding:		0px;	
+ 	vertical-align: top;
+}
+
+td.header{
+	font-size: 		11px;
+	font-weight: 	bold;
+}
+
+td.header a{
+	color: black;
+}
+
+td.header a:hover{
+	color: #990000;
+}
+
+td.middleleft{
+	width:	160px;	
+}
+
+td.middlecenter{
+ 	width:			590px;
+ 	height:			350px;		
+}
+
+td.middleright{
+}
+
+td.footer{
+}
+
+/*Left menu components*/
+div.menuheader{
+	margin-bottom:	15px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+div.menuheader a{
+	color: black;
+    text-decoration: none;
+}
+
+div.menuheader a:hover {
+	color: white;
+    text-decoration: underline;
+}
+
+div.menuitem {
+	font-size: 12px;
+	font-weight: bold;
+	margin: 5px 0px 0px 10px;
+}
+
+div.menuitem a {
+	color: #669999;
+    text-decoration: none;	
+}
+
+div.menuitem a:hover {
+	color: white;
+    text-decoration: underline;
+}
+
+
+/*Central div in the middle center table div */
+div#innertext{
+	margin:	15px;	
+	font-size: 12px;
+}
+
+div#innertext div{
+	font: inherit;
+}
+
+div#innertext a{
+	font-family: Arial, Helvetica, sans-serif;
+	color: 		#2C405E;
+    text-decoration: none;	
+}
+div#innertext a:hover{
+	color: black;
+    text-decoration: underline;
+}
+
+
+/* /checklists/ folder pages */
+#checklisteditform div{
+	margin-top:	2px;
+}
+
+#checklisteditform span{
+	font-weight:	bold;
+}
+
+#addspeciesform div{
+	margin-top:	2px;
+}
+
+#cloptiondiv{
+	margin:		5px;
+	width:		250px;
+	text-align:	left;
+	float:		right;
+}
+
+#taxonfilterdiv{
+	padding:			5px;
+	background-color:	#FFFFCC;
+	border:				1px solid;
+}
+
+#taxonfilterdiv{
+	 margin:	3px;
+}
+
+div.tnimg{
+	width:200px;
+	height:200px;
+	border:1px solid black;	
+}
+
+
+/* /collections/ folder pages */
+#omlisttable{
+	 width:	610px;
+}
+
+#omlisttable img{
+    border: medium double #990000;
+}
+
+/*Download buttons on the search display pages*/
+div.button {
+	background-color:	#FFFFD7;
+	padding:			3px;
+	border:				1px outset #A0A0A0;
+}
+
+div.button img {
+	border:	0px;	
+}
+
+div.button:hover {
+	border:	1px inset #A0A0A0;
+}
+
+/* Tabs located on the Collection Search display pages (checklists, list, map) */
+#tabdiv{
+	padding:0px;
+	border: 0px;
+	width:	600px;
+	height:	27px;
+	margin-top:	15px;
+}
+#tabdiv div{
+	float:left;
+	padding-top:3px;
+	text-align: center;
+	background-repeat: no-repeat;
+}
+#tabdiv div.fronttab{
+	height:		100%;
+	border-top: solid 2px #BDD3D1;
+	width:		150px;
+	font-size: 	14px;
+	font-weight:bold;
+}
+div.frontendtab{
+}
+div.midleft{
+	height:	100%;
+	width:29px;
+	border-bottom: solid 2px #BDD3D1;
+	background-image: url("../images/tabs/tabcrack2_baseline.gif");
+}
+html>body div.midleft{
+	height:22px;
+} 
+div.midright{
+	height:	100%;
+	width:29px;
+	border-bottom: solid 2px #BDD3D1;
+	background-image: url("../images/tabs/tabcrack3_baseline.gif");
+}
+html>body div.midright{
+	height:22px;
+} 
+div.backtab{
+	height:	100%;
+	width:	150px;
+	border-bottom: solid 2px #BDD3D1;
+	border-top: solid 2px #BDD3D1;
+}
+html>body div.backtab{
+	height:20px;
+} 
+div.backtab a{
+	color: #000000;
+	font-size: 11px;
+	font-weight:bold;
+}
+div.backtab a:hover{
+	color: #669999;
+}
+div.backendleft{
+	height:	100%;
+	background-image: url("../images/tabs/tableft.gif");
+	width:	29px;
+	border-bottom: solid 2px #BDD3D1;
+}
+html>body div.backendleft{
+	height:22px;
+} 
+div.backendright{
+	height:	100%;
+	background-image: url("../images/tabs/tabright.gif");
+	width:	29px;
+	border-bottom: solid 2px #BDD3D1;
+}
+html>body div.backendright{
+	height:22px;
+} 
+
+
+/*Misc general items*/
+table{
+	border:	0px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+h1{
+	color: #990000;
+	font-size: 18px;
+}
+
+h2{
+	color: black;
+	font-size: 16px;
+}
+
+h3{
+	color: black;
+	font-size: 14px;
+}
+
+hr{
+	color: #BDD3D1;
+}
+
+/*  navpath styles */
+div.navpath {
+	color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+div.navpath a {
+	font-size: 11px;
+	color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+div.navpath a:hover {
+	color: #990000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+/*Fieldset-like divs */
+div.fieldset {
+	position:	relative;
+	margin-top:	15px;
+	border:		1px solid #75736E;
+	padding: 	15px 10px 10px 10px;
+}
+
+div.legend {
+	padding-left: 	5px;
+	padding-right: 	5px;
+	font-weight: 	bold;
+	font-size:		110%;
+	background: 	#FFF;
+	position:		absolute;
+	top:			-10px;
+	left:			15px;
+}
+
+div.genericpopup{
+	position:				absolute;
+	display:				none;
+	width:					300px;
+	background-color:		#EFEFEF;
+	padding:				10px;
+	-moz-border-radius: 	5px;
+	-webkit-border-radius: 	5px;
+	border:					black solid 3px;
+}
+

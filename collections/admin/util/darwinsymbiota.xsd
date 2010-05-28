@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
+	xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" 
+	xmlns:dc14="http://rs.tdwg.org/dwc/tdwg_dw_core.xsd" 
+	xmlns:simpledc="http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd" 
+	elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd"/>
+	<xsd:element name="record">
+		<xsd:annotation>
+			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="dc14:GlobalUniqueIdentifier"/>
+				<xsd:element ref="darwin:DateLastModified"/>
+				<xsd:element ref="darwin:InstitutionCode"/>
+				<xsd:element ref="darwin:CollectionCode"/>
+				<xsd:element ref="darwin:CatalogNumber"/>
+				<xsd:element ref="dc14:CatalogNumberNumeric"/>
+				<xsd:element ref="dc14:CatalogNumberText"/>
+				<xsd:element ref="dc14:Remarks"/>
+				<xsd:element ref="darwin:ScientificName"/>
+				<xsd:element ref="darwin:Family"/>
+				<xsd:element ref="darwin:Genus"/>
+				<xsd:element ref="dc14:SpecificEpithet"/>
+				<xsd:element ref="darwin:Species"/>
+				<xsd:element ref="dc14:InfraspecificRank"/>
+				<xsd:element ref="dc14:InfraspecificEpithet"/>
+				<xsd:element ref="darwin:Subspecies"/>
+				<xsd:element ref="dc14:AuthorYearOfScientificName"/>
+				<xsd:element ref="darwin:ScientificNameAuthor"/>
+				<xsd:element ref="dc14:IdentificationQualifier"/>
+				<xsd:element ref="dc14:IdentificationModifier"/>
+				<xsd:element ref="darwin:Country"/>
+				<xsd:element ref="darwin:StateProvince"/>
+				<xsd:element ref="darwin:County"/>
+				<xsd:element ref="darwin:Locality"/>
+				<xsd:element ref="dc14:MinimumElevationInMeters"/>
+				<xsd:element ref="dc14:MaximumElevationInMeters"/>
+				<xsd:element ref="darwin:MinimumElevation"/>
+				<xsd:element ref="darwin:MaximumElevation"/>
+				<xsd:element ref="dc14:VerbatimElevation"/>
+				<xsd:element ref="darwin:YearCollected"/>
+				<xsd:element ref="darwin:MonthCollected"/>
+				<xsd:element ref="darwin:DayCollected"/>
+				<xsd:element ref="dc14:EarliestDateCollected"/>
+				<xsd:element ref="dc14:LatestDateCollected"/>
+				<xsd:element ref="dc14:VerbatimCollectingDate"/>
+				<xsd:element ref="darwin:Collector"/>
+				<xsd:element ref="dc14:Attributes"/>
+				<xsd:element ref="dc14:DecimalLatitude"/>
+				<xsd:element ref="dc14:DecimalLongitude"/>
+				<xsd:element ref="darwin:Latitude"/>
+				<xsd:element ref="darwin:Longitude"/>
+				<xsd:element ref="dc14:GeodeticDatum"/>
+				<xsd:element ref="dc14:HorizontalDatum"/>
+				<xsd:element ref="dc14:CoordinateUncertaintyInMeters"/>
+				<xsd:element ref="darwin:CoordinatePrecision"/>
+				<xsd:element ref="dc14:VerbatimCoordinates"/>
+				<xsd:element ref="dc14:VerbatimLatitude"/>
+				<xsd:element ref="dc14:VerbatimLongitude"/>
+				<xsd:element ref="dc14:VerbatimCoordinateSystem"/>
+				<xsd:element ref="dc14:OriginalCoordinateSystem"/>
+				<xsd:element ref="dc14:GeoreferenceProtocol"/>
+				<xsd:element ref="dc14:GeoreferenceMethod"/>
+				<xsd:element ref="dc14:GeoreferenceSources"/>
+				<xsd:element ref="dc14:GeoreferenceVerificationStatus"/>
+				<xsd:element ref="dc14:GeoreferenceRemarks"/>
+				<xsd:element ref="darwin:IdentifiedBy"/>
+				<xsd:element ref="dc14:DateIdentified"/>
+				<xsd:element ref="darwin:CollectorNumber"/>
+				<xsd:element ref="darwin:FieldNumber"/>
+				<xsd:element ref="dc14:FieldNotes"/>
+				<xsd:element ref="darwin:Notes"/>
+				<xsd:element ref="darwin:TypeStatus"/>
+				<xsd:element ref="dc14:RelatedCatalogedItems"/>
+				<xsd:element ref="dc14:RelatedInformation"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>
