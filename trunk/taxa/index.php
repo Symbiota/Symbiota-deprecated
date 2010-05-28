@@ -1,0 +1,564 @@
+<?php
+/*
+ * Created on Jun 11, 2006
+ * By E.E. Gilbert
+ */
+ //error_reporting(0);
+ Header('Content-Type: text/html; charset=ISO-8859-1');
+ include_once("TPManager.php");
+ include_once("../util/symbini.php");
+ 
+ $descrDisplayLevel;
+ $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+ $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
+ $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
+ $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+ $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
+ $descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
+ 
+ if(!$projValue && !$clValue) $projValue = $defaultProjId;
+ 
+ $taxonManager = new TPData();
+ if($taxAuthId || $taxAuthId === "0") {
+ 	$taxonManager->setTaxAuthId($taxAuthId);
+ }
+ if($clValue) $taxonManager->setClName($clValue);
+ if($projValue) $taxonManager->setProj($projValue);
+ if($lang) $taxonManager->setLanguage($lang);
+ if($taxonValue) $taxonManager->setTaxon($taxonValue);
+ $spDisplay = $taxonManager->getDisplayName();
+ $taxonRank = $taxonManager->getRankId();
+ 
+ $editable = false;
+ if(isset($userRights) && $userRights && $isAdmin){
+ 	$editable = true;
+ }
+ $descr = Array();
+ 
+?>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta name='keywords' content='virtual flora,<?php echo $spDisplay; ?>' />
+	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
+	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
+	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
+	<SCRIPT LANGUAGE="JavaScript">
+
+		var imageArr = new Array();
+		var imgCnt = 0;
+		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
+		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
+	
+		function toggle(target){
+			var spanObjs = document.getElementsByTagName("span");
+			for (i = 0; i < spanObjs.length; i++) {
+				var obj = spanObjs[i];
+				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
+					if(obj.style.display=="none"){
+						obj.style.display="inline";
+					}
+					else {
+						obj.style.display="none";
+					}
+				}
+			}
+	
+			var divObjs = document.getElementsByTagName("div");
+			for (i = 0; i < divObjs.length; i++) {
+				var obj = divObjs[i];
+				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
+					if(obj.style.display=="none"){
+						obj.style.display="inline";
+					}
+					else {
+						obj.style.display="none";
+					}
+				}
+			}
+		}
+	
+		function toggleMap(mapObj){
+			var roi = mapObj.value;
+			var mapObjs = getElementByTagName("div");
+			for(x=0;x<mapObjs;x++){
+				var mObj = mapObjs[x];
+				if(mObj.classname == "mapdiv"){
+					if(mObj == mapObj){
+						mObj.style.display = "block";
+					}
+					else{
+						mObj.style.display = "none";
+					}
+				}
+			}
+		}
+		
+		function toggleImgInfo(target, anchorObj){
+			var obj = document.getElementById(target);
+			var pos = findPos(anchorObj);
+			var posLeft = pos[0];
+			if(posLeft > 550){
+				posLeft = 550;
+			}
+			obj.style.left = posLeft + 10;
+			obj.style.top = pos[1] - 70;
+			if(obj.style.display=="block"){
+				obj.style.display="none";
+			}
+			else {
+				obj.style.display="block";
+			}
+			var targetStr = "document.getElementById('" + target + "').style.display='none'";
+			var t=setTimeout(targetStr,10000);
+		}
+		
+		function findPos(obj){
+			var curleft = 0; 
+			var curtop = 0;
+			if(obj.offsetParent) {
+				do{
+					curleft += obj.offsetLeft;
+					curtop += obj.offsetTop;
+				}while(obj = obj.offsetParent);
+			}
+			return [curleft,curtop];
+		}	
+		
+		function decreaseDescrLevel(){
+			var getLevel = false;
+			var newLevelArr = levelArr.slice(0);
+			newLevelArr.reverse();
+			for(x in newLevelArr){
+				if(getLevel){
+					var targetLevel = newLevelArr[x];
+					currentLevel = targetLevel;
+					changeDescrLevel();
+					document.getElementById("increasedetail").style.color = "blue";
+					document.getElementById("increasedetail").style.cursor = "pointer";
+					if(x == (newLevelArr.length - 1)){
+						document.getElementById("decreasedetail").style.color = "grey";
+						document.getElementById("decreasedetail").style.cursor = "default";
+					}
+					break;
+				}
+				if(newLevelArr[x] == currentLevel){
+					getLevel = true; 
+				}
+			}
+		}
+		
+		function increaseDescrLevel(){
+			var getLevel = false;
+			for(x in levelArr){
+				if(getLevel){
+					var targetLevel = levelArr[x];
+					currentLevel = targetLevel;
+					changeDescrLevel();
+					document.getElementById("decreasedetail").style.color = "blue";
+					document.getElementById("decreasedetail").style.cursor = "pointer";
+					if(x == (levelArr.length - 1)){
+						document.getElementById("increasedetail").style.color = "grey";
+						document.getElementById("increasedetail").style.cursor = "default";
+					}
+					break;
+				} 
+				if(levelArr[x] == currentLevel){
+					getLevel = true; 
+				}
+			}
+		}
+		
+		function changeDescrLevel(){
+			var targetObj = document.getElementById("descr-" + currentLevel);
+			var levelTag = document.getElementById("currentlevel");
+			if (levelTag.innerHTML){ 
+				levelTag.innerHTML = currentLevel;
+			}
+			else if (tag.innertext) {
+				levelTag.innertext = currentLevel; 
+			} 
+			var divObjs = document.getElementsByTagName("div");
+			for (i = 0; i < divObjs.length; i++) {
+				var obj = divObjs[i];
+				if(obj.getAttribute("class") == "descr" || obj.getAttribute("className") == "descr"){
+					obj.style.display = "none";
+				}
+			}
+			targetObj.style.display = "block";
+		}
+		
+		function expandImages(){
+			eiObj = document.getElementById("imgextra");
+			eiObj.style.display = "block";
+			mpObj = document.getElementById("morephotos");
+			mpObj.style.display = "none";
+		}
+		
+		function appendImages(){
+			var max = 3;
+			for(;;){
+			
+		
+			}
+		}
+	</script>
+</head>
+<body>
+<?php
+$displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
+include($serverRoot."/util/header.php");
+if(isset($taxa_indexCrumbs)){
+	echo "<div class='navpath'>";
+	echo "<a href='../index.php'>Home</a> &gt; ";
+	echo $taxa_indexCrumbs;
+	echo " <b>$spDisplay</b>";
+	echo "</div>";
+}
+?>
+<table id='innertable'>
+<?php 
+if($taxonManager->getSciName() != "unknown"){
+	if($taxonRank > 180){
+		echo "<tr><td colspan='2' valign='bottom' height='35px'>";
+		//Top Middle Section, scientific name
+		echo "<div style='float:left;font-size:16px;margin-left:10px;'><span style='font-weight:bold;color:#990000;'><i>$spDisplay</i></span> ".$taxonManager->getAuthor();
+		$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+		echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+	 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
+	 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
+	 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
+	 	}
+		echo "</div>";
+		if($editable){
+			echo "<div style='float:right;'><a href='admin/tpeditor.php?taxon=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+		}
+		echo "</td></tr>\n";
+
+		//Left Middle Section
+		echo "<tr><td width='300' valign='top'>\n";
+		echo "\t<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
+	
+		$vernStr = $taxonManager->getVernacularStr();
+		if($vernStr){
+			echo "\t<div id='vernaculars' style='margin-left:10px;margin-top:0.5em;font-size:130%;' title='Common Names'>";
+			echo $vernStr;
+			echo"</div>\n";
+		}
+		
+		$synStr = $taxonManager->getSynonymStr();
+		if($synStr){
+			echo "\t<div id='synonyms' style='margin-left:20px;margin-top:0.5em;' title='Synonyms'>[";
+			echo $synStr;
+			echo"]</div>\n";
+		}
+		
+		if(!$taxonManager->echoImages(0,1)){
+			echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
+			if($editable){
+				echo "<a href='admin/tpeditor.php?category=imageadd&taxon=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
+			}
+			else{
+				echo "<br/><br/><br/><br/><br/><br/>Images<br/>not yet<br/>available";
+			}
+			echo "</div>";
+		}
+		echo "</td>\n";
+		
+		//Middle Right Section (Description section)
+		echo "<td valign='top' width='525' height='300'>";
+		$descr = $taxonManager->getDescriptions();
+		$clInfo = $taxonManager->getClInfo();
+		if($descr){
+			echo "<div id='descr' ".($clInfo?"height='230'":"").">";
+			ksort($descr);
+			if(!$descrDisplayLevel){
+				$descrDisplayLevel = key($descr);
+			}
+			$isFirst = false;
+			$isLast = false;
+			end($descr);
+			if($descrDisplayLevel == key($descr)) $isLast = true;
+			reset($descr);
+			if($descrDisplayLevel == key($descr)) $isFirst = true;
+			if(count($descr) > 1){
+				//Display Level Controller
+				echo "<div id='displaylevel' style='margin-top:20px;text-align:right;'>";
+				echo "<span id='decreasedetail' style='color:".($isFirst?"grey":"blue;cursor:pointer;")."' onclick='javascript:decreaseDescrLevel();'> << <u>less</u></span>";
+				echo " || <b>Detail Level <span id='currentlevel'>".$descrDisplayLevel."</span></b> || ";
+				echo "<span id='increasedetail' style='color:".($isLast?"grey":"blue;cursor:pointer;")."' onclick='javascript:increaseDescrLevel();'> <u>more</u> >> </span>";
+				echo "</div>\n";
+			}
+			else{
+				echo "<div style='height:35px;'>&nbsp;</div>";
+			}
+			foreach($descr as $level => $descrArr){
+				//Display Description
+				echo "<div id='descr-".$level."' class='descr' style='display:".($descrDisplayLevel == $level?"block":"none").";'>";
+				echo "<div style='margin:25px 10px 10px 10px;'>";
+				foreach($descrArr as $heading => $descrStr){
+					if(is_int($heading)){
+						echo $descrStr."\n";
+					}
+					else{
+						echo "<b>".$heading.":</b> ".$descrStr." \n";
+					}
+				}
+				echo "</div></div>\n";
+			}
+			echo "</div>";
+			if($clInfo){
+				echo "<div id='clinfo'><b>Within ".$taxonManager->getClName().":</b> ".$clInfo."</div>";
+			}
+		}
+		else{
+			echo "<div style='margin:80px 0px 0px 30px;'>Description not yet available</div>";
+		}
+		
+		echo "</td></tr>\n";
+		
+		//Bottom Section - Pics and Map
+		echo "<tr><td colspan='2'>";
+
+		//Display next 4 pics along bottom to left of map
+		$taxonManager->echoImages(1,4);
+		
+		//Map
+		$mapSrc = $taxonManager->getMapUrl();
+		if($mapSrc){
+			$gUrl = ""; $iUrl = "";
+			if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
+				$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/maps/googlemap.php?usecookies=false&type=3&db=all&thes=on&taxa=".$taxonManager->getSciName()."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
+			}
+			$url = array_shift($mapSrc);
+			if(strpos($url,"maps.google.com")){
+				if($gUrl) $aUrl = $gUrl;
+			}
+			else{
+				$aUrl = $url;
+				if($gUrl) $iUrl = $gUrl;
+			}
+			echo "<div class='mapthumb'>";
+			if($aUrl) echo "<a href=\"".$aUrl."\">";
+			echo "<img src='".$url."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
+			if($aUrl) echo "</a>";
+			if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
+			echo "</div>";
+		}
+		echo "</td></tr>";
+		
+		//Section with extra images
+		echo "<tr><td colspan='2'><div id='imgextra' style='display:none;'>\n";
+		$taxonManager->echoImages(5,0);
+		echo "</div></td></tr>\n";
+
+		//Far Bottom Section - Other Links
+		echo "<tr><td colspan='2'>";
+	}
+	else{
+		echo "<tr><td>";
+		$displayName = $spDisplay;
+		if($taxonRank == 180){
+			$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+			$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+		}
+		echo "<div style='float:left;width:250px;'>";
+		echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
+		if($taxonRank == 180) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
+		if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b>".$taxonManager->getProjName()."</div>\n";
+		echo "</div>";
+		//Display description
+		$descr = $taxonManager->getDescriptions();
+		if($descr){
+			echo "<div id='descr-genus' style='float:left;width:500px;margin-top:10px;'>";
+			ksort($descr);
+			if(!$descrDisplayLevel){
+				$descrDisplayLevel = key($descr);
+			}
+			$isFirst = false;
+			$isLast = false;
+			end($descr);
+			if($descrDisplayLevel == key($descr)) $isLast = true;
+			reset($descr);
+			if($descrDisplayLevel == key($descr)) $isFirst = true;
+			if(count($descr) > 1){
+				//Display Level Controller
+				echo "<div id='displaylevel' style='margin-top:30px;text-align:right;'>";
+				echo "<span id='decreasedetail' style='color:".($isFirst?"grey":"blue;cursor:pointer;")."' onclick='javascript:decreaseDescrLevel();'> << <u>less</u></span>";
+				echo " || <b>Detail Level <span id='currentlevel'>".$descrDisplayLevel."</span></b> || ";
+				echo "<span id='increasedetail' style='color:".($isLast?"grey":"blue;cursor:pointer;")."' onclick='javascript:increaseDescrLevel();'> <u>more</u> >> </span>";
+				echo "</div>\n";
+			}
+			foreach($descr as $level => $descrArr){
+				//Display Description
+				echo "<div id='descr-".$level."' class='descr' style='display:".($descrDisplayLevel == $level?"block":"none").";'>";
+				echo "<div style='margin:10px;'>";
+				foreach($descrArr as $heading => $descrStr){
+					if(is_int($heading)){
+						echo $descrStr."\n";
+					}
+					else{
+						echo "<b>".$heading.":</b> ".$descrStr." \n";
+					}
+				}
+				echo "</div></div>\n";
+			}
+			echo "</div>";
+		}
+		if($editable){
+			echo "<div style='float:right;'><a href='admin/tpeditor.php?taxon=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+		}
+		
+		echo "</td></tr>";
+		?>
+
+		<tr><td>
+			<div class='fieldset' style="padding:10px 2px 10px 2px;">
+				<div class='legend'>Species
+				<?php 
+				if($clValue){
+					echo " within ".$taxonManager->getClTitle()."&nbsp;&nbsp;";
+					if($taxonManager->getParentClid()){
+						echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:12px;height:12px;' src='../images/toparent.jpg'/></a>";
+					}
+				}
+				?>
+				</div>
+				<div>
+				<?php 
+				$sppArr = $taxonManager->getSppArray();
+				$cnt = 0;
+				ksort($sppArr);
+				foreach($sppArr as $sciNameKey => $subArr){
+					if($cnt%5 == 0 && $cnt > 0){
+						echo "<div style='clear:both;'><hr></div>";
+					}
+					echo "<div class='spptaxon'>";
+					echo "<div style='margin-top:10px;'><a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'><i>".$sciNameKey."</i></a></div>\n";
+					echo "<div class='sppimg'>";
+
+					if(array_key_exists("url",$subArr)){
+						$imgUrl = $subArr["url"];
+						if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+							$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+						}
+						echo "<a href='".$imgUrl."'>";
+
+						if($subArr["thumbnailurl"]){
+							$imgUrl = $subArr["thumbnailurl"];
+							if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
+								$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+							}
+						}
+						echo "<img src='".$imgUrl."' title='".$sciNameKey."' alt='Image of ".$sciNameKey."'>";
+						echo "</a>\n";
+					}
+					elseif($editable){
+						echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&taxon=".$subArr["tid"]."'>Add an Image!</a></div>";
+					}
+					else{
+						echo "<div class='spptext'>Image<br/>Not Available</div>";
+					}
+					echo "</div>\n";
+					if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
+						$gUrl = ""; $iUrl = "";
+						if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
+							$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/maps/googlemap.php?usecookies=false&type=3&db=all&thes=on&taxa=".$subArr["tid"]."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
+						}
+						if(strpos($mapUrl,"maps.google.com")){
+							if($gUrl) $aUrl = $gUrl;
+						}
+						else{
+							$aUrl = $mapUrl;
+							if($gUrl) $iUrl = $gUrl;
+						}
+						echo "<div class='sppmap'>";
+						if($aUrl) echo "<a href=\"".$aUrl."\">";
+						echo "<img src='".$mapUrl."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
+						if($aUrl) echo "</a>";
+						if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
+						echo "</div>";
+					}
+					elseif($taxonManager->getRankId()>140){
+						echo "<div class='sppmap'><div class='spptext'>Map<br />not<br />Available</div></div>\n";
+					}
+					echo "</div>";
+					$cnt++;
+				}
+				?>
+					<div style='clear:both;'><hr></div>
+				</div>
+			</div>
+		</td></tr>
+		<tr><td>
+		<?php 
+
+	}
+	//Bottom line listing options
+	echo "<div style='margin-top:15px;text-align:center;'>";
+	if($taxonRank > 180){
+		if($taxonManager->getTaxaImageCnt() > 5) echo "<span id='morephotos'><a href='javascript:expandImages();'>More Photos</a></span>";
+		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:toggle('links')\">Web Links</a>";
+	}
+
+	if($taxonRank > 140){
+		$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&taxauthid=".$taxAuthId;
+		if($clValue) $parentLink .= "&cl=".$taxonManager->getClName();
+		if($projValue) $parentLink .= "&proj=".$projValue;
+		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='".$parentLink."'>View Parent Taxon</a>";
+	}
+	echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript: self.close();'>Close window</a>";
+	echo "</div>";
+	
+	//List Web Links as a list
+	if($taxonRank > 180){
+		echo "<div class='links' style='display:none;'>\n<h1 style='margin-left:20px;'>Web Links</h1>\n<ul style='margin-left:30px;'>\n";
+		$links = $taxonManager->getTaxaLinks();
+		if($links){
+			foreach($links as $l){
+				$urlStr = str_replace("--SCINAME--",str_replace(" ","%20",$taxonManager->getSciName()),$l["url"]);
+				$title = $l["title"];
+				if(!$title) $title = $urlStr;
+				echo "<li><a href='".$urlStr."' target='_blank'>".$title."</a></li>";
+				if($l["notes"]) echo " ".$l["notes"];
+			}
+		}
+		echo "</ul>\n</div>";
+	}
+	echo "</td></tr>\n";
+}
+elseif($taxonValue){
+	echo "<tr><td>";
+	echo "<div style='margin-top:45px;margin-left:20px'><h1>Sorry, we do not have <i>$taxonValue</i> in our system.</h1>\n";
+	echo "<h3>Links below may provide some useful information:</h3>\n";
+	echo "<ul><li><a target='_blank' href='http://www.google.com/search?hl=en&btnG=Google+Search&q=\"".$taxonValue."\"'>Google</a></li>\n";
+	echo "<li><a target='_blank' href='http://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=all&search_value=".$taxonValue."&search_kingdom=every&search_span=exactly_for&categories=All&source=html&search_credRating=All'>ITIS: Integrated Taxonomic Information System</a></li>\n";
+	echo "<li><a target='_blank' href='http://images.google.com/images?q=\"".$taxonValue."\"'>Google Images</a></li>\n</ul></div>\n";
+	echo "</td></tr>";
+}
+else{
+	echo "<tr><td>";
+	echo "Scientific name (eg: taxon=Pinus+ponderosa) not submitted. Please submit a taxon value.";
+	echo "</td></tr>";
+}
+?>
+</table>
+<?php 
+include($serverRoot."/util/footer.php");
+
+?>
+	<script type="text/javascript">
+		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+		try {
+			var pageTracker = _gat._getTracker("<?php echo $googleAnalyticsKey; ?>");
+			pageTracker._trackPageview();
+		} catch(err) {}
+	</script>
+</body>
+</html>
+
