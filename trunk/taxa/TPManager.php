@@ -188,27 +188,41 @@
 		$this->sppArray = Array();
 		$sql = "";
 		if($this->clid){
-			$sql = "SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
+			$sql = "(SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.Tid) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.Tid ".
 				"WHERE (t.RankId = 220) AND ctl.clid = ".$this->clid." AND ".
-				"(ts.Family = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."' ".
-				"OR t.UnitName1 = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."')";
+				"(".($this->rankId == 140?"ts.Family":"t.UnitName1")." = '".
+				($this->taxAuthId?$this->sciName:$this->submittedSciName)."')) ".
+				"UNION DISTINCT (SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
+				"FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.parenttid) ".
+				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.tid ".
+				"WHERE (t.RankId = 220) AND (ctl.clid = ".$this->clid.") AND ".
+				"(".($this->rankId == 140?"ts.Family":"t.UnitName1")." = '".
+				($this->taxAuthId?$this->sciName:$this->submittedSciName)."'))";
 		}
 		elseif($this->pid){
-			$sql = "SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
+			$sql = "(SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
 				"FROM ((taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID) ".
 				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
 				"WHERE (ts.taxauthid = 1) AND (t.RankId = 220) AND cpl.pid = ".$this->pid." AND ".
+				"(".($this->rankId == 140?"ts.Family":"t.UnitName1")." = '".
+				($this->taxAuthId?$this->sciName:$this->submittedSciName)."')) ".
+				"UNION DISTINCT (SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
+				"FROM (((taxa t INNER JOIN taxstatus ts ON t.Tid = ts.parenttid) ".
+				"INNER JOIN taxstatus ts2 ON ts.Tid = ts2.tidaccepted) ".
+				"INNER JOIN fmchklsttaxalink ctl ON ts2.Tid = ctl.TID) ".
+				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
+				"WHERE (ts.taxauthid = 1) AND (t.RankId = 220) AND cpl.pid = ".$this->pid." AND ".
 				"(ts.Family = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."' ".
-				"OR t.UnitName1 = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."')";
+				"OR t.UnitName1 = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."'))";
 		}
 		else{
 			$sql = "SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
 				"FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted ".
 				"WHERE (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") AND (t.RankId = 220) ".
-				"AND (ts.Family = '".$this->sciName."' OR t.UnitName1 = '".$this->sciName."') ";
+				"AND (".($this->rankId == 140?"ts.Family":"t.UnitName1")." = '".$this->sciName."') ";
 		}
 		//echo $sql;
 		
