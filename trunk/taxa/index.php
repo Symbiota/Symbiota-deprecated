@@ -367,7 +367,7 @@ if($taxonManager->getSciName() != "unknown"){
 		echo "<div style='float:left;width:250px;'>";
 		echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
 		if($taxonRank == 180) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
-		if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b>".$taxonManager->getProjName()."</div>\n";
+		if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
 		echo "</div>";
 		//Display description
 		$descr = $taxonManager->getDescriptions();
