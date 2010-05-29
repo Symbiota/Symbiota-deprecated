@@ -47,7 +47,7 @@ $pManager = new PhotographerManager();
 					echo "<div style='font-weight:bold;'>Images: $limitStart - ".($limitStart+$limitNum)." of $imgCnt</div>";
 				}
 				echo "<hr />";
-				$pManager->echoPhotographerImages($phUid,$limitStart,$limitNum);
+				$pManager->echoPhotographerImages($phUid,$limitStart,$limitNum,$imgCnt);
 			}
 			else{
 				$pManager->echoPhotographerList(); 
@@ -117,7 +117,7 @@ class PhotographerManager{
     	$result->close();
 	}
 	
-	public function echoPhotographerimages($uid,$limitStart = 0, $limitNum = 50){
+	public function echoPhotographerimages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
 		$sql = "SELECT i.thumbnailurl, i.url, ts.family, t.sciname ".
 			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
 			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".
@@ -129,12 +129,12 @@ class PhotographerManager{
 		echo "<div>";
 		if($limitStart){
 			echo "<div style='float:left;'>";
-			echo "<a href='photographers.php?phuid=368&imgcnt=2830&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
+			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
 			echo "</div>";
 		}
 		if($rowCnt >= $limitNum){
 			echo "<div style='float:right;'>";
-			echo "<a href='photographers.php?phuid=368&imgcnt=2830&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
+			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
 			echo "</div>";
 		}
 		echo "</div><div style='clear:both;'>";
@@ -164,12 +164,12 @@ class PhotographerManager{
 		echo "</div><div style='clear:both;'>";
 		if($limitStart){
 			echo "<div style='float:left;'>";
-			echo "<a href='photographers.php?phuid=368&imgcnt=2830&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
+			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
 			echo "</div>";
 		}
 		if($rowCnt >= $limitNum){
 			echo "<div style='float:right;'>";
-			echo "<a href='photographers.php?phuid=368&imgcnt=2830&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
+			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
 			echo "</div>";
 		}
 	}

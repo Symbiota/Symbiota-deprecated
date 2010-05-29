@@ -52,7 +52,6 @@ class MapManager extends CollectionManager{
 		if($limit){
 			$sql .= " LIMIT 1000";
 		}
-
         $coordArr = Array();
 		$taxaMapper = Array();
 		$taxaMapper["undefined"] = "undefined";
