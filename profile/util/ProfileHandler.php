@@ -266,7 +266,7 @@ class ProfileHandler{
 			//Send email
 			$subject = "Your password";
 			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."</a>) password has been reset to: ".$newPassword." ";
-			$bodyStr .= "<br/><br/>After logging in, you can reset your password clicking on View Profile link and then selecting edit.";
+			$bodyStr .= "<br/><br/>After logging in, you can reset your password clicking on ,a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."/profile/viewprofile.php'>View Profile</a> link and then selecting edit.";
 			$bodyStr .= "<br/>If you have problems with the new password, contact the System Administrator ";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
