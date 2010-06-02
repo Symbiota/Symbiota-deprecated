@@ -270,6 +270,7 @@ class ProfileHandler{
 			$bodyStr .= "\r\nIf you have problems with the new password, contact the System Administrator ";
 			if(isset($adminEmail)){
 				$bodyStr .= "<".$adminEmail.">";
+			}
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=iso-8859-1 \r\n".
 				"To: ".$emailStr." \r\n";
