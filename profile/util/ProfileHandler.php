@@ -268,14 +268,14 @@ class ProfileHandler{
 			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." password has been reset to: ".$newPassword." ";
 			$bodyStr .= "\r\n\nAfter logging in, you can reset your password clicking on View Profile link and then selecting edit.";
 			$bodyStr .= "\r\nIf you have problems with the new password, contact the System Administrator ";
-			if(isset($adminEmail)){
-				$bodyStr .= "<".$adminEmail.">";
+			if(array_key_exists("adminEmail",$GLOBALS)){
+				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
 			}
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=iso-8859-1 \r\n".
 				"To: ".$emailStr." \r\n";
-			if(isset($adminEmail)){
-				$headerStr .= "From: Admin <".$adminEmail."> \r\n";
+			if(array_key_exists("adminEmail",$GLOBALS)){
+				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
 			}
 			mail($emailStr,$subject,$bodyStr,$headerStr);
 			
