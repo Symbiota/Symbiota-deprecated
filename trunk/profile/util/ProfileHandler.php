@@ -3,8 +3,11 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
  */
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 include_once("../util/dbconnection.php");
 include_once("Person.php");
+
 //include_once('includes_php/common.inc.php');
 
 class ProfileHandler{
