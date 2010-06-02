@@ -265,7 +265,7 @@ class ProfileHandler{
 
 			//Send email
 			$subject = "Your password";
-			$bodyStr = "Your ".$defaultTitle." password has been reset to: ".$newPassword." ";
+			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." password has been reset to: ".$newPassword." ";
 			$bodyStr .= "\r\n\nAfter logging in, you can reset your password clicking on View Profile link and then selecting edit.";
 			$bodyStr .= "\r\nIf you have problems with the new password, contact the System Administrator ";
 			if(isset($adminEmail)){
