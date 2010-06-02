@@ -3,8 +3,8 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
  */
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 include_once("../util/dbconnection.php");
 include_once("Person.php");
 
@@ -265,13 +265,17 @@ class ProfileHandler{
 
 			//Send email
 			$subject = "Your password";
-			$bodyStr = "Your password has been reset to: ".$newPassword." ";
+			$bodyStr = "Your ".$defaultTitle." password has been reset to: ".$newPassword." ";
 			$bodyStr .= "\r\n\nAfter logging in, you can reset your password clicking on View Profile link and then selecting edit.";
-			$bodyStr .= "\r\nIf you have problems with the new password, contact the Admin <seinetadmin@asu.edu>";
+			$bodyStr .= "\r\nIf you have problems with the new password, contact the System Administrator ";
+			if(isset($adminEmail)){
+				$bodyStr .= "<".$adminEmail.">";
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=iso-8859-1 \r\n".
-				"To: ".$emailStr." \r\n".
-				"From: Admin <seinetadmin@asu.edu> \r\n";
+				"To: ".$emailStr." \r\n";
+			if(isset($adminEmail)){
+				$headerStr .= "From: Admin <".$adminEmail."> \r\n";
+			}
 			mail($emailStr,$subject,$bodyStr,$headerStr);
 			
 			$returnStr = "Your new password was just emailed to: ".$emailStr;
