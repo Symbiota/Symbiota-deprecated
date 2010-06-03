@@ -379,7 +379,7 @@
 	public function getFamilyRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
-		$sql = "SELECT o.Family, Count(o.*) AS cnt ".
+		$sql = "SELECT o.Family, Count(*) AS cnt ".
 			"FROM omoccurrences o GROUP BY o.CollID, o.Family HAVING (o.CollID = $this->collId) AND (o.Family IS NOT NULL) AND o.Family <> '' ".
 			"ORDER BY o.Family";
 		$rs = $this->con->query($sql);
@@ -393,7 +393,7 @@
 	public function getCountryRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
-		$sql = "SELECT o.Country, Count(o.*) AS cnt ".
+		$sql = "SELECT o.Country, Count(*) AS cnt ".
 			"FROM omoccurrences o GROUP BY o.CollID, o.Country HAVING (o.CollID = $this->collId) AND o.Country IS NOT NULL AND o.Country <> '' ".
 			"ORDER BY o.Country";
 		$rs = $this->con->query($sql);
@@ -407,7 +407,7 @@
  	public function getStateRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
-		$sql = "SELECT o.StateProvince, Count(o.*) AS cnt ".
+		$sql = "SELECT o.StateProvince, Count(*) AS cnt ".
 			"FROM omoccurrences o GROUP BY o.CollID, o.StateProvince, o.country ".
 			"HAVING (o.CollID = $this->collId) AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> '') ".
 			"AND (o.country = 'USA' OR o.country = 'United States' OR o.country = 'United States of America') ".
