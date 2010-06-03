@@ -56,84 +56,86 @@ if($isAdmin){
 	    <?php
 		if($editable){
 			?>
-			<form id="imgloader" name="imgloader" action="imagebatchloader.php" method="post">
+			<form id="imgloader" name="imgloader" action="imagebatchloader.php" method="get">
 				<fieldset>
 					<legend>Query Criteria</legend>
-					<div>
-						Collection/Observation: 
-						<select>
-							<option value=''>Select Collection/Observation Project</option>
-							<?php ?>
-						</select>
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">Collection/Observation:</div> 
+						<div style="float:left;">
+							<select name="collid">
+								<option value=''>Select Collection/Observation Project</option>
+								<option value=''>---------------------------------------------------------</option>
+								<?php echo $uploadManager->echoOccurrenceHoldings(); ?>
+							</select>
+						</div>
 					</div>
-					<div>
-						GUID: <input type="text" name="gui" />
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">GUID:</div>
+						<div style="float:left;"><input type="text" name="gui" /></div>
 					</div>
-					<div>
-						Upload Date: <input type="text" name="loaddate" />
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">Upload Date:</div> 
+						<div style="float:left;"><input type="text" name="loaddate" /></div>
 					</div>
-					<div>
-						Observer: <input type="text" name="observer" />
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">Observer:</div> 
+						<div style="float:left;"><input type="text" name="observer" /></div>
 					</div>
-					<div>
-						Family: <input type="text" name="family" />
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">Family:</div> 
+						<div style="float:left;"><input type="text" name="family" /></div>
 					</div>
-					<div>
-						Taxon: <input type="text" name="sciname" />
+					<div style="clear:both;">
+						<div style="float:left;width:130px;">Taxon:</div> 
+						<div style="float:left;"><input type="text" name="sciname" /></div>
 					</div>
-					<div>
-						<input type="submit" name="action" value="Query Records" />
+					<div style="clear:both;">
+						<div style="float:right;"><input type="submit" name="action" value="Query Records" /></div>
 					</div>
 				</fieldset>
 			</form>
 			<hr />
 			<?php
-				if($editable){
-					if($action == "Query Records" && $collId){
-						$queryArr = Array("collid"=>$collId);
-						if($_REQUEST["gui"]) $queryArr["gui"] = $_REQUEST["gui"];
-						if($_REQUEST["loaddate"]) $queryArr["loaddate"] = $_REQUEST["loaddate"];
-						if($_REQUEST["observer"]) $queryArr["observer"] = $_REQUEST["observer"];
-						if($_REQUEST["family"]) $queryArr["family"] = $_REQUEST["family"];
-						if($_REQUEST["sciname"]) $queryArr["sciname"] = $_REQUEST["sciname"];
-						$recArr = $uploadManager->getOccurrenceRecords($queryArr);
-						foreach($recArr as $k => $v){
-							echo "<div>".$v["occurrenceid"]."; ".$v["recordedby"]." [".$v["recordnumber"]."] ".
-								$v["eventdate"]."; ".$v["sciname"]."[".$v["family"]."]; ".$v["locality"]."</div>";
-						}
+				if($action == "Query Records" && $collId){
+					$queryArr = Array("collid"=>$collId);
+					if($_REQUEST["gui"]) $queryArr["gui"] = $_REQUEST["gui"];
+					if($_REQUEST["loaddate"]) $queryArr["loaddate"] = $_REQUEST["loaddate"];
+					if($_REQUEST["observer"]) $queryArr["observer"] = $_REQUEST["observer"];
+					if($_REQUEST["family"]) $queryArr["family"] = $_REQUEST["family"];
+					if($_REQUEST["sciname"]) $queryArr["sciname"] = $_REQUEST["sciname"];
+					$recArr = $uploadManager->getOccurrenceRecords($queryArr);
+					foreach($recArr as $k => $v){
+						?>
+						<div>
+							<form action="imagebatchloader.php" method="get">
+								<fieldset>
+									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
+									<div style="margin:3px;">
+									<?php 
+									echo $v["recordedby"];
+									if($v["recordnumber"]) echo " [".$v["recordnumber"]."] ";
+									echo $v["eventdate"]."; ".$v["sciname"];
+									if($v["family"]) {
+										echo " [".$v["family"]."]";
+									}	
+									echo " ; ".$v["locality"];
+									?>
+									</div>
+									<div style="font-weight:bold;margin:3px;">
+										<input type="hidden" name="MAX_FILE_SIZE" value="500000" />
+										File: <input id="uploadfile" name="uploadfile" type="file" size="45" />
+									</div>
+									<div style="margin:3px;">
+										<input type="hidden" name="gui" value="<?php echo $v["occurrenceid"]; ?>" />
+										<input type="submit" name="action" value="Add Image" />
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<?php 
 					}
 				}
-			?>
 
-			
-			<form id="imgloader" name="imgloader" enctype="multipart/form-data" action="observationuploader.php" method="post" onsubmit="return validateForm(this);">
-				<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
-				<div style="font-weight:bold;">
-					File: 
-					<input id="uploadfile" name="uploadfile" type="file" size="45" />
-				</div>
-				<div>
-					<input type="checkbox" name="defaults" value="1" <?php if($useDefaults) echo "CHECKED"; ?>> 
-					Use first line as default values 
-				</div>
-				<div style="">
-					<input id="analyzesubmit" name="analyzesubmit" type="submit" value="Analyze File" />
-				</div>
-				<?php if($analyzeSubmit && !$reqFieldStr){ ?>
-					<div>
-						<select name="collid">
-							<?php $dataLoader->echoCollectionIdSelect(); ?>
-						</select>
-					</div>
-					<div>
-						Replace Matching Records <input type="checkbox" name="replacerecs" value="1" title="Reload Existing Records" />
-					</div>
-					<div style="">
-						<input id="obsersubmit" name="obsersubmit" type="submit" value="Upload File" />
-					</div>
-				<?php } ?>
-			</form>
-		<?php 
 		}
 		else{
 			echo "<div>You must be logged in and authorized to view this page. Please login.</div>";
@@ -152,6 +154,7 @@ class ImageUploadManager{
 	private $conn;
 
 	function __construct() {
+		$this->setConnection();
 	}
 
 	function __destruct(){
@@ -163,16 +166,18 @@ class ImageUploadManager{
 	}
 	
 	public function getOccurrenceRecords($queryArr){
-		$this->setConnection();
 		$returnArr = Array();
 		$sql = "SELECT o.occurrenceid, o.recordedby, o.recordnumber, o.eventdate, ".
 			"o.family, o.sciname, o.locality, o.initialtimestamp ".
-			"FROM omoccurrences o WHERE o.collid = ".$queryArr["collid"]." ";
-		if(array_key_exists("gui",$queryArr)) "AND o.occurrenceId LIKE '%".$queryArr["gui"]."%' "; 
-		if(array_key_exists("loaddate",$queryArr)) "AND o.initialtimestamp = '".$queryArr["loaddate"]."' "; 
-		if(array_key_exists("observer",$queryArr)) "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
-		if(array_key_exists("family",$queryArr)) "AND o.family = '".$queryArr["family"]."' "; 
-		if(array_key_exists("sciname",$queryArr)) "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
+			"FROM omoccurrences o LEFT JOIN  ON".
+			"WHERE o.collid = ".$queryArr["collid"]." ";
+		if(array_key_exists("gui",$queryArr)) $sql .= "AND o.occurrenceId LIKE '%".$queryArr["gui"]."%' "; 
+		if(array_key_exists("loaddate",$queryArr)) $sql .= "AND o.initialtimestamp = '".$queryArr["loaddate"]."' "; 
+		if(array_key_exists("observer",$queryArr)) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
+		if(array_key_exists("family",$queryArr)) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
+		if(array_key_exists("sciname",$queryArr)) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
+		$sql .= "ORDER BY o.occurrenceid "; 
+		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
 		$recCnt = 1;
 		while($row = $result->fetch_object()){
@@ -190,6 +195,15 @@ class ImageUploadManager{
 		return $returnArr;	
 	}
 
+	public function echoOccurrenceHoldings(){
+		$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
+			"WHERE colltype = 'observations' ORDER BY c.collectionname";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			echo "<option value='".$row->collid."'>".$row->collectionname."</option>";
+		}
+		$rs->close();
+	}
 }
 
 ?>

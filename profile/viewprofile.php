@@ -13,7 +13,7 @@ $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
 
 $isSelf = 0;
 $isEditable = 0;
-if(isset($symbUid)){
+if(isset($symbUid) && $symbUid){
 	if($userId == $symbUid){
 		$isSelf = 1;
 	}
@@ -678,7 +678,7 @@ if(isset($profile_viewprofileCrumbs)){
 	<?php 
 	}
 	else{
-		echo "<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>You must login or have administrator rights to view profile.</div>";
+		echo "<div style='color:#FF0000;margin:10px;'>You must login or have administrator rights to view profile.</div>";
 	}
 	?>
 	</div>
