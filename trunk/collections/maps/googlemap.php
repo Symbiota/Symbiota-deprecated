@@ -52,7 +52,7 @@
                         echo "var marker".$markerCnt." = new GMarker(point, tinyIcon);\n";
                         $spStr = "";
                         $functionStr = "";
-                        foreach($dataArr as $specCnt => $spArr){
+                        foreach($dataArr as $occId => $spArr){
 	                		$collId = $spArr["collid"];
 							$dbpk = $spArr["dbpk"];
 							if(count($dataArr) == 1){
@@ -60,7 +60,7 @@
 							}
 							else{
 								$gui = $spArr["gui"];
-								if(!$gui) $gui = "occurrence #".$specCnt;
+								if(!$gui) $gui = "occurrence #".$occId;
 								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'../individual/individual.php?pk=".$dbpk."&collid=".$collId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
 							}
                         }

@@ -372,7 +372,7 @@
 		$tidStr = implode(",",array_merge(Array($this->tid,$this->submittedTid),array_keys($this->synonyms)));
 		$this->imageArr = Array();
 		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
-			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.specimengui, ti.notes ".
+			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.notes, ti.occid ".
 			"FROM ((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) ".
@@ -390,8 +390,8 @@
 			if($row->sourceurl) $this->imageArr[$imgCnt]["sourceurl"] = $row->sourceurl;
 			if($row->copyright) $this->imageArr[$imgCnt]["copyright"] = $row->copyright;
 			if($row->locality) $this->imageArr[$imgCnt]["locality"] = $row->locality;
-			if($row->specimengui) $this->imageArr[$imgCnt]["specimengui"] = $row->specimengui;
 			if($row->notes) $this->imageArr[$imgCnt]["notes"] = $row->notes;
+			if($row->occid) $this->imageArr[$imgCnt]["occid"] = $row->occid;
 			$imgCnt++;
 		}
 		$result->close();
@@ -460,7 +460,7 @@
 				if(array_key_exists("notes",$this->imageArr[$n])) echo "<div><b>Notes:</b> ".$this->imageArr[$n]["notes"]."</div>";
 				if(array_key_exists("copyright",$this->imageArr[$n])) echo "<div><b>Copyright:</b> ".$this->imageArr[$n]["copyright"]."</div>";
 				if(array_key_exists("sourceurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["sourceurl"]."'>Source Image</a></div>";
-				if(array_key_exists("specimengui",$this->imageArr[$n])) echo "<div><b>Specimen Info:</b> <a href='../collections/individual/individual.php?gui=".$this->imageArr[$n]["specimengui"]."'>".$this->imageArr[$n]["specimengui"]."</a></div>";
+				if(array_key_exists("occid",$this->imageArr[$n])) echo "<div><a href='../collections/individual/individual.php?occid=".$this->imageArr[$n]["occid"]."'>Specimen Details</a></div>";
 				echo "</div>\n";
 			}
 			return true;

@@ -8,7 +8,7 @@ include_once("util/symbini.php");
 ?>
 <html>
 <head>
-    <title>SEINet Home</title>
+    <title><?php echo $defaultTitle?> Home</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" />
     <meta name='keywords' content='Arizona,New Mexico,Sonora,Sonoran,Desert,plants,lichens,natural history collections,flora, fauna, checklists,species lists' />
 </head>

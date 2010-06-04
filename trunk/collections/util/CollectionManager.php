@@ -112,7 +112,7 @@ class CollectionManager{
 			$sqlWhere .= "AND (o.ownerInstitutionCode IN('".str_replace(";","','",$this->searchTermsArr["oic"])."')) ";
 		}
 		elseif(array_key_exists("spprid",$this->searchTermsArr)){
-			$sqlWhere .= "AND (spl.spprid IN('".str_replace(";","','",$this->searchTermsArr["spprid"])."')) ";
+			$sqlWhere .= "AND (opl.spprid IN('".str_replace(";","','",$this->searchTermsArr["spprid"])."')) ";
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)){

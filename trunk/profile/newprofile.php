@@ -173,7 +173,7 @@ if($action == "Submit Profile"){
 					</div>
 
 	                <div style="margin: 1em 1em 1em 0em;">Please email 
-	                    <a class='bodylink' href="mailto:seinetAdmin@asu.edu?subject=Contacting%20SEINetAdmin">
+	                    <a class='bodylink' href="mailto:<?php echo $adminEmail; ?>?subject=Contacting%20<?php echo $defaultTitle; ?>">
 	                    Administration</a> with problems, questions, or concerns.
 	                </div>
 	            </fieldset>

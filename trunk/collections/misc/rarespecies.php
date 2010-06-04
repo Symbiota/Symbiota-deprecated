@@ -188,7 +188,7 @@ if($editable){
 	}
 	?>
 	<h1>Rare, Threatened, Sensitive Species</h1>
-	<div style='margin-left:10px;'>The following species have a protective status within SEINet.  
+	<div style='margin-left:10px;'>The following species have a protective status within <?php echo $defaultTitle; ?>.  
 	Sensitive population numbers and a threatened status are the typical cause for this though some 
 	species that are cherished by collectors (Orchids and Cacti) or wild harvesters will also occur 
 	on this list. In some cases, whole families have a blanket protection. Specific locality 
@@ -278,6 +278,9 @@ if($editable){
  		$sql = "UPDATE taxa t SET t.SecurityStatus = 2 WHERE t.tid = ".$tid;
  		//echo $sql;
 		$this->con->query($sql);
+		//Update specimen records
+		$sql2 = "UPDATE omoccurrences o SET o.LocalitySecurity = 2 WHERE o.tidinterpreted = ".$tid;
+		$this->con->query($sql2);
 	}
  }
 ?>

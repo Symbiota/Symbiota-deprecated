@@ -7,13 +7,13 @@
  $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
  $collectionCode = array_key_exists("collcode",$_REQUEST)?trim($_REQUEST["collcode"]):"";
  $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
- $gui = array_key_exists("gui",$_REQUEST)?trim($_REQUEST["gui"]):"";
+ $occId = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):"";
 
  $indManager = new IndividualRecord();
  if($collId) $indManager->setCollId($collId); 
  if($collectionCode) $indManager->setCollectionCode($collectionCode);
  if($pk) $indManager->setDbpk($pk);
- if($gui) $indManager->setGui($gui);
+ if($occId) $indManager->setOccId($occId);
 
  $htmlVec = Array();
  $htmlVec = $indManager->getData();
@@ -101,8 +101,8 @@
     						<legend>Voucher Assignment:</legend>
 							<?php
 				    		$voucherTid = $indManager->getTid();
-				    		$voucherGui = $indManager->getGui();
-				    		if($voucherTid && $voucherGui){
+				    		$voucherOccId = $indManager->getOccId();
+				    		if($voucherTid){
 								$clArr = $indManager->getChecklists($paramsArr["uid"]);
 								if($clArr){
 							?>
@@ -110,7 +110,7 @@
 								<div style='margin:5px 0px 0px 10px;'>
 								Add as voucher to checklist: 
 								<?php 
-								echo "<input name='vgui' type='hidden' value='".$voucherGui."'>\n";
+								echo "<input name='voccid' type='hidden' value='".$voucherOccId."'>\n";
 								echo "<input name='tid' type='hidden' value='".$voucherTid."'>\n";
 								echo "<select id='clid' name='clid'>\n";
 					  			echo "<option value='0'>Select a Checklist</option>\n";
@@ -148,15 +148,12 @@
 				    					echo "<li>Scientific name is not in Taxonomic Thesaurus (name maybe misspelled)";
 				    					
 				    				}
-				    				if(!$voucherGui){
-				    					echo "<li>Global Unique Identifier is null (does specimen have an assigned accession number)";
-				    				}
 				    			?>
 				    			</ul>
 								<div>
 									Contact 
-									<a href="mailto:seinetAdmin@asu.edu?subject=bad voucher specimen?body=gui: <?php echo $voucherGui."%0Atid: ".$voucherTid."%0AcollId ".$collId."%0AcollectionCode ".$collectionCode."%0Adbpk ".$pk;?>">
-										seinetAdmin@asu.edu
+									<a href="mailto:<?php echo $adminEmail; ?>?subject=bad voucher specimen?body=occid: <?php echo $voucherOccId."%0Atid: ".$voucherTid."%0AcollId ".$collId."%0AcollectionCode ".$collectionCode."%0Adbpk ".$pk;?>">
+										<?php echo $adminEmail; ?>
 									</a> 
 									to resolve this issue.
 								</div>
@@ -178,7 +175,7 @@
  
  class IndividualRecord {
     
-    private $gui;
+    private $occId;
     private $collectionCode;
     private $collId;
     private $dbpk;
@@ -246,12 +243,12 @@
  		}
  	}
  	
- 	public function setGui($g){
-		$this->gui = $g;
+ 	public function setOccId($o){
+		$this->occId = $o;
 	}
 	
-	public function getGui(){
-		return $this->gui;
+	public function getOccId(){
+		return $this->occId;
 	}
 	
 	public function getTid(){
@@ -276,7 +273,7 @@
     
     public function getData(){
 		$sql = "SELECT c.CollID, IFNULL(o.CollectionCode,c.CollectionCode) AS CollectionCode, ".
-			"c.CollectionName, c.Homepage, c.IndividualUrl, c.Contact, c.email, c.icon, o.occurrenceID, ".
+			"c.CollectionName, c.Homepage, c.IndividualUrl, c.Contact, c.email, c.icon, o.occid, o.occurrenceID, ".
 			"o.CatalogNumber, o.occurrenceRemarks, o.TidInterpreted, o.Family, o.SciName, o.scientificNameAuthorship, o.IdentificationQualifier, o.IdentifiedBy, ".
 			"DATE_FORMAT(o.DateIdentified,'%d %M %Y') AS DateIdentified, o.Country, o.StateProvince, o.County, o.Locality, o.MinimumElevationInMeters, o.MaximumElevationInMeters, o.VerbatimElevation, ".
 			"o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, o.GeoreferenceSources, ".
@@ -286,8 +283,8 @@
 			"o.Habitat, o.associatedTaxa, o.reproductiveCondition, o.CultivationStatus, o.ownerInstitutionCode, o.otherCatalogNumbers, ".
 			"o.reproductiveCondition ".
 			"FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID WHERE ";
-		if($this->gui) {
-			$sql .= "o.occurrenceID = '".$this->gui."'";
+		if($this->occId) {
+			$sql .= "o.occid = ".$this->occId;
 		}
 		else{
 			$sqlWhere = "";
@@ -312,7 +309,7 @@
 
 		$result = $this->con->query($sql);
 		if($row = $result->fetch_object()){
-			if(!$this->gui) $this->gui = $row->occurrenceID;
+			if(!$this->occId) $this->occId = $row->occid;
 			$this->tid = $row->TidInterpreted;
 			$this->contactEmail = $row->email;
 			$this->contactName = $row->Contact;
@@ -417,9 +414,9 @@
     }
         
     private function addImages(){
-    	if($this->gui){
+    	if($this->occId){
 	        $imgSql = "SELECT ti.url, ti.notes FROM images ti ".
-				"WHERE (ti.specimengui = '".$this->gui."') ORDER BY ti.sortsequence";
+				"WHERE (ti.occid = ".$this->occId.") ORDER BY ti.sortsequence";
 	        $cnt = 0;
 	        $result = $this->con->query($imgSql);
 			$imgArr = Array();
