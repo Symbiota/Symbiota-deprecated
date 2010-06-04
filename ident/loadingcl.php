@@ -67,12 +67,12 @@ Header($ExpStr);
 		        <td rowspan="2" width="20" background="../images/brown_hor_strip.gif"></td>
 		        <td rowspan="1" height="30" width="805">
 					<?php if($symClid){ ?>
-			            <a href='../index.php' class='navpath'>SEINet Home</a> &gt;
+			            <a href='../index.php' class='navpath'>Home</a> &gt;
 			            <a href='../collections/index.jsp' class='navpath'>Select Databases</a> &gt;
 			            <a href='../collections/harvestparams.jsp' class='navpath'>Search Parameters</a> &gt;
 			            <a href='../collections/checklist.jsp' class='navpath'>Checklist</a> 
 					<?php }else{ ?>
-			        	<a href='../index.php' class='navpath'>SEINet Home</a> &gt; 
+			        	<a href='../index.php' class='navpath'>Home</a> &gt; 
 			        	<a href='../ident/index.php' class='navpath'>Symbiota Intro</a> &gt; 
 			        	<span class='navpath'>Symbiota Key</span>
 					<?php } ?>

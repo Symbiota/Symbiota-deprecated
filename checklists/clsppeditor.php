@@ -43,18 +43,18 @@ header("Content-Type: text/html; charset=ISO-8859-1");
  }
  elseif($action == "Submit Voucher Edits"){
  	$vStrings = Array();
- 	$vStrings["gui"] = $_REQUEST["gui"];
+ 	$vStrings["occid"] = $_REQUEST["occid"];
  	$vStrings["collector"] = $_REQUEST["collector"];
 	$vStrings["notes"] = $_REQUEST["notes"];
  	$vStrings["editornotes"] = $_REQUEST["editornotes"];
 	$status = $vManager->editVoucher($vStrings);
  }
  elseif($action == "Delete Voucher"){
- 	$status = $vManager->removeVoucher($_REQUEST["guidel"]);
+ 	$status = $vManager->removeVoucher($_REQUEST["oiddel"]);
  }
  elseif($action == "Add Voucher"){
  	//For processing requests sent from /collections/individual/individual.php
- 	$status = $vManager->addVoucher($_REQUEST["vgui"],$_REQUEST["vnotes"],$_REQUEST["veditnotes"]);
+ 	$status = $vManager->addVoucher($_REQUEST["voccid"],$_REQUEST["vnotes"],$_REQUEST["veditnotes"]);
  }
  $clArray = $vManager->getChecklistData();
  ?>
@@ -315,17 +315,17 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 					?>
 					<ul>
 					<?php 
-					foreach($vArray as $gui => $iArray){
+					foreach($vArray as $occId => $iArray){
 					?>
 						<li><?php
-							$url = "javascript:var popupReference=window.open('../collections/individual/individual.php?gui=".$gui."','indpane','toolbar=1,resizable=1,width=650,height=600,left=20,top=20');";
-							echo "<a href=\"$url\">".$gui."</a>: ";
+							$url = "javascript:var popupReference=window.open('../collections/individual/individual.php?occid=".$occId."','indpane','toolbar=1,resizable=1,width=650,height=600,left=20,top=20');";
+							echo "<a href=\"$url\">".$occId."</a>: ";
 							echo $iArray["collector"].($iArray["notes"]?"; ".$iArray["notes"]:"").($iArray["editornotes"]?"; ".$iArray["editornotes"]:"");
 							?>
 							<form action="clsppeditor.php" method='post' name='delform' style="display:inline;;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">
 								<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 								<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
-								<input type='hidden' name='guidel' id='guidel' value="<?php echo $gui;?>" />
+								<input type='hidden' name='oiddel' id='oiddel' value="<?php echo $occId;?>" />
 								<input type="image" name="action" src="../images/del.gif" style="width:13px;" value="Delete Voucher" title="Delete Voucher" />
 							</form>
 							<div style='margin:10px;clear:both;'>
@@ -334,7 +334,7 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 										<legend>Edit Voucher:</legend>
 										<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 										<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
-										<input type='hidden' name='gui' value="<?php echo $gui;?>" />
+										<input type='hidden' name='occid' value="<?php echo $occid;?>" />
 										<div style='margin-top:0.5em;'>
 											<b>Collector:</b> 
 											<input name='collector' type='text' value="<?php echo $iArray["collector"];?>" size='30' maxlength='100' />
@@ -523,18 +523,15 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 	public function getVoucherData(){
 		$voucherData = Array();
  		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = "SELECT v.GlobalUniqueIdentifier, v.Collector, v.Locality, v.Determiner, v.SciName, v.Notes, v.editornotes ".
+		$sql = "SELECT v.occid, v.Collector, v.Notes, v.editornotes ".
 			"FROM fmvouchers v ".
 			"WHERE (v.TID = ".$this->tid.") AND (v.CLID = ".$this->clid.")";
 		$result = $this->vCon->query($sql);
 		while($row = $result->fetch_object()){
-			$gui = $row->GlobalUniqueIdentifier;
-			$voucherData[$gui]["collector"] = $row->Collector;
-			$voucherData[$gui]["locality"] = $row->Locality; 
-			$voucherData[$gui]["determiner"] = $row->Determiner;
-			$voucherData[$gui]["sciname"] = $row->SciName; 
-			$voucherData[$gui]["notes"] = $row->Notes;
-			$voucherData[$gui]["editornotes"] = $row->editornotes;
+			$occId = $row->occid;
+			$voucherData[$occId]["collector"] = $row->Collector;
+			$voucherData[$occId]["notes"] = $row->Notes;
+			$voucherData[$occId]["editornotes"] = $row->editornotes;
 		}
 		$result->close();
 		return $voucherData;
@@ -542,55 +539,55 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 	
 	public function editVoucher($editArr){
 		if($this->tid && $this->clid){
-			$gui = $editArr["gui"];
-			unset($editArr["gui"]);
+			$occId = $editArr["occid"];
+			unset($editArr["occid"]);
 			$setStr = "";
 			foreach($editArr as $k => $v){
 				$setStr .= ", ".$k." = '".$v."'";
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = "UPDATE fmvouchers v ".
-			"SET $setStr WHERE v.GlobalUniqueIdentifier = \"".$gui."\" AND v.TID = ".$this->tid." AND v.CLID = ".$this->clid;
+				"SET $setStr WHERE v.occid = \"".$occId."\" AND v.TID = ".$this->tid." AND v.CLID = ".$this->clid;
 			$this->vCon->query($sqlVoucUpdate);
 		}
 	}
 	
-	public function addVoucher($vGui, $vNotes, $vEditNotes){
-		if($vGui && $this->clid){
-			$status = $this->addVoucherRecord($vGui, $vNotes, $vEditNotes);
+	public function addVoucher($vOccId, $vNotes, $vEditNotes){
+		if($vOccId && $this->clid){
+			$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
 			if($status){
 				$sqlInsertCl = "INSERT INTO fmchklsttaxalink ( clid, TID ) ".
 					"SELECT ".$this->clid." AS clid, o.TidInterpreted ".
-					"FROM omoccurrences o WHERE o.occurrenceID = \"".$vGui."\"";
+					"FROM omoccurrences o WHERE o.occid = ".$vOccId;
 				//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
 				if($this->vCon->query($sqlInsertCl)){
-					return $this->addVoucherRecord($vGui, $vNotes, $vEditNotes);
+					return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
 				}
 			}
 		}
 	}
 
-	private function addVoucherRecord($vGui, $vNotes, $vEditNotes){
+	private function addVoucherRecord($vOccId, $vNotes, $vEditNotes){
 		$insertArr = Array();
 		//Checklist-taxon combination already exists
-		$sql = "SELECT DISTINCT o.occurrenceID, ctl.tid, ctl.clid, ".
-			"CONCAT_WS('',o.recordedBy, CONCAT(' (',IFNULL(o.recordNumber,o.occurrenceID),')')) AS Collector, ".
+		$sql = "SELECT DISTINCT o.occid, o.occurrenceID, ctl.tid, ctl.clid, ".
+			"CONCAT_WS('',o.recordedby, CONCAT(' (',IFNULL(o.recordnumber,o.occurrenceid),')')) AS Collector, ".
 			"'".$vNotes."' AS Notes, '".$vEditNotes."' AS editnotes ".
 			"FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) ".
 			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
 			"INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid ".
-			"WHERE ctl.clid = ".$this->clid." AND o.occurrenceID = '".$vGui."' AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 ".
+			"WHERE ctl.clid = ".$this->clid." AND o.occid = ".$vOccId." AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 ".
 			"LIMIT 1";
 		//echo "addVoucherSql: ".$sql."<br/>";
 		$rs = $this->vCon->query($sql);
 		if($row = $rs->fetch_object()){
-			$gui = str_replace("\"","''",$row->occurrenceID);
+			$occId = str_replace("\"","''",$row->occid);
 			$collector = str_replace("\"","''",$row->Collector);
 			$notes = str_replace("\"","''",$row->Notes);
 			$editNotes = str_replace("\"","''",$row->editnotes);
 			
-			$sqlInsert = "INSERT INTO fmvouchers ( GlobalUniqueIdentifier, TID, CLID, Collector, Notes, editornotes ) ".
-				"VALUES (\"".$gui."\",".$row->tid.",".$row->clid.",\"".$collector."\",\"".
+			$sqlInsert = "INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) ".
+				"VALUES (\"".$occId."\",".$row->tid.",".$row->clid.",\"".$collector."\",\"".
 				$notes."\",\"".$editNotes."\") ";
 			//echo "<div>".$sqlInsert."</div>";
 			if(!$this->vCon->query($sqlInsert)){
@@ -606,8 +603,8 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 		return "ERROR: Neither the target taxon nor a sysnonym is present in this checklists. Taxon needs to be added.";
 	}
 
-	public function removeVoucher($delGui){
-		$sqlDel = "DELETE FROM fmvouchers WHERE GlobalUniqueIdentifier = '".$delGui."' AND TID = ".$this->tid." AND CLID = ".$this->clid;
+	public function removeVoucher($delOid){
+		$sqlDel = "DELETE FROM fmvouchers WHERE occid = ".$delOid." AND TID = ".$this->tid." AND CLID = ".$this->clid;
 		$this->vCon->query($sqlDel);
 	}
  }

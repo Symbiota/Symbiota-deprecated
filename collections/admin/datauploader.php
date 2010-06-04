@@ -127,7 +127,7 @@ if($statusStr){
 	 	if(!$collList) echo "<div>There are no Database for which you have authority to update</div>";
  	}
  	else{
- 		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=/seinet/collections/admin/datauploader.php'>login</a>!</div>";
+ 		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/admin/datauploader.php'>login</a>!</div>";
  	}
  }
  else{

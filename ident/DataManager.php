@@ -3,7 +3,6 @@
  * Created on May 16, 2006
  * E.E.Gilbert
  */
- //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']. PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."/seinet/" );
  include_once("../util/dbconnection.php");
 
  class DataManager {
@@ -172,11 +171,13 @@
 	}
 
 	function setAttrs($attrs){
-		foreach($attrs as $attr){
-			$fragments = explode("-",$attr);
-			$cid = $fragments[0];
-			$cs = $fragments[1];
-			$this->charArr[$cid][] = $cs;
+		if(is_array($attrs)){
+			foreach($attrs as $attr){
+				$fragments = explode("-",$attr);
+				$cid = $fragments[0];
+				$cs = $fragments[1];
+				$this->charArr[$cid][] = $cs;
+			}
 		}
 	}
 
@@ -449,7 +450,7 @@
 		$returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
 			"The key has been developed to minimize the exclusion of species due to the ".
 			"lack of data. The consequences of this is that a 'shrubs' selection may show non-shrubs until that information is corrected. ".
-			"User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='mailto:seinetAdmin@asu.edu'>seinetAdmin@asu.edu</a><br><br>";
+			"User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='".$adminEmail."'>".$adminEmail."</a><br><br>";
 		$returnStr .= "<b>Note:</b> If few morphological characters are displayed for a particular checklist, it is likely due to not yet having enough ".
 		"morphological data compiled for that subset of species. If you would like to help, please email me at the above address. ";
 		return $returnStr;

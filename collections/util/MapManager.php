@@ -26,12 +26,12 @@ class MapManager extends CollectionManager{
 		global $userRights,$isAdmin;
 		$conn = $this->getConnection();
         $querySql = "";
-        $sql = "SELECT o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.dbpk, o.occurrenceID ";
+        $sql = "SELECT o.occid, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.dbpk, o.occurrenceID ";
         if($includeDescr){
         	$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
         }
         $sql .= "FROM omoccurrences o ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omspecprojlink spl ON o.occurrenceID = spl.guid ";
+		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
         $sql .= $this->getSqlWhere();
         $sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if($isAdmin){
@@ -75,9 +75,8 @@ class MapManager extends CollectionManager{
         }
 		//echo "<div>SQL: ".$sql."</div>";
         $result = $conn->query($sql);
-		$specCnt = 0;
         while($row = $result->fetch_object()){
-			$specCnt++;
+			$occId = $row->occid;
 			$sciName = $row->sciname;
 			$family = $row->family;
 			$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
@@ -93,11 +92,11 @@ class MapManager extends CollectionManager{
 				}
 			}
 			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$specCnt]["collid"] = $row->collid;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$specCnt]["dbpk"] = $row->dbpk;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$specCnt]["gui"] = $row->occurrenceID;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["dbpk"] = $row->dbpk;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["gui"] = $row->occurrenceID;
 			if($includeDescr){
-				$coordArr[$taxaMapper[$sciName]][$latLngStr][$specCnt]["descr"] = $row->descr;
+				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
 			}
 		}
 		if(array_key_exists("undefined",$coordArr)){
@@ -142,19 +141,13 @@ class MapManager extends CollectionManager{
 			echo "<Folder><name>".$sciName."</name>\n";
 
 			foreach($contentArr as $latLong => $llArr){
-				foreach($llArr as $specCnt => $pointArr){
+				foreach($llArr as $occId => $pointArr){
 					echo "<Placemark>\n";
 					echo "<name>".$pointArr["gui"]."</name>\n";
 					echo "<description><![CDATA[<p>".$pointArr["descr"]."</p>";
-					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/individual.php";
-					if($pointArr["gui"]){
-						$url .= "?gui=".$pointArr["gui"];
-					}
-					else{
-						$url .= "?collid=".$pointArr["collid"]."&pk=".$pointArr["dbpk"];
-					}
+					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/individual.php?occid=".$occId;
 					echo "<p><b>More Information:</b> <a href='".$url."'>".$url."</a></p>";
-					echo "<p><b>Data retrieved from <a href='".$_SERVER["SERVER_NAME"]."'>".$defaultTitle." Data Portal</a></b></p>]]></description>\n";
+					echo "<p><b>Data retrieved from <a href='http://".$_SERVER["SERVER_NAME"]."'>".$defaultTitle." Data Portal</a></b></p>]]></description>\n";
 					echo "<styleUrl>#".str_replace(" ","_",$sciName)."</styleUrl>\n";
 	                echo "<Point><coordinates>".implode(",",array_reverse(explode(",",$latLong))).",0</coordinates></Point>\n";
 					echo "</Placemark>\n";

@@ -23,13 +23,13 @@ class ListManager extends CollectionManager{
 		if(!$this->recordCount){
 			$this->setRecordCnt($sqlWhere,$conn);
 		}
-		$sql = "SELECT o.CollID, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, ".
+		$sql = "SELECT o.occid, o.CollID, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, ".
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
 			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,1) AS LocalitySecurity ".
 			"FROM omoccurrences o ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink spl ON o.occurrenceId = spl.guid ";
+		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
 		$sql .= "ORDER BY o.CollID, o.sciname ";
@@ -40,6 +40,7 @@ class ListManager extends CollectionManager{
 		while($row = $result->fetch_object()){
 			$collIdStr = $row->CollID;
 			$dbpk = $row->dbpk;
+			$returnArr[$collIdStr][$dbpk]["occid"] = $row->occid;
 			$returnArr[$collIdStr][$dbpk]["accession"] = $row->catalognumber;
 			$returnArr[$collIdStr][$dbpk]["family"] = $row->family;
 			$returnArr[$collIdStr][$dbpk]["sciname"] = $row->sciname;
@@ -68,8 +69,8 @@ class ListManager extends CollectionManager{
 	private function setRecordCnt($sqlWhere, $conn){
 		global $clientRoot;
 		if($sqlWhere){
-			$sql = "SELECT COUNT(*) AS cnt FROM omoccurrences o ";
-			if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occurrenceID = opl.guid ";
+			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
+			if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
 			$sql .= $sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $conn->query($sql);

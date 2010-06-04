@@ -16,6 +16,10 @@ if($tid && ($isAdmin)){
 	$sql = "UPDATE taxa t SET t.SecurityStatus = 1 WHERE t.tid = ".$tid;
 	//echo $sql;
 	if($conn->query($sql)){
+		$sql2 = "UPDATE omoccurrences o ".
+			"SET o.LocalitySecurity = 1 ".
+			"WHERE o.tidinterpreted = ".$tid;
+		$conn->query($sql2);
 		echo $tid;
 	}
 	else{

@@ -954,10 +954,10 @@ class ChecklistManager {
 		if($this->showImages) return $this->getTaxaImageList($pageNumber);
 		//Get list that shows which taxa have vouchers
 		if($this->showVouchers && $this->clType != "dynamic"){
-			$vSql = "SELECT DISTINCT v.tid, v.globaluniqueidentifier, v.collector, v.notes FROM fmvouchers v WHERE (v.CLID = $this->clid)";
+			$vSql = "SELECT DISTINCT v.tid, v.occid, v.collector, v.notes FROM fmvouchers v WHERE (v.CLID = $this->clid)";
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
-				$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/individual.php?gui=".$row->globaluniqueidentifier."','individwindow')\">".$row->collector."</a>\n";
+				$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/individual.php?occid=".$row->occid."','individwindow')\">".$row->collector."</a>\n";
 			}
 			$vResult->close();
 		}

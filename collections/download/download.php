@@ -48,13 +48,13 @@
         
         <h3 style="margin-top:10px;">Guidelines for Acceptable Use of Data: </H3>
         <ul>
-        <li>While SEINet will make every effort possible to control and document the quality of the data it publishes, the data are made available "as is". Any report of errors in the data should be directed to the appropriate curators and/or collections managers. </li>
-        <li>SEINet cannot assume responsibility for damages resulting from mis-use or mis-interpretation of datasets or from errors or omissions that may exist in the data. </li>
+        <li>While <?php echo $defaultTitle; ?> will make every effort possible to control and document the quality of the data it publishes, the data are made available "as is". Any report of errors in the data should be directed to the appropriate curators and/or collections managers. </li>
+        <li><?php echo $defaultTitle; ?> cannot assume responsibility for damages resulting from mis-use or mis-interpretation of datasets or from errors or omissions that may exist in the data. </li>
         <li>It is considered a matter of professional ethics to acknowledge the work of other scientists that has resulted in data used in subsequent research. </li>
-        <li>SEINet expects that any use of data from this server will be accompanied with the appropriate citations and acknowledgments. </li>
-        <li>SEINet encourages users to contact the original investigator responsible for the data that they are accessing. Where appropriate, researchers whose projects 
+        <li><?php echo $defaultTitle; ?> expects that any use of data from this server will be accompanied with the appropriate citations and acknowledgments. </li>
+        <li><?php echo $defaultTitle; ?> encourages users to contact the original investigator responsible for the data that they are accessing. Where appropriate, researchers whose projects 
             are integrally dependent on particular group of specimen data are encouraged to consider collaboration and/or co-authorship with original investigators. </li>
-        <li>SEINet asks that users not redistribute data obtained from this site. However, links or references to this site may be freely posted.</li>
+        <li><?php echo $defaultTitle; ?> asks that users not redistribute data obtained from this site. However, links or references to this site may be freely posted.</li>
         </ul>
 
     </td></tr>
@@ -72,7 +72,7 @@ else{
     //echo "<li style='font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=darwincore_xml'>Darwin Core XML file</a></li>";
     echo "<li style='font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=darwincore_text'>Darwin Core tab-delimited text file</a></li>";
     echo "<ul><li><a href='http://wiki.tdwg.org/twiki/bin/view/DarwinCore/WebHome' class='bodylink' target='_blank'>What is Darwin Core?</a></li></ul>";
-    echo "<li style='margin-top:5px;font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=seinet'>SEINet tab-delimited text file</a></li>";
+    echo "<li style='margin-top:5px;font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=symbiota'>Symbiota tab-delimited text file</a></li>";
 }
    
 ?>
