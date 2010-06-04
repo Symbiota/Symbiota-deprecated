@@ -64,7 +64,7 @@
 				<?php echo $indManager->getCollectionName(); ?>
 			</span>
 		</div>
-		<div style="clear:both;margin:20px;">
+		<div style="clear:both;width:550px;">
 	        <?php
 			foreach($htmlVec as $value){
 	                echo $value."\n";

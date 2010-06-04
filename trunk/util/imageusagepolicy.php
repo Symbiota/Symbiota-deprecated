@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>SEINet Image Library General Copyright</title>
+<title><?php echo $defaultTitle;?> Image Library General Copyright</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link rel="stylesheet" href="../css/main.css" type="text/css">
 </head>

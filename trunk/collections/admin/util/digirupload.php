@@ -6,7 +6,7 @@ class DigirUpload extends DataUploadManager {
 	private $searchStart = 0;
 	private $searchLimit = 1000;
 	//private $defaultSchema = "http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd";
-	private $defaultSchema = "http://swbiodiversity.org/seinet/collections/admin/util/darwinsymbiota.xsd";
+	private $defaultSchema = "";
 	private $returnCount = true;
 	
 	//XML parser stuff
@@ -25,6 +25,7 @@ class DigirUpload extends DataUploadManager {
 	
  	public function __construct(){
  		parent::__construct();
+ 		$defaultSchema = $clientRoot."/collections/admin/util/darwinsymbiota.xsd";
  		set_time_limit(10000);
  		//
 		$this->initByteMap();
