@@ -686,29 +686,29 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 			?>
 			<table>
 				<tr><td>
-					<div style="margin:20px 0px 0px 15px;float:left;">
+					<div style="margin:20px;float:left;">
 						<a href="<?php echo (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"];?>">
 							<img width="250" src="<?php echo (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"];?>"/>
 						</a>
 					</div>
 				</td>
-				<td>
+				<td valign="middle">
 					<div style='float:right;margin-right:10px;cursor:pointer;'>
 						<img src="../../images/edit.png" onclick="toggle('image<?php echo $imgArr["imgid"];?>');">
 					</div>
-					<?php 
-					if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
-					if($imgArr["photographerdisplay"]) echo "<div><b>Photographer:</b> ".$imgArr["photographerdisplay"]."</div>";
-					if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
-					if($imgArr["sourceurl"]) echo "<div><b>Source URL:</b> ".$imgArr["sourceurl"]."</div>";
-					if($imgArr["copyright"]) echo "<div><b>Copyright:</b> ".$imgArr["copyright"]."</div>";
-					if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
-					if($imgArr["occid"]) echo "<div><b>Specimen #:</b> ".$imgArr["occid"]."</div>";
-					if($imgArr["anatomy"]) echo "<div><b>Anatomy:</b> ".$imgArr["anatomy"]."</div>";
-					if($imgArr["imagetype"]) echo "<div><b>Image Type:</b> ".$imgArr["imagetype"]."</div>";
-					if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
-					?>
-					<div style='margin:0px 0px 10px 0px ;'>
+					<div style='margin:60px 10px 10px 10px;clear:both;'>
+						<?php 
+						if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
+						if($imgArr["photographerdisplay"]) echo "<div><b>Photographer:</b> ".$imgArr["photographerdisplay"]."</div>";
+						if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
+						if($imgArr["sourceurl"]) echo "<div><b>Source URL:</b> ".$imgArr["sourceurl"]."</div>";
+						if($imgArr["copyright"]) echo "<div><b>Copyright:</b> ".$imgArr["copyright"]."</div>";
+						if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
+						if($imgArr["occid"]) echo "<div><b>Specimen #:</b> ".$imgArr["occid"]."</div>";
+						if($imgArr["anatomy"]) echo "<div><b>Anatomy:</b> ".$imgArr["anatomy"]."</div>";
+						if($imgArr["imagetype"]) echo "<div><b>Image Type:</b> ".$imgArr["imagetype"]."</div>";
+						if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
+						?>
 						<b>Sort sequence:</b> 
 						<?php echo $imgArr["sortsequence"];?>
 					</div>
