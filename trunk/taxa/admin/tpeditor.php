@@ -101,7 +101,7 @@
 		$imgEditArr["photographeruid"] = $_REQUEST["photographeruid"];
 		$imgEditArr["owner"] = $_REQUEST["owner"];
 		$imgEditArr["locality"] = str_replace("\"","-",$_REQUEST["locality"]);
-		$imgEditArr["specimengui"] = $_REQUEST["specimengui"];
+		$imgEditArr["occid"] = $_REQUEST["occid"];
 		$imgEditArr["notes"] = str_replace("\"","-",$_REQUEST["notes"]);
 		$imgEditArr["sourceurl"] = $_REQUEST["sourceurl"];
 		$imgEditArr["copyright"] = $_REQUEST["copyright"];
@@ -140,7 +140,7 @@
 			$imgData["copyright"] = $_REQUEST["copyright"];
 			$imgData["owner"] = trim($_REQUEST["owner"]);
 			$imgData["locality"] = str_replace("\"","-",trim($_REQUEST["locality"]));
-			$imgData["specimengui"] = trim($_REQUEST["specimengui"]);
+			$imgData["occid"] = trim($_REQUEST["occid"]);
 			$imgData["notes"] = str_replace("\"","-",trim($_REQUEST["notes"]));
 			$imgData["anatomy"] = trim($_REQUEST["anatomy"]);
 			$imgData["imagetype"] = $_REQUEST["imagetype"];
@@ -631,8 +631,9 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					<input name='locality' type='text' value='' size='70' maxlength='250'>
 				</div>
 				<div style='margin-top:2px;'>
-					<b>Specimen GUI:</b> 
-					<input name='specimengui' type='text' value='' size='15' maxlength='50'>
+					<b>Specimen #:</b> 
+					<input name='specimengui' type='text' value='' size='15' maxlength='50' onchange="" />
+					<input id="occidinput" name="occid" type="hidden" value="" />
 				</div>
 				<div style='margin-top:2px;'>
 					<b>Notes:</b> 
@@ -702,7 +703,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					if($imgArr["sourceurl"]) echo "<div><b>Source URL:</b> ".$imgArr["sourceurl"]."</div>";
 					if($imgArr["copyright"]) echo "<div><b>Copyright:</b> ".$imgArr["copyright"]."</div>";
 					if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
-					if($imgArr["specimengui"]) echo "<div><b>Specimen GUI:</b> ".$imgArr["specimengui"]."</div>";
+					if($imgArr["occid"]) echo "<div><b>Specimen #:</b> ".$imgArr["occid"]."</div>";
 					if($imgArr["anatomy"]) echo "<div><b>Anatomy:</b> ".$imgArr["anatomy"]."</div>";
 					if($imgArr["imagetype"]) echo "<div><b>Image Type:</b> ".$imgArr["imagetype"]."</div>";
 					if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
@@ -754,7 +755,8 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Specimen GUI:</b> 
-									<input name='specimengui' type='text' value='<?php echo $imgArr["specimengui"];?>' size='15' maxlength='50'/>
+									<input name='specimengui' type='text' value="" size='15' maxlength='50'/>
+									<input id="occidinput" name="occid" type="hidden" value="" />
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Anatomy:</b> 
@@ -1163,7 +1165,7 @@ include($serverRoot."/util/footer.php");
 		$imageArr = Array();
 		$sql = "SELECT DISTINCT ti.imgid, ti.url, ti.thumbnailurl, ti.photographer, ti.photographeruid, ".
 			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ti.imagetype, ti.caption, ti.owner, ".
-			"ti.anatomy, ti.locality, ti.specimengui, ti.notes, ti.sortsequence, ti.username, ti.sourceurl, ti.copyright ".
+			"ti.anatomy, ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.username, ti.sourceurl, ti.copyright ".
 			"FROM ((images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid) ".
 			"LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.TID ".
@@ -1186,7 +1188,7 @@ include($serverRoot."/util/footer.php");
 			$imageArr[$imgCnt]["locality"] = $row->locality;
 			$imageArr[$imgCnt]["sourceurl"] = $row->sourceurl;
 			$imageArr[$imgCnt]["copyright"] = $row->copyright;
-			$imageArr[$imgCnt]["specimengui"] = $row->specimengui;
+			$imageArr[$imgCnt]["occid"] = $row->occid;
 			$imageArr[$imgCnt]["notes"] = $row->notes;
 			$imageArr[$imgCnt]["sortsequence"] = $row->sortsequence;
 			$imageArr[$imgCnt]["username"] = $row->username;
@@ -1219,7 +1221,7 @@ include($serverRoot."/util/footer.php");
 		$sql .= "sourceurl = \"".$imgEdits["sourceurl"]."\", ";
 		$sql .= "copyright = \"".$imgEdits["copyright"]."\", ";
 		$sql .= "locality = \"".$imgEdits["locality"]."\", ";
-		$sql .= "specimengui = \"".$imgEdits["specimengui"]."\", ";
+		$sql .= "occid = ".($imgEdits["occid"]?$imgEdits["occid"]:"NULL").", ";
 		$sql .= "anatomy = \"".$imgEdits["anatomy"]."\", ";
 		$sql .= "imagetype = \"".$imgEdits["imagetype"]."\", ";
 		$sql .= "notes = \"".$imgEdits["notes"]."\", ";
@@ -1235,11 +1237,11 @@ include($serverRoot."/util/footer.php");
 		if($con->query($sql)){
 			$this->setPrimaryImage($con, $this->tid);
 			if(array_key_exists("addtoparent",$imgEdits)){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, owner, sourceurl, copyright, locality, specimenGUI, notes, anatomy, sortsequence) 
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, owner, sourceurl, copyright, locality, occid, notes, anatomy, sortsequence) 
 					VALUES (".$this->parentTid.",\"".$imgEdits["url"]."\",\"".$imgEdits["thumbnailurl"]."\",\"".
 					$imgEdits["photographer"]."\",".$imgEdits["photographeruid"].",\"".
 					$imgEdits["imagetype"]."\",\"".$imgEdits["caption"]."\",\"".$imgEdits["owner"]."\",\"".$imgEdits["sourceurl"]."\",\"".
-					$imgEdits["copyright"]."\",\"".$imgEdits["locality"]."\",\"".$imgEdits["specimengui"]."\",\"".$imgEdits["notes"]."\",\"".
+					$imgEdits["copyright"]."\",\"".$imgEdits["locality"]."\",\"".$imgEdits["occid"]."\",\"".$imgEdits["notes"]."\",\"".
 					$imgEdits["anatomy"]."\",".($imgEdits["sortsequence"]?$imgEdits["sortsequence"]:"50").")";
 				//echo $sql;
 				if($con->query($sql)){
@@ -1305,22 +1307,24 @@ include($serverRoot."/util/footer.php");
 			$imgUrl = $this->getUrlPath($imageData["imagetype"]);
 		}
 		$imgThumbnailUrl = $this->createImageThumbnail($imgUrl);
-		$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, owner, sourceurl, copyright, locality, specimenGUI, notes, anatomy, username, sortsequence) 
-			VALUES (".$this->tid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
+		$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
+			"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
+			"VALUES (".$this->tid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
 			($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-			$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",\"".
-			$imageData["specimengui"]."\",\"".$imageData["notes"]."\",\"".
+			$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
+			($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
 			$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
 		//echo $sql;
 		$status = "";
 		if($con->query($sql)){
 			$this->setPrimaryImage($con, $this->tid);
 			if($this->rankId > 220 && !$this->submittedTid && array_key_exists("addtoparent",$imageData)){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, owner, sourceurl, copyright, locality, specimenGUI, notes, anatomy, username, sortsequence) 
-					VALUES (".$this->parentTid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
+					"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
+					"VALUES (".$this->parentTid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
 					($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-					$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",\"".
-					$imageData["specimengui"]."\",\"".$imageData["notes"]."\",\"".
+					$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
+					($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
 					$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
 				//echo $sql;
 				if($con->query($sql)){

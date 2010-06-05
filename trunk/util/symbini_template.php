@@ -2,6 +2,7 @@
 $defaultLang = "English";			//Default language
 $defaultProjId = 1;
 $defaultTitle = "SEINet";
+$adminEmail = "seinetadmin@asu.edu";
 
 $clientRoot = "";					//URL path to project root folder 
 $serverRoot = "";
