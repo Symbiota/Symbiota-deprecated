@@ -70,7 +70,7 @@ if($isAdmin){
 						</div>
 					</div>
 					<div style="clear:both;">
-						<div style="float:left;width:130px;">GUID:</div>
+						<div style="float:left;width:130px;">Occurrence ID (GUID):</div>
 						<div style="float:left;"><input type="text" name="gui" /></div>
 					</div>
 					<div style="clear:both;">
@@ -86,7 +86,7 @@ if($isAdmin){
 						<div style="float:left;"><input type="text" name="family" /></div>
 					</div>
 					<div style="clear:both;">
-						<div style="float:left;width:130px;">Taxon:</div> 
+						<div style="float:left;width:130px;">Scientific Name:</div> 
 						<div style="float:left;"><input type="text" name="sciname" /></div>
 					</div>
 					<div style="clear:both;">
@@ -98,30 +98,36 @@ if($isAdmin){
 			<?php
 				if($action == "Query Records" && $collId){
 					$queryArr = Array("collid"=>$collId);
-					if($_REQUEST["gui"]) $queryArr["gui"] = $_REQUEST["gui"];
-					if($_REQUEST["loaddate"]) $queryArr["loaddate"] = $_REQUEST["loaddate"];
-					if($_REQUEST["observer"]) $queryArr["observer"] = $_REQUEST["observer"];
-					if($_REQUEST["family"]) $queryArr["family"] = $_REQUEST["family"];
-					if($_REQUEST["sciname"]) $queryArr["sciname"] = $_REQUEST["sciname"];
+					$queryArr["gui"] = $_REQUEST["gui"];
+					$queryArr["loaddate"] = $_REQUEST["loaddate"];
+					$queryArr["observer"] = $_REQUEST["observer"];
+					$queryArr["family"] = $_REQUEST["family"];
+					$queryArr["sciname"] = $_REQUEST["sciname"];
 					$recArr = $uploadManager->getOccurrenceRecords($queryArr);
-					foreach($recArr as $k => $v){
+					foreach($recArr as $occId => $v){
 						?>
 						<div>
 							<form action="imagebatchloader.php" method="get">
 								<fieldset>
 									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
 									<div style="margin:3px;">
-									<?php 
-									echo $v["recordedby"];
-									if($v["recordnumber"]) echo " [".$v["recordnumber"]."] ";
-									echo $v["eventdate"]."; ".$v["sciname"];
-									if($v["family"]) {
-										echo " [".$v["family"]."]";
-									}	
-									echo " ; ".$v["locality"];
-									?>
+										<a href="<?php echo $clientRoot."/collections/individual/individual.php?occid=".$occId;?>"><?php echo $occId;?></a>
+										<?php 
+										echo $v["recordedby"];
+										if($v["recordnumber"]) echo " [".$v["recordnumber"]."] ";
+										echo ", ".$v["eventdate"]."; ".$v["sciname"];
+										if($v["family"]) {
+											echo " [".$v["family"]."]";
+										}	
+										echo "; ".$v["locality"];
+										?>
 									</div>
-									<div style="font-weight:bold;margin:3px;">
+									<?php if(array_key_exists("images",$v)){ ?>
+									<div style="margin:3px;">
+										
+									</div>
+									<?php } ?>
+									<div style="clear:both;font-weight:bold;margin:3px;">
 										<input type="hidden" name="MAX_FILE_SIZE" value="500000" />
 										File: <input id="uploadfile" name="uploadfile" type="file" size="45" />
 									</div>
@@ -167,31 +173,41 @@ class ImageUploadManager{
 	
 	public function getOccurrenceRecords($queryArr){
 		$returnArr = Array();
-		$sql = "SELECT o.occurrenceid, o.recordedby, o.recordnumber, o.eventdate, ".
+		$sql = "SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, o.eventdate, ".
 			"o.family, o.sciname, o.locality, o.initialtimestamp ".
-			"FROM omoccurrences o LEFT JOIN  ON".
+			"FROM omoccurrences o ".
 			"WHERE o.collid = ".$queryArr["collid"]." ";
-		if(array_key_exists("gui",$queryArr)) $sql .= "AND o.occurrenceId LIKE '%".$queryArr["gui"]."%' "; 
-		if(array_key_exists("loaddate",$queryArr)) $sql .= "AND o.initialtimestamp = '".$queryArr["loaddate"]."' "; 
-		if(array_key_exists("observer",$queryArr)) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
-		if(array_key_exists("family",$queryArr)) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
-		if(array_key_exists("sciname",$queryArr)) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
+		if($queryArr["gui"]) $sql .= "AND o.occurrenceId LIKE '".$queryArr["gui"]."%' "; 
+		if($queryArr["loaddate"]) $sql .= "AND o.initialtimestamp = '".$queryArr["loaddate"]."' "; 
+		if($queryArr["observer"]) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
+		if($queryArr["family"]) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
+		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
 		$sql .= "ORDER BY o.occurrenceid "; 
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
-		$recCnt = 1;
 		while($row = $result->fetch_object()){
-			$returnArr[$recCnt]["occurrenceid"] = $row->occurrenceid;
-			$returnArr[$recCnt]["recordedby"] = $row->recordedby;
-			$returnArr[$recCnt]["recordnumber"] = $row->recordnumber;
-			$returnArr[$recCnt]["eventdate"] = $row->eventdate;
-			$returnArr[$recCnt]["family"] = $row->family;
-			$returnArr[$recCnt]["sciname"] = $row->sciname;
-			$returnArr[$recCnt]["locality"] = $row->locality;
-			$returnArr[$recCnt]["initialtimestamp"] = $row->initialtimestamp;
-			$recCnt++;
+			$occId = $row->occid;
+			$returnArr[$occId]["occurrenceid"] = $row->occurrenceid;
+			$returnArr[$occId]["recordedby"] = $row->recordedby;
+			$returnArr[$occId]["recordnumber"] = $row->recordnumber;
+			$returnArr[$occId]["eventdate"] = $row->eventdate;
+			$returnArr[$occId]["family"] = $row->family;
+			$returnArr[$occId]["sciname"] = $row->sciname;
+			$returnArr[$occId]["locality"] = $row->locality;
+			$returnArr[$occId]["initialtimestamp"] = $row->initialtimestamp;
 		}
 		$result->close();
+		//Grab images
+		$sql = "SELECT i.imgid, i.occid, i.url, i.thumbnailurl ".
+			"FROM images i ".
+			"WHERE i.occid IN (".implode(",",array_keys($returnArr)).")";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$occId = $row->occid;
+			if($row->url) $returnArr[$occId]["images"][$row->imgid]["url"] = $row->url;
+			if($row->thumbnailurl) $returnArr[$occId]["images"][$row->imgid]["tnurl"] = $row->thumbnailurl;
+		}
+		$rs->close();
 		return $returnArr;	
 	}
 

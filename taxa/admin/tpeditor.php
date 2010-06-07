@@ -331,6 +331,11 @@
 		  	}
 			return xmlHttp;
 		}
+
+		function openOccurrenceSearch(target) {
+			occWindow=open("occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=530,height=500,left=20,top=20");
+			if (occWindow.opener == null) occWindow.opener = self;
+		}
 		
 	</script>
 </head>
@@ -631,9 +636,9 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					<input name='locality' type='text' value='' size='70' maxlength='250'>
 				</div>
 				<div style='margin-top:2px;'>
-					<b>Specimen #:</b> 
-					<input name='specimengui' type='text' value='' size='15' maxlength='50' onchange="" />
-					<input id="occidinput" name="occid" type="hidden" value="" />
+					<b>Occurrence Record #:</b> 
+					<input id="occidadd" name="occid" type="text" value="" READONLY/>
+					<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
 				</div>
 				<div style='margin-top:2px;'>
 					<b>Notes:</b> 
@@ -696,21 +701,89 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					<div style='float:right;margin-right:10px;cursor:pointer;'>
 						<img src="../../images/edit.png" onclick="toggle('image<?php echo $imgArr["imgid"];?>');">
 					</div>
-					<div style='margin:60px 10px 10px 10px;clear:both;'>
+					<div style='margin:60px 0px 10px 10px;clear:both;'>
+						<?php if($imgArr["caption"]){ ?>
+						<div>
+							<b>Caption:</b> 
+							<?php echo $imgArr["caption"];?>
+						</div>
 						<?php 
-						if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
-						if($imgArr["photographerdisplay"]) echo "<div><b>Photographer:</b> ".$imgArr["photographerdisplay"]."</div>";
-						if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
-						if($imgArr["sourceurl"]) echo "<div><b>Source URL:</b> ".$imgArr["sourceurl"]."</div>";
-						if($imgArr["copyright"]) echo "<div><b>Copyright:</b> ".$imgArr["copyright"]."</div>";
-						if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
-						if($imgArr["occid"]) echo "<div><b>Specimen #:</b> ".$imgArr["occid"]."</div>";
-						if($imgArr["anatomy"]) echo "<div><b>Anatomy:</b> ".$imgArr["anatomy"]."</div>";
-						if($imgArr["imagetype"]) echo "<div><b>Image Type:</b> ".$imgArr["imagetype"]."</div>";
-						if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
+						}
 						?>
-						<b>Sort sequence:</b> 
-						<?php echo $imgArr["sortsequence"];?>
+						<div>
+							<b>Photographer:</b> 
+							<?php echo $imgArr["photographerdisplay"];?>
+						</div>
+						<?php 
+						if($imgArr["owner"]){
+						?>
+						<div>
+							<b>Manager:</b> 
+							<?php echo $imgArr["owner"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["sourceurl"]){
+						?>
+						<div>
+							<b>Source URL:</b> 
+							<?php echo $imgArr["sourceurl"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["copyright"]){
+						?>
+						<div>
+							<b>Copyright:</b> 
+							<?php echo $imgArr["copyright"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["locality"]){
+						?>
+						<div>
+							<b>Locality:</b> 
+							<?php echo $imgArr["locality"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["occid"]){
+						?>
+						<div>
+							<b>Occurrence Record #:</b> 
+							<a href="<?php echo $clientRoot;?>/collections/individual/individual.php?occid=<?php echo $imgArr["occid"]; ?>"><?php echo $imgArr["occid"];?></a>
+						</div>
+						<?php
+						} 
+						if($imgArr["anatomy"]){
+						?>
+						<div>
+							<b>Anatomy:</b> 
+							<?php echo $imgArr["anatomy"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["imagetype"]){
+						?>
+						<div>
+							<b>Image Type:</b> 
+							<?php echo $imgArr["imagetype"];?>
+						</div>
+						<?php
+						} 
+						if($imgArr["notes"]){
+						?>
+						<div>
+							<b>Notes:</b> 
+							<?php echo $imgArr["notes"];?>
+						</div>
+						<?php
+						} 
+						?>
+						<div>
+							<b>Sort sequence:</b> 
+							<?php echo $imgArr["sortsequence"];?>
+						</div>
 					</div>
 				
 				</td></tr>
@@ -754,9 +827,9 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 									<input name='locality' type='text' value='<?php echo $imgArr["locality"];?>' size='70' maxlength='250'>
 								</div>
 								<div style='margin-top:2px;'>
-									<b>Specimen GUI:</b> 
-									<input name='specimengui' type='text' value="" size='15' maxlength='50'/>
-									<input id="occidinput" name="occid" type="hidden" value="" />
+									<b>Occurrence Record #:</b> 
+									<input id="occidedit" name="occid" type="text" value="" READONLY/>
+									<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidedit')">Link to Occurrence Record</span>
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Anatomy:</b> 
