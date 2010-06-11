@@ -168,7 +168,7 @@ if($statusStr){
  	
 	if($action == "addprofile"){
 		?>
-		<form name="parameditform" action="datauploader.php" method="post">
+		<form name="paramaddform" action="datauploader.php" method="post">
 			<fieldset>
 				<legend>Add New Upload Profile</legend>
 				<div style="clear:both;">
@@ -382,6 +382,13 @@ if($statusStr){
 								<option value="<?php echo $FILEUPLOAD; ?>" <?php if($uploadType == $FILEUPLOAD) echo "SELECTED";?>>File Upload</option>
 								<option value="<?php echo $STOREDPROCEDURE; ?>" <?php if($uploadType == $STOREDPROCEDURE) echo "SELECTED";?>>Stored Procedure</option>
 							</select>
+						</div>
+					</div>
+					<div style="clear:both;">
+						<div style="width:200px;font-weight:bold;float:left;">Title: </div>
+						<div class="editdiv" style=""><?php echo $duManager->getTitle(); ?></div>
+						<div class="editdiv" style="display:none;">
+							<input name="euptitle" type="text" value="<?php echo $duManager->getTitle(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">

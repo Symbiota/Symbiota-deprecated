@@ -65,7 +65,7 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 		<title>Species Details: <?php echo $vManager->getTaxonName()." of ".$vManager->getClName(); ?></title>
 		<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	    <link rel="stylesheet" href="../css/jqac.css" type="text/css" />
-		<script type="text/javascript" src="../js/jquery-1.2.6.min.js"></script>
+		<script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
 		<script type="text/javascript" src="../js/jquery.autocomplete-1.4.2.js"></script>
 		<script language="JavaScript">
 		
@@ -511,10 +511,10 @@ header("Content-Type: text/html; charset=ISO-8859-1");
 	
 	public function deleteTaxon(){
 		//Delete vouchers
-		$vSql = "DELETE FROM fmvouchers v WHERE tid = ".$this->tid." AND clid = ".$this->clid;
+		$vSql = "DELETE v.* FROM fmvouchers v WHERE v.tid = ".$this->tid." AND v.clid = ".$this->clid;
 		$this->vCon->query($vSql);
 		//Delete checklist record 
-		$sql = "DELETE FROM fmchklsttaxalink ctl WHERE ctl.tid = $this->tid AND ctl.clid = $this->clid ";
+		$sql = "DELETE ctl.* FROM fmchklsttaxalink ctl WHERE ctl.tid = $this->tid AND ctl.clid = $this->clid ";
 		if(!$this->vCon->query($sql)){
 			return "ERROR - Unable to delete taxon from checklist: ".$this->vCon->error;
 		}

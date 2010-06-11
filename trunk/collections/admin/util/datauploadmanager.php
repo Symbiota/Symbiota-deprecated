@@ -12,6 +12,7 @@ class DataUploadManager {
 	protected $finalTransfer;
 	protected $doFullReplace = false;
 	
+	protected $title = "";
 	protected $platform = 0;
 	protected $server;
 	protected $port = 0;
@@ -104,7 +105,7 @@ class DataUploadManager {
 	
 	public function getUploadList(){
 		$returnArr = Array();
-		$sql = "SELECT usp.UploadType ".
+		$sql = "SELECT usp.UploadType, usp.title ".
 			"FROM uploadspecparameters usp ".
 			"WHERE (usp.collid = $this->collId) ORDER BY usp.UploadType";
 		//echo $sql;
@@ -122,9 +123,9 @@ class DataUploadManager {
 				$uploadStr = "File Upload";
 			}
 			elseif($uploadType == $this->STOREDPROCEDURE){
-				$uploadStr = "Stored Procedure Upload";
+				$uploadStr = "Stored Procedure";
 			}
-			$returnArr[$row->UploadType] = $uploadStr;
+			$returnArr[$row->UploadType] = $row->title." (".$uploadStr.")";
 		}
 		$result->close();
 		return $returnArr;
@@ -200,18 +201,12 @@ class DataUploadManager {
     
     public function editUploadProfile(){
 		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["eultitle"]."\", platform = \"".$_REQUEST["eulplatform"].
-			"\", server = \"".$_REQUEST["eulserver"]."\", port = ".$_REQUEST["eulport"].", ";
-    	if(array_key_exists("username",$_REQUEST)) $sql .= "username = \"".$_REQUEST["username"]."\", ";
-    	if(array_key_exists("password",$_REQUEST)) $sql .= "password = \"".$_REQUEST["password"]."\", ";
-    	$sql .= "schemaname = \"".$_REQUEST["schemaname"]."\", ";
-    	$sql .= "driver = \"".$_REQUEST["driver"]."\", ";
-    	if(array_key_exists("digircode",$_REQUEST)) $sql .= "digircode = \"".$_REQUEST["digircode"]."\", ";
-    	if(array_key_exists("digirpath",$_REQUEST)) $sql .= "digirpath = \"".$_REQUEST["digirpath"]."\", ";
-    	if(array_key_exists("digirpkfield",$_REQUEST)) $sql .= "digirpkfield = \"".$_REQUEST["digirpkfield"]."\", ";
-    	$sql .= "querystr = \"".$this->cleanField(strtolower($_REQUEST["querystr"]))."\", ";
-    	$sql .= "cleanupsp = \"".$_REQUEST["cleanupsp"]."\", ";
-    	$sql .= "dlmisvalid = ".$_REQUEST["dlmisvalid"]." ";
-    	$sql .= "WHERE collid = ".$this->collId." AND UploadType = ".$this->uploadType;
+			"\", server = \"".$_REQUEST["eulserver"]."\", port = ".$_REQUEST["eulport"].", username = \"".$_REQUEST["eulusername"].
+			"\", password = \"".$_REQUEST["eulpassword"]."\", schemaname = \"".$_REQUEST["eulschemaname"].
+			"\", driver = \"".$_REQUEST["euldriver"]."\", digircode = \"".$_REQUEST["euldigircode"].
+			"\", digirpath = \"".$_REQUEST["euldigirpath"]."\", digirpkfield = \"".$_REQUEST["euldigirpkfield"].
+			"\", querystr = \"".$this->cleanField(strtolower($_REQUEST["eulquerystr"]))."\", cleanupsp = \"".$_REQUEST["eulcleanupsp"].
+			"\", dlmisvalid = ".$_REQUEST["euldlmisvalid"]." WHERE collid = ".$this->collId." AND UploadType = ".$_REQUEST["euluploadtype"];
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -220,13 +215,13 @@ class DataUploadManager {
 	}
 	
     public function addUploadProfile(){
-		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, platform, server, port, driver, digircode, digirpath, ".
+		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, driver, digircode, digirpath, ".
 			"digirpkfield, username, password, schemaname, cleanupsp, querystr, dlmisvalid) VALUES (".
-			$_REQUEST["collid"].",".$_REQUEST["newuploadtype"].",\"".$_REQUEST["platform"]."\",\"".$_REQUEST["server"]."\",".
-			($_REQUEST["port"]?$_REQUEST["port"]:"NULL").",\"".$_REQUEST["driver"]."\",\"".$_REQUEST["digircode"].
-			"\",\"".$_REQUEST["digirpath"]."\",\"".$_REQUEST["digirpkfield"]."\",\"".$_REQUEST["username"].
-			"\",\"".$_REQUEST["password"]."\",\"".$_REQUEST["schemaname"]."\",\"".$_REQUEST["cleanupsp"]."\",\"".
-			$this->cleanField(strtolower($_REQUEST["querystr"]))."\",".$_REQUEST["dlmisvalid"].")";
+			$this->collid.",".$_REQUEST["aupuploadtype"].",\"".$_REQUEST["auptitle"]."\",\"".$_REQUEST["aupplatform"]."\",\"".$_REQUEST["aupserver"]."\",".
+			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdriver"]."\",\"".$_REQUEST["aupdigircode"].
+			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
+			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
+			$this->cleanField(strtolower($_REQUEST["aupquerystr"]))."\",".$_REQUEST["aupdlmisvalid"].")";
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -307,9 +302,9 @@ class DataUploadManager {
 		}
 	}
 	
- 	private function uploadData(){
+ 	public function uploadData(){
  		//Stored Procedure upload
- 		if($uploadType == $STOREDPROCEDURE){
+ 		if($this->uploadType == $this->STOREDPROCEDURE){
  			$this->finalTransferSteps();
  		}
  	}
@@ -340,6 +335,10 @@ class DataUploadManager {
 			echo "<li>Upload Procedure Complete: ".$this->transferCount."</li>";
 			echo "<li>Records transferred only to temporary specimen table, review records and then use controls below to transfer to specimen table</li>";
 		}
+	}
+
+	public function getTitle(){
+		return $this->title;
 	}
 
 	public function getPlatform(){
