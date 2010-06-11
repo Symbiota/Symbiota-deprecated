@@ -6,18 +6,23 @@ class DirectUpload extends DataUploadManager {
  	}
  	
 	public function analyzeFile(){
-		$rs = $this->conn->query($this->queryStr);
-		$row = $rs->fetch_assoc();
-		$sourceArr = Array();
-		foreach($row as $k => $v){
-			$sourceArr[] = strtolower($k);
+	 	$this->readUploadParameters();
+		$sourceConn = $this->getSourceConnection();
+		if($sourceConn){
+			$rs = $sourceConn->query($this->queryStr);
+			$row = $rs->fetch_assoc();
+			$sourceArr = Array();
+			foreach($row as $k => $v){
+				$sourceArr[] = strtolower($k);
+			}
+			$rs->close();
+			
+			$this->echoFieldMapTable($sourceArr);
 		}
-		$rs->close();
-		
-		$this->echoFieldMapTable($sourceArr);
 	}
 
  	public function uploadData(){
+	 	$this->readUploadParameters();
  		$sourceDbpkFieldName = "";
 		if(array_key_exists("dbpk",$this->fieldMap)){
 			$sourceDbpkFieldName = $this->fieldMap["dbpk"]["field"];
@@ -35,17 +40,9 @@ class DirectUpload extends DataUploadManager {
 			$this->conn->query($sqlDel);
 			
 			echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
-			set_time_limit(600);
+			set_time_limit(800);
 			$sourceConn->query("SET NAMES latin1;");
-			//If Append/Update changed and new records, get only records that have been changed recently
-			if(!$this->doFullReplace){
-				$sourceDlmField = $this->fieldMap["modified"]["field"];
-				if($sourceDlmField){
-					if(!strpos($this->queryStr," WHERE ")) $this->queryStr .= " WHERE ";
-					$this->queryStr .= $sourceDlmField." >= '".$this->lastUploadDate."'";
-				}
-			}
-			//echo "<div>".$this->sourceSql."</div><br/>";
+			//echo "<div>".$this->queryStr."</div><br/>";
 			if($result = $sourceConn->query($this->queryStr)){
 				echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
 				$recCnt = 1;
@@ -90,13 +87,12 @@ class DirectUpload extends DataUploadManager {
 							}
 						}
 						else{
-							$size = $sourceField["size"];
 							$value = str_replace("\"","'",$value);
 							$value = str_replace(chr(10),"",$value);
 							$value = str_replace(chr(11),"",$value);
 							$value = str_replace(chr(13),"",$value);
 							
-							if(strlen($value) > $size){
+							if(array_key_exists("size",$sourceField) && strlen($value) > $sourceField["size"]){
 								$value = substr($value,0,$size);
 							}
 							$sqlInsertValues .= ",\"".$value."\"";

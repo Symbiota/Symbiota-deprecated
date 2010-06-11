@@ -136,7 +136,7 @@
 	            echo "<td colspan='3'>".$localStr."</td>";
 	            echo "</tr><tr><td colspan='3'>";
 	            echo "<a href=\"javascript:var popupReference=window.open('individual/individual.php?pk=".
-	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\"> More Information </a>\n";
+	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec-".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\"> More Information </a>\n";
 	            echo "</td></tr><tr><td colspan='4'><hr/></td></tr>";
 	        }
 	    }

@@ -7,7 +7,7 @@ $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:"0";
 $statusStr = "";
-$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3;
+$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4;
 
 $duManager;
 if($uploadType == $DIRECTUPLOAD){
@@ -32,8 +32,16 @@ $isEditable = 0;
 if($isAdmin || in_array("coll-".$collId,$userRights)){
 	$isEditable = 1;
 }
-if($isEditable && array_key_exists("parameditsubmit",$_REQUEST)){
-	$statusStr = $duManager->editUploadParameter();
+if($isEditable){
+	if($action == "Submit Edits"){
+		$statusStr = $duManager->editUploadProfile();
+	}
+	elseif($action == "Add New Profile"){
+		$statusStr = $duManager->addUploadProfile();
+	}
+	elseif($action == "Delete Profile"){
+		$statusStr = $duManager->deleteUploadProfile($collId, $_REQUEST["dupuploadtype"]);
+	}
 }
 ?>
 
@@ -84,7 +92,7 @@ if($isEditable && array_key_exists("parameditsubmit",$_REQUEST)){
 			var submitForm = false;
 			submitForm = confirm('Are you sure you want to upload new specimens records?');
 			uploadObj = getElementById("uploadfile");
-			if(uploadObj.value) == null){
+			if(uploadObj.value = null){
 				alert("Please select the file that is to be uploaded");
 				submitForm = false;
 			}
@@ -106,6 +114,16 @@ if($isEditable && array_key_exists("parameditsubmit",$_REQUEST)){
 ?> 
 <!-- This is inner text! -->
 <div id="innertext">
+	<div style="float:right;">
+		<?php if($collId){ ?>
+		<a href="datauploader.php">
+			<img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to upload listing" />
+		</a>
+		<a href="datauploader.php?collid=<?php echo ($collId);?>&action=addprofile">
+			<img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" />
+		</a>
+		<?php } ?>
+	</div>
 	<h1>Data Upload Module</h1>
 <?php
 
@@ -116,7 +134,7 @@ if($statusStr){
 }
 
  if(!$collId){
- 	if($uid){
+ 	if($symbUid){
 	 	$collList = $duManager->getCollectionList($userRights);
 		echo "<h2>Select Collection to Update</h2>";
 	 	echo "<ul>";
@@ -132,106 +150,154 @@ if($statusStr){
  }
  else{
  	
+ 	if(array_key_exists("sf",$_REQUEST)){
+ 		$targetFields = $_REQUEST["tf"];
+ 		$sourceFields = $_REQUEST["sf"];
+ 		$fieldMap = Array();
+		for($x = 0;$x<count($targetFields);$x++){
+			if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
+		}
+ 		$duManager->setFieldMap($fieldMap);
+ 		if(array_key_exists("savefieldmap",$_REQUEST) && $_REQUEST["savefieldmap"]){
+ 			$duManager->saveFieldMap();
+ 		}
+ 	}
+ 	
  	$collInfo = $duManager->getCollInfo();
  	echo "<h2>".$collInfo["name"]."</h2>";
  	
- 	if(!$uploadType){
- 		echo "<div class='fieldset' style='width:300px;'>";
-	 	echo "<div class='legend'>Available Upload Options:</div>";
-		$actionList = $duManager->getUploadList($collId);
+	if($action == "addprofile"){
+		?>
+		<form name="parameditform" action="datauploader.php" method="post">
+			<fieldset>
+				<legend>Add New Upload Profile</legend>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Upload Type: </div>
+					<div>
+						<select name="aupuploadtype">
+							<option value="">Select an Upload Type</option>
+							<option value="">------------------------</option>
+							<option value="<?php echo $DIGIRUPLOAD; ?>">DiGIR Provider</option>
+							<option value="<?php echo $DIRECTUPLOAD; ?>">Direct Upload</option>
+							<option value="<?php echo $FILEUPLOAD; ?>">File Upload</option>
+							<option value="<?php echo $STOREDPROCEDURE; ?>">Stored Procedure</option>
+						</select>
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Title: </div>
+					<div>
+						<input name="auptitle" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Database Platform: </div>
+					<div>
+						<select name="aupplatform">
+							<option value="">Select the Database Platform</option>
+							<option value="">-----------------------</option>
+							<option value="MySQL">MySQL</option>
+							<option value="MS Access">MS Access</option>
+							<option value="Oracle">Oracle</option>
+						</select>
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Server (host): </div>
+					<div>
+						<input name="aupserver" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Port: </div>
+					<div>
+						<input name="aupport" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
+					<div>
+						<input name="aupdriver" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">DiGIR Code: </div>
+					<div>
+						<input name="aupdigircode" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
+					<div>
+						<input name="aupdigirpath" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Digir Primary Key Field: </div>
+					<div>
+						<input name="aupdigirpkfield" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Username: </div>
+					<div>
+						<input name="aupusername" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Password: </div>
+					<div>
+						<input name="auppassword" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
+					<div>
+						<input name="aupschemaname" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Cleanup SP: </div>
+					<div>
+						<input name="aupcleanupsp" type="text" value="" />
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">DateLastModified Field Is Valid: </div>
+					<div>
+						<select name="aupdlmisvalid">
+							<option value="0">false</option>
+							<option value="1">true</option>
+						</select>
+					</div>
+				</div>
+				<div style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
+					<div>
+						<textarea name="aupquerystr" cols="49" rows="6" ></textarea>
+					</div>
+				</div>
+				<div>
+					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+					<div>
+						<input type="submit" name="action" value="Add New Profile" />
+					</div>
+				</div>
+			</fieldset>
+		</form>
+		
+		<?php 
+	}
+ 	elseif(stripos($action,"upload") === false && stripos($action,"transfer") === false){
+	 	$actionList = $duManager->getUploadList($collId);
 		foreach($actionList as $k => $v){
 			?>
-			<div style='clear:both;height:25px;background-color:lightgray;padding:15px;border:1px solid black;'>
-				<div style='font-weight:bold;float:left;font-size:120%;'>
-					<?php echo $v;?>:
-				</div>
-				<div style='float:right;'>
-					<form name="uploadform" action="datauploader.php" method="post">
-						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-						<input type="hidden" name="uploadtype" value="<?php echo $k;?>" />
-						<input type="submit" name="uploadsubmit" value="Perform..." />
-					</form>
-				</div>
-			</div>
-			<hr />
-			<?php 
-		}
-		echo "</div>";
- 	}
- 	else{
- 		if(array_key_exists("sf",$_REQUEST)){
- 			$targetFields = $_REQUEST["tf"];
- 			$sourceFields = $_REQUEST["sf"];
- 			$fieldMap = Array();
-			for($x = 0;$x<count($targetFields);$x++){
-				if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
-			}
- 			$duManager->setFieldMap($fieldMap);
- 			if(array_key_exists("savefieldmap",$_REQUEST) && $_REQUEST["savefieldmap"]){
- 				$duManager->saveFieldMap();
- 			}
- 		}
- 		$duManager->readUploadParameters();
-		if(!$action || $action == "Analyze Upload"){
-			if(!$action && $uploadType != $DIGIRUPLOAD){
-				?> 
-	 			<form name="analyzeform" action="datauploader.php" enctype="multipart/form-data" method="post" style="margin-top:10px;" onsubmit="return checkAnalyzeForm()">
-	 				<fieldset>
-	 					<legend>
-	 						<?php 
-	 						if($uploadType == $DIRECTUPLOAD){
-		 						echo "Direct Upload Analyze Panel";
-	 						}
-	 						elseif($uploadType == $DIGIRUPLOAD){
-		 						echo "DiGIR Upload Analyze Panel";
-	 						}
-	 						elseif($uploadType == $FILEUPLOAD){
-		 						echo "File Upload Analyze Panel";
-	 						}
-	 						?>
-	 					</legend>
-	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
-	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-						<?php if($uploadType == $FILEUPLOAD){ ?>
-							<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
-							<div>
-								<b>Upload File:</b> 
-								<input id="uploadfile" name="uploadfile" type="file" size="40" />
-							</div>
-						<?php } ?>
-	 					<div>
-							<input type="submit" name="action" value="Analyze Upload" />
-						</div>
-	 				</fieldset>			
-	 			</form>
-	 			<?php 
-			}
-			else{
-				?>
-	 			<form name="uploadform" action="datauploader.php" method="post" enctype="multipart/form-data" style="margin-top:10px;" onsubmit="return checkUploadForm();">
-	 				<fieldset>
-	 					<legend>
-	 						<?php 
-	 						if($uploadType == $DIRECTUPLOAD){
-		 						echo "Direct Upload Panel";
-	 						}
-	 						elseif($uploadType == $DIGIRUPLOAD){
-		 						echo "DiGIR Upload Panel";
-	 						}
-	 						elseif($uploadType == $FILEUPLOAD){
-		 						echo "File Upload Panel";
-	 						}
-	 						?>
-	 					</legend>
-	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-						<?php if($uploadType == $FILEUPLOAD){ ?>
-							<div style="margin:5px 0px 10px 0px;">
-								<b>Upload File:</b>
-								<input id="uploadfile" name="uploadfile" type="file" size="40" />
-								<input type='hidden' name='MAX_FILE_SIZE' value='30000000' />
-							</div>
-						<?php } ?>
+			<form name="uploadform" action="datauploader.php" method="post" <?php echo ($k==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkAnalyzeForm()">
+				<fieldset style="width:450px;">
+					<legend style="font-weight:bold;font-size:120%;"><?php echo $v;?></legend>
+					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+					<input type="hidden" name="uploadtype" value="<?php echo $k;?>" />
+					<?php if(stripos($action,"Analyze") !== false && $uploadType == $k){ ?>
 						<table border="1" cellpadding="2" style="border:1px solid black">
 							<tr>
 								<th>
@@ -243,9 +309,29 @@ if($statusStr){
 							</tr>
 							<?php $duManager->analyzeFile(); ?>
 						</table>
-	 					<div>
-	 						<input type="checkbox" name="finaltransfer" value="1" <?php echo ($finalTransfer?"checked":""); ?> onclick="toogle('dodiv')"/>
-	 						Perform Final Transfer (temp table &#61;&gt; specimen table, update stats, clear temp table) 
+					<?php } ?>
+					<?php if($k == $FILEUPLOAD){ ?>
+						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+						<div>
+							<b>Upload File:</b> 
+							<input id="uploadfile" name="uploadfile" type="file" size="40" />
+						</div>
+					<?php } ?>
+	
+						<input type="submit" name="action" value="View/Edit Parameters..." />
+					<?php if($k != $STOREDPROCEDURE && $k != $DIGIRUPLOAD && stripos($action,"Analyze") === false){ ?>
+						<input type="submit" name="action" value="Analyze..." />
+					<?php } ?>
+					<?php if($k == $STOREDPROCEDURE || $k == $DIGIRUPLOAD || stripos($action,"Analyze")!==false) { ?>
+						<input type="submit" name="action" value="Start Upload..." />
+					<?php if(stripos($action,"Analyze")!==false){ ?>
+						<div>
+							<input type="checkbox" name="savefieldmap" value="1" /> Save Field Mapping
+						</div>
+					<?php } ?>
+		 				<div>
+		 					<input type="checkbox" name="finaltransfer" value="1" <?php echo ($finalTransfer?"checked":""); ?> onclick="toggle('dodiv')"/>
+		 					Perform Final Transfer and Make Public 
 						</div>
 						<div id="dodiv" style="display:none;">
 							<div>
@@ -255,20 +341,33 @@ if($statusStr){
 								<input name="dofullreplace" type="radio" value="1" /> Replace All Records
 							</div>
 						</div>
-						<div>
-							<input type="checkbox" name="savefieldmap" value="1" /> Save Field Mapping
-						</div>
-	 					<div>
-	 						<input type="submit" name="action" value="Upload Data" />
-						</div>
-	 				</fieldset>			
-	 			</form>
-	 			<?php 
-			}
-			?>
+					<?php } ?>
+				</fieldset>
+			</form>
+			<hr />
+			<?php 
+		}
+	 	
+		//Edit Parameters
+		if(stripos($action,"Edit") !== false){
+	 		$duManager->readUploadParameters();
+			$editTitle = "";
+	 		if($uploadType == $DIRECTUPLOAD){
+	 			$editTitle = "Direct";
+	 		}
+	 		elseif($uploadType == $DIGIRUPLOAD){
+	 			$editTitle = "DiGIR";
+	 		}
+	 		elseif($uploadType == $FILEUPLOAD){
+	 			$editTitle = "File";
+	 		}
+	 		elseif($uploadType == $STOREDPROCEDURE){
+	 			$editTitle = "Stored Procedure";
+	 		}
+	 		?>			
 			<form name="parameditform" action="datauploader.php" method="post">
 				<fieldset>
-					<legend>Upload Parameters</legend>
+					<legend><?php echo $editTitle; ?> Upload Parameters</legend>
 					<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editdiv');" title="Toggle Editing Functions">
 						<img style='border:0px;' src='../../images/edit.png'/>
 					</div>
@@ -276,11 +375,12 @@ if($statusStr){
 						<div style="width:200px;font-weight:bold;float:left;">Upload Type: </div>
 						<div class="editdiv" style=""><?php echo $uploadType; ?></div>
 						<div class="editdiv" style="display:none;">
-							<select name="uploadtype">
+							<select name="eupuploadtype">
 								<option value="">Select an Upload Type</option>
 								<option value="<?php echo $DIGIRUPLOAD; ?>" <?php if($uploadType == $DIGIRUPLOAD) echo "SELECTED";?>>DiGIR Provider</option>
 								<option value="<?php echo $DIRECTUPLOAD; ?>" <?php if($uploadType == $DIRECTUPLOAD) echo "SELECTED";?>>Direct Upload</option>
 								<option value="<?php echo $FILEUPLOAD; ?>" <?php if($uploadType == $FILEUPLOAD) echo "SELECTED";?>>File Upload</option>
+								<option value="<?php echo $STOREDPROCEDURE; ?>" <?php if($uploadType == $STOREDPROCEDURE) echo "SELECTED";?>>Stored Procedure</option>
 							</select>
 						</div>
 					</div>
@@ -288,84 +388,84 @@ if($statusStr){
 						<div style="width:200px;font-weight:bold;float:left;">Database Platform: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getPlatform(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="platform" type="text" value="<?php echo $duManager->getPlatform(); ?>" />
+							<input name="eupplatform" type="text" value="<?php echo $duManager->getPlatform(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Server: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getServer(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="server" type="text" value="<?php echo $duManager->getServer(); ?>" />
+							<input name="eupserver" type="text" value="<?php echo $duManager->getServer(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Port: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getPort(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="port" type="text" value="<?php echo $duManager->getPort(); ?>" />
+							<input name="eupport" type="text" value="<?php echo $duManager->getPort(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getDriver(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="driver" type="text" value="<?php echo $duManager->getDriver(); ?>" />
+							<input name="eupdriver" type="text" value="<?php echo $duManager->getDriver(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">DiGIR Code: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getDigirCode(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="digircode" type="text" value="<?php echo $duManager->getDigirCode(); ?>" />
+							<input name="eupdigircode" type="text" value="<?php echo $duManager->getDigirCode(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getDigirPath(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="digirpath" type="text" value="<?php echo $duManager->getDigirPath(); ?>" />
+							<input name="eupdigirpath" type="text" value="<?php echo $duManager->getDigirPath(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Digir Primary Key Field: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getDigirPKField(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="digirpkfield" type="text" value="<?php echo $duManager->getDigirPKField(); ?>" />
+							<input name="eupdigirpkfield" type="text" value="<?php echo $duManager->getDigirPKField(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Username: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getUsername(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="username" type="text" value="<?php echo $duManager->getUsername(); ?>" />
+							<input name="eupusername" type="text" value="<?php echo $duManager->getUsername(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Password: </div>
 						<div class="editdiv" style="">********</div>
 						<div class="editdiv" style="display:none;">
-							<input name="password" type="text" value="<?php echo $duManager->getPassword(); ?>" />
+							<input name="euppassword" type="text" value="<?php echo $duManager->getPassword(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getSchemaName(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="schemaname" type="text" value="<?php echo $duManager->getSchemaName(); ?>" />
+							<input name="eupschemaname" type="text" value="<?php echo $duManager->getSchemaName(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Cleanup SP: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getCleanupSP(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="cleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
+							<input name="eupcleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">DateLastModified Field Is Valid: </div>
 						<div class="editdiv" style=""><?php echo ($duManager->getDLMIsValid()?"true":"false"); ?></div>
 						<div class="editdiv" style="display:none;">
-							<select name="dlmisvalid">
+							<select name="eupdlmisvalid">
 								<option value="0">false</option>
 								<option value="1" <?php echo ($duManager->getDLMIsValid()?"SELECTED":""); ?>>true</option>
 							</select>
@@ -375,23 +475,35 @@ if($statusStr){
 						<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
 						<div class="editdiv" style=""><?php echo htmlentities($duManager->getQueryStr()); ?></div>
 						<div class="editdiv" style="display:none;">
-							<textarea name="querystr" cols="49" rows="6" >
-								<?php echo $duManager->getQueryStr(); ?>
-							</textarea>
+							<textarea name="eupquerystr" cols="49" rows="6" ><?php echo $duManager->getQueryStr(); ?></textarea>
 						</div>
 					</div>
 					<div>
 						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-						<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 						<div class="editdiv" style="display:none;">
-							<input type="submit" name="parameditsubmit" value="Submit Edits" />
+							<input type="submit" name="action" value="Submit Edits" />
 						</div>
 					</div>
 				</fieldset>
 			</form>
-			<?php
+			<div class="editdiv" style="display:none;">
+				<form action="datauploader.php" method="get">
+					<fieldset>
+						<legend>Delete this Profile</legend>
+						<div>
+							<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+							<input type="hidden" name="dupuploadtype" value="<?php echo $uploadType;?>" />
+							<input type="submit" name="action" value="Delete Profile" />
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<?php 
 		}
-		elseif($action == "Upload Data"){
+ 	}
+ 	else{
+		//Upload records
+		if(stripos($action,"upload") !== false){
 	 		echo "<div style='font-weight:bold;font-size:120%'>Starting Data Upload: </div>";
 	 		echo "<ol style='margin:10px;font-weight:bold;'>";
 	 		$duManager->uploadData();
@@ -415,10 +527,12 @@ if($statusStr){
 	 						Perform Final Transfer (temp table &#61;&gt; specimen table, update stats, clear temp table) 
 						</div>
 						<div>
-							<input name="dofullreplace" type="radio" value="0" <?php if(!$doFullReplace) echo "SELECTED"; ?> /> Append New / Update Modified Records
+							<input name="dofullreplace" type="radio" value="0" <?php if(!$doFullReplace) echo "SELECTED"; ?> /> 
+							Append New / Update Modified Records
 						</div>
 						<div>
-							<input name="dofullreplace" type="radio" value="1" <?php if($doFullReplace) echo "SELECTED"; ?> /> Replace All Records
+							<input name="dofullreplace" type="radio" value="1" <?php if($doFullReplace) echo "SELECTED"; ?> /> 
+							Replace All Records
 						</div>
 	 					<div style="margin:5px;"> 
 	 						<input type="submit" name="action" value="Transfer to Central Specimen Table" />
@@ -428,7 +542,7 @@ if($statusStr){
 				<?php 							
 			}
 		}
-		elseif($action == "Transfer to Central Specimen Table"){
+		else{
 	 		$duManager->finalTransfer = 1;
 			$duManager->performFinalTransfer();
 		}
