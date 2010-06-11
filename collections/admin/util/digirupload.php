@@ -39,7 +39,8 @@ class DigirUpload extends DataUploadManager {
  	}
 	
  	public function uploadData(){
-		if($this->schemaName){
+	 	$this->readUploadParameters();
+ 		if($this->schemaName){
 			if(substr($this->schemaName,0,4) != "http"){
 				$this->schemaName = "http://".$_SERVER["HTTP_HOST"].substr($_SERVER["PHP_SELF"],0,strrpos($_SERVER["PHP_SELF"],"/"))."/".$this->schemaName;
 			}

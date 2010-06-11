@@ -10,7 +10,7 @@ class DataUploadManager {
 	protected $collId = 0;
 	protected $uploadType;
 	protected $finalTransfer;
-	protected $doFullReplace = true;
+	protected $doFullReplace = false;
 	
 	protected $platform = 0;
 	protected $server;
@@ -31,7 +31,7 @@ class DataUploadManager {
 	protected $fieldMap = Array();
 	protected $symbFields = Array();
 	
-	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3;
+	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -62,6 +62,7 @@ class DataUploadManager {
 	}
 
 	public function getCollectionList($uRights){
+		global $isAdmin;
 		$returnArr = Array();
 		$collStr = "";
 		foreach($uRights as $right){
@@ -72,7 +73,7 @@ class DataUploadManager {
 		if($collStr) $collStr = substr($collStr,1);
 		if($collStr || $isAdmin){
 			$sql = "SELECT DISTINCT c.CollID, c.CollectionName, c.icon ".
-				"FROM uploadspecparameters usp INNER JOIN omcollections c ON usp.CollID = c.CollID ";
+				"FROM omcollections c ";
 			if($collStr) $sql .= "WHERE c.collid IN($collStr) "; 
 			$sql .= "ORDER BY c.CollectionName";
 			//echo $sql;
@@ -120,6 +121,9 @@ class DataUploadManager {
 			elseif($uploadType == $this->FILEUPLOAD){
 				$uploadStr = "File Upload";
 			}
+			elseif($uploadType == $this->STOREDPROCEDURE){
+				$uploadStr = "Stored Procedure Upload";
+			}
 			$returnArr[$row->UploadType] = $uploadStr;
 		}
 		$result->close();
@@ -127,13 +131,14 @@ class DataUploadManager {
 	}
 
     public function readUploadParameters(){
-		$sql = "SELECT usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, usp.driver, ".
+		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, usp.driver, ".
     		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, usp.dlmisvalid, cs.uploaddate ".
 			"FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid ".
     		"WHERE usp.collid = ".$this->collId." AND usp.UploadType = '".$this->uploadType."'";
 		//echo $sql;
 		$result = $this->conn->query($sql);
     	if($row = $result->fetch_object()){
+    		$this->title = $row->title;
     		$this->platform = $row->Platform;
     		$this->server = $row->server;
     		$this->port = $row->port;
@@ -153,7 +158,7 @@ class DataUploadManager {
     	$result->close();
 
 		//Get Field Map for $fieldMap
-		if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD){
+		if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
 	    	$sql = "SELECT usm.sourcefield, usm.symbspecfield ".
 				"FROM uploadspecmap AS usm ".
 	    		"WHERE usm.collid = ".$this->collId." AND usm.uploadtype = ".$this->uploadType;
@@ -175,7 +180,7 @@ class DataUploadManager {
     		$type = $row->Type;
     		$this->symbFields[] = $field;
 			if(array_key_exists($field,$this->fieldMap)){
-				if(strpos($type,"double") !== false || strpos($type,"int") !== false){
+				if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
 					$this->fieldMap[$field]["type"] = "numeric";
 				}
 				elseif(strpos($type,"date") !== false){
@@ -193,13 +198,9 @@ class DataUploadManager {
     	$rs->close();
     }
     
-    public function editUploadParameter(){
-		$sql = "UPDATE uploadspecparameters SET ";
-		if(array_key_exists("platform",$_REQUEST)) $sql .= "platform = \"".$_REQUEST["platform"]."\", ";
-    	if(array_key_exists("server",$_REQUEST)) $sql .= "server = \"".$_REQUEST["server"]."\", ";
-    	$port = $_REQUEST["port"];
-    	if(!$port) $port = "NULL";
-    	$sql .= "port = ".$port.", ";
+    public function editUploadProfile(){
+		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["eultitle"]."\", platform = \"".$_REQUEST["eulplatform"].
+			"\", server = \"".$_REQUEST["eulserver"]."\", port = ".$_REQUEST["eulport"].", ";
     	if(array_key_exists("username",$_REQUEST)) $sql .= "username = \"".$_REQUEST["username"]."\", ";
     	if(array_key_exists("password",$_REQUEST)) $sql .= "password = \"".$_REQUEST["password"]."\", ";
     	$sql .= "schemaname = \"".$_REQUEST["schemaname"]."\", ";
@@ -207,7 +208,7 @@ class DataUploadManager {
     	if(array_key_exists("digircode",$_REQUEST)) $sql .= "digircode = \"".$_REQUEST["digircode"]."\", ";
     	if(array_key_exists("digirpath",$_REQUEST)) $sql .= "digirpath = \"".$_REQUEST["digirpath"]."\", ";
     	if(array_key_exists("digirpkfield",$_REQUEST)) $sql .= "digirpkfield = \"".$_REQUEST["digirpkfield"]."\", ";
-    	$sql .= "querystr = \"".$_REQUEST["querystr"]."\", ";
+    	$sql .= "querystr = \"".$this->cleanField(strtolower($_REQUEST["querystr"]))."\", ";
     	$sql .= "cleanupsp = \"".$_REQUEST["cleanupsp"]."\", ";
     	$sql .= "dlmisvalid = ".$_REQUEST["dlmisvalid"]." ";
     	$sql .= "WHERE collid = ".$this->collId." AND UploadType = ".$this->uploadType;
@@ -216,6 +217,36 @@ class DataUploadManager {
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
 		}
 		return "";
+	}
+	
+    public function addUploadProfile(){
+		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, platform, server, port, driver, digircode, digirpath, ".
+			"digirpkfield, username, password, schemaname, cleanupsp, querystr, dlmisvalid) VALUES (".
+			$_REQUEST["collid"].",".$_REQUEST["newuploadtype"].",\"".$_REQUEST["platform"]."\",\"".$_REQUEST["server"]."\",".
+			($_REQUEST["port"]?$_REQUEST["port"]:"NULL").",\"".$_REQUEST["driver"]."\",\"".$_REQUEST["digircode"].
+			"\",\"".$_REQUEST["digirpath"]."\",\"".$_REQUEST["digirpkfield"]."\",\"".$_REQUEST["username"].
+			"\",\"".$_REQUEST["password"]."\",\"".$_REQUEST["schemaname"]."\",\"".$_REQUEST["cleanupsp"]."\",\"".
+			$this->cleanField(strtolower($_REQUEST["querystr"]))."\",".$_REQUEST["dlmisvalid"].")";
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
+		}
+		return "SUCCESS: New Upload Profile Added";
+	}
+	
+    public function deleteUploadProfile($collId, $uploadType){
+		$sql = "DELETE FROM uploadspecparameters WHERE collid = ".$collId." AND uploadtype = ".$uploadType;
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
+		}
+		return "SUCCESS: Upload Profile Deleted";
+	}
+	
+	private function cleanField($field){
+		$rStr = trim($field);
+		$rStr = str_replace("\"","'",$rStr);
+		return $rStr;
 	}
 	
 	protected function echoFieldMapTable($sourceArr){
@@ -236,8 +267,9 @@ class DataUploadManager {
 			echo $fieldName;
 			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
 			echo "</td>\n";
-			echo "<td bgcolor='".(in_array($fieldName,$this->symbFields)||array_key_exists($fieldName,$sourceSymbArr)?"":"yellow")."'>\n";
-			echo "<select name='tf[]'><option value=''>Select Target Field</option>\n";
+			echo "<td>\n";
+			echo "<select name='tf[]' style='background:".(in_array($fieldName,$this->symbFields)||array_key_exists($fieldName,$sourceSymbArr)?"":"yellow")."'>";
+			echo "<option value=''>Select Target Field</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
 			if(in_array($fieldName,$this->symbFields)){
 				//Source Field = Symbiota Field
@@ -275,6 +307,13 @@ class DataUploadManager {
 		}
 	}
 	
+ 	private function uploadData(){
+ 		//Stored Procedure upload
+ 		if($uploadType == $STOREDPROCEDURE){
+ 			$this->finalTransferSteps();
+ 		}
+ 	}
+	
 	public function finalTransferSteps(){
 		//Run cleanup Stored Procedure, if one exists 
 		if($this->cleanupSP){
@@ -289,46 +328,8 @@ class DataUploadManager {
 	
 	public function performFinalTransfer(){
 		if($this->finalTransfer){
-			//Transfer records from uploadspectemp to specimens
-			$uploadArr = Array();
-			$uploadRS = $this->conn->query("SHOW COLUMNS FROM uploadspectemp");
-			while($row = $uploadRS->fetch_objects()){
-    			$uploadArr[] = strtolower($row->Field);
-			}
-			$uploadRS->close();
-
-			$specArr = Array();
-			$specRS = $this->conn->query("SHOW COLUMNS FROM omoccurrences");
-			while($row = $specRS->fetch_objects()){
-    			$specArr[] = strtolower($row->Field);
-			}
-			$specRS->close();
-			$specArr = array_intersect($specArr,$uploadArr);
-			unset($specArr[array_search("initialtimestamp")]);
-
-			$sql = "REPLACE INTO omoccurrences ( ".implode(",",$specArr)." ) ".
-				"SELECT us.".implode(",us.",$specArr)." ".
-				"FROM uploadspectemp AS us";
-			if($this->conn->query($sql)){
-				echo "<li>Data transferred from temporary upload table to central specimen table</li>";
-
-				if($this->doFullReplace){
-					//Delete all records in specimens table that have not been updated (old records that are not in new recordset)
-					if($this->conn->query("DELETE FROM omoccurrences WHERE collid = ".$this->collId." AND InitialTimeStamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)")){
-						echo "<li>All old records deleted</li>";
-					}
-				}
-				
-				//Update Collection Stats
-				if($this->conn->query("CALL UpdateCollectionStats(".$this->collId.");")){
-					echo "<li>Collection Statistics have been updated</li>";
-				}
-
-				//Delete all records in uploadspectemp table
-				if($this->conn->query("DELETE FROM uploadspectemp")){
-					echo "<li>Records in temporary upload table has been delete</li>";
-				}
-				
+			//Clean and Transfer records from uploadspectemp to specimens
+			if($this->conn->query("CALL TransferUploads(".($this->doFullReplace?"1":"0").");")){
 				echo "<li>Upload Procedure Complete: ".($this->transferCount)." records transferred to central specimen table</li>";
 			}
 			else{
@@ -340,7 +341,6 @@ class DataUploadManager {
 			echo "<li>Records transferred only to temporary specimen table, review records and then use controls below to transfer to specimen table</li>";
 		}
 	}
-	
 
 	public function getPlatform(){
 		return $this->platform;

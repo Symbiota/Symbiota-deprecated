@@ -122,17 +122,33 @@ if($isAdmin){
 										echo "; ".$v["locality"];
 										?>
 									</div>
-									<?php if(array_key_exists("images",$v)){ ?>
-									<div style="margin:3px;">
-										
-									</div>
-									<?php } ?>
+									<?php 
+									if(array_key_exists("images",$v)){
+										$imgArr = $v["images"];
+										foreach($imgArr as $imgId => $iArr){
+											$tnUrl = (array_key_exists("tnurl",$iArr)?$iArr["tnurl"]:"");
+											$url = (array_key_exists("url",$iArr)?$iArr["url"]:"");
+											if(!$tnUrl) $tnUrl = $url;
+											if(array_key_exists("imageDomain",$GLOBALS)){
+												if(substr($url,0,1)=="/") $url = $GLOBALS["imageDomain"].$url;
+												if(substr($tnUrl,0,1)=="/") $url = $GLOBALS["imageDomain"].$tnUrl;
+											}
+											?>
+											<div style="margin:3px;float:left;">
+												<a href="<?php echo $tnUrl;?>">
+													<img src="<?php echo $url;?>" />
+												</a>
+											</div>
+											<?php
+										} 
+									} 
+									?>
 									<div style="clear:both;font-weight:bold;margin:3px;">
 										<input type="hidden" name="MAX_FILE_SIZE" value="500000" />
 										File: <input id="uploadfile" name="uploadfile" type="file" size="45" />
 									</div>
 									<div style="margin:3px;">
-										<input type="hidden" name="gui" value="<?php echo $v["occurrenceid"]; ?>" />
+										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="submit" name="action" value="Add Image" />
 									</div>
 								</fieldset>
@@ -158,6 +174,13 @@ if($isAdmin){
 class ImageUploadManager{
 
 	private $conn;
+	private $imageRootPath = "";
+	private $imageRootUrl = "";
+
+	private $maxImageWidth = 1024;
+	private $maxImageHeight = 1024;
+	private $maxThumbnailWidth = 250;
+	private $maxThumbnailHeight = 300;
 
 	function __construct() {
 		$this->setConnection();
@@ -220,6 +243,88 @@ class ImageUploadManager{
 		}
 		$rs->close();
 	}
+	public function loadImageData($inArray){
+		$imageData = $this->cleanArray($inArray);
+		$con = $this->getConnection("write");
+		$imgUrl = "";
+		if(array_key_exists("url",$imageData)){
+			$imgUrl = $imageData["url"];
+		}
+		else{
+			$imgUrl = $this->getUrlPath($imageData["imagetype"]);
+		}
+		$imgThumbnailUrl = $this->createImageThumbnail($imgUrl);
+		$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
+			"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
+			"VALUES (".$this->tid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
+			($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
+			$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
+			($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
+			$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
+		//echo $sql;
+		$status = "";
+		if($con->query($sql)){
+			$this->setPrimaryImage($con, $this->tid);
+			if($this->rankId > 220 && !$this->submittedTid && array_key_exists("addtoparent",$imageData)){
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
+					"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
+					"VALUES (".$this->parentTid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
+					($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
+					$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
+					($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
+					$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
+				//echo $sql;
+				if($con->query($sql)){
+					$this->setPrimaryImage($con,$this->parentTid);
+				}
+				else{
+					$status = "Error: unable to upload image to parent taxon";
+					//$status = "Error:loadImageData:loading the parent data: ".$con->error."<br/>SQL: ".$sql;
+				}
+			}
+		}
+		else{
+			$status = "loadImageData: ".$con->error."<br/>SQL: ".$sql;
+		}
+		$con->close();
+		return $status;
+	}
+	
+ 	public function setFileName($fName){
+		$fName = str_replace("'","",$fName);
+		$fName = str_replace(" ","_",$fName);
+		$fName = str_replace("\"","",$fName);
+		if(strlen($fName) > 30) {
+			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
+		}
+ 		$this->fileName = $fName;
+ 	}
+ 	
+	public function getDownloadPath($subFolder){
+		if(substr($this->imageRootPath,-1,1) != "/") $this->imageRootPath .= "/";
+		$path = $this->imageRootPath.$this->family."/".$subFolder."/";
+ 		if(!file_exists($this->imageRootPath.$this->family)){
+ 			mkdir($this->imageRootPath.$this->family, 0775);
+ 		}
+ 		if(!file_exists($this->imageRootPath.$this->family."/".$subFolder)){
+ 			mkdir($this->imageRootPath.$this->family."/".$subFolder, 0775);
+ 		}
+ 		//Check and see if file already exists, if so, rename filename until it has a unique name
+ 		$tempFileName = $this->fileName;
+ 		$cnt = 0;
+ 		while(file_exists($path.$tempFileName)){
+ 			$tempFileName = substr($this->fileName,0,strrpos($this->fileName,"."))."_".$cnt.substr($this->fileName,strrpos($this->fileName,".")).""; 
+ 			$cnt++;
+ 		}
+ 		$this->fileName = $tempFileName;
+ 		return $path.$this->fileName;
+ 	}
+
+ 	private function getUrlPath($imagetype){
+		$path = $this->imageRootUrl.$this->family."/".$imagetype."/".$this->fileName;
+		return $path;
+ 	}
+ 	
 }
 
 ?>

@@ -7,6 +7,7 @@ class FileUpload extends DataUploadManager{
 	}
 
 	public function analyzeFile(){
+	 	$this->readUploadParameters();
 		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'rb') or die("Can't open file");
 		$headerData = fgets($fh);
@@ -26,6 +27,7 @@ class FileUpload extends DataUploadManager{
 	}
  	
 	public function uploadData(){
+	 	$this->readUploadParameters();
 		set_time_limit(200);
 		ini_set("max_input_time",120);
 		ini_set("upload_max_filesize",10);
