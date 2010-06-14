@@ -482,7 +482,7 @@ class TaxonLoader{
 			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"":"NULL").",\"".$dataArr["unitname1"]."\",".
 			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"":"NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"":"NULL").
 			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"":"NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"":"NULL").
-			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",\"".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
+			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
 			",".$dataArr["securitystatus"].")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if(!$this->conn->query($sqlTaxa)){
