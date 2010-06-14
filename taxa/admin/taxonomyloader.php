@@ -478,11 +478,11 @@ class TaxonLoader{
 		//Load new name into taxa table
 		$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
 			"source, notes, securitystatus) ".
-			"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"","NULL").",".$dataArr["rankid"].
-			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"","NULL").",\"".$dataArr["unitname1"]."\",".
-			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"","NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"","NULL").
-			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"","NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"","NULL").
-			",".($dataArr["source"]?"\"".$dataArr["source"]."\"","NULL").",\"".($dataArr["notes"]?"\"".$dataArr["notes"]."\"","NULL").
+			"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"":"NULL").",".$dataArr["rankid"].
+			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"":"NULL").",\"".$dataArr["unitname1"]."\",".
+			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"":"NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"":"NULL").
+			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"":"NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"":"NULL").
+			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",\"".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
 			",".$dataArr["securitystatus"].")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if(!$this->conn->query($sqlTaxa)){
