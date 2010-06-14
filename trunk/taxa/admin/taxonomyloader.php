@@ -478,9 +478,12 @@ class TaxonLoader{
 		//Load new name into taxa table
 		$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
 			"source, notes, securitystatus) ".
-			"VALUES (\"".$dataArr["sciname"]."\",\"".$dataArr["author"]."\",".$dataArr["rankid"].",\"".$dataArr["unitind1"]."\",\"".
-			$dataArr["unitname1"]."\",\"".$dataArr["unitind2"]."\",\"".$dataArr["unitname2"]."\",\"".$dataArr["unitind3"]."\",\"".
-			$dataArr["unitname3"]."\",\"".$dataArr["source"]."\",\"".$dataArr["notes"]."\",".$dataArr["securitystatus"].")";
+			"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"","NULL").",".$dataArr["rankid"].
+			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"","NULL").",\"".$dataArr["unitname1"]."\",".
+			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"","NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"","NULL").
+			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"","NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"","NULL").
+			",".($dataArr["source"]?"\"".$dataArr["source"]."\"","NULL").",\"".($dataArr["notes"]?"\"".$dataArr["notes"]."\"","NULL").
+			",".$dataArr["securitystatus"].")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if(!$this->conn->query($sqlTaxa)){
 			return "Taxon Insert FAILED: sql = ".$sqlTaxa;
@@ -497,8 +500,8 @@ class TaxonLoader{
 	 	$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
 	 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
 		$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, UnacceptabilityReason, hierarchystr) ".
-			"VALUES (".$tid.",".$tidAccepted.",1,\"".$dataArr["family"]."\",\"".
-			$upperTaxon."\",".$dataArr["parenttid"].",\"".$dataArr["UnacceptabilityReason"]."\",\"".$hierarchy."\") ";
+			"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
+			($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["UnacceptabilityReason"]."\",\"".$hierarchy."\") ";
 		//echo "sqlTaxStatus: ".$sqlTaxStatus;
 		if(!$this->conn->query($sqlTaxStatus)){
 			return "Taxon inserted, but taxonomy insert FAILED: sql = ".$sqlTaxa;
