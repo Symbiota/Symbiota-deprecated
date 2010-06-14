@@ -140,7 +140,7 @@ include_once("../../util/symbini.php");
 		<table height='500' border='0'>
 			<tr>
 				<td width='200' valign='top'>
-		  			<form id="setupform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+		  			<form id="setupform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
 						<div style='font-weight:bold;'>Checklist:</div>
 	  					<select name="clf"> 
 							<option value='all'>Select a Checklist</option>
@@ -466,8 +466,8 @@ class MassUpdateManager{
 
 	public function getStates(){
 		$stateArr = Array();
-		$sql = "SELECT cs.CharStateName, cs.CS FROM kmcs ".
-			"WHERE cs.Language = '".$this->lang."' AND cs.CID = $this->cid ORDER BY cs.SortSequence";
+		$sql = "SELECT kmcs.CharStateName, kmcs.CS FROM kmcs ".
+			"WHERE kmcs.Language = '".$this->lang."' AND kmcs.CID = $this->cid ORDER BY kmcs.SortSequence";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$stateArr[$row->CS] = $row->CharStateName;
@@ -479,7 +479,7 @@ class MassUpdateManager{
 	public function getTaxaList(){
 		//Get list of Char States
  		$stateList = Array();
-		$sql = "SELECT cs.CS, cs.CharStateName FROM kmcs WHERE cs.CID = $this->cid";
+		$sql = "SELECT kmcs.CS, kmcs.CharStateName FROM kmcs WHERE kmcs.CID = $this->cid";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$stateList[$row->CS] = $row->CharStateName; 
@@ -522,7 +522,7 @@ class MassUpdateManager{
 		$famStr = implode("','",$famArr);
 		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
 		"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-		"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di".
+		"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
 		"WHERE (di.CID=$this->cid)) AS d ON t.TID = d.TID ".
 		"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
 		$rs = $this->con->query($sql);
