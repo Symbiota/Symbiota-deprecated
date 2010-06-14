@@ -1002,7 +1002,8 @@ class TaxonEditor{
 			$con->query($sqlDel);
 		}
 		$sql = "INSERT INTO taxstatus (tid,tidaccepted,taxauthid,uppertaxonomy,family,parenttid,hierarchystr) ".
-			"VALUES ($tid, $tidAcc, $this->taxAuthId,'".$upperTax."','".$family."',".$parentTid.",'".$hierarchyStr."') ";
+			"VALUES ($tid, $tidAcc, $this->taxAuthId,".($upperTax?"\"".$upperTax."\"":"NULL").",".
+			($family?"\"".$family."\"":"NULL").",".$parentTid.",'".$hierarchyStr."') ";
 		//echo $sql;
 		$status = $con->query($sql);
 		$con->close();
