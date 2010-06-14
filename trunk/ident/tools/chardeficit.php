@@ -183,7 +183,7 @@ class CharDeficitManager{
 		$returnList = Array();
 
 		$sql = "SELECT DISTINCT t.RankId, t.SciName, t.TID ".
-			"FROM taxa t INNER JOIN fmchartaxalink ctl ON t.TID = ctl.TID ".
+			"FROM taxa t INNER JOIN kmchartaxalink ctl ON t.TID = ctl.TID ".
 			"ORDER BY t.RankId, t.SciName";
 
 		$result = $this->con->query($sql);
@@ -293,7 +293,7 @@ class CharDeficitManager{
 			$targetList = Array();
 			$sql = "SELECT DISTINCT t.TID, t.rankid, cl.clid ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-				"LEFT JOIN (SELECT ctl.tid, ctl.clid From chklsttaxalink ctl WHERE ctl.clid = ".$clVal.") AS cl ".
+				"LEFT JOIN (SELECT ctl.tid, ctl.clid From fmchklsttaxalink ctl WHERE ctl.clid = ".$clVal.") AS cl ".
 				"ON ts.TID = cl.tid ".
 				"WHERE ts.taxauthid = 1 AND (ts.ParentTID IN(".$targetStr.")) ";
 			if($excludeStr) $sql .= "AND t.TID NOT IN(".$excludeStr.")";
