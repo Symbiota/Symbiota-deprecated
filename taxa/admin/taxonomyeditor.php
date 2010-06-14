@@ -928,8 +928,10 @@ class TaxonEditor{
 			$sql .= $key." = \"".trim($value)."\",";
 		}
 		$sql .= "sciname = \"".($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
-			$taxonEditArr["unitname1"]." ".($taxonEditArr["unitind2"]?$taxonEditArr["unitind2"]." ":"").
-			$taxonEditArr["unitname2"]." ".$taxonEditArr["unitind3"]." ".$taxonEditArr["unitname3"]."\"";
+			$taxonEditArr["unitname1"].($taxonEditArr["unitind2"]?" ".$taxonEditArr["unitind2"]:"").
+			($taxonEditArr["unitname2"]?" ".$taxonEditArr["unitname2"]:"").
+			($taxonEditArr["unitind3"]?" ".$taxonEditArr["unitind3"]:"").
+			($taxonEditArr["unitname3"]?" ".$taxonEditArr["unitname3"]:"")."\"";
 		$sql .= " WHERE tid = ".$tid;
 		//echo $sql;
 		$con = MySQLiConnectionFactory::getCon("write");
