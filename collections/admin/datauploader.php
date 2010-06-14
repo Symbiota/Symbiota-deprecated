@@ -519,7 +519,7 @@ if($statusStr){
 				?>
 	 			<form name="finaltransferform" action="datauploader.php" method="get" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 				<fieldset>
-	 					<legend>Direct Upload: Final transfer</legend>
+	 					<legend>Final transfer</legend>
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
 	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 	 					<div style="font-weight:bold;margin:5px;"> 

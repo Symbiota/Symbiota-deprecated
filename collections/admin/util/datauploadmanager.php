@@ -217,7 +217,7 @@ class DataUploadManager {
     public function addUploadProfile(){
 		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, driver, digircode, digirpath, ".
 			"digirpkfield, username, password, schemaname, cleanupsp, querystr, dlmisvalid) VALUES (".
-			$this->collid.",".$_REQUEST["aupuploadtype"].",\"".$_REQUEST["auptitle"]."\",\"".$_REQUEST["aupplatform"]."\",\"".$_REQUEST["aupserver"]."\",".
+			$this->collId.",".$_REQUEST["aupuploadtype"].",\"".$_REQUEST["auptitle"]."\",\"".$_REQUEST["aupplatform"]."\",\"".$_REQUEST["aupserver"]."\",".
 			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdriver"]."\",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
@@ -304,6 +304,7 @@ class DataUploadManager {
 	
  	public function uploadData(){
  		//Stored Procedure upload
+	 	$this->readUploadParameters();
  		if($this->uploadType == $this->STOREDPROCEDURE){
  			$this->finalTransferSteps();
  		}
@@ -314,10 +315,18 @@ class DataUploadManager {
 		if($this->cleanupSP){
 			if($this->conn->query("CALL ".$this->cleanupSP.";")){
 				echo "<li>";
-				echo "Following cleanup stored proceure performed on uploadspectemp table: ".$this->cleanupSP;
+				echo "Following cleanup stored proceure performed on uploadspectemp table: ".$this->cleanupSP."()";
 				echo "</li>";
 			}
 		}
+		if(!$this->transferCount){
+			$sql = "SELECT count(*) AS cnt FROM uploadspectemp";
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$this->transferCount = $row->cnt;
+			}
+			$rs->close();
+		}  
 		$this->performFinalTransfer();
 	}
 	
@@ -325,7 +334,7 @@ class DataUploadManager {
 		if($this->finalTransfer){
 			//Clean and Transfer records from uploadspectemp to specimens
 			if($this->conn->query("CALL TransferUploads(".($this->doFullReplace?"1":"0").");")){
-				echo "<li>Upload Procedure Complete: ".($this->transferCount)." records transferred to central specimen table</li>";
+				echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount:" records transferred to central specimen table")."</li>";
 			}
 			else{
 				echo "<li>Unable to complete transfer. Please contact system administrator</li>";
