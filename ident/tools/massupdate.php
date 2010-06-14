@@ -571,7 +571,7 @@ class MassUpdateManager{
 			$this->con->query($sqlTrans);
 			
 			//delete value from descr
-			$sqlStr = "DELETE d.* FROM descr d WHERE ".implode(" OR ",$this->removes);
+			$sqlStr = "DELETE d.* FROM kmdescr d WHERE ".implode(" OR ",$this->removes);
 			$this->con->query($sqlStr);
 		}
 		
@@ -583,9 +583,9 @@ class MassUpdateManager{
 	public function deleteInheritance(){
 		//delete all inherited children traits for CIDs that will be modified
 		$this->setChildrenList();
-		$sqlDel = "DELETE FROM kmdescr d ".
-			"WHERE (d.TID IN(".$this->childrenStr.")) ".
-			"AND (d.CID = ".$this->cid.") AND (d.Inherited Is Not Null AND d.Inherited <> '')";
+		$sqlDel = "DELETE FROM kmdescr ".
+			"WHERE (TID IN(".$this->childrenStr.")) ".
+			"AND (CID = ".$this->cid.") AND (Inherited Is Not Null AND Inherited <> '')";
 		$this->con->query($sqlDel);
 	}
 		
