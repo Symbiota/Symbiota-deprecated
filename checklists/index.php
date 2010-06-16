@@ -88,7 +88,7 @@
 								<span class="stcl-<?php echo $projId; ?>" style="display:inline;">
 									<img src='../images/minus.gif'/>
 								</span>&nbsp;&nbsp;
-								<?php echo $projStr;?> Species Lists
+								<?php echo $projStr;?>
 							</span>&nbsp;&nbsp;
 							<a href="<?php echo "clgmap.php?cltype=static&proj=".$projStr; ?>" title='Show checklists on map'>
 								<img src='../images/world40.gif' style='width:10px;border:0' />
