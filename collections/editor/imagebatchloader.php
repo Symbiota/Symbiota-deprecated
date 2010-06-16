@@ -8,11 +8,16 @@ $uploadManager = new ImageUploadManager();
 $collId = (array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:"");
 $action = (array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"");
 
-$editable = false;
+$isEditable = false;
 if($isAdmin){
- 	$editable = true;
+ 	$isEditable = true;
 }
 
+if($isEditable){
+	if($action == "Add Image"){
+		
+	}
+}
 
 ?>
 <html>
@@ -23,14 +28,14 @@ if($isAdmin){
 	<script type="text/javascript">
 	
 	function validateForm(thisForm){
-		var testStr = document.getElementById("uploadfile").value;
+		var testStr = document.getElementById("uploadimg").value;
 		if(testStr == ""){
-			alert("Please select a file to upload");
+			alert("Please select an image file to upload");
 			return false;
 		}
 		testStr = testStr.toLowerCase();
-		if(testStr.indexOf(".txt") == -1){
-			alert("Document "+document.getElementById("uploadfile").value+" must be a text file (with a .txt extension)");
+		if(testStr.indexOf(".jpg") == -1){
+			alert("Document "+testStr+" must be a JPG file (with a .jpg extension)");
 			return false;
 		}
 		return true;
@@ -54,7 +59,7 @@ if($isAdmin){
 	<div id="innertext">
 		<h2>Observation Image Loader</h2>
 	    <?php
-		if($editable){
+		if($isEditable){
 			?>
 			<form id="imgloader" name="imgloader" action="imagebatchloader.php" method="get">
 				<fieldset>
@@ -71,26 +76,71 @@ if($isAdmin){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Occurrence ID (GUID):</div>
-						<div style="float:left;"><input type="text" name="gui" /></div>
+						<div style="float:left;"><input type="text" name="qgui" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Upload Date:</div> 
-						<div style="float:left;"><input type="text" name="loaddate" /></div>
+						<div style="float:left;"><input type="text" name="qloaddate" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Observer:</div> 
-						<div style="float:left;"><input type="text" name="observer" /></div>
+						<div style="float:left;"><input type="text" name="qobserver" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Family:</div> 
-						<div style="float:left;"><input type="text" name="family" /></div>
+						<div style="float:left;"><input type="text" name="qfamily" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Scientific Name:</div> 
-						<div style="float:left;"><input type="text" name="sciname" /></div>
+						<div style="float:left;"><input type="text" name="qsciname" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:right;"><input type="submit" name="action" value="Query Records" /></div>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend><b>Default Upload Parameters</b></legend>
+					<div style='margin:3px;clear:both;'>
+						<div style="float:left;width:150px;">Image Type:</div>
+						<select name='dimagetype'>
+							<option value='observation'>
+								Observation Image
+							</option>
+							<option value='specimen'>
+								Specimen Image
+							</option>
+							<option value='field'>
+								Field Image
+							</option>
+						</select>
+					</div>
+					<div style="clear:both;">
+						<div style="float:left;width:150px;">Photographer:</div>
+						<select name="dphotographeruid">
+							<option value="">Select a photographer</option>
+							<option value="">--------------------------------</option>
+							<?php $uploadManager->echoPhotographerSelect(); ?>
+						</select>
+					</div>
+					<div style="clear:both;">
+						<div style="float:left;width:150px;">Manager:</div>
+						<div style="float:left;"><input name="downer" value="" /></div>
+					</div>
+					<div style="clear:both;">
+						<div style="float:left;width:150px;">Copyright URL:</div>
+						<div style="float:left;"><input name="dcopyright" value="" /></div>
+					</div>
+					<div style="clear:both;">
+						<div style="float:left;width:150px;">Sort Sequence:</div>
+						<div style="float:left;"><input name="dsortsequence" value="50" /></div>
+					</div>
+					<div style="clear:both;">
+						<input type="checkbox" name="maptn" value="1" CHECKED /> 
+						Map Thumbnail Image
+					</div>
+					<div style="clear:both;">
+						<input type="checkbox" name="maplg" value="1" CHECKED /> 
+						Map Large Image
 					</div>
 				</fieldset>
 			</form>
@@ -98,11 +148,11 @@ if($isAdmin){
 			<?php
 				if($action == "Query Records" && $collId){
 					$queryArr = Array("collid"=>$collId);
-					$queryArr["gui"] = $_REQUEST["gui"];
-					$queryArr["loaddate"] = $_REQUEST["loaddate"];
-					$queryArr["observer"] = $_REQUEST["observer"];
-					$queryArr["family"] = $_REQUEST["family"];
-					$queryArr["sciname"] = $_REQUEST["sciname"];
+					$queryArr["gui"] = $_REQUEST["qgui"];
+					$queryArr["loaddate"] = $_REQUEST["qloaddate"];
+					$queryArr["observer"] = $_REQUEST["qobserver"];
+					$queryArr["family"] = $_REQUEST["qfamily"];
+					$queryArr["sciname"] = $_REQUEST["qsciname"];
 					$recArr = $uploadManager->getOccurrenceRecords($queryArr);
 					foreach($recArr as $occId => $v){
 						?>
@@ -145,12 +195,74 @@ if($isAdmin){
 									?>
 									<div style="clear:both;font-weight:bold;margin:3px;">
 										<input type="hidden" name="MAX_FILE_SIZE" value="500000" />
-										File: <input id="uploadfile" name="uploadfile" type="file" size="45" />
+										File: <input id="uploadimg" name="uploadimg" type="file" size="45" />
 									</div>
-									<div style="margin:3px;">
+									<div style="margin:3px;float:right;">
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="submit" name="action" value="Add Image" />
 									</div>
+								</fieldset>
+								<fieldset>
+									<legend><b>Upload Parameters</b></legend>
+									<div style='margin:3px;clear:both;'>
+										<b>Image Type:</b> 
+										<select name='imagetype'>
+											<option value='observation'>
+												Observation Image
+											</option>
+											<option value='specimen' <?php echo ($_REQUEST["dimagetype"]=="specimen"?"SELECTED":"");?>>
+												Specimen Image
+											</option>
+											<option value='field' <?php echo ($_REQUEST["dimagetype"]=="field"?"SELECTED":"");?>>
+												Field Image
+											</option>
+										</select>
+									</div>
+									<div style="clear:both;">
+										<div style="float:left;width:150px;">Caption:</div>
+										<div style="float:left;">
+											<input name="caption" value="" />
+										</div>
+									</div>
+									<div style="clear:both;">
+										<div style="float:left;width:150px;">Photographer:</div>
+										<select name="photographeruid">
+											<option value="">Select a photographer</option>
+											<option value="">--------------------------------</option>
+											<?php $uploadManager->echoPhotographerSelect($_REQUEST["dphotographeruid"]); ?>
+										</select>
+									</div>
+									<div style="clear:both;">
+										<div style="float:left;width:150px;">Manager:</div>
+										<div style="float:left;">
+											<input name="owner" value="<?php echo $_REQUEST["downer"]; ?>" />
+										</div>
+									</div>
+									<div style="clear:both;">
+										<div style="float:left;width:150px;">Copyright URL:</div>
+										<div style="float:left;">
+											<input name="copyright" value="<?php echo $_REQUEST["dcopyright"]; ?>" />
+										</div>
+									</div>
+									<div style="clear:both;">
+										<div style="float:left;width:150px;">Sort Sequence:</div>
+										<div style="float:left;">
+											<input name="sortsequence" value="<?php echo $_REQUEST["dsortsequence"]; ?>" />
+										</div>
+									</div>
+									<input type="hidden" name="dimagetype" value="<?php echo $_REQUEST["dimagetype"];?>" />
+									<input type="hidden" name="dphotographeruid" value="<?php echo $_REQUEST["dphotographeruid"];?>" />
+									<input type="hidden" name="downer" value="<?php echo $_REQUEST["downer"];?>" />
+									<input type="hidden" name="dcopyright" value="<?php echo $_REQUEST["dcopyright"];?>" />
+									<input type="hidden" name="dsortsequence" value="<?php echo $_REQUEST["dsortsequence"];?>" />
+									<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+									<input type="hidden" name="qgui" value="<?php echo $_REQUEST["qgui"];?>" />
+									<input type="hidden" name="qloaddate" value="<?php echo $_REQUEST["qloaddate"];?>" />
+									<input type="hidden" name="qobserver" value="<?php echo $_REQUEST["qobserver"];?>" />
+									<input type="hidden" name="qfamily" value="<?php echo $_REQUEST["qfamily"];?>" />
+									<input type="hidden" name="qsciname" value="<?php echo $_REQUEST["qsciname"];?>" />
+									<input type="hidden" name="maptn" value="<?php echo $_REQUEST["maptn"];?>" />
+									<input type="hidden" name="maplg" value="<?php echo $_REQUEST["maplg"];?>" />
 								</fieldset>
 							</form>
 						</div>
@@ -174,14 +286,13 @@ if($isAdmin){
 class ImageUploadManager{
 
 	private $conn;
-	private $imageRootPath = "";
-	private $imageRootUrl = "";
+	private $urlPath = "";
+	private $uploadPath = "";
 
-	private $maxImageWidth = 1024;
-	private $maxImageHeight = 1024;
-	private $maxThumbnailWidth = 250;
-	private $maxThumbnailHeight = 300;
-
+	private $tnPixWidth = 130;
+	private $webPixWidth = 1300;
+	private $largePixWidth = 3168;
+	
 	function __construct() {
 		$this->setConnection();
 	}
@@ -197,11 +308,11 @@ class ImageUploadManager{
 	public function getOccurrenceRecords($queryArr){
 		$returnArr = Array();
 		$sql = "SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, o.eventdate, ".
-			"o.family, o.sciname, o.locality, o.initialtimestamp ".
+			"o.family, o.sciname, o.locality, o.datelastmodified ".
 			"FROM omoccurrences o ".
-			"WHERE o.collid = ".$queryArr["collid"]." ";
+			"WHERE o.collid = ".$queryArr["collid"]." AND o.tidinterpreted IS NOT NULL ";
 		if($queryArr["gui"]) $sql .= "AND o.occurrenceId LIKE '".$queryArr["gui"]."%' "; 
-		if($queryArr["loaddate"]) $sql .= "AND o.initialtimestamp = '".$queryArr["loaddate"]."' "; 
+		if($queryArr["loaddate"]) $sql .= "AND o.datelastmodified = '".$queryArr["loaddate"]."' "; 
 		if($queryArr["observer"]) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
 		if($queryArr["family"]) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
 		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
@@ -217,7 +328,7 @@ class ImageUploadManager{
 			$returnArr[$occId]["family"] = $row->family;
 			$returnArr[$occId]["sciname"] = $row->sciname;
 			$returnArr[$occId]["locality"] = $row->locality;
-			$returnArr[$occId]["initialtimestamp"] = $row->initialtimestamp;
+			$returnArr[$occId]["datelastmodified"] = $row->datelastmodified;
 		}
 		$result->close();
 		//Grab images
@@ -243,88 +354,130 @@ class ImageUploadManager{
 		}
 		$rs->close();
 	}
-	public function loadImageData($inArray){
-		$imageData = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
-		$imgUrl = "";
-		if(array_key_exists("url",$imageData)){
-			$imgUrl = $imageData["url"];
-		}
-		else{
-			$imgUrl = $this->getUrlPath($imageData["imagetype"]);
-		}
-		$imgThumbnailUrl = $this->createImageThumbnail($imgUrl);
-		$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
-			"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
-			"VALUES (".$this->tid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
-			($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-			$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
-			($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
-			$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
-		//echo $sql;
+	public function loadImageData(){
 		$status = "";
-		if($con->query($sql)){
-			$this->setPrimaryImage($con, $this->tid);
-			if($this->rankId > 220 && !$this->submittedTid && array_key_exists("addtoparent",$imageData)){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
-					"VALUES (".$this->parentTid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
-					($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-					$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
-					($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
-					$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
-				//echo $sql;
-				if($con->query($sql)){
-					$this->setPrimaryImage($con,$this->parentTid);
+		$this->setUploadPath(); 
+	 	$this->setUrlPath();
+		$imgFileName = $this->cleanFileName(basename($_FILES['userfile']['name']),$this->uploadPath);
+		$tnFileName = "";$lgFileName = "";
+		
+		if(move_uploaded_file($_FILES['userfile']['tmp_name'], $this->uploadPath.$imgFileName)){
+			list($width, $height) = getimagesize($this->uploadPath.$imgFileName);
+			//Create Large Image
+			if($_REQUEST["maplg"] && $width > ($this->webPixWidth*1.2)){
+				$targetName = substr($imgFileName,0,strrpos($imgFileName,"."))."lg".substr($imgFileName,strrpos($imgFileName,"."));;
+				if($width < ($this->largePixWidth*1.2)){
+					if(copy($this->uploadPath.$imgFileName,$this->uploadPath.$targetName)){
+						$lgFileName = $targetName;
+					}
+					else{
+						$status = "ERROR: Unable to copy source image to create large version";
+					}
 				}
 				else{
-					$status = "Error: unable to upload image to parent taxon";
-					//$status = "Error:loadImageData:loading the parent data: ".$con->error."<br/>SQL: ".$sql;
+					if($this->resizeImage($imgFileName,$targetName,$this->largePixWidth,round($this->largePixWidth*$height/$width),$width,$height)){
+						$lgFileName = $targetName;
+					}
+					else{
+						$status = "ERROR: Unable to resize source image to create large version";
+					}
 				}
 			}
+			//Create Thumbnail Image
+			if($_REQUEST["maptn"]){
+				$targetName = substr($imgFileName,0,strrpos($imgFileName,"."))."tn".substr($imgFileName,strrpos($imgFileName,"."));;
+				if($this->resizeImage($imgFileName,$targetName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
+					$tnFileName = $targetName;
+				}
+				else{
+					$status = "ERROR: Unable to resize source image to create thumbnail version";
+				}
+			}
+			//If upload image to too large, create web version
+			if($width > ($this->webPixWidth*1.2)){
+				if(!$this->resizeImage($imgFileName,$imgFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height)){
+					$status = "ERROR: Unable to resize source image to create web version";
+				}
+			}
+
+			if(!$status){
+				//Load record into database 
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, ".
+					"owner, copyright, occid, notes, sortsequence) ".
+					"SELECT o.tidinterpreted, \"".$this->urlPath.$imgFileName."\, \"".$this->urlPath.$tnFileName."\, \"".$this->urlPath.$lgFileName."\", ".
+					$_REQUEST["photographeruid"].", \"".$_REQUEST["imagetype"]."\", \"".$_REQUEST["caption"]."\", \"".$_REQUEST["owner"]."\", \"".
+					$_REQUEST["copyright"]."\", ".$_REQUEST["occid"].", \"".$_REQUEST["notes"]."\", ".$_REQUEST["sortsequence"]." ".
+					"FROM omoccurrences o WHERE o.occid = ".$_REQUEST["occid"];
+				//echo $sql;
+				if(!$con->query($sql)){
+					$status = "ERROR: unable to load image record into database: ".$con->error."<br/>SQL: ".$sql;
+				}
+			}
+		} 
+		else {
+			$status = "ERROR: problem uploading image file";
 		}
-		else{
-			$status = "loadImageData: ".$con->error."<br/>SQL: ".$sql;
-		}
-		$con->close();
+	 	
 		return $status;
 	}
 	
- 	public function setFileName($fName){
+ 	private function cleanFileName($fName, $dlPath){
 		$fName = str_replace("'","",$fName);
-		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace("\"","",$fName);
+		$fName = str_replace(" ","_",$fName);
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
 		}
- 		$this->fileName = $fName;
- 	}
- 	
-	public function getDownloadPath($subFolder){
-		if(substr($this->imageRootPath,-1,1) != "/") $this->imageRootPath .= "/";
-		$path = $this->imageRootPath.$this->family."/".$subFolder."/";
- 		if(!file_exists($this->imageRootPath.$this->family)){
- 			mkdir($this->imageRootPath.$this->family, 0775);
- 		}
- 		if(!file_exists($this->imageRootPath.$this->family."/".$subFolder)){
- 			mkdir($this->imageRootPath.$this->family."/".$subFolder, 0775);
- 		}
  		//Check and see if file already exists, if so, rename filename until it has a unique name
- 		$tempFileName = $this->fileName;
+ 		$tempFileName = $fName;
  		$cnt = 0;
- 		while(file_exists($path.$tempFileName)){
- 			$tempFileName = substr($this->fileName,0,strrpos($this->fileName,"."))."_".$cnt.substr($this->fileName,strrpos($this->fileName,".")).""; 
+ 		while(file_exists($dlPath.$tempFileName)){
+ 			$tempFileName = substr($fName,0,strrpos($fName,"."))."_".$cnt.substr($fName,strrpos($fName,"."));
  			$cnt++;
  		}
- 		$this->fileName = $tempFileName;
- 		return $path.$this->fileName;
- 	}
-
- 	private function getUrlPath($imagetype){
-		$path = $this->imageRootUrl.$this->family."/".$imagetype."/".$this->fileName;
-		return $path;
+ 		$fName = $tempFileName;
+		return $fName;
  	}
  	
+	private function getUploadPath(){
+		$this->uploadPath = $GLOBALS["imageRootPath"];
+		if(substr($this->uploadPath,-1,1) != "/") $this->uploadPath .= "/";
+		if(!file_exists($this->uploadPath.$_REQUEST["imagetype"])){
+ 			mkdir($this->uploadPath.$_REQUEST["imagetype"], 0775);
+ 		}
+		$this->uploadPath .= $_REQUEST["imagetype"]."/";
+ 	}
+
+ 	private function setUrlPath(){
+		$this->urlPath = $GLOBALS["imageRootUrl"];
+		if(substr($this->urlPath,-1,1) != "/") $this->urlPath .= "/";
+		$this->urlPath .= $_REQUEST["imagetype"]."/";
+ 	}
+ 	
+	private function resizeImage($sourceName, $targetName, $newWidth, $newHeight, $oldWidth, $oldHeight){
+		$status = false;
+       	$sourceImg = imagecreatefromjpeg($this->uploadPath.$sourceName);
+   		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
+        if(imagejpeg($tmpImg, $this->uploadPath.$targetName, 50)){
+        	$status = "";
+        }
+        else{
+        	$status = "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetName</li>";
+        }
+		imagedestroy($tmpImg);
+		return $status;
+	}
+	
+	private function echoPhotographerSelect($defaultUid = 0){
+ 		$sql = "SELECT u.uid, CONCAT_WS(' ',u.lastname,u.firstname) AS fullname ".
+			"FROM users u ORDER BY u.lastname, u.firstname ";
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			echo "<option value='".$row->uid."'".($defaultUid==$row->uid?" SELECTED":"").">".$row->fullname."</option>";
+		}
+		$result->close();
+ 	}
 }
 
 ?>
