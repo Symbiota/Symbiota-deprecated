@@ -17,9 +17,6 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 <body>
 
 	<?php
-		$displayLeftMenu = true;
-		 include("../../util/header.php");
-		 
 	$displayLeftMenu = (isset($imagelib_misc_buildthumbnailsMenu)?$imagelib_misc_buildthumbnailsMenu:"true");
 	include($serverRoot."/util/header.php");
 	if(isset($imagelib_misc_buildthumbnailsCrumbs)){
@@ -35,7 +32,6 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 		<h1>Thumbnail Builder</h1>
 		<div style="margin:10px;">
 			Clicking the button below will build thumbnail images for all image records that have NULL values for the thumbnail field.
-			Screen output will be produced for all thumbnails created. 
 		</div>
 
 		<?php 
