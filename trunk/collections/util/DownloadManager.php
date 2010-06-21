@@ -30,7 +30,7 @@ class DownloadManager extends CollectionManager{
  			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.previousIdentifications, ".
 	 		"o.disposition, o.modified, o.language ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+		if(array_key_exists("ocprid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
  		$this->dwcSql .= $this->getSqlWhere();
 		$this->dwcSql .= "ORDER BY c.CollectionCode, o.SciName";
  	}
@@ -58,7 +58,7 @@ class DownloadManager extends CollectionManager{
 			"o.disposition, o.modified, o.language ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+		if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
 		$sql .= $this->getSqlWhere();
 		$sql .= "ORDER BY c.CollectionCode, o.SciName";
 		//echo $sql;
@@ -71,7 +71,7 @@ class DownloadManager extends CollectionManager{
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
 			"c.CollectionName, c.CollectionCode, o.occurrenceID, o.DBPK, o.LocalitySecurity ".
 		"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+		if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
 		$sql .= $this->getSqlWhere();
 		$sql .= "ORDER BY c.CollectionCode, o.ScientificName";
 		//echo $sql;
@@ -84,7 +84,7 @@ class DownloadManager extends CollectionManager{
             $sql = "SELECT DISTINCT ts.family, t.sciname, CONCAT_WS(' ',t.unitind1,t.unitname1) AS genus, ".
             	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS epithet, t.unitind3 AS infrarank, t.unitname3 AS infraepithet, t.author ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-			if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+			if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
             $sql .= $this->getSqlWhere()."AND t.RankId > 140 AND ts.taxauthid = ".$taxonFilterCode." ORDER BY ts.family, t.SciName ";
         }
         else{
@@ -92,7 +92,7 @@ class DownloadManager extends CollectionManager{
 				"IFNULL(o.taxonRank,'') AS taxonRank, ".
 				"IFNULL(o.InfraSpecificEpithet,'') AS InfraSpecificEpithet, IFNULL(t.author, o.scientificNameAuthorship) AS author ".
 				"FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ";
-			if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+			if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
 			$sql .= $this->getSqlWhere()."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
                 "ORDER BY o.family, o.SciName ";
         }
