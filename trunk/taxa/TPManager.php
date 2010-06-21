@@ -427,17 +427,16 @@
 					echo "<div class='imgthumb'>";
 				}
 				$imgUrl = $this->imageArr[$n]["url"];
+				$imgThumbnail = $this->imageArr[$n]["thumbnailurl"];
 				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+					$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
 				}
 				echo "<a href='".$imgUrl."'>";
 				if($useThumbnail && $this->imageArr[$n]["thumbnailurl"]){
-					list($width, $height) = getimagesize((array_key_exists("imageDomain",$GLOBALS)?$GLOBALS["imageDomain"]:"http://".$_SERVER['HTTP_HOST']).$this->imageArr[$n]["thumbnailurl"]);
+					list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
 					if($n > 0 || $width > 190 || $height > 190){
-						$imgUrl = $this->imageArr[$n]["thumbnailurl"];
-						if(array_key_exists("imageDomain",$GLOBALS) && substr($this->imageArr[$n]["thumbnailurl"],0,1)=="/"){
-							$imgUrl = $GLOBALS["imageDomain"].$this->imageArr[$n]["thumbnailurl"];
-						}
+						$imgUrl = $imgThumbnail;
 					}
 				}
 				$imgCaption = "";
