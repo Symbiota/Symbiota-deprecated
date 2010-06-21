@@ -40,14 +40,11 @@ class CollectionManager{
 			//reset all search terms except db terms 
 			$dbsTemp = "";
 			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
-			$oicTemp = "";
-			if(array_key_exists("oic",$this->searchTermsArr)) $oicTemp = $this->searchTermsArr["oic"];
-			$sppridTemp = "";
-			if(array_key_exists("spprid",$this->searchTermsArr)) $sppridTemp = $this->searchTermsArr["spprid"];
+			$ocpridTemp = "";
+			if(array_key_exists("ocprid",$this->searchTermsArr)) $ocpridTemp = $this->searchTermsArr["ocprid"];
 			unset($this->searchTermsArr);
 			if($dbsTemp) $this->searchTermsArr["db"] = $dbsTemp;
-			if($oicTemp) $this->searchTermsArr["oic"] = $oicTemp;
-			if($sppridTemp) $this->searchTermsArr["spprid"] = $sppridTemp;
+			if($ocpridTemp) $this->searchTermsArr["ocprid"] = $ocpridTemp;
 		}
 	}
 
@@ -55,11 +52,8 @@ class CollectionManager{
 		if(array_key_exists("colldbs",$_COOKIE)){
 			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
 		}
-		elseif(array_key_exists("colloic",$_COOKIE)){
-			$this->searchTermsArr["oic"] = $_COOKIE["colloic"];
-		}
-		elseif(array_key_exists("collspprid",$_COOKIE)){
-			$this->searchTermsArr["spprid"] = $_COOKIE["collspprid"];
+		elseif(array_key_exists("collocprid",$_COOKIE)){
+			$this->searchTermsArr["ocprid"] = $_COOKIE["collocprid"];
 		}
 		if(array_key_exists("colltaxa",$_COOKIE)){
 			$collTaxa = $_COOKIE["colltaxa"]; 
@@ -108,11 +102,8 @@ class CollectionManager{
 		if(array_key_exists("db",$this->searchTermsArr) && strpos($this->searchTermsArr["db"],"all") === false){
 			$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",$this->searchTermsArr["db"]).")) ";
 		}
-		elseif(array_key_exists("oic",$this->searchTermsArr)){
-			$sqlWhere .= "AND (o.ownerInstitutionCode IN('".str_replace(";","','",$this->searchTermsArr["oic"])."')) ";
-		}
-		elseif(array_key_exists("spprid",$this->searchTermsArr)){
-			$sqlWhere .= "AND (opl.spprid IN('".str_replace(";","','",$this->searchTermsArr["spprid"])."')) ";
+		elseif(array_key_exists("ocprid",$this->searchTermsArr)){
+			$sqlWhere .= "AND (opl.ocprid IN('".str_replace(";","','",$this->searchTermsArr["ocprid"])."')) ";
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)){
@@ -357,32 +348,18 @@ class CollectionManager{
 		return $this->collectionArr;
 	}
 	
-	public function getOwnerInstitutions(){
+	public function getOccurProjects(){
 		$returnArr = Array();
-		$sql = "SELECT DISTINCT i.InstitutionCode, i.InstitutionName ". 
-			"FROM institutions i INNER JOIN omoccurrences o ON i.InstitutionCode = o.ownerInstitutionCode ".
-			"ORDER BY i.InstitutionName";
+		$sql = "SELECT c.name, p.ocprid, p.projectname ".
+			"FROM (omoccurprojcatagory c INNER JOIN omoccurprojcatlink pc ON c.opcid = pc.opcid) ".
+			"INNER JOIN omoccurprojects p ON pc.ocprid = p.ocprid ".
+			"WHERE c.occurrencesearch = 1 AND c.ispublic = 1 ".
+			"ORDER BY c.name, p.projectname"; 
 		//echo "<div>$sql</div>";
 		$conn = $this->getConnection();
 		$rs = $conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->InstitutionCode] = $row->InstitutionName;
-		}
-		$rs->close();
-		$conn->close();
-		return $returnArr;
-	}
-	
-	public function getSpecProjects(){
-		$returnArr = Array();
-		$sql = "SELECT DISTINCT op.spprid, op.projectname ". 
-			"FROM omoccurprojects op INNER JOIN omoccurprojlink opl ON op.spprid = opl.spprid ".
-			"ORDER BY op.projectname"; 
-		//echo "<div>$sql</div>";
-		$conn = $this->getConnection();
-		$rs = $conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->spprid] = $row->projectname;
+			$returnArr[$row->name][$row->ocprid] = $row->projectname;
 		}
 		$rs->close();
 		$conn->close();
@@ -391,18 +368,14 @@ class CollectionManager{
 	
 	public function getDatasetSearchStr(){
 		$returnStr ="";
-		if(array_key_exists("oic",$this->searchTermsArr)){
-			$returnStr = $this->searchTermsArr["oic"];
-		}
-		elseif(array_key_exists("spprid",$this->searchTermsArr)){
-			
-			$returnStr = $this->getSpecProjIds();
+		if(array_key_exists("ocprid",$this->searchTermsArr)){
+			$returnStr = $this->getOccProjStr();
 		}
 		else{
 			if(!$this->collectionArr) $this->getCollectionArr();
 			$tempArr = Array();
 			foreach($this->getCollectionArr() as $collId => $fieldArr){
-				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["collectioncode"];  
+				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["collectioncode"];
 			}
 			sort($tempArr);
 			if(count($this->getCollectionArr()) == count($tempArr)){
@@ -415,9 +388,9 @@ class CollectionManager{
 		return $returnStr;
 	}
 	
-	private function getSpecProjIds(){
+	private function getOccProjStr(){
 		$returnStr = "";
-		$sql = "SELECT projectname FROM omoccurprojects WHERE spprid IN(".str_replace(";",",",$this->searchTermsArr["spprid"]).") ";
+		$sql = "SELECT projectname FROM omoccurprojects WHERE ocprid IN(".str_replace(";",",",$this->searchTermsArr["ocprid"]).") ";
 		$conn = $this->getConnection();
 		$rs = $conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -471,27 +444,16 @@ class CollectionManager{
 		 		$dbStr = implode(";",$dbs);
 		 	}
 		 	if($this->useCookies) setCookie("colldbs",$dbStr,0,$clientRoot);
-			setCookie("colloic","",time()-3600,$clientRoot);
-			setCookie("collspprid","",time()-3600,$clientRoot);
+			setCookie("collocprid","",time()-3600,$clientRoot);
 			$this->searchTermsArr["db"] = $dbStr;
 		}
-		elseif(array_key_exists("oic",$_REQUEST)){
-			$oicArr = $_GET["oic"];
-			if(is_string($oicArr)) $oicArr = Array($oicArr); 
-		 	$oicStr = implode(";",$oicArr);
-		 	if($this->useCookies) setCookie("colloic",$oicStr,0,$clientRoot);
+		elseif(array_key_exists("ocprid",$_REQUEST)){
+			$ocpridArr = $_GET["ocprid"];
+			if(is_string($ocpridArr)) $ocpridArr = Array($ocpridArr); 
+		 	$ocpridStr = implode(";",$ocpridArr);
+		 	if($this->useCookies) setCookie("collocprid",$ocpridStr,0,$clientRoot);
 			setCookie("colldbs","",time()-3600,$clientRoot);
-			setCookie("collspprid","",time()-3600,$clientRoot);
-			$this->searchTermsArr["oic"] = $oicStr;
-		}
-		elseif(array_key_exists("spprid",$_REQUEST)){
-			$sppridArr = $_GET["spprid"];
-			if(is_string($sppridArr)) $sppridArr = Array($sppridArr); 
-		 	$sppridStr = implode(";",$sppridArr);
-		 	if($this->useCookies) setCookie("collspprid",$sppridStr,0,$clientRoot);
-			setCookie("colldbs","",time()-3600,$clientRoot);
-			setCookie("colloic","",time()-3600,$clientRoot);
-			$this->searchTermsArr["spprid"] = $sppridStr;
+			$this->searchTermsArr["ocprid"] = $ocpridStr;
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $_REQUEST["taxa"];

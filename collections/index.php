@@ -21,8 +21,9 @@
 	 	$obsArr[$collId]["icon"] = $collObj["icon"];
 	}
  } 
- $ownerInstArr = $collManager->getOwnerInstitutions();
- $specProjArr = $collManager->getSpecProjects();
+ $otherCatArr = $collManager->getOccurProjects();
+ //$ownerInstArr = $collManager->getOwnerInstitutions();
+ //$specProjArr = $collManager->getSpecProjects();
  ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -120,8 +121,8 @@
 		        <li><a href="#" rel="specimendiv">Specimens Only</a></li>
 		        <?php }if($obsArr){?>
 		        <li><a href="#" rel="observationdiv">Observations Only</a></li>
-		        <?php }if($ownerInstArr || $specProjArr){?>
-		        <li><a href="#" rel="otherdiv">Other</a></li>
+		        <?php }if($otherCatArr){?>
+		        <li><a href="#" rel="otherdiv">Other Catagories</a></li>
 		        <?php } ?>
 		    </ul>
 			<div style="border:1px solid gray; width:570px; margin-bottom: 1em; padding: 10px">
@@ -260,52 +261,30 @@
 					</div>
 		        <?php } ?>
 				</form>
-				<?php if($ownerInstArr || $specProjArr){ ?>
+				<?php if($otherCatArr){ ?>
 				<div id="otherdiv" class="tabcontent" style="margin:10px;">
-					<form id="ownerInstform" action="harvestparams.php" method="get">
+					<form id="othercatform" action="harvestparams.php" method="get">
 					<?php 
-					if($ownerInstArr){
+					foreach($otherCatArr as $catTitle => $projArr){
 						?>
-							<fieldset>
-								<legend style="font-weight:bold;">Owner Institution / Associated Land Manager</legend>
-								<div style="margin:10px;">
-									<?php 
-									foreach($ownerInstArr as $oic => $oin){
-										?>
-										<div style="margin:5px;">
-											<input name="oic[]" value='<?php echo $oic; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$ownerInstArr)?"CHECKED":""); ?> />
-											<?php echo $oin; ?>
-										</div>
-										<?php 
-									}
+						<fieldset>
+							<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
+							<div style="margin:10px;">
+								<?php 
+								foreach($projArr as $ocprid => $projName){
 									?>
-									<div style="margin:15px;">
-										<input type="submit" name="action" value="Submit Query" />
+									<div style="margin:5px;">
+										<input name="ocprid[]" value='<?php echo $ocprid; ?>' type='checkbox' />
+										<?php echo $projName; ?>
 									</div>
-								</div>
-							</fieldset>
-						<?php 
-					}
-					if($specProjArr){
-						?>
-							<fieldset style="margin-top:15px;">
-								<legend style="font-weight:bold;">Unit / Project Association</legend>
-									<div style="margin:10px;">
 									<?php 
-									foreach($specProjArr as $spprid => $pn){
-										?>
-										<div style="margin:5px;">
-											<input name="spprid[]" value='<?php echo $spprid; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$specProjArr)?"CHECKED":""); ?> />
-											<?php echo $pn; ?>
-										</div>
-										<?php 
-									}
-									?>
-									<div style="margin:15px;">
-										<input type="submit" name="action" value="Submit Query" />
-									</div>
+								}
+								?>
+								<div style="margin:15px;">
+									<input type="submit" name="action" value="Submit Query" />
 								</div>
-							</fieldset>
+							</div>
+						</fieldset>
 						<?php 
 					}
 					?>

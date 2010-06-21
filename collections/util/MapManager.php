@@ -31,7 +31,7 @@ class MapManager extends CollectionManager{
         	$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
         }
         $sql .= "FROM omoccurrences o ";
-		if(array_key_exists("spprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+		if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
         $sql .= $this->getSqlWhere();
         $sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if($isAdmin){
