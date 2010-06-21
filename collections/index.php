@@ -267,7 +267,7 @@
 					<?php 
 					foreach($otherCatArr as $catTitle => $projArr){
 						?>
-						<fieldset>
+						<fieldset style="margin:10px;">
 							<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
 							<div style="margin:10px;">
 								<?php 
