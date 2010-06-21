@@ -255,7 +255,7 @@ if($taxonManager->getSciName() != "unknown"){
 			echo"]</div>\n";
 		}
 		
-		if(!$taxonManager->echoImages(0,1)){
+		if(!$taxonManager->echoImages(0,1,0)){
 			echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
 			if($editable){
 				echo "<a href='admin/tpeditor.php?category=imageadd&taxon=".$taxonManager->getTid()."'><b>Add an Image</b></a>";

@@ -332,7 +332,7 @@
 		while($row = $result->fetch_object()){
 			$this->synonyms[$row->tid] = "<i>".$row->SciName."</i> ".$row->Author;
 		}
-		$result->free();
+		$result->close();
 		if(!$this->taxAuthId && ($this->tid != $this->submittedTid)){
 			unset($this->synonyms[$this->submittedTid]);
 		}
@@ -371,7 +371,8 @@
 	private function setTaxaImages(){
 		$tidStr = implode(",",array_merge(Array($this->tid,$this->submittedTid),array_keys($this->synonyms)));
 		$this->imageArr = Array();
-		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
+		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ".
+			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
 			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.notes, ti.occid ".
 			"FROM ((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
@@ -384,6 +385,7 @@
 			$this->imageArr[$imgCnt]["imgid"] = $row->imgid;
 			$this->imageArr[$imgCnt]["url"] = $row->url;
 			$this->imageArr[$imgCnt]["thumbnailurl"] = $row->thumbnailurl;
+			if($row->originalurl) $this->imageArr[$imgCnt]["originalurl"] = $row->originalurl;
 			if($row->photographer) $this->imageArr[$imgCnt]["photographer"] = $row->photographer;
 			if($row->caption) $this->imageArr[$imgCnt]["caption"] = $row->caption;
 			if($row->owner) $this->imageArr[$imgCnt]["owner"] = $row->owner;
@@ -410,7 +412,7 @@
  		}
  	}
  	
- 	public function echoImages($start, $length){		//A length of 0 means show all images
+ 	public function echoImages($start, $length, $useThumbnail = 1){		//A length of 0 means show all images
  		if(!$this->imageArr){
 			$this->setTaxaImages();
 		}
@@ -429,7 +431,7 @@
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 				}
 				echo "<a href='".$imgUrl."'>";
-				if($this->imageArr[$n]["thumbnailurl"]){
+				if($useThumbnail && $this->imageArr[$n]["thumbnailurl"]){
 					list($width, $height) = getimagesize((array_key_exists("imageDomain",$GLOBALS)?$GLOBALS["imageDomain"]:"").$this->imageArr[$n]["thumbnailurl"]);
 					if($n > 0 || $width > 190 || $height > 190){
 						$imgUrl = $this->imageArr[$n]["thumbnailurl"];
@@ -438,7 +440,11 @@
 						}
 					}
 				}
-				echo "<img src='".$imgUrl."' title='".$spDisplay."' alt='".$spDisplay." image loading' />";
+				$imgCaption = "";
+				if(array_key_exists("caption",$this->imageArr[$n])){
+					$imgCaption = $this->imageArr[$n]["caption"]."&nbsp;&nbsp;";
+				}
+				echo "<img src='".$imgUrl."' title='".$imgCaption."' alt='".$spDisplay." image' />";
 				echo "</a>";
 				echo "<div class='photographer'>";
 				if(array_key_exists("photographer",$this->imageArr[$n])){
@@ -459,8 +465,10 @@
 				if(array_key_exists("locality",$this->imageArr[$n])) echo "<div><b>Locality:</b> ".$this->imageArr[$n]["locality"]."</div>";
 				if(array_key_exists("notes",$this->imageArr[$n])) echo "<div><b>Notes:</b> ".$this->imageArr[$n]["notes"]."</div>";
 				if(array_key_exists("copyright",$this->imageArr[$n])) echo "<div><b>Copyright:</b> ".$this->imageArr[$n]["copyright"]."</div>";
-				if(array_key_exists("sourceurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["sourceurl"]."'>Source Image</a></div>";
-				if(array_key_exists("occid",$this->imageArr[$n])) echo "<div><a href='../collections/individual/individual.php?occid=".$this->imageArr[$n]["occid"]."'>Specimen Details</a></div>";
+				if(array_key_exists("sourceurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["sourceurl"]."'>Source Webpage</a></div>";
+				if(array_key_exists("occid",$this->imageArr[$n])) echo "<div><a href='../collections/individual/individual.php?occid=".$this->imageArr[$n]["occid"]."'>Display Specimen Details</a></div>";
+				echo "<div><a href='".$this->imageArr[$n]["url"]."'>Open Medium Sized Image</a></div>";
+				if(array_key_exists("originalurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["originalurl"]."'>Open Large Image</a></div>";
 				echo "</div>\n";
 			}
 			return true;

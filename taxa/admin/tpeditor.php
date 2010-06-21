@@ -92,24 +92,7 @@
  		$status = $tEditor->deleteDescription($delTdid);
 	 }
 	 elseif($action == "Submit Image Edits"){
-	 	$imgEditArr = Array();
-		$imgEditArr["imgid"] = $_REQUEST["imgid"];
-	 	$imgEditArr["url"] = $_REQUEST["url"];
-	 	$imgEditArr["thumbnailurl"] = $_REQUEST["thumbnailurl"];
-	 	$imgEditArr["caption"] = $_REQUEST["caption"];
-		$imgEditArr["photographer"] = $_REQUEST["photographer"];
-		$imgEditArr["photographeruid"] = $_REQUEST["photographeruid"];
-		$imgEditArr["owner"] = $_REQUEST["owner"];
-		$imgEditArr["locality"] = str_replace("\"","-",$_REQUEST["locality"]);
-		$imgEditArr["occid"] = $_REQUEST["occid"];
-		$imgEditArr["notes"] = str_replace("\"","-",$_REQUEST["notes"]);
-		$imgEditArr["sourceurl"] = $_REQUEST["sourceurl"];
-		$imgEditArr["copyright"] = $_REQUEST["copyright"];
-		$imgEditArr["anatomy"] = $_REQUEST["anatomy"];
-		$imgEditArr["imagetype"] = $_REQUEST["imagetype"];
-		$imgEditArr["sortsequence"] = $_REQUEST["sortsequence"];
-		if(array_key_exists("addtoparent",$_REQUEST)) $imgEditArr["addtoparent"] = $_REQUEST["addtoparent"];
-		$status = $status = $tEditor->editImage($imgEditArr);
+		$status = $tEditor->editImage();
 	 }
 	 elseif($action == "Transfer Image"){
 	 	$tEditor->changeTaxon($_REQUEST["imgid"],$taxonValue,$_REQUEST["sourcetid"]);
@@ -124,37 +107,7 @@
 	 	$status = $tEditor->editImageSort($imgSortArr);
 	 } 
 	 elseif($action == "Upload Image"){
-	 	$imgPath = trim($_REQUEST["filepath"]);
-	 	if(!$imgPath){
-		 	$userFile = basename($_FILES['userfile']['name']);
-			$tEditor->setFileName($userFile);
-		 	$downloadPath = $tEditor->getDownloadPath($_REQUEST["imagetype"]);
-	 	}
-		if($imgPath || move_uploaded_file($_FILES['userfile']['tmp_name'], $downloadPath)) {
-			$imgData = Array();
-			if($imgPath) $imgData["url"] = $imgPath;
-			$imgData["caption"] = trim($_REQUEST["caption"]);
-			$imgData["photographer"] = trim($_REQUEST["photographer"]);
-			$imgData["photographeruid"] = $_REQUEST["photographeruid"];
-			$imgData["sourceurl"] = $_REQUEST["sourceurl"];
-			$imgData["copyright"] = $_REQUEST["copyright"];
-			$imgData["owner"] = trim($_REQUEST["owner"]);
-			$imgData["locality"] = str_replace("\"","-",trim($_REQUEST["locality"]));
-			$imgData["occid"] = trim($_REQUEST["occid"]);
-			$imgData["notes"] = str_replace("\"","-",trim($_REQUEST["notes"]));
-			$imgData["anatomy"] = trim($_REQUEST["anatomy"]);
-			$imgData["imagetype"] = $_REQUEST["imagetype"];
-			$imgData["sortsequence"] = trim($_REQUEST["sortsequence"]);
-			if(array_key_exists("addtoparent",$_REQUEST)) $imgData["addtoparent"] = $_REQUEST["addtoparent"];
-			$imgData["username"] = $paramsArr["un"];
-			$status = $tEditor->loadImageData($imgData);
-		} else {
-			$status = "<h1>Problem loading image</h1>\n";
-			$status .= "<div style='text-weight:bold;'>Remeber that image size can not be greater than 250KB</div>";
-			//echo "Path: ".$uploadPath;
-			//echo 'Debugging info:';
-			//print_r($_FILES);
-		}
+	 	$status = $tEditor->loadImageData();
 	 }
 	 elseif($action == "Delete Image"){
 		$imgDel = $_REQUEST["imgdel"];
@@ -582,17 +535,17 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 			<fieldset style='margin:5px;width:485px;'>
 		    	<legend>Add a New Image</legend>
 		
-		    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 				<div style='padding:10px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
 					<div style="font-weight:bold;font-size:110%;margin-bottom:7px;">
 						Select an image file located on your computer that you want to upload 
 						OR enter a URL to an image already located on a web server (don't do both)
 					</div>
-					<input type='hidden' name='MAX_FILE_SIZE' value='250000' />
+			    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
+					<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
 					<div>
 						<b>Upload File:</b> <input name='userfile' type='file' size='50'/>
 					</div>
-					<div>Note: upload image size can not be greater than 250KB</div>
+					<div>Note: upload image size can not be greater than 1MB</div>
 					<div style='margin-top:7px;'>
 						<b>URL:</b> <input type='text' name='filepath' size='50'/>
 					</div>
@@ -662,10 +615,23 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 				<?php if($tEditor->getRankId() > 220 && !$tEditor->getSubmittedTid()){ ?>
 				<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
 					<input type='checkbox' name='addtoparent' value='1' /> 
-					Add to Parent Taxon 
+					Add Image to Species Rank 
 					<div style='margin-left:10px;'>
 						* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
 					</div>
+				</div>
+				<?php }elseif($cArr = $tEditor->getChildrenArr()){ ?>
+				<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
+					Add Image to a Child Taxon 
+					<select name='addtotid'>
+						<option value='0'>Child Taxon</option>
+						<option value='0'>-----------------------</option>
+						<?php 
+							foreach($cArr as $t => $sn){
+								?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
+							}
+						?>
+					</select> 
 				</div>
 				<?php } ?>
 				<input name="taxon" type="hidden" value="<?php echo $tEditor->getTid();?>">
@@ -856,21 +822,38 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<div style='margin-top:2px;'>
 									<b>URL:</b> 
-									<input name='url' type='text' value='<?php echo $imgArr["url"];?>' size='85' maxlength='100' />
+									<input name='url' type='text' value='<?php echo $imgArr["url"];?>' size='85' maxlength='150' />
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Thumbnail URL:</b> 
-									<input name='thumbnailurl' type='text' value='<?php echo $imgArr["thumbnailurl"];?>' size='85' maxlength='100'>
+									<input name='thumbnailurl' type='text' value='<?php echo $imgArr["thumbnailurl"];?>' size='85' maxlength='150'>
+								</div>
+								<div style='margin-top:2px;'>
+									<b>Large Image URL:</b> 
+									<input name='originalurl' type='text' value='<?php echo $imgArr["originalurl"];?>' size='85' maxlength='150'>
 								</div>
 								<?php if($tEditor->getRankId() > 220 && !$tEditor->getSubmittedTid() && !$tEditor->imageExists($imgArr["url"],$tEditor->getParentTid())){ ?>
 								<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
 									<input type='checkbox' name='addtoparent' value='1' /> 
-									Add to Parent Taxon 
+									Add Image to Species Rank 
 									<div style='margin-left:10px;'>
 										* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
 									</div>
 								</div>
-								<?php }?>
+								<?php }elseif($tEditor->getRankId() == 220 && $cArr = $tEditor->getChildrenArr($imgArr["url"])){ ?>
+								<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
+									Add Image to a Child Taxon 
+									<select name='addtotid'>
+										<option value='0'>Child Taxon</option>
+										<option value='0'>-----------------------</option>
+										<?php 
+											foreach($cArr as $t => $sn){
+												?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
+											}
+										?>
+									</select> 
+								</div>
+								<?php } ?>
 				
 								<input name="taxon" type="hidden" value="<?php echo $tEditor->getTid();?>" />
 								<input name="category" type="hidden" value="<?php echo $category; ?>" />
@@ -958,29 +941,22 @@ include($serverRoot."/util/footer.php");
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
 
-	private $maxImageWidth = 1024;
-	private $maxImageHeight = 1024;
-	private $maxThumbnailWidth = 250;
-	private $maxThumbnailHeight = 300;
+	private $tnPixWidth = 130;
+	private $webPixWidth = 1300;
+	private $lgPixWidth = 3168;
 	
  	public function __construct(){
 		$this->imageRootPath = $GLOBALS["imageRootPath"];
 		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
- 		$this->taxonCon = MySQLiConnectionFactory::getCon("readonly");
+ 		$this->taxonCon = MySQLiConnectionFactory::getCon("write");
  	}
  	
  	public function __destruct(){
 		if(!($this->taxonCon === null)) $this->taxonCon->close();
 	}
  	
- 	public function getConnection($conType){
- 		if(!$conType) $conType = "readonly";
- 		$con = MySQLiConnectionFactory::getCon($conType);
- 		return $con;
- 	}
-	
  	public function setTaxon($t){
 		if(intval($t)){
 			$this->tid = $t;
@@ -1028,7 +1004,7 @@ include($serverRoot."/util/footer.php");
 	    else{
 	    	$this->sciName = "unknown";
 	    }
-	    $result->free();
+	    $result->close();
  	}
  	
  	public function getTid(){
@@ -1057,7 +1033,7 @@ include($serverRoot."/util/footer.php");
 			$childrenArr[$row->Tid]["sciname"] = $row->SciName;
 			$childrenArr[$row->Tid]["author"] = $row->Author;
 		}
-		$result->free();
+		$result->close();
 		return $childrenArr;
  	}
 	
@@ -1074,21 +1050,19 @@ include($serverRoot."/util/footer.php");
 			$synArr[$row->tid]["sciname"] = $row->SciName;
 			$synArr[$row->tid]["sortsequence"] = $row->SortSequence;
 		}
-		$result->free();
+		$result->close();
  		return $synArr;
  	}
  	
 	public function editSynonymSort($synSort){
 		$status = "";
-		$con = $this->getConnection("write");
 		foreach($synSort as $editKey => $editValue){
 			$sql = "UPDATE taxstatus SET SortSequence = ".$editValue." WHERE tid = ".$editKey." AND TidAccepted = ".$this->tid;
 			//echo $sql."<br>";
-			if(!$con->query($sql)){
-				$status .= $con->error."\nSQL: ".$sql.";<br/> ";
+			if(!$this->taxonCon->query($sql)){
+				$status .= $this->taxonCon->error."\nSQL: ".$sql.";<br/> ";
 			}
 		}
-		$con->close();
 		if($status) $status = "Errors with editVernacularSort method:<br/> ".$status;
 		return $status;
 	}
@@ -1113,13 +1087,12 @@ include($serverRoot."/util/footer.php");
 			$vernArr[$lang][$vernCnt]["sortsequence"] = $row->SortSequence;
 			$vernCnt++;
 		}
-		$result->free();
+		$result->close();
 		return $vernArr;
 	}
 	
 	public function editVernacular($inArray){
 		$editArr = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
 		$vid = $editArr["vid"];
 		unset($editArr["vid"]);
 		$setFrag = "";
@@ -1129,38 +1102,33 @@ include($serverRoot."/util/footer.php");
 		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE VID = ".$vid;
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:editingVernacular: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:editingVernacular: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
 		return $status;
 	}
 	
 	public function addVernacular($inArray){
 		$newVerns = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
 		$sql = "INSERT INTO taxavernaculars (tid,".implode(",",array_keys($newVerns)).") VALUES (".$this->getTid().",\"".implode("\",\"",$newVerns)."\")";
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:addingNewVernacular: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:addingNewVernacular: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
 		return $status;
 	}
 	
 	public function deleteVernacular($delVid){
-		$con = $this->getConnection("write");
 		$sql = "DELETE FROM taxavernaculars WHERE VID = ".$delVid;
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:deleteVernacular: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:deleteVernacular: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
 		else{
 			$status = "";
 		}
-		$con->close();
 		return $status;
 	}
 
@@ -1181,14 +1149,13 @@ include($serverRoot."/util/footer.php");
 			$descriptionsArr[$row->Language][$row->DisplayLevel][$row->Heading]["source"] = $row->Source;
 			$descriptionsArr[$row->Language][$row->DisplayLevel][$row->Heading]["sortsequence"] = $row->SortSequence;
 		}
-		$result->free();
+		$result->close();
 		ksort($descriptionsArr);
 		return $descriptionsArr;
 	}
 
 	public function editDescription($inArray){
 		$descrArr = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
 		$targetTdid = $descrArr["tdid"];
 		unset($descrArr["tdid"]);
 		$setFrag = "";
@@ -1199,44 +1166,39 @@ include($serverRoot."/util/footer.php");
 			"WHERE tdid = ".$targetTdid;
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:editingDescription: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:editingDescription: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
 		return $status;
 	}
 
 	public function deleteDescription($tdid){
-		$con = $this->getConnection("write");
 		$sql = "DELETE FROM taxadescriptions WHERE tdid = ".$tdid;
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:deleteDescription: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:deleteDescription: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
 		else{
 			$status = "";
 		}
-		$con->close();
 		return $status;
 	}
 
 	public function addDescription($inArray){
 		$descrArr = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
 		$sql = "INSERT INTO taxadescriptions (tid,".implode(",",array_keys($descrArr)).") VALUES (".$this->tid.",\"".implode("\",\"",$descrArr)."\")";
 		//echo $sql;
 		$status = "";
-		if(!$con->query($sql)){
-			$status = "Error:addingNewDescription: ".$con->error."\nSQL: ".$sql;
+		if(!$this->taxonCon->query($sql)){
+			$status = "Error:addingNewDescription: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
 		return $status;
 	}
 
 	public function getImages(){
 		$imageArr = Array();
-		$sql = "SELECT DISTINCT ti.imgid, ti.url, ti.thumbnailurl, ti.photographer, ti.photographeruid, ".
+		$sql = "SELECT DISTINCT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.photographer, ti.photographeruid, ".
 			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ti.imagetype, ti.caption, ti.owner, ".
 			"ti.anatomy, ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.username, ti.sourceurl, ti.copyright ".
 			"FROM ((images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid) ".
@@ -1251,6 +1213,7 @@ include($serverRoot."/util/footer.php");
 			$imageArr[$imgCnt]["imgid"] = $row->imgid;
 			$imageArr[$imgCnt]["url"] = $row->url;
 			$imageArr[$imgCnt]["thumbnailurl"] = $row->thumbnailurl;
+			$imageArr[$imgCnt]["originalurl"] = $row->originalurl;
 			$imageArr[$imgCnt]["photographer"] = $row->photographer;
 			$imageArr[$imgCnt]["photographeruid"] = $row->photographeruid;
 			$imageArr[$imgCnt]["photographerdisplay"] = $row->photographerdisplay;
@@ -1267,7 +1230,7 @@ include($serverRoot."/util/footer.php");
 			$imageArr[$imgCnt]["username"] = $row->username;
 			$imgCnt++;
 		}
-		$result->free();
+		$result->close();
 		return $imageArr;
 	}
 	
@@ -1281,67 +1244,68 @@ include($serverRoot."/util/footer.php");
 		$result->close();
 	}
 
-	public function editImage($inArray){
-		$imgEdits = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
-		$sql = "UPDATE images SET ";
-		$sql .= "caption = \"".$imgEdits["caption"]."\", ";
-		$sql .= "url = \"".$imgEdits["url"]."\", ";
-		$sql .= "thumbnailurl = \"".$imgEdits["thumbnailurl"]."\", ";
-		$sql .= "photographer = ".($imgEdits["photographer"]?"\"".$imgEdits["photographer"]."\"":"NULL").", ";
-		$sql .= "photographeruid = ".($imgEdits["photographeruid"]?$imgEdits["photographeruid"]:"\N").", ";
-		$sql .= "owner = \"".$imgEdits["owner"]."\", ";
-		$sql .= "sourceurl = \"".$imgEdits["sourceurl"]."\", ";
-		$sql .= "copyright = \"".$imgEdits["copyright"]."\", ";
-		$sql .= "locality = \"".$imgEdits["locality"]."\", ";
-		$sql .= "occid = ".($imgEdits["occid"]?$imgEdits["occid"]:"NULL").", ";
-		$sql .= "anatomy = \"".$imgEdits["anatomy"]."\", ";
-		$sql .= "imagetype = \"".$imgEdits["imagetype"]."\", ";
-		$sql .= "notes = \"".$imgEdits["notes"]."\", ";
-		if(!$imgEdits["sortsequence"]){
-			$sql .= "sortsequence = 50 ";
+	public function editImage(){
+		$imgId = $_REQUEST["imgid"];
+	 	$url = $_REQUEST["url"];
+	 	$thumbnailUrl = $_REQUEST["thumbnailurl"];
+	 	$originalUrl = $_REQUEST["originalurl"];
+	 	$caption = $this->cleanStr($_REQUEST["caption"]);
+		$photographer = $this->cleanStr($_REQUEST["photographer"]);
+		$photographerUid = $_REQUEST["photographeruid"];
+		$owner = $this->cleanStr($_REQUEST["owner"]);
+		$locality = $this->cleanStr($_REQUEST["locality"]);
+		$occId = $_REQUEST["occid"];
+		$notes = $this->cleanStr($_REQUEST["notes"]);
+		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
+		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
+		$anatomy = $this->cleanStr($_REQUEST["anatomy"]);
+		$imageType = $_REQUEST["imagetype"];
+		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
+		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->getParentTid:0);
+		if(array_key_exists("addtotid",$_REQUEST)){
+			$addToTid = $_REQUEST["addtotid"];
 		}
-		else{
-			$sql .= "sortsequence = ".$imgEdits["sortsequence"]." ";
-		}
-		$sql .= " WHERE imgid = ".$imgEdits["imgid"];
+		
+		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$thumbnailUrl."\", ".
+			"originalurl = \"".$originalUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
+			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
+			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", anatomy = \"".$anatomy."\", ".
+			"imagetype = \"".$imageType."\", notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
+			" WHERE imgid = ".$imgId;
 		//echo $sql;
 		$status = "";
-		if($con->query($sql)){
-			$this->setPrimaryImage($con, $this->tid);
-			if(array_key_exists("addtoparent",$imgEdits)){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, owner, sourceurl, copyright, locality, occid, notes, anatomy, sortsequence) 
-					VALUES (".$this->parentTid.",\"".$imgEdits["url"]."\",\"".$imgEdits["thumbnailurl"]."\",\"".
-					$imgEdits["photographer"]."\",".$imgEdits["photographeruid"].",\"".
-					$imgEdits["imagetype"]."\",\"".$imgEdits["caption"]."\",\"".$imgEdits["owner"]."\",\"".$imgEdits["sourceurl"]."\",\"".
-					$imgEdits["copyright"]."\",\"".$imgEdits["locality"]."\",\"".$imgEdits["occid"]."\",\"".$imgEdits["notes"]."\",\"".
-					$imgEdits["anatomy"]."\",".($imgEdits["sortsequence"]?$imgEdits["sortsequence"]:"50").")";
+		if($this->taxonCon->query($sql)){
+			$this->setPrimaryImageSort($this->tid);
+			if($addToTid){
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
+					"owner, sourceurl, copyright, locality, occid, notes, anatomy, sortsequence) ".
+					"VALUES (".$addToTid.",\"".$url."\",\"".$thumbnailUrl."\",\"".$originalUrl."\",\"".
+					$photographer."\",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
+					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\",\"".
+					$anatomy."\",".$sortSequence.")";
 				//echo $sql;
-				if($con->query($sql)){
-					$this->setPrimaryImage($con,$this->parentTid);
+				if($this->taxonCon->query($sql)){
+					$this->setPrimaryImageSort($addToTid);
 				}
 				else{
-					$status = "unable to upload image to parent taxon";
-					//$status = "Error:editImage:loading the parent data: ".$con->error."<br/>SQL: ".$sql;
+					$status = "unable to upload image for related taxon";
+					//$status = "Error:editImage:loading the parent data: ".$this->taxonCon->error."<br/>SQL: ".$sql;
 				}
 			}
 		}
 		else{
-			$status = "Error:editImage: ".$con->error."\nSQL: ".$sql;
+			$status = "Error:editImage: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
 		return $status;
 	}
 	
 	public function changeTaxon($imgId,$targetTid,$sourceTid){
-		$con = $this->getConnection("write");
 		$sql = "UPDATE images SET tid = $targetTid, sortsequence = 50 WHERE imgid = $imgId";
-		if($con->query($sql)){
+		if($this->taxonCon->query($sql)){
 			//$sql2 = "DELETE FROM images WHERE tid = $sourceTid AND url = '".."'";
-			//$con->query($sql2);
+			//$this->taxonCon->query($sql2);
 		}
-		$this->setPrimaryImage($con,$this->tid);
-		$con->close();
+		$this->setPrimaryImageSort($this->tid);
 	}
 	
 	public function imageExists($url, $targetTid){
@@ -1355,78 +1319,178 @@ include($serverRoot."/util/footer.php");
 	
 	public function editImageSort($imgSortEdits){
 		$status = "";
-		$con = $this->getConnection("write");
 		foreach($imgSortEdits as $editKey => $editValue){
 			$sql = "UPDATE images SET sortsequence = ".$editValue." WHERE imgid = ".$editKey.";";
 			//echo $sql;
-			if(!$con->query($sql)){
-				$status .= $con->error."\nSQL: ".$sql."; ";
+			if(!$this->taxonCon->query($sql)){
+				$status .= $this->taxonCon->error."\nSQL: ".$sql."; ";
 			}
 		}
-		$this->setPrimaryImage($con,$this->tid);
-		$con->close();
+		$this->setPrimaryImageSort($this->tid);
 		if($status) $status = "with editImageSort method: ".$status;
 		return $status;
 	}
-
-	public function loadImageData($inArray){
-		$imageData = $this->cleanArray($inArray);
-		$con = $this->getConnection("write");
-		$imgUrl = "";
-		if(array_key_exists("url",$imageData)){
-			$imgUrl = $imageData["url"];
+	
+	public function deleteImage($imgIdDel, $removeImg){
+		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
+		$sqlQuery = "SELECT ti.url, ti.thumbnailurl, ti.originalurl FROM images ti WHERE ti.imgid = ".$imgIdDel;
+		$result = $this->taxonCon->Query($sqlQuery);
+		if($row = $result->fetch_object()){
+			$imgUrl = $row->url;
+			$imgThumbnailUrl = $row->thumbnailurl;
+			$imgOriginalUrl = $row->originalurl;
 		}
-		else{
-			$imgUrl = $this->getUrlPath($imageData["imagetype"]);
-		}
-		$imgThumbnailUrl = $this->createImageThumbnail($imgUrl);
-		$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
-			"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
-			"VALUES (".$this->tid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
-			($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-			$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
-			($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
-			$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
+		$result->close();
+				
+		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
 		//echo $sql;
 		$status = "";
-		if($con->query($sql)){
-			$this->setPrimaryImage($con, $this->tid);
-			if($this->rankId > 220 && !$this->submittedTid && array_key_exists("addtoparent",$imageData)){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, photographer, photographeruid, imagetype, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
-					"VALUES (".$this->parentTid.",\"".$imgUrl."\",".($imgThumbnailUrl?"\"".$imgThumbnailUrl."\"":"NULL").",".
-					($imageData["photographer"]?"\"".$imageData["photographer"]."\"":"NULL").",".$imageData["photographeruid"].",\"".
-					$imageData["imagetype"]."\",\"".$imageData["caption"]."\",\"".$imageData["owner"]."\",\"".$imageData["sourceurl"]."\",\"".$imageData["copyright"]."\",\"".$imageData["locality"]."\",".
-					($imageData["occid"]?$imageData["occid"]:"NULL").",\"".$imageData["notes"]."\",\"".
-					$imageData["anatomy"]."\",\"".$imageData["username"]."\",".($imageData["sortsequence"]?$imageData["sortsequence"]:"50").")";
-				//echo $sql;
-				if($con->query($sql)){
-					$this->setPrimaryImage($con,$this->parentTid);
-				}
-				else{
-					$status = "Error: unable to upload image to parent taxon";
-					//$status = "Error:loadImageData:loading the parent data: ".$con->error."<br/>SQL: ".$sql;
+		if($this->taxonCon->query($sql)){
+			if($removeImg){
+				//Remove images only if there are no other references to the image
+				$sql = "SELECT imgid FROM images WHERE url = '".$imgUrl."'";
+				$rs = $this->taxonCon->query($sql);
+				if(!$rs->num_rows){
+					//Delete image from server
+					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
+					if(file_exists($imgDelPath)){
+						if(!unlink($imgDelPath)){
+							$status = "Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
+						}
+					}
+					$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
+					if(file_exists($imgTnDelPath)){
+						unlink($imgTnDelPath);
+					}
+					$imgOriginalDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgOriginalUrl);
+					if(file_exists($imgOriginalDelPath)){
+						unlink($imgOriginalDelPath);
+					}
 				}
 			}
 		}
 		else{
-			$status = "loadImageData: ".$con->error."<br/>SQL: ".$sql;
+			$status = "deleteImage: ".$this->taxonCon->error."\nSQL: ".$sql;
 		}
-		$con->close();
+		$this->setPrimaryImageSort($this->tid);
 		return $status;
 	}
 	
- 	public function setFileName($fName){
+	public function loadImageData(){
+		global $paramsArr;
+		$imgUrl = $_REQUEST["filepath"];
+		$imgPath = "";
+		if(!$imgUrl){
+			$imgPath = $this->loadImage();
+			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
+		}
+		if(!$imgUrl) return;
+		$caption = $this->cleanStr($_REQUEST["caption"]);
+		$photographer = $this->cleanStr($_REQUEST["photographer"]);
+		$photographerUid = $_REQUEST["photographeruid"];
+		$sourceUrl = trim($_REQUEST["sourceurl"]);
+		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
+		$owner = $this->cleanStr($_REQUEST["owner"]);
+		$locality = $this->cleanStr($_REQUEST["locality"]);
+		$occId = $_REQUEST["occid"];
+		$notes = $this->cleanStr($_REQUEST["notes"]);
+		$anatomy = $this->cleanStr($_REQUEST["anatomy"]);
+		$imageType = $_REQUEST["imagetype"];
+		$sortSequence = $_REQUEST["sortsequence"];
+		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
+		if(array_key_exists("addtotid",$_REQUEST)){
+			$addToTid = $_REQUEST["addtotid"];
+		}
+		$userName = $paramsArr["un"];
+		
+		$imgTnUrl = $this->createImageThumbnail($imgUrl);
+
+		//Create Large Image
+		list($width, $height) = getimagesize(($imgPath?$imgPath:$imgUrl));
+		$imgLgUrl = "";
+		if($width > ($this->webPixWidth*1.2)){
+			$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
+			if($width < ($this->lgPixWidth*1.2)){
+				if(copy($imgPath,$lgWebUrlTemp)){
+					$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+				}
+			}
+			else{
+				if($this->createNewImage($imgPath,$lgWebUrlTemp,$this->lgPixWidth)){
+					$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+				}
+			}
+		}
+
+		//Create web url
+		$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
+		if($width < ($this->webPixWidth*1.2)){
+			rename($imgPath,$imgTargetPath);
+		}
+		else{
+			$this->createNewImage($imgPath,$imgTargetPath,$this->webPixWidth);
+		}
+		$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
+		if(file_exists($imgPath)) unlink($imgPath);
+		
+		if($imgWebUrl){
+			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
+				"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
+				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
+				($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
+				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
+				($occId?$occId:"NULL").",\"".$notes."\",\"".
+				$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
+			//echo $sql;
+			$status = "";
+			if($this->taxonCon->query($sql)){
+				$this->setPrimaryImageSort($this->tid);
+				if($addToTid){
+					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
+						"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
+						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
+						($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
+						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
+						($occId?$occId:"NULL").",\"".$notes."\",\"".
+						$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
+					//echo $sql;
+					if($this->taxonCon->query($sql)){
+						$this->setPrimaryImageSort($addToTid);
+					}
+					else{
+						$status = "Error: unable to upload image for related taxon";
+						//$status = "Error:loadImageData:loading the parent data: ".$this->taxonCon->error."<br/>SQL: ".$sql;
+					}
+				}
+			}
+			else{
+				$status = "loadImageData: ".$this->taxonCon->error."<br/>SQL: ".$sql;
+			}
+		}
+		return $status;
+	}
+	
+	private function loadImage(){
+	 	$userFile = basename($_FILES['userfile']['name']);
+		$fileName = $this->getFileName($userFile);
+	 	$downloadPath = $this->getDownloadPath($fileName, $_REQUEST["imagetype"]); 
+	 	if(move_uploaded_file($_FILES['userfile']['tmp_name'], $downloadPath)){
+			return $downloadPath;
+	 	}
+	 	return;
+	}
+
+	private function getFileName($fName){
 		$fName = str_replace("'","",$fName);
 		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace("\"","",$fName);
 		if(strlen($fName) > 30) {
 			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
 		}
- 		$this->fileName = $fName;
+ 		return $fName;
  	}
  	
-	public function getDownloadPath($subFolder){
+	private function getDownloadPath($fileName, $subFolder){
 		if(substr($this->imageRootPath,-1,1) != "/") $this->imageRootPath .= "/";
 		$path = $this->imageRootPath.$this->family."/".$subFolder."/";
  		if(!file_exists($this->imageRootPath.$this->family)){
@@ -1436,63 +1500,16 @@ include($serverRoot."/util/footer.php");
  			mkdir($this->imageRootPath.$this->family."/".$subFolder, 0775);
  		}
  		//Check and see if file already exists, if so, rename filename until it has a unique name
- 		$tempFileName = $this->fileName;
+ 		$tempFileName = $fileName;
  		$cnt = 0;
  		while(file_exists($path.$tempFileName)){
- 			$tempFileName = substr($this->fileName,0,strrpos($this->fileName,"."))."_".$cnt.substr($this->fileName,strrpos($this->fileName,".")).""; 
+ 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
  			$cnt++;
  		}
- 		$this->fileName = $tempFileName;
- 		return $path.$this->fileName;
+ 		$fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
+ 		return $path.$fileName;
  	}
 
- 	private function getUrlPath($imagetype){
-		$path = $this->imageRootUrl.$this->family."/".$imagetype."/".$this->fileName;
-		return $path;
- 	}
- 	
-	public function deleteImage($imgIdDel, $removeImg){
-		$con = $this->getConnection("write");
-		$imgUrl = "";
-		$imgThumbnailUrl = ""; 
-		$sqlQuery = "SELECT ti.url, ti.thumbnailurl FROM images ti WHERE ti.imgid = ".$imgIdDel;
-		$result = $con->Query($sqlQuery);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			$imgThumbnailUrl = $row->thumbnailurl;
-		}
-		$result->close();
-
-		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
-		//echo $sql;
-		$status = "";
-		if(!$con->query($sql)){
-			$status = "deleteImage: ".$con->error."\nSQL: ".$sql;
-		}
-		else{
-			if($removeImg){
-				//Delete other references to this image so that you don't create broken links
-				$sql = "DELETE FROM images WHERE url = '".$imgUrl."'";
-				$con->query($sql);
-				
-				//Delete image from server
-				$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-				if(file_exists($imgDelPath)){
-					if(!unlink($imgDelPath)){
-						$status = "Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
-					}
-				}
-				$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
-				if(file_exists($imgTnDelPath)){
-					unlink($imgTnDelPath);
-				}
-			}
-		}
-		$this->setPrimaryImage($con,$this->tid);
-		$con->close();
-		return $status;
-	}
-	
 	private function createImageThumbnail($imgUrl){
 		$newThumbnailUrl = "";
 		if($imgUrl){
@@ -1504,88 +1521,103 @@ include($serverRoot."/util/footer.php");
 				if(!is_dir($this->imageRootPath."misc_thumbnails/")){
 					if(!mkdir($this->imageRootPath."misc_thumbnails/", 0775)) return "";
 				}
-				$fileName = str_ireplace(".jpg","_tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				$fileName = str_ireplace("_temp.jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
 				$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
 				$newThumbnailUrl = $this->imageRootUrl."misc_thumbnails/".$fileName;
 			}
 			elseif(strpos($imgUrl,$this->imageRootUrl) === 0){
 				$imgPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-				$newThumbnailUrl = str_ireplace(".jpg","_tn.jpg",$imgUrl);
+				$newThumbnailUrl = str_ireplace("_temp.jpg","tn.jpg",$imgUrl);
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
 			if(file_exists($imgPath) || $this->url_exists($filePath)){
 				if(!file_exists($newThumbnailPath)){
-		        	list($sourceWidth, $sourceHeight, $imageType) = getimagesize($imgPath);
-		        	$newWidth = $this->maxThumbnailWidth;
-		        	$newHeight = round($sourceHeight*($this->maxThumbnailWidth/$sourceWidth));
-		        	if($newHeight > $this->maxThumbnailHeight){
-		        		$newHeight = $this->maxThumbnailHeight;
-		        		$newWidth = round($sourceWidth*($this->maxThumbnailHeight/$sourceHeight));
-		        	}
-		        	
-				    switch ($imageType){
-				        case 1: 
-				        	$sourceImg = imagecreatefromgif($imgPath);
-				        	break;
-				        case 2: 
-				        	$sourceImg = imagecreatefromjpeg($imgPath);  
-				        	break;
-				        case 3: 
-				        	$sourceImg = imagecreatefrompng($imgPath);
-				        	break;
-				        default: 
-				        	return "";
-				        	break;
-				    }
-		        	
-		    		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-		
-				    /* Check if this image is PNG or GIF to preserve its transparency */
-				    if(($imageType == 1) || ($imageType==3)){
-				        imagealphablending($tmpImg, false);
-				        imagesavealpha($tmpImg,true);
-				        $transparent = imagecolorallocatealpha($tmpImg, 255, 255, 255, 127);
-				        imagefilledrectangle($tmpImg, 0, 0, $newWidth, $newHeight, $transparent);
-				    }
-					imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
-		
-					switch ($imageType){
-				        case 1: 
-				        	if(!imagegif($tmpImg,$newThumbnailPath)){
-				        		echo "<div style='margin:5px;'>Failed to write GIF thumbnail: $newThumbnailPath</div>";
-				        	}
-				        	break;
-				        case 2: 
-				        	if(!imagejpeg($tmpImg, $newThumbnailPath, 50)){
-				        		echo "<div style='margin:5px;'>Failed to write JPG thumbnail: $newThumbnailPath</div>";
-				        	}
-				        	break; // best quality
-				        case 3: 
-				        	if(!imagepng($tmpImg, $newThumbnailPath, 0)){
-				        		echo "<div style='margin:5px;'>Failed to write PNG thumbnail: $newThumbnailPath</div>";
-				        	}
-				        	break; // no compression
-				    }
-				    imagedestroy($tmpImg);
+					$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50);
 				}
 			}
 		}
 		return $newThumbnailUrl;
 	}
+	
+	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 75){
+        $successStatus = false;
+		list($sourceWidth, $sourceHeight, $imageType) = getimagesize($sourceImg);
+        $newWidth = $targetWidth;
+        $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
+        if($newHeight > $targetWidth*1.2){
+        	$newHeight = $targetWidth;
+        	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
+        }
+        
+	    switch ($imageType){
+	        case 1: 
+	        	$newImg = imagecreatefromgif($sourceImg);
+	        	break;
+	        case 2: 
+	        	$newImg = imagecreatefromjpeg($sourceImg);  
+	        	break;
+	        case 3: 
+	        	$newImg = imagecreatefrompng($sourceImg);
+	        	break;
+	        default: 
+	        	return "";
+	        	break;
+	    }
+        
+    	$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 
-	private function setPrimaryImage($conn,$subjectTid){
+	    /* Check if this image is PNG or GIF to preserve its transparency */
+	    if(($imageType == 1) || ($imageType==3)){
+	        imagealphablending($tmpImg, false);
+	        imagesavealpha($tmpImg,true);
+	        $transparent = imagecolorallocatealpha($tmpImg, 255, 255, 255, 127);
+	        imagefilledrectangle($tmpImg, 0, 0, $newWidth, $newHeight, $transparent);
+	    }
+		imagecopyresampled($tmpImg,$newImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
+
+		switch ($imageType){
+	        case 1: 
+	        	$successStatus = imagegif($tmpImg,$targetPath);
+	        	break;
+	        case 2: 
+	        	$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
+	        	break; // best quality
+	        case 3: 
+	        	$successStatus = imagepng($tmpImg, $targetPath, 0);
+	        	break; // no compression
+	    }
+	    imagedestroy($tmpImg);
+	    return $successStatus;
+	}
+
+	public function getChildrenArr($url = ""){
+		$returnArr = Array();
+		$sql = "SELECT t.tid, t.sciname FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ";
+		if($url) $sql .= "LEFT JOIN (SELECT i2.tid FROM images i2 WHERE i2.url = '".$url."' ) i ON t.tid = i.tid "; 
+		$sql .= "WHERE ts.taxauthid = 1 AND ts.parenttid = ".$this->tid;
+		if($url) $sql .= " AND i.tid IS NULL ";
+		//echo $sql;
+		$result = $this->taxonCon->query($sql);
+		while($row = $result->fetch_object()){
+			$returnArr[$row->tid] = $row->sciname;
+		}
+		$result->close();
+		return $returnArr;
+	}
+	
+	private function setPrimaryImageSort($subjectTid){
 		$sql1 = "SELECT count(ti.imgid) AS reccnt FROM images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid 
 			WHERE ts.taxauthid = 1 AND ti.SortSequence = 1 AND ts.tidaccepted = ".$subjectTid;
 		//echo $sql1;
-		$result = $conn->query($sql1);
+		$result = $this->taxonCon->query($sql1);
 		if($row = $result->fetch_object()){
 			if($row->reccnt == 0){
 				$sql2 = "UPDATE images ti2 INNER JOIN (SELECT ti.imgid, ti.sortsequence FROM images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid
 					WHERE ((ts.taxauthid = 1) AND (ts.tidaccepted=".$subjectTid.")) ORDER BY ti.SortSequence LIMIT 1) innertab ON ti2.imgid = innertab.imgid 
 					SET ti2.SortSequence = 1";
 				//echo $sql2;
-				$conn->query($sql2);
+				$this->taxonCon->query($sql2);
 			}
 		}
 		$result->close();
@@ -1619,7 +1651,7 @@ include($serverRoot."/util/footer.php");
 			$linkArr[$linkCnt]["title"] = $row->title;
 			$linkCnt++;
 		}
-		$result->free();
+		$result->close();
 		return $linkArr;
 	}
 	
@@ -1646,16 +1678,19 @@ include($serverRoot."/util/footer.php");
  	private function cleanArray($arr){
  		$newArray = Array();
  		foreach($arr as $key => $value){
- 			$newKey = trim($key);
- 			$newKey = preg_replace('/\s\s+/', ' ',$newKey);
- 			$newValue = trim($value);
- 			$newValue = preg_replace('/\s\s+/', ' ',$newValue);
- 			$newArray[$newKey] = $newValue;
+ 			$newArray[$this->cleanStr($key)] = $this->cleanStr($value);
  		}
  		return $newArray;
  	}
 	
-	private function url_exists($url) {
+ 	private function cleanStr($str){
+ 		$newStr = trim($str);
+ 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = str_replace("\"","'",$newStr);
+ 		return $newStr;
+ 	}
+	
+ 	private function url_exists($url) {
 	    // Version 4.x supported
 	    $handle   = curl_init($url);
 	    if (false === $handle)
