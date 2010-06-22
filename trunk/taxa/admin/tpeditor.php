@@ -1279,8 +1279,8 @@ include($serverRoot."/util/footer.php");
 			if($addToTid){
 				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
 					"owner, sourceurl, copyright, locality, occid, notes, anatomy, sortsequence) ".
-					"VALUES (".$addToTid.",\"".$url."\",\"".$thumbnailUrl."\",\"".$originalUrl."\",\"".
-					$photographer."\",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
+					"VALUES (".$addToTid.",\"".$url."\",\"".$thumbnailUrl."\",\"".$originalUrl."\",".
+					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
 					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\",\"".
 					$anatomy."\",".$sortSequence.")";
 				//echo $sql;
