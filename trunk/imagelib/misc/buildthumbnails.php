@@ -138,8 +138,8 @@ class BuildThumbnails{
 				$newThumbnailPath = str_replace($this->urlPath,$this->rootPath,$newThumbnailUrl);
 			}
 
-			$idealWidth = 250;
-			$maxHeight = 300;
+			$idealWidth = 200;
+			$maxHeight = 250;
 			if(file_exists($filePath) || $this->url_exists($filePath)){
 				if(!file_exists($newThumbnailPath)){
 		        	list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
