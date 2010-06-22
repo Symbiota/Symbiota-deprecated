@@ -128,13 +128,13 @@ class BuildThumbnails{
 				if(!is_dir($this->rootPath."misc_thumbnails/")){
 					if(!mkdir($this->rootPath."misc_thumbnails/")) return "";
 				}
-				$fileName = str_ireplace(".jpg","_tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
 				$newThumbnailPath = $this->rootPath."misc_thumbnails/".$fileName;
 				$newThumbnailUrl = $this->urlPath."misc_thumbnails/".$fileName;
 			}
 			elseif(substr($imgUrl,0,strlen($this->urlPath)) == $this->urlPath){
 				$filePath = str_replace($this->urlPath,$this->rootPath,$imgUrl);
-				$newThumbnailUrl = str_ireplace(".jpg","_tn.jpg",$imgUrl);
+				$newThumbnailUrl = str_ireplace(".jpg","tn.jpg",$imgUrl);
 				$newThumbnailPath = str_replace($this->urlPath,$this->rootPath,$newThumbnailUrl);
 			}
 
