@@ -75,7 +75,7 @@ class BuildThumbnails{
 	
 	public function buildThumbnails(){
 		$sql = "SELECT ti.imgid, trim(ti.url) AS url FROM images ti ".
-			"WHERE ti.thumbnailurl IS NULL AND ti.url LIKE '".$this->urlPath."%' ";
+			"WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = '') AND ti.url LIKE '".$this->urlPath."%' ";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
