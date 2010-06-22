@@ -941,7 +941,7 @@ include($serverRoot."/util/footer.php");
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
 
-	private $tnPixWidth = 130;
+	private $tnPixWidth = 200;
 	private $webPixWidth = 1300;
 	private $lgPixWidth = 3168;
 	
