@@ -21,7 +21,7 @@
 	 	$obsArr[$collId]["icon"] = $collObj["icon"];
 	}
  } 
- $otherCatArr = $collManager->getOccurProjects();
+ $otherCatArr = $collManager->getSurveys();
  //$ownerInstArr = $collManager->getOwnerInstitutions();
  //$specProjArr = $collManager->getSpecProjects();
  ?>
@@ -265,17 +265,17 @@
 				<div id="otherdiv" class="tabcontent" style="margin:10px;">
 					<form id="othercatform" action="harvestparams.php" method="get">
 					<?php 
-					foreach($otherCatArr as $catTitle => $projArr){
+					foreach($otherCatArr as $projTitle => $surveyArr){
 						?>
 						<fieldset style="margin:10px;">
-							<legend style="font-weight:bold;"><?php echo $catTitle; ?></legend>
+							<legend style="font-weight:bold;"><?php echo $projTitle; ?></legend>
 							<div style="margin:10px;">
 								<?php 
-								foreach($projArr as $ocprid => $projName){
+								foreach($surveyArr as $surveyId => $surveyName){
 									?>
 									<div style="margin:5px;">
-										<input name="ocprid[]" value='<?php echo $ocprid; ?>' type='checkbox' />
-										<?php echo $projName; ?>
+										<input name="surveyid[]" value='<?php echo $surveyId; ?>' type='checkbox' />
+										<?php echo $surveyName; ?>
 									</div>
 									<?php 
 								}

@@ -40,11 +40,11 @@ class CollectionManager{
 			//reset all search terms except db terms 
 			$dbsTemp = "";
 			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
-			$ocpridTemp = "";
-			if(array_key_exists("ocprid",$this->searchTermsArr)) $ocpridTemp = $this->searchTermsArr["ocprid"];
+			$surveyIdTemp = "";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $surveyIdTemp = $this->searchTermsArr["surveyid"];
 			unset($this->searchTermsArr);
 			if($dbsTemp) $this->searchTermsArr["db"] = $dbsTemp;
-			if($ocpridTemp) $this->searchTermsArr["ocprid"] = $ocpridTemp;
+			if($surveyIdTemp) $this->searchTermsArr["surveyid"] = $surveyIdTemp;
 		}
 	}
 
@@ -52,8 +52,8 @@ class CollectionManager{
 		if(array_key_exists("colldbs",$_COOKIE)){
 			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
 		}
-		elseif(array_key_exists("collocprid",$_COOKIE)){
-			$this->searchTermsArr["ocprid"] = $_COOKIE["collocprid"];
+		elseif(array_key_exists("collsurveyid",$_COOKIE)){
+			$this->searchTermsArr["surveyid"] = $_COOKIE["collsurveyid"];
 		}
 		if(array_key_exists("colltaxa",$_COOKIE)){
 			$collTaxa = $_COOKIE["colltaxa"]; 
@@ -102,8 +102,8 @@ class CollectionManager{
 		if(array_key_exists("db",$this->searchTermsArr) && strpos($this->searchTermsArr["db"],"all") === false){
 			$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",$this->searchTermsArr["db"]).")) ";
 		}
-		elseif(array_key_exists("ocprid",$this->searchTermsArr)){
-			$sqlWhere .= "AND (opl.ocprid IN('".str_replace(";","','",$this->searchTermsArr["ocprid"])."')) ";
+		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
+			$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)){
@@ -348,18 +348,18 @@ class CollectionManager{
 		return $this->collectionArr;
 	}
 	
-	public function getOccurProjects(){
+	public function getSurveys(){
 		$returnArr = Array();
-		$sql = "SELECT c.name, p.ocprid, p.projectname ".
-			"FROM (omoccurprojcatagory c INNER JOIN omoccurprojcatlink pc ON c.opcid = pc.opcid) ".
-			"INNER JOIN omoccurprojects p ON pc.ocprid = p.ocprid ".
-			"WHERE c.occurrencesearch = 1 AND c.ispublic = 1 ".
-			"ORDER BY c.name, p.projectname"; 
+		$sql = "SELECT p.projname, s.surveyid, s.projectname ".
+			"FROM (fmprojects p INNER JOIN omsurveyprojlink spl ON p.pid = spl.pid) ".
+			"INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
+			"WHERE p.occurrencesearch = 1 ".
+			"ORDER BY p.projname, s.projectname"; 
 		//echo "<div>$sql</div>";
 		$conn = $this->getConnection();
 		$rs = $conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->name][$row->ocprid] = $row->projectname;
+			$returnArr[$row->projname][$row->surveyid] = $row->projectname;
 		}
 		$rs->close();
 		$conn->close();
@@ -368,8 +368,8 @@ class CollectionManager{
 	
 	public function getDatasetSearchStr(){
 		$returnStr ="";
-		if(array_key_exists("ocprid",$this->searchTermsArr)){
-			$returnStr = $this->getOccProjStr();
+		if(array_key_exists("surveyid",$this->searchTermsArr)){
+			$returnStr = $this->getSurveyStr();
 		}
 		else{
 			if(!$this->collectionArr) $this->getCollectionArr();
@@ -388,9 +388,9 @@ class CollectionManager{
 		return $returnStr;
 	}
 	
-	private function getOccProjStr(){
+	private function getSurveyStr(){
 		$returnStr = "";
-		$sql = "SELECT projectname FROM omoccurprojects WHERE ocprid IN(".str_replace(";",",",$this->searchTermsArr["ocprid"]).") ";
+		$sql = "SELECT projectname FROM omsurveys WHERE surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).") ";
 		$conn = $this->getConnection();
 		$rs = $conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -444,16 +444,16 @@ class CollectionManager{
 		 		$dbStr = implode(";",$dbs);
 		 	}
 		 	if($this->useCookies) setCookie("colldbs",$dbStr,0,$clientRoot);
-			setCookie("collocprid","",time()-3600,$clientRoot);
+			setCookie("collsurveyid","",time()-3600,$clientRoot);
 			$this->searchTermsArr["db"] = $dbStr;
 		}
-		elseif(array_key_exists("ocprid",$_REQUEST)){
-			$ocpridArr = $_GET["ocprid"];
-			if(is_string($ocpridArr)) $ocpridArr = Array($ocpridArr); 
-		 	$ocpridStr = implode(";",$ocpridArr);
-		 	if($this->useCookies) setCookie("collocprid",$ocpridStr,0,$clientRoot);
+		elseif(array_key_exists("surveyid",$_REQUEST)){
+			$surveyidArr = $_GET["surveyid"];
+			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
+		 	$surveyidStr = implode(";",$surveyidArr);
+		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,$clientRoot);
 			setCookie("colldbs","",time()-3600,$clientRoot);
-			$this->searchTermsArr["ocprid"] = $ocpridStr;
+			$this->searchTermsArr["surveyid"] = $surveyidStr;
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $_REQUEST["taxa"];
