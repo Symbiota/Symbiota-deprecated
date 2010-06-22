@@ -181,7 +181,7 @@ class BuildThumbnails{
 				        	}
 				        	break;
 				        case 2: 
-				        	if(!imagejpeg($tmpImg, $newThumbnailPath, 50)){
+				        	if(!imagejpeg($tmpImg, $newThumbnailPath)){
 				        		echo "<div style='margin:5px;'>Failed to write JPG thumbnail: $newThumbnailPath</div>";
 				        	}
 				        	break; // best quality
