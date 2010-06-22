@@ -102,11 +102,13 @@
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
 	include($serverRoot."/util/header.php");
 	if(isset($projects_indexCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $projects_indexCrumbs;
-		echo " <b>$defaultTitle Project</b>"; 
-		echo "</div>";
+		?>
+		<div class="navpath">
+			<a href="../index.php">Home</a> &gt; 
+			<?php echo $projects_indexCrumbs;?>
+			<b>$defaultTitle Project</b> 
+		</div>
+		<?php 
 	}
 	?>
 	
@@ -126,16 +128,27 @@
 	}
 	else{
 		if($isEditable){
-			echo "<div style=\"float:right;cursor:pointer;\" onclick=\"toggleById('projeditor');\" title=\"Toggle Editing Functions\">";
-			echo "<img style='border:0px;' src='../images/edit.png'/>";
-			echo "</div>";
+			?>
+			<div style="float:right;cursor:pointer;" onclick="toggleById('projeditor');" title="Toggle Editing Functions">
+				<img style="border:0px;" src="../images/edit.png"/>
+			</div>
+			<?php 
 		}
 		$projectArr = $projManager->getProjectData();
 		foreach($projectArr as $pid => $projArr){
-			echo "<h1>".$projArr["projname"]."</h1>\n";
-			echo "<div style='margin:10px;'><b>Project Managers:</b> ".$projArr["managers"]."</div>";
-			echo "<div style='margin:10px;'>".$projArr["fulldescription"]."</div>";
-			echo "<div style='margin:10px;'>".$projArr["notes"]."</div>";
+			?>
+			<h1><?php echo $projArr["projname"]; ?></h1>
+			<div style='margin:10px;'>
+				<b>Project Managers:</b> 
+				<?php echo $projArr["managers"];?>
+			</div>
+			<div style='margin:10px;'>
+				<?php echo echo $projArr["fulldescription"];?>
+			</div>
+			<div style='margin:10px;'>
+				<?php echo $projArr["notes"]; ?>
+			</div>
+			<?php 
 		}
 
 		if($isEditable){ ?>
@@ -176,7 +189,7 @@
 
         <div style="margin:20px;">
             <?php
-            $staticList = $projManager->getStaticChecklists();
+            $staticList = $projManager->getResearchChecklists();
 			if($staticList){
 			?>
 				<h3>Static Species Lists
@@ -340,11 +353,11 @@
 		$conn->close();
 	}
 	
-	public function getStaticChecklists(){
+	public function getResearchChecklists(){
 		$returnArr = Array();
 		$sql = "SELECT c.clid, c.name ".
 			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".
-			"WHERE (c.Type = 'static') AND (cpl.pid = ".$this->projId.") ".
+			"WHERE (c.access = 'public') AND (cpl.pid = ".$this->projId.") ".
 			"ORDER BY c.SortSequence, c.name";
 		$rs = $this->con->query($sql);
 		echo "<ul>";
@@ -356,7 +369,7 @@
 		return $returnArr;
 	}
 	
-	public function getDynamicChecklists(){
+	public function getOccurProjChecklists(){
 		$returnArr = Array();
 		$sql = "SELECT c.clid, c.name ".
 			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".

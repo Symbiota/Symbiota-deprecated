@@ -25,12 +25,12 @@ class ChecklistManager extends CollectionManager{
         if($taxonAuthorityId){
 			$sql = "SELECT DISTINCT ts.Family, t.SciName ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-			if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			$sql .= $this->getSqlWhere()." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = "SELECT DISTINCT o.Family, o.SciName FROM omoccurrences o ";
-			if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			$sql .= $this->getSqlWhere()." AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
 				"ORDER BY o.family, o.SciName ";
         }
@@ -72,13 +72,13 @@ class ChecklistManager extends CollectionManager{
 			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
 			if(!$taxonAuthorityId){
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-				if(array_key_exists("ocprid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 				$sqlTaxaInsert .= $this->getSqlWhere()." AND t.RankId > 140";
 			}
 			else{
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-				if(array_key_exists("ocprid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 				$sqlTaxaInsert .= $this->getSqlWhere()."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140";
 			}
 			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;

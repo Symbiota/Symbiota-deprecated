@@ -29,7 +29,7 @@ class ListManager extends CollectionManager{
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
 			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,1) AS LocalitySecurity ".
 			"FROM omoccurrences o ";
-		if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
 		$sql .= "ORDER BY o.CollID, o.sciname ";
@@ -70,7 +70,7 @@ class ListManager extends CollectionManager{
 		global $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
-			if(array_key_exists("ocprid",$this->searchTermsArr)) $sql .= "INNER JOIN omoccurprojlink opl ON o.occid = opl.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			$sql .= $sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $conn->query($sql);
