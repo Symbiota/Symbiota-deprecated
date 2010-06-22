@@ -1261,7 +1261,7 @@ include($serverRoot."/util/footer.php");
 		$anatomy = $this->cleanStr($_REQUEST["anatomy"]);
 		$imageType = $_REQUEST["imagetype"];
 		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
-		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->getParentTid:0);
+		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
 		if(array_key_exists("addtotid",$_REQUEST)){
 			$addToTid = $_REQUEST["addtotid"];
 		}
