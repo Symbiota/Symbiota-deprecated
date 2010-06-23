@@ -44,8 +44,8 @@
 		 	}
 		}
 
-		function toggleStaticInfoBox(anchorObj){
-			var obj = document.getElementById("staticlistpopup");
+		function toggleResearchInfoBox(anchorObj){
+			var obj = document.getElementById("researchlistpopup");
 			var pos = findPos(anchorObj);
 			var posLeft = pos[0];
 			if(posLeft > 550){
@@ -59,12 +59,12 @@
 			else {
 				obj.style.display="block";
 			}
-			var targetStr = "document.getElementById('staticlistpopup').style.display='none'";
+			var targetStr = "document.getElementById('researchlistpopup').style.display='none'";
 			var t=setTimeout(targetStr,25000);
 		}
 
-		function toggleDynamicInfoBox(anchorObj){
-			var obj = document.getElementById("dynamiclistpopup");
+		function toggleSurveyInfoBox(anchorObj){
+			var obj = document.getElementById("surveylistpopup");
 			var pos = findPos(anchorObj);
 			var posLeft = pos[0];
 			if(posLeft > 550){
@@ -78,7 +78,7 @@
 			else {
 				obj.style.display="block";
 			}
-			var targetStr = "document.getElementById('dynamiclistpopup').style.display='none'";
+			var targetStr = "document.getElementById('surveylistpopup').style.display='none'";
 			var t=setTimeout(targetStr,20000);
 		}
 
@@ -143,7 +143,7 @@
 				<?php echo $projArr["managers"];?>
 			</div>
 			<div style='margin:10px;'>
-				<?php echo echo $projArr["fulldescription"];?>
+				<?php echo $projArr["fulldescription"];?>
 			</div>
 			<div style='margin:10px;'>
 				<?php echo $projArr["notes"]; ?>
@@ -189,28 +189,28 @@
 
         <div style="margin:20px;">
             <?php
-            $staticList = $projManager->getResearchChecklists();
-			if($staticList){
+            $researchList = $projManager->getResearchChecklists();
+			if($researchList){
 			?>
-				<h3>Static Species Lists
-					<span onclick="toggleStaticInfoBox(this);" title="What is a Static Species List?" style="cursor:pointer;">
+				<h3>Research Checklists
+					<span onclick="toggleResearchInfoBox(this);" title="What is a Research Species List?" style="cursor:pointer;">
 						<img src="../images/qmark.jpg" style="height:15px;"/>
 					</span> 
-					<a href="../checklists/clgmap.php?proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
+					<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
 						<img src='../images/world40.gif' style='width:14px;border:0' />
 					</a>
 				</h3>
-				<div id="staticlistpopup" class="genericpopup">
+				<div id="researchlistpopup" class="genericpopup">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-		            Static Species Lists are pre-compiled by floristic researchers.
+		            Research checklists are pre-compiled by floristic scientists.
 		            This is a very controlled method of building a species list, which allows for  
-		            specific specimens to be linked to species name and serve as vouchers. 
+		            specific specimens to be linked to the checklist to serve as vouchers. 
 		            Vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
-		            can inspect these specimens for verification or make identification annotations when necessary.
+		            can inspect these specimens for verification or make annotations to the identification when necessary.
 				</div>
 				<ul>
 				<?php 	
-					foreach($staticList as $key=>$value){
+					foreach($researchList as $key=>$value){
 	            ?>
 					<li>
 						<a href='../checklists/checklist.php?cl=<?php echo $key."&proj=".$projManager->getProjectId(); ?>'>
@@ -223,18 +223,18 @@
 					<?php } ?>
 				</ul>
 			<?php }
-                $dynamicList = $projManager->getDynamicChecklists();
-			if($dynamicList){
+                $surveyList = $projManager->getSurveyLists();
+			if($surveyList){
 			?>
-				<h3>Dynamic Species Lists 
-					<span onclick="toggleDynamicInfoBox(this);" title="What is a Dynamic Species List?" style="cursor:pointer;">
+				<h3>Public Survey Checklists 
+					<span onclick="toggleSurveyInfoBox(this);" title="What is a Public Survey Checklist?" style="cursor:pointer;">
 						<img src="../images/qmark.jpg" style="height:15px;"/>
 					</span> 
-					<a href="../checklists/clgmap.php?proj=" title="Map checklists">
+					<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
 						<img src="../images/world40.gif" style="width:14px;border:0" />
 					</a>
 				</h3>
-				<div id="dynamiclistpopup" class="genericpopup">
+				<div id="surveylistpopup" class="genericpopup">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
 		            Dynamic checklists are generated directly from specimen data each time the checklist is accessed.
 		            Since these lists are built on-the-fly, they take a bit longer to display. 
@@ -243,11 +243,11 @@
 				</div>
 				<ul>
 				<?php 	
-				foreach($dynamicList as $key=>$value){
+				foreach($surveyList as $key=>$value){
 	            ?>
             
 					<li>
-						<a href='../checklists/checklist.php?cl=<?php echo $key;?>'><?php echo $value;?></a> 
+						<a href='../checklists/survey.php?surveyid=<?php echo $key;?>'><?php echo $value;?></a> 
 					</li>
 					<?php } ?>
 				</ul>
@@ -307,7 +307,7 @@
 	public function getProjectList(){
 		$returnArr = Array();
 		$sql = "SELECT p.pid, p.projname, p.managers, p.briefdescription ".
-			"FROM fmprojects p ".
+			"FROM fmprojects p WHERE p.ispublic = 1 ".
 			"ORDER BY p.SortSequence, p.projname";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
@@ -323,7 +323,7 @@
 	public function getProjectData(){
 		$returnArr = Array();
 		$sql = "SELECT p.pid, p.projname, p.managers, p.briefdescription, p.fulldescription, p.notes, p.sortsequence ".
-			"FROM fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid ".
+			"FROM fmprojects p ".
 			"WHERE (p.pid = ".$this->projId.") ".
 			"ORDER BY p.SortSequence, p.projname";
 		//echo $sql;
@@ -369,16 +369,16 @@
 		return $returnArr;
 	}
 	
-	public function getOccurProjChecklists(){
+	public function getSurveyLists(){
 		$returnArr = Array();
-		$sql = "SELECT c.clid, c.name ".
-			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".
-			"WHERE (c.Type = 'dynamic') AND (cpl.pid = ".$this->projId.") ".
-			"ORDER BY c.SortSequence, c.name";
+		$sql = "SELECT s.surveyid, s.projectname ".
+			"FROM omsurveyprojlink spl INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
+			"WHERE (spl.pid = ".$this->projId.") ".
+			"ORDER BY s.SortSequence, s.projectname";
 		$rs = $this->con->query($sql);
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+			$returnArr[$row->surveyid] = $row->projectname;
 		}
 		echo "</ul>";
 		$rs->close();
