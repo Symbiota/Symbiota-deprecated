@@ -13,7 +13,7 @@ $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 if(!$projValue && isset($defaultProjId)) $projValue = $defaultProjId;
 $clType = array_key_exists("cltype",$_REQUEST)?$_REQUEST["cltype"]:""; 
 
-$mapperObj = new ChecklistMapper($projValue, $clType);
+$mapperObj = new ChecklistMapper($projValue);
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -36,9 +36,7 @@ $mapperObj = new ChecklistMapper($projValue, $clType);
                 map.addControl(new GOverviewMapControl()); // small overview in corner
 
                 map.setCenter(new GLatLng( 41.0, -95.0 ), 3);
-                <?php
-                    $mapperObj->echoChecklistPoints();
-                ?>
+                <?php $mapperObj->echoChecklistPoints($clType); ?>
                 resizeMap(map, points);
             }
         }
@@ -86,7 +84,7 @@ $mapperObj = new ChecklistMapper($projValue, $clType);
     </script>
   </head>
   <body onload="load()" onunload="GUnload()">
-    <div id="map" style="width: 800px; height: 600px"></div>
+    <div id="map" style="width:800px;height:600px;"></div>
   </body>
 </html>
 
@@ -95,12 +93,10 @@ $mapperObj = new ChecklistMapper($projValue, $clType);
 class ChecklistMapper{
     
     private $projName;
-    private $clType;
     private $pid;
     private $conn; 
 
-    function __construct($projValue,$type) {
-    	$this->clType = $type;
+    function __construct($projValue) {
         $this->conn = MySQLiConnectionFactory::getCon("readonly");
         $sql = "SELECT p.pid, p.projname FROM fmprojects p ";
         if(is_numeric($projValue)){
@@ -128,15 +124,20 @@ class ChecklistMapper{
         return $this->pid;
     }
 
-    public function echoChecklistPoints(){
-        $clList = Array();
-        $sql = "SELECT c.clid, c.Name, c.LongCentroid, c.LatCentroid ".
+    public function echoChecklistPoints($type){
+        if($type == "research"){
+        	$this->echoResearchPoints();
+        }
+        elseif($type == "survey"){
+        	$this->echoSurveyPoints();
+        }
+    }
+
+    private function echoResearchPoints(){
+    	$sql = "SELECT c.clid, c.Name, c.LongCentroid, c.LatCentroid ".
             "FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ". 
             "INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-            "WHERE c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
-        if($this->clType){
-        	$sql .= " AND c.type = '".$this->clType."' ";
-        }
+            "WHERE c.access = 'public' AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $idStr = $row->clid;
@@ -147,6 +148,24 @@ class ChecklistMapper{
             echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'checklist.php?cl=".$idStr."&proj=".$this->getPid()."';});\n";
             echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml(\"<b>".$nameStr."</b><br>Double Click to open checklist.\");});\n";
               echo "map.addOverlay(marker$idStr);\n";
+        }
+        $result->close();
+    }
+
+    private function echoSurveyPoints(){
+        $sql = "SELECT s.surveyid, s.projectname, s.longcentroid, s.latcentroid ".
+            "FROM omsurveys s INNER JOIN omsurveyprojlink spl ON s.surveyid = spl.surveyid ". 
+        	"WHERE s.ispublic = 1 AND s.longcentroid IS NOT NULL AND spl.pid = ".$this->pid;
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            $idStr = $row->surveyid;
+            $nameStr = $row->projectname;
+            echo "var point = new GLatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
+            echo "points.push( point );\n";
+            echo "var marker$idStr = new GMarker(point);\n";
+			echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'survey.php?surveyid=".$idStr."&proj=".$this->pid."';});\n";
+            echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml(\"<b>".$nameStr."</b><br>Double Click to open survey checklist.\");});\n";
+            echo "map.addOverlay(marker$idStr);\n";
         }
         $result->close();
     }

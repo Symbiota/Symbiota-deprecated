@@ -73,7 +73,7 @@ include_once("../util/symbini.php");
 
  <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-	<title><?php echo $defaultTitle; ?> Checklist: <?php echo $clManager->getClName(); ?></title>
+	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
@@ -324,21 +324,17 @@ include_once("../util/symbini.php");
 		<h1>
 		<?php 
 			echo $clManager->getClName()."&nbsp;&nbsp;";
-			if($clManager->getClType() == "static"){
-				if($keyModIsActive){
-					?>
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj;?>&taxon=All+Species">
-						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
-					</a>&nbsp;&nbsp;&nbsp;
-					<?php 
-				}
+			if($keyModIsActive){
 				?>
-				<a href="flashcards.php?clid=<?php echo $clManager->getClid().($taxonFilter?"&taxonfilter=".$taxonFilter:"")."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
-					<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
-				</a>
+				<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj;?>&taxon=All+Species">
+					<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
+				</a>&nbsp;&nbsp;&nbsp;
 				<?php 
 			}
-		?>
+			?>
+			<a href="flashcards.php?clid=<?php echo $clManager->getClid().($taxonFilter?"&taxonfilter=".$taxonFilter:"")."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
+				<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
+			</a>
 		</h1>
 		<div>
 			<span style="font-weight:bold;">
@@ -511,7 +507,6 @@ include_once("../util/symbini.php");
 							    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
 							?>
 						</div>
-						<?php if($clManager->getClType() == "static"){ ?>
 						<div>
 							<!-- Display as Images: 0 = false, 1 = true  --> 
 						    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
@@ -522,7 +517,6 @@ include_once("../util/symbini.php");
 						    <input id='showvouchers' name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
 						    Notes &amp; Vouchers
 						</div>
-						<?php } ?>
 						<div style="float:right;">
 							<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
@@ -682,7 +676,7 @@ include_once("../util/symbini.php");
 									echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
 									$imgSrc = ($imgArr["tnurl"]?$imgArr["tnurl"]:$imgArr["url"]);
 									echo "<div class='tnimg'>";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".($clManager->getClType()=="static"?$clManager->getClid():"");
+									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
 									if($imgSrc){
 										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 										echo "<a href='".$spUrl."'>";
@@ -704,7 +698,6 @@ include_once("../util/symbini.php");
 						}
 					}
 					else{
-						//$showVoucher = ($clManager->getClType() == "static"?true:false);
 						$voucherArr = Array();
 						if($showVouchers) $voucherArr = $clManager->getVoucherArr();
 						foreach($taxaArray as $family => $sppArr){
@@ -716,7 +709,7 @@ include_once("../util/symbini.php");
 								<?php 
 								foreach($sppArr as $tid => $displayName){
 									$voucherLink = "";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".($clManager->getClType()=="static"?$clManager->getClid():"");
+									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
 									echo "<div id='tid-$tid'>";
 									echo "<div>";
 									if(!preg_match('/\ssp\d/',$displayName)) echo "<a href='".$spUrl."' target='_blank'>";
@@ -782,7 +775,6 @@ class ChecklistManager {
 	private $clName;
 	private $clMetaData = Array();
 	private $language = "English";
-	private $clType;
 	private $dynamicSql;
 	private $voucherArr = Array();
 	private $thesFilter = 0;
@@ -885,9 +877,8 @@ class ChecklistManager {
 	
 	private function setClMetaData(){
 		$sql = "SELECT c.CLID, c.Name, c.Locality, c.Publication, ".
-			"c.Abstract, c.Authors, c.Type, c.dynamicsql, c.parentclid, c.Notes, ".
+			"c.Abstract, c.Authors, c.dynamicsql, c.parentclid, c.Notes, ".
 			"c.LatCentroid, c.LongCentroid, c.pointradiusmeters, c.access, ".
-			"c.taxacount, c.familycount, c.genuscount, c.speciescount, ".
 			"c.DateLastModified, c.uid, c.InitialTimeStamp ".
 			"FROM fmchecklists c WHERE c.CLID = ".$this->clid;
  		$result = $this->clCon->query($sql);
@@ -898,22 +889,15 @@ class ChecklistManager {
 			$this->clMetaData["publication"] = $row->Publication;
 			$this->clMetaData["abstract"] = $row->Abstract;
 			$this->clMetaData["authors"] = $row->Authors;
-			$this->clType = $row->Type;
-			$this->clMetaData["type"] = $this->clType;
 			$this->clMetaData["parentclid"] = $row->parentclid;
 			$this->clMetaData["notes"] = $row->Notes;
 			$this->clMetaData["latcentroid"] = $row->LatCentroid;
 			$this->clMetaData["longcentroid"] = $row->LongCentroid;
 			$this->clMetaData["pointradiusmeters"] = $row->pointradiusmeters;
 			$this->clMetaData["access"] = $row->access;
-			$this->clMetaData["taxacount"] = $row->taxacount;
-			$this->clMetaData["familycount"] = $row->familycount;
-			$this->clMetaData["genuscount"] = $row->genuscount;
-			$this->clMetaData["speciescount"] = $row->speciescount;
 			$this->clMetaData["datelastmodified"] = $row->DateLastModified;
 			$this->dynamicSql = $row->dynamicsql;
     	}
-		if($this->clType == "dynamic") $this->thesFilter = 1;
     	$result->close();
 	}
 	
@@ -953,7 +937,7 @@ class ChecklistManager {
 	public function getTaxaList($pageNumber = 0){
 		if($this->showImages) return $this->getTaxaImageList($pageNumber);
 		//Get list that shows which taxa have vouchers
-		if($this->showVouchers && $this->clType != "dynamic"){
+		if($this->showVouchers){
 			$vSql = "SELECT DISTINCT v.tid, v.occid, v.collector, v.notes FROM fmvouchers v WHERE (v.CLID = $this->clid)";
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
@@ -963,28 +947,19 @@ class ChecklistManager {
 		}
 		//Get species list
 		$sql = "";
-		if($this->clType == "dynamic"){
-			if(!$this->dynamicSql) return null;
-			$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, ts.family, t.SciName, t.Author ".
+		if($this->thesFilter){
+			$sql = "SELECT DISTINCT ts.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, 
+				t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.TidAccepted) ".
-				"INNER JOIN omoccurrences o ON ts.TID = o.TidInterpreted ".
-    	  		"WHERE t.RankId > 180 AND ts.taxauthid = ".$this->thesFilter." AND (".$this->dynamicSql.")";
+				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.TID ".
+    	  		"WHERE ctl.CLID = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
 		}
 		else{
-			if($this->thesFilter){
-				$sql = "SELECT DISTINCT ts.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, 
-					t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.TidAccepted) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.TID ".
-	    	  		"WHERE ctl.CLID = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
-			}
-			else{
-				$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, ".
-					"t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.Tid) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.TID ".
-	    	  		"WHERE (ts.taxauthid = 1) AND ctl.CLID = ".$this->clid;
-			}
+			$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, ".
+				"t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
+				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.Tid) ".
+				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.TID ".
+    	  		"WHERE (ts.taxauthid = 1) AND ctl.CLID = ".$this->clid;
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
@@ -992,20 +967,20 @@ class ChecklistManager {
 			}
 			else{
 				if($this->searchSynonyms){
-					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (".($this->clType == "dynamic"?"ts.Family":"IFNULL(ctl.familyoverride,ts.Family)")." = '".$this->taxonFilter."') ".
+					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (IFNULL(ctl.familyoverride,ts.Family) = '".$this->taxonFilter."') ".
 						"OR (t.tid IN(SELECT tsb.tid FROM (taxa ta INNER JOIN taxstatus tsa ON ta.tid = tsa.tid) ".
 						"INNER JOIN taxstatus tsb ON tsa.tidaccepted = tsb.tidaccepted ".
 						"WHERE (tsa.UpperTaxonomy = '".$this->taxonFilter."') OR (ta.SciName Like '".$this->taxonFilter."%')))) ";
 				}
 				else{
 					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (t.SciName Like '".$this->taxonFilter."%') ".
-						"OR (".($this->clType == "dynamic"?"ts.Family":"IFNULL(ctl.familyoverride,ts.Family)")." = '".$this->taxonFilter."')) ";
+						"OR (IFNULL(ctl.familyoverride,ts.Family) = '".$this->taxonFilter."')) ";
 				}
 			}
 		}
 		if($this->showCommon){
-			$sql = "SELECT DISTINCT it.TID, it.uppertaxonomy, it.family, v.VernacularName, it.SciName, it.Author ".
-				($this->clType == "dynamic"?"":", it.habitat, it.abundance, it.notes ").
+			$sql = "SELECT DISTINCT it.TID, it.uppertaxonomy, it.family, v.VernacularName, it.SciName, it.Author, ".
+				"it.habitat, it.abundance, it.notes ".
 				"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid=ts.tid) ".
 				"LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = '".$this->language.
 				"' AND vern.SortSequence = 1) v ON ts.TidAccepted = v.tid WHERE ts.taxauthid = 1";
@@ -1033,7 +1008,7 @@ class ChecklistManager {
 			}
 			if($this->taxaCount >= ($pageNumber*$this->taxaLimit) && $this->taxaCount <= ($pageNumber+1)*$this->taxaLimit){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
-				if($this->showVouchers && $this->clType != "dynamic"){
+				if($this->showVouchers){
 					$clStr = $row->habitat.($row->habitat && $row->abundance?", ":"").$row->abundance;
 					$clStr .= ($clStr && $row->notes?", ":"").$row->notes;
 					if(array_key_exists($tid,$this->voucherArr)){
@@ -1078,36 +1053,25 @@ class ChecklistManager {
 	private function getTaxaImageList($pageNumber){
 		//Get species list
 		$sql = "";
-		if($this->clType == "dynamic" && $this->dynamicSql){
-			$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, ts.family, t.SciName, t.Author, ".
-				"imgs.url, imgs.thumbnailurl ".
+		if($this->thesFilter){
+			$sql = "SELECT DISTINCT ts.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, 
+				t.SciName, t.Author, imgs.url, imgs.thumbnailurl ".
 				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.TidAccepted) ".
-				"INNER JOIN omoccurrences o ON ts.TID = o.TidInterpreted) ".
-				"LEFT JOIN (SELECT DISTINCT ts2.tidaccepted, ti.url, ti.thumbnailurl FROM taxstatus ts2 ".
-				"INNER JOIN images ti ON ts2.tid = ti.tid WHERE ts2.taxauthid = $this->thesFilter AND ti.SortSequence = 1) imgs ON ts.tidaccepted = imgs.tidaccepted ".
-    	  		"WHERE t.RankId > 180 AND ts.taxauthid = ".$this->thesFilter." AND (".$this->dynamicSql.") ";
+				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.TID) ".
+				"LEFT JOIN (SELECT DISTINCT ts2.tidaccepted, ti.url, ti.thumbnailurl ".
+				"FROM taxstatus ts2 INNER JOIN images ti ON ts2.tid = ti.tid ".
+				"WHERE ts2.taxauthid = $this->thesFilter AND ti.SortSequence = 1) imgs ON ts.tidaccepted = imgs.tidaccepted ".
+    	  		"WHERE ctl.CLID = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
 		}
 		else{
-			if($this->thesFilter){
-				$sql = "SELECT DISTINCT ts.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, 
-					t.SciName, t.Author, imgs.url, imgs.thumbnailurl ".
-					"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.TidAccepted) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.TID) ".
-					"LEFT JOIN (SELECT DISTINCT ts2.tidaccepted, ti.url, ti.thumbnailurl ".
-					"FROM taxstatus ts2 INNER JOIN images ti ON ts2.tid = ti.tid ".
-					"WHERE ts2.taxauthid = $this->thesFilter AND ti.SortSequence = 1) imgs ON ts.tidaccepted = imgs.tidaccepted ".
-	    	  		"WHERE ctl.CLID = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
-			}
-			else{
-				$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, ".
-					"t.SciName, t.Author, imgs.url, imgs.thumbnailurl ".
-					"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.Tid) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.TID) ".
-					"LEFT JOIN (SELECT ts2.tidaccepted, ti.url, ti.thumbnailurl ".
-					"FROM taxstatus ts2 INNER JOIN images ti ON ts2.tid = ti.tid ".
-					"WHERE ts2.taxauthid = 1 AND ti.SortSequence = 1) imgs ON ts.tidaccepted = imgs.tidaccepted ".
-					"WHERE (ts.taxauthid = 1) AND ctl.CLID = ".$this->clid;
-			}
+			$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, ".
+				"t.SciName, t.Author, imgs.url, imgs.thumbnailurl ".
+				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.Tid) ".
+				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.TID) ".
+				"LEFT JOIN (SELECT ts2.tidaccepted, ti.url, ti.thumbnailurl ".
+				"FROM taxstatus ts2 INNER JOIN images ti ON ts2.tid = ti.tid ".
+				"WHERE ts2.taxauthid = 1 AND ti.SortSequence = 1) imgs ON ts.tidaccepted = imgs.tidaccepted ".
+				"WHERE (ts.taxauthid = 1) AND ctl.CLID = ".$this->clid;
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
@@ -1115,14 +1079,14 @@ class ChecklistManager {
 			}
 			else{
 				if($this->searchSynonyms){
-					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (".($this->clType == "dynamic"?"ts.Family":"IFNULL(ctl.familyoverride,ts.Family)")." = '".$this->taxonFilter."') ".
+					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (IFNULL(ctl.familyoverride,ts.Family) = '".$this->taxonFilter."') ".
 						"OR (t.tid IN(SELECT tsb.tid FROM (taxa ta INNER JOIN taxstatus tsa ON ta.tid = tsa.tid) ".
 						"INNER JOIN taxstatus tsb ON tsa.tidaccepted = tsb.tidaccepted ".
 						"WHERE (tsa.UpperTaxonomy = '".$this->taxonFilter."') OR (ta.SciName Like '".$this->taxonFilter."%')))) ";
 				}
 				else{
 					$sql .= " AND ((ts.UpperTaxonomy = '".$this->taxonFilter."') OR (t.SciName Like '".$this->taxonFilter."%') ".
-						"OR (".($this->clType == "dynamic"?"ts.Family":"IFNULL(ctl.familyoverride,ts.Family)")." = '".$this->taxonFilter."')) ";
+						"OR (IFNULL(ctl.familyoverride,ts.Family) = '".$this->taxonFilter."')) ";
 				}
 			}
 		}
@@ -1232,10 +1196,6 @@ class ChecklistManager {
 		return $this->clName;
 	}
 	
-	public function getClType(){
-		return $this->clType;
-	}
-
 	public function setLanguage($l){
 		$this->language = $l;
 	}
