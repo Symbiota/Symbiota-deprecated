@@ -1278,11 +1278,11 @@ include($serverRoot."/util/footer.php");
 			$this->setPrimaryImageSort($this->tid);
 			if($addToTid){
 				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes, anatomy, sortsequence) ".
+					"owner, sourceurl, copyright, locality, occid, notes, anatomy) ".
 					"VALUES (".$addToTid.",\"".$url."\",\"".$thumbnailUrl."\",\"".$originalUrl."\",".
 					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
 					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\",\"".
-					$anatomy."\",".$sortSequence.")";
+					$anatomy."\")";
 				//echo $sql;
 				if($this->taxonCon->query($sql)){
 					$this->setPrimaryImageSort($addToTid);
@@ -1452,7 +1452,7 @@ include($serverRoot."/util/footer.php");
 						($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
 						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 						($occId?$occId:"NULL").",\"".$notes."\",\"".
-						$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
+						$anatomy."\",\"".$userName."\")";
 					//echo $sql;
 					if($this->taxonCon->query($sql)){
 						$this->setPrimaryImageSort($addToTid);
