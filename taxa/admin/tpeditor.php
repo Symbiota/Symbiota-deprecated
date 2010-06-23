@@ -434,7 +434,8 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 	}
 	elseif($category == "textdescr"){
 		//Display Description info
-		$descList = $tEditor->getDescriptions();
+		echo "<h1>The description editing functions are under construction Please come back later today. Sorry for any the inconvinence. </h1>";
+/*		$descList = $tEditor->getDescriptions();
 		echo "<div><b>Descriptions</b>&nbsp;&nbsp;&nbsp;<span onclick='javascript:toggle(\"adddescr\");' title='Add a New Description'><img style='border:0px;width:15px;' src='../../images/add.png'/></span></div>\n";
 		//Add new Description section
 		echo "<div id='adddescr' class='adddescr' style='display:none;'>";
@@ -499,7 +500,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 				echo "</fieldset></div>";
 			}
 		}
-	}
+*/	}
 	elseif($category == "imagequicksort"){
 		$images = $tEditor->getImages();
 		echo "<div style='clear:both;'><form action='".$_SERVER["PHP_SELF"]."' method='post' target='_self'>\n";
