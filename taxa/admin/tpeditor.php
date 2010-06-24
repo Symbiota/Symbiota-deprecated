@@ -10,13 +10,13 @@
  set_time_limit(120);
  ini_set("max_input_time",120);
  
- $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
+ $tid = $_REQUEST["tid"];
  $category = array_key_exists("category",$_REQUEST)?$_REQUEST["category"]:""; 
  $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
  $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
  
  $tEditor = new TPEditor();
- $tEditor->setTaxon($taxonValue);
+ $tEditor->setTid($tid);
  $tEditor->setLanguage($lang);
  
  $editable = false;
@@ -61,39 +61,28 @@
 	 	$status = $tEditor->deleteVernacular($delVern);
 	 }
 	 elseif($action == "Edit Description Block"){
+	 	$tEditor->editDescriptionBlock();
 	 }
 	 elseif($action == "Delete Description Block"){
+	 	$tEditor->deleteDescriptionBlock();
 	 }
 	 elseif($action == "Add Description Block"){
+	 	$tEditor->addDescriptionBlock();
 	 }
 	 elseif($action == "Edit Statement"){
+	 	$tEditor->editStatement();
 	 }
 	 elseif($action == "Delete Statement"){
+	 	$tEditor->deleteStatement();
 	 }
 	 elseif($action == "Add Statement"){
-	 }
-	 elseif($action == "Add Description"){
-	 	$addDescrArr = Array();
-	 	$addDescrArr["heading"] = $_REQUEST["heading"];
-	 	$addDescrArr["displayheader"] = (array_key_exists("displayheader",$_REQUEST)?$_REQUEST["displayheader"]:0);
-	 	$addDescrArr["description"] = str_replace("\"","-",$_REQUEST["description"]);
-	 	if($_REQUEST["language"]) $addDescrArr["language"] = $_REQUEST["language"];
-	 	if($_REQUEST["notes"]) $addDescrArr["notes"] = str_replace("\"","-",$_REQUEST["notes"]);
-	 	if($_REQUEST["source"]) $addDescrArr["source"] = $_REQUEST["source"];
-	 	if($_REQUEST["sortsequence"]) $addDescrArr["sortsequence"] = $_REQUEST["sortsequence"];
-	 	if($_REQUEST["displaylevel"]) $addDescrArr["displaylevel"] = $_REQUEST["displaylevel"];
-	 	$addDescrArr["username"] = $paramsArr["un"];
-	 	$status = $tEditor->addDescription($addDescrArr);
-	 }
-	 elseif($action == "Delete Description"){
- 		$delTdid = $_REQUEST["deltdid"];
- 		$status = $tEditor->deleteDescription($delTdid);
+	 	$tEditor->addStatement();
 	 }
 	 elseif($action == "Submit Image Edits"){
 		$status = $tEditor->editImage();
 	 }
 	 elseif($action == "Transfer Image"){
-	 	$tEditor->changeTaxon($_REQUEST["imgid"],$taxonValue,$_REQUEST["sourcetid"]);
+	 	$tEditor->changeTaxon($_REQUEST["imgid"],$tid,$_REQUEST["sourcetid"]);
 	 }
 	 elseif($action == "Submit Image Sort Edits"){
 	 	$imgSortArr = Array();
@@ -158,7 +147,17 @@
 				}
 			}
 		}
-		
+
+		function toggleById(target){
+			var obj = document.getElementById(target);
+			if(obj.style.display=="none"){
+				obj.style.display="block";
+			}
+			else {
+				obj.style.display="none";
+			}
+		}
+
 		function expandImages(){
 			var divCnt = 0;
 			var divObjs = document.getElementsByTagName("div");
@@ -308,13 +307,13 @@ if(isset($taxa_admin_tpeditorCrumbs)){
  		<tr><td>
 			<div style='float:right;'>
 				<ul style="margin-top:15px;width:200px;border:dotted 1px;">
-					<li><a href="tpeditor.php?taxon=<?php echo $tEditor->getTid(); ?>&category=images">Edit Images</a></li>
+					<li><a href="tpeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=images">Edit Images</a></li>
 					<ul>
-						<li><a href="tpeditor.php?taxon=<?php echo $tEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
-						<li><a href="tpeditor.php?taxon=<?php echo $tEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
+						<li><a href="tpeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
+						<li><a href="tpeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
 					</ul>
-					<li><a href="tpeditor.php?taxon=<?php echo $tEditor->getTid(); ?>&category=common">Synonyms / Common Names</a></li>
-					<li><a href="tpeditor.php?taxon=<?php echo $tEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
+					<li><a href="tpeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=common">Synonyms / Common Names</a></li>
+					<li><a href="tpeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
 		<!-- 
 					<li><a href="taxonomydisplay.php?target=<?php echo $tEditor->getFamily(); ?>">View Taxonomic Tree</a></li>
 					<ul>
@@ -333,7 +332,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 	//Display Scientific Name and Family
 	echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;'><a href='../index.php?taxon=".$tEditor->getTid()."' style='color:#990000;text-decoration:none;'><b><i>".$tEditor->getSciName()."</i></b></a> ".$tEditor->getAuthor();
 	//Display Parent link
-	if($tEditor->getRankId() > 140) echo "&nbsp;<a href='tpeditor.php?taxon=".$tEditor->getParentTid()."'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a>";
+	if($tEditor->getRankId() > 140) echo "&nbsp;<a href='tpeditor.php?tid=".$tEditor->getParentTid()."'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a>";
 	echo "</div>\n";
 	//Display Family
 	echo "<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$tEditor->getFamily()."</div>\n";
@@ -343,7 +342,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 	if($childrenArr){
 		echo "<div style='width:300px;margin:5px 0px 5px 25px;font-weight:bold;border:1px dotted olive;padding:3px;'>Children Taxa:\n ";
 		foreach($childrenArr as $tid => $childArr){
-			echo "<div style='margin-left:10px;'><a href='tpeditor.php?taxon=".$tid."'><b><i>".$childArr["sciname"]."</i></b></a> ".$childArr["author"]."</div>\n";
+			echo "<div style='margin-left:10px;'><a href='tpeditor.php?tid=".$tid."'><b><i>".$childArr["sciname"]."</i></b></a> ".$childArr["author"]."</div>\n";
 		}
 		echo "</div>\n";
 	}
@@ -365,7 +364,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 			echo "</div>\n";
 			echo "<div class='synsort' style='display:none;'>";
 			echo "<form action='".$_SERVER["PHP_SELF"]."' method='post'>\n";
-			echo "<input type='hidden' name='taxon' value='".$tEditor->getTid()."' />";
+			echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
 			echo "<fieldset style='margin:5px 0px 5px 5px;margin-left:20px;width:350px;'>";
 	    	echo "<legend>Synonym Sort Order</legend>";
 			foreach($synonymArr as $tidKey => $valueArr){
@@ -390,7 +389,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 		echo "<div style=''>Notes: <input id='notes' name='notes' style='margin-top:5px;border:inset;' type='text' /></div>\n";
 		echo "<div style=''>Source: <input id='source' name='source' style='margin-top:5px;border:inset;' type='text' /></div>\n";
 		echo "<div style=''>Sort Sequence: <input id='sortsequence' name='sortsequence' style='margin-top:5px;border:inset;width:40px;' type='text' /></div>\n";
-		echo "<input type='hidden' name='taxon' value='".$tEditor->getTid()."' />";
+		echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
 		echo "<div><input id='vernsadd' name='action' style='margin-top:5px;' type='submit' value='Add Common Name' /></div>\n";
 		echo "</fieldset>";
 		echo "</form>\n";
@@ -406,7 +405,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><div style='background-color:yellow;'>\n";
 					echo "<form id='delvern' name='delvern' action='".$_SERVER["PHP_SELF"]."' method='post' onsubmit=\"javascript: return window.confirm('Are you sure you want to delete this Common Name?');\">\n";
 					echo "<input type='hidden' name='delvern' value='".$vernArr["vid"]."'>\n";
-					echo "<input type='hidden' name='taxon' value='".$tEditor->getTid()."' />";
+					echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
 					echo "<input id='vernsubmitimg' name='action' type='image' value='Delete Common Name' style='margin:10px 0px 0px 20px;height:12px;' src='../../images/del.gif'/> Delete Common Name ";
 					echo "</form></div></div>\n";
 					echo "<form id='updatevern' name='updatevern' style='margin-left:20px;'>";
@@ -420,7 +419,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					echo "<div style=''>Sort Sequence: ".$vernArr["sortsequence"]."</div>";
 					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='".$vernArr["sortsequence"]."' /></div>\n";
 					echo "<input type='hidden' name='vid' value='".$vernArr["vid"]."'>\n";
-					echo "<input type='hidden' name='taxon' value='".$tEditor->getTid()."' />";
+					echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
 					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='vernssubmit' name='action' style='margin:2px 0px 20px 15px;' type='submit' value='Submit Common Name Edits' /></div>\n";
 					echo "</form>\n";
 					
@@ -435,9 +434,33 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 		?>
 		<div>
 			<b>Descriptions</b>&nbsp;&nbsp;&nbsp;
-			<span onclick="javascript:toggle('adddescr');" title="Add a New Description">
+			<span onclick="javascript:toggleById('adddescrblock');" title="Add a New Description">
 				<img style='border:0px;width:15px;' src='../../images/add.png'/>
 			</span>
+		</div>
+		<div id='adddescrblock' style='display:none;'>
+			<form name='adddescrblockform' action="tpeditor.php" method="get">
+				<fieldset style='width:475px;margin:20px;'>
+	    			<legend><b>New Description Block</b></legend>
+					<div style=''>
+						Language: <input id='language' name='language' style='margin-top:5px;' type='text' />
+					</div>
+					<div style=''>
+						Source: <input id='source' name='source' style='margin:2px;width:300px;' type='text' />
+					</div>
+					<div style=''>
+						Notes: <input id='notes' name='notes' style='margin:2px;width:300px;' type='text' />
+					</div>
+					<div style="float:right;">
+						<input name='action' style='margin-top:5px;' type='submit' value='Add Description Block' />
+						<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
+						<input type='hidden' name='category' value='<?php echo $category; ?>' />
+					</div>
+					<div style=''>
+						Display Level: <input id='displaylevel' name='displaylevel' style='margin:2px;width:40px;' type='text' />
+					</div>
+				</fieldset>
+			</form>
 		</div>
 		<?php 
 		$descList = $tEditor->getDescriptions();
@@ -445,158 +468,132 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 			foreach($descList as $lang => $dlArr){
 		    	foreach($dlArr as $displayLevel => $bArr){
 		    		?>
-    				<div style='width:500px;margin:5px 0px 0px 15px;'>
-    					<fieldset>
-							<legend><?php echo $lang.": Display Level ".$displayLevel; ?></legend>
-							<div style="float:right;" onclick="javascript:toggle('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
-								<img style='border:0px;width:12px;' src='../../images/edit.png'/>
-							</div>
-							<div style="clear:both;">
-								<?php
-								if($bArr["source"]) echo "<b>Source:</b>".$bArr["source"]; 
-								if($bArr["notes"]) echo "<b>Notes:</b>".$bArr["notes"];
-								?>
-							</div> 
-							<div class="dblock-<?php echo echo $tdsid;?>" style="display:none;">
-								<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
-									<form id='updatedescrblock' name='updatedescrblock' action="tpeditor.php">
-										<div>
-											Language: 
-											<input name='language' style='margin-top:5px;border:inset;' type='text' value='<?php echo $lang; ?>' />
-										</div>
-										<div>
-											Display Level: 
-											<input id='displaylevel' name='displaylevel' style='margin-top:5px;border:inset;width:40px;' type='text' value='<?php echo $displayLevel;?>' />
-										</div>
-										<div>
-											Source: 
-											<input id='source' name='source' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["source"];?>' />
-										</div>
-										<div>
-											Notes: 
-											<input name='notes' style='margin-top:5px;border:inset;width:400px;' type='text' value='<?php echo $bArr["notes"];?>' />
-										</div>
-										<div>
-											<input type='hidden' name='deltdbid' value='<?php echo $tdbid;?>' />
-											<input type='hidden' name='tid' value='<?php echo $tid;?>' />
-											<input type='hidden' name='category' value='<?php echo $category;?>'>
-											<input name='action' value='Edit Decription Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
-											Edit Decription Block
-										</div> 
+    				<fieldset style='width:500px;margin:10px 5px 5px 5px;'>
+						<legend><b><?php echo $lang.": Display Level ".$displayLevel; ?></b></legend>
+						<div style="float:right;" onclick="javascript:toggleById('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
+							<img style='border:0px;width:12px;' src='../../images/edit.png'/>
+						</div>
+						<div><b>Source:</b> <?php echo $bArr["source"]; ?></div> 
+						<div><b>Notes:</b> <?php echo $bArr["notes"]; ?></div> 
+						<div id="dblock-<?php echo $bArr["tdbid"];?>" style="display:none;margin-top:10px;">
+							<fieldset>
+								<legend><b>Description Block Edits</b></legend>
+								<form id='updatedescrblock' name='updatedescrblock' action="tpeditor.php" method="post">
+									<div>
+										Language: 
+										<input name='language' style='margin-top:5px;border:inset;' type='text' value='<?php echo $lang; ?>' />
+									</div>
+									<div>
+										Source: 
+										<input id='source' name='source' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["source"];?>' />
+									</div>
+									<div>
+										Notes: 
+										<input name='notes' style='margin-top:5px;border:inset;width:400px;' type='text' value='<?php echo $bArr["notes"];?>' />
+									</div>
+									<div style="float:right;margin:10px;">
+										<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
+										<input type='hidden' name='tid' value='<?php echo $tid;?>' />
+										<input type='hidden' name='category' value='<?php echo $category;?>'>
+										<input type='submit' name='action' value='Edit Description Block' /> 
+									</div> 
+									<div>
+										Display Level: 
+										<input id='displaylevel' name='displaylevel' style='margin-top:5px;border:inset;width:40px;' type='text' value='<?php echo $displayLevel;?>' />
+									</div>
+								</form>
+								<div style='margin:5px 0px 5px 20px;border:2px solid red;padding:2px;'>
+									<form name='delstmt' action='tpeditor.php' method='post' onsubmit="javascript: return window.confirm('Are you sure you want to delete this Description?');">
+										<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
+										<input type='hidden' name='tid' value='<?php echo $tid;?>' />
+										<input type='hidden' name='category' value='<?php echo $category;?>'>
+										<input name='action' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+										Delete Description Block (Including all statements below) 
 									</form>
-									<div style='margin:5px 0px 5px 20px;border:2px solid red;padding:2px;'>
-										<form name='delstmt' action='tpeditor.php' method='post' onsubmit="javascript: return window.confirm('Are you sure you want to delete this Description?');">
-											<input type='hidden' name='deltdbid' value='<?php echo $tdbid;?>' />
-											<input type='hidden' name='tid' value='<?php echo $tid;?>' />
-											<input type='hidden' name='category' value='<?php echo $category;?>'>
-											<input name='action' value='Delete Decription Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
-											Delete Decription Block 
-										</form>
-									</div>
 								</div>
-							</div>
-	    					<fieldset>
-								<legend>Statements</legend>
-								<?php
-								$sArr = $bArr["stmts"];
-								foreach($sArr as $tdsid => $stmtArr){
-									?>
-									<div style="float:right;" onclick="javascript:toggle('dstmt-<?php echo $tdsid;?>');" title="Edit Statement">
-										<img style='border:0px;width:12px;' src='../../images/edit.png'/>
-									</div>
-									<div style='clear:both;'>
-										<b><?php echo $stmtArr["heading"];?></b>&nbsp;&nbsp;&nbsp;
-										<?php echo ($stmtArr["displayheader"]?"(header displayed)":"(heading hidden)");?>
-									</div>
-									<div><?php echo $stmtArr["statement"];?></div>
-									<div class="dstmt-<?php echo echo $tdsid;?>" style="display:none;">
-										<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
-											<form id='updatedescr' name='updatedescr' action='".$_SERVER["PHP_SELF"]."'>
-												<div>
-													Heading: <input name='heading' style='margin-top:5px;border:inset;' type='text' value='".$heading."' />&nbsp;&nbsp;&nbsp;
-													<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> Display Header
-												</div>
-												<div>
-													<textarea name='description' cols='50' rows='3' style='border:inset;'>
-														<?php echo $stmtArr["description"];?>
-													</textarea>
-												</div>
-												<div>
-													Notes: 
-													<input name='notes' style='margin-top:5px;border:inset;width:400px;' type='text' value='<?php echo $stmtArr["notes"];?>' />
-												</div>
-												<div>
-													Sort Sequence: 
-													<input id='sortsequence' name='sortsequence' style='margin-top:5px;border:inset;width:40px;' type='text' value='<?php echo $stmtArr["sortsequence"];?>' />&nbsp;&nbsp;
-												</div>
-												<div>
-													<input type='hidden' name='tdsid' value='<?php echo $tdsid;?>'>
-													<input type='hidden' name='tid' value='<?php echo $tid;?>' />
-													<input type='hidden' name='category' value='<?php echo $category;?>'>
-													<input name='action' type='submit' value='Edit Statement Edit' />
-												</div>
-											</form>
-										</div>
-										<div style='margin:5px 0px 5px 20px;border:2px solid red;padding:2px;'>
-											<form name='delstmt' action='tpeditor.php' method='post' onsubmit="javascript: return window.confirm('Are you sure you want to delete this Description?');">
-												<input type='hidden' name='deltdsid' value='<?php echo $tdsid;?>' />
-												<input type='hidden' name='tid' value='<?php echo $tid;?>' />
-												<input type='hidden' name='category' value='<?php echo $category;?>'>
-												<input name='action' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
-												Delete Statement 
-											</form>
-										</div>
-									</div>
-								<?php } ?>
-								<div id='adddescrstmt' class='adddescrstmt' style='display:none;'>
-									<form name='adddescrstmtform'>
-										<fieldset style='width:535px;margin:5px 0px 0px 15px;'>
-							    			<legend>New Description Statement</legend>
-											<div style=''>
-												Heading: <input name='heading' style='margin-top:5px;border:inset;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
-												<input name='displayheader' type='checkbox' value='1' CHECKED />	Display Header
+							</fieldset>
+						</div>
+    					<div style="margin-top:10px;">
+							<fieldset>
+								<legend><b>Statements</b></legend>
+								<div onclick="javascript:toggleById('addstmt-<?php echo $bArr["tdbid"];?>');" style="float:right;" title="Add a New Statement">
+									<img style='border:0px;width:15px;' src='../../images/add.png'/>
+								</div>
+								<div id='addstmt-<?php echo $bArr["tdbid"];?>' style='display:none;'>
+									<form name='adddescrstmtform' action="tpeditor.php" method="post">
+										<fieldset style='margin:5px 0px 0px 15px;'>
+							    			<legend><b>New Description Statement</b></legend>
+											<div style='margin:3px;'>
+												Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
+												<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Header
 											</div>
-											<div style=''>
-												<textarea name='statement' cols='63' rows='3' style='border:inset;'></textarea>
+											<div style='margin:3px;'>
+												<textarea name='statement' cols='50' rows='3'></textarea>
 											</div>
-											<div style=''>
-												Sort Sequence: <input name='sortsequence' style='margin-top:5px;border:inset;width:40px;' type='text' />
+											<div style="float:right;">
+												<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
+												<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
+												<input type='hidden' name='category' value='<?php echo $category; ?>' />
+												<input name='action' style='margin:3px;' type='submit' value='Add Statement' />
 											</div>
-											<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
-											<input type='hidden' name='category' value='<?php echo $category; ?>' />
-											<div>
-												<input name='action' style='margin-top:5px;' type='submit' value='Add Statement' />
+											<div style='margin:3px;'>
+												Sort Sequence: <input name='sortsequence' style='margin-top:5px;width:40px;' type='text' />
 											</div>
 										</fieldset>
 									</form>
 								</div>
+								<?php
+								if(array_key_exists("stmts",$bArr)){
+									$sArr = $bArr["stmts"];
+									foreach($sArr as $tdsid => $stmtArr){
+										?>
+										<div style="margin-top:3px;">
+											<b><?php echo $stmtArr["heading"];?></b>&nbsp;&nbsp;&nbsp;
+											<?php echo ($stmtArr["displayheader"]?"(header displayed)":"(heading hidden)");?>&nbsp;&nbsp;&nbsp;
+											<span onclick="javascript:toggleById('dstmt-<?php echo $tdsid;?>');" title="Edit Statement">
+												<img style='border:0px;width:12px;' src='../../images/edit.png'/>
+											</span>
+										</div>
+										<div style='clear:both;'><?php echo $stmtArr["statement"];?></div>
+										<div id="dstmt-<?php echo $tdsid;?>" style="display:none;">
+											<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
+												<form id='updatedescr' name='updatedescr' action="tpeditor.php" method="post">
+													<div>
+														<b>Heading:</b> <input name='heading' style='margin:3px;' type='text' value='<?php echo $stmtArr["heading"];?>' />&nbsp;&nbsp;&nbsp;
+														<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> Display Header
+													</div>
+													<div>
+														<textarea name='statement' cols='50' rows='3' style='margin:3px;'><?php echo $stmtArr["statement"];?></textarea>
+													</div>
+													<div style="float:right;margin:10px;">
+														<input name='action' type='submit' value='Edit Statement' />
+													</div>
+													<div>
+														<b>Sort Sequence:</b> 
+														<input id='sortsequence' name='sortsequence' style='margin:3px;width:40px;' type='text' value='<?php echo $stmtArr["sortsequence"];?>' />&nbsp;&nbsp;
+														<input type='hidden' name='tdsid' value='<?php echo $tdsid;?>'>
+														<input type='hidden' name='tid' value='<?php echo $tid;?>' />
+														<input type='hidden' name='category' value='<?php echo $category;?>'>
+													</div>
+												</form>
+											</div>
+											<div style='margin:5px 0px 5px 20px;border:2px solid red;padding:2px;'>
+												<form name='delstmt' action='tpeditor.php' method='post' onsubmit="javascript: return window.confirm('Are you sure you want to delete this Description?');">
+													<input type='hidden' name='tdsid' value='<?php echo $tdsid;?>' />
+													<input type='hidden' name='tid' value='<?php echo $tid;?>' />
+													<input type='hidden' name='category' value='<?php echo $category;?>'>
+													<input name='action' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+													Delete Statement 
+												</form>
+											</div>
+										</div>
+									<?php 
+									}
+								}
+							?>
 							</fieldset>
-							<div id='adddescrblock' class='adddescrblock' style='display:none;'>
-								<form name='adddescrblockform'>
-									<fieldset style='width:535px;margin:5px 0px 0px 15px;'>
-						    			<legend>New Description Block</legend>
-										<div style=''>
-											Language: <input id='language' name='language' style='margin-top:5px;border:inset;' type='text' />
-										</div>
-										<div style=''>
-											Display Level: <input id='displaylevel' name='displaylevel' style='margin-top:5px;border:inset;width:40px;' type='text' />
-										</div>
-										<div style=''>
-											Source: <input id='source' name='source' style='margin-top:5px;border:inset;' type='text' />
-										</div>
-										<div style=''>
-											Notes: <input id='notes' name='notes' style='margin-top:5px;border:inset;' type='text' />
-										</div>
-										<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
-										<input type='hidden' name='category' value='<?php echo $category; ?>' />
-										<div>
-											<input name='action' style='margin-top:5px;' type='submit' value='Add Description Block' />
-										</div>
-									</fieldset>
-								</form>
-							</div>
-						</fieldset>
-					</div>
+						</div>
+					</fieldset>
 					<?php 
 				}
 			}
@@ -626,7 +623,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 		}
 		echo "</tr>\n";
 		echo "</table>\n";
-		echo "<input name='taxon' type='hidden' value='".$tEditor->getTid()."'>\n";
+		echo "<input name='tid' type='hidden' value='".$tEditor->getTid()."'>\n";
 		echo "<input name='category' type='hidden' value='".$category."'>\n";
 		if($imgCnt%5 != 0) echo "<div style='margin-top:2px;'><input type='submit' name='action' id='imgsortsubmit' value='Submit Image Sort Edits'/></div>\n";
 		echo "</form></div>\n";
@@ -736,7 +733,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 					</select> 
 				</div>
 				<?php } ?>
-				<input name="taxon" type="hidden" value="<?php echo $tEditor->getTid();?>">
+				<input name="tid" type="hidden" value="<?php echo $tEditor->getTid();?>">
 				<input name='category' type='hidden' value='images'>
 				<div style='margin-top:2px;'>
 					<input type='submit' name='action' id='imgaddsubmit' value='Upload Image'/>
@@ -957,7 +954,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<?php } ?>
 				
-								<input name="taxon" type="hidden" value="<?php echo $tEditor->getTid();?>" />
+								<input name="tid" type="hidden" value="<?php echo $tEditor->getTid();?>" />
 								<input name="category" type="hidden" value="<?php echo $category; ?>" />
 								<input name="imgid" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
 								<div style='margin-top:2px;'>
@@ -971,7 +968,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								<div style="font-weight:bold;">
 									Transfer to Taxon: 
 									<input type="text" id="targettaxon" name="targettaxon" size="40" onfocus="initChangeTaxonList(this,<?php echo $imgArr["imgid"]; ?>)" autocomplete="off" />
-									<input type="hidden" id="targettid-<?php echo $imgArr["imgid"]; ?>" name="taxon" value="" />
+									<input type="hidden" id="targettid-<?php echo $imgArr["imgid"]; ?>" name="tid" value="" />
 	
 									<input name="sourcetid" type="hidden" value="<?php echo $tEditor->getTid();?>" />
 									<input name="imgid" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
@@ -989,7 +986,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								<fieldset style="margin:5px 0px 5px 5px;">
 							    	<legend>Authorized to Remove this Image</legend>
 									<input name="imgdel" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
-									<input name="taxon" type="hidden" value="<?php echo $tEditor->getTid(); ?>" />
+									<input name="tid" type="hidden" value="<?php echo $tEditor->getTid(); ?>" />
 									<input name="category" type="hidden" value="<?php echo $category; ?>" />
 									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server (as well as database)
 									<div style='margin-top:2px;'>
@@ -1059,26 +1056,14 @@ include($serverRoot."/util/footer.php");
 		if(!($this->taxonCon === null)) $this->taxonCon->close();
 	}
  	
- 	public function setTaxon($t){
-		if(intval($t)){
-			$this->tid = $t;
-		}
-		else{
-			$this->sciName = $t;
-		}
+ 	public function setTid($t){
+		$this->tid = $t;
 		$sql = "SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
 			"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-			"WHERE (ts.taxauthid = 1) ";
-		if($this->tid){
-			$sql .= "AND t.TID = ".$this->tid;
-		}
-		else{
-			$sql .= "AND t.SciName = '".$this->sciName."'";
-		}
+			"WHERE (ts.taxauthid = 1) AND t.TID = ".$this->tid;
 		$result = $this->taxonCon->query($sql);
 		if($row = $result->fetch_object()){
 			if($row->TID == $row->TidAccepted){
-				$this->tid = $row->TID;
 				if(!$this->sciName) $this->sciName = $row->SciName;
 				$this->family = $row->family;
 				$this->author = $row->Author;
@@ -1100,7 +1085,7 @@ include($serverRoot."/util/footer.php");
 					$this->rankId = $row->RankId;
 					$this->parentTid = $row->ParentTID;
 				}
-				$resultNew->free();
+				$resultNew->close();
 			}
 		}
 	    else{
@@ -1235,15 +1220,14 @@ include($serverRoot."/util/footer.php");
 	}
 
 	public function getDescriptions(){
-		$descriptionsArr = Array();
+		$descrArr = Array();
 		$sql = "SELECT tdb.tdbid, tdb.displaylevel, tdb.language, tdb.notes, tdb.source, ".
-			"tds.tdsid, tds.heading, tds.statement, tdd.notes, tds.displayheader, tds.sortsequence ".
+			"tds.tdsid, tds.heading, tds.statement, tds.notes as stmtnotes, tds.displayheader, tds.sortsequence ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
-			"INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) ".
-			"ORDER BY tds.sortsequence";
-		if($this->language) $sql .=	"AND (td.Language = '".$this->language."') ";
-		$sql .=	"ORDER BY td.Language, td.DisplayLevel, td.SortSequence";
+			"LEFT JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
+			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) ";
+		if($this->language) $sql .=	"AND (tdb.Language = '".$this->language."') ";
+		$sql .=	"ORDER BY tdb.Language, tdb.DisplayLevel, tds.SortSequence";
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
 		$prevTdbid = 0;
@@ -1254,18 +1238,20 @@ include($serverRoot."/util/footer.php");
 				$descrArr[$row->language][$row->displaylevel]["notes"] = $row->notes;
 				$descrArr[$row->language][$row->displaylevel]["source"] = $row->source;
 			}
-			$descrArr[$row->language][$row->displaylevel]["stmts"][$row->tdsid]["heading"] = $row->heading;
-			$descrArr[$row->language][$row->displaylevel]["stmts"][$row->tdsid]["statement"] = $row->statement;
-			$descrArr[$row->language][$row->displaylevel]["stmts"][$row->tdsid]["notes"] = $row->notes;
-			$descrArr[$row->language][$row->displaylevel]["stmts"][$row->tdsid]["displayheader"] = $row->displayheader;
-			$descrArr[$row->language][$row->displaylevel]["stmts"][$row->tdsid]["sortsequence"] = $row->sortsequence;
+			if($tdsid = $row->tdsid){
+				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["heading"] = $row->heading;
+				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["statement"] = $row->statement;
+				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["notes"] = $row->stmtnotes;
+				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["displayheader"] = $row->displayheader;
+				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["sortsequence"] = $row->sortsequence;
+			}
 			$prevTdbid = $tdbid;
 		}
 		$result->close();
 		return $descrArr;
 	}
 	
-	public function editDecriptionBlock(){
+	public function editDescriptionBlock(){
 		$sql = "UPDATE taxadescrblock ".
 			"SET language = ".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\"":"NULL").
 			",displaylevel = ".$_REQUEST["displaylevel"].
@@ -1281,7 +1267,7 @@ include($serverRoot."/util/footer.php");
 		return $status;
 	}
 
-	public function deleteDecriptionBlock(){
+	public function deleteDescriptionBlock(){
 		$sql = "DELETE FROM taxadescrblock WHERE tdbid = ".$_REQUEST["tdbid"];
 		//echo $sql;
 		$status = "";
@@ -1292,14 +1278,14 @@ include($serverRoot."/util/footer.php");
 		return $status;
 	}
 
-	public function addDecriptionBlock(){
-		$sql = "INSERT INTO taxadescrblock(tid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"")."notes,source) ".
-			"VALUES(".$_REQUEST["tid"].",".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\",":"").
-			($_REQUEST["displaylevel"]?"\"".$_REQUEST["displaylevel"]."\",":"").
+	public function addDescriptionBlock(){
+		global $symbUid;
+		$sql = "INSERT INTO taxadescrblock(tid,uid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"")."notes,source) ".
+			"VALUES(".$_REQUEST["tid"].",".$symbUid.",".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\",":"").
+			($_REQUEST["displaylevel"]?$_REQUEST["displaylevel"].",":"").
 			($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\",":"NULL,").
-			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").
-			") WHERE tdbid = ".$_REQUEST["tdbid"];
-		//echo $sql;
+			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").")";
+		echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
 			$status = "ERROR adding description block: ".$this->taxonCon->error;
@@ -1311,9 +1297,8 @@ include($serverRoot."/util/footer.php");
 	public function editStatement(){
 		$sql = "UPDATE taxadescrstmts ".
 			"SET heading = \"".$_REQUEST["heading"]."\",".
-			"statement = \"".$_REQUEST["statement"]."\",".
-			($_REQUEST["displaylevel"]?"displayheader = \"".$_REQUEST["displaylevel"]."\",":"").
-			"notes = ".($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\"":"NULL").
+			"statement = \"".$_REQUEST["statement"]."\"".
+			(array_key_exists("displayheader",$_REQUEST)?",displayheader = 1":",displayheader = 0").
 			($_REQUEST["sortsequence"]?",sortsequence = ".$_REQUEST["sortsequence"]:"").
 			" WHERE tdsid = ".$_REQUEST["tdsid"];
 		//echo $sql;
@@ -1337,12 +1322,10 @@ include($serverRoot."/util/footer.php");
 	}
 
 	public function addStatement(){
-		$sql = "INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader,notes".($_REQUEST["sortsequence"]?",".$_REQUEST["sortsequence"]:"").") ".
-			"VALUES(".$_REQUEST["tdbid"].",\"".$_REQUEST["heading"]."\",\"".$_REQUEST["statement"]."\","
-			($_REQUEST["displayheader"]?$_REQUEST["displayheader"]:"1").","
-			($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\",":"NULL,").
-			($_REQUEST["sortsequence"]?$_REQUEST["sortsequence"]:"").
-			") WHERE tdbid = ".$_REQUEST["tdbid"];
+		$sql = "INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader".($_REQUEST["sortsequence"]?",sortsequence":"").") ".
+			"VALUES(".$_REQUEST["tdbid"].",\"".$_REQUEST["heading"]."\",\"".$_REQUEST["statement"]."\",".
+			(array_key_exists("displayheader",$_REQUEST)?"1":"0").
+			($_REQUEST["sortsequence"]?",".$_REQUEST["sortsequence"]:"").")";
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
