@@ -233,7 +233,7 @@ if($taxonManager->getSciName() != "unknown"){
 	 	}
 		echo "</div>";
 		if($editable){
-			echo "<div style='float:right;'><a href='admin/tpeditor.php?taxon=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+			echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
 		}
 		echo "</td></tr>\n";
 
@@ -258,7 +258,7 @@ if($taxonManager->getSciName() != "unknown"){
 		if(!$taxonManager->echoImages(0,1,0)){
 			echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
 			if($editable){
-				echo "<a href='admin/tpeditor.php?category=imageadd&taxon=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
+				echo "<a href='admin/tpeditor.php?category=imageadd&tid=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
 			}
 			else{
 				echo "<br/><br/><br/><br/><br/><br/>Images<br/>not yet<br/>available";
@@ -408,7 +408,7 @@ if($taxonManager->getSciName() != "unknown"){
 			echo "</div>";
 		}
 		if($editable){
-			echo "<div style='float:right;'><a href='admin/tpeditor.php?taxon=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+			echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
 		}
 		
 		echo "</td></tr>";
@@ -456,7 +456,7 @@ if($taxonManager->getSciName() != "unknown"){
 						echo "</a>\n";
 					}
 					elseif($editable){
-						echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&taxon=".$subArr["tid"]."'>Add an Image!</a></div>";
+						echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&tid=".$subArr["tid"]."'>Add an Image!</a></div>";
 					}
 					else{
 						echo "<div class='spptext'>Image<br/>Not Available</div>";
