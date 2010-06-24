@@ -1285,7 +1285,7 @@ include($serverRoot."/util/footer.php");
 			($_REQUEST["displaylevel"]?$_REQUEST["displaylevel"].",":"").
 			($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\",":"NULL,").
 			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").")";
-		echo $sql;
+		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
 			$status = "ERROR adding description block: ".$this->taxonCon->error;
