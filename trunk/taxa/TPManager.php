@@ -599,7 +599,7 @@
 	public function getDescriptions(){
 		$descriptionsStr = "There is no description set for this taxon.";
 		$descriptions = Array();
-		$sql = "SELECT DISTINCT tdb.tdbid, tds.heading, tds.statement, tdb.displaylevel, tds.displayheader ".
+		$sql = "SELECT DISTINCT tdb.tdbid, tds.heading, tds.tdsid, tds.statement, tdb.displaylevel, tds.displayheader ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
 			"INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
 			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->language."') ".
@@ -607,7 +607,7 @@
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
-			$descriptions[$row->displaylevel][($row->displayheader?$row->heading:$row->tdid)] = $row->statement;
+			$descriptions[$row->displaylevel][($row->displayheader?$row->heading:$row->tdsid)] = $row->statement;
 		}
 		$result->close();
 		return $descriptions;
