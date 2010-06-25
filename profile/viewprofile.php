@@ -14,11 +14,11 @@ $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
 $isSelf = 0;
 $isEditable = 0;
 if(isset($symbUid) && $symbUid){
-	if($userId == $symbUid){
-		$isSelf = 1;
-	}
 	if(!$userId){
 		$userId = $symbUid;
+	}
+	if($userId == $symbUid){
+		$isSelf = 1;
 	}
 	if($isSelf || $isAdmin){
 		$isEditable = 1;

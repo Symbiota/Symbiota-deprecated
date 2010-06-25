@@ -1517,7 +1517,7 @@ include($serverRoot."/util/footer.php");
 	
 	public function loadImageData(){
 		global $paramsArr;
-		$imgUrl = $_REQUEST["filepath"];
+		$imgUrl = (array_key_exists("filepath",$_REQUEST)?$_REQUEST["filepath"]:"");
 		$imgPath = "";
 		if(!$imgUrl){
 			$imgPath = $this->loadImage();
@@ -1525,15 +1525,15 @@ include($serverRoot."/util/footer.php");
 		}
 		if(!$imgUrl) return;
 		$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographer = $this->cleanStr($_REQUEST["photographer"]);
+		$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanStr($_REQUEST["photographer"]):"");
 		$photographerUid = $_REQUEST["photographeruid"];
-		$sourceUrl = trim($_REQUEST["sourceurl"]);
+		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 		$owner = $this->cleanStr($_REQUEST["owner"]);
-		$locality = $this->cleanStr($_REQUEST["locality"]);
+		$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanStr($_REQUEST["locality"]):"");
 		$occId = $_REQUEST["occid"];
-		$notes = $this->cleanStr($_REQUEST["notes"]);
-		$anatomy = $this->cleanStr($_REQUEST["anatomy"]);
+		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
+		$anatomy = (array_key_exists("anatomy",$_REQUEST)?$this->cleanStr($_REQUEST["anatomy"]):"");
 		$imageType = $_REQUEST["imagetype"];
 		$sortSequence = $_REQUEST["sortsequence"];
 		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);

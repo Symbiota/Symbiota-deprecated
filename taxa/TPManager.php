@@ -376,7 +376,7 @@
 			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.notes, ti.occid ".
 			"FROM ((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) ".
+			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) AND ti.SortSequence < 500 ".
 			"ORDER BY ti.sortsequence";
 		//echo "<div>".$sql."</div>";
 		$result = $this->con->query($sql);
