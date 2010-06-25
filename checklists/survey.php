@@ -381,7 +381,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 							<div>
 								<input type='submit' name='editsubmit' id='editsubmit' value='Submit Changes' />
 							</div>
-							<input type='hidden' name='survey' value='<?php echo $surveyId(); ?>' />
+							<input type='hidden' name='survey' value='<?php echo $surveyId; ?>' />
 							<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
 							<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 							<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
