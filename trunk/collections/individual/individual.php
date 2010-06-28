@@ -415,21 +415,24 @@
         
     private function addImages(){
     	if($this->occId){
-	        $imgSql = "SELECT ti.url, ti.notes FROM images ti ".
+	        $imgSql = "SELECT ti.url, ti.originalurl, ti.notes FROM images ti ".
 				"WHERE (ti.occid = ".$this->occId.") ORDER BY ti.sortsequence";
 	        $cnt = 0;
 	        $result = $this->con->query($imgSql);
 			$imgArr = Array();
 			while($row = $result->fetch_object()){
 				$imgUrl = $row->url;
+				$imgLarge = $row->originalurl;
 				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+					if($imgLarge) $imgLarge = $GLOBALS["imageDomain"].$imgLarge;
 				}
 	            if($imgUrl){
 	            	$cnt++;
-	              	$imgArr[] = "<div style='float:left;'>";
+	              	$imgArr[] = "<div style='float:left;text-align:center;'>";
 	            	$imgArr[] = "<a href='".$imgUrl."'><img border=1 width='150' src='".$imgUrl."'></a>&nbsp;";
-	              	$imgArr[] = "</div>";
+	            	if($imgLarge) $imgArr[] = "<br /><a href='".$imgLarge."'>Large Version</a>";
+	            	$imgArr[] = "</div>";
 	            }
 	        }
 			$result->free();
