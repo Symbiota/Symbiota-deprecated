@@ -136,29 +136,29 @@ class DataLoader{
 	
 	//SourceField => ObservationField
 	private $fieldMapArr = Array(
-		"occurrenceID" => "gui",
+		"occurrenceid" => "gui",
 		"dbpk" => "gui",
-		"stateProvince" => "State",
-		"county" => "MunicipioCounty",
-		"decimalLatitude" => "declat",
-		"decimalLongitude" => "declon",
-		"minimumElevationInMeters" => "elevation_meters",
-		"recordedBy" => "Observer",
-		"recordNumber" => "CollNumber",
-		"associatedCollectors" => "Associates",
-		"eventDate" => "DateObserved",
-		"fieldNotes" => "Vegetation",
-		"occurrenceRemarks" => "Notes",
-		"attributes" => "Description",
-		"disposition" => "Vouchers"
+		"stateprovince" => "state",
+		"county" => "municipiocounty",
+		"decimallatitude" => "declat",
+		"decimallongitude" => "declon",
+		"minimumelevationinmeters" => "elevation_meters",
+		"recordedby" => "observer",
+		"recordnumber" => "collnumber",
+		"associatedCollectors" => "associates",
+		"eventdate" => "dateobserved",
+		"fieldnotes" => "vegetation",
+		"occurrenceremarks" => "notes",
+		"attributes" => "description",
+		"disposition" => "vouchers"
 	);
 	private $requiredArr = Array(		//Enter target values 
 		"sciname",
 		"locality",
-		"recordedBy",
-		"eventDate",
-		"decimalLatitude",
-		"decimalLongitude"
+		"recordedby",
+		"eventdate",
+		"decimallatitude",
+		"decimallongitude"
 	);
 
 	private function setConnection() {
@@ -329,7 +329,7 @@ class DataLoader{
 				}
 				if(!$reqValue){
 					//A required field has a null value
-					echo "<div>Adding observation #".$recordCnt.": FAILED - Required field '".$soField."' has a null value</div>";
+					echo "<div>Adding observation #".$recordCnt.": FAILED - Required field '".$reqKey."' has a null value</div>";
 					$loadRecord = false;
 					$reqFieldsNullCnt++;
 					if($reqFieldsNullCnt > 4){
