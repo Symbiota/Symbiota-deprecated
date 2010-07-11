@@ -117,7 +117,7 @@ class PhotographerManager{
     	$result->close();
 	}
 	
-	public function echoPhotographerimages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
+	public function echoPhotographerImages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
 		$sql = "SELECT i.thumbnailurl, i.url, ts.family, t.sciname ".
 			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
 			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".

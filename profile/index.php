@@ -14,11 +14,25 @@ $login = array_key_exists("login",$_REQUEST)?$_REQUEST["login"]:"";
 $remMe = array_key_exists("remember",$_REQUEST)?$_REQUEST["remember"]:"";
 $refUrl = "";
 if(array_key_exists("refurl",$_REQUEST)){
-	$refUrl = $_REQUEST["refurl"];
+	$refGetStr = "";
 	foreach($_GET as $k => $v){
 		if($k != "refurl"){
-			$refUrl .= "&".$k."=".$v;
+			if($k == "attr" && is_array($v)){
+				foreach($v as $v2){
+					$refGetStr .= "&attr[]=".$v2;
+				}
+			}
+			else{
+				$refGetStr .= "&".$k."=".$v;
+			}
 		}
+	}
+	$refUrl = $_REQUEST["refurl"];
+	if(substr($refUrl,-4) == ".php"){
+		$refUrl .= "?".substr($refGetStr,1);
+	}
+	else{
+		$refUrl .= $refGetStr;
 	}
 }
 

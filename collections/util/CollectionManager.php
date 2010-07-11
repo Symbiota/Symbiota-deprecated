@@ -354,7 +354,7 @@ class CollectionManager{
 			"FROM (fmprojects p INNER JOIN omsurveyprojlink spl ON p.pid = spl.pid) ".
 			"INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
 			"WHERE p.occurrencesearch = 1 ".
-			"ORDER BY p.projname, s.projectname"; 
+			"ORDER BY p.sortsequence, p.projname, s.projectname"; 
 		//echo "<div>$sql</div>";
 		$conn = $this->getConnection();
 		$rs = $conn->query($sql);

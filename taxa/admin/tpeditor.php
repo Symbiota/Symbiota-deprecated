@@ -1679,7 +1679,7 @@ include($serverRoot."/util/footer.php");
 		return $newThumbnailUrl;
 	}
 	
-	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 75){
+	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 60){
         $successStatus = false;
 		list($sourceWidth, $sourceHeight, $imageType) = getimagesize($sourceImg);
         $newWidth = $targetWidth;
