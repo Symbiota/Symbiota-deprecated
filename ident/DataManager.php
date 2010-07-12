@@ -236,13 +236,16 @@
 		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than 
 		$charList = Array();
 		$countMin = $this->taxaCount * $this->relevanceValue;
-		$sqlRev = "SELECT tc.CID, Count(tc.TID) AS c FROM ".
-			"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
-			"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
-		$rs = $this->keyCon->query($sqlRev);
-		//echo $sqlRev;
-		while($row = $rs->fetch_object()){
-			$charList[] = $row->CID;
+		while(!$charList){
+			$sqlRev = "SELECT tc.CID, Count(tc.TID) AS c FROM ".
+				"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
+				"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
+			$rs = $this->keyCon->query($sqlRev);
+			//echo $sqlRev;
+			while($row = $rs->fetch_object()){
+				$charList[] = $row->CID;
+			}
+			$countMin = $countMin*0.9;
 		}
 		$charList = array_merge($charList,array_keys($this->charArr));
 

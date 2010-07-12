@@ -107,9 +107,11 @@
 	        ?>
 			<tr>
 				<td colspan='4'>
-					<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
-						<h2><?php echo $dispName;?></h2>
-		        	</a>
+					<h2>
+						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
+							<?php echo $dispName;?>
+			        	</a>
+		        	</h2>
 					<hr />
 				</td>
 			</tr>
@@ -135,8 +137,8 @@
 	            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
 	            echo "<td colspan='3'>".$localStr."</td>";
 	            echo "</tr><tr><td colspan='3'>";
-	            echo "<a href=\"javascript:var popupReference=window.open('individual/individual.php?pk=".
-	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec-".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\"> More Information </a>\n";
+	            echo "<a href=\"javascript:var puRef=window.open('individual/individual.php?pk=".
+	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\"> More Information </a>\n";
 	            echo "</td></tr><tr><td colspan='4'><hr/></td></tr>";
 	        }
 	    }
