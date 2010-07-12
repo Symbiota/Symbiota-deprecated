@@ -60,7 +60,7 @@
 				var dbElements = document.getElementsByName("db[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];
-					if(dbElement.className == cName){
+					if(dbElement.className = cName){
 						dbElement.checked = boxesChecked;
 					}
 					else{
@@ -133,7 +133,7 @@
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
-						         		<input id="dballcb" name='db[]' class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
+						         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
 						         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						        	</div>
 								</td>
@@ -177,7 +177,7 @@
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
-						         		<input name="" class="spec" value='all' type="checkbox" onclick="javascript:selectAll(this);" />
+						         		<input name="db[]" class="spec" value='all' type="checkbox" onclick="javascript:selectAll(this);" />
 						         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						        	</div>
 								</td>
@@ -221,7 +221,7 @@
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
-						         		<input name="" class="obs" value='all' type="checkbox" onclick="javascript:selectAll(this,'obstable');" />
+						         		<input name="db[]" class="obs" value='all' type="checkbox" onclick="javascript:selectAll(this,'obstable');" />
 						         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						        	</div>
 								</td>

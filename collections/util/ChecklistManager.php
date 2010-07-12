@@ -26,7 +26,7 @@ class ChecklistManager extends CollectionManager{
 			$sql = "SELECT DISTINCT ts.Family, t.SciName ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
+			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = "SELECT DISTINCT o.Family, o.SciName FROM omoccurrences o ";
@@ -73,13 +73,13 @@ class ChecklistManager extends CollectionManager{
 			if(!$taxonAuthorityId){
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
 				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				$sqlTaxaInsert .= $this->getSqlWhere()." AND t.RankId > 140";
+				$sqlTaxaInsert .= $this->getSqlWhere()." AND t.RankId > 180";
 			}
 			else{
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				$sqlTaxaInsert .= $this->getSqlWhere()."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140";
+				$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 			}
 			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;
 			$conn->query($sqlTaxaInsert);
