@@ -1043,6 +1043,7 @@ include($serverRoot."/util/footer.php");
 	private $tnPixWidth = 200;
 	private $webPixWidth = 1300;
 	private $lgPixWidth = 3168;
+	private $webFileSizeLimit = 300000;
 	
  	public function __construct(){
 		$this->imageRootPath = $GLOBALS["imageRootPath"];
@@ -1545,9 +1546,10 @@ include($serverRoot."/util/footer.php");
 		$imgTnUrl = $this->createImageThumbnail($imgUrl);
 
 		//Create Large Image
-		list($width, $height) = getimagesize(($imgPath?$imgPath:$imgUrl));
+		list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
+		$fileSize = filesize($imgPath?$imgPath:$imgUrl);
 		$imgLgUrl = "";
-		if($width > ($this->webPixWidth*1.2)){
+		if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
 			$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
 			if($width < ($this->lgPixWidth*1.2)){
 				if(copy($imgPath,$lgWebUrlTemp)){
@@ -1563,11 +1565,12 @@ include($serverRoot."/util/footer.php");
 
 		//Create web url
 		$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
-		if($width < ($this->webPixWidth*1.2)){
+		if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
 			rename($imgPath,$imgTargetPath);
 		}
 		else{
-			$this->createNewImage($imgPath,$imgTargetPath,$this->webPixWidth);
+			$newWidth = ($width<($this->webPixWidth*1.2)?$width:$this->webPixWidth);
+			$this->createNewImage($imgPath,$imgTargetPath,$newWidth);
 		}
 		$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
 		if(file_exists($imgPath)) unlink($imgPath);
