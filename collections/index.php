@@ -2,12 +2,15 @@
  header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../util/symbini.php");
  include_once("util/CollectionManager.php");
+
+ $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
+ 
  $collManager = new CollectionManager();
  $collManager->reset();
  
  $specArr = Array();
  $obsArr = Array();
- $collList = $collManager->getCollectionArr();
+ $collList = $collManager->getCollectionArr($catId);
  foreach($collList as $collId => $collObj){
 	$collType = $collObj["colltype"];
 	if(stripos($collType, "specimen") !== false){

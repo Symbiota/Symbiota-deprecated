@@ -322,14 +322,18 @@ class CollectionManager{
     	}
     }
 	
-	public function getCollectionArr(){
+	public function getCollectionArr($catId = ""){
 		if(!$this->collectionArr) {
 			$conn = $this->getConnection();
 			$tempCollArr = Array();
 			if(array_key_exists("db",$this->searchTermsArr)) $tempCollArr = explode(";",$this->searchTermsArr["db"]);
-			$sql = "SELECT CollId, CollectionCode, CollectionName, Homepage, IndividualUrl, icon, colltype, Contact, email, SortSeq ".
-				"FROM omcollections ".
-				"ORDER BY SortSeq ";
+			$sql = "SELECT c.CollId, c.CollectionCode, c.CollectionName, c.Homepage, ".
+				"c.IndividualUrl, c.icon, c.colltype, c.Contact, c.email, c.SortSeq ".
+				"FROM omcollections c ";
+			if($catId){
+				$sql .= "INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid WHERE ccl.ccpk = ".$catId." ";
+			}
+			$sql .= "ORDER BY c.SortSeq ";
 			//echo "<div>SQL: ".$sql."</div>";
 			$result = $conn->query($sql);
 			while($row = $result->fetch_object()){
