@@ -893,8 +893,8 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Occurrence Record #:</b> 
-									<input id="occidedit" name="occid" type="text" value="" READONLY/>
-									<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidedit')">Link to Occurrence Record</span>
+									<input id="occid<?php  echo $imgArr["imgid"];?>" name="occid" type="text" value="" />
+									<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occid<?php  echo $imgArr["imgid"];?>')">Link to Occurrence Record</span>
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Anatomy:</b> 
