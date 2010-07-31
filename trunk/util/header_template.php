@@ -15,15 +15,17 @@
 		?> 
 		<td class='middleleft'> 
 			<div style="float:left;height:100%;width:20px;">
-				<img src="<?php echo $clientRoot;?>/util/images/brown_hor_strip.gif">
+				<img src="<?php echo $clientRoot;?>/util/images/leftstrip.gif">
 			</div>
-			<?php include($serverRoot."/util/leftmenu.php"); ?>
+			<div>
+				<?php include($serverRoot."/util/leftmenu.php"); ?>
+			</div>
 		</td>
 		<?php 
 	}
 	else{
 		?>
-        	<td class="middleleftnomenu" background="<?php echo $clientRoot;?>/util/images/brown_hor_strip.gif">
+        	<td class="middleleftnomenu" background="<?php echo $clientRoot;?>/util/images/leftstrip.gif">
         		<div style='width:20px;'></div>
         	</td>
         <?php 
