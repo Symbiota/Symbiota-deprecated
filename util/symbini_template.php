@@ -1,8 +1,8 @@
 <?php
 $defaultLang = "English";			//Default language
 $defaultProjId = 1;
-$defaultTitle = "SEINet";
-$adminEmail = "seinetadmin@asu.edu";
+$defaultTitle = "";
+$adminEmail = "";
 
 $clientRoot = "";					//URL path to project root folder 
 $serverRoot = "";
@@ -17,7 +17,7 @@ $tempDirRoot = "";
 $tempDirUrl = "";
 
 $googleMapKey = "";					//Needed for Google Map; get from Google 
-$mappingBoundaries = "";			//Project bounding box; used for setting default map focus 
+$mappingBoundaries = "";			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
 $googleAnalyticsKey = "";			//Needed for setting up Google Analytics 
 
 //Module activations
@@ -25,7 +25,8 @@ $occurrenceModIsActive = 1;
 $floraModIsActive = 1;
 $keyModIsActive = 1;
 
-//MIsc Options
+//Misc Options
+$dynKeyRadius = 10;				//Controls size of concentric rings that are sampled when building dynamic map key
 $displayCommonNames = 1;			//0 = false, 1 = true
 
 //Individual page menu and navigation crumbs
@@ -62,25 +63,6 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 		$taxa_indexMenu = false;
 		$taxa_admin_tpeditorMenu = false;
 		
-//Check cookie to see if signed in
-$paramsArr = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
-$userRights = Array();
-if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))){
-    $userValue = $_COOKIE["SymbiotaBase"];
-    $userValues =	explode("&",$userValue);
-    foreach($userValues as $val){
-        $tok1 = strtok($val, "=");
-        $tok2 = strtok("=");
-        $paramsArr[$tok1] = $tok2;
-    }
-	//Check user rights
-	if(isset($_COOKIE["SymbiotaRights"])){
-        $userRightsStr = $_COOKIE["SymbiotaRights"];
-		$userRights = explode("&",$userRightsStr);
-	}
-}
-
-$userDisplayName = (array_key_exists("dn",$paramsArr)?$paramsArr["dn"]:"");
-$symbUid = (array_key_exists("uid",$paramsArr)?$paramsArr["uid"]:0);
-$isAdmin = (in_array("SuperAdmin",$userRights)?1:0);
+//Base code shared by all pages; leave as is
+include_once("symbbase.php");
 ?>
