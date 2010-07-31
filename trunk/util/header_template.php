@@ -13,11 +13,8 @@
 	<?php 
 	if($displayLeftMenu){
 		?> 
-		<td class='middleleft'> 
-			<div style="float:left;height:100%;width:20px;">
-				<img src="<?php echo $clientRoot;?>/util/images/defaultleftstrip.gif">
-			</div>
-			<div>
+		<td class='middleleft' background="<?php echo $clientRoot;?>/util/images/defaultleftstrip.gif" style="background-repeat:repeat-y;"> 
+			<div style="">
 				<?php include($serverRoot."/util/leftmenu.php"); ?>
 			</div>
 		</td>
