@@ -4,7 +4,7 @@
 			<!-- <div style="height:110px;background-image:url(--PUT HEADER URL--);background-repeat:no-repeat;position:relative;"> -->
 			<div style="clear:both;">
 				<div style="clear:both;">
-					<img style="" src="--PUT HEADER URL--" />
+					<img style="" src="<?php echo $clientRoot; ?>/util/images/header.jpg" />
 				</div>
 			</div>
 		</td>

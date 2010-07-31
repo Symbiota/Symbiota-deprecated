@@ -10,8 +10,8 @@ body{
 /*Main table framework*/
 #maintable{
 	border-spacing: 0px;
-	width:		650px; 
-	height:		400px;
+	width:		850px; 
+	height:		500px;
 }
 
 #maintable td{
@@ -37,7 +37,7 @@ td.middleleft{
 }
 
 td.middlecenter{
- 	width:			590px;
+ 	width:			100%;
  	height:			350px;		
 }
 

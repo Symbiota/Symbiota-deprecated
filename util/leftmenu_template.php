@@ -1,4 +1,4 @@
-<div style="margin:40px 0 0 10px;">
+<div class="menu">
 	<div class='menuheader'>
 		<a href='<?php echo $clientRoot; ?>/index.php'>
 			<?php echo $defaultTitle; ?> Homepage
