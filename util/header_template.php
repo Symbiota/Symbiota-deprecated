@@ -14,13 +14,18 @@
 	if($displayLeftMenu){
 		?> 
 		<td class='middleleft'> 
+			<div style="float:left;height:100%;width:20px;">
+				<img src="<?php echo $clientRoot;?>/util/images/brown_hor_strip.gif">
+			</div>
 			<?php include($serverRoot."/util/leftmenu.php"); ?>
 		</td>
 		<?php 
 	}
 	else{
 		?>
-      	  	<td class='middleleftnomenu'></td>
+        	<td class="middleleftnomenu" background="<?php echo $clientRoot;?>/util/images/brown_hor_strip.gif">
+        		<div style='width:20px;'></div>
+        	</td>
         <?php 
 	}
 	?>
