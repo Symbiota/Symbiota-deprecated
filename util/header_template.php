@@ -13,24 +13,14 @@
 	<?php 
 	if($displayLeftMenu){
 		?> 
-		<td valign="top" style="height:100%;width:161px;background-color:#CCCC99;"> 
-			<div>
-				<img src="<?php echo $clientRoot;?>/util/images/below_header.gif">
-			</div>
-			<div style="float:left;">
-				<?php include($serverRoot."/util/leftmenu.php"); ?>
-			</div>
-			<div style='vertical-align:top;height:100%;width:12px;background-color:white;float:right;'>
-				<img src="<?php echo $clientRoot;?>/util/images/vert_strip_left.gif">
-			</div>
+		<td class='middleleft'> 
+			<?php include($serverRoot."/util/leftmenu.php"); ?>
 		</td>
 		<?php 
 	}
 	else{
 		?>
-			<td background="<?php echo $clientRoot; ?>/util/images/brown_hor_strip.gif">
-				<div style='width:20px;'></div>
-			</td>
+      	  	<td class='middleleftnomenu'></td>
         <?php 
 	}
 	?>
