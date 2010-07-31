@@ -24,6 +24,35 @@
     		Image Library
     	</a>
     </div>
+	<div>
+		<hr/>
+	</div>
+	<?php
+	if($userDisplayName){
+	?>
+		<div class='menuitem'>
+			<a href='<?php echo $clientRoot; ?>/profile/viewprofile.php'>My Profile</a>
+		</div>
+		<div class='menuitem'>
+			<a href='<?php echo $clientRoot; ?>/profile/index.php?submit=logout'>Logout</a>
+		</div>
+	<?php
+	}
+	else{
+	?>
+		<div class='menuitem'>
+			<a href='<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>'>
+				Log In
+			</a>
+		</div>
+		<div class='menuitem'>
+			<a href='<?php echo $clientRoot; ?>/profile/newprofile.php'>
+				New Account
+			</a>
+		</div>
+	<?php
+	}
+	?>
 </div>
 
 

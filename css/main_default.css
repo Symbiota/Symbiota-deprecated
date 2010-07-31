@@ -1,9 +1,3 @@
-/*
-colors:
-tan side bar: #CCCC99;
-blue lines: #669999;
-red: #990000
-*/
 
 body{
 	margin:	8px;
@@ -54,10 +48,29 @@ td.footer{
 }
 
 /*Left menu components*/
+div.menu {
+	background-color:   white;
+	margin:				15px;
+	border:   			1px solid #CCCCFF;
+	padding-bottom:   	15px;
+	overflow:   		hidden;
+	width:   			150px;
+	height:				200px;
+	border-radius: 0.5em 0.5em 1.5em 0.5em;
+	-moz-border-radius: 0.5em 0.5em 1.5em 0.5em;
+	-khtml-border-radius: 0.5em 0.5em 1.5em 0.5em;
+}
+
 div.menuheader{
-	margin-bottom:	15px;
-	font-size: 14px;
-	font-weight: bold;
+	background-color:   #C0C0C0;
+	font-family:   		Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:   		13px;
+	color:   			white;
+	font-weight:   		bold;
+	overflow:   		hidden;
+	text-align:   		center;
+	padding:   			3px;
+	margin:			   	0px; 
 }
 
 div.menuheader a{
@@ -67,13 +80,15 @@ div.menuheader a{
 
 div.menuheader a:hover {
 	color: white;
+	font-family: Arial, Helvetica, sans-serif;
     text-decoration: underline;
 }
 
 div.menuitem {
+	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
 	font-weight: bold;
-	margin: 5px 0px 0px 10px;
+	margin: 	10px;
 }
 
 div.menuitem a {
@@ -82,7 +97,8 @@ div.menuitem a {
 }
 
 div.menuitem a:hover {
-	color: white;
+	color: darkblue;
+	font-family: Arial, Helvetica, sans-serif;
     text-decoration: underline;
 }
 
