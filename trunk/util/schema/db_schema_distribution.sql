@@ -912,7 +912,7 @@ DROP TABLE IF EXISTS `taxa`;
 CREATE TABLE `taxa` (
   `TID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `KingdomID` tinyint(3) unsigned NOT NULL DEFAULT '3',
-  `RankId` smallint(5) NOT NULL DEFAULT '220',
+  `RankId` smallint(5) unsigned NOT NULL DEFAULT '220',
   `SciName` varchar(250) NOT NULL,
   `UnitInd1` varchar(1) DEFAULT NULL,
   `UnitName1` varchar(50) NOT NULL,
@@ -1109,8 +1109,8 @@ DROP TABLE IF EXISTS `taxonunits`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `taxonunits` (
-  `kingdomid` int(11) NOT NULL,
-  `rankid` smallint(6) NOT NULL,
+  `kingdomid` tinyint(3) unsigned NOT NULL,
+  `rankid` smallint(5) unsigned NOT NULL,
   `rankname` varchar(15) NOT NULL,
   `dirparentrankid` smallint(6) NOT NULL,
   `reqparentrankid` smallint(6) NOT NULL,
@@ -1504,4 +1504,16 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-06-28 23:48:52
+
+ALTER TABLE `taxa` ADD CONSTRAINT `FK_taxa_taxonunit` FOREIGN KEY `FK_taxa_taxonunit` (`KingdomID`, `RankId`)
+    REFERENCES `taxonunits` (`kingdomid`, `rankid`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT;
+
+-- Create the general admin user
+INSERT INTO users(uid,firstname,lastname,state,country,email)
+VALUES (1,"General","Administrator","NA","NA","NA");
+INSERT INTO userlogin(uid,username,password)
+VALUES (1,"admin",password("admin"));
+INSERT INTO userpermissions(uid,pname)
+VALUES (1,"SuperAdmin");

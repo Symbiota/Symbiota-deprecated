@@ -236,10 +236,12 @@
 				</h3>
 				<div id="surveylistpopup" class="genericpopup">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-		            Dynamic checklists are generated directly from specimen data each time the checklist is accessed.
-		            Since these lists are built on-the-fly, they take a bit longer to display. 
-		            The addition or annotation of a specimen at any of the participating research institutions 
-		            will automatically adjust the dynamic species list without the name having to be explicitly added.
+		            Public Survey Checklists are defined through the linkage of species occurrences 
+		            to a survey project name. This method allow biological surveys to be conduced through group participation. 
+		            If a team member comes across a new species, they document the occurrence through a specimen collecton or a
+		            photo observation. Linking the observation to a survey project automatically adds the species to the checklist. 
+		            Verification procedures ensure that observations are expert reviewed and identified correctly. The annotation of the 
+		            misidentified specimen will automatically adjust the species.
 				</div>
 				<ul>
 				<?php 	
