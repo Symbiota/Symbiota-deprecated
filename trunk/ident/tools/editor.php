@@ -2,11 +2,9 @@
 /*
  * Created on Jul 20, 2006
  */
-header("Cache-control: private; Content-Type: text/html; charset=ISO-8859-1");
-//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
-
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+include_once("../../util/dbconnection.php");
+include_once("../../util/symbini.php");
+header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  
  $addValues = Array();
  $removeValues = Array();

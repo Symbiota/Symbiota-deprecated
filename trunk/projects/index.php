@@ -1,9 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-
- header("Content-Type: text/html; charset=ISO-8859-1");
- include_once("../util/dbconnection.php");
- include_once("../util/symbini.php");
+include_once("../util/dbconnection.php");
+include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
  $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
  $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 

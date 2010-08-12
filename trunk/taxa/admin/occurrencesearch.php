@@ -1,8 +1,8 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  //error_reporting(E_ALL);
  include_once("../../util/dbconnection.php");
  include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
  
  $targetId = $_REQUEST["targetid"];
  $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0; 
@@ -15,7 +15,7 @@
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Search Page</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
 	<script type="text/javascript">

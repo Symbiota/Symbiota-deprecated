@@ -1,7 +1,7 @@
 <?php 
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../../util/dbconnection.php");
 include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $taxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";

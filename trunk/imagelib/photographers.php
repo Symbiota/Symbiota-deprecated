@@ -1,7 +1,7 @@
 <?php 
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $phUid = array_key_exists("phuid",$_REQUEST)?$_REQUEST["phuid"]:0;
 $limitStart = array_key_exists("lstart",$_REQUEST)?$_REQUEST["lstart"]:0;

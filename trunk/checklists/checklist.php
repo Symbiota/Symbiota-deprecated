@@ -3,11 +3,11 @@
  * Rebuilt 29 Jan 2010
  * By E.E. Gilbert
  */
-header("Content-Type: text/html; charset=ISO-8859-1");
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+	include_once("../util/dbconnection.php");
+	include_once("../util/symbini.php");
+	header("Content-Type: text/html; charset=".$charset);
+	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	$clValue = $_REQUEST["cl"]; 
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
 	$symClid = array_key_exists("symclid",$_REQUEST)?$_REQUEST["symclid"]:"0"; 
@@ -58,6 +58,7 @@ include_once("../util/symbini.php");
 			if($_REQUEST["habitat"]) $dataArr["habitat"] = $_REQUEST["habitat"];
 			if($_REQUEST["abundance"]) $dataArr["abundance"] = $_REQUEST["abundance"];
 			if($_REQUEST["notes"]) $dataArr["notes"] = $_REQUEST["notes"];
+			if($_REQUEST["source"]) $dataArr["source"] = $_REQUEST["source"];
 			if($_REQUEST["internalnotes"]) $dataArr["internalnotes"] = $_REQUEST["internalnotes"];
 			$clManager->addNewSpecies($dataArr);
 		}
@@ -72,7 +73,7 @@ include_once("../util/symbini.php");
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
 
  <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<?php
@@ -161,7 +162,7 @@ include_once("../util/symbini.php");
 				}
 			}
 		}
-	
+
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
@@ -190,9 +191,62 @@ include_once("../util/symbini.php");
 			}
 		}
 
+		function validateMetadataForm(f){ 
+			if(f.ecllatcentroid.value == "" && f.ecllongcentroid.value == ""){
+				return true;
+			}
+			if(f.ecllatcentroid.value == ""){
+				alert("If longitude has a value, latitude must also have a value");
+				return false;
+			} 
+			if(f.ecllongcentroid.value == ""){
+				alert("If latitude has a value, longitude must also have a value");
+				return false;
+			} 
+			if(!isNumeric(f.ecllatcentroid.value)){
+				alert("Latitude must be strictly numeric (decimal format: e.g. 34.2343)");
+				return false;
+			}
+			if(Math.abs(f.ecllatcentroid.value) > 90){
+				alert("Latitude values can not be greater than 90 or less than -90.");
+				return false;
+			} 
+			if(!isNumeric(f.ecllongcentroid.value)){
+				alert("Longitude must be strictly numeric (decimal format: e.g. -112.2343)");
+				return false;
+			}
+			if(Math.abs(f.ecllongcentroid.value) > 180){
+				alert("Longitude values can not be greater than 180 or less than -180.");
+				return false;
+			}
+			if(f.ecllongcentroid.value > 1){
+				alert("Is this checklist in the western hemisphere?\nIf so, decimal longitude should be a negative value (e.g. -112.2343)");
+			} 
+			if(!isNumeric(f.eclpointradiusmeters.value)){
+				alert("Point radius must be a numeric value only");
+				return false;
+			}
+			return true;
+		}
+		
+		function isNumeric(sText){
+		   	var ValidChars = "0123456789-.";
+		   	var IsNumber = true;
+		   	var Char;
+		 
+		   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
+			   Char = sText.charAt(i); 
+				if (ValidChars.indexOf(Char) == -1){
+					IsNumber = false;
+					break;
+	          	}
+		   	}
+			return IsNumber;
+		}
+
 		function validateAddSpecies(){ 
 			var sciName = document.getElementById("speciestoadd").value;
-			if(sciName == ""){
+			if(sciName = ""){
 				alert("Enter the scientific name of species you wish to add");
 				return false;
 			}
@@ -315,8 +369,13 @@ include_once("../util/symbini.php");
 		<?php 
 			if($clManager->getEditable()){
 				?>
-				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editingobj');" title="Toggle Checklist Editing Functions">
-					<img style="border:0px;" src="../images/edit.png" />
+				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editspp');" title="Edit Species List">
+					<img style="border:0px;width:12px;" src="../images/edit.png" /><br/>
+					<span style="font-size:70%;">Spp.</span>
+				</div>
+				<div style="float:right;cursor:pointer;margin-right:10px;" onclick="javascript:toggle('editmd');" title="Edit MetaData">
+					<img style="border:0px;width:12px;" src="../images/edit.png" /><br/>
+					<span style="font-size:70%;">MD</span>
 				</div>
 				<?php 
 			}
@@ -369,14 +428,14 @@ include_once("../util/symbini.php");
 		if($clManager->getEditable()){
 	?>
 		<!-- Checklist editing div  -->
-		<div class="editingobj" style="display:none;">
+		<div class="editmd" style="display:none;">
 			<div id="tabs" style="margin:10px;height:500px;">
 			    <ul>
 			        <li><a href="#metadata"><span>Metadata</span></a></li>
 			        <li><a href="#editors"><span>Editors</span></a></li>
 			    </ul>
 				<div id="metadata">
-					<form id="checklisteditform" action='checklist.php' method='get' name='editclmatadata' target='_self'>
+					<form id="checklisteditform" action='checklist.php' method='get' name='editclmatadata' onsubmit="return validateMetadataForm(this)">
 						<fieldset style='margin:5px 0px 5px 5px;'>
 							<legend>Edit Checklist Details:</legend>
 							<div>
@@ -582,8 +641,8 @@ include_once("../util/symbini.php");
 
 				if($clManager->getEditable()){
 				?>
-					<div class="editingobj" style="display:none;width:250px;margin-bottom:15px;">
-						<form id='addspeciesform' action='checklist.php' method='get' name='addspeciesform' onsubmit="return validateAddSpecies();">
+					<div class="editspp" style="display:none;width:250px;margin-bottom:15px;">
+						<form id='addspeciesform' action='checklist.php' method='get' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 							<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 								<legend>Add New Species to Checklist:</legend>
 								<div style="clear:left">
@@ -644,6 +703,14 @@ include_once("../util/symbini.php");
 									</div>
 									<div style="float:left;">
 										<input type="text" name="internalnotes" title="Displayed to administrators only"/>
+									</div>
+								</div>
+								<div style="clear:left;">
+									<div style="font-weight:bold;float:left;width:70px;">
+										Source:
+									</div>
+									<div style="float:left;">
+										<input type="text" name="source" />
 									</div>
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
@@ -718,7 +785,7 @@ include_once("../util/symbini.php");
 									if($clManager->getEditable()){
 										//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 										?> 
-										<span class="editingobj" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
+										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
 											<img src='../images/edit.png' style='width:13px;' title='edit details' />
 										</span>
 										<?php 
@@ -949,14 +1016,14 @@ class ChecklistManager {
 		$sql = "";
 		if($this->thesFilter){
 			$sql = "SELECT DISTINCT ts.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, 
-				t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
+				t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.TidAccepted) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.TID ".
     	  		"WHERE ctl.CLID = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
 		}
 		else{
 			$sql = "SELECT DISTINCT t.TID, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family, ".
-				"t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes ".
+				"t.SciName, t.Author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.Tid) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.TID ".
     	  		"WHERE (ts.taxauthid = 1) AND ctl.CLID = ".$this->clid;
@@ -980,7 +1047,7 @@ class ChecklistManager {
 		}
 		if($this->showCommon){
 			$sql = "SELECT DISTINCT it.TID, it.uppertaxonomy, it.family, v.VernacularName, it.SciName, it.Author, ".
-				"it.habitat, it.abundance, it.notes ".
+				"it.habitat, it.abundance, it.notes, it.source ".
 				"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid=ts.tid) ".
 				"LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = '".$this->language.
 				"' AND vern.SortSequence = 1) v ON ts.TidAccepted = v.tid WHERE ts.taxauthid = 1";
@@ -1009,14 +1076,16 @@ class ChecklistManager {
 			if($this->taxaCount >= ($pageNumber*$this->taxaLimit) && $this->taxaCount <= ($pageNumber+1)*$this->taxaLimit){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
 				if($this->showVouchers){
-					$clStr = $row->habitat.($row->habitat && $row->abundance?", ":"").$row->abundance;
-					$clStr .= ($clStr && $row->notes?", ":"").$row->notes;
+					$clStr = "";
+					if($row->habitat) $clStr = ", ".$row->habitat;
+					if($row->abundance) $clStr .= ", ".$row->abundance;
+					if($row->notes) $clStr .= ", ".$row->notes;
+					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if(array_key_exists($tid,$this->voucherArr)){
 						$clStr .= ($clStr?"; ":"").(is_array($this->voucherArr[$tid])?implode(", ",$this->voucherArr[$tid]):$this->voucherArr[$tid]);
-						$this->voucherArr[$tid] = $clStr;
 					}
-					elseif($clStr){
-						$this->voucherArr[$tid] = $clStr;
+					if($clStr){
+						$this->voucherArr[$tid] = substr($clStr,1);
 					}
 				}
 				$author = $row->Author;

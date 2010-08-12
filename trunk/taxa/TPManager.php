@@ -254,8 +254,8 @@
 		}
 		
 		//Get Images 
-		$sql = "SELECT t.sciname, ti.tid, ti.imagetype, ti.sortsequence, ti.url, ti.thumbnailurl, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ".
+		$sql = "SELECT t.sciname, ti.tid, ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
+			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ". 
 			"FROM (((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxstatus ts1 ON ti.tid = ts1.tid) ".
 			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
@@ -269,8 +269,11 @@
 				$firstPos = strpos($sciName," ",2)+2;
 				$sciName = substr($sciName,0,strpos($sciName," ",$firstPos));
 			}
+			$this->sppArray[$sciName]["imgid"] = $row->imgid;
 			$this->sppArray[$sciName]["url"] = $row->url;
 			$this->sppArray[$sciName]["thumbnailurl"] = $row->thumbnailurl;
+			$this->sppArray[$sciName]["photographer"] = $row->photographer;
+			$this->sppArray[$sciName]["caption"] = $row->caption;
 		}
 		$result->close();
 		
@@ -371,30 +374,18 @@
 	private function setTaxaImages(){
 		$tidStr = implode(",",array_merge(Array($this->tid,$this->submittedTid),array_keys($this->synonyms)));
 		$this->imageArr = Array();
-		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
-			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.notes, ti.occid ".
+		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
+			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ".
 			"FROM ((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) AND ti.SortSequence < 500 ".
 			"ORDER BY ti.sortsequence";
-		//echo "<div>".$sql."</div>";
 		$result = $this->con->query($sql);
-		$imgCnt = 0;
 		while($row = $result->fetch_object()){
-			$this->imageArr[$imgCnt]["imgid"] = $row->imgid;
-			$this->imageArr[$imgCnt]["url"] = $row->url;
-			$this->imageArr[$imgCnt]["thumbnailurl"] = $row->thumbnailurl;
-			if($row->originalurl) $this->imageArr[$imgCnt]["originalurl"] = $row->originalurl;
-			if($row->photographer) $this->imageArr[$imgCnt]["photographer"] = $row->photographer;
-			if($row->caption) $this->imageArr[$imgCnt]["caption"] = $row->caption;
-			if($row->owner) $this->imageArr[$imgCnt]["owner"] = $row->owner;
-			if($row->sourceurl) $this->imageArr[$imgCnt]["sourceurl"] = $row->sourceurl;
-			if($row->copyright) $this->imageArr[$imgCnt]["copyright"] = $row->copyright;
-			if($row->locality) $this->imageArr[$imgCnt]["locality"] = $row->locality;
-			if($row->notes) $this->imageArr[$imgCnt]["notes"] = $row->notes;
-			if($row->occid) $this->imageArr[$imgCnt]["occid"] = $row->occid;
-			$imgCnt++;
+			$this->imageArr[$row->imgid]["url"] = $row->url;
+			$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
+			$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
+			$this->imageArr[$row->imgid]["caption"] = $row->caption;
 		}
 		$result->close();
 		if(!$this->imageArr) $this->imageArr = "No images";
@@ -417,57 +408,39 @@
 			$this->setTaxaImages();
 		}
 		if(is_array($this->imageArr) && count($this->imageArr) >= $start){
-			$end = ($length && count($this->imageArr) > $start + $length?$start + $length:count($this->imageArr));
+			$length = (count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
 			$spDisplay = $this->getDisplayName();
-			for($n = $start;$n < $end;$n++){
+			$iArr = array_slice($this->imageArr,$start,$length,true);
+			foreach($iArr as $imgId => $imgObj){
 				if($start == 0 && $length == 1){
 					echo "<div id='centralimage'>";
 				}
 				else{
 					echo "<div class='imgthumb'>";
 				}
-				$imgUrl = $this->imageArr[$n]["url"];
-				$imgThumbnail = $this->imageArr[$n]["thumbnailurl"];
+				$imgUrl = $imgObj["url"];
+				$imgThumbnail = $imgObj["thumbnailurl"];
 				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 					$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
 				}
-				echo "<a href='".$imgUrl."'>";
-				if($useThumbnail && $this->imageArr[$n]["thumbnailurl"]){
+				echo "<a href='imgdetails.php?imgid=".$imgId."'>";
+				if($useThumbnail && $imgObj["thumbnailurl"]){
 					list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
-					if($n > 0 || $width > 190 || $height > 190){
+					if(($start != 0 && $length != 1) || $width > 190 || $height > 190){
 						$imgUrl = $imgThumbnail;
 					}
 				}
-				$imgCaption = "";
-				if(array_key_exists("caption",$this->imageArr[$n])){
-					$imgCaption = $this->imageArr[$n]["caption"]."&nbsp;&nbsp;";
-				}
-				echo "<img src='".$imgUrl."' title='".$imgCaption."' alt='".$spDisplay." image' />";
+				echo "<img src='".$imgUrl."' title='".$imgObj["caption"]."' alt='".$spDisplay." image' />";
 				echo "</a>";
 				echo "<div class='photographer'>";
-				if(array_key_exists("photographer",$this->imageArr[$n])){
-					echo $this->imageArr[$n]["photographer"]."&nbsp;&nbsp;";
+				if($imgObj["photographer"]){
+					echo $imgObj["photographer"]."&nbsp;&nbsp;";
 				}
-				echo "<span style='cursor:pointer;' onclick='toggleImgInfo(\"img".$n."\",this);'>";
+				echo "<a href='imgdetails.php?imgid=".$imgId."'>";
 				echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg'/>";
-				echo "</span>";
-				echo "</div>";
+				echo "</a>";
 				echo "</div>\n";
-			}
-			for($n = $start;$n < $end;$n++){
-				//Pane for image details
-				echo "<div id='img".$n."' class='imgpopup'>";
-				if(array_key_exists("caption",$this->imageArr[$n])) echo "<div><b>Caption:</b> ".$this->imageArr[$n]["caption"]."</div>";
-				if(array_key_exists("photographer",$this->imageArr[$n])) echo "<div><b>Photographer:</b> ".$this->imageArr[$n]["photographer"]."</div>";
-				if(array_key_exists("owner",$this->imageArr[$n])) echo "<div><b>Manager:</b> ".$this->imageArr[$n]["owner"]."</div>";
-				if(array_key_exists("locality",$this->imageArr[$n])) echo "<div><b>Locality:</b> ".$this->imageArr[$n]["locality"]."</div>";
-				if(array_key_exists("notes",$this->imageArr[$n])) echo "<div><b>Notes:</b> ".$this->imageArr[$n]["notes"]."</div>";
-				if(array_key_exists("copyright",$this->imageArr[$n])) echo "<div><b>Copyright:</b> ".$this->imageArr[$n]["copyright"]."</div>";
-				if(array_key_exists("sourceurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["sourceurl"]."'>Source Webpage</a></div>";
-				if(array_key_exists("occid",$this->imageArr[$n])) echo "<div><a href='../collections/individual/individual.php?occid=".$this->imageArr[$n]["occid"]."'>Display Specimen Details</a></div>";
-				echo "<div><a href='".$this->imageArr[$n]["url"]."'>Open Medium Sized Image</a></div>";
-				if(array_key_exists("originalurl",$this->imageArr[$n])) echo "<div><a href='".$this->imageArr[$n]["originalurl"]."'>Open Large Image</a></div>";
 				echo "</div>\n";
 			}
 			return true;

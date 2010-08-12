@@ -11,8 +11,8 @@ div#centralimage{
 div#centralimage img{
 	max-width:	250px;
 	max-height:	250px;
-	width: 		expression(this.width > this.height ? 250: true);
-	height:		expression(this.height > this.width ? 250: true);
+	width: 		expression(this.width >= this.height ? 250: true);
+	height:		expression(this.height >= this.width ? 250: true);
 	border:		1px dotted black;
 }
 
@@ -122,8 +122,8 @@ div.sppimg img{
   	border:			1px dotted gray;
 	max-width:		135px;
 	max-height:		135px;
-	width: 			expression(this.width > this.height ? 135: true);
-	height:			expression(this.height > this.width ? 135: true);
+	width: 			expression(this.width >= this.height ? 135: true);
+	height:			expression(this.height >= this.width ? 135: true);
 }
 
 div.sppmap{

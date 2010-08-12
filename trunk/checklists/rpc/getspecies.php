@@ -1,5 +1,9 @@
 <?php
 	include_once("../../util/dbconnection.php");
+	include_once("../../util/symbini.php");
+	header("Content-Type: text/html; charset=".$charSet);
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['q']);

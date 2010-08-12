@@ -3,10 +3,10 @@
  * Created on Jul 9, 2006
  * By E.E. Gilbert
  */
- header('Content-Type: text/html; charset=ISO-8859-1');
  //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
  include_once("../../util/dbconnection.php");
  include_once("../../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
  
  $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
  $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 

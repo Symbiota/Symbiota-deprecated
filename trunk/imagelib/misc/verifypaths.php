@@ -1,8 +1,8 @@
 <?php
-error_reporting(E_ALL);
-header("Content-Type: text/html; charset=ISO-8859-1");
+//error_reporting(E_ALL);
 include_once("../../util/dbconnection.php");
 include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $buildThumbnails = array_key_exists("buildthumbnails",$_REQUEST)?$_REQUEST["buildthumbnails"]:0;

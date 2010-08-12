@@ -1,8 +1,9 @@
 <?php
-header("Content-Type: text/html; charset=ISO-8859-1");
+include_once("../../../util/dbconnection.php");
+include_once("../../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-include_once("../../../util/dbconnection.php");
 
 //get the q parameter from URL
 $family = $_REQUEST["family"]; 

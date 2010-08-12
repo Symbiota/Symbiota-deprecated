@@ -1,7 +1,7 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../util/symbini.php");
  include_once("util/ChecklistManager.php");
+ header("Content-Type: text/html; charset=".$charset);
 
  $checklistManager = new ChecklistManager();
 

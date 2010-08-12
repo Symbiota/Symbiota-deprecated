@@ -1,8 +1,8 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  //error_reporting(E_ALL);
  include_once("../../util/dbconnection.php");
  include_once("../../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
  
  $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
  $collectionCode = array_key_exists("collcode",$_REQUEST)?trim($_REQUEST["collcode"]):"";
@@ -21,7 +21,6 @@
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
 	<script type="text/javascript">

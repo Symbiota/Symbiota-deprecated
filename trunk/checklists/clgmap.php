@@ -1,13 +1,8 @@
 <?php
-/*
- * Created on Jun 11, 2006
- * By E.E. Gilbert
- */
-
 //error_reporting(E_ALL);
-header('Content-Type: text/html; charset=ISO-8859-1');
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
 if(!$projValue && isset($defaultProjId)) $projValue = $defaultProjId;
@@ -137,7 +132,7 @@ class ChecklistMapper{
     	$sql = "SELECT c.clid, c.Name, c.LongCentroid, c.LatCentroid ".
             "FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ". 
             "INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-            "WHERE c.access = 'public' AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
+            "WHERE c.access = 'public' AND p.ispublic = 1 AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $idStr = $row->clid;

@@ -3,10 +3,10 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-Header('Content-Type: text/html; charset=ISO-8859-1');
 include_once("../util/symbini.php");
 include_once("util/ProfileHandler.php");
 include_once("util/Person.php");
+Header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;

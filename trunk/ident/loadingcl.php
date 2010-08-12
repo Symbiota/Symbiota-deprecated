@@ -1,18 +1,17 @@
 <?php
 /*
  * Created on Jun 11, 2006
- *
  * By E.E. Gilbert
  */
 
-header("Content-Type: text/html; charset=ISO-8859-1");
+//error_reporting(E_ERROR);
+//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
+include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 Header("Cache-Control: must-revalidate");
 $offset = 60 * 60 * 24 * 7;
 $ExpStr = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
 Header($ExpStr);
-//error_reporting(E_ERROR);
-//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once("../util/symbini.php");
 
  $symClid = 0;
  $attrsValues = Array();

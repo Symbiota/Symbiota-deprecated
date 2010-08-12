@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../../util/dbconnection.php");
 include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
 $hasHeader = array_key_exists("hasheader",$_REQUEST)?$_REQUEST["hasheader"]:"";
@@ -20,8 +20,6 @@ if($symbUid && isset($userRights) && ($isAdmin || in_array("cl-".$clid,$userRigh
 <head>
 	<title><?php echo $defaultTitle; ?> Species Checklist Loader</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
-	<script type="text/javascript">
-	</script>
 	<script type="text/javascript">
 	
 	function validateUploadForm(thisForm){

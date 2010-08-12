@@ -1,11 +1,10 @@
 <?php
 /* E.E. Gilbert 16 Oct 2008 */
-header("Content-Type: text/html; charset=ISO-8859-1");
-header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-
 include_once("../../util/symbini.php");
 include_once("../../util/dbconnection.php");
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate");
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $userid = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:""; 
 $login = array_key_exists("login",$_REQUEST)?$_REQUEST["login"]:""; 

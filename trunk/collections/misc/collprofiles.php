@@ -1,9 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../../util/dbconnection.php");
  include_once("../../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
 
  $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
  $showFamilyList = array_key_exists("sfl",$_REQUEST)?$_REQUEST["sfl"]:0;

@@ -1,15 +1,13 @@
 <?php
-header("Content-Type: text/html; charset=ISO-8859-1");
 /*
- * Created on Oct. 16, 2008
- * By E.E. Gilbert
+ * E.E. Gilbert 
+ * Oct. 16, 2008
  */
-
- header("Cache-Control: no-cache, must-revalidate");
- // Date in the past
- header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+include_once("../../util/dbconnection.php");
+include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charSet);
+header("Cache-Control: no-cache, must-revalidate");
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
  
  $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
  $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 

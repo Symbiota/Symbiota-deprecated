@@ -1,13 +1,13 @@
 <?php
-header("Content-Type: text/html; charset=ISO-8859-1");
 /*
- * Modified on Jan 2010
- * By E.E. Gilbert
+ * 15 Jan 2010
+ * E.E. Gilbert
  */
 
 //error_reporting(E_ALL);
- include_once("../util/dbconnection.php");
- include_once("../util/symbini.php");
+include_once("../util/dbconnection.php");
+include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
  
  $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
  $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 

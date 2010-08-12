@@ -1,10 +1,10 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
  ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
     <title><?php echo $defaultTitle; ?> - Collections Search Maps</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
 </head>
@@ -25,9 +25,9 @@
     <div id="innertext">
 		<div id="tabdiv">
 			<div class='backendleft'>&nbsp;</div>
-			<div class='backtab'><a href='../checklist.php'>Checklist</a></div>
+			<div class='backtab'><a href='../checklist.php'>Species list</a></div>
 			<div class="midleft">&nbsp;</div>
-			<div class='backtab'><a href='../list.php'>List</a></div>
+			<div class='backtab'><a href='../list.php'>Specimen List</a></div>
 			<div class="midleft" style='border-bottom:0px;height:100%;'>&nbsp;</div>
 			<div class='fronttab'>Maps</div>
 			<div class='backendright' style='border-bottom:0px;'>&nbsp;</div>

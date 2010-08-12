@@ -1,6 +1,6 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
- include_once("../../util/symbini.php");
+include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
  $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
  $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0; 
@@ -28,11 +28,11 @@
 <div id="tabdiv">
 	<div class='backendleft'>&nbsp;</div>
 	<div class='backtab'>
-		<a href='../checklist.php'>Checklist</a>
+		<a href='../checklist.php'>Species List</a>
 	</div>
 	<div class="midleft" style='border-bottom:0px;height:100%;'>&nbsp;</div>
 	<div class='fronttab'>
-		<a style="color:black;" href="../list.php">List</a>
+		<a style="color:black;" href="../list.php">Specimen List</a>
 	</div>
 	<div class="midright" style='border-bottom:0px;height:100%;'>&nbsp;</div>
 	<div class='backtab'>

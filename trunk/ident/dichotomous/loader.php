@@ -1,7 +1,7 @@
 <?php 
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $nodeId = array_key_exists("nodeid",$_REQUEST)?$_REQUEST["nodeid"]:0;
 $stmtId = array_key_exists("stmtid",$_REQUEST)?$_REQUEST["stmtid"]:0;

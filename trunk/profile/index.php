@@ -3,9 +3,9 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-Header('Content-Type: text/html; charset=ISO-8859-1');
 include_once("../util/symbini.php");
 include_once("util/ProfileHandler.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $submit = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
