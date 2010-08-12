@@ -1,7 +1,7 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../util/symbini.php");
  include_once("util/ChecklistManager.php");
+ header("Content-Type: text/html; charset=".$charset);
 
  $checklistManager = new ChecklistManager();
  $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
@@ -10,7 +10,7 @@
 
 <html>
     <head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
         <title><?php echo $defaultTitle; ?> Dynamic Checklist</title>
         <link rel="stylesheet" href="../css/main.css" type="text/css">
     </head>
@@ -31,9 +31,9 @@
 	<div id='innertext'>
 		<div id="tabdiv">
 			<div class='backendleft' style='border-bottom:0px;height:100%;'>&nbsp;</div>
-			<div class='fronttab'>Checklist</div>
+			<div class='fronttab'>Species List</div>
 			<div class="midright" style='border-bottom:0px;height:100%;'>&nbsp;</div>
-			<div class='backtab'><a href='list.php'>List</a></div>
+			<div class='backtab'><a href='list.php'>Specimen List</a></div>
 			<div class="midright">&nbsp;</div>
 			<div class='backtab'><a href='maps/index.php'>Maps</a></div>
 			<div class='backendright'>&nbsp;</div>
@@ -65,9 +65,17 @@
 		<?php
 			$checklistArr = $checklistManager->getChecklist($taxonFilter);
 			echo "<div style='font-weight:bold;font-size:125%;'>Taxa Count: ".$checklistManager->getChecklistTaxaCnt()."</div>";
+			$undFamilyArray = Array();
+			if(array_key_exists("undefined",$checklistArr)) $undFamilyArray = $checklistArr["undefined"]; 
 			foreach($checklistArr as $family => $sciNameArr){
 				echo "<div style='margin-left:5;margin-top:5;'><h3>".$family."</h3></div>";
 				foreach($sciNameArr as $sciName){
+					echo "<div style='margin-left:20;font-style:italic;'><a target='_blank' href='../taxa/index.php?taxon=".$sciName."'>".$sciName."</a></div>";
+				}
+			}
+			if($undFamilyArray){
+				echo "<div style='margin-left:5;margin-top:5;'><h3>Family Not Defined</h3></div>";
+				foreach($undFamilyArray as $sciName){
 					echo "<div style='margin-left:20;font-style:italic;'><a target='_blank' href='../taxa/index.php?taxon=".$sciName."'>".$sciName."</a></div>";
 				}
 			}

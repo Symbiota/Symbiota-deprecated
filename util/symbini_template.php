@@ -3,6 +3,7 @@ $defaultLang = "English";			//Default language
 $defaultProjId = 1;
 $defaultTitle = "";
 $adminEmail = "";
+$charset = "ISO-8859-1";
 
 $clientRoot = "";					//URL path to project root folder 
 $serverRoot = "";

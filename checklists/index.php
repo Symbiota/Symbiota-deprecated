@@ -1,9 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-
- header("Content-Type: text/html; charset=ISO-8859-1");
- include_once("../util/dbconnection.php");
  include_once("../util/symbini.php");
+ include_once("../util/dbconnection.php");
+ header("Content-Type: text/html; charset=".$charset);
  $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
  $clManager = new ChecklistManager();
  $clManager->setProj($projValue);
@@ -214,6 +213,7 @@
 			"WHERE (c.access = 'public' AND p.ispublic = 1) ";
 		if($this->projectId) $sql .= "AND p.pid = ".$this->projectId." ";
 		$sql .= "ORDER BY p.SortSequence, p.projname, c.SortSequence, c.Name";
+		//echo $sql;
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->pid."::".$row->projname][$row->CLID] = $row->Name;
@@ -229,6 +229,7 @@
 			"WHERE (p.ispublic = 1 AND s.ispublic = 1) ";
 		if($this->projectId) $sql .= "AND p.pid = ".$this->projectId." ";
 		$sql .= "ORDER BY p.SortSequence, p.projname, s.SortSequence, s.projectname";
+		//echo $sql;
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->pid."::".$row->projname][$row->surveyid] = $row->projectname;

@@ -20,7 +20,7 @@ if(isset($userRights) && $userRights && $isAdmin){
 <head>
 	<title>Observation data loader</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<script type="text/javascript">
 	
 	function validateForm(thisForm){

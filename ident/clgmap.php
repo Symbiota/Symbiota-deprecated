@@ -1,14 +1,13 @@
 <?php
 /*
  * Created on Jun 11, 2006
- *
  * By E.E. Gilbert
  */
 
 //error_reporting(E_ALL);
-header('Content-Type: text/html; charset=ISO-8859-1');
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
 if(!$projValue) $projValue = "Arizona";

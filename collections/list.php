@@ -1,7 +1,7 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../util/symbini.php");
  include_once("util/ListManager.php");
+ header("Content-Type: text/html; charset=".$charset);
 
  $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
  $collManager = new ListManager(); 
@@ -11,7 +11,7 @@
 
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
     <title><?php echo $defaultTitle; ?> Collections Search Results</title>
     <link rel="stylesheet" href="../css/main.css" type="text/css">
 </head>
@@ -32,9 +32,9 @@
 <div id="innertext">
 	<div id="tabdiv">
 		<div class='backendleft'>&nbsp;</div>
-		<div class='backtab'><a href='checklist.php'>Checklist</a></div>
+		<div class='backtab'><a href='checklist.php'>Species List</a></div>
 		<div class="midleft" style='border-bottom:0px;height:100%;'>&nbsp;</div>
-		<div class='fronttab'>List</div>
+		<div class='fronttab'>Specimen List</div>
 		<div class="midright" style='border-bottom:0px;height:100%;'>&nbsp;</div>
 		<div class='backtab'><a href='maps/index.php<?php echo (array_key_exists("clid",$_REQUEST)?"?clid=".$_REQUEST["clid"]:"");?>'>Maps</a></div>
 		<div class='backendright'>&nbsp;</div>

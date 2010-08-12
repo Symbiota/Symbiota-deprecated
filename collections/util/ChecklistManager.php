@@ -43,7 +43,7 @@ class ChecklistManager extends CollectionManager{
 				$returnVec[$family][] = $sciName;
 			}
 			else{
-				$returnVec["Undefined"][] = $sciName;
+				$returnVec["undefined"][] = $sciName;
 			}
 			$this->checklistTaxaCnt++;
         }

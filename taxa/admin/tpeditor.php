@@ -108,7 +108,7 @@
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$tEditor->getSciName(); ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<link rel="stylesheet" href="../../css/speciesprofile.css" type="text/css"/>
     <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />

@@ -2,11 +2,11 @@
 /*
  * Modified: 22 June 2010 - E.E. Gilbert
  */
-header("Content-Type: text/html; charset=ISO-8859-1");
-header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $surveyId = $_REQUEST["surveyid"]; 
 $pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
@@ -66,7 +66,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Survey Checklist: <?php echo $clManager->getSurveyName(); ?></title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<?php

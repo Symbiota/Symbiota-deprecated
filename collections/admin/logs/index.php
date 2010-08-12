@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../../../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
  
 ?>
 <html>

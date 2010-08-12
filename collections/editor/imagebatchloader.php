@@ -1,4 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <?php 
 include_once("../../util/symbini.php");
 include_once("../../util/dbconnection.php");
@@ -20,11 +19,12 @@ if($isEditable){
 }
 
 ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 	<title>Observation Image Batch Loader</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta http-equiv="Content-Type" content="text/html; charset="<?php echo $charset;?>>
 	<script type="text/javascript">
 	
 	function validateForm(thisForm){

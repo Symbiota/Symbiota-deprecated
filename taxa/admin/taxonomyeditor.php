@@ -4,7 +4,7 @@
  * E.E. Gilbert
  */
 
- error_reporting(E_ALL);
+ //error_reporting(E_ALL);
  //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
  include_once("../../util/dbconnection.php");
  include_once("../../util/symbini.php");
@@ -88,7 +88,7 @@ if($editable){
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$target; ?></title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>"/>
 	<script language=javascript>
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 		var tidAccepted;

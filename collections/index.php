@@ -1,7 +1,7 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
  include_once("../util/symbini.php");
  include_once("util/CollectionManager.php");
+ header("Content-Type: text/html; charset=".$charset);
 
  $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
  
@@ -33,7 +33,7 @@
    "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> Collections Search</title>
 	    <link rel="stylesheet" href="../css/main.css" type="text/css">
 		<link rel="stylesheet" type="text/css" href="../css/tabcontent.css" />

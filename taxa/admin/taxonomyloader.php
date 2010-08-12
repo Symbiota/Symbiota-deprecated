@@ -52,7 +52,7 @@
 <head>
 	<title><?php echo $defaultTitle; ?> Taxon Loader: </title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 </head>
 <body onload="">
 <?php

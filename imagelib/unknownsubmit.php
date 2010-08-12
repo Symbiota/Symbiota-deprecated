@@ -1,7 +1,7 @@
 <?php 
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
 $photographer = array_key_exists("photographer",$_REQUEST)?$_REQUEST["photographer"]:""; 
 $owner = array_key_exists("owner",$_REQUEST)?$_REQUEST["owner"]:""; 

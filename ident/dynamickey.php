@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
- header("Content-Type: text/html; charset=ISO-8859-1");
- include_once("../util/dbconnection.php");
- include_once("../util/symbini.php");
+include_once("../util/dbconnection.php");
+include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
  
  $lat = array_key_exists("lat",$_REQUEST)?$_REQUEST["lat"]:0;
  $lng = array_key_exists("lng",$_REQUEST)?$_REQUEST["lng"]:0;

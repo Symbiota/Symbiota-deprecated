@@ -1,7 +1,7 @@
 <?php 
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 $unkid = array_key_exists("unkid",$_REQUEST)?$_REQUEST["unkid"]:"";
 
 $unkDisplayManager = new UnknownDisplayManager();

@@ -1,9 +1,9 @@
 <?php
-header("Content-Type: text/html; charset=ISO-8859-1");
 error_reporting(E_ALL);
 //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
 include_once("../../util/dbconnection.php");
 include_once("../../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -1,15 +1,15 @@
 <?php
-header("Content-Type: text/html; charset=ISO-8859-1");
- //error_reporting(E_ALL);
+/*
+ * Created on Jun 11, 2006
+ * By E.E. Gilbert
+ */
+//error_reporting(E_ALL);
  include_once("DataManager.php");
  include_once("../util/symbini.php");
+ header("Content-Type: text/html; charset=".$charset);
  $editable = false;
  if($symbUid) $editable = true;
  ?> 
-<!--
- * Created on Jun 11, 2006
- * By E.E. Gilbert
--->
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

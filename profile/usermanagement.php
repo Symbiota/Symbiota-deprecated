@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 $searchTerm = array_key_exists("searchterm",$_REQUEST)?trim($_REQUEST["searchterm"]):"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:"";
 $del = array_key_exists("del",$_REQUEST)?$_REQUEST["del"]:"";

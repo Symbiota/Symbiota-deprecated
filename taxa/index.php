@@ -4,10 +4,10 @@
  * By E.E. Gilbert
  */
  //error_reporting(0);
- Header('Content-Type: text/html; charset=ISO-8859-1');
  include_once("TPManager.php");
  include_once("../util/symbini.php");
- 
+ Header("Content-Type: text/html; charset=".$charset);
+
  $descrDisplayLevel;
  $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
  $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
@@ -40,7 +40,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='virtual flora,<?php echo $spDisplay; ?>' />
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
@@ -83,7 +83,7 @@
 		function toggleMap(mapObj){
 			var roi = mapObj.value;
 			var mapObjs = getElementByTagName("div");
-			for(x=0;x<mapObjs;x++){
+			for(x=0;x<mapObjs.length;x++){
 				var mObj = mapObjs[x];
 				if(mObj.classname == "mapdiv"){
 					if(mObj == mapObj){
@@ -97,14 +97,24 @@
 		}
 		
 		function toggleImgInfo(target, anchorObj){
+			//close all imgpopup divs
+			var divs = document.getElementsByTagName("div");
+			for(x=0;x<divs.length;x++){
+				var d = divs[x];
+				if(d.getAttribute("class") == "imgpopup" || d.getAttribute("className") == "imgpopup"){
+					d.style.display = "none";
+				}
+			}
+
+			//Open and place target imgpopup
 			var obj = document.getElementById(target);
 			var pos = findPos(anchorObj);
 			var posLeft = pos[0];
 			if(posLeft > 550){
 				posLeft = 550;
 			}
-			obj.style.left = posLeft + 10;
-			obj.style.top = pos[1] - 70;
+			obj.style.left = posLeft;
+			obj.style.top = pos[1];
 			if(obj.style.display=="block"){
 				obj.style.display="none";
 			}
@@ -118,14 +128,34 @@
 		function findPos(obj){
 			var curleft = 0; 
 			var curtop = 0;
-			if(obj.offsetParent) {
-				do{
-					curleft += obj.offsetLeft;
-					curtop += obj.offsetTop;
-				}while(obj = obj.offsetParent);
-			}
+			curleft = obj.offsetLeft;
+			curtop = obj.offsetTop;
 			return [curleft,curtop];
 		}	
+		
+		function setImgPopupHtml(puTarget,imgId){
+			siphXmlHttp=GetXmlHttpObject();
+			if (siphXmlHttp==null){
+		  		alert ("Your browser does not support AJAX!");
+		  		return;
+		  	}
+			var url="<?php echo $clientRoot; ?>/imagelib/rpc/getimgmetadata.php";
+			url=url+"?imgid="+imgId;
+			siphXmlHttp.onreadystatechange=function(){
+				alert(siphXmlHttp.readyState);
+				alert(siphXmlHttp.responseText);
+				if(siphXmlHttp.readyState==4){
+					if(siphXmlHttp.status==200){
+						puTarget.innerHTML=siphXmlHttp.responseText;
+					}
+					else{
+						puTarget.innerHTML = "Unable to retrieve image details";
+					}
+				}
+			}
+			siphXmlHttp.open("POST",url,true);
+			siphXmlHttp.send(null);
+		} 
 		
 		function decreaseDescrLevel(){
 			var getLevel = false;
@@ -196,14 +226,25 @@
 			mpObj = document.getElementById("morephotos");
 			mpObj.style.display = "none";
 		}
-		
-		function appendImages(){
-			var max = 3;
-			for(;;){
-			
-		
-			}
+
+		function GetXmlHttpObject(){
+			var xmlHttp=null;
+			try{
+				// Firefox, Opera 8.0+, Safari, IE 7.x
+		  		xmlHttp=new XMLHttpRequest();
+		  	}
+			catch (e){
+		  		// Internet Explorer
+		  		try{
+		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+		    	}
+		  		catch(e){
+		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		    	}
+		  	}
+			return xmlHttp;
 		}
+		
 	</script>
 </head>
 <body>
@@ -444,7 +485,7 @@ if($taxonManager->getSciName() != "unknown"){
 						if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 							$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 						}
-						echo "<a href='".$imgUrl."'>";
+						echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
 
 						if($subArr["thumbnailurl"]){
 							$imgUrl = $subArr["thumbnailurl"];
@@ -452,8 +493,13 @@ if($taxonManager->getSciName() != "unknown"){
 								$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
 							}
 						}
-						echo "<img src='".$imgUrl."' title='".$sciNameKey."' alt='Image of ".$sciNameKey."'>";
+						echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."'>";
 						echo "</a>\n";
+						echo "<div style='text-align:right;position:relative;top:-25px;left:8px;' title='Photographer: ".$subArr["photographer"]."'>";
+						echo "<a href='imgdetails.php?imgid=".$subArr["imgid"]."'>";
+						echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg'/>";
+						echo "</a>";
+						echo "</div>";
 					}
 					elseif($editable){
 						echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&tid=".$subArr["tid"]."'>Add an Image!</a></div>";
@@ -462,6 +508,7 @@ if($taxonManager->getSciName() != "unknown"){
 						echo "<div class='spptext'>Image<br/>Not Available</div>";
 					}
 					echo "</div>\n";
+					
 					if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
 						$gUrl = ""; $iUrl = "";
 						if($taxonManager->getSecurityStatus() == 1 || $isAdmin){

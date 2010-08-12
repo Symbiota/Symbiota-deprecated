@@ -48,7 +48,7 @@ if($isEditable){
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?>Data Uploader</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language=javascript>

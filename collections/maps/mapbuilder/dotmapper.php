@@ -1,10 +1,9 @@
 <?php
 //error_reporting(E_ALL);
-
-header("Content-Type: text/html; charset=ISO-8859-1");
 include_once("../../../util/symbini.php");
 include_once("../../../util/dbconnection.php");
 include_once("MapperManager.php");
+header("Content-Type: text/html; charset=".$charset);
 
 $mapId = array_key_exists("mapid",$_REQUEST)?$_REQUEST["mapid"]:"";
 $taxon = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
@@ -30,7 +29,6 @@ if($mapId){
 <head>
     <title><?php echo $defaultTitle; ?> - Map Builder</title>
     <link rel="stylesheet" href="../../../css/main.css" type="text/css" />
-    <meta name='keywords' content='Arizona,New Mexico,Sonora,Sonoran,Desert,plants,lichens,natural history collections,flora, fauna, checklists,species lists' />
 </head>
 
 <body>
