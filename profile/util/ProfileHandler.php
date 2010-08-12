@@ -239,6 +239,7 @@ class ProfileHandler{
     }
     
     public function resetPassword($un){
+    	global $charset;
         $newPassword = $this->generateNewPassword();
         $status = false;
         $returnStr = "";
@@ -269,7 +270,7 @@ class ProfileHandler{
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
 			}
 			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=iso-8859-1 \r\n".
+				"Content-type: text/html; charset=".$charset." \r\n".
 				"To: ".$emailStr." \r\n";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";

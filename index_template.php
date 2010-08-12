@@ -1,10 +1,9 @@
 <?php
 //error_reporting(E_ALL);
-
-header("Content-Type: text/html; charset=ISO-8859-1");
+include_once("util/symbini.php");
+header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-include_once("util/symbini.php");
 ?>
 <html>
 <head>

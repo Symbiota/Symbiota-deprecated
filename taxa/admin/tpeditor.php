@@ -606,16 +606,39 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 		echo "<tr>";
 		$imgCnt = 0;
 		foreach($images as $imgArr){
-			echo "<td align='center' valign='bottom'>";
-			echo "<div style='margin:20px 0px 0px 0px;'>";
-			echo "<a href='".(array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]."'>";
-			echo "<img width='150' src='".(array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]."'/></a></div>";
-			echo "<div style='margin-top:2px;'>Sort sequence: <b>".$imgArr["sortsequence"]."</b></div>";
-			echo "<div>New Value: <input name='imgid-".$imgArr["imgid"]."' type='text' value='' size='5' maxlength='5'></div>\n";
-			echo "</td>\n";
+			$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
+			$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+			?>
+			<td align='center' valign='bottom'>
+				<div style='margin:20px 0px 0px 0px;'>
+					<a href="<?php echo $webUrl; ?>">
+						<img width="150" src="<?php echo $tnUrl;?>" />
+					</a>
+				</div>
+				<div style='margin-top:2px;'>
+					Sort sequence: 
+					<b><?php echo $imgArr["sortsequence"];?></b>
+				</div>
+				<div>
+					New Value: 
+					<input name="imgid-<?php echo $imgArr["imgid"];?>" type="text" size="5" maxlength="5" />
+				</div>
+			</td>
+			<?php 
 			$imgCnt++;
 			if($imgCnt%5 == 0){
-				echo "</tr><tr><td colspan='5'><hr><div style='margin-top:2px;'><input type='submit' name='action' id='submit' value='Submit Image Sort Edits'/></div></td></tr>\n<tr>";
+				?>
+				</tr>
+				<tr>
+					<td colspan='5'>
+						<hr>
+						<div style='margin-top:2px;'>
+							<input type='submit' name='action' id='submit' value='Submit Image Sort Edits' />
+						</div>
+					</td>
+				</tr>
+				<tr>
+				<?php 
 			}
 		}
 		for($i = (5 - $imgCnt%5);$i > 0; $i--){
@@ -756,10 +779,22 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 			?>
 			<table>
 				<tr><td>
-					<div style="margin:20px;float:left;">
-						<a href="<?php echo (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"];?>">
-							<img width="250" src="<?php echo (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"];?>"/>
+					<div style="margin:20px;float:left;text-align:center;">
+						<?php 
+						$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
+						$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+						?>
+						<a href="<?php echo $webUrl;?>">
+							<img src="<?php echo $tnUrl;?>"/>
 						</a>
+						<?php 
+						if($imgArr["originalurl"]){
+							$origUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["originalurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["originalurl"];
+							?>
+							<br /><a href="$origUrl">Open Large Image</a>
+							<?php 
+						}
+						?>
 					</div>
 				</td>
 				<td valign="middle">
@@ -816,7 +851,9 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 						?>
 						<div>
 							<b>Occurrence Record #:</b> 
-							<a href="<?php echo $clientRoot;?>/collections/individual/individual.php?occid=<?php echo $imgArr["occid"]; ?>"><?php echo $imgArr["occid"];?></a>
+							<a href="<?php echo $clientRoot;?>/collections/individual/individual.php?occid=<?php echo $imgArr["occid"]; ?>">
+								<?php echo $imgArr["occid"];?>
+							</a>
 						</div>
 						<?php
 						} 
@@ -873,7 +910,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								<div style='margin-top:2px;'>
 									<b>Photographer (override):</b> 
 									<input name='photographer' type='text' value='<?php echo $imgArr["photographer"];?>' size='37' maxlength='100'>
-									* Only enter a value to override value entered in above Select Box
+									* Will override above selection
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Manager:</b> 
@@ -893,7 +930,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Occurrence Record #:</b> 
-									<input id="occid<?php  echo $imgArr["imgid"];?>" name="occid" type="text" value="" />
+									<input id="occid<?php  echo $imgArr["imgid"];?>" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
 									<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occid<?php  echo $imgArr["imgid"];?>')">Link to Occurrence Record</span>
 								</div>
 								<div style='margin-top:2px;'>
@@ -909,7 +946,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 										<option value='specimen' <?php echo ($imgArr["imagetype"]=="herbarium specimen image"?"SELECTED":"")?>>
 											specimen image
 										</option>
-									</select>
+									</selecbt>
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Notes:</b> 
@@ -920,16 +957,37 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 									<input name='sortsequence' type='text' value='<?php echo $imgArr["sortsequence"];?>' size='5' maxlength='5' />
 								</div>
 								<div style='margin-top:2px;'>
-									<b>URL:</b> 
-									<input name='url' type='text' value='<?php echo $imgArr["url"];?>' size='85' maxlength='150' />
+									<b>Web Image:</b> 
+									<input name='url' type='text' value='<?php echo $imgArr["url"];?>' size='70' maxlength='150' />
+									<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
+									<div style="margin-left:70px;">
+										<input type="checkbox" name="renameweburl" value="1" />
+										Rename web image file on server to match above edit (web server editing privileges requiered)
+									</div>
+									<input name='oldurl' type='hidden' value='<?php echo $imgArr["url"];?>' />
+									<?php } ?>
 								</div>
 								<div style='margin-top:2px;'>
-									<b>Thumbnail URL:</b> 
-									<input name='thumbnailurl' type='text' value='<?php echo $imgArr["thumbnailurl"];?>' size='85' maxlength='150'>
+									<b>Thumbnail:</b> 
+									<input name='thumbnailurl' type='text' value='<?php echo $imgArr["thumbnailurl"];?>' size='70' maxlength='150'>
+									<?php if(stripos($imgArr["thumbnailurl"],$imageRootUrl) === 0){ ?>
+									<div style="margin-left:70px;">
+										<input type="checkbox" name="renametnurl" value="1" />
+										Rename thumbnail image file on server to match above edit (web server editing privileges requiered)
+									</div>
+									<input name='oldthumbnailurl' type='hidden' value='<?php echo $imgArr["thumbnailurl"];?>' />
+									<?php } ?>
 								</div>
 								<div style='margin-top:2px;'>
-									<b>Large Image URL:</b> 
-									<input name='originalurl' type='text' value='<?php echo $imgArr["originalurl"];?>' size='85' maxlength='150'>
+									<b>Large Image:</b> 
+									<input name='originalurl' type='text' value='<?php echo $imgArr["originalurl"];?>' size='70' maxlength='150'>
+									<?php if(stripos($imgArr["originalurl"],$imageRootUrl) === 0){ ?>
+									<div style="margin-left:80px;">
+										<input type="checkbox" name="renameorigurl" value="1" />
+										Rename large image file on server to match above edit (web server editing privileges requiered)
+									</div>
+									<input name='oldoriginalurl' type='hidden' value='<?php echo $imgArr["originalurl"];?>' />
+									<?php } ?>
 								</div>
 								<?php if($tEditor->getRankId() > 220 && !$tEditor->getSubmittedTid() && !$tEditor->imageExists($imgArr["url"],$tEditor->getParentTid())){ ?>
 								<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
@@ -988,7 +1046,10 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 									<input name="imgdel" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
 									<input name="tid" type="hidden" value="<?php echo $tEditor->getTid(); ?>" />
 									<input name="category" type="hidden" value="<?php echo $category; ?>" />
-									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server (as well as database)
+									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server 
+									<div style="margin-left:20px;">
+										(Note: leaving unchecked removes image from database w/o removing from server)
+									</div>
 									<div style='margin-top:2px;'>
 										<input type='submit' name='action' id='submit' value='Delete Image'/>
 									</div>
@@ -1385,10 +1446,48 @@ include($serverRoot."/util/footer.php");
 	}
 
 	public function editImage(){
+		$searchStr = $GLOBALS["imageRootUrl"];
+		if(substr($searchStr,-1) != "/") $searchStr .= "/";
+		$replaceStr = $GLOBALS["imageRootPath"];
+		if(substr($replaceStr,-1) != "/") $replaceStr .= "/";
+		$status = "";
 		$imgId = $_REQUEST["imgid"];
 	 	$url = $_REQUEST["url"];
-	 	$thumbnailUrl = $_REQUEST["thumbnailurl"];
-	 	$originalUrl = $_REQUEST["originalurl"];
+	 	$tnUrl = $_REQUEST["thumbnailurl"];
+	 	$origUrl = $_REQUEST["originalurl"];
+	 	if(array_key_exists("renameweburl",$_REQUEST)){
+	 		$oldUrl = $_REQUEST["oldurl"];
+	 		$oldName = str_replace($searchStr,$replaceStr,$oldUrl);
+	 		$newName = str_replace($searchStr,$replaceStr,$url);
+	 		if($url != $oldUrl){
+	 			if(!rename($oldName,$newName)){
+	 				$url = $oldUrl;
+		 			$status .= "Web URL rename FAILED; url address unchanged";
+	 			}
+	 		}
+		}
+		if(array_key_exists("renametnurl",$_REQUEST)){
+	 		$oldTnUrl = $_REQUEST["oldthumbnailurl"];
+	 		$oldName = str_replace($searchStr,$replaceStr,$oldTnUrl);
+	 		$newName = str_replace($searchStr,$replaceStr,$tnUrl);
+	 		if($tnUrl != $oldTnUrl){
+	 			if(!rename($oldName,$newName)){
+	 				$tnUrl = $oldTnUrl;
+		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
+	 			}
+	 		}
+		}
+		if(array_key_exists("renameorigurl",$_REQUEST)){
+	 		$oldOrigUrl = $_REQUEST["oldoriginalurl"];
+	 		$oldName = str_replace($searchStr,$replaceStr,$oldOrigUrl);
+	 		$newName = str_replace($searchStr,$replaceStr,$origUrl);
+	 		if($origUrl != $oldOrigUrl){
+	 			if(!rename($oldName,$newName)){
+	 				$origUrl = $oldOrigUrl;
+		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
+	 			}
+	 		}
+		}
 	 	$caption = $this->cleanStr($_REQUEST["caption"]);
 		$photographer = $this->cleanStr($_REQUEST["photographer"]);
 		$photographerUid = $_REQUEST["photographeruid"];
@@ -1406,20 +1505,19 @@ include($serverRoot."/util/footer.php");
 			$addToTid = $_REQUEST["addtotid"];
 		}
 		
-		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$thumbnailUrl."\", ".
-			"originalurl = \"".$originalUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
+		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$tnUrl."\", ".
+			"originalurl = \"".$origUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
 			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
 			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", anatomy = \"".$anatomy."\", ".
 			"imagetype = \"".$imageType."\", notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
 			" WHERE imgid = ".$imgId;
 		//echo $sql;
-		$status = "";
 		if($this->taxonCon->query($sql)){
 			$this->setPrimaryImageSort($this->tid);
 			if($addToTid){
 				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
 					"owner, sourceurl, copyright, locality, occid, notes, anatomy) ".
-					"VALUES (".$addToTid.",\"".$url."\",\"".$thumbnailUrl."\",\"".$originalUrl."\",".
+					"VALUES (".$addToTid.",\"".$url."\",\"".$tnUrl."\",\"".$origUrl."\",".
 					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
 					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\",\"".
 					$anatomy."\")";

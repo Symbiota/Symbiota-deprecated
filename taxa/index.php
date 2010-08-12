@@ -478,7 +478,7 @@ if($taxonManager->getSciName() != "unknown"){
 					}
 					echo "<div class='spptaxon'>";
 					echo "<div style='margin-top:10px;'><a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'><i>".$sciNameKey."</i></a></div>\n";
-					echo "<div class='sppimg'>";
+					echo "<div class='sppimg' style='overflow:hidden;'>";
 
 					if(array_key_exists("url",$subArr)){
 						$imgUrl = $subArr["url"];
@@ -493,11 +493,11 @@ if($taxonManager->getSciName() != "unknown"){
 								$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
 							}
 						}
-						echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."'>";
+						echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."' style='z-index:-1' />";
 						echo "</a>\n";
-						echo "<div style='text-align:right;position:relative;top:-25px;left:8px;' title='Photographer: ".$subArr["photographer"]."'>";
+						echo "<div style='text-align:right;position:relative;top:-26px;left:5px;' title='Photographer: ".$subArr["photographer"]."'>";
 						echo "<a href='imgdetails.php?imgid=".$subArr["imgid"]."'>";
-						echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg'/>";
+						echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg' />";
 						echo "</a>";
 						echo "</div>";
 					}
