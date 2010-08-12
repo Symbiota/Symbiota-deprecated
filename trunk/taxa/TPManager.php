@@ -408,7 +408,7 @@
 			$this->setTaxaImages();
 		}
 		if(is_array($this->imageArr) && count($this->imageArr) >= $start){
-			$length = (count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
+			$length = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
 			$spDisplay = $this->getDisplayName();
 			$iArr = array_slice($this->imageArr,$start,$length,true);
 			foreach($iArr as $imgId => $imgObj){
