@@ -36,6 +36,10 @@ td.middleleft{
 	width:	160px;	
 }
 
+td.middleleftnomenu{
+	width:	20px;	
+}
+
 td.middlecenter{
  	width:			100%;
  	height:			350px;		

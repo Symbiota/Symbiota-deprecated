@@ -791,7 +791,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 						if($imgArr["originalurl"]){
 							$origUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["originalurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["originalurl"];
 							?>
-							<br /><a href="$origUrl">Open Large Image</a>
+							<br /><a href="<?php echo $origUrl;?>">Open Large Image</a>
 							<?php 
 						}
 						?>
