@@ -946,7 +946,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 										<option value='specimen' <?php echo ($imgArr["imagetype"]=="herbarium specimen image"?"SELECTED":"")?>>
 											specimen image
 										</option>
-									</selecbt>
+									</select>
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Notes:</b> 
