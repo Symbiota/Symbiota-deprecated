@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
  
  $targetId = $_REQUEST["targetid"];
  $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0; 
- $gui = array_key_exists("gui",$_REQUEST)?$_REQUEST["gui"]:""; 
+ $identifier = array_key_exists("identifier",$_REQUEST)?$_REQUEST["identifier"]:""; 
  $collector = array_key_exists("collector",$_REQUEST)?$_REQUEST["collector"]:""; 
  $collNumber = array_key_exists("collnum",$_REQUEST)?$_REQUEST["collnum"]:""; 
  
@@ -40,13 +40,13 @@ header("Content-Type: text/html; charset=".$charset);
 						<select name="collid">
 							<option value="">Select Collection</option>
 							<option value="">--------------------------------</option>
-							<?php $occManager->echoCollections(); ?>
+							<?php $occManager->echoCollections($collId); ?>
 						</select>
 					</div>
 				</div>
 				<div style="clear:both;padding:2px;">
-					<div style="float:left;width:130px;">Occurrence Id (GUID):</div>
-					<div style="float:left;"><input name="gui" type="text" /></div>
+					<div style="float:left;width:130px;">Identifier (GUID, Catalog #):</div>
+					<div style="float:left;"><input name="identifier" type="text" /></div>
 				</div>
 				<div style="clear:both;padding:2px;">
 					<div style="float:left;width:130px;">Collector Last Name:</div>
@@ -63,7 +63,7 @@ header("Content-Type: text/html; charset=".$charset);
 			</fieldset>
 		</form>
 		<?php 
-			$occArr = $occManager->getOccurrenceList($collId, $gui, $collector, $collNumber);
+			$occArr = $occManager->getOccurrenceList($collId, $identifier, $collector, $collNumber);
 			foreach($occArr as $occId => $vArr){
 				?>
 				<div style="margin:10px;">
@@ -73,6 +73,13 @@ header("Content-Type: text/html; charset=".$charset);
 					</div>
 				</div>
 				<hr />
+				<?php 
+			}
+			if(!$occArr){
+				?>
+				<div style="margin:10px;">
+					No records were returned. Please modify your search and try again. 
+				</div>
 				<?php 
 			}
 		?>
@@ -95,21 +102,21 @@ header("Content-Type: text/html; charset=".$charset);
 		if(!($this->conn === null)) $this->conn->close();
 	}
     
- 	public function getOccurrenceList($collId, $gui, $collector, $collNumber){
+ 	public function getOccurrenceList($collId, $identifier, $collector, $collNumber){
  		$returnArr = Array();
- 		if(!$gui && !$collector && !$collNumber) return $returnArr;
+ 		if(!$identifier && !$collector && !$collNumber) return $returnArr;
  		$sql = "";
  		if($collId){
- 			$sql .= "AND collid = ".$collId." ";
+ 			$sql .= "AND o.collid = ".$collId." ";
  		}
- 		if($gui){
- 			$sql .= "AND occurrenceId LIKE '".$gui."%' ";
+ 		if($identifier){
+ 			$sql .= "AND (o.occurrenceId LIKE \"%".$identifier."%\" OR o.catalognumber LIKE \"%".$identifier."%\")";
  		}
  		if($collector){
- 			$sql .= "AND recordedby LIKE '%".$collector."%' ";
+ 			$sql .= "AND o.recordedby LIKE '%".$collector."%' ";
  		}
  		if($collNumber){
- 			$sql .= "AND recordnumber LIKE '%".$collNumber."%' ";
+ 			$sql .= "AND o.recordnumber LIKE '%".$collNumber."%' ";
  		}
  		$sql = "SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, CONCAT_WS('; ',o.stateprovince, o.county, o.locality) AS locality ".
  			"FROM omoccurrences o WHERE ".substr($sql,4);
@@ -126,11 +133,13 @@ header("Content-Type: text/html; charset=".$charset);
  		return $returnArr;
  	}
  	
- 	public function echoCollections(){
+ 	public function echoCollections($defaultCollId){
  		$sql = "SELECT c.collid, c.collectionname FROM omcollections c ORDER BY c.collectionname";
  		$rs = $this->conn->query($sql);
  		while($row = $rs->fetch_object()){
- 			echo "<option value='".$row->collid."'>".$row->collectionname."</option>";
+ 			echo "<option value='".$row->collid."' ".($row->collid==$defaultCollId?"SELECTED":"").">";
+ 			echo $row->collectionname;
+ 			echo "</option>";
  		}
  		$rs->close();
  	}

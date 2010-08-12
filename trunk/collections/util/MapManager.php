@@ -108,7 +108,7 @@ class MapManager extends CollectionManager{
 	}
 
     public function writeKMLFile(){
-    	global $defaultTitle, $userRights, $clientRoot;
+    	global $defaultTitle, $userRights, $clientRoot, $charset;
 		$fileName = $defaultTitle;
 		if($fileName){
 			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
@@ -125,7 +125,7 @@ class MapManager extends CollectionManager{
 
 		$coordArr = $this->getGeoCoords(0,true);
 		
-        echo "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
+        echo "<?xml version='1.0' encoding='".$charset."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
         echo "<Document>\n";
 		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
