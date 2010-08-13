@@ -118,7 +118,7 @@ class PhotographerManager{
 	}
 	
 	public function echoPhotographerImages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
-		$sql = "SELECT i.thumbnailurl, i.url, ts.family, t.sciname ".
+		$sql = "SELECT i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname ".
 			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
 			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE ts.taxauthid = 1 AND i.photographeruid = $uid ".
@@ -139,7 +139,7 @@ class PhotographerManager{
 		}
 		echo "</div><div style='clear:both;'>";
 		while($row = $result->fetch_object()){
-			echo "<div style='float:left;' class='imgthumb'>";
+			echo "<div style='float:left;height:160px;' class='imgthumb'>";
 			$imgUrl = $row->url;
 			$imgTn = $row->thumbnailurl;
 			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
@@ -157,7 +157,7 @@ class PhotographerManager{
 			}
 			echo "<img src='".$imgUrl."' style='height:130px;' />";
 			echo "</a><br />";
-			echo $row->sciname;
+			echo "<a href='../taxa/index.php?taxon=".$row->sciname."'><i>".$row->sciname."</i></a>";
 			echo "</div>";
 		}
     	$result->close();
