@@ -147,12 +147,9 @@ class PhotographerManager{
 			}
 			echo "<a href='".$imgUrl."'>";
 			if($imgTn){
-				list($width, $height) = getimagesize((array_key_exists("imageDomain",$GLOBALS)?$GLOBALS["imageDomain"]:"").$imgTn);
-				if($width > 190 || $height > 190){
-					$imgUrl = $imgTn;
-					if(array_key_exists("imageDomain",$GLOBALS) && substr($imgTn,0,1)=="/"){
-						$imgUrl = $GLOBALS["imageDomain"].$imgTn;
-					}
+				$imgUrl = $imgTn;
+				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgTn,0,1)=="/"){
+					$imgUrl = $GLOBALS["imageDomain"].$imgTn;
 				}
 			}
 			echo "<img src='".$imgUrl."' style='height:130px;' />";
