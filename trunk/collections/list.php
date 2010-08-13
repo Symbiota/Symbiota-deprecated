@@ -120,10 +120,13 @@
 				echo "<tr>";
 	            echo "<td rowspan='4' width='30' valign='top' align='center'>".
 	                    "<a target='_blank' href='misc/collprofiles.php?collid=".$collId."'>".
-	                    "<img align='absbottom' height='25' width='25' src='../".$icon."'/></a>".
+	                    "<img align='absbottom' height='25' width='25' src='../".$icon."' title='".$collCode." Collection Statistics' /></a>".
 	                    "<div style='font-weight:bold;font-size:75%;'>".$collCode."</div>".
 	                    "</td>";
-				echo "<td width='420' colspan='3'><a target='_blank' href='../taxa/index.php?taxon=".$fieldArr["sciname"]."'><span style='font-style:italic;font-weight:bold;'>".$fieldArr["sciname"]."</span></a> ".$fieldArr["author"]."</td>";
+				echo "<td width='420' colspan='3'>";
+				echo "<a target='_blank' href='../taxa/index.php?taxon=".$fieldArr["sciname"]."'>";
+				echo "<span style='font-style:italic;' title='General Species Information'>".$fieldArr["sciname"]."</span>";
+				echo "</a> ".$fieldArr["author"]."</td>";
 				echo "</tr><tr>";
 				echo "<td width='75'>".$fieldArr["accession"]."</td>";
 				echo "<td>".$fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]."</td>";
@@ -137,8 +140,8 @@
 	            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
 	            echo "<td colspan='3'>".$localStr."</td>";
 	            echo "</tr><tr><td colspan='3'>";
-	            echo "<a href=\"javascript:var puRef=window.open('individual/individual.php?pk=".
-	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\"> More Information </a>\n";
+	            echo "<b><a href=\"javascript:var puRef=window.open('individual/individual.php?pk=".
+	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\">Full Record Details</a></b>\n";
 	            echo "</td></tr><tr><td colspan='4'><hr/></td></tr>";
 	        }
 	    }
