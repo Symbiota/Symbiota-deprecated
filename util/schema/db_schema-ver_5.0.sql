@@ -70,7 +70,7 @@ CREATE TABLE `fmchecklists` (
   `DateLastModified` datetime DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`CLID`),
-  UNIQUE KEY `name` (`Name`,`Type`) USING BTREE,
+  UNIQUE KEY `name` (`Name`,`Type`),
   KEY `Index_checklist_title` (`Title`),
   KEY `FK_checklists_uid` (`uid`),
   CONSTRAINT `FK_checklists_uid` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`)
@@ -293,8 +293,8 @@ CREATE TABLE `imageannotations` (
   `AnnDate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `Annotator` varchar(100) DEFAULT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`imgid`,`AnnDate`) USING BTREE,
-  KEY `TID` (`tid`) USING BTREE,
+  PRIMARY KEY (`imgid`,`AnnDate`),
+  KEY `TID` (`tid`),
   CONSTRAINT `FK_resourceannotations_imgid` FOREIGN KEY (`imgid`) REFERENCES `images` (`imgid`),
   CONSTRAINT `FK_resourceannotations_tid` FOREIGN KEY (`TID`) REFERENCES `taxa` (`TID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -327,7 +327,7 @@ CREATE TABLE `images` (
   `username` varchar(45) DEFAULT NULL,
   `sortsequence` int(10) unsigned NOT NULL DEFAULT '50',
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`imgid`) USING BTREE,
+  PRIMARY KEY (`imgid`),
   UNIQUE KEY `Index_unique` (`tid`,`url`),
   KEY `Index_tid` (`tid`),
   KEY `FK_images_occ` (`occid`),
@@ -379,7 +379,7 @@ CREATE TABLE `kmcharacterlang` (
   `description` varchar(255) DEFAULT NULL,
   `helpurl` varchar(500) DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`cid`,`language`) USING BTREE,
+  PRIMARY KEY (`cid`,`language`),
   CONSTRAINT `FK_characterlang_1` FOREIGN KEY (`cid`) REFERENCES `kmcharacters` (`cid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -423,7 +423,7 @@ CREATE TABLE `kmchardependance` (
   `CIDDependance` int(10) unsigned NOT NULL,
   `CSDependance` varchar(16) NOT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`CSDependance`,`CIDDependance`,`CID`) USING BTREE,
+  PRIMARY KEY (`CSDependance`,`CIDDependance`,`CID`),
   KEY `FK_chardependance_cid` (`CID`),
   KEY `FK_chardependance_2` (`CIDDependance`),
   CONSTRAINT `FK_chardependance_2` FOREIGN KEY (`CID`) REFERENCES `kmcharacters` (`cid`),
@@ -444,8 +444,8 @@ CREATE TABLE `kmcharheading` (
   `language` varchar(45) NOT NULL DEFAULT 'English',
   `notes` longtext,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`hid`,`language`) USING BTREE,
-  KEY `HeadingName` (`headingname`) USING BTREE
+  PRIMARY KEY (`hid`,`language`),
+  KEY `HeadingName` (`headingname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -461,7 +461,7 @@ CREATE TABLE `kmcharheadinglink` (
   `CID` int(10) unsigned NOT NULL DEFAULT '0',
   `Notes` varchar(255) DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`HID`,`CID`) USING BTREE,
+  PRIMARY KEY (`HID`,`CID`),
   KEY `CharactersCharHeadingLinker` (`CID`),
   KEY `CharHeadingCharHeadingLinker` (`HID`),
   KEY `CID` (`CID`),
@@ -608,7 +608,7 @@ CREATE TABLE `kmdescrdeletions` (
   `DeletedBy` varchar(100) NOT NULL,
   `DeletedTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `PK` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`PK`) USING BTREE
+  PRIMARY KEY (`PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -623,7 +623,7 @@ CREATE TABLE `omcollcatagories` (
   `ccpk` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `catagory` varchar(45) NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`ccpk`) USING BTREE
+  PRIMARY KEY (`ccpk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -668,8 +668,8 @@ CREATE TABLE `omcollections` (
   `CollType` varchar(45) NOT NULL DEFAULT 'Preserved Specimens' COMMENT 'Preserved Specimens, Observations',
   `SortSeq` int(10) unsigned DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`CollID`) USING BTREE,
-  UNIQUE KEY `unique_index` (`CollectionCode`) USING BTREE,
+  PRIMARY KEY (`CollID`),
+  UNIQUE KEY `unique_index` (`CollectionCode`),
   KEY `Index_inst` (`InstitutionCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -825,7 +825,7 @@ CREATE TABLE `omoccurrences` (
   `language` varchar(2) DEFAULT NULL,
   `observeruid` int(10) unsigned DEFAULT NULL,
   `dateLastModified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`occid`) USING BTREE,
+  PRIMARY KEY (`occid`),
   UNIQUE KEY `Index_unique` (`collid`,`dbpk`),
   KEY `Index_sciname` (`sciname`),
   KEY `Index_family` (`family`),
@@ -873,8 +873,8 @@ CREATE TABLE `omsurveyprojlink` (
   `surveyid` int(10) unsigned NOT NULL,
   `pid` int(10) unsigned NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`surveyid`,`pid`) USING BTREE,
-  KEY `FK_specprojcatlink_cat` (`pid`) USING BTREE,
+  PRIMARY KEY (`surveyid`,`pid`),
+  KEY `FK_specprojcatlink_cat` (`pid`),
   CONSTRAINT `FK_omsurveyprojlink_proj` FOREIGN KEY (`pid`) REFERENCES `fmprojects` (`pid`),
   CONSTRAINT `FK_omsurveyprojlink_sur` FOREIGN KEY (`surveyid`) REFERENCES `omsurveys` (`surveyid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -933,7 +933,7 @@ CREATE TABLE `taxa` (
   PRIMARY KEY (`TID`),
   UNIQUE KEY `sciname_unique` (`SciName`),
   KEY `rankid_index` (`RankId`),
-  KEY `unitname1_index` (`UnitName1`,`UnitName2`) USING BTREE
+  KEY `unitname1_index` (`UnitName1`,`UnitName2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1047,7 +1047,7 @@ CREATE TABLE `taxamaps` (
   `dmid` int(10) unsigned DEFAULT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`mid`),
-  UNIQUE KEY `Index_unique` (`tid`,`dmid`) USING BTREE,
+  UNIQUE KEY `Index_unique` (`tid`,`dmid`),
   KEY `FK_taxamaps_dmid` (`dmid`),
   CONSTRAINT `FK_taxamaps_dmid` FOREIGN KEY (`dmid`) REFERENCES `taxamapparams` (`dmid`) ON UPDATE CASCADE,
   CONSTRAINT `FK_taxamaps_taxa` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`)
@@ -1072,7 +1072,7 @@ CREATE TABLE `taxauthority` (
   `notes` varchar(250) DEFAULT NULL,
   `isactive` int(1) unsigned NOT NULL DEFAULT '1',
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`taxauthid`) USING BTREE
+  PRIMARY KEY (`taxauthid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1115,7 +1115,7 @@ CREATE TABLE `taxonunits` (
   `dirparentrankid` smallint(6) NOT NULL,
   `reqparentrankid` smallint(6) NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`kingdomid`,`rankid`) USING BTREE
+  PRIMARY KEY (`kingdomid`,`rankid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1138,13 +1138,13 @@ CREATE TABLE `taxstatus` (
   `notes` varchar(250) DEFAULT NULL,
   `SortSequence` int(10) unsigned DEFAULT '50',
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`tid`,`tidaccepted`,`taxauthid`) USING BTREE,
+  PRIMARY KEY (`tid`,`tidaccepted`,`taxauthid`),
   KEY `FK_taxstatus_tidacc` (`tidaccepted`),
   KEY `FK_taxstatus_taid` (`taxauthid`),
   KEY `Index_ts_family` (`family`),
   KEY `Index_ts_upper` (`uppertaxonomy`),
   KEY `Index_parenttid` (`parenttid`),
-  KEY `Index_hierarchy` (`hierarchystr`) USING BTREE,
+  KEY `Index_hierarchy` (`hierarchystr`),
   CONSTRAINT `FK_taxstatus_parent` FOREIGN KEY (`parenttid`) REFERENCES `taxa` (`TID`),
   CONSTRAINT `FK_taxstatus_taid` FOREIGN KEY (`taxauthid`) REFERENCES `taxauthority` (`taxauthid`) ON UPDATE CASCADE,
   CONSTRAINT `FK_taxstatus_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`),
@@ -1165,7 +1165,7 @@ CREATE TABLE `unknowncomments` (
   `comment` varchar(500) NOT NULL,
   `username` varchar(45) NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`unkcomid`) USING BTREE,
+  PRIMARY KEY (`unkcomid`),
   KEY `FK_unknowncomments` (`unkid`),
   CONSTRAINT `FK_unknowncomments` FOREIGN KEY (`unkid`) REFERENCES `unknowns` (`unkid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1209,7 +1209,7 @@ CREATE TABLE `unknowns` (
   `username` varchar(45) NOT NULL,
   `idstatus` varchar(45) NOT NULL DEFAULT 'ID pending',
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`unkid`) USING BTREE,
+  PRIMARY KEY (`unkid`),
   KEY `FK_unknowns_username` (`username`),
   KEY `FK_unknowns_tid` (`tid`),
   CONSTRAINT `FK_unknowns_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`),
@@ -1249,20 +1249,16 @@ CREATE TABLE `uploadimagetemp` (
 -- Table structure for table `uploadspecmap`
 --
 
-DROP TABLE IF EXISTS `uploadspecmap`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `uploadspecmap` (
-  `collid` int(10) unsigned NOT NULL,
-  `UploadType` int(10) unsigned NOT NULL,
+  `usmid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uspid` int(10) unsigned NOT NULL,
   `sourcefield` varchar(45) NOT NULL,
   `symbdatatype` varchar(45) NOT NULL DEFAULT 'string' COMMENT 'string, numeric, datetime',
   `symbspecfield` varchar(45) NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`collid`,`symbspecfield`,`UploadType`) USING BTREE,
-  KEY `FK_uploadspecmap_up` (`collid`,`UploadType`),
-  CONSTRAINT `FK_uploadspecmap_up` FOREIGN KEY (`collid`, `UploadType`) REFERENCES `uploadspecparameters` (`CollID`, `UploadType`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`usmid`),
+  CONSTRAINT `FK_uploadspecmap_usp` FOREIGN KEY (`uspid`) REFERENCES `uploadspecparameters` (`uspid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1273,8 +1269,10 @@ DROP TABLE IF EXISTS `uploadspecparameters`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `uploadspecparameters` (
+  `uspid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `CollID` int(10) unsigned NOT NULL,
   `UploadType` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '1 = Direct; 2 = DiGIR; 3 = File',
+  `title` varchar(45) NOT NULL,
   `Platform` varchar(45) DEFAULT '1' COMMENT '1 = MySQL; 2 = MSSQL; 3 = ORACLE; 11 = MS Access; 12 = FileMaker',
   `server` varchar(150) DEFAULT NULL,
   `port` int(10) unsigned DEFAULT NULL,
@@ -1289,10 +1287,12 @@ CREATE TABLE `uploadspecparameters` (
   `cleanupsp` varchar(45) DEFAULT NULL,
   `dlmisvalid` int(10) unsigned DEFAULT '0',
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`CollID`,`UploadType`) USING BTREE,
-  CONSTRAINT `FK_uploadspecparameters_collection` FOREIGN KEY (`CollID`) REFERENCES `omcollections` (`CollID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`uspid`),
+  KEY `FK_uploadspecparameters_coll` (`CollID`),
+  CONSTRAINT `FK_uploadspecparameters_coll` FOREIGN KEY (`CollID`) REFERENCES `omcollections` (`CollID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `uploadspectemp`
@@ -1384,7 +1384,7 @@ CREATE TABLE `uploadspectemp` (
   `modified` datetime DEFAULT NULL COMMENT 'DateLastModified',
   `language` varchar(2) DEFAULT NULL,
   `initialTimestamp` datetime DEFAULT NULL,
-  PRIMARY KEY (`collid`,`dbpk`) USING BTREE
+  PRIMARY KEY (`collid`,`dbpk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1422,7 +1422,7 @@ CREATE TABLE `uploadtaxa` (
   `Hybrid` varchar(50) DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`scinameinput`),
-  UNIQUE KEY `sciname_index` (`SciName`) USING BTREE
+  UNIQUE KEY `sciname_index` (`SciName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1439,7 +1439,7 @@ CREATE TABLE `userlogin` (
   `password` varchar(45) NOT NULL,
   `lastlogindate` datetime DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`username`) USING BTREE,
+  PRIMARY KEY (`username`),
   KEY `FK_login_user` (`uid`),
   CONSTRAINT `FK_login_user` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1491,7 +1491,7 @@ CREATE TABLE `users` (
   `usergroups` varchar(100) DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `Index_email` (`email`,`lastname`) USING BTREE
+  UNIQUE KEY `Index_email` (`email`,`lastname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

@@ -5,7 +5,11 @@ class DirectUpload extends DataUploadManager {
 		parent::__construct();
  	}
  	
-	public function analyzeFile(){
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+	
+ 	public function analyzeFile(){
 	 	$this->readUploadParameters();
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
@@ -21,7 +25,7 @@ class DirectUpload extends DataUploadManager {
 		}
 	}
 
- 	public function uploadData(){
+ 	public function uploadData($finalTransfer){
 	 	$this->readUploadParameters();
  		$sourceDbpkFieldName = "";
 		if(array_key_exists("dbpk",$this->fieldMap)){
@@ -108,7 +112,7 @@ class DirectUpload extends DataUploadManager {
 					if($recCnt%1000 == 0) echo "<li style='font-weight:bold;'>Record Count: $recCnt</li>";
 				}
 				
-				$this->finalTransferSteps();
+				$this->finalUploadSteps($finalTransfer);
 				$this->transferCount = $recCnt-1;
 				$result->close();
 			}

@@ -9,7 +9,7 @@ class DataUploadManager {
 	protected $conn;
 	protected $collId = 0;
 	protected $uploadType;
-	protected $finalTransfer;
+	protected $uspid = 0;
 	protected $doFullReplace = false;
 	
 	protected $title = "";
@@ -50,12 +50,12 @@ class DataUploadManager {
 		$this->uploadType = $t;
 	}
 	
-	public function setFieldMap($fm){
-		$this->fieldMap = $fm;
+	public function setUspid($id){
+		$this->uspid = $id;
 	}
 	
-	public function setFinalTransfer($ft){
-		$this->finalTransfer = $ft;
+	public function setFieldMap($fm){
+		$this->fieldMap = $fm;
 	}
 	
 	public function setDoFullReplace($dfr){
@@ -105,13 +105,13 @@ class DataUploadManager {
 	
 	public function getUploadList(){
 		$returnArr = Array();
-		$sql = "SELECT usp.UploadType, usp.title ".
+		$sql = "SELECT usp.uspid, usp.uploadtype, usp.title ".
 			"FROM uploadspecparameters usp ".
-			"WHERE (usp.collid = $this->collId) ORDER BY usp.UploadType";
+			"WHERE (usp.collid = $this->collId) ORDER BY usp.uploadtype";
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$uploadType = $row->UploadType;
+			$uploadType = $row->uploadtype;
 			$uploadStr = "";
 			if($uploadType == $this->DIRECTUPLOAD){
 				$uploadStr = "Direct Upload";
@@ -125,7 +125,8 @@ class DataUploadManager {
 			elseif($uploadType == $this->STOREDPROCEDURE){
 				$uploadStr = "Stored Procedure";
 			}
-			$returnArr[$row->UploadType] = $row->title." (".$uploadStr.")";
+			$returnArr[$row->uspid]["title"] = $row->title." (".$uploadStr.")";
+			$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;
 		}
 		$result->close();
 		return $returnArr;
@@ -135,7 +136,7 @@ class DataUploadManager {
 		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, usp.driver, ".
     		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, usp.dlmisvalid, cs.uploaddate ".
 			"FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid ".
-    		"WHERE usp.collid = ".$this->collId." AND usp.UploadType = '".$this->uploadType."'";
+    		"WHERE usp.uspid = ".$this->uspid;
 		//echo $sql;
 		$result = $this->conn->query($sql);
     	if($row = $result->fetch_object()){
@@ -161,8 +162,8 @@ class DataUploadManager {
 		//Get Field Map for $fieldMap
 		if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
 	    	$sql = "SELECT usm.sourcefield, usm.symbspecfield ".
-				"FROM uploadspecmap AS usm ".
-	    		"WHERE usm.collid = ".$this->collId." AND usm.uploadtype = ".$this->uploadType;
+				"FROM uploadspecmap usm ".
+	    		"WHERE usm.uspid = ".$this->uspid;
 	    	//echo $sql;
 			$rs = $this->conn->query($sql);
 	    	while($row = $rs->fetch_object()){
@@ -200,13 +201,13 @@ class DataUploadManager {
     }
     
     public function editUploadProfile(){
-		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["eultitle"]."\", platform = \"".$_REQUEST["eulplatform"].
-			"\", server = \"".$_REQUEST["eulserver"]."\", port = ".$_REQUEST["eulport"].", username = \"".$_REQUEST["eulusername"].
-			"\", password = \"".$_REQUEST["eulpassword"]."\", schemaname = \"".$_REQUEST["eulschemaname"].
-			"\", driver = \"".$_REQUEST["euldriver"]."\", digircode = \"".$_REQUEST["euldigircode"].
-			"\", digirpath = \"".$_REQUEST["euldigirpath"]."\", digirpkfield = \"".$_REQUEST["euldigirpkfield"].
-			"\", querystr = \"".$this->cleanField(strtolower($_REQUEST["eulquerystr"]))."\", cleanupsp = \"".$_REQUEST["eulcleanupsp"].
-			"\", dlmisvalid = ".$_REQUEST["euldlmisvalid"]." WHERE collid = ".$this->collId." AND UploadType = ".$_REQUEST["euluploadtype"];
+		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["euptitle"]."\", platform = \"".$_REQUEST["eupplatform"].
+			"\", server = \"".$_REQUEST["eupserver"]."\", port = ".($_REQUEST["eupport"]?$_REQUEST["eupport"]:"NULL").", username = \"".$_REQUEST["eupusername"].
+			"\", password = \"".$_REQUEST["euppassword"]."\", schemaname = \"".$_REQUEST["eupschemaname"].
+			"\", driver = \"".$_REQUEST["eupdriver"]."\", digircode = \"".$_REQUEST["eupdigircode"].
+			"\", digirpath = \"".$_REQUEST["eupdigirpath"]."\", digirpkfield = \"".$_REQUEST["eupdigirpkfield"].
+			"\", querystr = \"".$this->cleanField(strtolower($_REQUEST["eupquerystr"]))."\", cleanupsp = \"".$_REQUEST["eupcleanupsp"].
+			"\", dlmisvalid = ".$_REQUEST["eupdlmisvalid"]." WHERE uspid = ".$this->uspid;
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -229,8 +230,8 @@ class DataUploadManager {
 		return "SUCCESS: New Upload Profile Added";
 	}
 	
-    public function deleteUploadProfile($collId, $uploadType){
-		$sql = "DELETE FROM uploadspecparameters WHERE collid = ".$collId." AND uploadtype = ".$uploadType;
+    public function deleteUploadProfile($uspid){
+		$sql = "DELETE FROM uploadspecparameters WHERE uspid = ".$uspid;
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -289,9 +290,10 @@ class DataUploadManager {
 	}
 
 	public function saveFieldMap(){
-		$this->conn->query("DELETE FROM uploadspecmap WHERE collid = ".$this->collId." AND uploadtype = ".$this->uploadType);
-		$sqlInsert = "INSERT INTO uploadspecmap(collid,uploadtype,symbspecfield,sourcefield) ";
-		$sqlValues = "VALUES (".$this->collId.",".$this->uploadType;
+		$this->conn->query("DELETE FROM uploadspecmap usm INNER JOIN uploadspecparameters usp ON usm.uspid = usp.uspid ".
+			"WHERE uspid = ".$this->uspid);
+		$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
+		$sqlValues = "VALUES (".$this->uspid;
 		foreach($this->fieldMap as $k => $v){
 			$sourceField = $v["field"];
 			if($sourceField != $k){
@@ -301,16 +303,16 @@ class DataUploadManager {
 			}
 		}
 	}
-	
- 	public function uploadData(){
- 		//Stored Procedure upload
+
+ 	public function uploadData($finalTransfer){
+ 		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
  		if($this->uploadType == $this->STOREDPROCEDURE){
- 			$this->finalTransferSteps();
+ 			$this->finalUploadSteps($finalTransfer);
  		}
  	}
-	
-	public function finalTransferSteps(){
+
+	public function finalUploadSteps($finalTransfer){
 		//Run cleanup Stored Procedure, if one exists 
 		if($this->cleanupSP){
 			if($this->conn->query("CALL ".$this->cleanupSP.";")){
@@ -326,23 +328,23 @@ class DataUploadManager {
 				$this->transferCount = $row->cnt;
 			}
 			$rs->close();
-		}  
-		$this->performFinalTransfer();
-	}
-	
-	public function performFinalTransfer(){
-		if($this->finalTransfer){
-			//Clean and Transfer records from uploadspectemp to specimens
-			if($this->conn->query("CALL TransferUploads(".($this->doFullReplace?"1":"0").");")){
-				echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount:" records transferred to central specimen table")."</li>";
-			}
-			else{
-				echo "<li>Unable to complete transfer. Please contact system administrator</li>";
-			}
+		}
+		if($finalTransfer){
+			$this->performFinalTransfer();
 		}
 		else{
 			echo "<li>Upload Procedure Complete: ".$this->transferCount."</li>";
 			echo "<li>Records transferred only to temporary specimen table, review records and then use controls below to transfer to specimen table</li>";
+		}
+	}
+
+	public function performFinalTransfer(){
+		//Clean and Transfer records from uploadspectemp to specimens
+		if($this->conn->query("CALL TransferUploads(".($this->doFullReplace?"1":"0").");")){
+			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount:" records transferred to central specimen table")."</li>";
+		}
+		else{
+			echo "<li>Unable to complete transfer. Please contact system administrator</li>";
 		}
 	}
 

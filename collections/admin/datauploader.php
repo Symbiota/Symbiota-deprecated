@@ -4,8 +4,9 @@ include_once("util/datauploadmanager.php");
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
+$uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
-$doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:"0";
+$doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:0;
 $statusStr = "";
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4;
 
@@ -25,7 +26,7 @@ else{
 
 if($collId) $duManager->setCollId($collId);
 if($uploadType) $duManager->setUploadType($uploadType);
-if($finalTransfer) $duManager->setFinalTransfer($finalTransfer);
+if($uspid) $duManager->setUspid($uspid);
 if($doFullReplace) $duManager->setDoFullReplace($doFullReplace);
 
 $isEditable = 0;
@@ -40,7 +41,7 @@ if($isEditable){
 		$statusStr = $duManager->addUploadProfile();
 	}
 	elseif($action == "Delete Profile"){
-		$statusStr = $duManager->deleteUploadProfile($collId, $_REQUEST["dupuploadtype"]);
+		$statusStr = $duManager->deleteUploadProfile($uspid);
 	}
 }
 ?>
@@ -289,15 +290,16 @@ if($statusStr){
 		<?php 
 	}
  	elseif(stripos($action,"upload") === false && stripos($action,"transfer") === false){
-	 	$actionList = $duManager->getUploadList($collId);
+	 	$actionList = $duManager->getUploadList();
 		foreach($actionList as $k => $v){
 			?>
-			<form name="uploadform" action="datauploader.php" method="post" <?php echo ($k==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkAnalyzeForm()">
+			<form name="uploadform" action="datauploader.php" method="post" <?php echo ($v["uploadtype"]==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkAnalyzeForm()">
 				<fieldset style="width:450px;">
-					<legend style="font-weight:bold;font-size:120%;"><?php echo $v;?></legend>
+					<legend style="font-weight:bold;font-size:120%;"><?php echo $v["title"];?></legend>
+					<input type="hidden" name="uspid" value="<?php echo $k;?>" />
 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-					<input type="hidden" name="uploadtype" value="<?php echo $k;?>" />
-					<?php if(stripos($action,"Analyze") !== false && $uploadType == $k){ ?>
+					<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
+					<?php if(stripos($action,"Analyze") !== false && $uploadType == $v["uploadtype"]){ ?>
 						<table border="1" cellpadding="2" style="border:1px solid black">
 							<tr>
 								<th>
@@ -310,7 +312,7 @@ if($statusStr){
 							<?php $duManager->analyzeFile(); ?>
 						</table>
 					<?php } ?>
-					<?php if($k == $FILEUPLOAD){ ?>
+					<?php if($v["uploadtype"] == $FILEUPLOAD){ ?>
 						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 						<div>
 							<b>Upload File:</b> 
@@ -319,10 +321,10 @@ if($statusStr){
 					<?php } ?>
 	
 						<input type="submit" name="action" value="View/Edit Parameters..." />
-					<?php if($k != $STOREDPROCEDURE && $k != $DIGIRUPLOAD && stripos($action,"Analyze") === false){ ?>
+					<?php if($v["uploadtype"] != $STOREDPROCEDURE && $v["uploadtype"] != $DIGIRUPLOAD && stripos($action,"Analyze") === false){ ?>
 						<input type="submit" name="action" value="Analyze..." />
 					<?php } ?>
-					<?php if($k == $STOREDPROCEDURE || $k == $DIGIRUPLOAD || stripos($action,"Analyze")!==false) { ?>
+					<?php if($v["uploadtype"] == $STOREDPROCEDURE || $v["uploadtype"] == $DIGIRUPLOAD || stripos($action,"Analyze")!==false) { ?>
 						<input type="submit" name="action" value="Start Upload..." />
 					<?php if(stripos($action,"Analyze")!==false){ ?>
 						<div>
@@ -331,11 +333,11 @@ if($statusStr){
 					<?php } ?>
 		 				<div>
 		 					<input type="checkbox" name="finaltransfer" value="1" <?php echo ($finalTransfer?"checked":""); ?> onclick="toggle('dodiv')"/>
-		 					Perform Final Transfer and Make Public 
+		 					Perform Final Transfer and Make Public
 						</div>
-						<div id="dodiv" style="display:none;">
+						<div id="dodiv" style="display:none;margin-left:20px;">
 							<div>
-								<input name="dofullreplace" type="radio" value="0" /> Append New / Update Modified Records
+								<input name="dofullreplace" type="radio" value="0" checked /> Append New / Update Modified Records
 							</div>
 							<div>
 								<input name="dofullreplace" type="radio" value="1" /> Replace All Records
@@ -373,7 +375,7 @@ if($statusStr){
 					</div>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Upload Type: </div>
-						<div class="editdiv" style=""><?php echo $uploadType; ?></div>
+						<div class="editdiv" style=""><?php echo $editTitle; ?> Upload</div>
 						<div class="editdiv" style="display:none;">
 							<select name="eupuploadtype">
 								<option value="">Select an Upload Type</option>
@@ -486,6 +488,7 @@ if($statusStr){
 						</div>
 					</div>
 					<div>
+						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 						<div class="editdiv" style="display:none;">
 							<input type="submit" name="action" value="Submit Edits" />
@@ -498,8 +501,8 @@ if($statusStr){
 					<fieldset>
 						<legend>Delete this Profile</legend>
 						<div>
+							<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 							<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-							<input type="hidden" name="dupuploadtype" value="<?php echo $uploadType;?>" />
 							<input type="submit" name="action" value="Delete Profile" />
 						</div>
 					</fieldset>
@@ -513,7 +516,7 @@ if($statusStr){
 		if(stripos($action,"upload") !== false){
 	 		echo "<div style='font-weight:bold;font-size:120%'>Starting Data Upload: </div>";
 	 		echo "<ol style='margin:10px;font-weight:bold;'>";
-	 		$duManager->uploadData();
+	 		$duManager->uploadData($finalTransfer);
 			echo "</ol>";
 	 		if($duManager->getTransferCount() && !$finalTransfer){
 				?>
@@ -522,16 +525,13 @@ if($statusStr){
 	 					<legend>Final transfer</legend>
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
 	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+	 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 	 					<div style="font-weight:bold;margin:5px;"> 
 	 						Number of records uploaded to temporary table (uploadspectemp): <?php echo $duManager->getTransferCount();?>
 						</div>
 	 					<div style="margin:5px;"> 
 	 						If this sounds correct, transfer to central specimen table using this form. Note that your old specimens 
 	 						records will be replaced. You may want to inspect uploadspectemp records to verify initial upload. 
-						</div>
-	 					<div> 
-	 						<input type="checkbox" name="finaltransfer" value="1" CHECKED READONLY />
-	 						Perform Final Transfer (temp table &#61;&gt; specimen table, update stats, clear temp table) 
 						</div>
 						<div>
 							<input name="dofullreplace" type="radio" value="0" <?php if(!$doFullReplace) echo "SELECTED"; ?> /> 
@@ -542,15 +542,14 @@ if($statusStr){
 							Replace All Records
 						</div>
 	 					<div style="margin:5px;"> 
-	 						<input type="submit" name="action" value="Transfer to Central Specimen Table" />
+	 						<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
 						</div>
 	 				</fieldset>			
 	 			</form>
 				<?php 							
 			}
 		}
-		else{
-	 		$duManager->finalTransfer = 1;
+		elseif(stripos($action,"transfer") !== false || $finalTransfer){
 			$duManager->performFinalTransfer();
 		}
  	}
