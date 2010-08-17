@@ -6,7 +6,7 @@ class FileUpload extends DataUploadManager{
  		set_time_limit(600);
 	}
 
-	public function analyzeFile(){
+	public function analyzeFile($autoMap = 0){
 	 	$this->readUploadParameters();
 		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'rb') or die("Can't open file");
@@ -23,7 +23,7 @@ class FileUpload extends DataUploadManager{
 			}
 		}
 		
-		$this->echoFieldMapTable($sourceArr);
+		$this->echoFieldMapTable($sourceArr,$autoMap);
 	}
  	
 	public function uploadData($finalTransfer){

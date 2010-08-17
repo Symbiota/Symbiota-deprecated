@@ -9,11 +9,16 @@ class DirectUpload extends DataUploadManager {
  		parent::__destruct();
 	}
 	
- 	public function analyzeFile(){
+ 	public function analyzeFile($autoMap = 0){
 	 	$this->readUploadParameters();
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
-			$rs = $sourceConn->query($this->queryStr);
+			$sql = trim($this->queryStr);
+			if(substr($sql,-1) == ";") $sql = substr($sql,0,strlen($sql)-1); 
+			if(strlen($sql) > 20 && stripos(substr($sql,-20)," limit ") === false){
+				$sql .= " LIMIT 10";
+			}
+			$rs = $sourceConn->query($sql);
 			$row = $rs->fetch_assoc();
 			$sourceArr = Array();
 			foreach($row as $k => $v){
@@ -21,7 +26,7 @@ class DirectUpload extends DataUploadManager {
 			}
 			$rs->close();
 			
-			$this->echoFieldMapTable($sourceArr);
+			$this->echoFieldMapTable($sourceArr,$autoMap);
 		}
 	}
 

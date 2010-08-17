@@ -1360,7 +1360,7 @@ CREATE TABLE `uploadspectemp` (
   `municipality` varchar(255) DEFAULT NULL,
   `locality` text,
   `localitySecurity` int(10) DEFAULT NULL COMMENT '0 = hide locality, 1 = display locality',
-  `decimalLatitude` decimal(9,8) DEFAULT NULL,
+  `decimalLatitude` decimal(10,8) DEFAULT NULL,
   `decimalLongitude` decimal(10,8) DEFAULT NULL,
   `geodeticDatum` varchar(255) DEFAULT NULL,
   `coordinateUncertaintyInMeters` decimal(10,2) DEFAULT NULL,

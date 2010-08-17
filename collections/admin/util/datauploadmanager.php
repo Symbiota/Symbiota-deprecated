@@ -103,11 +103,17 @@ class DataUploadManager {
 		return $returnArr;
 	}
 	
-	public function getUploadList(){
+	public function getUploadList($uspid = 0){
 		$returnArr = Array();
 		$sql = "SELECT usp.uspid, usp.uploadtype, usp.title ".
 			"FROM uploadspecparameters usp ".
-			"WHERE (usp.collid = $this->collId) ORDER BY usp.uploadtype";
+			"WHERE (usp.collid = $this->collId) ";
+		if($uspid){
+			$sql .= "AND usp.uspid = ".$uspid;
+		}
+		else{
+			$sql .= "ORDER BY usp.uploadtype";
+		}
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -245,16 +251,13 @@ class DataUploadManager {
 		return $rStr;
 	}
 	
-	protected function echoFieldMapTable($sourceArr){
+	protected function echoFieldMapTable($sourceArr,$autoMap = 0){
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
 		foreach($this->fieldMap as $symbField => $fArr){
-			$sField = $fArr["field"];
-			if($sField != $symbField){
-				$sourceSymbArr[$fArr["field"]] = $symbField;
-			} 
+			$sourceSymbArr[$fArr["field"]] = $symbField;
 		}
-		
+
 		//Output table rows for source data
 		sort($this->symbFields);
 		foreach($sourceArr as $fieldName){
@@ -264,24 +267,25 @@ class DataUploadManager {
 			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
 			echo "</td>\n";
 			echo "<td>\n";
-			echo "<select name='tf[]' style='background:".(in_array($fieldName,$this->symbFields)||array_key_exists($fieldName,$sourceSymbArr)?"":"yellow")."'>";
+			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)?"yellow":"")."'>";
 			echo "<option value=''>Select Target Field</option>\n";
+			echo "<option value=''>Leave Field Unmapped</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
-			if(in_array($fieldName,$this->symbFields)){
+			if($autoMap && in_array($fieldName,$this->symbFields)){
 				//Source Field = Symbiota Field
-				foreach($this->symbFields as $symbField){
-					echo "<option ".($fieldName==$symbField?"SELECTED":"").">".$symbField."</option>\n";
+				foreach($this->symbFields as $sField){
+					echo "<option ".($fieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
 				}
 			}
 			elseif(array_key_exists($fieldName,$sourceSymbArr)){
 				//Source Field is mapped to Symbiota Field
-				foreach($this->symbFields as $symbField){
-					echo "<option ".($sourceSymbArr[$fieldName]==$symbField?"SELECTED":"").">".$symbField."</option>\n";
+				foreach($this->symbFields as $sField){
+					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
 				}
 			}
 			else{
-				foreach($this->symbFields as $symbField){
-					echo "<option>".$symbField."</option>\n";
+				foreach($this->symbFields as $sField){
+					echo "<option>".$sField."</option>\n";
 				}
 			}
 			echo "</select></td>\n";
@@ -290,21 +294,23 @@ class DataUploadManager {
 	}
 
 	public function saveFieldMap(){
-		$this->conn->query("DELETE FROM uploadspecmap usm INNER JOIN uploadspecparameters usp ON usm.uspid = usp.uspid ".
-			"WHERE uspid = ".$this->uspid);
+		$this->deleteFieldMap();
 		$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
 		$sqlValues = "VALUES (".$this->uspid;
 		foreach($this->fieldMap as $k => $v){
 			$sourceField = $v["field"];
-			if($sourceField != $k){
-				$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
-				//echo $sql;
-				$this->conn->query($sql);
-			}
+			$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
+			//echo $sql;
+			$this->conn->query($sql);
 		}
 	}
 
- 	public function uploadData($finalTransfer){
+	public function deleteFieldMap(){
+		$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid;
+		$this->conn->query($sql);
+	}
+
+	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
  		if($this->uploadType == $this->STOREDPROCEDURE){
