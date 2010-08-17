@@ -38,7 +38,7 @@ class DigirUpload extends DataUploadManager {
 		$this->nibbleGoodChars = "@^($ascii_char+|$utf8_2|$utf8_3|$utf8_4|$utf8_5)(.*)$@s";
  	}
 	
- 	public function uploadData(){
+ 	public function uploadData($finalTransfer){
 	 	$this->readUploadParameters();
  		if($this->schemaName){
 			if(substr($this->schemaName,0,4) != "http"){
@@ -59,7 +59,7 @@ class DigirUpload extends DataUploadManager {
 			$this->searchStart = 0;
 			$this->submitReq($alphaChar."%%");
 		}
-		$this->finalTransferSteps();
+		$this->finalUploadSteps($finalTransfer);
  	}
 
 	private function submitReq($searchStr){

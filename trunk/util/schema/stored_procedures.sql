@@ -348,7 +348,7 @@ BEGIN
 
         #if replace all, delete record where the datelastmodified has not been changed
         IF doFullReplace = 1 THEN
-           DELETE FROM omoccurrences
+           DELETE IGNORE FROM omoccurrences
            WHERE collid = targetCollId AND DateLastModified < DATE_SUB(CURDATE(), INTERVAL 1 DAY);
         END IF;
 
@@ -357,15 +357,6 @@ BEGIN
         #Update stats
         UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = targetCollId;
         CALL UpdateCollectionStats(targetCollId);
-
-
-        #Rebuild omoccurgeoindex
-        REPLACE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude)
-           SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3)
-           FROM omoccurrences o
-           WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL;
-
-        DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY);
 
 
      #transfer images
@@ -408,9 +399,6 @@ BEGIN
 
         DELETE FROM uploadimagetemp;
 
-        IF doFullReplace = 1 THEN
-           OPTIMIZE TABLE omoccurrences, images;
-        END IF;
     END IF;
 
 END//

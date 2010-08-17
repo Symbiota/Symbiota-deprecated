@@ -26,7 +26,7 @@ class FileUpload extends DataUploadManager{
 		$this->echoFieldMapTable($sourceArr);
 	}
  	
-	public function uploadData(){
+	public function uploadData($finalTransfer){
 	 	$this->readUploadParameters();
 		set_time_limit(200);
 		ini_set("max_input_time",120);
@@ -135,7 +135,7 @@ class FileUpload extends DataUploadManager{
 		}
 		fclose($fh);
 		
-		$this->finalTransferSteps();
+		$this->finalUploadSteps($finalTransfer);
     }
 }
 	
