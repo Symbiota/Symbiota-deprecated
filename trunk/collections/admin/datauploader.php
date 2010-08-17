@@ -159,7 +159,7 @@ if($statusStr){
 			if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
 		}
  		$duManager->setFieldMap($fieldMap);
- 		if(array_key_exists("savefieldmap",$_REQUEST) && $_REQUEST["savefieldmap"]){
+ 		if($action == "Save Field Mapping"){
  			$duManager->saveFieldMap();
  		}
  	}
@@ -321,16 +321,14 @@ if($statusStr){
 					<?php } ?>
 	
 						<input type="submit" name="action" value="View/Edit Parameters..." />
+					<?php if(stripos($action,"Analyze")!==false){ ?>
+						<input type="submit" name="action" value="Save Field Mapping" />
+					<?php } ?>
 					<?php if($v["uploadtype"] != $STOREDPROCEDURE && $v["uploadtype"] != $DIGIRUPLOAD && stripos($action,"Analyze") === false){ ?>
 						<input type="submit" name="action" value="Analyze..." />
 					<?php } ?>
 					<?php if($v["uploadtype"] == $STOREDPROCEDURE || $v["uploadtype"] == $DIGIRUPLOAD || stripos($action,"Analyze")!==false) { ?>
 						<input type="submit" name="action" value="Start Upload..." />
-					<?php if(stripos($action,"Analyze")!==false){ ?>
-						<div>
-							<input type="checkbox" name="savefieldmap" value="1" /> Save Field Mapping
-						</div>
-					<?php } ?>
 		 				<div>
 		 					<input type="checkbox" name="finaltransfer" value="1" <?php echo ($finalTransfer?"checked":""); ?> onclick="toggle('dodiv')"/>
 		 					Perform Final Transfer and Make Public
