@@ -104,7 +104,12 @@ class DirectUpload extends DataUploadManager {
 							if(array_key_exists("size",$sourceField) && strlen($value) > $sourceField["size"]){
 								$value = substr($value,0,$size);
 							}
-							$sqlInsertValues .= ",\"".$value."\"";
+							if($value){
+								$sqlInsertValues .= ",\"".$value."\"";
+							}
+							else{
+								$sqlInsertValues .= ",NULL";
+							}
 						}
 					}
 					$sqlInsert = $sqlInsertInto.$sqlInsertValues.")";
