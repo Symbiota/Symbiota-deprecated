@@ -31,6 +31,7 @@ class DirectUpload extends DataUploadManager {
 	}
 
  	public function uploadData($finalTransfer){
+ 		global $charset;
 	 	$this->readUploadParameters();
  		$sourceDbpkFieldName = "";
 		if(array_key_exists("dbpk",$this->fieldMap)){
@@ -45,12 +46,12 @@ class DirectUpload extends DataUploadManager {
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
 			//Delete all records in uploadspectemp table
-			$sqlDel = "DELETE FROM uploadspectemp";
+			$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
 			$this->conn->query($sqlDel);
 			
 			echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
 			set_time_limit(800);
-			$sourceConn->query("SET NAMES latin1;");
+			$sourceConn->query("SET NAMES ".$charset.";");
 			//echo "<div>".$this->queryStr."</div><br/>";
 			if($result = $sourceConn->query($this->queryStr)){
 				echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
@@ -74,10 +75,10 @@ class DirectUpload extends DataUploadManager {
 					}
 					foreach($this->fieldMap as $symbField => $sourceField){
 						$value = $row[$sourceField["field"]];
-						if(mb_detect_encoding($value,'UTF-8, ISO-8859-1') == "UTF-8"){
+						//if(mb_detect_encoding($value,'UTF-8, ISO-8859-1') == "UTF-8"){
 							//$value = utf8_decode($value);
-							$value = iconv("UTF-8","ISO-8859-1//TRANSLIT",$value);
-				        }
+							//$value = iconv("UTF-8","ISO-8859-1//TRANSLIT",$value);
+				        //}
 						if($sourceField["type"] == "date"){
 							if($datetime = strtotime($value)){
 								$value = date('Y-m-d H:i:s',$datetime);

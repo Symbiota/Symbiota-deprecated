@@ -2,14 +2,22 @@
 //error_reporting(E_ALL);
 include_once("../util/dbconnection.php");
 include_once("../util/symbini.php");
+include_once("util/ProfileHandler.php");
+
 header("Content-Type: text/html; charset=".$charset);
+$loginAs = array_key_exists("loginas",$_REQUEST)?trim($_REQUEST["loginas"]):"";
 $searchTerm = array_key_exists("searchterm",$_REQUEST)?trim($_REQUEST["searchterm"]):"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:"";
 $del = array_key_exists("del",$_REQUEST)?$_REQUEST["del"]:"";
 
 $userManager = new UserManager();
 if($isAdmin){
-	if($del){
+	if($loginAs){
+		$pHandler = new ProfileHandler();
+		$pHandler->authenticate($loginAs);
+		header("Location: ../index.php");
+	}
+	elseif($del){
 		$userManager->deletionPermissions($del,$userId);
 	}
 	elseif(array_key_exists("apsubmit",$_REQUEST)){
@@ -124,6 +132,9 @@ if($isAdmin){
 									?>
 								</div>
 							</div>
+						</div>
+						<div style="clear:both;margin:0px 0px 20px 30px;">
+							<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
 						</div>
 						<div style="clear:both;margin:10px;" class="fieldset">
 							<div class="legend">Permissions</div>

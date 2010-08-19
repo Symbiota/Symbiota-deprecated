@@ -51,14 +51,16 @@ class ProfileHandler{
     	}
     }
     
-    public function authenticate($userNameStr, $pwdStr){
+    public function authenticate($userNameStr, $pwdStr = ""){
         $authStatus = false;
         $this->userName = $userNameStr;
 		//check login
         $sql = "SELECT u.uid, u.firstname, u.lastname ".
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-            "WHERE (ul.username = '".$userNameStr."') ".
+            "WHERE (ul.username = '".$userNameStr."') ";
+        if($pwdStr){
 			"AND (ul.password = PASSWORD('".$pwdStr."'))";
+        }
 		//echo $sql;
         $result = $this->con->query($sql);
         if($row = $result->fetch_object()){
