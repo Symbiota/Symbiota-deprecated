@@ -75,10 +75,18 @@ class DirectUpload extends DataUploadManager {
 					}
 					foreach($this->fieldMap as $symbField => $sourceField){
 						$value = $row[$sourceField["field"]];
-						//if(mb_detect_encoding($value,'UTF-8, ISO-8859-1') == "UTF-8"){
-							//$value = utf8_decode($value);
-							//$value = iconv("UTF-8","ISO-8859-1//TRANSLIT",$value);
-				        //}
+						if($charset == "utf8"){
+							if(mb_detect_encoding($value,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+								//$value = utf8_encode($value);
+								$value = iconv("ISO-8859-1//TRANSLIT","UTF-8",$value);
+					        }
+						}
+						else{
+							if(mb_detect_encoding($value,'UTF-8, ISO-8859-1') == "UTF-8"){
+								//$value = utf8_decode($value);
+								$value = iconv("UTF-8","ISO-8859-1//TRANSLIT",$value);
+					        }
+						}
 						if($sourceField["type"] == "date"){
 							if($datetime = strtotime($value)){
 								$value = date('Y-m-d H:i:s',$datetime);
