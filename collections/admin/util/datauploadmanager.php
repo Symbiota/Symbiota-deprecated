@@ -328,7 +328,7 @@ class DataUploadManager {
 			}
 		}
 		if(!$this->transferCount){
-			$sql = "SELECT count(*) AS cnt FROM uploadspectemp";
+			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = ".$this->collId ;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->transferCount = $row->cnt;
@@ -346,7 +346,7 @@ class DataUploadManager {
 
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		if($this->conn->query("CALL TransferUploads(".($this->doFullReplace?"1":"0").");")){
+		if($this->conn->query("CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");")){
 			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount:" records transferred to central specimen table")."</li>";
 		}
 		else{
