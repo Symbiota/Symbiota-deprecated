@@ -15,10 +15,19 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 	if(isset($_COOKIE["SymbiotaRights"])){
         $userRightsStr = $_COOKIE["SymbiotaRights"];
 		$userRights = explode("&",$userRightsStr);
+		foreach($userRights as $v){
+			$tArr = explode("-",$v);
+			if(count($tArr) > 1){
+				$userRights[$tArr[0]][] = $tArr[1];
+			}
+			else{
+				$userRights[$tArr[0]] = "";
+			}
+		}
 	}
 }
 
 $userDisplayName = (array_key_exists("dn",$paramsArr)?$paramsArr["dn"]:"");
 $symbUid = (array_key_exists("uid",$paramsArr)?$paramsArr["uid"]:0);
-$isAdmin = (in_array("SuperAdmin",$userRights)?1:0);
+$isAdmin = (array_key_exists("SuperAdmin",$userRights)?1:0);
 ?>

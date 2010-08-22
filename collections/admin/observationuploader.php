@@ -12,7 +12,7 @@ $collId = (array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:"");
 $replaceRecs = (array_key_exists("replacerecs",$_REQUEST)?1:0);
 
 $editable = false;
-if(isset($userRights) && $userRights && $isAdmin){
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
  	$editable = true;
 }
 ?>

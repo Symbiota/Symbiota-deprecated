@@ -9,7 +9,7 @@ header("Content-Type: text/html; charset=".$charset);
  $projManager = new ProjectManager($proj);
  
  $isEditable = 0;
- if($isAdmin || in_array("proj-".$projManager->getProjectId(),$userRights)){
+ if($isAdmin){
 	$isEditable = 1;
  }
  

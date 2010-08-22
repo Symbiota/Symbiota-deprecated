@@ -34,7 +34,7 @@ if($action){
 }
 
 $editable = false;
-if(isset($userRights) && $userRights && $isAdmin){
+if($isAdmin || array_key_exists("KeyEditor",$userRights)){
  	$editable = true;
 }
 

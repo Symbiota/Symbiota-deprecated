@@ -80,18 +80,18 @@
 	           }
 			echo "<div>For more information on this specimen, please contact <a class='bodylink' href='mailto:".$indManager->getContactEmail()."'>".$indManager->getContactName()." (".$indManager->getContactEmail().")</a></div>";
 		        
-	    	if($symbUid && $userRights){
+	    	if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 				?>
 	    		<div style='margin-top:15px;'>
 					<div class='voucheredit' style="display:block;">
-						<span onclick="javascript: toggle('voucheredit');">
+						<span onclick="toggle('voucheredit');">
 							<img src='../../images/plus.gif'>
 						</span>
 						Show Voucher Editing Box
 					</div>
 					<div class='voucheredit' style="display:none;">
 						<div>
-							<span onclick="javascript: toggle('voucheredit');">
+							<span onclick="toggle('voucheredit');">
 								<img src='../../images/minus.gif'>
 							</span>
 							Hide Voucher Editing Box
@@ -189,57 +189,35 @@
     
 	private $con;
     private	$outputVec = Array();
-    private $uRights = Array();
-    private $checklistRights = Array();
-    private $isAdmin = false;
     
  	public function __construct(){
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
- 		$this->setUserRights();
  	}
  	
  	public function __destruct(){
 		if(!($this->con === null)) $this->con->close();
 	}
     
- 	public function getChecklists($uid){
+ 	public function getChecklists(){
+ 		global $userRights;
  		$returnArr = Array();
-		if($this->isAdmin){
+		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("ClAdmin",$userRights)){
 			//Get all public checklist names
 			$sql = "SELECT DISTINCT c.Name, c.CLID ".
 				"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
 				"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-				"WHERE c.type = 'static' AND (c.Access = 'public' or c.uid = ".$uid.") ".
-				"ORDER BY c.Name";
+				"WHERE c.Access = 'public' ";
+			if(!array_key_exists("SuperAdmin",$userRights)){
+				$sql .= "AND c.clid IN(".implode(",",$userRights["ClAdmin"]).") "
+			}
+			$sql .= "ORDER BY c.Name";
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
 				$returnArr[$row->CLID] = $row->Name;
 			}
 			$result->close();
 		}
-		elseif($this->checklistRights){
-			$sql = "SELECT DISTINCT c.Name, c.CLID FROM fmchecklists c ".
-				"WHERE c.type = 'static' AND (c.clid IN(".implode(",",$this->checklistRights).") OR c.uid = ".$uid.") ".
-				"ORDER BY c.Name";
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$returnArr[$row->CLID] = $row->Name;
-			}
-			$result->free();
-		}
 		return $returnArr;
- 	}
- 	
- 	private function setUserRights(){
- 		global $userRights, $isAdmin;
- 		$this->uRights = $userRights;
- 		if($isAdmin) $this->isAdmin = true;
- 		foreach($this->uRights as $value){
- 			if(strpos($value, "CL") === 0 && strpos($value, "-admin")){
- 				$replaceTxt = array("CL","-admin");
- 				$this->checklistRights[] = str_replace($replaceTxt,"",$value);
- 			}
- 		}
  	}
  	
  	public function setOccId($o){
@@ -271,7 +249,8 @@
 	}
     
     public function getData(){
-		$sql = "SELECT c.CollID, IFNULL(o.CollectionCode,c.CollectionCode) AS CollectionCode, ".
+ 		global $userRights;
+    	$sql = "SELECT c.CollID, IFNULL(o.CollectionCode,c.CollectionCode) AS CollectionCode, ".
 			"c.CollectionName, c.Homepage, c.IndividualUrl, c.Contact, c.email, c.icon, o.occid, o.occurrenceID, ".
 			"o.CatalogNumber, o.occurrenceRemarks, o.TidInterpreted, o.Family, o.SciName, o.scientificNameAuthorship, o.IdentificationQualifier, o.IdentifiedBy, ".
 			"DATE_FORMAT(o.DateIdentified,'%d %M %Y') AS DateIdentified, o.Country, o.StateProvince, o.County, o.Locality, o.MinimumElevationInMeters, o.MaximumElevationInMeters, o.VerbatimElevation, ".
@@ -367,7 +346,9 @@
             $secur = $row->LocalitySecurity;
             if(!$secur) $secur = 1;
             $this->outputVec[] = "<div style='margin-left:15px;'>";
-            if($secur < 2 || $this->isAdmin || in_array($row->CollectionCode,$this->uRights)){
+            if($secur < 2 || array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) 
+            	|| array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
+            	|| (array_key_exists("RareSppReader",$userRights) && in_array($this->collId,$userRights["RareSppReader"]))){
 	            $this->outputVec[] = "<div>".$row->Locality."</div>";
 	            $latDecimal = $row->DecimalLatitude;
 	            $longDecimal = $row->DecimalLongitude;

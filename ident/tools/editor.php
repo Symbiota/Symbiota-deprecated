@@ -23,7 +23,9 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  $editorManager = new EditorManager();
  if($langValue) $editorManager->setLanguage($langValue);
  $editable = false;
- if($symbUid) $editable = true;
+ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+ 	$editable = true;
+ }
  
 ?>
 

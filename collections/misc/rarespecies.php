@@ -7,7 +7,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
 
 $editable = 0;
-if($isAdmin){
+if($isAdmin || array_key_exists("RareSppAdmin",$userRights)){
 	$editable = 1;
 }
 if($editable){

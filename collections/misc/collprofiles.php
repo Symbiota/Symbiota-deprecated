@@ -16,7 +16,7 @@
  $collManager->setCollectionId($collId);
 
  $isEditable = 0;
- if($isAdmin || in_array("coll-".$collId,$userRights)){
+ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 	$isEditable = 1;
  }
  

@@ -13,8 +13,8 @@
  $taxonDisplayObj = new TaxonDisplay($target);
  
  $editable = false;
- if(isset($userRights) && $userRights && ($isAdmin || in_array("TaxonAdmin",$userRights))){
- 	$editable = true;
+ if($isAdmin || in_array("Taxonomy",$userRights)){
+	$editable = true;
  }
  
 ?>

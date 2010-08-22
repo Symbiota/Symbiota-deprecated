@@ -36,7 +36,7 @@
  	if($showImages) $clManager->setShowImages();
  	if($showVouchers) $clManager->setShowVouchers();
  	
-	if($isAdmin || in_array("cl-".$clManager->getClid(),$userRights)){
+	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
 		$clManager->setEditable(true);
 		
 		//Submit checklist MetaData edits

@@ -38,7 +38,7 @@
  $loaderObj = new TaxonLoader();
  
  $editable = false;
- if(isset($userRights) && $userRights && $isAdmin){
+ if($isAdmin || array_key_exists("",$userRights)){
  	$editable = true;
  }
  
