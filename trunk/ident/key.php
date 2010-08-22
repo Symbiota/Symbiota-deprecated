@@ -8,7 +8,9 @@
  include_once("../util/symbini.php");
  header("Content-Type: text/html; charset=".$charset);
  $editable = false;
- if($symbUid) $editable = true;
+ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+ 	$editable = true;
+ }
  ?> 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

@@ -12,7 +12,7 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
  $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
  $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
  
-if($clid && $tid && ($isAdmin || in_array("cl-".$clManager->getClid(),$userRights) )){
+if($clid && $tid && ($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"])))){
 	$conn = MySQLiConnectionFactory::getCon("write");
 
 	$delStatus = "false";

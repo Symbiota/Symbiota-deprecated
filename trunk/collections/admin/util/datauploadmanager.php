@@ -26,9 +26,9 @@ class DataUploadManager {
 	protected $queryStr;
 	protected $cleanupSP;
 	protected $lastUploadDate;
-	protected $dlmIsValid = false;	//DateLastModified field is valid. Even if it is in definition, need to make sure it's an updated field
 
 	protected $transferCount = 0;
+	protected $sourceArr = Array();
 	protected $fieldMap = Array();
 	protected $symbFields = Array();
 	
@@ -140,7 +140,7 @@ class DataUploadManager {
 
     public function readUploadParameters(){
 		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, usp.driver, ".
-    		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, usp.dlmisvalid, cs.uploaddate ".
+    		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, cs.uploaddate ".
 			"FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid ".
     		"WHERE usp.uspid = ".$this->uspid;
 		//echo $sql;
@@ -159,7 +159,6 @@ class DataUploadManager {
     		$this->digirPKField = $row->digirpkfield;
     		$this->queryStr = $row->querystr;
     		$this->cleanupSP = $row->cleanupsp;
-			$this->dlmIsValid = $row->dlmisvalid;
     		$this->lastUploadDate = $row->uploaddate;
 			if(!$this->lastUploadDate) $this->lastUploadDate = date('Y-m-d H:i:s');
     	}
@@ -213,7 +212,7 @@ class DataUploadManager {
 			"\", driver = \"".$_REQUEST["eupdriver"]."\", digircode = \"".$_REQUEST["eupdigircode"].
 			"\", digirpath = \"".$_REQUEST["eupdigirpath"]."\", digirpkfield = \"".$_REQUEST["eupdigirpkfield"].
 			"\", querystr = \"".$this->cleanField(strtolower($_REQUEST["eupquerystr"]))."\", cleanupsp = \"".$_REQUEST["eupcleanupsp"].
-			"\", dlmisvalid = ".$_REQUEST["eupdlmisvalid"]." WHERE uspid = ".$this->uspid;
+			"\" WHERE uspid = ".$this->uspid;
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -223,12 +222,12 @@ class DataUploadManager {
 	
     public function addUploadProfile(){
 		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, driver, digircode, digirpath, ".
-			"digirpkfield, username, password, schemaname, cleanupsp, querystr, dlmisvalid) VALUES (".
+			"digirpkfield, username, password, schemaname, cleanupsp, querystr) VALUES (".
 			$this->collId.",".$_REQUEST["aupuploadtype"].",\"".$_REQUEST["auptitle"]."\",\"".$_REQUEST["aupplatform"]."\",\"".$_REQUEST["aupserver"]."\",".
 			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdriver"]."\",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
-			$this->cleanField(strtolower($_REQUEST["aupquerystr"]))."\",".$_REQUEST["aupdlmisvalid"].")";
+			$this->cleanField(strtolower($_REQUEST["aupquerystr"]))."\")";
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -251,7 +250,7 @@ class DataUploadManager {
 		return $rStr;
 	}
 	
-	protected function echoFieldMapTable($sourceArr,$autoMap = 0){
+	public function echoFieldMapTable($autoMap = 0){
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
 		foreach($this->fieldMap as $symbField => $fArr){
@@ -260,37 +259,52 @@ class DataUploadManager {
 
 		//Output table rows for source data
 		sort($this->symbFields);
-		foreach($sourceArr as $fieldName){
-			echo "<tr>\n";
-			echo "<td style='padding:2px;'>";
-			echo $fieldName;
-			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
-			echo "</td>\n";
-			echo "<td>\n";
-			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)?"yellow":"")."'>";
-			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value=''>Leave Field Unmapped</option>\n";
-			echo "<option value=''>-------------------------</option>\n";
-			if($autoMap && in_array($fieldName,$this->symbFields)){
-				//Source Field = Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".($fieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+		$dbpk = (array_key_exists("dbpk",$this->fieldMap)?$this->fieldMap["dbpk"]["field"]:"");
+		foreach($this->sourceArr as $fieldName){
+			if($dbpk != $fieldName){
+				echo "<tr>\n";
+				echo "<td style='padding:2px;'>";
+				echo $fieldName;
+				echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
+				echo "</td>\n";
+				echo "<td>\n";
+				echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)?"yellow":"")."'>";
+				echo "<option value=''>Select Target Field</option>\n";
+				echo "<option value=''>Leave Field Unmapped</option>\n";
+				echo "<option value=''>-------------------------</option>\n";
+				if($autoMap && in_array($fieldName,$this->symbFields)){
+					//Source Field = Symbiota Field
+					foreach($this->symbFields as $sField){
+						if($sField != "dbpk"){
+							echo "<option ".($fieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+						}
+					}
 				}
-			}
-			elseif(array_key_exists($fieldName,$sourceSymbArr)){
-				//Source Field is mapped to Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+				elseif(array_key_exists($fieldName,$sourceSymbArr)){
+					//Source Field is mapped to Symbiota Field
+					foreach($this->symbFields as $sField){
+						if($sField != "dbpk"){
+							echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+						}
+					}
 				}
-			}
-			else{
-				foreach($this->symbFields as $sField){
-					echo "<option>".$sField."</option>\n";
+				else{
+					foreach($this->symbFields as $sField){
+						if($sField != "dbpk"){
+							echo "<option>".$sField."</option>\n";
+						}
+					}
 				}
+				echo "</select></td>\n";
+				echo "</tr>\n";
 			}
-			echo "</select></td>\n";
-			echo "</tr>\n";
 		}
+	}
+
+	public function savePrimaryKey($dbpk){
+		$sql = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
+			"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
+		$this->conn->query($sql);
 	}
 
 	public function saveFieldMap(){
@@ -298,15 +312,17 @@ class DataUploadManager {
 		$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
 		$sqlValues = "VALUES (".$this->uspid;
 		foreach($this->fieldMap as $k => $v){
-			$sourceField = $v["field"];
-			$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
-			//echo $sql;
-			$this->conn->query($sql);
+			if($k != "dbpk"){
+				$sourceField = $v["field"];
+				$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
+				//echo $sql;
+				$this->conn->query($sql);
+			}
 		}
 	}
 
 	public function deleteFieldMap(){
-		$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid;
+		$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid." AND symbspecfield <> 'dbpk' ";
 		$this->conn->query($sql);
 	}
 
@@ -354,6 +370,14 @@ class DataUploadManager {
 		}
 	}
 
+	public function getFieldMap(){
+		return $this->fieldMap;
+	}
+	
+	public function getSourceArr(){
+		return $this->sourceArr;
+	}
+	
 	public function getTitle(){
 		return $this->title;
 	}
@@ -406,22 +430,6 @@ class DataUploadManager {
 		return $this->cleanupSP;
 	}
 	
-	public function getDLMIsValid(){
-		return $this->dlmIsValid;
-	}
-	
-	public function updateIsPermissible(){
-		if(!$this->dlmIsValid) return false;
-		if($this->uploadType == "File Upload") return true;
-		if($this->uploadType == "DiGIR Provider"){
-			
-		}
-		if($this->uploadType == "Direct Upload"){
-			
-		}
-		return false;
-	}
-
 	public function getTransferCount(){
 		return $this->transferCount;
 	}

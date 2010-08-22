@@ -11,7 +11,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $clLoaderManager = new ClLoaderManager();
  
 $editable = false;
-if($symbUid && isset($userRights) && ($isAdmin || in_array("cl-".$clid,$userRights))){
+if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
 	$editable = true;
 }
  

@@ -19,7 +19,9 @@
  if($langValue) $cdManager->setLanguage($langValue);
  if($projValue) $cdManager->setProject($projValue);
  $editable = false;
- if($symbUid) $editable = true;
+ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+ 	$editable = true;
+ }
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

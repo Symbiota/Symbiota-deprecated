@@ -87,7 +87,9 @@ header("Content-Type: text/html; charset=".$charset);
 
  	
  	$editable = false;
- 	if($symbUid) $editable = true;
+ 	if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+ 		$editable = true;
+ 	}
  	 	
  	$muManager = new MassUpdateManager();
 

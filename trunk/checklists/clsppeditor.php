@@ -14,7 +14,7 @@ header("Content-Type: text/html; charset=".$charset);
  $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
  
  $editable = false;
- if($isAdmin || in_array("CL".$clid."-admin",$userRights)){
+ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
  	$editable = true;
  }
  

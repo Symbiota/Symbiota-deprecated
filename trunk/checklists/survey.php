@@ -32,7 +32,7 @@ if($showCommon) $clManager->setShowCommon();
 if($showImages) $clManager->setShowImages();
 
 $editable = 0;
-if($isAdmin || in_array("survey-".$surveyId,$userRights)){
+if($isAdmin || (array_key_exists("SurveyAdmin",$userRights) && in_array($surveyId,$userRights["SurveyAdmin"]))){
 	$editable = 1;
 }
 		

@@ -664,6 +664,8 @@ CREATE TABLE `omcollections` (
   `IndividualUrl` varchar(500) DEFAULT NULL,
   `Contact` varchar(45) DEFAULT NULL,
   `email` varchar(45) DEFAULT NULL,
+  `latitudedecimal` decimal(8,6) DEFAULT NULL,
+  `longitudedecimal` decimal(9,6) DEFAULT NULL,
   `icon` varchar(250) DEFAULT NULL,
   `CollType` varchar(45) NOT NULL DEFAULT 'Preserved Specimens' COMMENT 'Preserved Specimens, Observations',
   `SortSeq` int(10) unsigned DEFAULT NULL,
@@ -1257,7 +1259,8 @@ CREATE TABLE `uploadspecmap` (
   `symbspecfield` varchar(45) NOT NULL,
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`usmid`),
-  CONSTRAINT `FK_uploadspecmap_usp` FOREIGN KEY (`uspid`) REFERENCES `uploadspecparameters` (`uspid`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_uploadspecmap_usp` FOREIGN KEY (`uspid`) REFERENCES `uploadspecparameters` (`uspid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE KEY `Index_unique` (`uspid`, `symbspecfield`)
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

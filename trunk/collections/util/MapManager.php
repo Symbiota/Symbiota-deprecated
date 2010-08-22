@@ -34,17 +34,11 @@ class MapManager extends CollectionManager{
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
         $sql .= $this->getSqlWhere();
         $sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
-		if($isAdmin){
-			//Add nothing to sql; grab all records
+		if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			//Add nothing to sql; grab all records   
 		}
-		elseif($userRights){
-			$sqlFrag = "";
-			foreach($userRights as $urValue){
-				if(is_int($urValue)) $sqlFrag .= ",".$urValue;
-			}
-			if(strlen($sqlFrag) > 2){
-				$sql .= " AND (o.CollId IN (".substr($sqlFrag,1)."))";
-			}
+		elseif(array_key_exists("RareSppReader",$userRights)){
+			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"])."))";
 		}
 		else{
 			$sql .= " AND (o.LocalitySecurity = 1 OR o.LocalitySecurity IS NULL) ";

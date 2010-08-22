@@ -30,11 +30,14 @@ if($uspid) $duManager->setUspid($uspid);
 if($doFullReplace) $duManager->setDoFullReplace($doFullReplace);
 
 $isEditable = 0;
-if($isAdmin || in_array("coll-".$collId,$userRights)){
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 	$isEditable = 1;
 }
 if($isEditable){
-	if($action == "Submit Parameter Edits"){
+ 	if($action == "Save Primary Key"){
+ 		$duManager->savePrimaryKey($_REQUEST["dbpk"]);
+ 	}
+	elseif($action == "Submit Parameter Edits"){
 		$statusStr = $duManager->editUploadProfile();
 	}
 	elseif($action == "Add New Profile"){
@@ -107,6 +110,67 @@ if($isEditable){
 
 			return formCheck;
 		}
+
+		function pkChanged(){
+			document.getElementById('pkdiv').style.display='block';
+			document.getElementById('mdiv').style.display='none';
+			document.getElementById('uldiv').style.display='none';
+		}
+
+		function adjustAddForm(selectObj){
+			//Show all
+			document.getElementById('aupplatform').style.display='block';
+			document.getElementById('aupserver').style.display='block';
+			document.getElementById('aupport').style.display='block';
+			document.getElementById('aupdriver').style.display='block';
+			document.getElementById('aupdigircode').style.display='block';
+			document.getElementById('aupdigirpath').style.display='block';
+			document.getElementById('aupdigirpkfield').style.display='block';
+			document.getElementById('aupusername').style.display='block';
+			document.getElementById('auppassword').style.display='block';
+			document.getElementById('aupschemaname').style.display='block';
+			document.getElementById('aupcleanupsp').style.display='block';
+			document.getElementById('aupquerystr').style.display='block';
+			//Then close according to upload type selection
+			selValue = selectObj.value;
+			if(selValue == 1){ //Direct Upload
+				document.getElementById('aupdigircode').style.display='none';
+				document.getElementById('aupdigirpath').style.display='none';
+				document.getElementById('aupdigirpkfield').style.display='none';
+			}
+			if(selValue == 2){ //DiGIR
+				document.getElementById('aupplatform').style.display='none';
+				document.getElementById('aupdriver').style.display='none';
+				document.getElementById('aupusername').style.display='none';
+				document.getElementById('auppassword').style.display='none';
+			}
+			if(selValue == 3){ //File Upload
+				document.getElementById('aupplatform').style.display='none';
+				document.getElementById('aupserver').style.display='none';
+				document.getElementById('aupport').style.display='none';
+				document.getElementById('aupdriver').style.display='none';
+				document.getElementById('aupdigircode').style.display='none';
+				document.getElementById('aupdigirpath').style.display='none';
+				document.getElementById('aupdigirpkfield').style.display='none';
+				document.getElementById('aupusername').style.display='none';
+				document.getElementById('auppassword').style.display='none';
+				document.getElementById('aupschemaname').style.display='none';
+				document.getElementById('aupquerystr').style.display='none';
+			}
+			if(selValue == 4){ //Stored Procedure
+				document.getElementById('aupplatform').style.display='none';
+				document.getElementById('aupserver').style.display='none';
+				document.getElementById('aupport').style.display='none';
+				document.getElementById('aupdriver').style.display='none';
+				document.getElementById('aupdigircode').style.display='none';
+				document.getElementById('aupdigirpath').style.display='none';
+				document.getElementById('aupdigirpkfield').style.display='none';
+				document.getElementById('aupusername').style.display='none';
+				document.getElementById('auppassword').style.display='none';
+				document.getElementById('aupschemaname').style.display='none';
+				document.getElementById('aupquerystr').style.display='none';
+			}
+		}
 	</script>
 </head>
 <body>
@@ -160,7 +224,7 @@ if($statusStr){
  else{
  	
  	if(array_key_exists("sf",$_REQUEST)){
- 		if(stripos($action,"delete") !== False){
+ 		if(stripos($action,"delete") !== false){
  			$duManager->deleteFieldMap();
  		}
  		else{
@@ -170,9 +234,11 @@ if($statusStr){
 			for($x = 0;$x<count($targetFields);$x++){
 				if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
 			}
+			//Set Source PK
+			if(array_key_exists("dbpk",$_REQUEST)) $fieldMap["dbpk"]["field"] = $_REQUEST["dbpk"];
 	 		$duManager->setFieldMap($fieldMap);
- 		}
- 		if(stripos($action,"save") !== False){
+		}
+ 		if($action == "Save Mapping"){
  			$duManager->saveFieldMap();
  		}
  	}
@@ -214,16 +280,38 @@ if($statusStr){
 		<hr />
 	<?php 
  	}
- 	elseif(stripos($action,"initialize") !== false || stripos($action,"analysis") !== false || stripos($action,"map") !== false){
+ 	elseif(stripos($action,"initialize") !== false || stripos($action,"analysis") !== false || stripos($action,"map") !== false || $action == "Save Primary Key"){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$ulArr = array_pop($ulList); 
-		?>
-		<form name="initform" action="datauploader.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
+		$duManager->analyzeFile(); 
+	 	?>
+		<form name="initform" action="datauploader.php" method="get" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;"><?php echo $ulArr["title"];?></legend>
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 				<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+				<div style="margin:20px;">
+					<b>Source Primary Key (required): </b>
+					<?php
+					$fm = $duManager->getFieldMap();
+					$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
+					$sFields = $duManager->getSourceArr();
+					?>
+					<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged();">
+						<option>Select Source Primary Key</option>
+						<option>----------------------------------</option>
+						<?php 
+						sort($sFields);
+						foreach($sFields as $f){
+							echo "<option ".($dbpk==$f?"SELECTED":"").">".$f."</option>\n";
+						}
+						?>
+					</select>
+					<div id="pkdiv" style="margin:5px 0px 0px 200px;display:<?php echo ($dbpk?"none":"block");?>";>
+						<input type="submit" name="action" value="Save Primary Key" />
+					</div>
+				</div>
 				<?php if($uploadType == $FILEUPLOAD){ ?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
@@ -237,33 +325,35 @@ if($statusStr){
 						</div>
 					</div>
 				<?php } ?>
-				<?php if($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && stripos($action,"analyze") !== false)){ ?>
-					<table border="1" cellpadding="2" style="border:1px solid black">
-						<tr>
-							<th>
-								Source Field
-							</th>
-							<th>
-								Target Field
-							</th>
-						</tr>
-						<?php 
-							$autoMap = (stripos($action,"auto")!==false?1:0);
-							$duManager->analyzeFile($autoMap); 
-						?>
-					</table>
-					<div>
-						* Mappings that are not yet save are displayed in Yellow
+				<?php if($dbpk && ($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && stripos($action,"analyze") !== false))){ ?>
+					<div id="mdiv">
+						<table border="1" cellpadding="2" style="border:1px solid black">
+							<tr>
+								<th>
+									Source Field
+								</th>
+								<th>
+									Target Field
+								</th>
+							</tr>
+							<?php 
+								$autoMap = (stripos($action,"auto")!==false?1:0);
+								$duManager->echoFieldMapTable($autoMap); 
+							?>
+						</table>
+						<div>
+							* Mappings that are not yet saved are displayed in Yellow
+						</div>
+						<div style="margin:10px;">
+							<input type="submit" name="action" value="Delete Field Mapping" />
+							<input type="submit" name="action" value="Automap Fields" />
+							<input type="submit" name="action" value="Save Mapping" />
+						</div>
+						<hr />
 					</div>
-					<div style="margin:10px;">
-						<input type="submit" name="action" value="Delete Field Mapping" />
-						<input type="submit" name="action" value="Automap Fields" />
-						<input type="submit" name="action" value="Save Mapping" />
-					</div>
-					<hr />
 				<?php } ?>
-				<?php if(($uploadType != $FILEUPLOAD || stripos($action,"analyze") !== false)){ ?>
-					<div>
+				<?php if($dbpk && ($uploadType != $FILEUPLOAD || stripos($action,"analyze") !== false)){ ?>
+					<div id="uldiv">
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="View Parameters" />
 							<input type="submit" name="action" value="Start Upload" />
@@ -305,22 +395,9 @@ if($statusStr){
  		?>			
 		<form name="parameterform" action="datauploader.php" method="post" onsubmit="return checkParameterForm()">
 			<fieldset>
-				<legend><?php echo $editTitle; ?> Upload Parameters</legend>
+				<legend><b><?php echo $editTitle; ?> Upload Parameters</b></legend>
 				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editdiv');" title="Toggle Editing Functions">
 					<img style='border:0px;' src='../../images/edit.png'/>
-				</div>
-				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Upload Type: </div>
-					<div class="editdiv" style=""><?php echo $editTitle; ?> Upload</div>
-					<div class="editdiv" style="display:none;">
-						<select name="eupuploadtype">
-							<option value="">Select an Upload Type</option>
-							<option value="<?php echo $DIGIRUPLOAD; ?>" <?php if($uploadType == $DIGIRUPLOAD) echo "SELECTED";?>>DiGIR Provider</option>
-							<option value="<?php echo $DIRECTUPLOAD; ?>" <?php if($uploadType == $DIRECTUPLOAD) echo "SELECTED";?>>Direct Upload</option>
-							<option value="<?php echo $FILEUPLOAD; ?>" <?php if($uploadType == $FILEUPLOAD) echo "SELECTED";?>>File Upload</option>
-							<option value="<?php echo $STOREDPROCEDURE; ?>" <?php if($uploadType == $STOREDPROCEDURE) echo "SELECTED";?>>Stored Procedure</option>
-						</select>
-					</div>
 				</div>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Title: </div>
@@ -329,6 +406,7 @@ if($statusStr){
 						<input name="euptitle" type="text" value="<?php echo $duManager->getTitle(); ?>" />
 					</div>
 				</div>
+				<?php if($uploadType == 1 || $uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Database Platform: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getPlatform(); ?></div>
@@ -336,6 +414,8 @@ if($statusStr){
 						<input name="eupplatform" type="text" value="<?php echo $duManager->getPlatform(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Server: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getServer(); ?></div>
@@ -343,6 +423,8 @@ if($statusStr){
 						<input name="eupserver" type="text" value="<?php echo $duManager->getServer(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Port: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getPort(); ?></div>
@@ -350,6 +432,8 @@ if($statusStr){
 						<input name="eupport" type="text" value="<?php echo $duManager->getPort(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1 || $uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getDriver(); ?></div>
@@ -357,6 +441,8 @@ if($statusStr){
 						<input name="eupdriver" type="text" value="<?php echo $duManager->getDriver(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">DiGIR Code: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getDigirCode(); ?></div>
@@ -364,6 +450,8 @@ if($statusStr){
 						<input name="eupdigircode" type="text" value="<?php echo $duManager->getDigirCode(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getDigirPath(); ?></div>
@@ -371,6 +459,8 @@ if($statusStr){
 						<input name="eupdigirpath" type="text" value="<?php echo $duManager->getDigirPath(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Digir Primary Key Field: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getDigirPKField(); ?></div>
@@ -378,6 +468,8 @@ if($statusStr){
 						<input name="eupdigirpkfield" type="text" value="<?php echo $duManager->getDigirPKField(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Username: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getUsername(); ?></div>
@@ -385,6 +477,8 @@ if($statusStr){
 						<input name="eupusername" type="text" value="<?php echo $duManager->getUsername(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Password: </div>
 					<div class="editdiv" style="">********</div>
@@ -392,6 +486,8 @@ if($statusStr){
 						<input name="euppassword" type="text" value="<?php echo $duManager->getPassword(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
+				<?php if($uploadType == 1 || $uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getSchemaName(); ?></div>
@@ -399,23 +495,15 @@ if($statusStr){
 						<input name="eupschemaname" type="text" value="<?php echo $duManager->getSchemaName(); ?>" />
 					</div>
 				</div>
+				<?php } ?>
 				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Cleanup SP: </div>
+					<div style="width:200px;font-weight:bold;float:left;">Stored Procedure (clean/transfer): </div>
 					<div class="editdiv" style=""><?php echo $duManager->getCleanupSP(); ?></div>
 					<div class="editdiv" style="display:none;">
 						<input name="eupcleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
 					</div>
 				</div>
-				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">DateLastModified Field Is Valid: </div>
-					<div class="editdiv" style=""><?php echo ($duManager->getDLMIsValid()?"true":"false"); ?></div>
-					<div class="editdiv" style="display:none;">
-						<select name="eupdlmisvalid">
-							<option value="0">false</option>
-							<option value="1" <?php echo ($duManager->getDLMIsValid()?"SELECTED":""); ?>>true</option>
-						</select>
-					</div>
-				</div>
+				<?php if($uploadType == 1 || $uploadType == 2){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
 					<div class="editdiv" style=""><?php echo htmlentities($duManager->getQueryStr()); ?></div>
@@ -423,9 +511,11 @@ if($statusStr){
 						<textarea name="eupquerystr" cols="49" rows="6" ><?php echo $duManager->getQueryStr(); ?></textarea>
 					</div>
 				</div>
+				<?php } ?>
 				<div>
 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 					<div class="editdiv" style="display:none;">
 						<input type="submit" name="action" value="Submit Parameter Edits" />
 					</div>
@@ -496,11 +586,11 @@ if($statusStr){
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Upload Type: </div>
 					<div>
-						<select name="aupuploadtype">
+						<select name="aupuploadtype" onchange="adjustAddForm(this)">
 							<option value="">Select an Upload Type</option>
 							<option value="">------------------------</option>
-							<option value="<?php echo $DIGIRUPLOAD; ?>">DiGIR Provider</option>
 							<option value="<?php echo $DIRECTUPLOAD; ?>">Direct Upload</option>
+							<option value="<?php echo $DIGIRUPLOAD; ?>">DiGIR Provider</option>
 							<option value="<?php echo $FILEUPLOAD; ?>">File Upload</option>
 							<option value="<?php echo $STOREDPROCEDURE; ?>">Stored Procedure</option>
 						</select>
@@ -512,7 +602,7 @@ if($statusStr){
 						<input name="auptitle" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupplatform" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Database Platform: </div>
 					<div>
 						<select name="aupplatform">
@@ -524,76 +614,67 @@ if($statusStr){
 						</select>
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupserver" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Server (host): </div>
 					<div>
 						<input name="aupserver" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupport" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Port: </div>
 					<div>
 						<input name="aupport" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupdriver" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
 					<div>
 						<input name="aupdriver" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupdigircode" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">DiGIR Code: </div>
 					<div>
 						<input name="aupdigircode" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupdigirpath" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
 					<div>
 						<input name="aupdigirpath" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupdigirpkfield" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Digir Primary Key Field: </div>
 					<div>
 						<input name="aupdigirpkfield" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupusername" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Username: </div>
 					<div>
 						<input name="aupusername" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="auppassword" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Password: </div>
 					<div>
 						<input name="auppassword" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
+				<div id="aupschemaname" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
 					<div>
 						<input name="aupschemaname" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Cleanup SP: </div>
+				<div id="aupcleanupsp" style="clear:both;">
+					<div style="width:200px;font-weight:bold;float:left;">Stored Procedure (clean/transfer): </div>
 					<div>
 						<input name="aupcleanupsp" type="text" value="" />
 					</div>
 				</div>
-				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">DateLastModified Field Is Valid: </div>
-					<div>
-						<select name="aupdlmisvalid">
-							<option value="0">false</option>
-							<option value="1">true</option>
-						</select>
-					</div>
-				</div>
-				<div style="clear:both;">
+				<div id="aupquerystr" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
 					<div>
 						<textarea name="aupquerystr" cols="49" rows="6" ></textarea>
