@@ -259,13 +259,13 @@ class SiteMapManager{
 	
 	private function setPermissions(){
 		global $userRights;
-		if(array_key_exists("CollAdmin",$userRights){
+		if(array_key_exists("CollAdmin",$userRights)){
 			$this->collList = $userRights["CollAdmin"];
 		}
-		if(array_key_exists("ClAdmin",$userRights){
+		if(array_key_exists("ClAdmin",$userRights)){
 			$this->clList = $userRights["ClAdmin"];
 		}
-		if(array_key_exists("ProjAdmin",$userRights){
+		if(array_key_exists("ProjAdmin",$userRights)){
 			$this->projList = $userRights["ProjAdmin"];
 		}
 	}
