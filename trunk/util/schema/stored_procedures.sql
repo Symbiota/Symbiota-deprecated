@@ -252,6 +252,11 @@ BEGIN
              SET u.family = ts.family
              WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "");
 
+         #Filling missing Authors
+         UPDATE uploadspectemp u INNER JOIN taxa t ON u.tidinterpreted = t.tid
+             SET u.scientificNameAuthorship = t.author
+             WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship) IS NULL AND t.author IS NOT NULL;
+
          #Convert positive longs to negative
          UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude
          WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "Mexico");
@@ -557,6 +562,10 @@ WHERE unitind3 IS NULL AND scinameinput LIKE "% var. %";
 UPDATE uploadtaxa
 SET unitind3 = "ssp.", rankid = 230
 WHERE unitind3 IS NULL AND (scinameinput LIKE "% subsp. %" OR scinameinput LIKE "% ssp. %");
+
+UPDATE uploadtaxa
+SET sciname = replace(sciname," subsp. "," ssp. ")
+WHERE sciname LIKE "% subsp. %";
 
 UPDATE uploadtaxa
 SET unitname3 = TRIM(SUBSTRING(scinameinput,LENGTH(CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3))+2,

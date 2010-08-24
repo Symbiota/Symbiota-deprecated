@@ -32,7 +32,7 @@ class DataUploadManager {
 	protected $fieldMap = Array();
 	protected $symbFields = Array();
 	
-	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4;
+	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SRCIPTUPLOAD = 5;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -332,7 +332,14 @@ class DataUploadManager {
  		if($this->uploadType == $this->STOREDPROCEDURE){
  			$this->finalUploadSteps($finalTransfer);
  		}
- 	}
+ 		if($this->uploadType == $this->SCRIPTUPLOAD){
+ 			if(system($this->queryStr)){
+				echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
+				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+ 				$this->finalUploadSteps($finalTransfer);
+ 			}
+ 		}
+	}
 
 	public function finalUploadSteps($finalTransfer){
 		//Run cleanup Stored Procedure, if one exists 
