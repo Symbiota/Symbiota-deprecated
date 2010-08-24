@@ -90,14 +90,16 @@ class DataUploadManager {
 
 	public function getCollInfo(){
 		$returnArr = Array();
-		$sql = "SELECT DISTINCT c.CollId, c.CollectionName, c.icon ".
-			"FROM omcollections c ".
+		$sql = "SELECT DISTINCT c.CollId, c.CollectionName, c.icon, cs.uploaddate ".
+			"FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid ".
 			"WHERE c.collid = $this->collId ";
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArr["collid"] = $row->CollId;
 			$returnArr["name"] = $row->CollectionName;
+			$dateStr = ($row->uploaddate?date("d F Y g:i:s", strtotime($row->uploaddate)):"");
+			$returnArr["uploaddate"] = $dateStr;
 		}
 		$result->close();
 		return $returnArr;
