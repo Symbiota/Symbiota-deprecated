@@ -257,7 +257,9 @@ if($statusStr){
  	
  	$collInfo = $duManager->getCollInfo();
  	echo "<h2>".$collInfo["name"]."</h2>";
- 	
+	if($collInfo["uploaddate"]) {
+		echo "<div style='margin:15px;'><b>Last Upload Date:</b> ".$collInfo["uploaddate"]."</div>"; 
+	}
  	if(!$action){
 	 	$actionList = $duManager->getUploadList();
 		?>
