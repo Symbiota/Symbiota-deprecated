@@ -148,7 +148,11 @@ $smManager = new SiteMapManager();
 	            			if($collList){
 	            				echo "<ul>";
 		            			foreach($collList as $k => $v){
-		            				echo "<li><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$k."&emode=1'>$v</a></li>";
+		            				echo "<li>$v</li>";
+		            				echo "<ul>";
+		            				echo "<li><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$k."&emode=1'>View/Edit Metadata</a></li>";
+		            				echo "<li><a href='".$clientRoot."/collections/admin/datauploader.php?collid=".$k."'>Upload Records</a></li>";
+		            				echo "</ul>";
 		            			}
 		            			echo "</ul>";
 	            			}
@@ -255,16 +259,14 @@ class SiteMapManager{
 	
 	private function setPermissions(){
 		global $userRights;
-		foreach($userRights as $v){
-			if(substr($v,0,5) == "coll-"){
-				$this->collList[] = substr($v,5);
-			}
-			elseif(substr($v,0,3) == "cl-"){
-				$this->clList[] = substr($v,3);
-			}
-			elseif(substr($v,0,5) == "proj-"){
-				$this->projList[] = substr($v,5);
-			}
+		if(array_key_exists("CollAdmin",$userRights){
+			$this->collList = $userRights["CollAdmin"];
+		}
+		if(array_key_exists("ClAdmin",$userRights){
+			$this->clList = $userRights["ClAdmin"];
+		}
+		if(array_key_exists("ProjAdmin",$userRights){
+			$this->projList = $userRights["ProjAdmin"];
 		}
 	}
 }

@@ -260,6 +260,7 @@ if($statusStr){
 	if($collInfo["uploaddate"]) {
 		echo "<div style='margin:15px;'><b>Last Upload Date:</b> ".$collInfo["uploaddate"]."</div>"; 
 	}
+	echo "<div style='margin:15px;'><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$collId."'><b>View/Edit Metadata</b></a></div>";
  	if(!$action){
 	 	$actionList = $duManager->getUploadList();
 		?>

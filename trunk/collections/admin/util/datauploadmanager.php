@@ -208,13 +208,20 @@ class DataUploadManager {
     }
     
     public function editUploadProfile(){
-		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["euptitle"]."\", platform = \"".$_REQUEST["eupplatform"].
-			"\", server = \"".$_REQUEST["eupserver"]."\", port = ".($_REQUEST["eupport"]?$_REQUEST["eupport"]:"NULL").", username = \"".$_REQUEST["eupusername"].
-			"\", password = \"".$_REQUEST["euppassword"]."\", schemaname = \"".$_REQUEST["eupschemaname"].
-			"\", driver = \"".$_REQUEST["eupdriver"]."\", digircode = \"".$_REQUEST["eupdigircode"].
-			"\", digirpath = \"".$_REQUEST["eupdigirpath"]."\", digirpkfield = \"".$_REQUEST["eupdigirpkfield"].
-			"\", querystr = \"".$this->cleanField(strtolower($_REQUEST["eupquerystr"]))."\", cleanupsp = \"".$_REQUEST["eupcleanupsp"].
-			"\" WHERE uspid = ".$this->uspid;
+		$sql = "UPDATE uploadspecparameters SET title = \"".$_REQUEST["euptitle"]."\"";
+		if(array_key_exists("eupplatform",$_REQUEST)) $sql .= ", platform = \"".$_REQUEST["eupplatform"]."\"";
+		if(array_key_exists("eupserver",$_REQUEST)) $sql .= ", server = \"".$_REQUEST["eupserver"]."\"";
+		if(array_key_exists("eupport",$_REQUEST)) $sql .= ", port = ".($_REQUEST["eupport"]?$_REQUEST["eupport"]:"NULL");
+		if(array_key_exists("eupusername",$_REQUEST)) $sql .= ", username = \"".$_REQUEST["eupusername"]."\"";
+		if(array_key_exists("euppassword",$_REQUEST)) $sql .= ", password = \"".$_REQUEST["euppassword"]."\"";
+		if(array_key_exists("eupschemaname",$_REQUEST)) $sql .= ", schemaname = \"".$_REQUEST["eupschemaname"]."\"";
+		if(array_key_exists("eupdriver",$_REQUEST)) $sql .= ", driver = \"".$_REQUEST["eupdriver"]."\"";
+		if(array_key_exists("eupdigircode",$_REQUEST)) $sql .= ", digircode = \"".$_REQUEST["eupdigircode"]."\"";
+		if(array_key_exists("eupdigirpath",$_REQUEST)) $sql .= ", digirpath = \"".$_REQUEST["eupdigirpath"]."\"";
+		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
+		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanField(strtolower($_REQUEST["eupquerystr"]))."\"";
+		if(array_key_exists("eupcleanupsp",$_REQUEST)) $sql .= ", cleanupsp = \"".$_REQUEST["eupcleanupsp"]."\"";
+		$sql .= " WHERE uspid = ".$this->uspid;
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
