@@ -170,6 +170,18 @@ if($isEditable){
 				document.getElementById('aupschemaname').style.display='none';
 				document.getElementById('aupquerystr').style.display='none';
 			}
+			if(selValue == 5){ //Script Upload
+				document.getElementById('aupplatform').style.display='none';
+				document.getElementById('aupserver').style.display='none';
+				document.getElementById('aupport').style.display='none';
+				document.getElementById('aupdriver').style.display='none';
+				document.getElementById('aupdigircode').style.display='none';
+				document.getElementById('aupdigirpath').style.display='none';
+				document.getElementById('aupdigirpkfield').style.display='none';
+				document.getElementById('aupusername').style.display='none';
+				document.getElementById('auppassword').style.display='none';
+				document.getElementById('aupschemaname').style.display='none';
+			}
 		}
 	</script>
 </head>
@@ -503,9 +515,9 @@ if($statusStr){
 						<input name="eupcleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
 					</div>
 				</div>
-				<?php if($uploadType == 1 || $uploadType == 2){ ?>
+				<?php if($uploadType == 1 || $uploadType == 2 || $uploadType == 5){ ?>
 				<div style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
+					<div style="width:200px;font-weight:bold;float:left;">Query/Command String: </div>
 					<div class="editdiv" style=""><?php echo htmlentities($duManager->getQueryStr()); ?></div>
 					<div class="editdiv" style="display:none;">
 						<textarea name="eupquerystr" cols="49" rows="6" ><?php echo $duManager->getQueryStr(); ?></textarea>
@@ -593,6 +605,7 @@ if($statusStr){
 							<option value="<?php echo $DIGIRUPLOAD; ?>">DiGIR Provider</option>
 							<option value="<?php echo $FILEUPLOAD; ?>">File Upload</option>
 							<option value="<?php echo $STOREDPROCEDURE; ?>">Stored Procedure</option>
+							<option value="<?php echo $SCRIPTUPLOAD; ?>">Script Upload</option>
 						</select>
 					</div>
 				</div>
@@ -675,7 +688,7 @@ if($statusStr){
 					</div>
 				</div>
 				<div id="aupquerystr" style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Query String: </div>
+					<div style="width:200px;font-weight:bold;float:left;">Query/Command String: </div>
 					<div>
 						<textarea name="aupquerystr" cols="49" rows="6" ></textarea>
 					</div>
