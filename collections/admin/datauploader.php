@@ -8,8 +8,9 @@ $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:0;
 $statusStr = "";
-$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4;
+$DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;
 
+if($uspid && !$uploadType) $uploadType = DataUploadManager::getUploadType($uspid);
 $duManager;
 if($uploadType == $DIRECTUPLOAD){
 	$duManager = new DirectUpload();
@@ -168,7 +169,6 @@ if($isEditable){
 				document.getElementById('aupusername').style.display='none';
 				document.getElementById('auppassword').style.display='none';
 				document.getElementById('aupschemaname').style.display='none';
-				document.getElementById('aupquerystr').style.display='none';
 			}
 			if(selValue == 5){ //Script Upload
 				document.getElementById('aupplatform').style.display='none';
@@ -274,13 +274,15 @@ if($statusStr){
 						<input type="radio" name="uspid" value="<?php echo $id;?>" />
 					<?php echo $v["title"];?>
 					</div>
-					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-					<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
-					<div style="margin:10px;">
-						<input type="submit" name="action" value="Initialize Upload..." />
-					</div>
 				<?php 
-			 	}
+			 	}	
+				?>
+				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+				<div style="margin:10px;">
+					<input type="submit" name="action" value="View Parameters" />
+					<input type="submit" name="action" value="Initialize Upload..." />
+				</div>
+				<?php 
 			 	if(!$actionList){
 			 		?>
 					<div>
@@ -297,6 +299,7 @@ if($statusStr){
  	}
  	elseif(stripos($action,"initialize") !== false || stripos($action,"analysis") !== false || stripos($action,"map") !== false || $action == "Save Primary Key"){
 	 	$ulList = $duManager->getUploadList($uspid);
+	 	$uploadType = $ulList[$uspid]["uploadtype"];
 	 	$ulArr = array_pop($ulList); 
 		$duManager->analyzeFile(); 
 	 	?>
@@ -306,6 +309,7 @@ if($statusStr){
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 				<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+				<?php if($uploadType == $DIRECTUPLOAD || $uploadType == $DIGIRUPLOAD || $uploadType == $FILEUPLOAD){ ?>
 				<div style="margin:20px;">
 					<b>Source Primary Key (required): </b>
 					<?php
@@ -327,6 +331,7 @@ if($statusStr){
 						<input type="submit" name="action" value="Save Primary Key" />
 					</div>
 				</div>
+				<?php } ?>
 				<?php if($uploadType == $FILEUPLOAD){ ?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
@@ -340,7 +345,7 @@ if($statusStr){
 						</div>
 					</div>
 				<?php } ?>
-				<?php if($dbpk && ($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && stripos($action,"analyze") !== false))){ ?>
+				<?php if(($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && stripos($action,"analyze") !== false)) && $dbpk){ ?>
 					<div id="mdiv">
 						<table border="1" cellpadding="2" style="border:1px solid black">
 							<tr>
@@ -367,10 +372,10 @@ if($statusStr){
 						<hr />
 					</div>
 				<?php } ?>
-				<?php if($dbpk && ($uploadType != $FILEUPLOAD || stripos($action,"analyze") !== false)){ ?>
+				<?php if((($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD) && $dbpk) || ($uploadType == $DIGIRUPLOAD) 
+					|| ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
 					<div id="uldiv">
 						<div style="margin:10px;">
-							<input type="submit" name="action" value="View Parameters" />
 							<input type="submit" name="action" value="Start Upload" />
 						</div>
 		 				<div style="margin:10px 0px 0px 10px;">
@@ -392,8 +397,9 @@ if($statusStr){
 		<?php 
  	}
  	elseif(stripos($action,"parameter") !== false){
-	 	$actionList = $duManager->getUploadList();
- 		$duManager->readUploadParameters();
+	 	$actionList = $duManager->getUploadList($uspid);
+	 	$uploadType = $actionList[$uspid]["uploadtype"];
+	 	$duManager->readUploadParameters();
 		$editTitle = "";
  		if($uploadType == $DIRECTUPLOAD){
  			$editTitle = "Direct";
@@ -408,12 +414,23 @@ if($statusStr){
  			$editTitle = "Stored Procedure";
  		}
  		?>			
+		<form name="inituploadform" action="datauploader.php" method="post">
+			<div class="editdiv" style="display:block;">
+				<input type="submit" name="action" value="Initialize Upload..." />
+				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+				<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+			</div>
+		</form>
 		<form name="parameterform" action="datauploader.php" method="post" onsubmit="return checkParameterForm()">
 			<fieldset>
 				<legend><b><?php echo $editTitle; ?> Upload Parameters</b></legend>
 				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editdiv');" title="Toggle Editing Functions">
 					<img style='border:0px;' src='../../images/edit.png'/>
 				</div>
+					<div class="editdiv" style="display:block;">
+						<input type="submit" name="action" value="Initialize Upload..." />
+					</div>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Title: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getTitle(); ?></div>
@@ -518,7 +535,7 @@ if($statusStr){
 						<input name="eupcleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
 					</div>
 				</div>
-				<?php if($uploadType == 1 || $uploadType == 2 || $uploadType == 5){ ?>
+				<?php if($uploadType == 1 || $uploadType == 2 || $uploadType == 4 || $uploadType == 5){ ?>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Query/Command String: </div>
 					<div class="editdiv" style=""><?php echo htmlentities($duManager->getQueryStr()); ?></div>
@@ -527,15 +544,12 @@ if($statusStr){
 					</div>
 				</div>
 				<?php } ?>
-				<div>
+				<div style="clear:both;">
 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 					<div class="editdiv" style="display:none;">
 						<input type="submit" name="action" value="Submit Parameter Edits" />
-					</div>
-					<div class="editdiv" style="display:block;">
-						<input type="submit" name="action" value="Initialize Upload..." />
 					</div>
 				</div>
 			</fieldset>
@@ -555,8 +569,9 @@ if($statusStr){
  	}
  	elseif(stripos($action,"upload") !== false){
 		//Upload records
- 		echo "<div style='font-weight:bold;font-size:120%'>Starting Data Upload: </div>";
+ 		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
  		echo "<ol style='margin:10px;font-weight:bold;'>";
+ 		echo "<li>Starting Data Upload</li>";
  		$duManager->uploadData($finalTransfer);
 		echo "</ol>";
  		if($duManager->getTransferCount() && !$finalTransfer){

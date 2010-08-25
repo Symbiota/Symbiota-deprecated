@@ -32,7 +32,7 @@ class DataUploadManager {
 	protected $fieldMap = Array();
 	protected $symbFields = Array();
 	
-	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SRCIPTUPLOAD = 5;
+	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -40,6 +40,18 @@ class DataUploadManager {
 	
 	function __destruct(){
  		if($this->conn) $this->conn->close();
+	}
+	
+	public static function getUploadType($uspid){
+		$retStr = "";
+		$con = MySQLiConnectionFactory::getCon("readonly");
+		$sql = "SELECT uploadtype FROM uploadspecparameters WHERE uspid = ".$uspid;
+		$rs = $con->query($sql);
+		if($row = $rs->fetch_object()){
+			$retStr = $row->uploadtype;
+		}
+		$con->close();
+		return $retStr;
 	}
 	
 	public function setCollId($id){
@@ -335,19 +347,28 @@ class DataUploadManager {
 		$this->conn->query($sql);
 	}
 
-	public function uploadData($finalTransfer){
+ 	public function analyzeFile(){
+ 	}
+
+ 	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
- 		if($this->uploadType == $this->STOREDPROCEDURE){
- 			$this->finalUploadSteps($finalTransfer);
- 		}
- 		if($this->uploadType == $this->SCRIPTUPLOAD){
- 			if(system($this->queryStr)){
-				echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
-				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
- 				$this->finalUploadSteps($finalTransfer);
- 			}
- 		}
+	 	if($this->queryStr){
+	 		if($this->uploadType == $this->STOREDPROCEDURE){
+				if($this->conn->query("CALL ".$this->queryStr)){
+					echo "<li style='font-weight:bold;'>Stored Procedure executed.</li>";
+					echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+					$this->finalUploadSteps($finalTransfer);
+				}
+	 		}
+	 		elseif($this->uploadType == $this->SCRIPTUPLOAD){
+	 			if(system($this->queryStr)){
+					echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
+					echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+	 				$this->finalUploadSteps($finalTransfer);
+	 			}
+	 		}
+	 	}
 	}
 
 	public function finalUploadSteps($finalTransfer){
