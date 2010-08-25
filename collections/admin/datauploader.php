@@ -415,7 +415,7 @@ if($statusStr){
  		}
  		?>			
 		<form name="inituploadform" action="datauploader.php" method="post">
-			<div class="editdiv" style="display:block;">
+			<div style="float:right;">
 				<input type="submit" name="action" value="Initialize Upload..." />
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
@@ -428,9 +428,6 @@ if($statusStr){
 				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editdiv');" title="Toggle Editing Functions">
 					<img style='border:0px;' src='../../images/edit.png'/>
 				</div>
-					<div class="editdiv" style="display:block;">
-						<input type="submit" name="action" value="Initialize Upload..." />
-					</div>
 				<div style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Title: </div>
 					<div class="editdiv" style=""><?php echo $duManager->getTitle(); ?></div>

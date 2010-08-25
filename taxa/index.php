@@ -30,7 +30,7 @@
  $taxonRank = $taxonManager->getRankId();
  
  $editable = false;
- if($isAdmin && array_key_exists("TaxonProfile",$userRights)){
+ if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
  	$editable = true;
  }
  $descr = Array();
