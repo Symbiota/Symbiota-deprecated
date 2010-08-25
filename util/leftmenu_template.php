@@ -10,6 +10,11 @@
 		</a>
 	</div>
     <div class='menuitem'>
+    	<a href='<?php echo $clientRoot; ?>/projects/index.php'>
+    		Flora Projects
+    	</a>
+    </div>
+    <div class='menuitem'>
     	<a href='<?php echo $clientRoot; ?>/checklists/index.php'>
     		Species Lists
     	</a>
@@ -17,6 +22,11 @@
     <div class='menuitem'>
     	<a href='<?php echo $clientRoot; ?>/ident/index.php'>
     		Identification Keys
+    	</a>
+    </div>
+    <div class='menuitem'>
+    	<a href='<?php echo $clientRoot; ?>/ident/dynamickeymap.php'>
+    		Dynamic Key
     	</a>
     </div>
     <div class='menuitem'>

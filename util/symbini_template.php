@@ -3,10 +3,10 @@ $defaultLang = "English";			//Default language
 $defaultProjId = 1;
 $defaultTitle = "";
 $adminEmail = "";
-$charset = "ISO-8859-1";
+$charset = "ISO-8859-1";			//ISO-8859-1 or UTF-8
 
 $clientRoot = "";					//URL path to project root folder 
-$serverRoot = "";
+$serverRoot = "";					//Root path to project root folder
 
 //the root for the image directory
 $imageDomain = "";					//Domain path to images, if different from Virtual Flora path (e.g. http://swbiodiversity.org)
