@@ -19,10 +19,15 @@ class DirectUpload extends DataUploadManager {
 				$sql .= " LIMIT 10";
 			}
 			$rs = $sourceConn->query($sql);
-			$row = $rs->fetch_assoc();
+			if(!$rs){
+				echo "<li style='font-weight:bold;'>ERROR: Possible syntax error in source SQL</li>";
+				return;
+			}
 			$sourceArr = Array();
-			foreach($row as $k => $v){
-				$sourceArr[] = strtolower($k);
+			if($row = $rs->fetch_assoc()){
+				foreach($row as $k => $v){
+					$sourceArr[] = strtolower($k);
+				}
 			}
 			$rs->close();
 			$this->sourceArr = $sourceArr;
