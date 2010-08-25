@@ -208,7 +208,7 @@
 				"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
 				"WHERE c.Access = 'public' ";
 			if(!array_key_exists("SuperAdmin",$userRights)){
-				$sql .= "AND c.clid IN(".implode(",",$userRights["ClAdmin"]).") "
+				$sql .= "AND c.clid IN(".implode(",",$userRights["ClAdmin"]).") ";
 			}
 			$sql .= "ORDER BY c.Name";
 			$result = $this->con->query($sql);
