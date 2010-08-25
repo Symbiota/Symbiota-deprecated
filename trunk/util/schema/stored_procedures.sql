@@ -146,45 +146,36 @@ END//
 -- =============================================
 
 DELIMITER //
-CREATE PROCEDURE `TransferUploads`(IN doFullReplace boolean)
+CREATE PROCEDURE `TransferUploads`(IN targetCollId INT, IN doFullReplace boolean)
 BEGIN
-
-   DECLARE targetCollId INT DEFAULT 0;
-
-
-   SELECT collid INTO targetCollId FROM uploadspectemp LIMIT 1;
-
-   IF targetCollId = 0 THEN
-        SELECT collid INTO targetCollId FROM uploadimagetemp LIMIT 1;
-   END IF;
 
    IF targetCollId > 0 THEN
 
         #Before transfer, Update misc fields when needed
         UPDATE uploadspectemp u
         SET u.year = YEAR(u.eventDate)
-        WHERE (u.year IS NULL OR u.year = 0) AND u.eventDate IS NOT NULL;
+        WHERE u.collid = targetCollId AND u.eventDate IS NOT NULL AND (u.year IS NULL OR u.year = 0);
 
         UPDATE uploadspectemp u
         SET u.month = MONTH(u.eventDate)
-        WHERE (u.month IS NULL OR u.month = 0) AND u.eventDate IS NOT NULL;
+        WHERE u.collid = targetCollId AND (u.month IS NULL OR u.month = 0) AND u.eventDate IS NOT NULL;
 
         UPDATE uploadspectemp u
         SET u.day = DAY(u.eventDate)
-        WHERE (u.day IS NULL OR u.day = 0) AND u.eventDate IS NOT NULL;
+        WHERE u.collid = targetCollId AND (u.day IS NULL OR u.day = 0) AND u.eventDate IS NOT NULL;
 
         UPDATE uploadspectemp u
         SET u.startDayOfYear = DAYOFYEAR(u.eventDate)
-        WHERE u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL;
+        WHERE u.collid = targetCollId AND u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL;
 
         UPDATE uploadspectemp u
         SET u.endDayOfYear = DAYOFYEAR(u.LatestDateCollected)
-        WHERE u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL;
+        WHERE u.collid = targetCollId AND u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL;
 
          #Update LocalitySecurity
          UPDATE taxa t INNER JOIN uploadspectemp u ON t.SciName = u.SciName
          SET u.LocalitySecurity = t.SecurityStatus
-         WHERE (t.SecurityStatus > 1) AND (u.LocalitySecurity = 1 OR u.LocalitySecurity IS NULL);
+         WHERE u.collid = targetCollId AND (t.SecurityStatus > 1) AND (u.LocalitySecurity = 1 OR u.LocalitySecurity IS NULL);
 
          #standardize some of the fields
          UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," subsp. "," ssp. ") WHERE s.sciname like "% subsp. %";
@@ -295,7 +286,7 @@ BEGIN
         #Link existing records
         UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid)
         SET u.occid = o.occid
-        WHERE u.occid IS NULL;
+        WHERE u.collid = targetCollId AND u.occid IS NULL;
 
         #Update existing records
         UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid
@@ -321,7 +312,8 @@ BEGIN
         o.georeferenceSources = u.georeferenceSources, o.georeferenceVerificationStatus = u.georeferenceVerificationStatus,
         o.georeferenceRemarks = u.georeferenceRemarks, o.minimumElevationInMeters = u.minimumElevationInMeters,
         o.maximumElevationInMeters = u.maximumElevationInMeters, o.verbatimElevation = u.verbatimElevation,
-        o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, o.language = u.language;
+        o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, o.language = u.language
+        WHERE u.collid = targetCollId;
 
 
         #Insert new records
@@ -348,7 +340,7 @@ BEGIN
         u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters,
         u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language
         FROM uploadspectemp u
-        WHERE u.occid Is Null;
+        WHERE u.occid Is Null AND u.collid = targetCollId;
 
 
         #if replace all, delete record where the datelastmodified has not been changed
@@ -357,52 +349,53 @@ BEGIN
            WHERE collid = targetCollId AND DateLastModified < DATE_SUB(CURDATE(), INTERVAL 1 DAY);
         END IF;
 
-        DELETE FROM uploadspectemp;
+        DELETE FROM uploadspectemp WHERE collid = targetCollId;
 
         #Update stats
         UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = targetCollId;
         CALL UpdateCollectionStats(targetCollId);
 
 
-     #transfer images
+       #transfer images
        UPDATE uploadimagetemp u INNER JOIN omoccurrences o ON u.collid = o.collid AND u.dbpk = o.dbpk
           SET u.occid = o.occid
-          WHERE u.occid IS NULL;
+          WHERE u.collid = targetCollId AND u.occid IS NULL;
 
        UPDATE uploadimagetemp u INNER JOIN omoccurrences o ON u.specimengui = o.occurrenceid
           SET u.occid = o.occid
-          WHERE u.occid = null;
+          WHERE u.collid = targetCollId AND u.occid = null;
 
        UPDATE uploadimagetemp u INNER JOIN omoccurrences o ON u.occid = o.occid
           SET u.tid = o.tidinterpreted
-          WHERE u.tid IS NULL AND o.tidinterpreted IS NOT NULL;
+          WHERE u.collid = targetCollId AND u.tid IS NULL AND o.tidinterpreted IS NOT NULL;
 
        UPDATE (uploadimagetemp u INNER JOIN omoccurrences o ON u.occid = o.occid)
           INNER JOIN taxa t ON o.genus = t.unitname1 AND o.specificepithet = t.unitname2
           SET u.tid = t.tid
-          WHERE o.genus IS NOT NULL AND o.specificepithet IS NOT NULL AND t.rankid = 220 AND u.tid IS NULL;
+          WHERE u.collid = targetCollId AND o.genus IS NOT NULL AND o.specificepithet IS NOT NULL AND t.rankid = 220 AND u.tid IS NULL;
 
        UPDATE (uploadimagetemp u INNER JOIN omoccurrences o ON u.occid = o.occid)
           INNER JOIN taxa t ON o.genus = t.sciname
           SET u.tid = t.tid
-          WHERE u.tid IS NULL AND o.genus IS NOT NULL AND t.rankid = 180;
+          WHERE u.collid = targetCollId AND u.tid IS NULL AND o.genus IS NOT NULL AND t.rankid = 180;
 
        UPDATE (uploadimagetemp u INNER JOIN omoccurrences o ON u.occid = o.occid)
           INNER JOIN taxa t ON o.family = t.sciname
           SET u.tid = t.tid
-          WHERE u.tid IS NULL AND o.family IS NOT NULL AND t.rankid = 140;
+          WHERE u.collid = targetCollId AND u.tid IS NULL AND o.family IS NOT NULL AND t.rankid = 140;
 
-       UPDATE uploadimagetemp
-          SET tid = 5571
-          WHERE tid IS NULL;
+       UPDATE uploadimagetemp ui
+          SET ui.tid = 5571
+          WHERE ui.collid = targetCollId AND ui.tid IS NULL;
 
        INSERT IGNORE INTO images(tid, url, thumbnailurl, originalurl, photographer,
          photographeruid, imagetype, caption, owner, occid, notes, sortsequence)
          SELECT tid, url, thumbnailurl, originalurl, photographer, photographeruid,
          imagetype, caption, owner, occid, notes, IFNULL(sortsequence,50) as sortseq
-         FROM uploadimagetemp WHERE tid IS NOT NULL AND url IS NOT NULL AND occid IS NOT NULL;
+         FROM uploadimagetemp ui
+         WHERE ui.collid = targetCollId AND ui.tid IS NOT NULL AND ui.url IS NOT NULL AND ui.occid IS NOT NULL;
 
-        DELETE FROM uploadimagetemp;
+        DELETE FROM uploadimagetemp WHERE collid = targetCollId;
 
     END IF;
 
