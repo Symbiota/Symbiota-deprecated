@@ -281,19 +281,25 @@ class DataUploadManager {
 		//Output table rows for source data
 		sort($this->symbFields);
 		$dbpk = (array_key_exists("dbpk",$this->fieldMap)?$this->fieldMap["dbpk"]["field"]:"");
+		$autoMapArr = Array();
 		foreach($this->sourceArr as $fieldName){
 			if($dbpk != $fieldName){
+				$isAutoMapped = false;
+				if($autoMap && in_array($fieldName,$this->symbFields)){
+					$isAutoMapped = true;
+					$autoMapArr[] = $fieldName;
+				}
 				echo "<tr>\n";
 				echo "<td style='padding:2px;'>";
 				echo $fieldName;
 				echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
 				echo "</td>\n";
 				echo "<td>\n";
-				echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)?"yellow":"")."'>";
+				echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
 				echo "<option value=''>Select Target Field</option>\n";
 				echo "<option value=''>Leave Field Unmapped</option>\n";
 				echo "<option value=''>-------------------------</option>\n";
-				if($autoMap && in_array($fieldName,$this->symbFields)){
+				if($isAutoMapped){
 					//Source Field = Symbiota Field
 					foreach($this->symbFields as $sField){
 						if($sField != "dbpk"){
@@ -320,11 +326,29 @@ class DataUploadManager {
 				echo "</tr>\n";
 			}
 		}
+		
+		if($autoMapArr){
+			$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
+			$sqlValues = "VALUES (".$this->uspid;
+			foreach($autoMapArr as $v){
+				if($v != "dbpk"){
+					$sql = $sqlInsert.$sqlValues.",'".$v."','".$v."')";
+					//echo $sql;
+					$this->conn->query($sql);
+				}
+			}
+		}
 	}
 
 	public function savePrimaryKey($dbpk){
-		$sql = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
-			"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
+		$sql = "";
+		if($dbpk){
+			$sql = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ".
+				"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
+		}
+		else{
+			$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid." AND symbspecfield = 'dbpk'";
+		}
 		$this->conn->query($sql);
 	}
 

@@ -22,8 +22,7 @@ class FileUpload extends DataUploadManager{
 				break;
 			}
 		}
-		
-		$this->echoFieldMapTable($sourceArr,$autoMap);
+		$this->sourceArr = $sourceArr;
 	}
  	
 	public function uploadData($finalTransfer){

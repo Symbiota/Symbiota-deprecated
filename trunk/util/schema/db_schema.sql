@@ -949,7 +949,9 @@ DROP TABLE IF EXISTS `taxadescrblock`;
 CREATE TABLE `taxadescrblock` (
   `tdbid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `tid` int(10) unsigned NOT NULL,
+  `caption` varchar(20) DEFAULT NULL,
   `source` varchar(250) DEFAULT NULL,
+  `sourceurl` varchar(250) DEFAULT NULL,
   `language` varchar(45) DEFAULT 'English',
   `displaylevel` int(10) unsigned NOT NULL DEFAULT '1' COMMENT '1 = short descr, 2 = intermediate descr',
   `uid` int(10) unsigned NOT NULL,
@@ -960,6 +962,7 @@ CREATE TABLE `taxadescrblock` (
   CONSTRAINT `FK_taxadescrblock_tid` FOREIGN KEY (`tid`) REFERENCES `taxa` (`TID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Table structure for table `taxadescrstmts`
@@ -1406,6 +1409,7 @@ CREATE TABLE `uploadtaxa` (
   `RankId` smallint(5) DEFAULT NULL,
   `scinameinput` varchar(250) NOT NULL,
   `SciName` varchar(250) DEFAULT NULL,
+  `SourcePK` varchar(45) DEFAULT NULL,
   `UnitInd1` varchar(1) DEFAULT NULL,
   `UnitName1` varchar(50) DEFAULT NULL,
   `UnitInd2` varchar(1) DEFAULT NULL,
@@ -1416,9 +1420,11 @@ CREATE TABLE `uploadtaxa` (
   `Acceptance` int(10) unsigned DEFAULT '1' COMMENT '0 = not accepted; 1 = accepted',
   `TidAccepted` int(10) unsigned DEFAULT NULL,
   `AcceptedStr` varchar(250) DEFAULT NULL,
+  `SourceAcceptedPK` varchar(45) DEFAULT NULL,
   `UnacceptabilityReason` varchar(24) DEFAULT NULL,
   `ParentTid` int(10) DEFAULT NULL,
   `ParentStr` varchar(250) DEFAULT NULL,
+  `SourceParentPK` varchar(45) DEFAULT NULL,
   `securitystatus` int(10) unsigned DEFAULT '1' COMMENT '1 = hide nothing; 2 = hide locality',
   `Source` varchar(250) DEFAULT NULL,
   `Notes` varchar(250) DEFAULT NULL,
@@ -1428,6 +1434,11 @@ CREATE TABLE `uploadtaxa` (
   UNIQUE KEY `sciname_index` (`SciName`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+ALTER TABLE `uploadtaxa` 
+ ADD COLUMN `SourcePK` VARCHAR(45) AFTER `scinameinput`,
+ ADD COLUMN `SourceAcceptedPK` VARCHAR(45) AFTER `AcceptedStr`,
+ ADD COLUMN `SourceParentPK` VARCHAR(45) AFTER `ParentStr`;
 
 --
 -- Table structure for table `userlogin`
@@ -1520,3 +1531,19 @@ INSERT INTO userlogin(uid,username,password)
 VALUES (1,"admin",password("admin"));
 INSERT INTO userpermissions(uid,pname)
 VALUES (1,"SuperAdmin");
+
+--
+-- Prime taxonomic base tables with data
+--
+LOCK TABLES `taxonunits` WRITE;
+/*!40000 ALTER TABLE `taxonunits` DISABLE KEYS */;
+INSERT INTO `taxonunits` VALUES (3,10,'Kingdom',10,10,'1996-06-13 14:00:00'),(3,20,'Subkingdom',10,10,'1996-06-13 14:00:00'),(3,30,'Division',20,10,'1996-06-13 14:00:00'),(3,40,'Subdivision',30,30,'1996-06-13 14:00:00'),(3,60,'Class',40,30,'1996-06-13 14:00:00'),(3,70,'Subclass',60,60,'1996-06-13 14:00:00'),(3,100,'Order',70,60,'1996-06-13 14:00:00'),(3,110,'Suborder',100,100,'1996-06-13 14:00:00'),(3,140,'Family',110,100,'1996-06-13 14:00:00'),(3,150,'Subfamily',140,140,'1996-06-13 14:00:00'),(3,160,'Tribe',150,140,'1996-06-13 14:00:00'),(3,170,'Subtribe',160,140,'1996-06-13 14:00:00'),(3,180,'Genus',170,140,'1996-06-13 14:00:00'),(3,190,'Subgenus',180,180,'1996-06-13 14:00:00'),(3,200,'Section',190,180,'1996-06-13 14:00:00'),(3,210,'Subsection',200,180,'1996-06-13 14:00:00'),(3,220,'Species',210,180,'1996-06-13 14:00:00'),(3,230,'Subspecies',220,180,'1996-06-13 14:00:00'),(3,240,'Variety',220,180,'1996-06-13 14:00:00'),(3,250,'Subvariety',240,180,'1996-06-13 14:00:00'),(3,260,'Form',220,180,'1996-06-13 14:00:00'),(3,270,'Subform',260,180,'1996-06-13 14:00:00'),(3,300,'Cultivated',220,220,'2010-07-31 21:54:04');
+/*!40000 ALTER TABLE `taxonunits` ENABLE KEYS */;
+UNLOCK TABLES;
+
+LOCK TABLES `taxauthority` WRITE;
+/*!40000 ALTER TABLE `taxauthority` DISABLE KEYS */;
+INSERT INTO `taxauthority`(taxauthid, isprimary, name) VALUES (1,1,'Default Taxonomic Thesaurus');
+/*!40000 ALTER TABLE `taxauthority` ENABLE KEYS */;
+UNLOCK TABLES;
+

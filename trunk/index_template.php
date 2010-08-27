@@ -9,7 +9,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 <head>
     <title><?php echo $defaultTitle?> Home</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" />
-    <meta name='keywords' content='Arizona,New Mexico,Sonora,Sonoran,Desert,plants,lichens,natural history collections,flora, fauna, checklists,species lists' />
+    <meta name='keywords' content='' />
 </head>
 
 <body>
