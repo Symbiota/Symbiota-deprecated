@@ -514,7 +514,7 @@ END//
 -- =============================================
 
 DELIMITER //
-CREATE PROCEDURE `UploadTaxa`(IN defaultParent INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UploadTaxa`(IN defaultParent INT)
 BEGIN
 
 #All taxa with a rank of family or higher (rankid <= 140) must have a rank setting
@@ -522,6 +522,45 @@ BEGIN
 
 DECLARE startLoadCnt INT DEFAULT -1;
 DECLARE endLoadCnt INT DEFAULT 0;
+
+#Do some cleaning in AcceptedStr column
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," subsp. "," ssp. ") WHERE AcceptedStr like "% subsp. %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," var "," var. ") WHERE AcceptedStr like "% var %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," ssp "," ssp. ") WHERE AcceptedStr like "% ssp %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," sp.","") WHERE AcceptedStr like "% sp.";
+UPDATE uploadtaxa SET AcceptedStr = trim(AcceptedStr) WHERE AcceptedStr like "% " OR AcceptedStr like " %";
+UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr,"  "," ") WHERE AcceptedStr like "%  %";
+
+#Insert into UploadTaxa all accepted taxa (AcceptedStr) that are not all ready in scinameinput
+INSERT INTO uploadtaxa(scinameinput)
+SELECT DISTINCT u.AcceptedStr
+FROM uploadtaxa u LEFT JOIN uploadtaxa ul2 ON u.AcceptedStr = ul2.scinameinput
+WHERE u.AcceptedStr IS NOT NULL AND ul2.scinameinput IS NULL;
+
+#Do some cleaning
+UPDATE uploadtaxa SET sciname = replace(sciname," subsp. "," ssp. ") WHERE sciname like "% subsp. %";
+UPDATE uploadtaxa SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %";
+UPDATE uploadtaxa SET sciname = replace(sciname," ssp "," ssp. ") WHERE sciname like "% ssp %";
+UPDATE uploadtaxa SET sciname = replace(sciname," cf. "," ") WHERE sciname like "% cf. %";
+UPDATE uploadtaxa SET sciname = replace(sciname," cf "," ") WHERE sciname like "% cf %";
+UPDATE uploadtaxa SET sciname = REPLACE(sciname," aff. "," ") WHERE sciname like "% aff. %";
+UPDATE uploadtaxa SET sciname = REPLACE(sciname," aff "," ") WHERE sciname like "% aff %";
+UPDATE uploadtaxa SET sciname = replace(sciname," sp.","") WHERE sciname like "% sp.";
+UPDATE uploadtaxa SET sciname = replace(sciname," sp","") WHERE sciname like "% sp";
+UPDATE uploadtaxa SET sciname = trim(sciname) WHERE sciname like "% " OR sciname like " %";
+UPDATE uploadtaxa SET sciname = replace(sciname,"  "," ") WHERE sciname like "%  %";
+
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," subsp. "," ssp. ") WHERE scinameinput like "% subsp. %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," var "," var. ") WHERE scinameinput like "% var %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," ssp "," ssp. ") WHERE scinameinput like "% ssp %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," cf. "," ") WHERE scinameinput like "% cf. %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," cf "," ") WHERE scinameinput like "% cf %";
+UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," aff. "," ") WHERE scinameinput like "% aff. %";
+UPDATE uploadtaxa SET scinameinput = REPLACE(scinameinput," aff "," ") WHERE scinameinput like "% aff %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," sp.","") WHERE scinameinput like "% sp.";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput," sp","") WHERE scinameinput like "% sp";
+UPDATE uploadtaxa SET scinameinput = trim(scinameinput) WHERE scinameinput like "% " OR scinameinput like " %";
+UPDATE uploadtaxa SET scinameinput = replace(scinameinput,"  "," ") WHERE scinameinput like "%  %";
 
 #Parse name
 UPDATE uploadtaxa
@@ -580,7 +619,7 @@ DELETE ut.* FROM uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname;
 #Set rankid
 UPDATE uploadtaxa
 SET rankid = 140
-WHERE rankid IS NULL AND sciname like "%aceae";
+WHERE rankid IS NULL AND (sciname like "%aceae" || sciname like "%idae");
 
 UPDATE uploadtaxa
 SET rankid = 220
@@ -631,6 +670,7 @@ UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.family = t.sciname
 SET ut.kingdomid = t.kingdomid
 WHERE t.rankid = 140 AND t.kingdomid is not null AND ut.kingdomid IS NULL;
 
+#ITIS default kingdom id is 3 for plants
 UPDATE uploadtaxa ut SET ut.kingdomid = 3 WHERE ut.kingdomid IS NULL;
 
 #Set parent string
@@ -654,7 +694,7 @@ UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname
 SET parenttid = t.tid
 WHERE parenttid IS NULL;
 
-#Insert into uploadtaxa parents that are not in taxa
+#Insert into uploadtaxa parents that are not in taxa table
 ##Load parents (species) of infraspecific taxa that are not already in uploadtaxa
 INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, KingdomID, uppertaxonomy, family, RankId, UnitName1, UnitName2, parentstr, Source)
 SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.uppertaxonomy, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source
@@ -694,7 +734,7 @@ WHILE endLoadCnt > 0 OR startLoadCnt <> endLoadCnt DO
 
         #Load taxa that have parent tids
         INSERT INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes )
-        SELECT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3,
+        SELECT DISTINCT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3,
         ut.UnitName3, ut.Author, ut.Source, ut.Notes
         FROM uploadtaxa AS ut
         WHERE (ut.TID Is Null AND parenttid IS NOT NULL );
@@ -709,12 +749,12 @@ WHILE endLoadCnt > 0 OR startLoadCnt <> endLoadCnt DO
         SET tidaccepted = tid
         WHERE (acceptance = 1 OR acceptance IS NULL) AND tid IS NOT NULL;
 
-        UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parentstr = t.sciname
+        UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname
         SET ut.tidaccepted = t.tid
-        WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL;
+        WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL AND ut.acceptedstr IS NOT NULL;
 
         INSERT INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason )
-        SELECT ut.TID, ut.TidAccepted, 1 AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason
+        SELECT DISTINCT ut.TID, ut.TidAccepted, 1 AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason
         FROM uploadtaxa AS ut
         WHERE (ut.TID Is Not Null AND ut.TidAccepted IS NOT NULL);
 
@@ -729,7 +769,6 @@ WHILE endLoadCnt > 0 OR startLoadCnt <> endLoadCnt DO
         SELECT COUNT(*) INTO endLoadCnt FROM uploadtaxa;
 
 END WHILE;
-
 END//
 
 
