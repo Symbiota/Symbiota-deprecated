@@ -5,8 +5,8 @@
  */
 
  //error_reporting(E_ALL);
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
  set_time_limit(120);
  ini_set("max_input_time",120);
  
@@ -292,7 +292,7 @@
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_admin_tpeditorMenu)?$taxa_admin_tpeditorMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($taxa_admin_tpeditorCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -1077,7 +1077,7 @@ if(isset($taxa_admin_tpeditorCrumbs)){
  	</td></tr>
  </table>
 <?php  
-include($serverRoot."/util/footer.php");
+include($serverRoot.'/footer.php');
  ?>
 	
 </body>

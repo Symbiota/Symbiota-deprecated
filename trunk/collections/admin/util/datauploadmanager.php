@@ -1,8 +1,8 @@
 <?php
-include_once($serverRoot."/util/dbconnection.php");
-include_once($serverRoot."/collections/admin/util/directupload.php");
-include_once($serverRoot."/collections/admin/util/digirupload.php");
-include_once($serverRoot."/collections/admin/util/fileupload.php");
+include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/collections/admin/util/directupload.php');
+include_once($serverRoot.'/collections/admin/util/digirupload.php');
+include_once($serverRoot.'/collections/admin/util/fileupload.php');
 
 class DataUploadManager {
 

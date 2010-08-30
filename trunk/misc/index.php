@@ -1,6 +1,6 @@
 <?php
 //error_reporting(E_ALL);
- include_once("../util/symbini.php");
+ include_once('../util/symbini.php');
  header("Content-Type: text/html; charset=".$charset);
  
 ?>
@@ -12,7 +12,7 @@
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot."/util/header.php");
+		include($serverRoot.'/header.php');
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -25,7 +25,7 @@
 			</div>
 		</div>
 		<?php
-			include($serverRoot."/util/footer.php");
+			include($serverRoot.'/footer.php');
 		?>
 	</body>
 </html>

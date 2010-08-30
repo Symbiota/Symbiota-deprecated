@@ -4,7 +4,7 @@
  * By E.E. Gilbert
  */
 //error_reporting(E_ALL);
-include_once("../util/dbconnection.php");
+include_once($serverRoot.'/config/dbconnection.php');
 include_once("Person.php");
 
 class ProfileHandler{

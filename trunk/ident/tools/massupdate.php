@@ -1,8 +1,8 @@
 <?php
 error_reporting(E_ALL);
 //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -125,7 +125,7 @@ header("Content-Type: text/html; charset=".$charset);
 	}
 
 	$displayLeftMenu = (isset($ident_tools_massupdateMenu)?$ident_tools_massupdateMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($ident_tools_massupdateCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -309,7 +309,7 @@ header("Content-Type: text/html; charset=".$charset);
 ?>
 	</div>
 <?php  
- include($serverRoot."/util/footer.php");
+ include($serverRoot.'/footer.php');
  
 ?>
 </body>

@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
@@ -43,7 +43,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 
 	<?php
 	$displayLeftMenu = (isset($checklists_checklistloaderMenu)?$checklists_checklistloaderMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($checklists_checklistloaderCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -106,7 +106,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 
 	</div>
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
 </body>
 </html>

@@ -5,9 +5,8 @@
  */
 
  //error_reporting(E_ALL);
- //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
   
  $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
  $taxonEditorObj = new TaxonEditor($target);
@@ -195,7 +194,7 @@ if($editable){
 <body onload="">
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomyeditorMenu)?$taxa_admin_taxonomyeditorMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($taxa_admin_taxonomyeditorCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -657,7 +656,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				echo "<div>You must be logged in and authorized to view internal taxonomy. Please login.</div>";
 			}
 		}
-		include($serverRoot."/util/footer.php");
+		include($serverRoot.'/footer.php');
 		?>
 	</div>
 	<script type="text/javascript">

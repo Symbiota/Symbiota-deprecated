@@ -6,8 +6,8 @@
 
  //error_reporting(E_ALL);
  //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
   
  $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
  $taxonDisplayObj = new TaxonDisplay($target);
@@ -28,7 +28,7 @@
 <body onload="">
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomydisplayMenu)?$taxa_admin_taxonomydisplayMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -71,7 +71,7 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 		?>
 	</div>
 	<?php 
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	<script type="text/javascript">
 

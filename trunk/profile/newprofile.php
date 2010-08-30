@@ -3,9 +3,9 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-include_once("util/ProfileHandler.php");
-include_once("util/Person.php");
-include_once("../util/symbini.php");
+include_once('../util/symbini.php');
+include_once('util/ProfileHandler.php');
+include_once('util/Person.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
@@ -63,11 +63,57 @@ if($action == "Submit Profile"){
 <head>
     <title><?php echo $defaultTitle; ?> - New User Profile</title>
     <link href="../css/main.css" rel="stylesheet" type="text/css"/>
+	<script language="JavaScript" type="text/javascript">
+	    function checkform(f){
+	        var pwd1 = f.pwd.value.replace(/\s/g, "");
+	        var pwd2 = f.pwd2.value.replace(/\s/g, "");
+	        if(pwd1 == "" || pwd2 == ""){
+	            window.alert("Both password fields must contain a value.");
+	            return false;
+	        }
+	        if(pwd1 != pwd2){
+	            window.alert("Password do not match. Please enter again.");
+	            f.pwd.value = "";
+	            f.pwd2.value = "";
+	            f.pwd2.focus();
+	            return false;
+	        }
+	        if(f.username.value.replace(/\s/g, "") == ""){
+	            window.alert("User Name must contain a value.");
+	            return false;
+	        }
+	
+	        var errorText = "";
+	        if(f.firstname.value.replace(/\s/g, "") == "" ){
+	            errorText += "\nFirst Name";
+	        }
+	        if(f.lastname.value.replace(/\s/g, "") == "" ){
+	            errorText += "\nLast Name";
+	        }
+	        if(f.state.value.replace(/\s/g, "") == "" ){
+	            errorText += "\nState";
+	        }
+	        if(f.country.value.replace(/\s/g, "") == "" ){
+	            errorText += "\nCountry";
+	        }
+	        if(f.email.value.replace(/\s/g, "") == "" ){
+	            errorText += "\nEmail";
+	        }
+	
+	        if(errorText == ""){
+	            return true;
+	        }
+	        else{
+	            window.alert("The following fields must be filled out:\n " + errorText);
+	            return false;
+	        }
+	    }
+	</script>
 </head>
 <body>
 	<?php
 	$displayLeftMenu = (isset($profile_newprofileMenu)?$profile_newprofileMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($profile_newprofileCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -190,54 +236,7 @@ if($action == "Submit Profile"){
 
         <!-- end inner text -->
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
-	<script language="JavaScript" type="text/javascript">
-	    function checkform(f){
-	        var pwd1 = f.pwd.value.replace(/\s/g, "");
-	        var pwd2 = f.pwd2.value.replace(/\s/g, "");
-	        if(pwd1 == "" || pwd2 == ""){
-	            window.alert("Both password fields must contain a value.");
-	            return false;
-	        }
-	        if(pwd1 != pwd2){
-	            window.alert("Password do not match. Please enter again.");
-	            f.pwd.value = "";
-	            f.pwd2.value = "";
-	            f.pwd2.focus();
-	            return false;
-	        }
-	        if(f.username.value.replace(/\s/g, "") == ""){
-	            window.alert("User Name must contain a value.");
-	            return false;
-	        }
-	
-	        var errorText = "";
-	        if(f.firstname.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nFirst Name";
-	        }
-	        if(f.lastname.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nLast Name";
-	        }
-	        if(f.state.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nState";
-	        }
-	        if(f.country.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nCountry";
-	        }
-	        if(f.email.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nEmail";
-	        }
-	
-	        if(errorText == ""){
-	            return true;
-	        }
-	        else{
-	            window.alert("The following fields must be filled out:\n " + errorText);
-	            return false;
-	        }
-	    }
-	</script>
-
 </body>
 </html>

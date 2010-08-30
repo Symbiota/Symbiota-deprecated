@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
@@ -20,7 +20,7 @@ $verifyPathsObj = new VerifyPaths();
 
 	<?php
 	$displayLeftMenu = (isset($imagelib_misc_verifypathsMenu)?$imagelib_misc_verifypathsMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($imagelib_misc_verifypathsCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -54,7 +54,7 @@ $verifyPathsObj = new VerifyPaths();
 		</form>
 	</div>
 	<?php 
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	
 </body>

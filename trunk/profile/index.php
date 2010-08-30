@@ -3,8 +3,8 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-include_once("../util/symbini.php");
-include_once("util/ProfileHandler.php");
+include_once('../config/symbini.php');
+include_once('util/ProfileHandler.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -96,7 +96,7 @@ else{
 
 <?php
 $displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($profile_indexCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -175,7 +175,7 @@ if(isset($profile_indexCrumbs)){
 </div>
 
 <?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 ?>
 
 </body>

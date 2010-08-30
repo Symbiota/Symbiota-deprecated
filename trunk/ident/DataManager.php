@@ -3,7 +3,7 @@
  * Created on May 16, 2006
  * E.E.Gilbert
  */
- include_once("../util/dbconnection.php");
+ include_once($serverRoot.'/config/dbconnection.php');
 
  class DataManager {
 

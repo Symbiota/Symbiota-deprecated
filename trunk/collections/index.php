@@ -1,6 +1,6 @@
 <?php
- include_once("../util/symbini.php");
- include_once("util/CollectionManager.php");
+ include_once('../config/symbini.php');
+ include_once('util/CollectionManager.php');
  header("Content-Type: text/html; charset=".$charset);
 
  $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
@@ -104,7 +104,7 @@
 	
 	<?php
 	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($collections_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -298,7 +298,7 @@
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot."/footer.php");
 	?>
 	
 		<script type="text/javascript">

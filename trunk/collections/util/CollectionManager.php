@@ -4,7 +4,7 @@
  * @author  E. Gilbert: egbot@asu.edu
  */
 
-include_once($serverRoot."/util/dbconnection.php");
+include_once($serverRoot.'/config/dbconnection.php');
 
 class CollectionManager{
 	

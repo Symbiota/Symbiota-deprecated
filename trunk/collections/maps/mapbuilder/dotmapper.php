@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../../../util/symbini.php");
-include_once("../../../util/dbconnection.php");
+include_once('../../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 include_once("MapperManager.php");
 header("Content-Type: text/html; charset=".$charset);
 
@@ -35,7 +35,7 @@ if($mapId){
 
 	<?php
 		$displayLeftMenu = (isset($collections_maps_mapbuilder_dotmapperMenu)?$collections_maps_mapbuilder_dotmapperMenu:"true");
-		include($serverRoot."/util/header.php");
+		include($serverRoot.'/header.php');
 		if(isset($collections_maps_mapbuilder_dotmapperCrumbs)) echo "<div class='navpath'>".$collections_maps_mapbuilder_dotmapperCrumbs."</div>";
 	?> 
     <!-- This is inner text! -->
@@ -89,7 +89,7 @@ if($mapId){
         </div>
 	</div>
 	<?php
-	    include($serverRoot."/util/footer.php");
+	    include($serverRoot.'/footer.php');
 	?> 
 
 </body>

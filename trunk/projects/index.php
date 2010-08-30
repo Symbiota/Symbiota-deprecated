@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
  $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
@@ -99,7 +99,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 	<?php
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($projects_indexCrumbs)){
 		?>
 		<div class="navpath">
@@ -260,7 +260,7 @@ header("Content-Type: text/html; charset=".$charset);
 	
 	</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 
 	<script type="text/javascript">

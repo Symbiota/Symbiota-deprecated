@@ -3,9 +3,9 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-include_once("../util/symbini.php");
-include_once("util/ProfileHandler.php");
-include_once("util/Person.php");
+include_once('../config/symbini.php');
+include_once('util/ProfileHandler.php');
+include_once('util/Person.php');
 Header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
@@ -234,7 +234,7 @@ if($isEditable){
 <body onload="initTabs('profiletabs');">
 <?php
 $displayLeftMenu = (isset($profile_viewprofileMenu)?$profile_viewprofileMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($profile_viewprofileCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -684,7 +684,7 @@ if(isset($profile_viewprofileCrumbs)){
 	</div>
 
 <?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 ?>
 
 </body>

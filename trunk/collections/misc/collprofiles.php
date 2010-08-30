@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
  header("Content-Type: text/html; charset=".$charset);
 
  $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -67,7 +67,7 @@
 
 	<?php
 	$displayLeftMenu = (isset($collections_misc_collprofilesMenu)?$collections_misc_collprofilesMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_misc_collprofilesCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -272,7 +272,7 @@
 	</div>
 	
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
 
 </body>

@@ -25,7 +25,7 @@ class DigirUpload extends DataUploadManager {
 	
  	public function __construct(){
  		parent::__construct();
- 		$defaultSchema = $clientRoot."/collections/admin/util/darwinsymbiota.xsd";
+ 		$defaultSchema = $GLOBALS["clientRoot"]."/collections/admin/util/darwinsymbiota.xsd";
  		set_time_limit(10000);
  		//
 		$this->initByteMap();

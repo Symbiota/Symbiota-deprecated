@@ -2,8 +2,8 @@
 /*
  * Created on Jul 20, 2006
  */
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once('/config/dbconnection.php');
 header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  
  $addValues = Array();
@@ -85,7 +85,7 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  
 <?php
 	$displayLeftMenu = (isset($ident_tools_editorMenu)?$ident_tools_editorMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($ident_tools_editorCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -192,7 +192,7 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  ?>
  </div>
  <?php 
- include($serverRoot."/util/footer.php");
+ include($serverRoot.'/footer.php');
 ?>
  
  </body>

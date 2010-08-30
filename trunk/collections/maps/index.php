@@ -1,5 +1,5 @@
 <?php
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
  header("Content-Type: text/html; charset=".$charset);
  ?>
 <html>
@@ -12,7 +12,7 @@
 
 <?php
 	$displayLeftMenu = (isset($collections_maps_indexMenu)?$collections_maps_indexMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_maps_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -67,7 +67,7 @@
     </div>
 
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 
 	<script type="text/javascript">

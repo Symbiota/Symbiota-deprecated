@@ -1,6 +1,6 @@
 <?php 
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
+include_once('/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"]:""; 
 
@@ -16,7 +16,7 @@ $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"
 <body>
 	<?php
 	$displayLeftMenu = (isset($imagelib_unknownbrowseMenu)?$imagelib_unknownbrowseMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($imagelib_unknownbrowseCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -55,7 +55,7 @@ $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	
 </body>
