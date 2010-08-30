@@ -1,0 +1,29 @@
+Edward Gilbert <egbot [at] asu . edu>
+   * Original developer and programmer
+   * Co-Principal Investigator for original project
+
+Corinna Gries
+   * Principal Investigator for original project
+
+Thomas Nash
+   * Co-Principal Investigator for original project
+
+Robin Schroeder
+   * One of the lead developers of the prototype 
+     of the origional specimen search engine
+
+
+Following individuals contributed significately to 
+testing and development of the user and data 
+management interfaces
+
+   * Dimmitt, Mark
+   * Hitchcock, Ann
+   * Landrum, Leslie 
+   * Licher, Max
+   * Lindley, Ries
+   * Makings, Elizabeth
+   * Mendoza, Anthony
+   * Trinks, Marc
+   * Van Devender, Thomas
+
