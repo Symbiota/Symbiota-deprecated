@@ -1,6 +1,6 @@
 <?php 
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $phUid = array_key_exists("phuid",$_REQUEST)?$_REQUEST["phuid"]:0;
@@ -22,7 +22,7 @@ $pManager = new PhotographerManager();
 
 	<?php
 	$displayLeftMenu = (isset($imagelib_photographersMenu)?$imagelib_photographersMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($imagelib_photographersCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -55,7 +55,7 @@ $pManager = new PhotographerManager();
 		?>
 	</div>
 	<?php 
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	
 </body>

@@ -1,5 +1,5 @@
 <?php
-include_once("../../util/dbconnection.php");
+include_once('../../config/dbconnection.php');
 
 $hierObj = new BuildHierarchy();
 $hierObj->buildNulls();

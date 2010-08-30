@@ -1,6 +1,6 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charSet);
  
 ?>

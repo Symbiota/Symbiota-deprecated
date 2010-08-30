@@ -1,6 +1,6 @@
 <?php 
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
@@ -53,7 +53,7 @@ $dichoKeyManager = new DichoKeyManager();
 
 	<?php
 	$displayLeftMenu = (isset($ident_dichotomous_keyMenu)?$ident_dichotomous_keyMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($ident_dichotomous_keyCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -72,7 +72,7 @@ $dichoKeyManager = new DichoKeyManager();
 	
 	</div>
 	<?php 
-		include($serverRoot."util/footer.php");
+		include($serverRoot."/footer.php");
 	?>
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

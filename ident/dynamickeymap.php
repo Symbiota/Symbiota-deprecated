@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
- include_once("../util/symbini.php");
+ include_once('../config/symbini.php');
  header("Content-Type: text/html; charset=".$charset);
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -65,7 +65,7 @@
 	<?php 
 		$displayLeftMenu = false;
 		$displayStyle = "nostrip";
-		include("../util/header.php");
+		include($serverRoot.'/header.php');
 	?>
 	    <div>
 	    	Pan, zoom and click on map to capture coordinates. Once done, submit coordinates to build key. 
@@ -101,7 +101,7 @@
 		</div>
 	    <div id='map' style='width: 600px; height: 500px;clear:both;'></div>
 	<?php
-	 	include_once("../util/footer.php");
+	 	include_once($serverRoot.'/footer.php');
 	?>
 
 	<script type="text/javascript">

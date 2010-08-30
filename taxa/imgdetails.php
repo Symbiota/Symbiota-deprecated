@@ -4,8 +4,8 @@
  * By E.E. Gilbert
  */
  //error_reporting(0);
- include_once("../util/dbconnection.php");
- include_once("../util/symbini.php");
+ include_once('../config/symbini.php');
+include_once('/config/dbconnection.php');
  Header("Content-Type: text/html; charset=".$charset);
  
  $imgId = $_REQUEST["imgid"]; 
@@ -25,7 +25,7 @@
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_imgdetailsMenu)?$taxa_imgdetailsMenu:false);
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($taxa_imgdetailsCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -76,7 +76,7 @@ if(isset($taxa_imgdetailsCrumbs)){
 	</div>
 
 <?php 
-include($serverRoot."/util/footer.php");
+include($serverRoot.'/footer.php');
 
 ?>
 </body>

@@ -1,13 +1,13 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once("../config/symbini.php");
+include_once($serverRoot."/config/dbconnection.php");
 header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Glossary</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 	<script type="text/javascript">
 	</script>
 </head>
@@ -16,7 +16,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 	<?php
 	$displayLeftMenu = (isset($glossary_indexMenu)?$glossary_indexMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($glossary_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -31,7 +31,7 @@ header("Content-Type: text/html; charset=".$charset);
 	</div>
 	
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot."/footer.php");
 	?>
 
 	<script type="text/javascript">

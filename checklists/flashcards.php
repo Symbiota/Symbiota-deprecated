@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
- include_once("../util/dbconnection.php");
- include_once("../util/symbini.php");
+ include_once('../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
  header("Content-Type: text/html; charset=".$charset);
 
 	$clid = $_REQUEST["clid"]; 
@@ -115,7 +115,7 @@
 <body onload="reset()">
 <?php
 	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($checklists_flashcardsCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -190,7 +190,7 @@
 		</div>
 	</div>
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot."/footer.php");
 	?>
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

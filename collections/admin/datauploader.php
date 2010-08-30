@@ -1,6 +1,6 @@
 <?php 
-include_once("../../util/symbini.php");
-include_once("util/datauploadmanager.php");
+include_once('../../config/symbini.php');
+include_once('util/datauploadmanager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
@@ -370,7 +370,7 @@ if($statusStr){
 						</div>
 					</div>
 				<?php } ?>
-				<?php if($uploadType == $DIRECTUPLOAD || $uploadType == $DIGIRUPLOAD || ($uploadType == $FILEUPLOAD && array_key_exists("uploadfile",$_FILES))){ ?>
+				<?php if($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && array_key_exists("uploadfile",$_FILES))){ ?>
 				<div style="margin:20px;">
 					<b>Source Primary Key (required): </b>
 					<?php

@@ -1,6 +1,6 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../../util/symbini.php");
+include_once('../../util/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
  
 ?>
@@ -12,7 +12,7 @@ header("Content-Type: text/html; charset=".$charset);
 	<body>
 		<?php
 		$displayLeftMenu = (isset($collections_editor_indexMenu)?$collections_editor_indexMenu:"true");
-		include($serverRoot."/util/header.php");
+		include($serverRoot.'/header.php');
 		if(isset($collections_editor_indexCrumbs)){
 			echo "<div class='navpath'>";
 			echo "<a href='../index.php'>Home</a> &gt; ";
@@ -34,7 +34,7 @@ header("Content-Type: text/html; charset=".$charset);
 		
 		</div>
 		<?php
-			include("../../util/footer.php");
+			include($serverRoot.'/footer.php');
 		?>
 	</body>
 </html>

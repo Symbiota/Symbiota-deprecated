@@ -4,8 +4,8 @@
  * By E.E. Gilbert
  */
  //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php');
  header("Content-Type: text/html; charset=".$charset);
  
  $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -35,7 +35,7 @@
  <body>
 <?php
 	$displayLeftMenu = (isset($ident_tools_chardeficitMenu)?$ident_tools_chardeficitMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($ident_tools_chardeficitCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -135,7 +135,7 @@
  }
  ?>
 </div>
-<?php include($serverRoot."/util/footer.php"); ?>
+<?php include($serverRoot.'/footer.php'); ?>
   </body>
 </html>
 

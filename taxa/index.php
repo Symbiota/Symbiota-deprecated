@@ -4,8 +4,8 @@
  * By E.E. Gilbert
  */
  //error_reporting(0);
- include_once("TPManager.php");
- include_once("../util/symbini.php");
+ include_once('../config/symbini.php');
+ include_once('TPManager.php');
  Header("Content-Type: text/html; charset=".$charset);
 
  $descrDisplayLevel;
@@ -250,7 +250,7 @@
 <body>
 <?php
 $displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
-include($serverRoot."/util/header.php");
+include($serverRoot.'/header.php');
 if(isset($taxa_indexCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
@@ -593,7 +593,7 @@ else{
 ?>
 </table>
 <?php 
-include($serverRoot."/util/footer.php");
+include($serverRoot.'/footer.php');
 
 ?>
 	<script type="text/javascript">

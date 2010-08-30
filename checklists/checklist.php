@@ -3,8 +3,8 @@
  * Rebuilt 29 Jan 2010
  * By E.E. Gilbert
  */
-	include_once("../util/dbconnection.php");
-	include_once("../util/symbini.php");
+	include_once('../config/symbini.php');
+	include_once($serverRoot.'/config/dbconnection.php');
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -355,7 +355,7 @@
  <body>
 <?php
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($checklists_checklistCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -811,7 +811,7 @@
 		</div>
 	</div>
 <?php
- 	include($serverRoot."/util/footer.php");
+ 	include($serverRoot."/footer.php");
 ?>
 
 	<script type="text/javascript">

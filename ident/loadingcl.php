@@ -6,7 +6,7 @@
 
 //error_reporting(E_ERROR);
 //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 Header("Cache-Control: must-revalidate");
 $offset = 60 * 60 * 24 * 7;
@@ -49,7 +49,7 @@ Header($ExpStr);
   <body>
 	<?php
 	$displayLeftMenu = (isset($ident_loadingclMenu)?$ident_loadingclMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($ident_loadingclCrumbs)) echo "<div class='navpath'>".$ident_loadingclCrumbs."</div>";
 	
 	//error_reporting(E_ALL);
@@ -57,7 +57,7 @@ Header($ExpStr);
 
 	$displayLeftMenu = false;
 		$displayStyle = "nostrip";
-		include_once("../util/header.php");
+		include_once('../util/header.php');
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
@@ -91,7 +91,7 @@ Header($ExpStr);
 		</table>
 	</div>
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
   
   </body>

@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
-include_once("util/ProfileHandler.php");
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
+include_once('util/ProfileHandler.php');
 
 header("Content-Type: text/html; charset=".$charset);
 $loginAs = array_key_exists("loginas",$_REQUEST)?trim($_REQUEST["loginas"]):"";
@@ -41,7 +41,7 @@ if($isAdmin){
 
 	<?php
 	$displayLeftMenu = (isset($profile_usermanagementMenu)?$profile_usermanagementMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($profile_usermanagementCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -380,7 +380,7 @@ if($isAdmin){
 
 		</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?> 
 
 </body>

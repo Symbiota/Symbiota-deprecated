@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
- include_once("../util/symbini.php");
- include_once("../util/dbconnection.php");
+ include_once("../config/symbini.php");
+ include_once($serverRoot."/config/dbconnection.php");
  header("Content-Type: text/html; charset=".$charset);
 
  $inValue = array_key_exists("invalue",$_REQUEST)?$_REQUEST["invalue"]:""; 
@@ -21,7 +21,7 @@
 
 	<?php
 	$displayLeftMenu = (isset($basefolder_indexMenu)?$basefolder_indexMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot."/header.php");
 	if(isset($thispage_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -39,7 +39,7 @@
 	</div>
 	
 	<?php
-		include($serverRoot."/util/footer.php");
+		include($serverRoot."/footer.php");
 	?>
 
 	<script type="text/javascript">

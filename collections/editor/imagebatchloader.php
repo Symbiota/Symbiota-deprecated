@@ -1,6 +1,6 @@
 <?php 
-include_once("../../util/symbini.php");
-include_once("../../util/dbconnection.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
 $uploadManager = new ImageUploadManager();
 
@@ -46,7 +46,7 @@ if($isEditable){
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_admin_observationuploaderMenu)?$collections_admin_observationuploaderMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_admin_observationuploaderCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -259,7 +259,7 @@ if($isEditable){
 		?>
 	</div>
 	<?php 
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	
 </body>

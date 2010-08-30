@@ -1,6 +1,6 @@
 <?php 
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
 $photographer = array_key_exists("photographer",$_REQUEST)?$_REQUEST["photographer"]:""; 
@@ -26,7 +26,7 @@ if($tid){
 <body>
 	<?php
 	$displayLeftMenu = (isset($imagelib_unknownsubmitMenu)?$imagelib_unknownsubmitMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($imagelib_unknownsubmitCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -102,7 +102,7 @@ if($tid){
 			echo "<div style='margin:15px;'>You must <a href='../profile/index.php?refurl=".$_SERVER['PHP_SELF']."'>login</a> before you can submit or comment on an image.</div>";
 			echo "<div style='margin:15px;'>Don't have an account? Create a <a href='../profile/newprofile.php'>new account</a>.</div>";
 		}
-		include($serverRoot."/util/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
 	
 </body>

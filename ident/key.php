@@ -4,8 +4,8 @@
  * By E.E. Gilbert
  */
 //error_reporting(E_ALL);
- include_once("DataManager.php");
- include_once("../util/symbini.php");
+ include_once('DataManager.php');
+ include_once('../config/symbini.php');
  header("Content-Type: text/html; charset=".$charset);
  $editable = false;
  if($isAdmin || array_key_exists("KeyEditor",$userRights)){
@@ -153,7 +153,7 @@ if($chars){
 
 <?php 
 	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(array_key_exists("crumburl",$_REQUEST) || isset($ident_keyCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -292,7 +292,7 @@ if($chars){
   </form>
 </div>
 <?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 ?>
 
 <script type="text/javascript">

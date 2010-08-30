@@ -1,6 +1,6 @@
 <?php 
-include_once("../util/dbconnection.php");
-include_once("../util/symbini.php");
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 $unkid = array_key_exists("unkid",$_REQUEST)?$_REQUEST["unkid"]:"";
 
@@ -18,7 +18,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 <body>
 	<?php
 	$displayLeftMenu = (isset($imagelib_unknowndisplayMenu)?$imagelib_unknowndisplayMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($imagelib_unknowndisplayCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -102,7 +102,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 	
 </body>

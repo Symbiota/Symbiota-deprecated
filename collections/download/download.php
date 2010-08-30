@@ -1,5 +1,5 @@
 <?php
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 
  $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
@@ -15,7 +15,7 @@ header("Content-Type: text/html; charset=".$charset);
 <body>
 <?php
 	$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_download_downloadCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -83,7 +83,7 @@ else{
 </table>
 
 <?php 
-	include_once("../../util/footer.php");
+	include($serverRoot.'/footer.php');
 ?>
 </body>
 

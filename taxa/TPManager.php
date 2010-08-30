@@ -7,7 +7,7 @@
  * 
  */
  
- include_once("../util/dbconnection.php");
+ include_once($serverRoot.'/config/dbconnection.php');
 
  class TPData {
 

@@ -1,6 +1,6 @@
 <?php
-include_once("../../util/dbconnection.php");
-include_once("../../util/symbini.php");
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
 $rsManager = new RareSpeciesManager();
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
@@ -166,7 +166,7 @@ if($editable){
 <body>
 <?php
 	$displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_rarespeciesMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_misc_rarespeciesCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -238,7 +238,7 @@ if($editable){
 ?>
 </div>
 <?php 		
-	include($serverRoot."/util/footer.php")
+	include($serverRoot.'/footer.php')
 ?>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
- include_once("../util/symbini.php");
- include_once("util/CollectionManager.php");
+ include_once('../config/symbini.php');
+ include_once('util/CollectionManager.php');
  header("Content-Type: text/html; charset=".$charset);
  header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
  header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -182,7 +182,7 @@
 
 <?php
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:"true");
-	include($serverRoot."/util/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_harvestparamsCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -351,7 +351,7 @@
 		</form>
 	</div>
 	<?php
-	include($serverRoot."/util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 </body>
 </html>
