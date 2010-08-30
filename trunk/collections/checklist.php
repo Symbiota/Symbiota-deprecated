@@ -1,5 +1,5 @@
 <?php
- include_once('../util/symbini.php');
+ include_once('../config/symbini.php');
  include_once('util/ChecklistManager.php');
  header("Content-Type: text/html; charset=".$charset);
 
@@ -17,7 +17,7 @@
     <body>
 <?php
 	$displayLeftMenu = (isset($collections_checklistMenu)?$collections_checklistMenu:"true");
-	include($serverRoot."/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($collections_checklistCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -82,7 +82,7 @@
 		?>
 	</div>
 	<?php 
-		include($serverRoot."/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

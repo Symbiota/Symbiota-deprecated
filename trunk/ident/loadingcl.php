@@ -57,7 +57,7 @@ Header($ExpStr);
 
 	$displayLeftMenu = false;
 		$displayStyle = "nostrip";
-		include_once('../util/header.php');
+		include($serverRoot.'/header.php');
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">

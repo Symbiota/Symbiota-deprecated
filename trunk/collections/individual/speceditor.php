@@ -1,8 +1,8 @@
 <?php
  header("Content-Type: text/html; charset=ISO-8859-1");
  //error_reporting(E_ALL);
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+ include_once($serverRoot.'/config/dbconnection.php'');
  
  $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
  $dbpk = array_key_exists("dbpk",$_REQUEST)?trim($_REQUEST["dbpk"]):"";
