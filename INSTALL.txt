@@ -1,0 +1,92 @@
+REQUIREMENTS
+============
+
+* Apache HTTP Server (2.x or better) - other PHP enabled web servers should work, 
+  yet we have only tested the installation through Apache HTTP Server
+* PHP (5.x or better) configured to your web server
+   * mysqli extension must be enabled (improved mysql library)
+   * GD2 extension must be enabled (GD image library)
+   * Enableing the PHP "mbstring" module is recommended
+   * If planning to upload specimen data as flat DwC text files, 
+     upload_max_filesize (= 2M as default) variable should be increased to 
+     match expected files sizes
+   * zip extension should be enabled if you plan on uploading compressed data files
+* MySQL (5.x or better, yet 5.1 or better recommended)
+* SVN Client - needed only for making use of a source code installation 
+
+
+
+INSTRUCTIONS
+============
+
+1. Download Symbiota code from SourceForge repository
+   http://sourceforge.net/scm/?type=svn&group_id=325583 
+   * Unless you are installing as a developer who plans on contributing 
+     future code to the project, you will probably want to checkout only 
+     trunk (main development line). Following command will create a folder 
+     named symbiota and checkout trunk within it: 
+     ‘svn co https://symbiota.svn.sourceforge.net/svnroot/symbiota/trunk/ portal’
+2. Install Symbiota database schema
+   a. Create new database 
+   b. Create read-only and read/write users for Symbiota database 
+   c. Load schema from scripts. Schema definition files are located in 
+      <SymbiotaBaseFolder>/util/schema/ and all start with db_schema. Database 
+      can be installed with ISO-8859-1 or UTF8 character set definitions. 
+      Note that source data needs to match database and website character 
+      set definitions. If your MySQL database is a pre 5.1 version, you 
+      must use the schema definitions with ver_5.0 in the name or an 
+      syntax error will be thrown.
+   d. Load Stored Procedures - Located in 
+      <SymbiotaBaseFolder>/util/schema/stored_procedures.sql
+3. Configure the Symbiota Node - modify following configuration files
+   a. Homepage – rename index_template.php in base folder to index.php. 
+      Add your homepage introductory text on this page.
+   b. Database connection file located in <SymbiotaBaseFolder>/util/. 
+      Rename dbconnection_template.php to dbconnection.php. Add readonly 
+      and read/write usernames and passwords to file.
+   c. Symbiota configuration file located in <SymbiotaBaseFolder>/util/. 
+      Rename <SymbiotaBaseFolder>/util/symbini_template.php to symbini.php. 
+      Modify variables within to match your project environment. See 
+      Symbiota configuration help page for more help on this subject.
+   d. Layout files located in <SymbiotaBaseFolder>/util/. These files 
+      are used by all pages to establish uniform header, menu, and footer. 
+      When an SVN update is executed, these pages are not modified. 
+      * Rename header_template.php to header.php. Within file, change 
+        /util/images/defaultheader.jpg to /util/images/header.jpg, or 
+        name matching your header. Add your header to /util/images/ folder. 
+        Change /util/images/defaultleftstrip.gif as desired. Establishing 
+        the header using an image is easy, yet more complex headers are possible. 
+      * Rename leftmenu_template.php to leftmenu.php. Add or remove menu 
+        items as desired. Login can be left here or put into the header file.
+      * Rename footer_template.php to footer.php and modify as you did 
+        with header.php file.
+   e. Files for style control: located in <SymbiotaBaseFolder>/util/css/.
+      * Rename main_default.css to main.css. Used by all files.
+      * Rename speciesprofile_default.css to speciesprofile.css. Used 
+        by speciesprofile.php only.
+      * Modify these files to match desired style and layout for all pages. 
+
+
+
+1.	Data – The general layers of data within Symbiota are: user, taxonomic, occurrence (specimen), images, floristic, identification key, and taxon profile (common names, text descriptions, etc). User interfaces exist for web management of some of the data layers, while others are still in development and need to be loaded by hand. Below are detailed instructions on loading the different layers of data needed.
+a.	User and permissions - Default administrative user has been installed with following login: username = admin; password: admin. Make sure to change password or better yet, create a new user (/profile/newprofile.php), assign admin rights (/profile/usermanagement.php), and then delete default admin user. 
+b.	Taxonomic Thesaurus - Taxon names are stored within the taxa table. Taxonomic hierarchy and placement definitions are defined in the taxstatus table. A recursive data relationship within the taxstatus table defines the taxonomic hierarchy. While multiple taxonomic thesauri can be defined, one of the thesauri needs to function as the central taxonomy. Names must be added in order from upper taxonomic levels to lower (e.g. kingdom, class, order… variety). Accepted names must be loaded before non-accepted names. See Taxonomic Schema page for more detailed layout.  
+i.	Names can be added one by one to the default thesaurus through: /taxa/admin/taxonomyloader.php. Once entered, taxon names and ranking can be edited via: /taxa/admin/taxonomydisplay.php 
+ii.	Batch Loader - Multiple names can be loaded from a flat, tab-delimited text file. See instructions on the Batch Taxon Loader for detailed instructions. See instructions on the batch loader for loading multiple names from a flat file.  
+iii.	Look in /util/schema/data/ folder to find taxonomic thesaurus data that may serve as a base for your taxonomic thesaurus.
+c.	Occurrence (Specimen) Data
+i.	Loading a new collection
+ii.	Establishing method for regular updates
+d.	Images - to be completed
+e.	Floristic data – to be completed
+f.	Identification key data – to be completed
+g.	Taxon Profile support data (common names, text descriptions, etc) - to be completed
+UPDATES
+=======
+a.	Code updates - If you installed through the SourceForge SVN repository, code changes and bugs fixes can be integrated into your node on a regular basis by running an SVN update.
+i.	Command line client: svn update 
+ii.	Shell Client (windows): Right click on folder and select  SVN Update
+Database schema updates - Updating the data structure can be a bit more complicated. 
+
+
+* Will be enabled once a stable release is made public
