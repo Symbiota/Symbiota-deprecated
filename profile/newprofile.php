@@ -3,7 +3,7 @@
  * Created on 26 Feb 2009
  * By E.E. Gilbert
 */
-include_once('../util/symbini.php');
+include_once('../config/symbini.php');
 include_once('util/ProfileHandler.php');
 include_once('util/Person.php');
 header("Content-Type: text/html; charset=".$charset);

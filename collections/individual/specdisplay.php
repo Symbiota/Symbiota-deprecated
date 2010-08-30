@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <?php
- include_once("../../util/dbconnection.php");
- include_once("../../util/symbini.php");
+ include_once('../../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
  
  $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
  $dbpk = array_key_exists("dbpk",$_REQUEST)?trim($_REQUEST["dbpk"]):"";
@@ -38,7 +38,7 @@
 <body>
 
 <?php
-	include_once("../../util/headermini.php");
+	include_once($serverRoot.'/config/headermini.php');
 	
 	$indManager = new IndividualRecord();
 	$row = $indManager->getData($gui,$collId,$dbpk);
@@ -264,7 +264,7 @@
 		</div>
 		<?php 
 	}
-	include_once("../../util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 
 </body>

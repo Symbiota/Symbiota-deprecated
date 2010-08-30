@@ -12,7 +12,7 @@ header("Content-Type: text/html; charset=".$charSet);
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot."/util/header.php");
+		include($serverRoot.'/header.php');
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -25,7 +25,7 @@ header("Content-Type: text/html; charset=".$charSet);
 			</div>
 		</div>
 		<?php
-			include($serverRoot."/util/footer.php");
+			include($serverRoot.'/footer.php');
 		?>
 	</body>
 </html>
