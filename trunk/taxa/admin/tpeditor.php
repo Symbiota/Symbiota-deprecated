@@ -1771,6 +1771,13 @@ include($serverRoot.'/footer.php');
 					$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
 				}
 				$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
+				$cnt = 1;
+				$fileNameBase = str_ireplace("tn.jpg","",$fileName);
+				while(file_exists($newThumbnailPath)){
+					$fileName = $fileNameBase."tn".$cnt.".jpg";
+					$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
+					$cnt++; 
+				}
 				$newThumbnailUrl = $this->imageRootUrl."misc_thumbnails/".$fileName;
 			}
 			elseif(strpos($imgUrl,$this->imageRootUrl) === 0){
@@ -1779,10 +1786,8 @@ include($serverRoot.'/footer.php');
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
-			if(!file_exists($newThumbnailPath)){
-				if(!$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50)){
-					return false;
-				}
+			if(!$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50)){
+				return false;
 			}
 		}
 		return $newThumbnailUrl;
