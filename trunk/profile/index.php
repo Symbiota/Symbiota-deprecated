@@ -44,7 +44,8 @@ if($submit == "logout"){
     $pHandler->reset();
 }
 elseif($action == "Login"){
-	$password = $_REQUEST["password"]; 
+	$password = $_REQUEST["password"];
+	if(!$password) $password = "emptypwd"; 
 	$statusStr = $pHandler->authenticate($login, $password);
     if($statusStr == "success"){
     	if($refUrl){

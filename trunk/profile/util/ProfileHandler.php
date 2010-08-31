@@ -59,7 +59,7 @@ class ProfileHandler{
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
             "WHERE (ul.username = '".$userNameStr."') ";
         if($pwdStr){
-			"AND (ul.password = PASSWORD('".$pwdStr."'))";
+			$sql .= "AND (ul.password = PASSWORD('".$pwdStr."'))";
         }
 		//echo $sql;
         $result = $this->con->query($sql);
