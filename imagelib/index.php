@@ -1,6 +1,6 @@
 <?php 
 include_once('../config/symbini.php');
-include_once('/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $taxon = array_key_exists("taxon",$_REQUEST)?trim($_REQUEST["taxon"]):"";
@@ -62,7 +62,7 @@ $imgLibManager = new ImageLibraryManager();
 			</div>
 			<div style='font-weight:bold;margin:15px 10px 0px 20px;'>
 				<div>
-					<a href="javascript:var popupReference=window.open('../util/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Image Copyright Policy</a>
+					<a href="javascript:var popupReference=window.open('imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Image Copyright Policy</a>
 				</div>
 				<div>
 					<a href="photographers.php">Contributing Photographers</a>
