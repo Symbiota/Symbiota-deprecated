@@ -424,7 +424,7 @@
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 					$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
 				}
-				echo "<a href='imgdetails.php?imgid=".$imgId."'>";
+				echo "<a href='../imagelib/imgdetails.php?imgid=".$imgId."'>";
 				if($useThumbnail && $imgObj["thumbnailurl"]){
 					list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
 					if(($start != 0 && $length != 1) || $width > 190 || $height > 190){
@@ -437,7 +437,7 @@
 				if($imgObj["photographer"]){
 					echo $imgObj["photographer"]."&nbsp;&nbsp;";
 				}
-				echo "<a href='imgdetails.php?imgid=".$imgId."'>";
+				echo "<a href='../imagelib/imgdetails.php?imgid=".$imgId."'>";
 				echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg'/>";
 				echo "</a>";
 				echo "</div>\n";

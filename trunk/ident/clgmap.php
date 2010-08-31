@@ -6,7 +6,7 @@
 
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once('/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 

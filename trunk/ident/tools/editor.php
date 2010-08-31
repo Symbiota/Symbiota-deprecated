@@ -3,7 +3,7 @@
  * Created on Jul 20, 2006
  */
 include_once('../../config/symbini.php');
-include_once('/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  
  $addValues = Array();
