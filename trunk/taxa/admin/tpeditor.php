@@ -1641,7 +1641,7 @@ include($serverRoot.'/footer.php');
 		}
 		$userName = $paramsArr["un"];
 		
-		$imgTnUrl = $this->createImageThumbnail($imgUrl);
+		$imgTnUrl = str_replace("//","/",$this->createImageThumbnail($imgUrl));
 
 		$imgWebUrl = $imgUrl;
 		$imgLgUrl = "";
@@ -1684,7 +1684,7 @@ include($serverRoot.'/footer.php');
 				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 				($occId?$occId:"NULL").",\"".$notes."\",\"".
 				$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
-			echo $sql;
+			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
 				$this->setPrimaryImageSort($this->tid);
@@ -1757,14 +1757,19 @@ include($serverRoot.'/footer.php');
 		$newThumbnailUrl = "";
 		if($imgUrl){
 			$imgPath = "";
-			$newThumbnailUrl = "";
 			$newThumbnailPath = "";
 			if(strpos($imgUrl,"http://") === 0 && strpos($imgUrl,$this->imageRootUrl) === false){
 				$imgPath = $imgUrl;
 				if(!is_dir($this->imageRootPath."misc_thumbnails/")){
 					if(!mkdir($this->imageRootPath."misc_thumbnails/", 0775)) return "";
 				}
-				$fileName = str_ireplace("_temp.jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				$fileName = "";
+				if(stripos($imgUrl,"_temp.jpg")){
+					$fileName = str_ireplace("_temp.jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				}
+				else{
+					$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				}
 				$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
 				$newThumbnailUrl = $this->imageRootUrl."misc_thumbnails/".$fileName;
 			}
@@ -1774,9 +1779,9 @@ include($serverRoot.'/footer.php');
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
-			if(file_exists($imgPath) || ($imgUrl && $this->url_exists($imgUrl))){
-				if(!file_exists($newThumbnailPath)){
-					$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50);
+			if(!file_exists($newThumbnailPath)){
+				if(!$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50)){
+					return false;
 				}
 			}
 		}
@@ -1797,14 +1802,11 @@ include($serverRoot.'/footer.php');
 	        case 1: 
 	        	$newImg = imagecreatefromgif($sourceImg);
 	        	break;
-	        case 2: 
-	        	$newImg = imagecreatefromjpeg($sourceImg);  
-	        	break;
 	        case 3: 
 	        	$newImg = imagecreatefrompng($sourceImg);
 	        	break;
 	        default: 
-	        	return "";
+	        	$newImg = imagecreatefromjpeg($sourceImg);  
 	        	break;
 	    }
         
