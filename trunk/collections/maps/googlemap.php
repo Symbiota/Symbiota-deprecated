@@ -26,8 +26,16 @@ header("Content-Type: text/html; charset=".$charset);
                 map.addControl(new GLargeMapControl()); // pan, zoom
                 map.addControl(new GMapTypeControl()); // map, satellite, hybrid
                 map.addControl(new GOverviewMapControl()); // small overview in corner
-
-                map.setCenter(new GLatLng( 41.0, -95.0 ), 3);
+                <?php
+                	$latCen = 41.0;
+                	$longCen = -95.0;
+                	$coorArr = explode(";",$mappingBoundaries);
+                	if($coorArr && count($coorArr) == 4){
+                		$latCen = ($coorArr[0] + $coorArr[2])/2;
+                		$longCen = ($coorArr[1] + $coorArr[3])/2;
+                	}
+                ?>
+                map.setCenter(new GLatLng( <?php echo $latCen.",".$longCen; ?> ), 3);
 
                 var tinyIcon = new GIcon(G_DEFAULT_ICON);
                 tinyIcon.shadow = "../../images/google/shadow.png";
