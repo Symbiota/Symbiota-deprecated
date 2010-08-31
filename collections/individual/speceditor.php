@@ -2,7 +2,7 @@
  header("Content-Type: text/html; charset=ISO-8859-1");
  //error_reporting(E_ALL);
  include_once('../../config/symbini.php');
- include_once($serverRoot.'/config/dbconnection.php'');
+ include_once($serverRoot.'/config/dbconnection.php');
  
  $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
  $dbpk = array_key_exists("dbpk",$_REQUEST)?trim($_REQUEST["dbpk"]):"";
@@ -36,7 +36,7 @@
 <BODY>
 
 <?php
-	include_once("../../util/headermini.php");
+	include($serverRoot.'/headermini.php');
 	
 	$indManager = new IndividualRecord();
 	$htmlVec = $indManager->echoData($gui,$collId,$dbpk);
@@ -117,7 +117,7 @@
 		</div>
 		<?php 
 	}
-	include_once("../../util/footer.php");
+	include($serverRoot.'/footer.php');
 	?>
 
 </body>

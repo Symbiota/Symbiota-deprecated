@@ -1,5 +1,6 @@
 <?php
-	include_once('../../../config/dbconnection.php');
+	include_once('../../../config/symbini.php');
+	include_once($serverRoot.'/config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['q']);
