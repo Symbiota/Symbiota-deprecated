@@ -55,7 +55,11 @@ if(isset($taxa_imgdetailsCrumbs)){
 					<a href="<?php echo $imgUrl;?>">
 						<img src="<?php echo $imgUrl;?>" style="width:90%;" />
 					</a>
-					<div>Click on Image to Enlarge</div>
+					<?php 
+					if($origUrl){
+						echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
+					}
+					?>
 				</td>
 				<td style="align:left;padding:100px 10px 10px 10px;">
 					<?php 

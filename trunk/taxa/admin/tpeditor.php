@@ -914,19 +914,19 @@ if(isset($taxa_admin_tpeditorCrumbs)){
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Manager:</b> 
-									<input name='owner' type='text' value='<?php echo $imgArr["owner"];?>' size='35' maxlength='100'>
+									<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" size="35" maxlength="100">
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Source URL:</b> 
-									<input name='sourceurl' type='text' value='<?php echo $imgArr["sourceurl"];?>' size='70' maxlength='250'>
+									<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" size="70" maxlength="250">
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Copyright:</b> 
-									<input name='copyright' type='text' value='<?php echo $imgArr["copyright"];?>' size='70' maxlength='250'>
+									<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" size="70" maxlength="250">
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Locality:</b> 
-									<input name='locality' type='text' value='<?php echo $imgArr["locality"];?>' size='70' maxlength='250'>
+									<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" size="70" maxlength="250">
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Occurrence Record #:</b> 
