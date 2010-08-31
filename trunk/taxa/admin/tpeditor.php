@@ -1643,36 +1643,39 @@ include($serverRoot.'/footer.php');
 		
 		$imgTnUrl = $this->createImageThumbnail($imgUrl);
 
-		//Create Large Image
-		list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
-		$fileSize = filesize($imgPath?$imgPath:$imgUrl);
+		$imgWebUrl = $imgUrl;
 		$imgLgUrl = "";
-		if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
-			$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
-			if($width < ($this->lgPixWidth*1.2)){
-				if(copy($imgPath,$lgWebUrlTemp)){
-					$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+		if(strpos($imgUrl,"http://") === false || strpos($imgUrl,$this->imageRootUrl) !== false){
+			//Create Large Image
+			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
+			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
+			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+				$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
+				if($width < ($this->lgPixWidth*1.2)){
+					if(copy($imgPath,$lgWebUrlTemp)){
+						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+					}
 				}
+				else{
+					if($this->createNewImage($imgPath,$lgWebUrlTemp,$this->lgPixWidth)){
+						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
+					}
+				}
+			}
+
+			//Create web url
+			$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
+			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
+				rename($imgPath,$imgTargetPath);
 			}
 			else{
-				if($this->createNewImage($imgPath,$lgWebUrlTemp,$this->lgPixWidth)){
-					$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
-				}
+				$newWidth = ($width<($this->webPixWidth*1.2)?$width:$this->webPixWidth);
+				$this->createNewImage($imgPath,$imgTargetPath,$newWidth);
 			}
+			$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
+			if(file_exists($imgPath)) unlink($imgPath);
 		}
-
-		//Create web url
-		$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
-		if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
-			rename($imgPath,$imgTargetPath);
-		}
-		else{
-			$newWidth = ($width<($this->webPixWidth*1.2)?$width:$this->webPixWidth);
-			$this->createNewImage($imgPath,$imgTargetPath,$newWidth);
-		}
-		$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
-		if(file_exists($imgPath)) unlink($imgPath);
-		
+			
 		if($imgWebUrl){
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
 				"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
@@ -1681,7 +1684,7 @@ include($serverRoot.'/footer.php');
 				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 				($occId?$occId:"NULL").",\"".$notes."\",\"".
 				$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
-			//echo $sql;
+			echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
 				$this->setPrimaryImageSort($this->tid);
@@ -1756,7 +1759,7 @@ include($serverRoot.'/footer.php');
 			$imgPath = "";
 			$newThumbnailUrl = "";
 			$newThumbnailPath = "";
-			if(strpos($imgUrl,"http://") === 0 && strpos($imgUrl,$this->imageRootUrl) !== 0){
+			if(strpos($imgUrl,"http://") === 0 && strpos($imgUrl,$this->imageRootUrl) === false){
 				$imgPath = $imgUrl;
 				if(!is_dir($this->imageRootPath."misc_thumbnails/")){
 					if(!mkdir($this->imageRootPath."misc_thumbnails/", 0775)) return "";
@@ -1771,7 +1774,7 @@ include($serverRoot.'/footer.php');
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
-			if(file_exists($imgPath) || $this->url_exists($filePath)){
+			if(file_exists($imgPath) || ($imgUrl && $this->url_exists($imgUrl))){
 				if(!file_exists($newThumbnailPath)){
 					$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50);
 				}
@@ -1931,7 +1934,18 @@ include($serverRoot.'/footer.php');
  	}
 	
  	private function url_exists($url) {
-	    // Version 4.x supported
+	    if(!strstr($url, "http://")){
+	        $url = "http://".$url;
+	    }
+
+	    $fp = @fsockopen($url, 80);
+
+    	if($fp === false){
+	        return false;   
+    	}
+    	return true;
+    	
+ 		// Version 4.x supported
 	    $handle   = curl_init($url);
 	    if (false === $handle)
 	    {
