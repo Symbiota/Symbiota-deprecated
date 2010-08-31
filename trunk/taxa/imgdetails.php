@@ -5,7 +5,7 @@
  */
  //error_reporting(0);
  include_once('../config/symbini.php');
-include_once('/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
  Header("Content-Type: text/html; charset=".$charset);
  
  $imgId = $_REQUEST["imgid"]; 

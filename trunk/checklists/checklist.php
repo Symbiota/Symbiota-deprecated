@@ -355,7 +355,7 @@
  <body>
 <?php
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:"true");
-	include($serverRoot."/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($checklists_checklistCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -811,7 +811,7 @@
 		</div>
 	</div>
 <?php
- 	include($serverRoot."/footer.php");
+ 	include($serverRoot.'/footer.php');
 ?>
 
 	<script type="text/javascript">

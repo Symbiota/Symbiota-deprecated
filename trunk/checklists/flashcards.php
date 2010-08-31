@@ -115,7 +115,7 @@
 <body onload="reset()">
 <?php
 	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
-	include($serverRoot."/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($checklists_flashcardsCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -190,7 +190,7 @@
 		</div>
 	</div>
 	<?php
-		include($serverRoot."/footer.php");
+		include($serverRoot.'/footer.php');
 	?>
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
