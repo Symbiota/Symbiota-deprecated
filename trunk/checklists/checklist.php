@@ -401,30 +401,26 @@
 			</span>
 			<?php echo $clArray["authors"]; ?>
 		</div>
-		<div>
-			<span style="font-weight:bold;">Locality: </span>
-			<?php 
-				echo $clArray["locality"]." ";
-				if($clArray["latcentroid"]){
-					echo "(".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
-				} 
-			?>
-		</div>
 		<?php 
-			if($clArray["publication"] || $clArray["abstract"] || $clArray["notes"]){
-				echo "<div class=\"moredetails\" style=\"color:blue;cursor:pointer;\" onclick=\"toggle('moredetails')\">More Details</div>";
-				echo "<div class='moredetails' style='display:none'>";
-				if($clArray["publication"]){
-					echo "<div><span style='font-weight:bold;'>Publication: </span>".$clArray["publication"]."</div>";
-				}
-				if($clArray["abstract"]){
-					echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
-				}
-				if($clArray["notes"]){
-					echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
-				}
-				echo "</div>";
+		if($clArray["publication"]){
+			echo "<div><span style='font-weight:bold;'>Publication: </span>".$clArray["publication"]."</div>";
+		}
+	
+		if($clArray["locality"] || $clArray["latcentroid"] || $clArray["abstract"] || $clArray["notes"]){
+			echo "<div class=\"moredetails\" style=\"color:blue;cursor:pointer;\" onclick=\"toggle('moredetails')\">More Details</div>";
+			echo "<div class='moredetails' style='display:none'>";
+			$locStr = $clArray["locality"].($clArray["latcentroid"]?" (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")":"");
+			if($locStr){
+				echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
 			}
+			if($clArray["abstract"]){
+				echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
+			}
+			if($clArray["notes"]){
+				echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
+			}
+			echo "</div>";
+		}
 		if($clManager->getEditable()){
 	?>
 		<!-- Checklist editing div  -->
