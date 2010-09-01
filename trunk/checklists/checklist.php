@@ -431,28 +431,28 @@
 			        <li><a href="#editors"><span>Editors</span></a></li>
 			    </ul>
 				<div id="metadata">
-					<form id="checklisteditform" action='checklist.php' method='get' name='editclmatadata' onsubmit="return validateMetadataForm(this)">
-						<fieldset style='margin:5px 0px 5px 5px;'>
+					<form id="checklisteditform" action="checklist.php" method="get" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
+						<fieldset style="margin:5px 0px 5px 5px;">
 							<legend>Edit Checklist Details:</legend>
 							<div>
 								<span>Checklist Name: </span>
-								<input type='text' name='eclname' size='80' value='<?php echo $clManager->getClName();?>' />
+								<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
 							</div>
 							<div>
 								<span>Authors: </span>
-								<input type='text' name='eclauthors' value='<?php echo $clArray["authors"]; ?>' />
+								<input type="text" name="eclauthors" value="<?php echo $clArray["authors"]; ?>" />
 							</div>
 							<div>
 								<span>Locality: </span>
-								<input type='text' name='ecllocality' size='80' value='<?php echo $clArray["locality"]; ?>' />
+								<input type="text" name="ecllocality" size="80" value="<?php echo $clArray["locality"]; ?>" />
 							</div> 
 							<div>
 								<span>Publication: </span>
-								<input type='text' name='eclpublication' size='80' value='<?php echo $clArray["publication"]; ?>' />
+								<input type="text" name="eclpublication" size="80" value="<?php echo $clArray["publication"]; ?>" />
 							</div>
 							<div>
 								<span>Abstract: </span>
-								<textarea name='eclabstract' cols='70' rows='3'><?php echo $clArray["abstract"]; ?></textarea>
+								<textarea name="eclabstract" cols="70" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 							</div>
 							<div>
 								<span>Parent Checklist: </span>
@@ -464,22 +464,22 @@
 							</div>
 							<div>
 								<span>Notes: </span>
-								<input type='text' name='eclnotes' size='80' value='<?php echo $clArray["notes"]; ?>' />
+								<input type="text" name="eclnotes" size="80" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
 							<div>
 								<span>Latitude Centroid: </span>
-								<input id="latdec" type='text' name='ecllatcentroid' value='<?php echo $clArray["latcentroid"]; ?>' />
+								<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
 								<span style="cursor:pointer;" onclick="openPointMap();">
 									<img src="../images/world40.gif" style="width:12px;" />
 								</span>
 							</div>
 							<div>
 								<span>Longitude Centroid: </span>
-								<input id="lngdec" type='text' name='ecllongcentroid' value='<?php echo $clArray["longcentroid"]; ?>' />
+								<input id="lngdec" type="text" name="ecllongcentroid" value="<?php echo $clArray["longcentroid"]; ?>" />
 							</div>
 							<div>
 								<span>Point Radius (meters): </span>
-								<input type='text' name='eclpointradiusmeters' value='<?php echo $clArray["pointradiusmeters"]; ?>' />
+								<input type="text" name="eclpointradiusmeters" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 							</div>
 							<div>
 								<span>Public Access: </span>
