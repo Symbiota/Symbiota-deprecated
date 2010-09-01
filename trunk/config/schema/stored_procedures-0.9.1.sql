@@ -798,3 +798,120 @@ BEGIN
 
 END//
 DELIMITER ;
+
+
+-- =============================================
+-- General Occurrence Cleanup
+-- =============================================
+
+DELIMITER //
+CREATE PROCEDURE `OccurrenceCleanup`()
+BEGIN
+        UPDATE omoccurrences u
+        SET u.year = YEAR(u.eventDate)
+        WHERE u.eventDate IS NOT NULL AND (u.year IS NULL OR u.year = 0);
+
+        UPDATE omoccurrences u
+        SET u.month = MONTH(u.eventDate)
+        WHERE (u.month IS NULL OR u.month = 0) AND u.eventDate IS NOT NULL;
+
+        UPDATE omoccurrences u
+        SET u.day = DAY(u.eventDate)
+        WHERE (u.day IS NULL OR u.day = 0) AND u.eventDate IS NOT NULL;
+
+        UPDATE omoccurrences u
+        SET u.startDayOfYear = DAYOFYEAR(u.eventDate)
+        WHERE u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL;
+
+         #Update LocalitySecurity
+         UPDATE taxa t INNER JOIN omoccurrences u ON t.SciName = u.SciName
+         SET u.LocalitySecurity = t.SecurityStatus
+         WHERE (t.SecurityStatus > 1) AND (u.LocalitySecurity = 1 OR u.LocalitySecurity IS NULL);
+
+         #standardize some of the fields
+         UPDATE omoccurrences s SET s.sciname = replace(s.sciname," subsp. "," ssp. ") WHERE s.sciname like "% subsp. %";
+         UPDATE omoccurrences s SET s.sciname = replace(s.sciname," var "," var. ") WHERE s.sciname like "% var %";
+         UPDATE omoccurrences s SET s.sciname = replace(s.sciname," ssp "," ssp. ") WHERE s.sciname like "% ssp %";
+         UPDATE omoccurrences s SET s.sciname = replace(s.sciname," cf. "," ") WHERE s.sciname like "% cf. %";
+         UPDATE omoccurrences s SET s.sciname = replace(s.sciname," cf "," ") WHERE s.sciname like "% cf %";
+         UPDATE omoccurrences s SET s.sciname = REPLACE(s.sciname," aff. "," "), tidinterpreted = null WHERE sciname like "% aff. %";
+         UPDATE omoccurrences s SET s.sciname = REPLACE(s.sciname," aff "," "), tidinterpreted = null WHERE sciname like "% aff %";
+
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "U.S.A.";
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "U.S.";
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "US";
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "United States";
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "United States of America";
+         UPDATE omoccurrences s SET s.country = "USA" WHERE s.country = "United States America";
+
+         UPDATE omoccurrences s
+         SET s.sciname = trim(s.sciname), tidinterpreted = null
+         WHERE sciname like "% " OR sciname like " %";
+
+         UPDATE omoccurrences s
+         SET s.sciname = replace(s.sciname,"   "," ")
+         WHERE sciname like "%   %";
+
+         UPDATE omoccurrences s
+         SET s.sciname = replace(s.sciname,"  "," ")
+         WHERE sciname like "%  %";
+
+         UPDATE omoccurrences s
+         SET s.sciname = replace(s.sciname," sp.","")
+         WHERE sciname like "% sp.";
+
+         UPDATE omoccurrences s
+         SET s.sciname = replace(s.sciname," sp","")
+         WHERE sciname like "% sp";
+
+         UPDATE omoccurrences
+         SET specificepithet = NULL
+         WHERE specificepithet = "sp." OR specificepithet = "sp";
+
+         #Link specimens to taxa
+         UPDATE omoccurrences s INNER JOIN taxa t ON s.sciname = t.sciname SET s.TidInterpreted = t.tid WHERE s.TidInterpreted IS NULL;
+         UPDATE (omoccurrences s INNER JOIN taxa t ON s.genus = t.unitname1 AND s.specificepithet = t.unitname2 AND s.InfraSpecificEpithet = t.unitname3)
+             INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted
+             SET s.TidInterpreted = t.tid
+             WHERE ts.taxauthid = 1 AND s.TidInterpreted IS NULL;
+         UPDATE omoccurrences s INNER JOIN taxa t ON s.genus = t.unitname1 AND s.specificepithet = t.unitname2 AND s.InfraSpecificEpithet = t.unitname3
+             SET s.TidInterpreted = t.tid WHERE s.TidInterpreted IS NULL;
+
+         #Filling missing families
+         UPDATE omoccurrences u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid
+             SET u.family = ts.family
+             WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "");
+
+         UPDATE ((omoccurrences u INNER JOIN taxa t ON u.family = t.sciname)
+             INNER JOIN taxstatus ts ON t.tid = ts.tid)
+             INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid
+             SET u.family = t2.sciname
+             WHERE ts.taxauthid = 1 AND t.rankid = 140 AND ts.tid <> ts.tidaccepted;
+
+         UPDATE omoccurrences u INNER JOIN taxa t ON u.genus = t.unitname1
+             inner join taxstatus ts on t.tid = ts.tid
+             SET u.family = ts.family
+             WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "");
+
+         #Filling missing Authors
+         UPDATE omoccurrences u INNER JOIN taxa t ON u.tidinterpreted = t.tid
+             SET u.scientificNameAuthorship = t.author
+             WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship) IS NULL AND t.author IS NOT NULL;
+
+         #Convert positive longs to negative
+         UPDATE omoccurrences SET DecimalLongitude = -1*DecimalLongitude
+         WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "Mexico");
+
+         #Clean illegal lat/longs that are out of range
+         UPDATE omoccurrences SET DecimalLatitude = \N, DecimalLongitude = \N WHERE DecimalLatitude = 0 AND DecimalLongitude = 0;
+         UPDATE omoccurrences SET DecimalLatitude = \N, DecimalLongitude = \N WHERE DecimalLatitude < -90 OR DecimalLatitude > 90;
+         UPDATE omoccurrences SET DecimalLatitude = \N, DecimalLongitude = \N WHERE DecimalLongitude < -180 OR DecimalLongitude > 180;
+
+
+         #Add statements to clean regional coordinates, see example below
+         #UPDATE omoccurrences SET DecimalLatitude = \N, DecimalLongitude = \N WHERE (StateProvince = "Arizona" OR StateProvince = "AZ")
+         #   AND (DecimalLatitude > 37.2 OR DecimalLatitude < 31.2 OR DecimalLongitude > -108.9 OR DecimalLongitude < -115.2);
+
+
+END//
+DELIMITER ;

@@ -49,15 +49,9 @@ Header($ExpStr);
   <body>
 	<?php
 	$displayLeftMenu = (isset($ident_loadingclMenu)?$ident_loadingclMenu:"true");
-	include($serverRoot."/header.php");
+	include($serverRoot.'/header.php');
 	if(isset($ident_loadingclCrumbs)) echo "<div class='navpath'>".$ident_loadingclCrumbs."</div>";
 	
-	//error_reporting(E_ALL);
-		//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
-
-	$displayLeftMenu = false;
-		$displayStyle = "nostrip";
-		include($serverRoot.'/header.php');
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">

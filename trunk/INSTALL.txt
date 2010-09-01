@@ -36,8 +36,8 @@ INSTRUCTIONS
       set definitions. If your MySQL database is a pre 5.1 version, you 
       must use the schema definitions with ver_5.0 in the name or an 
       syntax error will be thrown.
-   d. Load Stored Procedures - Located in 
-      <SymbiotaBaseFolder>/config/schema/stored_procedures.sql
+   d. Load Stored Procedures - Scripts located in 
+      <SymbiotaBaseFolder>/config/schema/stored_procedures-x.x.x.sql
 3. Configure the Symbiota Node - modify following configuration files
    a. Symbiota configuration - rename 
       <SymbiotaBaseFolder>/config/symbini_template.php to symbini.php. 
@@ -49,7 +49,7 @@ INSTRUCTIONS
       to dbconnection.php. Add readonly and read/write usernames 
       and passwords to this file.
    c. Homepage – rename <SymbiotaBaseFolder>/index_template.php
-      to index.php. This is will be your home page to which you 
+      to index.php. This is your home page to which you 
       will need to add your introductory text.
    d. Layout - header.php, menu.php, and footer.php are used 
       by all pages to establish uniform layout. Within <SymbiotaBaseFolder>
