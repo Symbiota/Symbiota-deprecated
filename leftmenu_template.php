@@ -40,6 +40,9 @@
 	<?php
 	if($userDisplayName){
 	?>
+		<div class='menuitem'>
+			Welcome <?php echo $userDisplayName; ?>!
+		</div>
 		<div class="menuitem">
 			<a href="<?php echo $clientRoot; ?>/profile/viewprofile.php">My Profile</a>
 		</div>
