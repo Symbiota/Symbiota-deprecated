@@ -972,7 +972,7 @@ class ChecklistManager {
 		$setSql = "";
 		foreach($editArr as $key =>$value){
 			if($value){
-				$setSql .= ", ".$key." = '".$value."'";
+				$setSql .= ", ".$key." = \"".$value."\"";
 			}
 			else{
 				$setSql .= ", ".$key." = NULL";
