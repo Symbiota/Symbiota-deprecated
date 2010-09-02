@@ -302,36 +302,38 @@ if($statusStr){
 		<form name="uploadlistform" action="datauploader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadListForm(this);">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
-		 		<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
-				<?php 
-			 	foreach($actionList as $id => $v){
-			 		?>
-			 		<div style="margin:10px;">
-						<input type="radio" name="uspid" value="<?php echo $id;?>" onchange="toggleUploadFile(this);" />
-					<?php echo $v["title"];?>
+				<?php if($actionList){ ?>
+			 		<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+					<?php 
+				 	foreach($actionList as $id => $v){
+				 		?>
+				 		<div style="margin:10px;">
+							<input type="radio" name="uspid" value="<?php echo $id;?>" onchange="toggleUploadFile(this);" />
+						<?php echo $v["title"];?>
+						</div>
+						<?php
+					 	if($v["uploadtype"] == $FILEUPLOAD){
+					 		?>
+							<div id="uldiv<?php echo $id; ?>" style="margin-left:30px;display:none;">
+								<b>Upload File:</b>
+								<div style="margin:10px;">
+									<input id="ulinput<?php echo $id; ?>" name="uploadfile" type="file" size="40" disabled="true" />
+								</div>
+					 		</div>
+					 		<?php 
+					 	}
+				 	}	
+					?>
+					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+					<div style="margin:10px;">
+						<input type="submit" name="action" value="View Parameters" />
+						<input type="submit" name="action" value="Initialize Upload..." />
 					</div>
 					<?php
-				 	if($v["uploadtype"] == $FILEUPLOAD){
-				 		?>
-						<div id="uldiv<?php echo $id; ?>" style="margin-left:30px;display:none;">
-							<b>Upload File:</b>
-							<div style="margin:10px;">
-								<input id="ulinput<?php echo $id; ?>" name="uploadfile" type="file" size="40" disabled="true" />
-							</div>
-				 		</div>
-				 		<?php 
-				 	}
-			 	}	
-				?>
-				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-				<div style="margin:10px;">
-					<input type="submit" name="action" value="View Parameters" />
-					<input type="submit" name="action" value="Initialize Upload..." />
-				</div>
-				<?php 
-			 	if(!$actionList){
+				} 
+			 	else{
 			 		?>
-					<div>
+					<div style="padding:30px;">
 						There are no Upload Profiles associated with this collection. <br />
 						Click <a href="datauploader.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
 					</div>
