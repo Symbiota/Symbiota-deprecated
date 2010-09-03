@@ -4,6 +4,7 @@ include_once('util/datauploadmanager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
+$ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:0;
@@ -105,18 +106,7 @@ if($isEditable){
 		}
 
 		function checkUploadListForm(f){
-			var len = document.uploadlistform.uspid.length;
-			for(i = 0; i <len; i++){
-				if(document.uploadlistform.uspid[i].checked==true){
-					var id = document.uploadlistform.uspid[i].value;
-					var obj = document.getElementById("ulinput"+id);
-					if(obj != null){
-						if(obj.value == ""){
-							return false;
-						}
-					}
-				}
-			}
+
 			return true;
 		}
 
@@ -269,12 +259,12 @@ if($statusStr){
  	}
  }
  else{
- 	
- 	if(array_key_exists("sf",$_REQUEST)){
- 		if(stripos($action,"delete") !== false){
- 			$duManager->deleteFieldMap();
- 		}
- 		else{
+	//Grab field mapping, if mapping form was submitted
+	if(array_key_exists("sf",$_REQUEST)){
+		if(stripos($action,"delete") !== false){
+			$duManager->deleteFieldMap();
+		}
+		else{
 	 		$targetFields = $_REQUEST["tf"];
 	 		$sourceFields = $_REQUEST["sf"];
 	 		$fieldMap = Array();
@@ -289,7 +279,8 @@ if($statusStr){
  			$duManager->saveFieldMap();
  		}
  	}
- 	
+	
+ 	//Grab collection name and last upload date and display for all
  	$collInfo = $duManager->getCollInfo();
  	echo "<h2>".$collInfo["name"]."</h2>";
 	if($collInfo["uploaddate"]) {
@@ -297,14 +288,14 @@ if($statusStr){
 	}
 	echo "<div style='margin:15px;'><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$collId."'><b>View/Edit Metadata</b></a></div>";
  	if(!$action){
+ 		//Collection has been selected, now display different upload options
 	 	$actionList = $duManager->getUploadList();
 		?>
-		<form name="uploadlistform" action="datauploader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadListForm(this);">
+		<form name="uploadlistform" action="datauploader.php" method="post" onsubmit="return checkUploadListForm(this);">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
-				<?php if($actionList){ ?>
-			 		<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
-					<?php 
+				<?php 
+				if($actionList){ 
 				 	foreach($actionList as $id => $v){
 				 		?>
 				 		<div style="margin:10px;">
@@ -312,16 +303,6 @@ if($statusStr){
 						<?php echo $v["title"];?>
 						</div>
 						<?php
-					 	if($v["uploadtype"] == $FILEUPLOAD){
-					 		?>
-							<div id="uldiv<?php echo $id; ?>" style="margin-left:30px;display:none;">
-								<b>Upload File:</b>
-								<div style="margin:10px;">
-									<input id="ulinput<?php echo $id; ?>" name="uploadfile" type="file" size="40" disabled="true" />
-								</div>
-					 		</div>
-					 		<?php 
-					 	}
 				 	}	
 					?>
 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
@@ -348,9 +329,10 @@ if($statusStr){
  	elseif(stripos($action,"initialize") !== false || stripos($action,"Analyze") !== false || stripos($action,"map") !== false || $action == "Save Primary Key"){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$uploadType = $ulList[$uspid]["uploadtype"];
-	 	$ulArr = array_pop($ulList); 
-	 	if($uploadType!=$FILEUPLOAD || array_key_exists("uploadfile",$_FILES)){
-			$duManager->analyzeFile();
+	 	$ulArr = array_pop($ulList);
+	 	$ulFileName = "";
+		if($uploadType!=$FILEUPLOAD || array_key_exists("uploadfile",$_FILES)){
+			$ulFileName = $duManager->analyzeFile();
 	 	} 
 	 	?>
 		<form name="initform" action="datauploader.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
@@ -359,7 +341,8 @@ if($statusStr){
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 				<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-				<?php if($uploadType == $FILEUPLOAD){ ?>
+				<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
+				<?php if($uploadType == $FILEUPLOAD && stripos($action,"initialize") !== false){ ?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
 						<b>Upload File:</b>
@@ -624,7 +607,12 @@ if($statusStr){
  		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
  		echo "<ol style='margin:10px;font-weight:bold;'>";
  		echo "<li>Starting Data Upload</li>";
- 		$duManager->uploadData($finalTransfer);
+ 		if($uploadType == $FILEUPLOAD){
+	 		$duManager->uploadData($finalTransfer, $ulFileName);
+ 		}
+ 		else{
+	 		$duManager->uploadData($finalTransfer);
+ 		}
 		echo "</ol>";
  		if($duManager->getTransferCount() && !$finalTransfer){
 			?>

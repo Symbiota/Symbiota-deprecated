@@ -423,8 +423,9 @@ class DataUploadManager {
 
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		if($this->conn->query("CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");")){
-			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount:" records transferred to central specimen table")."</li>";
+		$spCallStr = "CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");";
+		if($this->conn->query($spCallStr)){
+			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."records transferred to central specimen table"."</li>";
 		}
 		else{
 			echo "<li>Unable to complete transfer. Please contact system administrator</li>";

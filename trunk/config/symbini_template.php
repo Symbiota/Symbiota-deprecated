@@ -6,7 +6,7 @@ $adminEmail = '';
 $charset = 'ISO-8859-1';			//ISO-8859-1 or UTF-8
 
 $clientRoot = '';					//URL path to project root folder 
-$serverRoot = '';					//Root path to project root folder
+$serverRoot = '';					//Root path to Symbiota project root folder
 
 //the root for the image directory
 $imageDomain = '';					//Domain path to images, if different from Virtual Flora path (e.g. http://swbiodiversity.org)
@@ -15,7 +15,6 @@ $imageRootPath = '';				//Writable path to images, especially needed for downloa
 
 //the root for the temp directory
 $tempDirRoot = '';
-$tempDirUrl = '';
 
 $googleMapKey = '';					//Needed for Google Map; get from Google 
 $mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
