@@ -109,7 +109,7 @@ class FileUpload extends DataUploadManager{
 									$valueStr = str_replace("\"","'",$valueStr);
 									//Load data
 									$type = $this->fieldMap[$specName]["type"];
-									$size = (array_key_exists("size",$this->fieldMap[$specName]?$this->fieldMap[$specName]["type"]:0);
+									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["type"]:0);
 									switch($type){
 										case "numeric":
 											if(!$valueStr) $valueStr = "NULL";
