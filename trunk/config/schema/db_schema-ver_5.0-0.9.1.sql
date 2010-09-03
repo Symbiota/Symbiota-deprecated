@@ -1331,7 +1331,7 @@ CREATE TABLE `uploadspectemp` (
   `scientificNameAuthorship` varchar(255) DEFAULT NULL,
   `taxonRemarks` text,
   `identifiedBy` varchar(255) DEFAULT NULL,
-  `dateIdentified` datetime DEFAULT NULL,
+  `dateIdentified` varchar(45) DEFAULT NULL,
   `identificationReferences` text,
   `identificationRemarks` text,
   `identificationQualifier` varchar(255) DEFAULT NULL COMMENT 'cf, aff, etc',
