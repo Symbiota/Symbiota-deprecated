@@ -109,7 +109,7 @@ class FileUpload extends DataUploadManager{
 									$valueStr = str_replace("\"","'",$valueStr);
 									//Load data
 									$type = $this->fieldMap[$specName]["type"];
-									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["type"]:0);
+									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);
 									switch($type){
 										case "numeric":
 											if(!$valueStr) $valueStr = "NULL";
@@ -159,12 +159,14 @@ class FileUpload extends DataUploadManager{
 					}
 				}
 				else{
-					echo "<li>Record skipped: ".count($recordArr)." columns of data exist, but ".count($headerArr)." columns were excepted";
-					print_r($recordArr);
+					echo "<li>Record skipped: ".count($recordArr)." columns of data exist, but ".count($headerArr)." columns were excepted; may be due to tab, return, or new line characters enbedded in data record.";
+					//print_r($recordArr);
 					echo "</li>";
 				}
 			}
 			fclose($fh);
+			//Delete upload file 
+			if(file_exists($fullPath)) unlink($fullPath);
 			
 			$this->finalUploadSteps($finalTransfer);
 		}
