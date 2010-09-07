@@ -245,7 +245,7 @@ if($statusStr){
 
  if(!$collId){
  	if($symbUid){
-	 	$collList = $duManager->getCollectionList($userRights);
+	 	$collList = $duManager->getCollectionList();
 		echo "<h2>Select Collection to Update</h2>";
 	 	echo "<ul>";
 	 	foreach($collList as $k => $v){
