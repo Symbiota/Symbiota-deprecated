@@ -74,21 +74,16 @@ class DataUploadManager {
 		$this->doFullReplace = $dfr;
 	}
 
-	public function getCollectionList($uRights){
-		global $isAdmin;
+	public function getCollectionList(){
+		global $isAdmin, $userRights;
 		$returnArr = Array();
-		$collStr = "";
-		foreach($uRights as $right){
-			if(substr($right,0,5) == "coll-"){
-				$collStr .= ",".substr($right,5);
+		if($isAdmin || array_key_exists("CollAdmin",$userRights)){
+			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon '.
+				'FROM omcollections c ';
+			if(array_key_exists('CollAdmin',$userRights)){
+				$sql .= 'WHERE c.collid IN('.implode(',',$userRights['CollAdmin']).') '; 
 			}
-		}
-		if($collStr) $collStr = substr($collStr,1);
-		if($collStr || $isAdmin){
-			$sql = "SELECT DISTINCT c.CollID, c.CollectionName, c.icon ".
-				"FROM omcollections c ";
-			if($collStr) $sql .= "WHERE c.collid IN($collStr) "; 
-			$sql .= "ORDER BY c.CollectionName";
+			$sql .= 'ORDER BY c.CollectionName';
 			//echo $sql;
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){

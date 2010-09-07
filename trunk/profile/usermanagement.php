@@ -228,7 +228,7 @@ if($isAdmin){
 											<?php 
 										}
 										//Checklists
-										if(array_key_exists("ClAdmin-",$userPermissions)){
+										if(array_key_exists("ClAdmin",$userPermissions)){
 											echo "<div style='font-weight:bold;text-decoration:underline;'>Checklists</div>";
 											$clList = $userPermissions["ClAdmin"];
 											echo "<ul>";
@@ -241,7 +241,7 @@ if($isAdmin){
 											echo "</ul>";
 										}
 										//Collections
-										if(array_key_exists("CollAdmin-",$userPermissions)){
+										if(array_key_exists("CollAdmin",$userPermissions)){
 											echo "<li>Collection Administrator for following collections</li>";
 											$collList = $userPermissions["CollAdmin"];
 											echo "<ul>";
@@ -253,7 +253,7 @@ if($isAdmin){
 											}
 											echo "</ul>";
 										}
-										if(array_key_exists("CollEditor-",$userPermissions)){
+										if(array_key_exists("CollEditor",$userPermissions)){
 											echo "<li>Collection Editor for following collections</li>";
 											$collList = $userPermissions["CollEditor"];
 											echo "<ul>";
