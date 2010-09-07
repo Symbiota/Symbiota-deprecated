@@ -22,6 +22,12 @@ elseif($taxon){
 	$tEditor->setTid($taxon);
 }
 if($tEditor->getTid()){
+	if(strpos($category,"image") !== false){
+		header('Location: tpimageeditor.php?tid='.$tEditor->getTid().'&category='.$category.'&lang='.$lang);
+	}
+	elseif(strpos($category,"desc") !== false){
+		header('Location: tpdesceditor.php?tid='.$tEditor->getTid().'&category='.$category.'&lang='.$lang);
+	}
 	$tEditor->setLanguage($lang);
 	 
 	$editable = false;
@@ -156,6 +162,7 @@ if($tEditor->getTid()){
 			<tr><td>
 				<div style='float:right;'>
 					<ul style="margin-top:15px;width:200px;border:dotted 1px;">
+						<li><a href="../index.php?taxon=<?php echo $tEditor->getTid(); ?>">Taxon Profile Page</a></li>
 						<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=images">Edit Images</a></li>
 						<ul>
 							<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
@@ -284,7 +291,7 @@ else{
 		<div style="font-weight:bold;">
 		<?php 
 		if($taxon){
-			echo $taxon." not found in system. Check to see if spelled correctly or add to system.";
+			echo "<i>".ucfirst($taxon)."</i> not found in system. Check to see if spelled correctly and if so, add to system.";
 		}
 		else{
 			echo "Enter scientific name you wish to edit:";
