@@ -51,7 +51,7 @@ if($tid){
 	}
 }
 else{
-	echo "header('Location: tpeditor.php?category=".$category."&lang=".$lang."&action=".$action."');";
+	header('Location: tpeditor.php?category='.$category.'&lang='.$lang.'&action='.$action);
 }
 
 ?>
