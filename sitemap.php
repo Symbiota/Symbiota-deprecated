@@ -42,28 +42,18 @@ $smManager = new SiteMapManager();
 	            	<ul>
 	            		<li><a href="imagelib/index.php">Image Library</a> - list of species images</li>
 	            		<li><a href="imagelib/photographers.php">Photographers</a> - list of individuals you have supplies images</li>
-	            		<li><a href="javascript:var popupReference=window.open('util/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Usage Policy</a> - copyright information</li>
+	            		<li><a href="javascript:var popupReference=window.open('imagelib/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Usage Policy</a> - copyright information</li>
 	            	</ul>
 	
 	            <h2>Projects</h2>
 	            	<ul>
-	            		<li><a href="projects/index.php?proj=1">Arizona Flora</a></li>
-	            			<ul>
-	            				<li>Manager: <a href="http://nhc.asu.edu/vpherbarium/">Arizona State University Herbarium</a></li>
-	            			</ul>
-						<li><a href="projects/index.php?proj=2">New Mexico Flora Project</a></li>
-							<ul>
-								<li>No Managers Yet Defined</li>
-							</ul>
-	            		<li><a href="projects/index.php?proj=3">Sonoran Flora</a></li>
-	            			<ul>
-	            				<li>Manager: <a href="http://www.desertmuseum.org/">Arizona-Sonora Desert Museum</a></li>
-	            				<li>Manager: <a href="http://www.conabio.gob.mx/remib_ingles/doctos/uson.html">Herbario de la Universidad de Sonora (DICTUS)</a></li>
-	            			</ul>
-						<li><a href="projects/index.php?proj=4">Teaching Checklists</a></li>
-							<ul>
-								<li>No Managers Yet Defined</li>
-							</ul>
+	            		<?php 
+	            		$projList = $smManager->getProjectList();
+	            		foreach($projList as $pid => $pArr){
+	            			echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
+	            			echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
+	            		}
+	            		?>
 	            	</ul>
 	            	
 	            <h2>Misc Features</h2>
@@ -77,7 +67,7 @@ $smManager = new SiteMapManager();
 		            <div class="legend">Data Editing Tools</div>
             		<h3>Identification Keys</h3>
 						<ul>
-		            		<?php if($isAdmin || in_array("IdentKey",$userRights)){ ?>
+		            		<?php if($isAdmin || array_key_exists("KeyEditor",$userRights)){ ?>
 								<li>You are authorized to edit Identification Keys</li>
 			            		<li>To add or remove species, edit checklist that is aligned with the key. 
 			            		Note that you must have editing rights for that checklist.</li>
@@ -93,11 +83,10 @@ $smManager = new SiteMapManager();
 
             		<h3>Projects</h3>
 	            		<?php 
-	            			$projList = $smManager->getProjectList();
-	            			if($projList){
+	            			if($isAdmin){
 		            			echo "<ul>";
-	            				foreach($projList as $k => $v){
-		            				echo "<li><a href='".$clientRoot."/projects/index.php?proj=".$k."&emode=1'>$v</a></li>";
+	            				foreach($projList as $pid => $pArr){
+		            				echo "<li><a href='".$clientRoot."/projects/index.php?proj=".$pid."&emode=1'>".$pArr["name"]."</a></li>";
 		            			}
 		            			echo "</ul>";
 	            			}
@@ -107,7 +96,7 @@ $smManager = new SiteMapManager();
 	            		?>
             		
             		<h3>Taxon Profile Page</h3>
-					<?php if($isAdmin || in_array("TaxonProfile",$userRights)){?>
+					<?php if($isAdmin || array_key_exists("TaxonProfile",$userRights)){?>
             			<ul>
             				<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
 							<li><a href="taxa/admin/tpdesceditor.php?taxon=&category=textdescr">Text Descriptions</a></li>
@@ -125,7 +114,7 @@ $smManager = new SiteMapManager();
 	            	?>
 
             		<h3>Taxonomy</h3>
-					<?php if($isAdmin || in_array("Taxonomy",$userRights)){?>
+					<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){?>
             			<ul>
 							<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
 							<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
@@ -140,13 +129,12 @@ $smManager = new SiteMapManager();
 	            	
 	            	<h3>Misc</h3>
 	            		<ul>
-	            			<li><a href="collections/admin/observationuploader.php">Observation Batch Loader</a></li>
 	            			<li><a href="profile/usermanagement.php">User Permissions</a></li>
             			</ul>
             		<h3>Collections</h3>
 	            		<?php 
-	            			$collList = $smManager->getCollectionList();
-	            			if($collList){
+	            			if($isAdmin || array_key_exists("CollAdmin",$userRights)){
+	            				$collList = $smManager->getCollectionList((array_key_exists("CollAdmin",$userRights)?$userRights["CollAdmin"]:""));
 	            				echo "<ul>";
 		            			foreach($collList as $k => $v){
 		            				echo "<li>$v</li>";
@@ -164,8 +152,8 @@ $smManager = new SiteMapManager();
 
             		<h3>Checklists</h3>
 	            		<?php 
-	            			$clList = $smManager->getChecklistList();
-	            			if($clList){
+	            			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
+	            				$clList = $smManager->getChecklistList((array_key_exists("ClAdmin",$userRights)?$userRights["ClAdmin"]:""));
 	            				echo "<ul>";
 	            				foreach($clList as $k => $v){
 		            				echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
