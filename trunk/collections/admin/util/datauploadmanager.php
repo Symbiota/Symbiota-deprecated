@@ -395,7 +395,7 @@ class DataUploadManager {
 		if($this->cleanupSP){
 			if($this->conn->query("CALL ".$this->cleanupSP.";")){
 				echo "<li>";
-				echo "Following cleanup stored proceure performed on uploadspectemp table: ".$this->cleanupSP."()";
+				echo "Records cleaned: ".$this->cleanupSP;
 				echo "</li>";
 			}
 		}
@@ -411,8 +411,8 @@ class DataUploadManager {
 			$this->performFinalTransfer();
 		}
 		else{
-			echo "<li>Upload Procedure Complete: ".$this->transferCount."</li>";
-			echo "<li>Records transferred only to temporary specimen table, review records and then use controls below to transfer to specimen table</li>";
+			echo "<li>Upload Procedure Complete: ".$this->transferCount." records</li>";
+			echo "<li>Records transferred only to temporary specimen table; use controls below to transfer to specimen table</li>";
 		}
 	}
 
@@ -420,7 +420,7 @@ class DataUploadManager {
 		//Clean and Transfer records from uploadspectemp to specimens
 		$spCallStr = "CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");";
 		if($this->conn->query($spCallStr)){
-			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."records transferred to central specimen table"."</li>";
+			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."</li>";
 		}
 		else{
 			echo "<li>Unable to complete transfer. Please contact system administrator</li>";

@@ -19,6 +19,7 @@ class SiteMapManager{
 		if($collArr){
 			$sql .= "WHERE c.collid IN(".implode(",",$collArr).")";
 		}
+		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -29,10 +30,12 @@ class SiteMapManager{
 	
 	public function getChecklistList($clArr = ""){
 		$returnArr = Array();
-		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ";
+		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
+			"WHERE cl.access = 'public' ";
 		if($clArr){
-			$sql .= "WHERE cl.clid IN(".implode(",",$this->clList).")";
+			$sql .= "AND cl.clid IN(".implode(",",$this->clList).") ";
 		}
+		$sql .= "ORDER BY cl.name";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
