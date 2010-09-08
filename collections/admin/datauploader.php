@@ -412,18 +412,6 @@ if($statusStr){
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Start Upload" />
 						</div>
-		 				<div style="margin:10px 0px 0px 10px;">
-		 					<input type="checkbox" name="finaltransfer" value="1" <?php echo ($finalTransfer?"checked":""); ?> onclick="toggle('dodiv')"/>
-		 					Perform Final Transfer and Make Public
-						</div>
-						<div id="dodiv" style="display:none;margin-left:30px;">
-							<div>
-								<input name="dofullreplace" type="radio" value="0" checked /> Append New / Update Modified Records
-							</div>
-							<div>
-								<input name="dofullreplace" type="radio" value="1" /> Replace All Records
-							</div>
-						</div>
 					</div>
 				<?php } ?>
 			</fieldset>
@@ -626,8 +614,7 @@ if($statusStr){
  						Number of records uploaded to temporary table (uploadspectemp): <?php echo $duManager->getTransferCount();?>
 					</div>
  					<div style="margin:5px;"> 
- 						If this sounds correct, transfer to central specimen table using this form. Note that your old specimens 
- 						records will be replaced. You may want to inspect uploadspectemp records to verify initial upload. 
+ 						If upload number sounds correct, transfer to central specimen table using this form.  
 					</div>
 					<div>
 						<input name="dofullreplace" type="radio" value="0" <?php if(!$doFullReplace) echo "SELECTED"; ?> /> 
