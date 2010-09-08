@@ -924,7 +924,13 @@ class TaxonEditor{
 		//Update taxa record
 		$sql = "UPDATE taxa SET ";
 		foreach($taxonEditArr as $key => $value){
-			$sql .= $key." = \"".trim($value)."\",";
+			$v = trim($value);
+			if($v){
+				$sql .= $key." = \"".$v."\",";
+			}
+			else{
+				$sql .= $key." = NULL,";
+			}
 		}
 		$sql .= "sciname = \"".($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
 			$taxonEditArr["unitname1"].($taxonEditArr["unitind2"]?" ".$taxonEditArr["unitind2"]:"").
