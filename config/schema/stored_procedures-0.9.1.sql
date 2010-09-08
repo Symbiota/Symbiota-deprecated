@@ -175,7 +175,7 @@ BEGIN
          #Update LocalitySecurity
          UPDATE taxa t INNER JOIN uploadspectemp u ON t.SciName = u.SciName
          SET u.LocalitySecurity = t.SecurityStatus
-         WHERE u.collid = targetCollId AND (t.SecurityStatus > 1) AND (u.LocalitySecurity = 1 OR u.LocalitySecurity IS NULL);
+         WHERE u.collid = targetCollId AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL);
 
          #standardize some of the fields
          UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," subsp. "," ssp. ") WHERE s.sciname like "% subsp. %";
@@ -826,7 +826,7 @@ BEGIN
          #Update LocalitySecurity
          UPDATE taxa t INNER JOIN omoccurrences u ON t.SciName = u.SciName
          SET u.LocalitySecurity = t.SecurityStatus
-         WHERE (t.SecurityStatus > 1) AND (u.LocalitySecurity = 1 OR u.LocalitySecurity IS NULL);
+         WHERE (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL);
 
          #standardize some of the fields
          UPDATE omoccurrences s SET s.sciname = replace(s.sciname," subsp. "," ssp. ") WHERE s.sciname like "% subsp. %";
