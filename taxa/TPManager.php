@@ -500,7 +500,7 @@
  		}
 		
  		$urlArr = $this->getTaxaMap($tidStr);
- 		if(!$urlArr && $occurrenceModIsActive && ($this->securityStatus == 1 || $isAdmin)){
+ 		if(!$urlArr && $occurrenceModIsActive && ($this->securityStatus == 0 || $isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights))){
 			return $this->getGoogleStaticMap($tidStr);
 		}
 		return $urlArr;
