@@ -95,6 +95,7 @@ class TaxonDisplay{
 	public function getTaxa(){
 		//Get target taxa (we don't want children and parents of not accepted taxa, so we'll get those later) 
 		$hArray = Array();
+		$hierarchyArr = Array();
 		$taxaParentIndex = Array();
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		if($this->targetStr){
@@ -184,7 +185,6 @@ class TaxonDisplay{
 			}
 			
 			//Build Hierarchy Array: grab leaf nodes and attach to parent until none are left
-			$hierarchyArr = Array();
 			$leafTaxa = Array();
 			while($leafTaxa = array_diff(array_keys($taxaParentIndex),$taxaParentIndex)){
 				foreach($leafTaxa as $value){
@@ -239,6 +239,9 @@ class TaxonDisplay{
 				}
 			}
 			$this->indentValue -= 10;
+		}
+		else{
+			echo "<div style='margin:20px;'>No taxa found matching your search</div>";
 		}
 	}
 
