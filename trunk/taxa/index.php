@@ -370,7 +370,7 @@ if($taxonManager->getSciName() != "unknown"){
 		$mapSrc = $taxonManager->getMapUrl();
 		if($mapSrc){
 			$gUrl = ""; $iUrl = "";
-			if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
+			if($taxonManager->getSecurityStatus() == 0 || $isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 				$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/maps/googlemap.php?usecookies=false&type=3&db=all&thes=on&taxa=".$taxonManager->getSciName()."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
 			}
 			$url = array_shift($mapSrc);
