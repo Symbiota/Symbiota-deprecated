@@ -16,7 +16,7 @@ class ListManager extends CollectionManager{
  	}
 
 	public function getSpecimenMap($pageRequest){
-		global $userRights,$isAdmin;
+		global $userRights;
 		$returnArr = Array();
 		$conn = $this->getConnection();
 		$sqlWhere = $this->getSqlWhere();
@@ -37,6 +37,10 @@ class ListManager extends CollectionManager{
 		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $conn->query($sql);
+		$canReadRareSpp = false;
+		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$canReadRareSpp = true;
+		}
 		while($row = $result->fetch_object()){
 			$collIdStr = $row->CollID;
 			$dbpk = $row->dbpk;
@@ -53,7 +57,7 @@ class ListManager extends CollectionManager{
 			$returnArr[$collIdStr][$dbpk]["state"] = $row->state;
 			$returnArr[$collIdStr][$dbpk]["county"] = $row->county;
 			$localitySecurity = $row->LocalitySecurity;
-			if($localitySecurity == 1 || ($userRights && ($isAdmin || in_array($collIdStr, $userRights)))){
+			if(!$localitySecurity || $canReadRareSpp || (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
 				$returnArr[$collIdStr][$dbpk]["locality"] = $row->locality;
 			}
 			else{

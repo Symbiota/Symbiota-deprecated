@@ -23,7 +23,7 @@ class MapManager extends CollectionManager{
     }
 
 	public function getGeoCoords($limit = 1000, $includeDescr= false){
-		global $userRights,$isAdmin;
+		global $userRights;
 		$conn = $this->getConnection();
         $querySql = "";
         $sql = "SELECT o.occid, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.dbpk, o.occurrenceID ";
@@ -34,14 +34,14 @@ class MapManager extends CollectionManager{
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
         $sql .= $this->getSqlWhere();
         $sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
-		if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-			//Add nothing to sql; grab all records   
+		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
 		elseif(array_key_exists("RareSppReader",$userRights)){
 			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"])."))";
 		}
 		else{
-			$sql .= " AND (o.LocalitySecurity = 1 OR o.LocalitySecurity IS NULL) ";
+			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
 		if($limit){
 			$sql .= " LIMIT 1000";
