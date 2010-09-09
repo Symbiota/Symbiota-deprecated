@@ -15,9 +15,10 @@ class DownloadManager extends CollectionManager{
     
  	public function __construct(){
  		parent::__construct();
-		$this->securityArr = Array("Locality","locationRemarks","MinimumElevationInMeters","MaximumElevationInMeters","VerbatimElevation",
-			"DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters","VerbatimCoordinates","verbatimCoordinateSystem",
-			"VerbatimLatitude","VerbatimLongitude","Habitat");
+		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision",
+			"verbatimCoordinates","verbatimCoordinateSystem","georeferenceRemarks",
+			"verbatimLatitude","verbatimLongitude","habitat");
  		$this->dwcSql = "SELECT o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
  			"o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, ".
  			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
@@ -28,7 +29,7 @@ class DownloadManager extends CollectionManager{
 	 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
  			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
  			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.previousIdentifications, ".
-	 		"o.disposition, o.modified, o.language ".
+	 		"o.disposition, o.modified, o.language, o.collid ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
  		$this->dwcSql .= $this->getSqlWhere();
@@ -36,7 +37,7 @@ class DownloadManager extends CollectionManager{
  	}
 
  	public function downloadDarwinCoreText(){
-		$this->writeTextFile($this->dwcSql);
+		$this->writeTextFile($this->dwcSql,1);
     }
 
 	public function downloadDarwinCoreXml(){
@@ -55,24 +56,33 @@ class DownloadManager extends CollectionManager{
 			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.previousIdentifications, ".
-			"o.disposition, o.modified, o.language ".
+			"o.disposition, o.modified, o.language, o.collid, o.LocalitySecurity ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $this->getSqlWhere();
 		$sql .= "ORDER BY c.CollectionCode, o.SciName";
 		//echo $sql;
-		$this->writeTextFile($sql);
+		$this->writeTextFile($sql, 1);
     }
 
 	public function downloadGeorefText(){
-        
+    	global $userRights;
 		$sql = "SELECT o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, ". 
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
-			"c.CollectionName, c.CollectionCode, o.occurrenceID, o.DBPK, o.LocalitySecurity ".
+			"c.CollectionName, c.CollectionCode, o.occurrenceID, o.DBPK ".
 		"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $this->getSqlWhere();
+		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			//Is global rare species reader, thus do nothing to sql and grab all records
+		}
+		elseif(array_key_exists("RareSppReader",$userRights)){
+			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"])."))";
+		}
+		else{
+			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
+		}
 		$sql .= "ORDER BY c.CollectionCode, o.ScientificName";
 		//echo $sql;
 		$this->writeTextFile($sql);
@@ -99,9 +109,13 @@ class DownloadManager extends CollectionManager{
 		$this->writeTextFile($sql);
     }
 
-    private function writeTextFile($sql){
+    private function writeTextFile($sql, $rareDataToHide = 0){
     	global $defaultTitle, $userRights, $isAdmin;
-		$fileName = $defaultTitle;
+		$canReadRareSpp = false;
+		if($rareDataToHide == 0 || $isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$canReadRareSpp = true;
+		}
+    	$fileName = $defaultTitle;
 		if($fileName){
 			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
 			$fileName = str_replace(".","",$fileName);
@@ -126,10 +140,10 @@ class DownloadManager extends CollectionManager{
 			
 			//Write column values out to file
 			do{
+				$localSecurity = (array_key_exists("localitySecurity",$row)?$row["localitySecurity"]:0); 
 				foreach($row as $colName => $value){
-					$localSecurity = (array_key_exists("LocalitySecurity",$row)?$row["LocalitySecurity"]:"1");
-					if($isAdmin || $localSecurity == 1 || !in_array($colName,$this->securityArr) || in_array($row["CollectionCode"],$userRights)){
-						echo $value."\t";
+					if($canReadRareSpp || $localSecurity == 0 || !in_array($colName,$this->securityArr) || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
+						echo $this->cleanStr($value)."\t"; 
 					}
 					else{
 						echo "Value Hidden\t";
@@ -143,6 +157,13 @@ class DownloadManager extends CollectionManager{
 		}
         $result->close();
 		$conn->close();
+    }
+    
+    private function cleanStr($inStr){
+    	$retStr = str_replace("\n"," ",$inStr);
+    	$retStr = str_replace("\r"," ",$retStr);
+    	$retStr = str_replace("\t"," ",$retStr);
+    	return $retStr;
     }
     
 /*

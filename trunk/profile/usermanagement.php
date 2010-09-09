@@ -392,7 +392,7 @@ if($isAdmin){
 SuperAdmin			Edit all data and assign new permissions
 
 RareSppAdmin		Add or remove species from rare species list
-RareSppReader		View and map rare species collection data for all collections
+RareSppReadAll		View and map rare species collection data for all collections
 RareSppReader-#		View and map rare species collecton data for specific collections
 CollAdmin-#			Upload records; modify metadata
 CollEditor-#		Edit collection records
