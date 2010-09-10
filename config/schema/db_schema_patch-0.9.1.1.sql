@@ -10,3 +10,6 @@ ALTER TABLE `taxa`
 
 ALTER TABLE `omoccurrences` 
  MODIFY COLUMN `localitySecurity` INT(10) DEFAULT 0 COMMENT '0 = no security; 1 = hidden locality';
+
+ALTER TABLE `uploadspectemp` 
+ MODIFY COLUMN `localitySecurity` INT(10) DEFAULT 0 COMMENT '0 = display locality, 1 = hide locality';
