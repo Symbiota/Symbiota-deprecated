@@ -344,9 +344,8 @@
             $local = substr($local, 0, strlen($local) - 2);
             $this->outputVec[] = "<div><b>Locality:</b> ".$local."</div>";
             $secur = $row->LocalitySecurity;
-            if(!$secur) $secur = 1;
             $this->outputVec[] = "<div style='margin-left:15px;'>";
-            if($secur == 0 || array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) 
+            if(!$secur || array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) 
             	|| array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
             	|| (array_key_exists("RareSppReader",$userRights) && in_array($this->collId,$userRights["RareSppReader"]))){
 	            $this->outputVec[] = "<div>".$row->Locality."</div>";
