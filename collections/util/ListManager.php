@@ -27,7 +27,7 @@ class ListManager extends CollectionManager{
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
-			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,1) AS LocalitySecurity ".
+			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity ".
 			"FROM omoccurrences o ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
