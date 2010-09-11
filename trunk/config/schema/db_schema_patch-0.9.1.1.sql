@@ -13,3 +13,9 @@ ALTER TABLE `omoccurrences`
 
 ALTER TABLE `uploadspectemp` 
  MODIFY COLUMN `localitySecurity` INT(10) DEFAULT 0 COMMENT '0 = display locality, 1 = hide locality';
+
+ALTER TABLE `uploadspectemp`
+    ADD CONSTRAINT `FK_uploadspectemp_coll` FOREIGN KEY `FK_uploadspectemp_coll` (`collid`)
+    REFERENCES `omcollections` (`CollID`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT;
