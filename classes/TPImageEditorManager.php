@@ -323,7 +323,7 @@ class TPImageEditorManager extends TPEditorManager{
 				$this->setPrimaryImageSort($this->tid);
 				if($addToTid){
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
-						"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ". 
+						"owner, sourceurl, copyright, locality, occid, notes, anatomy, username) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
 						($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
 						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
