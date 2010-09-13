@@ -132,6 +132,9 @@ else{
 	                errorText += "\nFile path must be entered";
 	            }
 	        }
+	        if(isNumeric(f.sortsequence.value) == false){
+	        	errorText += "\nSort value must be a number";
+	        }
 	        if(errorText != ""){
 	            window.alert("Errors:\n " + errorText);
 	            return false;
@@ -236,6 +239,21 @@ else{
 		function openOccurrenceSearch(target) {
 			occWindow=open("occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=530,height=500,left=20,top=20");
 			if (occWindow.opener == null) occWindow.opener = self;
+		}
+
+		function isNumeric(sText){
+		   	var ValidChars = "0123456789-.";
+		   	var IsNumber = true;
+		   	var Char;
+		 
+		   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
+			   Char = sText.charAt(i); 
+				if (ValidChars.indexOf(Char) == -1){
+					IsNumber = false;
+					break;
+	          	}
+		   	}
+			return IsNumber;
 		}
 		
 	</script>
