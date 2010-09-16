@@ -53,7 +53,6 @@ if($tid){
 else{
 	header('Location: tpeditor.php?category='.$category.'&lang='.$lang.'&action='.$action);
 }
-
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
 <html>

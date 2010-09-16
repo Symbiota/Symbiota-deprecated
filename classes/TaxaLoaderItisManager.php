@@ -1,18 +1,12 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-class ItisTaxaLoaderManager{
-	
-	private $conn;
+class TaxaLoaderItisManager extends TaxaLoaderManager{
 	
 	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
- 		set_time_limit(600);
-		ini_set("max_input_time",120);
-		ini_set("upload_max_filesize",10);
+ 		parent::__construct();
 	}
 
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+ 		parent::__destruct();
 	}
 
 	public function uploadFile(){

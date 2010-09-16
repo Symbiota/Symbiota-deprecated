@@ -254,7 +254,7 @@ if(isset($profile_viewprofileCrumbs)){
 		?>
 		<div style="margin:10px;">
 		    <ul id="profiletabs" class="shadetabs">
-		        <li><a href="#" rel="viewprofilediv" class=selected>View Profile</a></li>
+		        <li><a href="#" rel="viewprofilediv" class="selected">View Profile</a></li>
 		        <li><a href="#" rel="editprofilediv">Edit Profile</a></li>
 		        <li><a href="#" rel="editpassworddiv">Edit Password</a></li>
 		        <li><a href="#" rel="checklistdiv">Personal Checklists</a></li>
