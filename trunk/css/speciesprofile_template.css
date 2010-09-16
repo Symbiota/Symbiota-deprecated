@@ -3,12 +3,12 @@ table#innertable{
 	width:			815px;
 }
 
-div#centralimage{
+#centralimage{
 	text-align:	center;
 	margin:		15px;
 }
 
-div#centralimage img{
+#centralimage img{
 	max-width:	250px;
 	max-height:	250px;
 	width: 		expression(this.width >= this.height ? 250: true);
@@ -16,7 +16,7 @@ div#centralimage img{
 	border:		1px dotted black;
 }
 
-div#centralimage a:hover img{
+#centralimage a:hover img{
 	border: 1px solid #0000ff;
 }
 
@@ -27,16 +27,33 @@ div#centralimage div.photographer{
 	font-size:		75%;
 }
 
-div#descr{
+/*Text Description*/
+td.desc{
+	vertical-align:	top;
+	width:			525px;
+	height:			300px;
+}
+
+#descrgenus{
+	float:left;
+	width:500px;
+	margin-top:10px;
+}	
+
+#descblock{
 	height:		280px;
 	width:		525px;
 	overflow: 	auto;
 }
 
-div#clinfo{
-	width:				450px;
+#descsource{
+	text-align:	right;
+	width:		400px;
+	padding:	10px 20px 10px 10px;
+}
+
+#clinfo{
 	margin:				5px;
-	margin-left:		25px;
 	padding:			5px;
 	text-align:			center;
 	vertical-align:		middle;

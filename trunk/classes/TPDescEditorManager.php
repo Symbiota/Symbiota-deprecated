@@ -18,7 +18,7 @@ class TPDescEditorManager extends TPEditorManager{
 
 	public function getDescriptions(){
 		$descrArr = Array();
-		$sql = "SELECT tdb.tdbid, tdb.displaylevel, tdb.language, tdb.notes, tdb.source, ".
+		$sql = "SELECT tdb.tdbid, tdb.displaylevel, tdb.language, tdb.notes, tdb.caption, tdb.source, tdb.sourceurl, ".
 			"tds.tdsid, tds.heading, tds.statement, tds.notes as stmtnotes, tds.displayheader, tds.sortsequence ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
 			"LEFT JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
@@ -33,7 +33,9 @@ class TPDescEditorManager extends TPEditorManager{
 			if($tdbid != $prevTdbid){
 				$descrArr[$row->language][$row->displaylevel]["tdbid"] = $tdbid;
 				$descrArr[$row->language][$row->displaylevel]["notes"] = $row->notes;
+				$descrArr[$row->language][$row->displaylevel]["caption"] = $row->caption;
 				$descrArr[$row->language][$row->displaylevel]["source"] = $row->source;
+				$descrArr[$row->language][$row->displaylevel]["sourceurl"] = $row->sourceurl;
 			}
 			if($tdsid = $row->tdsid){
 				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["heading"] = $row->heading;
@@ -53,7 +55,9 @@ class TPDescEditorManager extends TPEditorManager{
 			"SET language = ".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\"":"NULL").
 			",displaylevel = ".$_REQUEST["displaylevel"].
 			",notes = ".($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\"":"NULL").
+			",caption = ".($_REQUEST["caption"]?"\"".$_REQUEST["caption"]."\"":"NULL").
 			",source = ".($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").
+			",sourceurl = ".($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").
 			" WHERE tdbid = ".$_REQUEST["tdbid"];
 		//echo $sql;
 		$status = "";
@@ -77,12 +81,15 @@ class TPDescEditorManager extends TPEditorManager{
 
 	public function addDescriptionBlock(){
 		global $symbUid;
-		$sql = "INSERT INTO taxadescrblock(tid,uid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"")."notes,source) ".
+		$sql = "INSERT INTO taxadescrblock(tid,uid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"").
+			"notes,caption,source,sourceurl) ".
 			"VALUES(".$_REQUEST["tid"].",".$symbUid.",".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\",":"").
 			($_REQUEST["displaylevel"]?$_REQUEST["displaylevel"].",":"").
 			($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\",":"NULL,").
-			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").")";
-		//echo $sql;
+			($_REQUEST["caption"]?"\"".$_REQUEST["caption"]."\",":"NULL,").
+			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\",":"NULL,").
+			($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").")";
+			//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
 			$status = "ERROR adding description block: ".$this->taxonCon->error;

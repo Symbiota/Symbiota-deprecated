@@ -128,7 +128,13 @@ if($editable && $tid){
 						Language: <input id='language' name='language' style='margin-top:5px;' type='text' />
 					</div>
 					<div style=''>
+						Caption: <input id='caption' name='caption' style='margin:2px;' type='text' />
+					</div>
+					<div style=''>
 						Source: <input id='source' name='source' style='margin:2px;width:300px;' type='text' />
+					</div>
+					<div style=''>
+						Source Url: <input id='sourceurl' name='sourceurl' style='margin:2px;width:300px;' type='text' />
 					</div>
 					<div style=''>
 						Notes: <input id='notes' name='notes' style='margin:2px;width:300px;' type='text' />
@@ -139,7 +145,7 @@ if($editable && $tid){
 						<input type='hidden' name='category' value='<?php echo $category; ?>' />
 					</div>
 					<div style=''>
-						Display Level: <input id='displaylevel' name='displaylevel' style='margin:2px;width:40px;' type='text' />
+						Sort Order: <input id='displaylevel' name='displaylevel' style='margin:2px;width:40px;' type='text' />
 					</div>
 				</fieldset>
 			</form>
@@ -151,12 +157,14 @@ if($editable && $tid){
 		    	foreach($dlArr as $displayLevel => $bArr){
 		    		?>
     				<fieldset style='width:500px;margin:10px 5px 5px 5px;'>
-						<legend><b><?php echo $lang.": Display Level ".$displayLevel; ?></b></legend>
+						<legend><b><?php echo $lang.": ".($bArr["caption"]?$bArr["caption"]:"Description ".$displayLevel); ?></b></legend>
 						<div style="float:right;" onclick="javascript:toggleById('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
 							<img style='border:0px;width:12px;' src='../../images/edit.png'/>
 						</div>
-						<div><b>Source:</b> <?php echo $bArr["source"]; ?></div> 
-						<div><b>Notes:</b> <?php echo $bArr["notes"]; ?></div> 
+						<div><b>Caption:</b> <?php echo $bArr["caption"]; ?></div>
+						<div><b>Source:</b> <?php echo $bArr["source"]; ?></div>
+						<div><b>Source URL:</b> <a href='<?php echo $bArr["sourceurl"]; ?>'><?php echo $bArr["sourceurl"]; ?></a></div>
+						<div><b>Notes:</b> <?php echo $bArr["notes"]; ?></div>
 						<div id="dblock-<?php echo $bArr["tdbid"];?>" style="display:none;margin-top:10px;">
 							<fieldset>
 								<legend><b>Description Block Edits</b></legend>
@@ -166,8 +174,16 @@ if($editable && $tid){
 										<input name='language' style='margin-top:5px;border:inset;' type='text' value='<?php echo $lang; ?>' />
 									</div>
 									<div>
+										Caption: 
+										<input id='caption' name='caption' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["caption"];?>' />
+									</div>
+									<div>
 										Source: 
 										<input id='source' name='source' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["source"];?>' />
+									</div>
+									<div>
+										Source URL: 
+										<input id='sourceurl' name='sourceurl' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["sourceurl"];?>' />
 									</div>
 									<div>
 										Notes: 

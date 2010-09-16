@@ -5,7 +5,7 @@
  */
  //error_reporting(0);
  include_once('../config/symbini.php');
- include_once('TPManager.php');
+ include_once($serverRoot.'/classes/TaxonProfileManager.php');
  Header("Content-Type: text/html; charset=".$charset);
 
  $descrDisplayLevel;
@@ -18,7 +18,7 @@
  
  if(!$projValue && !$clValue) $projValue = $defaultProjId;
  
- $taxonManager = new TPData();
+ $taxonManager = new TaxonProfileManager();
  if($taxAuthId || $taxAuthId === "0") {
  	$taxonManager->setTaxAuthId($taxAuthId);
  }
@@ -40,11 +40,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
 <html>
 <head>
+	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='virtual flora,<?php echo $spDisplay; ?>' />
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
-	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
+	<link rel="stylesheet" type="text/css" href="../css/tabcontent.css" />
+	<script type="text/javascript" src="../js/tabcontent.js"></script>
 	<SCRIPT LANGUAGE="JavaScript">
 
 		var imageArr = new Array();
@@ -157,67 +159,11 @@
 			siphXmlHttp.send(null);
 		} 
 		
-		function decreaseDescrLevel(){
-			var getLevel = false;
-			var newLevelArr = levelArr.slice(0);
-			newLevelArr.reverse();
-			for(x in newLevelArr){
-				if(getLevel){
-					var targetLevel = newLevelArr[x];
-					currentLevel = targetLevel;
-					changeDescrLevel();
-					document.getElementById("increasedetail").style.color = "blue";
-					document.getElementById("increasedetail").style.cursor = "pointer";
-					if(x == (newLevelArr.length - 1)){
-						document.getElementById("decreasedetail").style.color = "grey";
-						document.getElementById("decreasedetail").style.cursor = "default";
-					}
-					break;
-				}
-				if(newLevelArr[x] == currentLevel){
-					getLevel = true; 
-				}
-			}
-		}
-		
-		function increaseDescrLevel(){
-			var getLevel = false;
-			for(x in levelArr){
-				if(getLevel){
-					var targetLevel = levelArr[x];
-					currentLevel = targetLevel;
-					changeDescrLevel();
-					document.getElementById("decreasedetail").style.color = "blue";
-					document.getElementById("decreasedetail").style.cursor = "pointer";
-					if(x == (levelArr.length - 1)){
-						document.getElementById("increasedetail").style.color = "grey";
-						document.getElementById("increasedetail").style.cursor = "default";
-					}
-					break;
-				} 
-				if(levelArr[x] == currentLevel){
-					getLevel = true; 
-				}
-			}
-		}
-		
-		function changeDescrLevel(){
-			var targetObj = document.getElementById("descr-" + currentLevel);
-			var levelTag = document.getElementById("currentlevel");
-			if (levelTag.innerHTML){ 
-				levelTag.innerHTML = currentLevel;
-			}
-			else if (tag.innertext) {
-				levelTag.innertext = currentLevel; 
-			} 
-			var divObjs = document.getElementsByTagName("div");
-			for (i = 0; i < divObjs.length; i++) {
-				var obj = divObjs[i];
-				if(obj.getAttribute("class") == "descr" || obj.getAttribute("className") == "descr"){
-					obj.style.display = "none";
-				}
-			}
-			targetObj.style.display = "block";
+		function initTabs(tabObjId){
+			var dTabs=new ddtabcontent(tabObjId); 
+			dTabs.setpersist(true);
+			dTabs.setselectedClassTarget("link"); 
+			dTabs.init();
 		}
 		
 		function expandImages(){
@@ -247,7 +193,7 @@
 		
 	</script>
 </head>
-<body>
+<body onload="initTabs('desctabs');">
 <?php
 $displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
 include($serverRoot.'/header.php');
@@ -263,23 +209,29 @@ if(isset($taxa_indexCrumbs)){
 <?php 
 if($taxonManager->getSciName() != "unknown"){
 	if($taxonRank > 180){
-		echo "<tr><td colspan='2' valign='bottom' height='35px'>";
-		//Top Middle Section, scientific name
-		echo "<div style='float:left;font-size:16px;margin-left:10px;'><span style='font-weight:bold;color:#990000;'><i>$spDisplay</i></span> ".$taxonManager->getAuthor();
-		$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
-		echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
-	 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
-	 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
-	 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
-	 	}
-		echo "</div>";
-		if($editable){
-			echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
-		}
-		echo "</td></tr>\n";
-
+		?>
+		<tr>
+			<td colspan="2" valign="bottom" height="35px">
+			<?php 
+			//Top Middle Section, scientific name
+			echo "<div style='float:left;font-size:16px;margin-left:10px;'><span style='font-weight:bold;color:#990000;'><i>$spDisplay</i></span> ".$taxonManager->getAuthor();
+			$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+			echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+		 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
+		 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
+		 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
+		 	}
+			echo "</div>";
+			if($editable){
+				echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+			}
+			?>
+			</td>
+		</tr>
+		<tr>
+			<td width='300' valign='top'>
+		<?php 
 		//Left Middle Section
-		echo "<tr><td width='300' valign='top'>\n";
 		echo "\t<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
 	
 		$vernStr = $taxonManager->getVernacularStr();
@@ -306,63 +258,19 @@ if($taxonManager->getSciName() != "unknown"){
 			}
 			echo "</div>";
 		}
-		echo "</td>\n";
-		
-		//Middle Right Section (Description section)
-		echo "<td valign='top' width='525' height='300'>";
-		$descr = $taxonManager->getDescriptions();
-		$clInfo = $taxonManager->getClInfo();
-		if($descr){
-			echo "<div id='descr' ".($clInfo?"height='230'":"").">";
-			ksort($descr);
-			if(!$descrDisplayLevel){
-				$descrDisplayLevel = key($descr);
-			}
-			$isFirst = false;
-			$isLast = false;
-			end($descr);
-			if($descrDisplayLevel == key($descr)) $isLast = true;
-			reset($descr);
-			if($descrDisplayLevel == key($descr)) $isFirst = true;
-			if(count($descr) > 1){
-				//Display Level Controller
-				echo "<div id='displaylevel' style='margin-top:20px;text-align:right;'>";
-				echo "<span id='decreasedetail' style='color:".($isFirst?"grey":"blue;cursor:pointer;")."' onclick='javascript:decreaseDescrLevel();'> << <u>less</u></span>";
-				echo " || <b>Detail Level <span id='currentlevel'>".$descrDisplayLevel."</span></b> || ";
-				echo "<span id='increasedetail' style='color:".($isLast?"grey":"blue;cursor:pointer;")."' onclick='javascript:increaseDescrLevel();'> <u>more</u> >> </span>";
-				echo "</div>\n";
-			}
-			else{
-				echo "<div style='height:35px;'>&nbsp;</div>";
-			}
-			foreach($descr as $level => $descrArr){
-				//Display Description
-				echo "<div id='descr-".$level."' class='descr' style='display:".($descrDisplayLevel == $level?"block":"none").";'>";
-				echo "<div style='margin:25px 10px 10px 10px;'>";
-				foreach($descrArr as $heading => $descrStr){
-					if(is_int($heading)){
-						echo $descrStr."\n";
-					}
-					else{
-						echo "<b>".$heading.":</b> ".$descrStr." \n";
-					}
-				}
-				echo "</div></div>\n";
-			}
-			echo "</div>";
-			if($clInfo){
-				echo "<div id='clinfo'><b>Within ".$taxonManager->getClName().":</b> ".$clInfo."</div>";
-			}
-		}
-		else{
-			echo "<div style='margin:80px 0px 0px 30px;'>Description not yet available</div>";
-		}
-		
-		echo "</td></tr>\n";
-		
+		?>
+			</td>
+			<td class="desc">
+			<?php 
+			//Middle Right Section (Description section)
+			$taxonManager->echoDescriptionBlock();
+			?>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+		<?php 
 		//Bottom Section - Pics and Map
-		echo "<tr><td colspan='2'>";
-
 		//Display next 4 pics along bottom to left of map
 		$taxonManager->echoImages(1,4);
 		
@@ -388,72 +296,50 @@ if($taxonManager->getSciName() != "unknown"){
 			if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
 			echo "</div>";
 		}
-		echo "</td></tr>";
-		
-		//Section with extra images
-		echo "<tr><td colspan='2'><div id='imgextra' style='display:none;'>\n";
-		$taxonManager->echoImages(5,0);
-		echo "</div></td></tr>\n";
-
+		?>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="imgextra" style="display:none;">
+					<?php 
+					//Section with extra images
+					$taxonManager->echoImages(5,0);
+					?>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+		<?php 
 		//Far Bottom Section - Other Links
-		echo "<tr><td colspan='2'>";
 	}
 	else{
-		echo "<tr><td>";
-		$displayName = $spDisplay;
-		if($taxonRank == 180){
-			$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
-			$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
-		}
-		echo "<div style='float:left;width:250px;'>";
-		echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
-		if($taxonRank == 180) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
-		if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
-		echo "</div>";
-		//Display description
-		$descr = $taxonManager->getDescriptions();
-		if($descr){
-			echo "<div id='descr-genus' style='float:left;width:500px;margin-top:10px;'>";
-			ksort($descr);
-			if(!$descrDisplayLevel){
-				$descrDisplayLevel = key($descr);
-			}
-			$isFirst = false;
-			$isLast = false;
-			end($descr);
-			if($descrDisplayLevel == key($descr)) $isLast = true;
-			reset($descr);
-			if($descrDisplayLevel == key($descr)) $isFirst = true;
-			if(count($descr) > 1){
-				//Display Level Controller
-				echo "<div id='displaylevel' style='margin-top:30px;text-align:right;'>";
-				echo "<span id='decreasedetail' style='color:".($isFirst?"grey":"blue;cursor:pointer;")."' onclick='javascript:decreaseDescrLevel();'> << <u>less</u></span>";
-				echo " || <b>Detail Level <span id='currentlevel'>".$descrDisplayLevel."</span></b> || ";
-				echo "<span id='increasedetail' style='color:".($isLast?"grey":"blue;cursor:pointer;")."' onclick='javascript:increaseDescrLevel();'> <u>more</u> >> </span>";
-				echo "</div>\n";
-			}
-			foreach($descr as $level => $descrArr){
-				//Display Description
-				echo "<div id='descr-".$level."' class='descr' style='display:".($descrDisplayLevel == $level?"block":"none").";'>";
-				echo "<div style='margin:10px;'>";
-				foreach($descrArr as $heading => $descrStr){
-					if(is_int($heading)){
-						echo $descrStr."\n";
-					}
-					else{
-						echo "<b>".$heading.":</b> ".$descrStr." \n";
-					}
-				}
-				echo "</div></div>\n";
-			}
-			echo "</div>";
-		}
-		if($editable){
-			echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
-		}
-		
-		echo "</td></tr>";
 		?>
+		<tr>
+			<td>
+				<?php 
+				$displayName = $spDisplay;
+				if($taxonRank == 180){
+					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+					$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+				}
+				echo "<div style='float:left;width:250px;'>";
+				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
+				if($taxonRank == 180) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
+				if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
+				echo "</div>";
+				//Display description
+				echo "<div id='descrgenus'>";
+				$taxonManager->echoDescriptionBlock();
+				echo "</div>";
+
+				if($editable){
+					echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+				}
+				?>
+			</td>
+		</tr>
 
 		<tr><td>
 			<div class='fieldset' style="padding:10px 2px 10px 2px;">
