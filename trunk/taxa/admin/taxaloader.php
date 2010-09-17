@@ -20,7 +20,7 @@ $loaderManager;
 $status = "";
 if($editable){
 	if($action == "Upload ITIS File"){
-		$loaderManager = new ItisTaxaLoaderManager();
+		$loaderManager = new TaxaLoaderItisManager();
 		$status = $loaderManager->uploadFile();
 	}
 	elseif($action == "Analyze Upload File"){
@@ -34,7 +34,7 @@ if($editable){
  		$sourceFields = $_REQUEST["sf"];
  		$fieldMap = Array();
 		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$targetFields[$x]] = $sourceFields[$x];
+			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
 		}
  		$duManager->setFieldMap($fieldMap);
 
@@ -56,18 +56,34 @@ if($editable){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script type="text/javascript">
+	function checkItisUploadForm(f){
+		if(f.uploadfile.value == ""){
+			alert("Plase enter a path value of the file you wish to upload");
+			return false;
+		}
+		return true;
+	}
 
+	function checkUploadForm(f){
+		var ulObj = document.getElementById("genuploadfile");
+		if(ulObj != null && ulObj.value == ""){
+			alert("Plase enter a path value of the file you wish to upload");
+			return false;
+		}
+		return true;
+	}
+	
 	</script>
 </head>
 <body>
 <?php
-$displayLeftMenu = (isset($taxa_admin_itistaxaloaderMenu)?$taxa_admin_itistaxaloaderMenu:false);
+$displayLeftMenu = (isset($taxa_admin_taxaloaderMenu)?$taxa_admin_taxaloaderMenu:false);
 include($serverRoot.'/header.php');
-if(isset($taxa_admin_itistaxaloaderCrumbs)){
+if(isset($taxa_admin_taxaloaderCrumbs)){
 	echo "<div class='navpath'>";
 	echo "<a href='../index.php'>Home</a> &gt; ";
-	echo $taxa_admin_itistaxaloaderCrumbs;
-	echo " <b>ITIS Taxa Loader</b>"; 
+	echo $taxa_admin_taxaloaderCrumbs;
+	echo " <b>Taxa Loader</b>"; 
 	echo "</div>";
 }
 
@@ -82,23 +98,6 @@ if($editable){
 	}
 	?>
 	<div>
-		<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
-			<fieldset style="width:450px;">
-				<legend style="font-weight:bold;font-size:120%;">Upload File</legend>
-				<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
-				<div>
-					<b>Upload File:</b>
-					<div style="margin:10px;">
-						<input id="uploadfile" name="uploadfile" type="file" size="40" />
-					</div>
-				</div>
-				<div style="margin:10px;">
-					<input type="submit" name="action" value="Upload ITIS File" />
-				</div>
-			</fieldset>
-		</form>
-	</div>
-	<div>
 		<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm()">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
@@ -108,7 +107,7 @@ if($editable){
 					<div>
 						<b>Upload File:</b>
 						<div style="margin:10px;">
-							<input id="uploadfile" name="uploadfile" type="file" size="40" />
+							<input id="genuploadfile" name="uploadfile" type="file" size="40" />
 						</div>
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Analyze Upload File" />
@@ -127,84 +126,68 @@ if($editable){
 							</tr>
 							<?php
 							$sArr = $loaderManager->getSourceArr();
-							 
-
-		$sourceSymbArr = Array();
-		foreach($this->fieldMap as $symbField => $fArr){
-			$sourceSymbArr[$fArr["field"]] = $symbField;
-		}
-
-		//Output table rows for source data
-		sort($this->symbFields);
-		$dbpk = (array_key_exists("dbpk",$this->fieldMap)?$this->fieldMap["dbpk"]["field"]:"");
-		$autoMapArr = Array();
-		foreach($this->sourceArr as $fieldName){
-			if($dbpk != $fieldName){
-				$isAutoMapped = false;
-				if($autoMap && in_array($fieldName,$this->symbFields)){
-					$isAutoMapped = true;
-					$autoMapArr[] = $fieldName;
-				}
-				echo "<tr>\n";
-				echo "<td style='padding:2px;'>";
-				echo $fieldName;
-				echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
-				echo "</td>\n";
-				echo "<td>\n";
-				echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
-				echo "<option value=''>Select Target Field</option>\n";
-				echo "<option value=''>Leave Field Unmapped</option>\n";
-				echo "<option value=''>-------------------------</option>\n";
-				if($isAutoMapped){
-					//Source Field = Symbiota Field
-					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
-							echo "<option ".($fieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
-						}
-					}
-				}
-				elseif(array_key_exists($fieldName,$sourceSymbArr)){
-					//Source Field is mapped to Symbiota Field
-					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
-							echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
-						}
-					}
-				}
-				else{
-					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
-							echo "<option>".$sField."</option>\n";
-						}
-					}
-				}
-				echo "</select></td>\n";
-				echo "</tr>\n";
-			}
-		}
-							
-
+							$tArr = $loaderManager->getTargetArr();
+							$fMap = $loaderManager->getTargetArr();
+							foreach($sArr as $sField){
+								?>
+								<tr>
+									<td style='padding:2px;'>
+										<?php echo $sField; ?>
+										<input type="hidden" name="sf[]" value="<?php echo $sField; ?>" />
+									</td>
+									<td>
+										<select name="tf[]" style="background:<?php echo (in_array($sField,$tArr)?"":"yellow");?>">
+											<option value="">Field Unmapped</option>
+											<option value="">-------------------------</option>
+											<?php 
+											$mappedTarget = (array_key_exists($sField,$fMap)?$fMap[$sField]:"");
+											foreach($tArr as $tField){
+												$selStr = "";
+												if($mappedTarget && $mappedTarget == $tField){
+													$selStr = "SELECTED";
+												}
+												elseif($tField==$sField){
+													$selStr = "SELECTED";
+												}
+												echo '<option '.$selStr.'>'.$tField."</option>\n";
+											}
+											?>
+										</select>
+									</td>
+								</tr>
+								<?php 
+							}
 							?>
 						</table>
 						<div>
 							* Mappings that are not yet saved are displayed in Yellow
 						</div>
 						<div style="margin:10px;">
-							<input type="submit" name="action" value="Check Mapping" />
-						</div>
-					</div>
-				<?php } ?>
-				<?php if((($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD) && $dbpk) || ($uploadType == $DIGIRUPLOAD) 
-					|| ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
-					<div id="uldiv">
-						<div style="margin:10px;">
 							<input type="submit" name="action" value="Start Upload" />
+							<input type="submit" name="action" value="Check Mapping" />
 						</div>
 					</div>
 				<?php } ?>
 			</fieldset>
 		</form>
 	
+	</div>
+	<div>
+		<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
+			<fieldset style="width:450px;">
+				<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
+				<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
+				<div>
+					<b>Upload File:</b>
+					<div style="margin:10px;">
+						<input id="itisuploadfile" name="uploadfile" type="file" size="40" />
+					</div>
+				</div>
+				<div style="margin:10px;">
+					<input type="submit" name="action" value="Upload ITIS File" />
+				</div>
+			</fieldset>
+		</form>
 	</div>
 </div>
 <?php  
@@ -214,7 +197,7 @@ else{
 	<div style='font-weight:bold;margin:30px;'>
 		You must login and have the correct permissions to upload taxonomic data.<br />
 		Please 
-		<a href="<?php echo $clientRoot; ?>/profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/itistaxaloader.php">
+		<a href="<?php echo $clientRoot; ?>/profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/taxaloader.php">
 			login
 		</a>!
 	</div>
