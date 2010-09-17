@@ -1,8 +1,8 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/TaxaLoaderManager.php');
+include_once($serverRoot.'/classes/TaxaLoaderItisManager.php');
 
-class TaxaLoaderItisManager{
+class TaxaLoaderManager{
 	
 	protected $conn;
 	protected $sourceArr = Array();
@@ -61,6 +61,10 @@ class TaxaLoaderItisManager{
 
 	protected function setFieldMap($fm){
 		$this->fieldMap = $fm;
+	}
+	
+	public function getFieldMap(){
+		return $this->fieldMap;
 	}
 
 	private function setTargetArr(){

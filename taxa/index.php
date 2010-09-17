@@ -53,7 +53,7 @@
 		var imgCnt = 0;
 		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
-	
+
 		function toggle(target){
 			var spanObjs = document.getElementsByTagName("span");
 			for (i = 0; i < spanObjs.length; i++) {

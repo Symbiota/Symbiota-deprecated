@@ -52,6 +52,10 @@
 </head>
 
 <body>
+<?php 
+	$displayLeftMenu = (isset($collections_individual_individualMenu)?$collections_individual_individualMenu:false);
+	include($serverRoot."/header.php");
+?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<div style="float:left;margin:15px;text-align:center;font-weight:bold;">
@@ -167,6 +171,9 @@
 			?>
 		</div>
 	</div>
+	<?php
+	include($serverRoot."/footer.php");
+	?>
 </body>
 </html> 
 
