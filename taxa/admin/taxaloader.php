@@ -16,7 +16,8 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
 	 
-$loaderManager;
+$loaderManager = new TaxaLoaderManager();
+
 $status = "";
 if($editable){
 	if($action == "Upload ITIS File"){
@@ -26,6 +27,10 @@ if($editable){
 	elseif($action == "Analyze Upload File"){
 		$loaderManager = new TaxaLoaderManager();
 		$loaderManager->setUploadFile();
+	}
+	elseif($action == "Activate Taxa"){
+		$loaderManager = new TaxaLoaderManager();
+		$loaderManager->transferUpload();
 	}
 	elseif(array_key_exists("sf",$_REQUEST)){
 		if($ulFileName) $loaderManager->setUploadFile($ulFileName);
@@ -38,15 +43,10 @@ if($editable){
 		}
  		$duManager->setFieldMap($fieldMap);
 
-		if($action == "Check Mapping"){
-		
+		if($action == "Upload Taxa"){
+			$status = $loaderManager->uploadFile();
 		}
-		elseif($action == "Upload Taxa"){
-			
-		}
-		
 	}
-	
 }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
@@ -96,99 +96,125 @@ if($editable){
 		echo $status;
 		echo '</ul></div><hr/>';
 	}
-	?>
-	<div>
-		<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm()">
-			<fieldset style="width:450px;">
-				<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
-				<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
-				<?php if(!$ulFileName){ ?>
-					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+	if(strpos($action,"Upload") !== false){
+		?>
+		<div>
+			<form name="transferform" action="taxaloader.php" method="post" onsubmit="return checkTransferForm()">
+				<fieldset style="width:450px;">
+					<legend style="font-weight:bold;font-size:120%;">Transfer Taxa To Central Table</legend>
+					<div>
+						It appears that the taxa successfully inserted into the temporary 
+						taxon upload table (&quot;uploadtaxa&quot;). 
+						You may want to inspect these records before activating by 
+						transferring to the central taxonomic tables  
+						(&quot;taxa&quot;,&quot;taxstatus&quot;) and building the hierarchy. 
+						If you feel confident of the data integrity, click the transfer button below.  
+					</div>
+					<div>
+						<input type="submit" name="action" value="Activate Taxa" />
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<?php 
+	}
+	else{
+		?>
+		<div>
+			<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm()">
+				<fieldset style="width:450px;">
+					<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
+					<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
+					<?php if(!$ulFileName){ ?>
+						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+						<div>
+							<b>Upload File:</b>
+							<div style="margin:10px;">
+								<input id="genuploadfile" name="uploadfile" type="file" size="40" />
+							</div>
+							<div style="margin:10px;">
+								<input type="submit" name="action" value="Analyze Upload File" />
+							</div>
+						</div>
+					<?php }else{ ?>
+						<div id="mdiv">
+							<table border="1" cellpadding="2" style="border:1px solid black">
+								<tr>
+									<th>
+										Source Field
+									</th>
+									<th>
+										Target Field
+									</th>
+								</tr>
+								<?php
+								$sArr = $loaderManager->getSourceArr();
+								$tArr = $loaderManager->getTargetArr();
+								$fMap = $loaderManager->getTargetArr();
+								foreach($sArr as $sField){
+									?>
+									<tr>
+										<td style='padding:2px;'>
+											<?php echo $sField; ?>
+											<input type="hidden" name="sf[]" value="<?php echo $sField; ?>" />
+										</td>
+										<td>
+											<select name="tf[]" style="background:<?php echo (in_array($sField,$tArr)?"":"yellow");?>">
+												<option value="">Field Unmapped</option>
+												<option value="">-------------------------</option>
+												<?php 
+												$mappedTarget = (array_key_exists($sField,$fMap)?$fMap[$sField]:"");
+												foreach($tArr as $tField){
+													$selStr = "";
+													if($mappedTarget && $mappedTarget == $tField){
+														$selStr = "SELECTED";
+													}
+													elseif($tField==$sField){
+														$selStr = "SELECTED";
+													}
+													echo '<option '.$selStr.'>'.$tField."</option>\n";
+												}
+												?>
+											</select>
+										</td>
+									</tr>
+									<?php 
+								}
+								?>
+							</table>
+							<div>
+								* Mappings that are not yet saved are displayed in Yellow
+							</div>
+							<div style="margin:10px;">
+								<input type="submit" name="action" value="Start Upload" />
+								<input type="submit" name="action" value="Check Mapping" />
+							</div>
+						</div>
+					<?php } ?>
+				</fieldset>
+			</form>
+		
+		</div>
+		<div>
+			<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
+				<fieldset style="width:450px;">
+					<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
+					<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 					<div>
 						<b>Upload File:</b>
 						<div style="margin:10px;">
-							<input id="genuploadfile" name="uploadfile" type="file" size="40" />
-						</div>
-						<div style="margin:10px;">
-							<input type="submit" name="action" value="Analyze Upload File" />
+							<input id="itisuploadfile" name="uploadfile" type="file" size="40" />
 						</div>
 					</div>
-				<?php }else{ ?>
-					<div id="mdiv">
-						<table border="1" cellpadding="2" style="border:1px solid black">
-							<tr>
-								<th>
-									Source Field
-								</th>
-								<th>
-									Target Field
-								</th>
-							</tr>
-							<?php
-							$sArr = $loaderManager->getSourceArr();
-							$tArr = $loaderManager->getTargetArr();
-							$fMap = $loaderManager->getTargetArr();
-							foreach($sArr as $sField){
-								?>
-								<tr>
-									<td style='padding:2px;'>
-										<?php echo $sField; ?>
-										<input type="hidden" name="sf[]" value="<?php echo $sField; ?>" />
-									</td>
-									<td>
-										<select name="tf[]" style="background:<?php echo (in_array($sField,$tArr)?"":"yellow");?>">
-											<option value="">Field Unmapped</option>
-											<option value="">-------------------------</option>
-											<?php 
-											$mappedTarget = (array_key_exists($sField,$fMap)?$fMap[$sField]:"");
-											foreach($tArr as $tField){
-												$selStr = "";
-												if($mappedTarget && $mappedTarget == $tField){
-													$selStr = "SELECTED";
-												}
-												elseif($tField==$sField){
-													$selStr = "SELECTED";
-												}
-												echo '<option '.$selStr.'>'.$tField."</option>\n";
-											}
-											?>
-										</select>
-									</td>
-								</tr>
-								<?php 
-							}
-							?>
-						</table>
-						<div>
-							* Mappings that are not yet saved are displayed in Yellow
-						</div>
-						<div style="margin:10px;">
-							<input type="submit" name="action" value="Start Upload" />
-							<input type="submit" name="action" value="Check Mapping" />
-						</div>
-					</div>
-				<?php } ?>
-			</fieldset>
-		</form>
-	
-	</div>
-	<div>
-		<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
-			<fieldset style="width:450px;">
-				<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
-				<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
-				<div>
-					<b>Upload File:</b>
 					<div style="margin:10px;">
-						<input id="itisuploadfile" name="uploadfile" type="file" size="40" />
+						<input type="submit" name="action" value="Upload ITIS File" />
 					</div>
-				</div>
-				<div style="margin:10px;">
-					<input type="submit" name="action" value="Upload ITIS File" />
-				</div>
-			</fieldset>
-		</form>
-	</div>
+				</fieldset>
+			</form>
+		</div>
+		<?php 
+	}
+	?>
 </div>
 <?php  
 }

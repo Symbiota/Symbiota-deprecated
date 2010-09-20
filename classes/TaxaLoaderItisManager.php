@@ -47,6 +47,7 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 			$statusStr .= '<ul><li>Vernaculars added</li></ul>';
 		}
 		fclose($fh);
+		$this->cleanUpload();
 		return $statusStr;
 	}
 
@@ -89,5 +90,5 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 		}
 	}
 }
-	
+
 ?>
