@@ -42,10 +42,85 @@ class TaxaLoaderManager{
 		}
 		$statusStr .= '<li>'.$recordCnt.' taxon records uploaded</li>';
 		fclose($fh);
+		$this->cleanUpload();
 		return $statusStr;
 	}
 
-    protected function getUploadTargetPath(){
+	protected function cleanUpload(){
+		$sql = "CALL uploadTaxaClean(0)";
+		$this->conn->query($sql);
+	}
+
+	public function transferUpload(){
+		$sql = "CALL uploadTaxaTransfer()";
+		$this->conn->query($sql);
+		$this->buildHierarchy();
+	}
+
+	protected function buildHierarchy($taxAuthId = 1){
+		do{
+			unset($hArr);
+			$hArr = Array();
+			$tempArr = Array();
+			$sql = "SELECT ts.tid FROM taxstatus ts WHERE taxauthid = $taxAuthId AND ts.hierarchystr IS NULL LIMIT 100";
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			if($rs->num_rows){
+				while($row = $rs->fetch_object()){
+					$hArr[$row->tid] = $row->tid;
+				}
+				do{
+					unset($tempArr);
+					$tempArr = Array();
+					$sql2 = "SELECT IFNULL(ts.parenttid,0) AS parenttid, ts.tid ".
+						"FROM taxstatus ts WHERE taxauthid = ".$taxAuthId." AND ts.tid IN(".implode(",",array_keys($hArr)).")";
+					//echo $sql2."<br />";
+					$rs2 = $this->conn->query($sql2);
+					while($row2 = $rs2->fetch_object()){
+						$tid = $row2->tid;
+						$pTid = $row2->parenttid;
+						if($pTid && $tid != $pTid){
+							if(array_key_exists($tid,$hArr)){
+								$tempArr[$pTid][$tid] = $hArr[$tid];
+								unset($hArr[$tid]);
+							}
+						}
+					}
+					foreach($tempArr as $p => $c){
+						$hArr[$p] = $c;
+					}
+					$rs2->close();
+				}while($tempArr);
+				//Process hierarchy strings
+				$finalArr = Array();
+				$finalArr = $this->getLeaves($hArr);
+				foreach($finalArr as $hStr => $taxaArr){
+					$sqlInsert = "UPDATE taxstatus ts ".
+						"SET ts.hierarchystr = '".$hStr."' ".
+						"WHERE ts.taxauthid = ".$taxAuthId." AND ts.tid IN(".implode(",",$taxaArr).") AND (ts.hierarchystr IS NULL)";
+					//echo "<div>".$sqlInsert."</div>";
+					$this->conn->query($sqlInsert);
+				}
+			}
+		}while($rs->num_rows);
+	}
+	
+	private function getLeaves($inArr,$seed=""){
+		$retArr = Array();
+		foreach($inArr as $p => $t){
+			if(is_array($t)){
+				$newSeed = $seed.",".$p;
+				$retArr = array_merge($retArr,$this->getLeaves($t,$newSeed));
+			}
+			else{
+				if(!$seed) $seed = $p;
+				$retArr[substr($seed,1)][] = $t;
+			}
+		}
+		return $retArr;
+	}
+
+	protected function getUploadTargetPath(){
 		$tPath = $GLOBALS["tempDirRoot"];
 		if(!$tPath){
 			$tPath = $GLOBALS["serverRoot"]."/temp";
