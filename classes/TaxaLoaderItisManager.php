@@ -61,7 +61,7 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 				($tuArr[3]?"\"".$tuArr[3]."\"":"NULL").",".($tuArr[4]?"\"".$tuArr[4]."\"":"NULL").",".($tuArr[5]?"\"".$tuArr[5]."\"":"NULL").",".
 				($unitInd3?"\"".$unitInd3."\"":"NULL").",".($unitName3?"\"".$unitName3."\"":"NULL").",".($tuArr[18]?$tuArr[18]:"NULL").",".
 				($tuArr[20]?$tuArr[20]:"NULL").",".($tuArr[23]?$tuArr[23]:"NULL").",".($tuArr[24]?$tuArr[24]:"NULL").")";
-			//echo '<div>'.$sql.'</div>';
+			echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
 	}
