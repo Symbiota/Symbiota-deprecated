@@ -11,7 +11,7 @@ class TaxaLoaderManager{
 	private $uploadFilePath; 
 	
 	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->conn = MySQLiConnectionFactory::getCon("write");
  		set_time_limit(600);
 		ini_set("max_input_time",120);
 		ini_set("upload_max_filesize",10);
