@@ -64,6 +64,7 @@ class TaxaLoaderManager{
 		}
 		fclose($fh);
 		$this->cleanUpload();
+		if(file_exists($this->getUploadTargetPath().$this->uploadFileName)) unlink($this->getUploadTargetPath().$this->uploadFileName);
 		return $statusStr;
 	}
 
