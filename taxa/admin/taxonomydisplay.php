@@ -134,13 +134,14 @@ class TaxonDisplay{
 			//Get parents and children, but only accepted children
 			$sql = "SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid ".
 				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) ".
-				"AND (t.tid IN(".implode(",",array_unique($hArray)).") ";
+				"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (";
 			//Add sql fragments that will grab the children taxa
+			$innerSql = "";
 			foreach($this->taxaArr as $t => $tArr){
-				$sql .= "OR ts.hierarchystr LIKE '%,".$t.",%' ";	
+				$innerSql .= "OR ts.hierarchystr LIKE '%,".$t.",%' ";	
 			}
-			$sql .= ")";
+			if($hArray) $innerSql .= "OR t.tid IN(".implode(",",array_unique($hArray)).") ";
+			$sql .= substr($innerSql,3).")";
 			//echo $sql."<br>";
 			$result = $conn->query($sql);
 			while($row = $result->fetch_object()){
