@@ -31,7 +31,7 @@ if($editable){
 	if($action == "Analyze Input File"){
 		$loaderManager->setUploadFile();
 	}
-	elseif($action == "Reverify Mapping"){
+	elseif($action == "Verify Mapping"){
 		
 	}
 	elseif($action == "Activate Taxa"){
@@ -218,7 +218,7 @@ if($editable){
 							</div>
 							<div style="margin:10px;">
 								<input type="submit" name="action" value="Upload Taxa" />
-								<input type="submit" name="action" value="Reverify Mapping" />
+								<input type="submit" name="action" value="Verify Mapping" />
 							</div>
 						</div>
 					<?php } ?>
