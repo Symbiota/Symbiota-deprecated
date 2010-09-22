@@ -170,7 +170,7 @@ class TaxaLoaderManager{
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
-    		if(stripos($field,"tid")!==false && stripos($field,"tidaccepted")!==false && stripos($field,"parenttid")!==false){
+    		if(stripos($field,"tid")===false && stripos($field,"tidaccepted")===false && stripos($field,"parenttid")===false){
 				$this->targetArr[] = $field;
     		}
     	}
