@@ -1,5 +1,5 @@
 <?php
-class DirectUpload extends DataUploadManager {
+class SpecimenDirectUpload extends SpecimenUploadManager {
 
  	public function __construct(){
 		parent::__construct();

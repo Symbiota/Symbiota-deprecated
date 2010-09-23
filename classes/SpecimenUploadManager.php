@@ -1,10 +1,10 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/collections/admin/util/directupload.php');
-include_once($serverRoot.'/collections/admin/util/digirupload.php');
-include_once($serverRoot.'/collections/admin/util/fileupload.php');
+include_once($serverRoot.'/classes/SpecimenDirectUpload.php');
+include_once($serverRoot.'/classes/SpecimenDigirUpload.php');
+include_once($serverRoot.'/classes/SpecimenFileUpload.php');
 
-class DataUploadManager {
+class SpecimenUploadManager{
 
 	protected $conn;
 	protected $collId = 0;
@@ -349,13 +349,13 @@ class DataUploadManager {
 
 	public function saveFieldMap(){
 		$this->deleteFieldMap();
-		$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
+		$sqlInsert = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
 		$sqlValues = "VALUES (".$this->uspid;
 		foreach($this->fieldMap as $k => $v){
 			if($k != "dbpk"){
 				$sourceField = $v["field"];
 				$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
-				//echo $sql;
+				//echo "<div>".$sql."</div>";
 				$this->conn->query($sql);
 			}
 		}
@@ -363,6 +363,7 @@ class DataUploadManager {
 
 	public function deleteFieldMap(){
 		$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid." AND symbspecfield <> 'dbpk' ";
+		//echo "<div>$sql</div>";
 		$this->conn->query($sql);
 	}
 

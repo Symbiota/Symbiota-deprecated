@@ -1,5 +1,5 @@
 <?php
-class FileUpload extends DataUploadManager{
+class SpecimenFileUpload extends SpecimenUploadManager{
 	
 	private $ulFileName;
 
@@ -8,15 +8,15 @@ class FileUpload extends DataUploadManager{
  		set_time_limit(600);
 	}
 
-	public function analyzeFile($ulFileName = ""){
+	public function analyzeFile(){
 	 	$this->readUploadParameters();
 		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
 	 	$targetPath = $this->getUploadTargetPath();
-		if(!$ulFileName){
-		 	$ulFileName = $_FILES['uploadfile']['name'];
-	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$ulFileName);
+		if(!$this->ulFileName){
+		 	$this->ulFileName = $_FILES['uploadfile']['name'];
+	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$this->ulFileName);
 		}
-		$fullPath = $targetPath."/".$ulFileName;
+		$fullPath = $targetPath."/".$this->ulFileName;
 		$fh = fopen($fullPath,'rb') or die("Can't open file");
 		$headerData = fgets($fh);
 		$headerArr = explode("\t",$headerData);
@@ -31,11 +31,10 @@ class FileUpload extends DataUploadManager{
 			}
 		}
 		$this->sourceArr = $sourceArr;
-		return $ulFileName;
 	}
  	
-	public function uploadData($finalTransfer, $ulFileName){
-		if($ulFileName){
+	public function uploadData($finalTransfer){
+		if($this->ulFileName){
 		 	$this->readUploadParameters();
 			set_time_limit(200);
 			ini_set("max_input_time",120);
@@ -45,7 +44,7 @@ class FileUpload extends DataUploadManager{
 			$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
 			$this->conn->query($sqlDel);
 			
-			$fullPath = $this->getUploadTargetPath()."/".$ulFileName;
+			$fullPath = $this->getUploadTargetPath()."/".$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
 			$headerData = fgets($fh);
 			$headerArr = explode("\t",$headerData);
@@ -187,6 +186,14 @@ class FileUpload extends DataUploadManager{
 			$tPath .= "/downloads";
 		}
     	return $tPath;
+    }
+    
+    public function setUploadFileName($ulFile){
+    	$this->ulFileName = $ulFile;
+    }
+    
+    public function getUploadFileName(){
+    	return $this->ulFileName;
     }
 }
 	

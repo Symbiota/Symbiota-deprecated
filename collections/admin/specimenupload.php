@@ -1,6 +1,6 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once('util/datauploadmanager.php');
+include_once($serverRoot.'/classes/SpecimenUploadManager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
@@ -12,19 +12,20 @@ $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $statusStr = "";
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;
 
-if($uspid && !$uploadType) $uploadType = DataUploadManager::getUploadType($uspid);
+if($uspid && !$uploadType) $uploadType = SpecimenUploadManager::getUploadType($uspid);
 $duManager;
 if($uploadType == $DIRECTUPLOAD){
-	$duManager = new DirectUpload();
+	$duManager = new SpecimenDirectUpload();
 }
 elseif($uploadType == $DIGIRUPLOAD){
-	$duManager = new DigirUpload();
+	$duManager = new SpecimenDigirUpload();
 }
 elseif($uploadType == $FILEUPLOAD){
-	$duManager = new FileUpload();
+	$duManager = new SpecimenFileUpload();
+	if($ulFileName) $duManager->setUploadFileName($ulFileName);
 }
 else{
-	$duManager = new DataUploadManager();
+	$duManager = new SpecimenUploadManager();
 }
 
 if($collId) $duManager->setCollId($collId);
@@ -212,12 +213,12 @@ if($isEditable){
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_admin_datauploaderMenu)?$collections_admin_datauploaderMenu:"true");
+	$displayLeftMenu = (isset($collections_admin_specimenuploadMenu)?$collections_admin_specimenuploadMenu:"true");
 	include($serverRoot.'/header.php');
-	if(isset($collections_admin_datauploaderCrumbs)){
+	if(isset($collections_admin_specimenuploadCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_admin_datauploaderCrumbs;
+		echo $collections_admin_specimenuploadCrumbs;
 		echo " <b>Specimen Loader</b>"; 
 		echo "</div>";
 	}
@@ -226,10 +227,10 @@ if($isEditable){
 <div id="innertext">
 	<div style="float:right;">
 		<?php if($collId){ ?>
-		<a href="datauploader.php">
+		<a href="specimenupload.php">
 			<img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to upload listing" />
 		</a>
-		<a href="datauploader.php?collid=<?php echo ($collId);?>&action=addprofile">
+		<a href="specimenupload.php?collid=<?php echo ($collId);?>&action=addprofile">
 			<img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" />
 		</a>
 		<?php } ?>
@@ -249,19 +250,19 @@ if($statusStr){
 		echo "<h2>Select Collection to Update</h2>";
 	 	echo "<ul>";
 	 	foreach($collList as $k => $v){
-	 		echo "<li><a href='datauploader.php?collid=".$k."'>$v</a></li>";
+	 		echo "<li><a href='specimenupload.php?collid=".$k."'>$v</a></li>";
 	 	}
 	 	echo "</ul>";
 	 	if(!$collList) echo "<div>There are no Database for which you have authority to update</div>";
  	}
  	else{
- 		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/admin/datauploader.php'>login</a>!</div>";
+ 		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/admin/specimenupload.php'>login</a>!</div>";
  	}
  }
  else{
 	//Grab field mapping, if mapping form was submitted
 	if(array_key_exists("sf",$_REQUEST)){
-		if(stripos($action,"delete") !== false){
+		if($action == "Delete Field Mapping"){
 			$duManager->deleteFieldMap();
 		}
 		else{
@@ -291,7 +292,7 @@ if($statusStr){
  		//Collection has been selected, now display different upload options
 	 	$actionList = $duManager->getUploadList();
 		?>
-		<form name="uploadlistform" action="datauploader.php" method="post" onsubmit="return checkUploadListForm(this);">
+		<form name="uploadlistform" action="specimenupload.php" method="post" onsubmit="return checkUploadListForm(this);">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
 				<?php 
@@ -316,7 +317,7 @@ if($statusStr){
 			 		?>
 					<div style="padding:30px;">
 						There are no Upload Profiles associated with this collection. <br />
-						Click <a href="datauploader.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
+						Click <a href="specimenupload.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
 					</div>
 					<?php 
 			 	}
@@ -326,16 +327,16 @@ if($statusStr){
 		<hr />
 	<?php 
  	}
- 	elseif(stripos($action,"initialize") !== false || stripos($action,"Analyze") !== false || stripos($action,"map") !== false || $action == "Save Primary Key"){
+ 	elseif(stripos($action,"initialize") !== false || stripos($action,"analyze") !== false || stripos($action,"map") !== false || stripos($action,"save")){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$uploadType = $ulList[$uspid]["uploadtype"];
 	 	$ulArr = array_pop($ulList);
-	 	$ulFileName = "";
-		if($uploadType!=$FILEUPLOAD || array_key_exists("uploadfile",$_FILES)){
-			$ulFileName = $duManager->analyzeFile();
+	 	if($ulFileName || array_key_exists("uploadfile",$_FILES)){
+			$duManager->analyzeFile();
+			$ulFileName = $duManager->getUploadFileName();
 	 	} 
 	 	?>
-		<form name="initform" action="datauploader.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
+		<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
 			<fieldset style="width:450px;">
 				<legend style="font-weight:bold;font-size:120%;"><?php echo $ulArr["title"];?></legend>
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
@@ -355,7 +356,7 @@ if($statusStr){
 						</div>
 					</div>
 				<?php } ?>
-				<?php if($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && array_key_exists("uploadfile",$_FILES))){ ?>
+				<?php if($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES)){ ?>
 				<div style="margin:20px;">
 					<b>Source Primary Key (required): </b>
 					<?php
@@ -437,7 +438,7 @@ if($statusStr){
  		}
  		?>
  		<div>
-			<form name="inituploadform" action="datauploader.php" method="post">
+			<form name="inituploadform" action="specimenupload.php" method="post">
 				<div style="float:right;">
 					<input type="submit" name="action" value="Initialize Upload..." />
 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
@@ -447,7 +448,7 @@ if($statusStr){
 			</form>
 		</div>
 		<div style="clear:both;">
-			<form name="parameterform" action="datauploader.php" method="post" onsubmit="return checkParameterForm()">
+			<form name="parameterform" action="specimenupload.php" method="post" onsubmit="return checkParameterForm()">
 				<fieldset>
 					<legend><b><?php echo $editTitle; ?> Upload Parameters</b></legend>
 					<div style="float:right;cursor:pointer;" onclick="toggle('editdiv');" title="Toggle Editing Functions">
@@ -578,7 +579,7 @@ if($statusStr){
 			</form>
 		</div>
 		<div class="editdiv" style="display:none;">
-			<form action="datauploader.php" method="post">
+			<form action="specimenupload.php" method="post">
 				<fieldset>
 					<legend>Delete this Profile</legend>
 					<div>
@@ -596,7 +597,7 @@ if($statusStr){
  		echo "<ol style='margin:10px;font-weight:bold;'>";
  		echo "<li>Starting Data Upload</li>";
  		if($uploadType == $FILEUPLOAD){
-	 		$duManager->uploadData($finalTransfer, $ulFileName);
+	 		$duManager->uploadData($finalTransfer);
  		}
  		else{
 	 		$duManager->uploadData($finalTransfer);
@@ -604,7 +605,7 @@ if($statusStr){
 		echo "</ol>";
  		if($duManager->getTransferCount() && !$finalTransfer){
 			?>
- 			<form name="finaltransferform" action="datauploader.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
+ 			<form name="finaltransferform" action="specimenupload.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
  				<fieldset>
  					<legend>Final transfer</legend>
  					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
@@ -637,7 +638,7 @@ if($statusStr){
 	}
 	elseif($action == "addprofile"){
 		?>
-		<form name="paramaddform" action="datauploader.php" method="post" onsubmit="return checkParamAddForm()">
+		<form name="paramaddform" action="specimenupload.php" method="post" onsubmit="return checkParamAddForm()">
 			<fieldset>
 				<legend>Add New Upload Profile</legend>
 				<div style="clear:both;">
