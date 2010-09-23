@@ -1,6 +1,6 @@
 <?php
 
-class DigirUpload extends DataUploadManager {
+class SpecimenDigirUpload extends SpecimenUploadManager {
 	
 	//Search variables
 	private $searchStart = 0;
