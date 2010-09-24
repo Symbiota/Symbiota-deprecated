@@ -305,14 +305,14 @@ class SpecimenUploadManager{
 				elseif(array_key_exists($fieldName,$sourceSymbArr)){
 					//Source Field is mapped to Symbiota Field
 					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
+						if($sField != "dbpk" && $sField != "initialTimestamp"){
 							echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
 						}
 					}
 				}
 				else{
 					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
+						if($sField != "dbpk" && $sField != "initialTimestamp"){
 							echo "<option>".$sField."</option>\n";
 						}
 					}

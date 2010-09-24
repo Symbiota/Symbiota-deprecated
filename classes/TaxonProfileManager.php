@@ -605,7 +605,7 @@
 					}
 					?>
 				</ul>
-				<div style='border:1px solid gray;height:270px;width:490px;margin-bottom:5px;padding:10px;overflow:auto;'>
+				<div style='border:1px solid gray;height:85%;width:95%;margin-bottom:5px;padding:10px;overflow:auto;'>
 					<?php 
 					foreach($descriptions as $k => $vArr){
 					?>

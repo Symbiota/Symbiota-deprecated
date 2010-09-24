@@ -507,6 +507,17 @@ class TaxonLoader{
 			return "Taxon inserted, but taxonomy insert FAILED: sql = ".$sqlTaxa;
 		}
 	 	
+		//Link new name to existing specimens
+		$sql1 = "UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ".
+			"WHERE o.TidInterpreted IS NULL";
+		$this->conn->query($sql1);
+		//Add their geopoints to omoccurgeoindex 
+		$sql2 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
+			"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
+			"FROM omoccurrences o ".
+			"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+		$this->conn->query($sql2);
+
 	 	header("Location: taxonomyeditor.php?target=".$tid);
 	}
 	
