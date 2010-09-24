@@ -58,7 +58,7 @@ if($isEditable){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?>Data Uploader</title>
+	<title><?php echo $defaultTitle; ?> Specimen Uploader</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language=javascript>
 		
@@ -88,34 +88,24 @@ if($isEditable){
 			}
 		}
 
-		function toggleUploadFile(){
-			var len = document.uploadlistform.uspid.length;
-			for(i = 0; i <len; i++){
-				var id = document.uploadlistform.uspid[i].value;
-				var obj = document.getElementById("uldiv"+id);
-				if(obj != null){
-					if(document.uploadlistform.uspid[i].checked==true){
-						obj.style.display = "block";
-						document.getElementById("ulinput"+id).disabled = false;
-					}
-					else{
-						obj.style.display = "none";
-						document.getElementById("ulinput"+id).disabled = true;
-					}
-				}
-			}
-		}
-
 		function checkUploadListForm(f){
-
+			var radio_choice = false;
+			var radioCnt = f.uspid.length;
+			for(counter = 0; counter < radioCnt; counter++){
+				if (f.uspid[counter].checked) radio_choice = true; 
+			}
+			if(!radio_choice){
+				alert("Please select an Upload Option")
+				return false;
+			}
 			return true;
 		}
 
 		function checkInitForm(){
 			var ufObj = document.getElementById("uploadfile");
-			if(ufObj != null){
-				if(ufObj.value == null){
-					alert("Please select the file that is to be analyzed");
+			if(ufObj){
+				if(ufObj.value == ""){
+					alert("Upload file path is empty. Please select the file that is to be uploaded.");
 					return false;
 				}
 			}
@@ -300,7 +290,7 @@ if($statusStr){
 				 	foreach($actionList as $id => $v){
 				 		?>
 				 		<div style="margin:10px;">
-							<input type="radio" name="uspid" value="<?php echo $id;?>" onchange="toggleUploadFile(this);" />
+							<input type="radio" name="uspid" value="<?php echo $id;?>" />
 						<?php echo $v["title"];?>
 						</div>
 						<?php
