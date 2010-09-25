@@ -93,7 +93,13 @@ if(isset($taxa_admin_taxaloaderCrumbs)){
 
 if($editable){
 ?>
+<h1>Taxonomic Name Batch Loader</h1>
 <div style="margin:30px;">
+	<div>
+		This page allows a Taxonomic Administrator to batch upload taxonomic data files. 
+		See <a href="">Symbiota Documentation</a> pages for more details on the Taxonomic Thesaurus layout.
+	</div> 
+	<hr/>
 	<?php 
 	if($status){
 		echo '<div><ul>';
@@ -125,6 +131,13 @@ if($editable){
 	else{
 		?>
 		<div>
+			<div>
+				Flat structured, tab-delimited text files can be uploaded here. 
+				To upload an Excel file, first save as a tab-delimted text file. 
+				Scientific name is the only required field. For more detailed loading 
+				instructions, see Symbiota documentation pages 
+				(<a href=""></a>).
+			</div>
 			<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm()">
 				<fieldset style="width:450px;">
 					<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
@@ -142,22 +155,6 @@ if($editable){
 						</div>
 					<?php }else{ ?>
 						<div id="mdiv">
-							<div>
-								The following rules must be followed: 
-							</div>
-							<ul>
-								<li>Scientific name, with or without author, is the only required field and must be mapped to &quot;scinameinput&quot;</li>
-								<li>Following fields are not required, yet recommended: author, family, name of parent taxon (parentStr) or hierarchical structure, accepted name. See documentation for more details.</li>
-								<li>If null, family will be determined from hierarchy or related taxa already in thesaurus</li>
-								<li>If acceptance is not defined, all taxa will be assumed to be accepted</li>
-								<li>Taxonomic Hierarchy</li>
-								<ul>
-									<li>In the absence of a hierarchical definition, family will be used to build hierarchy up to family rank, given that it is filled or can be determined from existant taxa</li>
-									<li>If family does not yet exist in thesaurus and hierarchy is not defined in upload field, family will be linked directly to kingdom</li>
-								</ul>
-								<li>Do not map more than one source columns to the same target</li>
-								<li>Having more than one source columns with the same name should be avoided</li>
-							</ul>
 							<table border="1" cellpadding="2" style="border:1px solid black">
 								<tr>
 									<th>
@@ -227,6 +224,11 @@ if($editable){
 		
 		</div>
 		<div>
+			<div>
+				ITIS data files downloaded from the <a href="http://www.itis.gov/access.html">ITIS Download Page</a> ca be uploaded
+				using this function. If the ITIS download file includes authors, synonym relationships, 
+				and vernaculars, this data will also be incorperated into the upload. 
+			</div>
 			<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
 				<fieldset style="width:450px;">
 					<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>

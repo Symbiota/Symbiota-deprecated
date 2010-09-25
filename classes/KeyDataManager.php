@@ -5,7 +5,7 @@
  */
  include_once($serverRoot.'/config/dbconnection.php');
 
- class DataManager {
+ class KeyDataManager {
 
 	private $sql;
 	private $relevanceValue;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed

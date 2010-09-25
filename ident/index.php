@@ -15,7 +15,7 @@
 
 	<?php
 	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-	$clManager = new ChecklistManager();
+	$klManager = new KeyListManager();
 
 	$displayLeftMenu = (isset($ident_indexMenu)?$ident_indexMenu:"true");
 	include($serverRoot.'/header.php');
@@ -39,7 +39,7 @@
 	                    
 	    <div style='margin:20px;'>
 	        <?php
-	        $staticList = $clManager->getStaticChecklists();
+	        $staticList = $klManager->getStaticChecklists();
 			foreach($staticList as $projStr => $clArr){
 				$projId = str_replace(" ","",$projStr);
 				echo "<div style='margin:3px 0px 0px 15px;'><a name='".$projStr."'></a>";
@@ -105,7 +105,7 @@
 </html>
 <?php
  
- class ChecklistManager {
+ class KeyListManager {
 
 	private $con;
 
