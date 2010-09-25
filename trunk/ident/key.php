@@ -5,7 +5,7 @@
  */
 //error_reporting(E_ALL);
  include_once('../config/symbini.php');
- include_once('DataManager.php');
+ include_once($serverRoot.'/classes/KeyChecklistManager.php');
  header("Content-Type: text/html; charset=".$charset);
  $editable = false;
  if($isAdmin || array_key_exists("KeyEditor",$userRights)){

@@ -316,7 +316,7 @@ if($taxonManager->getSciName() != "unknown"){
 	else{
 		?>
 		<tr>
-			<td style="width:250px;">
+			<td style="width:250px;vertical-align:top;">
 				<?php 
 				$displayName = $spDisplay;
 				if($taxonRank == 180){

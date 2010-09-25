@@ -119,6 +119,7 @@ $smManager = new SiteMapManager();
 							<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
 							<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
 							<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
+							<li><a href="taxa/admin/taxaloader.php">Bathc Upload a Taxonomic Data File</a></li>
             			</ul>
 	            	<?php 
 						}

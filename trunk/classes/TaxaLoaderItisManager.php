@@ -17,8 +17,15 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 		$this->conn->query("DELETE FROM uploadtaxa");
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'rb') or die("Can't open file");
 		$recordCnt = 0;
+		$delimtStr = "";
 		while($record = fgets($fh)){
-			$recordArr = explode("|",$record);
+			if(!$delimtStr){
+				$delimtStr = "|";
+				if(!strpos($record,"|") && strpos($record,",")){
+					$delimtStr = ",";
+				}
+			}
+			$recordArr = explode($delimtStr,$record);
 			if($recordArr[0] == "[TU]"){
 				$this->loadTaxonUnit($recordArr);
 				$recordCnt++;
