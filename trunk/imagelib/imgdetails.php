@@ -5,11 +5,11 @@
  */
  //error_reporting(0);
  include_once('../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
+ include_once($serverRoot.'/classes/ImageDetailManager.php');
  Header("Content-Type: text/html; charset=".$charset);
  
  $imgId = $_REQUEST["imgid"]; 
- $imgManager = new ImgManager();
+ $imgManager = new ImageDetailManager();
  
 ?>
 
@@ -86,42 +86,3 @@ include($serverRoot.'/footer.php');
 </body>
 </html>
 
-<?php 
-
-class ImgManager{
-	
-	private $conn;
-	
- 	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
- 	}
-
- 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
-	}
- 	
-	public function getImageMetadata($imgId){
-		$retArr = Array();
-		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
-			"ti.caption, ti.owner, ti.sourceurl, ti.copyright, ti.locality, ti.notes, ti.occid ".
-			"FROM images ti LEFT JOIN users u ON ti.photographeruid = u.uid ".
-			"WHERE ti.imgid = ".$imgId;
-		//echo "<div>$sql</div>";
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$retArr["url"] = $row->url;
-			$retArr["originalurl"] = $row->originalurl;
-			$retArr["photographer"] = $row->photographer;
-			$retArr["caption"] = $row->caption;
-			$retArr["owner"] = $row->owner;
-			$retArr["sourceurl"] = $row->sourceurl;
-			$retArr["copyright"] = $row->copyright;
-			$retArr["locality"] = $row->locality;
-			$retArr["notes"] = $row->notes;
-			$retArr["occid"] = $row->occid;
-		}
-		return $retArr;
-	}
-}
-?>

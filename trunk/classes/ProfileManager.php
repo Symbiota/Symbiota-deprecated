@@ -7,7 +7,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once("Person.php");
 
-class ProfileHandler{
+class ProfileManager{
 
     private $rememberMe = false;
 	private $uid;

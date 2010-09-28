@@ -3,9 +3,9 @@
  * Created on 3 May 2009
  * @author  E. Gilbert: egbot@asu.edu
  */
-include_once('CollectionManager.php');
+include_once('OccurrenceManager.php');
 
-class ChecklistManager extends CollectionManager{
+class OccurrenceChecklistManager extends OccurrenceManager{
 	
 	private $checklistTaxaCnt = 0;
 

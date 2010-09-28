@@ -4,8 +4,8 @@
  * By E.E. Gilbert
 */
 include_once('../config/symbini.php');
-include_once('util/ProfileHandler.php');
-include_once('util/Person.php');
+include_once($serverRoot.'/classes/ProfileManager.php');
+include_once($serverRoot.'/classes/Person.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
@@ -32,7 +32,7 @@ if($action == "Submit Profile"){
 	$biography = $_REQUEST["biography"];
 	$isPublic = $_REQUEST["ispublic"];
 	
-	$pHandler = new ProfileHandler();
+	$pHandler = new ProfileManager();
 	$newPerson = new Person();
     $newPerson->setPassword($pwd);
 	$newPerson->setUserName($username);

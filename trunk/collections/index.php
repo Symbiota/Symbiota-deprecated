@@ -1,11 +1,11 @@
 <?php
  include_once('../config/symbini.php');
- include_once('util/CollectionManager.php');
+ include_once($serverRoot.'/classes/OccurrenceManager.php');
  header("Content-Type: text/html; charset=".$charset);
 
  $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
  
- $collManager = new CollectionManager();
+ $collManager = new OccurrenceManager();
  $collManager->reset();
  
  $specArr = Array();
