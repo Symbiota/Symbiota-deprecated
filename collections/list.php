@@ -1,10 +1,10 @@
 <?php
  include_once('../config/symbini.php');
- include_once('util/ListManager.php');
+ include_once($serverRoot.'/classes/OccurrenceListManager.php');
  header("Content-Type: text/html; charset=".$charset);
 
  $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
- $collManager = new ListManager(); 
+ $collManager = new OccurrenceListManager();
  
  $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(fieldName,value))
 ?>

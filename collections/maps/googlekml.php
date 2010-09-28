@@ -1,9 +1,9 @@
 <?php
 include_once('../../config/symbini.php');
-include_once('../util/MapManager.php');
+include_once($serverRoot.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
- $mapManager = new MapManager(); 
+ $mapManager = new OccurrenceMapManager(); 
 
   $kmlFilePath = $mapManager->writeKMLFile();
 ?>

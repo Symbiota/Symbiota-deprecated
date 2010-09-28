@@ -6,7 +6,7 @@
 
 include_once($serverRoot.'/config/dbconnection.php');
 
-class CollectionManager{
+class OccurrenceManager{
 	
 	protected $taxaArr = Array();
 	private $taxaSearchType;

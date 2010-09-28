@@ -4,7 +4,7 @@
  * By E.E. Gilbert
 */
 include_once('../config/symbini.php');
-include_once('util/ProfileHandler.php');
+include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -36,7 +36,7 @@ if(array_key_exists("refurl",$_REQUEST)){
 	}
 }
 
-$pHandler = new ProfileHandler();
+$pHandler = new ProfileManager();
 if($remMe) $pHandler->setRememberMe(true);
 
 $statusStr = "";

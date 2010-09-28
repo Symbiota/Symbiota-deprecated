@@ -3,9 +3,9 @@
  * Created on 1 May 2009
  * @author  E. Gilbert: egbot@asu.edu
  */
-include_once("CollectionManager.php");
+include_once("OccurrenceManager.php");
 
-class ListManager extends CollectionManager{
+class OccurrenceListManager extends OccurrenceManager{
 
 	private $cntPerPage = 50;	  //default is 50 - this can be set in the jsp page
 	protected $recordCount = 0;

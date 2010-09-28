@@ -1,9 +1,9 @@
 <?php
  include_once('../config/symbini.php');
- include_once('util/ChecklistManager.php');
+ include_once($serverRoot.'/classes/OccurrenceChecklistManager.php');
  header("Content-Type: text/html; charset=".$charset);
 
- $checklistManager = new ChecklistManager();
+ $checklistManager = new OccurrenceChecklistManager();
 
  //$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:1;
  //if(!$taxonFilter) $taxonFilter = 1;

@@ -3,9 +3,9 @@
  * Created on 5 May 2009
  * @author  E. Gilbert: egbot@asu.edu
  */
-include_once("CollectionManager.php");
+include_once("OccurrenceManager.php");
 
-class DownloadManager extends CollectionManager{
+class OccurrenceDownloadManager extends OccurrenceManager{
 	
  	private $securityArr = Array();
  	private $dwcSql = "";
