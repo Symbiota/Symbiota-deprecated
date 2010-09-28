@@ -313,7 +313,7 @@ class TPImageEditorManager extends TPEditorManager{
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
 				"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
+				($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
 				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 				($occId?$occId:"NULL").",\"".$notes."\",\"".
 				$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
@@ -325,7 +325,7 @@ class TPImageEditorManager extends TPEditorManager{
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
 						"owner, sourceurl, copyright, locality, occid, notes, anatomy, username) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-						($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".
+						($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
 						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 						($occId?$occId:"NULL").",\"".$notes."\",\"".
 						$anatomy."\",\"".$userName."\")";

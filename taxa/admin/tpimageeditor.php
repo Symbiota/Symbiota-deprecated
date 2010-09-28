@@ -131,6 +131,11 @@ else{
 	                errorText += "\nFile path must be entered";
 	            }
 	        }
+	        if(f.elements["photographeruid"].value.replace(/\s/g, "") == "" ){
+	            if(f.elements["photographer"].value.replace(/\s/g, "") == ""){
+	                errorText += "\nPlease select the photographer from the pulldown or enter an override value";
+	            }
+	        }
 	        if(isNumeric(f.sortsequence.value) == false){
 	        	errorText += "\nSort value must be a number";
 	        }
@@ -389,7 +394,7 @@ if($editable && $tid){
 				<div style='margin-top:2px;'>
 					<b>Photographer Override:</b> 
 					<input name='photographer' type='text' value='' size='37' maxlength='100'> 
-					* Only enter a value to override value entered in above Select Box
+					* Use only when photographer is not found in above pulldown
 				</div>
 				<div style='margin-top:2px;'>
 					<b>Manager:</b> 
