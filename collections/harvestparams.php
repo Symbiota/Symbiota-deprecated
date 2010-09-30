@@ -22,11 +22,16 @@
 		 * key: input for LOOK(1)
 		 * cont: function(res) for return of suggest results
 		*/ 
-		function getSuggs(key,cont){ 
-		   var script_name = 'rpc/sciname.php';
-		   var params = { 'q':key }
-		   $.get(script_name,params,
-		         function(obj){ 
+		function getSuggs(key,cont){
+			var taxonType = 1;
+			var taxonTypeObj = document.getElementById("taxontype");
+			if(taxonTypeObj){
+				taxonType = taxonTypeObj.value;
+			}
+			var script_name = 'rpc/taxalist.php';
+			var params = { 'q':key , 't':taxonType }
+			$.get(script_name,params,
+				function(obj){ 
 		           // obj is just array of strings
 		           var res = [];
 		           for(var i=0;i<obj.length;i++){
@@ -210,11 +215,12 @@
 			</div>
 			<div id="taxonSearch0">
 				<div>
-					<select id="taxonOption" name="type">
+					<select id="taxontype" name="type">
 						<option id='familysciname' value='1' <?php if(!array_key_exists("taxontype",$collArray) || $collArray["taxontype"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
 						<option id='family' value='2' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "2") echo "SELECTED"; ?> >Family only</option>
 						<option id='sciname' value='3' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-						<option id='commonname' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> >Common Name</option>
+						<option id='classorder' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> >Class / Order</option>
+						<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "5") echo "SELECTED"; ?> >Common Name</option>
 					</select>: 
 					<input class="complete" id="taxa" type="text" size="30" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Seperate multiple taxa w/ commas" />
 				</div>
@@ -224,16 +230,16 @@
 				<h1>Locality Criteria:</h1>
 			</div>
 			<div>
-				Country: <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>">
+				Country: <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
-				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>">
+				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
-				County/Municipio: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>">
+				County/Municipio: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
-				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>">
+				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />
 			</div>
 			<div style="margin:10 0 10 0;">
 				<hr>
@@ -331,10 +337,10 @@
 				<h1>Collector Criteria:</h1>
 			</div>
 			<div>
-				Collector's Last Name: <input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>">
+				Collector's Last Name: <input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
-				Collector's Number: <input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>">
+				Collector's Number: <input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div><hr></div>
 			<div>

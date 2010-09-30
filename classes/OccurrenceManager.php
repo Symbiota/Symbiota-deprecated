@@ -117,7 +117,7 @@ class OccurrenceManager{
 				$this->taxaArr[trim($sName)] = Array();
 			}
 			$conn = $this->getConnection();
-			if($this->taxaSearchType == 4){
+			if($this->taxaSearchType == 5){
 				//Common name search
 				$this->setSciNamesByVerns($conn);
 			}
@@ -126,46 +126,64 @@ class OccurrenceManager{
 					$this->setSynonyms($conn);
 				}
 			}
-			$conn->close();
-			
+
 			//Build sql
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
-					if(array_key_exists("families",$valueArray)){
-						foreach($valueArray["families"] as $f){
-							$sqlWhereTaxa .= "OR (o.family = '".$f."') ";
+					$rs1 = $conn->query("SELECT tid FROM taxa WHERE sciname = '".$key."'");
+					if($r1 = $rs1->fetch_object()){
+						$fStr = "";
+						$sql2 = "SELECT DISTINCT ts.family ".
+							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
+							"WHERE ts.taxauthid = 1 AND ts.hierarchystr LIKE '%,".$r1->tid.",%'";
+						$rs2 = $conn->query($sql2);
+						while($r2 = $rs2->fetch_object()){
+							$fStr .= "','".$r2->family;
 						}
-					}
-					if(array_key_exists("scinames",$valueArray)){
-						foreach($valueArray["scinames"] as $sciName){
-							$sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
+						if($fStr){
+							$sqlWhereTaxa .= "OR (o.family IN('".substr($fStr,3)."')) ";
 						}
 					}
 				}
 				else{
-					if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (substr($key,-5) == "aceae" || substr($key,-4) == "idae"))){
-						$sqlWhereTaxa .= "OR (o.family = '".$key."') OR (o.SciName = '".$key."') ";
-					}
-					if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && substr($key,-5) != "aceae" && substr($key,-4) != "idae")){
-						$sqlWhereTaxa .= "OR (o.SciName LIKE '".$key."%') ";
-					}
-				}
-				if(array_key_exists("synonyms",$valueArray)){
-					$synArr = $valueArray["synonyms"];
-					foreach($synArr as $sciName){ 
-						if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 4){
-							$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+					if($this->taxaSearchType == 5){
+						if(array_key_exists("families",$valueArray)){
+							foreach($valueArray["families"] as $f){
+								$sqlWhereTaxa .= "OR (o.family = '".$f."') ";
+							}
 						}
-						if($this->taxaSearchType == 2){
-							$sqlWhereTaxa .= "OR (o.SciName = '".$sciName."') ";
+						if(array_key_exists("scinames",$valueArray)){
+							foreach($valueArray["scinames"] as $sciName){
+								$sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
+							}
 						}
-						else{
-		                    $sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
-		                }
+					}
+					else{
+						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (substr($key,-5) == "aceae" || substr($key,-4) == "idae"))){
+							$sqlWhereTaxa .= "OR (o.family = '".$key."') OR (o.SciName = '".$key."') ";
+						}
+						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && substr($key,-5) != "aceae" && substr($key,-4) != "idae")){
+							$sqlWhereTaxa .= "OR (o.SciName LIKE '".$key."%') ";
+						}
+					}
+					if(array_key_exists("synonyms",$valueArray)){
+						$synArr = $valueArray["synonyms"];
+						foreach($synArr as $sciName){ 
+							if($this->taxaSearchType == 1 || $this->taxaSearchType == 2 || $this->taxaSearchType == 5){
+								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
+							}
+							if($this->taxaSearchType == 2){
+								$sqlWhereTaxa .= "OR (o.SciName = '".$sciName."') ";
+							}
+							else{
+			                    $sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
+			                }
+						}
 					}
 				}
 			}
 			$sqlWhere .= "AND (".substr($sqlWhereTaxa,3).") ";
+			$conn->close();
 		}
 
 		if(array_key_exists("country",$this->searchTermsArr)){
@@ -307,7 +325,7 @@ class OccurrenceManager{
 	        		while($row = $result->fetch_object()){
 	        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
 	        		}
-        			$result->free();
+        			$result->close();
     			}
     		}
     		else{
