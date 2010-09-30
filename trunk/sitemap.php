@@ -141,7 +141,7 @@ $smManager = new SiteMapManager();
 		            				echo "<li>$v</li>";
 		            				echo "<ul>";
 		            				echo "<li><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$k."&emode=1'>View/Edit Metadata</a></li>";
-		            				echo "<li><a href='".$clientRoot."/collections/admin/datauploader.php?collid=".$k."'>Upload Records</a></li>";
+		            				echo "<li><a href='".$clientRoot."/collections/admin/specimenupload.php?collid=".$k."'>Upload Records</a></li>";
 		            				echo "</ul>";
 		            			}
 		            			echo "</ul>";

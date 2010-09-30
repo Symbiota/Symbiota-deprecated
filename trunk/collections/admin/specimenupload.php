@@ -317,7 +317,7 @@ if($statusStr){
 		<hr />
 	<?php 
  	}
- 	elseif(stripos($action,"initialize") !== false || stripos($action,"analyze") !== false || stripos($action,"map") !== false || stripos($action,"save")){
+ 	elseif(stripos($action,"initialize") !== false || stripos($action,"analyze") !== false || stripos($action,"map") !== false || stripos($action,"save") !== false){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$uploadType = $ulList[$uspid]["uploadtype"];
 	 	$ulArr = array_pop($ulList);
