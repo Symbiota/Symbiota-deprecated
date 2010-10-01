@@ -514,7 +514,7 @@ END//
 -- =============================================
 
 DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UploadTaxa`(IN defaultParent INT)
+CREATE PROCEDURE `UploadTaxa`(IN defaultParent INT)
 BEGIN
 
 #All taxa with a rank of family or higher (rankid <= 140) must have a rank setting
@@ -797,7 +797,6 @@ BEGIN
   WHERE timages.sortsequence > 1;
 
 END//
-DELIMITER ;
 
 
 -- =============================================
