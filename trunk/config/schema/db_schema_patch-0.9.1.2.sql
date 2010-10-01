@@ -272,7 +272,7 @@ END//
 -- =============================================
 
 DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UploadTaxaTransfer`()
+CREATE PROCEDURE `UploadTaxaTransfer`()
 BEGIN
 
 #All taxa with a rank of family or higher (rankid <= 140) must have a rank setting
@@ -350,7 +350,6 @@ END//
 
 DELIMITER ;
 
-
 -- =============================================================
 -- Redefine GeneralMaintenance Procedure
 -- =============================================================
@@ -358,7 +357,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS GeneralMaintenance;
 
 DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GeneralMaintenance`()
+CREATE PROCEDURE `GeneralMaintenance`()
 BEGIN
   #Make sure that all vernacular groups (tid, language) have at least one record with a sort order of 1
   UPDATE taxavernaculars vern INNER JOIN (SELECT v.TID, v.Language,
@@ -424,3 +423,5 @@ BEGIN
   OPTIMIZE TABLE omoccurrences, images;
 
 END//
+
+DELIMITER ;
