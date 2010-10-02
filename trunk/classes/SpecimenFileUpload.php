@@ -15,6 +15,13 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 		if(!$this->ulFileName){
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
 	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$this->ulFileName);
+	        if(substr($this->ulFileName,-4) == ".zip"){
+				$zip = new ZipArchive;
+				$zip->open($targetPath."/".$this->ulFileName);
+				$this->ulFileName = $zip->getNameIndex(0);
+				$zip->extractTo($targetPath);
+				$zip->close();
+	        }
 		}
 		$fullPath = $targetPath."/".$this->ulFileName;
 		$fh = fopen($fullPath,'rb') or die("Can't open file");
