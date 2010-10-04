@@ -39,12 +39,10 @@ class TaxaLoaderManager{
 		$statusStr = "<li>Starting Upload</li>";
 		$this->conn->query("DELETE FROM uploadtaxa");
 		$fh = fopen($this->getUploadTargetPath().$this->uploadFileName,'rb') or die("Can't open file");
-		$headerData = trim(fgets($fh));
-		$headerArr = explode("\t",$headerData);
+		$headerArr = fgetcsv($fh);
 		$recordCnt = 0;
 		if(in_array("scinameinput",$this->fieldMap)){
-			while($record = fgets($fh)){
-				$recordArr = explode("\t",$record);
+			while($recordArr = fgetcsv($fh)){
 				//Load into uploadtaxa
 				$sql = "INSERT INTO uploadtaxa(".implode(",",$this->fieldMap).") ";
 				$valueSql = "";
@@ -179,8 +177,7 @@ class TaxaLoaderManager{
 	
 	private function setSourceArr(){
 		$fh = fopen($this->getUploadTargetPath().$this->uploadFileName,'rb') or die("Can't open file");
-		$headerData = fgets($fh);
-		$headerArr = explode("\t",$headerData);
+		$headerArr = fgetcsv($fh);
 		$sourceArr = Array();
 		foreach($headerArr as $field){
 			$fieldStr = strtolower(trim($field));

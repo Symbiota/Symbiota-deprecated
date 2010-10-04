@@ -1,133 +1,7 @@
 <?php
- header("Content-Type: text/html; charset=ISO-8859-1");
- //error_reporting(E_ALL);
- include_once('../../config/symbini.php');
  include_once($serverRoot.'/config/dbconnection.php');
- 
- $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
- $dbpk = array_key_exists("dbpk",$_REQUEST)?trim($_REQUEST["dbpk"]):"";
- $gui = array_key_exists("gui",$_REQUEST)?trim($_REQUEST["gui"]):"";
- 
-?>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
-    <link rel="stylesheet" href="<?php echo "default.css"; ?>" type="text/css">
-	<script language="javascript">
-		function toggle(target){
-			var divObjs = document.getElementsByTagName("div");
-		  	for (i = 0; i < divObjs.length; i++) {
-		  		var obj = divObjs[i];
-		  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-						if(obj.style.display=="none"){
-							obj.style.display="inline";
-						}
-				 	else {
-				 		obj.style.display="none";
-				 	}
-				}
-			}
-		}
-	</script>
-</head>
 
-<BODY>
-
-<?php
-	include($serverRoot.'/headermini.php');
-	
-	$indManager = new IndividualRecord();
-	$htmlVec = $indManager->echoData($gui,$collId,$dbpk);
-	include_once("defaultlabels.php");
-?>
-
-<?php 
-	if($symbUid && $userRights){
-?>
-		<div id='voucherlinker' style='margin-top:15px;'>
-		<?php 
-   		$voucherTid = $indManager->getTid();
-   		$voucherGui = $indManager->getGui();
-   		if($voucherTid && $voucherGui){
-			$clArr = $indManager->getChecklists($paramsArr["uid"]);
-			if($clArr){
-			?>
-			<div class='voucheredit' style="display:block;">
-				<span onclick="javascript: toggle('voucheredit');">
-					<img src='../../images/plus.gif'>
-				</span>
-				Show Voucher Editing Box
-			</div>
-			<div class='voucheredit' style="display:none;">
-				<div>
-					<span onclick="javascript: toggle('voucheredit');">
-						<img src='../../images/minus.gif'>
-					</span>
-					Hide Voucher Editing Box
-				</div>
-				<fieldset style='margin:5px 0px 0px 0px;'>
-	    			<legend>Voucher Assignment:</legend>
-					<form action='../../checklists/tools/vouchers.php'>
-						<div style='margin:5px 0px 0px 10px;'>
-							Add as voucher to checklist: 
-							<input name='vgui' type='hidden' value='<?php echo $voucherGui; ?>'>
-							<input name='tid' type='hidden' value='<?php echo $voucherTid; ?>'>
-							<select name='clid'>
-			  					<option value='0'>Select a Checklist</option>
-								<?php 
-								$clid = (array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0);
-					  			foreach($clArr as $clKey => $clValue){
-					  				echo "<option value='".$clKey."' ".($clid==$clKey?"SELECTED":"").">$clValue</option>\n";
-								}
-								?>
-							</select>
-						</div>
-						<div style='margin:5px 0px 0px 10px;'>
-							Notes: 
-							<input name='vnotes' type='text' size='50' title='Viewable to public'>
-						</div>
-						<div style='margin:5px 0px 0px 10px;'>
-							Editor Notes: 
-							<input name='veditnotes' type='text' size='50' title='Viewable only to checklist editors'>
-						</div>
-						<div style='margin:5px 0px 0px 10px;'>
-							<input type='submit' name='submit' value='Add Voucher'>
-						</div>
-					</form>
-				</fieldset>
-			</div>
-		<?php 
-			}
-    	}
-    	else{
-    		?>
-    		<div style='font-weight:bold;'>Unable to use this specimen record as a voucher due to:</div>
-    		<ul>
-    		<?php 
-    		if(!$voucherTid) echo "<li>Scientific name is not in Taxonomic Thesaurus (name maybe misspelled)";
-    		if(!$voucherGui) echo "<li>Global Unique Identifier is null (does specimen have an assigned accession number)";
-    		?>
-    		</ul>
-    		<?php 
-			echo "<div>Contact <a href=\"mailto:seinetAdmin@asu.edu?subject=bad voucher specimen?body=gui ".$voucherGui."%0Atid ".$voucherTid."%0AcollId ".$collId."%0AcollectionCode ".$collectionCode."%0Adbpk ".$pk."\">seinetAdmin@asu.edu</a> to resolve this issue.</div>";
-		}
-		?>
-		</div>
-		<?php 
-	}
-	include($serverRoot.'/footer.php');
-	?>
-
-</body>
-</html> 
-
-<?php
-//$indManager->printDefaultLabelDivs();
-//$indManager->printCss();
-
- class IndividualRecord {
+ class OccurrenceEditorManager {
 
 	private $con;
 	private $tid;
@@ -135,7 +9,6 @@
     private $uRights = Array();
     private $checklistRights = Array();
     private $isAdmin = false;
-    
     private $localityFields = Array("locality","MinimumElevationInMeters","MaximumElevationInMeters","VerbatimElevation",
     	"DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters","VerbatimCoordinates",  
     	"VerbatimLatitude","VerbatimLongitude","VerbatimCoordinateSystem","UtmNorthing","UtmEasting","UtmZoning", 
@@ -144,14 +17,13 @@
     
  	public function __construct(){
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
- 		$this->setUserRights();
  	}
  	
  	public function __destruct(){
 		if(!($this->con === null)) $this->con->close();
 	}
 	
-    public function echoData($gui,$collId,$dbpk){
+    public function getOccurArr($occid){
     	//Get Map to specimen table
     	$specimenMap = Array();
     	$metaSql = "SHOW COLUMNS FROM omspecimens";

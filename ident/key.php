@@ -5,7 +5,7 @@
  */
 //error_reporting(E_ALL);
  include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/KeyChecklistManager.php');
+ include_once($serverRoot.'/classes/KeyDataManager.php');
  header("Content-Type: text/html; charset=".$charset);
  $editable = false;
  if($isAdmin || array_key_exists("KeyEditor",$userRights)){
@@ -41,7 +41,7 @@
  	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
  }
  
- $dataManager = new DataManager();
+ $dataManager = new KeyDataManager();
  if(!$langValue) $langValue = $defaultLang;
  if($displayMode) $dataManager->setCommonDisplay(true);;  
  $dataManager->setLanguage($langValue);

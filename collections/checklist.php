@@ -16,7 +16,7 @@
     </head>
     <body>
 <?php
-	$displayLeftMenu = (isset($collections_checklistMenu)?$collections_checklistMenu:"true");
+	$displayLeftMenu = (isset($collections_checklistMenu)?$collections_checklistMenu:true);
 	include($serverRoot.'/header.php');
 	if(isset($collections_checklistCrumbs)){
 		echo "<div class='navpath'>";

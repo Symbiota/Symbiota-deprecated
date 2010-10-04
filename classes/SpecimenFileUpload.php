@@ -2,6 +2,9 @@
 class SpecimenFileUpload extends SpecimenUploadManager{
 	
 	private $ulFileName;
+	private $zipFileName;
+	private $delimiter = ",";
+	private $isCsv = false;
 
 	function __construct() {
  		parent::__construct();
@@ -16,6 +19,7 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
 	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$this->ulFileName);
 	        if(substr($this->ulFileName,-4) == ".zip"){
+	        	$zipFileName = $this->ulFileName;
 				$zip = new ZipArchive;
 				$zip->open($targetPath."/".$this->ulFileName);
 				$this->ulFileName = $zip->getNameIndex(0);
@@ -25,22 +29,10 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 		}
 		$fullPath = $targetPath."/".$this->ulFileName;
 		$fh = fopen($fullPath,'rb') or die("Can't open file");
-		$headerData = fgets($fh);
-		$headerArr = explode("\t",$headerData);
-		$sourceArr = Array();
-		foreach($headerArr as $field){
-			$fieldStr = strtolower(trim($field));
-			if($fieldStr){
-				$sourceArr[] = $fieldStr;
-			}
-			else{
-				break;
-			}
-		}
-		$this->sourceArr = $sourceArr;
+		$this->sourceArr = $this->getHeaderArr($fh);
 	}
  	
-	public function uploadData($finalTransfer){
+	public function uploadData($finalTransfer,$delimiter="\t"){
 		if($this->ulFileName){
 		 	$this->readUploadParameters();
 			set_time_limit(200);
@@ -53,17 +45,9 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 			
 			$fullPath = $this->getUploadTargetPath()."/".$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
-			$headerData = fgets($fh);
-			$headerArr = explode("\t",$headerData);
-			foreach($headerArr as $k => $hv){
-				$fieldStr = strtolower(trim($hv));
-				if($fieldStr){
-					$headerArr[$k] = $fieldStr;
-				}
-				else{
-					break;
-				}
-			}
+			
+			$headerArr = $this->getHeaderArr($fh);
+			
 			$colCnt = 0;
 			$sourceArr = Array();
 			$targetArr = Array();
@@ -84,12 +68,11 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 				}
 				$colCnt++;
 			}
+			//Grab data 
 			$sqlBase = "INSERT INTO uploadspectemp(collid,".implode(",",$targetArr).") ";
-	
 			$this->transferCount = 1;
 			$reqFieldsNullCnt = 0;
-			while($record = fgets($fh)){
-				$recordArr = explode("\t",$record);
+			while($recordArr = $this->getRecordArr($fh)){
 				if(count($recordArr) == count($headerArr)){
 					//If there is no sciname, see if you can populate by family
 					if(!$recordArr[array_search($sourceArr["sciname"],$headerArr)]){
@@ -173,6 +156,7 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 			fclose($fh);
 			//Delete upload file 
 			if(file_exists($fullPath)) unlink($fullPath);
+			if($zipFileName) unlink($this->getUploadTargetPath()."/".$zipFileName);
 			
 			$this->finalUploadSteps($finalTransfer);
 		}
@@ -181,6 +165,51 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 		}
     }
     
+    private function getHeaderArr($fHandler){
+		$headerData = fgets($fHandler);
+		//Check to see if we can figure out the delimiter
+		if(strpos($headerData,",") === false){
+			if(strpos($headerData,"\t") !== false){
+				$this->delimiter = "\t";
+			}
+		}
+		//Check to see if file is csv\
+        if(substr($this->ulFileName,-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
+        	$this->isCsv = true;
+        }
+        //Grab header terms
+        $headerArr = Array();
+		if($this->isCsv){
+			rewind($fHandler);
+			$headerArr = fgetcsv($fHandler,0,$this->delimiter);
+		}
+		else{
+			$headerArr = explode($this->delimiter,$headerData);
+		}
+		foreach($headerArr as $k => $field){
+			$fieldStr = strtolower(trim($field));
+			if($fieldStr){
+				$headerArr[$k] = $fieldStr;
+			}
+			else{
+				break;
+			}
+		}
+		return $headerArr;
+    }
+
+    private function getRecordArr($fHandler){
+    	$recordArr = Array();
+    	if($this->isCsv){
+			$recordArr = fgetcsv($fHandler,0,$this->delimiter);
+    	}
+    	else{
+	    	$record = fgets($fh);
+    		$recordArr = explode($this->delimiter,$record);
+    	}
+    	return $recordArr;
+    }
+
     private function getUploadTargetPath(){
 		$tPath = $GLOBALS["tempDirRoot"];
 		if(!$tPath){
@@ -201,6 +230,10 @@ class SpecimenFileUpload extends SpecimenUploadManager{
     
     public function getUploadFileName(){
     	return $this->ulFileName;
+    }
+    
+    public function setDelimiter($dlimit){
+		$this->delimiter = $dlimit;
     }
 }
 	
