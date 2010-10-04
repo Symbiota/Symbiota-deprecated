@@ -38,6 +38,8 @@ INSTRUCTIONS
       syntax error will be thrown.
    d. Load Stored Procedures - Scripts located in 
       <SymbiotaBaseFolder>/config/schema/stored_procedures-x.x.x.sql
+   e. Run database patch scripts available for upload version. 
+      Make sure to run the scripts in the correct order. 
 3. Configure the Symbiota Node - modify following configuration files
    a. Symbiota configuration - rename 
       <SymbiotaBaseFolder>/config/symbini_template.php to symbini.php. 
