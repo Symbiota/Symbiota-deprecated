@@ -252,7 +252,7 @@ class ChecklistManager {
 					if($row->notes) $clStr .= ", ".$row->notes;
 					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if(array_key_exists($tid,$this->voucherArr)){
-						$clStr .= ($clStr?"; ":"").(is_array($this->voucherArr[$tid])?implode(", ",$this->voucherArr[$tid]):$this->voucherArr[$tid]);
+						$clStr .= "; ".(is_array($this->voucherArr[$tid])?implode(", ",$this->voucherArr[$tid]):$this->voucherArr[$tid]);
 					}
 					if($clStr){
 						$this->voucherArr[$tid] = substr($clStr,1);
