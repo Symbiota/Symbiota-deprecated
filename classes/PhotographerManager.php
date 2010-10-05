@@ -56,7 +56,7 @@ class PhotographerManager{
 	}
 	
 	public function echoPhotographerImages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
-		$sql = "SELECT i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname ".
+		$sql = "SELECT i.imgid, i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname ".
 			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
 			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE ts.taxauthid = 1 AND i.photographeruid = $uid ".
@@ -83,7 +83,7 @@ class PhotographerManager{
 			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
 				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 			}
-			echo "<a href='".$imgUrl."'>";
+			echo "<a href='imgdetails.php?imgid=".$row->imgid."'>";
 			if($imgTn){
 				$imgUrl = $imgTn;
 				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgTn,0,1)=="/"){
