@@ -244,9 +244,9 @@
 			return IsNumber;
 		}
 
-		function validateAddSpecies(){ 
-			var sciName = document.getElementById("speciestoadd").value;
-			if(sciName = ""){
+		function validateAddSpecies(f){ 
+			var sciName = f.speciestoadd.value;
+			if(sciName == ""){
 				alert("Enter the scientific name of species you wish to add");
 				return false;
 			}
