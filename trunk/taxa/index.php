@@ -355,7 +355,7 @@ if($taxonManager->getSciName() != "unknown"){
 					<div class='legend'>Species
 					<?php 
 					if($clValue){
-						echo " within ".$taxonManager->getClTitle()."&nbsp;&nbsp;";
+						echo " within ".$taxonManager->getClName()."&nbsp;&nbsp;";
 						if($taxonManager->getParentClid()){
 							echo "<a href='index.php?taxon=$taxonValue&cl=".$taxonManager->getParentClid()."&taxauthid=".$taxAuthId."' title='Go to ".$taxonManager->getParentName()." checklist'><img style='border:0px;width:12px;height:12px;' src='../images/toparent.jpg'/></a>";
 						}

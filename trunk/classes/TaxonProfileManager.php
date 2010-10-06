@@ -29,7 +29,6 @@
 	private $clid;
 	private $clTitle;
 	private $clInfo;
-	private $clType;
 	private $parentClid;
 	private $parentName;
 	private $pid;
@@ -73,6 +72,13 @@
 		//echo $sql;
 		$result = $this->con->query($sql);
 		if($row = $result->fetch_object()){
+			if(strpos($row->SciName," spp.") && $row->TID != $row->ParentTID){
+				$this->clid = 0;
+				$this->clName = "";
+				$this->parentClid = 0;
+				$this->parentName = "";
+				$this->setTaxon($row->ParentTID);
+			}
 			$this->submittedTid = $row->TID;
 			$this->submittedSciName = $row->SciName;
 			$this->submittedAuthor = $row->Author;
@@ -673,7 +679,7 @@
 	}
  	
  	public function setClName($clv){
-		$sql = "SELECT c.CLID, c.Name, c.Title, c.Type, c.parentclid, cp.name AS parentname ".
+		$sql = "SELECT c.CLID, c.Name, c.parentclid, cp.name AS parentname ".
 			"FROM fmchecklists c LEFT JOIN fmchecklists cp ON cp.clid = c.parentclid ";
 		if(intval($clv)){
 			$sql .= "WHERE c.CLID = '".$clv."'";
@@ -686,8 +692,6 @@
 		if($row = $result->fetch_object()){
 			$this->clid = $row->CLID;
 			$this->clName = $row->Name;
-			$this->clTitle = $row->Title;
-			$this->clType = $row->Type;
 			$this->parentClid = $row->parentclid;
 			$this->parentName = $row->parentname;
 		}
@@ -700,14 +704,6 @@
 
 	public function getClName(){
 		return $this->clName;		
-	}
-
-	public function getClTitle(){
-		return $this->clTitle;		
-	}
-	
-	public function getClType(){
-		return $this->clType;
 	}
 
 	public function getParentClid(){
