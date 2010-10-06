@@ -79,32 +79,34 @@
 				$this->parentName = "";
 				$this->setTaxon($row->ParentTID);
 			}
-			$this->submittedTid = $row->TID;
-			$this->submittedSciName = $row->SciName;
-			$this->submittedAuthor = $row->Author;
-			$this->family = $row->family;
-			$this->author = $row->Author;
-			$this->rankId = $row->RankId;
-			$this->parentTid = $row->ParentTID;
-			$this->securityStatus = $row->SecurityStatus;
-			
-			if($this->submittedTid == $row->TidAccepted){
-				$this->tid = $this->submittedTid;
-				$this->sciName = $this->submittedSciName;
-			}
 			else{
-				$this->tid = $row->TidAccepted;
-				$this->setAccepted();
-			}
-			
-			if($this->rankId >= 140 && $this->rankId < 220){
-				//For family and genus hits
-				$this->setSppData();
-			}
-			elseif(count($this->acceptedTaxa) < 2){
-				if($this->clid) $this->setChecklistInfo();
-				$this->setVernaculars();
-	 			$this->setSynonyms();
+				$this->submittedTid = $row->TID;
+				$this->submittedSciName = $row->SciName;
+				$this->submittedAuthor = $row->Author;
+				$this->family = $row->family;
+				$this->author = $row->Author;
+				$this->rankId = $row->RankId;
+				$this->parentTid = $row->ParentTID;
+				$this->securityStatus = $row->SecurityStatus;
+				
+				if($this->submittedTid == $row->TidAccepted){
+					$this->tid = $this->submittedTid;
+					$this->sciName = $this->submittedSciName;
+				}
+				else{
+					$this->tid = $row->TidAccepted;
+					$this->setAccepted();
+				}
+				
+				if($this->rankId >= 140 && $this->rankId < 220){
+					//For family and genus hits
+					$this->setSppData();
+				}
+				elseif(count($this->acceptedTaxa) < 2){
+					if($this->clid) $this->setChecklistInfo();
+					$this->setVernaculars();
+		 			$this->setSynonyms();
+				}
 			}
 		}
 	    else{
