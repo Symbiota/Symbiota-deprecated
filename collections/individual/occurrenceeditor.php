@@ -248,27 +248,29 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								Basis of Record:
 								<input type="text" name="basisOfRecord" tabindex="55" maxlength="32" value="<?php echo array_key_exists("basisOfRecord",$occArr)?$occArr["basisOfRecord"]:""; ?>" />
 							</span>
-							<span style="margin-left:30px;">
+							<span style="margin-left:20px;">
 								Language:
-								<input type="text" name="language" tabindex="53" maxlength="255" value="<?php echo array_key_exists("language",$occArr)?$occArr["language"]:""; ?>" />
+								<input type="text" name="language" tabindex="53" maxlength="20" value="<?php echo array_key_exists("language",$occArr)?$occArr["language"]:""; ?>" />
 							</span>
+							<span style="margin-left:20px;">
+								Dataset ID:
+								<input type="text" name="datasetID" tabindex="53" maxlength="255" value="<?php echo array_key_exists("datasetID",$occArr)?$occArr["datasetID"]:""; ?>" />
+							</span>
+						</div>
+						<div style="padding:3px;">
+							Associated Occurrences:
+							<input type="text" name="associatedOccurrences" tabindex="53" value="<?php echo array_key_exists("associatedOccurrences",$occArr)?$occArr["associatedOccurrences"]:""; ?>" />
+						</div>
+						<div style="padding:3px;">
+							Field Notes:
+							<input type="text" name="fieldNotes" tabindex="53" value="<?php echo array_key_exists("fieldNotes",$occArr)?$occArr["fieldNotes"]:""; ?>" />
+						</div>
+						<div style="padding:3px;">
+							Dynamic Properties:
+							<input type="text" name="dynamicProperties" tabindex="53" value="<?php echo array_key_exists("dynamicProperties",$occArr)?$occArr["dynamicProperties"]:""; ?>" />
 						</div>
 						
 					</fieldset>
-
-	basisOfRecord	Text	32
-	language	Text	2
-	associatedOccurrences	Memo	-
-	datasetID	Text	255
-	fieldNotes	Memo	-
-	dynamicProperties	Memo	-
-
-	[occid]	Long Integer	4
-	[collid]	Long Integer	4
-	[dbpk]	Text	45
-	[modified]	Date/Time	8
-	[dateLastModified]	Date/Time	8
-				
 				</form>
 			</div>
 			<form id='longform' name='longform' action='occurrenceeditor.php' method='get'>
