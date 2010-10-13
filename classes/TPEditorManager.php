@@ -270,9 +270,9 @@ class TPEditorManager {
  	protected function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","'",$newStr);
+		$newStr = str_replace("\"","&quot;",$newStr);
  		return $newStr;
  	}
- }
+}
 ?>
 

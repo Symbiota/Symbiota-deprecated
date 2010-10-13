@@ -1,13 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
- include_once('../../config/symbini.php');
+ include_once('../config/symbini.php');
  header("Content-Type: text/html; charset=".$charset);
  $formId = array_key_exists("formid",$_REQUEST)?$_REQUEST["formid"]:""; 
  
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Critter - Coordinate Point Mapper</title>
+    <title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
   </head> 
   <body onload="initialize()"  onunload="GUnload()">
   	<?php 
@@ -56,7 +56,7 @@
 	            opener.document.getElementById("<?php echo $formId; ?>").lngdec.value = document.getElementById("lngbox").value;
 			}
 			catch(myErr){
-				alert("Unable to transfer data. Please let an administrator know");
+				alert("Unable to transfer data. Please let an administrator know.");
 			}
 			finally{
 	            self.close();

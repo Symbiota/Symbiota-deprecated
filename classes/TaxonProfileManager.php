@@ -324,7 +324,7 @@
  			$str = array_shift($this->vernaculars);
  		}
  		if($this->vernaculars){
- 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='cursor:pointer;display:inline;font-size:50%;vertical-align:sub' title='Click here to show more common names'>,&nbsp;&nbsp;more</span>";
+ 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;vertical-align:sub' title='Click here to show more common names'>,&nbsp;&nbsp;more</span>";
  			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='display:none;'>, ";
  			$str .= implode(", ",$this->vernaculars);
  			$str .= "</span>";
@@ -622,7 +622,7 @@
 							if($vArr["source"]){
 								echo "<div id='descsource' style='float:right;'>";
 								if($vArr["url"]){
-									echo "<a href='".$vArr["url"]."'>";
+									echo "<a href='".$vArr["url"]."' target='_blank'>";
 								}
 								echo $vArr["source"];
 								if($vArr["url"]){

@@ -89,16 +89,17 @@ if($isEditable){
 		}
 
 		function checkUploadListForm(f){
-			var radio_choice = false;
-			var radioCnt = f.uspid.length;
-			for(counter = 0; counter < radioCnt; counter++){
-				if (f.uspid[counter].checked) radio_choice = true; 
+			if(f.uspid.length == null){
+				if(f.uspid.checked) return true;
 			}
-			if(!radio_choice){
-				alert("Please select an Upload Option")
-				return false;
+			else{
+				var radioCnt = f.uspid.length;
+				for(var counter = 0; counter < radioCnt; counter++){
+					if (f.uspid[counter].checked) return true; 
+				}
 			}
-			return true;
+			alert("Please select an Upload Option")
+			return false;
 		}
 
 		function checkInitForm(){
@@ -112,9 +113,12 @@ if($isEditable){
 			return true;
 		}
 
-		function checkParameterForm(){
+		function checkParameterForm(f){
 			var formCheck = true;
-
+			if(f.euptitle.value == ""){
+				alert("Profile title is required");
+				return false;
+			}
 			return formCheck;
 		}
 		
@@ -122,9 +126,12 @@ if($isEditable){
 			return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');
 		}
 
-		function checkParamAddForm(){
+		function checkParamAddForm(f){
 			var formCheck = true;
-
+			if(f.auptitle.value == ""){
+				alert("Profile title is required");
+				return false;
+			}
 			return formCheck;
 		}
 
@@ -139,7 +146,6 @@ if($isEditable){
 			document.getElementById('aupplatform').style.display='block';
 			document.getElementById('aupserver').style.display='block';
 			document.getElementById('aupport').style.display='block';
-			document.getElementById('aupdriver').style.display='block';
 			document.getElementById('aupdigircode').style.display='block';
 			document.getElementById('aupdigirpath').style.display='block';
 			document.getElementById('aupdigirpkfield').style.display='block';
@@ -157,7 +163,6 @@ if($isEditable){
 			}
 			if(selValue == 2){ //DiGIR
 				document.getElementById('aupplatform').style.display='none';
-				document.getElementById('aupdriver').style.display='none';
 				document.getElementById('aupusername').style.display='none';
 				document.getElementById('auppassword').style.display='none';
 			}
@@ -165,7 +170,6 @@ if($isEditable){
 				document.getElementById('aupplatform').style.display='none';
 				document.getElementById('aupserver').style.display='none';
 				document.getElementById('aupport').style.display='none';
-				document.getElementById('aupdriver').style.display='none';
 				document.getElementById('aupdigircode').style.display='none';
 				document.getElementById('aupdigirpath').style.display='none';
 				document.getElementById('aupdigirpkfield').style.display='none';
@@ -178,7 +182,6 @@ if($isEditable){
 				document.getElementById('aupplatform').style.display='none';
 				document.getElementById('aupserver').style.display='none';
 				document.getElementById('aupport').style.display='none';
-				document.getElementById('aupdriver').style.display='none';
 				document.getElementById('aupdigircode').style.display='none';
 				document.getElementById('aupdigirpath').style.display='none';
 				document.getElementById('aupdigirpkfield').style.display='none';
@@ -190,7 +193,6 @@ if($isEditable){
 				document.getElementById('aupplatform').style.display='none';
 				document.getElementById('aupserver').style.display='none';
 				document.getElementById('aupport').style.display='none';
-				document.getElementById('aupdriver').style.display='none';
 				document.getElementById('aupdigircode').style.display='none';
 				document.getElementById('aupdigirpath').style.display='none';
 				document.getElementById('aupdigirpkfield').style.display='none';
@@ -217,12 +219,8 @@ if($isEditable){
 <div id="innertext">
 	<div style="float:right;">
 		<?php if($collId){ ?>
-		<a href="specimenupload.php">
-			<img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to upload listing" />
-		</a>
-		<a href="specimenupload.php?collid=<?php echo ($collId);?>&action=addprofile">
-			<img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" />
-		</a>
+		<a href="specimenupload.php"><img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to upload listing" /></a>
+		<a href="specimenupload.php?collid=<?php echo ($collId);?>&action=addprofile"><img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>
 		<?php } ?>
 	</div>
 	<h1>Data Upload Module</h1>
@@ -270,7 +268,7 @@ if($statusStr){
  			$duManager->saveFieldMap();
  		}
  	}
-	
+
  	//Grab collection name and last upload date and display for all
  	$collInfo = $duManager->getCollInfo();
  	echo "<h2>".$collInfo["name"]."</h2>";
@@ -293,7 +291,7 @@ if($statusStr){
 							<input type="radio" name="uspid" value="<?php echo $id;?>" />
 						<?php echo $v["title"];?>
 						</div>
-						<?php
+						<?php 
 				 	}	
 					?>
 					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
@@ -321,9 +319,9 @@ if($statusStr){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$uploadType = $ulList[$uspid]["uploadtype"];
 	 	$ulArr = array_pop($ulList);
-	 	if($ulFileName || array_key_exists("uploadfile",$_FILES)){
+	 	if($ulFileName || array_key_exists("uploadfile",$_FILES) || $uploadType == $DIRECTUPLOAD){
 			$duManager->analyzeFile();
-			$ulFileName = $duManager->getUploadFileName();
+			if(array_key_exists("uploadfile",$_FILES)) $ulFileName = $duManager->getUploadFileName();
 	 	} 
 	 	?>
 		<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
@@ -438,7 +436,7 @@ if($statusStr){
 			</form>
 		</div>
 		<div style="clear:both;">
-			<form name="parameterform" action="specimenupload.php" method="post" onsubmit="return checkParameterForm()">
+			<form name="parameterform" action="specimenupload.php" method="post" onsubmit="return checkParameterForm(this)">
 				<fieldset>
 					<legend><b><?php echo $editTitle; ?> Upload Parameters</b></legend>
 					<div style="float:right;cursor:pointer;" onclick="toggle('editdiv');" title="Toggle Editing Functions">
@@ -475,15 +473,6 @@ if($statusStr){
 						<div class="editdiv" style=""><?php echo $duManager->getPort(); ?></div>
 						<div class="editdiv" style="display:none;">
 							<input name="eupport" type="text" value="<?php echo $duManager->getPort(); ?>" />
-						</div>
-					</div>
-					<?php } ?>
-					<?php if($uploadType == 1 || $uploadType == 2){ ?>
-					<div style="clear:both;">
-						<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
-						<div class="editdiv" style=""><?php echo $duManager->getDriver(); ?></div>
-						<div class="editdiv" style="display:none;">
-							<input name="eupdriver" type="text" value="<?php echo $duManager->getDriver(); ?>" />
 						</div>
 					</div>
 					<?php } ?>
@@ -628,7 +617,7 @@ if($statusStr){
 	}
 	elseif($action == "addprofile"){
 		?>
-		<form name="paramaddform" action="specimenupload.php" method="post" onsubmit="return checkParamAddForm()">
+		<form name="paramaddform" action="specimenupload.php" method="post" onsubmit="return checkParamAddForm(this)">
 			<fieldset>
 				<legend>Add New Upload Profile</legend>
 				<div style="clear:both;">
@@ -658,8 +647,8 @@ if($statusStr){
 							<option value="">Select the Database Platform</option>
 							<option value="">-----------------------</option>
 							<option value="MySQL">MySQL</option>
-							<option value="MS Access">MS Access</option>
-							<option value="Oracle">Oracle</option>
+							<!-- <option value="MS Access">MS Access</option>  -->
+							<!-- <option value="Oracle">Oracle</option> -->
 						</select>
 					</div>
 				</div>
@@ -673,12 +662,6 @@ if($statusStr){
 					<div style="width:200px;font-weight:bold;float:left;">Port: </div>
 					<div>
 						<input name="aupport" type="text" value="" />
-					</div>
-				</div>
-				<div id="aupdriver" style="clear:both;">
-					<div style="width:200px;font-weight:bold;float:left;">Driver: </div>
-					<div>
-						<input name="aupdriver" type="text" value="" />
 					</div>
 				</div>
 				<div id="aupdigircode" style="clear:both;">

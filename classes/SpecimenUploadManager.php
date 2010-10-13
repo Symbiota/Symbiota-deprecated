@@ -18,7 +18,6 @@ class SpecimenUploadManager{
 	protected $port = 0;
 	protected $username;
 	protected $password;
-	protected $driver;
 	protected $digirCode;
 	protected $digirPath;
 	protected $digirPKField;
@@ -148,7 +147,7 @@ class SpecimenUploadManager{
 	}
 
     public function readUploadParameters(){
-		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, usp.driver, ".
+		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, ".
     		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, cs.uploaddate ".
 			"FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid ".
     		"WHERE usp.uspid = ".$this->uspid;
@@ -162,7 +161,6 @@ class SpecimenUploadManager{
     		$this->username = $row->Username;
     		$this->password = $row->Password;
     		$this->schemaName = $row->SchemaName;
-    		$this->driver = $row->driver;
     		$this->digirCode = $row->digircode;
     		$this->digirPath = $row->digirpath;
     		$this->digirPKField = $row->digirpkfield;
@@ -222,7 +220,6 @@ class SpecimenUploadManager{
 		if(array_key_exists("eupusername",$_REQUEST)) $sql .= ", username = \"".$_REQUEST["eupusername"]."\"";
 		if(array_key_exists("euppassword",$_REQUEST)) $sql .= ", password = \"".$_REQUEST["euppassword"]."\"";
 		if(array_key_exists("eupschemaname",$_REQUEST)) $sql .= ", schemaname = \"".$_REQUEST["eupschemaname"]."\"";
-		if(array_key_exists("eupdriver",$_REQUEST)) $sql .= ", driver = \"".$_REQUEST["eupdriver"]."\"";
 		if(array_key_exists("eupdigircode",$_REQUEST)) $sql .= ", digircode = \"".$_REQUEST["eupdigircode"]."\"";
 		if(array_key_exists("eupdigirpath",$_REQUEST)) $sql .= ", digirpath = \"".$_REQUEST["eupdigirpath"]."\"";
 		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
@@ -237,10 +234,10 @@ class SpecimenUploadManager{
 	}
 	
     public function addUploadProfile(){
-		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, driver, digircode, digirpath, ".
+		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, digircode, digirpath, ".
 			"digirpkfield, username, password, schemaname, cleanupsp, querystr) VALUES (".
 			$this->collId.",".$_REQUEST["aupuploadtype"].",\"".$_REQUEST["auptitle"]."\",\"".$_REQUEST["aupplatform"]."\",\"".$_REQUEST["aupserver"]."\",".
-			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdriver"]."\",\"".$_REQUEST["aupdigircode"].
+			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
 			$this->cleanField(strtolower($_REQUEST["aupquerystr"]))."\")";
@@ -265,7 +262,7 @@ class SpecimenUploadManager{
 		$rStr = str_replace("\"","'",$rStr);
 		return $rStr;
 	}
-	
+
 	public function echoFieldMapTable($autoMap = 0){
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
@@ -280,7 +277,7 @@ class SpecimenUploadManager{
 		foreach($this->sourceArr as $fieldName){
 			if($dbpk != $fieldName){
 				$isAutoMapped = false;
-				if($autoMap && in_array($fieldName,$this->symbFields)){
+				if($autoMap && in_array(strtolower($fieldName),$this->symbFields)){
 					$isAutoMapped = true;
 					$autoMapArr[] = $fieldName;
 				}
@@ -298,7 +295,7 @@ class SpecimenUploadManager{
 					//Source Field = Symbiota Field
 					foreach($this->symbFields as $sField){
 						if($sField != "dbpk"){
-							echo "<option ".($fieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+							echo "<option ".(strtolower($fieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
 						}
 					}
 				}
@@ -419,6 +416,7 @@ class SpecimenUploadManager{
 
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
+		set_time_limit(800);
 		$spCallStr = "CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");";
 		if($this->conn->query($spCallStr)){
 			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."</li>";
@@ -458,10 +456,6 @@ class SpecimenUploadManager{
 	
 	public function getPassword(){
 		return $this->password;
-	}
-	
-	public function getDriver(){
-		return $this->driver;
 	}
 	
 	public function getDigirCode(){

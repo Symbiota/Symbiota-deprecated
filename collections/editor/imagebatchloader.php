@@ -94,43 +94,45 @@ if($isEditable){
 						<div style="float:left;width:130px;">Scientific Name:</div> 
 						<div style="float:left;"><input type="text" name="qsciname" /></div>
 					</div>
-					<fieldset style="margin:10px 2px 10px 2px;">
-						<legend><b>Default Upload Parameters</b></legend>
-						<div style='margin:3px;clear:both;'>
-							<div style="float:left;width:150px;">Image Type:</div>
-							<select name='dimagetype'>
-								<option value='observation'>
-									Observation Image
-								</option>
-								<option value='specimen'>
-									Specimen Image
-								</option>
-								<option value='field'>
-									Field Image
-								</option>
-							</select>
-						</div>
-						<div style="clear:both;">
-							<div style="float:left;width:150px;">Photographer:</div>
-							<select name="dphotographeruid">
-								<option value="">Select a photographer</option>
-								<option value="">--------------------------------</option>
-								<?php $uploadManager->echoPhotographerSelect(); ?>
-							</select>
-						</div>
-						<div style="clear:both;">
-							<div style="float:left;width:150px;">Manager:</div>
-							<div style="float:left;"><input name="downer" value="" /></div>
-						</div>
-						<div style="clear:both;">
-							<div style="float:left;width:150px;">Copyright URL:</div>
-							<div style="float:left;"><input name="dcopyright" value="" /></div>
-						</div>
-						<div style="clear:both;">
-							<div style="float:left;width:150px;">Sort Sequence:</div>
-							<div style="float:left;"><input name="dsortsequence" value="50" /></div>
-						</div>
-					</fieldset>
+					<div style="clear:both;margin:5px">
+						<fieldset style="margin:10px 2px 10px 2px;">
+							<legend><b>Default Upload Parameters</b></legend>
+							<div style='margin:3px;clear:both;'>
+								<div style="float:left;width:150px;">Image Type:</div>
+								<select name='dimagetype'>
+									<option value='observation'>
+										Observation Image
+									</option>
+									<option value='specimen'>
+										Specimen Image
+									</option>
+									<option value='field'>
+										Field Image
+									</option>
+								</select>
+							</div>
+							<div style="clear:both;">
+								<div style="float:left;width:150px;">Photographer:</div>
+								<select name="dphotographeruid">
+									<option value="">Select a photographer</option>
+									<option value="">--------------------------------</option>
+									<?php $uploadManager->echoPhotographerSelect(); ?>
+								</select>
+							</div>
+							<div style="clear:both;">
+								<div style="float:left;width:150px;">Manager:</div>
+								<div style="float:left;"><input name="downer" value="" /></div>
+							</div>
+							<div style="clear:both;">
+								<div style="float:left;width:150px;">Copyright URL:</div>
+								<div style="float:left;"><input name="dcopyright" value="" /></div>
+							</div>
+							<div style="clear:both;">
+								<div style="float:left;width:150px;">Sort Sequence:</div>
+								<div style="float:left;"><input name="dsortsequence" value="50" /></div>
+							</div>
+						</fieldset>
+					</div>
 					<div style="clear:both;">
 						<div style="float:right;">
 							<input type="submit" name="action" value="Query Records" />
@@ -151,7 +153,7 @@ if($isEditable){
 					foreach($recArr as $occId => $v){
 						?>
 						<div>
-							<form action="<?php echo $clientRoot;?>/taxa/admin/tpeditor.php" method="post" enctype='multipart/form-data' target="_blank">
+							<form action="<?php echo $clientRoot;?>/taxa/admin/tpimageeditor.php" method="post" enctype='multipart/form-data' target="_blank">
 								<fieldset>
 									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
 									<div style="margin:3px;">
@@ -291,8 +293,7 @@ class ImageUploadManager{
 		if($queryArr["loaddate"]) $sql .= "AND o.datelastmodified = '".$queryArr["loaddate"]."' "; 
 		if($queryArr["observer"]) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
 		if($queryArr["family"]) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
-		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ".
-		"WHERE o.tidinterpreted IS NOT NULL ";
+		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
 		$sql .= "ORDER BY o.occurrenceid "; 
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
@@ -328,7 +329,7 @@ class ImageUploadManager{
 			"WHERE colltype = 'observations' ORDER BY c.collectionname";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			echo "<option value='".$row->collid."'>".$row->collectionname."</option>";
+			echo "<option value='".$row->collid."' ".(strpos($row->collectionname,"Madrean")!==false?"SELECTED":"").">".$row->collectionname."</option>";
 		}
 		$rs->close();
 	}

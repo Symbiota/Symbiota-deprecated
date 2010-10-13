@@ -54,9 +54,9 @@ class TPDescEditorManager extends TPEditorManager{
 		$sql = "UPDATE taxadescrblock ".
 			"SET language = ".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\"":"NULL").
 			",displaylevel = ".$_REQUEST["displaylevel"].
-			",notes = ".($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\"":"NULL").
-			",caption = ".($_REQUEST["caption"]?"\"".$_REQUEST["caption"]."\"":"NULL").
-			",source = ".($_REQUEST["source"]?"\"".$_REQUEST["source"]."\"":"NULL").
+			",notes = ".($_REQUEST["notes"]?"\"".$this->cleanStr($_REQUEST["notes"])."\"":"NULL").
+			",caption = ".($_REQUEST["caption"]?"\"".$this->cleanStr($_REQUEST["caption"])."\"":"NULL").
+			",source = ".($_REQUEST["source"]?"\"".$this->cleanStr($_REQUEST["source"])."\"":"NULL").
 			",sourceurl = ".($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").
 			" WHERE tdbid = ".$_REQUEST["tdbid"];
 		//echo $sql;
@@ -85,9 +85,9 @@ class TPDescEditorManager extends TPEditorManager{
 			"notes,caption,source,sourceurl) ".
 			"VALUES(".$_REQUEST["tid"].",".$symbUid.",".($_REQUEST["language"]?"\"".$_REQUEST["language"]."\",":"").
 			($_REQUEST["displaylevel"]?$_REQUEST["displaylevel"].",":"").
-			($_REQUEST["notes"]?"\"".$_REQUEST["notes"]."\",":"NULL,").
-			($_REQUEST["caption"]?"\"".$_REQUEST["caption"]."\",":"NULL,").
-			($_REQUEST["source"]?"\"".$_REQUEST["source"]."\",":"NULL,").
+			($_REQUEST["notes"]?"\"".$this->cleanStr($_REQUEST["notes"])."\",":"NULL,").
+			($_REQUEST["caption"]?"\"".$this->cleanStr($_REQUEST["caption"])."\",":"NULL,").
+			($_REQUEST["source"]?"\"".$this->cleanStr($_REQUEST["source"])."\",":"NULL,").
 			($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").")";
 			//echo $sql;
 		$status = "";
@@ -101,7 +101,7 @@ class TPDescEditorManager extends TPEditorManager{
 	public function editStatement(){
 		$sql = "UPDATE taxadescrstmts ".
 			"SET heading = \"".$_REQUEST["heading"]."\",".
-			"statement = \"".$_REQUEST["statement"]."\"".
+			"statement = \"".$this->cleanStr($_REQUEST["statement"])."\"".
 			(array_key_exists("displayheader",$_REQUEST)?",displayheader = 1":",displayheader = 0").
 			($_REQUEST["sortsequence"]?",sortsequence = ".$_REQUEST["sortsequence"]:"").
 			" WHERE tdsid = ".$_REQUEST["tdsid"];
@@ -127,7 +127,7 @@ class TPDescEditorManager extends TPEditorManager{
 
 	public function addStatement(){
 		$sql = "INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader".($_REQUEST["sortsequence"]?",sortsequence":"").") ".
-			"VALUES(".$_REQUEST["tdbid"].",\"".$_REQUEST["heading"]."\",\"".$_REQUEST["statement"]."\",".
+			"VALUES(".$_REQUEST["tdbid"].",\"".$_REQUEST["heading"]."\",\"".$this->cleanStr($_REQUEST["statement"])."\",".
 			(array_key_exists("displayheader",$_REQUEST)?"1":"0").
 			($_REQUEST["sortsequence"]?",".$_REQUEST["sortsequence"]:"").")";
 		//echo $sql;
@@ -138,5 +138,6 @@ class TPDescEditorManager extends TPEditorManager{
 		}
 		return $status;
 	}
+	
 }
 ?>
