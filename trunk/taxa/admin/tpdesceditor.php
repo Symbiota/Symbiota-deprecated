@@ -125,7 +125,7 @@ if($editable && $tid){
 				<fieldset style='width:475px;margin:20px;'>
 	    			<legend><b>New Description Block</b></legend>
 					<div style=''>
-						Language: <input id='language' name='language' style='margin-top:5px;' type='text' />
+						Language: <input id="language" name="language" style="margin-top:5px;" type="text" value="<?php echo $defaultLang; ?>" />
 					</div>
 					<div style=''>
 						Caption: <input id='caption' name='caption' style='margin:2px;' type='text' />

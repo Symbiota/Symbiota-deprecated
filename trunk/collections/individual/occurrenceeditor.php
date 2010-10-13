@@ -77,7 +77,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 			<div id="shortdiv" class="tabcontent" style="margin:10px;">
 				<form id='shortform' name='shortform' action='occurrenceeditor.php' method='get'>
 					<div style="margin:10px;padding:10px;height:120px;border:1px solid gray;">
-						<div style="clear:both;">
+						<div style="clear:both;" class="p1">
 							<span style="width:125px;">
 								Scientific Name:
 							</span>
@@ -85,7 +85,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								Author:
 							</span>
 						</div>
-						<div style="clear:both;">
+						<div style="clear:both;" class="p1">
 							<span>
 								<input type="text" name="sciname" size="60" maxlength="250" tabindex="1" value="<?php echo array_key_exists("sciname",$occArr)?$occArr["sciname"]:""; ?>" />
 							</span>
@@ -93,7 +93,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								<input type="text" name="author" maxlength="100" tabindex="0" value="<?php echo array_key_exists("author",$occArr)?$occArr["author"]:""; ?>" />
 							</span>
 						</div>
-						<div style="clear:both;padding:3px 0px 0px 10px;">
+						<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 							<div style="float:left;">
 								ID Qualifier:
 								<input type="text" name="identificationQualifier" tabindex="2" size="5" value="<?php echo array_key_exists("identificationQualifier",$occArr)?$occArr["identificationQualifier"]:""; ?>" />
@@ -103,7 +103,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								<input type="text" name="family" size="30" maxlength="50" tabindex="0" value="<?php echo array_key_exists("family",$occArr)?$occArr["family"]:""; ?>" />
 							</div>
 						</div>
-						<div style="clear:both;padding:3px 0px 0px 10px;">
+						<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 							<div style="float:left;">
 								Identified By:
 								<input type="text" name="identifiedBy" maxlength="255" tabindex="3" value="<?php echo array_key_exists("identifiedBy",$occArr)?$occArr["identifiedBy"]:""; ?>" />
@@ -125,7 +125,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 						</div>
 					</div>
 					<div style="margin:10px;padding:10px;height:75px;border:1px solid gray">
-						<div style="clear:both;">
+						<div style="clear:both;" class="p1">
 							<span>
 								Collector:
 							</span>
@@ -139,7 +139,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								Verbatim Date:
 							</span>
 						</div>
-						<div style="clear:both;">
+						<div style="clear:both;" class="p1">
 							<span>
 								<input type="text" name="recordedBy" size="35" maxlength="255" tabindex="7" value="<?php echo array_key_exists("recordedBy",$occArr)?$occArr["recordedBy"]:""; ?>" />
 							</span>
@@ -149,6 +149,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 							<span style="margin-left:20px;">
 								<input type="text" name="eventDate" size="10" tabindex="12" value="<?php echo array_key_exists("eventDate",$occArr)?$occArr["eventDate"]:""; ?>" />
 							</span>
+							<img src="" />
 							<span style="margin-left:20px;">
 								<input type="text" name="verbatimEventDate" tabindex="0" maxlength="255" value="<?php echo array_key_exists("verbatimEventDate",$occArr)?$occArr["verbatimEventDate"]:""; ?>" />
 							</span>

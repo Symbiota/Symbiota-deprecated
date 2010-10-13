@@ -41,8 +41,9 @@
 		$returnArr = Array();
 		$sql = "SELECT i.InstitutionCode, i.InstitutionName, i.Address1, i.Address2, i.City, i.StateProvince, ".
 			"i.PostalCode, i.Country, i.Phone, c.collid, c.CollectionCode, c.CollectionName, ".
-			"c.BriefDescription, c.FullDescription, c.Homepage, c.Contact, c.email, c.icon, ".
-			"cs.recordcnt, cs.familycnt, cs.genuscnt, cs.speciescnt, cs.georefcnt, cs.uploaddate ".
+			"c.BriefDescription, c.FullDescription, c.Homepage, c.Contact, c.email, c.latitudedecimal, ".
+			"c.longitudedecimal, c.icon, cs.uploaddate, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
+			"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 			"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 			"LEFT JOIN institutions i ON c.iid = i.iid ".
 			"WHERE c.collid = $this->collId ORDER BY c.SortSeq";
@@ -65,12 +66,9 @@
 			$returnArr["homepage"] = $row->Homepage;
 			$returnArr["contact"] = $row->Contact;
 			$returnArr["email"] = $row->email;
+			$returnArr["latitudedecimal"] = $row->latitudedecimal;
+			$returnArr["longitudedecimal"] = $row->longitudedecimal;
 			$returnArr["icon"] = $row->icon;
-			$returnArr["recordcnt"] = $row->recordcnt;
-			$returnArr["familycnt"] = $row->familycnt;
-			$returnArr["generacnt"] = $row->genuscnt;
-			$returnArr["speciescnt"] = $row->speciescnt;
-			$returnArr["georefcnt"] = $row->georefcnt;
 			$uDate = "";
 			if($row->uploaddate){
 				$uDate = $row->uploaddate;
@@ -80,6 +78,11 @@
 				$uDate = date("j F Y",mktime(0,0,0,$month,$day,$year));
 			}
 			$returnArr["uploaddate"] = $uDate;
+			$returnArr["recordcnt"] = $row->recordcnt;
+			$returnArr["georefcnt"] = $row->georefcnt;
+			$returnArr["familycnt"] = $row->familycnt;
+			$returnArr["genuscnt"] = $row->genuscnt;
+			$returnArr["speciescnt"] = $row->speciescnt;
 		}
 		$rs->close();
 		return $returnArr;
@@ -95,6 +98,25 @@
 		//echo $sql;
 		$conn->query($sql);
 		$conn->close();
+	}
+	
+	public function submitCollAdd($addArr){
+		global $symbUid;
+		$conn = MySQLiConnectionFactory::getCon("write");
+		$sql = "INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,".
+			"contact,email,latitudedecimal,longitudedecimal,icon,individualurl) ".
+			"VALUES (\"".$addArr["institutioncode"]."\",\"".$addArr["collectioncode"]."\",\"".$addArr["collectionname"]."\",\"".
+			$addArr["briefdescription"]."\",\"".$addArr["fulldescription"]."\",\"".$addArr["homepage"]."\",\"".
+			$addArr["contact"]."\",\"".$addArr["email"]."\",\"".$addArr["latitudedecimal"]."\",\"".$addArr["longitudedecimal"].
+			"\",".(array_key_exists("icon",$addArr)?"\"".$addArr["icon"]."\"":"NULL").",".
+			(array_key_exists("individualurl",$addArr)?"\"".$addArr["individualurl"]."\"":"NULL").") ";
+		$conn->query($sql);
+		$cid = $conn->insert_id;
+		$sql = "INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) ".
+			"VALUES(".$cid.",0,\"".$symbUid."\")";
+		$conn->query($sql);
+		$conn->close();
+		return $cid;
 	}
 	
 	public function getFamilyRecordCounts(){

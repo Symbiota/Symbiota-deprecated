@@ -92,8 +92,6 @@
 	<script type="text/javascript" src="../js/ui.core.js"></script>
 	<script type="text/javascript" src="../js/ui.tabs.js"></script>
 	<script language=javascript>
-		var rtXmlHttp;
-		var sciNameDeletion;
 		
 		function toggle(target){
 		  	var divs = document.getElementsByTagName("div");
@@ -124,7 +122,7 @@
 		}
 
 		function openPointMap() {
-		    mapWindow=open("tools/mappointaid.php?formid=checklisteditform","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		    mapWindow=open("../tools/mappointaid.php?formid=checklisteditform","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -140,29 +138,26 @@
 			  		alert ("Your browser does not support AJAX!");
 			  		return;
 			  	}
-				sciNameDeletion = sciName;
 				var url = "rpc/removetidfromchklst.php";
 				url=url + "?clid=" + clid + "&tid=" + tid;
 				url=url + "&sid="+Math.random();
-				rtXmlHttp.onreadystatechange=rtStateChanged;
+				rtXmlHttp.onreadystatechange=function(){
+					if(rtXmlHttp.readyState==4 && rtXmlHttp.status==200){
+						var tidDeleted = rtXmlHttp.responseText;
+						var sciNameDeletion = sciName.replace(/<.{1,2}>/gi,"");
+						if(tidDeleted == 0){
+							alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
+						}
+						else{
+							document.getElementById("tid-"+tidDeleted).style.display = "none";
+						}
+					}
+				};
 				rtXmlHttp.open("POST",url,true);
 				rtXmlHttp.send(null);
 	        }
 		} 
 		
-		function rtStateChanged(){
-			if (rtXmlHttp.readyState==4){
-				var tidDeleted = rtXmlHttp.responseText;
-				sciNameDeletion = sciNameDeletion.replace(/<.{1,2}>/gi,"");
-				if(tidDeleted == 0){
-					alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
-				}
-				else{
-					document.getElementById("tid-"+tidDeleted).style.display = "none";
-				}
-			}
-		}
-
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
@@ -268,24 +263,22 @@
 			var url="rpc/gettid.php";
 			url=url+"?sciname="+sciname;
 			url=url+"&sid="+Math.random();
-			cseXmlHttp.onreadystatechange=cseStateChanged;
+			cseXmlHttp.onreadystatechange=function(){
+				if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
+					testTid = cseXmlHttp.responseText;
+					if(testTid == ""){
+						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+					}
+					else{
+						document.getElementById("tidtoadd").value = testTid;
+						document.forms["addspeciesform"].submit();
+					}
+				}
+			};
 			cseXmlHttp.open("POST",url,true);
 			cseXmlHttp.send(null);
 		} 
 		
-		function cseStateChanged(){
-			if (cseXmlHttp.readyState==4){
-				renameTid = cseXmlHttp.responseText;
-				if(renameTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
-				}
-				else{
-					document.getElementById("tidtoadd").value = renameTid;
-					document.forms["addspeciesform"].submit();
-				}
-			}
-		}
-
 		function initAddList(input){
 			$(input).autocomplete({ ajax_get:getAddSuggs, minchars:3 });
 		}
@@ -733,7 +726,7 @@
 							<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
 								<h3><?php echo $family; ?></h3>
 							</div>
-							<div>";
+							<div>
 							<?php 
 								foreach($sppArr as $tid => $imgArr){
 									echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";

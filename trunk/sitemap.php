@@ -133,6 +133,18 @@ $smManager = new SiteMapManager();
 	            			<li><a href="profile/usermanagement.php">User Permissions</a></li>
             			</ul>
             		<h3>Collections</h3>
+						<ul>
+							<li>
+								<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?emode=2">
+									Add a New Collection
+								</a>
+							</li>
+							<li>
+								<a href="<?php echo $clientRoot; ?>/collections/admin/specimenupload.php">
+									Specimen Upload Management
+								</a>
+							</li>
+            			</ul>
 	            		<?php 
 	            			if($isAdmin || array_key_exists("CollAdmin",$userRights)){
 	            				$collList = $smManager->getCollectionList((array_key_exists("CollAdmin",$userRights)?$userRights["CollAdmin"]:""));
