@@ -181,8 +181,8 @@ if($isEditable){
 											}
 											?>
 											<div style="margin:3px;float:left;">
-												<a href="<?php echo $tnUrl;?>">
-													<img src="<?php echo $url;?>" />
+												<a href="<?php echo $url;?>">
+													<img src="<?php echo $tnUrl;?>" />
 												</a>
 											</div>
 											<?php
@@ -295,7 +295,7 @@ class ImageUploadManager{
 		if($queryArr["family"]) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
 		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
 		$sql .= "ORDER BY o.occurrenceid "; 
-		//echo "SQL: ".$sql;
+		echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$occId = $row->occid;
