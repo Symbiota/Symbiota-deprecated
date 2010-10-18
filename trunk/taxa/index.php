@@ -338,7 +338,7 @@ if($taxonManager->getSciName() != "unknown"){
 				if($editable){
 					?>
 					<div style='position:absolute;top:0px;right:0px;'>
-						<a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'>
+						<a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="Edit Taxon Data">
 							<img style='border:0px;' src='../images/edit.png'/>
 						</a>
 					</div>
