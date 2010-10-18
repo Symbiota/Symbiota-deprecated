@@ -274,7 +274,7 @@ class TPImageEditorManager extends TPEditorManager{
 		}
 		$userName = $paramsArr["un"];
 		
-		$imgTnUrl = str_replace("//","/",$this->createImageThumbnail($imgUrl));
+		$imgTnUrl = $this->createImageThumbnail($imgUrl);
 
 		$imgWebUrl = $imgUrl;
 		$imgLgUrl = "";
