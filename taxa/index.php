@@ -261,7 +261,7 @@ if($taxonManager->getSciName() != "unknown"){
 		?>
 			</td>
 			<td class="desc">
-				<div style="height:290px;">
+				<div id="descblock">
 				<?php 
 				//Middle Right Section (Description section)
 				$taxonManager->echoDescriptionBlock();
