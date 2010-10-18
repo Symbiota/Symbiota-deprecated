@@ -222,7 +222,7 @@
 				"INNER JOIN taxstatus ts2 ON ts.Tid = ts2.tidaccepted) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ts2.Tid = ctl.TID) ".
 				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
-				"WHERE (ts.taxauthid = 1) AND (t.RankId = 220) AND cpl.pid = ".$this->pid." AND ".
+				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (t.RankId = 220) AND cpl.pid = ".$this->pid." AND ".
 				"(ts.Family = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."' ".
 				"OR t.UnitName1 = '".($this->taxAuthId?$this->sciName:$this->submittedSciName)."'))";
 		}
