@@ -11,18 +11,18 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 	$dlManager = new OccurrenceDownloadManager();
  
     if($downloadType == "checklist"){
-		$dlManager->downloadChecklistText($taxonFilterCode);
+		$dlManager->downloadChecklistCsv($taxonFilterCode);
     }
     elseif($downloadType == "georef"){
-		$dlManager->downloadGeorefText();
+		$dlManager->downloadGeorefCsv();
     }
     elseif($downloadType == "darwincore_text"){
-		$dlManager->downloadDarwinCoreText();  
+		$dlManager->downloadDarwinCoreCsv();  
     }
     elseif($downloadType == "darwincore_xml"){
 		//$dlManager->downloadSpecimenDarwinCoreXml();  
     }
     else{
-        $dlManager->downloadSymbiotaText();  
+        $dlManager->downloadSymbiotaCsv();  
     }
 ?>
