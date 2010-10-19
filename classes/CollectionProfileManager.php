@@ -41,7 +41,7 @@
 		$returnArr = Array();
 		$sql = "SELECT i.InstitutionCode, i.InstitutionName, i.Address1, i.Address2, i.City, i.StateProvince, ".
 			"i.PostalCode, i.Country, i.Phone, c.collid, c.CollectionCode, c.CollectionName, ".
-			"c.BriefDescription, c.FullDescription, c.Homepage, c.Contact, c.email, c.latitudedecimal, ".
+			"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, c.latitudedecimal, ".
 			"c.longitudedecimal, c.icon, cs.uploaddate, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 			"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 			"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
@@ -64,6 +64,7 @@
 			$returnArr["briefdescription"] = $row->BriefDescription;
 			$returnArr["fulldescription"] = $row->FullDescription;
 			$returnArr["homepage"] = $row->Homepage;
+			$returnArr["individualurl"] = $row->individualurl;
 			$returnArr["contact"] = $row->Contact;
 			$returnArr["email"] = $row->email;
 			$returnArr["latitudedecimal"] = $row->latitudedecimal;
@@ -92,7 +93,9 @@
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "";
 		foreach($editArr as $field=>$value){
-			$sql .= ",$field = \"".$value."\"";
+			$v = trim($value);
+			$v = str_replace("\"","'",$v);
+			$sql .= ",$field = ".($v?"\"".$v."\"":"NULL");
 		}
 		$sql = "UPDATE omcollections SET ".substr($sql,1)." WHERE collid = ".$this->collId;
 		//echo $sql;

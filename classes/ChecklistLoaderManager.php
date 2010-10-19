@@ -12,20 +12,27 @@ class ChecklistLoaderManager {
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
+	
+	public function getThesauri(){
+		$sql = "SELECT ";
+		$rs = $this->query($sql);
+		while($row = $rs->fetch_object()){
+			
+		}
+	}
 
-	public function uploadChecklist($clid, $hasHeader){
+	public function uploadCsvList($clid, $hasHeader){
 		set_time_limit(120);
 		ini_set("max_input_time",120);
-		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file");
+		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
 		
 		$headerArr = Array();
 		if($hasHeader){
-			$headerStr = fgets($fh);
-			$headerData = explode("\t",$headerStr);
+			$headerData = fgetcsv($fh);
 			foreach($headerData as $k => $v){
 				$vStr = strtolower($v);
 				$vStr = str_replace(Array(" ",".","_"),"",$vStr);
-				$vStr = str_replace(Array("scientificname","taxa","species","taxon"),"sciname",$vStr);
+				$vStr = str_replace(Array("scientificnamewithauthor","scientificname","taxa","species","taxon"),"sciname",$vStr);
 				$headerArr[$vStr] = $k;
 			}
 		}
@@ -40,8 +47,7 @@ class ChecklistLoaderManager {
 			echo "<ol>";
 			$successCnt = 0;
 			$failCnt = 0;
-			while($line = fgets($fh)){
-				$valueArr = explode("\t",$line);
+			while($valueArr = fgetcsv($fh)){
 				$statusStr = "";
 				$tid = 0;
 				$rankId = 0;
@@ -50,16 +56,17 @@ class ChecklistLoaderManager {
 				if($sciNameStr){
 					$sql = "SELECT t.tid, ts.family, t.rankid ".
 						"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-						"WHERE ts.taxauthid = 1 AND t.sciname = '".$sciNameStr."'";
-					//echo $sql;
+						"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciNameStr."\"";
 					$rs = $this->conn->query($sql);
-					if($row = $rs->fetch_object()){
-						$tid = $row->tid;
-						$family = $row->family;
-						$sciName = $sciNameStr;
-						$rankId = $row->rankid;
+					if($rs){
+						if($row = $rs->fetch_object()){
+							$tid = $row->tid;
+							$family = $row->family;
+							$sciName = $sciNameStr;
+							$rankId = $row->rankid;
+						}
+						$rs->close();
 					}
-					$rs->close();
 		
 					if(!$tid){
 						//$sciNameStr not in database, thus try parsing out author  
@@ -76,24 +83,31 @@ class ChecklistLoaderManager {
 								if(strtolower($sciNameArr[0]) == "x"){
 									$unitInd2 = array_shift($sciNameArr);
 								}
-								$unitName1 = array_shift($sciNameArr);
-							}				
-						}
-						while($sciStr = array_shift($sciNameArr)){
-							if($sciStr == "ssp." || $sciStr == "ssp" || $sciStr == "subsp." || $sciStr == "subsp" || $sciStr == "var." || $sciStr == "var" || $sciStr == "f." || $sciStr == "forma"){
-								$unitInd3 = $sciStr;
-								$unitName3 = array_shift($sciNameArr);
+								elseif((strpos($sciNameArr[0],".") !== false) || ord($sciNameArr[0]) < 97 || ord($sciNameArr[0]) > 122){
+									unset($sciNameArr);
+								}
+								else{
+									$unitName2 = array_shift($sciNameArr);
+								}
 							}
 						}
-						$sciName = $unitInd1." ".$unitName1." ".$unitInd2." ".$unitName2." ".$unitInd3." ".$unitName3;
-						$sql = "SELECT t.tid, ts.family ".
+						while(isset($sciNameArr) && $sciStr = array_shift($sciNameArr)){
+							if($sciStr == "ssp." || $sciStr == "ssp" || $sciStr == "subsp." || $sciStr == "subsp" || $sciStr == "var." || $sciStr == "var" || $sciStr == "f." || $sciStr == "forma"){
+								if($sciNameArr){
+									$unitInd3 = $sciStr;
+									$unitName3 = array_shift($sciNameArr);
+								}
+							}
+						}
+						$sciName = trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3));
+						$sql = "SELECT t.tid, ts.family, t.rankid ".
 							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 							"WHERE ts.taxauthid = 1 AND t.sciname = '".$sciName."'";
+						//echo $sql;
 						$rs = $this->conn->query($sql);
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
 							$family = $row->family;
-							$sciName = $sciNameStr;
 							$rankId = $row->rankid;
 						}
 						$rs->close();
@@ -127,6 +141,7 @@ class ChecklistLoaderManager {
 						else{
 							$failCnt++;
 							$statusStr = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
+							//echo $sql."<br />";
 						}
 					}
 					else{
