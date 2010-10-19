@@ -20,7 +20,7 @@ $isEditable = 0;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 	$isEditable = 1;
 }
- 
+
 if($isEditable){
 	if($action == "Add New Profile" || $action == "Submit Edits"){
  		$collArr = Array();
@@ -35,8 +35,8 @@ if($isEditable){
  		$collArr["latitudedecimal"] = $_REQUEST["latitudedecimal"];
  		$collArr["longitudedecimal"] = $_REQUEST["longitudedecimal"];
  		$collArr["email"] = $_REQUEST["email"];
- 		if(array_key_exists("icon",$_REQUEST)) $collArr["icon"] = $_REQUEST["icon"];
-  		if(array_key_exists("individualurl",$_REQUEST)) $collArr["individualurl"] = $_REQUEST["individualurl"];
+  		$collArr["icon"] = (array_key_exists("icon",$_REQUEST)?$_REQUEST["icon"]:"");
+ 		$collArr["individualurl"] = (array_key_exists("individualurl",$_REQUEST)?$_REQUEST["individualurl"]:"");
  		if($action == "Submit Edits"){
  			$collManager->submitCollEdits($collArr);
  		}
@@ -309,7 +309,7 @@ else{
 									<?php } ?>
 									<div>
 										<input type="hidden" name="collid" value="<?php echo $collId;?>">
-										<input type="submit" name="collsubmit" value="Submit Edits" />
+										<input type="submit" name="action" value="Submit Edits" />
 									</div>
 								</fieldset>
 							</form>

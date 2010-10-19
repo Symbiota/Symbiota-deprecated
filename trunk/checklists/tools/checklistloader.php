@@ -29,8 +29,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 			return false;
 		}
 		testStr = testStr.toLowerCase();
-		if(testStr.indexOf(".txt") == -1){
-			alert("Document "+document.getElementById("uploadfile").value+" must be a text file (with a .txt extension)");
+		if(testStr.indexOf(".csv") == -1 && testStr.indexOf(".CSV") == -1){
+			alert("Document "+document.getElementById("uploadfile").value+" must be a CSV file (with a .csv extension)");
 			return false;
 		}
 		return true;
@@ -58,7 +58,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 			if($editable){ 
 				if($action == "Upload Checklist"){
 					echo "<div style='margin:10px;'>";
-					$clLoaderManager->uploadChecklist($clid,$hasHeader);
+					$clLoaderManager->uploadCsvList($clid,$hasHeader);
 					echo "</div>";
 				}
 				?>
@@ -74,8 +74,19 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 							<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader?"CHECKED":""); ?> />
 							First line contains header
 						</div>
+						<div>
+							<select>
+								<option value="">Leave taxonomy as is</option>
+								<?php 
+								$clLoaderManager->
+								?>
+							</select>
+							<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader?"CHECKED":""); ?> />
+							Taxonomy Resolution
+						</div>
 						<div style="margin:10px;">
-							<div>Must be a tab-delimited text file that follows one of the following criteria:</div>
+							<div>Must be a CSV text file that follows one of the following criteria. 
+							Note that Excel spreadsheets can be saved as a CSV file.</div>
 							<ul>
 								<li>First column consisting of the scientific name, with or without authors</li>
 								<li>First row contains following column names (in any order):</li>
