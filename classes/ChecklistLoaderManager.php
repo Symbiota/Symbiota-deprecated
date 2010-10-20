@@ -14,14 +14,16 @@ class ChecklistLoaderManager {
 	}
 	
 	public function getThesauri(){
-		$sql = "SELECT ";
-		$rs = $this->query($sql);
+		$retArr = Array();
+		$sql = "SELECT taxauthid, name FROM taxauthority WHERE isactive = 1";
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			
+			$retArr[$row->taxauthid] = $row->name; 
 		}
+		return $retArr;
 	}
 
-	public function uploadCsvList($clid, $hasHeader){
+	public function uploadCsvList($clid, $hasHeader, $thesId){
 		set_time_limit(120);
 		ini_set("max_input_time",120);
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
@@ -54,15 +56,23 @@ class ChecklistLoaderManager {
 				$sciName = ""; $family = "";
 				$sciNameStr = $valueArr[$headerArr["sciname"]];
 				if($sciNameStr){
-					$sql = "SELECT t.tid, ts.family, t.rankid ".
-						"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-						"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciNameStr."\"";
+					$sql = "";
+					if($thesId){
+						$sql = "SELECT t2.tid, ts.family, t2.rankid ".
+							"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+							"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
+							"WHERE ts.taxauthid = ".$thesId." AND t.sciname = \"".$sciNameStr."\"";
+					}
+					else{
+						$sql = "SELECT t.tid, ts.family, t.rankid ".
+							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
+							"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciNameStr."\"";
+					}
 					$rs = $this->conn->query($sql);
 					if($rs){
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
 							$family = $row->family;
-							$sciName = $sciNameStr;
 							$rankId = $row->rankid;
 						}
 						$rs->close();
@@ -100,9 +110,18 @@ class ChecklistLoaderManager {
 							}
 						}
 						$sciName = trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3));
-						$sql = "SELECT t.tid, ts.family, t.rankid ".
-							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-							"WHERE ts.taxauthid = 1 AND t.sciname = '".$sciName."'";
+						$sql = "";
+						if($thesId){
+							$sql = "SELECT t2.tid, ts.family, t2.rankid ".
+								"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+								"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
+								"WHERE ts.taxauthid = ".$thesId." AND t.sciname = \"".$sciName."\"";
+						}
+						else{
+							$sql = "SELECT t.tid, ts.family, t.rankid ".
+								"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
+								"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciName."\"";
+						}
 						//echo $sql;
 						$rs = $this->conn->query($sql);
 						if($row = $rs->fetch_object()){
@@ -114,39 +133,41 @@ class ChecklistLoaderManager {
 					}
 					
 					//Load taxon into checklist
-					if($tid && $rankId > 140){
-						$sqlInsert = "";
-						$sqlValues = "";
-						if(array_key_exists("family",$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr["family"]])){
-							$sqlInsert .= ",familyoverride";
-							$sqlValues .= ",'".$valueArr[$headerArr["family"]]."'";
-						}
-						if(array_key_exists("habitat",$headerArr) && $valueArr[$headerArr["habitat"]]){
-							$sqlInsert .= ",habitat";
-							$sqlValues .= ",'".$valueArr[$headerArr["habitat"]]."'";
-						}
-						if(array_key_exists("abundance",$headerArr) && $valueArr[$headerArr["abundance"]]){
-							$sqlInsert .= ",abundance";
-							$sqlValues .= ",'".$valueArr[$headerArr["abundance"]]."'";
-						}
-						if(array_key_exists("notes",$headerArr) && $valueArr[$headerArr["notes"]]){
-							$sqlInsert .= ",notes";
-							$sqlValues .= ",'".$valueArr[$headerArr["notes"]]."'";
-						}
-						$sql = "INSERT INTO fmchklsttaxalink (tid,clid".$sqlInsert.") VALUES (".$tid.", ".$clid.$sqlValues.")";
-						//echo $sql;
-						if($this->conn->query($sql)){
-							$successCnt++;
+					if($rankId > 180){
+						if($tid){
+							$sqlInsert = "";
+							$sqlValues = "";
+							if(array_key_exists("family",$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr["family"]])){
+								$sqlInsert .= ",familyoverride";
+								$sqlValues .= ",'".$valueArr[$headerArr["family"]]."'";
+							}
+							if(array_key_exists("habitat",$headerArr) && $valueArr[$headerArr["habitat"]]){
+								$sqlInsert .= ",habitat";
+								$sqlValues .= ",'".$valueArr[$headerArr["habitat"]]."'";
+							}
+							if(array_key_exists("abundance",$headerArr) && $valueArr[$headerArr["abundance"]]){
+								$sqlInsert .= ",abundance";
+								$sqlValues .= ",'".$valueArr[$headerArr["abundance"]]."'";
+							}
+							if(array_key_exists("notes",$headerArr) && $valueArr[$headerArr["notes"]]){
+								$sqlInsert .= ",notes";
+								$sqlValues .= ",'".$valueArr[$headerArr["notes"]]."'";
+							}
+							$sql = "INSERT INTO fmchklsttaxalink (tid,clid".$sqlInsert.") VALUES (".$tid.", ".$clid.$sqlValues.")";
+							//echo $sql;
+							if($this->conn->query($sql)){
+								$successCnt++;
+							}
+							else{
+								$failCnt++;
+								$statusStr = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
+								//echo $sql."<br />";
+							}
 						}
 						else{
+							$statusStr = $sciNameStr." failed to load";
 							$failCnt++;
-							$statusStr = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
-							//echo $sql."<br />";
 						}
-					}
-					else{
-						$statusStr = $sciNameStr." failed to load";
-						$failCnt++;
 					}
 				}
 				if($statusStr) echo "<li><span style='color:red;'>ERROR:</span> ".$statusStr."</li>";

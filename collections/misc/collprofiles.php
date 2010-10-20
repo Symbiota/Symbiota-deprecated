@@ -104,15 +104,15 @@ else{
 					<legend><b>Add a New Collection Profile</b></legend>
 					<div>
 						Institution Code:
-						<input type="text" name="institutioncode" value="" style="width:75px;"/>
+						<input type="text" name="institutioncode" value="" style="width:75px;" />
 					</div>	
 					<div>
 						Collection Code:
-						<input type="text" name="collectioncode" value="" style="width:75px;"/>
+						<input type="text" name="collectioncode" value="" style="width:75px;" />
 					</div>	
 					<div>
 						Collection Name: 
-						<input type="text" name="collectionname" value="" style="width:300px;"/>
+						<input type="text" name="collectionname" value="" style="width:300px;" />
 					</div>
 					<div>
 						Brief Description (300 character max): 
@@ -147,11 +147,11 @@ else{
 					</div>
 					<div>
 						Icon URL:
-						<input type="text" name="icon" value="" style="width:320;" title="Small url usually placed in /images/collicons/ folder" />
+						<input type="text" name="icon" value="" style="width:320px;" title="Small url usually placed in /images/collicons/ folder" />
 					</div>
 					<div>
 						Source Record URL:
-						<input type="text" name="individualurl" style="width:290;" value="Dynamic link to source database individual record page" />
+						<input type="text" name="individualurl" style="width:290px;" value="Dynamic link to source database individual record page" />
 					</div>
 					<div>
 						<input type="submit" name="action" value="Add New Profile" />
@@ -194,7 +194,7 @@ else{
 						</a>
 					</div>
 					<div style="float:right;margin:3px;cursor:pointer;" onclick="toggleById('colledit');" title="Editing Contact Information">
-						<img style='border:0px;' src='../../images/edit.png'/>
+						<img style='border:0px;' src='../../images/edit.png' />
 					</div>
 					<?php 
 				}
@@ -256,15 +256,15 @@ else{
 									<legend><b>Edit Collection Information</b></legend>
 									<div>
 										Institution Code:
-										<input type="text" name="institutioncode" value="<?php echo $collData["institutioncode"];?>" style="width:75px;"/>
-									</div>	
+										<input type="text" name="institutioncode" value="<?php echo $collData["institutioncode"];?>" style="width:75px;" />
+									</div>
 									<div>
 										Collection Code:
-										<input type="text" name="collectioncode" value="<?php echo $collData["collectioncode"];?>" style="width:75px;"/>
+										<input type="text" name="collectioncode" value="<?php echo $collData["collectioncode"];?>" style="width:75px;" />
 									</div>	
 									<div>
 										Collection Name: 
-										<input type="text" name="collectionname" value="<?php echo $collData["collectionname"];?>" style="width:300px;"/>
+										<input type="text" name="collectionname" value="<?php echo $collData["collectionname"];?>" style="width:300px;" />
 									</div>
 									<div>
 										Brief Description (300 character max): 
@@ -300,15 +300,15 @@ else{
 									<?php if($isAdmin){ ?>
 									<div>
 										Icon URL:
-										<input type="text" name="icon" value="<?php echo $collData["icon"];?>" />
+										<input type="text" name="icon" style="width:320px;" value="<?php echo $collData["icon"];?>" />
 									</div>
 									<div>
 										Source Record URL:
-										<input type="text" name="individualurl" value="<?php echo $collData["individualurl"];?>" />
+										<input type="text" name="individualurl" style="width:270px;" value="<?php echo $collData["individualurl"];?>" />
 									</div>
 									<?php } ?>
 									<div>
-										<input type="hidden" name="collid" value="<?php echo $collId;?>">
+										<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 										<input type="submit" name="action" value="Submit Edits" />
 									</div>
 								</fieldset>
