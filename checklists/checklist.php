@@ -80,7 +80,7 @@
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
 		if($clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
 		if($proj) $keywordStr .= ",".$proj;
-		echo"<meta name='keywords' content='".$keywordStr."' />";
+		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
 	?>
     <link rel="stylesheet" href="../css/jqac.css" type="text/css" />
 	<link type="text/css" href="../css/ui.tabs.css" rel="stylesheet" />
