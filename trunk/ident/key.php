@@ -68,7 +68,7 @@ if($chars){
 	echo"<title>$defaultTitle Web-Key: $projValue</title>\n";
 	echo"<link rel='stylesheet' href='../css/main.css' type='text/css'>\n";
 	$keywordStr = "interactive key,plants identification,".$dataManager->getClName();
-	echo"<meta name='keywords' content='".$keywordStr."' />\n";
+	echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />\n";
 ?>
 	<script type="text/javascript">
 	
