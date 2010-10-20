@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
 $hasHeader = array_key_exists("hasheader",$_REQUEST)?$_REQUEST["hasheader"]:"";
+$thesId = array_key_exists("thes",$_REQUEST)?$_REQUEST["thes"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 
 $clLoaderManager = new ChecklistLoaderManager();
@@ -58,14 +59,13 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 			if($editable){ 
 				if($action == "Upload Checklist"){
 					echo "<div style='margin:10px;'>";
-					$clLoaderManager->uploadCsvList($clid,$hasHeader);
-					echo "</div>";
+					$clLoaderManager->uploadCsvList($clid,$hasHeader,$thesId);
 				}
 				?>
 				<form enctype="multipart/form-data" action="checklistloader.php" method="post" onsubmit="return validateUploadForm(this);">
 					<fieldset>
 						<legend>Checklist Upload Form</legend>
-						<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+						<input type="hidden" name="MAX_FILE_SIZE" value="5000000" />
 						<div style="font-weight:bold;">
 							Checklist File: 
 							<input id="uploadfile" name="uploadfile" type="file" size="45" />
@@ -75,14 +75,17 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 							First line contains header
 						</div>
 						<div>
-							<select>
-								<option value="">Leave taxonomy as is</option>
+							Taxonomic Resolution:
+							<select name="thes">
+								<option value="">Leave Taxonomy As Is</option>
 								<?php 
-								$clLoaderManager->
+								$thesArr = $clLoaderManager->getThesauri();
+								foreach($thesArr as $k => $v){
+									echo "<option value='".$k."'>".$v."</option>";
+								}
 								?>
 							</select>
-							<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader?"CHECKED":""); ?> />
-							Taxonomy Resolution
+							
 						</div>
 						<div style="margin:10px;">
 							<div>Must be a CSV text file that follows one of the following criteria. 

@@ -102,7 +102,7 @@
 		$conn->query($sql);
 		$conn->close();
 	}
-	
+
 	public function submitCollAdd($addArr){
 		global $symbUid;
 		$conn = MySQLiConnectionFactory::getCon("write");
