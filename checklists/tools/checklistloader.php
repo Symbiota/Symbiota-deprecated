@@ -10,6 +10,7 @@ $thesId = array_key_exists("thes",$_REQUEST)?$_REQUEST["thes"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 
 $clLoaderManager = new ChecklistLoaderManager();
+$clLoaderManager->setClid($clid);
  
 $editable = false;
 if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
@@ -55,11 +56,19 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
+		<h1>
+			<a href="<?php echo $clientRoot."/checklists/checklist.php?cl=".$clid; ?>">
+				<?php echo $clLoaderManager->getClName(); ?>
+			</a>
+		</h1>
+		<div style="margin:10px;">
+			<b>Authors:</b> <?php echo $clLoaderManager->getClAuthors(); ?>
+		</div>
 		<?php 
 			if($editable){ 
 				if($action == "Upload Checklist"){
 					echo "<div style='margin:10px;'>";
-					$clLoaderManager->uploadCsvList($clid,$hasHeader,$thesId);
+					$clLoaderManager->uploadCsvList($hasHeader,$thesId);
 				}
 				?>
 				<form enctype="multipart/form-data" action="checklistloader.php" method="post" onsubmit="return validateUploadForm(this);">
@@ -71,7 +80,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->
 							<input id="uploadfile" name="uploadfile" type="file" size="45" />
 						</div>
 						<div>
-							<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader?"CHECKED":""); ?> />
+							<input type="checkbox" name="hasheader" value="1" <?php echo ($hasHeader||!$action?"CHECKED":""); ?> />
 							First line contains header
 						</div>
 						<div>

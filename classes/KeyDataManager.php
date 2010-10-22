@@ -23,7 +23,7 @@
 	private $lang;
 	private $commonDisplay = false;
 	private $pid;
-	private $symClid;
+	private $dynClid;
 	
 	function __construct() {
 		$this->relevanceValue = .9;
@@ -96,9 +96,9 @@
 			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
 				"WHERE (cltl.CLID = ".$this->clid.")";
 		}
-		else if($this->symClid){
+		else if($this->dynClid){
 			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID ".
-			"WHERE (dcltl.dynclid = ".$this->symClid.")";
+			"WHERE (dcltl.dynclid = ".$this->dynClid.")";
 		}
 		else{
 			$sql .= "FROM (((taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) ".
@@ -134,8 +134,8 @@
 
 	function setClValue($clv){
 		$sql = "";
-		if($this->symClid){
-			$sql = "SELECT d.name, d.details FROM fmdynamicchecklists d WHERE dynclid = $this->symClid";
+		if($this->dynClid){
+			$sql = "SELECT d.name, d.details FROM fmdynamicchecklists d WHERE dynclid = $this->dynClid";
 			$result = $this->keyCon->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
@@ -166,8 +166,8 @@
 		return $this->clid;
 	}
 	
-	public function setSymClid($id){
-		$this->symClid = $id;
+	public function setDynClid($id){
+		$this->dynClid = $id;
 	}
 
 	function setAttrs($attrs){
@@ -214,7 +214,7 @@
 	function getData(){
  		$charArray = array();
 		$taxaArray = array();
-		if(($this->clid && $this->taxonFilter) || $this->symClid){
+		if(($this->clid && $this->taxonFilter) || $this->dynClid){
 		    $this->setTaxaListSQL();
 			$taxaArray = $this->getTaxaList();
 			$charArray = $this->getCharList();
@@ -306,7 +306,7 @@
 				$checked = "";
 				if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
 				if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
-					$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div".($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
+					$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
 						">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
 				}
 
@@ -395,12 +395,12 @@
 			$sqlBase = "SELECT DISTINCT t.tid, ts.UpperTaxonomy, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
 			$sqlFromBase = "";
 			$sqlWhere = "";
-			if($this->symClid){
+			if($this->dynClid){
 				$sqlFromBase = "INNER JOIN taxstatus ts1 ON t.tid = ts1.tid) ".
 	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
 	                "INNER JOIN taxstatus ts ON ts.tidaccepted = t1.tid) ".
 	                "INNER JOIN fmdyncltaxalink clk ON ts.tid = clk.tid ";
-				$sqlWhere = "WHERE clk.dynclid = ".$this->symClid." AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
+				$sqlWhere = "WHERE clk.dynclid = ".$this->dynClid." AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
 			}
 			else{
 				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".

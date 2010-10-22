@@ -25,7 +25,12 @@
     	</a>
     </div>
     <div class="menuitem">
-    	<a href="<?php echo $clientRoot; ?>/ident/dynamickeymap.php">
+    	<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
+    		Dynamic Checklist
+    	</a>
+    </div>
+    <div class="menuitem">
+    	<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">
     		Dynamic Key
     	</a>
     </div>

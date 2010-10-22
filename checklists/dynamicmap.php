@@ -1,11 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
- include_once('../config/symbini.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/DynamicChecklistManager.php');
+header("Content-Type: text/html; charset=".$charset);
+
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
+$interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_REQUEST["interface"]:"checklist";
+
+$dynClManager = new DynamicChecklistManager();
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title><?php echo $defaultTitle; ?> - Dynamic Key Generator</title>
+    <title><?php echo $defaultTitle; ?> - Dynamic Checklist Generator</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<script type="text/javascript">
 	    //<![CDATA[
@@ -78,16 +84,29 @@
 			The area is sampled in concentric rings expanding from point until the sample size significantly represents the species diversity. 
 			In other words, if an area has been poorly collected, a greater radius will be sampled.     
 		</div>
+		
 	    <div style="margin-top:5px;">
 			<form id="mapForm" action="dynamickey.php" method="get" onsubmit="return checkForm();">
 				<div>
 					Point (Lat, Long): 
 					<span id="latlngspan" style="font-weight:bold;"></span>
-					<span style="float:right;margin-right:150px;">
+					<span style="float:right;margin-right:50px;">
+						<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
 						<input type="submit" name="addcoords" value="Submit Coordinates" />
-					</span>	
+					</span>
+					<span style="float:right;margin-right:10px;">
+						<select name="tid">
+							<option>Taxon Filter (optional)</option>
+							<?php 
+							$taxaArr = $dynChecklistManager->getFilterTaxa();
+							foreach($taxaArr as $k => $sciname){
+								echo "<option value='".$k."' ".($k==$tid?"SELECTED":"").">".$sciname."</option>";
+							}
+							?>
+						</select>
+					</span> 
 					<input type="hidden" id="radius" name="radius" value="" />
-					<input type="hidden" id="latbox" name="lat" value="" /> 
+					<input type="hidden" id="latbox" name="lat" value="" />
 					<input type="hidden" id="lngbox" name="lng" value="" />
 				</div>
 				<div style="display:none;">
@@ -99,7 +118,7 @@
 				</div>
 			</form>
 		</div>
-	    <div id='map' style='width: 600px; height: 500px;clear:both;'></div>
+	    <div id='map' style='width: 700px; height: 600px;clear:both;'></div>
 	<?php
 	 	include_once($serverRoot.'/footer.php');
 	?>

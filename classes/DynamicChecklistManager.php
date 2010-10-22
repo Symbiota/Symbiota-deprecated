@@ -1,0 +1,41 @@
+<?php
+/*
+ * Built 20 Oct 2010
+ * E.E. Gilbert
+ */
+include_once($serverRoot.'/config/dbconnection.php');
+
+class DynamicChecklistManager {
+
+	private $conn;
+
+	public function __construct(){
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+	}
+
+	public function __destruct(){
+		if(!($this->conn === null)) $this->conn->close();
+	}
+
+	public function createChecklist($lat, $lng, $radius, $tid){
+		//set_time_limit(120);
+		$result = $this->conn->query("Call DynamicChecklist(".$lat.",".$lng.",".$radius.",".$tid.")");
+		if($row = $result->fetch_row()){
+			$dynPk = $row[0];
+		}
+		$result->close();
+		return $dynPk;
+	}
+	
+	public function getFilterTaxa(){
+		$retArr = Array();
+		$sql = "SELECT t.tid, t.sciname FROM taxa t WHERE t.rankid <= 140 ORDER BY t.sciname ";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->tid] = $row->sciname;
+		}
+		return $retArr;
+	}
+}
+
+ ?>

@@ -8,26 +8,32 @@
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-	$clValue = $_REQUEST["cl"]; 
+	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
+	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
-	$symClid = array_key_exists("symclid",$_REQUEST)?$_REQUEST["symclid"]:"0"; 
- 	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
- 	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0; 
- 	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
- 	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
- 	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
- 	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
- 	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
- 	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
- 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:1;
- 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 
- 	 	
- 	$clManager = new ChecklistManager();
- 	$clManager->setClValue($clValue);
- 	if($thesFilter) $clManager->setThesFilter($thesFilter);
- 	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
- 	if($searchCommon){
- 		$showCommon = 1;
+	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0; 
+	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
+	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
+	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
+	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
+	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
+	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
+	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:1;
+	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 
+	$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
+
+	$clManager = new ChecklistManager();
+	if($clValue){
+		$clManager->setClValue($clValue);
+	}
+	elseif($dynClid){
+		$clManager->setDynClid($dynClid);
+	}
+	if($thesFilter) $clManager->setThesFilter($thesFilter);
+	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
+	if($searchCommon){
+		$showCommon = 1;
  		$clManager->setSearchCommon();
  	}
  	if($searchSynonyms) $clManager->setSearchSynonyms();
@@ -63,8 +69,10 @@
 			$clManager->addNewSpecies($dataArr);
 		}
 	}
- 	$clArray = $clManager->getClMetaData();
-	$taxaArray = $clManager->getTaxaList($pageNumber);
+	if($clValue || $dynClid){
+		$clArray = $clManager->getClMetaData();
+		$taxaArray = $clManager->getTaxaList($pageNumber);
+	}
  ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -78,7 +86,7 @@
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
-		if($clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
+		if(array_key_exists("authors",$clArray) && $clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
 		if($proj) $keywordStr .= ",".$proj;
 		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
 	?>
@@ -349,18 +357,26 @@
 <?php
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:"true");
 	include($serverRoot.'/header.php');
-	if(isset($checklists_checklistCrumbs)){
+	if($crumbLink || isset($checklists_checklistCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $checklists_checklistCrumbs;
-		echo " <b>".$clManager->getClName()."</b>"; 
+		if($crumbLink == "occurcl"){
+			echo "<a href='".$clientRoot."/collections/checklist.php'>";
+			echo "Occurrence Checklist";
+			echo "</a> &gt; ";
+		}
+		elseif(!$dynClid){
+			echo $checklists_checklistCrumbs;
+		}
+		echo " <b>".$clManager->getClName()."</b>";
 		echo "</div>";
 	}
 	?>
 	<!-- This is inner text! -->
 	<div id='innertext'>
-		<?php 
-			if($clManager->getEditable()){
+		<?php
+		if($clValue || $dynClid){
+			if($clValue && $clManager->getEditable()){
 				?>
 				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editspp');" title="Edit Species List">
 					<img style="border:0px;width:12px;" src="../images/edit.png" /><br/>
@@ -372,335 +388,126 @@
 				</div>
 				<?php 
 			}
-		?>
-		<h1>
-		<?php 
-			echo $clManager->getClName()."&nbsp;&nbsp;";
-			if($keyModIsActive){
-				?>
-				<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj;?>&taxon=All+Species">
-					<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
-				</a>&nbsp;&nbsp;&nbsp;
-				<?php 
-			}
 			?>
-			<a href="flashcards.php?clid=<?php echo $clManager->getClid().($taxonFilter?"&taxonfilter=".$taxonFilter:"")."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
-				<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
-			</a>
-		</h1>
-		<div>
-			<span style="font-weight:bold;">
-				Authors: 
-			</span>
-			<?php echo $clArray["authors"]; ?>
-		</div>
-		<?php 
-		if($clArray["publication"]){
-			echo "<div><span style='font-weight:bold;'>Publication: </span>".$clArray["publication"]."</div>";
-		}
-	
-		if($clArray["locality"] || $clArray["latcentroid"] || $clArray["abstract"] || $clArray["notes"]){
-			echo "<div class=\"moredetails\" style=\"color:blue;cursor:pointer;\" onclick=\"toggle('moredetails')\">More Details</div>";
-			echo "<div class='moredetails' style='display:none'>";
-			$locStr = $clArray["locality"].($clArray["latcentroid"]?" (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")":"");
-			if($locStr){
-				echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
-			}
-			if($clArray["abstract"]){
-				echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
-			}
-			if($clArray["notes"]){
-				echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
-			}
-			echo "</div>";
-		}
-		if($clManager->getEditable()){
-	?>
-		<!-- Checklist editing div  -->
-		<div class="editmd" style="display:none;">
-			<div id="tabs" style="margin:10px;height:500px;">
-			    <ul>
-			        <li><a href="#metadata"><span>Metadata</span></a></li>
-			        <li><a href="#editors"><span>Editors</span></a></li>
-			    </ul>
-				<div id="metadata">
-					<form id="checklisteditform" action="checklist.php" method="get" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
-						<fieldset style="margin:5px 0px 5px 5px;">
-							<legend>Edit Checklist Details:</legend>
-							<div>
-								<span>Checklist Name: </span>
-								<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
-							</div>
-							<div>
-								<span>Authors: </span>
-								<input type="text" name="eclauthors" value="<?php echo $clArray["authors"]; ?>" />
-							</div>
-							<div>
-								<span>Locality: </span>
-								<input type="text" name="ecllocality" size="80" value="<?php echo $clArray["locality"]; ?>" />
-							</div> 
-							<div>
-								<span>Publication: </span>
-								<input type="text" name="eclpublication" size="80" value="<?php echo $clArray["publication"]; ?>" />
-							</div>
-							<div>
-								<span>Abstract: </span>
-								<textarea name="eclabstract" cols="70" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
-							</div>
-							<div>
-								<span>Parent Checklist: </span>
-								<select name="eclparentclid">
-									<option value="">Select a Parent checklist</option>
-									<option value="">----------------------------------</option>
-									<?php $clManager->echoParentSelect(); ?>
-								</select>
-							</div>
-							<div>
-								<span>Notes: </span>
-								<input type="text" name="eclnotes" size="80" value="<?php echo $clArray["notes"]; ?>" />
-							</div>
-							<div>
-								<span>Latitude Centroid: </span>
-								<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
-								<span style="cursor:pointer;" onclick="openPointMap();">
-									<img src="../images/world40.gif" style="width:12px;" />
-								</span>
-							</div>
-							<div>
-								<span>Longitude Centroid: </span>
-								<input id="lngdec" type="text" name="ecllongcentroid" value="<?php echo $clArray["longcentroid"]; ?>" />
-							</div>
-							<div>
-								<span>Point Radius (meters): </span>
-								<input type="text" name="eclpointradiusmeters" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
-							</div>
-							<div>
-								<span>Public Access: </span>
-								<select name="eclaccess">
-									<option value="private">Private</option>
-									<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
-								<?php if($isAdmin || $clArray["access"]=="public"){ ?>
-									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public Research Grade</option>
-								<?php } ?>
-								</select>
-							</div>
-							<div>
-								<input type='submit' name='editsubmit' id='editsubmit' value='Submit Changes' />
-							</div>
-							<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-							<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
-							<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
-							<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
-							<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
-							<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
-							<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
-							<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
-						</fieldset>
-					</form>
-				</div>
-				<div id="editors">
-					Editors
-					<div style="margin:10px;">
-						<?php 
-							$clManager->echoEditorList();
-						
-						?>
-					</div>
-				</div>
-			</div>
-		</div>
-	<?php
-		}
-	?>
-		<div>
-			<hr/>
-		</div>
-		<div>
-			<!-- Option box -->
-			<div id="cloptiondiv">
-				<form id='changetaxonomy' name='changetaxonomy' action='checklist.php' method='get'>
-					<fieldset>
-					    <legend>Options</legend>
-						<!-- Taxon Filter option -->
-					    <div id="taxonfilterdiv" title="Filter species list by family or genus">
-					    	<div>
-					    		<b>Search:</b> 
-								<input type="text" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" onfocus="initFilterList(this)" autocomplete="off" />
-							</div>
-							<div>
-								<?php 
-									if($displayCommonNames){
-										echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names";
-									}
-								?>
-								<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
-							</div>
-						</div>
-					    <!-- Thesaurus Filter -->
-					    <div><b>Filter:</b>
-					    	<select id='thesfilter' name='thesfilter'>
-								<option value='0'>Original Checklist</option>
-								<?php 
-									$taxonAuthList = Array();
-									$taxonAuthList = $clManager->getTaxonAuthorityList();
-									foreach($taxonAuthList as $taCode => $taValue){
-										echo "<option value='".$taCode."'".($taCode == $clManager->getThesFilter()?" selected":"").">".$taValue."</option>\n";
-									}
-								?>
-							</select>
-						</div>
-						<div>
-							<?php 
-								//Display Common Names: 0 = false, 1 = true 
-							    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
-							?>
-						</div>
-						<div>
-							<!-- Display as Images: 0 = false, 1 = true  --> 
-						    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
-						    Display as Images
-						</div>
-						<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
-							<!-- Display as Vouchers: 0 = false, 1 = true  --> 
-						    <input id='showvouchers' name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
-						    Notes &amp; Vouchers
-						</div>
-						<div style="float:right;">
-							<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-							<input type="submit" name="optionsubmit" value="Rebuild List" />
-						</div>
-						<div>
-							<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
-						    <input id='showauthors' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
-						    Taxon Authors
-						</div>
-					</fieldset>
-				</form>
-			</div>
-			<div>
-				<h1>Species List</h1>
-				<div style="margin:3px;">
-					<b>Families:</b> 
-					<?php echo $clManager->getFamilyCount(); ?>
-				</div>
-				<div style="margin:3px;">
-					<b>Genera:</b>
-					<?php echo $clManager->getGenusCount(); ?>
-				</div>
-				<div style="margin:3px;">
-					<b>Species:</b>
-					<?php echo $clManager->getSpeciesCount(); ?>
-					(species rank)
-				</div>
-				<div style="margin:3px;">
-					<b>Total Taxa:</b> 
-					<?php echo $clManager->getTaxaCount(); ?>
-					(including ssp. and var.)
+			<h1>
+				<?php 
+				echo $clManager->getClName()."&nbsp;&nbsp;";
+				if($keyModIsActive){
+					?>
+					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid."&crumblink=".$crumbLink;?>&taxon=All+Species">
+						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
+					</a>&nbsp;&nbsp;&nbsp;
+					<?php 
+				}
+				?>
+				<a href="flashcards.php?clid=<?php echo $clManager->getClid()."&dynclid=".$dynClid."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
+					<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
+				</a>
+			</h1>
+			<?php
+			//Do not show certain fields if Dynamic Checklist ($dynClid)
+			if($clValue){
+				?>
+				<div>
+					<span style="font-weight:bold;">
+						Authors: 
+					</span>
+					<?php echo $clArray["authors"]; ?>
 				</div>
 				<?php 
-				$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
-				$pageCount = ceil($clManager->getTaxaCount()/$taxaLimit);
-				$argStr = "";
-				if($pageCount > 1){
-					if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
-					$argStr .= "&cl=".$clValue.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
-					$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-					$argStr .= ($proj?"&proj=".$proj:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
-					$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
-					echo "<hr /><div>Page <b>".($pageNumber+1)."</b> of <b>$pageCount</b>: ";
-					for($x=0;$x<$pageCount;$x++){
-						if($x) echo " | ";
-						if(($pageNumber) == $x){
-							echo "<b>";
-						}
-						else{
-							echo "<a href='checklist.php?pagenumber=".$x.$argStr."'>";
-						}
-						echo ($x+1);
-						if(($pageNumber) == $x){
-							echo "</b>";
-						}
-						else{
-							echo "</a>";
-						}
-					}
-					echo "</div><hr />";
+				if($clArray["publication"]){
+					echo "<div><span style='font-weight:bold;'>Publication: </span>".$clArray["publication"]."</div>";
 				}
-
-				if($clManager->getEditable()){
-				?>
-					<div class="editspp" style="display:none;width:250px;margin-bottom:15px;">
-						<form id='addspeciesform' action='checklist.php' method='get' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
-							<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
-								<legend>Add New Species to Checklist:</legend>
-								<div style="clear:left">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Taxon:
-									</div>
-									<div style="float:left;">
-										<input type="text" id="speciestoadd" name="speciestoadd" onfocus="initAddList(this)" autocomplete="off" />
-										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
-									</div>
+			}
+		
+			if($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"]){
+				echo "<div class=\"moredetails\" style=\"color:blue;cursor:pointer;\" onclick=\"toggle('moredetails')\">More Details</div>";
+				echo "<div class='moredetails' style='display:none'>";
+				$locStr = $clArray["locality"];
+				if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
+				if($locStr){
+					echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
+				}
+				if($clValue && $clArray["abstract"]){
+					echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
+				}
+				if($clValue && $clArray["notes"]){
+					echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
+				}
+				echo "</div>";
+			}
+			if($clValue && $clManager->getEditable()){
+			?>
+			<!-- Checklist editing div  -->
+			<div class="editmd" style="display:none;">
+				<div id="tabs" style="margin:10px;height:500px;">
+				    <ul>
+				        <li><a href="#metadata"><span>Metadata</span></a></li>
+				        <li><a href="#editors"><span>Editors</span></a></li>
+				    </ul>
+					<div id="metadata">
+						<form id="checklisteditform" action="checklist.php" method="get" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
+							<fieldset style="margin:5px 0px 5px 5px;">
+								<legend>Edit Checklist Details:</legend>
+								<div>
+									<span>Checklist Name: </span>
+									<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
 								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:100px;">
-										Family Override: 
-									</div>
-									<div style="float:left;">
-										<input type="text" name="familyoverride" size="15" title="Only enter if you want to override current family" />
-									</div>
+								<div>
+									<span>Authors: </span>
+									<input type="text" name="eclauthors" size="70" value="<?php echo $clArray["authors"]; ?>" />
 								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Habitat:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="habitat" />
-									</div>
+								<div>
+									<span>Locality: </span>
+									<input type="text" name="ecllocality" size="80" value="<?php echo $clArray["locality"]; ?>" />
+								</div> 
+								<div>
+									<span>Publication: </span>
+									<input type="text" name="eclpublication" size="80" value="<?php echo $clArray["publication"]; ?>" />
 								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Abundance:
-									</div>
-									<div style="float:left;">
-										<select name="abundance">
-											<option value="">undefined</option>
-											<option>abundant</option>
-											<option>locally abundant</option>
-											<option>seasonal abundant</option>
-											<option>frequent</option>
-											<option>locally frequent</option>
-											<option>seasonal frequent</option>
-											<option>occasional</option>
-											<option>infrequent</option>
-											<option>rare</option>
-										</select>
-									</div>
+								<div>
+									<span>Abstract: </span>
+									<textarea name="eclabstract" cols="70" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Notes:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="notes" />
-									</div>
+								<div>
+									<span>Parent Checklist: </span>
+									<select name="eclparentclid">
+										<option value="">Select a Parent checklist</option>
+										<option value="">----------------------------------</option>
+										<?php $clManager->echoParentSelect(); ?>
+									</select>
 								</div>
-								<div style="clear:left;padding-top:2px;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Internal Notes:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="internalnotes" title="Displayed to administrators only"/>
-									</div>
+								<div>
+									<span>Notes: </span>
+									<input type="text" name="eclnotes" size="80" value="<?php echo $clArray["notes"]; ?>" />
 								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Source:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="source" />
-									</div>
+								<div>
+									<span>Latitude Centroid: </span>
+									<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
+									<span style="cursor:pointer;" onclick="openPointMap();">
+										<img src="../images/world40.gif" style="width:12px;" />
+									</span>
+								</div>
+								<div>
+									<span>Longitude Centroid: </span>
+									<input id="lngdec" type="text" name="ecllongcentroid" value="<?php echo $clArray["longcentroid"]; ?>" />
+								</div>
+								<div>
+									<span>Point Radius (meters): </span>
+									<input type="text" name="eclpointradiusmeters" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
+								</div>
+								<div>
+									<span>Public Access: </span>
+									<select name="eclaccess">
+										<option value="private">Private</option>
+										<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
+									<?php if($isAdmin || $clArray["access"]=="public"){ ?>
+										<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public Research Grade</option>
+									<?php } ?>
+									</select>
+								</div>
+								<div>
+									<input type='submit' name='editsubmit' id='editsubmit' value='Submit Changes' />
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
@@ -710,98 +517,326 @@
 								<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
 								<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
 								<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
-								<input type="submit" name="submitadd" value="Add Species to List"/>
-								<hr />
-								<div style="text-align:center;">
-									<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload</a>
-								</div>
 							</fieldset>
 						</form>
 					</div>
-					<?php
-					}
-					if($showImages){
-						foreach($taxaArray as $family => $sppArr){
-							?>
-							<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
-								<h3><?php echo $family; ?></h3>
-							</div>
-							<div>
+					<div id="editors">
+						Editors
+						<div style="margin:10px;">
 							<?php 
-								foreach($sppArr as $tid => $imgArr){
-									echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
-									$imgSrc = ($imgArr["tnurl"]?$imgArr["tnurl"]:$imgArr["url"]);
-									echo "<div class='tnimg'>";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
-									if($imgSrc){
-										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
-										echo "<a href='".$spUrl."'>";
-										list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
-										$dim = ($width > $height?"width":"height"); 
-										echo "<img src='".$imgSrc."' style='$dim:196px;' />";
-										echo "</a>";
-									}
-									else{
-										echo "<div style='margin-top:50px;'><b>Image<br/>not yet<br/>available</b></div>";
-									}
-									echo "</div>";
-									echo "<div><a href='".$spUrl."'><b>".$imgArr["sciname"]."</b></a></div>";
-									echo "</div>\n";
-								}
+								$clManager->echoEditorList();
+							
 							?>
+						</div>
+					</div>
+				</div>
+			</div>
+			<?php
+			}
+			?>
+			<div>
+				<hr/>
+			</div>
+			<div>
+				<!-- Option box -->
+				<div id="cloptiondiv">
+					<form id='changetaxonomy' name='changetaxonomy' action='checklist.php' method='get'>
+						<fieldset>
+						    <legend>Options</legend>
+							<!-- Taxon Filter option -->
+						    <div id="taxonfilterdiv" title="Filter species list by family or genus">
+						    	<div>
+						    		<b>Search:</b> 
+									<input type="text" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" onfocus="initFilterList(this)" autocomplete="off" />
+								</div>
+								<div>
+									<?php 
+										if($displayCommonNames){
+											echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names";
+										}
+									?>
+									<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
+								</div>
 							</div>
-							<?php 
-						}
-					}
-					else{
-						$voucherArr = Array();
-						if($showVouchers) $voucherArr = $clManager->getVoucherArr();
-						foreach($taxaArray as $family => $sppArr){
-							?>
-							<div class="familydiv" id="<?php echo $family;?>" style="margin-top:30px;">
-								<h3><?php echo $family;?></h3>
+						    <!-- Thesaurus Filter -->
+						    <div><b>Filter:</b>
+						    	<select id='thesfilter' name='thesfilter'>
+									<option value='0'>Original Checklist</option>
+									<?php 
+										$taxonAuthList = Array();
+										$taxonAuthList = $clManager->getTaxonAuthorityList();
+										foreach($taxonAuthList as $taCode => $taValue){
+											echo "<option value='".$taCode."'".($taCode == $clManager->getThesFilter()?" selected":"").">".$taValue."</option>\n";
+										}
+									?>
+								</select>
 							</div>
 							<div>
 								<?php 
-								foreach($sppArr as $tid => $displayName){
-									$voucherLink = "";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
-									echo "<div id='tid-$tid'>";
-									echo "<div>";
-									if(!preg_match('/\ssp\d/',$displayName)) echo "<a href='".$spUrl."' target='_blank'>";
-									echo $displayName;
-									if(!preg_match('/\ssp\d/',$displayName)) echo "</a>";
-									if($clManager->getEditable()){
-										//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
-										?> 
-										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
-											<img src='../images/edit.png' style='width:13px;' title='edit details' />
-										</span>
-										<?php 
-									}
-									echo "</div>\n";
-									if($showVouchers && array_key_exists($tid,$voucherArr)){
-										echo "<div style='margin-left:10px;'>".$voucherArr[$tid]."</div>";
-									}
-									echo "</div>\n";
-								}
+									//Display Common Names: 0 = false, 1 = true 
+								    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
 								?>
 							</div>
-							<?php 
-						}
-					}
+							<div>
+								<!-- Display as Images: 0 = false, 1 = true  --> 
+							    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
+							    Display as Images
+							</div>
+							<?php if($clValue){ ?>
+								<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
+									<!-- Display as Vouchers: 0 = false, 1 = true  --> 
+								    <input id='showvouchers' name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
+								    Notes &amp; Vouchers
+								</div>
+							<?php } ?>
+							<div style="float:right;">
+								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
+								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
+								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
+								<input type="submit" name="optionsubmit" value="Rebuild List" />
+							</div>
+							<div>
+								<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
+							    <input id='showauthors' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
+							    Taxon Authors
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div>
+					<h1>Species List</h1>
+					<div style="margin:3px;">
+						<b>Families:</b> 
+						<?php echo $clManager->getFamilyCount(); ?>
+					</div>
+					<div style="margin:3px;">
+						<b>Genera:</b>
+						<?php echo $clManager->getGenusCount(); ?>
+					</div>
+					<div style="margin:3px;">
+						<b>Species:</b>
+						<?php echo $clManager->getSpeciesCount(); ?>
+						(species rank)
+					</div>
+					<div style="margin:3px;">
+						<b>Total Taxa:</b> 
+						<?php echo $clManager->getTaxaCount(); ?>
+						(including ssp. and var.)
+					</div>
+					<?php 
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
-					if($clManager->getTaxaCount() > (($pageNumber+1)*$taxaLimit)){
-						echo "<div style='margin:20px;clear:both;'><a href='checklist.php?pagenumber=".($pageNumber+1).$argStr."'>Display next ".$taxaLimit." taxa...</a></div>";
+					$pageCount = ceil($clManager->getTaxaCount()/$taxaLimit);
+					$argStr = "";
+					if($pageCount > 1){
+						if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
+						$argStr .= "&cl=".$clValue.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
+						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
+						$argStr .= ($proj?"&proj=".$proj:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
+						echo "<hr /><div>Page <b>".($pageNumber+1)."</b> of <b>$pageCount</b>: ";
+						for($x=0;$x<$pageCount;$x++){
+							if($x) echo " | ";
+							if(($pageNumber) == $x){
+								echo "<b>";
+							}
+							else{
+								echo "<a href='checklist.php?pagenumber=".$x.$argStr."'>";
+							}
+							echo ($x+1);
+							if(($pageNumber) == $x){
+								echo "</b>";
+							}
+							else{
+								echo "</a>";
+							}
+						}
+						echo "</div><hr />";
 					}
-					if(!$taxaArray) echo "<h1 style='margin-top:100px;'>No Taxa Found</h1>";
-				?>
+	
+					if($clValue && $clManager->getEditable()){
+					?>
+						<div class="editspp" style="display:none;width:250px;margin-bottom:15px;">
+							<form id='addspeciesform' action='checklist.php' method='get' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
+								<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
+									<legend>Add New Species to Checklist:</legend>
+									<div style="clear:left">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Taxon:
+										</div>
+										<div style="float:left;">
+											<input type="text" id="speciestoadd" name="speciestoadd" onfocus="initAddList(this)" autocomplete="off" />
+											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
+										</div>
+									</div>
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:100px;">
+											Family Override: 
+										</div>
+										<div style="float:left;">
+											<input type="text" name="familyoverride" size="15" title="Only enter if you want to override current family" />
+										</div>
+									</div>
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Habitat:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="habitat" />
+										</div>
+									</div>
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Abundance:
+										</div>
+										<div style="float:left;">
+											<select name="abundance">
+												<option value="">undefined</option>
+												<option>abundant</option>
+												<option>locally abundant</option>
+												<option>seasonal abundant</option>
+												<option>frequent</option>
+												<option>locally frequent</option>
+												<option>seasonal frequent</option>
+												<option>occasional</option>
+												<option>infrequent</option>
+												<option>rare</option>
+											</select>
+										</div>
+									</div>
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Notes:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="notes" />
+										</div>
+									</div>
+									<div style="clear:left;padding-top:2px;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Internal Notes:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="internalnotes" title="Displayed to administrators only"/>
+										</div>
+									</div>
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Source:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="source" />
+										</div>
+									</div>
+									<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
+									<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
+									<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
+									<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
+									<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
+									<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
+									<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
+									<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
+									<input type="submit" name="submitadd" value="Add Species to List"/>
+									<hr />
+									<div style="text-align:center;">
+										<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload</a>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<?php
+						}
+						if($showImages){
+							foreach($taxaArray as $family => $sppArr){
+								?>
+								<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
+									<h3><?php echo $family; ?></h3>
+								</div>
+								<div>
+								<?php 
+									foreach($sppArr as $tid => $imgArr){
+										echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
+										$imgSrc = ($imgArr["tnurl"]?$imgArr["tnurl"]:$imgArr["url"]);
+										echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
+										$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+										if($imgSrc){
+											$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
+											echo "<a href='".$spUrl."'>";
+											list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
+											$dim = ($width > $height?"width":"height"); 
+											echo "<img src='".$imgSrc."' style='$dim:196px;' />";
+											echo "</a>";
+										}
+										else{
+											echo "<div style='margin-top:50px;'><b>Image<br/>not yet<br/>available</b></div>";
+										}
+										echo "</div>";
+										echo "<div><a href='".$spUrl."'><b>".$imgArr["sciname"]."</b></a></div>";
+										echo "</div>\n";
+									}
+								?>
+								</div>
+								<?php 
+							}
+						}
+						else{
+							$voucherArr = Array();
+							if($showVouchers) $voucherArr = $clManager->getVoucherArr();
+							foreach($taxaArray as $family => $sppArr){
+								?>
+								<div class="familydiv" id="<?php echo $family;?>" style="margin-top:30px;">
+									<h3><?php echo $family;?></h3>
+								</div>
+								<div>
+									<?php 
+									foreach($sppArr as $tid => $displayName){
+										$voucherLink = "";
+										$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+										echo "<div id='tid-$tid'>";
+										echo "<div>";
+										if(!preg_match('/\ssp\d/',$displayName)) echo "<a href='".$spUrl."' target='_blank'>";
+										echo $displayName;
+										if(!preg_match('/\ssp\d/',$displayName)) echo "</a>";
+										if($clManager->getEditable()){
+											//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
+											?> 
+											<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
+												<img src='../images/edit.png' style='width:13px;' title='edit details' />
+											</span>
+											<?php 
+										}
+										echo "</div>\n";
+										if($showVouchers && array_key_exists($tid,$voucherArr)){
+											echo "<div style='margin-left:10px;'>".$voucherArr[$tid]."</div>";
+										}
+										echo "</div>\n";
+									}
+									?>
+								</div>
+								<?php 
+							}
+						}
+						$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
+						if($clManager->getTaxaCount() > (($pageNumber+1)*$taxaLimit)){
+							echo "<div style='margin:20px;clear:both;'><a href='checklist.php?pagenumber=".($pageNumber+1).$argStr."'>Display next ".$taxaLimit." taxa...</a></div>";
+						}
+						if(!$taxaArray) echo "<h1 style='margin-top:100px;'>No Taxa Found</h1>";
+					?>
+				</div>
 			</div>
-		</div>
+			<?php
+		}
+		else{
+			?>
+			<div>
+				Checklist identification is null!
+			</div>
+			<?php 
+		}
+		?>
 	</div>
-<?php
+	<?php
  	include($serverRoot.'/footer.php');
-?>
+	?>
 
 	<script type="text/javascript">
 		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

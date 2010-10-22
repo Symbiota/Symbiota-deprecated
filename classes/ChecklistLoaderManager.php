@@ -4,7 +4,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 class ChecklistLoaderManager {
 
 	private $conn;
-
+	private $clid;
+	private $clName;
+	private $clAuthors;
+	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -13,6 +16,26 @@ class ChecklistLoaderManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 	
+	public function setClid($c){
+		if($c){
+			$this->clid = $c;
+			$sql = "SELECT c.name, c.authors FROM fmchecklists c WHERE c.clid = ".$c;
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$this->clName = $row->name;
+				$this->clAuthors = $row->authors;
+			}
+		}
+	}
+
+	public function getClName(){
+		return $this->clName;
+	}
+
+	public function getClAuthors(){
+		return $this->clAuthors;
+	}
+
 	public function getThesauri(){
 		$retArr = Array();
 		$sql = "SELECT taxauthid, name FROM taxauthority WHERE isactive = 1";

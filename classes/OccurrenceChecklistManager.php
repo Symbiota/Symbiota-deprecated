@@ -61,11 +61,11 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		if($this->getTaxaSearchStr()) $searchStr .= "; ".$this->getTaxaSearchStr();
 		if($this->getLocalSearchStr()) $searchStr .= "; ".$this->getLocalSearchStr();
 		if($this->getDatasetSearchStr()) $searchStr .= "; ".$this->getDatasetSearchStr();
-		$searchStr = substr($searchStr,2,250);
-		$nameStr = substr($searchStr,0,35)."-".time();
+		//$searchStr = substr($searchStr,2,250);
+		//$nameStr = substr($searchStr,0,35)."-".time();
 		$dynClid = 0;
 		$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
-			"VALUES ('Specimen Key #".date('Y-m-d H:i:s',time())."', 'Specimen Key #".date('Y-m-d H:i:s',time())."', '".$userId."', 'dynamic checklist', '', '".$expirationTime."') ";
+			"VALUES ('Dynamic Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'dynamic checklist', '', '".$expirationTime."') ";
 		if($conn->query($sqlCreateCl)){
 			$dynClid = $conn->insert_id;
 			//Get checklist and append to dyncltaxalink
