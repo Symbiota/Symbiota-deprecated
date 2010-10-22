@@ -39,7 +39,32 @@
 			<div class='backendright'>&nbsp;</div>
 		</div>
 
-		<div style='margin:10px;float:left;'>
+		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Download Checklist Data'>
+			<a href='download/downloadhandler.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+				<img width='15px' src='../images/dl.png'/>
+			</a>
+		</div>
+		<?php 
+		if($keyModIsActive){
+		?>
+			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Interactive Key Interface'>
+				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=key">
+					<img width='15px' src='../images/key.jpg'/>
+				</a>
+			</div>
+		<?php 
+		}
+		if($floraModIsActive){
+		?>
+			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Checklist Explorer Interface'>
+				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist">
+					<img width='15px' src='../images/list.png'/>
+				</a>
+			</div>
+		<?php
+		}
+		?>
+		<div style='margin:10px;float:right;'>
 			<form name="changetaxonomy" id="changetaxonomy" action="checklist.php" method="get">
 				Taxonomic Filter:
 					<select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
@@ -52,14 +77,6 @@
 	                        ?>
 					</select>
 			</form>
-		</div>
-		<?php if($keyModIsActive){ ?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open Checklist in Interactive Key Interface'>
-			<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>"><img width='15px' src='../images/key.jpg'/></a>
-		</div>
-		<?php } ?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Download Checklist Data'>
-			<a href='download/downloadhandler.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'><img src='../images/dl.png'/></a>
 		</div>
 		<div style="clear:both;"><hr/></div>
 		<?php

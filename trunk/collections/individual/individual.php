@@ -82,7 +82,7 @@
 				$indUrl = str_replace("--PK--",$indManager->getDbpk(),$indUrl);
 	           	echo "<div>".$indManager->getCollectionName()." <a href='".$indUrl."'> display page</a></div>";
 	           }
-			echo "<div>For more information on this specimen, please contact <a class='bodylink' href='mailto:".$indManager->getContactEmail()."'>".$indManager->getContactName()." (".$indManager->getContactEmail().")</a></div>";
+			echo "<div>For additional information on this specimen, please contact <a class='bodylink' href='mailto:".$indManager->getContactEmail()."'>".$indManager->getContactName()." (".$indManager->getContactEmail().")</a></div>";
 		        
 	    	if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 				?>

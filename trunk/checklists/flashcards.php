@@ -1,15 +1,23 @@
 <?php
 //error_reporting(E_ALL);
- include_once('../config/symbini.php');
- include_once($serverRoot.'/config/dbconnection.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
+header("Content-Type: text/html; charset=".$charset);
 
-	$clid = $_REQUEST["clid"]; 
+	$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0; 
 	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:1; 
 	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
 	$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
-	
+
+	$fcManager = new FlashcardManager();
+	$fcManager->setClid($clid);
+	$fcManager->setDynClid($dynClid);
+	$fcManager->setTaxonFilter($taxonFilter);
+	$fcManager->setThesFilter($thesFilter);
+	$fcManager->setShowCommon($showCommon);
+	$fcManager->setLang($lang);
 ?>
 <html>
 <head>
@@ -18,8 +26,7 @@
 	<script type="text/javascript">
 		var imageArr = new Array();
 		<?php 
-			$fcManager = new FlashcardManager();
-			$urlArr = $fcManager->getImages($clid,$taxonFilter,$thesFilter,$showCommon,$lang);
+			$urlArr = $fcManager->getImages();
 			if($urlArr){
 	 			$sciNameStr = "\"".implode("\",\"",array_keys($urlArr))."\""; 
 				echo "var sciNameArr = Array(".$sciNameStr.");\n";
@@ -171,7 +178,7 @@
 							<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
 								<option value="0">Filter Quiz by Taxonomic Group</option>
 								<?php 
-									$fcManager->echoTaxonFilterList($clid,$thesFilter,$taxonFilter);
+									$fcManager->echoTaxonFilterList();
 								?>
 							</select>
 						</div>
@@ -207,28 +214,39 @@
 <?php
  
  class FlashcardManager {
-
- 	private function getConnection(){
- 		return MySQLiConnectionFactory::getCon("readonly");
- 	}
  	
-	public function getImages($clid, $taxonFilter, $thesFilter = 1, $showCommon = 0, $lang){
+	private $conn;
+	private $clid;
+	private $dynClid;
+	private $taxonFilter;
+	private $thesFilter = 1;
+	private $showCommon = 0;
+	private $lang;
+
+	function __construct() {
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+	}
+
+	function __destruct(){
+ 		if(!($this->conn === false)) $this->conn->close();
+	}
+	
+	public function getImages(){
 		//Get species list
-		$sql1 = "SELECT DISTINCT ts.uppertaxonomy, ts.family, t.sciname, ti.url ";
-		$sql2 = "FROM ((((fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid) ".
-			"INNER JOIN taxa t ON ts.".($thesFilter?"tidaccepted":"tid")." = t.tid) ".
+		$sql1 = "SELECT DISTINCT t.sciname, ti.url ";
+		$sql2 = "FROM ((((".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid) ".
+			"INNER JOIN taxa t ON ts.".($this->thesFilter?"tidaccepted":"tid")." = t.tid) ".
 			"INNER JOIN taxstatus ts1 ON ts.tidaccepted = ts1.tidaccepted) ".
 			"INNER JOIN images ti ON ts1.tid = ti.tid) ";
-		if($showCommon){
+		if($this->showCommon){
 			$sql1 .= ",v.vernacularname "; 
-			$sql2 .= "LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = '".$lang."' AND vern.SortSequence = 1) v ON ts.TidAccepted = v.tid ";
+			$sql2 .= "LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = '".$this->lang."' AND vern.SortSequence = 1) v ON ts.TidAccepted = v.tid ";
 		}
-		$sql = $sql1.$sql2."WHERE ctl.clid = $clid AND ts.taxauthid = ".($thesFilter?$thesFilter:"1")." AND ts1.taxauthid = 1 AND ti.SortSequence < 90 ";
-		if($taxonFilter) $sql .= "AND (ts.UpperTaxonomy = '".$taxonFilter."' OR ts.Family = '".$taxonFilter."' OR t.sciname Like '".$taxonFilter."%') ";
+		$sql = $sql1.$sql2."WHERE ".($this->clid?"ctl.clid = ".$this->clid:"ctl.dynclid = ".$this->dynClid)." AND ts.taxauthid = ".($this->thesFilter?$this->thesFilter:"1")." AND ts1.taxauthid = 1 AND ti.SortSequence < 90 ";
+		if($this->taxonFilter) $sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR ts.Family = '".$this->taxonFilter."' OR t.sciname Like '".$this->taxonFilter."%') ";
 		$sql .= "ORDER BY t.sciname";
 		//echo $sql;
-		$conn = $this->getConnection();
-		$result = $conn->query($sql);
+		$result = $this->conn->query($sql);
 		$returnArr = Array();
 		while ($row = $result->fetch_object()){
 			$url = $row->url;
@@ -236,36 +254,35 @@
 				$url = $GLOBALS["imageDomain"].$url;
 			}
 			$sciName = $row->sciname;
-			if($showCommon && $row->vernacularname) $sciName .= " (".$row->vernacularname.")"; 
+			if($this->showCommon && $row->vernacularname) $sciName .= " (".$row->vernacularname.")"; 
 			$returnArr[$sciName][] = $url;
 		}
 		$result->close();
-		$conn->close();
 		return $returnArr;
 	}
-	
-	public function echoTaxonFilterList($clid, $thesFilter = 1, $taxonFilter = 0){
+
+	public function echoTaxonFilterList(){
 		$returnArr = Array();
 		$upperList = Array();
-		$sqlFamily = "SELECT DISTINCT ts.UpperTaxonomy, IFNULL(ctl.familyoverride,ts.Family) AS family ".
+		$sqlFamily = "SELECT DISTINCT ts.uppertaxonomy, ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
 			"FROM (taxa t INNER JOIN taxstatus ts ON t.TID = ts.TID) ".
-			"INNER JOIN fmchklsttaxalink ctl ON t.TID = ctl.TID ".
-			"WHERE (ts.taxauthid = ".($thesFilter?$thesFilter:1)." AND ctl.CLID = ".$clid.") ";
+			"INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.TID = ctl.TID ".
+			"WHERE (ts.taxauthid = ".($this->thesFilter?$this->thesFilter:1)." AND ctl.".
+			($this->clid?"clid = ".$this->clid:"dynclid = ".$this->dynClid).") ";
 		//echo $sqlFamily."<br>";
-		$conn = $this->getConnection();
-		$rsFamily = $conn->query($sqlFamily);
+		$rsFamily = $this->conn->query($sqlFamily);
 		while ($row = $rsFamily->fetch_object()){
 			$returnArr[] = $row->family;
-			$upperList[$row->UpperTaxonomy] = "";
+			$upperList[$row->uppertaxonomy] = "";
 		}
 		$rsFamily->close();
-		$sqlGenus = "SELECT DISTINCT taxa.UnitName1 ".
-			"FROM taxa INNER JOIN fmchklsttaxalink ON taxa.TID = chklsttaxalink.TID ".
-			"WHERE (chklsttaxalink.CLID = ".$clid.") ";
+		$sqlGenus = "SELECT DISTINCT t.unitname1 ".
+			"FROM taxa t INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.tid = ctl.tid ".
+			"WHERE (ctl.clid = ".$this->clid.") ";
 		//echo $sqlGenus."<br>";
- 		$rsGenus = $conn->query($sqlGenus);
+ 		$rsGenus = $this->conn->query($sqlGenus);
 		while ($row = $rsGenus->fetch_object()){
-			$returnArr[] = $row->UnitName1;
+			$returnArr[] = $row->unitname1;
 		}
 		$rsGenus->close();
 		natcasesort($returnArr);
@@ -273,15 +290,38 @@
 		$upperList["-----------------------------------------------"] = "";
 		$returnArr["-----------------------------------------------"] = "";
 		$returnArr = array_merge(array_keys($upperList),$returnArr);
-		$conn->close();
 		foreach($returnArr as $value){
 			echo "<option ";
-			if($taxonFilter && $taxonFilter == $value){
+			if($this->taxonFilter && $this->taxonFilter == $value){
 				echo " SELECTED";
 			}
 			echo ">".$value."</option>\n";
 		}
 	}
- }
+
+	public function setClid($id){
+		$this->clid = $id;
+	}
+
+	public function setDynClid($id){
+		$this->dynClid = $id;
+	}
+
+	public function setTaxonFilter($tValue){
+		$this->taxonFilter = $tValue;
+	}
+
+	public function setThesFilter($tValue){
+		$this->thesFilter = $tValue;
+	}
+
+	public function setShowCommon($sc){
+		$this->showCommon = $sc;
+	}
+
+	public function setLang($l){
+		$this->lang = $l;
+	}
+}
 
  ?>

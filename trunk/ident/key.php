@@ -18,35 +18,36 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
 
 <?php
- $spLink = "../taxa/index.php?taxon=--SPECIES--";
- // $spLink = "http://mobot.mobot.org/cgi-bin/search_vast?name=--SPECIES--";
- $secondaryLink = "";
- $secondaryIcon = "";
- //$secondaryLink = "http://images.google.com/images?q=&#034;--SPECIES--&#034;";
- //$secondaryIcon = "../images/google.jpg";
- //$secondaryLink = "http://132.236.163.181/cgi-bin/dol/dol_terminal.pl?taxon_name=--SPECIES--&rank=genus&classif_id=0";
- //$secondaryIcon = "dol.org";
- 
- $attrsValues = Array();
- 
- $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
- $symClid = array_key_exists("symclid",$_REQUEST)?$_REQUEST["symclid"]:0; 
- $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
- $action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:""; 
- $rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:""; 
- $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
- $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
- $displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:""; 
- if(!$action){
- 	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
- }
+$spLink = "../taxa/index.php?taxon=--SPECIES--";
+// $spLink = "http://mobot.mobot.org/cgi-bin/search_vast?name=--SPECIES--";
+$secondaryLink = "";
+$secondaryIcon = "";
+//$secondaryLink = "http://images.google.com/images?q=&#034;--SPECIES--&#034;";
+//$secondaryIcon = "../images/google.jpg";
+//$secondaryLink = "http://132.236.163.181/cgi-bin/dol/dol_terminal.pl?taxon_name=--SPECIES--&rank=genus&classif_id=0";
+//$secondaryIcon = "dol.org";
+
+$attrsValues = Array();
+
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
+$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0; 
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+$action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:""; 
+$rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:""; 
+$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+$displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:""; 
+if(!$action){
+	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
+}
+$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
  
  $dataManager = new KeyDataManager();
  if(!$langValue) $langValue = $defaultLang;
  if($displayMode) $dataManager->setCommonDisplay(true);;  
  $dataManager->setLanguage($langValue);
  if($projValue) $dataManager->setProject($projValue);
- if($symClid) $dataManager->setSymClid($symClid);
+ if($dynClid) $dataManager->setDynClid($dynClid);
  $dataManager->setClValue($clValue);
  if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
  if($attrsValues) $dataManager->setAttrs($attrsValues);
@@ -149,20 +150,20 @@ if($chars){
 	</script>
 </head>
  
-<body onload='setDisplayStatus()'>
+<body>
 
 <?php 
 	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:"true");
 	include($serverRoot.'/header.php');
-	if(array_key_exists("crumburl",$_REQUEST) || isset($ident_keyCrumbs)){
+	if($crumbLink || isset($ident_keyCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		if(array_key_exists("crumburl",$_REQUEST)){
-			echo "<a href='".$_REQUEST["crumburl"]."'>";
-			echo (array_key_exists("crumbtitle",$_REQUEST)?$_REQUEST["crumbtitle"]:$_REQUEST["crumburl"]);
+		if($crumbLink == "occurcl"){
+			echo "<a href='".$clientRoot."/collections/checklist.php'>";
+			echo "Occurrence Checklist";
 			echo "</a> &gt; ";
 		}
-		else{
+		elseif(!$dynClid){
 			echo $ident_keyCrumbs;
 		}
 		echo " <b>".$dataManager->getClName()." Key</b>";
@@ -179,7 +180,7 @@ if($chars){
       	  <tr>
       	  <td>
 	  		<?php 
-			if(!$symClid){
+			if(!$dynClid){
 	  			echo "<div style='font-weight:bold;'>Checklist:</div>";
 				echo "<select name='cl'>";
 	  			$selectList = Array();
@@ -191,9 +192,9 @@ if($chars){
 				echo "</select>";
 			}
 			//Pass project value to next page
-			echo "<INPUT Type='hidden' Id='symclid' Name='symclid' Value='".$symClid."'>";
-			echo "<INPUT Type='hidden' Id='proj' Name='proj' Value='".$projValue."'>";
-			echo "<INPUT Type='hidden' Id='rv' Name='rv' Value='".$dataManager->getRelevanceValue()."'>";
+			echo "<input Type='hidden' Id='dynclid' Name='dynclid' Value='".$dynClid."' />";
+			echo "<input Type='hidden' Id='proj' Name='proj' Value='".$projValue."' />";
+			echo "<input Type='hidden' Id='rv' Name='rv' Value='".$dataManager->getRelevanceValue()."' />";
 			if($projValue) echo "<div><a href='clgmap.php?proj=".$projValue."'>map view</a></div>";
 			?>
 			<div style='font-weight:bold; margin-top:0.5em;'>Taxon:</div>
@@ -228,8 +229,8 @@ if($chars){
   		}
   		echo "<div style='margin:5px'>Display as: <select name='displaymode' onchange='javascript: document.forms[0].submit();'><option value='0'>Scientific Name</option><option value='1'".($displayMode?" SELECTED":"").">Common Name</option></select></div>";
   		if($chars){
-			echo "<div id='showall' class='dynamControl' style='display:block'><a href='#' onclick='javascript: toggleAll();'>Show All Characters</a></div>\n";
-			echo "<div class='dynamControl' style='display:none'><a href='#' onclick='javascript: toggleAll();'>Hide Advanced Characters</a></div>\n";
+			//echo "<div id='showall' class='dynamControl' style='display:none'><a href='#' onclick='javascript: toggleAll();'>Show All Characters</a></div>\n";
+			//echo "<div class='dynamControl' style='display:block'><a href='#' onclick='javascript: toggleAll();'>Hide Advanced Characters</a></div>\n";
 			foreach($chars as $key => $htmlStrings){
 				echo $htmlStrings."\n";
   		  	}
@@ -241,15 +242,16 @@ if($chars){
     
 		<?php
 		//List taxa by family/sci name
-		if(($clValue && $taxonValue) || $symClid){
+		if(($clValue && $taxonValue) || $dynClid){
 			echo "<table border='0' width='300px'>";
 			echo "<tr><td colspan='2'>";
 			echo "<h2>".$dataManager->getClName()." ";
-			if(!$symClid && $floraModIsActive){
-				echo "<a href='../checklists/checklist.php?cl=".$clValue."'><img src='../images/info.jpg' title='More information' border='0' width='12' /></a>";
+			if($floraModIsActive){
+				echo "<a href='../checklists/checklist.php?cl=".$clValue."&dynclid=".$dynClid."&crumblink=".$crumbLink."'>";
+				echo "<img src='../images/info.jpg' title='More information' border='0' width='12' /></a>";
 			}
 			echo "</h2>";
-			if(!$symClid) echo "<div>".$dataManager->getClAuthors()."</div>";
+			if(!$dynClid) echo "<div>".$dataManager->getClAuthors()."</div>";
 			echo "</td></tr>";
 			$count = $dataManager->getTaxaCount();
 		  	if($count > 0){

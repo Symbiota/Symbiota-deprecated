@@ -409,6 +409,7 @@ if($taxonManager->getSciName() != "unknown"){
 							if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
 								$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/maps/googlemap.php?usecookies=false&type=3&db=all&thes=on&taxa=".$subArr["tid"]."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
 							}
+							$aUrl = "";
 							if(strpos($mapUrl,"maps.google.com")){
 								if($gUrl) $aUrl = $gUrl;
 							}
