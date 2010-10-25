@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
  
 $lat = array_key_exists("lat",$_REQUEST)?$_REQUEST["lat"]:0;
 $lng = array_key_exists("lng",$_REQUEST)?$_REQUEST["lng"]:0;
-$radius = (isset($dynKeyRadius)?$dynKeyRadius:5);
+$radius = (isset($dynChecklistRadius)?$dynChecklistRadius:(isset($dynKeyRadius)?$dynKeyRadius:5));
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_REQUEST["interface"]:"checklist";
 
