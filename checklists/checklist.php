@@ -8,6 +8,7 @@
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+	$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
@@ -19,9 +20,12 @@
 	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
 	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
 	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
-	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:1;
+	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 
 	$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
+	
+	//Search Synonyms is default
+	if($action != "Rebuild List") $searchSynonyms = 1;
 
 	$clManager = new ChecklistManager();
 	if($clValue){
@@ -46,7 +50,6 @@
 		$clManager->setEditable(true);
 		
 		//Submit checklist MetaData edits
-		$action = array_key_exists("editsubmit",$_REQUEST)?$_REQUEST["editsubmit"]:"";
 	 	if($action == "Submit Changes"){
 	 		$editArr = Array();
 			foreach($_REQUEST as $k => $v){
@@ -507,7 +510,7 @@
 									</select>
 								</div>
 								<div>
-									<input type='submit' name='editsubmit' id='editsubmit' value='Submit Changes' />
+									<input type='submit' name='action' id='editsubmit' value='Submit Changes' />
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
@@ -593,7 +596,7 @@
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-								<input type="submit" name="optionsubmit" value="Rebuild List" />
+								<input type="submit" name="action" value="Rebuild List" />
 							</div>
 							<div>
 								<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
@@ -629,7 +632,7 @@
 					$argStr = "";
 					if($pageCount > 1){
 						if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
-						$argStr .= "&cl=".$clValue.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
+						$argStr .= "&cl=".$clValue."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 						$argStr .= ($proj?"&proj=".$proj:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");

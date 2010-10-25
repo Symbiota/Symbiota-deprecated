@@ -26,7 +26,7 @@ $floraModIsActive = 1;
 $keyModIsActive = 1;
 
 //Misc Options
-$dynKeyRadius = 10;				//Controls size of concentric rings that are sampled when building dynamic map key
+$dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = 1;			//0 = false, 1 = true
 
 //Individual page menu and navigation crumbs

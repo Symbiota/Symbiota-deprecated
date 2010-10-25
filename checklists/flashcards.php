@@ -244,7 +244,7 @@ header("Content-Type: text/html; charset=".$charset);
 		}
 		$sql = $sql1.$sql2."WHERE ".($this->clid?"ctl.clid = ".$this->clid:"ctl.dynclid = ".$this->dynClid)." AND ts.taxauthid = ".($this->thesFilter?$this->thesFilter:"1")." AND ts1.taxauthid = 1 AND ti.SortSequence < 90 ";
 		if($this->taxonFilter) $sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR ts.Family = '".$this->taxonFilter."' OR t.sciname Like '".$this->taxonFilter."%') ";
-		$sql .= "ORDER BY t.sciname";
+		$sql .= "ORDER BY t.sciname,ti.sortsequence";
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		$returnArr = Array();
@@ -254,8 +254,10 @@ header("Content-Type: text/html; charset=".$charset);
 				$url = $GLOBALS["imageDomain"].$url;
 			}
 			$sciName = $row->sciname;
-			if($this->showCommon && $row->vernacularname) $sciName .= " (".$row->vernacularname.")"; 
-			$returnArr[$sciName][] = $url;
+			if($this->showCommon && $row->vernacularname) $sciName .= " (".$row->vernacularname.")";
+			if(!array_key_exists($sciName,$returnArr) || count($returnArr[$sciName]) < 10){
+				$returnArr[$sciName][] = $url;
+			}
 		}
 		$result->close();
 		return $returnArr;

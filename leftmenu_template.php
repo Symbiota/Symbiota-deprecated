@@ -15,6 +15,11 @@
     	</a>
     </div>
     <div class="menuitem">
+    	<a href="<?php echo $clientRoot; ?>/projects/index.php?proj=1">
+    		Blabla Flora
+    	</a>
+    </div>
+    <div class="menuitem">
     	<a href="<?php echo $clientRoot; ?>/checklists/index.php">
     		Species Lists
     	</a>

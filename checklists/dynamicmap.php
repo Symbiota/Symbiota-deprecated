@@ -86,7 +86,7 @@ $dynClManager = new DynamicChecklistManager();
 		</div>
 		
 	    <div style="margin-top:5px;">
-			<form id="mapForm" action="dynamickey.php" method="get" onsubmit="return checkForm();">
+			<form id="mapForm" action="dynamicchecklist.php" method="get" onsubmit="return checkForm();">
 				<div>
 					Point (Lat, Long): 
 					<span id="latlngspan" style="font-weight:bold;"></span>
@@ -96,9 +96,9 @@ $dynClManager = new DynamicChecklistManager();
 					</span>
 					<span style="float:right;margin-right:10px;">
 						<select name="tid">
-							<option>Taxon Filter (optional)</option>
+							<option value="0">Taxon Filter (optional)</option>
 							<?php 
-							$taxaArr = $dynChecklistManager->getFilterTaxa();
+							$taxaArr = $dynClManager->getFilterTaxa();
 							foreach($taxaArr as $k => $sciname){
 								echo "<option value='".$k."' ".($k==$tid?"SELECTED":"").">".$sciname."</option>";
 							}
@@ -110,7 +110,7 @@ $dynClManager = new DynamicChecklistManager();
 					<input type="hidden" id="lngbox" name="lng" value="" />
 				</div>
 				<div style="display:none;">
-					Radius: <input type="text" id="radiustemp"  name="radiustemp" size="5" value="6" onchange="updateRadius();" /> 
+					Radius: <input type="text" id="radiustemp"  name="radiustemp" size="5" onchange="updateRadius();" /> 
 					<select id="radiusunits" name="radiusunits" onchange="updateRadius();">
 						<option value="mi">Miles</option>
 						<option value="km">Kilometers</option>
