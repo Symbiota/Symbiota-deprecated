@@ -121,9 +121,9 @@
 		        <?php if($specArr && $obsArr){?>
 		        <li><a href="#" rel="specobsdiv" class=selected>Specimens &amp; Observations</a></li>
 		        <?php }if($specArr){?>
-		        <li><a href="#" rel="specimendiv">Specimens Only</a></li>
+		        <li><a href="#" rel="specimendiv">Specimens</a></li>
 		        <?php }if($obsArr){?>
-		        <li><a href="#" rel="observationdiv">Observations Only</a></li>
+		        <li><a href="#" rel="observationdiv">Observations</a></li>
 		        <?php }if($otherCatArr){?>
 		        <li><a href="#" rel="otherdiv">Other Categories</a></li>
 		        <?php } ?>
