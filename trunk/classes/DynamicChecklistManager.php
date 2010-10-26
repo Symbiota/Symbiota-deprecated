@@ -10,7 +10,7 @@ class DynamicChecklistManager {
 	private $conn;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	public function __destruct(){
