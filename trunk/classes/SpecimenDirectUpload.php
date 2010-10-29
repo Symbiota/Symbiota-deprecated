@@ -76,18 +76,7 @@ class SpecimenDirectUpload extends SpecimenUploadManager {
 						}
 						foreach($this->fieldMap as $symbField => $sourceField){
 							$value = $row[$sourceField["field"]];
-							if($charset == "utf8"){
-								if(mb_detect_encoding($value,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
-									//$value = utf8_encode($value);
-									$value = iconv("ISO-8859-1//TRANSLIT","UTF-8",$value);
-						        }
-							}
-							else{
-								if(mb_detect_encoding($value,'UTF-8, ISO-8859-1') == "UTF-8"){
-									//$value = utf8_decode($value);
-									$value = iconv("UTF-8","ISO-8859-1//TRANSLIT",$value);
-						        }
-							}
+							$value = $this->cleanString($value);
 							if($sourceField["type"] == "date"){
 								if($datetime = strtotime($value)){
 									$value = date('Y-m-d H:i:s',$datetime);
@@ -106,11 +95,6 @@ class SpecimenDirectUpload extends SpecimenUploadManager {
 								}
 							}
 							else{
-								$value = str_replace("\"","'",$value);
-								$value = str_replace(chr(10),"",$value);
-								$value = str_replace(chr(11),"",$value);
-								$value = str_replace(chr(13),"",$value);
-								
 								if(array_key_exists("size",$sourceField) && strlen($value) > $sourceField["size"]){
 									$value = substr($value,0,$size);
 								}

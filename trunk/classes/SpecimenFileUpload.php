@@ -95,7 +95,7 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 									if(substr($valueStr,0,1) == "\"" && substr($valueStr,-1) == "\""){
 										$valueStr = substr($valueStr,1,strlen($valueStr)-2);
 									}
-									$valueStr = str_replace("\"","'",$valueStr);
+									$valueStr = $this->cleanString($valueStr);
 									//Load data
 									$type = $this->fieldMap[$specName]["type"];
 									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);

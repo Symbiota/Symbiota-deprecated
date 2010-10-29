@@ -5,8 +5,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 	//Search variables
 	private $searchStart = 0;
 	private $searchLimit = 1000;
-	//private $defaultSchema = "http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd";
-	private $defaultSchema = "";
+	private $defaultSchema = "";	//http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd
 	private $returnCount = true;
 	
 	//XML parser stuff
@@ -19,23 +18,10 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 	private $symbTargetFields = Array();
 	private $dbpkSequence = 0;
 	
-	//
-	private $nibbleGoodChars;
-	private $byteMap = array();
-	
  	public function __construct(){
  		parent::__construct();
- 		$defaultSchema = $GLOBALS["clientRoot"]."/collections/admin/util/darwinsymbiota.xsd";
+ 		$this->defaultSchema = $GLOBALS["clientRoot"]."/collections/admin/darwinsymbiota.xsd";
  		set_time_limit(10000);
- 		//
-		$this->initByteMap();
-		$ascii_char='[\x00-\x7F]';
-		$cont_byte='[\x80-\xBF]';
-		$utf8_2='[\xC0-\xDF]'.$cont_byte;
-		$utf8_3='[\xE0-\xEF]'.$cont_byte.'{2}';
-		$utf8_4='[\xF0-\xF7]'.$cont_byte.'{3}';
-		$utf8_5='[\xF8-\xFB]'.$cont_byte.'{4}';
-		$this->nibbleGoodChars = "@^($ascii_char+|$utf8_2|$utf8_3|$utf8_4|$utf8_5)(.*)$@s";
  	}
 	
  	public function uploadData($finalTransfer){
@@ -49,26 +35,20 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			$this->schemaName = $this->defaultSchema;
 		}
  		//Delete all records in uploadspectemp table
-		$sqlDel = "DELETE FROM uploadspectemp";
-		//$this->conn->query($sqlDel);
+		$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$collId;
+		$this->conn->query($sqlDel);
  		
-		$alphabet = array ("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z");
-		//$alphabet = array ("M");
-		foreach($alphabet as $alphaChar){
-			echo "<li style='font-weight:bold;'>Starting ".$alphaChar."%%</li>\n";
-			$this->searchStart = 0;
-			$this->submitReq($alphaChar."%%");
-		}
+		echo "<li style='font-weight:bold;'>Starting record harvest</li>\n";
+		$this->searchStart = 0;
+		$this->submitReq();
 		$this->finalUploadSteps($finalTransfer);
  	}
 
-	private function submitReq($searchStr){
+	private function submitReq(){
 
 		$digirEof = false;
 		$recordCount = 0;
 		$recordReturn = 0;
-		//$outFile = "C:\\temp\\outFile.xml";
-		//$fh = fopen($outFile, 'w') or die("can't open file");
 		
 		do{
 			$fp = fsockopen($this->server, $this->port, $errno, $errstr, 30);
@@ -88,7 +68,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 					"<destination resource='".$this->digirCode."'>".$this->server."</destination>".
 					"<type>search</type>".
 					"</header><search><filter>");
-				$poststring .= urlencode(trim(str_replace("--TAXON--",$searchStr,$this->queryStr)));
+				$poststring .= urlencode(trim($this->queryStr));
 				$poststring .= urlencode("</filter>".
 					"<records limit='".$this->searchLimit."' start='".$this->searchStart."'>".
 					"<structure schemaLocation='".$this->schemaName."'/>".
@@ -173,7 +153,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 	private function startElement($parser, $name, $attribs){
 		if($name == "RECORD") $this->withinRecordElement = true;
 		if($this->withinRecordElement){
-			if(substr($name,0,7) == "DARWIN:") $name = substr($name,7);
+			if(strpos($name,0,7) == "DARWIN:") $name = substr($name,7);
 			$this->activeFieldName = trim($name);
 		}
 	}
@@ -188,77 +168,79 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 		}
 		if($this->withinRecordElement && $this->activeFieldName && $this->activeFieldValue){
 			switch($this->activeFieldName){
-				case "DATELASTMODIFIED":
+				case "DATELASTMODIFIED" && !array_key_exists("MODIFIED",$this->fieldDataArr):
 					$datetime = strtotime($this->activeFieldValue);
 					$this->fieldDataArr["MODIFIED"] = date('Y-m-d H:i:s',$datetime);
 					break;
-				case "EARLIESTDATECOLLECTED":
+				case "EARLIESTDATECOLLECTED" && !array_key_exists("EVENTDATE",$this->fieldDataArr):
 					$datetime = strtotime($this->activeFieldValue);
-					$this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
-					$this->fieldDataArr["YEAR"] = date('Y',$datetime);
-					$this->fieldDataArr["MONTH"] = date('m',$datetime);
-					$this->fieldDataArr["DAY"] = date('d',$datetime);
-					$this->fieldDataArr["STARTDAYOFYEAR"] = date('z',$datetime);
+					if($datetime){
+						$this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
+						$this->fieldDataArr["YEAR"] = date('Y',$datetime);
+						$this->fieldDataArr["MONTH"] = date('m',$datetime);
+						$this->fieldDataArr["DAY"] = date('d',$datetime);
+						$this->fieldDataArr["STARTDAYOFYEAR"] = date('z',$datetime);
+					}
 					break;
-				case "LATESTDATECOLLECTED":
+				case "LATESTDATECOLLECTED" && !array_key_exists("ENDDAYOFYEAR",$this->fieldDataArr):
 					$datetime = strtotime($this->activeFieldValue);
 					$this->fieldDataArr["ENDDAYOFYEAR"] = date('z',$datetime);
 					break;
-				case "VERBATIMCOLLECTINGDATE":
-					$this->fieldDataArr["VERBATIMEVENTDATE"] = $this->activeFieldValue;
-					$datetime = strtotime($this->activeFieldValue);
-					if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d H:i:s',$datetime);
+				case "VERBATIMCOLLECTINGDATE" || "VERBATIMEVENTDATE":
+					if(!array_key_exists("VERBATIMEVENTDATE",$this->fieldDataArr)){
+						$this->fieldDataArr["VERBATIMEVENTDATE"] = $this->activeFieldValue;
+					}
+					if(!array_key_exists("EVENTDATE",$this->fieldDataArr)){
+						$datetime = strtotime($this->activeFieldValue);
+						if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d H:i:s',$datetime);
+					}
 					break;
-				case "CATALOGNUMBERTEXT":
+				case "CATALOGNUMBERTEXT" && !array_key_exists("CATALOGNUMBER",$this->fieldDataArr):
 					$this->fieldDataArr["CATALOGNUMBER"] = $this->activeFieldValue; 
 					break;
-				case "SPECIES":
+				case "SPECIES" && !array_key_exists("SPECIFICEPITHET",$this->fieldDataArr):
 					$this->fieldDataArr["SPECIFICEPITHET"] = $this->activeFieldValue;
 					break;
-				case "SUBSPECIES":
+				case "SUBSPECIES" && !array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr):
 					$this->fieldDataArr["INFRASPECIFICEPITHET"] = $this->activeFieldValue;
 					break;
-				case "SCIENTIFICNAMEAUTHOR":
+				case "SCIENTIFICNAMEAUTHOR" && !array_key_exists("SCIENTIFICNAMEAUTHORSHIP",$this->fieldDataArr):
 					$this->fieldDataArr["SCIENTIFICNAMEAUTHORSHIP"] = $this->activeFieldValue;
 					break;
-				case "IDENTIFICATIONMODIFIER":
+				case "IDENTIFICATIONMODIFIER" && !array_key_exists("IDENTIFICATIONQUALIFIER",$this->fieldDataArr):
 					$this->fieldDataArr["IDENTIFICATIONQUALIFIER"] = $this->activeFieldValue;
 					break;
-				case "LONGITUDE":
+				case "LONGITUDE" && !array_key_exists("DECIMALLONGITUDE",$this->fieldDataArr):
 					$this->fieldDataArr["DECIMALLONGITUDE"] = $this->activeFieldValue;
 					break;
-				case "LATITUDE":
+				case "LATITUDE" && !array_key_exists("DECIMALLATITUDE",$this->fieldDataArr):
 					$this->fieldDataArr["DECIMALLATITUDE"] = $this->activeFieldValue;
 					break;
-				case "HORIZONTALDATUM":
+				case "HORIZONTALDATUM" && !array_key_exists("GEODETICDATUM",$this->fieldDataArr):
 					$this->fieldDataArr["GEODETICDATUM"] = $this->activeFieldValue;
 					break;
-				case "ORIGINALCOORDINATESYSTEM":
+				case "ORIGINALCOORDINATESYSTEM" && !array_key_exists("VERBATIMCOORDINATESYSTEM",$this->fieldDataArr):
 					$this->fieldDataArr["VERBATIMCOORDINATESYSTEM"] = $this->activeFieldValue;
 					break;
-				case "GEOREFMETHOD":
+				case "GEOREFMETHOD" && !array_key_exists("GEOREFERENCEPROTOCOL",$this->fieldDataArr):
 					$this->fieldDataArr["GEOREFERENCEPROTOCOL"] = $this->activeFieldValue;
 					break;
-				case "COORDINATEPRECISION":
+				case "COORDINATEPRECISION" && !array_key_exists("COORDINATEUNCERTAINTYINMETERS",$this->fieldDataArr):
 					$this->fieldDataArr["COORDINATEUNCERTAINTYINMETERS"] = $this->activeFieldValue;
 					break;
-				case "MINIMUMELEVATION":
+				case ("MINIMUMELEVATION" || "MINIMUMELEVATIONINMETERS") && !array_key_exists("MINIMUMELEVATIONINMETERS",$this->fieldDataArr):
 					$this->fieldDataArr["MINIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
 					break;
-				case "MAXIMUMELEVATION":
+				case ("MAXIMUMELEVATION" || "MAXIMUMELEVATIONINMETERS") && !array_key_exists("MAXIMUMELEVATIONINMETERS",$this->fieldDataArr):
 					$this->fieldDataArr["MAXIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
 					break;
-				case "MINIMUMELEVATIONINMETERS":
-					$this->fieldDataArr["MINIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
-					break;
-				case "MAXIMUMELEVATIONINMETERS":
-					$this->fieldDataArr["MAXIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
-					break;
-				case "NOTES":
+				case "NOTES" && !array_key_exists("OCCURRANCEREMARKS",$this->fieldDataArr):
 					$this->fieldDataArr["OCCURRANCEREMARKS"] = $this->activeFieldValue;
 					break;
 				default:
-					$this->fieldDataArr[$this->activeFieldName] = $this->activeFieldValue;
+					if(!array_key_exists($this->activeFieldName,$this->fieldDataArr)){
+						$this->fieldDataArr[$this->activeFieldName] = $this->activeFieldValue;
+					}
 			}
 		}
 		$this->activeFieldValue = "";
@@ -266,7 +248,9 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 	}
 
 	private function characterData($parser, $data){
-		if($this->withinRecordElement) $this->activeFieldValue .= utf8_decode(trim($data));
+		if($this->withinRecordElement){
+			$this->activeFieldValue .= cleanString($data);
+		}
 	}
 
 	private function databaseRecord(){
@@ -330,64 +314,6 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 				}
 			}
 		}
-	}
-	
-	private function initByteMap(){
-		for($x=128;$x<256;++$x){
-			$this->byteMap[chr($x)]=utf8_encode(chr($x));
-		}
-		$cp1252Map=array(
-			"\x80"=>"\xE2\x82\xAC",    // EURO SIGN
-			"\x82" => "\xE2\x80\x9A",  // SINGLE LOW-9 QUOTATION MARK
-			"\x83" => "\xC6\x92",      // LATIN SMALL LETTER F WITH HOOK
-			"\x84" => "\xE2\x80\x9E",  // DOUBLE LOW-9 QUOTATION MARK
-			"\x85" => "\xE2\x80\xA6",  // HORIZONTAL ELLIPSIS
-			"\x86" => "\xE2\x80\xA0",  // DAGGER
-			"\x87" => "\xE2\x80\xA1",  // DOUBLE DAGGER
-			"\x88" => "\xCB\x86",      // MODIFIER LETTER CIRCUMFLEX ACCENT
-			"\x89" => "\xE2\x80\xB0",  // PER MILLE SIGN
-			"\x8A" => "\xC5\xA0",      // LATIN CAPITAL LETTER S WITH CARON
-			"\x8B" => "\xE2\x80\xB9",  // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
-			"\x8C" => "\xC5\x92",      // LATIN CAPITAL LIGATURE OE
-			"\x8E" => "\xC5\xBD",      // LATIN CAPITAL LETTER Z WITH CARON
-			"\x91" => "\xE2\x80\x98",  // LEFT SINGLE QUOTATION MARK
-			"\x92" => "\xE2\x80\x99",  // RIGHT SINGLE QUOTATION MARK
-			"\x93" => "\xE2\x80\x9C",  // LEFT DOUBLE QUOTATION MARK
-			"\x94" => "\xE2\x80\x9D",  // RIGHT DOUBLE QUOTATION MARK
-			"\x95" => "\xE2\x80\xA2",  // BULLET
-			"\x96" => "\xE2\x80\x93",  // EN DASH
-			"\x97" => "\xE2\x80\x94",  // EM DASH
-			"\x98" => "\xCB\x9C",      // SMALL TILDE
-			"\x99" => "\xE2\x84\xA2",  // TRADE MARK SIGN
-			"\x9A" => "\xC5\xA1",      // LATIN SMALL LETTER S WITH CARON
-			"\x9B" => "\xE2\x80\xBA",  // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
-			"\x9C" => "\xC5\x93",      // LATIN SMALL LIGATURE OE
-			"\x9E" => "\xC5\xBE",      // LATIN SMALL LETTER Z WITH CARON
-			"\x9F" => "\xC5\xB8"       // LATIN CAPITAL LETTER Y WITH DIAERESIS
-		);
-		foreach($cp1252Map as $k=>$v){
-			$this->byteMap[$k]=$v;
-		}
-	}
-
-	private function fixLatin($instr){
-		if(mb_check_encoding($instr,'UTF-8'))return $instr; // no need for the rest if it's all valid UTF-8 already
-  		$outstr='';
-		$char='';
-		$rest='';
-		while((strlen($instr))>0){
-			if(1==preg_match($this->nibbleGoodChars,$instr,$match)){
-				$char=$match[1];
-				$rest=$match[2];
-				$outstr.=$char;
-			}elseif(1==preg_match('@^(.)(.*)$@s',$instr,$match)){
-				$char=$match[1];
-				$rest=$match[2];
-				$outstr.=$this->byteMap[$char];
-			}
-			$instr=$rest;
-		}
-		return $outstr;
 	}
 }
 ?>

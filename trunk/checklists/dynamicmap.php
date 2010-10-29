@@ -22,7 +22,16 @@ $dynClManager = new DynamicChecklistManager();
 	    function initialize(){
 	
 	        var map = new GMap2(document.getElementById("map"));
-	        map.setCenter(new GLatLng(36.97, -109.05), zoomLevel);
+            <?php
+				$latCen = 41.0;
+				$longCen = -95.0;
+				$coorArr = explode(";",$mappingBoundaries);
+				if($coorArr && count($coorArr) == 4){
+					$latCen = ($coorArr[0] + $coorArr[2])/2;
+					$longCen = ($coorArr[1] + $coorArr[3])/2;
+				}
+			?>
+			map.setCenter(new GLatLng( <?php echo $latCen.",".$longCen; ?> ), zoomLevel);
 	        map.setUIToDefault();
 	        
 	        GEvent.addListener(map, 'dblclick', function(overlay, point) {
