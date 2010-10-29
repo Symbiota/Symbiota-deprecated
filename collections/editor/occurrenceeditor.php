@@ -7,13 +7,14 @@ header("Content-Type: text/html; charset=".$charset);
 $occId = array_key_exists("occid",$_REQUEST)?$_REQUEST["occid"]:"";
 
 $occManager = new OccurrenceEditorManager();
-$occArr = Array();//$occManager->getOccurArr($occId);
-
-$collId = 3;//$occArr["collid"];
-
+$occArr = Array();
 $editable = 0;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
-	$editable = 1;
+if($occId){
+	$occArr = $occManager->getOccurArr($occId);
+	$collId = $occArr["collid"]["value"];
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+		$editable = 1;
+	}
 }
 
 ?>
@@ -73,7 +74,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 	        <li><a href="#" rel="identdiv">Identification</a></li>
 	        <li><a href="#" rel="localitydiv">Locality</a></li>
 	    </ul>
-		<div style="border:1px solid gray; width:800px; margin-bottom: 1em; padding: 10px">
+		<div style="border:1px solid gray;width:800px;margin-bottom:1em;padding:10px;">
 			<div id="shortdiv" class="tabcontent" style="margin:10px;">
 				<form id='shortform' name='shortform' action='occurrenceeditor.php' method='get'>
 					<div style="margin:10px;padding:10px;height:120px;border:1px solid gray;">
@@ -87,40 +88,40 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 						</div>
 						<div style="clear:both;" class="p1">
 							<span>
-								<input type="text" name="sciname" size="60" maxlength="250" tabindex="1" value="<?php echo array_key_exists("sciname",$occArr)?$occArr["sciname"]:""; ?>" />
+								<input type="text" name="sciname" size="60" maxlength="250" tabindex="1" value="<?php echo array_key_exists("sciname",$occArr)?$occArr["sciname"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:10px;">
-								<input type="text" name="author" maxlength="100" tabindex="0" value="<?php echo array_key_exists("author",$occArr)?$occArr["author"]:""; ?>" />
+								<input type="text" name="author" maxlength="100" tabindex="0" value="<?php echo array_key_exists("author",$occArr)?$occArr["author"]["value"]:""; ?>" />
 							</span>
 						</div>
 						<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 							<div style="float:left;">
 								ID Qualifier:
-								<input type="text" name="identificationQualifier" tabindex="2" size="5" value="<?php echo array_key_exists("identificationQualifier",$occArr)?$occArr["identificationQualifier"]:""; ?>" />
+								<input type="text" name="identificationQualifier" tabindex="2" size="5" value="<?php echo array_key_exists("identificationqualifier",$occArr)?$occArr["identificationqualifier"]["value"]:""; ?>" />
 							</div>
 							<div style="float:left;margin-left:160px;">
 								Family:
-								<input type="text" name="family" size="30" maxlength="50" tabindex="0" value="<?php echo array_key_exists("family",$occArr)?$occArr["family"]:""; ?>" />
+								<input type="text" name="family" size="30" maxlength="50" tabindex="0" value="<?php echo array_key_exists("family",$occArr)?$occArr["family"]["value"]:""; ?>" />
 							</div>
 						</div>
 						<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 							<div style="float:left;">
 								Identified By:
-								<input type="text" name="identifiedBy" maxlength="255" tabindex="3" value="<?php echo array_key_exists("identifiedBy",$occArr)?$occArr["identifiedBy"]:""; ?>" />
+								<input type="text" name="identifiedBy" maxlength="255" tabindex="3" value="<?php echo array_key_exists("identifiedby",$occArr)?$occArr["identifiedby"]["value"]:""; ?>" />
 							</div>
 							<div style="float:left;margin-left:15px;">
 								Date Identified:
-								<input type="text" name="dateIdentified" maxlength="45" tabindex="4" value="<?php echo array_key_exists("dateIdentified",$occArr)?$occArr["dateIdentified"]:""; ?>" />
+								<input type="text" name="dateIdentified" maxlength="45" tabindex="4" value="<?php echo array_key_exists("dateidentified",$occArr)?$occArr["dateidentified"]["value"]:""; ?>" />
 							</div>
 						</div>
 						<div style="clear:both;padding:3px 0px 0px 10px;">
 							<div style="float:left;">
 								ID References:
-								<input type="text" name="identificationReferences" tabindex="5" value="<?php echo array_key_exists("identificationReferences",$occArr)?$occArr["identificationReferences"]:""; ?>" />
+								<input type="text" name="identificationReferences" tabindex="5" value="<?php echo array_key_exists("identificationreferences",$occArr)?$occArr["identificationreferences"]["value"]:""; ?>" />
 							</div>
 							<div style="float:left;margin-left:20px;">
 								ID Remarks:
-								<input type="text" name="taxonRemarks" tabindex="6" value="<?php echo array_key_exists("identificationRemarks",$occArr)?$occArr["identificationRemarks"]:""; ?>" />
+								<input type="text" name="taxonRemarks" tabindex="6" value="<?php echo array_key_exists("identificationremarks",$occArr)?$occArr["identificationremarks"]["value"]:""; ?>" />
 							</div>
 						</div>
 					</div>

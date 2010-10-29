@@ -1,177 +1,74 @@
 <?php
- include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
- class OccurrenceEditorManager {
+class OccurrenceEditorManager {
 
-	private $con;
-	private $tid;
-	private $gui;
-    private $uRights = Array();
-    private $checklistRights = Array();
-    private $isAdmin = false;
-    private $localityFields = Array("locality","MinimumElevationInMeters","MaximumElevationInMeters","VerbatimElevation",
-    	"DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters","VerbatimCoordinates",  
-    	"VerbatimLatitude","VerbatimLongitude","VerbatimCoordinateSystem","UtmNorthing","UtmEasting","UtmZoning", 
-    	"GeoreferenceProtocol","GeoreferenceSources","GeoreferenceVerificationStatus","GeoreferenceRemarks");
-
-    
- 	public function __construct(){
- 		$this->con = MySQLiConnectionFactory::getCon("readonly");
- 	}
- 	
- 	public function __destruct(){
-		if(!($this->con === null)) $this->con->close();
-	}
+	private $conn;
+	private $occurrenceMap = Array();
 	
-    public function getOccurArr($occid){
-    	//Get Map to specimen table
-    	$specimenMap = Array();
-    	$metaSql = "SHOW COLUMNS FROM omspecimens";
-    	$metaRs = $this->con->query($metaSql);
-    	while($metaRow = $metaRs->fetch_object()){
-    		$specimenMap[strtolower($metaRow->Field)]["field"] = $metaRow->Field;
-    		$specimenMap[strtolower($metaRow->Field)]["type"] = $metaRow->Type;
-    	}
-    	$metaRs->close();
-    	
-    	//Get Specimen record
-		$sql = "SELECT c.collid, IFNULL(s.collectioncode,c.collectioncode) AS collcode, ".
-			"c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon, ".
-			"s.* ".
-			"FROM fmcollections AS c INNER JOIN omspecimens AS s ON c.CollID = s.CollID ";
-		if($gui){
-			$sql .= "WHERE s.GlobalUniqueIdentifier = '".$gui."'";
-		}
-		elseif($collId && $dbpk){
-			$sql .= "WHERE s.DBPK = '".$dbpk."' AND c.CollID = ".$collId;
-		}
-		else{
-            echo "<div id='errdiv'>ERROR: record not found</div>";
-			return;
-		}
-		//echo "SQL: ".$sql;
-		
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_assoc()){
-			$this->gui = $row[$specimenMap["globaluniqueidentifier"]["field"]];
-			$this->tid = $row[$specimenMap["tidinterpreted"]["field"]];
-			echo "<div id='collicon'><img border='1' height='50' width='50' src='../../".$row["icon"]."'/></div>";
-			echo "<div id='collcode'>".$row["collcode"]."</div>";
-			echo "<div id='collname'>".$row["collcode"]."</div>";
+	public function __construct(){
+		$this->conn = MySQLiConnectionFactory::getCon("write");
+	}
 
-			if($row["individualurl"]){
-				$indUrl = str_replace("--PK--",$row[$specimenMap["dbpk"]["field"]],$row["individualurl"]);
-				echo "<div id='collsource'>".$row["collectionname"]." <a href='".$indUrl."'> display page</a></div>";
-			}
-			if($row["email"] && $row["contact"]){
-				echo "<div id='collemail'>For more information on this specimen, please contact <a class='bodylink' href='mailto:".$row["email"]."'>".$row["contact"]." (".$row["contact"].")</a></div>";
-			}
-			if($row["homepage"]){
-				echo "<div id='collhomepage'><a class='bodylink' href='".$row["homepage"]."'>".$row["collectionname"]." Homepage</a></div>";
-			}
-			
-			foreach($specimenMap as $k => $v){
-            	if(!in_array($k,$this->localityFields) || $row[$specimenMap["localitysecurity"]["field"]] < 2 || $this->isAdmin || in_array($row[$specimenMap["collid"]["field"]],$this->uRights)){
-					$value = $row[$v["field"]];
-					$typeStr = $v["type"];
-					if($typeStr == "date"){
-						if($t == strtotime($value)){
-							$value = date("j F Y",$t);
-						}
-					}
-					elseif($typeStr == "datetime"){
-						if($t = strtotime($value)){
-							$value = date("j F Y H:i:s",$t);
-						}
-					}
-					echo "<div id='".$k."'>".$value."</div>\n";
-            	}
-			}
-	        if($row[$specimenMap["localitysecurity"]["field"]] < 2 || $this->isAdmin || in_array($row[$specimenMap["collid"]["field"]],$this->uRights)){
-				echo "<div id='locsecdiv'><div style='color:red;'>This species has a sensitive status.</div>";
-				echo "<div>For more information, please contact collection manager (see email below).</div></div>";
-	        }
-	        if($gui = $row[$specimenMap["globaluniqueidentifier"]["field"]]){
-				$this->addImages($gui);
-	        }
+	public function __destruct(){
+		if(!($this->conn === null)) $this->conn->close();
+	}
+
+	public function getOccurArr($occid){
+		$metaSql = "SHOW COLUMNS FROM omoccurrences";
+		$metaRs = $this->conn->query($metaSql);
+		while($metaRow = $metaRs->fetch_object()){
+			$this->occurrenceMap[strtolower($metaRow->Field)]["type"] = $metaRow->Type;
 		}
-        $result->close();
-    }
-        
-    private function addImages($gui){
-        $imgSql = "SELECT ti.url, ti.notes FROM images ti ".
-			"WHERE (ti.specimengui = '".$gui."') ORDER BY ti.sortsequence";
-        $cnt = 0;
-        $result = $this->con->query($imgSql);
-		$rowCnt = $result->num_rows;
-		if($rowCnt) echo "<div id='imagediv' style='margin:15px;position:relative;'><div><hr/></div>"; 
+		$metaRs->close();
+		$sql = "SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, ".
+			"o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, ".
+			"o.specificEpithet, o.datasetID, o.taxonRank, o.infraspecificEpithet, o.institutionCode, o.collectionCode, ".
+			"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
+			"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, o.CollectorFamilyName, ".
+			"o.CollectorInitials, o.associatedCollectors, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
+			"o.verbatimEventDate, o.habitat, o.fieldNotes, o.occurrenceRemarks, o.associatedOccurrences, o.associatedTaxa, ".
+			"o.dynamicProperties, o.attributes, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
+			"o.stateProvince, o.county, o.municipality, o.locality, o.localitySecurity, o.decimalLatitude, o.decimalLongitude, ".
+			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
+			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, ".
+			"o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, ".
+			"o.verbatimElevation, o.previousIdentifications, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified ".
+			"FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ".
+			"WHERE o.occid = ".$occid;
+		//echo "<div>".$sql."</div>";
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			foreach($row as $k => $v){
+				$this->occurrenceMap[strtolower($k)]["value"] = $v;
+			}
+		}
+		$rs->close();
+
+		$this->setImages();
+
+		return $this->occurrenceMap;
+	}
+
+	private function setImages(){
+		$sql = "SELECT i.url, i.thumbnailurl, i.originalurl FROM images i ".
+			"WHERE i.occid = ".$this->occurrenceMap["occid"]["value"]." ORDER BY i.sortsequence";
+		$cnt = 0;
+		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-			}
-            if($imgUrl){
-            	$cnt++;
-              	echo "<div id='image' style='float:left;'>";
-            	echo "<a href='".$imgUrl."'><img border=1 width='150' src='".$imgUrl."'></a>";
-              	echo "</div>";
-            }
-        }
-		if($rowCnt) echo "</div>"; 
-        $result->close();
-    }
-    
- 	public function getChecklists($uid){
- 		$returnArr = Array();
-		if($this->isAdmin){
-			//Get all public checklist names
-			$sql = "SELECT DISTINCT c.Name, c.CLID ".
-				"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
-				"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-				"WHERE c.clid < 500 AND (c.Access = 'public' or c.uid = ".$uid.") ORDER BY c.Name";
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$returnArr[$row->CLID] = $row->Name;
-			}
-			$result->close();
+			$this->occurrenceMap["images"]["url"] = $row->url;
+			$this->occurrenceMap["images"]["tnurl"] = $row->thumbnailurl;
+			$this->occurrenceMap["images"]["origurl"] = $row->originalurl;
+			$cnt++;
 		}
-		elseif($this->checklistRights){
-			$sql = "SELECT DISTINCT c.Name, c.CLID ".
-				"FROM fmchecklists c WHERE c.clid IN(".implode(",",$this->checklistRights).") OR c.uid = ".$uid." ORDER BY c.Name";
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$returnArr[$row->CLID] = $row->Name;
-			}
-			$result->close();
-		}
-		return $returnArr;
- 	}
- 	
- 	private function setUserRights(){
- 		global $userRights;
- 		$this->uRights = $userRights;
- 		if($isAdmin) $this->isAdmin = true;
- 		foreach($this->uRights as $value){
- 			if(strpos($value, "CL") === 0 && strpos($value, "-admin")){
- 				$replaceTxt = array("CL","-admin");
- 				$this->checklistRights[] = str_replace($replaceTxt,"",$value);
- 			}
- 		}
- 	}
- 	
- 	public function getTid(){
- 		return $this->tid;
- 	}
- 	
- 	public function getGui(){
- 		return $this->gui;
- 	}
+		$result->close();
+	}
 
-	function LatLonPointUTMtoLL($northing, $easting, $zone=12) {
+	private function LatLonPointUTMtoLL($northing, $easting, $zone=12) {
 		$d = 0.99960000000000004; // scale along long0
 		$d1 = 6378137; // Polar Radius
 		$d2 = 0.0066943799999999998;
-		
+
 		$d4 = (1 - sqrt(1 - $d2)) / (1 + sqrt(1 - $d2));
 		$d15 = $easting - 500000;
 		$d16 = $northing;
@@ -192,29 +89,7 @@
 		$d18 = $d11 + rad2deg($d18); // Længdegrad (Ø)
 		return array('lat'=>$d17,'lng'=>$d18);
 	}
-
- 	public function printDefaultLabelDivs(){
-    	$specimenMap = Array();
-    	$metaSql = "SHOW COLUMNS FROM omspecimens";
-    	$metaRs = $this->con->query($metaSql);
-    	while($metaRow = $metaRs->fetch_object()){
-    		echo "<div id=\"".$metaRow->Field."-label\" class=\"labeldiv\">$metaRow->Field<div>\n";
-    	}
- 		$metaRs->close();
- 	}
-
- 	public function printCss(){
-    	$specimenMap = Array();
-    	$metaSql = "SHOW COLUMNS FROM omspecimens";
-    	$metaRs = $this->con->query($metaSql);
-    	while($metaRow = $metaRs->fetch_object()){
-    		echo "#".$metaRow->Field."{\n";
-    		echo "\tdisplay:\tblock;\n";
-    		echo "}\n";
-    	}
- 		$metaRs->close();
- 	}
- }
+}
 
 ?>
 

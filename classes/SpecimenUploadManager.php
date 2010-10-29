@@ -223,7 +223,7 @@ class SpecimenUploadManager{
 		if(array_key_exists("eupdigircode",$_REQUEST)) $sql .= ", digircode = \"".$_REQUEST["eupdigircode"]."\"";
 		if(array_key_exists("eupdigirpath",$_REQUEST)) $sql .= ", digirpath = \"".$_REQUEST["eupdigirpath"]."\"";
 		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
-		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanField(strtolower($_REQUEST["eupquerystr"]))."\"";
+		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanString(strtolower($_REQUEST["eupquerystr"]))."\"";
 		if(array_key_exists("eupcleanupsp",$_REQUEST)) $sql .= ", cleanupsp = \"".$_REQUEST["eupcleanupsp"]."\"";
 		$sql .= " WHERE uspid = ".$this->uspid;
 		//echo $sql;
@@ -240,7 +240,7 @@ class SpecimenUploadManager{
 			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
-			$this->cleanField(strtolower($_REQUEST["aupquerystr"]))."\")";
+			$this->cleanString(strtolower($_REQUEST["aupquerystr"]))."\")";
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -255,12 +255,6 @@ class SpecimenUploadManager{
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
 		}
 		return "SUCCESS: Upload Profile Deleted";
-	}
-	
-	private function cleanField($field){
-		$rStr = trim($field);
-		$rStr = str_replace("\"","'",$rStr);
-		return $rStr;
 	}
 
 	public function echoFieldMapTable($autoMap = 0){
@@ -487,13 +481,29 @@ class SpecimenUploadManager{
 	}
 	
 	protected function cleanString($inStr){
-		$str = trim($inStr);
-		$str = str_replace(chr(10),' ',$str);
-		$str = str_replace(chr(11),' ',$str);
-		$str = str_replace(chr(13),' ',$str);
-		$str = str_replace(chr(20),' ',$str);
-		$str = str_replace(chr(30),' ',$str);
-		return $str;
+ 		global $charset;
+		$retStr = trim($inStr);
+
+		if($charset == "utf8"){
+			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				//$value = utf8_encode($value);
+				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+			}
+		}
+		else{
+			if(mb_detect_encoding($inStr,'UTF-8, ISO-8859-1') == "UTF-8"){
+				//$value = utf8_decode($value);
+				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+			}
+		}
+
+		$retStr = str_replace("\"","'",$retStr);
+		$retStr = str_replace(chr(10),' ',$retStr);
+		$retStr = str_replace(chr(11),' ',$retStr);
+		$retStr = str_replace(chr(13),' ',$retStr);
+		$retStr = str_replace(chr(20),' ',$retStr);
+		$retStr = str_replace(chr(30),' ',$retStr);
+		return $retStr;
 	}
 }
 	
