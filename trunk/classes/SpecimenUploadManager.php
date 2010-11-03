@@ -8,6 +8,7 @@ class SpecimenUploadManager{
 
 	protected $conn;
 	protected $collId = 0;
+	protected $collMetadataArr = Array();
 	protected $uploadType;
 	protected $uspid = 0;
 	protected $doFullReplace = false;
@@ -55,6 +56,7 @@ class SpecimenUploadManager{
 	
 	public function setCollId($id){
 		$this->collId = $id;
+		$this->setCollInfo();
 	}
 	
 	public function setUploadType($t){
@@ -94,21 +96,32 @@ class SpecimenUploadManager{
 		return $returnArr;
 	}
 
-	public function getCollInfo(){
-		$returnArr = Array();
-		$sql = "SELECT DISTINCT c.CollId, c.CollectionName, c.icon, cs.uploaddate ".
+	private function setCollInfo(){
+		$sql = "SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, cs.uploaddate ".
 			"FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid ".
 			"WHERE c.collid = $this->collId ";
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$returnArr["collid"] = $row->CollId;
-			$returnArr["name"] = $row->CollectionName;
+			$this->collMetadataArr["collid"] = $row->collid;
+			$this->collMetadataArr["name"] = $row->collectionname;
+			$this->collMetadataArr["institutioncode"] = $row->institutioncode;
+			$this->collMetadataArr["collectioncode"] = $row->collectioncode;
 			$dateStr = ($row->uploaddate?date("d F Y g:i:s", strtotime($row->uploaddate)):"");
-			$returnArr["uploaddate"] = $dateStr;
+			$this->collMetadataArr["uploaddate"] = $dateStr;
 		}
 		$result->close();
-		return $returnArr;
+	}
+	
+	public function getCollInfo($fieldStr = ""){
+		if(!$this->collMetadataArr) $this->setCollInfo();
+		if($fieldStr){
+			if(array_key_exists($fieldStr,$this->collMetadataArr)){
+				return $this->collMetadataArr[$fieldStr];
+			}
+			return;			
+		}
+		return $this->collMetadataArr;
 	}
 	
 	public function getUploadList($uspid = 0){
@@ -173,9 +186,9 @@ class SpecimenUploadManager{
 
 		//Get Field Map for $fieldMap
 		if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
-	    	$sql = "SELECT usm.sourcefield, usm.symbspecfield ".
+			$sql = "SELECT usm.sourcefield, usm.symbspecfield ".
 				"FROM uploadspecmap usm ".
-	    		"WHERE usm.uspid = ".$this->uspid;
+				"WHERE usm.uspid = ".$this->uspid;
 	    	//echo $sql;
 			$rs = $this->conn->query($sql);
 	    	while($row = $rs->fetch_object()){
@@ -191,6 +204,9 @@ class SpecimenUploadManager{
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
+    		if($this->uploadType == $this->DIGIRUPLOAD){
+				$this->fieldMap[$field]["field"] = $field;
+    		} 
     		$type = $row->Type;
     		$this->symbFields[] = $field;
 			if(array_key_exists($field,$this->fieldMap)){

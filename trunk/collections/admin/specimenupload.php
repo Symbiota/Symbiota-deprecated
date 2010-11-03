@@ -232,8 +232,8 @@ if($statusStr){
 	echo "<hr />";
 }
 
- if(!$collId){
- 	if($symbUid){
+if(!$collId){
+	if($symbUid){
 	 	$collList = $duManager->getCollectionList();
 		echo "<h2>Select Collection to Update</h2>";
 	 	echo "<ul>";
@@ -242,12 +242,12 @@ if($statusStr){
 	 	}
 	 	echo "</ul>";
 	 	if(!$collList) echo "<div>There are no Database for which you have authority to update</div>";
- 	}
- 	else{
- 		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/admin/specimenupload.php'>login</a>!</div>";
- 	}
- }
- else{
+	}
+	else{
+		echo "<div style='font-weight:bold;'>Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/admin/specimenupload.php'>login</a>!</div>";
+	}
+}
+else{
 	//Grab field mapping, if mapping form was submitted
 	if(array_key_exists("sf",$_REQUEST)){
 		if($action == "Delete Field Mapping"){
@@ -264,16 +264,15 @@ if($statusStr){
 			if($dbpk) $fieldMap["dbpk"]["field"] = $dbpk;
 	 		$duManager->setFieldMap($fieldMap);
 		}
- 		if($action == "Save Mapping"){
- 			$duManager->saveFieldMap();
- 		}
- 	}
+		if($action == "Save Mapping"){
+			$duManager->saveFieldMap();
+		}
+	}
 
- 	//Grab collection name and last upload date and display for all
- 	$collInfo = $duManager->getCollInfo();
- 	echo "<h2>".$collInfo["name"]."</h2>";
-	if($collInfo["uploaddate"]) {
-		echo "<div style='margin:15px;'><b>Last Upload Date:</b> ".$collInfo["uploaddate"]."</div>"; 
+	//Grab collection name and last upload date and display for all
+	echo "<h2>".$duManager->getCollInfo("name")."</h2>";
+	if($duManager->getCollInfo("uploaddate")) {
+		echo "<div style='margin:15px;'><b>Last Upload Date:</b> ".$duManager->getCollInfo("uploaddate")."</div>";
 	}
 	echo "<div style='margin:15px;'><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$collId."'><b>View/Edit Metadata</b></a></div>";
  	if(!$action){
@@ -449,7 +448,7 @@ if($statusStr){
 							<input name="euptitle" type="text" value="<?php echo $duManager->getTitle(); ?>" />
 						</div>
 					</div>
-					<?php if($uploadType == 1 || $uploadType == 2){ ?>
+					<?php if($uploadType == 1){ ?>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Database Platform: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getPlatform(); ?></div>
@@ -458,7 +457,7 @@ if($statusStr){
 						</div>
 					</div>
 					<?php } ?>
-					<?php if($uploadType == 1){ ?>
+					<?php if($uploadType == 1 || $uploadType == 2){ ?>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Server: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getServer(); ?></div>
@@ -467,7 +466,7 @@ if($statusStr){
 						</div>
 					</div>
 					<?php } ?>
-					<?php if($uploadType == 1){ ?>
+					<?php if($uploadType == 1 || $uploadType == 2){ ?>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Port: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getPort(); ?></div>

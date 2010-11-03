@@ -35,7 +35,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			$this->schemaName = $this->defaultSchema;
 		}
  		//Delete all records in uploadspectemp table
-		$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$collId;
+		$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
 		$this->conn->query($sqlDel);
  		
 		echo "<li style='font-weight:bold;'>Starting record harvest</li>\n";
@@ -51,74 +51,58 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 		$recordReturn = 0;
 		
 		do{
-			$fp = fsockopen($this->server, $this->port, $errno, $errstr, 30);
+			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->digirPath."?doc=".urlencode("<request ".
+				"xmlns='http://digir.net/schema/protocol/2003/1.0' ".
+				"xmlns:xsd='http://www.w3.org/2001/XMLSchema' ".
+				"xmlns:darwin='http://digir.net/schema/conceptual/darwin/2003/1.0' ".
+				"xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' ".
+				"xsi:schemaLocation='http://digir.net/schema/protocol/2003/1.0 http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd http://digir.net/schema/conceptual/darwin/2003/1.0 http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd'>".
+				"<header>".
+				"<version>1.0</version>".
+				"<sendTime>".date(DATE_ISO8601)."</sendTime>".
+				"<source>".$_SERVER['SERVER_ADDR']."</source>".
+				"<destination resource='".$this->digirCode."'>".$this->server."</destination>".
+				"<type>search</type>".
+				"</header><search><filter>");
+			$url .= urlencode(trim($this->queryStr));
+			$url .= urlencode("</filter>".
+				"<records limit='".$this->searchLimit."' start='".$this->searchStart."'>".
+				"<structure schemaLocation='".$this->schemaName."'/>".
+				"</records>".
+				"<count>".($this->returnCount?"true":"false")."</count>".
+				"</search></request>");
+			//echo "\n".$url."\n";
+			$fp = fopen($url, 'rb');
 			if(!$fp){
-				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR: $errstr ($errno)</div>\n";
+				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR: Unable to retrieve data</div>\n";
+				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>SQL: ".$url."</div>\n";
 			} else {
-				$poststring = "GET ".$this->digirPath."?doc=".urlencode("<request ".
-					"xmlns='http://digir.net/schema/protocol/2003/1.0' ".
-					"xmlns:xsd='http://www.w3.org/2001/XMLSchema' ".
-					"xmlns:darwin='http://digir.net/schema/conceptual/darwin/2003/1.0' ".
-					"xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' ".
-					"xsi:schemaLocation='http://digir.net/schema/protocol/2003/1.0 http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd http://digir.net/schema/conceptual/darwin/2003/1.0 http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd'>".
-					"<header>".
-					"<version>1.0</version>".
-					"<sendTime>".date(DATE_ISO8601)."</sendTime>".
-					"<source>".$_SERVER['SERVER_ADDR']."</source>".
-					"<destination resource='".$this->digirCode."'>".$this->server."</destination>".
-					"<type>search</type>".
-					"</header><search><filter>");
-				$poststring .= urlencode(trim($this->queryStr));
-				$poststring .= urlencode("</filter>".
-					"<records limit='".$this->searchLimit."' start='".$this->searchStart."'>".
-					"<structure schemaLocation='".$this->schemaName."'/>".
-					"</records>".
-					"<count>".($this->returnCount?"true":"false")."</count>".
-					"</search></request>");
-				//echo urldecode($poststring)."\n";
-			    $poststring .= " HTTP/1.0\r\nHost: ".$this->server."\r\n";
-			    $poststring .= "Connection: Close\r\n\r\n";
-				//fputs($fp,"Content-type: application/x-www-form- urlencoded\r\n");
-				//fputs($fp, "Content-length: " . strlen($data) . "\r\n");
-			    fwrite($fp, $poststring);
-			    //$doc = "";
 			    $line = "";
 			    $contentPassed = false;
-			    $headerPassed = false;
 				$diagnosticStr = "";
 				$xml_parser = xml_parser_create();
 				xml_set_element_handler($xml_parser, array(&$this,"startElement"), array(&$this,"endElement"));
 				xml_set_character_data_handler($xml_parser, array(&$this,"characterData"));
 				while(!feof($fp)){
 					$line = fgets($fp);
-					//echo "line: ".$line;
-					if($headerPassed){
-						$line = $this->cleanString($line);
-				        //fwrite($fh, $line);
-						//$doc .= $line;
-						if (!xml_parse($xml_parser, $line, feof($fp))){
-							echo "<div style='font-weight:bold;color:red;'>";
-							echo "XML error: %s at line %d".xml_error_string(xml_get_error_code($xml_parser)).xml_get_current_line_number($xml_parser);
-							echo "</div>";
-							echo "<div style='margin-left:10px;'>".$line."</div>";
-							break;
-						}
-			        	if($contentPassed){
-				        	$diagnosticStr .= $line;
-				        }
-						elseif(strpos($line,"<diagnostics>") !== false){
-				        	$contentPassed = true;
-				        	$diagnosticStr = substr($line,strpos($line,"<diagnostics>"));
-						}
+					//echo "line: ".$line."\n";
+					$line = $this->cleanString($line);
+					if (!xml_parse($xml_parser, $line, feof($fp))){
+						echo "<div style='font-weight:bold;color:red;'>";
+						echo "XML error: %s at line %d".xml_error_string(xml_get_error_code($xml_parser)).xml_get_current_line_number($xml_parser);
+						echo "</div>";
+						echo "<div style='margin-left:10px;'>".$line."</div>";
+						break;
+					}
+		        	if($contentPassed){
+			        	$diagnosticStr .= $line;
 			        }
-			        else{
-			        	if($line == "\r\n"){
-							$headerPassed = true;
-			        	}
-			        }
+					elseif(strpos($line,"<diagnostics>") !== false){
+			        	$contentPassed = true;
+			        	$diagnosticStr = substr($line,strpos($line,"<diagnostics>"));
+					}
 			    }
 			    xml_parser_free($xml_parser);
-				//$this->processXmlDom($doc);
 			    
 				//Process $diagnosticStr
 				$diagnosticStr = substr($diagnosticStr,0,strpos($diagnosticStr,"</response>"));
@@ -147,14 +131,16 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			flush();
 			//sleep(3);
 		} while ($recordCount > $recordReturn && !$digirEof);
-		//fclose($fh);
 	}
 	
-	private function startElement($parser, $name, $attribs){
+	private function startElement($parser, $name, $attrs){
 		if($name == "RECORD") $this->withinRecordElement = true;
 		if($this->withinRecordElement){
-			if(strpos($name,0,7) == "DARWIN:") $name = substr($name,7);
-			$this->activeFieldName = trim($name);
+			if($p = strpos($name,":")){
+				$name = substr($name,$p+1);
+				//echo "<div>".$name."</div>";
+			}
+			$this->activeFieldName = $name;
 		}
 	}
 
@@ -165,82 +151,106 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			$this->withinRecordElement = false;
 			$this->databaseRecord();
 			unset($this->fieldDataArr);
+			$this->fieldDataArr = Array();
 		}
-		if($this->withinRecordElement && $this->activeFieldName && $this->activeFieldValue){
-			switch($this->activeFieldName){
-				case "DATELASTMODIFIED" && !array_key_exists("MODIFIED",$this->fieldDataArr):
+		elseif($this->withinRecordElement && $this->activeFieldName && $this->activeFieldValue){
+			if($this->activeFieldName == "GLOBALUNIQUEIDENTIFIER" && !array_key_exists("OCCURRENCEID",$this->fieldDataArr)){
+				$this->fieldDataArr["OCCURRENCEID"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "DATELASTMODIFIED" && !array_key_exists("MODIFIED",$this->fieldDataArr)){
+				$datetime = strtotime($this->activeFieldValue);
+				$this->fieldDataArr["MODIFIED"] = date('Y-m-d H:i:s',$datetime);
+			}
+			elseif($this->activeFieldName == "COLLECTOR" && !array_key_exists("RECORDEDBY",$this->fieldDataArr)){
+				$this->fieldDataArr["RECORDEDBY"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "COLLECTORNUMBER" && !array_key_exists("RECORDNUMBER",$this->fieldDataArr)){
+				$this->fieldDataArr["RECORDNUMBER"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "YEARCOLLECTED" && !array_key_exists("YEAR",$this->fieldDataArr)){
+				$this->fieldDataArr["YEAR"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "MONTHCOLLECTED" && !array_key_exists("MONTH",$this->fieldDataArr)){
+				$this->fieldDataArr["MONTH"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "DAYCOLLECTED" && !array_key_exists("DAY",$this->fieldDataArr)){
+				$this->fieldDataArr["DAY"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "EARLIESTDATECOLLECTED" && !array_key_exists("EVENTDATE",$this->fieldDataArr)){
+				$datetime = strtotime($this->activeFieldValue);
+				if($datetime){
+					$this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
+					$this->fieldDataArr["YEAR"] = date('Y',$datetime);
+					$this->fieldDataArr["MONTH"] = date('m',$datetime);
+					$this->fieldDataArr["DAY"] = date('d',$datetime);
+					$this->fieldDataArr["STARTDAYOFYEAR"] = date('z',$datetime);
+				}
+			}
+			elseif($this->activeFieldName == "LATESTDATECOLLECTED" && !array_key_exists("ENDDAYOFYEAR",$this->fieldDataArr)){
+				$datetime = strtotime($this->activeFieldValue);
+				$this->fieldDataArr["ENDDAYOFYEAR"] = date('z',$datetime);
+			}
+			elseif($this->activeFieldName == "VERBATIMCOLLECTINGDATE" || $this->activeFieldName == "VERBATIMEVENTDATE"){
+				if(!array_key_exists("VERBATIMEVENTDATE",$this->fieldDataArr)){
+					$this->fieldDataArr["VERBATIMEVENTDATE"] = $this->activeFieldValue;
+				}
+				if(!array_key_exists("EVENTDATE",$this->fieldDataArr)){
 					$datetime = strtotime($this->activeFieldValue);
-					$this->fieldDataArr["MODIFIED"] = date('Y-m-d H:i:s',$datetime);
-					break;
-				case "EARLIESTDATECOLLECTED" && !array_key_exists("EVENTDATE",$this->fieldDataArr):
-					$datetime = strtotime($this->activeFieldValue);
-					if($datetime){
-						$this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
-						$this->fieldDataArr["YEAR"] = date('Y',$datetime);
-						$this->fieldDataArr["MONTH"] = date('m',$datetime);
-						$this->fieldDataArr["DAY"] = date('d',$datetime);
-						$this->fieldDataArr["STARTDAYOFYEAR"] = date('z',$datetime);
-					}
-					break;
-				case "LATESTDATECOLLECTED" && !array_key_exists("ENDDAYOFYEAR",$this->fieldDataArr):
-					$datetime = strtotime($this->activeFieldValue);
-					$this->fieldDataArr["ENDDAYOFYEAR"] = date('z',$datetime);
-					break;
-				case "VERBATIMCOLLECTINGDATE" || "VERBATIMEVENTDATE":
-					if(!array_key_exists("VERBATIMEVENTDATE",$this->fieldDataArr)){
-						$this->fieldDataArr["VERBATIMEVENTDATE"] = $this->activeFieldValue;
-					}
-					if(!array_key_exists("EVENTDATE",$this->fieldDataArr)){
-						$datetime = strtotime($this->activeFieldValue);
-						if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d H:i:s',$datetime);
-					}
-					break;
-				case "CATALOGNUMBERTEXT" && !array_key_exists("CATALOGNUMBER",$this->fieldDataArr):
-					$this->fieldDataArr["CATALOGNUMBER"] = $this->activeFieldValue; 
-					break;
-				case "SPECIES" && !array_key_exists("SPECIFICEPITHET",$this->fieldDataArr):
-					$this->fieldDataArr["SPECIFICEPITHET"] = $this->activeFieldValue;
-					break;
-				case "SUBSPECIES" && !array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr):
-					$this->fieldDataArr["INFRASPECIFICEPITHET"] = $this->activeFieldValue;
-					break;
-				case "SCIENTIFICNAMEAUTHOR" && !array_key_exists("SCIENTIFICNAMEAUTHORSHIP",$this->fieldDataArr):
-					$this->fieldDataArr["SCIENTIFICNAMEAUTHORSHIP"] = $this->activeFieldValue;
-					break;
-				case "IDENTIFICATIONMODIFIER" && !array_key_exists("IDENTIFICATIONQUALIFIER",$this->fieldDataArr):
-					$this->fieldDataArr["IDENTIFICATIONQUALIFIER"] = $this->activeFieldValue;
-					break;
-				case "LONGITUDE" && !array_key_exists("DECIMALLONGITUDE",$this->fieldDataArr):
-					$this->fieldDataArr["DECIMALLONGITUDE"] = $this->activeFieldValue;
-					break;
-				case "LATITUDE" && !array_key_exists("DECIMALLATITUDE",$this->fieldDataArr):
-					$this->fieldDataArr["DECIMALLATITUDE"] = $this->activeFieldValue;
-					break;
-				case "HORIZONTALDATUM" && !array_key_exists("GEODETICDATUM",$this->fieldDataArr):
-					$this->fieldDataArr["GEODETICDATUM"] = $this->activeFieldValue;
-					break;
-				case "ORIGINALCOORDINATESYSTEM" && !array_key_exists("VERBATIMCOORDINATESYSTEM",$this->fieldDataArr):
-					$this->fieldDataArr["VERBATIMCOORDINATESYSTEM"] = $this->activeFieldValue;
-					break;
-				case "GEOREFMETHOD" && !array_key_exists("GEOREFERENCEPROTOCOL",$this->fieldDataArr):
-					$this->fieldDataArr["GEOREFERENCEPROTOCOL"] = $this->activeFieldValue;
-					break;
-				case "COORDINATEPRECISION" && !array_key_exists("COORDINATEUNCERTAINTYINMETERS",$this->fieldDataArr):
-					$this->fieldDataArr["COORDINATEUNCERTAINTYINMETERS"] = $this->activeFieldValue;
-					break;
-				case ("MINIMUMELEVATION" || "MINIMUMELEVATIONINMETERS") && !array_key_exists("MINIMUMELEVATIONINMETERS",$this->fieldDataArr):
-					$this->fieldDataArr["MINIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
-					break;
-				case ("MAXIMUMELEVATION" || "MAXIMUMELEVATIONINMETERS") && !array_key_exists("MAXIMUMELEVATIONINMETERS",$this->fieldDataArr):
-					$this->fieldDataArr["MAXIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
-					break;
-				case "NOTES" && !array_key_exists("OCCURRANCEREMARKS",$this->fieldDataArr):
-					$this->fieldDataArr["OCCURRANCEREMARKS"] = $this->activeFieldValue;
-					break;
-				default:
-					if(!array_key_exists($this->activeFieldName,$this->fieldDataArr)){
-						$this->fieldDataArr[$this->activeFieldName] = $this->activeFieldValue;
-					}
+					if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d H:i:s',$datetime);
+				}
+			}
+			elseif(($this->activeFieldName == "CATALOGNUMBERTEXT" || $this->activeFieldName == "CATALOGNUMBERNUMERIC") && !array_key_exists("CATALOGNUMBER",$this->fieldDataArr)){
+				$this->fieldDataArr["CATALOGNUMBER"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "SPECIES" && !array_key_exists("SPECIFICEPITHET",$this->fieldDataArr)){
+				$this->fieldDataArr["SPECIFICEPITHET"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "SUBSPECIES" && !array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr)){
+				$this->fieldDataArr["INFRASPECIFICEPITHET"] = $this->activeFieldValue;
+			}
+			elseif(($this->activeFieldName == "SCIENTIFICNAMEAUTHOR" || $this->activeFieldName == "AUTHORYEAROFSCIENTIFICNAME") && !array_key_exists("SCIENTIFICNAMEAUTHORSHIP",$this->fieldDataArr)){
+				$this->fieldDataArr["SCIENTIFICNAMEAUTHORSHIP"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "IDENTIFICATIONMODIFIER" && !array_key_exists("IDENTIFICATIONQUALIFIER",$this->fieldDataArr)){
+				$this->fieldDataArr["IDENTIFICATIONQUALIFIER"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "LATITUDE" && !array_key_exists("DECIMALLATITUDE",$this->fieldDataArr)){
+				$this->fieldDataArr["DECIMALLATITUDE"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "LONGITUDE" && !array_key_exists("DECIMALLONGITUDE",$this->fieldDataArr)){
+				$this->fieldDataArr["DECIMALLONGITUDE"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "HORIZONTALDATUM" && !array_key_exists("GEODETICDATUM",$this->fieldDataArr)){
+				$this->fieldDataArr["GEODETICDATUM"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "ORIGINALCOORDINATESYSTEM" && !array_key_exists("VERBATIMCOORDINATESYSTEM",$this->fieldDataArr)){
+				$this->fieldDataArr["VERBATIMCOORDINATESYSTEM"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "GEOREFMETHOD" && !array_key_exists("GEOREFERENCEPROTOCOL",$this->fieldDataArr)){
+				$this->fieldDataArr["GEOREFERENCEPROTOCOL"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "COORDINATEPRECISION" && !array_key_exists("COORDINATEUNCERTAINTYINMETERS",$this->fieldDataArr)){
+				$this->fieldDataArr["COORDINATEUNCERTAINTYINMETERS"] = $this->activeFieldValue;
+			}
+			elseif(($this->activeFieldName == "MINIMUMELEVATION" || $this->activeFieldName == "MINIMUMELEVATIONINMETERS") && !array_key_exists("MINIMUMELEVATIONINMETERS",$this->fieldDataArr)){
+				$this->fieldDataArr["MINIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
+			}
+			elseif(($this->activeFieldName == "MAXIMUMELEVATION" || $this->activeFieldName == "MAXIMUMELEVATIONINMETERS") && !array_key_exists("MAXIMUMELEVATIONINMETERS",$this->fieldDataArr)){
+				$this->fieldDataArr["MAXIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "NOTES" && !array_key_exists("OCCURRANCEREMARKS",$this->fieldDataArr)){
+				$this->fieldDataArr["OCCURRANCEREMARKS"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "INSTITUTIONCODE" && strtolower($this->activeFieldValue) != strtolower($this->getCollInfo("institutioncode"))){
+				$this->fieldDataArr["INSTITUTIONCODE"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "COLLECTIONCODE" && strtolower($this->activeFieldValue) != strtolower($this->getCollInfo("collectioncode"))){
+				$this->fieldDataArr["COLLECTIONCODE"] = $this->activeFieldValue;
+			}
+			else{
+				if(!array_key_exists($this->activeFieldName,$this->fieldDataArr)){
+					$this->fieldDataArr[$this->activeFieldName] = $this->activeFieldValue;
+				}
 			}
 		}
 		$this->activeFieldValue = "";
@@ -249,19 +259,61 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 
 	private function characterData($parser, $data){
 		if($this->withinRecordElement){
-			$this->activeFieldValue .= cleanString($data);
+			$this->activeFieldValue .= trim($this->cleanString($data));
 		}
 	}
 
 	private function databaseRecord(){
 		if(array_key_exists("SCIENTIFICNAME",$this->fieldDataArr) || array_key_exists("SCINAME",$this->fieldDataArr)){
-			if(array_key_exists("SCIENTIFICNAME",$this->fieldDataArr) || !array_key_exists("SCINAME",$this->fieldDataArr)){
-				$this->fieldDataArr["SCINAME"] = $this->fieldDataArr["SCIENTIFICNAME"];
+			if(!array_key_exists("SCINAME",$this->fieldDataArr)){
+				$sciName = "";
+				if(array_key_exists("GENUS",$this->fieldDataArr)){
+					$sciName = $this->fieldDataArr["GENUS"];
+					if(array_key_exists("SPECIFICEPITHET",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["SPECIFICEPITHET"];
+					if(array_key_exists("INFRASPECIFICRANK",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["INFRASPECIFICRANK"];
+					if(array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["INFRASPECIFICEPITHET"];
+				}
+				else{
+					$sciArr = explode(" ",$this->fieldDataArr["SCIENTIFICNAME"]);
+					if(strlen($sciArr[0])==1){
+						//Is hybrid
+						$sciName = array_shift($sciArr)." ";
+					}
+					//Genus
+					$sciName = array_shift($sciArr);
+					if(strlen($sciArr[0])==1){
+						//is hybrid
+						$sciName = " ".array_shift($sciArr);
+					}
+					$nextStr = array_shift($sciArr);
+					if(preg_match('/^[a-z]+$/', $nextStr)){
+						//is epithet
+						$sciName = " ".array_shift($sciArr);
+						//Now look for infrasp. data
+						$infraRank = "";$infraSp = "";
+						while($nextStr = strtolower(array_shift($sciArr))){
+							if($nextStr == "ssp." || $nextStr == "subsp." || $nextStr == "var." || $nextStr == "forma" || $nextStr == "f."){
+								$infraRank = $nextStr;
+								$infraSp = array_shift($sciArr);
+							}
+						}
+						if($infraSp){
+							$sciName = " ".$infraRank;
+							$sciName = " ".$infraSp;
+						}
+					}
+				}
+				if($sciName){
+					$this->fieldDataArr["SCINAME"] = trim($sciName);
+				}
+				else{
+					$this->fieldDataArr["SCINAME"] = $this->fieldDataArr["SCIENTIFICNAME"];
+				}
 			}
-			if(!array_key_exists("SCIENTIFICNAME",$this->fieldDataArr) || array_key_exists("SCINAME",$this->fieldDataArr)){
+			if(!array_key_exists("SCIENTIFICNAME",$this->fieldDataArr)){
 				$this->fieldDataArr["SCIENTIFICNAME"] = $this->fieldDataArr["SCINAME"]." ".(array_key_exists("SCIENTIFICNAMEAUTHORSHIP",$this->fieldDataArr)?$this->fieldDataArr["SCIENTIFICNAMEAUTHORSHIP"]:"");
 			}
-			if(array_key_exists("YEAR",$this->fieldDataArr) && array_key_exists("MONTH",$this->fieldDataArr) && array_key_exists("DAY",$this->fieldDataArr) && !array_key_exists("EVENTDATE",$this->fieldDataArr)){
+			if(!array_key_exists("EVENTDATE",$this->fieldDataArr) && array_key_exists("YEAR",$this->fieldDataArr) && array_key_exists("MONTH",$this->fieldDataArr) && array_key_exists("DAY",$this->fieldDataArr)){
 				$datetime = strtotime($this->fieldDataArr["YEAR"]."-".$this->fieldDataArr["MONTH"]."-".$this->fieldDataArr["DAY"]);
 				if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
 			}
@@ -272,7 +324,6 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 				$this->fieldDataArr["DBPK"] = ++$this->dbpkSequence;
 			}
 			$this->fieldDataArr["COLLID"] = $this->collId;
-			//$this->fieldDataArr["ULID"] = $this->collId;
 			$sqlInsertFrag = "";
 			$sqlValuesFrag = "";
 			foreach($this->fieldDataArr as $fieldName => $fieldValue){
@@ -285,33 +336,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			//echo "<div>SQL: ".$sql."</div>";
 			if(!$this->conn->query($sql)){
 				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>";
-				echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>";
-				//$textFile = "C:\\temp\\TransferErrors.txt";
-				//$fh = fopen($textFile, 'a') or die("can't open file");
-				//fwrite($fh, "<div>ERROR LOADING RECORD: ".$this->con->error."</div>");
-				//fwrite($fh, "<div>SQL: ".$sql."</div>");
-				//fclose($fh);
-			}
-		}
-	}
-	
-	private function processXmlDom($doc){
-		$dom = new DOMDocument();
-		$dom->loadXML( $doc );
-		$recordList = $dom->getElementsByTagName("record");
-		//$recCnt = 0;
-		foreach($recordList as $recordNode){
-			$childNodes = $recordNode->childNodes;
-			//++$recCnt;
-			//echo "<h1>Record ".$recCnt."</h1>";
-			foreach($childNodes as $fieldNode){
-				$fieldType = $fieldNode->nodeType;
-				if($fieldType == 1){
-					$fieldName = $fieldNode->nodeName;
-					$fieldValue = $fieldNode->nodeValue;
-					$this->fieldDataArr[$fieldName] = $fieldValue;
-					//if($fieldValue) echo "<div>".$fieldName.": ".$fieldValue."</div>";
-				}
+				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>";
 			}
 		}
 	}
