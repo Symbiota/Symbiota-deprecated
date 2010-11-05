@@ -462,7 +462,7 @@ else{
 						<div style="width:200px;font-weight:bold;float:left;">Server: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getServer(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="eupserver" type="text" value="<?php echo $duManager->getServer(); ?>" />
+							<input name="eupserver" type="text" size="50" value="<?php echo $duManager->getServer(); ?>" />
 						</div>
 					</div>
 					<?php } ?>
@@ -489,7 +489,7 @@ else{
 						<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getDigirPath(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="eupdigirpath" type="text" value="<?php echo $duManager->getDigirPath(); ?>" />
+							<input name="eupdigirpath" type="text" size="50" value="<?php echo $duManager->getDigirPath(); ?>" />
 						</div>
 					</div>
 					<?php } ?>
@@ -525,7 +525,7 @@ else{
 						<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
 						<div class="editdiv" style=""><?php echo $duManager->getSchemaName(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="eupschemaname" type="text" value="<?php echo $duManager->getSchemaName(); ?>" />
+							<input name="eupschemaname" type="text" size="65" value="<?php echo $duManager->getSchemaName(); ?>" />
 						</div>
 					</div>
 					<?php } ?>
@@ -533,7 +533,7 @@ else{
 						<div style="width:200px;font-weight:bold;float:left;">Stored Procedure (clean/transfer): </div>
 						<div class="editdiv" style=""><?php echo $duManager->getCleanupSP(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="eupcleanupsp" type="text" value="<?php echo $duManager->getCleanupSP(); ?>" />
+							<input name="eupcleanupsp" type="text" size="40" value="<?php echo $duManager->getCleanupSP(); ?>" />
 						</div>
 					</div>
 					<?php if($uploadType == 1 || $uploadType == 2 || $uploadType == 4 || $uploadType == 5){ ?>
@@ -654,7 +654,7 @@ else{
 				<div id="aupserver" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Server (host): </div>
 					<div>
-						<input name="aupserver" type="text" value="" />
+						<input name="aupserver" type="text" size="50" value="" />
 					</div>
 				</div>
 				<div id="aupport" style="clear:both;">
@@ -672,7 +672,7 @@ else{
 				<div id="aupdigirpath" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">DiGIR Path: </div>
 					<div>
-						<input name="aupdigirpath" type="text" value="" />
+						<input name="aupdigirpath" type="text" size="50" value="" />
 					</div>
 				</div>
 				<div id="aupdigirpkfield" style="clear:both;">
@@ -696,13 +696,13 @@ else{
 				<div id="aupschemaname" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Schema Name: </div>
 					<div>
-						<input name="aupschemaname" type="text" value="" />
+						<input name="aupschemaname" type="text" size="65" value="" />
 					</div>
 				</div>
 				<div id="aupcleanupsp" style="clear:both;">
 					<div style="width:200px;font-weight:bold;float:left;">Stored Procedure (clean/transfer): </div>
 					<div>
-						<input name="aupcleanupsp" type="text" value="" />
+						<input name="aupcleanupsp" type="text" size="40" value="" />
 					</div>
 				</div>
 				<div id="aupquerystr" style="clear:both;">
