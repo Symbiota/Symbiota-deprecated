@@ -151,7 +151,7 @@ else{
 					</div>
 					<div>
 						Source Record URL:
-						<input type="text" name="individualurl" style="width:290px;" value="Dynamic link to source database individual record page" />
+						<input type="text" name="individualurl" value="" style="width:290px;" title="Dynamic link to source database individual record page" />
 					</div>
 					<div>
 						<input type="submit" name="action" value="Add New Profile" />
@@ -300,11 +300,11 @@ else{
 									<?php if($isAdmin){ ?>
 									<div>
 										Icon URL:
-										<input type="text" name="icon" style="width:320px;" value="<?php echo $collData["icon"];?>" />
+										<input type="text" name="icon" style="width:320px;" value="<?php echo $collData["icon"];?>" title="Small url usually placed in /images/collicons/ folder" />
 									</div>
 									<div>
 										Source Record URL:
-										<input type="text" name="individualurl" style="width:270px;" value="<?php echo $collData["individualurl"];?>" />
+										<input type="text" name="individualurl" style="width:270px;" value="<?php echo $collData["individualurl"];?>" title="Dynamic link to source database individual record page" />
 									</div>
 									<?php } ?>
 									<div>

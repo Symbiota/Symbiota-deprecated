@@ -39,10 +39,11 @@
 	
 	public function getCollectionData(){
 		$returnArr = Array();
-		$sql = "SELECT i.InstitutionCode, i.InstitutionName, i.Address1, i.Address2, i.City, i.StateProvince, ".
-			"i.PostalCode, i.Country, i.Phone, c.collid, c.CollectionCode, c.CollectionName, ".
+		$sql = "SELECT IFNULL(i.InstitutionCode,c.InstitutionCode) AS institutioncode, i.InstitutionName, ".
+			"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
+			"c.collid, c.CollectionCode, c.CollectionName, ".
 			"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, c.latitudedecimal, ".
-			"c.longitudedecimal, c.icon, cs.uploaddate, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
+			"c.longitudedecimal, c.icon, c.sortseq, cs.uploaddate, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 			"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 			"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 			"LEFT JOIN institutions i ON c.iid = i.iid ".
@@ -50,7 +51,7 @@
 		//echo $sql;
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr["institutioncode"] = $row->InstitutionCode;
+			$returnArr["institutioncode"] = $row->institutioncode;
 			$returnArr["institutionname"] = $row->InstitutionName;
 			$returnArr["address2"] = $row->Address1;
 			$returnArr["address1"] = $row->Address2;
@@ -70,6 +71,7 @@
 			$returnArr["latitudedecimal"] = $row->latitudedecimal;
 			$returnArr["longitudedecimal"] = $row->longitudedecimal;
 			$returnArr["icon"] = $row->icon;
+			$returnArr["sortseq"] = $row->sortseq;
 			$uDate = "";
 			if($row->uploaddate){
 				$uDate = $row->uploaddate;
@@ -107,12 +109,13 @@
 		global $symbUid;
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,".
-			"contact,email,latitudedecimal,longitudedecimal,icon,individualurl) ".
+			"contact,email,latitudedecimal,longitudedecimal,icon,individualurl,sortseq) ".
 			"VALUES (\"".$addArr["institutioncode"]."\",\"".$addArr["collectioncode"]."\",\"".$addArr["collectionname"]."\",\"".
 			$addArr["briefdescription"]."\",\"".$addArr["fulldescription"]."\",\"".$addArr["homepage"]."\",\"".
 			$addArr["contact"]."\",\"".$addArr["email"]."\",\"".$addArr["latitudedecimal"]."\",\"".$addArr["longitudedecimal"].
 			"\",".(array_key_exists("icon",$addArr)?"\"".$addArr["icon"]."\"":"NULL").",".
-			(array_key_exists("individualurl",$addArr)?"\"".$addArr["individualurl"]."\"":"NULL").") ";
+			(array_key_exists("individualurl",$addArr)?"\"".$addArr["individualurl"]."\"":"NULL").",".
+			(array_key_exists("sortseq",$addArr)?$addArr["sortseq"]:"NULL").") ";
 		$conn->query($sql);
 		$cid = $conn->insert_id;
 		$sql = "INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) ".
