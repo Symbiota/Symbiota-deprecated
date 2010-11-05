@@ -90,10 +90,6 @@ class OccurrenceListManager extends OccurrenceManager{
 		return $this->recordCount;
 	}
 	
-	public function resetRecordCount(){
-		$this->recordCount = 0;
-	}
-
 	public function getCntPerPage(){
 		return $this->cntPerPage;
 	}

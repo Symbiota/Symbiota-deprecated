@@ -7,7 +7,6 @@
  
  $collManager = new OccurrenceManager(); 
  $collArray = $collManager->getSearchTerms();
- $collManager->reset();
 ?>
  
 <html>
@@ -353,7 +352,7 @@
 					onmouseout="javascript:this.src = '../images/search.gif';"
 					title="Click button to display the results of your search">
 			</div>
-			<input type="hidden" name="resetrecordcnt" value="1"/>
+			<input type="hidden" name="reset" value="1" />
 		</form>
 	</div>
 	<?php

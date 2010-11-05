@@ -205,7 +205,8 @@ else{
 					?>
 					<hr />
 					<div style="font-weight:bold;">
-						New collection added successfully! Click <a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">here</a> 
+						New collection added successfully! <br/>
+						Click <a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">here</a> 
 						upload specimen records for this new collection.
 					</div>
 					<hr />
