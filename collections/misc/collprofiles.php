@@ -37,6 +37,7 @@ if($isEditable){
  		$collArr["email"] = $_REQUEST["email"];
   		$collArr["icon"] = (array_key_exists("icon",$_REQUEST)?$_REQUEST["icon"]:"");
  		$collArr["individualurl"] = (array_key_exists("individualurl",$_REQUEST)?$_REQUEST["individualurl"]:"");
+ 		$collArr["sortseq"] = $_REQUEST["sortseq"];
  		if($action == "Submit Edits"){
  			$collManager->submitCollEdits($collArr);
  		}
@@ -152,6 +153,10 @@ else{
 					<div>
 						Source Record URL:
 						<input type="text" name="individualurl" value="" style="width:290px;" title="Dynamic link to source database individual record page" />
+					</div>
+					<div>
+						Sort Sequence:
+						<input type="text" name="sortseq" value="<?php echo $collData["sortseq"];?>" />
 					</div>
 					<div>
 						<input type="submit" name="action" value="Add New Profile" />
@@ -308,6 +313,10 @@ else{
 										<input type="text" name="individualurl" style="width:270px;" value="<?php echo $collData["individualurl"];?>" title="Dynamic link to source database individual record page" />
 									</div>
 									<?php } ?>
+									<div>
+										Sort Sequence:
+										<input type="text" name="sortseq" value="<?php echo $collData["sortseq"];?>" />
+									</div>
 									<div>
 										<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 										<input type="submit" name="action" value="Submit Edits" />

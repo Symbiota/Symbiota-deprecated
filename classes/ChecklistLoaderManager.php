@@ -46,7 +46,7 @@ class ChecklistLoaderManager {
 		return $retArr;
 	}
 
-	public function uploadCsvList($clid, $hasHeader, $thesId){
+	public function uploadCsvList($hasHeader, $thesId){
 		set_time_limit(120);
 		ini_set("max_input_time",120);
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
@@ -176,7 +176,7 @@ class ChecklistLoaderManager {
 								$sqlInsert .= ",notes";
 								$sqlValues .= ",'".$valueArr[$headerArr["notes"]]."'";
 							}
-							$sql = "INSERT INTO fmchklsttaxalink (tid,clid".$sqlInsert.") VALUES (".$tid.", ".$clid.$sqlValues.")";
+							$sql = "INSERT INTO fmchklsttaxalink (tid,clid".$sqlInsert.") VALUES (".$tid.", ".$this->clid.$sqlValues.")";
 							//echo $sql;
 							if($this->conn->query($sql)){
 								$successCnt++;

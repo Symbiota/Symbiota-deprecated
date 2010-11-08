@@ -1,19 +1,20 @@
 <?php
- include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
- class CollectionProfileManager {
+//Used by /collections/misc/collprofiles.php page
+class CollectionProfileManager {
 
 	private $con;
 	private $collId;
 
- 	public function __construct(){
- 		$this->con = MySQLiConnectionFactory::getCon("readonly");
- 	}
- 	
- 	public function __destruct(){
+	public function __construct(){
+		$this->con = MySQLiConnectionFactory::getCon("readonly");
+	}
+
+	public function __destruct(){
 		if(!($this->con === null)) $this->con->close();
 	}
-	
+
 	public function setCollectionId($collId){
 		$this->collId = $collId;
 	}
@@ -22,7 +23,7 @@
 		$returnArr = Array();
 		$sql = "SELECT c.collid, c.CollectionCode, c.CollectionName, c.BriefDescription, ".
 			"c.Homepage, c.Contact, c.email, c.icon ".
-			"FROM omcollections c ORDER BY c.SortSeq";
+			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]["collectioncode"] = $row->CollectionCode;
@@ -36,7 +37,7 @@
 		$rs->close();
 		return $returnArr;
 	}
-	
+
 	public function getCollectionData(){
 		$returnArr = Array();
 		$sql = "SELECT IFNULL(i.InstitutionCode,c.InstitutionCode) AS institutioncode, i.InstitutionName, ".
@@ -90,7 +91,7 @@
 		$rs->close();
 		return $returnArr;
 	}
-	
+
 	public function submitCollEdits($editArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "";
@@ -124,7 +125,7 @@
 		$conn->close();
 		return $cid;
 	}
-	
+
 	public function getFamilyRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
@@ -138,7 +139,7 @@
 		$rs->close();
 		return $returnArr;
 	}
-	
+
 	public function getCountryRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
@@ -153,7 +154,7 @@
 		return $returnArr;
 	}
 
- 	public function getStateRecordCounts(){
+	public function getStateRecordCounts(){
 		$returnArr = Array();
 		//Specimen count
 		$sql = "SELECT o.StateProvince, Count(*) AS cnt ".
@@ -169,6 +170,6 @@
 		$rs->close();
 		return $returnArr;
 	}
- }
+}
 
  ?>
