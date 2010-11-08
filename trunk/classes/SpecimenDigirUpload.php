@@ -49,6 +49,10 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 		$digirEof = false;
 		$recordCount = 0;
 		$recordReturn = 0;
+		$qStr = "<like><darwin:collectioncode>%%%</darwin:collectioncode></like>";
+		if($this->queryStr){
+			$qStr = trim($this->queryStr);
+		}
 		
 		do{
 			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->digirPath."?doc=".urlencode("<request ".
@@ -64,7 +68,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 				"<destination resource='".$this->digirCode."'>".$this->server."</destination>".
 				"<type>search</type>".
 				"</header><search><filter>");
-			$url .= urlencode(trim($this->queryStr));
+			$url .= urlencode($qStr);
 			$url .= urlencode("</filter>".
 				"<records limit='".$this->searchLimit."' start='".$this->searchStart."'>".
 				"<structure schemaLocation='".$this->schemaName."'/>".

@@ -351,7 +351,7 @@ class OccurrenceManager{
 			if($catId){
 				$sql .= "INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid WHERE ccl.ccpk = ".$catId." ";
 			}
-			$sql .= "ORDER BY c.SortSeq ";
+			$sql .= "ORDER BY c.SortSeq, c.CollectionName ";
 			//echo "<div>SQL: ".$sql."</div>";
 			$result = $conn->query($sql);
 			while($row = $result->fetch_object()){
