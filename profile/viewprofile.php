@@ -260,7 +260,7 @@ if(isset($profile_viewprofileCrumbs)){
 		        <li><a href="#" rel="editpassworddiv">Edit Password</a></li>
 		        <li><a href="#" rel="checklistdiv">Personal Checklists</a></li>
 		    </ul>
-			<div style="border:1px solid gray; width:100%; margin-bottom: 1em; padding: 10px">
+			<div style="border:1px solid gray; width:90%; margin-bottom: 1em; padding: 10px">
 				<div id="viewprofilediv" class="tabcontent" style="margin:10px;">
 					<table cellspacing='3'>
 					    <tr>
