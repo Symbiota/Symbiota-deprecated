@@ -128,7 +128,7 @@
 		        <li><a href="#" rel="otherdiv">Other Categories</a></li>
 		        <?php } ?>
 		    </ul>
-			<div style="border:1px solid gray; width:670px; margin-bottom: 1em; padding: 10px">
+			<div style="border:1px solid gray; width:100%; margin-bottom: 1em; padding: 10px">
 				<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return checkForm()">
 		        <?php if($specArr && $obsArr){?>
 					<div id="specobsdiv" class="tabcontent" style="margin:10px;">
