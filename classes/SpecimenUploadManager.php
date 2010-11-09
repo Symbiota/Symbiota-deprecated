@@ -495,11 +495,21 @@ class SpecimenUploadManager{
 	public function getTransferCount(){
 		return $this->transferCount;
 	}
-	
+
 	protected function cleanString($inStr){
- 		global $charset;
 		$retStr = trim($inStr);
 
+		$retStr = str_replace("\"","'",$retStr);
+		$retStr = str_replace(chr(10),' ',$retStr);
+		$retStr = str_replace(chr(11),' ',$retStr);
+		$retStr = str_replace(chr(13),' ',$retStr);
+		$retStr = str_replace(chr(20),' ',$retStr);
+		$retStr = str_replace(chr(30),' ',$retStr);
+		return $retStr;
+	}
+
+	protected function encodeString($inStr){
+ 		global $charset;
 		if($charset == "utf8"){
 			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
 				//$value = utf8_encode($value);
@@ -512,13 +522,6 @@ class SpecimenUploadManager{
 				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 			}
 		}
-
-		$retStr = str_replace("\"","'",$retStr);
-		$retStr = str_replace(chr(10),' ',$retStr);
-		$retStr = str_replace(chr(11),' ',$retStr);
-		$retStr = str_replace(chr(13),' ',$retStr);
-		$retStr = str_replace(chr(20),' ',$retStr);
-		$retStr = str_replace(chr(30),' ',$retStr);
 		return $retStr;
 	}
 }

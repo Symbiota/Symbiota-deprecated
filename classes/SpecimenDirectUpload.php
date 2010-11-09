@@ -77,6 +77,7 @@ class SpecimenDirectUpload extends SpecimenUploadManager {
 						foreach($this->fieldMap as $symbField => $sourceField){
 							$value = $row[$sourceField["field"]];
 							$value = $this->cleanString($value);
+							$value = $this->encodeString($value);
 							if($sourceField["type"] == "date"){
 								if($datetime = strtotime($value)){
 									$value = date('Y-m-d H:i:s',$datetime);

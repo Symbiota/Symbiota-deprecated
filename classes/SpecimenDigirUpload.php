@@ -263,7 +263,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 
 	private function characterData($parser, $data){
 		if($this->withinRecordElement){
-			$this->activeFieldValue .= trim($this->cleanString($data));
+			$this->activeFieldValue .= $this->encodeString($data);
 		}
 	}
 
@@ -344,5 +344,22 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 			}
 		}
 	}
+	
+	public function setSearchStart($start){
+		$this->searchStart = $start;
+	}
+
+	public function getSearchStart(){
+		return $this->searchStart;
+	}
+
+	public function setSearchLimit($limit){
+		$searchLimit = $limit;
+	}
+	
+	public function getSearchLimit(){
+		return $this->searchLimit;
+	}
+	
 }
 ?>

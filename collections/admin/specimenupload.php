@@ -9,6 +9,9 @@ $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
+$recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
+$recLimit = array_key_exists("reclimit",$_REQUEST)?$_REQUEST["reclimit"]:1000;
+$dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $statusStr = "";
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;
 
@@ -19,6 +22,8 @@ if($uploadType == $DIRECTUPLOAD){
 }
 elseif($uploadType == $DIGIRUPLOAD){
 	$duManager = new SpecimenDigirUpload();
+	$duManager->setSearchStart($recStart);
+	$duManager->setSearchLimit($recLimit);
 }
 elseif($uploadType == $FILEUPLOAD){
 	$duManager = new SpecimenFileUpload();
@@ -397,6 +402,20 @@ else{
 				<?php if((($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD) && $dbpk) || ($uploadType == $DIGIRUPLOAD) 
 					|| ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
 					<div id="uldiv">
+						<?php 
+						if($uploadType == $DIGIRUPLOAD){
+							?>
+							<div>
+								Record Start: 
+								<input type="text" name="recstart" size="5" value="<?php echo $duManager->getSearchStart(); ?>" />
+							</div>
+							<div>
+								Record Limit: 
+								<input type="text" name="reclimit" size="5" value="<?php echo $duManager->getSearchLimit(); ?>" />
+							</div>
+							<?php 
+						}
+						?>
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Start Upload" />
 						</div>
