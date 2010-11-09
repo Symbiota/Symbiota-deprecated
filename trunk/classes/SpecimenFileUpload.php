@@ -96,6 +96,7 @@ class SpecimenFileUpload extends SpecimenUploadManager{
 										$valueStr = substr($valueStr,1,strlen($valueStr)-2);
 									}
 									$valueStr = $this->cleanString($valueStr);
+									$valueStr = $this->encodeString($valueStr);
 									//Load data
 									$type = $this->fieldMap[$specName]["type"];
 									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);
