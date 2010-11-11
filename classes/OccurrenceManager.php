@@ -21,7 +21,7 @@ class OccurrenceManager{
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
  		}
- 		elseif($this->useCookies){
+ 		if($this->useCookies){
  			$this->readCollCookies();
  		}
 		$this->readRequestVariables();
