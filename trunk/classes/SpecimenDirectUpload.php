@@ -26,7 +26,7 @@ class SpecimenDirectUpload extends SpecimenUploadManager {
 			$sourceArr = Array();
 			if($row = $rs->fetch_assoc()){
 				foreach($row as $k => $v){
-					$sourceArr[] = $k;
+					$sourceArr[] = strtolower($k);
 				}
 			}
 			$rs->close();

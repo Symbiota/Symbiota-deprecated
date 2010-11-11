@@ -192,8 +192,8 @@ class SpecimenUploadManager{
 	    	//echo $sql;
 			$rs = $this->conn->query($sql);
 	    	while($row = $rs->fetch_object()){
-	    		$sourceField = trim($row->sourcefield);
-				$symbField = strtolower(trim($row->symbspecfield));
+	    		$sourceField = $row->sourcefield;
+				$symbField = $row->symbspecfield;
 				$this->fieldMap[$symbField]["field"] = $sourceField;
 	    	}
 	    	$rs->close();
@@ -239,7 +239,7 @@ class SpecimenUploadManager{
 		if(array_key_exists("eupdigircode",$_REQUEST)) $sql .= ", digircode = \"".$_REQUEST["eupdigircode"]."\"";
 		if(array_key_exists("eupdigirpath",$_REQUEST)) $sql .= ", digirpath = \"".$_REQUEST["eupdigirpath"]."\"";
 		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
-		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanString(strtolower($_REQUEST["eupquerystr"]))."\"";
+		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanString($_REQUEST["eupquerystr"])."\"";
 		if(array_key_exists("eupcleanupsp",$_REQUEST)) $sql .= ", cleanupsp = \"".$_REQUEST["eupcleanupsp"]."\"";
 		$sql .= " WHERE uspid = ".$this->uspid;
 		//echo $sql;
@@ -248,7 +248,7 @@ class SpecimenUploadManager{
 		}
 		return "";
 	}
-	
+
     public function addUploadProfile(){
 		$sql = "INSERT INTO uploadspecparameters(collid, uploadtype, title, platform, server, port, digircode, digirpath, ".
 			"digirpkfield, username, password, schemaname, cleanupsp, querystr) VALUES (".
@@ -256,7 +256,7 @@ class SpecimenUploadManager{
 			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
-			$this->cleanString(strtolower($_REQUEST["aupquerystr"]))."\")";
+			$this->cleanString($_REQUEST["aupquerystr"])."\")";
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
