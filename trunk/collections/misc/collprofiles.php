@@ -156,7 +156,7 @@ else{
 					</div>
 					<div>
 						Sort Sequence:
-						<input type="text" name="sortseq" value="<?php echo $collData["sortseq"];?>" />
+						<input type="text" name="sortseq" value="" />
 					</div>
 					<div>
 						<input type="submit" name="action" value="Add New Profile" />
@@ -312,11 +312,11 @@ else{
 										Source Record URL:
 										<input type="text" name="individualurl" style="width:270px;" value="<?php echo $collData["individualurl"];?>" title="Dynamic link to source database individual record page" />
 									</div>
-									<?php } ?>
 									<div>
 										Sort Sequence:
 										<input type="text" name="sortseq" value="<?php echo $collData["sortseq"];?>" />
 									</div>
+									<?php } ?>
 									<div>
 										<input type="hidden" name="collid" value="<?php echo $collId;?>" />
 										<input type="submit" name="action" value="Submit Edits" />

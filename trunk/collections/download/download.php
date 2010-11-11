@@ -72,7 +72,7 @@ else{
     //echo "<li style='font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=darwincore_xml'>Darwin Core XML file</a></li>";
     echo "<li style='font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=darwincore_text'>Darwin Core CSV text file</a></li>";
     echo "<ul><li><a href='http://rs.tdwg.org/dwc/index.htm' class='bodylink' target='_blank'>What is Darwin Core?</a></li></ul>";
-    echo "<li style='margin-top:5px;font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=symbiota'>Symbiota tab-delimited text file</a></li>";
+    echo "<li style='margin-top:5px;font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=symbiota'>Symbiota CSV text file</a></li>";
 }
    
 ?>

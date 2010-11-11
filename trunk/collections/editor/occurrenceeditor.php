@@ -60,6 +60,11 @@ if($occId){
 			}
 		}
 
+		function toggleIdDetails(){
+			toggle("idrefdiv");
+			toggle("taxremdiv");
+		}
+
 	</script>
 </head>
 <body onload="initTabs('occedittabs');">
@@ -86,7 +91,7 @@ if($occId){
 	        <li><a href="#" rel="identdiv">Identification</a></li>
 	        <li><a href="#" rel="localitydiv">Locality</a></li>
 	    </ul>
-		<div style="border:1px solid gray;width:800px;margin-bottom:1em;padding:10px;">
+		<div style="border:1px solid gray;width:96%;margin-bottom:1em;padding:10px;">
 			<div id="shortdiv" class="tabcontent" style="margin:10px;">
 				<form id='fullform' name='fullform' action='occurrenceeditor.php' method='get'>
 					<fieldset>
@@ -126,16 +131,16 @@ if($occId){
 								Date Identified:
 								<input type="text" name="dateidentified" maxlength="45" tabindex="4" value="<?php echo array_key_exists("dateidentified",$occArr)?$occArr["dateidentified"]["value"]:""; ?>" />
 							</div>
-							<div style="float:left;margin-left:15px;cursor:pointer;" onclick="toggle('iddetails')">
+							<div style="float:left;margin-left:15px;cursor:pointer;" onclick="toggleIdDetails();">
 								<img src="../../images/showedit.png" style="width:15px;" />
 							</div>
 						</div>
-						<div id="iddetails" style="clear:both;display:none;">
-							<div style="padding:3px 0px 0px 10px;">
+						<div style="clear:both;">
+							<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 								ID References:
 								<input type="text" name="identificationreferences" tabindex="5" size="60" value="<?php echo array_key_exists("identificationreferences",$occArr)?$occArr["identificationreferences"]["value"]:""; ?>" />
 							</div>
-							<div style="padding:3px 0px 0px 10px;">
+							<div id="taxremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 								ID Remarks:
 								<input type="text" name="taxonremarks" tabindex="6" size="60" value="<?php echo array_key_exists("identificationremarks",$occArr)?$occArr["identificationremarks"]["value"]:""; ?>" />
 							</div>
@@ -169,12 +174,33 @@ if($occId){
 									<img src="../../images/showedit.png" style="width:15px;" />
 								</span>
 							</div>
-							<div style="clear:both;padding:5px 0px 0px 10px;">
+							<div style="clear:both;padding:5px 0px 0px 10px;" class="p1">
 								Associated Collectors:
 								<input type="text" name="associatedcollectors" tabindex="15" maxlength="255" size="50" value="<?php echo array_key_exists("associatedcollectors",$occArr)?$occArr["associatedcollectors"]["value"]:""; ?>" />
 							</div>
 						</div>
-						<div id="dateextradiv" style="float:left;padding:5px;margin-left:10px;border:1px solid gray;display:none;">
+						<?php 
+							$dateExtraDiv = "none";
+							if(array_key_exists("verbatimeventdate",$occArr) && $occArr["verbatimeventdate"]["value"]){
+								$dateExtraDiv = "block";
+							}
+							elseif(array_key_exists("month",$occArr) && $occArr["month"]["value"]){
+								$dateExtraDiv = "block";
+							}
+							elseif(array_key_exists("day",$occArr) && $occArr["day"]["value"]){
+								$dateExtraDiv = "block";
+							}
+							elseif(array_key_exists("year",$occArr) && $occArr["year"]["value"]){
+								$dateExtraDiv = "block";
+							}
+							elseif(array_key_exists("startdayofyear",$occArr) && $occArr["startdayofyear"]["value"]){
+								$dateExtraDiv = "block";
+							}
+							elseif(array_key_exists("enddayofyear",$occArr) && $occArr["enddayofyear"]["value"]){
+								$dateExtraDiv = "block";
+							}
+						?>
+						<div id="dateextradiv" style="float:left;padding:5px;margin-left:10px;border:1px solid gray;display:<?php echo $dateExtraDiv; ?>;" class="p2">
 							<div>
 								<span>
 									Verbatim Date:
@@ -185,7 +211,7 @@ if($occId){
 							</div>
 							<div>
 								<span>
-									Month/Day/Year:
+									MM/DD/YYYY:
 								</span>
 								<span>
 									<input type="text" name="month" tabindex="0" size="1" value="<?php echo array_key_exists("month",$occArr)?$occArr["month"]["value"]:""; ?>" title="Month" />/
@@ -248,11 +274,9 @@ if($occId){
 								<input type="text" name="locality" tabindex="" size="100" value="<?php echo array_key_exists("locality",$occArr)?$occArr["locality"]["value"]:""; ?>" />
 							</span>
 						</div>
-						<div>
-							<span>
-								<input type="checkbox" name="localitysecurity" tabindex="" value="1" <?php echo (array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]["value"]?"CHECKED":""); ?> title="Hide Locality Data from General Public" />
-								Hidden Locality Data
-							</span>
+						<div style="margin-top:5px;">
+							<input type="checkbox" name="localitysecurity" tabindex="" value="1" <?php echo (array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]["value"]?"CHECKED":""); ?> title="Hide Locality Data from General Public" />
+							Hidden Locality Data
 						</div>
 						<div>
 							<span style="">
@@ -296,56 +320,90 @@ if($occId){
 							<span>
 								<input type="text" name="verbatimelevation" tabindex="" size="" maxlength="255" value="<?php echo array_key_exists("verbatimelevation",$occArr)?$occArr["verbatimelevation"]["value"]:""; ?>" title="" />
 							</span>
-						</div>
-						<div>
-							<span style="">
-								Verbatim Coordinates
-							</span>
-							<span style="margin-left:30px;">
-								Verbatim Coordinate System
-							</span>
-							<span style="margin-left:22px;">
-								Georeferenced By
-							</span>
-							<span style="margin-left:50px;">
-								Georeference Protocol
+							<span style="margin-left:5px;cursor:pointer;" onclick="toggle('locextradiv1');toggle('locextradiv2');">
+								<img src="../../images/showedit.png" style="width:15px;" />
 							</span>
 						</div>
-						<div>
-							<span>
-								<input type="text" name="verbatimCoordinates" tabindex="" size="" maxlength="255" value="<?php echo array_key_exists("verbatimCoordinates",$occArr)?$occArr["verbatimCoordinates"]["value"]:""; ?>" title="" />
-							</span>
-							<span>
-								<input type="text" name="verbatimCoordinateSystem" tabindex="" size="25" maxlength="255" value="<?php echo array_key_exists("verbatimCoordinateSystem",$occArr)?$occArr["verbatimCoordinateSystem"]["value"]:""; ?>" title="" />
-							</span>
-							<span>
-								<input type="text" name="georeferencedby" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferencedby",$occArr)?$occArr["georeferencedby"]["value"]:""; ?>" />
-							</span>
-							<span>
-								<input type="text" name="georeferenceprotocol" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferenceprotocol",$occArr)?$occArr["georeferenceprotocol"]["value"]:""; ?>" />
-							</span>
+						<?php 
+							$locExtraDiv1 = "none";
+							if(array_key_exists("verbatimcoordinates",$occArr) && $occArr["verbatimcoordinates"]["value"]){
+								$locExtraDiv1 = "block";
+							}
+							elseif(array_key_exists("verbatimcoordinatesystem",$occArr) && $occArr["verbatimcoordinatesystem"]["value"]){
+								$locExtraDiv1 = "block";
+							}
+							elseif(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]["value"]){
+								$locExtraDiv1 = "block";
+							}
+							elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]["value"]){
+								$locExtraDiv1 = "block";
+							}
+						?>
+						<div id="locextradiv1" style="display:<?php echo $locExtraDiv1; ?>;">
+							<div>
+								<span style="">
+									Verbatim Coordinates
+								</span>
+								<span style="margin-left:30px;">
+									Verbatim Coordinate System
+								</span>
+								<span style="margin-left:22px;">
+									Georeferenced By
+								</span>
+								<span style="margin-left:50px;">
+									Georeference Protocol
+								</span>
+							</div>
+							<div>
+								<span>
+									<input type="text" name="verbatimcoordinates" tabindex="" size="" maxlength="255" value="<?php echo array_key_exists("verbatimcoordinates",$occArr)?$occArr["verbatimcoordinates"]["value"]:""; ?>" title="" />
+								</span>
+								<span>
+									<input type="text" name="verbatimcoordinatesystem" tabindex="" size="25" maxlength="255" value="<?php echo array_key_exists("verbatimcoordinatesystem",$occArr)?$occArr["verbatimcoordinatesystem"]["value"]:""; ?>" title="" />
+								</span>
+								<span>
+									<input type="text" name="georeferencedby" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferencedby",$occArr)?$occArr["georeferencedby"]["value"]:""; ?>" />
+								</span>
+								<span>
+									<input type="text" name="georeferenceprotocol" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferenceprotocol",$occArr)?$occArr["georeferenceprotocol"]["value"]:""; ?>" />
+								</span>
+							</div>
 						</div>
-						<div>
-							<span style="">
-								Georeference Sources
-							</span>
-							<span style="margin-left:28px;">
-								Georef Verification Status
-							</span>
-							<span style="margin-left:10px;">
-								Georeference Remarks
-							</span>
-						</div>
-						<div>
-							<span>
-								<input type="text" name="georeferencesources" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferencesources",$occArr)?$occArr["georeferencesources"]["value"]:""; ?>" />
-							</span>
-							<span>
-								<input type="text" name="georeferenceverificationstatus" tabindex="" size="" maxlength="32" value="<?php echo array_key_exists("georeferenceverificationstatus",$occArr)?$occArr["georeferenceverificationstatus"]["value"]:""; ?>" />
-							</span>
-							<span>
-								<input type="text" name="georeferenceremarks" tabindex="" size="50" maxlength="255" value="<?php echo array_key_exists("georeferenceremarks",$occArr)?$occArr["georeferenceremarks"]["value"]:""; ?>" />
-							</span>
+						<?php 
+							$locExtraDiv2 = "none";
+							if(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]["value"]){
+								$locExtraDiv2 = "block";
+							}
+							elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]["value"]){
+								$locExtraDiv2 = "block";
+							}
+							elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]["value"]){
+								$locExtraDiv2 = "block";
+							}
+						?>
+						<div id="locextradiv2" style="display:<?php echo $locExtraDiv2; ?>;">
+							<div>
+								<span style="">
+									Georeference Sources
+								</span>
+								<span style="margin-left:28px;">
+									Georef Verification Status
+								</span>
+								<span style="margin-left:10px;">
+									Georeference Remarks
+								</span>
+							</div>
+							<div>
+								<span>
+									<input type="text" name="georeferencesources" tabindex="" maxlength="255" value="<?php echo array_key_exists("georeferencesources",$occArr)?$occArr["georeferencesources"]["value"]:""; ?>" />
+								</span>
+								<span>
+									<input type="text" name="georeferenceverificationstatus" tabindex="" size="" maxlength="32" value="<?php echo array_key_exists("georeferenceverificationstatus",$occArr)?$occArr["georeferenceverificationstatus"]["value"]:""; ?>" />
+								</span>
+								<span>
+									<input type="text" name="georeferenceremarks" tabindex="" size="50" maxlength="255" value="<?php echo array_key_exists("georeferenceremarks",$occArr)?$occArr["georeferenceremarks"]["value"]:""; ?>" />
+								</span>
+							</div>
 						</div>
 					</fieldset>
 					<fieldset>
@@ -386,7 +444,7 @@ if($occId){
 							</span>
 							<span style="margin-left:30px;">
 								Disposition:
-								<input type="text" name="disposition" tabindex="35" maxlength="32" value="<?php echo array_key_exists("disposition",$occArr)?$occArr["disposition"]["value"]:""; ?>" />
+								<input type="text" name="disposition" size="40" tabindex="35" maxlength="32" value="<?php echo array_key_exists("disposition",$occArr)?$occArr["disposition"]["value"]:""; ?>" />
 							</span>
 						</div>
 						<div style="padding:3px;">
@@ -398,7 +456,7 @@ if($occId){
 								Establishment Means:
 								<input type="text" name="establishmentmeans" tabindex="45" maxlength="32" value="<?php echo array_key_exists("establishmentmeans",$occArr)?$occArr["establishmentmeans"]["value"]:""; ?>" />
 							</span>
-							<span style="margin-left:30px;">
+							<span style="margin-left:15px;">
 								<input type="checkbox" name="cultivationstatus" tabindex="48" value="<?php echo array_key_exists("cultivationstatus",$occArr)?$occArr["cultivationstatus"]["value"]:0; ?>" />
 								Cultivated
 							</span>
@@ -425,22 +483,24 @@ if($occId){
 								Language:
 								<input type="text" name="language" tabindex="53" maxlength="20" value="<?php echo array_key_exists("language",$occArr)?$occArr["language"]["value"]:""; ?>" />
 							</span>
+						</div>
+						<div style="padding:3px;">
 							<span style="margin-left:20px;">
 								Dataset ID:
 								<input type="text" name="datasetid" tabindex="53" maxlength="255" value="<?php echo array_key_exists("datasetid",$occArr)?$occArr["datasetid"]["value"]:""; ?>" />
 							</span>
-						</div>
-						<div style="padding:3px;">
-							Associated Occurrences:
-							<input type="text" name="associatedoccurrences" tabindex="53" value="<?php echo array_key_exists("associatedoccurrences",$occArr)?$occArr["associatedoccurrences"]["value"]:""; ?>" />
+							<span style="margin-left:20px;">
+								Associated Occurrences:
+								<input type="text" name="associatedoccurrences" size="40" tabindex="53" value="<?php echo array_key_exists("associatedoccurrences",$occArr)?$occArr["associatedoccurrences"]["value"]:""; ?>" />
+							</span>
 						</div>
 						<div style="padding:3px;">
 							Field Notes:
-							<input type="text" name="fieldnotes" tabindex="53" value="<?php echo array_key_exists("fieldnotes",$occArr)?$occArr["fieldnotes"]["value"]:""; ?>" />
+							<input type="text" name="fieldnotes" size="80" tabindex="53" value="<?php echo array_key_exists("fieldnotes",$occArr)?$occArr["fieldnotes"]["value"]:""; ?>" />
 						</div>
 						<div style="padding:3px;">
 							Dynamic Properties:
-							<input type="text" name="dynamicproperties" tabindex="53" value="<?php echo array_key_exists("dynamicproperties",$occArr)?$occArr["dynamicproperties"]["value"]:""; ?>" />
+							<input type="text" name="dynamicproperties" size="80" tabindex="53" value="<?php echo array_key_exists("dynamicproperties",$occArr)?$occArr["dynamicproperties"]["value"]:""; ?>" />
 						</div>
 						
 					</fieldset>

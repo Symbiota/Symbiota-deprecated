@@ -111,12 +111,19 @@ class CollectionProfileManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,".
 			"contact,email,latitudedecimal,longitudedecimal,icon,individualurl,sortseq) ".
-			"VALUES (\"".$addArr["institutioncode"]."\",\"".$addArr["collectioncode"]."\",\"".$addArr["collectionname"]."\",\"".
-			$addArr["briefdescription"]."\",\"".$addArr["fulldescription"]."\",\"".$addArr["homepage"]."\",\"".
-			$addArr["contact"]."\",\"".$addArr["email"]."\",\"".$addArr["latitudedecimal"]."\",\"".$addArr["longitudedecimal"].
-			"\",".(array_key_exists("icon",$addArr)?"\"".$addArr["icon"]."\"":"NULL").",".
-			(array_key_exists("individualurl",$addArr)?"\"".$addArr["individualurl"]."\"":"NULL").",".
-			(array_key_exists("sortseq",$addArr)?$addArr["sortseq"]:"NULL").") ";
+			"VALUES (".(array_key_exists("individualurl",$addArr)?"\"".$addArr["institutioncode"]."\"":"NULL").
+			",\"".$addArr["collectioncode"]."\",\"".$addArr["collectionname"]."\",".
+			($addArr["briefdescription"]?"\"".$addArr["briefdescription"]."\"":"NULL").",".
+			($addArr["fulldescription"]?"\"".$addArr["fulldescription"]."\"":"NULL").",".
+			($addArr["homepage"]?"\"".$addArr["homepage"]."\"":"NULL").",".
+			($addArr["contact"]?"\"".$addArr["contact"]."\"":"NULL").",".
+			($addArr["email"]?"\"".$addArr["email"]."\"":"NULL").",".
+			($addArr["latitudedecimal"]?$addArr["latitudedecimal"]:"NULL").",".
+			($addArr["longitudedecimal"]?$addArr["longitudedecimal"]:"NULL").",".
+			(array_key_exists("icon",$addArr)&&$addArr["icon"]?"\"".$addArr["icon"]."\"":"NULL").",".
+			(array_key_exists("individualurl",$addArr)&&$addArr["individualurl"]?"\"".$addArr["individualurl"]."\"":"NULL").",".
+			(array_key_exists("sortseq",$addArr)&&$addArr["sortseq"]?$addArr["sortseq"]:"NULL").") ";
+		//echo "<div>$sql</div>";
 		$conn->query($sql);
 		$cid = $conn->insert_id;
 		$sql = "INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) ".
