@@ -424,7 +424,7 @@ class TPImageEditorManager extends TPEditorManager{
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
-			if(!$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,50)){
+			if(!$this->createNewImage($imgPath,$newThumbnailPath,$this->tnPixWidth,70)){
 				return false;
 			}
 		}
