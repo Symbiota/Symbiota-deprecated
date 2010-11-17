@@ -195,76 +195,7 @@ class ChecklistManager {
 			$vResult->close();
 		}
 		//Get species list
-		$sql = "";
-		if($this->clid){
-			if($this->thesFilter){
-				$sql = "SELECT DISTINCT ts.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ". 
-					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid ".
-	    	  		"WHERE ctl.clid = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
-			}
-			else{
-				$sql = "SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ".
-					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ".
-	    	  		"WHERE (ts.taxauthid = 1) AND ctl.clid = ".$this->clid;
-			}
-		}
-		else{
-			if($this->thesFilter > 1){
-				$sql = "SELECT ts.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = ts.tid ".
-	    	  		"WHERE ctl.dynclid = ".$this->dynClid." AND ts.taxauthid = ".$this->thesFilter;
-			}
-			else{
-				$sql = "SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = t.tid ".
-	    	  		"WHERE (ts.taxauthid = 1) AND ctl.dynclid = ".$this->dynClid;
-			}
-		}
-		if($this->taxonFilter){
-			if($this->searchCommon){
-				$sql .= " AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.vernacularname LIKE '%".$this->taxonFilter."%')) ";
-			}
-			else{
-				$sql .= " AND ((ts.uppertaxonomy = '".$this->taxonFilter."') ";
-				if($this->clid){
-					$sql .= "OR (IFNULL(ctl.familyoverride,ts.family) = '".$this->taxonFilter."') ";
-				}
-				else{
-					$sql .= "OR (family = '".$this->taxonFilter."') ";
-				}
-				if($this->searchSynonyms){
-					$sql .= "OR (t.tid IN(SELECT tsb.tid FROM (taxa ta INNER JOIN taxstatus tsa ON ta.tid = tsa.tid) ".
-						"INNER JOIN taxstatus tsb ON tsa.tidaccepted = tsb.tidaccepted ".
-						"WHERE (tsa.uppertaxonomy = '".$this->taxonFilter."') OR (ta.sciname Like '".$this->taxonFilter."%')))) ";
-				}
-				else{
-					$sql .= "OR (t.SciName Like '".$this->taxonFilter."%')) ";
-				}
-			}
-		}
-		if($this->showCommon){
-			if($this->clid){
-				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, v.vernacularname, it.sciname, it.author, ".
-					"it.habitat, it.abundance, it.notes, it.source ".
-					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
-					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
-			}
-			else{
-				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, it.sciname, it.author, v.vernacularname ".
-					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
-					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
-			}
-		}
-		$sql .= " ORDER BY family, sciname";
-		//echo $sql;
+		$sql = $this->getClSql();
 		$result = $this->clCon->query($sql);
 		$taxaList = Array();
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
@@ -459,7 +390,106 @@ class ChecklistManager {
 		return $taxaList;
 	}
 
-	public function setThesFilter($filt){
+    public function downloadChecklistCsv(){
+    	$sql = $this->getClSql();
+		//Output checklist
+    	$fileName = $this->clName."_".time().".csv";
+    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header ('Content-Type: text/csv');
+		header ("Content-Disposition: attachment; filename=\"$fileName\"");
+		//echo $sql;
+		$result = $this->clCon->query($sql);
+		//Write column names out to file
+		if($result){
+			$hasVernacular = (stripos($sql,"vernacularname")?true:false);
+			echo "Family,ScientificName,ScientificNameAuthorship,";
+			echo ($hasVernacular?"CommonName,":"")."TaxonId\n";
+			while($row = $result->fetch_object()){
+				echo "\"".$row->family."\",\"".$row->sciname."\",\"".$row->author."\",";
+				echo ($hasVernacular?"\"".$row->vernacularname."\",":"")."\"".$row->tid."\"\n";
+			}
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+        $result->close();
+    }
+
+	private function getClSql(){
+		$sql = "";
+		if($this->clid){
+			if($this->thesFilter){
+				$sql = "SELECT DISTINCT ts.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ". 
+					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
+					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
+					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid ".
+	    	  		"WHERE ctl.clid = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
+			} 
+			else{
+				$sql = "SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ".
+					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
+					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ".
+	    	  		"WHERE (ts.taxauthid = 1) AND ctl.clid = ".$this->clid;
+			}
+		}
+		else{
+			if($this->thesFilter > 1){
+				$sql = "SELECT ts.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
+					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
+					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = ts.tid ".
+	    	  		"WHERE ctl.dynclid = ".$this->dynClid." AND ts.taxauthid = ".$this->thesFilter;
+			}
+			else{
+				$sql = "SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
+					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = t.tid ".
+	    	  		"WHERE (ts.taxauthid = 1) AND ctl.dynclid = ".$this->dynClid;
+			}
+		}
+		if($this->taxonFilter){
+			if($this->searchCommon){
+				$sql .= " AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.vernacularname LIKE '%".$this->taxonFilter."%')) ";
+			}
+			else{
+				$sql .= " AND ((ts.uppertaxonomy = '".$this->taxonFilter."') ";
+				if($this->clid){
+					$sql .= "OR (IFNULL(ctl.familyoverride,ts.family) = '".$this->taxonFilter."') ";
+				}
+				else{
+					$sql .= "OR (family = '".$this->taxonFilter."') ";
+				}
+				if($this->searchSynonyms){
+					$sql .= "OR (t.tid IN(SELECT tsb.tid FROM (taxa ta INNER JOIN taxstatus tsa ON ta.tid = tsa.tid) ".
+						"INNER JOIN taxstatus tsb ON tsa.tidaccepted = tsb.tidaccepted ".
+						"WHERE (tsa.uppertaxonomy = '".$this->taxonFilter."') OR (ta.sciname Like '".$this->taxonFilter."%')))) ";
+				}
+				else{
+					$sql .= "OR (t.SciName Like '".$this->taxonFilter."%')) ";
+				}
+			}
+		}
+		if($this->showCommon){
+			if($this->clid){
+				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, v.vernacularname, it.sciname, it.author, ".
+					"it.habitat, it.abundance, it.notes, it.source ".
+					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
+					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
+					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
+			}
+			else{
+				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, it.sciname, it.author, v.vernacularname ".
+					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
+					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
+					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
+			}
+		}
+		$sql .= " ORDER BY family, sciname";
+		//echo $sql;
+		return $sql;
+	}
+    
+    public function setThesFilter($filt){
 		$this->thesFilter = $filt;
 	}
 

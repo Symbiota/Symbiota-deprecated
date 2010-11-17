@@ -13,7 +13,7 @@
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
 	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
-	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0; 
+	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
 	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
 	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
 	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
@@ -38,14 +38,19 @@
 	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 	if($searchCommon){
 		$showCommon = 1;
- 		$clManager->setSearchCommon();
- 	}
- 	if($searchSynonyms) $clManager->setSearchSynonyms();
- 	if($showAuthors) $clManager->setShowAuthors();
- 	if($showCommon) $clManager->setShowCommon();
- 	if($showImages) $clManager->setShowImages();
- 	if($showVouchers) $clManager->setShowVouchers();
- 	
+		$clManager->setSearchCommon();
+	}
+	if($searchSynonyms) $clManager->setSearchSynonyms();
+	if($showAuthors) $clManager->setShowAuthors();
+	if($showCommon) $clManager->setShowCommon();
+	if($showImages) $clManager->setShowImages();
+	if($showVouchers) $clManager->setShowVouchers();
+
+	if($action == "Download List"){
+		$clManager->downloadChecklistCsv();
+		exit();
+	}
+
 	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
 		$clManager->setEditable(true);
 		
@@ -580,6 +585,7 @@
 								    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
 								?>
 							</div>
+							<div class="button" style='margin:5px;float:right;width:13px;height:13px;' title="Download Checklist"><input type="image" name="action" value="Download List" src="../images/dl.png" /></div>
 							<div>
 								<!-- Display as Images: 0 = false, 1 = true  --> 
 							    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
@@ -854,4 +860,3 @@
 
 </body>
 </html> 
- 

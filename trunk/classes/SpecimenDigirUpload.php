@@ -39,7 +39,6 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 		$this->conn->query($sqlDel);
  		
 		echo "<li style='font-weight:bold;'>Starting record harvest</li>\n";
-		$this->searchStart = 0;
 		$this->submitReq();
 		$this->finalUploadSteps($finalTransfer);
  	}
@@ -354,7 +353,7 @@ class SpecimenDigirUpload extends SpecimenUploadManager {
 	}
 
 	public function setSearchLimit($limit){
-		$searchLimit = $limit;
+		$this->searchLimit = $limit;
 	}
 	
 	public function getSearchLimit(){
