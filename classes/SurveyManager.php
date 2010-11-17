@@ -113,31 +113,7 @@ class SurveyManager {
 
 	//return an array: [family][sciname][occid] => collector
 	public function getTaxaList($pageNumber = 0){
-		$sql = "SELECT ts.family, t.tid, t.sciname, t.author, o.occid, CONCAT_WS(' ',o.recordedby,o.recordnumber) as collstr ";
-		if($this->showCommon) $sql .= ", v.vernacularname ";
-		$sql .= "FROM (((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) ".
-			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
-			"INNER JOIN taxa t ON ts.tidaccepted = t.tid) ";
-		if($this->showCommon){
-			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".$this->language.
-				"' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
-		}
-		$sql .= "WHERE sol.surveyid = ".$this->surveyId." AND ts.taxauthid = ".$this->thesFilter." ";
-		if($this->taxonFilter){
-			if($this->searchCommon){
-				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".$this->taxonFilter."%')) ";
-			}
-			else{
-				$sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR t.SciName Like '".$this->taxonFilter."%' ".
-					"OR ts.Family = '".$this->taxonFilter."' ";
-				if($this->searchSynonyms){
-					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
-						"WHERE ta.SciName Like '".$this->taxonFilter."%'))";
-				}
-				$sql .= ")";
-			}
-		}
-		$sql .= " ORDER BY ts.family, t.SciName";
+		$sql = $this->getClSql();
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		$itemLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
@@ -207,6 +183,63 @@ class SurveyManager {
 			}
 		}
 		return $taxaArr;
+	}
+
+    public function downloadChecklistCsv(){
+    	$sql = $this->getClSql();
+		$hasVernacular = (stripos($sql,"vernacularname")?true:false);
+    	$sql = "SELECT DISTINCT family, tid, sciname, author ".($hasVernacular?", vernacularname ":"").
+    		"FROM (".$this->getClSql().") inntab";
+		//echo $sql;
+    	//Output checklist
+    	$fileName = $this->surveyName."_".time().".csv";
+    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header ('Content-Type: text/csv');
+		header ("Content-Disposition: attachment; filename=\"$fileName\"");
+		$result = $this->conn->query($sql);
+		//Write column names out to file
+		if($result){
+			echo "Family,ScientificName,ScientificNameAuthorship,";
+			echo ($hasVernacular?"CommonName,":"")."TaxonId\n";
+			while($row = $result->fetch_object()){
+				echo "\"".$row->family."\",\"".$row->sciname."\",\"".$row->author."\",";
+				echo ($hasVernacular?"\"".$row->vernacularname."\",":"")."\"".$row->tid."\"\n";
+			}
+        	$result->close();
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+    }
+
+	private function getClSql(){
+		$sql = "SELECT ts.family, t.tid, t.sciname, t.author, o.occid, CONCAT_WS(' ',o.recordedby,o.recordnumber) as collstr ";
+		if($this->showCommon) $sql .= ", v.vernacularname ";
+		$sql .= "FROM (((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) ".
+			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
+			"INNER JOIN taxa t ON ts.tidaccepted = t.tid) ";
+		if($this->showCommon){
+			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".$this->language.
+				"' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
+		}
+		$sql .= "WHERE sol.surveyid = ".$this->surveyId." AND ts.taxauthid = ".$this->thesFilter." ";
+		if($this->taxonFilter){
+			if($this->searchCommon){
+				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".$this->taxonFilter."%')) ";
+			}
+			else{
+				$sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR t.SciName Like '".$this->taxonFilter."%' ".
+					"OR ts.Family = '".$this->taxonFilter."' ";
+				if($this->searchSynonyms){
+					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
+						"WHERE ta.SciName Like '".$this->taxonFilter."%'))";
+				}
+				$sql .= ")";
+			}
+		}
+		$sql .= " ORDER BY ts.family, t.SciName";
+		//echo $sql;
+		return $sql;
 	}
 
 	public function setThesFilter($filt){

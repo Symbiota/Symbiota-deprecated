@@ -9,6 +9,7 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $surveyId = $_REQUEST["surveyid"]; 
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
 $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 //Display option
@@ -31,6 +32,11 @@ if($showAuthors) $clManager->setShowAuthors();
 if($showCommon) $clManager->setShowCommon();
 if($showImages) $clManager->setShowImages();
 
+if($action == "Download List"){
+	$clManager->downloadChecklistCsv();
+	exit();
+}
+
 $editable = 0;
 if($isAdmin || (array_key_exists("SurveyAdmin",$userRights) && in_array($surveyId,$userRights["SurveyAdmin"]))){
 	$editable = 1;
@@ -38,7 +44,6 @@ if($isAdmin || (array_key_exists("SurveyAdmin",$userRights) && in_array($surveyI
 		
 if($editable){
 	//Submit checklist MetaData edits
-	$action = array_key_exists("editsubmit",$_REQUEST)?$_REQUEST["editsubmit"]:"";
  	if($action == "Submit Changes"){
  		$editArr = Array();
 		foreach($_REQUEST as $k => $v){
@@ -379,7 +384,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 								<input type="radio" name="ispublic" value="1" <?php if($mdArray["ispublic"]) echo "checked"; ?>/> Available to Public
 							</div>
 							<div>
-								<input type='submit' name='editsubmit' id='editsubmit' value='Submit Changes' />
+								<input type='submit' name='action' id='editsubmit' value='Submit Changes' />
 							</div>
 							<input type='hidden' name='survey' value='<?php echo $surveyId; ?>' />
 							<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
@@ -442,6 +447,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 								?>
 							</select>
 						</div>
+						<div class="button" style='margin:5px;float:right;width:13px;height:13px;' title="Download Checklist">
+							<input type="image" name="action" value="Download List" src="../images/dl.png" />
+						</div>
 						<div>
 							<?php 
 								//Display Common Names: 0 = false, 1 = true 
@@ -456,7 +464,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 						<div style="float:right;">
 							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
 							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-							<input type="submit" name="optionsubmit" value="Rebuild List" />
+							<input type="submit" name="action" value="Rebuild List" />
 						</div>
 						<div>
 							<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
