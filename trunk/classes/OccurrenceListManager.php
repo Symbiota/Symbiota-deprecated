@@ -20,7 +20,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		$returnArr = Array();
 		$conn = $this->getConnection();
 		$sqlWhere = $this->getSqlWhere();
-		if(!$this->recordCount){
+		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere,$conn);
 		}
 		$sql = "SELECT o.occid, o.CollID, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, ".
