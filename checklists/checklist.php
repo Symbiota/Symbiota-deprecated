@@ -146,7 +146,7 @@
 			newWindow = window.open(urlStr,windowName,'toolbar=1,resizable=1,width=650,height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
-	
+
 		function removeTaxon(tid, clid, sciName){
 	        if(window.confirm('Are you sure you want to delete this taxon?')){
 				rtXmlHttp = GetXmlHttpObject();

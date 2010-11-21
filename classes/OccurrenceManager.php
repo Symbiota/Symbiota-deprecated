@@ -14,12 +14,14 @@ class OccurrenceManager{
 	protected $localSearchArr = Array();
 	protected $collectionArr = Array();
 	protected $useCookies = true;
+	protected $reset = false;
 	protected $dynamicClid;
 	
  	public function __construct(){
  		$this->useCookies = array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?false:true; 
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
+ 			$this->reset = true;
  		}
  		if($this->useCookies){
  			$this->readCollCookies();
@@ -37,7 +39,7 @@ class OccurrenceManager{
 		setCookie("collsearch","",time()-3600,$clientRoot);
 		setCookie("collvars","",time()-3600,$clientRoot);
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
-			//reset all search terms except db terms 
+			//reset all other search terms except maintain the db terms 
 			$dbsTemp = "";
 			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
 			$surveyIdTemp = "";
