@@ -85,12 +85,12 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["taxonRemarks"]."\",\"".$row["identifiedBy"]."\",\"".$row["dateIdentified"]."\",\"".$row["identificationReferences"]."\",\"".
 					$row["identificationRemarks"]."\",\"".$row["identificationQualifier"]."\",\"".$row["typeStatus"]."\",\"".$row["recordedBy"]."\",\"".
 					$row["recordNumber"]."\",".$row["eventDate"].",".$row["year"].",".$row["month"].",".$row["day"].",".$row["startDayOfYear"].",".
-					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$row["habitat"]."\",\"".$row["fieldNotes"]."\",\"".
+					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["fieldNotes"])."\",\"".
 					$row["occurrenceRemarks"]."\",\"".$row["associatedOccurrences"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
 					$row["cultivationStatus"]."\",\"".$row["establishmentMeans"]."\",\"".$row["country"]."\",\"".$row["stateProvince"]."\",\"".
 					$row["county"]."\",\"".$row["municipality"]."\",";
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo "\"".$row["locality"]."\",".$row["decimalLatitude"].",".$row["decimalLongitude"].",\"".$row["geodeticDatum"]."\",".
+					echo "\"".$this->cleanStr($row["locality"])."\",".$row["decimalLatitude"].",".$row["decimalLongitude"].",\"".$row["geodeticDatum"]."\",".
 					$row["coordinateUncertaintyInMeters"].",\"".$row["coordinatePrecision"]."\",\"".$row["locationRemarks"]."\",\"".
 					$row["verbatimCoordinates"]."\",\"".$row["verbatimCoordinateSystem"]."\",\"".$row["georeferencedBy"]."\",\"".
 					$row["georeferenceProtocol"]."\",\"".$row["georeferenceSources"]."\",\"".$row["georeferenceVerificationStatus"]."\",\"".
@@ -179,12 +179,12 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["taxonRemarks"]."\",\"".$row["identifiedBy"]."\",\"".$row["dateIdentified"]."\",\"".$row["identificationReferences"]."\",\"".
 					$row["identificationRemarks"]."\",\"".$row["identificationQualifier"]."\",\"".$row["typeStatus"]."\",\"".$row["recordedBy"]."\",\"".$row["associatedCollectors"]."\",\"".
 					$row["recordNumber"]."\",".$row["eventDate"].",".$row["year"].",".$row["month"].",".$row["day"].",".$row["startDayOfYear"].",".
-					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$row["habitat"]."\",\"".$row["fieldNotes"]."\",\"".
+					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["fieldNotes"])."\",\"".
 					$row["occurrenceRemarks"]."\",\"".$row["attributes"]."\",\"".$row["associatedOccurrences"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
 					$row["cultivationStatus"]."\",\"".$row["establishmentMeans"]."\",\"".$row["country"]."\",\"".$row["stateProvince"]."\",\"".
 					$row["county"]."\",\"".$row["municipality"]."\",";
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo "\"".$row["locality"]."\",".$row["decimalLatitude"].",".$row["decimalLongitude"].",\"".$row["geodeticDatum"]."\",".
+					echo "\"".$this->cleanStr($row["locality"])."\",".$row["decimalLatitude"].",".$row["decimalLongitude"].",\"".$row["geodeticDatum"]."\",".
 					$row["coordinateUncertaintyInMeters"].",\"".$row["coordinatePrecision"]."\",\"".$row["locationRemarks"]."\",\"".
 					$row["verbatimCoordinates"]."\",\"".$row["verbatimCoordinateSystem"]."\",\"".$row["georeferencedBy"]."\",\"".
 					$row["georeferenceProtocol"]."\",\"".$row["georeferenceSources"]."\",\"".$row["georeferenceVerificationStatus"]."\",\"".
@@ -310,6 +310,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     	$retStr = str_replace("\n"," ",$inStr);
     	$retStr = str_replace("\r"," ",$retStr);
     	$retStr = str_replace("\t"," ",$retStr);
+		$retStr = str_replace("\"","'",$retStr);
     	return $retStr;
     }
     
