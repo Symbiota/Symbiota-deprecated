@@ -104,7 +104,8 @@ if($isEditable){
 			}
 		}
 		$newClArr["uid"] = $_REQUEST["userid"];
-		$pClManager->createChecklist($newClArr);
+		$newClid = $pClManager->createChecklist($newClArr);
+		header("Location: ".$clientRoot."/checklists/checklist.php?cl=".$newClid."&emode=1");
 	}
 	elseif($action == "DeleteChecklist"){
 	    if(!$pClManager->deleteChecklist($_REQUEST["cliddel"])){
@@ -531,7 +532,7 @@ if(isset($profile_viewprofileCrumbs)){
 				</div>
 				<div id="checklistdiv" class="tabcontent">
 					<div style="margin:10px;" class="fieldset">
-						<div class="legend">Available Checklists</div>
+						<div class="legend"><b>Available Checklists</b></div>
 						<ul>
 						<?php 
 							$clArr = $pClManager->getChecklists($userId);
@@ -569,7 +570,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Checklist Name:
 								</div>
 								<div style="float:left;">
-									<input name="nclname" type="text" maxlength="50" size="42" />
+									<input name="nclname" type="text" maxlength="50" size="60" />
 								</div>
 							</div>
 							<div style="clear:both;">
@@ -577,7 +578,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Authors:
 								</div>
 								<div style="float:left;">
-									<input name="nclauthors" type="text" maxlength="250" size="42" />
+									<input name="nclauthors" type="text" maxlength="250" size="60" />
 								</div>
 							</div>
 							<div style="clear:both;">
@@ -585,7 +586,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Locality:
 								</div>
 								<div style="float:left;">
-									<input name="ncllocality" type="text" maxlength="500" size="42" />
+									<input name="ncllocality" type="text" maxlength="500" size="60" />
 								</div>
 							</div>
 							<div style="clear:both;">
@@ -593,7 +594,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Publication:
 								</div>
 								<div style="float:left;">
-									<input name="nclpublication" type="text" maxlength="500" size="42" />
+									<input name="nclpublication" type="text" maxlength="500" size="60" />
 								</div>
 							</div>
 							<div style="clear:both;">
@@ -601,7 +602,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Abstract:
 								</div>
 								<div style="float:left;">
-									<textarea name="nclabstract" rows="4" cols="32"></textarea>
+									<textarea name="nclabstract" rows="4" cols="45"></textarea>
 								</div>
 							</div>
 							<div style="clear:both;">
@@ -621,7 +622,7 @@ if(isset($profile_viewprofileCrumbs)){
 									Notes:
 								</div>
 								<div style="float:left;">
-									<input name="nclnotes" type="text" maxlength="500" size="42" />
+									<input name="nclnotes" type="text" maxlength="500" size="60" />
 								</div>
 							</div>
 							<div style="clear:both;">
