@@ -41,7 +41,8 @@ class PersonalChecklistManager{
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
 		//echo $sql;
-		$this->conn->query($sql);
+		if($this->conn->query($sql)) return $this->conn->insert_id;
+		return 0;
 	}
 
 	public function deleteChecklist($clidDel){
