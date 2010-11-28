@@ -35,8 +35,11 @@ $dynClManager = new DynamicChecklistManager();
 				if($coordRange < 20){
 					$zoomInt = 6;
 				}
-				elseif($coordRange > 40){
+				elseif($coordRange > 35 && $coordRange < 40){
 					$zoomInt = 4;
+				}
+				elseif($coordRange > 40){
+					$zoomInt = 3;
 				}
 			?>
 			zoomLevel = <?php echo $zoomInt; ?>;
