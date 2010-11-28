@@ -30,7 +30,16 @@ $dynClManager = new DynamicChecklistManager();
 					$latCen = ($coorArr[0] + $coorArr[2])/2;
 					$longCen = ($coorArr[1] + $coorArr[3])/2;
 				}
+				$coordRange = ($coorArr[0] - $coorArr[2]);
+				$zoomInt = 5;
+				if($coordRange < 20){
+					$zoomInt = 6;
+				}
+				elseif($coordRange > 40){
+					$zoomInt = 4;
+				}
 			?>
+			zoomLevel = <?php echo $zoomInt; ?>;
 			map.setCenter(new GLatLng( <?php echo $latCen.",".$longCen; ?> ), zoomLevel);
 	        map.setUIToDefault();
 	        
