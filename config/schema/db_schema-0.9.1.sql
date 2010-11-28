@@ -1403,7 +1403,7 @@ DROP TABLE IF EXISTS `uploadtaxa`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `uploadtaxa` (
   `TID` int(10) unsigned DEFAULT NULL,
-  `KingdomID` tinyint(3) unsigned DEFAULT NULL,
+  `KingdomID` tinyint(3) unsigned DEFAULT '3',
   `UpperTaxonomy` varchar(50) DEFAULT NULL,
   `Family` varchar(50) DEFAULT NULL,
   `RankId` smallint(5) DEFAULT NULL,

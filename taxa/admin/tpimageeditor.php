@@ -770,7 +770,7 @@ else{
 	<div style="margin:30px;">
 		<h2>You must be logged in and authorized to taxon data.</h2>
 		<h3>
-			Click <a href="<?php $clientRoot; ?>/profile/index.php">here</a> to login
+			Click <a href="<?php echo $clientRoot; ?>/profile/index.php">here</a> to login
 		</h3>
 	</div>
 	<?php 
