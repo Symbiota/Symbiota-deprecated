@@ -75,11 +75,14 @@ $status = "";
 				return false;
 			}
 
-			if(document.getElementById("uppertaxonomy").value == "" && document.getElementById("newuppertaxon").value == "") errorStr += "Upper Taxonomy \n"; 
-			if(document.getElementById("family").value == "" || document.getElementById("family").value == "undefined") errorStr += "family \n"; 
-			if(errorStr != ""){
-				var answer = confirm("Following fields are recommended. Are you sure you want to leave them blank?\n"+errorStr);
-				return answer;
+			rankId = document.getElementById("rankid").value;
+			if(rankId < 140){
+				if(document.getElementById("uppertaxonomy").value == "" && document.getElementById("newuppertaxon").value == "") errorStr += "Upper Taxonomy \n"; 
+				if(document.getElementById("family").value == "" || document.getElementById("family").value == "undefined") errorStr += "family \n"; 
+				if(errorStr != ""){
+					answer = confirm("Following fields are recommended. Are you sure you want to leave them blank?\n"+errorStr);
+					return answer;
+				}
 			}
 			 
 			return true;
@@ -355,7 +358,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						</select>
 					</div>
 					<div>
-						<div style="float:left;width:110px;">Genus:</div>
+						<div style="float:left;width:110px;">Base Name (genus):</div>
 						<input type='text' id='unitind1' name='unitind1' style='width:20px;border:inset;' title='Genus hybrid indicator'/>
 						<input type='text' id='unitname1' name='unitname1' style='width:200px;border:inset;' title='Genus or Base Name'/>
 					</div>
@@ -407,8 +410,8 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 					<div>
 						Locality Security Status:
 						<select id="securitystatus" name="securitystatus" style='border:inset;'>
-							<option value="1">No Security</option>
-							<option value="2">Hide Locality Details</option>
+							<option value="0">No Security</option>
+							<option value="1">Hide Locality Details</option>
 						</select>
 					</div>
 					<fieldset>

@@ -359,8 +359,8 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							<select id="securitystatus" name="securitystatus">
 								<option value="0">select a locality setting</option>
 								<option value="0">---------------------------------</option>
-								<option value="1" <?php if($taxonEditorObj->getSecurityStatus()==1) echo "SELECTED"; ?>>show all locality data</option>
-								<option value="2" <?php if($taxonEditorObj->getSecurityStatus()==2) echo "SELECTED"; ?>>hide locality data</option>
+								<option value="0" <?php if($taxonEditorObj->getSecurityStatus()==0) echo "SELECTED"; ?>>show all locality data</option>
+								<option value="1" <?php if($taxonEditorObj->getSecurityStatus()==1) echo "SELECTED"; ?>>hide locality data</option>
 							</select>
 						</div>
 					</div>

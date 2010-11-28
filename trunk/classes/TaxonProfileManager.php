@@ -388,6 +388,7 @@
 			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) AND ti.SortSequence < 500 ".
 			"ORDER BY ti.sortsequence";
+		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$this->imageArr[$row->imgid]["url"] = $row->url;
@@ -613,7 +614,7 @@
 					}
 					?>
 				</ul>
-				<div style='border:1px solid gray;height:85%;width:95%;margin-bottom:5px;padding:10px;overflow:auto;'>
+				<div style='border:1px solid gray;height:83%;width:95%;margin-bottom:5px;padding:10px;overflow:auto;'>
 					<?php 
 					foreach($descriptions as $k => $vArr){
 					?>
