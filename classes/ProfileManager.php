@@ -57,9 +57,9 @@ class ProfileManager{
 		//check login
         $sql = "SELECT u.uid, u.firstname, u.lastname ".
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-            "WHERE (ul.username = '".$userNameStr."') ";
+            "WHERE (ul.username = \"".$userNameStr."\") ";
         if($pwdStr){
-			$sql .= "AND (ul.password = PASSWORD('".$pwdStr."'))";
+			$sql .= "AND (ul.password = PASSWORD(\"".$pwdStr."\"))";
         }
 		//echo $sql;
         $result = $this->con->query($sql);
@@ -82,7 +82,7 @@ class ProfileManager{
             
 	        //Upadate last login data
 	        $conn = $this->getConnection("write");
-	        $sql = "UPDATE userlogin SET lastlogindate = NOW() WHERE username = '".$userNameStr."'";
+	        $sql = "UPDATE userlogin SET lastlogindate = NOW() WHERE username = \"".$userNameStr."\"";
 	        $conn->query($sql); 
 	        
         	return "success";
@@ -91,7 +91,7 @@ class ProfileManager{
                 //Check and see why authentication failed
         	$sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.email, ul.password ".
             	"FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid ".
-				"WHERE (ul.username = '".$userNameStr."')";
+				"WHERE (ul.username = \"".$userNameStr."\")";
             //echo $sqlStr;
 	        $result = $this->con->query($sqlStr);
 			if($row = $result->fetch_object()){
@@ -115,7 +115,7 @@ class ProfileManager{
         	"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
         	"u.url, u.biography, u.ispublic, u.notes, ul.username ".
             "FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid ".
-            "WHERE (ul.username = '".$userName."')";
+            "WHERE (ul.username = \"".$userName."\")";
         return $this->getPersonBySql($sqlStr);
     }
         
@@ -181,21 +181,21 @@ class ProfileManager{
         	$editCon = $this->getConnection("write");
     		$fields = "UPDATE users SET ";
             $where = "WHERE uid = ".$person->getUid();
-            $values = "firstname = '".$person->getFirstName()."'";
-            $values .= ", lastname= '".$person->getLastName()."'";
+            $values = "firstname = \"".$person->getFirstName()."\"";
+            $values .= ", lastname= \"".$person->getLastName()."\"";
 
-            $values .= ", title= '".$person->getTitle()."'";
-            $values .= ", institution='".$person->getInstitution()."'";
-            $values .= ", department= '".$person->getDepartment()."'";
-            $values .= ", address= '".$person->getAddress()."'";
-            $values .= ", city='".$person->getCity()."'";
-            $values .= ", state='".$person->getState()."'";
-            $values .= ", zip='".$person->getZip()."'";
-            $values .= ", country= '".$person->getCountry()."'";
-            $values .= ", phone='".$person->getPhone()."'";
-            $values .= ", email='".$person->getEmail()."'";
-            $values .= ", url='".$person->getUrl()."'";
-            $values .= ", biography='".$person->getBiography()."'";
+            $values .= ", title= \"".$person->getTitle()."\"";
+            $values .= ", institution=\"".$person->getInstitution()."\"";
+            $values .= ", department= \"".$person->getDepartment()."\"";
+            $values .= ", address= \"".$person->getAddress()."\"";
+            $values .= ", city=\"".$person->getCity()."\"";
+            $values .= ", state=\"".$person->getState()."\"";
+            $values .= ", zip=\"".$person->getZip()."\"";
+            $values .= ", country= \"".$person->getCountry()."\"";
+            $values .= ", phone=\"".$person->getPhone()."\"";
+            $values .= ", email=\"".$person->getEmail()."\"";
+            $values .= ", url=\"".$person->getUrl()."\"";
+            $values .= ", biography=\"".$person->getBiography()."\"";
             $values .= ", ispublic=".$person->getIsPublic()." ";
             $sql = $fields." ".$values." ".$where;
 			//echo $sql;
@@ -222,13 +222,13 @@ class ProfileManager{
     	if($newPwd){
         	$editCon = $this->getConnection("write");
         	if($isSelf){
-	        	$sqlTest = "SELECT ul.uid FROM userlogin ul WHERE ul.username = '".$id."' AND ul.password = PASSWORD('".$oldPwd."')";
+	        	$sqlTest = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$id."\" AND ul.password = PASSWORD(\"".$oldPwd."\")";
 	        	$rsTest = $editCon->query($sqlTest);
 	        	if(!$rsTest->num_rows) return false;
         	}
-    		$sql = "UPDATE userlogin ul SET ul.password = PASSWORD('".$newPwd."') "; 
+    		$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$newPwd."\") "; 
     		if($isSelf){
-    			$sql .= "WHERE ul.username = '".$id."'";
+    			$sql .= "WHERE ul.username = \"".$id."\"";
     		}
     		else{
     			$sql .= "WHERE uid = ".$id;
@@ -247,8 +247,8 @@ class ProfileManager{
         $returnStr = "";
         if($un){
         	$editCon = $this->getConnection("write");
-        	$sql = "UPDATE userlogin ul SET ul.password = PASSWORD('".$newPassword."') ". 
-                    "WHERE ul.username = '".$un."'";
+        	$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$newPassword."\") ". 
+                    "WHERE ul.username = \"".$un."\"";
 			$status = $editCon->query($sql);
         	$editCon->close();
         }
@@ -256,7 +256,7 @@ class ProfileManager{
 			//Get email address
 			$emailStr = ""; 
         	$sql = "SELECT u.email FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-        		"WHERE ul.username = '".$un."'";
+        		"WHERE ul.username = \"".$un."\"";
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$emailStr = $row->email;
@@ -303,7 +303,7 @@ class ProfileManager{
 
         //Test to see if user already exists
         if($person->getEmail()){
-        	$sql = "SELECT u.uid FROM users u WHERE u.email = '".$person->getEmail()."' AND u.lastname = '".$person->getLastName()."'";
+        	$sql = "SELECT u.uid FROM users u WHERE u.email = \"".$person->getEmail()."\" AND u.lastname = \"".$person->getLastName()."\"";
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$person->setUid($row->uid);
@@ -318,57 +318,57 @@ class ProfileManager{
 			$fields = "INSERT INTO users (";
 			$values = "VALUES (";
 			$fields .= "firstname ";
-            $values .= "'".$person->getFirstName()."'";
+            $values .= "\"".$person->getFirstName()."\"";
 			$fields .= ", lastname";
-			$values .= ", '".$person->getLastName()."'";
+			$values .= ", \"".$person->getLastName()."\"";
             if($person->getTitle()){
 	            $fields .=", title";
-                $values .= ", '".$person->getTitle()."'";
+                $values .= ", \"".$person->getTitle()."\"";
             }
             if($person->getInstitution()){
             	$fields .=", institution";
-                $values .= ", '".$person->getInstitution()."'";
+                $values .= ", \"".$person->getInstitution()."\"";
             }
 
             if($person->getDepartment()){
             	$fields .=", department";
-                $values .= ", '".$person->getDepartment()."'";
+                $values .= ", \"".$person->getDepartment()."\"";
             }
             if($person->getAddress()){
 				$fields .=", address";
-                $values .= ", '".$person->getAddress()."'";
+                $values .= ", \"".$person->getAddress()."\"";
             }
             if($person->getCity()){
 				$fields .=", city";
-                $values .= ", '".$person->getCity()."'";
+                $values .= ", \"".$person->getCity()."\"";
             }
             if($person->getState()){
 				$fields .=", state";
-                $values .= ", '".$person->getState()."'";
+                $values .= ", \"".$person->getState()."\"";
             }
             if($person->getZip()){
             	$fields .=", zip";
-				$values .= ", '".$person->getZip()."'";
+				$values .= ", \"".$person->getZip()."\"";
             }
             if($person->getCountry()){
             	$fields .=", country";
-                $values .= ", '".$person->getCountry()."'";
+                $values .= ", \"".$person->getCountry()."\"";
             }
             if($person->getPhone()){
             	$fields .=", phone";
-                $values .= ", '".$person->getPhone()."'";
+                $values .= ", \"".$person->getPhone()."\"";
             }
             if($person->getEmail()){
 	            $fields .= ", email";
-                $values .= ", '".$person->getEmail()."'";
+                $values .= ", \"".$person->getEmail()."\"";
             }
             if($person->getUrl()){
             	$fields .=", url";
-				$values .= ", '".$person->getUrl()."'";
+				$values .= ", \"".$person->getUrl()."\"";
             }
             if($person->getBiography()){
             	$fields .=", biography";
-				$values .= ", '".$person->getBiography()."'";
+				$values .= ", \"".$person->getBiography()."\"";
             }
             if($person->getIsPublic()){
             	$fields .=", ispublic";
@@ -386,7 +386,7 @@ class ProfileManager{
         
         //Add userlogin
         $sql = "INSERT INTO userlogin (uid, username, password) ".
-			"VALUES (".$person->getUid().", '".$person->getUserName()."', PASSWORD('".$person->getPassword()."'))";
+			"VALUES (".$person->getUid().", \"".$person->getUserName()."\", PASSWORD(\"".$person->getPassword()."\"))";
         $editCon = $this->getConnection("write");
         $insertStatus = $editCon->query($sql);
         $editCon->close();
@@ -403,7 +403,7 @@ class ProfileManager{
     	$returnStr = "";
     	$sql = "SELECT u.uid, ul.username ".
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-			"WHERE (u.email = '".$emailAddr."')";
+			"WHERE (u.email = \"".$emailAddr."\")";
     	$result = $this->con->query($sql);
     	if($row = $result->fetch_object()){
     		$returnStr = $row->username;
@@ -416,7 +416,7 @@ class ProfileManager{
     	$newLogin = trim($newLogin);
     	
     	//Test if login exists
-    	$sqlTestLogin = "SELECT ul.uid FROM userlogin ul WHERE ul.username = '".$newLogin."' ";
+    	$sqlTestLogin = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$newLogin."\" ";
     	$rs = $this->con->query($sqlTestLogin);
     	$numRows = $rs->num_rows;
     	$rs->close();
@@ -424,7 +424,7 @@ class ProfileManager{
     	
     	//Create new login
     	$sql = "INSERT INTO userlogin (uid, username, password) ".
-    		"VALUES ($userId,'".$newLogin."',PASSWORD('".$newPwd."'))";
+    		"VALUES ($userId,\"".$newLogin."\",PASSWORD(\"".$newPwd."\"))";
     	//echo $sql;
         $editCon = $this->getConnection("write");
     	if($editCon->query($sql)) $statusStr = "<span color='green'>Creation of New Login successful!</span>";
@@ -437,7 +437,7 @@ class ProfileManager{
         $returnStr = "";
        	$sql = "SELECT u.uid, u.email ".
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-			"WHERE (ul.username = '".$username."')";
+			"WHERE (ul.username = \"".$username."\")";
 		$result = $this->con->query($sql);
         if($row = $result->fetch_object()){
             $loginEmail = $row->email;
