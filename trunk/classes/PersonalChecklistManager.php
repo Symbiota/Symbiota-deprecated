@@ -4,6 +4,7 @@
  * By E.E. Gilbert
 */
 include_once($serverRoot.'/config/dbconnection.php');
+include_once('ProfileManager.php');
 
 class PersonalChecklistManager{
 
@@ -41,8 +42,15 @@ class PersonalChecklistManager{
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
 		//echo $sql;
-		if($this->conn->query($sql)) return $this->conn->insert_id;
-		return 0;
+		$newClId = 0;
+		if($this->conn->query($sql)){
+			$newClId = $this->conn->insert_id;
+			//Set permissions to allow creater to be an editor
+		 	$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
+		 	$newPManager = new ProfileManager();
+		 	$newPManager->authenticate($GLOBALS["paramsArr"]["un"]);
+		}
+		return $newClId;
 	}
 
 	public function deleteChecklist($clidDel){
