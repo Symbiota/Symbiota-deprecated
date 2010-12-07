@@ -13,7 +13,7 @@ $clLoaderManager = new ChecklistLoaderManager();
 $clLoaderManager->setClid($clid);
  
 $editable = false;
-if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
+if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 	$editable = true;
 }
  
