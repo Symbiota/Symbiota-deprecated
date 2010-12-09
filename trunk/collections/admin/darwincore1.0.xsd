@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
+	xmlns:dwc10="http://digir.net/schema/conceptual/darwin/2003/1.0/"
+	elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd"/>
+	<xsd:element name="record">
+		<xsd:annotation>
+			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="dwc10:DateLastModified"/>
+				<xsd:element ref="dwc10:InstitutionCode"/>
+				<xsd:element ref="dwc10:CollectionCode"/>
+				<xsd:element ref="dwc10:CatalogNumber"/>
+				<xsd:element ref="dwc10:ScientificName"/>
+				<xsd:element ref="dwc10:Family"/>
+				<xsd:element ref="dwc10:Genus"/>
+				<xsd:element ref="dwc10:Species"/>
+				<xsd:element ref="dwc10:Subspecies"/>
+				<xsd:element ref="dwc10:ScientificNameAuthor"/>
+				<xsd:element ref="dwc10:IdentifiedBy"/>
+				<xsd:element ref="dwc10:YearIdentified"/>
+				<xsd:element ref="dwc10:MonthIdentified" />
+				<xsd:element ref="dwc10:DayIdentified" />
+				<xsd:element ref="dwc10:Collector"/>
+				<xsd:element ref="dwc10:YearCollected"/>
+				<xsd:element ref="dwc10:MonthCollected"/>
+				<xsd:element ref="dwc10:DayCollected"/>
+				<xsd:element ref="dwc10:CollectorNumber"/>
+				<xsd:element ref="dwc10:FieldNumber"/>
+				<xsd:element ref="dwc10:Notes"/>
+				<xsd:element ref="dwc10:Country"/>
+				<xsd:element ref="dwc10:StateProvince"/>
+				<xsd:element ref="dwc10:County"/>
+				<xsd:element ref="dwc10:Locality"/>
+				<xsd:element ref="dwc10:Latitude" />
+				<xsd:element ref="dwc10:Longitude"/>
+				<xsd:element ref="dwc10:CoordinatePrecision"/>
+				<xsd:element ref="dwc10:MinimumElevation"/>
+				<xsd:element ref="dwc10:MaximumElevation"/>
+				<xsd:element ref="dwc10:TypeStatus"/>
+				<xsd:element ref="dwc10:Sex" />
+				<xsd:element ref="dwc10:RelationshipType" />
+				<xsd:element ref="dwc10:RelatedCatalogItem" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

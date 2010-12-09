@@ -53,7 +53,7 @@ class OccurrenceEditorManager {
 	}
 
 	private function setImages(){
-		$sql = "SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl, i.caption, i.sourceurl, i.copyrights, i.notes, i.sortsequence ".
+		$sql = "SELECT i.imgid, i.url, i.thumbnailurl, i.originalurl, i.caption, i.sourceurl, i.copyright, i.notes, i.sortsequence ".
 			"FROM images i ".
 			"WHERE i.occid = ".$this->occId." ORDER BY i.sortsequence";
 		$result = $this->conn->query($sql);
@@ -64,9 +64,9 @@ class OccurrenceEditorManager {
 			$this->occurrenceMap["images"][$imgId]["origurl"] = $row->originalurl;
 			$this->occurrenceMap["images"][$imgId]["caption"] = $row->caption;
 			$this->occurrenceMap["images"][$imgId]["sourceurl"] = $row->sourceurl;
-			$this->occurrenceMap["images"][$imgId]["copyrights"] = $row->copyrights;
+			$this->occurrenceMap["images"][$imgId]["copyright"] = $row->copyright;
 			$this->occurrenceMap["images"][$imgId]["notes"] = $row->notes;
-			$this->occurrenceMap["images"][$imgId]["sortsequence"] = $row->sortsequence;
+			$this->occurrenceMap["images"][$imgId]["sortseq"] = $row->sortsequence;
 		}
 		$result->close();
 	}
@@ -206,6 +206,15 @@ class OccurrenceEditorManager {
 			"WHERE occid = ".$occArr["occid"];
 			$this->conn->query($sql);
 		}
+	}
+	
+	public function editImage($imgArr){
+		$sql = "UPDATE images ".
+			"SET url = \"".$imgArr["url"]."\", thumbnailurl = \"".$imgArr["tnurl"]."\",originalurl = \"".$imgArr["origurl"]."\",caption = \"".
+			$imgArr["caption"]."\",notes = \"".$imgArr["notes"]."\",copyright = \"".$imgArr["copyright"]."\",sourceurl = \"".
+			$imgArr["copyright"]."\",sortsequence = \"".$imgArr["sortseq"]."\" ".
+			"WHERE imgid = ".$imgArr["imgid"];
+		$this->conn->query($sql);
 	}
 
 	private function LatLonPointUTMtoLL($northing, $easting, $zone=12) {
