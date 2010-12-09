@@ -1,49 +1,58 @@
-<?php
-//error_reporting(E_ALL);
+<?php 
 include_once('../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
- 
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle;?> Image Library General Copyright</title>
-<link rel="stylesheet" href="../css/main.css" type="text/css">
+<title><?php echo $defaultTitle; ?> Image Usage policy</title>
+	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 </head>
 <body>
 
-<table width=470 align="center">
-    <tr><td><hr></td></tr>
-    <tr><td><H3>COPYRIGHT OF ASU VASCULAR PLANT HERBARIUM IMAGES</H3></td></tr>
-    <tr><td><p>All Internet Pages of the ASU vascular plant herbarium are copyrighted!
-        This copyright includes all images, drawings, logos or other pictures.</p>
-        <p>We are aware of the general abuse of copyright on the internet.
-        Although there is no way to prevent this abuse we nevertheless hope
-        you will follow the general rules of copyright outlined <a class="bodylink" href="http://lcweb.loc.gov/copyright">here</a>.
-        Pictures and drawings are screen resolution (72 dpi). Thus they do not print out well. 
-        If you are interested in using any of  the images at high resolution please contact the herbarium 
-        curator, Dr. Leslie Landrum at <a href="mailto:les.landrum@asu.edu" class="bodylink">les.landrum@asu.edu</a>. 
-        All materials on the website are primarily intended for research and education purposes.  
-        One copy may be printed for your own reference.  Please do not print in bulk!   
-        Ask permission if you want to use an image for another webpage.  
-        Images are not available for commercial use.</p>
-
-        <br>
-        <H3>NOTE ON HERBARIUM SPECIMENS: </h3>
-        <p>Herbarium specimens are used for scientific studies of plants 
-        and because of skilled preparation and careful use they may last for hundreds of years.  
-        In our herbarium we have specimens of plants collected in Tempe 100 years ago that are no longer
-        found here and are thus vouchers of a vegetation that has now disappeared.  
-        We expect the specimens in our herbarium to be available for future generations.  
-        By making some of our herbarium specimens available on the web as images we not only 
-        increase their availability but we also reduce the inadvertent damage caused by use.   
-        If you are considering making specimens, remember collecting normally requires permission 
-        of the landowner and, in the case of rare and endangered plants, additional permits may 
-        be required.</p>
-        <br>
-        <p><a href="http://askabiologist.asu.edu/profiles/landrum/index.html" class="bodylink">Click here to see how 
-        herbarium specimens are prepared.</a></p></td></tr>                   
-    <tr><td><hr></td></tr>
-</table>
-
+	<?php
+	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
+	include($serverRoot.'/header.php');
+	if(isset($imagelib_indexCrumbs)){
+		echo "<div class='navpath'>";
+		echo "<a href='../index.php'>Home</a> &gt; ";
+		echo $imagelib_indexCrumbs;
+		echo " <b>Image Library</b>";
+		echo "</div>";
+	}
+	?> 
+	<!-- This is inner text! -->
+	<div id="innertext">
+	   	<h1>Image Usage policy</h1>
+	    <div style="margin:30px;">
+	    	<p>Images within this website have been generously contributed by their owners to 
+	    	promote education and research. These contributors retain the full copyright for 
+	    	their images. Unless stated otherwise, images are made available under the “Fair Use” 
+	    	provision of the U.S. Copyright Law (
+	    	<a href="http://lcweb.loc.gov/copyright">http://www.copyright.gov/</a>). They may be used 
+	    	only for personal or educational use and are NOT available for commercial use unless 
+	    	permission is first obtained from the copyright holder. If any image is used in a 
+	    	non-commercial publication, report, or as a web link, one must credit the photographer 
+	    	as well as the name of the website hosting the image. If you have any doubt or 
+	    	questions regarding the use of an image, contact the author or the site manager.</p>
+	    </div>
+		<h1>Notes on Specimen Images</h1> 
+	    <div style="margin:30px;">
+			Specimens are used for scientific research and because of skilled preparation and 
+			careful use they may last for hundreds of years. Some collections have specimens 
+			that were collected over 100 years ago that are no longer occur within the area. 
+			By making these specimens available on the web as images, their availability and 
+			value improves without an increase in inadvertent damage caused by use. Note that 
+			if you are considering making specimens, remember collecting normally requires 
+			permission of the landowner and, in the case of rare and endangered plants, 
+			additional permits may be required. It is best to coordinate such efforts with a 
+			local institution that manages a local collection.
+		</div> 
+	    <div style="margin:30px;">
+	    	Return to <a href="index.php">Image Library</a>
+	    </div>
+	</div>
+	<?php 
+	include($serverRoot.'/footer.php');
+	?>
 </body>
 </html>
