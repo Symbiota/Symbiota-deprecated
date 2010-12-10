@@ -147,6 +147,7 @@ class DataLoader{
 		"recordnumber" => "collnumber",
 		"associatedCollectors" => "associates",
 		"eventdate" => "dateobserved",
+		"verbatimeventdate" => "verbatimdate",
 		"fieldnotes" => "vegetation",
 		"occurrenceremarks" => "notes",
 		"attributes" => "description",
