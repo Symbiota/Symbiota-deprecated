@@ -139,11 +139,13 @@
 	                    </div>
 					</td>
 					<td colspan='3'>
+						<?php if($isAdmin){ ?>
 						<div style="float:right;" title="Edit Occurrence Record">
 							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
 								<img src="../images/edit.png" style="border:0px;height:12px;" />
 							</a>
 						</div>
+						<?php } ?>
 						<div style="float:left;">
 							<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
 								<span style='font-style:italic;' title='General Species Information'>
