@@ -136,11 +136,11 @@ if($occId){
 		  		return;
 		  	}
 			var url = "rpc/verifysciname.php";
-			url=url + "?sciname=" + sciNameInput.value;
+			url=url + "?sciname=" + sciNameInput.value; 
 			snXmlHttp.onreadystatechange=function(){
 				if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-					var retObj = eval("("+snXmlHttp.responseText+")");
-					if(retObj){
+					if(snXmlHttp.responseText){
+						var retObj = eval("("+snXmlHttp.responseText+")");
 						document.fullform.scientificnameauthorship.value = retObj.author;
 						document.fullform.family.value = retObj.family;
 					}
@@ -161,7 +161,7 @@ if($occId){
 		}
 
 		function inputIsNumeric(inputObj, titleStr){
-			if(!isNumeric(inputObj)){
+			if(!isNumeric(inputObj.value)){
 				alert("Input value for " + titleStr + " must be a number value only! " );
 			}
 		}
@@ -204,12 +204,12 @@ if($occId){
 <body onload="initTabs('occedittabs');">
 
 <?php
-	$displayLeftMenu = (isset($collections_individual_occurrenceEditorMenu)?$collections_individual_occurrenceEditorMenu:false);
+	$displayLeftMenu = (isset($collections_editor_occurrenceEditorMenu)?$collections_individual_occurrenceEditorMenu:false);
 	include($serverRoot.'/header.php');
-	if(isset($collections_individual_occurrenceEditorCrumbs)){
+	if(isset($collections_editor_occurrenceEditorCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_individual_occurrenceEditorCrumbs;
+		echo $collections_editor_occurrenceEditorCrumbs;
 		echo " &gt; <b>Occurrence Editor</b>";
 		echo "</div>";
 	}
@@ -220,11 +220,11 @@ if($occId){
 	if($editable){
 		?>
 	    <ul id="occedittabs" class="shadetabs">
-	        <li><a href="#" rel="shortdiv" class="selected">All Fields</a></li>
+	        <li><a href="#" rel="shortdiv" class="selected">Specimen Data</a></li>
 	        <li><a href="#" rel="determdiv">Determination History</a></li>
 	        <li><a href="#" rel="imagediv">Images</a></li>
 	    </ul>
-		<div style="border:1px solid gray;width:96%;margin-bottom:1em;padding:10px;">
+		<div style="border:1px solid gray;width:96%;margin-bottom:1em;padding:5px;">
 			<div id="shortdiv" class="tabcontent" style="margin:10px;">
 				<form id='fullform' name='fullform' action='occurrenceeditor.php' method='get'>
 					<fieldset>
@@ -233,14 +233,14 @@ if($occId){
 							<span class="flabel" style="width:125px;">
 								Scientific Name:
 							</span>
-							<span class="flabel" style="margin-left:310px;">
+							<span class="flabel" style="margin-left:315px;">
 								Author:
 							</span>
 						</div>
 						<div style="clear:both;" class="p1">
 							<span>
 								<?php $hasValue = array_key_exists("sciname",$occArr)&&$occArr["sciname"]["value"]?1:0; ?>
-								<input type="text" name="sciname" size="60" maxlength="250" tabindex="2" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]["value"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="verifySciName(this);" />
+								<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]["value"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="verifySciName(this);" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 							</span>
 							<span style="margin-left:10px;">
@@ -298,22 +298,22 @@ if($occId){
 								<span style="margin-left:210px;">
 									Number:
 								</span>
-								<span style="margin-left:60px;">
+								<span style="margin-left:40px;">
 									Date:
 								</span>
 							</div>
 							<div style="clear:both;" class="p1">
 								<span>
 									<?php $hasValue = array_key_exists("recordedby",$occArr)&&$occArr["recordedby"]["value"]?1:0; ?>
-									<input type="text" name="recordedby" size="35" maxlength="255" tabindex="14" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordedby"]["value"]:""; ?>" />
+									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordedby"]["value"]:""; ?>" />
 								</span>
-								<span style="margin-left:20px;">
+								<span style="margin-left:10px;">
 									<?php $hasValue = array_key_exists("recordnumber",$occArr)&&$occArr["recordnumber"]["value"]?1:0; ?>
-									<input type="text" name="recordnumber" size="10" maxlength="45" tabindex="16" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordnumber"]["value"]:""; ?>" />
+									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordnumber"]["value"]:""; ?>" />
 								</span>
-								<span style="margin-left:20px;">
+								<span style="margin-left:10px;">
 									<?php $hasValue = array_key_exists("eventdate",$occArr)&&$occArr["eventdate"]["value"]?1:0; ?>
-									<input type="text" name="eventdate" size="10" tabindex="18" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["eventdate"]["value"]:""; ?>" onchange="verifyDate(this);" />
+									<input type="text" name="eventdate" tabindex="18" style="width:80px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["eventdate"]["value"]:""; ?>" onchange="verifyDate(this);" />
 								</span>
 								<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 									<img src="../../images/showedit.png" style="width:15px;" />
@@ -322,7 +322,7 @@ if($occId){
 							<div style="clear:both;margin-top:5px;" class="p1">
 								<?php $hasValue = array_key_exists("associatedcollectors",$occArr)&&$occArr["associatedcollectors"]["value"]?1:0; ?>
 								Associated Collectors:<br />
-								<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" size="70" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedcollectors"]["value"]:""; ?>" />
+								<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" style="width:430px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedcollectors"]["value"]:""; ?>" />
 							</div>
 						</div>
 						<?php 
@@ -348,42 +348,28 @@ if($occId){
 						?>
 						<div id="dateextradiv" style="float:left;padding:5px;margin-left:10px;border:1px solid gray;display:<?php echo $dateExtraDiv; ?>;" class="p2">
 							<div>
-								<span>
-									Verbatim Date:
-								</span>
-								<span style="margin-left:7px;">
-									<?php $hasValue = array_key_exists("verbatimeventdate",$occArr)&&$occArr["verbatimeventdate"]["value"]?1:0; ?>
-									<input type="text" name="verbatimeventdate" size="10" tabindex="20" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimeventdate"]["value"]:""; ?>" />
-								</span>
+								Verbatim Date:
+								<?php $hasValue = array_key_exists("verbatimeventdate",$occArr)&&$occArr["verbatimeventdate"]["value"]?1:0; ?>
+								<input type="text" name="verbatimeventdate" tabindex="20" maxlength="255" style="width:120px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimeventdate"]["value"]:""; ?>" />
 							</div>
 							<div>
-								<span>
-									MM/DD/YYYY:
-								</span>
-								<span>
+								MM/DD/YYYY:
+								<span style="margin:8px;">
 									<?php $hasValue = array_key_exists("month",$occArr)&&$occArr["month"]["value"]?1:0; ?>
-									<input type="text" name="month" tabindex="22" size="1" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["month"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Month')" title="Numeric Month" />/
-								</span>
-								<span>
+									<input type="text" name="month" tabindex="22" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["month"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Month')" title="Numeric Month" />/
 									<?php $hasValue = array_key_exists("day",$occArr)&&$occArr["day"]["value"]?1:0; ?>
-									<input type="text" name="day" tabindex="24" size="1" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["day"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Day')" title="Numeric Day" />/
-								</span>
-								<span>
+									<input type="text" name="day" tabindex="24" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["day"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Day')" title="Numeric Day" />/
 									<?php $hasValue = array_key_exists("year",$occArr)&&$occArr["year"]["value"]?1:0; ?>
-									<input type="text" name="year" tabindex="26" size="2" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["year"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Year')" title="Numeric Year" />
+									<input type="text" name="year" tabindex="26" style="width:45px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["year"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Year')" title="Numeric Year" />
 								</span>
 							</div>
 							<div>
-								<span>
-									Day of Year:
-								</span>
-								<span style="margin-left:22px;">
+								Day of Year:
+								<span style="margin:16px;">
 									<?php $hasValue = array_key_exists("startdayofyear",$occArr)&&$occArr["startdayofyear"]["value"]?1:0; ?>
-									<input type="text" name="startdayofyear" tabindex="28" size="3" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["startdayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Start Day of Year')" title="Start Day of Year" /> -
-								</span>
-								<span>
+									<input type="text" name="startdayofyear" tabindex="28" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["startdayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Start Day of Year')" title="Start Day of Year" /> -
 									<?php $hasValue = array_key_exists("enddayofyear",$occArr)&&$occArr["enddayofyear"]["value"]?1:0; ?>
-									<input type="text" name="enddayofyear" tabindex="30" size="3" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["enddayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'End Day of Year')" title="End Day of Year" />
+									<input type="text" name="enddayofyear" tabindex="30" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["enddayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'End Day of Year')" title="End Day of Year" />
 								</span>
 							</div>
 						</div>

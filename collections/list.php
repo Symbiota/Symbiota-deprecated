@@ -128,32 +128,71 @@
 			</tr>
 			<?php 
 	        foreach($specData as $dbpk => $fieldArr){
-				echo "<tr>";
-	            echo "<td rowspan='4' width='30' valign='top' align='center'>".
-	                    "<a target='_blank' href='misc/collprofiles.php?collid=".$collId."'>".
-	                    "<img align='absbottom' height='25' width='25' src='../".$icon."' title='".$collCode." Collection Statistics' /></a>".
-	                    "<div style='font-weight:bold;font-size:75%;'>".$collCode."</div>".
-	                    "</td>";
-				echo "<td width='420' colspan='3'>";
-				echo "<a target='_blank' href='../taxa/index.php?taxon=".$fieldArr["sciname"]."'>";
-				echo "<span style='font-style:italic;' title='General Species Information'>".$fieldArr["sciname"]."</span>";
-				echo "</a> ".$fieldArr["author"]."</td>";
-				echo "</tr><tr>";
-				echo "<td width='75'>".$fieldArr["accession"]."</td>";
-				echo "<td>".$fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]."</td>";
-				echo "<td>".$fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:"")."</td>";
-				echo "</tr><tr>";
-	            $localStr = "";
-	            if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
-	            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
-	            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
-	            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
-	            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
-	            echo "<td colspan='3'>".$localStr."</td>";
-	            echo "</tr><tr><td colspan='3'>";
-	            echo "<b><a href=\"javascript:var puRef=window.open('individual/individual.php?pk=".
-	            $fieldArr["dbpk"]."&collid=".$collId."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]."','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\">Full Record Details</a></b>\n";
-	            echo "</td></tr><tr><td colspan='4'><hr/></td></tr>";
+	        	?>
+				<tr>
+					<td rowspan="4" width='30' valign='top' align='center'>
+						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
+	                    	<img align='absbottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo $collCode; ?>' Collection Statistics' />
+	                    </a>
+	                    <div style='font-weight:bold;font-size:75%;'>
+	                    	<?php echo $collCode; ?>
+	                    </div>
+					</td>
+					<td width='420' colspan='3'>
+						<div style="float:right;" title="Edit Occurrence Record">
+							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
+								<img src="../images/edit.png" style="border:0px;height:12px;" />
+							</a>
+						</div>
+						<div style="float:left;">
+							<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
+								<span style='font-style:italic;' title='General Species Information'>
+									<?php echo $fieldArr["sciname"];?>
+								</span>
+							</a> 
+							<?php echo $fieldArr["author"]; ?>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td width='75'>
+						<?php echo $fieldArr["accession"];?>
+					</td>
+					<td>
+						<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]; ?>
+					</td>
+					<td>
+						<?php echo $fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:""); ?>
+					</td>
+				</tr>
+				<tr>
+					<?php 
+		            $localStr = "";
+		            if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
+		            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
+		            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
+		            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+		            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
+		            ?>
+		            <td colspan='3'>
+		            	<?php echo $localStr; ?>
+		            </td>
+	            </tr>
+	            <tr>
+	            	<td colspan='3'>
+			            <b>
+			            	<a href="javascript:var puRef=window.open('individual/individual.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');">
+		            			Full Record Details
+		            		</a>
+		            	</b>
+	            	</td>
+	            </tr>
+	            <tr>
+	            	<td colspan='4'>
+	            		<hr/>
+	            	</td>
+	            </tr>
+	            <?php 
 	        }
 	    }
 	    ?>
