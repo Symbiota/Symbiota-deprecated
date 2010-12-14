@@ -279,12 +279,12 @@ if($occId){
 							<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 								<?php $hasValue = array_key_exists("identificationreferences",$occArr)&&$occArr["identificationreferences"]["value"]?1:0; ?>
 								ID References:
-								<input type="text" name="identificationreferences" tabindex="10" size="60" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationreferences"]["value"]:""; ?>" />
+								<input type="text" name="identificationreferences" tabindex="10" style="width:450px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationreferences"]["value"]:""; ?>" />
 							</div>
 							<div id="taxremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 								<?php $hasValue = array_key_exists("taxonremarks",$occArr)&&$occArr["taxonremarks"]["value"]?1:0; ?>
 								ID Remarks:
-								<input type="text" name="taxonremarks" tabindex="12" size="60" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["taxonremarks"]["value"]:""; ?>" />
+								<input type="text" name="taxonremarks" tabindex="12" style="width:500px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["taxonremarks"]["value"]:""; ?>" />
 							</div>
 						</div>
 					</fieldset>
@@ -380,38 +380,38 @@ if($occId){
 							<span style="">
 								Country
 							</span>
-							<span style="margin-left:109px;">
+							<span style="margin-left:110px;">
 								State/Province
 							</span>
-							<span style="margin-left:70px;">
+							<span style="margin-left:72px;">
 								County
 							</span>
-							<span style="margin-left:110px;">
+							<span style="margin-left:112px;">
 								Municipality
 							</span>
 						</div>
 						<div>
 							<span>
 								<?php $hasValue = array_key_exists("country",$occArr)&&$occArr["country"]["value"]?1:0; ?>
-								<input type="text" name="country" tabindex="32" size="" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["country"]["value"]:""; ?>" />
+								<input type="text" name="country" tabindex="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["country"]["value"]:""; ?>" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("stateprovince",$occArr)&&$occArr["stateprovince"]["value"]?1:0; ?>
-								<input type="text" name="stateprovince" tabindex="34" size="" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["stateprovince"]["value"]:""; ?>" />
+								<input type="text" name="stateprovince" tabindex="34" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["stateprovince"]["value"]:""; ?>" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("county",$occArr)&&$occArr["county"]["value"]?1:0; ?>
-								<input type="text" name="county" tabindex="36" size="" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["county"]["value"]:""; ?>" />
+								<input type="text" name="county" tabindex="36" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["county"]["value"]:""; ?>" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("municipality",$occArr)&&$occArr["municipality"]["value"]?1:0; ?>
-								<input type="text" name="municipality" tabindex="38" size="" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["municipality"]["value"]:""; ?>" />
+								<input type="text" name="municipality" tabindex="38" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["municipality"]["value"]:""; ?>" />
 							</span>
 						</div>
 						<div style="margin:4px 0px 2px 0px;">
 							Locality:<br />
 							<?php $hasValue = array_key_exists("locality",$occArr)&&$occArr["locality"]["value"]?1:0; ?>
-							<input type="text" name="locality" tabindex="40" size="100" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["locality"]["value"]:""; ?>" />
+							<input type="text" name="locality" tabindex="40" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["locality"]["value"]:""; ?>" />
 						</div>
 						<div style="margin-bottom:5px;">
 							<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]["value"]?1:0; ?>
@@ -425,47 +425,47 @@ if($occId){
 							<span style="margin-left:45px;">
 								Longitude
 							</span>
-							<span style="margin-left:35px;">
+							<span style="margin-left:34px;">
 								Uncertainty
 							</span>
 							<span style="margin-left:10px;">
 								Datum
 							</span>
-							<span style="margin-left:53px;">
+							<span style="margin-left:43px;">
 								Elevation in Meters
 							</span>
-							<span style="margin-left:25px;">
+							<span style="margin-left:15px;">
 								Verbatim Elevation
 							</span>
 						</div>
 						<div>
 							<span>
 								<?php $hasValue = array_key_exists("decimallatitude",$occArr)&&$occArr["decimallatitude"]["value"]?1:0; ?>
-								<input type="text" name="decimallatitude" tabindex="44" size="10" maxlength="10" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["decimallatitude"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude')" />
+								<input type="text" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["decimallatitude"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude')" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("decimallongitude",$occArr)&&$occArr["decimallongitude"]["value"]?1:0; ?>
-								<input type="text" name="decimallongitude" tabindex="46" size="10" maxlength="13" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["decimallongitude"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude')" />
+								<input type="text" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["decimallongitude"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude')" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("coordinateuncertaintyinmeters",$occArr)&&$occArr["coordinateuncertaintyinmeters"]["value"]?1:0; ?>
-								<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" size="7" maxlength="10" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["coordinateuncertaintyinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty')" title="Uncertainty in Meters" />
+								<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["coordinateuncertaintyinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty')" title="Uncertainty in Meters" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("geodeticdatum",$occArr)&&$occArr["geodeticdatum"]["value"]?1:0; ?>
-								<input type="text" name="geodeticdatum" tabindex="50" size="10" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["geodeticdatum"]["value"]:""; ?>" />
+								<input type="text" name="geodeticdatum" tabindex="50" maxlength="255" style="width:80px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["geodeticdatum"]["value"]:""; ?>" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("minimumelevationinmeters",$occArr)&&$occArr["minimumelevationinmeters"]["value"]?1:0; ?>
-								<input type="text" name="minimumelevationinmeters" tabindex="52" size="5" maxlength="6" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["minimumelevationinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation')" title="Minumum Elevation In Meters" />
+								<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:55px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["minimumelevationinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation')" title="Minumum Elevation In Meters" />
 							</span> -
 							<span>
 								<?php $hasValue = array_key_exists("maximumelevationinmeters",$occArr)&&$occArr["maximumelevationinmeters"]["value"]?1:0; ?>
-								<input type="text" name="maximumelevationinmeters" tabindex="54" size="5" maxlength="6" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["maximumelevationinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation')" title="Maximum Elevation In Meters" />
+								<input type="text" name="maximumelevationinmeters" tabindex="54" maxlength="6" style="width:55px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["maximumelevationinmeters"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation')" title="Maximum Elevation In Meters" />
 							</span>
 							<span>
 								<?php $hasValue = array_key_exists("verbatimelevation",$occArr)&&$occArr["verbatimelevation"]["value"]?1:0; ?>
-								<input type="text" name="verbatimelevation" tabindex="56" size="" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimelevation"]["value"]:""; ?>" title="" />
+								<input type="text" name="verbatimelevation" tabindex="56" maxlength="255" style="width:100px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimelevation"]["value"]:""; ?>" title="" />
 							</span>
 							<span style="margin-left:5px;cursor:pointer;" onclick="toggle('locextradiv1');toggle('locextradiv2');">
 								<img src="../../images/showedit.png" style="width:15px;" />
@@ -491,32 +491,32 @@ if($occId){
 								<span style="">
 									Verbatim Coordinates
 								</span>
-								<span style="margin-left:30px;">
+								<span style="margin-left:32px;">
 									Verbatim Coordinate System
 								</span>
-								<span style="margin-left:22px;">
+								<span style="margin-left:18px;">
 									Georeferenced By
 								</span>
-								<span style="margin-left:50px;">
+								<span style="margin-left:52px;">
 									Georeference Protocol
 								</span>
 							</div>
 							<div>
 								<span>
 									<?php $hasValue = array_key_exists("verbatimcoordinates",$occArr)&&$occArr["verbatimcoordinates"]["value"]?1:0; ?>
-									<input type="text" name="verbatimcoordinates" tabindex="58" size="" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimcoordinates"]["value"]:""; ?>" title="" />
+									<input type="text" name="verbatimcoordinates" tabindex="58" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimcoordinates"]["value"]:""; ?>" title="" />
 								</span>
 								<span>
 									<?php $hasValue = array_key_exists("verbatimcoordinatesystem",$occArr)&&$occArr["verbatimcoordinatesystem"]["value"]?1:0; ?>
-									<input type="text" name="verbatimcoordinatesystem" tabindex="60" size="25" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimcoordinatesystem"]["value"]:""; ?>" title="" />
+									<input type="text" name="verbatimcoordinatesystem" tabindex="60" maxlength="255" style="width:175px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimcoordinatesystem"]["value"]:""; ?>" title="" />
 								</span>
 								<span>
 									<?php $hasValue = array_key_exists("georeferencedby",$occArr)&&$occArr["georeferencedby"]["value"]?1:0; ?>
-									<input type="text" name="georeferencedby" tabindex="62" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencedby"]["value"]:""; ?>" />
+									<input type="text" name="georeferencedby" tabindex="62" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencedby"]["value"]:""; ?>" />
 								</span>
 								<span>
 									<?php $hasValue = array_key_exists("georeferenceprotocol",$occArr)&&$occArr["georeferenceprotocol"]["value"]?1:0; ?>
-									<input type="text" name="georeferenceprotocol" tabindex="64" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceprotocol"]["value"]:""; ?>" />
+									<input type="text" name="georeferenceprotocol" tabindex="64" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceprotocol"]["value"]:""; ?>" />
 								</span>
 							</div>
 						</div>
@@ -537,25 +537,25 @@ if($occId){
 								<span style="">
 									Georeference Sources
 								</span>
-								<span style="margin-left:28px;">
+								<span style="margin-left:40px;">
 									Georef Verification Status
 								</span>
-								<span style="margin-left:10px;">
+								<span style="margin-left:20px;">
 									Georeference Remarks
 								</span>
 							</div>
 							<div>
 								<span>
 									<?php $hasValue = array_key_exists("georeferencesources",$occArr)&&$occArr["georeferencesources"]["value"]?1:0; ?>
-									<input type="text" name="georeferencesources" tabindex="66" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencesources"]["value"]:""; ?>" />
+									<input type="text" name="georeferencesources" tabindex="66" maxlength="255" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencesources"]["value"]:""; ?>" />
 								</span>
 								<span>
 									<?php $hasValue = array_key_exists("georeferenceverificationstatus",$occArr)&&$occArr["georeferenceverificationstatus"]["value"]?1:0; ?>
-									<input type="text" name="georeferenceverificationstatus" tabindex="68" size="" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceverificationstatus"]["value"]:""; ?>" />
+									<input type="text" name="georeferenceverificationstatus" tabindex="68" maxlength="32" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceverificationstatus"]["value"]:""; ?>" />
 								</span>
 								<span>
 									<?php $hasValue = array_key_exists("georeferenceremarks",$occArr)&&$occArr["georeferenceremarks"]["value"]?1:0; ?>
-									<input type="text" name="georeferenceremarks" tabindex="70" size="50" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceremarks"]["value"]:""; ?>" />
+									<input type="text" name="georeferenceremarks" tabindex="70" maxlength="255" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceremarks"]["value"]:""; ?>" />
 								</span>
 							</div>
 						</div>
@@ -565,22 +565,22 @@ if($occId){
 						<div style="padding:3px;">
 							<?php $hasValue = array_key_exists("habitat",$occArr)&&$occArr["habitat"]["value"]?1:0; ?>
 							Habitat:
-							<input type="text" name="habitat" tabindex="82" size="105" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["habitat"]["value"]:""; ?>" />
+							<input type="text" name="habitat" tabindex="82" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["habitat"]["value"]:""; ?>" />
 						</div>
 						<div style="padding:3px;">
 							<?php $hasValue = array_key_exists("associatedtaxa",$occArr)&&$occArr["associatedtaxa"]["value"]?1:0; ?>
 							Associated Taxa:
-							<input type="text" name="associatedtaxa" tabindex="84" size="97" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedtaxa"]["value"]:""; ?>" />
+							<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedtaxa"]["value"]:""; ?>" />
 						</div>
 						<div style="padding:3px;">
 							<?php $hasValue = array_key_exists("dynamicproperties",$occArr)&&$occArr["dynamicproperties"]["value"]?1:0; ?>
 							Description:
-							<input type="text" name="dynamicproperties" tabindex="86" size="101" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["dynamicproperties"]["value"]:""; ?>" />
+							<input type="text" name="dynamicproperties" tabindex="86" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["dynamicproperties"]["value"]:""; ?>" />
 						</div>
 						<div style="padding:3px;">
 							<?php $hasValue = array_key_exists("occurrenceremarks",$occArr)&&$occArr["occurrenceremarks"]["value"]?1:0; ?>
 							Notes:
-							<input type="text" name="occurrenceremarks" tabindex="88" size="106" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceremarks"]["value"]:""; ?>" title="Occurrence Remarks" />
+							<input type="text" name="occurrenceremarks" tabindex="88" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceremarks"]["value"]:""; ?>" title="Occurrence Remarks" />
 						</div>
 					</fieldset>
 					<fieldset>
@@ -589,36 +589,36 @@ if($occId){
 							<span>
 								<?php $hasValue = array_key_exists("catalognumber",$occArr)&&$occArr["catalognumber"]["value"]?1:0; ?>
 								Catalog Number:
-								<input type="text" name="catalognumber" tabindex="90" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["catalognumber"]["value"]:""; ?>" />
+								<input type="text" name="catalognumber" tabindex="90" maxlength="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["catalognumber"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:30px;">
 								<?php $hasValue = array_key_exists("occurrenceid",$occArr)&&$occArr["occurrenceid"]["value"]?1:0; ?>
 								Occurrence ID (GUID):
-								<input type="text" name="occurrenceid" tabindex="92" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceid"]["value"]:""; ?>" title="Global Unique Identifier" />
+								<input type="text" name="occurrenceid" tabindex="92" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceid"]["value"]:""; ?>" title="Global Unique Identifier" />
 							</span>
 						</div>
 						<div style="padding:3px;">
 							<span>
 								<?php $hasValue = array_key_exists("typestatus",$occArr)&&$occArr["typestatus"]["value"]?1:0; ?>
 								Type Status:
-								<input type="text" name="typestatus" tabindex="94" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php $hasValue?$occArr["typestatus"]["value"]:""; ?>" />
+								<input type="text" name="typestatus" tabindex="94" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php $hasValue?$occArr["typestatus"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:30px;">
 								<?php $hasValue = array_key_exists("disposition",$occArr)&&$occArr["disposition"]["value"]?1:0; ?>
 								Disposition:
-								<input type="text" name="disposition" size="40" tabindex="96" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["disposition"]["value"]:""; ?>" />
+								<input type="text" name="disposition" tabindex="96" maxlength="32" style="width:200px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["disposition"]["value"]:""; ?>" />
 							</span>
 						</div>
 						<div style="padding:3px;">
 							<span>
 								<?php $hasValue = array_key_exists("reproductivecondition",$occArr)&&$occArr["reproductivecondition"]["value"]?1:0; ?>
 								Reproductive Condition:
-								<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["reproductivecondition"]["value"]:""; ?>" />
+								<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["reproductivecondition"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:30px;">
 								<?php $hasValue = array_key_exists("establishmentmeans",$occArr)&&$occArr["establishmentmeans"]["value"]?1:0; ?>
 								Establishment Means:
-								<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["establishmentmeans"]["value"]:""; ?>" />
+								<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["establishmentmeans"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:15px;">
 								<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]["value"]?1:0; ?>
@@ -630,12 +630,12 @@ if($occId){
 							<span>
 								<?php $hasValue = array_key_exists("ownerinstitutioncode",$occArr)&&$occArr["ownerinstitutioncode"]["value"]?1:0; ?>
 								Owner InstitutionCode:
-								<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["ownerinstitutioncode"]["value"]:""; ?>" />
+								<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["ownerinstitutioncode"]["value"]:""; ?>" />
 							</span>
 							<span style="margin-left:30px;">
 								<?php $hasValue = array_key_exists("othercatalognumbers",$occArr)&&$occArr["othercatalognumbers"]["value"]?1:0; ?>
 								Other Catalog Numbers:
-								<input type="text" name="othercatalognumbers" tabindex="106" maxlength="255" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["othercatalognumbers"]["value"]:""; ?>" />
+								<input type="text" name="othercatalognumbers" tabindex="106" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["othercatalognumbers"]["value"]:""; ?>" />
 							</span>
 						</div>
 					</fieldset>
@@ -778,7 +778,7 @@ if($occId){
 											<?php echo $imgArr["caption"]; ?>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="caption" type="text" size="40" value="<?php echo $imgArr["caption"]; ?>" />
+											<input name="caption" type="text" value="<?php echo $imgArr["caption"]; ?>" style="width:250px;" />
 										</span>
 									</div>
 									<div>
@@ -787,7 +787,7 @@ if($occId){
 											<?php echo $imgArr["notes"]; ?>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="notes" type="text" size="40" value="<?php echo $imgArr["notes"]; ?>" />
+											<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:300px;" />
 										</span>
 									</div>
 									<div>
@@ -796,7 +796,7 @@ if($occId){
 											<?php echo $imgArr["copyright"]; ?>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="copyright" type="text" size="40" value="<?php echo $imgArr["copyright"]; ?>" />
+											<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:250px;" />
 										</span>
 									</div>
 									<div>
@@ -807,7 +807,7 @@ if($occId){
 											</a>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="sourceurl" type="text" size="40" value="<?php echo $imgArr["sourceurl"]; ?>" />
+											<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:250px;" />
 										</span>
 									</div>
 									<div>
@@ -818,7 +818,7 @@ if($occId){
 											</a>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="url" type="text" size="40" value="<?php echo $imgArr["url"]; ?>" />
+											<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:300px;" />
 										</span>
 									</div>
 									<div>
@@ -829,7 +829,7 @@ if($occId){
 											</a>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="origurl" type="text" size="40" value="<?php echo $imgArr["origurl"]; ?>" />
+											<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:250px;" />
 										</span>
 									</div>
 									<div>
@@ -840,7 +840,7 @@ if($occId){
 											</a>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="tnurl" type="text" size="40" value="<?php echo $imgArr["tnurl"]; ?>" />
+											<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:250px;" />
 										</span>
 									</div>
 									<div>
@@ -849,7 +849,7 @@ if($occId){
 											<?php echo $imgArr["sortseq"]; ?>
 										</span>
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
-											<input name="sortseq" type="text" size="40" value="<?php echo $imgArr["sortseq"]; ?>" />
+											<input name="sortseq" type="text" value="<?php echo $imgArr["sortseq"]; ?>" style="width:50px;" />
 										</span>
 									</div>
 									<div style="margin-top:10px;">
