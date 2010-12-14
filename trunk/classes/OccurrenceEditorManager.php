@@ -128,7 +128,7 @@ class OccurrenceEditorManager {
 			"disposition = ".($occArr["disposition"]?"'".$occArr["disposition"]."'":"NULL").",".
 			"language = ".($occArr["language"]?"'".$occArr["language"]."' ":"NULL ").
 			"WHERE occid = ".$occArr["occid"];
-			echo $sql;
+			//echo $sql;
 			$this->conn->query($sql);
 		}
 		
