@@ -130,7 +130,7 @@
 	        foreach($specData as $dbpk => $fieldArr){
 	        	?>
 				<tr>
-					<td rowspan="4" width='30' valign='top' align='center'>
+					<td rowspan="4" width='60' valign='top' align='center'>
 						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
 	                    	<img align='absbottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo $collCode; ?>' Collection Statistics' />
 	                    </a>
@@ -138,7 +138,7 @@
 	                    	<?php echo $collCode; ?>
 	                    </div>
 					</td>
-					<td width='420' colspan='3'>
+					<td colspan='3'>
 						<div style="float:right;" title="Edit Occurrence Record">
 							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
 								<img src="../images/edit.png" style="border:0px;height:12px;" />
@@ -155,13 +155,13 @@
 					</td>
 				</tr>
 				<tr>
-					<td width='75'>
+					<td width='20%'>
 						<?php echo $fieldArr["accession"];?>
 					</td>
 					<td>
 						<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]; ?>
 					</td>
-					<td>
+					<td width='20%'>
 						<?php echo $fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:""); ?>
 					</td>
 				</tr>
