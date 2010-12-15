@@ -1,12 +1,12 @@
 <?php
- include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/OccurrenceListManager.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/OccurrenceListManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
- $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
- $collManager = new OccurrenceListManager();
+$pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
+$collManager = new OccurrenceListManager();
  
- $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(fieldName,value))
+$specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(fieldName,value))
 ?>
 
 <html>
@@ -24,6 +24,48 @@
 			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();
+
+		function addVoucherToCl(occid,clid,tid){
+			var vXmlHttp = GetXmlHttpObject();
+			if(vXmlHttp==null){
+		  		alert ("Your browser does not support AJAX!");
+		  		return;
+		  	}
+			var url = "rpc/addvoucher.php";
+			url=url + "?occid=" + occid + "&clid=" + clid + "&tid=" + tid; 
+			vXmlHttp.onreadystatechange=function(){
+				if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
+					var rStr = vXmlHttp.responseText;
+					if(rStr == "1"){
+						alert("Success! Voucher add to checklists");
+					}
+					else{
+						alert(rStr);
+					}
+				}
+			};
+			vXmlHttp.open("POST",url,true);
+			vXmlHttp.send(null);
+		}
+
+		function GetXmlHttpObject(){
+			var xmlHttp=null;
+			try{
+				// Firefox, Opera 8.0+, Safari, IE 7.x
+		  		xmlHttp=new XMLHttpRequest();
+		  	}
+			catch (e){
+		  		// Internet Explorer
+		  		try{
+		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+		    	}
+		  		catch(e){
+		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		    	}
+		  	}
+			return xmlHttp;
+		}
+
 	</script>
 </head>
 <body>
@@ -142,9 +184,14 @@
 						<?php if($isAdmin){ ?>
 						<div style="float:right;" title="Edit Occurrence Record">
 							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
-								<img src="../images/edit.png" style="border:0px;height:12px;" />
+								<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
 							</a>
 						</div>
+						<?php if($collManager->getClName() && $_REQUEST["targettid"]){ ?>
+						<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $fieldArr["occid"].",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+							<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+						</div>
+						<?php } ?>
 						<?php } ?>
 						<div style="float:left;">
 							<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>

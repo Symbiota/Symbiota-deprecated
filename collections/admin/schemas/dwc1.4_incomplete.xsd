@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
+	xmlns:dc14="http://rs.tdwg.org/dwc/" 
+	elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://rs.tdwg.org/dwc/" schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_core.xsd"/>
+	<xsd:element name="record">
+		<xsd:annotation>
+			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="GlobalUniqueIdentifier" />
+				<xsd:element ref="DateLastModified" />
+				<xsd:element ref="BasisOfRecord" />
+				<xsd:element ref="InstitutionCode" />
+				<xsd:element ref="CollectionCode" />
+				<xsd:element ref="CatalogNumber" />
+				<xsd:element ref="dc14:CatalogNumberNumeric"/>
+				<xsd:element ref="dc14:CatalogNumberText"/>
+<xsd:element ref="InformationWithheld" />
+<xsd:element ref="Remarks" />
+<xsd:element ref="ScientificName" />
+<xsd:element ref="HigherTaxon" />
+<xsd:element ref="Kingdom" />
+<xsd:element ref="Family" />
+<xsd:element ref="Genus" />
+<xsd:element ref="SpecificEpithet" />
+<xsd:element ref="InfraspecificRank" />
+<xsd:element ref="InfraspecificEpithet" />
+<xsd:element ref="AuthorYearOfScientificName" />
+				<xsd:element ref="dc14:IdentificationModifier"/>
+<xsd:element ref="IdentificationQualifier" />
+				<xsd:element ref="darwin:IdentifiedBy"/>
+				<xsd:element ref="dc14:DateIdentified"/>
+<xsd:element ref="HigherGeography" />
+<xsd:element ref="Country" />
+<xsd:element ref="StateProvince" />
+<xsd:element ref="County" />
+<xsd:element ref="Locality" />
+				<xsd:element ref="dc14:DecimalLatitude"/>
+				<xsd:element ref="dc14:DecimalLongitude"/>
+				<xsd:element ref="dc14:GeodeticDatum"/>
+				<xsd:element ref="dc14:HorizontalDatum"/>
+				<xsd:element ref="dc14:CoordinateUncertaintyInMeters"/>
+				<xsd:element ref="dc14:VerbatimCoordinates"/>
+				<xsd:element ref="dc14:VerbatimLatitude"/>
+				<xsd:element ref="dc14:VerbatimLongitude"/>
+				<xsd:element ref="dc14:VerbatimCoordinateSystem"/>
+				<xsd:element ref="dc14:OriginalCoordinateSystem"/>
+				<xsd:element ref="dc14:GeoreferenceProtocol"/>
+				<xsd:element ref="dc14:GeoreferenceMethod"/>
+				<xsd:element ref="dc14:GeoreferenceSources"/>
+				<xsd:element ref="dc14:GeoreferenceVerificationStatus"/>
+				<xsd:element ref="dc14:GeoreferenceRemarks"/>
+<xsd:element ref="MinimumElevationInMeters" />
+<xsd:element ref="MaximumElevationInMeters" />
+				<xsd:element ref="dc14:VerbatimElevation"/>
+<xsd:element ref="CollectingMethod" />
+<xsd:element ref="EarliestDateCollected" />
+<xsd:element ref="LatestDateCollected" />
+				<xsd:element ref="darwin:YearCollected"/>
+				<xsd:element ref="darwin:MonthCollected"/>
+				<xsd:element ref="darwin:DayCollected"/>
+<xsd:element ref="DayOfYear" />
+				<xsd:element ref="dc14:VerbatimCollectingDate"/>
+<xsd:element ref="Collector" />
+				<xsd:element ref="darwin:CollectorNumber"/>
+				<xsd:element ref="darwin:FieldNumber"/>
+				<xsd:element ref="dc14:FieldNotes"/>
+<xsd:element ref="LifeStage" />
+<xsd:element ref="Attributes" />
+<xsd:element ref="ImageURL" />
+<xsd:element ref="RelatedInformation" />
+				<xsd:element ref="darwin:TypeStatus"/>
+				<xsd:element ref="dc14:RelatedCatalogedItems"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

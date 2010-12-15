@@ -16,6 +16,7 @@ class OccurrenceManager{
 	protected $useCookies = true;
 	protected $reset = false;
 	protected $dynamicClid;
+	private $clName;
 	
  	public function __construct(){
  		$this->useCookies = array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?false:true; 
@@ -269,10 +270,14 @@ class OccurrenceManager{
 			$clid = $this->searchTermsArr["clid"];
 			$clSql = ""; 
 			if($clid){
-				$sql = "SELECT dynamicsql FROM fmchecklists WHERE clid = ".$clid;
+				$sql = "SELECT dynamicsql, name ".
+					"FROM fmchecklists WHERE clid = ".$clid;
 				$con = $this->getConnection();
 				$result = $con->query($sql);
-				if($row = $result->fetch_object()) $clSql = $row->dynamicsql;
+				if($row = $result->fetch_object()){
+					$clSql = $row->dynamicsql;
+					$this->clName = $row->name;
+				}
 				$con->close();
 				if($clSql){
 					$sqlWhere .= "AND (".$clSql.")";
@@ -666,6 +671,10 @@ class OccurrenceManager{
 	
 	public function getUseCookies(){
 		return $this->useCookies;
+	}
+	
+	public function getClName(){
+		return $this->clName;
 	}
 }
 ?>
