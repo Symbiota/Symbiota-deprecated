@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
+	xmlns:manis="http://digir.net/schema/conceptual/darwin/manis/1.21" elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" 
+		schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/manis/1.21" 
+		schemaLocation="http://digir.net/schema/conceptual/darwin/manis/1.21/darwin2.xsd"/>
+	<xsd:element name="record">
+		<xsd:annotation>
+			<xsd:documentation>Manis </xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="manis:DateLastModified" />
+				<xsd:element ref="manis:BasisOfRecord" />
+				<xsd:element ref="manis:InstitutionCode" />
+				<xsd:element ref="manis:CollectionCode" />
+				<xsd:element ref="manis:CatalogNumberText" />
+				<xsd:element ref="manis:CatalogNumberNumeric" />
+				<xsd:element ref="manis:Collector" />
+				<xsd:element ref="manis:CollectorNumber" />
+				<xsd:element ref="manis:FieldNumber" />
+				<xsd:element ref="manis:YearCollected" />
+				<xsd:element ref="manis:MonthCollected" />
+				<xsd:element ref="manis:DayCollected" />
+				<xsd:element ref="manis:TimeCollected" />
+				<xsd:element ref="manis:VerbatimCollectingDate" />
+				<xsd:element ref="manis:FieldNotes" />
+				<xsd:element ref="manis:JulianDay" />
+				<xsd:element ref="manis:HigherGeography" />
+				<xsd:element ref="manis:ContinentOcean" />
+				<xsd:element ref="manis:IslandGroup" />
+				<xsd:element ref="manis:Island" />
+				<xsd:element ref="manis:Country" />
+				<xsd:element ref="manis:StateProvince" />
+				<xsd:element ref="manis:County" />
+				<xsd:element ref="manis:Locality" />
+				<xsd:element ref="manis:DecimalLatitude" />
+				<xsd:element ref="manis:DecimalLongitude" />
+				<xsd:element ref="manis:HorizontalDatum" />
+				<xsd:element ref="manis:OriginalCoordinateSystem" />
+				<xsd:element ref="manis:VerbatimLatitude" />
+				<xsd:element ref="manis:VerbatimLongitude" />
+				<xsd:element ref="manis:GeorefMethod" />
+				<xsd:element ref="manis:CoordinateUncertaintyInMeters" />
+				<xsd:element ref="manis:LatLongComments" />
+				<xsd:element ref="manis:BoundingBox" />
+				<xsd:element ref="manis:MinimumElevationInMeters" />
+				<xsd:element ref="manis:MaximumElevationInMeters" />
+				<xsd:element ref="manis:VerbatimElevation" />
+				<xsd:element ref="manis:MinimumDepthInMeters" />
+				<xsd:element ref="manis:MaximumDepthInMeters" />
+				<xsd:element ref="manis:VerbatimDepth" />
+				<xsd:element ref="manis:ScientificName" />
+				<xsd:element ref="manis:HigherTaxon" />
+				<xsd:element ref="manis:Kingdom" />
+				<xsd:element ref="manis:Phylum" />
+				<xsd:element ref="manis:Class" />
+				<xsd:element ref="manis:Order" />
+				<xsd:element ref="manis:Family" />
+				<xsd:element ref="manis:Genus" />
+				<xsd:element ref="manis:Species" />
+				<xsd:element ref="manis:Subspecies" />
+				<xsd:element ref="manis:ScientificNameAuthor" />
+				<xsd:element ref="manis:IdentificationModifier" />
+				<xsd:element ref="manis:IdentifiedBy" />
+				<xsd:element ref="manis:YearIdentified" />
+				<xsd:element ref="manis:MonthIdentified" />
+				<xsd:element ref="manis:DayIdentified" />
+				<xsd:element ref="manis:TypeStatus" />
+				<xsd:element ref="manis:Sex" />
+				<xsd:element ref="manis:Preparations" />
+				<xsd:element ref="manis:Tissues" />
+				<xsd:element ref="manis:IndividualCount" />
+				<xsd:element ref="manis:AgeClass" />
+				<xsd:element ref="manis:GenBankNum" />
+				<xsd:element ref="manis:OtherCatalogNumbers" />
+				<xsd:element ref="manis:RelatedCatalogedItems" />
+				<xsd:element ref="manis:Remarks" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

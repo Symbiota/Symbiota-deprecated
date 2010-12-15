@@ -157,6 +157,7 @@ header("Content-Type: text/html; charset=".$charset);
 				//window.opener.location.href = URL
 				self.close();
 			}
+
 		</script>
 	</head>
 	<body onload="<?php  if($action == "close" && !$status) echo "closeEditor()"; ?>" >
@@ -301,7 +302,7 @@ header("Content-Type: text/html; charset=".$charset);
 				</form>
 				<hr />
 				<div style="float:right;margin-top:10px;">
-					<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&clid=".$vManager->getClid();?>">
+					<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&clid=".$vManager->getClid()."&targettid=".$tid;?>">
 						<img src="../images/link.png"  style="border:0px;" />
 					</a>
 				</div>

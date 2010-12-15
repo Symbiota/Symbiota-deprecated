@@ -143,7 +143,7 @@
 		}
 
 		function openPopup(urlStr,windowName){
-			newWindow = window.open(urlStr,windowName,'toolbar=1,resizable=1,width=650,height=600,left=20,top=20');
+			newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width=950,height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 
