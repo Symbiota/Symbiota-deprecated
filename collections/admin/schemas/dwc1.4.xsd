@@ -4,7 +4,9 @@
 	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
-	xmlns:dc="http://rs.tdwg.org/dwc/dwcore/" elementFormDefault="qualified">
+	xmlns:dc="http://rs.tdwg.org/dwc/dwcore/" 
+	xmlns:dcgeo="http://rs.tdwg.org/dwc/geospatial/"
+	xmlns:dccur="http://rs.tdwg.org/dwc/curatorial/" elementFormDefault="qualified">
 	<xsd:annotation>
 		<xsd:documentation>$Id: darwin2brief.xsd</xsd:documentation>
 	</xsd:annotation>
@@ -12,6 +14,10 @@
 		schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
 	<xsd:import namespace="http://rs.tdwg.org/dwc/dwcore/" 
 		schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_core.xsd"/>
+	<xsd:import namespace="http://rs.tdwg.org/dwc/geospatial/" 
+		schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_geospatial.xsd"/>
+	<xsd:import namespace="http://rs.tdwg.org/dwc/curatorial/" 
+		schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_curatorial.xsd"/>
 	<xsd:element name="record">
 		<xsd:annotation>
 			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
@@ -24,6 +30,7 @@
 				<xsd:element ref="dc:InstitutionCode" />
 				<xsd:element ref="dc:CollectionCode" />
 				<xsd:element ref="dc:CatalogNumber" />
+				<xsd:element ref="dccur:CatalogNumberNumeric" />
 				<xsd:element ref="dc:InformationWithheld" />
 				<xsd:element ref="dc:Remarks" />
 				<xsd:element ref="dc:ScientificName" />
@@ -36,6 +43,41 @@
 				<xsd:element ref="dc:InfraspecificEpithet" />
 				<xsd:element ref="dc:AuthorYearOfScientificName" />
 				<xsd:element ref="dc:IdentificationQualifier" />
+				<xsd:element ref="dccur:IdentifiedBy"/>
+				<xsd:element ref="dccur:DateIdentified"/>
+				<xsd:element ref="dc:HigherGeography" />
+				<xsd:element ref="dc:Country" />
+				<xsd:element ref="dc:StateProvince" />
+				<xsd:element ref="dc:County" />
+				<xsd:element ref="dc:Locality" />
+				<xsd:element ref="dcgeo:DecimalLatitude"/>
+				<xsd:element ref="dcgeo:DecimalLongitude"/>
+				<xsd:element ref="dcgeo:GeodeticDatum"/>
+				<xsd:element ref="dcgeo:CoordinateUncertaintyInMeters"/>
+				<xsd:element ref="dcgeo:VerbatimCoordinates"/>
+				<xsd:element ref="dcgeo:VerbatimCoordinateSystem"/>
+				<xsd:element ref="dcgeo:GeoreferenceProtocol"/>
+				<xsd:element ref="dcgeo:GeoreferenceSources"/>
+				<xsd:element ref="dcgeo:GeoreferenceVerificationStatus"/>
+				<xsd:element ref="dcgeo:GeoreferenceRemarks"/>
+				<xsd:element ref="dc:MinimumElevationInMeters" />
+				<xsd:element ref="dc:MaximumElevationInMeters" />
+				<xsd:element ref="dccur:VerbatimElevation"/>
+				<xsd:element ref="dc:CollectingMethod" />
+				<xsd:element ref="dc:EarliestDateCollected" />
+				<xsd:element ref="dc:LatestDateCollected" />
+				<xsd:element ref="dc:DayOfYear" />
+				<xsd:element ref="dccur:VerbatimCollectingDate"/>
+				<xsd:element ref="dc:Collector" />
+				<xsd:element ref="dccur:CollectorNumber"/>
+				<xsd:element ref="dccur:FieldNumber"/>
+				<xsd:element ref="dccur:FieldNotes"/>
+				<xsd:element ref="dc:Attributes" />
+				<xsd:element ref="dc:ImageURL" />
+				<xsd:element ref="dc:RelatedInformation" />
+				<xsd:element ref="dccur:TypeStatus"/>
+				<xsd:element ref="dccur:RelatedCatalogedItems" />
+				<xsd:element ref="dccur:Disposition" />
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
