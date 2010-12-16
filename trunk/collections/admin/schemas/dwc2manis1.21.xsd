@@ -3,7 +3,7 @@
 	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
-	xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDefault="qualified">
+	xmlns:dwcmanis="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDefault="qualified">
 	<xsd:annotation>
 		<xsd:documentation>$Id: dwc2manis1.21.xsd</xsd:documentation>
 	</xsd:annotation>
@@ -17,72 +17,53 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="darwin:DateLastModified" />
-				<xsd:element ref="darwin:BasisOfRecord" />
-				<xsd:element ref="darwin:InstitutionCode" />
-				<xsd:element ref="darwin:CollectionCode" />
-				<xsd:element ref="darwin:CatalogNumberText" />
-				<xsd:element ref="darwin:CatalogNumberNumeric" />
-				<xsd:element ref="darwin:Collector" />
-				<xsd:element ref="darwin:CollectorNumber" />
-				<xsd:element ref="darwin:FieldNumber" />
-				<xsd:element ref="darwin:YearCollected" />
-				<xsd:element ref="darwin:MonthCollected" />
-				<xsd:element ref="darwin:DayCollected" />
-				<xsd:element ref="darwin:TimeCollected" />
-				<xsd:element ref="darwin:VerbatimCollectingDate" />
-				<xsd:element ref="darwin:FieldNotes" />
-				<xsd:element ref="darwin:JulianDay" />
-				<xsd:element ref="darwin:HigherGeography" />
-				<xsd:element ref="darwin:ContinentOcean" />
-				<xsd:element ref="darwin:IslandGroup" />
-				<xsd:element ref="darwin:Island" />
-				<xsd:element ref="darwin:Country" />
-				<xsd:element ref="darwin:StateProvince" />
-				<xsd:element ref="darwin:County" />
-				<xsd:element ref="darwin:Locality" />
-				<xsd:element ref="darwin:DecimalLatitude" />
-				<xsd:element ref="darwin:DecimalLongitude" />
-				<xsd:element ref="darwin:HorizontalDatum" />
-				<xsd:element ref="darwin:OriginalCoordinateSystem" />
-				<xsd:element ref="darwin:VerbatimLatitude" />
-				<xsd:element ref="darwin:VerbatimLongitude" />
-				<xsd:element ref="darwin:GeorefMethod" />
-				<xsd:element ref="darwin:CoordinateUncertaintyInMeters" />
-				<xsd:element ref="darwin:LatLongComments" />
-				<xsd:element ref="darwin:BoundingBox" />
-				<xsd:element ref="darwin:MinimumElevationInMeters" />
-				<xsd:element ref="darwin:MaximumElevationInMeters" />
-				<xsd:element ref="darwin:VerbatimElevation" />
-				<xsd:element ref="darwin:MinimumDepthInMeters" />
-				<xsd:element ref="darwin:MaximumDepthInMeters" />
-				<xsd:element ref="darwin:VerbatimDepth" />
-				<xsd:element ref="darwin:ScientificName" />
-				<xsd:element ref="darwin:HigherTaxon" />
-				<xsd:element ref="darwin:Kingdom" />
-				<xsd:element ref="darwin:Phylum" />
-				<xsd:element ref="darwin:Class" />
-				<xsd:element ref="darwin:Order" />
-				<xsd:element ref="darwin:Family" />
-				<xsd:element ref="darwin:Genus" />
-				<xsd:element ref="darwin:Species" />
-				<xsd:element ref="darwin:Subspecies" />
-				<xsd:element ref="darwin:ScientificNameAuthor" />
-				<xsd:element ref="darwin:IdentificationModifier" />
-				<xsd:element ref="darwin:IdentifiedBy" />
-				<xsd:element ref="darwin:YearIdentified" />
-				<xsd:element ref="darwin:MonthIdentified" />
-				<xsd:element ref="darwin:DayIdentified" />
-				<xsd:element ref="darwin:TypeStatus" />
-				<xsd:element ref="darwin:Sex" />
-				<xsd:element ref="darwin:Preparations" />
-				<xsd:element ref="darwin:Tissues" />
-				<xsd:element ref="darwin:IndividualCount" />
-				<xsd:element ref="darwin:AgeClass" />
-				<xsd:element ref="darwin:GenBankNum" />
-				<xsd:element ref="darwin:OtherCatalogNumbers" />
-				<xsd:element ref="darwin:RelatedCatalogedItems" />
-				<xsd:element ref="darwin:Remarks" />
+				<xsd:element ref="dwcmanis:DateLastModified" />
+				<xsd:element ref="dwcmanis:BasisOfRecord" />
+				<xsd:element ref="dwcmanis:InstitutionCode" />
+				<xsd:element ref="dwcmanis:CollectionCode" />
+				<xsd:element ref="dwcmanis:CatalogNumberText" />
+				<xsd:element ref="dwcmanis:CatalogNumberNumeric" />
+				<xsd:element ref="dwcmanis:Collector" />
+				<xsd:element ref="dwcmanis:CollectorNumber" />
+				<xsd:element ref="dwcmanis:FieldNumber" />
+				<xsd:element ref="dwcmanis:YearCollected" />
+				<xsd:element ref="dwcmanis:MonthCollected" />
+				<xsd:element ref="dwcmanis:DayCollected" />
+				<xsd:element ref="dwcmanis:VerbatimCollectingDate" />
+				<xsd:element ref="dwcmanis:FieldNotes" />
+				<xsd:element ref="dwcmanis:HigherGeography" />
+				<xsd:element ref="dwcmanis:Country" />
+				<xsd:element ref="dwcmanis:StateProvince" />
+				<xsd:element ref="dwcmanis:County" />
+				<xsd:element ref="dwcmanis:Locality" />
+				<xsd:element ref="dwcmanis:DecimalLatitude" />
+				<xsd:element ref="dwcmanis:DecimalLongitude" />
+				<xsd:element ref="dwcmanis:OriginalCoordinateSystem" />
+				<xsd:element ref="dwcmanis:VerbatimLatitude" />
+				<xsd:element ref="dwcmanis:VerbatimLongitude" />
+				<xsd:element ref="dwcmanis:GeorefMethod" />
+				<xsd:element ref="dwcmanis:CoordinateUncertaintyInMeters" />
+				<xsd:element ref="dwcmanis:LatLongComments" />
+				<xsd:element ref="dwcmanis:MinimumElevationInMeters" />
+				<xsd:element ref="dwcmanis:MaximumElevationInMeters" />
+				<xsd:element ref="dwcmanis:VerbatimElevation" />
+				<xsd:element ref="dwcmanis:ScientificName" />
+				<xsd:element ref="dwcmanis:HigherTaxon" />
+				<xsd:element ref="dwcmanis:Kingdom" />
+				<xsd:element ref="dwcmanis:Family" />
+				<xsd:element ref="dwcmanis:Genus" />
+				<xsd:element ref="dwcmanis:Species" />
+				<xsd:element ref="dwcmanis:Subspecies" />
+				<xsd:element ref="dwcmanis:ScientificNameAuthor" />
+				<xsd:element ref="dwcmanis:IdentificationModifier" />
+				<xsd:element ref="dwcmanis:IdentifiedBy" />
+				<xsd:element ref="dwcmanis:YearIdentified" />
+				<xsd:element ref="dwcmanis:MonthIdentified" />
+				<xsd:element ref="dwcmanis:DayIdentified" />
+				<xsd:element ref="dwcmanis:TypeStatus" />
+				<xsd:element ref="dwcmanis:OtherCatalogNumbers" />
+				<xsd:element ref="dwcmanis:RelatedCatalogedItems" />
+				<xsd:element ref="dwcmanis:Remarks" />
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
