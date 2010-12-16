@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
+<!-- $Id: darwin2brief.xsd -->
 <xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
 	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
-	xmlns:dc="http://rs.tdwg.org/dwc/dwcore/" elementFormDefault="qualified"
+	xmlns:dc="http://rs.tdwg.org/dwc/dwcore/" 
 	xmlns:dcgeo="http://rs.tdwg.org/dwc/geospatial/"
-	xmlns:dccur="http://rs.tdwg.org/dwc/curatorial/">
+	xmlns:dccur="http://rs.tdwg.org/dwc/curatorial/" elementFormDefault="qualified">
 	<xsd:annotation>
-		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
+		<xsd:documentation>$Id: darwin2brief.xsd</xsd:documentation>
 	</xsd:annotation>
 	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" 
 		schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
