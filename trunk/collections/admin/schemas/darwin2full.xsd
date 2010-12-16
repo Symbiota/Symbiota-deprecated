@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: darwin2full.xsd,v 1.1 2003/03/10 01:11:02 peejinator Exp $ -->
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/full/2001/1.0" xmlns="http://digir.net/schema/conceptual/darwin/full/2001/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:digir="http://digir.net/schema/protocol/2003/1.0" xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>$Id: darwin2full.xsd,v 1.1 2003/03/10 01:11:02 peejinator Exp $</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd"/>
+	<xsd:element name="record">
+		<xsd:annotation>
+			<xsd:documentation>The predefined record structure of a full response.  Essentially a sequence of all the returnable elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="darwin:DateLastModified"/>
+				<xsd:element ref="darwin:InstitutionCode"/>
+				<xsd:element ref="darwin:CollectionCode"/>
+				<xsd:element ref="darwin:CatalogNumber"/>
+				<xsd:element ref="darwin:ScientificName"/>
+				<xsd:element ref="darwin:BasisOfRecord"/>
+				<xsd:element ref="darwin:Kingdom"/>
+				<xsd:element ref="darwin:Phylum"/>
+				<xsd:element ref="darwin:Class"/>
+				<xsd:element ref="darwin:Order"/>
+				<xsd:element ref="darwin:Family"/>
+				<xsd:element ref="darwin:Genus"/>
+				<xsd:element ref="darwin:Species"/>
+				<xsd:element ref="darwin:Subspecies"/>
+				<xsd:element ref="darwin:ScientificNameAuthor"/>
+				<xsd:element ref="darwin:IdentifiedBy"/>
+				<xsd:element ref="darwin:YearIdentified"/>
+				<xsd:element ref="darwin:MonthIdentified"/>
+				<xsd:element ref="darwin:DayIdentified"/>
+				<xsd:element ref="darwin:TypeStatus"/>
+				<xsd:element ref="darwin:CollectorNumber"/>
+				<xsd:element ref="darwin:FieldNumber"/>
+				<xsd:element ref="darwin:Collector"/>
+				<xsd:element ref="darwin:YearCollected"/>
+				<xsd:element ref="darwin:MonthCollected"/>
+				<xsd:element ref="darwin:DayCollected"/>
+				<xsd:element ref="darwin:JulianDay"/>
+				<xsd:element ref="darwin:TimeOfDay"/>
+				<xsd:element ref="darwin:ContinentOcean"/>
+				<xsd:element ref="darwin:Country"/>
+				<xsd:element ref="darwin:StateProvince"/>
+				<xsd:element ref="darwin:County"/>
+				<xsd:element ref="darwin:Locality"/>
+				<xsd:element ref="darwin:Longitude"/>
+				<xsd:element ref="darwin:Latitude"/>
+				<xsd:element ref="darwin:CoordinatePrecision"/>
+				<xsd:element ref="darwin:MinimumElevation"/>
+				<xsd:element ref="darwin:MaximumElevation"/>
+				<xsd:element ref="darwin:MinimumDepth"/>
+				<xsd:element ref="darwin:MaximumDepth"/>
+				<xsd:element ref="darwin:Sex"/>
+				<xsd:element ref="darwin:PreparationType"/>
+				<xsd:element ref="darwin:IndividualCount"/>
+				<xsd:element ref="darwin:PreviousCatalogNumber"/>
+				<xsd:element ref="darwin:RelationshipType"/>
+				<xsd:element ref="darwin:RelatedCatalogItem"/>
+				<xsd:element ref="darwin:Notes"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- $Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $ -->
-<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:digir="http://digir.net/schema/protocol/2003/1.0" xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDefault="qualified">
+<xsd:schema targetNamespace="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
+xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDefault="qualified">
 	<xsd:annotation>
 		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
 	</xsd:annotation>
-	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
-	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" 
+		schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/conceptual/darwin/2003/1.0" 
+		schemaLocation="http://digir.sourceforge.net/schema/conceptual/darwin/2003/1.0/darwin2.xsd"/>
 	<xsd:element name="record">
 		<xsd:annotation>
 			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
