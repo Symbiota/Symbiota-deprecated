@@ -23,6 +23,8 @@ xmlns:darwin="http://digir.net/schema/conceptual/darwin/2003/1.0" elementFormDef
 				<xsd:element ref="darwin:CollectionCode"/>
 				<xsd:element ref="darwin:CatalogNumber"/>
 				<xsd:element ref="darwin:ScientificName"/>
+				<xsd:element ref="darwin:DecimalLatitude"/>
+				<xsd:element ref="darwin:DecimalLongitude"/>
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
