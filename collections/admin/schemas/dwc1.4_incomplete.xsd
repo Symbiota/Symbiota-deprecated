@@ -4,47 +4,47 @@
 	xmlns="http://digir.net/schema/conceptual/darwin/brief/2001/1.0" 
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns:digir="http://digir.net/schema/protocol/2003/1.0" 
-	xmlns:dc14="http://rs.tdwg.org/dwc/" 
+	xmlns:dc14="http://rs.tdwg.org/dwc/dwcore/" 
 	elementFormDefault="qualified">
 	<xsd:annotation>
 		<xsd:documentation>$Id: darwin2brief.xsd,v 1.1 2003/03/10 01:09:29 peejinator Exp $</xsd:documentation>
 	</xsd:annotation>
-	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
-	<xsd:import namespace="http://rs.tdwg.org/dwc/" schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_core.xsd"/>
+	<xsd:import namespace="http://digir.net/schema/protocol/2003/1.0" 
+		schemaLocation="http://digir.sourceforge.net/schema/protocol/2003/1.0/digir.xsd"/>
+	<xsd:import namespace="http://rs.tdwg.org/dwc/dwcore/" 
+		schemaLocation="http://rs.tdwg.org/dwc/tdwg_dw_core.xsd"/>
 	<xsd:element name="record">
 		<xsd:annotation>
 			<xsd:documentation>The predefined record structure of a brief response.  Essentially a sequence of the required elements from Darwin Core V2 (http://tsadev.speciesanalyst.net/documentation/ow.asp?DarwinCoreV2).</xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="GlobalUniqueIdentifier" />
-				<xsd:element ref="DateLastModified" />
-				<xsd:element ref="BasisOfRecord" />
-				<xsd:element ref="InstitutionCode" />
-				<xsd:element ref="CollectionCode" />
-				<xsd:element ref="CatalogNumber" />
-				<xsd:element ref="dc14:CatalogNumberNumeric"/>
-				<xsd:element ref="dc14:CatalogNumberText"/>
-<xsd:element ref="InformationWithheld" />
-<xsd:element ref="Remarks" />
-<xsd:element ref="ScientificName" />
-<xsd:element ref="HigherTaxon" />
-<xsd:element ref="Kingdom" />
-<xsd:element ref="Family" />
-<xsd:element ref="Genus" />
-<xsd:element ref="SpecificEpithet" />
-<xsd:element ref="InfraspecificRank" />
-<xsd:element ref="InfraspecificEpithet" />
-<xsd:element ref="AuthorYearOfScientificName" />
+				<xsd:element ref="dc14:GlobalUniqueIdentifier" />
+				<xsd:element ref="dc14:DateLastModified" />
+				<xsd:element ref="dc14:BasisOfRecord" />
+				<xsd:element ref="dc14:InstitutionCode" />
+				<xsd:element ref="dc14:CollectionCode" />
+				<xsd:element ref="dc14:CatalogNumber" />
+<xsd:element ref="dc14:InformationWithheld" />
+<xsd:element ref="dc14:Remarks" />
+<xsd:element ref="dc14:ScientificName" />
+<xsd:element ref="dc14:HigherTaxon" />
+<xsd:element ref="dc14:Kingdom" />
+<xsd:element ref="dc14:Family" />
+<xsd:element ref="dc14:Genus" />
+<xsd:element ref="dc14:SpecificEpithet" />
+<xsd:element ref="dc14:InfraspecificRank" />
+<xsd:element ref="dc14:InfraspecificEpithet" />
+<xsd:element ref="dc14:AuthorYearOfScientificName" />
 				<xsd:element ref="dc14:IdentificationModifier"/>
-<xsd:element ref="IdentificationQualifier" />
-				<xsd:element ref="darwin:IdentifiedBy"/>
+<xsd:element ref="dc14:IdentificationQualifier" />
+				<xsd:element ref="dc14:IdentifiedBy"/>
 				<xsd:element ref="dc14:DateIdentified"/>
-<xsd:element ref="HigherGeography" />
-<xsd:element ref="Country" />
-<xsd:element ref="StateProvince" />
-<xsd:element ref="County" />
-<xsd:element ref="Locality" />
+<xsd:element ref="dc14:HigherGeography" />
+<xsd:element ref="dc14:Country" />
+<xsd:element ref="dc14:StateProvince" />
+<xsd:element ref="dc14:County" />
+<xsd:element ref="dc14:Locality" />
 				<xsd:element ref="dc14:DecimalLatitude"/>
 				<xsd:element ref="dc14:DecimalLongitude"/>
 				<xsd:element ref="dc14:GeodeticDatum"/>
@@ -60,12 +60,12 @@
 				<xsd:element ref="dc14:GeoreferenceSources"/>
 				<xsd:element ref="dc14:GeoreferenceVerificationStatus"/>
 				<xsd:element ref="dc14:GeoreferenceRemarks"/>
-<xsd:element ref="MinimumElevationInMeters" />
-<xsd:element ref="MaximumElevationInMeters" />
+<xsd:element ref="dc14:MinimumElevationInMeters" />
+<xsd:element ref="dc14:MaximumElevationInMeters" />
 				<xsd:element ref="dc14:VerbatimElevation"/>
-<xsd:element ref="CollectingMethod" />
-<xsd:element ref="EarliestDateCollected" />
-<xsd:element ref="LatestDateCollected" />
+<xsd:element ref="dc14:CollectingMethod" />
+<xsd:element ref="dc14:EarliestDateCollected" />
+<xsd:element ref="dc14:LatestDateCollected" />
 				<xsd:element ref="darwin:YearCollected"/>
 				<xsd:element ref="darwin:MonthCollected"/>
 				<xsd:element ref="darwin:DayCollected"/>
