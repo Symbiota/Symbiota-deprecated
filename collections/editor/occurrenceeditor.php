@@ -20,6 +20,14 @@ if($occId){
 	elseif($action == "Submit Image Edits"){
 		$occManager->editImage($_REQUEST);
 	}
+	elseif($action == "Submit New Image"){
+		$occManager->addImage($_REQUEST);
+	}
+	elseif($action == "Delete Image"){
+		$imgDel = $_REQUEST["imgdel"];
+		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
+		$occManager->deleteImage($imgDel, $removeImg);
+	}
 	$occArr = $occManager->getOccurArr($occId);
 	$collId = $occArr["collid"]["value"];
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
@@ -687,45 +695,45 @@ if($occId){
 					<form name="newimgform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return submitAddImageForm(this);">
 						<fieldset>
 							<legend>Add a New Image</legend>
-							<div style='padding:10px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
+							<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
 								<div style="font-weight:bold;font-size:110%;margin-bottom:7px;">
 									Select an image file located on your computer that you want to upload 
-									OR enter a URL to an image already located on a web server (don't do both)
+									OR enter an image URL already available on the web (don't do both)
 								</div>
 						    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 								<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
-								<div>
+								<div style="margin:10px 0px 0px 10px;">
 									<b>Upload File:</b> <input name='userfile' type='file' size='50'/>
 								</div>
-								<div>Note: upload image size can not be greater than 1MB</div>
-								<div style='margin-top:7px;'>
-									<b>URL:</b> <input type='text' name='filepath' size='50'/>
+								<div style="margin-left:80px;">Note: image uploads can not be greater than 2MB</div>
+								<div style='margin:20px 0px 5px 10px;'>
+									<b>URL:</b> <span style="margin-left:35px;"><input type='text' name='filepath' size='50'/></span>
 								</div>
 								<div style='margin-left:10px;'>
-									* url can be relative or absolute
+									<b>Thumbnail:</b> <input type='text' name='filepath' size='50'/>
 								</div>
 							</div>
-							<div style="clear:both;">
+							<div style="clear:both;margin:20px 0px 5px 10px;">
 								<b>Caption:</b> 
 								<input name="caption" type="text" size="40" value="" />
 							</div>
-							<div>
+							<div style="margin:0px 0px 5px 10px;">
 								<b>Notes:</b> 
 								<input name="notes" type="text" size="40" value="" />
 							</div>
-							<div>
+							<div style="margin:0px 0px 5px 10px;">
 								<b>Copyright:</b>
 								<input name="copyright" type="text" size="40" value="" />
 							</div>
-							<div>
+							<div style="margin:0px 0px 5px 10px;">
 								<b>Source Webpage:</b>
 								<input name="sourceurl" type="text" size="40" value="" />
 							</div>
-							<div>
+							<div style="margin:0px 0px 5px 10px;">
 								<b>Sort Sequence:</b>
 								<input name="sortseq" type="text" size="40" value="" />
 							</div>
-							<div style="margin-top:10px;">
+							<div style="margin:10px 0px 10px 20px;">
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="submit" name="action" value="Submit New Image" />
 							</div>
@@ -767,7 +775,7 @@ if($occId){
 								}
 								?>
 							</td>
-							<td style="text-align:left;padding:30px 10px 10px 10px;">
+							<td style="text-align:left;padding:10px 10px 10px 10px;">
 								<div style="float:right;cursor:pointer;margin:10px;" onclick="toggleSpan('img-<?php echo $imgId; ?>');" title="Edit Image MetaData">
 									<img style="border:0px;width:12px;" src="../../images/edit.png" />
 								</div>
@@ -820,6 +828,13 @@ if($occId){
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
 											<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:300px;" />
 										</span>
+										<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
+										<div style="margin-left:70px;">
+											<input type="checkbox" name="renameweburl" value="1" />
+											Rename web image file on server to match above edit (web server editing privileges requiered)
+										</div>
+										<input name='oldurl' type='hidden' value='<?php echo $imgArr["url"];?>' />
+										<?php } ?>
 									</div>
 									<div>
 										<b>Large Image URL: </b>
@@ -831,6 +846,13 @@ if($occId){
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
 											<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:250px;" />
 										</span>
+										<?php if(stripos($imgArr["origurl"],$imageRootUrl) === 0){ ?>
+										<div style="margin-left:80px;">
+											<input type="checkbox" name="renameorigurl" value="1" />
+											Rename large image file on server to match above edit (web server editing privileges requiered)
+										</div>
+										<input name='oldorigurl' type='hidden' value='<?php echo $imgArr["origurl"];?>' />
+										<?php } ?>
 									</div>
 									<div>
 										<b>Thumbnail URL: </b>
@@ -842,6 +864,13 @@ if($occId){
 										<span class="img-<?php echo $imgId; ?>" style="display:none;">
 											<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:250px;" />
 										</span>
+										<?php if(stripos($imgArr["tnurl"],$imageRootUrl) === 0){ ?>
+										<div style="margin-left:70px;">
+											<input type="checkbox" name="renametnurl" value="1" />
+											Rename thumbnail image file on server to match above edit (web server editing privileges requiered)
+										</div>
+										<input name='oldtnurl' type='hidden' value='<?php echo $imgArr["tnurl"];?>' />
+										<?php } ?>
 									</div>
 									<div>
 										<b>Sort Sequence:</b>
@@ -853,9 +882,12 @@ if($occId){
 										</span>
 									</div>
 									<div style="margin-top:10px;">
-										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-										<input type="submit" name="action" value="Submit Image Edits" />
+										<span class="img-<?php echo $imgId; ?>" style="display:none;">
+											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+											<input type="hidden" name="tid" value="<?php echo $imgArr["tidinterpreted"]; ?>" />
+											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+											<input type="submit" name="action" value="Submit Image Edits" />
+										</span>
 									</div>
 								</form>
 							</td>

@@ -49,6 +49,7 @@ class ChecklistLoaderManager {
 	public function uploadCsvList($hasHeader, $thesId){
 		set_time_limit(120);
 		ini_set("max_input_time",120);
+  		ini_set('auto_detect_line_endings', true);
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file. File may be too large. Try uploading file in sections.");
 		
 		$headerArr = Array();
@@ -156,8 +157,8 @@ class ChecklistLoaderManager {
 					}
 					
 					//Load taxon into checklist
-					if($rankId > 180){
-						if($tid){
+					if($tid){
+						if($rankId > 180){
 							$sqlInsert = "";
 							$sqlValues = "";
 							if(array_key_exists("family",$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr["family"]])){
@@ -188,9 +189,13 @@ class ChecklistLoaderManager {
 							}
 						}
 						else{
-							$statusStr = $sciNameStr." failed to load";
+							$statusStr = $sciNameStr." failed to load (taxon must be of genus, species, or infraspecific ranking)";
 							$failCnt++;
 						}
+					}
+					else{
+						$statusStr = $sciNameStr." failed to load (misspelled or not yet in taxonomic thesaurus)";
+						$failCnt++;
 					}
 				}
 				if($statusStr) echo "<li><span style='color:red;'>ERROR:</span> ".$statusStr."</li>";
