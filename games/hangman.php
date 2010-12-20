@@ -1,4 +1,5 @@
 <?php
+$listname = $_GET['listname'];
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
 include_once('../classes/FloraProjectManager.php');
