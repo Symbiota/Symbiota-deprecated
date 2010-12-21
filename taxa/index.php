@@ -402,9 +402,6 @@ if($taxonManager->getSciName() != "unknown"){
 							echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."' style='z-index:-1' />";
 							echo "</a>\n";
 							echo "<div style='text-align:right;position:relative;top:-26px;left:5px;' title='Photographer: ".$subArr["photographer"]."'>";
-							echo "<a href='../imagelib/imgdetails.php?imgid=".$subArr["imgid"]."'>";
-							echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg' />";
-							echo "</a>";
 							echo "</div>";
 						}
 						elseif($editable){

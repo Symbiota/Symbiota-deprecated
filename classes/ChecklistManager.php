@@ -120,7 +120,7 @@ class ChecklistManager {
 		$sql = "";
 		if($this->clid){
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
-				"c.abstract, c.authors, c.dynamicsql, c.parentclid, c.notes, ".
+				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
 				"c.datelastmodified, c.uid, c.initialtimestamp ".
 				"FROM fmchecklists c WHERE c.clid = ".$this->clid;
