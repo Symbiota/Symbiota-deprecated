@@ -115,7 +115,9 @@ header("Content-Type: text/html; charset=".$charset);
 	<div id="innertext">
 <h1>Seinet Games</h1>
 
-	<a href = "hangmanlist.php"><b>-<u>SEINet Spelling Quiz</u>-</b></a><br><br>
+	<a href = "namegamelist.php"><b>-<u>SEINet Name Game</u>-</b></a><br>
+	<a href = "flashcardquizlist.php"><b>-<u>Checklist Quiz</u>-</b></a><br>
+	<br>
 	More games coming in the future!
 	</div>
 	<!-- This ends inner text! -->
