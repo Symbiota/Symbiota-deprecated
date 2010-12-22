@@ -29,7 +29,7 @@ header("Content-Type: text/html; charset=".$charset);
  ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> SEINet Spelling Quiz</title>
+	<title><?php echo $defaultTitle; ?> SEINet Name Game</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<script type="text/javascript">
 	
@@ -117,11 +117,11 @@ header("Content-Type: text/html; charset=".$charset);
 	<?php
 	
 	if(!$proj){
-		echo "<h1>".$defaultTitle." Spelling Quiz Categories</h1>"; 
-		echo"<h3>Please choose a category for a Spelling Quiz word list</h3>";
+		echo "<h1>".$defaultTitle." Name Game Categories</h1>"; 
+		echo"<h3>Please choose a category for a Name Game word list</h3>";
 		$projectArr = $projManager->getProjectList();
 		foreach($projectArr as $pid => $projList){
-			echo "<h2><a href='hangmanlist.php?proj=".$pid."'>".$projList["projname"]."</a></h2>\n";
+			echo "<h2><a href='namegamelist.php?proj=".$pid."'>".$projList["projname"]."</a></h2>\n";
 			//if($projList["managers"]) echo "<div><b>Managers:</b> ".$projList["managers"]."</div>\n";
 			echo "<div style='margin:10px;'>".$projList["descr"]."</div>\n";
 		}
@@ -137,8 +137,8 @@ header("Content-Type: text/html; charset=".$charset);
 		$projectArr = $projManager->getProjectData();
 		foreach($projectArr as $pid => $projArr){
 			?>
-			<h1><?php echo $projArr["projname"]." Spelling Quiz"; ?></h1>
-			<h3>Choose one of the plant lists below to start playing SEINet Spelling Quiz</h3>
+			<h1><?php echo $projArr["projname"]." Name Game"; ?></h1>
+			<h3>Choose one of the plant lists below to start playing SEINet Name Game</h3>
 			<div style='margin:10px;'>
 				<?php //echo $projArr["fulldescription"];?>
 			</div>
@@ -210,43 +210,12 @@ header("Content-Type: text/html; charset=".$charset);
 					foreach($researchList as $key=>$value){
 	            ?>
 					<li>
-						<a href='hangman.php?cl=<?php echo $key."&listname=".$value; ?>'>
+						<a href='namegame.php?cl=<?php echo $key."&listname=".$value; ?>'>
 							<?php echo $value; ?>
 						</a> 
 						<!--<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
 							<img style='width:12px;border:0px;' src='../images/key.jpg'/>
 						</a>-->
-					</li>
-					<?php } ?>
-				</ul>
-			<?php }
-                $surveyList = $projManager->getSurveyLists();
-			if($surveyList){
-			?>
-				<h3>Public Survey Checklists 
-					<!--<span onclick="toggleSurveyInfoBox(this);" title="What is a Public Survey Checklist?" style="cursor:pointer;">
-						<img src="../images/qmark.jpg" style="height:15px;"/>
-					</span> 
-					<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
-						<img src="../images/world40.gif" style="width:14px;border:0" />
-					</a>-->
-				</h3>
-				<div id="surveylistpopup" class="genericpopup">
-					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-		            Public Survey Checklists are defined through the linkage of species occurrences 
-		            to a survey project name. This method allow biological surveys to be conduced through group participation. 
-		            If a team member comes across a new species, they document the occurrence through a specimen collecton or a
-		            photo observation. Linking the observation to a survey project automatically adds the species to the checklist. 
-		            Verification procedures ensure that observations are expert reviewed and identified correctly. The annotation of the 
-		            misidentified specimen will automatically adjust the species.
-				</div>
-				<ul>
-				<?php 	
-				foreach($surveyList as $key=>$value){
-	            ?>
-            
-					<li>
-						<a href='../checklists/survey.php?surveyid=<?php echo $key;?>'><?php echo $value;?></a> 
 					</li>
 					<?php } ?>
 				</ul>
