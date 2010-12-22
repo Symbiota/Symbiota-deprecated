@@ -121,7 +121,7 @@ header("Content-Type: text/html; charset=".$charset);
 		echo"<h3>Please choose a category for Flash Card Quiz</h3>";
 		$projectArr = $projManager->getProjectList();
 		foreach($projectArr as $pid => $projList){
-			echo "<h2><a href='idquizlist.php?proj=".$pid."'>".$projList["projname"]."</a></h2>\n";
+			echo "<h2><a href='flashcardquizlist.php?proj=".$pid."'>".$projList["projname"]."</a></h2>\n";
 			//if($projList["managers"]) echo "<div><b>Managers:</b> ".$projList["managers"]."</div>\n";
 			echo "<div style='margin:10px;'>".$projList["descr"]."</div>\n";
 		}
