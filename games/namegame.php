@@ -30,7 +30,7 @@ header("Content-Type: text/html; charset=".$charset);
  ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> SEINet Spelling Quiz</title>
+	<title><?php echo $defaultTitle; ?> SEINet Name Game</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<script type="text/javascript">
 	
@@ -114,10 +114,10 @@ header("Content-Type: text/html; charset=".$charset);
 	
 	<!-- This is inner text! -->
 	<div id="innertext">
-<h1>Seinet Spelling Quiz</h1>
+<h1>SEINet Name Game</h1>
 <h2><?php echo $listname;?></h2>
 			<?php
-			include ('hangmanbody.php');
+			include ('namegamebody.php');
 			?>
 	</div>
 	<!-- This ends inner text! -->
