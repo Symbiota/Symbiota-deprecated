@@ -115,8 +115,11 @@ header("Content-Type: text/html; charset=".$charset);
 	<div id="innertext">
 <h1>Seinet Games</h1>
 
-	<a href = "namegamelist.php"><b>-<u>SEINet Name Game</u>-</b></a><br>
-	<a href = "flashcardquizlist.php"><b>-<u>Flash Card Quiz</u>-</b></a><br>
+	<h2><a href = "namegamelist.php">SEINet Name Game</a></h2>
+	<div style='margin:10px;'>Deduce the scientific names of plants.</div>
+	<h2><a href = "flashcardquizlist.php">Flash Card Quiz</a></h2>
+	<div style='margin:10px;'>You are shown a picture, and you must choose which plant is being displayed.</div>
+	<br>
 	<br>
 	More games coming in the future!
 	</div>
