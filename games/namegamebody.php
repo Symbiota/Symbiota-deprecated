@@ -1,6 +1,7 @@
 <?
 $clist = $_GET['cl'];
 //$listname = $_GET['listname'];
+$imgloc = "../images/games/hangman/";
 ?>
 <HTML>
 <HEAD>
@@ -198,14 +199,14 @@ list='<?echo $listname;?>';
 //document.getElementById("attempt").innerHTML="";
 <!--
 hangpics=[
-["../images/games/hangman/man1_0.gif","../images/games/hangman/man1_1.gif","../images/games/hangman/man1_2.gif","../images/games/hangman/man1_3.gif","../images/games/hangman/man1_4.gif","../images/games/hangman/man1_5.gif","../images/games/hangman/gallow.gif","../images/games/hangman/gallow5.gif","../images/games/hangman/gallow4.gif","../images/games/hangman/gallow3.gif","../images/games/hangman/gallow2.gif","../images/games/hangman/gallow1.gif","../images/games/hangman/spacer.gif","../images/games/hangman/man1win.gif"],
-["../images/games/hangman/woman1_0.gif","../images/games/hangman/woman1_1.gif","../images/games/hangman/woman1_2.gif","../images/games/hangman/woman1_3.gif","../images/games/hangman/woman1_4.gif","../images/games/hangman/woman1_5.gif","../images/games/hangman/gallow.gif","../images/games/hangman/gallow5.gif","../images/games/hangman/gallow4.gif","../images/games/hangman/gallow3.gif","../images/games/hangman/gallow2.gif","../images/games/hangman/gallow1.gif","../images/games/hangman/spacer.gif","../images/games/hangman/woman1win.gif"],
-["../images/games/hangman/man2_0.gif","../images/games/hangman/man2_1.gif","../images/games/hangman/man2_2.gif","../images/games/hangman/man2_3.gif","../images/games/hangman/man2_4.gif","../images/games/hangman/man2_5.gif","../images/games/hangman/gallow.gif","../images/games/hangman/gallow5.gif","../images/games/hangman/gallow4.gif","../images/games/hangman/gallow3.gif","../images/games/hangman/gallow2.gif","../images/games/hangman/gallow1.gif","../images/games/hangman/spacer.gif","../images/games/hangman/man2win.gif"],
-["../images/games/hangman/woman2_0.gif","../images/games/hangman/woman2_1.gif","../images/games/hangman/woman2_2.gif","../images/games/hangman/woman2_3.gif","../images/games/hangman/woman2_4.gif","../images/games/hangman/woman2_5.gif","../images/games/hangman/gallow.gif","../images/games/hangman/gallow5.gif","../images/games/hangman/gallow4.gif","../images/games/hangman/gallow3.gif","../images/games/hangman/gallow2.gif","../images/games/hangman/gallow1.gif","../images/games/hangman/spacer.gif","../images/games/hangman/woman2win.gif"],
-["../images/games/hangman/wwoman0.gif","../images/games/hangman/wwoman1.gif","../images/games/hangman/wwoman2.gif","../images/games/hangman/wwoman3.gif","../images/games/hangman/wwoman4.gif","../images/games/hangman/wwoman5.gif","../images/games/hangman/gallow.gif","../images/games/hangman/gallow5.gif","../images/games/hangman/gallow4.gif","../images/games/hangman/gallow3.gif","../images/games/hangman/gallow2.gif","../images/games/hangman/gallow1.gif","../images/games/hangman/spacer.gif","../images/games/hangman/wwomanwin.gif"],
-["../images/games/hangman/flower0.gif","../images/games/hangman/flower1.gif","../images/games/hangman/flower2.gif","../images/games/hangman/flower3.gif","../images/games/hangman/flower4.gif","../images/games/hangman/flower5.gif","../images/games/hangman/flower6.gif","../images/games/hangman/flower7.gif","../images/games/hangman/flower8.gif","../images/games/hangman/flower9.gif","../images/games/hangman/flower10.gif","../images/games/hangman/flower11.gif","../images/games/hangman/flower12.gif","../images/games/hangman/flowerwin.gif"],
-["../images/games/hangman/plant0.gif","../images/games/hangman/plant1.gif","../images/games/hangman/plant2.gif","../images/games/hangman/plant3.gif","../images/games/hangman/plant4.gif","../images/games/hangman/plant5.gif","../images/games/hangman/plant6.gif","../images/games/hangman/plant7.gif","../images/games/hangman/plant8.gif","../images/games/hangman/plant9.gif","../images/games/hangman/plant10.gif","../images/games/hangman/plant11.gif","../images/games/hangman/plant12.gif","../images/games/hangman/plantwin.gif"],
-["../images/games/hangman/tempcover0.jpg","../images/games/hangman/tempcover1.jpg","../images/games/hangman/tempcover2.jpg","../images/games/hangman/tempcover3.jpg","../images/games/hangman/tempcover4.jpg","../images/games/hangman/tempcover5.jpg","../images/games/hangman/tempcover6.jpg","../images/games/hangman/plant7.gif","../images/games/hangman/plant8.gif","../images/games/hangman/plant9.gif","../images/games/hangman/plant10.gif","../images/games/hangman/plant11.gif","../images/games/hangman/plant12.gif","../images/games/hangman/tempcover0.jpg"]
+["<? echo $imgloc; ?>man1_0.gif","<? echo $imgloc; ?>man1_1.gif","<? echo $imgloc; ?>man1_2.gif","<? echo $imgloc; ?>man1_3.gif","<? echo $imgloc; ?>man1_4.gif","<? echo $imgloc; ?>man1_5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>man1win.gif"],
+["<? echo $imgloc; ?>woman1_0.gif","<? echo $imgloc; ?>woman1_1.gif","<? echo $imgloc; ?>woman1_2.gif","<? echo $imgloc; ?>woman1_3.gif","<? echo $imgloc; ?>woman1_4.gif","<? echo $imgloc; ?>woman1_5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>woman1win.gif"],
+["<? echo $imgloc; ?>man2_0.gif","<? echo $imgloc; ?>man2_1.gif","<? echo $imgloc; ?>man2_2.gif","<? echo $imgloc; ?>man2_3.gif","<? echo $imgloc; ?>man2_4.gif","<? echo $imgloc; ?>man2_5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>man2win.gif"],
+["<? echo $imgloc; ?>woman2_0.gif","<? echo $imgloc; ?>woman2_1.gif","<? echo $imgloc; ?>woman2_2.gif","<? echo $imgloc; ?>woman2_3.gif","<? echo $imgloc; ?>woman2_4.gif","<? echo $imgloc; ?>woman2_5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>woman2win.gif"],
+["<? echo $imgloc; ?>wwoman0.gif","<? echo $imgloc; ?>wwoman1.gif","<? echo $imgloc; ?>wwoman2.gif","<? echo $imgloc; ?>wwoman3.gif","<? echo $imgloc; ?>wwoman4.gif","<? echo $imgloc; ?>wwoman5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>wwomanwin.gif"],
+["<? echo $imgloc; ?>flower0.gif","<? echo $imgloc; ?>flower1.gif","<? echo $imgloc; ?>flower2.gif","<? echo $imgloc; ?>flower3.gif","<? echo $imgloc; ?>flower4.gif","<? echo $imgloc; ?>flower5.gif","<? echo $imgloc; ?>flower6.gif","<? echo $imgloc; ?>flower7.gif","<? echo $imgloc; ?>flower8.gif","<? echo $imgloc; ?>flower9.gif","<? echo $imgloc; ?>flower10.gif","<? echo $imgloc; ?>flower11.gif","<? echo $imgloc; ?>flower12.gif","<? echo $imgloc; ?>flowerwin.gif"],
+["<? echo $imgloc; ?>plant0.gif","<? echo $imgloc; ?>plant1.gif","<? echo $imgloc; ?>plant2.gif","<? echo $imgloc; ?>plant3.gif","<? echo $imgloc; ?>plant4.gif","<? echo $imgloc; ?>plant5.gif","<? echo $imgloc; ?>plant6.gif","<? echo $imgloc; ?>plant7.gif","<? echo $imgloc; ?>plant8.gif","<? echo $imgloc; ?>plant9.gif","<? echo $imgloc; ?>plant10.gif","<? echo $imgloc; ?>plant11.gif","<? echo $imgloc; ?>plant12.gif","<? echo $imgloc; ?>plantwin.gif"],
+["<? echo $imgloc; ?>tempcover0.jpg","<? echo $imgloc; ?>tempcover1.jpg","<? echo $imgloc; ?>tempcover2.jpg","<? echo $imgloc; ?>tempcover3.jpg","<? echo $imgloc; ?>tempcover4.jpg","<? echo $imgloc; ?>tempcover5.jpg","<? echo $imgloc; ?>tempcover6.jpg","<? echo $imgloc; ?>plant7.gif","<? echo $imgloc; ?>plant8.gif","<? echo $imgloc; ?>plant9.gif","<? echo $imgloc; ?>plant10.gif","<? echo $imgloc; ?>plant11.gif","<? echo $imgloc; ?>plant12.gif","<? echo $imgloc; ?>tempcover0.jpg"]
 ]
 
 
@@ -218,7 +219,7 @@ hangpics=[
 	PreImage6 = new Image();
 	
 
-defaultImage="../images/games/hangman/plant7.gif"
+defaultImage="<? echo $imgloc; ?>plant7.gif"
 maxWildCards=1
 
 imgSetId="imageset" //  default avatar
@@ -243,8 +244,8 @@ ns=document.getElementById&&!document.all
 function initHangMan2()
 {
 	
-	mClick(imgSetId,lastImgId,imgSetVal,'../images/games/hangman/plant_on.gif','../images/games/hangman/plant_off.gif')
-	mClick(levelSet,lastLevelId,levelSetVal,'../images/games/hangman/radio_on4.gif','../images/games/hangman/radio_off4.gif')
+	mClick(imgSetId,lastImgId,imgSetVal,'<? echo $imgloc; ?>plant_on.gif','<? echo $imgloc; ?>plant_off.gif')
+	mClick(levelSet,lastLevelId,levelSetVal,'<? echo $imgloc; ?>radio_on4.gif','<? echo $imgloc; ?>radio_off4.gif')
 	
 	tds=document.getElementById("charactertable").getElementsByTagName("TD")
 	
@@ -502,21 +503,21 @@ function level()
 	if(avatar=="5")
 	{
 		if(guessCount=="12") 	
-			document.getElementById("hpic").src="../images/games/hangman/flower12.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>flower12.gif"
 		else if(guessCount=="6") 	
-			document.getElementById("hpic").src="../images/games/hangman/flower6.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>flower6.gif"
 		else if(guessCount=="3") 	
-			document.getElementById("hpic").src="../images/games/hangman/flower3.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>flower3.gif"
 	
 	}
 	else if(avatar=="6")
 	{
 		if(guessCount=="12") 	
-			document.getElementById("hpic").src="../images/games/hangman/plant12.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>plant12.gif"
 		else if(guessCount=="6") 	
-			document.getElementById("hpic").src="../images/games/hangman/plant7.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>plant7.gif"
 		else if(guessCount=="3") 	
-			document.getElementById("hpic").src="../images/games/hangman/plant4.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>plant4.gif"
 	
 	}
 	else if(avatar=="7")				// IF IT'S THE REVEALING PLANT PICTURE
@@ -524,20 +525,20 @@ function level()
 		getpic('getpic.php?species='+wordanswer);
 		
 		if(guessCount=="12") 	
-			document.getElementById("hpic").src="../images/games/hangman/plant12.gif"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>plant12.gif"
 		else if(guessCount=="6") 	
-			document.getElementById("hpic").src="../images/games/hangman/tempcover6.jpg"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>tempcover6.jpg"
 		else if(guessCount=="3") 	
-			document.getElementById("hpic").src="../images/games/hangman/tempcover3.jpg"
+			document.getElementById("hpic").src="<? echo $imgloc; ?>tempcover3.jpg"
 	
 	}
 	else if(guessCount=="12")
 	{
-		document.getElementById("hpic").src="../images/games/hangman/spacer.gif"
+		document.getElementById("hpic").src="<? echo $imgloc; ?>spacer.gif"
 	}
 	else if((avatar>="0")&&(avatar<="4"))
 	{
-		document.getElementById("hpic").src="../images/games/hangman/gallows.gif"
+		document.getElementById("hpic").src="<? echo $imgloc; ?>gallows.gif"
 	}
 	
 	document.getElementById("counter").innerHTML="Chances left = "+guessCount // visual counter
@@ -774,23 +775,23 @@ table{}
 <table class = "tableplain" border="0" cellpadding="5px">
 <tr>
 <td colspan="2" align="center">
-<!--<img src="../images/games/hangman/hangman_title3.gif">-->
+<!--<img src="<? echo $imgloc; ?>hangman_title3.gif">-->
 <P>
 <div id="imageset" style="cursor:hand;cursor:pointer">
-<img onclick="mClick(this.parentNode.id,this.id,'6','../images/games/hangman/plant_on.gif','../images/games/hangman/plant_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/plant_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/plant_off.gif')" src="../images/games/hangman/plant_off.gif" id="img7">
-<img onclick="mClick(this.parentNode.id,this.id,'5','../images/games/hangman/flower_on.gif','../images/games/hangman/flower_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/flower_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/flower_off.gif')" src="../images/games/hangman/flower_off.gif" id="img6">
-<img onclick="mClick(this.parentNode.id,this.id,'0','../images/games/hangman/man1_head_on.gif','../images/games/hangman/man1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/man1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/man1_head_off.gif')" src="../images/games/hangman/man1_head_off.gif" id="img1">
-<!--<img onclick="mClick(this.parentNode.id,this.id,'1','../images/games/hangman/woman1_head_on.gif','../images/games/hangman/woman1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/woman1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/woman1_head_off.gif')" src="../images/games/hangman/woman1_head_off.gif" id="img2">-->
-<!--<img onclick="mClick(this.parentNode.id,this.id,'2','../images/games/hangman/man2_head_on.gif','../images/games/hangman/man2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/man2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/man2_head_off.gif')" src="../images/games/hangman/man2_head_off.gif" id="img3">-->
-<img onclick="mClick(this.parentNode.id,this.id,'3','../images/games/hangman/woman2_head_on.gif','../images/games/hangman/woman2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/woman2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/woman2_head_off.gif')" src="../images/games/hangman/woman2_head_off.gif" id="img4">
-<!--<img onclick="mClick(this.parentNode.id,this.id,'4','../images/games/hangman/wwoman_head_on.gif','../images/games/hangman/wwoman_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/wwoman_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/wwoman_head_off.gif')" src="../images/games/hangman/wwoman_head_off.gif" id="img5">-->
-<!--<img onclick="mClick(this.parentNode.id,this.id,'7','../images/games/hangman/hidden_on.gif','../images/games/hangman/hidden_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'../images/games/hangman/hidden_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'../images/games/hangman/hidden_off.gif')" src="../images/games/hangman/hidden_off.gif" id="img8">-->
+<img onclick="mClick(this.parentNode.id,this.id,'6','<? echo $imgloc; ?>plant_on.gif','<? echo $imgloc; ?>plant_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_off.gif')" src="<? echo $imgloc; ?>plant_off.gif" id="img7">
+<img onclick="mClick(this.parentNode.id,this.id,'5','<? echo $imgloc; ?>flower_on.gif','<? echo $imgloc; ?>flower_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>flower_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>flower_off.gif')" src="<? echo $imgloc; ?>flower_off.gif" id="img6">
+<!--<img onclick="mClick(this.parentNode.id,this.id,'0','<? echo $imgloc; ?>man1_head_on.gif','<? echo $imgloc; ?>man1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>man1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>man1_head_off.gif')" src="<? echo $imgloc; ?>man1_head_off.gif" id="img1">-->
+<!--<img onclick="mClick(this.parentNode.id,this.id,'1','<? echo $imgloc; ?>woman1_head_on.gif','<? echo $imgloc; ?>woman1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman1_head_off.gif')" src="<? echo $imgloc; ?>woman1_head_off.gif" id="img2">-->
+<!--<img onclick="mClick(this.parentNode.id,this.id,'2','<? echo $imgloc; ?>man2_head_on.gif','<? echo $imgloc; ?>man2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>man2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>man2_head_off.gif')" src="<? echo $imgloc; ?>man2_head_off.gif" id="img3">-->
+<!--<img onclick="mClick(this.parentNode.id,this.id,'3','<? echo $imgloc; ?>woman2_head_on.gif','<? echo $imgloc; ?>woman2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman2_head_off.gif')" src="<? echo $imgloc; ?>woman2_head_off.gif" id="img4">-->
+<!--<img onclick="mClick(this.parentNode.id,this.id,'4','<? echo $imgloc; ?>wwoman_head_on.gif','<? echo $imgloc; ?>wwoman_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>wwoman_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>wwoman_head_off.gif')" src="<? echo $imgloc; ?>wwoman_head_off.gif" id="img5">-->
+<!--<img onclick="mClick(this.parentNode.id,this.id,'7','<? echo $imgloc; ?>hidden_on.gif','<? echo $imgloc; ?>hidden_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>hidden_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>hidden_off.gif')" src="<? echo $imgloc; ?>hidden_off.gif" id="img8">-->
 </div>
 </td>
 </tr>
 <tr align="center">
 <td width="300px">
-<img id="hpic"src="../images/games/hangman/plant7.gif"  height="150"><!--width="75"-->
+<img id="hpic"src="<? echo $imgloc; ?>plant7.gif"  height="150"><!--width="75"-->
 
 <P>
 <div id="counter" style="text-align:center">Chances left = 6</div><br>
@@ -799,9 +800,9 @@ table{}
 <br><br>
 Difficulty<br>
 <div id="levelset" style="cursor:hand;cursor:pointer">
-Hard <img onclick="mClick(this.parentNode.id,this.id,'3','../images/games/hangman/radio_on4.gif','../images/games/hangman/radio_off4.gif')" src="../images/games/hangman/radio_off4.gif" id="level1">
-<img onclick="mClick(this.parentNode.id,this.id,'6','../images/games/hangman/radio_on4.gif','../images/games/hangman/radio_off4.gif')" src="../images/games/hangman/radio_off4.gif" id="level2">
-<img onclick="mClick(this.parentNode.id,this.id,'12','../images/games/hangman/radio_on4.gif','../images/games/hangman/radio_off4.gif')" src="../images/games/hangman/radio_off4.gif" id="level3"> Easy
+Hard <img onclick="mClick(this.parentNode.id,this.id,'3','<? echo $imgloc; ?>radio_on4.gif','<? echo $imgloc; ?>radio_off4.gif')" src="<? echo $imgloc; ?>radio_off4.gif" id="level1">
+<img onclick="mClick(this.parentNode.id,this.id,'6','<? echo $imgloc; ?>radio_on4.gif','<? echo $imgloc; ?>radio_off4.gif')" src="<? echo $imgloc; ?>radio_off4.gif" id="level2">
+<img onclick="mClick(this.parentNode.id,this.id,'12','<? echo $imgloc; ?>radio_on4.gif','<? echo $imgloc; ?>radio_off4.gif')" src="<? echo $imgloc; ?>radio_off4.gif" id="level3"> Easy
 </div>
 
 <P>Games Played <span id="plays">0</span><br>
