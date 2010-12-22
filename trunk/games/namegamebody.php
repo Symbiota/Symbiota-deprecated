@@ -1,13 +1,13 @@
 <?
 $clist = $_GET['cl'];
 //$listname = $_GET['listname'];
-$imgloc = "../images/games/hangman/";
+$imgloc = "../images/games/namegame/";
 ?>
 <HTML>
 <HEAD>
 
 
-<LINK href="../css/hangmanstyle.css" rel=stylesheet type=text/css>
+<LINK href="../css/namegamestyle.css" rel=stylesheet type=text/css>
 
 <style type="text/css">
 <!--
@@ -38,15 +38,9 @@ $imgloc = "../images/games/hangman/";
 }
 -->
 </style>
-<script type="text/javascript" src="../js/hangmancsspopup.js" charset="utf-8"></script>
-<script type="text/javascript">
+<script type="text/javascript" src="../js/namegamecsspopup.js" charset="utf-8"></script>
 
-/*<!--
-if (top.location.href.indexOf("mainfram.htm") == -1)
-top.location.href="../../main/mainfram.htm?../games/hangman/hangman2.htm"
-setTimeout("parent.active('jscript')",4000)*/
-// -->
-</script>
+
 <!------------------------------------------COLLAPSE MENU--------------------------------------------------------->
 <script language="javascript"> 
 function toggle(divID, linkID) {
@@ -241,7 +235,7 @@ hintShown=0
 wordChosen=""
 ns=document.getElementById&&!document.all
 
-function initHangMan2()
+function initNameGame()
 {
 	
 	mClick(imgSetId,lastImgId,imgSetVal,'<? echo $imgloc; ?>plant_on.gif','<? echo $imgloc; ?>plant_off.gif')
@@ -740,7 +734,7 @@ getKey(wildCardChar)
 
 document.onkeypress = getKey
 
-// add onload="initHangMan2()" to the opening BODY tag
+
 
 // -->
 </script> 
@@ -766,7 +760,7 @@ table{}
 </style>
 </HEAD>
 <!----------------------------------------BODY STARTS HERE, VISIBLE STUFF BELOW------------------------------------------------------>
-<BODY onload="initHangMan2()">
+<BODY onload="initNameGame()">
 <center>
 
 <table class = "tableplain" border = "0">
@@ -775,7 +769,7 @@ table{}
 <table class = "tableplain" border="0" cellpadding="5px">
 <tr>
 <td colspan="2" align="center">
-<!--<img src="<? echo $imgloc; ?>hangman_title3.gif">-->
+
 <P>
 <div id="imageset" style="cursor:hand;cursor:pointer">
 <img onclick="mClick(this.parentNode.id,this.id,'6','<? echo $imgloc; ?>plant_on.gif','<? echo $imgloc; ?>plant_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_off.gif')" src="<? echo $imgloc; ?>plant_off.gif" id="img7">
