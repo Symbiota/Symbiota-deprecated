@@ -78,8 +78,8 @@ if($editable){
 				alert("Please enter a path value of the file you wish to upload");
 				return false;
 			}
-			if(valueStr.indexOf(".csv") == -1 && valueStr.indexOf(".CSV") == -1){
-				alert("Upload file must be a CSV file");
+			if(valueStr.indexOf(".csv") == -1 && valueStr.indexOf(".CSV") == -1 && valueStr.indexOf(".zip") == -1){
+				alert("Upload file must be a CSV or ZIP file");
 				return false;
 			}			
 		}

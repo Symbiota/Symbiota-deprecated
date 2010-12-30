@@ -64,203 +64,7 @@ else{
     <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
 	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
 	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
-	<script type="text/javascript">
-		var cseXmlHttp;
-		var imageArr = new Array();
-		var imgCnt = 0;
-		var targetImg = "";
-	
-		function toggle(target){
-			var spanObjs = document.getElementsByTagName("span");
-			for (i = 0; i < spanObjs.length; i++) {
-				var obj = spanObjs[i];
-				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-					if(obj.style.display=="none"){
-						obj.style.display="inline";
-					}
-					else {
-						obj.style.display="none";
-					}
-				}
-			}
-	
-			var divObjs = document.getElementsByTagName("div");
-			for (var i = 0; i < divObjs.length; i++) {
-				var obj = divObjs[i];
-				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-					if(obj.style.display=="none"){
-						obj.style.display="block";
-					}
-					else {
-						obj.style.display="none";
-					}
-				}
-			}
-		}
-
-		function toggleById(target){
-			var obj = document.getElementById(target);
-			if(obj.style.display=="none"){
-				obj.style.display="block";
-			}
-			else {
-				obj.style.display="none";
-			}
-		}
-
-		function expandImages(){
-			var divCnt = 0;
-			var divObjs = document.getElementsByTagName("div");
-			for (i = 0; i < divObjs.length; i++) {
-				var obj = divObjs[i];
-				if(obj.getAttribute("class") == "extraimg" || obj.getAttribute("className") == "extraimg"){
-					if(obj.style.display=="none"){
-						obj.style.display="inline";
-						divCnt++;
-						if(divCnt >= 5) break;
-					}
-				}
-			}
-		}
-		
-	    function submitAddForm(f){
-	        var errorText = "";
-	
-	        if(f.elements["userfile"].value.replace(/\s/g, "") == "" ){
-	            if(f.elements["filepath"].value.replace(/\s/g, "") == ""){
-	                errorText += "\nFile path must be entered";
-	            }
-	        }
-	        if(f.elements["photographeruid"].value.replace(/\s/g, "") == "" ){
-	            if(f.elements["photographer"].value.replace(/\s/g, "") == ""){
-	                errorText += "\nPlease select the photographer from the pulldown or enter an override value";
-	            }
-	        }
-	        if(isNumeric(f.sortsequence.value) == false){
-	        	errorText += "\nSort value must be a number";
-	        }
-	        if(errorText != ""){
-	            window.alert("Errors:\n " + errorText);
-	            return false;
-	        }
-	        return true;
-	    }
-
-	    function submitEditForm(f){
-	        var errorText = "";
-	
-	        if(f.elements["url"].value.replace(/\s/g, "") == "" ){
-	            errorText += "\nFile path must be entered";
-	        }
-	        if(errorText != ""){
-	            window.alert("Errors:\n " + errorText);
-	            return false;
-	        }
-	        return true;
-	    }
-
-	    function submitChangeTaxonForm(f){
-			var sciName = f.elements["targettaxon"].value.replace(/^\s+|\s+$/g, ""); 
-	        if(sciName == ""){
-	            window.alert("Error: Enter a taxon name to which the image will be transferred");
-	        }
-			else{
-				checkScinameExistance(sciName);
-			}
-            return false;	//Submit takes place in the checkScinameExistance method
-	    }
-
-		function initChangeTaxonList(input,tImg){
-			targetImg = tImg;
-			$(input).autocomplete({ ajax_get:getChangeTaxonList, minchars:3 });
-		}
-
-		function getChangeTaxonList(key,cont){ 
-		   	var script_name = 'rpc/gettaxonlist.php';
-		   	var params = { 'q':key }
-		   	$.get(script_name,params,
-				function(obj){ 
-					// obj is just array of strings
-					var res = [];
-					for(var i=0;i<obj.length;i++){
-						res.push({ id:i , value:obj[i]});
-					}
-					// will build suggestions list
-					cont(res); 
-				},
-			'json');
-		}
-
-		function checkScinameExistance(sciname){
-			if (sciname.length == 0){
-		  		return;
-		  	}
-			cseXmlHttp=GetXmlHttpObject();
-			if (cseXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url="rpc/gettid.php";
-			url=url+"?sciname="+sciname;
-			url=url+"&sid="+Math.random();
-			
-			cseXmlHttp.onreadystatechange=cseStateChanged;
-			cseXmlHttp.open("POST",url,true);
-			cseXmlHttp.send(null);
-		} 
-		
-		function cseStateChanged(){
-			if (cseXmlHttp.readyState==4){
-				renameTid = cseXmlHttp.responseText;
-				if(renameTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? It may have to be added to database.");
-				}
-				else{
-					document.getElementById("targettid-"+targetImg).value = renameTid;
-					document.forms["changetaxonform-"+targetImg].submit();
-				}
-			}
-		}
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
-		}
-
-		function openOccurrenceSearch(target) {
-			occWindow=open("occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=530,height=500,left=20,top=20");
-			if (occWindow.opener == null) occWindow.opener = self;
-		}
-
-		function isNumeric(sText){
-		   	var ValidChars = "0123456789-.";
-		   	var IsNumber = true;
-		   	var Char;
-		 
-		   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
-				if (ValidChars.indexOf(Char) == -1){
-					IsNumber = false;
-					break;
-	          	}
-		   	}
-			return IsNumber;
-		}
-		
-	</script>
+	<script type="text/javascript" src="../../js/taxa.tpimageeditor.js"></script>
 </head>
 <body>
 <?php
@@ -283,23 +87,37 @@ if($editable && $tid){
 					Main Menu
 				</a>
 			</div>
-		<?php 
-
- 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
- 	if($imageEditor->getSubmittedTid()){
- 		echo "<div style='font-size:16px;margin-top:5px;margin-left:10px;font-weight:bold;'>Redirected from: <i>".$imageEditor->getSubmittedSciName()."</i></div>"; 
- 	}
-	//Display Scientific Name and Family
-	echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;'><a href='../index.php?taxon=".$imageEditor->getTid()."' style='color:#990000;text-decoration:none;'><b><i>".$imageEditor->getSciName()."</i></b></a> ".$imageEditor->getAuthor();
-	//Display Parent link
-	if($imageEditor->getRankId() > 140) echo "&nbsp;<a href='tpeditor.php?tid=".$imageEditor->getParentTid()."'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a>";
-	echo "</div>\n";
-	//Display Family
-	echo "<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$imageEditor->getFamily()."</div>\n";
-	
-	if($status){
-		echo "<h3 style='color:red;'>Error: $status<h3>";
-	}
+			<?php 
+		 	if($imageEditor->getSubmittedTid()){
+		 		?>
+		 		<div style='font-size:16px;margin-top:5px;margin-left:10px;font-weight:bold;'>
+		 			Redirected from: <i><?php echo $imageEditor->getSubmittedSciName(); ?></i>
+		 		</div>
+		 		<?php  
+		 	}
+		 	?>
+			<div style='font-size:16px;margin-top:15px;margin-left:10px;'>
+				<a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>" style="color:#990000;text-decoration:none;">
+					<b><i><?php echo $imageEditor->getSciName(); ?></i></b>
+				</a> 
+				<?php echo $imageEditor->getAuthor(); ?>
+				<?php 
+				if($imageEditor->getRankId() > 140){
+					?>
+					<a href='tpeditor.php?tid=<?php echo $imageEditor->getParentTid(); ?>'>
+						<img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' />
+					</a>
+					<?php 
+				}
+			?>
+			</div>
+			<div id='family' style='margin-left:20px;margin-top:0.25em;'>
+				<b>Family:</b> <?php echo $imageEditor->getFamily();?>
+			</div>
+			<?php 
+			if($status){
+				echo "<h3 style='color:red;'>Error: $status<h3>";
+			}
 
 	if($category == "imagequicksort"){
 		$images = $imageEditor->getImages();
@@ -356,25 +174,34 @@ if($editable && $tid){
 	elseif($category == "imageadd"){
 		?>
 		<form enctype='multipart/form-data' action='tpimageeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddForm(this);'>
-			<fieldset style='margin:5px;width:485px;'>
+			<fieldset style='margin:15px;width:90%;'>
 		    	<legend>Add a New Image</legend>
-		
-				<div style='padding:10px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-					<div style="font-weight:bold;font-size:110%;margin-bottom:7px;">
-						Select an image file located on your computer that you want to upload 
-						OR enter a URL to an image already located on a web server (don't do both)
+				<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
+					<div class="targetdiv" style="display:block;">
+						<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
+							Select an image file located on your computer that you want to upload:
+						</div>
+				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
+						<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+						<div>
+							<input name='userfile' type='file' size='70'/>
+						</div>
+						<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
+						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
+							Link to External Image
+						</div>
 					</div>
-			    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-					<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
-					<div>
-						<b>Upload File:</b> <input name='userfile' type='file' size='50'/>
-					</div>
-					<div>Note: upload image size can not be greater than 1MB</div>
-					<div style='margin-top:7px;'>
-						<b>URL:</b> <input type='text' name='filepath' size='50'/>
-					</div>
-					<div style='margin-left:10px;'>
-						* url can be relative or absolute
+					<div class="targetdiv" style="display:none;">
+						<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
+							Enter a URL to an image already located on a web server:
+						</div>
+						<div>
+							<b>URL:</b> 
+							<input type='text' name='filepath' size='70'/>
+						</div>
+						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
+							Upload Local Image
+						</div>
 					</div>
 				</div>
 				
@@ -390,74 +217,70 @@ if($editable && $tid){
 						<option value="">---------------------------------------</option>
 						<?php $imageEditor->echoPhotographerSelect($paramsArr["uid"]); ?>
 					</select>
+					<img style="border:0px;cursor:pointer;" src="../../images/add.png" onclick="toggle('photooveridediv');" title="Photographer Override"/>
 				</div>
-				<div style='margin-top:2px;'>
+				<div id="photooveridediv" style='margin:2px 0px 5px 10px;display:none;'>
 					<b>Photographer Override:</b> 
-					<input name='photographer' type='text' value='' size='37' maxlength='100'> 
+					<input name='photographer' type='text' value='' size='37' maxlength='100'><br/> 
 					* Use only when photographer is not found in above pulldown
 				</div>
-				<div style='margin-top:2px;'>
+				<div style="margin-top:2px;" title="Use if manager is different than photographer">
 					<b>Manager:</b> 
 					<input name='owner' type='text' value='' size='35' maxlength='100'>
-				</div>
-				<div style='margin-top:2px;'>
-					<b>Source URL:</b> 
-					<input name='sourceurl' type='text' value='' size='70' maxlength='250'>
-				</div>
-				<div style='margin-top:2px;'>
-					<b>Copyright:</b> 
-					<input name='copyright' type='text' value='' size='70' maxlength='250'>
 				</div>
 				<div style='margin-top:2px;'>
 					<b>Locality:</b> 
 					<input name='locality' type='text' value='' size='70' maxlength='250'>
 				</div>
 				<div style='margin-top:2px;'>
-					<b>Occurrence Record #:</b> 
-					<input id="occidadd" name="occid" type="text" value="" READONLY/>
-					<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
-				</div>
-				<div style='margin-top:2px;'>
 					<b>Notes:</b> 
 					<input name='notes' type='text' value='' size='70' maxlength='250'>
 				</div>
 				<div style='margin-top:2px;'>
-					<b>Anatomy:</b> 
-					<input name='anatomy' type='text' value='' size='25' maxlength='100'>
-				</div>
-				<div style='margin-top:2px;'>
-					<b>Image Type:</b> 
-					<select name='imagetype'>
-						<option value='photos'>field photo</option>
-						<option value='specimen'>specimen image</option>
-					</select>
-				</div>
-				<div style='margin-top:2px;'>
 					<b>Sort sequence:</b> 
 					<input name='sortsequence' type='text' value='' size='5' maxlength='5'>
+					<span style="cursor:pointer;" onclick="toggle('adoptiondiv');" title="Additional Options">
+						<img style="border:0px;" src="../../images/add.png" />
+					</span>
 				</div>
-				<?php if($imageEditor->getRankId() > 220 && !$imageEditor->getSubmittedTid()){ ?>
-				<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-					<input type='checkbox' name='addtoparent' value='1' /> 
-					Add Image to Species Rank 
-					<div style='margin-left:10px;'>
-						* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
+				<div id="adoptiondiv" style="border:1px dotted blue;margin:10px;padding:10px;display:none;">
+					<div style="font-size:120%;font-weight:bold;margin-left:-5px;">Additional Options:</div>
+					<div style='margin-top:2px;' title="URL to source project. Use when linking to an external image.">
+						<b>Source URL:</b> 
+						<input name='sourceurl' type='text' value='' size='70' maxlength='250'>
 					</div>
+					<div style='margin-top:2px;'>
+						<b>Copyright:</b> 
+						<input name='copyright' type='text' value='' size='70' maxlength='250'>
+					</div>
+					<div style='margin-top:2px;'>
+						<b>Occurrence Record #:</b> 
+						<input id="occidadd" name="occid" type="text" value="" READONLY/>
+						<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
+					</div>
+					<?php if($imageEditor->getRankId() > 220 && !$imageEditor->getSubmittedTid()){ ?>
+					<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
+						<input type='checkbox' name='addtoparent' value='1' /> 
+						Add Image to Species Rank 
+						<div style='margin-left:10px;'>
+							* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
+						</div>
+					</div>
+					<?php }elseif($cArr = $imageEditor->getChildrenArr()){ ?>
+					<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
+						Add Image to a Child Taxon 
+						<select name='addtotid'>
+							<option value='0'>Child Taxon</option>
+							<option value='0'>-----------------------</option>
+							<?php 
+								foreach($cArr as $t => $sn){
+									?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
+								}
+							?>
+						</select> 
+					</div>
+					<?php } ?>
 				</div>
-				<?php }elseif($cArr = $imageEditor->getChildrenArr()){ ?>
-				<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-					Add Image to a Child Taxon 
-					<select name='addtotid'>
-						<option value='0'>Child Taxon</option>
-						<option value='0'>-----------------------</option>
-						<?php 
-							foreach($cArr as $t => $sn){
-								?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
-							}
-						?>
-					</select> 
-				</div>
-				<?php } ?>
 				<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
 				<input name='category' type='hidden' value='images'>
 				<div style='margin-top:2px;'>
@@ -551,23 +374,7 @@ if($editable && $tid){
 							</a>
 						</div>
 						<?php
-						} 
-						if($imgArr["anatomy"]){
-						?>
-						<div>
-							<b>Anatomy:</b> 
-							<?php echo $imgArr["anatomy"];?>
-						</div>
-						<?php
-						} 
-						if($imgArr["imagetype"]){
-						?>
-						<div>
-							<b>Image Type:</b> 
-							<?php echo $imgArr["imagetype"];?>
-						</div>
-						<?php
-						} 
+						}
 						if($imgArr["notes"]){
 						?>
 						<div>
@@ -627,21 +434,6 @@ if($editable && $tid){
 									<b>Occurrence Record #:</b> 
 									<input id="occid<?php  echo $imgArr["imgid"];?>" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
 									<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occid<?php  echo $imgArr["imgid"];?>')">Link to Occurrence Record</span>
-								</div>
-								<div style='margin-top:2px;'>
-									<b>Anatomy:</b> 
-									<input name='anatomy' type='text' value='<?php echo $imgArr["anatomy"];?>' size='25' maxlength='100'>
-								</div>
-								<div style='margin-top:2px;'>
-									<b>Image Type:</b> 
-									<select name='imagetype'>
-										<option value='photos' <?php echo ($imgArr["imagetype"]=="field image"?"SELECTED":"");?>>
-											field photo
-										</option>
-										<option value='specimen' <?php echo ($imgArr["imagetype"]=="herbarium specimen image"?"SELECTED":"")?>>
-											specimen image
-										</option>
-									</select>
 								</div>
 								<div style='margin-top:2px;'>
 									<b>Notes:</b> 
@@ -733,7 +525,7 @@ if($editable && $tid){
 						</form>
 						
 						<?php 
-						if($paramsArr["un"] == $imgArr["username"] || $isAdmin){
+						if($symbUid == $imgArr["photographeruid"] || $isAdmin){
 							?>
 							<form action="tpimageeditor.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
 								<fieldset style="margin:5px 0px 5px 5px;">

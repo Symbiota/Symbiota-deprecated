@@ -23,6 +23,7 @@
 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 	$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
+	$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 	
 	//Search Synonyms is default
 	if($action != "Rebuild List") $searchSynonyms = 1;
@@ -51,6 +52,8 @@
 		exit();
 	}
 
+	$dynSqlExists = false;
+	$statusStr = "";
 	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
 		$clManager->setEditable(true);
 		
@@ -63,6 +66,9 @@
 				}
 			}
 	 		$clManager->editMetaData($editArr);
+	 	}
+		elseif($action == "Save SQL Fragment"){
+	 		$statusStr = $clManager->saveSql($sqlFrag);
 	 	}
 	 	
 	 	//Add species to checklist
@@ -81,7 +87,11 @@
 		$clArray = $clManager->getClMetaData();
 		$taxaArray = $clManager->getTaxaList($pageNumber);
 	}
- ?>
+	if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
+		$dynSqlExists = true;
+	}
+
+?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -107,269 +117,8 @@
 	<script type="text/javascript" src="../js/AutoCompleteDB.js"></script>
 	<script type="text/javascript" src="../js/ui.core.js"></script>
 	<script type="text/javascript" src="../js/ui.tabs.js"></script>
-	<script language=javascript>
-		
-		function toggle(target){
-		  	var divs = document.getElementsByTagName("div");
-		  	for (var i = 0; i < divs.length; i++) {
-		  	var divObj = divs[i];
-				if(divObj.className == target){
-					if(divObj.style.display=="none"){
-						divObj.style.display="block";
-					}
-				 	else {
-				 		divObj.style.display="none";
-				 	}
-				}
-			}
-
-		  	var spans = document.getElementsByTagName("span");
-		  	for (var i = 0; i < spans.length; i++) {
-		  	var spanObj = spans[i];
-				if(spanObj.className == target){
-					if(spanObj.style.display=="none"){
-						spanObj.style.display="inline";
-					}
-				 	else {
-				 		spanObj.style.display="none";
-				 	}
-				}
-			}
-		}
-
-		function openPointMap() {
-		    mapWindow=open("../tools/mappointaid.php?formid=checklisteditform","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-		    if (mapWindow.opener == null) mapWindow.opener = self;
-		}
-
-		function openPopup(urlStr,windowName){
-			newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width=950,height=600,left=20,top=20');
-			if (newWindow.opener == null) newWindow.opener = self;
-		}
-
-		function removeTaxon(tid, clid, sciName){
-	        if(window.confirm('Are you sure you want to delete this taxon?')){
-				rtXmlHttp = GetXmlHttpObject();
-				if (rtXmlHttp==null){
-			  		alert ("Your browser does not support AJAX!");
-			  		return;
-			  	}
-				var url = "rpc/removetidfromchklst.php";
-				url=url + "?clid=" + clid + "&tid=" + tid;
-				url=url + "&sid="+Math.random();
-				rtXmlHttp.onreadystatechange=function(){
-					if(rtXmlHttp.readyState==4 && rtXmlHttp.status==200){
-						var tidDeleted = rtXmlHttp.responseText;
-						var sciNameDeletion = sciName.replace(/<.{1,2}>/gi,"");
-						if(tidDeleted == 0){
-							alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
-						}
-						else{
-							document.getElementById("tid-"+tidDeleted).style.display = "none";
-						}
-					}
-				};
-				rtXmlHttp.open("POST",url,true);
-				rtXmlHttp.send(null);
-	        }
-		} 
-		
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
-		}
-		
-		function showImagesChecked(cbObj){
-			if(cbObj.checked){
-				document.getElementById("showvouchers").checked = false;
-				document.getElementById("showvouchersdiv").style.display = "none"; 
-			}
-			else{
-				document.getElementById("showvouchersdiv").style.display = "block"; 
-			}
-		}
-
-		function validateMetadataForm(f){ 
-			if(f.ecllatcentroid.value == "" && f.ecllongcentroid.value == ""){
-				return true;
-			}
-			if(f.ecllatcentroid.value == ""){
-				alert("If longitude has a value, latitude must also have a value");
-				return false;
-			} 
-			if(f.ecllongcentroid.value == ""){
-				alert("If latitude has a value, longitude must also have a value");
-				return false;
-			} 
-			if(!isNumeric(f.ecllatcentroid.value)){
-				alert("Latitude must be strictly numeric (decimal format: e.g. 34.2343)");
-				return false;
-			}
-			if(Math.abs(f.ecllatcentroid.value) > 90){
-				alert("Latitude values can not be greater than 90 or less than -90.");
-				return false;
-			} 
-			if(!isNumeric(f.ecllongcentroid.value)){
-				alert("Longitude must be strictly numeric (decimal format: e.g. -112.2343)");
-				return false;
-			}
-			if(Math.abs(f.ecllongcentroid.value) > 180){
-				alert("Longitude values can not be greater than 180 or less than -180.");
-				return false;
-			}
-			if(f.ecllongcentroid.value > 1){
-				alert("Is this checklist in the western hemisphere?\nIf so, decimal longitude should be a negative value (e.g. -112.2343)");
-			} 
-			if(!isNumeric(f.eclpointradiusmeters.value)){
-				alert("Point radius must be a numeric value only");
-				return false;
-			}
-			return true;
-		}
-		
-		function isNumeric(sText){
-		   	var ValidChars = "0123456789-.";
-		   	var IsNumber = true;
-		   	var Char;
-		 
-		   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
-				if (ValidChars.indexOf(Char) == -1){
-					IsNumber = false;
-					break;
-	          	}
-		   	}
-			return IsNumber;
-		}
-
-		function validateAddSpecies(f){ 
-			var sciName = f.speciestoadd.value;
-			if(sciName == ""){
-				alert("Enter the scientific name of species you wish to add");
-				return false;
-			}
-			else{
-				checkScinameExistance(sciName);
-				return false;
-			}
-		}
-		
-		function checkScinameExistance(sciname){
-			if (sciname.length == 0){
-		  		return;
-		  	}
-			cseXmlHttp=GetXmlHttpObject();
-			if (cseXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url="rpc/gettid.php";
-			url=url+"?sciname="+sciname;
-			url=url+"&sid="+Math.random();
-			cseXmlHttp.onreadystatechange=function(){
-				if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
-					testTid = cseXmlHttp.responseText;
-					if(testTid == ""){
-						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data adminitrator to add this species to the Taxonomic Thesaurus.");
-					}
-					else{
-						document.getElementById("tidtoadd").value = testTid;
-						document.forms["addspeciesform"].submit();
-					}
-				}
-			};
-			cseXmlHttp.open("POST",url,true);
-			cseXmlHttp.send(null);
-		} 
-		
-		function initAddList(input){
-			$(input).autocomplete({ ajax_get:getAddSuggs, minchars:3 });
-		}
-
-		function getAddSuggs(key,cont){ 
-		   	var script_name = 'rpc/getspecies.php';
-		   	var params = { 'q':key,'cl':'<?php echo $clManager->getClid();?>' }
-		   	$.get(script_name,params,
-				function(obj){
-					// obj is just array of strings
-					var res = [];
-					for(var i=0;i<obj.length;i++){
-						res.push({ id:i , value:obj[i]});
-					}
-					// will build suggestions list
-					cont(res);
-				},
-			'json');
-		}
-
-		function initFilterList(input){
-		    //process lookup list for fast access
-			if(!db){
-				db = new AutoCompleteDB();
-				var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
-				var arLen=taxonArr.length;
-				if(arLen > 0){
-					$(input).autocomplete({ get:getFilterSuggs, minchars:1, timeout:10000 });
-					for ( var i=0; i<arLen; ++i ){
-						db.add(taxonArr[i]);
-					}
-				}
-			}
-		}
-
-		function getFilterSuggs(v){ 
-			// get all the matching strings from the AutoCompleteDB
-			var matchArr = new Array();
-			db.getStrings(v, "", matchArr);
-			matchArr = matchArr.unique();
-			// add each string to the popup-div
-			var displayArr = new Array();
-			for( i = 0; i < matchArr.length; i++ ){
-				displayArr.push({id:i, value:matchArr[i] });
-			}
-			return displayArr;
-		}
-				
-		$(document).ready(function(){
-			$("#tabs").tabs();
-		});
-
-		Array.prototype.unique = function() {
-			var a = [];
-			var l = this.length;
-		    for(var i=0; i<l; i++) {
-				for(var j=i+1; j<l; j++) {
-				if (this[i] === this[j]) j = ++i;
-			}
-			a.push(this[i]);
-			}
-			return a;
-		};
-	</script>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
+	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript" src="../js/checklists.checklist.js"></script>
 </head>
 
 <body>
@@ -455,17 +204,28 @@
 				}
 				echo "</div>";
 			}
+			if($statusStr){ 
+				?>
+				<hr />
+				<div style="margin:20px;font-weight:bold;color:red;">
+					<?php echo $statusStr; ?>
+				</div>
+				<hr />
+				<?php 
+			} 
+			
 			if($clValue && $clManager->getEditable()){
 			?>
 			<!-- Checklist editing div  -->
 			<div class="editmd" style="display:none;">
-				<div id="tabs" style="margin:10px;height:500px;">
+				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#metadata"><span>Metadata</span></a></li>
+				        <li><a href="#dynsql"><span>Dynamic SQL</span></a></li>
 				        <li><a href="#editors"><span>Editors</span></a></li>
 				    </ul>
 					<div id="metadata">
-						<form id="checklisteditform" action="checklist.php" method="get" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
+						<form id="checklisteditform" action="checklist.php" method="post" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
 							<fieldset style="margin:5px 0px 5px 5px;">
 								<legend>Edit Checklist Details:</legend>
 								<div>
@@ -536,6 +296,87 @@
 								<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
 								<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
 								<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
+							</fieldset>
+						</form>
+					</div>
+					<div id="dynsql">
+						<div style="margin:15px;">
+							This editing module will aid you in building an SQL fragment that will be used to help link vouchers to species names within the checklist. 
+							When a dynamic SQL fragment exists, the checklist editors will have access to 
+							editing tools that will dynamically query occurrence records matching the criteria within the SQL statement. 
+							Editors can then go through the list and select the records that are to serve as specimen vouchers for that checklist.
+							See the Flora Voucher Mapping Tutorial for more details. 
+						</div>
+						<fieldset style="padding:20px;">
+							<legend><b>Current Dynamic SQL Fragment</b></legend>
+							<?php echo $clManager->getDynamicSql()?$clManager->getDynamicSql():"SQL not set"?>
+						</fieldset>
+						<form name="sqlbuilder" action="" onsubmit="return buildSql();" style="margin-bottom:15px;">
+							<fieldset style="padding:15px;">
+								<legend><b>SQL Fragment Builder</b></legend>
+								<div style="margin:0px 10px 10px 10px;">
+									Use this form to aid in building the SQL fragment. 
+									Clicking the 'Build SQL' button will build the SQL using the terms 
+									supplied and place it in the form near the bottom of the page. 
+								</div>
+								<div style="float:left;width:250px;">
+									<div style="margin:3px;">
+										<b>Country:</b>
+										<input id="countryinput" type="text" name="country" onchange="" />
+									</div>
+									<div style="margin:3px;">
+										<b>State:</b>
+										<input id="stateinput" type="text" name="state" onchange="" />
+									</div>
+									<div style="margin:3px;">
+										<b>County:</b>
+										<input id="countyinput" type="text" name="county" onchange="" />
+									</div>
+									<div style="margin:3px;">
+										<b>Locality:</b>
+										<input id="localityinput" type="text" name="locality" onchange="" />
+									</div>
+								</div>
+								<div style="float:left;width:350px;">
+									<div>
+										<b>Latitude/Longitude:</b>
+										<span style="margin-left:75px;">
+											<input id="latnorthinput" type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
+										</span>
+									</div>
+									<div style="margin-left:112px;">
+										<span style="">
+											<input id="lngwestinput" type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
+										</span>
+										<span style="margin-left:70px;">
+											<input id="lngeastinput" type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
+										</span>
+									</div>
+									<div style="margin-left:187px;">
+										<input id="latsouthinput" type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
+									</div>
+									<div style="float:right;margin:20px 20px 0px 0px;">
+										<input type="submit" name="buildsql" value="Build SQL" />
+									</div>
+								</div>
+							</fieldset>
+						</form>
+						<form name="sqlform" action="checklist.php" method="post" style="margin-bottom:15px;">
+							<div style="margin:20px 20px 10px 20px;">
+								Once SQL fragment meets your requirements, click the 'Save SQL Fragment' button to transfer to the database. 
+								The 'Test SQL Fragment' button will test and verify your SQL syntax. 
+								Note that you can fine tune the SQL by hand before saving.
+							</div>
+							<fieldset style="padding:10px">
+								<legend><b>New SQL Fragment</b></legend>
+								<input type="hidden" name="cl" value="<?php echo $clValue; ?>"/>
+								<textarea id="sqlfrag" name="sqlfrag" rows="5" cols="90"><?php echo $sqlFrag?$sqlFrag:$clManager->getDynamicSql();?></textarea>
+								<div>
+									<input type="submit" name="action" value="Save SQL Fragment" />
+									<span style="margin-left:175px;cursor:pointer;color:blue;" onclick="testSql(<?php echo $clManager->getClid(); ?>);">
+										Test SQL Fragment
+									</span>
+								</div>
 							</fieldset>
 						</form>
 					</div>
@@ -811,23 +652,32 @@
 							</div>
 							<div>
 								<?php 
-								foreach($sppArr as $tid => $displayName){
+								foreach($sppArr as $tid => $taxonArr){
 									$voucherLink = "";
 									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
 									echo "<div id='tid-$tid'>";
 									echo "<div>";
-									if(!preg_match('/\ssp\d/',$displayName)) echo "<a href='".$spUrl."' target='_blank'>";
-									echo $displayName;
-									if(!preg_match('/\ssp\d/',$displayName)) echo "</a>";
+									if(!preg_match('/\ssp\d/',$taxonArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
+									echo "<b><i>".$taxonArr["sciname"]."</b></i> ";
+									if(array_key_exists("author",$taxonArr)) echo $taxonArr["author"];
+									if(!preg_match('/\ssp\d/',$taxonArr["sciname"])) echo "</a>";
 									if($clManager->getEditable()){
 										//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 										?> 
 										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
 											<img src='../images/edit.png' style='width:13px;' title='edit details' />
 										</span>
-										<?php 
+										<?php if($showVouchers && $dynSqlExists){ ?>
+										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $taxonArr["sciname"]."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
+											<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
+										</span>
+										<?php
+										} 
 									}
 									echo "</div>\n";
+									if(array_key_exists("vern",$taxonArr)){
+										echo "<div style='margin-left:10px;font-weight:bold;'>".$taxonArr["vern"]."</div>";
+									}
 									if($showVouchers && array_key_exists($tid,$voucherArr)){
 										echo "<div style='margin-left:10px;'>".$voucherArr[$tid]."</div>";
 									}

@@ -27,6 +27,14 @@ class TaxaLoaderManager{
 	 		$targetPath = $this->getUploadTargetPath();
 			$ulFileName = $_FILES['uploadfile']['name'];
 	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath.$ulFileName);
+	        if(substr($ulFileName,-4) == ".zip"){
+	        	$zipFileName = $ulFileName;
+				$zip = new ZipArchive;
+				$zip->open($targetPath.$ulFileName);
+				$ulFileName = $zip->getNameIndex(0);
+				$zip->extractTo($targetPath);
+				$zip->close();
+	        }
 		}
 		$this->uploadFileName = $ulFileName;
 	}
@@ -40,6 +48,10 @@ class TaxaLoaderManager{
 		$this->conn->query("DELETE FROM uploadtaxa");
 		$fh = fopen($this->getUploadTargetPath().$this->uploadFileName,'rb') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
+		//convert all values to lowercase
+		foreach($headerArr as $k => $v){
+			$headerArr[$k] = strtolower($v);
+		}
 		$recordCnt = 0;
 		if(in_array("scinameinput",$this->fieldMap)){
 			while($recordArr = fgetcsv($fh)){
