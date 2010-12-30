@@ -33,8 +33,8 @@ class TPImageEditorManager extends TPEditorManager{
 	public function getImages(){
 		$imageArr = Array();
 		$sql = "SELECT DISTINCT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.photographer, ti.photographeruid, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ti.imagetype, ti.caption, ti.owner, ".
-			"ti.anatomy, ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.username, ti.sourceurl, ti.copyright ".
+			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ti.caption, ti.owner, ".
+			"ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright ".
 			"FROM ((images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid) ".
 			"LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.TID ".
@@ -51,17 +51,14 @@ class TPImageEditorManager extends TPEditorManager{
 			$imageArr[$imgCnt]["photographer"] = $row->photographer;
 			$imageArr[$imgCnt]["photographeruid"] = $row->photographeruid;
 			$imageArr[$imgCnt]["photographerdisplay"] = $row->photographerdisplay;
-			$imageArr[$imgCnt]["imagetype"] = $row->imagetype;
 			$imageArr[$imgCnt]["caption"] = $row->caption;
 			$imageArr[$imgCnt]["owner"] = $row->owner;
-			$imageArr[$imgCnt]["anatomy"] = $row->anatomy;
 			$imageArr[$imgCnt]["locality"] = $row->locality;
 			$imageArr[$imgCnt]["sourceurl"] = $row->sourceurl;
 			$imageArr[$imgCnt]["copyright"] = $row->copyright;
 			$imageArr[$imgCnt]["occid"] = $row->occid;
 			$imageArr[$imgCnt]["notes"] = $row->notes;
 			$imageArr[$imgCnt]["sortsequence"] = $row->sortsequence;
-			$imageArr[$imgCnt]["username"] = $row->username;
 			$imgCnt++;
 		}
 		$result->close();
@@ -130,8 +127,6 @@ class TPImageEditorManager extends TPEditorManager{
 		$notes = $this->cleanStr($_REQUEST["notes"]);
 		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$anatomy = $this->cleanStr($_REQUEST["anatomy"]);
-		$imageType = $_REQUEST["imagetype"];
 		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
 		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
 		if(array_key_exists("addtotid",$_REQUEST)){
@@ -141,19 +136,18 @@ class TPImageEditorManager extends TPEditorManager{
 		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$tnUrl."\", ".
 			"originalurl = \"".$origUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
 			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
-			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", anatomy = \"".$anatomy."\", ".
-			"imagetype = \"".$imageType."\", notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
+			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", ".
+			"notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
 			" WHERE imgid = ".$imgId;
 		//echo $sql;
 		if($this->taxonCon->query($sql)){
 			$this->setPrimaryImageSort($this->tid);
 			if($addToTid){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes, anatomy) ".
+				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
+					"owner, sourceurl, copyright, locality, occid, notes) ".
 					"VALUES (".$addToTid.",\"".$url."\",\"".$tnUrl."\",\"".$origUrl."\",".
-					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$imageType."\",\"".$caption."\",\"".
-					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\",\"".
-					$anatomy."\")";
+					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$caption."\",\"".
+					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\")";
 				//echo $sql;
 				if($this->taxonCon->query($sql)){
 					$this->setPrimaryImageSort($addToTid);
@@ -265,14 +259,11 @@ class TPImageEditorManager extends TPEditorManager{
 		$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanStr($_REQUEST["locality"]):"");
 		$occId = $_REQUEST["occid"];
 		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
-		$anatomy = (array_key_exists("anatomy",$_REQUEST)?$this->cleanStr($_REQUEST["anatomy"]):"");
-		$imageType = $_REQUEST["imagetype"];
 		$sortSequence = $_REQUEST["sortsequence"];
 		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
 		if(array_key_exists("addtotid",$_REQUEST)){
 			$addToTid = $_REQUEST["addtotid"];
 		}
-		$userName = $paramsArr["un"];
 		
 		$imgTnUrl = $this->createImageThumbnail($imgUrl);
 
@@ -310,25 +301,23 @@ class TPImageEditorManager extends TPEditorManager{
 		}
 			
 		if($imgWebUrl){
-			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
-				"owner, sourceurl, copyright, locality, occid, notes, anatomy, username, sortsequence) ".
+			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
+				"owner, sourceurl, copyright, locality, occid, notes, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
 				($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
 				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
-				($occId?$occId:"NULL").",\"".$notes."\",\"".
-				$anatomy."\",\"".$userName."\",".($sortSequence?$sortSequence:"50").")";
+				($occId?$occId:"NULL").",\"".$notes."\",".($sortSequence?$sortSequence:"50").")";
 			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
 				$this->setPrimaryImageSort($this->tid);
 				if($addToTid){
-					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, imagetype, caption, ".
-						"owner, sourceurl, copyright, locality, occid, notes, anatomy, username) ". 
+					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
+						"owner, sourceurl, copyright, locality, occid, notes) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
 						($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
 						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
-						($occId?$occId:"NULL").",\"".$notes."\",\"".
-						$anatomy."\",\"".$userName."\")";
+						($occId?$occId:"NULL").",\"".$notes."\")";
 					//echo $sql;
 					if($this->taxonCon->query($sql)){
 						$this->setPrimaryImageSort($addToTid);
@@ -349,7 +338,7 @@ class TPImageEditorManager extends TPEditorManager{
 	private function loadImage(){
 	 	$userFile = basename($_FILES['userfile']['name']);
 		$fileName = $this->getFileName($userFile);
-	 	$downloadPath = $this->getDownloadPath($fileName, $_REQUEST["imagetype"]); 
+	 	$downloadPath = $this->getDownloadPath($fileName); 
 	 	if(move_uploaded_file($_FILES['userfile']['tmp_name'], $downloadPath)){
 			return $downloadPath;
 	 	}
@@ -371,14 +360,11 @@ class TPImageEditorManager extends TPEditorManager{
  		return $fName;
  	}
  	
-	private function getDownloadPath($fileName, $subFolder){
+	private function getDownloadPath($fileName){
 		if(substr($this->imageRootPath,-1,1) != "/") $this->imageRootPath .= "/";
-		$path = $this->imageRootPath.$this->family."/".$subFolder."/";
+		$path = $this->imageRootPath.$this->family."/";
  		if(!file_exists($this->imageRootPath.$this->family)){
  			mkdir($this->imageRootPath.$this->family, 0775);
- 		}
- 		if(!file_exists($this->imageRootPath.$this->family."/".$subFolder)){
- 			mkdir($this->imageRootPath.$this->family."/".$subFolder, 0775);
  		}
  		//Check and see if file already exists, if so, rename filename until it has a unique name
  		$tempFileName = $fileName;
@@ -480,20 +466,13 @@ class TPImageEditorManager extends TPEditorManager{
 	}
 
 	private function setPrimaryImageSort($subjectTid){
-		$sql1 = "SELECT count(ti.imgid) AS reccnt FROM images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid 
-			WHERE ts.taxauthid = 1 AND ti.SortSequence = 1 AND ts.tidaccepted = ".$subjectTid;
-		//echo $sql1;
-		$result = $this->taxonCon->query($sql1);
-		if($row = $result->fetch_object()){
-			if($row->reccnt == 0){
-				$sql2 = "UPDATE images ti2 INNER JOIN (SELECT ti.imgid, ti.sortsequence FROM images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid
-					WHERE ((ts.taxauthid = 1) AND (ts.tidaccepted=".$subjectTid.")) ORDER BY ti.SortSequence LIMIT 1) innertab ON ti2.imgid = innertab.imgid 
-					SET ti2.SortSequence = 1";
-				//echo $sql2;
-				$this->taxonCon->query($sql2);
-			}
-		}
-		$result->close();
+		$sql = "UPDATE images ti INNER JOIN ".
+			"(SELECT ti.imgid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
+			"INNER JOIN images ti ON ts2.tid = ti.tid WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ".
+			"AND (ts1.tidaccepted=".$subjectTid.") ORDER BY ti.SortSequence LIMIT 1) innertab ON ti.imgid = innertab.imgid ".
+			"SET ti.SortSequence = 1";
+		//echo $sql2;
+		$this->taxonCon->query($sql);
 	}
 	
  	private function url_exists($url) {

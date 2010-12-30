@@ -1,38 +1,21 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/ImageObservationManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = array_key_exists("occid",$_REQUEST)?$_REQUEST["occid"]:"";
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
-$occManager = new OccurrenceEditorManager($occId);
-$occArr = Array();
+$obsManager = new ImageObservationManager();
+
 $editable = 0;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 	$editable = 1;
 }
 if($editable){
-	if($action == "Edit Record"){
-		$occManager->editOccurrence($_REQUEST);
+	if($action == "Submit Observation"){
+		$obsManager->submitObservation();
 	}
-	elseif($action == "Add New Record"){
-		$occManager->addOccurrence($_REQUEST);
-	}
-	elseif($action == "Submit Image Edits"){
-		$occManager->editImage($_REQUEST);
-	}
-	elseif($action == "Submit New Image"){
-		$occManager->addImage($_REQUEST);
-	}
-	elseif($action == "Delete Image"){
-		$imgDel = $_REQUEST["imgdel"];
-		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
-		$occManager->deleteImage($imgDel, $removeImg);
-	}
-	$occArr = $occManager->getOccurArr();
-	$collId = $occArr["collid"]["value"];
 }
 
 ?>
@@ -40,25 +23,22 @@ if($editable){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
+	<title><?php echo $defaultTitle; ?> Observation Submission</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
-	<link rel="stylesheet" type="text/css" href="../../css/tabcontent.css" />
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css">
-	<script type="text/javascript" src="../../js/tabcontent.js"></script>
 	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
 	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
-	<script language="javascript" src="../../js/collections.occurrenceeditor.js"></script>
+	<script language="javascript" src="../../js/collections.imageobservation.js"></script>
 </head>
-<body onload="initTabs('occedittabs');">
+<body>
 
 <?php
-	$displayLeftMenu = (isset($collections_editor_occurrenceEditorMenu)?$collections_individual_occurrenceEditorMenu:false);
+	$displayLeftMenu = (isset($collections_editor_imageObservationMenu)?$collections_individual_imageObservationMenu:false);
 	include($serverRoot.'/header.php');
-	if(isset($collections_editor_occurrenceEditorCrumbs)){
+	if(isset($collections_editor_imageObservationCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_editor_occurrenceEditorCrumbs;
-		echo " &gt; <b>Occurrence Editor</b>";
+		echo $collections_editor_imageObservationCrumbs;
+		echo " &gt; <b>Observation Submission</b>";
 		echo "</div>";
 	}
 ?>
@@ -73,10 +53,9 @@ if($editable){
 	        <li><a href="#" rel="imagediv">Images</a></li>
 	    </ul>
 		<div style="border:1px solid gray;width:96%;margin-bottom:1em;padding:5px;">
-			<div id="shortdiv" class="tabcontent" style="margin:10px;">
 				<form id='fullform' name='fullform' action='occurrenceeditor.php' method='get'>
 					<fieldset>
-						<legend><b>Latest Description</b></legend>
+						<legend><b>Observation</b></legend>
 						<div style="clear:both;" class="p1">
 							<span class="flabel" style="width:125px;">
 								Scientific Name:
@@ -87,37 +66,31 @@ if($editable){
 						</div>
 						<div style="clear:both;" class="p1">
 							<span>
-								<?php $hasValue = array_key_exists("sciname",$occArr)&&$occArr["sciname"]["value"]?1:0; ?>
-								<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]["value"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="verifySciName(this);" />
+								<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onfocus="initTaxonList(this)" autocomplete="off" onchange="verifySciName(this);" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 							</span>
 							<span style="margin-left:10px;">
-								<?php $hasValue = array_key_exists("scientificnameauthorship",$occArr)&&$occArr["scientificnameauthorship"]["value"]?1:0; ?>
-								<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["scientificnameauthorship"]["value"]:""; ?>" />
+								<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="background-color:;" value="" />
 							</span>
 						</div>
 						<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 							<div style="float:left;">
-								<?php $hasValue = array_key_exists("identificationqualifier",$occArr)&&$occArr["identificationqualifier"]["value"]?1:0; ?>
 								<span class="flabel">ID Qualifier:</span>
-								<input type="text" name="identificationqualifier" tabindex="4" size="5" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationqualifier"]["value"]:""; ?>" />
+								<input type="text" name="identificationqualifier" tabindex="4" size="5" style="background-color:;" value="" />
 							</div>
 							<div style="float:left;margin-left:160px;">
-								<?php $hasValue = array_key_exists("family",$occArr)&&$occArr["family"]["value"]?1:0; ?>
 								<span class="flabel">Family:</span>
-								<input type="text" name="family" size="30" maxlength="50" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" tabindex="0" value="<?php echo $hasValue?$occArr["family"]["value"]:""; ?>" />
+								<input type="text" name="family" size="30" maxlength="50" style="background-color:;" tabindex="0" value="" />
 							</div>
 						</div>
 						<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;" class="p1">
 							<div style="float:left;">
-								<?php $hasValue = array_key_exists("identifiedby",$occArr)&&$occArr["identifiedby"]["value"]?1:0; ?>
 								Identified By:
-								<input type="text" name="identifiedby" maxlength="255" tabindex="6" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identifiedby"]["value"]:""; ?>" />
+								<input type="text" name="identifiedby" maxlength="255" tabindex="6" style="background-color:;" value="" />
 							</div>
 							<div style="float:left;margin-left:15px;padding:3px 0px 0px 10px;">
-								<?php $hasValue = array_key_exists("dateidentified",$occArr)&&$occArr["dateidentified"]["value"]?1:0; ?>
 								Date Identified:
-								<input type="text" name="dateidentified" maxlength="45" tabindex="8" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["dateidentified"]["value"]:""; ?>" />
+								<input type="text" name="dateidentified" maxlength="45" tabindex="8" style="background-color:;" value="" />
 							</div>
 							<div style="float:left;margin-left:15px;cursor:pointer;" onclick="toggleIdDetails();">
 								<img src="../../images/showedit.png" style="width:15px;" />
@@ -125,23 +98,21 @@ if($editable){
 						</div>
 						<div style="clear:both;">
 							<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
-								<?php $hasValue = array_key_exists("identificationreferences",$occArr)&&$occArr["identificationreferences"]["value"]?1:0; ?>
 								ID References:
-								<input type="text" name="identificationreferences" tabindex="10" style="width:450px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationreferences"]["value"]:""; ?>" />
+								<input type="text" name="identificationreferences" tabindex="10" style="width:450px;background-color:;" value="" />
 							</div>
 							<div id="taxremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
-								<?php $hasValue = array_key_exists("taxonremarks",$occArr)&&$occArr["taxonremarks"]["value"]?1:0; ?>
 								ID Remarks:
-								<input type="text" name="taxonremarks" tabindex="12" style="width:500px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["taxonremarks"]["value"]:""; ?>" />
+								<input type="text" name="taxonremarks" tabindex="12" style="width:500px;background-color:;" value="" />
 							</div>
 						</div>
 					</fieldset>
 					<fieldset>
-						<legend><b>Collector Info</b></legend>
+						<legend><b>Observer Details</b></legend>
 						<div style="float:left;">
 							<div style="clear:both;" class="p1">
 								<span>
-									Collector:
+									Observer:
 								</span>
 								<span style="margin-left:210px;">
 									Number:
@@ -171,54 +142,6 @@ if($editable){
 								<?php $hasValue = array_key_exists("associatedcollectors",$occArr)&&$occArr["associatedcollectors"]["value"]?1:0; ?>
 								Associated Collectors:<br />
 								<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" style="width:430px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedcollectors"]["value"]:""; ?>" />
-							</div>
-						</div>
-						<?php 
-							$dateExtraDiv = "none";
-							if(array_key_exists("verbatimeventdate",$occArr) && $occArr["verbatimeventdate"]["value"]){
-								$dateExtraDiv = "block";
-							}
-							elseif(array_key_exists("month",$occArr) && $occArr["month"]["value"]){
-								$dateExtraDiv = "block";
-							}
-							elseif(array_key_exists("day",$occArr) && $occArr["day"]["value"]){
-								$dateExtraDiv = "block";
-							}
-							elseif(array_key_exists("year",$occArr) && $occArr["year"]["value"]){
-								$dateExtraDiv = "block";
-							}
-							elseif(array_key_exists("startdayofyear",$occArr) && $occArr["startdayofyear"]["value"]){
-								$dateExtraDiv = "block";
-							}
-							elseif(array_key_exists("enddayofyear",$occArr) && $occArr["enddayofyear"]["value"]){
-								$dateExtraDiv = "block";
-							}
-						?>
-						<div id="dateextradiv" style="float:left;padding:5px;margin-left:10px;border:1px solid gray;display:<?php echo $dateExtraDiv; ?>;" class="p2">
-							<div>
-								Verbatim Date:
-								<?php $hasValue = array_key_exists("verbatimeventdate",$occArr)&&$occArr["verbatimeventdate"]["value"]?1:0; ?>
-								<input type="text" name="verbatimeventdate" tabindex="20" maxlength="255" style="width:120px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimeventdate"]["value"]:""; ?>" />
-							</div>
-							<div>
-								MM/DD/YYYY:
-								<span style="margin:8px;">
-									<?php $hasValue = array_key_exists("month",$occArr)&&$occArr["month"]["value"]?1:0; ?>
-									<input type="text" name="month" tabindex="22" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["month"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Month')" title="Numeric Month" />/
-									<?php $hasValue = array_key_exists("day",$occArr)&&$occArr["day"]["value"]?1:0; ?>
-									<input type="text" name="day" tabindex="24" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["day"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Day')" title="Numeric Day" />/
-									<?php $hasValue = array_key_exists("year",$occArr)&&$occArr["year"]["value"]?1:0; ?>
-									<input type="text" name="year" tabindex="26" style="width:45px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["year"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Year')" title="Numeric Year" />
-								</span>
-							</div>
-							<div>
-								Day of Year:
-								<span style="margin:16px;">
-									<?php $hasValue = array_key_exists("startdayofyear",$occArr)&&$occArr["startdayofyear"]["value"]?1:0; ?>
-									<input type="text" name="startdayofyear" tabindex="28" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["startdayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'Start Day of Year')" title="Start Day of Year" /> -
-									<?php $hasValue = array_key_exists("enddayofyear",$occArr)&&$occArr["enddayofyear"]["value"]?1:0; ?>
-									<input type="text" name="enddayofyear" tabindex="30" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["enddayofyear"]["value"]:""; ?>" onchange="inputIsNumeric(this, 'End Day of Year')" title="End Day of Year" />
-								</span>
 							</div>
 						</div>
 					</fieldset>

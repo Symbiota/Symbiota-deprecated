@@ -7,7 +7,7 @@ include_once($serverRoot.'/config/dbconnection.php');
  
 class ChecklistManager {
 
-	private $clCon;
+	private $clCnn;
 	private $clid;
 	private $dynClid;
 	private $clName;
@@ -122,7 +122,7 @@ class ChecklistManager {
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
-				"c.datelastmodified, c.uid, c.initialtimestamp ".
+				"c.dynamicsql, c.datelastmodified, c.uid, c.initialtimestamp ".
 				"FROM fmchecklists c WHERE c.clid = ".$this->clid;
 		}
 		elseif($this->dynClid){
@@ -144,6 +144,7 @@ class ChecklistManager {
 				$this->clMetaData["longcentroid"] = $row->longcentroid;
 				$this->clMetaData["pointradiusmeters"] = $row->pointradiusmeters;
 				$this->clMetaData["access"] = $row->access;
+				$this->clMetaData["dynamicsql"] = $row->dynamicsql;
 				$this->clMetaData["datelastmodified"] = $row->datelastmodified;
 			}
     	}
@@ -230,11 +231,13 @@ class ChecklistManager {
 						$this->voucherArr[$tid] = substr($clStr,1);
 					}
 				}
-				$author = $row->author;
-				$sciName = "<i><b>".$sciName."</b></i> ";
-				if($this->showAuthors) $sciName .= $author;
-				if($this->showCommon && $row->vernacularname) $sciName .= "<br />&nbsp;&nbsp;&nbsp;<b>[".$row->vernacularname."]</b>"; 
-				$taxaList[$family][$tid] = $sciName;
+				$taxaList[$family][$tid]["sciname"] = $sciName;
+				if($this->showAuthors){
+					$taxaList[$family][$tid]["author"] = $row->author;
+				}
+				if($this->showCommon && $row->vernacularname){
+					$taxaList[$family][$tid]["vern"] = $row->vernacularname;
+				}
     		}
     		if($family != $familyPrev) $this->familyCount++;
     		$familyPrev = $family;
@@ -488,7 +491,30 @@ class ChecklistManager {
 		//echo $sql;
 		return $sql;
 	}
-    
+
+	//Dynamic SQL functions
+	public function getDynamicSql(){
+		$sqlStr = "";
+		$sql = "SELECT c.dynamicsql FROM fmchecklists c WHERE c.clid = ".$this->clid;
+		//echo $sql;
+		$rs = $this->clCon->query($sql);
+		while($row = $rs->fetch_object()){
+			$sqlStr = $row->dynamicsql;
+		}
+		$rs->close();
+		return $sqlStr;
+	}
+	
+	public function saveSql($sqlFrag){
+		$sqlFrag = $this->cleanStr($sqlFrag);
+		$sql = "UPDATE fmchecklists c SET c.dynamicsql = ".($sqlFrag?"\"".$sqlFrag."\"":"NULL")." WHERE c.clid = ".$this->clid;
+		//echo $sql;
+		$conn = MySQLiConnectionFactory::getCon("write");
+		$conn->query($sql);
+		$conn->close();
+	}
+
+	//Misc set/get functions
     public function setThesFilter($filt){
 		$this->thesFilter = $filt;
 	}
@@ -589,6 +615,12 @@ class ChecklistManager {
 		}
 		$rs->close();
 	}
+
+	private function cleanStr($str){
+ 		$newStr = trim($str);
+ 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+ 		return $newStr;
+ 	}
 }
 ?>
  
