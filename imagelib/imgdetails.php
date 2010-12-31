@@ -68,7 +68,19 @@ if(isset($taxa_imgdetailsCrumbs)){
 						if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
 						if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
 						if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
-						if($imgArr["copyright"]) echo "<div><b>Copyright:</b> ".$imgArr["copyright"]."</div>";
+						$crStr = "";
+						if($imgArr["copyright"]){
+							$crStr = "<div>";
+							if($imgArr["copyrighturl"]){
+								$crStr = "<a href='".$imgArr["copyrighturl"]."'>";
+							}
+							echo $imgArr["copyright"];
+							if($imgArr["copyrighturl"]){
+								$crStr = "</a>";
+							}
+							$crStr = "</div>";
+						}
+						if($crStr) echo $crStr;
 						if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
 						if($imgArr["occid"]) echo "<div><a href='../collections/individual/individual.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
 						echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
