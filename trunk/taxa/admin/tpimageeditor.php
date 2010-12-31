@@ -301,6 +301,7 @@ if($editable && $tid){
 						<?php 
 						$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
 						$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+						if(!$tnUrl) $tnUrl = $webUrl;
 						?>
 						<a href="<?php echo $webUrl;?>">
 							<img src="<?php echo $tnUrl;?>"/>
