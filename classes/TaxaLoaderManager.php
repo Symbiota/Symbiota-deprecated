@@ -54,11 +54,11 @@ class TaxaLoaderManager{
 		}
 		$recordCnt = 0;
 		if(in_array("scinameinput",$this->fieldMap)){
+			$keys = array_keys($this->fieldMap);
 			while($recordArr = fgetcsv($fh)){
 				//Load into uploadtaxa
 				$sql = "INSERT INTO uploadtaxa(".implode(",",$this->fieldMap).") ";
 				$valueSql = "";
-				$keys = array_keys($this->fieldMap);
 				foreach($keys as $sourceName){
 					$valueSql .= "\",\"".trim($recordArr[array_search($sourceName,$headerArr)]);
 				}

@@ -305,7 +305,7 @@ class TPImageEditorManager extends TPEditorManager{
 				"owner, sourceurl, copyright, locality, occid, notes, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
 				($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
-				$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
+				$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
 				($occId?$occId:"NULL").",\"".$notes."\",".($sortSequence?$sortSequence:"50").")";
 			//echo $sql;
 			$status = "";
