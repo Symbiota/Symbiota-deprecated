@@ -316,7 +316,7 @@ if($editable && $tid){
 						?>
 					</div>
 				</td>
-				<td valign="middle">
+				<td valign="middle" style="width:90%">
 					<div style='float:right;margin-right:10px;cursor:pointer;'>
 						<img src="../../images/edit.png" onclick="toggle('image<?php echo $imgArr["imgid"];?>');">
 					</div>
