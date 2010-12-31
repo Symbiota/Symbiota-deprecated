@@ -304,7 +304,7 @@ if($editable && $tid){
 						if(!$tnUrl) $tnUrl = $webUrl;
 						?>
 						<a href="<?php echo $webUrl;?>">
-							<img src="<?php echo $tnUrl;?>"/>
+							<img src="<?php echo $tnUrl;?>" style="width:200px;"/>
 						</a>
 						<?php 
 						if($imgArr["originalurl"]){
