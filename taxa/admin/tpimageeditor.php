@@ -82,10 +82,26 @@ if($editable && $tid){
 	?>
 	<table style="width:100%;">
 		<tr><td>
-			<div style='float:right;margin:15px;'>
-				<a href="tpeditor.php?tid=<?php echo $imageEditor->getTid(); ?>">
-					Main Menu
-				</a>
+			<div class="menudiv" style="float:right;margin:15px;cursor:pointer;color:blue;" onclick="toggle('menudiv')">
+				Show Menu
+			</div>
+			<div class="menudiv" style="float:right;display:none;">
+				<ul style="margin-top:15px;width:200px;border:dotted 1px;">
+					<li><a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>">Taxon Profile Page</a></li>
+					<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=images">Edit Images</a></li>
+					<ul>
+						<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
+						<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
+					</ul>
+					<li><a href="tpdesceditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
+					<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){ ?>
+					<li><a href="taxonomydisplay.php?target=<?php echo $imageEditor->getSciName(); ?>">View Taxonomic Tree</a></li>
+					<ul>
+						<li><a href="taxonomyeditor.php?target=<?php echo $imageEditor->getTid(); ?>">Edit Taxonomic Placement</a></li>
+						<li><a href="taxonomyloader.php">Add New Taxonomic Name</a></li>
+					</ul>
+					<?php } ?>
+				</ul>
 			</div>
 			<?php 
 		 	if($imageEditor->getSubmittedTid()){
@@ -128,6 +144,7 @@ if($editable && $tid){
 		foreach($images as $imgArr){
 			$webUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["url"]; 
 			$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
+			if(!$tnUrl) $tnUrl = $webUrl;
 			?>
 			<td align='center' valign='bottom'>
 				<div style='margin:20px 0px 0px 0px;'>
