@@ -210,7 +210,7 @@ header("Content-Type: text/html; charset=".$charset);
 					foreach($researchList as $key=>$value){
 	            ?>
 					<li>
-						<a href='<?php echo $clientRoot; ?>/seinet/checklists/flashcards.php?clid=<?php echo $key."&listname=".$value; ?>&taxonfilter=&showcommon=0'>
+						<a href='<?php echo $clientRoot; ?>/checklists/flashcards.php?clid=<?php echo $key."&listname=".$value; ?>&taxonfilter=&showcommon=0'>
 							<?php echo $value; ?>
 						</a> 
 						<!--<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
