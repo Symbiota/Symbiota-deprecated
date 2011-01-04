@@ -6,6 +6,7 @@ class ObservationSubmitManager {
 	private $conn;
 	private $occId;
 	private $uid;
+	private $username = "";
 
 	private $occurrenceMap = Array();
 
@@ -21,6 +22,11 @@ class ObservationSubmitManager {
 	public function __construct($uid){
 		$this->uid = $uid;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		$rs = $this->conn->query("SELECT CONCAT_WS(', ',lastname,firstname) as name FROM users WHERE uid = ".$uid);
+		if($row = $rs->fetch_object()){
+			$this->username = $row->name;
+		}
+		$rs->close();
 	}
 
 	public function __destruct(){
@@ -28,149 +34,73 @@ class ObservationSubmitManager {
 	}
 
 	public function addObservation($occArr){
+		$statusStr = "";
 		if($occArr){
-			$sql = "INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, ".
-			"identificationReferences, identificationQualifier, recordedBy, recordNumber, ".
-			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
-			"habitat, occurrenceRemarks, associatedTaxa, ".
-			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, ".
-			"stateProvince, county, municipality, locality, localitySecurity, decimalLatitude, decimalLongitude, ".
-			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
-			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
-			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
-			"verbatimElevation, disposition, language) ".
+			$collId = $occArr["collid"];
+			$dbpk = 1;
+			$rs = $this->conn->query("SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = ".$collId);
+			if($rs && $row = $rs->fetch_object()){
+				echo $row->maxpk;
+				if($row->maxpk) $dbpk = $row->maxpk;
+			}
+			
+			//Setup Event Date fields
+			if($dateObj = strtotime($occArr['eventdate'])){
+				$eventDate = date('Y-m-d',$dateObj);
+				$eventYear = date('Y',$dateObj);
+				$eventMonth = date('m',$dateObj);
+				$eventDay = date('d',$dateObj);
+				$startDay = date('z',$dateObj)+1;
+			}
+			
+			//Get tid for scinetific name
+			$tid = 0;
+			$result = $this->conn->query("SELECT tid FROM taxa WHERE sciname = '".$occArr["sciname"]."'");
+			if($row = $result->fetch_object()){
+				$tid = $row->tid;
+			}
+			
+			$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, '.
+				'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
+				'identificationReferences, identificationQualifier, recordedBy, recordNumber, '.
+				'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
+				'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
+				'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
+				'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters ) '.
 
-			"VALUES (".$occArr["collid"].",\"".$occArr["catalognumber"]."\",".
-			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
-			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
-			($occArr["catalognumber"]?"\"".$occArr["catalognumber"]."\"":"NULL").",".
-			($occArr["othercatalognumbers"]?"\"".$occArr["othercatalognumbers"]."\"":"NULL").",".
-			($occArr["ownerinstitutioncode"]?"\"".$occArr["ownerinstitutioncode"]."\"":"NULL").",".
-			($occArr["family"]?"\"".$occArr["family"]."\"":"NULL").",".
-			"\"".$occArr["sciname"]."\",".
-			($occArr["scientificnameauthorship"]?"\"".$occArr["scientificnameauthorship"]."\"":"NULL").",".
-			($occArr["taxonremarks"]?"\"".$occArr["taxonremarks"]."\"":"NULL").",".
-			($occArr["identifiedby"]?"\"".$occArr["identifiedby"]."\"":"NULL").",".
-			($occArr["dateidentified"]?"\"".$occArr["dateidentified"]."\"":"NULL").",".
-			($occArr["identificationreferences"]?"\"".$occArr["identificationreferences"]."\"":"NULL").",".
-			($occArr["identificationqualifier"]?"\"".$occArr["identificationqualifier"]."\"":"NULL").",".
-			($occArr["typestatus"]?"\"".$occArr["typestatus"]."\"":"NULL").",".
-			($occArr["recordedby"]?"\"".$occArr["recordedby"]."\"":"NULL").",".
-			($occArr["recordnumber"]?"\"".$occArr["recordnumber"]."\"":"NULL").",".
-			($occArr["associatedcollectors"]?"\"".$occArr["associatedcollectors"]."\"":"NULL").",".
-			($occArr["eventdate"]?"\"".$occArr["eventdate"]."\"":"NULL").",".
-			($occArr["year"]?$occArr["year"]:"NULL").",".
-			($occArr["month"]?$occArr["month"]:"NULL").",".
-			($occArr["day"]?$occArr["day"]:"NULL").",".
-			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
-			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			($occArr["verbatimeventdate"]?"\"".$occArr["verbatimeventdate"]."\"":"NULL").",".
-			($occArr["habitat"]?"\"".$occArr["habitat"]."\"":"NULL").",".
-			($occArr["occurrenceremarks"]?"\"".$occArr["occurrenceremarks"]."\"":"NULL").",".
-			($occArr["associatedoccurrences"]?"\"".$occArr["associatedoccurrences"]."\"":"NULL").",".
-			($occArr["associatedtaxa"]?"\"".$occArr["associatedtaxa"]."\"":"NULL").",".
-			($occArr["dynamicproperties"]?"\"".$occArr["dynamicproperties"]."\"":"NULL").",".
-			($occArr["reproductivecondition"]?"\"".$occArr["reproductivecondition"]."\"":"NULL").",".
-			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			($occArr["establishmentmeans"]?"\"".$occArr["establishmentmeans"]."\"":"NULL").",".
-			($occArr["country"]?"\"".$occArr["country"]."\"":"NULL").",".
-			($occArr["stateprovince"]?"\"".$occArr["stateprovince"]."\"":"NULL").",".
-			($occArr["county"]?"\"".$occArr["county"]."\"":"NULL").",".
-			($occArr["municipality"]?"\"".$occArr["municipality"]."\"":"NULL").",".
-			($occArr["locality"]?"\"".$occArr["locality"]."\"":"NULL").",".
-			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
-			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
-			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			($occArr["geodeticdatum"]?"\"".$occArr["geodeticdatum"]."\"":"NULL").",".
-			($occArr["coordinateuncertaintyinmeters"]?"\"".$occArr["coordinateuncertaintyinmeters"]."\"":"NULL").",".
-			($occArr["verbatimcoordinates"]?"\"".$occArr["verbatimcoordinates"]."\"":"NULL").",".
-			($occArr["verbatimcoordinatesystem"]?"\"".$occArr["verbatimcoordinatesystem"]."\"":"NULL").",".
-			($occArr["georeferencedby"]?"\"".$occArr["georeferencedby"]."\"":"NULL").",".
-			($occArr["georeferenceprotocol"]?"\"".$occArr["georeferenceprotocol"]."\"":"NULL").",".
-			($occArr["georeferencesources"]?"\"".$occArr["georeferencesources"]."\"":"NULL").",".
-			($occArr["georeferenceverificationstatus"]?"\"".$occArr["georeferenceverificationstatus"]."\"":"NULL").",".
-			($occArr["georeferenceremarks"]?"\"".$occArr["georeferenceremarks"]."\"":"NULL").",".
-			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
-			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			($occArr["verbatimelevation"]?"\"".$occArr["verbatimelevation"]."\"":"NULL").",".
-			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
-			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").") ".
-			"WHERE occid = ".$occArr["occid"];
-			$this->conn->query($sql);
+			'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+			'"'.$occArr['sciname'].'",'.($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
+			$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
+			($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
+			($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
+			($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
+			($occArr['identificationqualifier']?'"'.$occArr['identificationqualifier'].'"':'NULL').','.
+			'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
+			($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
+			'"'.$eventDate.'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
+			($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
+			($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
+			($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
+			($occArr['dynamicproperties']?'"'.$occArr['dynamicproperties'].'"':'NULL').','.
+			($occArr['reproductivecondition']?'"'.$occArr['reproductivecondition'].'"':'NULL').','.
+			(array_key_exists('cultivationstatus',$occArr)?'1':'0').','.
+			($occArr['establishmentmeans']?'"'.$occArr['establishmentmeans'].'"':'NULL').','.
+			'"'.$occArr['country'].'",'.($occArr['stateprovince']?'"'.$occArr['stateprovince'].'"':'NULL').','.
+			($occArr['county']?'"'.$occArr['county'].'"':'NULL').','.
+			'"'.$occArr['locality'].'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
+			$occArr['decimallatitude'].','.$occArr['decimallongitude'].','.
+			($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','.
+			($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
+			($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
+			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').') ';
+			//echo $sql;
+			if($this->conn->query($sql)){
+				//$this->addImage($occArr,$this->conn->insert_id,$tid);
+			}
 		}
 	}
-	
-	public function editImage(){
-		$rootUrl = $GLOBALS["imageRootUrl"];
-		if(substr($rootUrl,-1) != "/") $rootUrl .= "/";
-		$rootPath = $GLOBALS["imageRootPath"];
-		if(substr($rootPath,-1) != "/") $rootPath .= "/";
-		$status = "";
-		$imgId = $_REQUEST["imgid"];
-	 	$url = $_REQUEST["url"];
-	 	$tnUrl = $_REQUEST["tnurl"];
-	 	$origUrl = $_REQUEST["origurl"];
-	 	if(array_key_exists("renameweburl",$_REQUEST)){
-	 		$oldUrl = $_REQUEST["oldurl"];
-	 		$oldName = str_replace($rootUrl,$rootPath,$oldUrl);
-	 		$newName = str_replace($rootUrl,$rootPath,$url);
-	 		if($url != $oldUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$url = $oldUrl;
-		 			$status .= "Web URL rename FAILED; ";
-	 			}
-	 		}
-		}
-		if(array_key_exists("renametnurl",$_REQUEST)){
-	 		$oldTnUrl = $_REQUEST["oldtnurl"];
-	 		$oldName = str_replace($rootUrl,$rootPath,$oldTnUrl);
-	 		$newName = str_replace($rootUrl,$rootPath,$tnUrl);
-	 		if($tnUrl != $oldTnUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$tnUrl = $oldTnUrl;
-		 			$status .= "Thumbnail URL rename FAILED; ";
-	 			}
-	 		}
-		}
-		if(array_key_exists("renameorigurl",$_REQUEST)){
-	 		$oldOrigUrl = $_REQUEST["oldorigurl"];
-	 		$oldName = str_replace($rootUrl,$rootPath,$oldOrigUrl);
-	 		$newName = str_replace($rootUrl,$rootPath,$origUrl);
-	 		if($origUrl != $oldOrigUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$origUrl = $oldOrigUrl;
-		 			$status .= "Thumbnail URL rename FAILED; ";
-	 			}
-	 		}
-		}
-		$occId = $_REQUEST["occid"];
-		$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographerUid = $_REQUEST["photographeruid"];
-		$notes = $this->cleanStr($_REQUEST["notes"]);
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
-		$sortSequence = (array_key_exists("sortseq",$_REQUEST)?$_REQUEST["sortseq"]:0);
 
-		$sql = "UPDATE images ".
-			"SET url = \"".$url."\", thumbnailurl = ".($tnUrl?"\"".$tnUrl."\"":"NULL").
-			",originalurl = ".($origUrl?"\"".$origUrl."\"":"NULL").",occid = ".$occId.",caption = ".
-			($caption?"\"".$caption."\"":"NULL").",photographeruid = ".($photographerUid?$photographerUid:"NULL").
-			",notes = ".($notes?"\"".$notes."\"":"NULL").
-			",copyright = ".($copyRight?"\"".$copyRight."\"":"NULL").",imagetype = \"specimen\",sourceurl = ".
-			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
-			($_REQUEST["sortseq"]?",sortsequence = ".$_REQUEST["sortseq"]:"").
-			" WHERE imgid = ".$imgId;
-		//echo $sql;
-		if($this->conn->query($sql)){
-			$this->setPrimaryImageSort();
-		}
-		else{
-			$status .= "ERROR: image not changed, ".$this->conn->error."SQL: ".$sql;
-		}
-		return $status;
-	}
-
-	public function addImage(){
+	private function addImage($occArr,$occId,$tid){
 		//Set download paths and variables
 		set_time_limit(120);
 		ini_set("max_input_time",120);
@@ -178,14 +108,9 @@ class ObservationSubmitManager {
 		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
-		//Check for image path or download image file
-		$imgUrl = (array_key_exists("imgurl",$_REQUEST)?$_REQUEST["imgurl"]:"");
-		$imgPath = "";
-		if(!$imgUrl){
-			$imgPath = $this->loadImage();
-			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
-		}
-		if(!$imgUrl) return;
+
+		$imgPath = $this->loadImage();
+		$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
 		
 		$imgTnUrl = $this->createImageThumbnail($imgUrl);
 
@@ -223,19 +148,14 @@ class ObservationSubmitManager {
 		}
 			
 		if($imgWebUrl){
-			$occId = $_REQUEST["occid"];
-			$owner = $_REQUEST["institutioncode"];
-			$caption = $this->cleanStr($_REQUEST["caption"]);
-			$photographerUid = $_REQUEST["photographeruid"];
-			$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-			$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
-			$sortSequence = $_REQUEST["sortseq"];
+			$owner = $occArr["institutioncode"]; 
+			$caption = $this->cleanStr($occArr["caption"]);
+			$photographerUid = $occArr["photographeruid"];
+			$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, ".
 				"owner, sourceurl, copyright, occid, notes, sortsequence) ".
-				"VALUES (".$_REQUEST["tid"].",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographerUid?$photographerUid:"NULL").",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",".
-				($occId?$occId:"NULL").",\"".$notes."\",".($sortSequence?$sortSequence:"50").")";
+				"VALUES (".$occArr["tid"].",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
+				($photographerUid?$photographerUid:"NULL").",\"".$caption."\",\"".$owner."\",".$occId.",\"".$notes."\",50)";
 			//echo $sql;
 			$status = "";
 			if($this->conn->query($sql)){
@@ -361,55 +281,6 @@ class ObservationSubmitManager {
 	    return $successStatus;
 	}
 	
-	public function deleteImage($imgIdDel, $removeImg){
-		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
-		$occid = 0;
-		$sqlQuery = "SELECT url, thumbnailurl, originalurl, occid ".
-			"FROM images WHERE imgid = ".$imgIdDel;
-		$result = $this->conn->query($sqlQuery);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			$imgThumbnailUrl = $row->thumbnailurl;
-			$imgOriginalUrl = $row->originalurl;
-		}
-		$result->close();
-				
-		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
-		//echo $sql;
-		$status = "";
-		if($this->conn->query($sql)){
-			if($removeImg){
-				//Remove images only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE url = '".$imgUrl."'";
-				$rs = $this->conn->query($sql);
-				if(!$rs->num_rows){
-					$imageRootUrl = $GLOBALS["imageRootUrl"];
-					$imageRootPath = $GLOBALS["imageRootPath"];
-					//Delete image from server 
-					$imgDelPath = str_replace($imageRootUrl,$imageRootPath,$imgUrl);
-					if(file_exists($imgDelPath)){
-						if(!unlink($imgDelPath)){
-							$status = "Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
-						}
-					}
-					$imgTnDelPath = str_replace($imageRootUrl,$imageRootPath,$imgThumbnailUrl);
-					if(file_exists($imgTnDelPath)){
-						unlink($imgTnDelPath);
-					}
-					$imgOriginalDelPath = str_replace($imageRootUrl,$imageRootPath,$imgOriginalUrl);
-					if(file_exists($imgOriginalDelPath)){
-						unlink($imgOriginalDelPath);
-					}
-				}
-			}
-		}
-		else{
-			$status = "deleteImage: ".$this->conn->error."\nSQL: ".$sql;
-		}
-		$this->setPrimaryImageSort();
-		return $status;
-	}
-	
 	public function getPhotographerArr(){
 		if(!$this->photographerArr){
 			$sql = "SELECT u.uid, CONCAT_WS(', ',u.lastname,u.firstname) AS fullname ".
@@ -439,31 +310,30 @@ class ObservationSubmitManager {
 		$newStr = str_replace("\"","'",$newStr);
 		return $newStr;
 	}
-	
- 	private function LatLonPointUTMtoLL($northing, $easting, $zone=12) {
-		$d = 0.99960000000000004; // scale along long0
-		$d1 = 6378137; // Polar Radius
-		$d2 = 0.0066943799999999998;
 
-		$d4 = (1 - sqrt(1 - $d2)) / (1 + sqrt(1 - $d2));
-		$d15 = $easting - 500000;
-		$d16 = $northing;
-		$d11 = (($zone - 1) * 6 - 180) + 3;
-		$d3 = $d2 / (1 - $d2);
-		$d10 = $d16 / $d;
-		$d12 = $d10 / ($d1 * (1 - $d2 / 4 - (3 * $d2 * $d2) / 64 - (5 * pow($d2,3) ) / 256));
-		$d14 = $d12 + ((3 * $d4) / 2 - (27 * pow($d4,3) ) / 32) * sin(2 * $d12) + ((21 * $d4 * $d4) / 16 - (55 * pow($d4,4) ) / 32) * sin(4 * $d12) + ((151 * pow($d4,3) ) / 96) * sin(6 * $d12);
-		$d13 = rad2deg($d14);
-		$d5 = $d1 / sqrt(1 - $d2 * sin($d14) * sin($d14));
-		$d6 = tan($d14) * tan($d14);
-		$d7 = $d3 * cos($d14) * cos($d14);
-		$d8 = ($d1 * (1 - $d2)) / pow(1 - $d2 * sin($d14) * sin($d14), 1.5);
-		$d9 = $d15 / ($d5 * $d);
-		$d17 = $d14 - (($d5 * tan($d14)) / $d8) * ((($d9 * $d9) / 2 - (((5 + 3 * $d6 + 10 * $d7) - 4 * $d7 * $d7 - 9 * $d3) * pow($d9,4) ) / 24) + (((61 + 90 * $d6 + 298 * $d7 + 45 * $d6 * $d6) - 252 * $d3 - 3 * $d7 * $d7) * pow($d9,6) ) / 720);
-		$d17 = rad2deg($d17); // Breddegrad (N)
-		$d18 = (($d9 - ((1 + 2 * $d6 + $d7) * pow($d9,3) ) / 6) + (((((5 - 2 * $d7) + 28 * $d6) - 3 * $d7 * $d7) + 8 * $d3 + 24 * $d6 * $d6) * pow($d9,5) ) / 120) / cos($d14);
-		$d18 = $d11 + rad2deg($d18); // Længdegrad (Ø)
-		return array('lat'=>$d17,'lng'=>$d18);
+	public function getUsername(){
+		return $this->username;
+	}
+	
+	public function getCollArr($collArr){
+		$retArr = Array();
+		$sql = "SELECT collid,collectionname,colltype FROM omcollections WHERE colltype LIKE '%observation%' ";
+		if(!$collArr || !in_array("all",$collArr)){
+			$sql .= "AND (colltype = 'General Observations' ";
+			if($collArr){
+				$sql .= "OR (collide IN(".implode(",",$collArr).") ";
+			}
+			$sql .= ")";
+		}
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$cName = $row->collectionname;
+			if($row->colltype == "General Observations"){
+				$cName .= " [default]";
+			}
+			$retArr[$row->collid] = $cName;
+		}
+		return $retArr;
 	}
 }
 
