@@ -5,13 +5,9 @@ window.onload = function(){
 	"August","September","October","November","December");
 	var now = new Date();
 	dateStr = now.getDate() + " " +	monthNames[now.getMonth()] + " " + now.getFullYear();
-	if(document.obsform.eventdate == ""){
+	if(document.obsform.eventdate.value == ""){
 		document.obsform.eventdate.value = dateStr;
 	}
-	//Clear certain fields
-	document.obsform.scientificnameauthorship = "";
-	document.obsform.family = "";
-	
 }
 
 function toggle(target){
@@ -44,9 +40,6 @@ function submitObsForm(f){
     if(f.sciname.value == ""){
 		window.alert("Observation must have an identification (scientific name) assigned to it, even if it is only to family rank.");
 		return false;
-    }
-    else{
-    	verifySciName(this);
     }
     if(f.recordedby.value == ""){
 		window.alert("Observer field must have a value.");
@@ -107,35 +100,51 @@ function getTaxonSuggs(key,cont){
 	'json');
 }
 
-function verifySciName(sciNameInput){
-	snXmlHttp = GetXmlHttpObject();
-	if(snXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/verifysciname.php";
-	url=url + "?sciname=" + sciNameInput.value; 
-	snXmlHttp.onreadystatechange=function(){
-		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-			if(snXmlHttp.responseText){
-				var retObj = eval("("+snXmlHttp.responseText+")");
-				document.obsform.scientificnameauthorship.value = retObj.author;
-				document.obsform.family.value = retObj.family;
+function verifySciName(){
+	if(document.obsform.family.value == ""){
+		var sciNameStr = document.obsform.sciname.value;
+		snXmlHttp = GetXmlHttpObject();
+		if(snXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/verifysciname.php";
+		url=url + "?sciname=" + sciNameStr;
+		snXmlHttp.onreadystatechange=function(){
+			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+				if(snXmlHttp.responseText){
+					var retObj = eval("("+snXmlHttp.responseText+")");
+					document.obsform.scientificnameauthorship.value = retObj.author;
+					document.obsform.family.value = retObj.family;
+				}
+				else{
+					document.obsform.scientificnameauthorship.value = "";
+					document.obsform.family.value = "";
+					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
+					snXmlHttp = null;
+				}
 			}
-			else{
-				alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
-			}
-		}
-	};
-	snXmlHttp.open("POST",url,true);
-	snXmlHttp.send(null);
+		};
+		snXmlHttp.open("POST",url,true);
+		snXmlHttp.send(null);
+	}
 } 
+
+function scinameChanged(){
+	document.obsform.scientificnameauthorship.value = "";
+	document.obsform.family.value = "";
+}
 
 function verifyDate(eventDateInput){
 	var dateStr = eventDateInput.value;
 	//test date and return mysqlformat
 
 	
+}
+
+function openPointMap() {
+    mapWindow=open("../mappointradius.php","pointradius","resizable=0,width=650,height=600,left=20,top=20");
+	if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function inputIsNumeric(inputObj, titleStr){

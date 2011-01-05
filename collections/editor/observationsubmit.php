@@ -66,14 +66,14 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 					</div>
 					<div style="clear:both;" class="p1">
 						<span>
-							<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onfocus="initTaxonList(this)" autocomplete="off" />
+							<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onfocus="initTaxonList(this)" onchange="scinameChanged()" autocomplete="off" />
 							<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 						</span>
 						<span style="margin-left:10px;">
 							<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="" value="" />
 						</span>
 						<span style="margin-left:10px;">
-							<input type="text" name="identificationqualifier" tabindex="4" size="5" style="" value="" />
+							<input type="text" name="identificationqualifier" tabindex="0" size="5" style="" value="" />
 						</span>
 					</div>
 					<div style="clear:both;margin-left:10px;padding:3px 0px 0px 10px;">
@@ -94,7 +94,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 						</div>
 						<div style="clear:both;">
 							<span>
-								<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" />
+								<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" onfocus="verifySciName()" />
 							</span>
 							<span style="margin-left:10px;">
 								<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" value="" />
@@ -169,25 +169,28 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 						<span style="margin-left:45px;">
 							Longitude
 						</span>
-						<span style="margin-left:34px;">
+						<span style="margin-left:50px;">
 							Uncertainty
 						</span>
-						<span style="margin-left:10px;">
+						<span style="margin-left:8px;">
 							Datum
 						</span>
 						<span style="margin-left:43px;">
 							Elev. (meters)
 						</span>
-						<span style="margin-left:10px;">
+						<span style="margin-left:9px;">
 							Georeference Remarks
 						</span>
 					</div>
 					<div>
 						<span>
-							<input type="text" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Latitude')" />
+							<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Latitude')" title="Decimal Format (eg 34.5436)" />
 						</span>
 						<span>
-							<input type="text" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Longitude')" />
+							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Longitude')" title="Decimal Format (eg -112.5436)" />
+						</span>
+						<span style="cursor:pointer;" onclick="openPointMap();">
+							<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
 						</span>
 						<span>
 							<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" value="" onchange="inputIsNumeric(this, 'Coordinate Uncertainty')" title="Uncertainty in Meters" />

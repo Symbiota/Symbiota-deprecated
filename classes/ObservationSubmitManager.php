@@ -7,6 +7,7 @@ class ObservationSubmitManager {
 	private $occId;
 	private $uid;
 	private $username = "";
+	private $institutionCode;
 
 	private $occurrenceMap = Array();
 
@@ -15,7 +16,7 @@ class ObservationSubmitManager {
 	private $imageRootUrl = "";
 
 	private $tnPixWidth = 200;
-	private $webPixWidth = 1300;
+	private $webPixWidth = 2000;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
 	
@@ -40,7 +41,6 @@ class ObservationSubmitManager {
 			$dbpk = 1;
 			$rs = $this->conn->query("SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = ".$collId);
 			if($rs && $row = $rs->fetch_object()){
-				echo $row->maxpk;
 				if($row->maxpk) $dbpk = $row->maxpk;
 			}
 			
@@ -60,7 +60,7 @@ class ObservationSubmitManager {
 				$tid = $row->tid;
 			}
 			
-			$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, '.
+			$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificname, '.
 				'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 				'identificationReferences, identificationQualifier, recordedBy, recordNumber, '.
 				'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
@@ -69,7 +69,8 @@ class ObservationSubmitManager {
 				'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters ) '.
 
 			'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
-			'"'.$occArr['sciname'].'",'.($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
+			'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
+			($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
 			$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
 			($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
 			($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
@@ -95,33 +96,43 @@ class ObservationSubmitManager {
 			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').') ';
 			//echo $sql;
 			if($this->conn->query($sql)){
-				//$this->addImage($occArr,$this->conn->insert_id,$tid);
+				$this->addImage($occArr,$this->conn->insert_id,$tid);
 			}
 		}
 	}
 
 	private function addImage($occArr,$occId,$tid){
+		$status = "";
 		//Set download paths and variables
 		set_time_limit(120);
-		ini_set("max_input_time",120);
- 		$this->imageRootPath = $GLOBALS["imageRootPath"];
-		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
-		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
-		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
+		ini_set('max_input_time',120);
+ 		$this->imageRootPath = $GLOBALS['imageRootPath'];
+		if(substr($this->imageRootPath,-1) != '/') $this->imageRootPath .= '/';  
+		$this->imageRootUrl = $GLOBALS['imageRootUrl'];
+		if(substr($this->imageRootUrl,-1) != '/') $this->imageRootUrl .= '/';
 
-		$imgPath = $this->loadImage();
-		$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
-		
-		$imgTnUrl = $this->createImageThumbnail($imgUrl);
-
-		$imgWebUrl = $imgUrl;
-		$imgLgUrl = "";
-		if(strpos($imgUrl,"http://") === false || strpos($imgUrl,$this->imageRootUrl) !== false){
+		for($i=1;$i<=3;$i++){
+			$owner = '';
+			$ownerSql = 'SELECT c.institutioncode, c.collectionname ".
+				"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid WHERE o.occid = '.$occId;
+			$rs = $this->conn->query($ownerSql);
+			if($row = $rs->fetch_object()){
+				$this->institutionCode = $row->institutioncode;
+				$owner = "";//$row->collectionname;
+			}
+			$imgPath = $this->loadImage('imgfile'.$i);
+			if(!$imgPath) break;
+			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
+			
+			$imgTnUrl = $this->createImageThumbnail($imgUrl);
+	
+			$imgWebUrl = $imgUrl;
+			$imgLgUrl = '';
 			//Create Large Image
-			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
-			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
+			list($width, $height) = getimagesize($imgPath);
+			$fileSize = filesize($imgPath);
 			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
-				$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
+				$lgWebUrlTemp = str_ireplace('_temp.jpg','lg.jpg',$imgPath); 
 				if($width < ($this->lgPixWidth*1.2)){
 					if(copy($imgPath,$lgWebUrlTemp)){
 						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
@@ -135,7 +146,7 @@ class ObservationSubmitManager {
 			}
 
 			//Create web url
-			$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
+			$imgTargetPath = str_ireplace('_temp.jpg','.jpg',$imgPath);
 			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
 				rename($imgPath,$imgTargetPath);
 			}
@@ -145,36 +156,37 @@ class ObservationSubmitManager {
 			}
 			$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
 			if(file_exists($imgPath)) unlink($imgPath);
-		}
-			
-		if($imgWebUrl){
-			$owner = $occArr["institutioncode"]; 
-			$caption = $this->cleanStr($occArr["caption"]);
-			$photographerUid = $occArr["photographeruid"];
-			$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
-			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, ".
-				"owner, sourceurl, copyright, occid, notes, sortsequence) ".
-				"VALUES (".$occArr["tid"].",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographerUid?$photographerUid:"NULL").",\"".$caption."\",\"".$owner."\",".$occId.",\"".$notes."\",50)";
-			//echo $sql;
-			$status = "";
-			if($this->conn->query($sql)){
-				$this->setPrimaryImageSort();
-			}
-			else{
-				$status = "loadImageData: ".$this->conn->error."<br/>SQL: ".$sql;
+				
+			if($imgWebUrl){
+				$caption = $this->cleanStr($occArr['caption']);
+				$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
+				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, '.
+					'owner, occid, notes, sortsequence) '.
+					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
+					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.
+					($owner?'"'.$owner.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
+				//echo $sql;
+				$status = '';
+				if($this->conn->query($sql)){
+					$this->setPrimaryImageSort();
+				}
+				else{
+					$status = 'loadImageData: '.$this->conn->error.'<br/>SQL: '.$sql;
+				}
 			}
 		}
 		return $status;
 	}
 
-	private function loadImage(){
-	 	$imgFile = basename($_FILES['imgfile']['name']);
-		$fileName = $this->getFileName($imgFile);
-	 	$downloadPath = $this->getDownloadPath($fileName); 
-	 	if(move_uploaded_file($_FILES['imgfile']['tmp_name'], $downloadPath)){
-			return $downloadPath;
-	 	}
+	private function loadImage($imgInput){
+		if(array_key_exists($imgInput,$_FILES) && $_FILES[$imgInput]['name']){
+		 	$imgFile = basename($_FILES[$imgInput]['name']);
+			$fileName = $this->getFileName($imgFile);
+		 	$downloadPath = $this->getDownloadPath($fileName); 
+		 	if(move_uploaded_file($_FILES[$imgInput]['tmp_name'], $downloadPath)){
+				return $downloadPath;
+		 	}
+		}
 	 	return;
 	}
 
@@ -194,10 +206,10 @@ class ObservationSubmitManager {
  	}
  	
 	private function getDownloadPath($fileName){
- 		if(!file_exists($this->imageRootPath.$_REQUEST["institutioncode"])){
- 			mkdir($this->imageRootPath.$_REQUEST["institutioncode"], 0775);
+ 		if(!file_exists($this->imageRootPath.$this->institutionCode)){
+ 			mkdir($this->imageRootPath.$this->institutionCode, 0775);
  		}
-		$path = $this->imageRootPath.$_REQUEST["institutioncode"]."/";
+		$path = $this->imageRootPath.$this->institutionCode."/";
 		$yearMonthStr = date('Ym');
  		if(!file_exists($path.$yearMonthStr)){
  			mkdir($path.$yearMonthStr, 0775);

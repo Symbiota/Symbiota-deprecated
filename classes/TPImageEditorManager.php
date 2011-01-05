@@ -12,7 +12,7 @@ class TPImageEditorManager extends TPEditorManager{
 	private $imageRootUrl = "";
 
 	private $tnPixWidth = 200;
-	private $webPixWidth = 1300;
+	private $webPixWidth = 2000;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
 	
