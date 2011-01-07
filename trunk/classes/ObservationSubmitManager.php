@@ -96,9 +96,14 @@ class ObservationSubmitManager {
 			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').') ';
 			//echo $sql;
 			if($this->conn->query($sql)){
-				$this->addImage($occArr,$this->conn->insert_id,$tid);
+				$statusStr = $this->addImage($occArr,$this->conn->insert_id,$tid);
+			}
+			else{
+				$statusStr = "ERROR: Failed to load observation record";
+				$statusStr .= "ERROR: Failed to load observation record";
 			}
 		}
+		return $statusStr?$statusStr:"SUCCESS: Image loaded successfully!";
 	}
 
 	private function addImage($occArr,$occId,$tid){
@@ -166,12 +171,11 @@ class ObservationSubmitManager {
 					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.
 					($owner?'"'.$owner.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
 				//echo $sql;
-				$status = '';
 				if($this->conn->query($sql)){
 					$this->setPrimaryImageSort();
 				}
 				else{
-					$status = 'loadImageData: '.$this->conn->error.'<br/>SQL: '.$sql;
+					$status .= 'loadImageData: '.$this->conn->error.'<br/>SQL: '.$sql;
 				}
 			}
 		}
