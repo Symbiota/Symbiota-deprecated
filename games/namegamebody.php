@@ -163,7 +163,7 @@ function confirmlistchange(a)
 	{
 		//<!-----------------------------Do stuff here to change the word list----------------------------------->
 		popup('popUpDiv');
-		getWordList('getwordlist.php?clid='+a, 'newlist');
+		getWordList('rpc/getwordlist.php?clid='+a, 'newlist');
 		listnum = a;
 		return false;
 	}
