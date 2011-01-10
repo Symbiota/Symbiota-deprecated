@@ -94,8 +94,8 @@ class PermissionsManager{
 				$collId = substr($pName,14);
 				$perArr["RareSppReader"][$collId] = $collId;
 			}
-			elseif(substr($pName,0,3) == "ClAdmin-"){
-				$clid = substr($pName,3);
+			elseif(strpos($pName,"ClAdmin-") !== false){
+				$clid = substr($pName,8);
 				$perArr["ClAdmin"][$clid] = $clid;
 			}
 			else{
@@ -133,7 +133,7 @@ class PermissionsManager{
 			}
 			$result->close();
 		}
-		
+
 		//If there are checklist, fetch names
 		if(array_key_exists("ClAdmin",$perArr)){
 			$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
@@ -144,10 +144,10 @@ class PermissionsManager{
 			}
 			$result->close();
 		}
-		
+
 		return $perArr;
 	}
-	
+
 	public function deletionPermissions($delStr, $id){
 		$sql = "DELETE FROM userpermissions WHERE uid = $id AND pname = '".$delStr."'";
 		$this->conn->query($sql);
@@ -162,12 +162,11 @@ class PermissionsManager{
 		}
 	}
 	
-	public function getAddCollectionArr($currentCollAdmin){
+	public function getAddCollectionArr($collKey){
 		$returnArr = Array();
-		$collKey = Array();
-		if($currentCollAdmin) $collKey = str_replace("CollAdmin-","",array_keys($currentCollAdmin));
-		$sql = "SELECT c.collid, c.collectionname FROM omcollections c ";
-		if($collKey) $sql .= "WHERE c.collid NOT IN(".implode(",",$collKey).") ORDER BY c.collectionname";
+		$sql = 'SELECT c.collid, c.collectionname FROM omcollections c ';
+		if($collKey) $sql .= 'WHERE c.collid NOT IN('.implode(',',$collKey).') ';
+		$sql .= 'ORDER BY c.collectionname';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -176,12 +175,11 @@ class PermissionsManager{
 		return $returnArr;
 	} 
 
-	public function getAddChecklistArr($currentCl){
+	public function getAddChecklistArr($clKeys){
 		$returnArr = Array();
-		$clKeys = Array();
-		if($currentCl) $clKeys = str_replace("ClAdmin-","",array_keys($currentCl));
-		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ";
-		if($currentCl) $sql .= "WHERE cl.clid NOT IN(".implode(",",$clKeys).") ORDER BY cl.name";
+		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl ';
+		if($clKeys) $sql .= 'WHERE cl.clid NOT IN('.implode(',',$clKeys).') ';
+		$sql .= 'ORDER BY cl.name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
