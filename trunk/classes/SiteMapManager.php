@@ -22,8 +22,11 @@ class SiteMapManager{
 		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+		if($rs){
+			while($row = $rs->fetch_object()){
+				$returnArr[$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+			}
+			$rs->close();
 		}
 		return $returnArr;
 	}
@@ -33,13 +36,16 @@ class SiteMapManager{
 		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
 			"WHERE cl.access = 'public' ";
 		if($clArr){
-			$sql .= "AND cl.clid IN(".implode(",",$this->clList).") ";
+			$sql .= "AND cl.clid IN(".implode(",",$clArr).") ";
 		}
 		$sql .= "ORDER BY cl.name";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+		if($rs){
+			while($row = $rs->fetch_object()){
+				$returnArr[$row->clid] = $row->name;
+			}
+			$rs->close();
 		}
 		return $returnArr;
 	}
@@ -53,9 +59,12 @@ class SiteMapManager{
 		$sql .= "ORDER BY p.projname";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->pid]["name"] = $row->projname;
-			$returnArr[$row->pid]["managers"] = $row->managers;
+		if($rs){
+			while($row = $rs->fetch_object()){
+				$returnArr[$row->pid]["name"] = $row->projname;
+				$returnArr[$row->pid]["managers"] = $row->managers;
+			}
+			$rs->close();
 		}
 		return $returnArr;
 	}
