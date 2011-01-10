@@ -187,7 +187,7 @@ getpic('getpic.php?species='+wordanswer);
 </script>
 </div>
 <script type="text/javascript">
-getWordList('getwordlist.php?clid=<?echo $clist;?>', 'newlist');
+getWordList('rpc/getwordlist.php?clid=<?echo $clist;?>', 'newlist');
 list='<?echo $listname;?>';
 
 //document.getElementById("attempt").innerHTML="";
@@ -357,7 +357,7 @@ function newWord()
 		// ////////////////////////////////////////////////////////////////////////////////Does this when you run out of words in current list
 		//generate()
 		popup('listreload');
-		getWordList('getwordlist.php?clid=<?echo $clist;?>', 'reloadlist');
+		getWordList('rpc/getwordlist.php?clid=<?echo $clist;?>', 'reloadlist');
 		return
 	}
 	
