@@ -162,7 +162,7 @@ function confirmlistchange(a)
 	if (confirmchange== true)
 	{
 		//<!-----------------------------Do stuff here to change the word list----------------------------------->
-		popup('popUpDiv');
+		//popup('popUpDiv');
 		getWordList('rpc/getwordlist.php?clid='+a, 'newlist');
 		listnum = a;
 		return false;
@@ -356,7 +356,7 @@ function newWord()
 	{ // generate random list 
 		// ////////////////////////////////////////////////////////////////////////////////Does this when you run out of words in current list
 		//generate()
-		popup('listreload');
+		//popup('listreload');
 		getWordList('rpc/getwordlist.php?clid=<?echo $clist;?>', 'reloadlist');
 		return
 	}
@@ -457,7 +457,7 @@ function newWord()
 	document.getElementById("attempt").innerHTML=temp // display empty places
 	if ( firstload == "1")
 	{
-		popup('popUpDiv')
+		//popup('popUpDiv')
 		firstload = "0"
 	}
 	//document.getElementById("newgame").innerHTML="New Game" 
