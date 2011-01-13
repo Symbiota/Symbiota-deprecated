@@ -619,6 +619,7 @@ class ChecklistManager {
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+ 		$newStr = str_replace('"',"'",$newStr);
  		return $newStr;
  	}
 }
