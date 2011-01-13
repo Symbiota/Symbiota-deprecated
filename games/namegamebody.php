@@ -108,14 +108,14 @@ function getWordList(strURL, referer)
 					//document.getElementById('wordlistinsert').innerHTML=req.responseText;
 					eval(req.responseText);
 					generate();
-					if (referer == 'newlist')
+					/*if (referer == 'newlist')
 					{
 						popup('popUpDiv')
 					}
 					else
 					{
 						popup('listreload')
-					}
+					}*/
 					//alert("Plant list has been changed");
 				} else
 				{
@@ -909,7 +909,7 @@ The "Show Family"/wild card cannot be used if you are down to your last guess<br
 				<u><b>Loading...</b></u></center></td><td width = "10">
 				<div align = right>
 					<font size = "5">
-					<!--<a href="#" onclick="popup('popUpDiv')">X</a>-->
+					<a href="#" onclick="popup('popUpDiv')">X</a>
 					</font>
 				</div>
 				</td></tr></table>
@@ -942,7 +942,7 @@ The "Show Family"/wild card cannot be used if you are down to your last guess<br
 				<u><b>Loading...</b></u></center></td><td width = "10">
 				<div align = right>
 					<font size = "5">
-					<!--<a href="#" onclick="popup('popUpDiv')">X</a>-->
+					<a href="#" onclick="popup('popUpDiv')">X</a>
 					</font>
 				</div>
 				</td></tr></table>
