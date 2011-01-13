@@ -200,7 +200,8 @@ hangpics=[
 ["<? echo $imgloc; ?>wwoman0.gif","<? echo $imgloc; ?>wwoman1.gif","<? echo $imgloc; ?>wwoman2.gif","<? echo $imgloc; ?>wwoman3.gif","<? echo $imgloc; ?>wwoman4.gif","<? echo $imgloc; ?>wwoman5.gif","<? echo $imgloc; ?>gallow.gif","<? echo $imgloc; ?>gallow5.gif","<? echo $imgloc; ?>gallow4.gif","<? echo $imgloc; ?>gallow3.gif","<? echo $imgloc; ?>gallow2.gif","<? echo $imgloc; ?>gallow1.gif","<? echo $imgloc; ?>spacer.gif","<? echo $imgloc; ?>wwomanwin.gif"],
 ["<? echo $imgloc; ?>flower0.gif","<? echo $imgloc; ?>flower1.gif","<? echo $imgloc; ?>flower2.gif","<? echo $imgloc; ?>flower3.gif","<? echo $imgloc; ?>flower4.gif","<? echo $imgloc; ?>flower5.gif","<? echo $imgloc; ?>flower6.gif","<? echo $imgloc; ?>flower7.gif","<? echo $imgloc; ?>flower8.gif","<? echo $imgloc; ?>flower9.gif","<? echo $imgloc; ?>flower10.gif","<? echo $imgloc; ?>flower11.gif","<? echo $imgloc; ?>flower12.gif","<? echo $imgloc; ?>flowerwin.gif"],
 ["<? echo $imgloc; ?>plant0.gif","<? echo $imgloc; ?>plant1.gif","<? echo $imgloc; ?>plant2.gif","<? echo $imgloc; ?>plant3.gif","<? echo $imgloc; ?>plant4.gif","<? echo $imgloc; ?>plant5.gif","<? echo $imgloc; ?>plant6.gif","<? echo $imgloc; ?>plant7.gif","<? echo $imgloc; ?>plant8.gif","<? echo $imgloc; ?>plant9.gif","<? echo $imgloc; ?>plant10.gif","<? echo $imgloc; ?>plant11.gif","<? echo $imgloc; ?>plant12.gif","<? echo $imgloc; ?>plantwin.gif"],
-["<? echo $imgloc; ?>tempcover0.jpg","<? echo $imgloc; ?>tempcover1.jpg","<? echo $imgloc; ?>tempcover2.jpg","<? echo $imgloc; ?>tempcover3.jpg","<? echo $imgloc; ?>tempcover4.jpg","<? echo $imgloc; ?>tempcover5.jpg","<? echo $imgloc; ?>tempcover6.jpg","<? echo $imgloc; ?>plant7.gif","<? echo $imgloc; ?>plant8.gif","<? echo $imgloc; ?>plant9.gif","<? echo $imgloc; ?>plant10.gif","<? echo $imgloc; ?>plant11.gif","<? echo $imgloc; ?>plant12.gif","<? echo $imgloc; ?>tempcover0.jpg"]
+["<? echo $imgloc; ?>tempcover0.jpg","<? echo $imgloc; ?>tempcover1.jpg","<? echo $imgloc; ?>tempcover2.jpg","<? echo $imgloc; ?>tempcover3.jpg","<? echo $imgloc; ?>tempcover4.jpg","<? echo $imgloc; ?>tempcover5.jpg","<? echo $imgloc; ?>tempcover6.jpg","<? echo $imgloc; ?>plant7.gif","<? echo $imgloc; ?>plant8.gif","<? echo $imgloc; ?>plant9.gif","<? echo $imgloc; ?>plant10.gif","<? echo $imgloc; ?>plant11.gif","<? echo $imgloc; ?>plant12.gif","<? echo $imgloc; ?>tempcover0.jpg"],
+["<? echo $imgloc; ?>apple_0.gif","<? echo $imgloc; ?>apple_1.gif","<? echo $imgloc; ?>apple_2.gif","<? echo $imgloc; ?>apple_3.gif","<? echo $imgloc; ?>apple_4.gif","<? echo $imgloc; ?>apple_5.gif","<? echo $imgloc; ?>apple_6.gif","<? echo $imgloc; ?>apple_7.gif","<? echo $imgloc; ?>apple_8.gif","<? echo $imgloc; ?>apple_9.gif","<? echo $imgloc; ?>apple_10.gif","<? echo $imgloc; ?>apple_11.gif","<? echo $imgloc; ?>apple_12.gif","<? echo $imgloc; ?>apple_win.gif"]
 ]
 
 
@@ -526,6 +527,16 @@ function level()
 			document.getElementById("hpic").src="<? echo $imgloc; ?>tempcover3.jpg"
 	
 	}
+	else if(avatar=="8")				// IF IT'S THE REVEALING PLANT PICTURE
+	{
+		if(guessCount=="12") 	
+			document.getElementById("hpic").src="<? echo $imgloc; ?>apple_12.gif"
+		else if(guessCount=="6") 	
+			document.getElementById("hpic").src="<? echo $imgloc; ?>apple_6.gif"
+		else if(guessCount=="3") 	
+			document.getElementById("hpic").src="<? echo $imgloc; ?>apple_6.gif"
+	
+	}
 	else if(guessCount=="12")
 	{
 		document.getElementById("hpic").src="<? echo $imgloc; ?>spacer.gif"
@@ -774,6 +785,7 @@ table{}
 <div id="imageset" style="cursor:hand;cursor:pointer">
 <img onclick="mClick(this.parentNode.id,this.id,'6','<? echo $imgloc; ?>plant_on.gif','<? echo $imgloc; ?>plant_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>plant_off.gif')" src="<? echo $imgloc; ?>plant_off.gif" id="img7">
 <img onclick="mClick(this.parentNode.id,this.id,'5','<? echo $imgloc; ?>flower_on.gif','<? echo $imgloc; ?>flower_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>flower_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>flower_off.gif')" src="<? echo $imgloc; ?>flower_off.gif" id="img6">
+<img onclick="mClick(this.parentNode.id,this.id,'8','<? echo $imgloc; ?>apple_on.gif','<? echo $imgloc; ?>apple_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>apple_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>apple_off.gif')" src="<? echo $imgloc; ?>apple_off.gif" id="img8">
 <!--<img onclick="mClick(this.parentNode.id,this.id,'0','<? echo $imgloc; ?>man1_head_on.gif','<? echo $imgloc; ?>man1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>man1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>man1_head_off.gif')" src="<? echo $imgloc; ?>man1_head_off.gif" id="img1">-->
 <!--<img onclick="mClick(this.parentNode.id,this.id,'1','<? echo $imgloc; ?>woman1_head_on.gif','<? echo $imgloc; ?>woman1_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman1_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>woman1_head_off.gif')" src="<? echo $imgloc; ?>woman1_head_off.gif" id="img2">-->
 <!--<img onclick="mClick(this.parentNode.id,this.id,'2','<? echo $imgloc; ?>man2_head_on.gif','<? echo $imgloc; ?>man2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<? echo $imgloc; ?>man2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<? echo $imgloc; ?>man2_head_off.gif')" src="<? echo $imgloc; ?>man2_head_off.gif" id="img3">-->
