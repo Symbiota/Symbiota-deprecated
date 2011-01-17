@@ -343,10 +343,10 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						<div class="editfield">
 							<?php 
 								switch($taxonEditorObj->getSecurityStatus()){
-									case 1:
+									case 0:
 										echo "show all locality data";
 										break;
-									case 2:
+									case 1:
 										echo "hide locality data";
 										break;
 									default:

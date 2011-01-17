@@ -11,6 +11,37 @@ ALTER TABLE `images`
  DROP INDEX `Index_unique`,
  ADD UNIQUE INDEX `Index_unique` USING BTREE(`tid`, `url`, `occid`);
 
+CREATE TABLE `omcollsecondary` (
+  `ocsid` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `collid` INTEGER UNSIGNED NOT NULL,
+  `InstitutionCode` VARCHAR(45) NOT NULL,
+  `CollectionCode` VARCHAR(45),
+  `CollectionName` VARCHAR(150) NOT NULL,
+  `BriefDescription` VARCHAR(300),
+  `FullDescription` VARCHAR(1000),
+  `Homepage` VARCHAR(250),
+  `IndividualUrl` VARCHAR(500),
+  `Contact` VARCHAR(45),
+  `Email` VARCHAR(45),
+  `LatitudeDecimal` DOUBLE,
+  `LongitudeDecimal` DOUBLE,
+  `icon` VARCHAR(250),
+  `CollType` VARCHAR(45),
+  `SortSeq` INTEGER UNSIGNED,
+  `InitialTimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`ocsid`),
+  CONSTRAINT `FK_omcollsecondary_coll` FOREIGN KEY `FK_omcollsecondary_coll` (`collid`)
+    REFERENCES `omcollections` (`CollID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
+ENGINE = InnoDB;
+
+ALTER TABLE `omcollections` 
+ MODIFY COLUMN `InstitutionCode` VARCHAR(45) NOT NULL,
+ MODIFY COLUMN `CollectionCode` VARCHAR(45) DEFAULT NULL,
+ DROP INDEX `unique_index`;
+
 CREATE TABLE `populusrawlabels` (
   `prlid` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
   `occid` INTEGER UNSIGNED NOT NULL,
@@ -27,6 +58,29 @@ ALTER TABLE `populusrawlabels`
     ON DELETE CASCADE
     ON UPDATE CASCADE;
 
+DROP TABLE `omoccurannotations`;
+CREATE TABLE `omoccurdeterminations` (
+  `detid` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `occid` INTEGER UNSIGNED NOT NULL,
+  `identifiedBy` VARCHAR(45) NOT NULL,
+  `dateIdentified` VARCHAR(45) NOT NULL,
+  `sciname` VARCHAR(100) NOT NULL,
+  `scientificNameAuthorship` VARCHAR(100),
+  `identificationQualifier` VARCHAR(45),
+  `identificationReferences` VARCHAR(255),
+  `identificationRemarks` VARCHAR(255),
+  `sortsequence` INTEGER UNSIGNED DEFAULT 10,
+  `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`detid`),
+  CONSTRAINT `FK_omoccurdets_occid` FOREIGN KEY `FK_omoccurdets_occid` (`occid`)
+    REFERENCES `omoccurrences` (`occid`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
+ENGINE = InnoDB;
+
+ALTER TABLE `omoccurdeterminations` 
+   ADD UNIQUE INDEX `Index_unique`(`occid`, `dateIdentified`, `identifiedBy`);
 
 -- =============================================================
 -- Redefine GeneralMaintenance Procedure

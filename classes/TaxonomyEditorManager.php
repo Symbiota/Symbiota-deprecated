@@ -251,16 +251,16 @@ class TaxonomyEditorManager{
 	public function submitTaxonEdits($taxonEditArr){
 		$tid = $taxonEditArr["tid"];
 		unset($taxonEditArr["tid"]);
-		
+
 		//Update taxa record
 		$sql = "UPDATE taxa SET ";
 		foreach($taxonEditArr as $key => $value){
 			$v = trim($value);
-			if($v){
-				$sql .= $key." = \"".$v."\",";
+			if($v === ""){
+				$sql .= $key." = NULL,";
 			}
 			else{
-				$sql .= $key." = NULL,";
+				$sql .= $key." = \"".$v."\",";
 			}
 		}
 		$sql .= "sciname = \"".($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
