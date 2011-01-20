@@ -73,8 +73,8 @@ class OccurrenceIndividualManager {
 
 		$result = $this->conn->query($sql);
 		if(!$result) return 'ERROR: unable to return record data';
-		if(!$this->occId) $this->occId = $row->occid;
 		$this->occArr = $result->fetch_assoc();
+		if(!$this->occId) $this->occId = $this->occArr['occid'];
 		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] == $this->occArr['institutioncode']){
 			$sqlSec = 'SELECT c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon '.
 			'FROM omcollsecondary '.
