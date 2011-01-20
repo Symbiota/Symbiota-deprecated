@@ -394,12 +394,12 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					$iArr = $occArr['imgs'];
 					?>
 					<fieldset style="padding:10px;">
-						<legend><b>Images of Specimen</b></legend>
+						<legend><b>Specimen Images</b></legend>
 						<?php 
 						foreach($iArr as $imgId => $imgArr){
 							?>
 							<div style='float:left;text-align:center;padding:5px;'>
-								<a href='/../../imagelib/imgdetails.php?imgid=<?php echo $imgId; ?>'>
+								<a href='../../imagelib/imgdetails.php?imgid=<?php echo $imgId; ?>'>
 									<img border=1 width='150' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 								</a>
 								<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'">Large Version</a>'; ?>
