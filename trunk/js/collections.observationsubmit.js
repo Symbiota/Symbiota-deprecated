@@ -147,6 +147,27 @@ function openPointMap() {
 	if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
+function verifyLatValue(inputObj){
+	inputIsNumeric(inputObj, 'Decimal Latitude');
+	if(inputObj.value > 90 || inputObj.value < -90){
+		alert('Decimal latitude value should be between -90 and 90 degrees');
+	}
+}
+
+function verifyLngValue(inputObj){
+	inputIsNumeric(inputObj, 'Decimal Longitude');
+	if(inputObj.value > 180 || inputObj.value < -180){
+		alert('Decimal longitude value should be between -180 and 180 degrees');
+	}
+}
+
+function verifyElevValue(inputObj){
+	inputIsNumeric(inputObj, 'Coordinate Uncertainty');
+	if(inputObj.value > 4000){
+		alert('Are you sure your elevation value in meters. ' + inputObj.value + ' meters is a very high elevation.');
+	}
+}
+
 function inputIsNumeric(inputObj, titleStr){
 	if(!isNumeric(inputObj.value)){
 		alert("Input value for " + titleStr + " must be a number value only! " );

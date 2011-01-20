@@ -352,7 +352,7 @@ class OccurrenceManager{
 			$conn = $this->getConnection();
 			$tempCollArr = Array();
 			if(array_key_exists("db",$this->searchTermsArr)) $tempCollArr = explode(";",$this->searchTermsArr["db"]);
-			$sql = "SELECT c.CollId, c.CollectionCode, c.CollectionName, c.Homepage, ".
+			$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.Homepage, ".
 				"c.IndividualUrl, c.icon, c.colltype, c.Contact, c.email, c.SortSeq ".
 				"FROM omcollections c ";
 			if($catId){
@@ -362,8 +362,9 @@ class OccurrenceManager{
 			//echo "<div>SQL: ".$sql."</div>";
 			$result = $conn->query($sql);
 			while($row = $result->fetch_object()){
-				$collId = $row->CollId;
-				$this->collectionArr[$collId]["collectioncode"] = $row->CollectionCode;
+				$collId = $row->collid;
+				$this->collectionArr[$collId]["institutioncode"] = $row->institutioncode;
+				$this->collectionArr[$collId]["collectioncode"] = $row->collectioncode;
 				$this->collectionArr[$collId]["collectionname"] = $row->CollectionName;
 				$this->collectionArr[$collId]["homepage"] = $row->Homepage;
 				$this->collectionArr[$collId]["icon"] = $row->icon;
@@ -404,7 +405,7 @@ class OccurrenceManager{
 			if(!$this->collectionArr) $this->getCollectionArr();
 			$tempArr = Array();
 			foreach($this->getCollectionArr() as $collId => $fieldArr){
-				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["collectioncode"];
+				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["institutioncode"];
 			}
 			sort($tempArr);
 			if(count($this->getCollectionArr()) == count($tempArr)){

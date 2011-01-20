@@ -14,16 +14,8 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
     <title><?php echo $defaultTitle; ?> Collections Search Results</title>
     <link rel="stylesheet" href="../css/main.css" type="text/css">
+	<script type="text/javascript" src="../js/googleanalytics.js"></script>
 	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
 
 		function addVoucherToCl(occid,clid,tid){
 			var vXmlHttp = GetXmlHttpObject();
@@ -37,7 +29,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 				if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
 					var rStr = vXmlHttp.responseText;
 					if(rStr == "1"){
-						alert("Success! Voucher add to checklists");
+						alert("Success! Voucher added to checklist.");
 					}
 					else{
 						alert(rStr);
@@ -153,9 +145,11 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		<table id="omlisttable" cellspacing="4">
 		<?php 
 	    foreach($specimenArray as $collId => $specData){
-	        $collectionData = $collectionArr[$collId];
-	    	$collCode = $collectionData["collectioncode"];
-	        $dispName = $collectionData["collectionname"];
+			$collectionData = $collectionArr[$collId];
+			$instCode1 = $collectionData["institutioncode"];
+			if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
+
+	    	$dispName = $collectionData["collectionname"];
 	        $icon = $collectionData["icon"];
 	        ?>
 			<tr>
@@ -170,14 +164,22 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			</tr>
 			<?php 
 	        foreach($specData as $dbpk => $fieldArr){
-	        	?>
+			$instCode2 = "";
+				if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
+					$instCode2 = $fieldArr["institutioncode"];
+					if($fieldArr["collectioncode"]) $instCode2 .= ":".$fieldArr["collectioncode"];
+				}
+				?>
 				<tr>
 					<td rowspan="4" width='60' valign='top' align='center'>
-						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
-	                    	<img align='absbottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo $collCode; ?>' Collection Statistics' />
+						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
+	                    	<img align='absbottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
 	                    </a>
 	                    <div style='font-weight:bold;font-size:75%;'>
-	                    	<?php echo $collCode; ?>
+	                    	<?php 
+	                    	echo $instCode1;
+							if($instCode2) echo "<br/>".$instCode2;
+	                    	?>
 	                    </div>
 					</td>
 					<td colspan='3'>

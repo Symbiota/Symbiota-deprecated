@@ -33,7 +33,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
  		$this->dwcSql .= $this->getSqlWhere();
-		$this->dwcSql .= "ORDER BY c.CollectionCode, o.SciName";
+		$this->dwcSql .= "ORDER BY c.institutioncode, o.SciName";
  	}
 
 	public function __destruct(){
@@ -132,7 +132,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $this->getSqlWhere();
-		$sql .= "ORDER BY c.CollectionCode, o.SciName";
+		$sql .= "ORDER BY c.institutioncode, o.SciName";
 		//echo $sql;
 		$canReadRareSpp = false;
 		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
@@ -208,7 +208,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     	global $userRights, $defaultTitle;
 		$sql = "SELECT o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, ". 
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
-			"c.CollectionName, c.CollectionCode, o.occurrenceID, o.occid ".
+			"c.CollectionName, c.institutioncode, o.occurrenceID, o.occid ".
 		"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $this->getSqlWhere();
@@ -222,7 +222,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		else{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
-		$sql .= "ORDER BY c.CollectionCode, o.ScientificName";
+		$sql .= "ORDER BY c.institutioncode, o.ScientificName";
 		//echo $sql;
 		//Output checklist
     	$fileName = $defaultTitle;
@@ -245,7 +245,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		//Write column names out to file
 		if($result){
 			echo "\"DecimalLatitude\",\"DecimalLongitude\",\"GeodeticDatum\",\"CoordinateUncertaintyInMeters\",\"GeoreferenceProtocol\",\"GeoreferenceSources\",".
-				"\"GeoreferenceVerificationStatus\",\"GeoreferenceRemarks\",\"CollectionName\",\"CollectionCode\",\"occurrenceID\",\"occid\"\n";
+				"\"GeoreferenceVerificationStatus\",\"GeoreferenceRemarks\",\"CollectionName\",\"institutioncode\",\"occurrenceID\",\"occid\"\n";
 			while($row = $result->fetch_row()){
 				echo $row[0].",".$row[1].",\"".$row[2]."\",".$row[3].",\"".$row[4]."\",\"".$row[5]."\",\"".$row[6]."\",\"".$row[7]."\",\"".$row[8]."\",\"".$row[9]."\",\"".$row[10]."\",".$row[11]."\n";
 			}
