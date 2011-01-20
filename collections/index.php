@@ -14,12 +14,12 @@
  foreach($collList as $collId => $collObj){
 	$collType = $collObj["colltype"];
 	if(stripos($collType, "specimen") !== false){
-	 	$specArr[$collId]["collectioncode"] = $collObj["collectioncode"];
+	 	$specArr[$collId]["institutioncode"] = $collObj["institutioncode"];
 	 	$specArr[$collId]["collectionname"] = $collObj["collectionname"];
 	 	$specArr[$collId]["icon"] = $collObj["icon"];
 	}
 	elseif(stripos($collType, "observation") !== false){
-	 	$obsArr[$collId]["collectioncode"] = $collObj["collectioncode"];
+	 	$obsArr[$collId]["institutioncode"] = $collObj["institutioncode"];
 		$obsArr[$collId]["collectionname"] = $collObj["collectionname"];
 	 	$obsArr[$collId]["icon"] = $collObj["icon"];
 	}
@@ -156,7 +156,7 @@
 								    </td>
 								    <td width="300px">
 							    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
-							    			<?php echo $collArr["collectionname"]." (".$collArr["collectioncode"].")"; ?>
+							    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 							    		</a>
 								    </td>
 								    <td align="center">
@@ -200,7 +200,7 @@
 								    </td>
 								    <td width="300px">
 							    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
-							    			<?php echo $collArr["collectionname"]." (".$collArr["collectioncode"].")"; ?>
+							    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 							    		</a>
 								    </td>
 								    <td align="center">
@@ -244,7 +244,7 @@
 								    </td>
 								    <td width="300px">
 							    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
-							    			<?php echo $collArr["collectionname"]." (".$collArr["collectioncode"].")"; ?>
+							    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 							    		</a>
 								    </td>
 								    <td align="center">

@@ -97,10 +97,10 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 								<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" onfocus="verifySciName()" />
 							</span>
 							<span style="margin-left:10px;">
-								<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" value="" />
+								<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
 							</span>
 							<span style="margin-left:10px;">
-								<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" value="" onchange="verifyDate(this);" />
+								<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" />
 							</span>
 							<span style="margin-left:5px;cursor:pointer;" onclick="toggle('obsextradiv')">
 								<img src="../../images/showedit.png" style="width:15px;" />
@@ -120,9 +120,9 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							Date Identified:
 							<input type="text" name="dateidentified" maxlength="45" tabindex="8" style="" value="" />
 						</div>
-						<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
+						<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2" >
 							ID References:
-							<input type="text" name="identificationreferences" tabindex="10" style="width:450px;" value="" />
+							<input type="text" name="identificationreferences" tabindex="10" style="width:450px;" title="cf, aff, etc" />
 						</div>
 						<div id="taxremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 							ID Remarks:
@@ -184,22 +184,22 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 					</div>
 					<div>
 						<span>
-							<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Latitude')" title="Decimal Format (eg 34.5436)" />
+							<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLatValue(this)" title="Decimal Format (eg 34.5436)" />
 						</span>
 						<span>
-							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="inputIsNumeric(this, 'Decimal Longitude')" title="Decimal Format (eg -112.5436)" />
+							<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLngValue(this)" title="Decimal Format (eg -112.5436)" />
 						</span>
 						<span style="cursor:pointer;" onclick="openPointMap();">
 							<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
 						</span>
 						<span>
-							<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" value="" onchange="inputIsNumeric(this, 'Coordinate Uncertainty')" title="Uncertainty in Meters" />
+							<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" onchange="inputIsNumeric(this, 'Lat/long uncertainty')" title="Uncertainty in Meters" />
 						</span>
 						<span>
 							<input type="text" name="geodeticdatum" tabindex="50" maxlength="255" style="width:80px;" value="" />
 						</span>
 						<span>
-							<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:85px;" value="" onchange="inputIsNumeric(this, 'Minumum Elevation')" title="Minumum Elevation In Meters" />
+							<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:85px;" value="" onchange="verifyElevValue(this)" title="Minumum Elevation In Meters" />
 						</span>
 						<span>
 							<input type="text" name="georeferenceremarks" tabindex="70" maxlength="255" style="width:250px;" value="" />
@@ -225,15 +225,15 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 						<input type="text" name="occurrenceremarks" tabindex="88" style="width:600px;" value="" title="Occurrence Remarks" />
 					</div>
 					<div style="padding:3px;">
-						<span>
+						<span title="e.g. sterile, flw, frt, flw/frt ">
 							Reproductive Condition:
 							<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="" />
 						</span>
-						<span style="margin-left:30px;">
+						<span style="margin-left:30px;" title="e.g. planted, seeded, garden excape, etc">
 							Establishment Means:
 							<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="" />
 						</span>
-						<span style="margin-left:15px;">
+						<span style="margin-left:15px;" title="Click if specimen was cultivated ">
 							<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="" />
 							Cultivated
 						</span>
@@ -246,8 +246,8 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 						<input type='hidden' name='MAX_FILE_SIZE' value='1200000' />
 						<div>
-							Image 1: <input name='imgfile1' type='file' size='70'/>
-							<input type="button" value="Reset" style="background-color:lightyellow;" onclick="document.obsform.imgfile1.value = ''">
+							Image 1: <input name='imgfile1' type='file' size='70' style="background-color:lightyellow;"/>
+							<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
 						</div>
 						<div style="margin:5px;">
 							Caption: 
@@ -299,7 +299,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 				</fieldset>
 				<div>
 					<b>Observation Project:</b> 
-					<select name="collid">
+					<select name="collid" style="background-color:FFFF99;">
 						<option value="">Select an Observation Project</option>
 						<option value="">-----------------------------------</option>
 						<?php 

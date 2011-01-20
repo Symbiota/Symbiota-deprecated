@@ -1,23 +1,33 @@
 <?php
- //error_reporting(E_ALL);
- include_once('../../config/symbini.php');
- include_once($serverRoot.'/config/dbconnection.php');
- header("Content-Type: text/html; charset=".$charset);
- 
- $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):"";
- $collectionCode = array_key_exists("collcode",$_REQUEST)?trim($_REQUEST["collcode"]):"";
- $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
- $occId = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):"";
+//error_reporting(E_ALL);
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/classes/OccurrenceIndividualManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
- $indManager = new IndividualRecord();
- if($collId) $indManager->setCollId($collId); 
- if($collectionCode) $indManager->setCollectionCode($collectionCode);
- if($pk) $indManager->setDbpk($pk);
- if($occId) $indManager->setOccId($occId);
+$occId = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
+$collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
+$pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
 
- $htmlVec = Array();
- $htmlVec = $indManager->getData();
- 
+$indManager = new OccurrenceIndividualManager($occId);
+if($collId) $indManager->setCollId($collId); 
+if($pk) $indManager->setDbpk($pk);
+
+$occArr = $indManager->getOccData();
+
+$displayLocality = false;
+$isEditor = false;
+if($symbUid){
+	if(array_key_exists("SuperAdmin",$userRights) 
+	|| (array_key_exists('CollAdmin',$userRights) && in_array($occArr['occid'],$userRights['CollAdmin']))
+	|| (array_key_exists('CollEditor',$userRights) && in_array($occArr['occid'],$userRights['CollEditor']))){
+		$displayLocality = true;
+		$isEditor = true;
+	}
+	elseif(!$occArr['localitysecurity'] || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
+	|| (array_key_exists("RareSppReader",$userRights) && in_array($occArr['collid'],$userRights["RareSppReader"]))){
+		$displayLocality = true;
+	}
+}
 ?>
 <html>
 <head>
@@ -49,17 +59,6 @@
 			}
 		}
 	</script>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
 </head>
 
 <body>
@@ -68,34 +67,380 @@
 	include($serverRoot."/header.php");
 ?>
 	<!-- This is inner text! -->
-	<div id="innertext">
-		<div style="float:left;margin:15px;text-align:center;font-weight:bold;">
-			<img border='1' height='50' width='50' src='../../<?php echo $indManager->getIcon(); ?>'/><br/>
-			<?php echo $indManager->getCollectionCode(); ?>
-		</div>
-		<div style="float:left;margin:25px;">
-			<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
-				<?php echo $indManager->getCollectionName(); ?>
-			</span>
-		</div>
-		<div style="clear:both;width:550px;">
-	        <?php
-			foreach($htmlVec as $value){
-	                echo $value."\n";
-	               }
-			if(!$htmlVec){
-	               echo "<div><b>There is a problem retrieving data. <br>Please try again later.</b></div>";
-	           }
-	
-	           echo "<div>&nbsp;</div>";
-	           if($indManager->getIndividualUrl()){
-				$indUrl = $indManager->getIndividualUrl();
-				$indUrl = str_replace("--PK--",$indManager->getDbpk(),$indUrl);
-	           	echo "<div>".$indManager->getCollectionName()." <a href='".$indUrl."'> display page</a></div>";
-	           }
-			echo "<div>For additional information on this specimen, please contact <a class='bodylink' href='mailto:".$indManager->getContactEmail()."'>".$indManager->getContactName()." (".$indManager->getContactEmail().")</a></div>";
-		        
-	    	if($isAdmin || array_key_exists("ClAdmin",$userRights)){
+	<div id="innertext" style="width:600px;">
+		<?php
+		if($occArr){
+			?>
+			<div style="float:left;padding:15px;text-align:center;font-weight:bold;width:60px;">
+				<img border='1' height='50' width='50' src='../../<?php echo $occArr['icon']; ?>'/><br/>
+				<?php 
+				echo $occArr['institutioncode'];
+				if($occArr['collectioncode']) echo ':'.$occArr['collectioncode'];
+				if($occArr['secondaryinstcode']){
+					echo '<br/>';
+					echo $occArr['secondaryinstcode'];
+					if($occArr['secondarycollcode']) echo ':'.$occArr['secondarycollcode'];
+				}
+				?>
+			</div>
+			<div style="float:left;padding:25px;width:450px;">
+				<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
+					<?php echo $occArr['collectionname']; ?>
+				</span>
+			</div>
+			<div style="clear:both;">
+				<div style='clear:both;'>
+					<div style='float:left;'>
+						<b>Taxon:</b> 
+						<?php echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); ?>
+						<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?><br/>
+						<b>Family:</b> <?php echo $occArr['family']; ?>
+					</div>
+					<div style='float:right;'>
+						<b>Accession #:</b> <?php echo $occArr['catalognumber']; ?>
+						<?php 
+						if($occArr['occurrenceid']){
+							?> 
+							<div title="Global Unique Identifier">
+								<b>GUID: </b>
+								<?php echo $occArr['occurrenceid']; ?>
+							</div>
+							<?php 
+						}
+						if($occArr['othercatalognumbers']){
+							?>
+							<div style="float:right;padding:2px;background-color:#EEEEEE;border:1px solid #AAC7E9;">
+								<b><?php echo $occArr['ownerinstitutioncode']; ?>:</b>
+								<?php echo $occArr['othercatalognumbers']; ?>
+							</div>
+							<?php 
+						}
+						?>
+					</div>
+				</div>
+				<div style="clear:both;">
+					<?php 
+					if($occArr['identifiedby']){ 
+						?>
+						<div>
+							<b>Determiner:</b> <?php echo $occArr['identifiedby']; ?>
+							<?php if($occArr['dateidentified']) echo ' ('.$occArr['dateidentified'].')'; ?>
+						</div>
+						<?php 
+					} 
+					if($occArr['identificationremarks']){ 
+						?>
+						<div style="margin-left:10px;">
+							<b>ID Remarks:</b>
+							<?php echo $occArr['identificationremarks']; ?>
+						</div>
+						<?php 
+					} 
+					if($occArr['identificationreferences']){ ?>
+						<div style="margin-left:10px;">
+							<b>ID References:</b>
+							<?php echo $occArr['identificationreferences']; ?>
+						</div>
+						<?php 
+					}
+					if(array_key_exists('dets',$occArr)){
+						?>
+						<div class="detdiv" style="margin-left:10px;cursor:pointer;" onclick="toggle('detdiv');">
+							<img src="../../images/plus.gif" style="border:0px;" />
+							Show Determination History
+						</div>
+						<div class="detdiv" style="display:none;">
+							<div style="margin-left:10px;cursor:pointer;" onclick="toggle('detdiv');">
+								<img src="../../images/minus.gif" style="border:0px;" />
+								Hide Determination History
+							</div>
+							<fieldset style="width:350px;margin:5px 0px 10px 10px;border:1px solid grey;">
+								<legend><b>Determination History</b></legend>
+								<?php
+								$firstIsOut = false;
+								$dArr = $occArr['dets'];
+								foreach($dArr as $detId => $detArr){
+								 	if($firstIsOut) echo '<hr />';
+									 	$firstIsOut = true;
+								 	?>
+									 <div style="margin:10px;">
+									 	<?php 
+									 	if($detArr['qualifier']) echo $detArr['qualifier']; 
+									 	echo ' <b><i>'.$detArr['sciname'].'</i></b> ';
+									 	echo $detArr['author']."\n";
+									 	?>
+									 	<div style="">
+									 		<b>Determiner: </b>
+									 		<?php echo $detArr['identifiedby']; ?>
+									 	</div>
+									 	<div style="">
+									 		<b>Date: </b>
+									 		<?php echo $detArr['date']; ?>
+									 	</div>
+									 	<?php 
+									 	if($detArr['ref']){ ?>
+										 	<div style="">
+										 		<b>ID References: </b>
+										 		<?php echo $detArr['ref']; ?>
+										 	</div>
+									 		<?php 
+									 	} 
+									 	if($detArr['notes']){ 
+									 		?>
+										 	<div style="">
+										 		<b>ID Remarks: </b>
+										 		<?php echo $detArr['notes']; ?>
+										 	</div>
+									 		<?php 
+									 	}
+									 	?>
+									 </div>
+									<?php 
+								}
+								?>
+							</fieldset>
+						</div>
+						<?php 
+					}
+					if($occArr['typestatus']){ ?>
+						<div>
+							<b>Type Status:</b>
+							<?php echo $occArr['typestatus']; ?>
+						</div>
+						<?php 
+					} 
+					?>
+				</div>
+				<div style="clear:both;">
+					<div style="float:left;">
+						<b>Collector:</b> 
+						<?php 
+						echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
+						echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
+						?>
+					</div>
+					<div style="float:right;">
+						<?php
+						if($occArr['eventdate']){
+							?>
+							<div>
+								<b>Collection Date: </b> 
+								<?php 
+								echo $occArr['eventdate']; 
+								if($occArr['eventdateend']){
+									echo ' - '.$occArr['eventdateend'];
+								}
+								?>
+							</div>
+							<?php 
+						}
+						if($occArr['verbatimeventdate']){
+							?>
+							<div>
+								<b>Verbatim Collection Date: </b> 
+								<?php echo $occArr['verbatimeventdate']; ?>
+							</div>
+							<?php 
+						}
+						?>
+					</div> 
+				</div>
+				<div style="clear:both;">
+					<?php 
+					if($occArr['associatedcollectors']){ 
+						?>
+						<div>
+							<b>Additional Collectors:</b> 
+							<?php echo $occArr['associatedcollectors']; ?>
+						</div>
+						<?php 
+					}
+					?>
+				</div>
+				<?php 
+				$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').'; ';
+				$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').'; ';
+				if($occArr['county']) $localityStr1 .= $occArr['county'].'; ';
+				?>
+				<div>
+					<b>Locality:</b>
+					<?php 
+					echo $localityStr1;
+					if($displayLocality){
+						echo $occArr['locality'];
+					}
+					?>
+				</div>
+				<?php 
+				if($displayLocality){
+					if($occArr['decimallatitude']){
+						?>
+						<div style="margin-left:10px;">
+							<?php 
+							echo $occArr['decimallatitude'].'&nbsp;&nbsp;'.$occArr['decimallongitude'];
+							if($occArr['coordinateuncertaintyinmeters']) echo ' +-'.$occArr['coordinateuncertaintyinmeters']; 
+							if($occArr['geodeticdatum']) echo '&nbsp;&nbsp;'.$occArr['geodeticdatum'];
+							?>
+						</div>
+						<?php 
+					}
+					if($occArr['verbatimcoordinates']){
+						?>
+						<div style="margin-left:10px;">
+							<b>Verbatim Coordinates: </b>
+							<?php echo $occArr['verbatimcoordinates']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['georeferenceremarks']){
+						?>
+						<div style="margin-left:10px;clear:both;">
+							<b>Georeference Remarks: </b>
+							<?php echo $occArr['georeferenceremarks']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['minimumelevationinmeters'] || $occArr['verbatimelevation']){
+						?>
+						<div style="clear:both;margin-left:10px;">
+							<div style="float:left;">
+								<b>Elevation:</b>
+								<?php 
+								echo $occArr['minimumelevationinmeters'];
+								if($occArr['maximumelevationinmeters']){
+									echo ' - '.$occArr['maximumelevationinmeters'];
+								} 
+								?>
+								meters
+							</div>
+							<?php
+							if($occArr['verbatimelevation']){
+								?>
+								<div style="float:right;">
+									<b>Verbatim Elevation: </b>
+									<?php echo $occArr['verbatimelevation']; ?>
+								</div>
+								<?php 
+							}
+							?>
+						</div>
+						<?php 
+					}
+				}
+				else{
+					?>
+					<div style='color:red;'>This species has a sensitive status.</div>
+					<div>For more information, please contact collection manager below.</div>
+					<?php 
+				}
+				if($occArr['habitat']){ 
+					?>
+					<div style="clear:both;">
+						<b>Habitat:</b> 
+						<?php echo $occArr['habitat']; ?>
+					</div>
+					<?php 
+				}
+				if($occArr['associatedtaxa']){ 
+					?>
+					<div style="clear:both;">
+						<b>Associated Species:</b> 
+						<?php echo $occArr['associatedtaxa']; ?>
+					</div>
+					<?php 
+				}
+				if($occArr['dynamicproperties']){ 
+					?>
+					<div style="clear:both;">
+						<b>Description:</b> 
+						<?php echo $occArr['dynamicproperties']; ?>
+					</div>
+					<?php 
+				}
+				if($occArr['reproductivecondition']){ 
+					?>
+					<div style="clear:both;">
+						<b>Phenology:</b> 
+						<?php echo $occArr['reproductivecondition']; ?>
+					</div>
+					<?php 
+				}
+				$noteStr = '';
+				if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
+				if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
+				if($occArr['cultivationstatus']) $noteStr .= "; Cultivated";
+				if($noteStr){ 
+					?>
+					<div style="clear:both;">
+						<b>Notes:</b>
+						<?php echo substr($noteStr,2); ?>
+					</div>
+					<?php 
+				}
+				if($occArr['disposition']){
+					?>
+					<div style="clear:both;">
+						<b>Duplicates sent to: </b>
+						<?php echo $occArr['disposition']; ?>
+					</div>
+					<?php 
+				}
+				?>
+			</div>
+			<div style="clear:both;padding:10px;">
+				<?php 
+				if(array_key_exists('imgs',$occArr)){
+					$iArr = $occArr['imgs'];
+					?>
+					<fieldset style="padding:10px;">
+						<legend><b>Images of Specimen</b></legend>
+						<?php 
+						foreach($iArr as $imgId => $imgArr){
+							?>
+							<div style='float:left;text-align:center;padding:5px;'>
+								<a href='/../../imagelib/imgdetails.php?imgid=<?php echo $imgId; ?>'>
+									<img border=1 width='150' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
+								</a>
+								<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'">Large Version</a>'; ?>
+							</div>
+							<?php 
+						}
+						?>
+					</fieldset>
+					<?php 
+				}
+				?>
+			</div>
+			<?php 
+			if($occArr['individualurl']){
+				$indUrl = str_replace('--PK--',$occArr['dbpk'],$occArr['individualurl']);
+				echo '<div style="margin-top:10px;clear:both;">'.$occArr['collectionname'].' <a href="'.$indUrl.'"> display page</a></div>';
+			}
+			?>
+			<div style="margin-top:10px;clear:both;">
+				For additional information on this specimen, please contact: 
+				<?php 
+				$emailSubject = $defaultTitle.' occurrence #'.$occArr['occid'];
+				$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/individual.php?occid='.$occArr['occid'];
+				$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
+				?>
+				<a href="mailto:<?php echo $occArr['email'].'?'.$emailRef; ?>">
+					<?php echo $occArr['contact'].' ('.$occArr['email'].')'; ?>
+				</a>
+			</div>
+			<?php 
+			if($isEditor){
+				?>
+				<div style="margin:10px 0px;">
+					You are authorized to edit this record: 
+					<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
+						Open Occurrence Editor
+					</a>
+				</div>
+				<?php
+			}
+
+			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 				?>
 	    		<div style='margin-top:15px;'>
 					<div class='voucheredit' style="display:block;">
@@ -112,42 +457,39 @@
 							Hide Voucher Editing Box
 						</div>
 						<fieldset style='margin:5px 0px 0px 0px;'>
-    						<legend>Voucher Assignment:</legend>
+	    					<legend>Voucher Assignment:</legend>
 							<?php
-				    		$voucherTid = $indManager->getTid();
-				    		$voucherOccId = $indManager->getOccId();
-				    		if($voucherTid){
-								$clArr = $indManager->getChecklists($paramsArr["uid"]);
-								if($clArr){
-							?>
-							<form action="../../checklists/clsppeditor.php" onsubmit="return checkVoucherForm(this);">
-								<div style='margin:5px 0px 0px 10px;'>
-								Add as voucher to checklist: 
-								<?php 
-								echo "<input name='voccid' type='hidden' value='".$voucherOccId."'>\n";
-								echo "<input name='tid' type='hidden' value='".$voucherTid."'>\n";
-								echo "<select id='clid' name='clid'>\n";
-					  			echo "<option value='0'>Select a Checklist</option>\n";
-					  			echo "<option value='0'>--------------------------</option>\n";
-					  			$clid = (array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0);
-					  			foreach($clArr as $clKey => $clValue){
-					  				echo "<option value='".$clKey."' ".($clid==$clKey?"SELECTED":"").">$clValue</option>\n";
-								}
-								echo "</select>\n";
-								?>
-								</div>
-								<div style='margin:5px 0px 0px 10px;'>
-									Notes: 
-									<input name='vnotes' type='text' size='50' title='Viewable to public'>
-								</div>
-								<div style='margin:5px 0px 0px 10px;'>
-									Editor Notes: 
-									<input name='veditnotes' type='text' size='50' title='Viewable only to checklist editors'>
-								</div>
-								<div style='margin:5px 0px 0px 10px;'>
-									<input type='submit' name='action' value='Add Voucher'>
-								</div>
-							</form>
+				    		if($occArr['tidinterpreted']){
+								if($clArr = $indManager->getChecklists($paramsArr)){
+									?>
+									<form action="../../checklists/clsppeditor.php" onsubmit="return checkVoucherForm(this);">
+										<div style='margin:5px 0px 0px 10px;'>
+											Add as voucher to checklist: 
+											<input name='voccid' type='hidden' value='<?php echo $occArr['occid']; ?>'>
+											<input name='tid' type='hidden' value='<?php echo $occArr['tidinterpreted']; ?>'>
+											<select id='clid' name='clid'>
+								  				<option value='0'>Select a Checklist</option>
+								  				<option value='0'>--------------------------</option>
+								  				<?php 
+									  			$clid = (array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0);
+									  			foreach($clArr as $clKey => $clValue){
+									  				echo "<option value='".$clKey."' ".($clid==$clKey?"SELECTED":"").">$clValue</option>\n";
+												}
+												?>
+											</select>
+										</div>
+										<div style='margin:5px 0px 0px 10px;'>
+											Notes: 
+											<input name='vnotes' type='text' size='50' title='Viewable to public'>
+										</div>
+										<div style='margin:5px 0px 0px 10px;'>
+											Editor Notes: 
+											<input name='veditnotes' type='text' size='50' title='Viewable only to checklist editors'>
+										</div>
+										<div style='margin:5px 0px 0px 10px;'>
+											<input type='submit' name='action' value='Add Voucher'>
+										</div>
+									</form>
 							<?php 
 								}
 				    		}
@@ -158,317 +500,29 @@
 				    			</div>
 				    			<ul>
 				    			<?php 
-				    				if(!$voucherTid){
+				    				if(!$occArr['tidinterpreted']){
 				    					echo "<li>Scientific name is not in Taxonomic Thesaurus (name maybe misspelled)";
 				    					
 				    				}
 				    			?>
 				    			</ul>
-								<div>
-									Contact 
-									<a href="mailto:<?php echo $adminEmail; ?>?subject=bad voucher specimen?body=occid: <?php echo $voucherOccId."%0Atid: ".$voucherTid."%0AcollId ".$collId."%0AcollectionCode ".$collectionCode."%0Adbpk ".$pk;?>">
-										<?php echo $adminEmail; ?>
-									</a> 
-									to resolve this issue.
-								</div>
 								<?php 
 							}
 							?>
 						</fieldset>
 					</div>
 				</div>
-			<?php 
+				<?php 
 			}
-			?>
-		</div>
+        }
+        else{
+        	echo "<h2>There is a problem retrieving data.</h2><h3>Please try again later.</h3>";
+        }
+		?>
 	</div>
 	<?php
 	include($serverRoot."/footer.php");
 	?>
 </body>
 </html> 
-
-<?php
- 
- class IndividualRecord {
-    
-    private $occId;
-    private $collectionCode;
-    private $collId;
-    private $dbpk;
-    private $tid;
-    
-    private $collectionName = "";
-    private $icon = "";
-    private $homepage = "";
-    private $contactName = "";
-    private $contactEmail = "";
-    private $individualUrl;
-    
-	private $con;
-    private	$outputVec = Array();
-    
- 	public function __construct(){
- 		$this->con = MySQLiConnectionFactory::getCon("readonly");
- 	}
- 	
- 	public function __destruct(){
-		if(!($this->con === null)) $this->con->close();
-	}
-    
- 	public function getChecklists(){
- 		global $userRights;
- 		$returnArr = Array();
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("ClAdmin",$userRights)){
-			//Get all public checklist names
-			$sql = "SELECT DISTINCT c.Name, c.CLID ".
-				"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
-				"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-				"WHERE c.Access = 'public' ";
-			if(!array_key_exists("SuperAdmin",$userRights)){
-				$sql .= "AND c.clid IN(".implode(",",$userRights["ClAdmin"]).") ";
-			}
-			$sql .= "ORDER BY c.Name";
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$returnArr[$row->CLID] = $row->Name;
-			}
-			$result->close();
-		}
-		return $returnArr;
- 	}
- 	
- 	public function setOccId($o){
-		$this->occId = $o;
-	}
-	
-	public function getOccId(){
-		return $this->occId;
-	}
-	
-	public function getTid(){
-		return $this->tid;
-	}
-	
-	public function setCollId($id){
-		$this->collId = $id;
-	}
-	
-	public function setCollectionCode($code){
-		$this->collectionCode = $code;
-	}
-	
-	public function setDbpk($pk){
-		$this->dbpk = $pk;
-	}
-	
-	public function getDbpk(){
-		return $this->dbpk;
-	}
-    
-    public function getData(){
- 		global $userRights;
-    	$sql = "SELECT c.CollID, IFNULL(o.CollectionCode,c.CollectionCode) AS CollectionCode, ".
-			"c.CollectionName, c.Homepage, c.IndividualUrl, c.Contact, c.email, c.icon, o.occid, o.occurrenceID, ".
-			"o.CatalogNumber, o.occurrenceRemarks, o.TidInterpreted, o.Family, o.SciName, o.scientificNameAuthorship, o.IdentificationQualifier, o.IdentifiedBy, ".
-			"DATE_FORMAT(o.DateIdentified,'%d %M %Y') AS DateIdentified, o.Country, o.StateProvince, o.County, o.Locality, o.MinimumElevationInMeters, o.MaximumElevationInMeters, o.VerbatimElevation, ".
-			"o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, o.GeoreferenceSources, ".
-			"o.verbatimCoordinates, o.verbatimCoordinateSystem, ".
-			"DATE_FORMAT(o.eventDate,'%d %M %Y') AS eventDate, MAKEDATE(o.year,o.enddayofyear) AS eventDateEnd, o.verbatimEventDate, ".
-			"o.recordedBy, o.associatedCollectors, o.recordNumber, o.FieldNotes, o.Attributes, o.TypeStatus, o.DBPK, o.LocalitySecurity, ".
-			"o.Habitat, o.associatedTaxa, o.reproductiveCondition, o.CultivationStatus, o.ownerInstitutionCode, o.otherCatalogNumbers, ".
-			"o.reproductiveCondition ".
-			"FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID WHERE ";
-		if($this->occId) {
-			$sql .= "o.occid = ".$this->occId;
-		}
-		else{
-			$sqlWhere = "";
-			if($this->dbpk){
-				$sqlWhere .= "AND o.DBPK = '".$this->dbpk."' ";
-			}
-			if($this->collId){
-				$sqlWhere .= "AND c.CollID = ".$this->collId." ";
-			}
-			if($this->collectionCode){
-				$sqlWhere .= "AND c.CollectionCode = '".$this->collectionCode."' ";
-			}
-			if($sqlWhere){
-				$sql .= substr($sqlWhere,4);
-			}
-			else{
-            	$this->outputVec[] = "ERROR: Collection acronym was null or empty";
-				return $this->outputVec;
-			}
-		}
-		//echo "SQL: ".$sql;
-
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_object()){
-			if(!$this->occId) $this->occId = $row->occid;
-			$this->tid = $row->TidInterpreted;
-			$this->contactEmail = $row->email;
-			$this->contactName = $row->Contact;
-			$this->collectionName = $row->CollectionName;
-			if(!$this->collectionCode) $this->collectionCode = $row->CollectionCode;
-			$this->icon = $row->icon;
-			$this->homepage = $row->Homepage;
-			$this->individualUrl = $row->IndividualUrl;
-			$this->dbpk = $row->DBPK;
-
-			$accNum = $row->CatalogNumber;
-			$this->outputVec[] = "<div><div style='float:left;'><b>Family:</b> ".$row->Family."</div><div style='float:right;'><b>Accession #:</b> ".$accNum."</div></div>";
-			$this->outputVec[] = "<div style='clear:both;'>";
-			$cf = $row->IdentificationQualifier;
-            $this->outputVec[] = "<div style='float:left;'><b>Taxon:</b> ".($cf?$cf." ":"")."<i>".$row->SciName."</i> ".$row->scientificNameAuthorship."</div>";
-			if($row->otherCatalogNumbers) $this->outputVec[] = "<div style='float:right;padding:2px;background-color:#EEEEEE;border:1px solid #AAC7E9;'><b>".$row->ownerInstitutionCode."</b> ".$row->otherCatalogNumbers."</div>";
-			$this->outputVec[] = "</div>";
-            $deter = $row->IdentifiedBy;
-            $deterDate = $row->DateIdentified;
-            if($deter && $deterDate) $deter .= " (".$deterDate.")";
-            if($deter) $this->outputVec[] = "<div style='clear:both;'><b>Determiner:</b> ".$deter."</div>";
-            $collNum = $row->recordNumber;
-            $this->outputVec[] = "<div style='clear:both;'><b>Collector:</b> ".$row->recordedBy.($collNum?" (#".$collNum.")":"")."</div>";
-
-            $collDate = $row->eventDate;
-            if($row->eventDateEnd) $collDate .= " - ".$row->eventDateEnd;
-            if(!$collDate) $collDate = $row->verbatimEventDate;
-            $this->outputVec[] = "<div><b>Date Collected:</b> ".$collDate."</div>";
-            $others = $row->associatedCollectors;
-            if($others) $this->outputVec[] = "<div><b>Additional Collectors:</b> ".$others."</div>";
-            $phen = $row->reproductiveCondition;
-            if($phen) $this->outputVec[] = "<div><b>Phenology:</b> ".$phen."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>";
-			
-            $habitat = $row->Habitat; 
-            $cult = $row->CultivationStatus;
-            if($cult && $cult == "-1") $habitat .= ($habitat?"; ":"")."cultivated";
-            if($habitat) $this->outputVec[] = "<div><b>Habitat:</b> ".$habitat."</div>";
-            $assocSpp = $row->associatedTaxa;
-            if($assocSpp) $this->outputVec[] = "<div><b>Associated Species:</b> <i>".$assocSpp."</i></div>";
-            $descr = $row->Attributes; 
-            if($descr) $this->outputVec[] = "<div><b>Description:</b> ".$descr."</div>";
-            $notes = $row->FieldNotes;
-            $remark = $row->occurrenceRemarks;
-            $notes =($notes&&$remark?"; ":"").$remark;
-            if($notes) $this->outputVec[] = "<div><b>Notes:</b> ".$notes."</div>";
-            $typeStatus = $row->TypeStatus;
-            if($typeStatus) $this->outputVec[] = "<div><b>Type Status:</b> ".$typeStatus."</div>";
-            $country = $row->Country; 
-            $state = $row->StateProvince;
-            $county = $row->County;
-            $local = $country.($country?"; ":"");
-            $local .= $state.($state?"; ":"");
-            $local .= $county.($county?"; ":"");
-            $local = substr($local, 0, strlen($local) - 2);
-            $this->outputVec[] = "<div><b>Locality:</b> ".$local."</div>";
-            $secur = $row->LocalitySecurity;
-            $this->outputVec[] = "<div style='margin-left:15px;'>";
-            if(!$secur || array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) 
-            	|| array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
-            	|| (array_key_exists("RareSppReader",$userRights) && in_array($this->collId,$userRights["RareSppReader"]))){
-	            $this->outputVec[] = "<div>".$row->Locality."</div>";
-	            $latDecimal = $row->DecimalLatitude;
-	            $longDecimal = $row->DecimalLongitude;
-	            if($latDecimal && $longDecimal){
-	            	echo "<div>";
-	            	$this->outputVec[] = $latDecimal."&nbsp;&nbsp;".$longDecimal;
-		            if($row->CoordinateUncertaintyInMeters) $this->outputVec[] = "&nbsp;&nbsp;&nbsp;(+-".trim($row->CoordinateUncertaintyInMeters)." meters)";
-	            	echo "</div>";
-	            }
-	            $datum = $row->GeodeticDatum;
-	            $coordSource = $row->GeoreferenceSources;
-	            if(($datum) || ($coordSource)){
-		            $this->outputVec[] = "<div>";
-	                if($datum) $this->outputVec[] = trim($datum);
-	                if($coordSource) $this->outputVec[] = "Source: ".trim($coordSource);
-	                $this->outputVec[] = "</div>";
-	            }
-	            $verbatimCoords = $row->verbatimCoordinates;
-	            if($verbatimCoords){
-		            $this->outputVec[] = "<div>".$verbatimCoords.($row->verbatimCoordinateSystem?" (".$row->verbatimCoordinateSystem.")":"")."</div>";
-	            }
-                $elevStr = $row->MinimumElevationInMeters;
-                $elevMeterMax = $row->MaximumElevationInMeters;
-                $verbatimElevation = $row->VerbatimElevation;
-                if($elevMeterMax){
-                	$elevStr .= ($elevStr?"-":"").$elevMeterMax;
-                }
-				if(!$elevStr && $verbatimElevation) $elevStr = $verbatimElevation;
-                if($elevStr) $this->outputVec[] = "<div><b>Elevation:</b> ".$elevStr."m.</div>";
-			}
-			else{
-	            $this->outputVec[] = "<div style='color:red;'>This species has a sensitive status.</div>";
-	            $this->outputVec[] = "<div>For more information, please contact collection manager (see email below).</div>";
-			}
-            $this->outputVec[] = "</div>";
-			$this->addImages();
-		}
-        else{
-        	$this->outputVec[] = "<h1>Record was not located.</h1>";
-        }
-        $result->close();
- 		return $this->outputVec;
-    }
-        
-    private function addImages(){
-    	if($this->occId){
-	        $imgSql = "SELECT ti.url, ti.originalurl, ti.notes FROM images ti ".
-				"WHERE (ti.occid = ".$this->occId.") ORDER BY ti.sortsequence";
-	        $cnt = 0;
-	        $result = $this->con->query($imgSql);
-			$imgArr = Array();
-			while($row = $result->fetch_object()){
-				$imgUrl = $row->url;
-				$imgLarge = $row->originalurl;
-				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-					if($imgLarge) $imgLarge = $GLOBALS["imageDomain"].$imgLarge;
-				}
-	            if($imgUrl){
-	            	$cnt++;
-	              	$imgArr[] = "<div style='float:left;text-align:center;'>";
-	            	$imgArr[] = "<a href='".$imgUrl."'><img border=1 width='150' src='".$imgUrl."'></a>&nbsp;";
-	            	if($imgLarge) $imgArr[] = "<br /><a href='".$imgLarge."'>Large Version</a>";
-	            	$imgArr[] = "</div>";
-	            }
-	        }
-			$result->free();
-			if($imgArr){
-				$this->outputVec[] = "<div><hr/></div><div style='margin:15px;position:relative;'>";
-				$this->outputVec = array_merge($this->outputVec, $imgArr);
-				$this->outputVec[] = "</div><div style='clear:both;'><hr/></div>";
-			}
-    	}
-    }
-    
-    public function getCollectionCode(){
-    	return $this->collectionCode;
-    }
-
-    public function getCollectionName(){
-    	return $this->collectionName;
-    }
-
-    public function getIcon(){
-    	return $this->icon;
-    }
-    
-    public function getHomepage(){
-    	return $this->homepage;
-    }
-    
-    public function getIndividualUrl(){
-    	return $this->individualUrl;
-    }
- 
-    public function getContactName(){
-    	return $this->contactName;
-    }
- 
-    public function getContactEmail(){
-    	return $this->contactEmail;
-    }
- }
-
-?>
 

@@ -23,7 +23,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere,$conn);
 		}
-		$sql = "SELECT o.occid, o.CollID, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, o.tidinterpreted, ".
+		$sql = "SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, o.tidinterpreted, ".
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
@@ -45,6 +45,8 @@ class OccurrenceListManager extends OccurrenceManager{
 			$collIdStr = $row->CollID;
 			$dbpk = $row->dbpk;
 			$returnArr[$collIdStr][$dbpk]["occid"] = $row->occid;
+			$returnArr[$collIdStr][$dbpk]["institutioncode"] = $row->institutioncode;
+			$returnArr[$collIdStr][$dbpk]["collectioncode"] = $row->collectioncode;
 			$returnArr[$collIdStr][$dbpk]["accession"] = $row->catalognumber;
 			$returnArr[$collIdStr][$dbpk]["family"] = $row->family;
 			$returnArr[$collIdStr][$dbpk]["sciname"] = $row->sciname;

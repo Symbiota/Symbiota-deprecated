@@ -32,22 +32,22 @@ class OccurrenceEditorManager {
 			$this->occurrenceMap[strtolower($metaRow->Field)]["type"] = $metaRow->Type;
 		}
 		$metaRs->close();
-		$sql = "SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, ".
-			"o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, ".
-			"o.specificEpithet, o.datasetID, o.taxonRank, o.infraspecificEpithet, ".
-			"IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, ".
-			"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
-			"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, o.CollectorFamilyName, ".
-			"o.CollectorInitials, o.associatedCollectors, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
-			"o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedOccurrences, o.associatedTaxa, ".
-			"o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
-			"o.stateProvince, o.county, o.municipality, o.locality, o.localitySecurity, o.decimalLatitude, o.decimalLongitude, ".
-			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
-			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, ".
-			"o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, ".
-			"o.verbatimElevation, o.previousIdentifications, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified ".
-			"FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ".
-			"WHERE o.occid = ".$this->occId;
+		$sql = 'SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
+			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
+			'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
+			'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
+			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, o.CollectorFamilyName, '.
+			'o.CollectorInitials, o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
+			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
+			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
+			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.decimalLatitude, o.decimalLongitude, '.
+			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
+			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
+			'o.verbatimElevation, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified '.
+			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+			'WHERE o.occid = '.$this->occId;
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -58,6 +58,7 @@ class OccurrenceEditorManager {
 		$rs->close();
 
 		$this->setImages();
+		$this->setDeterminations();
 
 		return $this->occurrenceMap;
 	}
@@ -81,81 +82,103 @@ class OccurrenceEditorManager {
 		}
 		$result->close();
 	}
-	
-	public function editOccurrence($occArr){
-		if($occArr){
-			$sql = "UPDATE omoccurrences SET basisofrecord = ".($occArr["basisofrecord"]?"'".$occArr["basisofrecord"]."'":"NULL").",".
-			"occurrenceid = ".($occArr["occurrenceid"]?"'".$occArr["occurrenceid"]."'":"NULL").",".
-			"catalognumber = ".($occArr["catalognumber"]?"'".$occArr["catalognumber"]."'":"NULL").",".
-			"othercatalognumbers = ".($occArr["othercatalognumbers"]?"'".$occArr["othercatalognumbers"]."'":"NULL").",".
-			"ownerinstitutioncode = ".($occArr["ownerinstitutioncode"]?"'".$occArr["ownerinstitutioncode"]."'":"NULL").",".
-			"family = ".($occArr["family"]?"'".$occArr["family"]."'":"NULL").",".
-			"sciname = '".$occArr["sciname"]."',".
-			"scientificnameauthorship = ".($occArr["scientificnameauthorship"]?"'".$occArr["scientificnameauthorship"]."'":"NULL").",".
-			"taxonremarks = ".($occArr["taxonremarks"]?"'".$occArr["taxonremarks"]."'":"NULL").",".
-			"identifiedby = ".($occArr["identifiedby"]?"'".$occArr["identifiedby"]."'":"NULL").",".
-			"dateidentified = ".($occArr["dateidentified"]?"'".$occArr["dateidentified"]."'":"NULL").",".
-			"identificationreferences = ".($occArr["identificationreferences"]?"'".$occArr["identificationreferences"]."'":"NULL").",".
-			"identificationqualifier = ".($occArr["identificationqualifier"]?"'".$occArr["identificationqualifier"]."'":"NULL").",".
-			"typestatus = ".($occArr["typestatus"]?"'".$occArr["typestatus"]."'":"NULL").",".
-			"recordedby = ".($occArr["recordedby"]?"'".$occArr["recordedby"]."'":"NULL").",".
-			"recordnumber = ".($occArr["recordnumber"]?"'".$occArr["recordnumber"]."'":"NULL").",".
-			"associatedcollectors = ".($occArr["associatedcollectors"]?"'".$occArr["associatedcollectors"]."'":"NULL").",".
-			"eventDate = ".($occArr["eventdate"]?"'".$occArr["eventdate"]."'":"NULL").",".
-			"year = ".($occArr["year"]?$occArr["year"]:"NULL").",".
-			"month = ".($occArr["month"]?$occArr["month"]:"NULL").",".
-			"day = ".($occArr["day"]?$occArr["day"]:"NULL").",".
-			"startDayOfYear = ".($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
-			"endDayOfYear = ".($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			"verbatimEventDate = ".($occArr["verbatimeventdate"]?"'".$occArr["verbatimeventdate"]."'":"NULL").",".
-			"habitat = ".($occArr["habitat"]?"'".$occArr["habitat"]."'":"NULL").",".
-			"occurrenceRemarks = ".($occArr["occurrenceremarks"]?"'".$occArr["occurrenceremarks"]."'":"NULL").",".
-			"associatedOccurrences = ".($occArr["associatedoccurrences"]?"'".$occArr["associatedoccurrences"]."'":"NULL").",".
-			"associatedTaxa = ".($occArr["associatedtaxa"]?"'".$occArr["associatedtaxa"]."'":"NULL").",".
-			"dynamicProperties = ".($occArr["dynamicproperties"]?"'".$occArr["dynamicproperties"]."'":"NULL").",".
-			"reproductiveCondition = ".($occArr["reproductivecondition"]?"'".$occArr["reproductivecondition"]."'":"NULL").",".
-			"cultivationStatus = ".(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			"establishmentMeans = ".($occArr["establishmentmeans"]?"'".$occArr["establishmentmeans"]."'":"NULL").",".
-			"country = ".($occArr["country"]?"'".$occArr["country"]."'":"NULL").",".
-			"stateProvince = ".($occArr["stateprovince"]?"'".$occArr["stateprovince"]."'":"NULL").",".
-			"county = ".($occArr["county"]?"'".$occArr["county"]."'":"NULL").",".
-			"municipality = ".($occArr["municipality"]?"'".$occArr["municipality"]."'":"NULL").",".
-			"locality = ".($occArr["locality"]?"'".$occArr["locality"]."'":"NULL").",".
-			"localitySecurity = ".(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
-			"decimalLatitude = ".($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
-			"decimalLongitude = ".($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			"geodeticDatum = ".($occArr["geodeticdatum"]?"'".$occArr["geodeticdatum"]."'":"NULL").",". 
-			"coordinateUncertaintyInMeters = ".($occArr["coordinateuncertaintyinmeters"]?"'".$occArr["coordinateuncertaintyinmeters"]."'":"NULL").",".
-			"verbatimCoordinates = ".($occArr["verbatimcoordinates"]?"'".$occArr["verbatimcoordinates"]."'":"NULL").",".
-			"verbatimCoordinateSystem = ".($occArr["verbatimcoordinatesystem"]?"'".$occArr["verbatimcoordinatesystem"]."'":"NULL").",".
-			"georeferencedBy = ".($occArr["georeferencedby"]?"'".$occArr["georeferencedby"]."'":"NULL").",".
-			"georeferenceProtocol = ".($occArr["georeferenceprotocol"]?"'".$occArr["georeferenceprotocol"]."'":"NULL").",".
-			"georeferenceSources = ".($occArr["georeferencesources"]?"'".$occArr["georeferencesources"]."'":"NULL").",".
-			"georeferenceVerificationStatus = ".($occArr["georeferenceverificationstatus"]?"'".$occArr["georeferenceverificationstatus"]."'":"NULL").",".
-			"georeferenceRemarks = ".($occArr["georeferenceremarks"]?"'".$occArr["georeferenceremarks"]."'":"NULL").",".
-			"minimumElevationInMeters = ".($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
-			"maximumElevationInMeters = ".($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			"verbatimElevation = ".($occArr["verbatimelevation"]?"'".$occArr["verbatimelevation"]."'":"NULL").",".
-			"disposition = ".($occArr["disposition"]?"'".$occArr["disposition"]."'":"NULL").",".
-			"language = ".($occArr["language"]?"'".$occArr["language"]."' ":"NULL ").
-			"WHERE occid = ".$occArr["occid"];
-			//echo $sql;
-			$this->conn->query($sql);
+
+	private function setDeterminations(){
+		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
+			"identificationQualifier, identificationReferences, identificationRemarks, sortsequence ".
+			"FROM omoccurdeterminations ".
+			"WHERE occid = ".$this->occId." ORDER BY sortsequence";
+		//echo "<div>".$sql."</div>";
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$detId = $row->detid;
+			$this->occurrenceMap["dets"][$detId]["identifiedby"] = $row->identifiedBy;
+			$this->occurrenceMap["dets"][$detId]["dateidentified"] = $row->dateIdentified;
+			$this->occurrenceMap["dets"][$detId]["sciname"] = $row->sciname;
+			$this->occurrenceMap["dets"][$detId]["scientificnameauthorship"] = $row->scientificNameAuthorship;
+			$this->occurrenceMap["dets"][$detId]["identificationqualifier"] = $row->identificationQualifier;
+			$this->occurrenceMap["dets"][$detId]["identificationreferences"] = $row->identificationReferences;
+			$this->occurrenceMap["dets"][$detId]["identificationremarks"] = $row->identificationRemarks;
+			$this->occurrenceMap["dets"][$detId]["sortsequence"] = $row->sortsequence;
 		}
-		
+		$result->close();
+	}
+
+	public function editOccurrence($occArr){
+		$status = '';
+		if($occArr){
+			$sql = 'UPDATE omoccurrences SET basisofrecord = '.($occArr['basisofrecord']?'"'.$occArr['basisofrecord'].'"':'NULL').','.
+			'occurrenceid = '.($occArr['occurrenceid']?'"'.$occArr['occurrenceid'].'"':'NULL').','.
+			'catalognumber = '.($occArr['catalognumber']?'"'.$occArr['catalognumber'].'"':'NULL').','.
+			'othercatalognumbers = '.($occArr['othercatalognumbers']?'"'.$occArr['othercatalognumbers'].'"':'NULL').','.
+			'ownerinstitutioncode = '.($occArr['ownerinstitutioncode']?'"'.$occArr['ownerinstitutioncode'].'"':'NULL').','.
+			'family = '.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+			'sciname = "'.$occArr['sciname'].'",'.
+			'scientificnameauthorship = '.($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
+			'identifiedby = '.($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
+			'dateidentified = '.($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
+			'identificationreferences = '.($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
+			'identificationremarks = '.($occArr['identificationremarks']?'"'.$occArr['identificationremarks'].'"':'NULL').','.
+			'identificationqualifier = '.($occArr['identificationqualifier']?'"'.$occArr['identificationqualifier'].'"':'NULL').','.
+			'typestatus = '.($occArr['typestatus']?'"'.$occArr['typestatus'].'"':'NULL').','.
+			'recordedby = '.($occArr['recordedby']?'"'.$occArr['recordedby'].'"':'NULL').','.
+			'recordnumber = '.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
+			'associatedcollectors = '.($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
+			'eventDate = '.($occArr['eventdate']?'"'.$occArr['eventdate'].'"':'NULL').','.
+			'year = '.($occArr['year']?$occArr['year']:'NULL').','.
+			'month = '.($occArr['month']?$occArr['month']:'NULL').','.
+			'day = '.($occArr['day']?$occArr['day']:'NULL').','.
+			'startDayOfYear = '.($occArr['startdayofyear']?$occArr['startdayofyear']:'NULL').','.
+			'endDayOfYear = '.($occArr['enddayofyear']?$occArr['enddayofyear']:'NULL').','.
+			'verbatimEventDate = '.($occArr['verbatimeventdate']?'"'.$occArr['verbatimeventdate'].'"':'NULL').','.
+			'habitat = '.($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
+			'occurrenceRemarks = '.($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
+			'associatedTaxa = '.($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
+			'dynamicProperties = '.($occArr['dynamicproperties']?'"'.$occArr['dynamicproperties'].'"':'NULL').','.
+			'reproductiveCondition = '.($occArr['reproductivecondition']?'"'.$occArr['reproductivecondition'].'"':'NULL').','.
+			'cultivationStatus = '.(array_key_exists('cultivationstatus',$occArr)?'1':'0').','.
+			'establishmentMeans = '.($occArr['establishmentmeans']?'"'.$occArr['establishmentmeans'].'"':'NULL').','.
+			'country = '.($occArr['country']?'"'.$occArr['country'].'"':'NULL').','.
+			'stateProvince = '.($occArr['stateprovince']?'"'.$occArr['stateprovince'].'"':'NULL').','.
+			'county = '.($occArr['county']?'"'.$occArr['county'].'"':'NULL').','.
+			'locality = '.($occArr['locality']?'"'.$occArr['locality'].'"':'NULL').','.
+			'localitySecurity = '.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
+			'decimalLatitude = '.($occArr['decimallatitude']?$occArr['decimallatitude']:'NULL').','.
+			'decimalLongitude = '.($occArr['decimallongitude']?$occArr['decimallongitude']:'NULL').','.
+			'geodeticDatum = '.($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','. 
+			'coordinateUncertaintyInMeters = '.($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
+			'verbatimCoordinates = '.($occArr['verbatimcoordinates']?'"'.$occArr['verbatimcoordinates'].'"':'NULL').','.
+			'georeferencedBy = '.($occArr['georeferencedby']?'"'.$occArr['georeferencedby'].'"':'NULL').','.
+			'georeferenceProtocol = '.($occArr['georeferenceprotocol']?'"'.$occArr['georeferenceprotocol'].'"':'NULL').','.
+			'georeferenceSources = '.($occArr['georeferencesources']?'"'.$occArr['georeferencesources'].'"':'NULL').','.
+			'georeferenceVerificationStatus = '.($occArr['georeferenceverificationstatus']?'"'.$occArr['georeferenceverificationstatus'].'"':'NULL').','.
+			'georeferenceRemarks = '.($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
+			'minimumElevationInMeters = '.($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
+			'maximumElevationInMeters = '.($occArr['maximumelevationinmeters']?$occArr['maximumelevationinmeters']:'NULL').','.
+			'verbatimElevation = '.($occArr['verbatimelevation']?'"'.$occArr['verbatimelevation'].'"':'NULL').','.
+			'disposition = '.($occArr['disposition']?'"'.$occArr['disposition'].'"':'NULL').','.
+			'language = '.($occArr['language']?'"'.$occArr['language'].'" ':'NULL ').
+			'WHERE occid = '.$occArr['occid'];
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = "ERROR - failed to edit occurrence record: ".$this->conn->error;
+			}
+		}
+		return $status;
 	}
 
 	public function addOccurrence($occArr){
+		$status = "";
 		if($occArr){
 			$sql = "INSERT INTO omoccurrences(collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
-			"ownerInstitutionCode, family, sciname, scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, ".
-			"identificationReferences, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
+			"ownerInstitutionCode, family, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, ".
+			"identificationReferences, identificationremarks, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
-			"verbatimEventDate, habitat, occurrenceRemarks, associatedOccurrences, associatedTaxa, ".
+			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, ".
 			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, ".
-			"stateProvince, county, municipality, locality, localitySecurity, decimalLatitude, decimalLongitude, ".
+			"stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, ".
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
-			"verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, georeferenceSources, ".
+			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
 			"verbatimElevation, disposition, language) ".
 
@@ -168,16 +191,16 @@ class OccurrenceEditorManager {
 			($occArr["family"]?"\"".$occArr["family"]."\"":"NULL").",".
 			"\"".$occArr["sciname"]."\",".
 			($occArr["scientificnameauthorship"]?"\"".$occArr["scientificnameauthorship"]."\"":"NULL").",".
-			($occArr["taxonremarks"]?"\"".$occArr["taxonremarks"]."\"":"NULL").",".
 			($occArr["identifiedby"]?"\"".$occArr["identifiedby"]."\"":"NULL").",".
 			($occArr["dateidentified"]?"\"".$occArr["dateidentified"]."\"":"NULL").",".
 			($occArr["identificationreferences"]?"\"".$occArr["identificationreferences"]."\"":"NULL").",".
+			($occArr["identificationremarks"]?"\"".$occArr["identificationremarks"]."\"":"NULL").",".
 			($occArr["identificationqualifier"]?"\"".$occArr["identificationqualifier"]."\"":"NULL").",".
 			($occArr["typestatus"]?"\"".$occArr["typestatus"]."\"":"NULL").",".
 			($occArr["recordedby"]?"\"".$occArr["recordedby"]."\"":"NULL").",".
 			($occArr["recordnumber"]?"\"".$occArr["recordnumber"]."\"":"NULL").",".
 			($occArr["associatedcollectors"]?"\"".$occArr["associatedcollectors"]."\"":"NULL").",".
-			($occArr["eventdate"]?"\"".$occArr["eventdate"]."\"":"NULL").",".
+			($occArr["eventdate"]?"STR_TO_DATE('".$occArr["eventdate"]."','%d %M %Y')":"NULL").",".
 			($occArr["year"]?$occArr["year"]:"NULL").",".
 			($occArr["month"]?$occArr["month"]:"NULL").",".
 			($occArr["day"]?$occArr["day"]:"NULL").",".
@@ -186,7 +209,6 @@ class OccurrenceEditorManager {
 			($occArr["verbatimeventdate"]?"\"".$occArr["verbatimeventdate"]."\"":"NULL").",".
 			($occArr["habitat"]?"\"".$occArr["habitat"]."\"":"NULL").",".
 			($occArr["occurrenceremarks"]?"\"".$occArr["occurrenceremarks"]."\"":"NULL").",".
-			($occArr["associatedoccurrences"]?"\"".$occArr["associatedoccurrences"]."\"":"NULL").",".
 			($occArr["associatedtaxa"]?"\"".$occArr["associatedtaxa"]."\"":"NULL").",".
 			($occArr["dynamicproperties"]?"\"".$occArr["dynamicproperties"]."\"":"NULL").",".
 			($occArr["reproductivecondition"]?"\"".$occArr["reproductivecondition"]."\"":"NULL").",".
@@ -195,7 +217,6 @@ class OccurrenceEditorManager {
 			($occArr["country"]?"\"".$occArr["country"]."\"":"NULL").",".
 			($occArr["stateprovince"]?"\"".$occArr["stateprovince"]."\"":"NULL").",".
 			($occArr["county"]?"\"".$occArr["county"]."\"":"NULL").",".
-			($occArr["municipality"]?"\"".$occArr["municipality"]."\"":"NULL").",".
 			($occArr["locality"]?"\"".$occArr["locality"]."\"":"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
 			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
@@ -203,7 +224,6 @@ class OccurrenceEditorManager {
 			($occArr["geodeticdatum"]?"\"".$occArr["geodeticdatum"]."\"":"NULL").",".
 			($occArr["coordinateuncertaintyinmeters"]?"\"".$occArr["coordinateuncertaintyinmeters"]."\"":"NULL").",".
 			($occArr["verbatimcoordinates"]?"\"".$occArr["verbatimcoordinates"]."\"":"NULL").",".
-			($occArr["verbatimcoordinatesystem"]?"\"".$occArr["verbatimcoordinatesystem"]."\"":"NULL").",".
 			($occArr["georeferencedby"]?"\"".$occArr["georeferencedby"]."\"":"NULL").",".
 			($occArr["georeferenceprotocol"]?"\"".$occArr["georeferenceprotocol"]."\"":"NULL").",".
 			($occArr["georeferencesources"]?"\"".$occArr["georeferencesources"]."\"":"NULL").",".
@@ -213,12 +233,92 @@ class OccurrenceEditorManager {
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
 			($occArr["verbatimelevation"]?"\"".$occArr["verbatimelevation"]."\"":"NULL").",".
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
-			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").") ".
-			"WHERE occid = ".$occArr["occid"];
-			$this->conn->query($sql);
+			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").") ";
+			if(!$this->conn->query($sql)){
+				$status = "ERROR - failed to add occurrence record: ".$this->conn->error;
+			}
 		}
+		return $status;
 	}
-	
+
+	public function addDetermination($detArr){
+		$status = "";
+		$isCurrent = false;
+		if(array_key_exists('makecurrent',$detArr) && $detArr['makecurrent'] == "1") $isCurrent = true;
+		$sortSeq = 10;
+		if($isCurrent){
+			$sortSeq = 1;
+			$sqlSort = 'UPDATE omoccurdeterminations '.
+				'SET sortsequence = (sortsequence + 10) '.
+				'WHERE occid = '.$detArr['occid'];
+			$this->conn->query($sqlSort);
+		}
+		//Load new determination into omoccurdeterminations
+		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
+			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
+			'VALUES ('.$detArr['occid'].',"'.$detArr['identifiedby'].'","'.$detArr['dateidentified'].'","'.
+			$detArr['sciname'].'",'.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
+			($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
+			($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
+			($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.
+			($detArr['sortsequence']?$detArr['sortsequence']:$sortSeq).')';
+		//echo "<div>".$sql."</div>";
+		if($this->conn->query($sql)){
+			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
+			if($isCurrent){
+				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
+				$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
+					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
+					'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
+					'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
+					'FROM omoccurrences WHERE occid = '.$detArr['occid'];
+				$rs = $this->conn->query($sqlInsert);
+				//echo "<div>".$sqlInsert."</div>";
+				//Load new determination into omoccurrences table
+				$sqlNewDet = 'UPDATE omoccurrences '.
+					'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'",'.
+					'family = '.($detArr['family']?'"'.$detArr['family'].'"':'NULL').','.
+					'sciname = "'.$detArr['sciname'].'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
+					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
+					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
+					'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
+					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').' '.
+					'WHERE occid = '.$detArr['occid'];
+				//echo "<div>".$sqlNewDet."</div>";
+				$this->conn->query($sqlNewDet);
+			}
+		}
+		else{
+			$status = 'ERROR - failed to add determination: '.$this->conn->error;
+		}
+		return $status;
+	}
+
+	public function editDetermination($detArr){
+		$status = "";
+		$sql = 'UPDATE omoccurdeterminations '.
+			'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'", sciname = "'.$detArr['sciname'].
+			'", scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
+			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
+			'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
+			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.
+			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').' '.
+			'WHERE detid = '.$detArr['detid'];
+		if(!$this->conn->query($sql)){
+			$status = "ERROR - failed to edit determination: ".$this->conn->error;
+		}
+		return $status;
+	}
+
+	public function deleteDetermination($detId){
+		$status = "";
+		$sql = 'DELETE FROM omoccurdeterminations WHERE detid = '.$detId;
+		if(!$this->conn->query($sql)){
+			$status = "ERROR - failed to delete determination: ".$this->conn->error;
+		}
+		return $status;
+	}
+
 	public function editImage(){
 		$rootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($rootUrl,-1) != "/") $rootUrl .= "/";
@@ -268,7 +368,6 @@ class OccurrenceEditorManager {
 		$notes = $this->cleanStr($_REQUEST["notes"]);
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
-		$sortSequence = (array_key_exists("sortseq",$_REQUEST)?$_REQUEST["sortseq"]:0);
 
 		$sql = "UPDATE images ".
 			"SET url = \"".$url."\", thumbnailurl = ".($tnUrl?"\"".$tnUrl."\"":"NULL").
@@ -277,7 +376,6 @@ class OccurrenceEditorManager {
 			",notes = ".($notes?"\"".$notes."\"":"NULL").
 			",copyright = ".($copyRight?"\"".$copyRight."\"":"NULL").",imagetype = \"specimen\",sourceurl = ".
 			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
-			($_REQUEST["sortseq"]?",sortsequence = ".$_REQUEST["sortseq"]:"").
 			" WHERE imgid = ".$imgId;
 		//echo $sql;
 		if($this->conn->query($sql)){
@@ -349,19 +447,19 @@ class OccurrenceEditorManager {
 			$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
 			$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
-			$sortSequence = $_REQUEST["sortseq"];
-			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, ".
-				"owner, sourceurl, copyright, occid, notes, sortsequence) ".
-				"VALUES (".$_REQUEST["tid"].",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographerUid?$photographerUid:"NULL").",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",".
-				($occId?$occId:"NULL").",\"".$notes."\",".($sortSequence?$sortSequence:"50").")";
+			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, '.
+				'owner, sourceurl, copyright, occid, notes) '.
+				'VALUES ('.$_REQUEST['tid'].',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				($photographerUid?$photographerUid:'NULL').','.($caption?'"'.$caption.'"':'NULL').','.
+				($owner?'"'.$owner.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
+				($copyRight?'"'.$copyRight.'"':'NULL').','.($occId?$occId:'NULL').','.($notes?'"'.$notes.'"':'NULL').')';
 			//echo $sql;
 			$status = "";
 			if($this->conn->query($sql)){
 				$this->setPrimaryImageSort();
 			}
 			else{
-				$status = "loadImageData: ".$this->conn->error."<br/>SQL: ".$sql;
+				$status = "ERROR Loading Image Data: ".$this->conn->error."<br/>SQL: ".$sql;
 			}
 		}
 		return $status;
@@ -508,7 +606,7 @@ class OccurrenceEditorManager {
 					$imgDelPath = str_replace($imageRootUrl,$imageRootPath,$imgUrl);
 					if(file_exists($imgDelPath)){
 						if(!unlink($imgDelPath)){
-							$status = "Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
+							$status = "Deleted image record from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
 						}
 					}
 					$imgTnDelPath = str_replace($imageRootUrl,$imageRootPath,$imgThumbnailUrl);
