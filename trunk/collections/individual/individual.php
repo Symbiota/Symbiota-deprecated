@@ -23,11 +23,12 @@ if($symbUid){
 		$displayLocality = true;
 		$isEditor = true;
 	}
-	elseif(!$occArr['localitysecurity'] || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
+	elseif(array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
 	|| (array_key_exists("RareSppReader",$userRights) && in_array($occArr['collid'],$userRights["RareSppReader"]))){
 		$displayLocality = true;
 	}
 }
+if(!$occArr['localitysecurity']) $displayLocality = true;
 ?>
 <html>
 <head>
