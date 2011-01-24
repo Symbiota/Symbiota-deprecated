@@ -238,7 +238,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						if($occArr['verbatimeventdate']){
 							?>
 							<div>
-								<b>Verbatim Collection Date: </b> 
+								<b>Verbatim Date: </b> 
 								<?php echo $occArr['verbatimeventdate']; ?>
 							</div>
 							<?php 
@@ -309,10 +309,15 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 								<?php 
 								echo $occArr['minimumelevationinmeters'];
 								if($occArr['maximumelevationinmeters']){
-									echo ' - '.$occArr['maximumelevationinmeters'];
+									echo '-'.$occArr['maximumelevationinmeters'];
 								} 
 								?>
-								meters
+								meters 
+								<?php
+								if(!$occArr['verbatimelevation']){
+									echo '('.round($occArr['minimumelevationinmeters']*3.28).($occArr['maximumelevationinmeters']?'-'.round($occArr['maximumelevationinmeters']*3.28):'').'ft)'; 
+								}
+								?>
 							</div>
 							<?php
 							if($occArr['verbatimelevation']){
