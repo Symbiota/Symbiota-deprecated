@@ -5,7 +5,7 @@ include_once('../classes/FloraProjectManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $listName = $_REQUEST['listname'];
-$clist = $_REQUEST['cl'];
+$clist = $_REQUEST['clid'];
 $imgloc = "../images/games/namegame/";
 
 ?>

@@ -119,6 +119,18 @@
 	<script type="text/javascript" src="../js/ui.tabs.js"></script>
 	<script type="text/javascript" src="../js/googleanalytics.js"></script>
 	<script type="text/javascript" src="../js/checklists.checklist.js"></script>
+	<style type="text/css">
+		#sddm{margin:0;padding:0;z-index:30;}
+		#sddm:hover {background-color:#EAEBD8;}
+		#sddm img{padding:3px;}
+		#sddm:hover img{background-color:#EAEBD8;}
+		#sddm li{margin:0px;padding: 0;list-style: none;float: left;font: bold 11px arial}
+		#sddm li a{display: block;margin: 0 1px 0 0;padding: 4px 10px;width: 60px;background: #5970B2;color: #FFF;text-align: center;text-decoration: none}
+		#sddm li a:hover{background: #49A3FF}
+		#sddm div{position: absolute;visibility:hidden;margin:0;padding:0;background:#EAEBD8;border:1px solid #5970B2}
+		#sddm div a	{position: relative;display:block;margin:0;padding:5px 10px;width:auto;white-space:nowrap;text-align:left;text-decoration:none;background:#EAEBD8;color:#2875DE;font-weight:bold;}
+		#sddm div a:hover{background:#49A3FF;color:#FFF}
+	</style>
 </head>
 
 <body>
@@ -157,21 +169,37 @@
 				<?php 
 			}
 			?>
-			<h1>
-				<?php 
-				echo $clManager->getClName()."&nbsp;&nbsp;";
-				if($keyModIsActive){
-					?>
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid."&crumblink=".$crumbLink;?>&taxon=All+Species">
-						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
-					</a>&nbsp;&nbsp;&nbsp;
-					<?php 
-				}
+			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
+				<?php echo $clManager->getClName(); ?>
+			</div>
+			<?php 
+			if($keyModIsActive){
 				?>
-				<a href="flashcards.php?clid=<?php echo $clManager->getClid()."&dynclid=".$dynClid."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");?>">
-					<img src="../images/quiz.jpg" style="height:10px;border:0px;" title="Open Flashcard Quiz" />
-				</a>
-			</h1>
+				<div style="float:left;padding-top:5px;">
+					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid."&crumblink=".$crumbLink;?>&taxon=All+Species">
+						<img src='../images/key.jpg' style="width:15px;border:0px;" title='Open Symbiota Key' />
+					</a>&nbsp;&nbsp;&nbsp;
+				</div>
+				<?php 
+			}
+			?>
+			<div style="float:left;padding-top:5px;">
+				<ul id="sddm">
+				    <li>
+				    	<span onmouseover="mopen('m1')" onmouseout="mclosetime()">
+				    		<img src="../images/games/games.png" style="height:17px;" title="Access Species List Games" />
+				    	</span>
+				        <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+				        	<?php 
+								$varStr = "?clid=".$clManager->getClid()."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():""); 
+				        	?>
+					        <a href="../games/namegame.php<?php echo $varStr; ?>">Name Game</a>
+					        <a href="../games/flashcards.php<?php echo $varStr; ?>">Flash Card Quiz</a>
+				        </div>
+				    </li>
+				</ul>
+			</div>
+			<div style="clear:both;"></div>
 			<?php
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clValue){
