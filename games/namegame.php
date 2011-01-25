@@ -1,11 +1,18 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once('../classes/FloraProjectManager.php');
+include_once($serverRoot.'/classes/GamesManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$listName = $_REQUEST['listname'];
-$clist = $_REQUEST['clid'];
+$clName = (array_key_exists('listname',$_REQUEST)?$_REQUEST['listname']:"");
+$clid = $_REQUEST['clid'];
+
+if(!$clName){
+	$gameManager = new GamesManager();
+	$gameManager->setChecklist($clid);
+	$clName = $gameManager->getClName();
+}
+
 $imgloc = "../images/games/namegame/";
 
 ?>
@@ -218,7 +225,7 @@ $imgloc = "../images/games/namegame/";
 				}
 			}
 			//alert("To begin playing, please choose a plant list from the left.");
-			getWordList('rpc/getwordlist.php?clid=<?php echo $clist;?>', 'newlist');
+			getWordList('rpc/getwordlist.php?clid=<?php echo $clid;?>', 'newlist');
 			generate();
 		}
 
@@ -296,7 +303,7 @@ $imgloc = "../images/games/namegame/";
 				// Does this when you run out of words in current list
 				//generate();
 				//popup('listreload');
-				getWordList('rpc/getwordlist.php?clid=<?echo $clist;?>', 'reloadlist');
+				getWordList('rpc/getwordlist.php?clid=<?echo $clid;?>', 'reloadlist');
 				return;
 			}
 			
@@ -669,7 +676,7 @@ $imgloc = "../images/games/namegame/";
 	<div id="innertext">
 		<h1>SEINet Name Game</h1>
 		<div style="margin:10px;">
-			I am thinking of a species found within the following checklist: <b><?php echo $listName;?></b><br/> 
+			I am thinking of a species found within the following checklist: <b><?php echo $clName;?></b><br/> 
 			What am I thinking of? 
 		</div>
 
