@@ -65,100 +65,11 @@ if($chars){
 }
 ?>
 <head>
-<?php 
-	echo"<title>$defaultTitle Web-Key: $projValue</title>\n";
-	echo"<link rel='stylesheet' href='../css/main.css' type='text/css'>\n";
-	$keywordStr = "interactive key,plants identification,".$dataManager->getClName();
-	echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />\n";
-?>
-	<script type="text/javascript">
-	
-		function toggleAll(){
-			toggleChars("dynam");
-			toggleChars("dynamControl");
-		}
-		
-		function toggleChars(name){
-		  var chars = document.getElementsByTagName("div");
-		  for (i = 0; i < chars.length; i++) {
-		  	var obj = chars[i];
-				if(obj.className == name){
-					if(obj.style.display=="none"){
-						obj.style.display="block";
-						setCookie("all");
-					}
-				 	else {
-				 		obj.style.display="none";
-						setCookie("limited");
-				 	}
-				}
-		  }
-		}
-		
-		function setCookie(status){
-			document.cookie = "showchars=" + status;		
-		}
-	
-		function getCookie(name){
-			var pos = document.cookie.indexOf(name + "=");
-			if(pos == -1){
-				return null;
-			} else {
-				var pos2 = document.cookie.indexOf(";", pos);
-				if(pos2 == -1){
-					return unescape(document.cookie.substring(pos + name.length + 1));
-				}else{
-					return unescape(document.cookie.substring(pos + name.length + 1, pos2));
-				}
-			}
-		}
-		
-		function setDisplayStatus(){
-			var showStatus = getCookie("showchars");
-			if(showStatus == "all"){
-				toggleAll();
-			} else {
-				//If everything is hid, show all; if everything is not hid, do nothing
-				if(allClosed()) toggleAll();
-			}
-		}
-		
-		function allClosed(){
-		  var objs = document.getElementsByTagName("div");
-		  for (i = 0; i < objs.length; i++) {
-		  	var obj = objs[i]; 
-				if(obj.id != "showall" && obj.style.display != "none"){
-					return false;
-				}
-			}
-			return true;
-		}
-		
-		function setLang(list){
-		  var langName = list.options[list.selectedIndex].value;
-		  var objs = document.getElementsByTagName("span");
-		  for (i = 0; i < objs.length; i++) {
-		  	var obj = objs[i]; 
-				if(obj.lang == langName){
-					obj.style.display="";
-				}
-				else if(obj.lang != ""){
-			 		obj.style.display="none";
-				}
-			}
-		}
-	</script>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
+	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo $projValue; ?></title>
+	<link rel='stylesheet' href='../css/main.css' type='text/css' />
+	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
+	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript" src="../js/ident.key.js"></script>
 </head>
  
 <body>
@@ -254,14 +165,21 @@ if($chars){
 		<?php
 		//List taxa by family/sci name
 		if(($clValue && $taxonValue) || $dynClid){
-			echo "<table border='0' width='300px'>";
-			echo "<tr><td colspan='2'>";
-			echo "<h2>".$dataManager->getClName()." ";
-			if($floraModIsActive){
-				echo "<a href='../checklists/checklist.php?cl=".$clValue."&dynclid=".$dynClid."&crumblink=".$crumbLink."'>";
-				echo "<img src='../images/info.jpg' title='More information' border='0' width='12' /></a>";
-			}
-			echo "</h2>";
+			?>
+			<table border='0' width='300px'>
+				<tr><td colspan='2'>
+					<h2>
+						<?php 
+						if($floraModIsActive){
+							echo "<a href='../checklists/checklist.php?cl=".$clValue."&dynclid=".$dynClid."&crumblink=".$crumbLink."'>";
+						}
+						echo $dataManager->getClName()." ";
+						if($floraModIsActive){
+							echo "<img src='../images/info.jpg' title='More information' border='0' width='12' /></a>";
+						}
+						?>
+					</h2>
+			<?php 
 			if(!$dynClid) echo "<div>".$dataManager->getClAuthors()."</div>";
 			echo "</td></tr>";
 			$count = $dataManager->getTaxaCount();

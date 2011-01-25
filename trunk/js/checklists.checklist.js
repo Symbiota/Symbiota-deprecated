@@ -1,27 +1,38 @@
 function toggle(target){
-  	var divs = document.getElementsByTagName("div");
-  	for (var h = 0; h < divs.length; h++) {
-  	var divObj = divs[h];
-		if(divObj.className == target){
-			if(divObj.style.display=="none"){
-				divObj.style.display="block";
-			}
-		 	else {
-		 		divObj.style.display="none";
-		 	}
+	var objDiv = document.getElementById("gamediv");
+	if(objDiv){
+		if(objDiv.style.display=="none"){
+			objDiv.style.display = "block";
+		}
+		else{
+			objDiv.style.display = "none";
 		}
 	}
-
-  	var spans = document.getElementsByTagName("span");
-  	for (var i = 0; i < spans.length; i++) {
-  	var spanObj = spans[i];
-		if(spanObj.className == target){
-			if(spanObj.style.display=="none"){
-				spanObj.style.display="inline";
+	else{
+	  	var divs = document.getElementsByTagName("div");
+	  	for (var h = 0; h < divs.length; h++) {
+	  	var divObj = divs[h];
+			if(divObj.className == target){
+				if(divObj.style.display=="none"){
+					divObj.style.display="block";
+				}
+			 	else {
+			 		divObj.style.display="none";
+			 	}
 			}
-		 	else {
-		 		spanObj.style.display="none";
-		 	}
+		}
+	
+	  	var spans = document.getElementsByTagName("span");
+	  	for (var i = 0; i < spans.length; i++) {
+	  	var spanObj = spans[i];
+			if(spanObj.className == target){
+				if(spanObj.style.display=="none"){
+					spanObj.style.display="inline";
+				}
+			 	else {
+			 		spanObj.style.display="none";
+			 	}
+			}
 		}
 	}
 }
@@ -271,3 +282,47 @@ Array.prototype.unique = function() {
 	}
 	return a;
 };
+
+//Game menu 
+var timeout	= 500;
+var closetimer	= 0;
+var ddmenuitem	= 0;
+
+// open hidden layer
+function mopen(id)
+{	
+	// cancel close timer
+	mcancelclosetime();
+
+	// close old layer
+	if(ddmenuitem) ddmenuitem.style.visibility = 'hidden';
+
+	// get new layer and show it
+	ddmenuitem = document.getElementById(id);
+	ddmenuitem.style.visibility = 'visible';
+
+}
+// close showed layer
+function mclose()
+{
+	if(ddmenuitem) ddmenuitem.style.visibility = 'hidden';
+}
+
+// go close timer
+function mclosetime()
+{
+	closetimer = window.setTimeout(mclose, timeout);
+}
+
+// cancel close timer
+function mcancelclosetime()
+{
+	if(closetimer)
+	{
+		window.clearTimeout(closetimer);
+		closetimer = null;
+	}
+}
+
+// close layer when click-out
+document.onclick = mclose; 

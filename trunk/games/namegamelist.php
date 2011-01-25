@@ -210,7 +210,7 @@ header("Content-Type: text/html; charset=".$charset);
 					foreach($researchList as $key=>$value){
 	            ?>
 					<li>
-						<a href='namegame.php?cl=<?php echo $key."&listname=".$value; ?>'>
+						<a href='namegame.php?clid=<?php echo $key."&listname=".$value; ?>'>
 							<?php echo $value; ?>
 						</a> 
 						<!--<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
