@@ -15,7 +15,10 @@ $clArr = $gameManager->getChecklistArr($pid);
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<script type="text/javascript">
 		function checkForm(f){
-			if(f.clid.value == "") return false;
+			if(f.clid.value == ""){
+				alert("Select a checklist from pulldown");
+				return false;
+			}
 			return true;
 		}
 	</script>
