@@ -47,10 +47,10 @@ class GamesManager {
 		$sql = 'SELECT DISTINCT c.clid, c.name '.
 			'FROM fmchecklists c INNER JOIN fmchklstprojlink plink ON c.clid = plink.clid ';
 		if($projId){
-			$sql .= 'WHERE plink.pid = '.$projId.' ';
+			$sql .= 'WHERE c.type = "static" AND plink.pid = '.$projId.' ';
 		}
 		else{
-			$sql .= 'INNER JOIN fmprojects p ON plink.pid = p.pid WHERE p.ispublic = 1 ';
+			$sql .= 'INNER JOIN fmprojects p ON plink.pid = p.pid WHERE c.type = "static" AND p.ispublic = 1 ';
 		}
 		$sql .= 'ORDER BY c.name';
 		//echo '<div>'.$sql.'</div>';
