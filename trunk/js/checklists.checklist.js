@@ -167,7 +167,7 @@ function initAddList(input){
 
 function getAddSuggs(key,cont){ 
    	var script_name = 'rpc/getspecies.php';
-   	var params = { 'q':key,'cl':'<?php echo $clManager->getClid();?>' }
+   	var params = { 'q':key,'cl':clid }
    	$.get(script_name,params,
 		function(obj){
 			// obj is just array of strings
@@ -185,7 +185,6 @@ function initFilterList(input){
     //process lookup list for fast access
 	if(!db){
 		db = new AutoCompleteDB();
-		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
 		var arLen=taxonArr.length;
 		if(arLen > 0){
 			$(input).autocomplete({ get:getFilterSuggs, minchars:1, timeout:10000 });
@@ -245,7 +244,7 @@ function buildSql(){
 	return false;
 }
 
-function testSql(clid){
+function testSql(){
 	tsXmlHttp=GetXmlHttpObject();
 	if (tsXmlHttp==null){
   		alert ("Your browser does not support AJAX!");

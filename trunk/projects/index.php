@@ -116,7 +116,7 @@ header("Content-Type: text/html; charset=".$charset);
 		<div class="navpath">
 			<a href="../index.php">Home</a> &gt; 
 			<?php echo $projects_indexCrumbs;?>
-			<b>$defaultTitle Project</b> 
+			<b><?php echo $defaultTitle; ?> Project</b> 
 		</div>
 		<?php 
 	}

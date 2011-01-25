@@ -118,6 +118,11 @@
 	<script type="text/javascript" src="../js/ui.core.js"></script>
 	<script type="text/javascript" src="../js/ui.tabs.js"></script>
 	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		taxonArr = new Array(<?php $clManager->echoFilterList();?>);
+		clid = <?php echo $clManager->getClid(); ?>;
+	</script>
+	
 	<script type="text/javascript" src="../js/checklists.checklist.js"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
