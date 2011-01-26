@@ -9,13 +9,13 @@ $con = MySQLiConnectionFactory::getCon("readonly");
 
 $linkQuery = '';
 if($clid){
-	$linkQuery = 'SELECT IFNULL(cl.familyoverride,ts.family) AS family, t.sciname '.
+	$linkQuery = 'SELECT DISTINCT IFNULL(cl.familyoverride,ts.family) AS family, CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
 		'FROM fmchklsttaxalink cl INNER JOIN taxa t ON cl.tid = t.tid '.
 		'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 		'WHERE cl.clid = '.$clid.' AND ts.taxauthid = 1 ORDER BY RAND() LIMIT 25';
 }
 elseif($dynClid){
-	$linkQuery = 'SELECT ts.family, t.sciname '.
+	$linkQuery = 'SELECT DISTINCT ts.family, CONCAT_WS(" ",t.unitind1,t.unitname1,t.unitind2,t.unitname2) AS sciname '.
 		'FROM fmdyncltaxalink cl INNER JOIN taxa t ON cl.tid = t.tid '.
 		'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 		'WHERE cl.dynclid = '.$dynClid.' AND ts.taxauthid = 1 ORDER BY RAND() LIMIT 25';

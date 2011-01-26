@@ -87,12 +87,14 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$collVarCookie = "dynclid:".$dynClid; 
 			if(array_key_exists("collvars",$_COOKIE)) $collVarCookie .= "&".$_COOKIE["collvars"];
 			setCookie("collvars",$collVarCookie,time()+64800,$clientRoot);
+			//Delete checklists that are greater than one week old
+			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()'); 
 		}
 		else{
 			echo "ERROR: ".$conn->error;
 			echo "insertSql: ".$sqlCreateCl;
 		}
-		$conn;
+		if($conn !== false) $conn->close();
 		return $dynClid;
 	}
 }
