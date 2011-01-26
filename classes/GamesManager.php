@@ -5,6 +5,7 @@ class GamesManager {
 
 	private $conn;
 	private $clid;
+	private $dynClid;
 	private $clName;
 
  	public function __construct(){
@@ -34,8 +35,26 @@ class GamesManager {
 		$rs->close();
 	}
 	
+	public function setDynChecklist($dynClid){
+		if(!$dynClid) return;
+		$sql = 'SELECT c.dynclid, c.name '.
+			'FROM fmdynamicchecklists c '.
+			'WHERE c.dynclid = '.$dynClid;
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$this->clName = $row->name;
+			$this->dynClid = $row->dynclid;
+		}
+		$rs->close();
+	}
+	
 	public function getClid(){
 		return $this->clid;
+	}
+	
+	public function getDynClid(){
+		return $this->dynClid;
 	}
 	
 	public function getClName(){

@@ -5,11 +5,17 @@ include_once($serverRoot.'/classes/GamesManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $clName = (array_key_exists('listname',$_REQUEST)?$_REQUEST['listname']:"");
-$clid = $_REQUEST['clid'];
+$clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:"";
+$dynClid = array_key_exists('dynclid',$_REQUEST)?$_REQUEST['dynclid']:"";
 
 if(!$clName){
 	$gameManager = new GamesManager();
-	$gameManager->setChecklist($clid);
+	if($clid){
+		$gameManager->setChecklist($clid);
+	}
+	elseif($dynClid){
+		$gameManager->setDynChecklist($dynClid);
+	}
 	$clName = $gameManager->getClName();
 }
 
@@ -143,7 +149,7 @@ $imgloc = "../images/games/namegame/";
 			if(confirmchange== true){
 				//<!-----------------------------Do stuff here to change the word list----------------------------------->
 				//popup('popUpDiv');
-				getWordList('rpc/getwordlist.php?clid='+a, 'newlist');
+				getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>'+a, 'newlist');
 				listnum = a;
 				return false;
 			}
@@ -225,7 +231,7 @@ $imgloc = "../images/games/namegame/";
 				}
 			}
 			//alert("To begin playing, please choose a plant list from the left.");
-			getWordList('rpc/getwordlist.php?clid=<?php echo $clid;?>', 'newlist');
+			getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'newlist');
 			generate();
 		}
 
@@ -303,7 +309,7 @@ $imgloc = "../images/games/namegame/";
 				// Does this when you run out of words in current list
 				//generate();
 				//popup('listreload');
-				getWordList('rpc/getwordlist.php?clid=<?echo $clid;?>', 'reloadlist');
+				getWordList('rpc/getwordlist.php?<?php echo $clid?'clid='.$clid:'dynclid='.$dynClid; ?>', 'reloadlist');
 				return;
 			}
 			
