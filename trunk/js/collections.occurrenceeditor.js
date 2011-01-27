@@ -152,6 +152,7 @@ function scinameChanged(){
 
 function verifyDate(eventDateInput){
 	var dateStr = eventDateInput.value;
+	if(dateStr == "") return true;
 	//test date and return mysqlformat
 	var validformat=/^\d{4}-\d{2}-\d{2}$/ //Format: yyyy-mm-dd
 	if(!validformat.test(dateStr)){
