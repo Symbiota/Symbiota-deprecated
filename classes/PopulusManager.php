@@ -36,6 +36,7 @@ class PopulusManager {
 				$statusArr = $this->parseAbbyyFile($fh);
 			}
 			fclose($fh);
+			unlink($filePath.$fileName);
 	 	}
 	 	return $statusArr;
 	}
@@ -84,8 +85,10 @@ class PopulusManager {
 			}
 			if($occId){
 				//load raw label record
-				if(!$this->conn->query('INSERT INTO populusrawlabels(occid,rawstr) VALUES('.$occId.',"'.$labelBlock.'")')){
+				$sql = 'INSERT INTO populusrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
+				if(!$this->conn->query($sql)){
 					$status = 'ERROR: unable to insert raw label record #'.$occId.'; SQL ERR: '.$this->conn->error;
+					$status .= 'SQL: '.$sql;
 				}
 			}
 			else{
@@ -117,6 +120,11 @@ class PopulusManager {
 			$result->close();
 		}
 		return $returnArr;
+	}
+	
+	private function cleanStr($str){
+		$str = str_replace('"','',$str);
+		return $str;
 	}
 }
 ?>
