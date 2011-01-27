@@ -103,7 +103,7 @@ if($isEditable){
 					if (f.uspid[counter].checked) return true; 
 				}
 			}
-			alert("Please select an Upload Option")
+			alert("Please select an Upload Option");
 			return false;
 		}
 
