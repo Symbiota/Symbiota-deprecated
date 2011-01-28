@@ -38,10 +38,10 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 <?php
 	$displayLeftMenu = (isset($collections_editor_imageObservationMenu)?$collections_individual_imageObservationMenu:false);
 	include($serverRoot.'/header.php');
-	if(isset($collections_editor_imageObservationCrumbs)){
+	if(isset($collections_editor_observationSubmitCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_editor_imageObservationCrumbs;
+		echo $collections_editor_observationSubmitCrumbs;
 		echo " &gt; <b>Observation Submission</b>";
 		echo "</div>";
 	}

@@ -132,7 +132,7 @@
 				<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return checkForm()">
 		        <?php if($specArr && $obsArr){?>
 					<div id="specobsdiv" class="tabcontent" style="margin:10px;">
-						<table width="600px">
+						<table width="700px">
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
@@ -154,7 +154,7 @@
 								    <td width="30px">
 							    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
 								    </td>
-								    <td width="300px">
+								    <td width="470px">
 							    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
 							    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 							    		</a>
