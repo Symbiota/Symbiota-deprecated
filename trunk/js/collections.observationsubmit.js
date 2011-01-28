@@ -142,9 +142,9 @@ function verifyDate(eventDateInput){
 	
 }
 
-function openPointMap() {
-    mapWindow=open("../mappointradius.php","pointradius","resizable=0,width=650,height=600,left=20,top=20");
-	if (mapWindow.opener == null) mapWindow.opener = self;
+function openMappingAid(targetForm,targetLat,targetLong) {
+    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function verifyLatValue(inputObj){

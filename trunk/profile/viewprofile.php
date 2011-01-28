@@ -125,8 +125,8 @@ if($isEditable){
 	<script type="text/javascript" language="JavaScript">
 		var dlXmlHttp;
 
-		function openPointMap() {
-		    mapWindow=open("../tools/mappointaid.php?formid=checklistaddform","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		function openMappingAid(targetForm,targetLat,targetLong) {
+		    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -562,7 +562,7 @@ if(isset($profile_viewprofileCrumbs)){
 						?>
 						</ul>
 					</div>
-					<form id="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="checkClCreateForm();">
+					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="checkClCreateForm();">
 						<fieldset>
 							<legend style="font-weight:bold;">Create a New Checklist</legend>
 							<div style="clear:both;">
@@ -631,7 +631,7 @@ if(isset($profile_viewprofileCrumbs)){
 								</div>
 								<div style="float:left;">
 									<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
-									<span style="cursor:pointer;" onclick="openPointMap();">
+									<span style="cursor:pointer;" onclick="openMappingAid('checklistaddform','ncllatcentroid','ncllongcentroid');">
 										<img src="../images/world40.gif" style="width:12px;" />
 									</span>
 								</div>

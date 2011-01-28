@@ -1,9 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
- include_once('../config/symbini.php');
- header("Content-Type: text/html; charset=".$charset);
- $formId = array_key_exists("formid",$_REQUEST)?$_REQUEST["formid"]:""; 
- 
+include_once('../config/symbini.php');
+header("Content-Type: text/html; charset=".$charset);
+$formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:""; 
+$latName = array_key_exists("latname",$_REQUEST)?$_REQUEST["latname"]:""; 
+$longName = array_key_exists("longname",$_REQUEST)?$_REQUEST["longname"]:""; 
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -52,8 +53,8 @@
 
         function updateParentForm() {
 			try{
-	            opener.document.getElementById("<?php echo $formId; ?>").latdec.value = document.getElementById("latbox").value;
-	            opener.document.getElementById("<?php echo $formId; ?>").lngdec.value = document.getElementById("lngbox").value;
+	            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
+	            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
 			}
 			catch(myErr){
 				alert("Unable to transfer data. Please let an administrator know.");
