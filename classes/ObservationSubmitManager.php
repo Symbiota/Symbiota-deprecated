@@ -35,11 +35,11 @@ class ObservationSubmitManager {
 	}
 
 	public function addObservation($occArr){
-		$statusStr = "";
+		$statusStr = '';
 		if($occArr){
-			$collId = $occArr["collid"];
+			$collId = $occArr['collid'];
 			$dbpk = 1;
-			$rs = $this->conn->query("SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = ".$collId);
+			$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);
 			if($rs && $row = $rs->fetch_object()){
 				if($row->maxpk) $dbpk = $row->maxpk;
 			}
@@ -55,7 +55,7 @@ class ObservationSubmitManager {
 			
 			//Get tid for scinetific name
 			$tid = 0;
-			$result = $this->conn->query("SELECT tid FROM taxa WHERE sciname = '".$occArr["sciname"]."'");
+			$result = $this->conn->query('SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"');
 			if($row = $result->fetch_object()){
 				$tid = $row->tid;
 			}
@@ -96,18 +96,21 @@ class ObservationSubmitManager {
 			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').') ';
 			//echo $sql;
 			if($this->conn->query($sql)){
-				$statusStr = $this->addImage($occArr,$this->conn->insert_id,$tid);
+				$statusStr = $this->conn->insert_id;
+				$imgStatus = $this->addImage($occArr,$this->conn->insert_id,$tid);
+				if($imgStatus){
+					$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
+				}
 			}
 			else{
-				$statusStr = "ERROR: Failed to load observation record";
-				$statusStr .= "ERROR: Failed to load observation record";
+				$statusStr = 'ERROR: Failed to load observation record.<br/> Err Descr: '.$this->conn->error;
 			}
 		}
-		return $statusStr?$statusStr:"SUCCESS: Image loaded successfully!";
+		return $statusStr;
 	}
 
 	private function addImage($occArr,$occId,$tid){
-		$status = "";
+		$status = '';
 		//Set download paths and variables
 		set_time_limit(120);
 		ini_set('max_input_time',120);
@@ -175,7 +178,8 @@ class ObservationSubmitManager {
 					$this->setPrimaryImageSort();
 				}
 				else{
-					$status .= 'loadImageData: '.$this->conn->error.'<br/>SQL: '.$sql;
+					$status = 'ERROR loadImageData: '.$this->conn->error;
+					//$status .= '<br/>SQL: '.$sql;
 				}
 			}
 		}
