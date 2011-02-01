@@ -270,10 +270,11 @@ class TPImageEditorManager extends TPEditorManager{
 		$imgWebUrl = $imgUrl;
 		$imgLgUrl = "";
 		if(strpos($imgUrl,"http://") === false || strpos($imgUrl,$this->imageRootUrl) !== false){
-			//Create Large Image
 			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
 			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
-			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+			//Create large image
+			$createlargeimg = (array_key_exists('createlargeimg',$_REQUEST)&&$_REQUEST['createlargeimg']==1?true:false);
+			if($createlargeimg && ($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit)){
 				$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
 				if($width < ($this->lgPixWidth*1.2)){
 					if(copy($imgPath,$lgWebUrlTemp)){

@@ -16,7 +16,7 @@ if(array_key_exists("CollAdmin",$userRights)) $okCollArr = array_merge($okCollAr
 if(array_key_exists("CollEditor",$userRights)) $okCollArr = array_merge($okCollArr,$userRights["CollEditor"]);
 if($isAdmin || ($collId && in_array($collId,$okCollArr))){
 	if($action == "Submit Observation"){
-		$status = $obsManager->addObservation($_REQUEST);
+		$status = $obsManager->addObservation($_REQUEST,$symbUid);
 	}
 }
 $okCollArr = $obsManager->getCollArr($okCollArr);
@@ -335,6 +335,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 								}
 								echo "<option value='".$collId."' ".$selectStr.">".$collName."</option>\n";
 							}
+							add survey project support
 							?>
 						</select>
 					</div>

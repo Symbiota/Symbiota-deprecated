@@ -34,7 +34,7 @@ if($isEditable){
 			return false;
 		}
 		testStr = testStr.toLowerCase();
-		if(testStr.indexOf(".jpg") == -1){
+		if((testStr.indexOf(".jpg") == -1) && (testStr.indexOf(".JPG") == -1)){
 			alert("Document "+testStr+" must be a JPG file (with a .jpg extension)");
 			return false;
 		}

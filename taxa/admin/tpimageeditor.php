@@ -203,6 +203,9 @@ if($editable && $tid){
 						<div>
 							<input name='userfile' type='file' size='70'/>
 						</div>
+						<div style="margin-left:10px;">
+							<input type="checkbox" name="createlargeimg" value="1" /> Create a large version of image, when applicable
+						</div>
 						<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
 						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
 							Link to External Image

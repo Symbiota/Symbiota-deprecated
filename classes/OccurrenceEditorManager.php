@@ -412,7 +412,8 @@ class OccurrenceEditorManager {
 			//Create Large Image
 			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
 			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
-			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+			$createlargeimg = (array_key_exists('createlargeimg',$_REQUEST)&&$_REQUEST['createlargeimg']==1?true:false);
+			if($createlargeimg && ($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit)){
 				$lgWebUrlTemp = str_ireplace("_temp.jpg","lg.jpg",$imgPath); 
 				if($width < ($this->lgPixWidth*1.2)){
 					if(copy($imgPath,$lgWebUrlTemp)){
@@ -601,7 +602,9 @@ class OccurrenceEditorManager {
 				$rs = $this->conn->query($sql);
 				if(!$rs->num_rows){
 					$imageRootUrl = $GLOBALS["imageRootUrl"];
+					if(substr($imageRootUrl,-1)!='/') $imageRootUrl .= "/";
 					$imageRootPath = $GLOBALS["imageRootPath"];
+					if(substr($imageRootPath,-1)!='/') $imageRootPath .= "/";
 					//Delete image from server 
 					$imgDelPath = str_replace($imageRootUrl,$imageRootPath,$imgUrl);
 					if(file_exists($imgDelPath)){
@@ -655,6 +658,16 @@ class OccurrenceEditorManager {
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = str_replace("\"","'",$newStr);
 		return $newStr;
+	}
+	
+	public function getObserverUid(){
+		$obsId = 0;
+		$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE occid = '.$this->occId);
+		if($row = $rs->fetch_object()){
+			$obsId = $row->observeruid;
+		}
+		$rs->close();
+		return $obsId;
 	}
 	
  	private function LatLonPointUTMtoLL($northing, $easting, $zone=12) {

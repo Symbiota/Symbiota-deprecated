@@ -18,8 +18,9 @@ $displayLocality = false;
 $isEditor = false;
 if($symbUid){
 	if(array_key_exists("SuperAdmin",$userRights) 
-	|| (array_key_exists('CollAdmin',$userRights) && in_array($occArr['occid'],$userRights['CollAdmin']))
-	|| (array_key_exists('CollEditor',$userRights) && in_array($occArr['occid'],$userRights['CollEditor']))){
+	|| (array_key_exists('CollAdmin',$userRights) && in_array($occArr['collid'],$userRights['CollAdmin']))
+	|| (array_key_exists('CollEditor',$userRights) && in_array($occArr['collid'],$userRights['CollEditor']))
+	|| $occArr['observeruid'] == $symbUid){
 		$displayLocality = true;
 		$isEditor = true;
 	}
