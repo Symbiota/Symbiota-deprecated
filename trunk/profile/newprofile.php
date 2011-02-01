@@ -30,7 +30,7 @@ if($action == "Submit Profile"){
     $email = $_REQUEST["email"];
 	$url = $_REQUEST["url"];
 	$biography = $_REQUEST["biography"];
-	$isPublic = $_REQUEST["ispublic"];
+	$isPublic = array_key_exists('ispublic',$_REQUEST);
 	
 	$pHandler = new ProfileManager();
 	$newPerson = new Person();

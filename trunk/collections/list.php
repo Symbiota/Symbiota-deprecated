@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
- 
+
 $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(fieldName,value))
 ?>
 
@@ -145,6 +145,12 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		<table id="omlisttable" cellspacing="4">
 		<?php 
 	    foreach($specimenArray as $collId => $specData){
+	    	$isEditor = false;
+	    	if($symbUid && (array_key_exists("SuperAdmin",$userRights)
+			|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
+			|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
+				$isEditor = true;
+			}
 			$collectionData = $collectionArr[$collId];
 			$instCode1 = $collectionData["institutioncode"];
 			if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
@@ -173,7 +179,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 				<tr>
 					<td rowspan="4" width='60' valign='top' align='center'>
 						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-	                    	<img align='absbottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
+	                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
 	                    </a>
 	                    <div style='font-weight:bold;font-size:75%;'>
 	                    	<?php 
@@ -183,7 +189,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 	                    </div>
 					</td>
 					<td colspan='3'>
-						<?php if($isAdmin){ ?>
+						<?php if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ ?>
 						<div style="float:right;" title="Edit Occurrence Record">
 							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
 								<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />

@@ -16,9 +16,9 @@ class ObservationSubmitManager {
 	private $imageRootUrl = "";
 
 	private $tnPixWidth = 200;
-	private $webPixWidth = 2000;
+	private $webPixWidth = 1400;
 	private $lgPixWidth = 3168;
-	private $webFileSizeLimit = 300000;
+	private $webFileSizeLimit = 250000;
 	
 	public function __construct($uid){
 		$this->uid = $uid;
@@ -34,7 +34,7 @@ class ObservationSubmitManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function addObservation($occArr){
+	public function addObservation($occArr, $obsUid){
 		$statusStr = '';
 		if($occArr){
 			$collId = $occArr['collid'];
@@ -66,7 +66,7 @@ class ObservationSubmitManager {
 				'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
 				'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
 				'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
-				'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters ) '.
+				'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
 
 			'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
 			'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
@@ -93,7 +93,8 @@ class ObservationSubmitManager {
 			($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','.
 			($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
 			($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
-			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').') ';
+			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
+			$obsUid.') ';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$statusStr = $this->conn->insert_id;
@@ -135,10 +136,11 @@ class ObservationSubmitManager {
 			$imgTnUrl = $this->createImageThumbnail($imgUrl);
 	
 			$imgWebUrl = $imgUrl;
-			$imgLgUrl = '';
-			//Create Large Image
 			list($width, $height) = getimagesize($imgPath);
 			$fileSize = filesize($imgPath);
+			//Create Large Image
+			$imgLgUrl = '';
+			/* Deactivate, at least for now
 			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
 				$lgWebUrlTemp = str_ireplace('_temp.jpg','lg.jpg',$imgPath); 
 				if($width < ($this->lgPixWidth*1.2)){
@@ -151,7 +153,7 @@ class ObservationSubmitManager {
 						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
 					}
 				}
-			}
+			}*/
 
 			//Create web url
 			$imgTargetPath = str_ireplace('_temp.jpg','.jpg',$imgPath);

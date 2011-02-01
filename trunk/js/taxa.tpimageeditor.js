@@ -55,12 +55,17 @@ function expandImages(){
 }
 
 function submitAddForm(f){
-    if(f.elements["userfile"].value.replace(/\s/g, "") == "" ){
+	var imgUploadPath = f.elements["userfile"].value.replace(/\s/g, "");
+	if(imgUploadPath == "" ){
         if(f.elements["filepath"].value.replace(/\s/g, "") == ""){
 			alert("File path must be entered");
 			return false;
         }
     }
+	if((imgUploadPath.indexOf(".jpg") == -1) && (imgUploadPath.indexOf(".JPG") == -1)){
+		alert("Image file upload must be a JPG file (with a .jpg extension)");
+		return false;
+	}
     if(f.elements["photographeruid"].value.replace(/\s/g, "") == "" ){
         if(f.elements["photographer"].value.replace(/\s/g, "") == ""){
 			alert("Please select the photographer from the pulldown or enter an override value");

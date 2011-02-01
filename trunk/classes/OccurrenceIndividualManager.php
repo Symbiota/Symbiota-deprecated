@@ -58,7 +58,7 @@ class OccurrenceIndividualManager {
 			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, '.
 			'o.verbatimcoordinates, o.georeferenceremarks, o.dynamicproperties, o.typestatus, o.dbpk, '.
 			'o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
-			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified '.
+			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, observeruid '.
 			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';
 		if($this->occId){
 			$sql .= 'WHERE o.occid = '.$this->occId;
