@@ -7,13 +7,23 @@ header("Content-Type: text/html; charset=".$charset);
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 
+$popManager;
+if($action == 'Upload ABBYY File'){
+	$popManager = new PopulusAbbyyManager();
+}
+elseif($action == "Upload Images"){
+	$popManager = new PopulusImageManager();
+}
+else{
+	$popManager = new PopulusManager();
+}
+
+$popManager->setCollId($collId);
+
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
  	$editable = true;
 }
-
-$popManager = new PopulusManager();
-if($collId) $popManager->setCollId($collId);
 
 $status = "";
 if($editable){
@@ -23,6 +33,10 @@ if($editable){
 			$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
 		}
 	}
+	elseif($action == "Upload Images"){
+		//$imageMapManagers->mapImages($mapTn,$mapLarge);
+	}
+	
 }
 
 ?>
@@ -74,7 +88,35 @@ if($editable){
 			}
 			if($collId){ 
 				?>
-				<div>
+				<div style="margin:10px;">
+					<form name="imgprocessform" action="index.php" method="get">
+						<fieldset>
+							<legend><b>Image Processor</b></legend>
+							<div>
+								This process will create web quality versions of the specimen images found within 
+								the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
+								and link them to their prespective specimen record.
+							</div>
+							<div style="margin-left:10px;">
+								<input type="checkbox" name="maptn" value="1" CHECKED /> 
+								Create Thumbnails<br/>
+								<input type="checkbox" name="maplarge" value="1" CHECKED /> 
+								Create Large Versions
+							</div>
+							<div>
+								<b>Source Folder:</b> 
+								<?php echo $imageMapManagers->getSourcePath();?><br/>
+								<b>Target Folder:</b> 
+								<?php echo $imageMapManagers->getTargetBase();?><br/>
+								<a href="logs/">Log Files</a>
+							</div>
+							<div>
+								<input type="submit" name="action" value="Process Images" />
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div style="margin:10px;">
 					<form name="abbyyloaderform" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateAbbyyForm(this);">
 						<fieldset>
 							<legend><b>ABBYY OCR File Loader</b></legend>

@@ -1,5 +1,5 @@
 <?php
-class SpecimenDirectUpload extends SpecimenUploadManager {
+class SpecUploadDirect extends SpecUploadManager {
 
  	public function __construct(){
 		parent::__construct();
