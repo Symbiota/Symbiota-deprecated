@@ -7,25 +7,32 @@ $charset = 'ISO-8859-1';			//ISO-8859-1 or UTF-8
 
 $clientRoot = '';					//URL path to project root folder 
 $serverRoot = '';					//Root path to Symbiota project root folder
+$tempDirRoot = '';
+$logPath = '';						//If left NULL, <$tempDirRoot>/logs will be used
 
 //the root for the image directory
 $imageDomain = '';					//Domain path to images, if different from Virtual Flora path (e.g. http://swbiodiversity.org)
 $imageRootUrl = '';					//URL path to images
 $imageRootPath = '';				//Writable path to images, especially needed for downloading images
 
-//the root for the temp directory
-$tempDirRoot = '';
-
-$googleMapKey = '';					//Needed for Google Map; get from Google 
-$mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
-$googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
+//Specimen Label and Batch Image Processor variables
+//Pixel variable also used in observation image, specimen image, and taxon image uploaders  
+$imgLoaderSourcePath = "C:/htdocs/symbiota/trunk/temp/images/toprocess";
+$imgLoaderTargetPath = "";		//If null, $imageRootPath will be used
+$imgLoaderUrl = "";				//If null, $imageRootUrl will be used
+$tnPixWidth = 130;				//Preferred pixel width of thumbnail 
+$webPixWidth = 1300;			//Preferred pixel width of basic web image. If source image is < 120% this width, it is not resized
+$lgPixWidth = 3168;			//Preferred pixel width of large image 
 
 //Module activations
 $occurrenceModIsActive = 1;
 $floraModIsActive = 1;
 $keyModIsActive = 1;
 
-//Misc Options
+//Misc variables
+$googleMapKey = '';					//Needed for Google Map; get from Google 
+$mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
+$googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = 1;			//0 = false, 1 = true
 

@@ -1,10 +1,10 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/SpecimenDirectUpload.php');
-include_once($serverRoot.'/classes/SpecimenDigirUpload.php');
-include_once($serverRoot.'/classes/SpecimenFileUpload.php');
+include_once($serverRoot.'/classes/SpecUploadDirect.php');
+include_once($serverRoot.'/classes/SpecUploadDigir.php');
+include_once($serverRoot.'/classes/SpecUploadFile.php');
 
-class SpecimenUploadManager{
+class SpecUploadManager{
 
 	protected $conn;
 	protected $collId = 0;

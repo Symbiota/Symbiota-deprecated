@@ -1,6 +1,6 @@
 <?php 
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecimenUploadManager.php');
+include_once($serverRoot.'/classes/SpecUploadManager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
@@ -15,22 +15,22 @@ $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $statusStr = "";
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;
 
-if($uspid && !$uploadType) $uploadType = SpecimenUploadManager::getUploadType($uspid);
+if($uspid && !$uploadType) $uploadType = SpecUploadManager::getUploadType($uspid);
 $duManager;
 if($uploadType == $DIRECTUPLOAD){
-	$duManager = new SpecimenDirectUpload();
+	$duManager = new SpecUploadDirect();
 }
 elseif($uploadType == $DIGIRUPLOAD){
-	$duManager = new SpecimenDigirUpload();
+	$duManager = new SpecUploadDigir();
 	$duManager->setSearchStart($recStart);
 	$duManager->setSearchLimit($recLimit);
 }
 elseif($uploadType == $FILEUPLOAD){
-	$duManager = new SpecimenFileUpload();
+	$duManager = new SpecUploadFile();
 	if($ulFileName) $duManager->setUploadFileName($ulFileName);
 }
 else{
-	$duManager = new SpecimenUploadManager();
+	$duManager = new SpecUploadManager();
 }
 
 if($collId) $duManager->setCollId($collId);

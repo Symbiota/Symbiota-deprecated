@@ -1,5 +1,5 @@
 <?php
-class SpecimenFileUpload extends SpecimenUploadManager{
+class SpecUploadFile extends SpecUploadManager{
 	
 	private $ulFileName;
 	private $zipFileName;
