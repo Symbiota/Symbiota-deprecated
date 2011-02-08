@@ -6,28 +6,12 @@
  
 class SpecProcessorImage extends SpecProcessorManager{
 
-	private $sourcePath;
-	private $targetBasePath;
-	private $targetUrl;
-	private $tnPixWidth = 200;
-	private $webPixWidth = 1300;
-	private $largePixWidth = 3168;
-
 	function __construct() {
  		parent::__construct();
-		$this->sourcePath = $GLOBALS['imgLoaderSourcePath'];
-		if(!substr($this->sourcePath,-1)) $this->sourcePath .= '/';
-		$this->targetBasePath = $GLOBALS['imgLoaderTargetPath'];
-		if(!substr($this->targetBasePath,-1)) $this->targetBasePath .= '/';
-		$this->targetUrl = $GLOBALS['imgLoaderUrl'];
-		if(!substr($this->targetUrl,-1)) $this->targetUrl .= '/';
-		$this->tnPixWidth = $tnPixWidth;
-		$this->webPixWidth = $webPixWidth;
-		$this->largePixWidth = $largePixWidth;
 		
 	}
 	
-	public function batchLoad($mTn,$mLarge){
+	public function batchLoadImages($mTn,$mLarge){
 		//Create log Files
 		if(file_exists($this->logPath)){
 			if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
@@ -53,49 +37,53 @@ class SpecProcessorImage extends SpecProcessorManager{
 	}
 	
 	private function processFolder($pathFrag = ''){
+		global $imageRootPath;
 		set_time_limit(800);
-		if($imgFH = opendir($this->sourcePath.$pathFrag)){
+		if($imgFH = opendir($this->projVars['sourcepath'].$pathFrag)){
 			$targetPath = '';
 			while($file = readdir($imgFH)){
         		if($file != "." && $file != ".."){
-        			if(is_file($this->sourcePath.$pathFrag.$file)){
+        			if(is_file($this->projVars['sourcepath'].$pathFrag.$file)){
 						if(!$targetPath){
-							$targetPath = $this->targetBasePath;
-							if(!$pathFrag){
-								
+							$targetPath = $this->projVars['targetbase'];
+							if(!targetPath){
+								$targetpath = $imageRootPath;
+							}
+							if($pathFrag){
+								$targetPath .= $pathFrag;
+								if(!file_exists($targetPath)){ 
+									mkdir($targetPath);
+								}
+							}
+							else{
+								$folderName = '';
+								$specPattern = $this->projVars['specpk'];
+								if(preg_match($specPattern,$file,$matchArr)){
+									if(preg_match('/(\d{3,4,5})\d{3}^\D*/',$matchArr[1],$matchArr2)){
+										$folderName = 'spec'.$matchArr[1];
+									}
+								}
+								if(!$folderName){
+									$folderName = 'spec'.date('Ym');
+								}
+								$targetPath .= $folderName.'/';
+								if(!file_exists($targetPath)){ 
+									mkdir($targetPath);
+								}
 							}
 						}
-
-			$folderName = "";
-			if(preg_match('/^\D*(\d+)/',$file,$matchArr)){
-				$num = $matchArr[1];
-				if($num > 1000){
-					$folderName = "spec".substr($num,0,strlen($num)-3)."/";
-				}
-				else{
-					$folderName = "spec0000/";
-				}
-			}
-			else{
-				$folderName = "spec0000/";
-			}
-			if(!file_exists($targetPath.$folderName)){
-				mkdir($targetPath.$folderName);
-			}
-			$targetPath .= $folderName;
-						
-						
-						
-						if((substr($file,-4) == ".tif") || (substr($file,-4) == ".TIF")){
-							
+						$fileExt = substr($file,-4);
+						if(($fileExt == ".tif") || ($fileExt == ".TIF")){
+							//Do something, like turn into a jpg for ocr processing
 						}
-        				elseif((substr($file,-4) == ".jpg") || (substr($file,-4) == ".JPG")){
+        				elseif(($fileExt == ".jpg") || ($fileExt == ".JPG")){
 							if(file_exists($targetPath.$file)){
+								//If image already exists at target, delete for replacement
 	        					unlink($targetPath.$file);
 	        					unlink($targetPath.substr($file,0,strlen($file)-4)."tn.jpg");
 	        					unlink($targetPath.substr($file,0,strlen($file)-4)."lg.jpg");
 							}
-							list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$file);
+							list($width, $height) = getimagesize($this->projVars['sourcepath'].$pathFrag.$file);
 							echo "<li>Start loading: ".$file."</li>";
 							fwrite($this->logFH, "Start loading: ".$file."\n");
 							//Create web image
@@ -107,7 +95,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 								$webImgCreated = $this->resizeImage($file,$targetPath.$file,$webPixWidth,round($webPixWidth*$height/$width),$width,$height);
 							}
 							else{
-								$webImgCreated = copy($this->sourcePath.$pathFrag.$file,$targetPath.$file);
+								$webImgCreated = copy($this->projVars['sourcepath'].$pathFrag.$file,$targetPath.$file);
 							}
 							if($webImgCreated){
 	        					//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
@@ -116,7 +104,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 								//Create Large Image
 								if($this->mLarge && $width > ($webPixWidth*1.2)){
 									if($width < ($largePixWidth*1.2)){
-										if(copy($this->sourcePath.$pathFrag.$file,$targetPath.substr($file,0,strlen($file)-4)."lg.jpg")){
+										if(copy($this->projVars['sourcepath'].$pathFrag.$file,$targetPath.substr($file,0,strlen($file)-4)."lg.jpg")){
 											$oUrl = substr($file,0,strlen($file)-4)."lg.jpg";
 										}
 									}
@@ -133,7 +121,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 									}
 								}
 								if($this->insertImageInDB($folderName.$file,$folderName.$tnUrl,$folderName.$oUrl)){
-									if(file_exists($this->sourcePath.$pathFrag.$file)) unlink($this->sourcePath.$pathFrag.$file);
+									if(file_exists($this->projVars['sourcepath'].$pathFrag.$file)) unlink($this->projVars['sourcepath'].$pathFrag.$file);
 									echo "<li>Success!</li>";
 									fwrite($this->logFH, "\tSuccess!\n");
 								}
@@ -144,7 +132,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 							fwrite($this->logErrFH, "Error: File skipped, not a supported image file: ".$file." \n");
 						}
 					}
-					elseif(is_dir($this->sourcePath.$pathFrag.$file)){
+					elseif(is_dir($this->projVars['sourcepath'].$pathFrag.$file)){
 						$this->processFolder($pathFrag.$file."/");
 					}
         		}
@@ -155,7 +143,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	
 	private function resizeImage($sourceName, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
 		$status = false;
-       	$sourceImg = imagecreatefromjpeg($this->sourcePath.$sourceName);
+       	$sourceImg = imagecreatefromjpeg($this->projVars['sourcepath'].$sourceName);
    		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
         if(imagejpeg($tmpImg, $targetPath)){
@@ -224,14 +212,6 @@ class SpecProcessorImage extends SpecProcessorManager{
         	echo "<li style='margin-left:20px;'><b>ERROR:</b> unable to extract barcode from file name (".$webFileName."). </li>";
 		}
 		return $status;
-	}
-	
-	public function getSourcePath(){
-		return $this->sourcePath;
-	}
-	
-	public function getTargetBase(){
-		return $this->targetBasePath;
 	}
 }
 ?>

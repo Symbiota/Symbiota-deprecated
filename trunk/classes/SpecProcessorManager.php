@@ -16,10 +16,14 @@ class SpecProcessorManager {
 	protected $logFH;
 	protected $logErrFH;
 	
+	protected $projVars = Array();
+
 	function __construct() {
+		global $logPath;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->logPath = $GLOBALS['logPath'];
+		$this->logPath = $logPath;
 		if(substr($this->logPath,1) != '/') $this->logPath .= '/';
+
 	}
 
 	function __destruct(){
@@ -27,7 +31,10 @@ class SpecProcessorManager {
 	}
 
 	public function setCollId($id) {
-		if($id) $this->collId = $id;
+		if($id) {
+			$this->collId = $id;
+			$this->loadProjVariables();
+		}
 	}
 
 	protected function loadRecord($labelBlock){
@@ -66,6 +73,41 @@ class SpecProcessorManager {
 		return $status;
 	}
 
+	protected function loadProjVariables(){
+		$this->projVars['sourcepath'] = 'sourcepath';
+		$this->projVars['targetbase'] = 'targetbase';
+		$this->projVars['targeturl'] = 'targeturl';
+		$this->projVars['tnpixwidth'] = 'tnpixwidth';
+		$this->projVars['webpixwidth'] = 'webpixwidth';
+		$this->projVars['largepixwidth'] = 'largepixwidth';
+		return;
+		
+		$sql = 'SELECT '.
+			'FROM '.
+			'WHERE collid = '.$this->collId;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$this->projVars['sourcepath'] = $row->sourcepath;
+			$this->projVars['targetbasepath'] = $row->targetbasepath;
+			$this->projVars['targeturl'] = $row->targeturl;
+			$this->projVars['tnpixwidth'] = $row->tnpixwidth;
+			$this->projVars['webpixwidth'] = $row->webpixwidth;
+			$this->projVars['largepixwidth'] = $row->largepixwidth;
+		}
+		$rs->close();
+
+		if(substr($this->projVars['sourcepath'],-1) != "/") $this->projVars['sourcepath'] = $this->projVars['sourcepath'].'/';
+		if(substr($this->projVars['targetbasepath'],-1) != "/") $this->projVars['targetbasepath'] = $this->projVars['targetbasepath'].'/';
+		if(substr($this->projVars['targeturl'],-1) != "/") $this->projVars['targeturl'] = $this->projVars['targeturl'].'/';
+	}
+	
+	public function getProjVarible($varName = ""){
+		if($varName){
+			return $this->projVars[$varName];
+		}
+		return $this->projVars;
+	}
+
 	public function getCollectionList(){
 		global $isAdmin, $userRights;
 		$returnArr = Array();
@@ -98,6 +140,14 @@ class SpecProcessorManager {
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
+	}
+	
+	public function getSourcePath(){
+		return $this->sourcePath;
+	}
+	
+	public function getTargetBase(){
+		return $this->targetBasePath;
 	}
 }
 ?>
