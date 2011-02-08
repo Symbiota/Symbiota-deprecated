@@ -1,24 +1,24 @@
 <?php
 //error_reporting(E_ALL);
-include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PopulusManager.php');
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/classes/SpecProcessorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 
-$popManager;
+$specManager;
 if($action == 'Upload ABBYY File'){
-	$popManager = new PopulusAbbyyManager();
+	$specManager = new SpecProcessorAbbyy();
 }
 elseif($action == "Upload Images"){
-	$popManager = new PopulusImageManager();
+	$specManager = new SpecProcessorImage();
 }
 else{
-	$popManager = new PopulusManager();
+	$specManager = new SpecProcessorManager();
 }
 
-$popManager->setCollId($collId);
+$specManager->setCollId($collId);
 
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -28,13 +28,13 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 $status = "";
 if($editable){
 	if($action == 'Upload ABBYY File'){
-		$statusArr = $popManager->loadLabelFile();
+		$statusArr = $specManager->loadLabelFile();
 		if($statusArr){
 			$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
 		}
 	}
 	elseif($action == "Upload Images"){
-		//$imageMapManagers->mapImages($mapTn,$mapLarge);
+		$specManager->batchLoadImages($mapTn,$mapLarge);
 	}
 	
 }
@@ -42,7 +42,7 @@ if($editable){
 ?>
 <html>
 	<head>
-		<title>Populus Control Panel</title>
+		<title>Specimen Processor Control Panel</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 		<script language="javascript">
 			function validateAbbyyForm(f){
@@ -75,7 +75,7 @@ if($editable){
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<h1>Populus Control Panel</h1>
+			<h1>Specimen Processor Control Panel</h1>
 			<?php 
 			if($status){ 
 				?>
@@ -92,26 +92,28 @@ if($editable){
 					<form name="imgprocessform" action="index.php" method="get">
 						<fieldset>
 							<legend><b>Image Processor</b></legend>
-							<div>
+							<div style="margin:10px;">
 								This process will create web quality versions of the specimen images found within 
 								the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
 								and link them to their prespective specimen record.
 							</div>
-							<div style="margin-left:10px;">
+							<div style="margin:15px;">
 								<input type="checkbox" name="maptn" value="1" CHECKED /> 
 								Create Thumbnails<br/>
 								<input type="checkbox" name="maplarge" value="1" CHECKED /> 
 								Create Large Versions
 							</div>
-							<div>
+							<div style="margin:15px;">
 								<b>Source Folder:</b> 
-								<?php echo $imageMapManagers->getSourcePath();?><br/>
+								<?php echo $specManager->getProjVarible('sourcepath');?><br/>
 								<b>Target Folder:</b> 
-								<?php echo $imageMapManagers->getTargetBase();?><br/>
-								<a href="logs/">Log Files</a>
+								<?php echo $specManager->getProjVarible('targetbase');?><br/>
 							</div>
-							<div>
+							<div style="margin:15px 0px 0px 15px;">
 								<input type="submit" name="action" value="Process Images" />
+							</div>
+							<div style="margin:5px 0px 10px 80px;">
+								<a href="logs/">Log Files</a>
 							</div>
 						</fieldset>
 					</form>
@@ -136,7 +138,7 @@ if($editable){
 			}
 			else{
 				if($symbUid){
-					if($collList = $popManager->getCollectionList()){
+					if($collList = $specManager->getCollectionList()){
 						?>
 						<form name="collidform" action="index.php" method="post" onsubmit="return validateCollidForm(this);">
 							<fieldset>
@@ -162,7 +164,7 @@ if($editable){
 				else{
 					?>
 					<div style='font-weight:bold;'>
-						Please <a href='../profile/index.php?refurl=<?php echo $clientRoot; ?>/populus/index.php'>login</a>!
+						Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/specprocessor/index.php'>login</a>!
 					</div>
 					<?php 
 				}
