@@ -11,6 +11,7 @@ class SpecProcessorManager {
 
 	protected $conn;
 	protected $collId;
+	protected $spprId;
 
 	protected $logPath;
 	protected $logFH;
@@ -33,7 +34,6 @@ class SpecProcessorManager {
 	public function setCollId($id) {
 		if($id) {
 			$this->collId = $id;
-			$this->loadProjVariables();
 		}
 	}
 
@@ -72,39 +72,70 @@ class SpecProcessorManager {
 		}
 		return $status;
 	}
+	
+	public function editProject($editArr){
+		$sql = 'UPDATE specprocessorprojects '.
+			'SET title = "'.$editArr['title'].'", speckeypattern = "'.$editArr['speckeypattern'].'", speckeyretrieval = "'.$editArr['speckeyretrieval'].
+			'", sourcepath = "'.$editArr['sourcepath'].'", targetpath = "'.$editArr['targetpath'].'", imgurl = "'.$editArr['imgurl'].
+			'", webpixwidth = "'.$editArr['webpixwidth'].'", tnpixwidth = "'.$editArr['tnpixwidth'].'", lgpixwidth = "'.$editArr['lgpixwidth'].
+			'", createtnimg = "'.$editArr['createtnimg'].'", createlgimg = "'.$editArr['createlgimg'].'" '.
+			'WHERE spprid = '.$editArr['spprid'];
+		$this->conn->query($sql);
+	}
+
+	public function addProject($addArr){
+		$sql = 'INSERT INTO specprocessorprojects(title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
+			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,createtnimg,createlgimg) '.
+			'VALUES("'.$addArr['title'].'","'.$addArr['speckeypattern'].'","'.$addArr['speckeyretrieval'].'","'.
+			$addArr['sourcepath'].'","'.$addArr['targetpath'].'","'.$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
+			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].',"'.$addArr['createtnimg'].'","'.$addArr['createlgimg'].'")';
+		$this->conn->query($sql);
+	}
+	
+	public function deleteProject($spprId){
+		$sql = 'DELETE FROM specprocessorprojects WHERE spprid = '.$spprId;
+		$this->conn->query($sql);
+	}
 
 	protected function loadProjVariables(){
-		$this->projVars['sourcepath'] = 'sourcepath';
-		$this->projVars['targetbase'] = 'targetbase';
-		$this->projVars['targeturl'] = 'targeturl';
-		$this->projVars['tnpixwidth'] = 'tnpixwidth';
-		$this->projVars['webpixwidth'] = 'webpixwidth';
-		$this->projVars['largepixwidth'] = 'largepixwidth';
-		return;
-		
-		$sql = 'SELECT '.
-			'FROM '.
+		$sql = 'SELECT spprid, title, speckeypattern, speckeyretrieval, coordx1, coordx2, coordy1, '. 
+			'coordy2, sourcepath, targetpath, imgurl, webpixwidth, tnpixwidth, lgpixwidth, createtnimg, createlgimg '.
+			'FROM specprocessorprojects '.
 			'WHERE collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$this->projVars['sourcepath'] = $row->sourcepath;
-			$this->projVars['targetbasepath'] = $row->targetbasepath;
-			$this->projVars['targeturl'] = $row->targeturl;
-			$this->projVars['tnpixwidth'] = $row->tnpixwidth;
-			$this->projVars['webpixwidth'] = $row->webpixwidth;
-			$this->projVars['largepixwidth'] = $row->largepixwidth;
+			$spprId = $row->spprid;
+			if(!$this->spprId) $this->spprId = $spprId; 
+			$this->projVars[$spprId]['title'] = $row->title;
+			$this->projVars[$spprId]['speckeypattern'] = $row->speckeypattern;
+			$this->projVars[$spprId]['speckeyretrieval'] = $row->speckeyretrieval;
+			$this->projVars[$spprId]['coordx1'] = $row->coordx1;
+			$this->projVars[$spprId]['coordx2'] = $row->coordx2;
+			$this->projVars[$spprId]['coordy1'] = $row->coordy1;
+			$this->projVars[$spprId]['coordy2'] = $row->coordy2;
+			$sourcePath = $row->sourcepath;
+			if(substr($sourcePath,-1) != '/') $sourcePath .= '/'; 
+			$this->projVars[$spprId]['sourcepath'] = $sourcePath;
+			$targetPath = $row->targetpath;
+			if(substr($targetPath,-1) != '/') $targetPath .= '/'; 
+			$this->projVars[$spprId]['targetpath'] = $targetPath;
+			$imgUrl = $row->imgurl;
+			if(substr($imgUrl,-1) != '/') $imgUrl .= '/'; 
+			$this->projVars[$spprId]['imgurl'] = $imgUrl;
+			$this->projVars[$spprId]['tnpixwidth'] = $row->tnpixwidth;
+			$this->projVars[$spprId]['webpixwidth'] = $row->webpixwidth;
+			$this->projVars[$spprId]['lgpixwidth'] = $row->lgpixwidth;
+			$this->projVars[$spprId]['createtnimg'] = $row->createtnimg;
+			$this->projVars[$spprId]['createlgimg'] = $row->createlgimg;
 		}
 		$rs->close();
-
-		if(substr($this->projVars['sourcepath'],-1) != "/") $this->projVars['sourcepath'] = $this->projVars['sourcepath'].'/';
-		if(substr($this->projVars['targetbasepath'],-1) != "/") $this->projVars['targetbasepath'] = $this->projVars['targetbasepath'].'/';
-		if(substr($this->projVars['targeturl'],-1) != "/") $this->projVars['targeturl'] = $this->projVars['targeturl'].'/';
 	}
 	
-	public function getProjVarible($varName = ""){
-		if($varName){
-			return $this->projVars[$varName];
+	public function getProjects($spprId = 0){
+		if($spprId){
+			$this->spprId = $spprId;
 		}
+		if(!$this->projVars) $this->loadProjVariables();
 		return $this->projVars;
 	}
 
