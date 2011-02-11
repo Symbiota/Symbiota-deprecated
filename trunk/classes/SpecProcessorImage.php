@@ -45,7 +45,7 @@ class SpecProcessorImage extends SpecProcessorManager{
         		if($file != "." && $file != ".."){
         			if(is_file($this->projVars['sourcepath'].$pathFrag.$file)){
 						if(!$targetPath){
-							$targetPath = $this->projVars['targetbase'];
+							$targetPath = $this->projVars['targetpath'];
 							if(!targetPath){
 								$targetpath = $imageRootPath;
 							}
@@ -57,7 +57,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 							}
 							else{
 								$folderName = '';
-								$specPattern = $this->projVars['specpk'];
+								$specPattern = $this->projVars['speckeypattern'];
 								if(preg_match($specPattern,$file,$matchArr)){
 									if(preg_match('/(\d{3,4,5})\d{3}^\D*/',$matchArr[1],$matchArr2)){
 										$folderName = 'spec'.$matchArr[1];
@@ -174,13 +174,13 @@ class SpecProcessorImage extends SpecProcessorManager{
 				$imgUrls[] = $row->hyperlink;
 			}
 			if($dbsn){
-				if(!in_array($this->targetUrl.$webFileName,$imgUrls)){
+				if(!in_array($this->projVars['imgurl'].$webFileName,$imgUrls)){
 					$sql = "INSERT tbl_photos(dbsn,hyperlink";
 					if($tnUrl) $sql .= ",thumbnailurl";
 					if($oUrl) $sql .= ",originalurl"; 
-					$sql .= ") VALUES (".$dbsn.", '".$this->targetUrl.$webFileName."' ";
-					if($tnUrl) $sql .= ", '".$this->targetUrl.$tnUrl."' ";
-					if($oUrl) $sql .= ", '".$this->targetUrl.$oUrl."' ";
+					$sql .= ") VALUES (".$dbsn.", '".$this->projVars['imgurl'].$webFileName."' ";
+					if($tnUrl) $sql .= ", '".$this->projVars['imgurl'].$tnUrl."' ";
+					if($oUrl) $sql .= ", '".$this->projVars['imgurl'].$oUrl."' ";
 					$sql .= ")";
 					$status = $this->conn->query($sql);
 					if($status){

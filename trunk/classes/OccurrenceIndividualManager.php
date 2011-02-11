@@ -64,7 +64,7 @@ class OccurrenceIndividualManager {
 			$sql .= 'WHERE o.occid = '.$this->occId;
 		}
 		elseif($this->collId && $this->dbpk){
-			$sql .= 'WHERE o.collid = '.$this->collId.' AND o.dbpk = '.$this->dbpk;
+			$sql .= 'WHERE o.collid = '.$this->collId.' AND o.dbpk = "'.$this->dbpk.'"';
 		}
 		else{
 			return 'ERROR: Collection acronym was null or empty';
