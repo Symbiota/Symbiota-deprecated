@@ -94,13 +94,21 @@ class CollectionProfileManager {
 
 	public function submitCollEdits($editArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = "";
-		foreach($editArr as $field=>$value){
-			$v = trim($value);
-			$v = str_replace("\"","'",$v);
-			$sql .= ",$field = ".($v?"\"".$v."\"":"NULL");
-		}
-		$sql = "UPDATE omcollections SET ".substr($sql,1)." WHERE collid = ".$this->collId;
+		$sql = 'UPDATE omcollections '.
+			'SET institutioncode = '.($editArr['institutioncode']?'"'.$editArr['institutioncode'].'"':'NULL').','.
+			'collectioncode = '.($editArr['collectioncode']?'"'.$editArr['collectioncode'].'"':'NULL').','.
+			'collectionname = '.($editArr['collectionname']?'"'.$editArr['collectionname'].'"':'NULL').','.
+			'briefdescription = '.($editArr['briefdescription']?'"'.$editArr['briefdescription'].'"':'NULL').','.
+			'fulldescription = '.($editArr['fulldescription']?'"'.$editArr['fulldescription'].'"':'NULL').','.
+			'homepage = '.($editArr['homepage']?'"'.$editArr['homepage'].'"':'NULL').','.
+			'contact = '.($editArr['contact']?'"'.$editArr['contact'].'"':'NULL').','.
+			'email = '.($editArr['email']?'"'.$editArr['email'].'"':'NULL').','.
+			'latitudedecimal = '.($editArr['latitudedecimal']?$editArr['latitudedecimal']:'NULL').','.
+			'longitudedecimal = '.($editArr['longitudedecimal']?$editArr['longitudedecimal']:'NULL').','.
+			'icon = '.($editArr['icon']?'"'.$editArr['icon'].'"':'NULL').','.
+			'individualurl = '.($editArr['individualurl']?'"'.$editArr['individualurl'].'"':'NULL').' '.
+			($editArr['sortseq']?',sortseq = '.$editArr['sortseq']:'').' '.
+			'WHERE collid = '.$this->collId;
 		//echo $sql;
 		$conn->query($sql);
 		$conn->close();

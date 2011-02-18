@@ -390,7 +390,7 @@ if($editable && $tid){
 						?>
 						<div>
 							<b>Occurrence Record #:</b> 
-							<a href="<?php echo $clientRoot;?>/collections/individual/individual.php?occid=<?php echo $imgArr["occid"]; ?>">
+							<a href="<?php echo $clientRoot;?>/collections/individual/index.php?occid=<?php echo $imgArr["occid"]; ?>">
 								<?php echo $imgArr["occid"];?>
 							</a>
 						</div>

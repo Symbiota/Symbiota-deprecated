@@ -121,7 +121,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		}
 
 		function openIndPu(occId){
-			urlStr = "<?php echo $clientRoot;?>/collections/individual/individual.php?occid=" + occId;
+			urlStr = "<?php echo $clientRoot;?>/collections/individual/index.php?occid=" + occId;
 			newWindow = window.open(urlStr,"newind","toolbar=1,resizable=1,width=650,height=600,left=20,top=20");
 			if (newWindow.opener == null) newWindow.opener = self;
 		}

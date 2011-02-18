@@ -170,7 +170,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			</tr>
 			<?php 
 	        foreach($specData as $dbpk => $fieldArr){
-			$instCode2 = "";
+				$instCode2 = "";
 				if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
 					$instCode2 = $fieldArr["institutioncode"];
 					if($fieldArr["collectioncode"]) $instCode2 .= ":".$fieldArr["collectioncode"];
@@ -238,7 +238,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 	            <tr>
 	            	<td colspan='3'>
 			            <b>
-			            	<a href="javascript:var puRef=window.open('individual/individual.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');">
+			            	<a href="javascript:var puRef=window.open('individual/index.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');">
 		            			Full Record Details
 		            		</a>
 		            	</b>
