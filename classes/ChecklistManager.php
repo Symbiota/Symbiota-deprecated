@@ -191,7 +191,7 @@ class ChecklistManager {
 			$vSql = "SELECT DISTINCT v.tid, v.occid, v.collector, v.notes FROM fmvouchers v WHERE (v.CLID = $this->clid)";
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
-				$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/individual.php?occid=".$row->occid."','individwindow')\">".$row->collector."</a>\n";
+				$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".$row->occid."','individwindow')\">".$row->collector."</a>\n";
 			}
 			$vResult->close();
 		}

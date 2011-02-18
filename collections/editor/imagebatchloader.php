@@ -157,7 +157,7 @@ if($isEditable){
 								<fieldset>
 									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
 									<div style="margin:3px;">
-										<a href="<?php echo $clientRoot."/collections/individual/individual.php?occid=".$occId;?>"><?php echo $occId;?></a>
+										<a href="<?php echo $clientRoot."/collections/individual/index.php?occid=".$occId;?>"><?php echo $occId;?></a>
 										<?php 
 										echo $v["recordedby"];
 										if($v["recordnumber"]) echo " [".$v["recordnumber"]."] ";

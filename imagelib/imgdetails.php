@@ -82,7 +82,7 @@ if(isset($taxa_imgdetailsCrumbs)){
 						}
 						echo "</div>";
 						if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
-						if($imgArr["occid"]) echo "<div><a href='../collections/individual/individual.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
+						if($imgArr["occid"]) echo "<div><a href='../collections/individual/index.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
 						echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
 						if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";
 					?>

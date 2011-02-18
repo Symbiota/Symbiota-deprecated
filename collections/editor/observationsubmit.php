@@ -63,7 +63,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 				if($occid){
 					?>
 					<br/>
-					<a href="../individual/individual.php?occid=<?php echo $occid; ?>">View Record</a>
+					<a href="../individual/index.php?occid=<?php echo $occid; ?>">View Record</a>
 					<?php
 				} 
 				?>

@@ -53,7 +53,7 @@ header("Content-Type: text/html; charset=".$charset);
  	$status = $vManager->removeVoucher($_REQUEST["oiddel"]);
  }
  elseif($action == "Add Voucher"){
- 	//For processing requests sent from /collections/individual/individual.php
+ 	//For processing requests sent from /collections/individual/index.php
  	$status = $vManager->addVoucher($_REQUEST["voccid"],$_REQUEST["vnotes"],$_REQUEST["veditnotes"]);
  }
  $clArray = $vManager->getChecklistData();
@@ -319,7 +319,7 @@ header("Content-Type: text/html; charset=".$charset);
 					foreach($vArray as $occId => $iArray){
 					?>
 						<li><?php
-							$url = "javascript:var popupReference=window.open('../collections/individual/individual.php?occid=".$occId."','indpane','toolbar=1,resizable=1,width=650,height=600,left=20,top=20');";
+							$url = "javascript:var popupReference=window.open('../collections/individual/index.php?occid=".$occId."','indpane','toolbar=1,resizable=1,width=650,height=600,left=20,top=20');";
 							echo "<a href=\"$url\">".$occId."</a>: ";
 							echo $iArray["collector"].($iArray["notes"]?"; ".$iArray["notes"]:"").($iArray["editornotes"]?"; ".$iArray["editornotes"]:"");
 							?>

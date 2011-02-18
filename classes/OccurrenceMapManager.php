@@ -139,7 +139,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 					echo "<Placemark>\n";
 					echo "<name>".$pointArr["gui"]."</name>\n";
 					echo "<description><![CDATA[<p>".$pointArr["descr"]."</p>";
-					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/individual.php?occid=".$occId;
+					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
 					echo "<p><b>More Information:</b> <a href='".$url."'>".$url."</a></p>";
 					echo "<p><b>Data retrieved from <a href='http://".$_SERVER["SERVER_NAME"]."'>".$defaultTitle." Data Portal</a></b></p>]]></description>\n";
 					echo "<styleUrl>#".str_replace(" ","_",$sciName)."</styleUrl>\n";
