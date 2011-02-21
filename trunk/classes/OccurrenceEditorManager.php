@@ -45,7 +45,7 @@ class OccurrenceEditorManager {
 			'o.CollectorInitials, o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
 			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
 			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
-			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.decimalLatitude, o.decimalLongitude, '.
+			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
 			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
@@ -173,7 +173,7 @@ class OccurrenceEditorManager {
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
 			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, ".
 			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, ".
-			"stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, ".
+			"stateProvince, county, locality, localitySecurity, localitysecurityreason, decimalLatitude, decimalLongitude, ".
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
@@ -216,6 +216,7 @@ class OccurrenceEditorManager {
 			($occArr["county"]?"\"".$occArr["county"]."\"":"NULL").",".
 			($occArr["locality"]?"\"".$occArr["locality"]."\"":"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
+			($occArr["localitysecurityreason"]?$occArr["localitysecurityreason"]:"NULL").",".
 			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
 			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
 			($occArr["geodeticdatum"]?"\"".$occArr["geodeticdatum"]."\"":"NULL").",".

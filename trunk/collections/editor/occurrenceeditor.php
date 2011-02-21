@@ -313,8 +313,12 @@ if($symbUid){
 									</div>
 									<div style="margin-bottom:5px;">
 										<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
-										<input type="checkbox" name="localitysecurity" tabindex="42" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');" title="Hide Locality Data from General Public" />
-										Hide Locality Data from Public
+										<input type="checkbox" name="localitysecurity" tabindex="42" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toogleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
+										Locality Security
+										<span id="locsecreason" style="margin-left:40px;display:<?php echo ($hasValue?'inline':'none') ?>">
+											<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
+											Security Reason Override: <input type="text" name="localitysecurityreason" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
+										</span>
 									</div>
 									<div>
 										<span style="">

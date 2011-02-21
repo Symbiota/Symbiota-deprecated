@@ -255,9 +255,9 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					?>
 				</div>
 				<?php 
-				$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').'; ';
-				$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').'; ';
-				if($occArr['county']) $localityStr1 .= $occArr['county'].'; ';
+				$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').', ';
+				$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').', ';
+				if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
 				?>
 				<div>
 					<b>Locality:</b>
@@ -265,6 +265,21 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					echo $localityStr1;
 					if($displayLocality){
 						echo $occArr['locality'];
+					}
+					else{
+						?>
+						<span style="color:red;">
+							Detailed locality information protected. 
+							<?php 
+							if($occArr['localitysecurityreason']){
+								echo $occArr['localitysecurityreason'];
+							}
+							else{
+								echo 'This is typically done to protect rare or threatened species localities.';
+							}
+							?>
+						</span>
+						<?php 
 					}
 					?>
 				</div>
@@ -328,12 +343,6 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						</div>
 						<?php 
 					}
-				}
-				else{
-					?>
-					<div style='color:red;'>This species has a sensitive status.</div>
-					<div>For more information, please contact collection manager below.</div>
-					<?php 
 				}
 				if($occArr['habitat']){ 
 					?>

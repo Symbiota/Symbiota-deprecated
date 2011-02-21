@@ -54,7 +54,7 @@ class OccurrenceIndividualManager {
 			'o.identifiedby, dateidentified, o.recordedby, o.associatedcollectors, o.recordnumber, '.
 			'DATE_FORMAT(o.eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
     		'o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality, '.
-    		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, '.
+    		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
 			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, '.
 			'o.verbatimcoordinates, o.georeferenceremarks, o.dynamicproperties, o.typestatus, o.dbpk, '.
 			'o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
