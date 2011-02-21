@@ -27,7 +27,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
-			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.observeruid ".
+			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
 			"FROM omoccurrences o ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
@@ -65,7 +65,14 @@ class OccurrenceListManager extends OccurrenceManager{
 				$returnArr[$collIdStr][$dbpk]["locality"] = $row->locality;
 			}
 			else{
-				$returnArr[$collIdStr][$dbpk]["locality"] = "<div style='color:red;'>--detailed locality info. masked due to rare status--</div>";
+				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
+				if($row->localitysecurityreason){
+					$securityStr .= $row->localitysecurityreason;
+				}
+				else{
+					$securityStr .= 'This is typically done to protect rare or threatened species localities.';
+				}
+				$returnArr[$collIdStr][$dbpk]["locality"] = $securityStr.'</span>';
 			}
 			$returnArr[$collIdStr][$dbpk]["dbpk"] = $row->dbpk;
 		}

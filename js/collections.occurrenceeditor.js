@@ -31,6 +31,16 @@ function toggle(target){
 	}
 }
 
+function toogleLocSecReason(f){
+	var lsrObj = document.getElementById("locsecreason");
+	if(f.localitysecurity.checked){
+		lsrObj.style.display = "inline";
+	}
+	else{
+		lsrObj.style.display = "none";
+	}
+}
+
 function toggleCoordDiv(){
 	coordObj = document.getElementById("coordaiddiv");
 	if(coordObj.style.display == "none"){
