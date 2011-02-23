@@ -439,35 +439,39 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					<?php echo $occArr['contact'].' ('.$occArr['email'].')'; ?>
 				</a>
 			</div>
-			<fieldset style="margin:10px 0px;padding:10px;">
-				<legend><b>User Input</b></legend>
-				Do you see an error that you would like to fix or would you like to comment on this occurrence record? 
-				<?php 
-				if($symbUid){
-					?>
-					<ul>
-						<li>
-							<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
-								Open Occurrence Editor
-							</a>
-						</li>
-						<li>
-							Ability to submit <a href="">Comments</a> coming soon...
-						</li>
-					</ul>
-					<?php
-				}
-				else{
-					?>
-					<div style="margin:10px;">
-						<a href="../../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">Login</a> 
-						to edit data or leave a comment.
-					</div>
-					<?php
-				}
+			<?php 
+			if($displayLocality){
 				?>
-			</fieldset>
-			<?php
+				<fieldset style="margin:10px 0px;padding:10px;">
+					<legend><b>User Input</b></legend>
+					Do you see an error that you would like to fix or would you like to comment on this occurrence record? 
+					<?php 
+					if($symbUid){
+						?>
+						<ul>
+							<li>
+								<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
+									Open Occurrence Editor
+								</a>
+							</li>
+							<li>
+								Ability to submit <a href="">Comments</a> coming soon...
+							</li>
+						</ul>
+						<?php
+					}
+					else{
+						?>
+						<div style="margin:10px;">
+							<a href="../../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">Login</a> 
+							to edit data or leave a comment.
+						</div>
+						<?php
+					}
+					?>
+				</fieldset>
+				<?php
+			}
 			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 				?>
 	    		<div style='margin-top:15px;'>

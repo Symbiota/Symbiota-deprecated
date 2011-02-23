@@ -32,20 +32,26 @@ CREATE TABLE `specprocessorprojects` (
 ENGINE = InnoDB;
 
 ALTER TABLE `omcollections` 
-  CHANGE COLUMN `CollType` `CollType` VARCHAR(45) NOT NULL DEFAULT 'Preserved Specimens' COMMENT 'Live Data, Snapshot, Observations '; 
+  CHANGE COLUMN `CollType` `CollType` VARCHAR(45) NOT NULL DEFAULT 'Preserved Specimens' COMMENT 'Live Data, Snapshot, Observations ',
+  ADD COLUMN `PublicEdits` INT(1) UNSIGNED NOT NULL DEFAULT 1  AFTER `CollType` ; 
+
 
 CREATE  TABLE `omoccuredits` (   
-  `ocid` INT NOT NULL AUTO_INCREMENT ,   
+  `ocedid` INT NOT NULL AUTO_INCREMENT ,   
   `occid` INT UNSIGNED NOT NULL ,   
   `FieldName` VARCHAR(45) NOT NULL ,   
   `FieldValueNew` TEXT NOT NULL ,   
   `FieldValueOld` TEXT NOT NULL ,   
-  `ReviewStatus` VARCHAR(45) NOT NULL DEFAULT 'open' ,   
-  `AppliedStatus` INT NOT NULL DEFAULT 0 ,   
-  `uid` INT NOT NULL ,   
+  `ReviewStatus` INT(1) NOT NULL DEFAULT 1 COMMENT '1=Open;2=Pending;3=Closed' ,   
+  `AppliedStatus` INT(1) NOT NULL DEFAULT 0 COMMENT '0=Not Applied;1=Applied' ,   
+  `uid` INT(10) UNSIGNED NOT NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`ocid`) 
 ); 
+
+ALTER TABLE `omoccuredits`    
+  ADD CONSTRAINT `fk_omoccuredits`   FOREIGN KEY (`uid` )   
+  REFERENCES `users` (`uid` )   ON DELETE CASCADE   ON UPDATE CASCADE , ADD INDEX `fk_omoccuredits` (`uid` ASC) ; 
 
 
 CREATE  TABLE `omoccurcomments` (   
