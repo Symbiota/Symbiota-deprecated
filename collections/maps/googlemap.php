@@ -75,7 +75,7 @@ header("Content-Type: text/html; charset=".$charset);
 	                		$collId = $spArr["collid"];
 							$dbpk = $spArr["dbpk"];
 							if(count($dataArr) == 1){
-	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('../individual/index.php?pk=".$dbpk."&collid=".$collId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=650,height=600,left=20,top=20');\";";
+	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('../individual/index.php?pk=".$dbpk."&collid=".$collId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
 							}
 							else{
 								$gui = $spArr["gui"];

@@ -72,7 +72,9 @@ if(!$latDef && !$lngDef){
         function updateParentForm() {
 			try{
 	            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
+	            opener.document.<?php echo $formName.'.'.$latName; ?>.onchange();
 	            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
+	            opener.document.<?php echo $formName.'.'.$longName; ?>.onchange();
 			}
 			catch(myErr){
 				alert("Unable to transfer data. Please let an administrator know.");
