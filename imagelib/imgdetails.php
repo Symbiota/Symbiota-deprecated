@@ -17,7 +17,6 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<meta name="keywords" content="<?php echo $spDisplay; ?>" />
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
 	<title><?php echo $defaultTitle." Image Details: #".$imgId; ?></title>
