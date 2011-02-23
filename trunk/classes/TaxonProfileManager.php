@@ -493,7 +493,7 @@
 	}
 
 	public function getMapUrl($tidObj = 0){
-		global $occurrenceModIsActive,$isAdmin;
+		global $occurrenceModIsActive,$isAdmin,$userRights;
 		$urlArr = Array();
  		$tidStr = "";
  		if($tidObj){
