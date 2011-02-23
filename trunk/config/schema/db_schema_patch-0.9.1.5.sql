@@ -46,7 +46,7 @@ CREATE  TABLE `omoccuredits` (
   `AppliedStatus` INT(1) NOT NULL DEFAULT 0 COMMENT '0=Not Applied;1=Applied' ,   
   `uid` INT(10) UNSIGNED NOT NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
-  PRIMARY KEY (`ocid`) 
+  PRIMARY KEY (`ocedid`) 
 ); 
 
 ALTER TABLE `omoccuredits`    
