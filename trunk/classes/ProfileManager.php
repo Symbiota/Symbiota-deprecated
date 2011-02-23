@@ -59,7 +59,7 @@ class ProfileManager{
 			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
             "WHERE (ul.username = \"".$userNameStr."\") ";
         if($pwdStr){
-			$sql .= "AND (ul.password = PASSWORD(\"".$pwdStr."\"))";
+			$sql .= "AND (ul.password = PASSWORD(\"".$pwdStr."\") OR ul.password = OLD_PASSWORD(\"".$pwdStr."\"))";
         }
 		//echo $sql;
         $result = $this->con->query($sql);
@@ -222,7 +222,7 @@ class ProfileManager{
     	if($newPwd){
         	$editCon = $this->getConnection("write");
         	if($isSelf){
-	        	$sqlTest = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$id."\" AND ul.password = PASSWORD(\"".$oldPwd."\")";
+	        	$sqlTest = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$id."\" AND (ul.password = PASSWORD(\"".$oldPwd."\") OR ul.password = OLD_PASSWORD(\"".$oldPwd."\"))";
 	        	$rsTest = $editCon->query($sqlTest);
 	        	if(!$rsTest->num_rows) return false;
         	}
