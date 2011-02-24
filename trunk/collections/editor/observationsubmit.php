@@ -193,7 +193,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							<span style="margin-left:45px;">
 								Longitude
 							</span>
-							<span style="margin-left:50px;">
+							<span style="margin-left:87px;">
 								Uncertainty
 							</span>
 							<span style="margin-left:8px;">
@@ -202,7 +202,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							<span style="margin-left:43px;">
 								Elev. (meters)
 							</span>
-							<span style="margin-left:9px;">
+							<span style="margin-left:35px;">
 								Georeference Remarks
 							</span>
 						</div>
@@ -216,6 +216,9 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							<span style="cursor:pointer;" onclick="openMappingAid('obsform','decimallatitude','decimallongitude');">
 								<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
 							</span>
+							<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('dmsdiv');">
+								DMS
+							</span>
 							<span>
 								<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" onchange="inputIsNumeric(this, 'Lat/long uncertainty')" title="Uncertainty in Meters" />
 							</span>
@@ -225,9 +228,44 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							<span>
 								<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:85px;" value="" onchange="verifyElevValue(this)" title="Minumum Elevation In Meters" />
 							</span>
+							<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('elevftdiv');">
+								ft.
+							</span>
 							<span>
 								<input type="text" name="georeferenceremarks" tabindex="70" maxlength="255" style="width:250px;" value="" />
 							</span>
+						</div>
+						<div id="dmsdiv" style="display:none;float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:270px;">
+							<div>
+								Latitude: 
+								<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
+								<input id="latmin" style="width:50px;" title="Latitude Minutes" />' 
+								<input id="latsec" style="width:50px;" title="Latitude Seconds" />&quot; 
+								<select id="latns">
+									<option>N</option>
+									<option>S</option>
+								</select>
+							</div>
+							<div>
+								Longitude: 
+								<input id="lngdeg" style="width:35px;" title="Longitude Degree" />&deg; 
+								<input id="lngmin" style="width:50px;" title="Longitude Minutes" />' 
+								<input id="lngsec" style="width:50px;" title="Longitude Seconds" />&quot; 
+								<select id="lngew">
+									<option>E</option>
+									<option SELECTED>W</option>
+								</select>
+							</div>
+							<div style="margin:5px;">
+								<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
+							</div>
+						</div>
+						<div id="elevftdiv" style="display:none;float:right;padding:15px;background-color:lightyellow;border:1px solid yellow;width:180px;margin:0px 160px 10px 0px;">
+							Elevation: 
+							<input id="elevft" style="width:45px;" /> feet
+							<div style="margin:5px;">
+								<input type="button" value="Insert Elevation" onclick="insertElevFt(this.form)" />
+							</div>
 						</div>
 					</fieldset>
 					<fieldset>
