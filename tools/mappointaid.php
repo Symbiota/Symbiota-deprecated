@@ -75,6 +75,7 @@ if(!$latDef && !$lngDef){
 	            opener.document.<?php echo $formName.'.'.$latName; ?>.onchange();
 	            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
 	            opener.document.<?php echo $formName.'.'.$longName; ?>.onchange();
+	            opener.document.<?php echo $formName; ?>.geodeticdatum.value = "WGS84";
 			}
 			catch(myErr){
 				alert("Unable to transfer data. Please let an administrator know.");

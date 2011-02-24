@@ -321,8 +321,8 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							</div>
 						</div>
 					</fieldset>
-					<div>
-						<b>Observation Project:</b> 
+					<div style="margin:5px;">
+						<b>Management:</b> 
 						<select name="collid" style="background-color:FFFF99;">
 							<option value="">Select an Observation Project</option>
 							<option value="">-----------------------------------</option>
@@ -335,11 +335,11 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 								}
 								echo "<option value='".$collId."' ".$selectStr.">".$collName."</option>\n";
 							}
-							add survey project support
+							//Voucher Project: stuff
 							?>
 						</select>
 					</div>
-					<div>
+					<div style="margin:10px;">
 						<input type="submit" name="action" value="Submit Observation" />
 						* Fields with background color are required  
 					</div>
