@@ -36,6 +36,53 @@ function toggle(target){
 	}
 }
 
+function insertLatLng(f) {
+	var latDeg = document.getElementById("latdeg").value.replace(/^\s+|\s+$/g,"");
+	var latMin = document.getElementById("latmin").value.replace(/^\s+|\s+$/g,"");
+	var latSec = document.getElementById("latsec").value.replace(/^\s+|\s+$/g,"");
+	var latNS = document.getElementById("latns").value;
+	var lngDeg = document.getElementById("lngdeg").value.replace(/^\s+|\s+$/g,"");
+	var lngMin = document.getElementById("lngmin").value.replace(/^\s+|\s+$/g,"");
+	var lngSec = document.getElementById("lngsec").value.replace(/^\s+|\s+$/g,"");
+	var lngEW = document.getElementById("lngew").value;
+	if(latDeg && latMin && lngDeg && lngMin){
+		if(latMin == "") latMin = 0;
+		if(latSec == "") latSec = 0;
+		if(lngMin == "") lngMin = 0;
+		if(lngSec == "") lngSec = 0;
+		if(isNumeric(latDeg) && isNumeric(latMin) && isNumeric(latSec) && isNumeric(lngDeg) && isNumeric(lngMin) && isNumeric(lngSec)){
+			if(latDeg < 0 || latDeg > 90){
+				alert("Latitude degree must be between 0 and 90 degrees");
+			}
+			else if(lngDeg < 0 || lngDeg > 180){
+				alert("Longitude degree must be between 0 and 180 degrees");
+			}
+			else if(latMin < 0 || latMin > 60 || lngMin < 0 || lngMin > 60 || latSec < 0 || latSec > 60 || lngSec < 0 || lngSec > 60){
+				alert("Minute and second values can only be between 0 and 60");
+			}
+			else{
+				var latDec = parseInt(latDeg) + (parseFloat(latMin)/60) + (parseFloat(latSec)/3600);
+				var lngDec = parseInt(lngDeg) + (parseFloat(lngMin)/60) + (parseFloat(lngSec)/3600);
+				if(latNS == "S") latDec = latDec * -1; 
+				if(lngEW == "W") lngDec = lngDec * -1; 
+				f.decimallatitude.value = Math.round(latDec*1000000)/1000000;
+				f.decimallongitude.value = Math.round(lngDec*1000000)/1000000;
+			}
+		}
+		else{
+			alert("Field values must be numeric only");
+		}
+	}
+	else{
+		alert("DMS fields must contain a value");
+	}
+}
+
+function insertElevFt(f){
+	var elev = document.getElementById("elevft").value;
+	f.minimumelevationinmeters.value = Math.round(elev*.03048)*10;
+}
+
 function submitObsForm(f){
     if(f.sciname.value == ""){
 		window.alert("Observation must have an identification (scientific name) assigned to it, even if it is only to family rank.");
