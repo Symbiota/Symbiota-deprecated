@@ -6,7 +6,10 @@ header("Content-Type: text/html; charset=".$charset);
 
 $occId = array_key_exists("occid",$_REQUEST)?$_REQUEST["occid"]:0;
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
+if(!$action){
+	$action = array_key_exists("gotonew",$_REQUEST)?$_REQUEST["gotonew"]:"";
+}
 
 $occManager = new OccurrenceEditorManager($occId);
 $occArr = Array();
@@ -21,7 +24,7 @@ if($symbUid){
 			$statusStr = $occManager->addOccurrence($_REQUEST);
 			$occId = $occManager->getOccId();
 		}
-		if($action == "Go to New Occurrence Record"){
+		elseif($action == "Go to New Occurrence Record"){
 			if(array_key_exists('carryloc',$_REQUEST)){
 				$occArr = $occManager->carryOverValues($_REQUEST);
 			}
@@ -626,15 +629,15 @@ if($symbUid){
 									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 									<?php if($occId){ ?>
 										<div style="margin:10px 0px 20px 20px;">
-											<input type="submit" name="action" value="Save Edits" style="width:150px;" /><br/>
+											<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" /><br/>
 										</div>
 										<div style="text-align:center;width:250px;border:1px solid black;background-color:lightyellow;padding:10px;">
-											<input type="submit" name="action" value="Go to New Occurrence Record" /><br/>
+											<input type="submit" name="gotonew" value="Go to New Occurrence Record" /><br/>
 											<input type="checkbox" name="carryloc" value="1" /> Carry over locality values<br/>
 											* For data entry purposes only 
 										</div>
 									<?php }else{ ?>
-										<input type="submit" name="action" value="Add Record" />
+										<input type="submit" name="submitaction" value="Add Record" />
 									<?php } ?>
 								</div>
 								<div style="clear:both;">&nbsp;</div>
@@ -687,7 +690,7 @@ if($symbUid){
 											</div>
 											<div style='margin:15px;'>
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-												<input type="submit" name="action" value="Add New Determination" />
+												<input type="submit" name="submitaction" value="Add New Determination" />
 												<span>
 													<input type="checkbox" name="makecurrent" value="1" CHECKED /> Make this the current determination
 												</span>
@@ -809,14 +812,14 @@ if($symbUid){
 														<div style='margin:3px;margin:15px;'>
 															<input type="hidden" name="occid" value="<?php echo $occId?>" />
 															<input type="hidden" name="detid" value="<?php echo $detId?>" />
-															<input type="submit" name="action" value="Submit Determination Edits" />
+															<input type="submit" name="submitaction" value="Submit Determination Edits" />
 														</div>
 													</form>
 													<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete this specimen determination?');">
 														<div style="padding:15px;background-color:blue;width:155px;margin:15px;">
 															<input type="hidden" name="occid" value="<?php echo $occId?>" />
 															<input type="hidden" name="detid" value="<?php echo $detId?>" />
-															<input type="submit" name="action" value="Delete Determination" />
+															<input type="submit" name="submitaction" value="Delete Determination" />
 														</div>
 													</form>
 												</fieldset>
@@ -915,7 +918,7 @@ if($symbUid){
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 												<input type="hidden" name="tid" value="<?php echo $occArr["tidinterpreted"]; ?>" />
 												<input type="hidden" name="institutioncode" value="<?php echo $occArr["institutioncode"]; ?>" />
-												<input type="submit" name="action" value="Submit New Image" />
+												<input type="submit" name="submitaction" value="Submit New Image" />
 											</div>
 										</fieldset>
 									</form>
@@ -1078,7 +1081,7 @@ if($symbUid){
 																<div style="margin-top:10px;">
 																	<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 																	<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-																	<input type="submit" name="action" value="Submit Image Edits" />
+																	<input type="submit" name="submitaction" value="Submit Image Edits" />
 																</div>
 															</fieldset>
 														</form>
@@ -1091,7 +1094,7 @@ if($symbUid){
 																<div style="margin-left:20px;">
 																	(Note: leaving unchecked removes image from database w/o removing from server)
 																</div>
-																<input type="submit" name="action" value="Delete Image" />
+																<input type="submit" name="submitaction" value="Delete Image" />
 															</fieldset>
 														</form>
 													</div>
