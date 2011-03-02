@@ -114,7 +114,7 @@ class OccurrenceEditorManager {
 		if($editedFields){
 			//Add edits to omoccuredits
 			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
-				'SELECT '.$occArr['occid'].' AS occid,"open" AS rs,'.($autoCommit?'1':'0').' AS astat,'.$uid.' AS uid,';
+				'SELECT '.$occArr['occid'].' AS occid, 1 AS rs,'.($autoCommit?'1':'0').' AS astat,'.$uid.' AS uid,';
 			$editArr = array_unique(explode(';',$editedFields));
 			foreach($editArr as $k => $v){
 				if($v){

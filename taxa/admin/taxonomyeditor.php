@@ -8,6 +8,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
   
+$submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $taxonEditorObj = new TaxonomyEditorManager($target);
 if(array_key_exists("taxauthid",$_REQUEST)){
@@ -37,7 +38,7 @@ if($editable){
 		$taxonEditArray["securitystatus"] = $_REQUEST["securitystatus"];
 		$taxonEditorObj->submitTaxonEdits($taxonEditArray);
 	}
-	elseif(array_key_exists("taxstatuseditsubmit",$_REQUEST)){
+	elseif($submitAction == 'updatetaxstatus'){
 		$tsArr = Array();
 		$tsArr["tid"] = $target;
 		$tsArr["tidaccepted"] = $_REQUEST["tidaccepted"];
@@ -55,11 +56,8 @@ if($editable){
 		$synEditArr["sortsequence"] = $_REQUEST["sortsequence"];
 		$taxonEditorObj->submitSynEdits($synEditArr);
 	}
-	elseif(array_key_exists("addacceptedlink",$_REQUEST)){
-		$deleteOther = false;
-		if(array_key_exists("deleteother",$_REQUEST)){
-			$deleteOther = true;
-		}
+	elseif($submitAction == 'linktoaccepted'){
+		$deleteOther = array_key_exists("deleteother",$_REQUEST)?true:false;
 		$taxonEditorObj->submitAddAcceptedLink($target,$_REQUEST["tidaccepted"],$deleteOther);
 	}
 	elseif(array_key_exists("changetoaccepted",$_REQUEST)){
@@ -70,7 +68,7 @@ if($editable){
 		}
 		$taxonEditorObj->submitChangeToAccepted($target,$tidAccepted,$switchAcceptance);
 	}
-	elseif(array_key_exists("changetonotaccepted",$_REQUEST)){
+	elseif($submitAction == 'changetonotaccepted'){
 		$tidAccepted = $_REQUEST["tidaccepted"];
 		$taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted);
 	}
@@ -88,110 +86,15 @@ if($editable){
 	<title><?php echo $defaultTitle." Taxon Editor: ".$target; ?></title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>"/>
+    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
+	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
 	<script language=javascript>
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
-		var tidAccepted;
-		var dalXmlHttp;
-	
-		function toogle(target){
-		  	var divs = document.getElementsByTagName("div");
-		  	var i;
-		  	for(i = 0; i < divs.length; i++) {
-			  	var divObj = divs[i];
-				if(divObj.className == target){
-					if(divObj.style.display=="none"){
-						divObj.style.display="block";
-					}
-				 	else {
-				 		divObj.style.display="none";
-				 	}
-				}
-			}
-
-		  	var spans = document.getElementsByTagName("span");
-		  	var j;
-		  	for(j = 0; j < spans.length; j++) {
-			  	var spanObj = spans[j];
-				if(spanObj.className == target){
-					if(spanObj.style.display=="none"){
-						spanObj.style.display="inline";
-					}
-				 	else {
-				 		spanObj.style.display="none";
-				 	}
-				}
-			}
-		}
-
-		function toogleById(target){
-			var obj = document.getElementById(target);
-			if(obj.style.display=="none"){
-				obj.style.display="block";
-			}
-		 	else {
-		 		obj.style.display="none";
-		 	}
-		}
-
-		function deleteAcceptedLink(tidAcc){
-			if (tidAcc == null){
-		  		return;
-		  	}
-			tidAccepted = tidAcc;
-			dalXmlHttp=GetXmlHttpObject();
-			if (dalXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url="rpc/deleteacceptedlink.php";
-			url=url+"?tid="+tid;
-			url=url+"&tidaccepted="+tidAccepted;
-			url=url+"&sid="+Math.random();
-			dalXmlHttp.onreadystatechange=dalStateChanged;
-			dalXmlHttp.open("POST",url,true);
-			dalXmlHttp.send(null);
-		} 
-		
-		function dalStateChanged(){
-			if (dalXmlHttp.readyState==4){
-				status = dalXmlHttp.responseText;
-				if(status == "0"){
-					alert("FAILED: sorry, error while attempting to delete accepted link");
-				}
-				else{
-					document.getElementById("acclink-"+tidAccepted).style.display = "none";
-				}
-			}
-		}
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
-		}
-
-		function addFamilyTextBox(){
-			document.getElementById("familydiv").innerHTML = "<input type='text' name='family' style='width:250px;'/>";
-		}
-			
-		function addUpperTaxonTextBox(){
-			document.getElementById("uppertaxondiv").innerHTML = "<input type='text' name='uppertaxonomy' style='width:250px;' />";
-		}
 	</script>
+	<script language="javascript" src="../../js/taxa.taxonomyeditor.js"></script>
 </head>
-<body onload="">
+<body>
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomyeditorMenu)?$taxa_admin_taxonomyeditorMenu:"true");
 include($serverRoot.'/header.php');
@@ -371,8 +274,8 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					</div>
 				</form>
 			</div>
-			<div class="fieldset" style="width:420px;">
-				<div class="legend">Taxonomic Placement</div>
+			<div class="fieldset" style="width:90%;">
+				<div class="legend"><b>Taxonomic Placement</b></div>
 				<div style="padding:7px 7px 0px 7px;background-color:silver;margin:-15px -10px 5px 0px;float:right;">
 					<form id="taxauthidform" name="taxauthidform" action="taxonomyeditor.php" method="GET">
 						<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
@@ -406,7 +309,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					</span>
 				</div>
 				<div style="clear:both;margin:10px;">
-					<form id="taxstatuslinksform" name="taxstatuslinksform" action="taxonomyeditor.php" method='GET'>
+					<form name="taxstatusform" action="taxonomyeditor.php" method="post">
 						<div>
 							<div style="float:right;cursor:pointer;" onclick="toogle('tsedit');">
 								<img style='border:0px;' src='../../images/edit.png'/>
@@ -415,47 +318,35 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							<div class="tsedit" style="">
 								<?php echo $taxonEditorObj->getUpperTaxon(); ?>
 							</div>
-							<div id="uppertaxondiv" class="tsedit" style="display:none;">
-								<select name="uppertaxonomy">
-									<option value="">Select a Taxon Group</option>
-									<option value="">----------------------------</option>
-									<?php $taxonEditorObj->echoUpperTaxonomySelect(); ?>
-								</select>
-								<img src="../../images/add.png" onclick="addUpperTaxonTextBox();" title="Add an Upper Taxon not on list" />
+							<div id="uppertaxondiv" class="tsedit" style="display:none;margin:3px;">
+								<input name="uppertaxonomy" type="text" style="width:270px;" value="<?php echo $taxonEditorObj->getUpperTaxon();?>" onfocus="initUpperTaxonList(this)" autocomplete="off" />
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Family: </div>
-							<div class="tsedit" style="">
+							<div style="">
 								<?php echo $taxonEditorObj->getFamily();?>&nbsp;
 							</div>
-							<div id="familydiv" class="tsedit" style="display:none;">
-								<select name="family">
-									<option value="">Select a Family</option>
-									<option value="">----------------------------</option>
-									<?php $taxonEditorObj->echoFamilySelect(); ?>
-								</select>
-								<img src="../../images/add.png" onclick="addFamilyTextBox();" title="Add a family not on list" />
+							<div id="familydiv" style="display:none;">
+								<input name="family" type="text" value="<?php echo $taxonEditorObj->getFamily();?>" onfocus="initTaxaList(this,140,0,0,1)" autocomplete="off" />
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Parent Taxon: </div>
 							<div class="tsedit">
-								<?php echo $taxonEditorObj->getParentName();?>
+								<?php echo $taxonEditorObj->getParentNameFull();?>
 							</div>
-							<div class="tsedit" style="display:none;">
-								<select id="parenttid" name="parenttid" style="width:275px;">
-									<?php 
-										$taxonEditorObj->echoParentTidSelect();
-									?>
-								</select>
+							<div class="tsedit" style="display:none;margin:3px;">
+								<input name="parentstr" type="text" value="<?php echo $taxonEditorObj->getParentName(); ?>" onfocus="initTaxaList(this,0,0,<?php echo $taxonEditorObj->getRankId();?>,1)" autocomplete="off" />
+								<input name="parenttid" type="hidden" value="<?php echo $taxonEditorObj->getParentTid(); ?>" />
 							</div>
 						</div>
 						<div class="tsedit" style="display:none;clear:both;">
 							<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 							<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
 							<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():array_shift(array_keys($taxonEditorObj->getAcceptedArr()))); ?>" />
-							<input type='submit' id='taxstatuseditsubmit' name='taxstatuseditsubmit' value='Submit Upper/Family Edits' />
+							<input type="hidden" name="submitaction" value="updatetaxstatus" />
+							<input type='button' name='taxstatuseditsubmit' value='Submit Upper/Family Edits' onclick="submitTaxStatusForm(this.form)" />
 						</div>
 					</form>
 				</div>
@@ -493,30 +384,27 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						?>
 						<div class="acceptedits" style="display:none;">
 							<div class="fieldset" style="width:380px;margin:20px;">
-								<div class="legend">Add an Accepted Link</div>
+								<div class="legend"><b>Link to Another Accepted Name</b></div>
 								<form id="accepteditsform" name="accepteditsform" action="taxonomyeditor.php" method="get">
 									<div>
-										<select id="acceptaddselect" name="tidaccepted">
-											<option value="0">Select an Accepted Taxon</option>
-											<option value="0">-------------------------------</option>
-											<?php 
-												$taxonEditorObj->echoAcceptedTaxaSelect();
-											?>
-										</select>
+										Accepted Taxon: 
+										<input name="acceptedstr" type="text" style="width:300px;" onfocus="initAcceptedList(this)" autocomplete="off" />
+										<input name="tidaccepted" type="hidden" />
 									</div>
 									<div>
-										<input type="checkbox" name="deleteother" checked /> Delete Other Accepted Links
+										<input type="checkbox" name="deleteother" checked /> Remove Other Accepted Links
 									</div>
 									<div>
 										<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
 										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-										<input type='submit' id='addacceptedsubmit' name='addacceptedlink' value='Add Link' />
+										<input type="hidden" name="submitaction" value="linktoaccepted" /> 
+										<input type='button' name='addacceptedlink' value='Add Link' onclick="submitLinkToAccepted(this.form);" />
 									</div>
 								</form>
 							</div>
 							<?php if($acceptedArr && count($acceptedArr)==1){ ?>
 							<div class="fieldset" style="width:350px;margin:20px;">
-								<div class="legend">Change to Accepted</div>
+								<div class="legend"><b>Change to Accepted</b></div>
 								<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
 									<div>
 										<input type="checkbox" name="switchacceptance" checked /> Switch Acceptance with Currently Accepted Name
@@ -540,7 +428,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					if($taxonEditorObj->getIsAccepted() <> 0){	//Is Accepted
 					?>
 						<h3>Synonyms:</h3>
-						<div style="float:right;cursor:pointer;" onclick="toogleById('tonotaccepteddiv');">
+						<div style="float:right;cursor:pointer;" onclick="toogleById('tonotaccepted');">
 							<img style='border:0px;width:15px;' src='../../images/edit.png'/>
 						</div>
 						<ul>
@@ -605,26 +493,25 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							echo "<div style='margin:20px;'>No Synonyms Linked to this Taxon</div>";
 						}
 						?>
-						<div id="tonotaccepteddiv" class="fieldset" style="width:350px;display:none;">
-							<div class="legend">Change to Not Accepted</div>
-							<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
+						<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="get">
+							<fieldset id="tonotaccepted" style="width:90%px;display:none;">
+								<legend><b>Change to Not Accepted</b></legend>
 								<div style="margin:5px;">
-									<select name="tidaccepted">
-										<option value="">Select Accepted Taxon</option>
-										<option value="">----------------------------</option>
-										<?php $taxonEditorObj->echoAcceptedTaxaSelect(); ?>
-									</select>
+									<b>Accepted Name:</b> 
+									<input name="acceptedstr" type="text" style="width:270px;" onfocus="initAcceptedList(this)" autocomplete="off" />
+									<input name="tidaccepted" type="hidden" value="" />
 								</div>
 								<div style="margin:5px;">
 									<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
 									<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-									<input type='submit' id='changetonotacceptedsubmit' name='changetonotaccepted' value='Change Status to Not Accepted' />
+									<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
+									<input type='button' name='changetonotacceptedbutton' value='Change Status to Not Accepted' onclick="submitLinkToAccepted(this.form);" />
 								</div>
 								<div style="margin:5px;">
 									* Synonyms will be transferred to Accepted Taxon
 								</div>
-							</form>
-						</div>
+							</fieldset>
+						</form>
 						<?php 
 					}
 					?>
@@ -659,17 +546,5 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 		include($serverRoot.'/footer.php');
 		?>
 	</div>
-	<script type="text/javascript">
-		function acceptanceChanged(){
-			if(document.getElementById("isaccepted").checked == true){
-				document.getElementById("acceptancediv").style.display = "none";
-			}
-			else{
-				document.getElementById("acceptancediv").style.display = "block";
-			}
-		}
-		
-	</script>
-
 </body>
 </html>

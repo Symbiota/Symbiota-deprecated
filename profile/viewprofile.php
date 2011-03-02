@@ -212,8 +212,43 @@ if($isEditable){
 				dlXmlHttp.open("POST",url,true);
 				dlXmlHttp.send(null);
 	        }
+		}
+
+		function verifyClAddForm(f){
+			if(f.nclname.value == ""){
+				alert("The Checklist Name field must have a value before a new checklist can be created");
+				return false;
+			}
+			if(!isNumeric(f.ncllatcentroid.value)){
+				alert("The Latitude Centriod field must contain a numeric value only");
+				return false;
+			}
+			if(!isNumeric(f.ncllongcentroid.value)){
+				alert("The Longitude Centriod field must contain a numeric value only");
+				return false;
+			}
+			if(!isNumeric(f.nclpointradiusmeters.value)){
+				alert("The Point Radius field must contain only a numeric value");
+				return false;
+			}
+			return true;
 		} 
 		
+		function isNumeric(sText){
+		   	var ValidChars = "0123456789-.";
+		   	var IsNumber = true;
+		   	var Char;
+		 
+		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
+			   Char = sText.charAt(i); 
+				if(ValidChars.indexOf(Char) == -1){
+					IsNumber = false;
+					break;
+		      	}
+		   	}
+			return IsNumber;
+		}
+
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
@@ -562,7 +597,7 @@ if(isset($profile_viewprofileCrumbs)){
 						?>
 						</ul>
 					</div>
-					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="checkClCreateForm();">
+					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
 						<fieldset>
 							<legend style="font-weight:bold;">Create a New Checklist</legend>
 							<div style="clear:both;">

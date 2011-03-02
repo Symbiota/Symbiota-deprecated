@@ -38,79 +38,94 @@ class ObservationSubmitManager {
 		$statusStr = '';
 		if($occArr){
 			$collId = $occArr['collid'];
-			$dbpk = 1;
-			$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);
-			if($rs && $row = $rs->fetch_object()){
-				if($row->maxpk) $dbpk = $row->maxpk;
+			//Get Institutional code for storage
+			$owner = '';
+			$ownerSql = 'SELECT institutioncode, collectionname FROM omcollections c WHERE collid = '.$collId;
+			$rs = $this->conn->query($ownerSql);
+			if($row = $rs->fetch_object()){
+				$this->institutionCode = $row->institutioncode;
+				$owner = "";//$row->collectionname;
 			}
-			
-			//Setup Event Date fields
-			if($dateObj = strtotime($occArr['eventdate'])){
-				$eventDate = date('Y-m-d',$dateObj);
-				$eventYear = date('Y',$dateObj);
-				$eventMonth = date('m',$dateObj);
-				$eventDay = date('d',$dateObj);
-				$startDay = date('z',$dateObj)+1;
-			}
-			
-			//Get tid for scinetific name
-			$tid = 0;
-			$result = $this->conn->query('SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"');
-			if($row = $result->fetch_object()){
-				$tid = $row->tid;
-			}
-			
-			$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificname, '.
-				'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
-				'identificationReferences, identificationQualifier, recordedBy, recordNumber, '.
-				'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
-				'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
-				'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
-				'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
-
-			'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
-			'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
-			($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
-			$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
-			($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
-			($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
-			($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
-			($occArr['identificationqualifier']?'"'.$occArr['identificationqualifier'].'"':'NULL').','.
-			'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
-			($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
-			'"'.$eventDate.'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
-			($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
-			($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
-			($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
-			($occArr['dynamicproperties']?'"'.$occArr['dynamicproperties'].'"':'NULL').','.
-			($occArr['reproductivecondition']?'"'.$occArr['reproductivecondition'].'"':'NULL').','.
-			(array_key_exists('cultivationstatus',$occArr)?'1':'0').','.
-			($occArr['establishmentmeans']?'"'.$occArr['establishmentmeans'].'"':'NULL').','.
-			'"'.$occArr['country'].'",'.($occArr['stateprovince']?'"'.$occArr['stateprovince'].'"':'NULL').','.
-			($occArr['county']?'"'.$occArr['county'].'"':'NULL').','.
-			'"'.$occArr['locality'].'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
-			$occArr['decimallatitude'].','.$occArr['decimallongitude'].','.
-			($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','.
-			($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
-			($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
-			($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
-			$obsUid.') ';
-			//echo $sql;
-			if($this->conn->query($sql)){
-				$statusStr = $this->conn->insert_id;
-				$imgStatus = $this->addImage($occArr,$this->conn->insert_id,$tid);
-				if($imgStatus){
-					$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
+			//Load Image, abort if unsuccessful
+			$nameArr = $this->loadImages();
+			if($nameArr){
+				//Setup Event Date fields
+				if($dateObj = strtotime($occArr['eventdate'])){
+					$eventDate = date('Y-m-d',$dateObj);
+					$eventYear = date('Y',$dateObj);
+					$eventMonth = date('m',$dateObj);
+					$eventDay = date('d',$dateObj);
+					$startDay = date('z',$dateObj)+1;
 				}
-			}
-			else{
-				$statusStr = 'ERROR: Failed to load observation record.<br/> Err Descr: '.$this->conn->error;
+				//Get tid for scinetific name
+				$tid = 0;
+				$result = $this->conn->query('SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"');
+				if($row = $result->fetch_object()){
+					$tid = $row->tid;
+				}
+				if(!$tid){
+					//Abort process
+					return 'ERROR: scientific name failed, contact admin to add name to thesaurus';
+				}
+				//Get PK for that collection
+				$dbpk = 1;
+				$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);
+				if($rs && $row = $rs->fetch_object()){
+					if($row->maxpk) $dbpk = $row->maxpk;
+				}
+
+				$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificname, '.
+					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
+					'identificationReferences, identificationQualifier, recordedBy, recordNumber, '.
+					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
+					'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
+					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
+					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
+	
+				'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+				'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
+				($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
+				$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
+				($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
+				($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
+				($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
+				($occArr['identificationqualifier']?'"'.$occArr['identificationqualifier'].'"':'NULL').','.
+				'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
+				($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
+				'"'.$eventDate.'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
+				($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
+				($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
+				($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
+				($occArr['dynamicproperties']?'"'.$occArr['dynamicproperties'].'"':'NULL').','.
+				($occArr['reproductivecondition']?'"'.$occArr['reproductivecondition'].'"':'NULL').','.
+				(array_key_exists('cultivationstatus',$occArr)?'1':'0').','.
+				($occArr['establishmentmeans']?'"'.$occArr['establishmentmeans'].'"':'NULL').','.
+				'"'.$occArr['country'].'",'.($occArr['stateprovince']?'"'.$occArr['stateprovince'].'"':'NULL').','.
+				($occArr['county']?'"'.$occArr['county'].'"':'NULL').','.
+				'"'.$occArr['locality'].'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
+				$occArr['decimallatitude'].','.$occArr['decimallongitude'].','.
+				($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','.
+				($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
+				($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
+				($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
+				$obsUid.') ';
+				//echo $sql;
+				if($this->conn->query($sql)){
+					$statusStr = $this->conn->insert_id;
+					$imgStatus = $this->dbImages($nameArr,$occArr,$this->conn->insert_id,$tid);
+					if($imgStatus){
+						$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
+					}
+				}
+				else{
+					$statusStr = 'ERROR: Failed to load observation record.<br/> Err Descr: '.$this->conn->error;
+				}
 			}
 		}
 		return $statusStr;
 	}
 
-	private function addImage($occArr,$occId,$tid){
+	private function loadImages(){
 		$status = '';
 		//Set download paths and variables
 		set_time_limit(120);
@@ -120,17 +135,23 @@ class ObservationSubmitManager {
 		$this->imageRootUrl = $GLOBALS['imageRootUrl'];
 		if(substr($this->imageRootUrl,-1) != '/') $this->imageRootUrl .= '/';
 
+		$retArr = Array();
 		for($i=1;$i<=3;$i++){
-			$owner = '';
-			$ownerSql = 'SELECT c.institutioncode, c.collectionname ".
-				"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid WHERE o.occid = '.$occId;
-			$rs = $this->conn->query($ownerSql);
-			if($row = $rs->fetch_object()){
-				$this->institutionCode = $row->institutioncode;
-				$owner = "";//$row->collectionname;
-			}
-			$imgPath = $this->loadImage('imgfile'.$i);
-			if(!$imgPath) break;
+			$imgFileName = 'imgfile'.$i;
+			if(!array_key_exists($imgFileName,$_FILES) || !$_FILES[$imgFileName]['name']) break;
+			$fileName = $this->cleanFileName(basename($_FILES[$imgFileName]['name']));
+		 	$fullPath = $this->getDownloadPath($fileName); 
+		 	if(move_uploaded_file($_FILES[$imgFileName]['tmp_name'], $fullPath)){
+				$retArr[] = $fullPath;
+		 	}
+		}
+		return $retArr;
+	}
+	
+	private function dbImages($imgNamesArr,$occArr,$occId,$tid){
+		$status = '';
+		//Get owner
+		foreach($imgNamesArr as $imgPath){
 			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
 			
 			$imgTnUrl = $this->createImageThumbnail($imgUrl);
@@ -170,11 +191,9 @@ class ObservationSubmitManager {
 			if($imgWebUrl){
 				$caption = $this->cleanStr($occArr['caption']);
 				$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
-				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, '.
-					'owner, occid, notes, sortsequence) '.
+				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
-					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.
-					($owner?'"'.$owner.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
+					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
 				//echo $sql;
 				if($this->conn->query($sql)){
 					$this->setPrimaryImageSort();
@@ -188,19 +207,7 @@ class ObservationSubmitManager {
 		return $status;
 	}
 
-	private function loadImage($imgInput){
-		if(array_key_exists($imgInput,$_FILES) && $_FILES[$imgInput]['name']){
-		 	$imgFile = basename($_FILES[$imgInput]['name']);
-			$fileName = $this->getFileName($imgFile);
-		 	$downloadPath = $this->getDownloadPath($fileName); 
-		 	if(move_uploaded_file($_FILES[$imgInput]['tmp_name'], $downloadPath)){
-				return $downloadPath;
-		 	}
-		}
-	 	return;
-	}
-
-	private function getFileName($fName){
+	private function cleanFileName($fName){
 		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
 		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);

@@ -63,7 +63,9 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 				if($occid){
 					?>
 					<br/>
-					<a href="../individual/index.php?occid=<?php echo $occid; ?>">View Record</a>
+					<div style="font:weight;font-size:120%;margin-top:10px;">
+						<a href="../individual/index.php?occid=<?php echo $occid; ?>">View Record</a>
+					</div>
 					<?php
 				} 
 				?>
@@ -306,7 +308,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 						<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
 						<div style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-							<input type='hidden' name='MAX_FILE_SIZE' value='1200000' />
+							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
 							<div>
 								Image 1: <input name='imgfile1' type='file' size='70' style="background-color:lightyellow;"/>
 								<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">

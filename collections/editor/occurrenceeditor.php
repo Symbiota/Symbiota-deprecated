@@ -21,7 +21,7 @@ if($symbUid){
 			$statusStr = $occManager->addOccurrence($_REQUEST);
 			$occId = $occManager->getOccId();
 		}
-		if($action == "Add New Occurrence Record"){
+		if($action == "Go to New Occurrence Record"){
 			if(array_key_exists('carryloc',$_REQUEST)){
 				$occArr = $occManager->carryOverValues($_REQUEST);
 			}
@@ -625,12 +625,13 @@ if($symbUid){
 									<input type="hidden" name="editedfields" value="" />
 									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 									<?php if($occId){ ?>
-										<div style="float:left;">
-											<input type="submit" name="action" value="Save Edits" />
+										<div style="margin:10px 0px 20px 20px;">
+											<input type="submit" name="action" value="Save Edits" style="width:150px;" /><br/>
 										</div>
-										<div style="float:left;border:1px solid black;background-color:lightyellow;margin-left:350px;padding:10px;">
-											<input type="submit" name="action" value="Add New Occurrence Record" /><br/>
-											<input type="checkbox" name="carryloc" value="1" /> Carry over locality values 
+										<div style="text-align:center;width:250px;border:1px solid black;background-color:lightyellow;padding:10px;">
+											<input type="submit" name="action" value="Go to New Occurrence Record" /><br/>
+											<input type="checkbox" name="carryloc" value="1" /> Carry over locality values<br/>
+											* For data entry purposes only 
 										</div>
 									<?php }else{ ?>
 										<input type="submit" name="action" value="Add Record" />

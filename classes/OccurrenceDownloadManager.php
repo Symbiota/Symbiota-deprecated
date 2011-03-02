@@ -58,7 +58,6 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			$fileName = "symbiota";
 		}
 		$fileName .= "_occur_".time().".csv";
-    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 		//echo $sql;
@@ -150,7 +149,6 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			$fileName = "symbiota";
 		}
 		$fileName .= "_occur_".time().".csv";
-    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 		$result = $this->conn->query($sql);
@@ -237,7 +235,6 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			$fileName = "symbiota";
 		}
 		$fileName .= "_geopoints_".time().".csv";
-    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		//echo $sql;
@@ -288,7 +285,6 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			$fileName = "symbiota";
 		}
 		$fileName .= "_checklist_".time().".csv";
-    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		//echo $sql;

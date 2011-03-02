@@ -126,8 +126,8 @@ if($tEditor->getTid()){
 		}
 
 		function getTaxonList(key,cont){ 
-		   	var script_name = 'rpc/gettaxonlist.php';
-		   	var params = { 'q':key };
+		   	var script_name = 'rpc/gettaxalist.php';
+		   	var params = { 'q':key , 'taid':'1' };
 		   	$.get(script_name,params,
 				function(obj){ 
 					// obj is just array of strings
@@ -271,6 +271,10 @@ if($tEditor->getTid()){
 			}
 			echo "</div>";
 		}
+		?>
+			</td></tr>
+		</table>
+		<?php  
 	}
 	else{
 		?>
@@ -307,10 +311,6 @@ else{
 	</div>
 	<?php 
 }
-?>
-	</td></tr>
-</table>
-<?php  
 include($serverRoot.'/footer.php');
 ?>
 

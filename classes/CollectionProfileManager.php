@@ -4,15 +4,15 @@ include_once($serverRoot.'/config/dbconnection.php');
 //Used by /collections/misc/collprofiles.php page
 class CollectionProfileManager {
 
-	private $con;
+	private $conn;
 	private $collId;
 
 	public function __construct(){
-		$this->con = MySQLiConnectionFactory::getCon("readonly");
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
 
 	public function __destruct(){
-		if(!($this->con === null)) $this->con->close();
+		if(!($this->conn === null)) $this->conn->close();
 	}
 
 	public function setCollectionId($collId){
@@ -24,7 +24,7 @@ class CollectionProfileManager {
 		$sql = "SELECT c.collid, c.CollectionCode, c.CollectionName, c.BriefDescription, ".
 			"c.Homepage, c.Contact, c.email, c.icon ".
 			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
-		$rs = $this->con->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]["collectioncode"] = $row->CollectionCode;
 			$returnArr[$row->collid]["collectionname"] = $row->CollectionName;
@@ -50,7 +50,7 @@ class CollectionProfileManager {
 			"LEFT JOIN institutions i ON c.iid = i.iid ".
 			"WHERE c.collid = $this->collId ORDER BY c.SortSeq";
 		//echo $sql;
-		$rs = $this->con->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr["institutioncode"] = $row->institutioncode;
 			$returnArr["institutionname"] = $row->InstitutionName;
@@ -147,7 +147,7 @@ class CollectionProfileManager {
 		$sql = "SELECT o.Family, Count(*) AS cnt ".
 			"FROM omoccurrences o GROUP BY o.CollID, o.Family HAVING (o.CollID = $this->collId) AND (o.Family IS NOT NULL) AND o.Family <> '' ".
 			"ORDER BY o.Family";
-		$rs = $this->con->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->Family] = $row->cnt;
 		}
@@ -161,7 +161,7 @@ class CollectionProfileManager {
 		$sql = "SELECT o.Country, Count(*) AS cnt ".
 			"FROM omoccurrences o GROUP BY o.CollID, o.Country HAVING (o.CollID = $this->collId) AND o.Country IS NOT NULL AND o.Country <> '' ".
 			"ORDER BY o.Country";
-		$rs = $this->con->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->Country] = $row->cnt;
 		}
@@ -178,7 +178,7 @@ class CollectionProfileManager {
 			"AND (o.country = 'USA' OR o.country = 'United States' OR o.country = 'United States of America') ".
 			"ORDER BY o.StateProvince";
 		//echo $sql;
-		$rs = $this->con->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->StateProvince] = $row->cnt;
 		}

@@ -34,12 +34,16 @@ if($symbUid){
 if($newCollRec && $editCode < 3){
 	$newCollRec = 0;		//Only Admin should be able to add a new collection profile
 }
-if($editCode == 3 && $action == "Add New Profile"){
-	$collId = $collManager->submitCollAdd($_REQUEST);
-	$collManager->setCollectionId($collId);
+if($editCode > 1){
+	if($action == 'Submit Edits'){
+		$collManager->submitCollEdits($_REQUEST);
+	}
 }
-if($editCode > 1 && $action == "Submit Edits"){
-	$collManager->submitCollEdits($_REQUEST);
+if($editCode == 3){
+	if($action == "Add New Profile"){
+		$collId = $collManager->submitCollAdd($_REQUEST);
+		$collManager->setCollectionId($collId);
+	}
 }
 $collData = Array();
 if($collId){
@@ -101,7 +105,7 @@ if($collId){
 			?>
 			<div id="controlpanel" style="clear:both;display:none;">
 				<fieldset style="padding:15px;">
-					<legend><b>Collection Managers Control Panel</b></legend>
+					<legend><b><?php echo ($collId?$collData['collectionname']:'');?> Management Control Panel</b></legend>
 					<ul>
 						<li>
 							<a href="../editor/occurrenceeditor.php?collid=<?php echo $collId; ?>">
@@ -109,6 +113,11 @@ if($collId){
 							</a>
 						</li>
 						<?php if($editCode > 1){ ?>
+							<li>
+								<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
+									Manage scientific names within collection 
+								</a>
+							</li>
 							<li>
 								<a href="#" onclick="toggleById('colledit');" >
 									Edit Metadata and Contact Information
@@ -120,15 +129,30 @@ if($collId){
 								</a>
 							</li>
 						<?php } ?>
-						<?php if($editCode == 3){ ?>
+					</ul>
+				</fieldset>
+				<?php if($editCode == 3){ ?>
+					<fieldset style="padding:15px;">
+						<legend><b>Admin Control Panel</b></legend>
+						<ul>
 							<li>
 								<a href="collprofiles.php?newcoll=1">
 									Add New Collection Profile
 								</a>
 							</li>
-						<?php } ?>
-					</ul>
-				</fieldset>
+							<li>
+								<a href="../admin/spectaxcleaner.php?collid=all">
+									Manage scientific names within collections 
+								</a>
+							</li>
+							<li>
+								<a href="collprofiles.php?action=buildhierarchies">
+									Verify/Build Taxonomic Hierarchies
+								</a>
+							</li>
+						</ul>
+					</fieldset>
+				<?php } ?>
 			</div>
 			<?php 
 		}

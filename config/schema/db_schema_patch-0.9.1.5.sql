@@ -47,12 +47,18 @@ CREATE  TABLE `omoccuredits` (
   `uid` INT(10) UNSIGNED NOT NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`ocedid`) 
-); 
+)
+ENGINE = InnoDB ; 
 
 ALTER TABLE `omoccuredits`    
-  ADD CONSTRAINT `fk_omoccuredits`   FOREIGN KEY (`uid` )   
-  REFERENCES `users` (`uid` )   ON DELETE CASCADE   ON UPDATE CASCADE , ADD INDEX `fk_omoccuredits` (`uid` ASC) ; 
+  ADD CONSTRAINT `fk_omoccuredits_uid`   FOREIGN KEY (`uid` )   
+  REFERENCES `users` (`uid` )   ON DELETE CASCADE   ON UPDATE CASCADE , 
+  ADD INDEX `fk_omoccuredits_uid` (`uid` ASC) ; 
 
+ALTER TABLE `omoccuredits`    
+  ADD CONSTRAINT `fk_omoccuredits_occid`   FOREIGN KEY (`occid` )   
+  REFERENCES `omoccurrences` (`occid` )   ON DELETE CASCADE   ON UPDATE CASCADE , 
+  ADD INDEX `fk_omoccuredits_occid` (`occid` ASC) ; 
 
 CREATE  TABLE `omoccurcomments` (   
   `comid` INT NOT NULL AUTO_INCREMENT ,   
@@ -63,7 +69,24 @@ CREATE  TABLE `omoccurcomments` (
   `parentcomid` INT UNSIGNED NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`comid`) 
-); 
+)
+ENGINE = InnoDB ; 
+
+ALTER TABLE `omoccurcomments`    
+  ADD CONSTRAINT `fk_omoccurcomments_occid`   
+  FOREIGN KEY (`occid` )   REFERENCES `omoccurrences` (`occid` )   ON DELETE CASCADE   ON UPDATE CASCADE , 
+  ADD INDEX `fk_omoccurcomments_occid` (`occid` ASC) ; 
+
+ALTER TABLE `omoccurcomments`    
+  ADD CONSTRAINT `fk_omoccurcomments_uid`   
+  FOREIGN KEY (`uid` )   REFERENCES `users` (`uid` )   ON DELETE CASCADE   ON UPDATE CASCADE , 
+  ADD INDEX `fk_omoccurcomments_uid` (`uid` ASC) ; 
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `localitySecurityReason` VARCHAR(100) NULL  AFTER `localitySecurity`;
+
+ALTER TABLE `fmchecklists` 
+ CHANGE COLUMN `Name` `Name` VARCHAR(50) CHARACTER SET 'utf8' NOT NULL,  
+ DROP INDEX `name`, 
+ ADD INDEX `name` USING BTREE (`Name` ASC, `Type` ASC), 
+ DROP INDEX `Index_checklist_title` ;
