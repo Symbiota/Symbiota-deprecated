@@ -1,15 +1,3 @@
-window.onload = function(){
-	//Set eventDate to today as default 
-	var monthNames = new Array(
-	"January","February","March","April","May","June","July",
-	"August","September","October","November","December");
-	var now = new Date();
-	dateStr = now.getDate() + " " +	monthNames[now.getMonth()] + " " + now.getFullYear();
-	if(document.obsform.eventdate.value == ""){
-		document.obsform.eventdate.value = dateStr;
-	}
-}
-
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
@@ -110,6 +98,10 @@ function submitObsForm(f){
     }
     if(isNumeric(f.decimallongitude.value) == false){
 		window.alert("Longitude must be in the decimal format with numeric characters only. Note that the western hemisphere is represented as a negitive number (-110.5335). ");
+		return false;
+    }
+    if(parseInt(f.decimallongitude.value ) > 0 && (f.stateprovince == 'USA' || f.stateprovince == 'Canada' || f.stateprovince == 'Mexico')){
+		window.alert("For North America, the decimal format of longitude should be negitive value. ");
 		return false;
     }
     if(isNumeric(f.coordinateuncertaintyinmeters.value) == false){

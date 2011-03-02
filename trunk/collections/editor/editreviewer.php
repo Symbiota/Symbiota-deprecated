@@ -2,14 +2,16 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecEditReviewManager.php');
-header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
-$faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:0;
-$frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:1;
+$submitStr = array_key_exists('submitstr',$_REQUEST)?$_REQUEST['submitstr']:'';
+$mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
+$download = array_key_exists('download',$_REQUEST)?$_REQUEST['download']:'';
+$faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
+$frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1';
 
-$reviewManager = new SpecEditReviewManager($collId);
+$reviewManager = new SpecEditReviewManager();
+$collName = $reviewManager->setCollId($collId);
 
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -18,11 +20,16 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 
 $status = "";
 if($editable){
-	if($action == ''){
-		//$reviewManager->;
+	if($download){
+		$reviewManager->downloadRecords($_REQUEST);
+		exit();
+	}
+	elseif($submitStr == 'Perform Action'){
+		$reviewManager->applyAction($_REQUEST);
 	}
 }
 
+header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>
 	<head>
@@ -77,164 +84,281 @@ if($editable){
 					}
 				}
 			}
+
+			function validateEditForm(){
+				var eElements = document.getElementsByName("ocedid[]");
+				for(i = 0; i < eElements.length; i++){
+					var elem = eElements[i];
+					if(elem.checked) return true;
+				}
+			   	alert("You need to select at least one editted record!");
+		      	return false;
+			}
+
+			function selectAllOcedid(cbObj){
+				var eElements = document.getElementsByName("ocedid[]");
+				for(i = 0; i < eElements.length; i++){
+					var elem = eElements[i];
+					if(cbObj.checked){
+						elem.checked = true;
+					}
+					else{
+						elem.checked = false;
+					}
+				}
+			}
+
+			function submitDownload(){
+				if(validateEditForm()){
+					var f = document.editform;
+					f.target = "_blank";
+					f.download.value = 1;
+					f.submit();
+				}
+			}
 			
 		</script>
 	</head>
 	<body>
 		<?php
-		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		if($mode != 'printmode'){
+			$displayLeftMenu = (isset($collections_editor_editreviewerMenu)?$collections_individual_editreviewerMenu:false);
+			include($serverRoot.'/header.php');
+			if(isset($collections_editor_editreviewerCrumbs)){
+				echo "<div class='navpath'>";
+				echo "<a href='../index.php'>Home</a> &gt; ";
+				echo $collections_editor_editreviewerCrumbs;
+				echo " &gt; <b>Specimen Edits Reviewer</b>";
+				echo "</div>";
+			}
+		}
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
 			<?php 
 			if($symbUid){
-				if($status){ 
-					?>
-					<div style='float:left;margin:20px 0px 20px 0px;'>
-						<hr/>
-						<?php echo $status; ?>
-						<hr/>
-					</div>
-					<?php 
-				}
 				if($collId){
 					?>
-					<div style="float:right;">
-						<form name="filter" action="editreviewer.php" method="post">
-							<fieldset>
-								<legend>Filter</legend>
-								Status: 
-								<select>
-									<option value="0">All Records</option>
-									<option value="1">Not Applied</option>
-									<option value="2">Applied</option>
-								</select><br/>
-								<select>
-									<option value="0">All Records</option>
-									<option value="1">Not Applied</option>
-									<option value="2">Applied</option>
-								</select>
-								<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-								<input name="action" type="submit" value="Filter Records" />
-							</fieldset>
-						</form>
-					</div>
-					<div style="clear:both;">
-						<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);">
-							<h2>Edits</h2>
-							<table id="edittab">
-								<tr>
-									<th>ID</th>
-									<th>Field Name</th>
-									<th>New Value</th>
-									<th>Old Value</th>
-									<th>Review Status</th>
-									<th>Applied Status</th>
-									<th>Editor</th>
-								</tr>
+					<table style="width:100%;">
+						<tr>
+						<td style="vertical-align:bottom;" <?php if($mode == 'printmode') echo 'colspan="2"'; ?>>
+							<div style="font-weight:bold;font-size:130%;"><?php echo $collName; ?></div>
+							<?php 
+							if($status){ 
+								?>
+								<div style='margin:20px;font-weight:bold;color:red;'>
+									<?php echo $status; ?>
+								</div>
 								<?php 
-								$editArr = $reviewManager->getEditArr($faStatus, $frStatus);
-								if($editArr){
-									$recCnt = 0;
-									foreach($editArr as $occid => $edits){
-										foreach($edits as $ocedid => $edObj){
+							}
+							if($mode != 'printmode'){ 
+								?>
+								<div style="margin:10px 0px 0px 10px;">
+									<input name='selectall' type="checkbox" onclick="selectAllOcedid(this)" /> Select/Deselect All
+								</div>
+								<?php 
+							}
+							?>
+						</td>
+						<?php 
+						if($mode != 'printmode'){
+							?>
+							<td width="30%">
+								<form name="filter" action="editreviewer.php" method="post">
+									<fieldset style="width:230px;text-align:left;">
+										<legend><b>Filter</b></legend>
+										<div style="margin:3px;">
+											Applied Status: 
+											<select name="fastatus">
+												<option value="">All Records</option>
+												<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
+												<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
+											</select>
+										</div>
+										<div style="margin:3px;">
+											Review Status: 
+											<select name="frstatus">
+												<option value="0">All Records</option>
+												<option value="1-2 <?php echo (!$frStatus||$frStatus=='1-2'?'SELECTED':''); ?>">Open/Pending</option>
+												<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
+												<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
+												<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
+											</select>
+										</div>
+										<div style="margin:3px;text-align:right;">
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+											<input name="action" type="submit" value="Filter Records" />
+										</div>
+									</fieldset>
+								</form>
+							</td>
+							<?php
+						}
+						?>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<form name="editform" action="editreviewer.php" method="get" onsubmit="return validateEditForm(this);">
+									<table id="edittab" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
+										<tr>
+											<?php if($mode != 'printmode'){ ?>
+												<th></th>
+											<?php } ?>
+											<th>Record #</th>
+											<th>Field Name</th>
+											<th>New Value</th>
+											<th>Old Value</th>
+											<th>Review Status</th>
+											<th>Applied Status</th>
+											<th>Editor</th>
+										</tr>
+										<?php 
+										$editArr = $reviewManager->getEditArr($faStatus, $frStatus);
+										if($editArr){
+											$recCnt = 0;
+											foreach($editArr as $occid => $edits){
+												foreach($edits as $ocedid => $edObj){
+													?>
+													<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
+														<?php if($mode != 'printmode'){ ?>
+															<td>
+																<input name="ocedid[]" type="checkbox" value="<?php echo $ocedid; ?>" />
+															</td>
+														<?php } ?>
+														<td>
+															<?php 
+															if($mode != 'printmode'){ 
+																?>
+																<a href="javascript:var puRef=window.open('../individual/index.php?occid=<?php echo $occid."','indspec".$occid; ?>','toolbar=1,scrollbars=1,width=870,height=600,left=300,top=20');">
+																	<?php echo $occid; ?>
+																</a>
+																<?php 
+															}
+															else{
+																echo $occid;
+															} 
+															?>
+														</td>
+														<td>
+															<div title="Field Name">
+																<?php echo $edObj['fname']; ?>
+															</div>
+														</td>
+														<td>
+															<div title="New Status">
+																<?php echo $edObj['fvaluenew']; ?>
+															</div>
+														</td>
+														<td>
+															<div title="Old Value">
+																<?php echo $edObj['fvalueold']; ?>
+															</div>
+														</td>
+														<td>
+															<div title="Review Status">
+																<?php
+																$rStatus = $edObj['rstatus'];
+																if($rStatus == 1){
+																	echo 'OPEN';
+																}
+																elseif($rStatus == 2){
+																	echo 'PENDING';
+																}
+																elseif($rStatus == 3){
+																	echo 'CLOSED';
+																}
+																else{
+																	echo 'UNKNOWN';
+																}
+																?>
+															</div>
+														</td>
+														<td>
+															<div title="Applied Status">
+																<?php 
+																$aStatus = $edObj['astatus'];
+																if($aStatus == 1){
+																	echo 'APPLIED';
+																}
+																else{
+																	echo 'NOT APPLIED';
+																}
+																?>
+															</div>
+														</td>
+														<td>
+															<div title="Editor">
+																<?php echo $edObj['uname']; ?>
+															</div>
+														</td>
+													</tr>
+													<?php 
+												}
+												$recCnt++;
+											}
+											if($mode != 'printmode'){ 
+												?>
+												<tr><td colspan="8" valign="bottom">
+													<div style="margin:10px;">
+														<span>
+															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits
+															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
+														</span>
+														<span style="margin-left:25px;">
+															Change Status to:
+															<select name="rstatus">
+																<option value="0">LEAVE AS IS</option>
+																<option value="1">OPEN</option>
+																<option value="2">PENDING</option>
+																<option value="3">CLOSED</option>
+															</select>
+														</span>
+														<span style="margin-left:25px;">
+															<input name="submitstr" type="submit" value="Perform Action" />
+															<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+															<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
+															<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
+															<input name="download" type="hidden" value="" />
+														</span>
+													</div>
+													<hr/>
+													<div>
+														<b>Other Actions:</b>
+													</div>
+													<div style="margin:5px 0px 10px 15px;">
+														<a href="javascript: var f = submitDownload();">
+															Download Selected Records
+														</a>
+													</div>
+													<div style="margin:10px 0px 5px 15px;">
+														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=printmode'; ?>">
+															Display as Printable Form
+														</a>
+													</div>
+												</td></tr>
+												<?php
+											}
+										}
+										else{
 											?>
-											<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
-												<td>
-													<input name="ocedid[]" type="checkbox" value="<?php echo $ocedid; ?>" />
-												</td>
-												<td>
-													<div title="Field Name">
-														<?php echo $edObj['fname']; ?>
-													</div>
-												</td>
-												<td>
-													<div title="New Status">
-														<?php echo $edObj['fvaluenew']; ?>
-													</div>
-												</td>
-												<td>
-													<div title="Old Value">
-														<?php echo $edObj['fvalueold']; ?>
-													</div>
-												</td>
-												<td>
-													<div title="Review Status">
-														<?php
-														$rStatus = $edObj['rstatus'];
-														if($rStatus == 1){
-															echo 'OPEN';
-														}
-														elseif($rStatus == 2){
-															echo 'PENDING';
-														}
-														elseif($rStatus == 3){
-															echo 'CLOSED';
-														}
-														else{
-															echo 'UNKNOWN';
-														}
-														?>
-													</div>
-												</td>
-												<td>
-													<div title="Applied Status">
-														<?php 
-														$aStatus = $edObj['astatus'];
-														if($rStatus == 1){
-															echo 'Edits Applied';
-														}
-														else{
-															echo 'Not Applied';
-														}
-														?>
-													</div>
-												</td>
-												<td>
-													<div title="Editor">
-														<?php echo $edObj['uname']; ?>
-													</div>
+											<tr>
+												<td colspan="7">
+													<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria</div>
 												</td>
 											</tr>
 											<?php 
 										}
-										$redCnt++;
-									}
-								?>
-								<tr><td colspan="7">
-									<div style="float:left;">
-										<input name="action" type="radio" title="Apply Edits, if not already done" />Apply Edits<br/>
-										<input name="action" type="radio" title="Revert Edits" />Revert Edits
-									</div>
-									<div style="float:left;">
-										Change Status to:
-										<select name="rstatus">
-											<option value="0">LEAVE AS IS</option>
-											<option value="1">OPEN</option>
-											<option value="2">PENDING</option>
-											<option value="3">CLOSED</option>
-										</select>
-									</div>
-									<div style="float:left;">
-										<input name="action" type="submit" value="Perform Action" />
-									</div>
-								</td></tr>
-								<?php 
-								}
-								else{
-									?>
-									<tr>
-										<td colspan="7">
-											<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria</div>
-										</td>
-									</tr>
+										?>
+									</table>
 									<?php 
-								}
-								?>
-							</table>
-						</form>
-					</div>
+									if($mode == 'printmode'){
+										echo '<h2><a href="editreviewer.php?collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'">Return to form</a></h2>';
+									}
+									?>
+								</form>
+							</td>
+						</tr>
+					</table>
 					<?php 
 				}
 				else{
@@ -273,6 +397,6 @@ if($editable){
 			}
 			?>
 		</div>
-		<?php include($serverRoot.'/footer.php');?>
+		<?php if($mode != 'printmode') include($serverRoot.'/footer.php');?>
 	</body>
 </html>

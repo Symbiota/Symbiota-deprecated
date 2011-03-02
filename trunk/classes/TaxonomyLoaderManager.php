@@ -43,40 +43,37 @@ class TaxonomyLoaderManager{
 			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
 			",".$dataArr["securitystatus"].")";
 		//echo "sqlTaxa: ".$sqlTaxa;
-		if(!$this->conn->query($sqlTaxa)){
-			return "Taxon Insert FAILED: sql = ".$sqlTaxa;
-		}
-		$tid = $this->conn->insert_id;
-		if($dataArr["acceptstatus"]){
-			$tidAccepted = $tid;
+		if($this->conn->query($sqlTaxa)){
+			$tid = $this->conn->insert_id;
+			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
+			
+		 	//Load accepteance status into taxstatus table
+		 	$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
+		 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
+			$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
+				"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
+				($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
+			//echo "sqlTaxStatus: ".$sqlTaxStatus;
+			if(!$this->conn->query($sqlTaxStatus)){
+				return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+			}
+		 	
+			//Link new name to existing specimens
+			$sql1 = "UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ".
+				"WHERE sciname = '".$dataArr["sciname"]."' AND o.TidInterpreted IS NULL";
+			$this->conn->query($sql1);
+			//Add their geopoints to omoccurgeoindex 
+			$sql2 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
+				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
+				"FROM omoccurrences o ".
+				"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+			$this->conn->query($sql2);
+			
 		}
 		else{
-			$tidAccepted = $dataArr["tidaccepted"];
+			return 'Taxon Insert FAILED: '.$this->conn->error.'; SQL = '.$sqlTaxa;
 		}
-		
-	 	//Load accepteance status into taxstatus table
-	 	$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
-	 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
-		$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, UnacceptabilityReason, hierarchystr) ".
-			"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
-			($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["UnacceptabilityReason"]."\",\"".$hierarchy."\") ";
-		//echo "sqlTaxStatus: ".$sqlTaxStatus;
-		if(!$this->conn->query($sqlTaxStatus)){
-			return "Taxon inserted, but taxonomy insert FAILED: sql = ".$sqlTaxa;
-		}
-	 	
-		//Link new name to existing specimens
-		$sql1 = "UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ".
-			"WHERE o.TidInterpreted IS NULL";
-		$this->conn->query($sql1);
-		//Add their geopoints to omoccurgeoindex 
-		$sql2 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
-			"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
-			"FROM omoccurrences o ".
-			"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
-		$this->conn->query($sql2);
-
-	 	header("Location: taxonomyeditor.php?target=".$tid);
+		return $tid;
 	}
 	
 	private function getHierarchy($tid){
@@ -103,15 +100,6 @@ class TaxonomyLoaderManager{
 		}while($targetTid && $parCnt < 16);
 		
 		return implode(",",array_reverse($parentArr));
-	}
-	
-	public function echoUpperTaxa(){
-		$sql = "SELECT DISTINCT ts.uppertaxonomy FROM taxstatus ts WHERE ts.taxauthid = 1 ORDER BY ts.uppertaxonomy";
-		//echo $sql;
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			if($row->uppertaxonomy) echo "<option>".$row->uppertaxonomy."</option>\n";
-		}
 	}
 }
 ?>
