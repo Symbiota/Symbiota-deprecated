@@ -130,6 +130,7 @@ header("Content-Type: text/html; charset=".$charset);
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $ident_tools_massupdateCrumbs;
+		echo "<b>Character Mass Update Editor</b>";
 		echo "</div>";
 	}
 	

@@ -15,9 +15,9 @@
 	include($serverRoot.'/header.php');
 	if(isset($collections_maps_indexCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
+		echo "<a href='../../index.php'>Home</a> &gt; ";
 		echo $collections_maps_indexCrumbs;
-		echo " &gt; <b>Mapping Options</b>"; 
+		echo " <b>Mapping Options</b>"; 
 		echo "</div>";
 	}
 ?>

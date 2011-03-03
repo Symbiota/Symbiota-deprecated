@@ -36,13 +36,13 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 <body>
 
 <?php
-	$displayLeftMenu = (isset($collections_editor_imageObservationMenu)?$collections_individual_imageObservationMenu:false);
+	$displayLeftMenu = (isset($collections_editor_observationsubmitMenu)?$collections_editor_observationsubmitMenu:false);
 	include($serverRoot.'/header.php');
-	if(isset($collections_editor_observationSubmitCrumbs)){
+	if(isset($collections_editor_observationsubmitCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_editor_observationSubmitCrumbs;
-		echo " &gt; <b>Observation Submission</b>";
+		echo $collections_editor_observationsubmitCrumbs;
+		echo "<b>Observation Submission</b>";
 		echo "</div>";
 	}
 ?>
