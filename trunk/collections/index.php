@@ -180,7 +180,7 @@
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
-						         		<input name="db[]" class="spec" value='all' type="checkbox" onclick="javascript:selectAll(this);" />
+						         		<input name="db[]" class="spec" value='' type="checkbox" onclick="javascript:selectAll(this);" />
 						         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						        	</div>
 								</td>
@@ -224,7 +224,7 @@
 							<tr>
 								<td colspan="4">
 						        	<div style="margin:0px 0px 10px 30px;">
-						         		<input name="db[]" class="obs" value='all' type="checkbox" onclick="javascript:selectAll(this,'obstable');" />
+						         		<input name="db[]" class="obs" value='' type="checkbox" onclick="javascript:selectAll(this,'obstable');" />
 						         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						        	</div>
 								</td>
@@ -254,6 +254,7 @@
 							                onmouseout="javascript:this.src = '../images/next1.gif';"
 							                title="Click button to advance to the next step" />
 								    	<?php } ?>
+								    	<input type="hidden" name="catid" value="<?php echo $catId; ?>" /> 
 							    	</td>
 							    </tr>
 							    <?php

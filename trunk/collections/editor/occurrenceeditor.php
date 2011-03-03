@@ -73,6 +73,9 @@ if($symbUid){
 		$occArr = $occManager->getOccurArr();
 		if(!$collId) $collId = $occArr["collid"];
 	}
+	elseif($collId){
+		$occArr = $occManager->setCollId($collId);
+	}
 }
 
 ?>
@@ -106,10 +109,13 @@ if($symbUid){
 		<?php 
 		if(!$symbUid){
 			?>
-			Please <a href="../../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">LOGIN to edit or add an occurrence record</a> 
+			Please <a href="../../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">LOGIN</a> to edit or add an occurrence record 
 			<?php 
 		}
 		else{
+			if($occArr){
+				echo '<h2>'.$occArr['collectionname'].' ('.$occArr['institutioncode'].($occArr['collectioncode']?':'.$occArr['collectioncode']:'').')</h2>';
+			}
 			if($statusStr){
 				?>
 				<fieldset style="margin:10px;padding:10px;">
@@ -728,28 +734,28 @@ if($symbUid){
 									<div class="legend"><b>Current Determination</b></div>
 									<div>
 										<?php 
-										if($occArr['identificationqualifier']['value']) echo $occArr['identificationqualifier']['value'].' ';
-										echo '<b><i>'.$occArr['sciname']['value'].'</i></b> '.$occArr['scientificnameauthorship']['value'];
+										if($occArr['identificationqualifier']) echo $occArr['identificationqualifier'].' ';
+										echo '<b><i>'.$occArr['sciname'].'</i></b> '.$occArr['scientificnameauthorship'];
 										?>
 									</div>
 									<div style='margin:3px 0px 0px 15px;'>
-										<b>Determiner:</b> <?php echo ($occArr['identifiedby']['value']?$occArr['identifiedby']['value']:$occArr['recordedby']['value']); ?>
+										<b>Determiner:</b> <?php echo ($occArr['identifiedby']?$occArr['identifiedby']:$occArr['recordedby']); ?>
 										<span style="margin-left:40px;">
-											<b>Date:</b> <?php echo $occArr['dateidentified']['value']; ?>
+											<b>Date:</b> <?php echo $occArr['dateidentified']; ?>
 										</span>
 									</div>
 									<?php 
-									if($occArr['identificationreferences']['value']){
+									if($occArr['identificationreferences']){
 										?>
 										<div style='margin:3px 0px 0px 15px;'>
-											<b>Reference:</b> <?php echo $occArr['identificationreferences']['value']; ?>
+											<b>Reference:</b> <?php echo $occArr['identificationreferences']; ?>
 										</div>
 										<?php 
 									}
-									if($occArr['identificationremarks']['value']){
+									if($occArr['identificationremarks']){
 										?>
 										<div style='margin:3px 0px 0px 15px;'>
-											<b>Notes:</b> <?php echo $occArr['identificationremarks']['value']; ?>
+											<b>Notes:</b> <?php echo $occArr['identificationremarks']; ?>
 										</div>
 										<?php 
 									}

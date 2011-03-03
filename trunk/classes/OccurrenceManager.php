@@ -102,8 +102,15 @@ class OccurrenceManager{
 
 	protected function getSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists("db",$this->searchTermsArr) && strpos($this->searchTermsArr["db"],"all") === false){
-			$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",$this->searchTermsArr["db"]).")) ";
+		if(array_key_exists("db",$this->searchTermsArr)){
+			if(strpos($this->searchTermsArr["db"],"all") === false){
+				$dbStr = preg_replace('/;catid:\d*/','',$this->searchTermsArr["db"]);
+				$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",trim($dbStr,';')).")) ";
+			}
+			elseif(preg_match('/;catid:(\d+)/',$this->searchTermsArr["db"],$matches)){
+				$catId = $matches[1];
+				$sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE ccpk = ".$catId.")) ";
+			}
 		}
 		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
 			$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
@@ -469,6 +476,9 @@ class OccurrenceManager{
 		 	$dbStr = "";
 		 	if(in_array("all",$dbs)){
 		 		$dbStr = "all";
+		 		if(array_key_exists('catid',$_REQUEST)){
+		 			$dbStr .= ";catid:".$_REQUEST['catid'];
+		 		}
 		 	}
 		 	else{
 		 		$dbStr = implode(";",$dbs);
