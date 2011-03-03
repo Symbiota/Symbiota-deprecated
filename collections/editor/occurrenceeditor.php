@@ -98,7 +98,7 @@ if($symbUid){
 	include($serverRoot.'/header.php');
 	if(isset($collections_editor_occurrenceeditorCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
+		echo "<a href='../../index.php'>Home</a> &gt; ";
 		echo $collections_editor_occurrenceeditorCrumbs;
 		echo "<b>Occurrence Editor</b>";
 		echo "</div>";
