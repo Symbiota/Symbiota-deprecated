@@ -128,7 +128,7 @@ header("Content-Type: text/html; charset=".$charset);
 				echo "<div class='navpath'>";
 				echo "<a href='../index.php'>Home</a> &gt; ";
 				echo $collections_editor_editreviewerCrumbs;
-				echo " &gt; <b>Specimen Edits Reviewer</b>";
+				echo " <b>Specimen Edits Reviewer</b>";
 				echo "</div>";
 			}
 		}

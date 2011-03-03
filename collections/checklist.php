@@ -33,7 +33,7 @@
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $collections_checklistCrumbs;
-		echo " &gt; <b>Dynamic Checklist</b>";
+		echo "<b>Dynamic Checklist</b>";
 		echo "</div>";
 	}
 ?>

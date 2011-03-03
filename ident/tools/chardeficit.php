@@ -40,6 +40,7 @@
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $ident_tools_chardeficitCrumbs;
+		echo "<b>Character Deficit Editor</b>";
 		echo "</div>";
 	}
 ?>

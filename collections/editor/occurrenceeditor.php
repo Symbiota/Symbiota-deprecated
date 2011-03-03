@@ -94,13 +94,13 @@ if($symbUid){
 <body onload="initTabs('occedittabs');">
 
 	<?php
-	$displayLeftMenu = (isset($collections_editor_occurrenceEditorMenu)?$collections_individual_occurrenceEditorMenu:false);
+	$displayLeftMenu = (isset($collections_editor_occurrenceeditorMenu)?$collections_individual_occurrenceeditorMenu:false);
 	include($serverRoot.'/header.php');
-	if(isset($collections_editor_occurrenceEditorCrumbs)){
+	if(isset($collections_editor_occurrenceeditorCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_editor_occurrenceEditorCrumbs;
-		echo " &gt; <b>Occurrence Editor</b>";
+		echo $collections_editor_occurrenceeditorCrumbs;
+		echo "<b>Occurrence Editor</b>";
 		echo "</div>";
 	}
 	?>

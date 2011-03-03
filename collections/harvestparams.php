@@ -27,7 +27,7 @@
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $collections_harvestparamsCrumbs;
-		echo " &gt; <b>Search Criteria</b>";
+		echo "<b>Search Criteria</b>";
 		echo "</div>";
 	}
 	?>
