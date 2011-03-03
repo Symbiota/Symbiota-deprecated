@@ -34,9 +34,21 @@ class OccurrenceEditorManager {
 	public function setOccId($id){
 		$this->occId = $id;
 	}
-
+	
+	public function setCollId($cid){
+		$sql = 'SELECT c.collectionname, c.institutioncode, c.collectioncode FROM omcollections c WHERE c.collid = '.$cid;
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$this->occurrenceMap['collectionname'] = $row->collectionname;
+			$this->occurrenceMap['institutioncode'] = $row->institutioncode;
+			$this->occurrenceMap['collectioncode'] = $row->collectioncode;
+		}
+		$rs->close();
+		return $this->occurrenceMap;
+	}
+	
 	public function getOccurArr(){
-		$sql = 'SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
 			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
 			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
 			'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
