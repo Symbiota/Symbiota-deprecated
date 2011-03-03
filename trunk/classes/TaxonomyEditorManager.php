@@ -327,13 +327,13 @@ class TaxonomyEditorManager{
 		return $status;
 	}
 	
-	public function submitChangeToAccepted($tid,$tidAccepted,$switchAccpetance = true){
+	public function submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance = true){
 		
 		$sql = "UPDATE taxstatus SET tidaccepted = $tid WHERE tid = $tid AND taxauthid = $this->taxAuthId";
 		$status = $this->conn->query($sql);
 
-		if($switchAccpetance){
-			$sqlSwitch = "UPDATE taxstatus SET tidaccepted = $tid WHERE tidaccepted = $tidAccepted AND taxauthid = $this->taxAuthId";
+		if($switchAcceptance){
+			$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE tidaccepted = '.$tidAccepted.' AND taxauthid = '.$this->taxAuthId;
 			$status = $this->conn->query($sqlSwitch);
 			
 			$this->updateDependentData($tidAccepted,$tid);
@@ -344,11 +344,11 @@ class TaxonomyEditorManager{
 	public function submitChangeToNotAccepted($tid,$tidAccepted){
 		//Change subject taxon to Not Accepted
 		$sql = "UPDATE taxstatus SET tidaccepted = $tidAccepted WHERE tid = $tid AND taxauthid = $this->taxAuthId";
-		$status = $this->connquery($sql);
+		$status = $this->conn->query($sql);
 
 		//Switch synonyms of subject to Accepted Taxon 
 		$sqlSyns = "UPDATE taxstatus SET tidaccepted = $tidAccepted WHERE tidaccepted = $tid AND taxauthid = $this->taxAuthId";
-		$status = $this->connquery($sqlSyns);
+		$status = $this->conn->query($sqlSyns);
 		
 		$this->updateDependentData($tid,$tidAccepted);
 		
@@ -358,16 +358,16 @@ class TaxonomyEditorManager{
 	private function updateDependentData($tid, $tidNew){
 		//method to update descr, vernaculars,
 
-		$this->conn->query("DELETE FROM fmdescr WHERE inherited IS NOT NULL AND tid = ".$tid);
-		$this->conn->query("UPDATE IGNORE fmdescr SET tid = ".$tidNew." WHERE tid = ".$tid);
-		$this->conn->query("DELETE FROM fmdescr WHERE tid = ".$tid);
+		$this->conn->query("DELETE FROM kmdescr WHERE inherited IS NOT NULL AND tid = ".$tid);
+		$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$tidNew." WHERE tid = ".$tid);
+		$this->conn->query("DELETE FROM kmdescr WHERE tid = ".$tid);
 		$this->resetCharStateInheritance($tidNew);
 		
 		$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE tid = ".$tid;
 		$this->conn->query($sqlVerns);
 		
-		$sqltd = "UPDATE taxadescrblock SET tid = ".$tidNew." ".
-			"WHERE tid = ".$tid." AND caption NOT IN (SELECT DISTINCT caption FROM taxadescrblock WHERE tid = ".$tidNew.")" ;
+		$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE tid = '.$tidNew.') lj ON tb.caption = lj.caption '.
+			'SET tid = '.$tidNew.' WHERE tid = '.$tid.' AND lj.caption IS NULL';
 		$this->conn->query($sqltd);
 
 		$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE tid = ".$tid;
@@ -376,9 +376,22 @@ class TaxonomyEditorManager{
 	}
 	
 	private function resetCharStateInheritance($tid){
-		if($charUsedStr){
-			//set inheritance for target only
-			$sqlAdd1 = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
+		//set inheritance for target only
+		$sqlAdd1 = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
+			"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
+			"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
+			"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
+			"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
+			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
+			"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
+			"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
+			"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+			"AND (t2.tid = $tid) And (d2.CID Is Null)";
+		$this->conn->query($sqlAdd1);
+
+		//Set inheritance for all children of target
+		if($this->rankId == 140){
+			$sqlAdd2a = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
 				"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
 				"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
 				"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
@@ -387,50 +400,35 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
 				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-				"AND (t2.tid = $tid) And (d2.CID Is Null)";
-			$this->conn->query($sqlAdd1);
+				"AND (t2.RankId = 180) AND (t1.tid = $tid) AND (d2.CID Is Null)";
+			//echo $sqlAdd2a;
+			$this->conn->query($sqlAdd2a);
+			$sqlAdd2b = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
+				"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
+				"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
+				"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
+				"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
+				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
+				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
+				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
+				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".$this->sciName."') AND (ts2.tid = ts2.tidaccepted) ".
+				"AND (t2.RankId = 220) AND (d2.CID Is Null)";
+			$this->conn->query($sqlAdd2b);
+		}
 
-			//Set inheritance for all children of target
-			if($this->rankId == 140){
-				$sqlAdd2a = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
-					"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
-					"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
-					"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
-					"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
-					"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
-					"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
-					"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-					"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-					"AND (t2.RankId = 180) AND (t1.tid = $tid) AND (d2.CID Is Null)";
-				//echo $sqlAdd2a;
-				$this->conn->query($sqlAdd2a);
-				$sqlAdd2b = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
-					"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
-					"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
-					"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
-					"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
-					"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
-					"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
-					"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-					"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".$this->sciName."') AND (ts2.tid = ts2.tidaccepted) ".
-					"AND (t2.RankId = 220) AND (d2.CID Is Null)";
-				$this->conn->query($sqlAdd2b);
-			}
-
-			if($this->rankId > 140 && $this->rankId < 220){
-				$sqlAdd3 = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
-					"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
-					"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
-					"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
-					"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
-					"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
-					"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
-					"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-					"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-					"AND (t2.RankId = 220) AND (t1.tid = $tid) AND (d2.CID Is Null)";
-				//echo $sqlAdd2b;
-				$this->conn->query($sqlAdd3);
-			}
+		if($this->rankId > 140 && $this->rankId < 220){
+			$sqlAdd3 = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
+				"SELECT DISTINCT t2.TID, d1.CID, d1.CS, d1.Modifier, d1.X, d1.TXT, ".
+				"d1.Seq, d1.Notes, IFNULL(d1.Inherited,t1.SciName) AS parent ".
+				"FROM ((((taxa AS t1 INNER JOIN kmdescr d1 ON t1.TID = d1.TID) ".
+				"INNER JOIN taxstatus ts1 ON d1.TID = ts1.tid) ".
+				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
+				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
+				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
+				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+				"AND (t2.RankId = 220) AND (t1.tid = $tid) AND (d2.CID Is Null)";
+			//echo $sqlAdd2b;
+			$this->conn->query($sqlAdd3);
 		}
 	}
 	

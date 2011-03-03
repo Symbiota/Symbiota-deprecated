@@ -4,9 +4,11 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = array_key_exists("occid",$_REQUEST)?$_REQUEST["occid"]:0;
-$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
+$occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
+$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$gotoMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:1;
+$carryLoc = array_key_exists('carryloc',$_REQUEST)?$_REQUEST['carryloc']:0;
+$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action){
 	$action = array_key_exists("gotonew",$_REQUEST)?$_REQUEST["gotonew"]:"";
 }
@@ -20,40 +22,51 @@ if($symbUid){
 		$isEditor = 1;
 	}
 	if($action){
-		if($action == "Add Record"){
-			$statusStr = $occManager->addOccurrence($_REQUEST);
-			$occId = $occManager->getOccId();
-		}
-		elseif($action == "Go to New Occurrence Record"){
-			if(array_key_exists('carryloc',$_REQUEST)){
-				$occArr = $occManager->carryOverValues($_REQUEST);
-			}
-			$occId = 0;
-		}
 		if(!$isEditor && $occManager->getObserverUid() == $symbUid){
 			$isEditor = 1;
 		}
 		if($action == "Save Edits"){
 			$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		}
-		elseif($action == "Submit Image Edits"){
-			$statusStr = $occManager->editImage($_REQUEST);
-		}
-		elseif($action == "Submit New Image"){
-			$statusStr = $occManager->addImage($_REQUEST);
-		}
-		elseif($action == "Delete Image"){
-			$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
-			$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
-		}
-		elseif($action == "Add New Determination"){
-			$statusStr = $occManager->addDetermination($_REQUEST);
-		}
-		elseif($action == "Submit Determination Edits"){
-			$statusStr = $occManager->editDetermination($_REQUEST);
-		}
-		elseif($action == "Delete Determination"){
-			$statusStr = $occManager->deleteDetermination($_REQUEST["detid"]);
+		if($isEditor){
+			if($action == "Add Record"){
+				$statusStr = $occManager->addOccurrence($_REQUEST);
+				$occId = $occManager->getOccId();
+				if($gotoMode <= 2){
+					if($gotoMode == 2){
+						$occArr = $occManager->carryOverValues($_REQUEST);
+					}
+					$occId = 0;
+				}
+				elseif($gotoMode == 4){
+					header('Location: ../individual/index.php?occid='.$occId);
+				}
+			}
+			elseif($action == "Go to New Occurrence Record"){
+				if($carryLoc){
+					$occArr = $occManager->carryOverValues($_REQUEST);
+				}
+				$occId = 0;
+			}
+			elseif($action == "Submit Image Edits"){
+				$statusStr = $occManager->editImage($_REQUEST);
+			}
+			elseif($action == "Submit New Image"){
+				$statusStr = $occManager->addImage($_REQUEST);
+			}
+			elseif($action == "Delete Image"){
+				$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
+				$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
+			}
+			elseif($action == "Add New Determination"){
+				$statusStr = $occManager->addDetermination($_REQUEST);
+			}
+			elseif($action == "Submit Determination Edits"){
+				$statusStr = $occManager->editDetermination($_REQUEST);
+			}
+			elseif($action == "Delete Determination"){
+				$statusStr = $occManager->deleteDetermination($_REQUEST["detid"]);
+			}
 		}
 	}
 	if($occId && !$occArr){
@@ -105,7 +118,7 @@ if($symbUid){
 						<?php echo $statusStr; ?>
 					</div>
 					<div style="margin:10px;">
-						Go to <a href="../individual/index.php?occid=<?php echo $occId; ?>">Occurrence Display Page</a>
+						Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
 					</div>
 				</fieldset>
 				<?php 
@@ -128,8 +141,8 @@ if($symbUid){
 						$collList = $occManager->getCollectionList($collList);
 						if($collList){
 							echo '<ul>';
-							foreach($collList as $cId => $cName){
-								echo '<a href="occurrenceeditor.php?collid="'.$cId.'>'.$cName.'</a>';
+							foreach($collList as $cid => $cName){
+								echo '<li><a href="occurrenceeditor.php?collid='.$cid.'">'.$cName.'</a></li>';
 							}
 							echo '</ul>';
 						}
@@ -169,19 +182,21 @@ if($symbUid){
 									<div style="clear:both;" class="p1">
 										<span>
 											<?php $hasValue = array_key_exists("sciname",$occArr)&&$occArr["sciname"]?1:0; ?>
-											<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="scinameChanged()" />
+											<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="scinameChanged()" <?php echo ($isEditor?'':'disabled '); ?> />
 											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 										</span>
 										<span style="margin-left:10px;">
 											<?php $hasValue = array_key_exists("scientificnameauthorship",$occArr)&&$occArr["scientificnameauthorship"]?1:0; ?>
-											<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["scientificnameauthorship"]:""; ?>" onchange="fieldChanged('scientificnameauthorship');" />
+											<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["scientificnameauthorship"]:""; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 										</span>
+										<?php if(!$isEditor) echo '<div style="color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>' ?>
+										<div></div>
 									</div>
 									<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
 										<div style="float:left;">
 											<?php $hasValue = array_key_exists("identificationqualifier",$occArr)&&$occArr["identificationqualifier"]?1:0; ?>
 											<span>ID Qualifier:</span>
-											<input type="text" name="identificationqualifier" tabindex="4" size="5" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationqualifier"]:""; ?>" onfocus="verifySciName(this.form)" onchange="fieldChanged('identificationqualifier');" />
+											<input type="text" name="identificationqualifier" tabindex="4" size="5" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationqualifier"]:""; ?>" onfocus="verifySciName(this.form)" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 										</div>
 										<div style="float:left;margin-left:160px;">
 											<?php $hasValue = array_key_exists("family",$occArr)&&$occArr["family"]?1:0; ?>
@@ -628,16 +643,27 @@ if($symbUid){
 									<input type="hidden" name="editedfields" value="" />
 									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 									<?php if($occId){ ?>
-										<div style="margin:10px 0px 20px 20px;">
+										<div style="margin:15px 0px 20px 30px;">
 											<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" /><br/>
 										</div>
-										<div style="text-align:center;width:250px;border:1px solid black;background-color:lightyellow;padding:10px;">
-											<input type="submit" name="gotonew" value="Go to New Occurrence Record" /><br/>
+										<div style="width:250px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
+											<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
 											<input type="checkbox" name="carryloc" value="1" /> Carry over locality values<br/>
 											* For data entry purposes only 
 										</div>
 									<?php }else{ ?>
-										<input type="submit" name="submitaction" value="Add Record" />
+										<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
+											<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" />
+											<div style="margin-left:15px;font-weight:bold;">
+												Follow-up Action:
+											</div>
+											<div style="margin-left:20px;">
+												<input type="radio" name="gotomode" value="1" <?php echo ($gotoMode>1?'':'CHECKED'); ?> /> Go to New Record<br/>
+												<input type="radio" name="gotomode" value="2" <?php echo ($gotoMode==2?'CHECKED':''); ?> /> Go to New Record and Carryover Locality Information<br/> 
+												<input type="radio" name="gotomode" value="3" <?php echo ($gotoMode==3?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)<br/>
+												<input type="radio" name="gotomode" value="4" <?php echo ($gotoMode==4?'CHECKED':''); ?> /> Go to Specimen Display Page 
+											</div>
+										</div>
 									<?php } ?>
 								</div>
 								<div style="clear:both;">&nbsp;</div>

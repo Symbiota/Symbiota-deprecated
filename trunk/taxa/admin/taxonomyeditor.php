@@ -344,7 +344,11 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						<div class="tsedit" style="display:none;clear:both;">
 							<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 							<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-							<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():array_shift(array_keys($taxonEditorObj->getAcceptedArr()))); ?>" />
+							<?php 
+								$aArr = $taxonEditorObj->getAcceptedArr();
+								$aStr = array_shift(array_keys($aArr)); 
+							?>
+							<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():$aStr); ?>" />
 							<input type="hidden" name="submitaction" value="updatetaxstatus" />
 							<input type='button' name='taxstatuseditsubmit' value='Submit Upper/Family Edits' onclick="submitTaxStatusForm(this.form)" />
 						</div>
@@ -407,12 +411,12 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<div class="legend"><b>Change to Accepted</b></div>
 								<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
 									<div>
-										<input type="checkbox" name="switchacceptance" checked /> Switch Acceptance with Currently Accepted Name
+										<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
 									</div>
 									<div>
 										<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
-										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-										<input type="hidden" name="tidaccepted" value="<?php echo array_shift(array_keys($acceptedArr));?>" />
+										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>" />
+										<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
 										<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
 									</div>
 								</form>

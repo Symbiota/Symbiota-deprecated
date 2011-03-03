@@ -223,6 +223,13 @@ function submitFullForm(f){
 	return true;
 }
 
+function verifyGotoNew(f){
+	if(f.editedfields.value){
+		return confirm("Edits not saved. If you go to a new record you will loss your edits. Are you sure you want to continue?");
+	}
+	return true;
+}
+
 function submitDetEditForm(f){
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value");

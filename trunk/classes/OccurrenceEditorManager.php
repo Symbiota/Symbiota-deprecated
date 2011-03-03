@@ -233,10 +233,12 @@ class OccurrenceEditorManager {
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
 			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").") ";
 			//echo "<div>".$sql."</div>";
-			if(!$this->conn->query($sql)){
+			if($this->conn->query($sql)){
+				$this->occId = $this->conn->insert_id;
+			}
+			else{
 				$status = "ERROR - failed to add occurrence record: ".$this->conn->error;
 			}
-			$this->occId = $this->conn->insert_id;
 		}
 		return $status;
 	}
