@@ -45,26 +45,28 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 		$collections_indexMenu = false;
 		$collections_indexCrumbs = "&nbsp;";
 		$collections_harvestparamsMenu = false;
-		$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a>";
+		$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a> &gt; ";
 		$collections_listMenu = false;
-		$collections_listCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a>";
+		$collections_listCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a> &gt; ";
 		$collections_checklistMenu = false;
-		$collections_checklistCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a>";
+		$collections_checklistCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a> &gt; ";
 		$collections_download_downloadMenu = false;
-		$collections_download_downloadCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a>";
+		$collections_download_downloadCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a> &gt; ";
 		$collections_maps_indexMenu = false;
-		$collections_maps_indexCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a>";
-
+		$collections_maps_indexCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a> &gt; ";
+		$collections_editor_occurrenceeditorCrumbs = "&nbsp;";
+		$collections_editor_observationsubmitCrumbs = "&nbsp;";
+		
 	//ident/
 		$ident_keyMenu = false;
 		$ident_keyCrumbs = "<a href='../ident/index.php'>Identification Keys</a> &gt; ";
 		$ident_loadingclMenu = false;
 		$ident_tools_chardeficitMenu = false;
-		$ident_tools_chardeficitCrumbs = "<a href='javascript: self.close();'> Back to Key</a> ";
+		$ident_tools_chardeficitCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
 		$ident_tools_massupdateMenu = false;
-		$ident_tools_massupdateCrumbs = "<a href='javascript: self.close();'> Back to Key</a> ";
+		$ident_tools_massupdateCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
 		$ident_tools_editorMenu = false;
-		$ident_tools_editorCrumbs = "<a href='javascript: self.close();'> Back to Key</a> ";
+		$ident_tools_editorCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
 		
 	//taxa/
 		$taxa_indexMenu = false;
