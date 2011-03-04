@@ -35,6 +35,18 @@ class OccurrenceEditorManager {
 		$this->occId = $id;
 	}
 	
+	public function getCollId(){
+		if(!$this->occId) return;
+		$collId = 0;
+		$sql = 'SELECT collid FROM omoccurrences WHERE occid = '.$this->occId;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$collId = $r->collid;
+		}
+		$rs->close();
+		return $collId;
+	}
+	
 	public function setCollId($cid){
 		$sql = 'SELECT c.collectionname, c.institutioncode, c.collectioncode FROM omcollections c WHERE c.collid = '.$cid;
 		$rs = $this->conn->query($sql);

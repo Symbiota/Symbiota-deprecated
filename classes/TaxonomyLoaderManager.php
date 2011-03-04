@@ -45,10 +45,9 @@ class TaxonomyLoaderManager{
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
-			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			
 		 	//Load accepteance status into taxstatus table
-		 	$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
+			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
+			$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
 		 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
 			$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
 				"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
@@ -58,16 +57,17 @@ class TaxonomyLoaderManager{
 				return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
 			}
 		 	
-			//Link new name to existing specimens
-			$sql1 = "UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ".
-				"WHERE sciname = '".$dataArr["sciname"]."' AND o.TidInterpreted IS NULL";
+			//Link new name to existing specimens and set locality secirity if needed
+			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
+			if($dataArr['securitystatus']) $sql1 .= ',localitysecurity = 1 '; 
+			$sql1 .= 'WHERE sciname = "'.$dataArr["sciname"].'"';
 			$this->conn->query($sql1);
 			//Add their geopoints to omoccurgeoindex 
-			$sql2 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
+			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
 				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
 				"FROM omoccurrences o ".
 				"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
-			$this->conn->query($sql2);
+			$this->conn->query($sql3);
 			
 		}
 		else{

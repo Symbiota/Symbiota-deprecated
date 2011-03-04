@@ -109,7 +109,7 @@ class OccurrenceManager{
 			}
 			elseif(preg_match('/;catid:(\d+)/',$this->searchTermsArr["db"],$matches)){
 				$catId = $matches[1];
-				$sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE ccpk = ".$catId.")) ";
+				if($catId) $sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE ccpk = ".$catId.")) ";
 			}
 		}
 		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
@@ -467,7 +467,7 @@ class OccurrenceManager{
 		$conn->close();
 		return $taxonAuthorityList;
 	}
-	
+
 	private function readRequestVariables(){
 		global $clientRoot;
 		if(array_key_exists("db",$_REQUEST)){
@@ -476,7 +476,7 @@ class OccurrenceManager{
 		 	$dbStr = "";
 		 	if(in_array("all",$dbs)){
 		 		$dbStr = "all";
-		 		if(array_key_exists('catid',$_REQUEST)){
+		 		if(array_key_exists('catid',$_REQUEST) && $_REQUEST['catid']){
 		 			$dbStr .= ";catid:".$_REQUEST['catid'];
 		 		}
 		 	}

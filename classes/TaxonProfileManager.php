@@ -261,29 +261,31 @@
 			$result->close();
 		}
 		
-		//Get Images 
-		$sql = "SELECT t.sciname, ti.tid, ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ". 
-			"FROM (((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
-			"INNER JOIN taxstatus ts1 ON ti.tid = ts1.tid) ".
-			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
-			"INNER JOIN taxa t ON ts2.tid = t.tid ".
-			"WHERE t.tid IN(".implode(",",$tids).") AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ti.sortsequence = 1) ";
-		//echo $sql;
-		$result = $this->con->query($sql);
-		while($row = $result->fetch_object()){
-			$sciName = ucfirst(strtolower($row->sciname));
-			if(!array_key_exists($sciName,$this->sppArray)){
-				$firstPos = strpos($sciName," ",2)+2;
-				$sciName = substr($sciName,0,strpos($sciName," ",$firstPos));
+		if($tids){
+			//Get Images 
+			$sql = "SELECT t.sciname, ti.tid, ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
+				"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ". 
+				"FROM (((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
+				"INNER JOIN taxstatus ts1 ON ti.tid = ts1.tid) ".
+				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
+				"INNER JOIN taxa t ON ts2.tid = t.tid ".
+				"WHERE t.tid IN(".implode(",",$tids).") AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ti.sortsequence = 1) ";
+			//echo $sql;
+			$result = $this->con->query($sql);
+			while($row = $result->fetch_object()){
+				$sciName = ucfirst(strtolower($row->sciname));
+				if(!array_key_exists($sciName,$this->sppArray)){
+					$firstPos = strpos($sciName," ",2)+2;
+					$sciName = substr($sciName,0,strpos($sciName," ",$firstPos));
+				}
+				$this->sppArray[$sciName]["imgid"] = $row->imgid;
+				$this->sppArray[$sciName]["url"] = $row->url;
+				$this->sppArray[$sciName]["thumbnailurl"] = $row->thumbnailurl;
+				$this->sppArray[$sciName]["photographer"] = $row->photographer;
+				$this->sppArray[$sciName]["caption"] = $row->caption;
 			}
-			$this->sppArray[$sciName]["imgid"] = $row->imgid;
-			$this->sppArray[$sciName]["url"] = $row->url;
-			$this->sppArray[$sciName]["thumbnailurl"] = $row->thumbnailurl;
-			$this->sppArray[$sciName]["photographer"] = $row->photographer;
-			$this->sppArray[$sciName]["caption"] = $row->caption;
+			$result->close();
 		}
-		$result->close();
 		
 		//Get Maps, if rank is genus level or higher
 		if($this->rankId > 140){
