@@ -16,8 +16,8 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 	//Check user rights
 	if(isset($_COOKIE["SymbiotaRights"])){
         $userRightsStr = $_COOKIE["SymbiotaRights"];
-		$userRights = explode("&",$userRightsStr);
-		foreach($userRights as $v){
+		$uRights = explode("&",$userRightsStr);
+		foreach($uRights as $v){
 			$tArr = explode("-",$v);
 			if(count($tArr) > 1){
 				$userRights[$tArr[0]][] = $tArr[1];

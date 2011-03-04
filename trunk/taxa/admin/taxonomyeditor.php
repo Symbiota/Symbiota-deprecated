@@ -265,6 +265,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<option value="0" <?php if($taxonEditorObj->getSecurityStatus()==0) echo "SELECTED"; ?>>show all locality data</option>
 								<option value="1" <?php if($taxonEditorObj->getSecurityStatus()==1) echo "SELECTED"; ?>>hide locality data</option>
 							</select>
+							<input type='hidden' name='securitystatusstart' value='<?php echo $taxonEditorObj->getSecurityStatus(); ?>' />
 						</div>
 					</div>
 					<div class="editfield" style="display:none;">

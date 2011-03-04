@@ -345,7 +345,7 @@ if($isAdmin){
 										if($collectionArr){
 	 										?>
 											<div style='margin:10px 0px 0px 3px;font-weight:bold;'>
-												Admin&nbsp;Reader&nbsp;<?php if($showRareSppOption) echo "Rare"; ?>
+												Admin&nbsp;Editor&nbsp;<?php if($showRareSppOption) echo "Rare"; ?>
 											</div>
 											<?php
 											foreach($collectionArr as $k=>$v){

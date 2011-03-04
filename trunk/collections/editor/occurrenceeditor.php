@@ -14,6 +14,9 @@ if(!$action){
 }
 
 $occManager = new OccurrenceEditorManager($occId);
+if($occId && !$collId){
+	$collId = $occManager->getCollId();
+}
 $occArr = Array();
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $statusStr = '';
@@ -71,13 +74,11 @@ if($symbUid){
 	}
 	if($occId && !$occArr){
 		$occArr = $occManager->getOccurArr();
-		if(!$collId) $collId = $occArr["collid"];
 	}
 	elseif($collId){
 		$occArr = $occManager->setCollId($collId);
 	}
 }
-
 ?>
 <html>
 <head>
@@ -176,7 +177,7 @@ if($symbUid){
 						<div id="occdiv" class="tabcontent" style="margin:10px;">
 							<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return submitFullForm(this)">
 								<fieldset>
-									<legend><b>Latest Description</b></legend>
+									<legend><b>Latest Identification</b></legend>
 									<div style="clear:both;" class="p1">
 										<span style="width:125px;">
 											Scientific Name:

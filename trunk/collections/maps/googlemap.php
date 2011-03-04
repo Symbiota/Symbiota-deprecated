@@ -3,36 +3,25 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
- $mapManager = new OccurrenceMapManager(); 
+$mapManager = new OccurrenceMapManager(); 
  
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title><?php echo $defaultTitle; ?> - Google Map</title>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
+	<title><?php echo $defaultTitle; ?> - Google Map</title>
 </head> 
 <body onload="load()" onunload="GUnload()">
-    <script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
-    <script type="text/javascript">
+	<script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
+	<script type="text/javascript">
       //<![CDATA[
-        var map;
-        var points;
-        var useLLDecimal = true;
-      
-        function load(){
-            if(GBrowserIsCompatible()) {
-                map = new GMap2(document.getElementById("map"));
+		var map;
+		var points;
+		var useLLDecimal = true;
+
+		function load(){
+			if(GBrowserIsCompatible()) {
+				map = new GMap2(document.getElementById("map"));
                 points = new Array();
                 map.addControl(new GLargeMapControl()); // pan, zoom
                 map.addControl(new GMapTypeControl()); // map, satellite, hybrid
@@ -72,15 +61,13 @@ header("Content-Type: text/html; charset=".$charset);
                         $spStr = "";
                         $functionStr = "";
                         foreach($dataArr as $occId => $spArr){
-	                		$collId = $spArr["collid"];
-							$dbpk = $spArr["dbpk"];
 							if(count($dataArr) == 1){
-	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('../individual/index.php?pk=".$dbpk."&collid=".$collId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
+	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('../individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
 							}
 							else{
 								$gui = $spArr["gui"];
 								if(!$gui) $gui = "occurrence #".$occId;
-								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'../individual/index.php?pk=".$dbpk."&collid=".$collId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
+								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'../individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
 							}
                         }
                         if($spStr){
