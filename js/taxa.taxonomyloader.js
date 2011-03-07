@@ -1,11 +1,12 @@
 function submitLoadForm(f){
 	var submitForm = true;
 	var errorStr = "";
-	if(f.sciname.value == "") errorStr += "Scientific Name \n"; 
-	if(f.unitname1.value == "") errorStr += "Genus (Base Name) \n"; 
-	if(f.parenttid.value == "") errorStr += "Parent Name \n"; 
+	if(f.sciname.value == "") errorStr += ", Scientific Name"; 
+	if(f.unitname1.value == "") errorStr += ", Base Name (eg Genus)"; 
+	if(f.rankid.value == 0 || f.rankid.value == "") errorStr += ", Taxon Rank"; 
+	if(f.parenttid.value == "") errorStr += ", Parent Taxon"; 
 	if(errorStr != ""){
-		alert("Following Fields Required:\n"+errorStr);
+		alert("Following Fields Required: "+errorStr.substring(2));
 		submitForm = false;
 	}
 
@@ -13,7 +14,7 @@ function submitLoadForm(f){
 		var rankId = f.rankid.value;
 		if(rankId < 140){
 			if(f.uppertaxonomy.value == "") errorStr += "Upper Taxonomy \n"; 
-			if(f.family.value == "" || f.family.value == "undefined") errorStr += "family \n"; 
+			if(f.family.value == "") errorStr += "family \n"; 
 			if(errorStr != ""){
 				submitForm = confirm("Following fields are recommended. Are you sure you want to leave them blank?\n"+errorStr);
 			}
@@ -60,7 +61,7 @@ function parseName(f){
 	var activeIndex = 0;
 	var unitName1 = "";
 	var unitName2 = "";
-	var rankId = 180;
+	var rankId = 0;
 	sciNameArr = sciName.split(' ');
 
 	if(sciNameArr[activeIndex].length == 1){
@@ -127,8 +128,10 @@ function setParent(f){
 	else if(rankId > 220){
 		parentName = unitName1 + " " + unitName2; 
 	}
-	f.parentname.value = parentName;
-	checkParentExistance(f);
+	if(parentName){
+		f.parentname.value = parentName;
+		checkParentExistance(f);
+	}
 }			
 
 function checkScinameExistance(sciname){
@@ -142,7 +145,6 @@ function checkScinameExistance(sciname){
   	}
 	var url="rpc/gettid.php";
 	url=url+"?sciname="+sciname;
-	url=url+"&sid="+Math.random();
 	cseXmlHttp.onreadystatechange=function(){
 		if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
 			var responseStr = cseXmlHttp.responseText;
@@ -180,17 +182,18 @@ function setUpperTaxonomy(f){
   	}
 	var url="rpc/getuppertaxonomy.php";
 	url=url+"?sciname="+genusStr;
-	url=url+"&sid="+Math.random();
 	sutXmlHttp.onreadystatechange=function(){
 		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
-			var responseStr = sutXmlHttp.responseText;
-			var responseArr = new Array();
-			responseArr = responseStr.split("|");
-			if(responseArr.length = 2){
-				document.getElementById("uppertaxonomy").value = responseArr[0];
-				document.getElementById("family").value = responseArr[1];
+			var responseStr = sutXmlHttp.responseText; 
+			if(responseStr){
+				var responseArr = new Array();
+				responseArr = responseStr.split("|");
+				if(responseArr.length = 2){
+					f.uppertaxonomy.value = responseArr[0];
+					f.family.value = responseArr[1];
+				}
+				setParent(f);
 			}
-			setParent(f);
 		}
 	};
 	sutXmlHttp.open("POST",url,true);

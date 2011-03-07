@@ -71,15 +71,17 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						<input type='text' id='author' name='author' style='width:200px;border:inset;' />
 					</div>
 					<div style="margin-top:5px;">
-						<div style="float:left;width:140px;">Rank:</div>
+						<div style="float:left;width:140px;">Taxon Rank:</div>
 						<select id="rankid" name="rankid" title="Rank ID" onchange="" style="border:inset;">
-						<?php 
-							$loaderObj->echoTaxonRanks();
-						?>
+							<option value="0">Select Taxon Rank</option>
+							<option value="">--------------------------------</option>
+							<?php 
+								$loaderObj->echoTaxonRanks();
+							?>
 						</select>
 					</div>
 					<div>
-						<div style="float:left;width:140px;">Base Name (genus):</div>
+						<div style="float:left;width:140px;">Base Name (eg genus):</div>
 						<input type='text' id='unitind1' name='unitind1' style='width:20px;border:inset;' title='Genus hybrid indicator'/>
 						<input type='text' id='unitname1' name='unitname1' style='width:200px;border:inset;' title='Genus or Base Name'/>
 					</div>
