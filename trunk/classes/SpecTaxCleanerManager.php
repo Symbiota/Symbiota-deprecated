@@ -9,6 +9,11 @@ include_once($serverRoot.'/config/dbconnection.php');
 class SpecTaxCleanerManager{
 
 	private $conn;
+	private $taxAuthId = 1;
+	private $testValidity = 1;
+	private $testTaxonomy = 1;
+	private $checkAuthor = 1;
+	private $verificationMode = 0;		//0 = default to internal taxonomy, 1 = adopt target taxonomy
 	
 	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon('write');
@@ -27,7 +32,7 @@ class SpecTaxCleanerManager{
 		$this->conn->query($sql);
 	}
 
-	public function verifySciNames($collId){
+	public function verifyCollNames($collId){
 		//Grab list of taxa, check each one, add valid taxa to taxonomic thesaurus, return number added and number problematic remaining
 		$this->verifySpecies2000("Berberis repens");
 		return;
@@ -56,11 +61,31 @@ class SpecTaxCleanerManager{
 		return $retArr;
 	}
 
-	private function verifySpecies2000($sciName){
+	public function verifyExistingNames(){
 		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/2010/webservice?format=php&response=full&name=";
-		$url = $urlTemplate.str_replace(" ","%20",$sciName);
+		//Check accepted taxa first
+		$sql = 'SELECT t.sciname, t.tid, t.author FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE ts.taxauthid = '.$taxAuthId.' AND ts.tid = ts.tidaccepted '; 
+		if($this->testValidity){
+			$sql .= 'AND t.validitystatus IS NULL ';
+		}
+		$sql .= 'LIMIT 1';
+		//echo '<div>'.$sql.'</div>';
+		while($rs = $this->conn->query($sql)){
+			while($taxonArr = $rs->fetch_assoc()){
+				
+				$this->verifySpecies2000($taxonArr,$taxonArr['tid']);
+				
+			}
+			$rs->close();
+		}
+	}
+	
+	private function verifySpecies2000($taxonArr, $tidAnchor){
+		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/2010/webservice?format=php&response=full&name=";
+		$url = $urlTemplate.str_replace(" ","%20",$taxonArr['sciName']);
 		if($fh = fopen($url, 'r')){
-			echo "<div>Reading page for ".$sciName." </div>\n";
+			echo "<div>Reading page for ".$taxonArr['sciName']." </div>\n";
 			$content = "";
 			while($line = fread($fh, 1024)){
 				$content .= trim($line);
@@ -69,13 +94,73 @@ class SpecTaxCleanerManager{
 			$retArr = unserialize($content);
 			$numResults = $retArr['number_of_results_returned'];
 			$resultArr = array_shift($retArr['results']);
-			$nameStatus = $resultArr['name_status'];
-			
-			
+			$source = $resultArr['source_database'];
+			//Set validitystatus of name
+			if($this->testValidity){
+				$sql = 'UPDATE taxa SET validitystatus = '.($numResults?'1':'0').', validitysource = "'.$source.'" WHERE tid = '.$taxonArr['tid'];
+				$this->conn->query($sql);
+			}
+			//Check author
+			if($this->checkAuthor){
+				if($resultArr['author'] && $taxonArr['author'] != $resultArr['author']){
+					$sql = 'UPDATE taxa SET author = '.$resultArr['author'].' WHERE tid = '.$taxonArr['tid'];
+					$this->conn->query($sql);
+				}
+			}
+			//Test taxonomy
+			if($this->testTaxonomy){
+				$nameStatus = $resultArr['name_status'];
+				if($taxonArr['tid'] == $tidAnchor){		//Is accepted within system
+					if($this->verificationMode === 0){		//default to system taxonomy
+						if($nameStatus == 'accepted'){
+							//Go through synonyms and check each
+							
+						}
+						elseif($nameStatus == 'synonym'){
+							//
+							
+						}
+	
+					}
+					elseif($this->verificationMode == 1){	//default to taxonomy of external site
+						if($nameStatus == 'accepted'){
+							//Go through synonyms and check each
+							
+						}
+						elseif($nameStatus == 'synonym'){
+							//Get accepted name 
+							//change to accepted
+						}
+	
+					}
+				}
+				else{			//Is not accepted within system
+					if($this->verificationMode === 0){		//default to system taxonomy
+						if($nameStatus == 'accepted'){
+							//Go through synonyms and check each
+							
+						}
+						elseif($nameStatus == 'synonym'){
+							//
+							
+						}
+	
+					}
+					elseif($this->verificationMode == 1){	//default to taxonomy of external site
+						if($nameStatus == 'accepted'){
+							//Go through synonyms and check each
+							
+						}
+						elseif($nameStatus == 'synonym'){
+							//Get accepted name 
+							//change to accepted
+						}
+	
+					}
+				}
+			}
 			fclose($fh);
 		}
-		//flush();
-		sleep(3);
 	}
 
 	private function verifyTropicos($sciName){

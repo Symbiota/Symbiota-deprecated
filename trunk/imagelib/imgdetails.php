@@ -85,6 +85,18 @@ if(isset($taxa_imgdetailsCrumbs)){
 						echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
 						if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";
 					?>
+					<div style="margin-top:20px;">
+						Do you see an error or have a comment about this image? <br/>If so, send email to: 
+						<?php 
+						$emailSubject = $defaultTitle.' Image #'.$imgId;
+						$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId;
+						$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
+						?>
+						<a href="mailto:<?php echo $adminEmail.'?'.$emailRef; ?>">
+							<?php echo $adminEmail; ?>
+						</a>
+						
+					</div>
 				</td>
 			</tr>
 		</table>
