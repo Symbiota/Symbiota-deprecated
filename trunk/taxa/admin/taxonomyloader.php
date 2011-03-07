@@ -7,6 +7,9 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyLoaderManager.php');
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";

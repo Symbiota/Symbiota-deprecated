@@ -12,7 +12,7 @@ function submitLoadForm(f){
 
 	if(submitForm){
 		var rankId = f.rankid.value;
-		if(rankId < 140){
+		if(rankId > 140){
 			if(f.uppertaxonomy.value == "") errorStr += "Upper Taxonomy \n"; 
 			if(f.family.value == "") errorStr += "family \n"; 
 			if(errorStr != ""){
