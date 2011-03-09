@@ -335,7 +335,7 @@ if($taxonManager->getSciName() != "unknown"){
 					$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
-				if($taxonRank == 180) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
+				if($taxonRank > 140) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
 				if($projValue) echo "<div style='margin-top:3px;margin-left:20px;'><b>Project:</b> ".$taxonManager->getProjName()."</div>\n";
 				?>
 			</td>
