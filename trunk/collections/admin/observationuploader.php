@@ -247,8 +247,8 @@ class DataLoader{
 		$this->setConnection();
 		$this->setFieldMap();
 
-		set_time_limit(120);
-		ini_set("max_input_time",120);
+		set_time_limit(240);
+		ini_set("max_input_time",240);
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file");
 		$headerData = fgets($fh);
 		$headerArr = explode("\t",$headerData);

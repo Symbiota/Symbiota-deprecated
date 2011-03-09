@@ -34,44 +34,47 @@ class TaxonomyLoaderManager{
 	
 	public function loadNewName($dataArr){
 		//Load new name into taxa table
-		$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
-			"source, notes, securitystatus) ".
-			"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"":"NULL").",".$dataArr["rankid"].
-			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"":"NULL").",\"".$dataArr["unitname1"]."\",".
-			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"":"NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"":"NULL").
-			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"":"NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"":"NULL").
-			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
-			",".$dataArr["securitystatus"].")";
-		//echo "sqlTaxa: ".$sqlTaxa;
-		if($this->conn->query($sqlTaxa)){
-			$tid = $this->conn->insert_id;
-		 	//Load accepteance status into taxstatus table
-			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
-		 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
-			$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-				"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
-				($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
-			//echo "sqlTaxStatus: ".$sqlTaxStatus;
-			if(!$this->conn->query($sqlTaxStatus)){
-				return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+		$tid;
+		if($dataArr["parenttid"]){
+			$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
+				"source, notes, securitystatus) ".
+				"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"":"NULL").",".$dataArr["rankid"].
+				",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"":"NULL").",\"".$dataArr["unitname1"]."\",".
+				($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"":"NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"":"NULL").
+				",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"":"NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"":"NULL").
+				",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
+				",".$dataArr["securitystatus"].")";
+			//echo "sqlTaxa: ".$sqlTaxa;
+			if($this->conn->query($sqlTaxa)){
+				$tid = $this->conn->insert_id;
+			 	//Load accepteance status into taxstatus table
+				$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
+				$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
+			 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
+				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
+					"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
+					($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
+				//echo "sqlTaxStatus: ".$sqlTaxStatus;
+				if(!$this->conn->query($sqlTaxStatus)){
+					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+				}
+			 	
+				//Link new name to existing specimens and set locality secirity if needed
+				$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
+				if($dataArr['securitystatus']) $sql1 .= ',localitysecurity = 1 '; 
+				$sql1 .= 'WHERE sciname = "'.$dataArr["sciname"].'"';
+				$this->conn->query($sql1);
+				//Add their geopoints to omoccurgeoindex 
+				$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
+					"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
+					"FROM omoccurrences o ".
+					"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+				$this->conn->query($sql3);
+				
 			}
-		 	
-			//Link new name to existing specimens and set locality secirity if needed
-			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
-			if($dataArr['securitystatus']) $sql1 .= ',localitysecurity = 1 '; 
-			$sql1 .= 'WHERE sciname = "'.$dataArr["sciname"].'"';
-			$this->conn->query($sql1);
-			//Add their geopoints to omoccurgeoindex 
-			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
-				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
-				"FROM omoccurrences o ".
-				"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
-			$this->conn->query($sql3);
-			
-		}
-		else{
-			return 'Taxon Insert FAILED: '.$this->conn->error.'; SQL = '.$sqlTaxa;
+			else{
+				return 'Taxon Insert FAILED: '.$this->conn->error.'; SQL = '.$sqlTaxa;
+			}
 		}
 		return $tid;
 	}
