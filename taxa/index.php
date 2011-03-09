@@ -330,7 +330,7 @@ if($taxonManager->getSciName() != "unknown"){
 			<td style="width:250px;vertical-align:top;">
 				<?php 
 				$displayName = $spDisplay;
-				if($taxonRank == 180){
+				if($taxonRank > 140){
 					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
 					$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
 				}
