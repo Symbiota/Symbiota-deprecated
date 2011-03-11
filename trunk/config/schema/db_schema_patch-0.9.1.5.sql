@@ -86,7 +86,7 @@ ALTER TABLE `omoccurrences`
   ADD COLUMN `localitySecurityReason` VARCHAR(100) NULL  AFTER `localitySecurity`;
 
 ALTER TABLE `fmchecklists` 
- CHANGE COLUMN `Name` `Name` VARCHAR(50) CHARACTER SET 'utf8' NOT NULL,  
+ CHANGE COLUMN `Name` `Name` VARCHAR(50) NOT NULL,  
  DROP INDEX `name`, 
  ADD INDEX `name` USING BTREE (`Name` ASC, `Type` ASC), 
  DROP INDEX `Index_checklist_title` ;
