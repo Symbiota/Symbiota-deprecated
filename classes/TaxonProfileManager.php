@@ -404,7 +404,9 @@
  	}
  	
 	private function setTaxaImages(){
-		$tidStr = implode(",",array_merge(Array($this->tid,$this->submittedTid),array_keys($this->synonyms)));
+		$tidArr = Array($this->tid,$this->submittedTid);
+		if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
+		$tidStr = implode(",",$tidArr);
 		$this->imageArr = Array();
 		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
 			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ".
@@ -529,7 +531,9 @@
 	 		}
  		}
  		else{
- 			$tidStr = implode(",",array_merge(Array($this->tid,$this->submittedTid),array_keys($this->synonyms)));
+			$tidArr = Array($this->tid,$this->submittedTid);
+			if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
+			$tidStr = implode(",",$tidArr);
  		}
 		
  		$urlArr = $this->getTaxaMap($tidStr);
