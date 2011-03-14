@@ -210,13 +210,13 @@ header("Content-Type: text/html; charset=".$charset);
 						<img src='../images/world40.gif' style='width:14px;border:0' />
 					</a>
 				</h3>
-				<div id="researchlistpopup" class="genericpopup">
+				<div id="researchlistpopup" class="genericpopup" style="display:none;">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
 		            Research checklists are pre-compiled by floristic scientists.
-		            This is a very controlled method of building a species list, which allows for  
-		            specific specimens to be linked to the checklist to serve as vouchers. 
-		            Vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
-		            can inspect these specimens for verification or make annotations to the identification when necessary.
+		            This is a very controlled method for building a species list, which allows for  
+		            specific specimens to be linked to the species names within the checklist and thus serve as vouchers. 
+		            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
+		            can inspect these specimens for verification or annotate the identification when necessary.
 				</div>
 				<ul>
 				<?php 	
@@ -236,22 +236,24 @@ header("Content-Type: text/html; charset=".$charset);
                 $surveyList = $projManager->getSurveyLists();
 			if($surveyList){
 			?>
-				<h3>Public Survey Checklists 
-					<span onclick="toggleSurveyInfoBox(this);" title="What is a Public Survey Checklist?" style="cursor:pointer;">
+				<h3>Dynamic Survey Species Lists 
+					<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
 						<img src="../images/qmark.jpg" style="height:15px;"/>
 					</span> 
 					<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
 						<img src="../images/world40.gif" style="width:14px;border:0" />
 					</a>
 				</h3>
-				<div id="surveylistpopup" class="genericpopup">
+				<div id="surveylistpopup" class="genericpopup" style="display:none;">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-		            Public Survey Checklists are defined through the linkage of species occurrences 
-		            to a survey project name. This method allow biological surveys to be conduced through group participation. 
-		            If a team member comes across a new species, they document the occurrence through a specimen collecton or a
-		            photo observation. Linking the observation to a survey project automatically adds the species to the checklist. 
-		            Verification procedures ensure that observations are expert reviewed and identified correctly. The annotation of the 
-		            misidentified specimen will automatically adjust the species.
+		            Dynamic Survey Species Lists are defined through the linkage of species occurrences 
+		            to a survey project name. This method allows long-term biological surveys to be conducted through group participation. 
+		            If a team member comes across a new species, they document the occurrence through a specimen collection or a
+		            photo observation. Linking the occurrence to a survey project automatically adds the species to the checklist. 
+		            Verification of the occurrence by taxonomic experts ensure that a correct identified has been made. If the occurrence was 
+		            misidentified, an annotation of the physical specimen within a collection or of an image stored within the system   
+					will automatically adjust the species. Explicit maintenance of the species list is unnecessary since the checklist is 
+					dynamically generated from the vouchers on demand. 
 				</div>
 				<ul>
 				<?php 	

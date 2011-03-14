@@ -60,14 +60,15 @@
 	<div id="innertext">
 		<h1>Species Checklists</h1>
         <div style="margin:20px">
-			Research and Public Survey Checklists are listed below. 
+			Research and Dynamic Survey Species Lists are listed below. 
             Research Checklists are pre-compiled by floristic researchers.
-            This is a very controlled method of building a species list where specific specimens can be linked to serve 
-            as a voucher. Vouchers specimens serve as physical proof that the species actually occurs in the given area. 
+            This is a very controlled method for building a species list where specific specimens can be linked in order to serve 
+            as vouchers. Vouchers specimens serve as physical proof that the species actually occurs in the given area. 
             While Research Checklists are compiled with vouchers linked afterwards as support data, 
-            Public Survey Checklists are directly generated from the specimen data. These are usually built by a team of individuals
-            who create the list by linking specimens or photo observations obtained from the area to a survey project. 
-            This offers a collaborative, reproducible method for generating a species list for a given area.  
+            Dynamic Survey Species Lists are generated directly from the specimen data. These are usually built by a team of researchers
+            who create the list over an extended period of time by linking physical specimens or photo observations 
+            as they are obtained from the research area. Since the lists are generated from the occurrence data on-demand, an annotation  
+            of an identification will automatically adjust the species list as needed.  
 		</div>
 
         <div style='margin:20px;'>
@@ -112,11 +113,11 @@
 					<?php 
 				}
 			}
-			//List Public Survey Checklists
+			//List Dynamic Survey Checklists
             $surveyList = $clManager->getSurveyChecklists();
             if($surveyList){
 				?>
-				<h2 style="margin-top:30px;">Public Survey Checklists</h2>
+				<h2 style="margin-top:30px;">Dynamic Survey Species Lists</h2>
 	            <?php
 				foreach($surveyList as $projStr => $clArr){
 					$tokens = explode("::",$projStr);
