@@ -28,11 +28,11 @@ class OccurrenceListManager extends OccurrenceManager{
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
 			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
-			"FROM omoccurrences o ";
+			"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
-		$sql .= "ORDER BY o.CollID, o.sciname ";
+		$sql .= "ORDER BY c.sortseq, c.collectionname ";
 		if(strpos($sqlWhere,"(o.SciName Like") == 0 || strpos($sqlWhere,"o.family =") == 0) $sql .= ", o.recordedBy, o.recordNumber ";
 		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";

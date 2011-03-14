@@ -411,11 +411,11 @@ class OccurrenceManager{
 		else{
 			if(!$this->collectionArr) $this->getCollectionArr();
 			$tempArr = Array();
-			foreach($this->getCollectionArr() as $collId => $fieldArr){
+			foreach($this->collectionArr as $collId => $fieldArr){
 				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["institutioncode"];
 			}
 			sort($tempArr);
-			if(count($this->getCollectionArr()) == count($tempArr)){
+			if(count($this->collectionArr) == count($tempArr)){
 				$returnStr = "All Collections";
 			}
 			else{
