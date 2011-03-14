@@ -167,11 +167,8 @@ class TPImageEditorManager extends TPEditorManager{
 	public function changeTaxon($imgId,$targetTid,$sourceTid){
 		$sql = "UPDATE images SET tid = $targetTid, sortsequence = 50 WHERE imgid = $imgId";
 		if(!$this->taxonCon->query($sql)){
-			//Image is probably already mapped to that taxon, thus see if we can replace one record with the other 
-			$sql2 = 'REPLACE INTO images (tid,url,thumbnailurl,originalurl,photographer,photographeruid,imagetype,caption,owner,'.
-				'sourceurl,copyright,copyrighturl,locality,occid,notes,anatomy,username) '.
-				'SELECT tid,url,thumbnailurl,originalurl,photographer,photographeruid,imagetype,caption,owner,'.
-				'sourceurl,copyright,copyrighturl,locality,occid,notes,anatomy,username FROM images WHERE imgid = '.$imgId;
+			//Transfer is not happening because image is probably already mapped to that taxon  
+			$sql2 = 'DELETE FROM images WHERE imgid = '.$imgId.' AND tid = '.$sourceTid;
 			$this->taxonCon->query($sql2);
 		}
 		$this->setPrimaryImageSort($this->tid);
