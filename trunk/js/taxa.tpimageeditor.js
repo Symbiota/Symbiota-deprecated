@@ -109,7 +109,7 @@ function initChangeTaxonList(input,tImg){
 }
 
 function getChangeTaxonList(key,cont){ 
-   	var script_name = 'rpc/gettaxonlist.php';
+   	var script_name = 'rpc/gettaxasuggest.php';
    	var params = { 'q':key }
    	$.get(script_name,params,
 		function(obj){ 

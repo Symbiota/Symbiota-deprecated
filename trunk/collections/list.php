@@ -144,112 +144,114 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		<hr/>
 		<table id="omlisttable" cellspacing="4">
 		<?php 
-	    foreach($specimenArray as $collId => $specData){
-	    	$isEditor = false;
-	    	if($symbUid && (array_key_exists("SuperAdmin",$userRights)
-			|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
-			|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
-				$isEditor = true;
-			}
-			$collectionData = $collectionArr[$collId];
-			$instCode1 = $collectionData["institutioncode"];
-			if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
-
-	    	$dispName = $collectionData["collectionname"];
-	        $icon = $collectionData["icon"];
-	        ?>
-			<tr>
-				<td colspan='4'>
-					<h2>
-						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
-							<?php echo $dispName;?>
-			        	</a>
-		        	</h2>
-					<hr />
-				</td>
-			</tr>
-			<?php 
-	        foreach($specData as $dbpk => $fieldArr){
-				$instCode2 = "";
-				if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
-					$instCode2 = $fieldArr["institutioncode"];
-					if($fieldArr["collectioncode"]) $instCode2 .= ":".$fieldArr["collectioncode"];
+	    foreach($collectionArr as $collId => $collectionData){
+			if(array_key_exists($collId,$specimenArray)){
+		    	$specData = $specimenArray[$collId];
+		    	$isEditor = false;
+		    	if($symbUid && (array_key_exists("SuperAdmin",$userRights)
+				|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
+				|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
+					$isEditor = true;
 				}
-				?>
+				$instCode1 = $collectionData["institutioncode"];
+				if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
+	
+		    	$dispName = $collectionData["collectionname"];
+		        $icon = $collectionData["icon"];
+		        ?>
 				<tr>
-					<td rowspan="4" width='60' valign='top' align='center'>
-						<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-	                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
-	                    </a>
-	                    <div style='font-weight:bold;font-size:75%;'>
-	                    	<?php 
-	                    	echo $instCode1;
-							if($instCode2) echo "<br/>".$instCode2;
-	                    	?>
-	                    </div>
-					</td>
-					<td colspan='3'>
-						<?php if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ ?>
-						<div style="float:right;" title="Edit Occurrence Record">
-							<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
-								<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
-							</a>
-						</div>
-						<?php if($collManager->getClName() && $_REQUEST["targettid"]){ ?>
-						<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $fieldArr["occid"].",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
-							<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
-						</div>
-						<?php } ?>
-						<?php } ?>
-						<div style="float:left;">
-							<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
-								<span style='font-style:italic;' title='General Species Information'>
-									<?php echo $fieldArr["sciname"];?>
-								</span>
-							</a> 
-							<?php echo $fieldArr["author"]; ?>
-						</div>
+					<td colspan='4'>
+						<h2>
+							<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
+								<?php echo $dispName;?>
+				        	</a>
+			        	</h2>
+						<hr />
 					</td>
 				</tr>
-				<tr>
-					<td width='20%'>
-						<?php echo $fieldArr["accession"];?>
-					</td>
-					<td>
-						<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]; ?>
-					</td>
-					<td width='20%'>
-						<?php echo $fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:""); ?>
-					</td>
-				</tr>
-				<tr>
-					<?php 
-		            $localStr = "";
-		            if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
-		            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
-		            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
-		            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
-		            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
-		            ?>
-		            <td colspan='3'>
-		            	<?php echo $localStr; ?>
-		            </td>
-	            </tr>
-	            <tr>
-	            	<td colspan='3'>
-			            <b>
-			            	<a href="javascript:var puRef=window.open('individual/index.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');">
-		            			Full Record Details
-		            		</a>
-		            	</b>
-	            	</td>
-	            </tr>
-	            <tr>
-	            	<td colspan='4'>
-	            		<hr/>
-	            	</td>
-	            </tr>
-	            <?php 
+				<?php 
+		        foreach($specData as $dbpk => $fieldArr){
+					$instCode2 = "";
+					if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
+						$instCode2 = $fieldArr["institutioncode"];
+						if($fieldArr["collectioncode"]) $instCode2 .= ":".$fieldArr["collectioncode"];
+					}
+					?>
+					<tr>
+						<td rowspan="4" width='60' valign='top' align='center'>
+							<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
+		                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
+		                    </a>
+		                    <div style='font-weight:bold;font-size:75%;'>
+		                    	<?php 
+		                    	echo $instCode1;
+								if($instCode2) echo "<br/>".$instCode2;
+		                    	?>
+		                    </div>
+						</td>
+						<td colspan='3'>
+							<?php if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ ?>
+							<div style="float:right;" title="Edit Occurrence Record">
+								<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
+									<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
+								</a>
+							</div>
+							<?php if($collManager->getClName() && $_REQUEST["targettid"]){ ?>
+							<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $fieldArr["occid"].",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+								<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+							</div>
+							<?php } ?>
+							<?php } ?>
+							<div style="float:left;">
+								<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
+									<span style='font-style:italic;' title='General Species Information'>
+										<?php echo $fieldArr["sciname"];?>
+									</span>
+								</a> 
+								<?php echo $fieldArr["author"]; ?>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td width='20%'>
+							<?php echo $fieldArr["accession"];?>
+						</td>
+						<td>
+							<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]; ?>
+						</td>
+						<td width='20%'>
+							<?php echo $fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:""); ?>
+						</td>
+					</tr>
+					<tr>
+						<?php 
+			            $localStr = "";
+			            if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
+			            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
+			            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
+			            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+			            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
+			            ?>
+			            <td colspan='3'>
+			            	<?php echo $localStr; ?>
+			            </td>
+		            </tr>
+		            <tr>
+		            	<td colspan='3'>
+				            <b>
+				            	<a href="javascript:var puRef=window.open('individual/index.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');">
+			            			Full Record Details
+			            		</a>
+			            	</b>
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<td colspan='4'>
+		            		<hr/>
+		            	</td>
+		            </tr>
+		            <?php 
+		        }
 	        }
 	    }
 	    ?>

@@ -554,9 +554,9 @@ if($editable && $tid){
 									<input name="imgdel" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
 									<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid(); ?>" />
 									<input name="category" type="hidden" value="<?php echo $category; ?>" />
-									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server 
-									<div style="margin-left:20px;">
-										(Note: leaving unchecked removes image from database w/o removing from server)
+									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+									<div style="margin-left:20px;color:red;">
+										(Note: if box is checked, image will be permanently deleted from server, as well as from database)
 									</div>
 									<div style='margin-top:2px;'>
 										<input type='submit' name='action' id='submit' value='Delete Image'/>
