@@ -43,16 +43,22 @@
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name='keywords' content='virtual flora,<?php echo $spDisplay; ?>' />
-	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
-	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
-	<link rel="stylesheet" type="text/css" href="../css/tabcontent.css" />
-	<script type="text/javascript" src="../js/tabcontent.js"></script>
-	<SCRIPT LANGUAGE="JavaScript">
+	<link type="text/css" href="../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../css/speciesprofile.css" rel="stylesheet" />
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
 
 		var imageArr = new Array();
 		var imgCnt = 0;
 		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
+
+		$(document).ready(function() {
+			$('#desctabs').tabs();
+		});
 
 		function toggle(target){
 			var spanObjs = document.getElementsByTagName("span");
@@ -159,13 +165,6 @@
 			siphXmlHttp.send(null);
 		} 
 		
-		function initTabs(tabObjId){
-			var dTabs=new ddtabcontent(tabObjId); 
-			dTabs.setpersist(true);
-			dTabs.setselectedClassTarget("link"); 
-			dTabs.init();
-		}
-		
 		function expandImages(){
 			eiObj = document.getElementById("imgextra");
 			eiObj.style.display = "block";
@@ -191,17 +190,6 @@
 			return xmlHttp;
 		}
 		
-	</script>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
 	</script>
 </head>
 <body onload="initTabs('desctabs');">
@@ -272,12 +260,61 @@ if($taxonManager->getSciName() != "unknown"){
 		?>
 			</td>
 			<td class="desc">
-				<div id="descblock">
 				<?php 
 				//Middle Right Section (Description section)
-				$taxonManager->echoDescriptionBlock();
+				if($descriptions = $taxonManager->getDescriptions()){
+					?>
+					<div id='desctabs'>
+						<ul>
+							<?php 
+							$capCnt = 1;
+							foreach($descriptions as $k => $vArr){
+								$cap = $vArr["caption"];
+								if(!$cap) $cap = "Description #".$capCnt;
+								echo "<li><a href='#tab".$k."' class='selected'>".$cap."</a></li>\n";
+								$capCnt++;
+							}
+							?>
+						</ul>
+						<?php 
+						foreach($descriptions as $k => $vArr){
+							?>
+							<div id='tab<?php echo $k; ?>' class="sptab">
+								<?php 
+								if($vArr["source"]){
+									echo "<div id='descsource' style='float:right;'>";
+									if($vArr["url"]){
+										echo "<a href='".$vArr["url"]."' target='_blank'>";
+									}
+									echo $vArr["source"];
+									if($vArr["url"]){
+										echo "</a>";
+									}
+									echo "</div>\n";
+								}
+								$descArr = $vArr["desc"];
+								?>
+								<div style='clear:both;'>
+									<?php 
+									foreach($descArr as $tdsId => $stmt){
+										echo $stmt." ";
+									}
+									//if($this->clInfo){
+										//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
+									//}
+									?>
+								</div>
+							</div>
+							<?php 
+						}
+						?>
+					</div>
+					<?php
+				}
+				else{
+					echo "<div style='margin:70px 0px 20px 50px '>Description Not Yet Available</div>";
+				}
 				?>
-				</div>
 			</td>
 		</tr>
 		<tr>
@@ -340,12 +377,60 @@ if($taxonManager->getSciName() != "unknown"){
 				?>
 			</td>
 			<td>
-				<div id='descrgenus' style='float:right;width:100%;height:200px;position:relative;'>
 				<?php 
 				//Display description
-				$taxonManager->echoDescriptionBlock();
-				?>
-				<?php 
+				if($descriptions = $taxonManager->getDescriptions()){
+					?>
+					<div id="desctabs" style="margin:10px;">
+						<ul>
+							<?php 
+							$capCnt = 1;
+							foreach($descriptions as $k => $vArr){
+								$cap = $vArr["caption"];
+								if(!$cap) $cap = "Description #".$capCnt;
+								echo "<li><a href='#tab".$k."'>".$cap."</a></li>\n";
+								$capCnt++;
+							}
+							?>
+						</ul>
+						<?php 
+						foreach($descriptions as $k => $vArr){
+							?>
+							<div id='tab<?php echo $k; ?>' class='genustab'>
+								<?php 
+								if($vArr["source"]){
+									echo "<div id='descsource' style='float:right;'>";
+									if($vArr["url"]){
+										echo "<a href='".$vArr["url"]."' target='_blank'>";
+									}
+									echo $vArr["source"];
+									if($vArr["url"]){
+										echo "</a>";
+									}
+									echo "</div>\n";
+								}
+								$descArr = $vArr["desc"];
+								?>
+								<div style='clear:both;'>
+									<?php 
+									foreach($descArr as $tdsId => $stmt){
+										echo $stmt." ";
+									}
+									//if($this->clInfo){
+										//echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
+									//}
+									?>
+								</div>
+							</div>
+							<?php 
+						}
+						?>
+					</div>
+					<?php
+				}
+				else{
+					echo "<div style='margin:70px 0px 20px 50px '>Description Not Yet Available</div>";
+				}
 				if($editable){
 					?>
 					<div style='position:absolute;top:0px;right:0px;'>
@@ -356,7 +441,6 @@ if($taxonManager->getSciName() != "unknown"){
 					<?php 
 				}
 				?>
-				</div>
 			</td>
 		</tr>
 

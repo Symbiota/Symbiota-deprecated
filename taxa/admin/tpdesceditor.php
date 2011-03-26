@@ -54,11 +54,8 @@ else{
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$descEditor->getSciName(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
-	<link rel="stylesheet" href="../../css/speciesprofile.css" type="text/css"/>
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
+	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../css/speciesprofile.css" rel="stylesheet" />
 	<script type="text/javascript">
 		function toggleById(target){
 			var obj = document.getElementById(target);

@@ -6,7 +6,7 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 //get the q parameter from URL
-$q = $_REQUEST['q'];
+$q = $_REQUEST['term'];
 $taxAuthId = array_key_exists('taid',$_REQUEST)?$_REQUEST['taid']:'1'; 
 
 $retArr = Array();
@@ -21,5 +21,5 @@ $result->close();
 if(!($con === false)) $con->close();
 
 //output the response
-echo "['".implode("','",$retArr)."']";
+echo json_encode($retArr);
 ?>

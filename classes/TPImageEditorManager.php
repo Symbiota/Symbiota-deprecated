@@ -75,114 +75,6 @@ class TPImageEditorManager extends TPEditorManager{
 		$result->close();
 	}
 
-	public function editImage(){
-		$searchStr = $GLOBALS["imageRootUrl"];
-		if(substr($searchStr,-1) != "/") $searchStr .= "/";
-		$replaceStr = $GLOBALS["imageRootPath"];
-		if(substr($replaceStr,-1) != "/") $replaceStr .= "/";
-		$status = "";
-		$imgId = $_REQUEST["imgid"];
-	 	$url = $_REQUEST["url"];
-	 	$tnUrl = $_REQUEST["thumbnailurl"];
-	 	$origUrl = $_REQUEST["originalurl"];
-	 	if(array_key_exists("renameweburl",$_REQUEST)){
-	 		$oldUrl = $_REQUEST["oldurl"];
-	 		$oldName = str_replace($searchStr,$replaceStr,$oldUrl);
-	 		$newName = str_replace($searchStr,$replaceStr,$url);
-	 		if($url != $oldUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$url = $oldUrl;
-		 			$status .= "Web URL rename FAILED; url address unchanged";
-	 			}
-	 		}
-		}
-		if(array_key_exists("renametnurl",$_REQUEST)){
-	 		$oldTnUrl = $_REQUEST["oldthumbnailurl"];
-	 		$oldName = str_replace($searchStr,$replaceStr,$oldTnUrl);
-	 		$newName = str_replace($searchStr,$replaceStr,$tnUrl);
-	 		if($tnUrl != $oldTnUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$tnUrl = $oldTnUrl;
-		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
-	 			}
-	 		}
-		}
-		if(array_key_exists("renameorigurl",$_REQUEST)){
-	 		$oldOrigUrl = $_REQUEST["oldoriginalurl"];
-	 		$oldName = str_replace($searchStr,$replaceStr,$oldOrigUrl);
-	 		$newName = str_replace($searchStr,$replaceStr,$origUrl);
-	 		if($origUrl != $oldOrigUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$origUrl = $oldOrigUrl;
-		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
-	 			}
-	 		}
-		}
-	 	$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographer = $this->cleanStr($_REQUEST["photographer"]);
-		$photographerUid = $_REQUEST["photographeruid"];
-		$owner = $this->cleanStr($_REQUEST["owner"]);
-		$locality = $this->cleanStr($_REQUEST["locality"]);
-		$occId = $_REQUEST["occid"];
-		$notes = $this->cleanStr($_REQUEST["notes"]);
-		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
-		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
-		if(array_key_exists("addtotid",$_REQUEST)){
-			$addToTid = $_REQUEST["addtotid"];
-		}
-		
-		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$tnUrl."\", ".
-			"originalurl = \"".$origUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
-			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
-			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", ".
-			"notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
-			" WHERE imgid = ".$imgId;
-		//echo $sql;
-		if($this->taxonCon->query($sql)){
-			$this->setPrimaryImageSort($this->tid);
-			if($addToTid){
-				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
-					"owner, sourceurl, copyright, locality, occid, notes) ".
-					"VALUES (".$addToTid.",\"".$url."\",\"".$tnUrl."\",\"".$origUrl."\",".
-					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$caption."\",\"".
-					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\")";
-				//echo $sql;
-				if($this->taxonCon->query($sql)){
-					$this->setPrimaryImageSort($addToTid);
-				}
-				else{
-					$status = "unable to upload image for related taxon";
-					//$status = "Error:editImage:loading the parent data: ".$this->taxonCon->error."<br/>SQL: ".$sql;
-				}
-			}
-		}
-		else{
-			$status = "Error:editImage: ".$this->taxonCon->error."\nSQL: ".$sql;
-		}
-		return $status;
-	}
-	
-	public function changeTaxon($imgId,$targetTid,$sourceTid){
-		$sql = "UPDATE images SET tid = $targetTid, sortsequence = 50 WHERE imgid = $imgId";
-		if(!$this->taxonCon->query($sql)){
-			//Transfer is not happening because image is probably already mapped to that taxon  
-			$sql2 = 'DELETE FROM images WHERE imgid = '.$imgId.' AND tid = '.$sourceTid;
-			$this->taxonCon->query($sql2);
-		}
-		$this->setPrimaryImageSort($this->tid);
-	}
-	
-	public function imageExists($url, $targetTid){
-		if($url && $targetTid){
-			$sql = "SELECT ti.imgid FROM images ti WHERE ti.tid = ".$targetTid." AND ti.url = '".$url."'";
-			$result = $this->taxonCon->query($sql);
-			if($result->num_rows > 0) return true;
-		}
-		return false;
-	}
-	
 	public function editImageSort($imgSortEdits){
 		$status = "";
 		foreach($imgSortEdits as $editKey => $editValue){
@@ -194,51 +86,6 @@ class TPImageEditorManager extends TPEditorManager{
 		}
 		$this->setPrimaryImageSort($this->tid);
 		if($status) $status = "with editImageSort method: ".$status;
-		return $status;
-	}
-	
-	public function deleteImage($imgIdDel, $removeImg){
-		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
-		$sqlQuery = "SELECT ti.url, ti.thumbnailurl, ti.originalurl FROM images ti WHERE ti.imgid = ".$imgIdDel;
-		$result = $this->taxonCon->Query($sqlQuery);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			$imgThumbnailUrl = $row->thumbnailurl;
-			$imgOriginalUrl = $row->originalurl;
-		}
-		$result->close();
-				
-		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
-		//echo $sql;
-		$status = "";
-		if($this->taxonCon->query($sql)){
-			if($removeImg){
-				//Remove images only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE url = '".$imgUrl."'";
-				$rs = $this->taxonCon->query($sql);
-				if(!$rs->num_rows){
-					//Delete image from server
-					$imgDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-					if(file_exists($imgDelPath)){
-						if(!unlink($imgDelPath)){
-							$status = "Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually.";
-						}
-					}
-					$imgTnDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgThumbnailUrl);
-					if(file_exists($imgTnDelPath)){
-						unlink($imgTnDelPath);
-					}
-					$imgOriginalDelPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgOriginalUrl);
-					if(file_exists($imgOriginalDelPath)){
-						unlink($imgOriginalDelPath);
-					}
-				}
-			}
-		}
-		else{
-			$status = "deleteImage: ".$this->taxonCon->error."\nSQL: ".$sql;
-		}
-		$this->setPrimaryImageSort($this->tid);
 		return $status;
 	}
 	
@@ -476,8 +323,8 @@ class TPImageEditorManager extends TPEditorManager{
 		//echo $sql2;
 		$this->taxonCon->query($sql);
 	}
-	
- 	private function url_exists($url) {
+
+	private function url_exists($url) {
 	    if(!strstr($url, "http://")){
 	        $url = "http://".$url;
 	    }

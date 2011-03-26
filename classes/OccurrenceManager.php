@@ -164,16 +164,16 @@ class OccurrenceManager{
 						}
 						if(array_key_exists("scinames",$valueArray)){
 							foreach($valueArray["scinames"] as $sciName){
-								$sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
+								$sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 							}
 						}
 					}
 					else{
 						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (substr($key,-5) == "aceae" || substr($key,-4) == "idae"))){
-							$sqlWhereTaxa .= "OR (o.family = '".$key."') OR (o.SciName = '".$key."') ";
+							$sqlWhereTaxa .= "OR (o.family = '".$key."') OR (o.sciname = '".$key."') ";
 						}
 						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && substr($key,-5) != "aceae" && substr($key,-4) != "idae")){
-							$sqlWhereTaxa .= "OR (o.SciName LIKE '".$key."%') ";
+							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$valueArray)){
@@ -183,10 +183,10 @@ class OccurrenceManager{
 								$sqlWhereTaxa .= "OR (o.family = '".$sciName."') ";
 							}
 							if($this->taxaSearchType == 2){
-								$sqlWhereTaxa .= "OR (o.SciName = '".$sciName."') ";
+								$sqlWhereTaxa .= "OR (o.sciname = '".$sciName."') ";
 							}
 							else{
-			                    $sqlWhereTaxa .= "OR (o.SciName Like '".$sciName."%') ";
+			                    $sqlWhereTaxa .= "OR (o.sciname Like '".$sciName."%') ";
 			                }
 						}
 					}

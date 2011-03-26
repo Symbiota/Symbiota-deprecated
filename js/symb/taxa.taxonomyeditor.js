@@ -3,6 +3,21 @@ var rankLow;
 var rankHigh;
 var taxAuthId;
 
+$(document).ready(function() {
+	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3, autoFocus: true });
+
+	$("#parentstr").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.taxauthidform.taxauthid.value, rhigh: document.taxoneditform.rankid.value }, response );
+		}
+	},{ minLength: 3, autoFocus: true }
+	);
+
+	$("#aefacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+
+	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+});
+
 function toogle(target){
   	var divs = document.getElementsByTagName("div");
   	var i;
@@ -87,70 +102,6 @@ function GetXmlHttpObject(){
     	}
   	}
 	return xmlHttp;
-}
-
-function initTaxaList(input,rLimit,rLow,rHigh,taId){
-	rankLimit = rLimit;
-	rankLow = rLow;
-	rankHigh = rHigh;
-	taxAuthId = taId;
-	$(input).autocomplete({ ajax_get:getTaxaList, minchars:3 });
-}
-
-function getTaxaList(key,cont){ 
-   	var script_name = 'rpc/gettaxasuggest.php';
-   	var params = { 'q':key, 'rlimit':rankLimit, 'rlow':rankLow, 'rhigh':rankHigh, 'taid':taxAuthId };
-   	$.get(script_name,params,
-		function(obj){ 
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res); 
-		},
-	'json');
-}
-
-function initUpperTaxonList(input){
-	$(input).autocomplete({ ajax_get:getUpperTaxonList, minchars:3 });
-}
-
-function getUpperTaxonList(key,cont){ 
-   	var script_name = 'rpc/getuppertaxonsuggest.php';
-   	var params = { 'q':key };
-   	$.get(script_name,params,
-		function(obj){ 
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res); 
-		},
-	'json');
-}
-
-function initAcceptedList(input){
-	$(input).autocomplete({ ajax_get:getAcceptedList, minchars:3 });
-}
-
-function getAcceptedList(key,cont){ 
-   	var script_name = 'rpc/getacceptedsuggest.php';
-   	var params = { 'q':key };
-   	$.get(script_name,params,
-		function(obj){ 
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res); 
-		},
-	'json');
 }
 
 function submitLinkToAccepted(f){

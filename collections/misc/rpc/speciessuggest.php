@@ -2,7 +2,7 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$queryString = $con->real_escape_string($_REQUEST['q']);
+	$queryString = $con->real_escape_string($_REQUEST['term']);
 	
 	$sql = "SELECT t.tid, t.sciname ". 
 		"FROM taxa t ".
@@ -14,5 +14,5 @@
        	$returnArr[] = $row->sciname;
 	}
 	$con->close();
-	echo "['".implode("','",$returnArr)."']";
+	echo json_encode($returnArr);
 ?>

@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/RareSpeciesManager.php');
 
 $rsManager = new RareSpeciesManager();
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
 
 $editable = 0;
@@ -11,8 +11,11 @@ if($isAdmin || array_key_exists("RareSppAdmin",$userRights)){
 	$editable = 1;
 }
 if($editable){
-	if(array_key_exists("tidtoadd",$_REQUEST) && $_REQUEST["tidtoadd"]){
+	if($submitAction == "addspecies"){
 		$rsManager->addSpecies($_REQUEST["tidtoadd"]);
+	}
+	elseif($submitAction == "deletespecies"){
+		$rsManager->deleteSpecies($_REQUEST["tidtodel"]);
 	}
 }
 
@@ -24,13 +27,13 @@ if($editable){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>Rare, Threatened, Sensitive Species</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script language=javascript>
-		var rtXmlHttp;
-		var vasXmlHttp;
-		var sciNameDeletion;
+		$(document).ready(function() {
+			$("#speciestoadd").autocomplete({ source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true });
+		});
 
 		function toggle(target){
 		  	var divs = document.getElementsByTagName("div");
@@ -60,38 +63,8 @@ if($editable){
 			}
 		}
 
-		function removeTaxon(tid, sciName){
-	        if(window.confirm('Are you sure you want to delete this taxon?')){
-				rtXmlHttp = GetXmlHttpObject();
-				if (rtXmlHttp==null){
-			  		alert ("Your browser does not support AJAX!");
-			  		return;
-			  	}
-				sciNameDeletion = sciName;
-				var url = "rpc/removetid.php";
-				url=url + "?tid=" + tid;
-				url=url + "&sid="+Math.random();
-				rtXmlHttp.onreadystatechange=rtStateChanged;
-				rtXmlHttp.open("POST",url,true);
-				rtXmlHttp.send(null);
-	        }
-		} 
-		
-		function rtStateChanged(){
-			if (rtXmlHttp.readyState==4){
-				var tidDeleted = rtXmlHttp.responseText;
-				sciNameDeletion = sciNameDeletion.replace(/<.{1,2}>/gi,"");
-				if(tidDeleted == 0){
-					alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
-				}
-				else{
-					document.getElementById("tid-"+tidDeleted).style.display = "none";
-				}
-			}
-		}
-	
-		function validateAddSpecies(sciname){
-			var sciName = document.getElementById("speciestoadd").value;
+		function submitAddSpecies(f){
+			var sciName = f.speciestoadd.value;
 			if(sciName == ""){
 				alert("Enter the scientific name of species you wish to add");
 				return false;
@@ -102,27 +75,22 @@ if($editable){
 		  		alert ("Your browser does not support AJAX!");
 		  		return false;
 		  	}
-			var url="rpc/gettid.php";
-			url=url+"?sciname="+sciName;
-			url=url+"&sid="+Math.random();
-			vasXmlHttp.onreadystatechange=vasStateChanged;
+			var url="rpc/gettid.php?sciname="+sciName;
+			vasXmlHttp.onreadystatechange=function(){
+				if(vasXmlHttp.readyState==4){
+					addTid = vasXmlHttp.responseText;
+					if(addTid == ""){
+						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+					}
+					else{
+						f.tidtoadd.value = addTid;
+						f.submit();
+					}
+				}
+			};
 			vasXmlHttp.open("POST",url,true);
 			vasXmlHttp.send(null);
-			return false;
 		} 
-		
-		function vasStateChanged(){
-			if (vasXmlHttp.readyState==4){
-				addTid = vasXmlHttp.responseText;
-				if(addTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
-				}
-				else{
-					document.getElementById("tidtoadd").value = addTid;
-					document.forms["addspeciesform"].submit();
-				}
-			}
-		}
 
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
@@ -140,26 +108,6 @@ if($editable){
 		    	}
 		  	}
 			return xmlHttp;
-		}
-
-		function initAddList(input){
-			$(input).autocomplete({ ajax_get:getAddSuggs, minchars:3 });
-		}
-
-		function getAddSuggs(key,cont){ 
-		   	var script_name = 'rpc/getspecies.php';
-		   	var params = { 'q':key, }
-		   	$.get(script_name,params,
-				function(obj){
-					// obj is just array of strings
-					var res = [];
-					for(var i=0;i<obj.length;i++){
-						res.push({ id:i , value:obj[i]});
-					}
-					// will build suggestions list
-					cont(res);
-				},
-			'json');
 		}
 	</script>
 </head>
@@ -198,16 +146,17 @@ if($editable){
 	if($editable){
 		?>
 		<div class="editobj" style="display:none;width:400px;">
-			<form name="addspeciesform" action='rarespecies.php' method='post' onsubmit="return validateAddSpecies();">
+			<form name="addspeciesform" action='rarespecies.php' method='post'>
 				<fieldset style='margin:5px;background-color:#FFFFCC;'>
 					<legend><b>Add Species to List</b></legend>
 					<div style="margin:3px;">
 						Scientific Name:
-						<input type="text" id="speciestoadd" name="speciestoadd" onfocus="initAddList(this)" autocomplete="off" size="35" />
+						<input type="text" id="speciestoadd" name="speciestoadd" />
 						<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 					</div>
 					<div style="margin:3px;">
-						<input type="submit" name="action" value="Add Species"/>
+						<input type="hidden" name="submitaction" value="addspecies" />
+						<input type="button" value="Add Species" onclick="submitAddSpecies(this.form)" />
 					</div>
 				</fieldset>
 			</form>
@@ -225,8 +174,10 @@ if($editable){
 				echo "<div id='tid-".$tid."'>".$sciName;
 				if($editable){
 					?>
-					<span class="editobj" style="display:none;cursor:pointer;" onclick="javascript:removeTaxon(<?php echo $tid.",'".$sciName."'";?>)">
-						<img src="../../images/del.gif" style="width:13px;" title="remove species from list" />
+					<span class="editobj" style="display:none;">
+						<a href="rarespecies.php?submitaction=deletespecies&tidtodel=<?php echo $tid;?>">
+							<img src="../../images/del.gif" style="width:13px;border:0px;" title="remove species from list" />
+						</a>
 					</span>
 					<?php
 				}

@@ -64,13 +64,11 @@ header("Content-Type: text/html; charset=".$charset);
 	<head>
 		<title>Species Details: <?php echo $vManager->getTaxonName()." of ".$vManager->getClName(); ?></title>
 		<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	    <link rel="stylesheet" href="../css/jqac.css" type="text/css" />
-		<script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
-		<script type="text/javascript" src="../js/jquery.autocomplete-1.4.2.js"></script>
+		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+		<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+		<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
 		<script language="JavaScript">
 		
-			var cseXmlHttp;
-
 			function validateRenameForm(){ 
 				var sciName = document.getElementById("renamesciname").value;
 				if(sciName == ""){
@@ -95,24 +93,22 @@ header("Content-Type: text/html; charset=".$charset);
 				var url="rpc/gettid.php";
 				url=url+"?sciname="+sciname;
 				url=url+"&sid="+Math.random();
-				cseXmlHttp.onreadystatechange=cseStateChanged;
+				cseXmlHttp.onreadystatechange=function(){
+					if (cseXmlHttp.readyState==4){
+						renameTid = cseXmlHttp.responseText;
+						if(renameTid == ""){
+							alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+						}
+						else{
+							document.getElementById("renametid").value = renameTid;
+							document.forms["renametaxonform"].submit();
+						}
+					}
+				};
 				cseXmlHttp.open("POST",url,true);
 				cseXmlHttp.send(null);
 			} 
 			
-			function cseStateChanged(){
-				if (cseXmlHttp.readyState==4){
-					renameTid = cseXmlHttp.responseText;
-					if(renameTid == ""){
-						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
-					}
-					else{
-						document.getElementById("renametid").value = renameTid;
-						document.forms["renametaxonform"].submit();
-					}
-				}
-			}
-
 			function GetXmlHttpObject(){
 				var xmlHttp=null;
 				try{
@@ -131,25 +127,16 @@ header("Content-Type: text/html; charset=".$charset);
 				return xmlHttp;
 			}
 		
-			function initRenameList(input){
-				$(input).autocomplete({ ajax_get:getRenameSuggs, minchars:3 });
-			}
+			$(document).ready(function() {
+				$("#renamesciname").autocomplete({
+					source: function( request, response ) {
+						$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: <?php echo $clid;?> }, response );
+					}
+					},{ minLength: 3, autoFocus: true }
+				);
 
-			function getRenameSuggs(key,cont){ 
-			   	var script_name = 'rpc/getspecies.php';
-			   	var params = { 'q':key,'cl':'<?php echo $clid;?>' }
-			   	$.get(script_name,params,
-					function(obj){ 
-						// obj is just array of strings
-						var res = [];
-						for(var i=0;i<obj.length;i++){
-							res.push({ id:i , value:obj[i]});
-						}
-						// will build suggestions list
-						cont(res); 
-					},
-				'json');
-			}
+
+			});
 
 			function closeEditor(){
 				//if(parent.opener.name != "gmap") parent.opener.location.reload();
@@ -210,18 +197,7 @@ header("Content-Type: text/html; charset=".$charset);
 								Abundance:
 							</div>
 							<div style='float:left;'>
-								<select name="abundance">
-									<option value="">undefined</option>
-									<option <?php echo ($abundance=="abundant"?" SELECTED":"");?>>abundant</option>
-									<option <?php echo ($abundance=="locally abundant"?" SELECTED":"");?>>locally abundant</option>
-									<option <?php echo ($abundance=="seasonal abundant"?" SELECTED":"");?>>seasonal abundant</option>
-									<option <?php echo ($abundance=="frequent"?" SELECTED":"");?>>frequent</option>
-									<option <?php echo ($abundance=="locally frequent"?" SELECTED":"");?>>locally frequent</option>
-									<option <?php echo ($abundance=="seasonal frequent"?" SELECTED":"");?>>seasonal frequent</option>
-									<option <?php echo ($abundance=="occasional"?" SELECTED":"");?>>occasional</option>
-									<option <?php echo ($abundance=="infrequent"?" SELECTED":"");?>>infrequent</option>
-									<option <?php echo ($abundance=="rare"?" SELECTED":"");?>>rare</option>
-								</select>
+								<input type="text"  name="abundance" value="<?php echo $abundance; ?>" />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -275,7 +251,7 @@ header("Content-Type: text/html; charset=".$charset);
 								New Taxon Name:
 							</div>
 							<div style='float:left;'>
-								<input id="renamesciname" name='renamesciname' type="text" size="50" onfocus="initRenameList(this)" autocomplete="off" />
+								<input id="renamesciname" name='renamesciname' type="text" size="50" />
 								<input id="renametid" name="renametid" type="hidden" value="" />
 							</div>
 							<div style='float:right;margin-right:30px;'>

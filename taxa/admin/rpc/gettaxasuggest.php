@@ -3,7 +3,7 @@
 	include_once($serverRoot.'/config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$q = $_REQUEST['q'];
+	$q = $_REQUEST['term'];
 	$taxAuthId = array_key_exists('taid',$_REQUEST)?$_REQUEST['taid']:0;
 	$rankLimit = array_key_exists('rlimit',$_REQUEST)?$_REQUEST['rlimit']:0;
 	$rankLow = array_key_exists('rlow',$_REQUEST)?$_REQUEST['rlow']:0;
@@ -39,5 +39,5 @@
        	$returnArr[] = $row->sciname;
 	}
 	$con->close();
-	echo "['".implode("','",$returnArr)."']";
+	echo json_encode($returnArr);
 ?>

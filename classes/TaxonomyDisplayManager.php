@@ -149,7 +149,7 @@ class TaxonomyDisplayManager{
 					$sciName = "<br/>Problematic Rooting (".$key.")";
 				}
 				echo "<div style='margin-left:".$indent.";'>";
-				echo "<a href='taxonomyeditor.php?target=".$key."' target='_blank'>".$sciName."</a>";
+				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
 				echo "</div>";
 				if(array_key_exists($key,$this->taxaArr) && array_key_exists("synonyms",$this->taxaArr[$key])){
 					foreach($this->taxaArr[$key]["synonyms"] as $synTid => $synName){

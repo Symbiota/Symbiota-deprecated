@@ -12,11 +12,11 @@
 <html>
 <head>
     <title><?php echo $defaultTitle; ?> Collection Search Parameters</title>
-    <link rel="stylesheet" href="../css/main.css" type="text/css">
-    <link rel="stylesheet" href="../css/jqac.css" type="text/css">
-	<script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.autocomplete-1.4.2.js"></script>
-	<script language="javascript" src="../js/collections.harvestparams.js"></script>
+    <link type="text/css" href="../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js"></script>
 </head>
 <body>
 
@@ -57,7 +57,7 @@
 						<option id='classorder' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> >Class / Order</option>
 						<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "5") echo "SELECTED"; ?> >Common Name</option>
 					</select>: 
-					<input class="complete" id="taxa" type="text" size="30" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Seperate multiple taxa w/ commas" />
+					<input id="taxa" type="text" size="60" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Seperate multiple taxa w/ commas" />
 				</div>
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>

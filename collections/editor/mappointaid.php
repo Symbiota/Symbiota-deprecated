@@ -1,10 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
-include_once('../config/symbini.php');
+include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
-$formName = array_key_exists("formname",$_REQUEST)?$_REQUEST["formname"]:""; 
-$latName = array_key_exists("latname",$_REQUEST)?$_REQUEST["latname"]:""; 
-$longName = array_key_exists("longname",$_REQUEST)?$_REQUEST["longname"]:""; 
 $latDef = array_key_exists("latdef",$_REQUEST)?$_REQUEST["latdef"]:0; 
 $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:0; 
 $zoom = array_key_exists("zoom",$_REQUEST)&&$_REQUEST["zoom"]?$_REQUEST["zoom"]:5;
@@ -71,11 +68,18 @@ if(!$latDef && !$lngDef){
 
         function updateParentForm() {
 			try{
-	            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
-	            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
+	            opener.document.fullform.decimallatitude.value = document.getElementById("latbox").value;
+	            opener.document.fullform.decimallongitude.value = document.getElementById("lngbox").value;
+	            opener.document.fullform.geodeticdatum.value = "WGS84";
+	            opener.document.fullform.decimallatitude.onchange();
+	            opener.document.fullform.decimallongitude.onchange();
 			}
 			catch(myErr){
 				alert("Unable to transfer data. Please let an administrator know.");
+			}
+			finally{
+	            self.close();
+    	        return false;
 			}
         }
 

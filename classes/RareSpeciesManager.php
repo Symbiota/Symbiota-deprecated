@@ -32,10 +32,19 @@ include_once($serverRoot.'/config/dbconnection.php');
  	
  	public function addSpecies($tid){
  		$sql = "UPDATE taxa t SET t.SecurityStatus = 1 WHERE t.tid = ".$tid;
- 		//echo $sql;
+ 		echo $sql;
 		$this->con->query($sql);
 		//Update specimen records
 		$sql2 = "UPDATE omoccurrences o SET o.LocalitySecurity = 1 WHERE o.tidinterpreted = ".$tid;
+		$this->con->query($sql2);
+	}
+
+	public function deleteSpecies($tid){
+ 		$sql = "UPDATE taxa t SET t.SecurityStatus = 0 WHERE t.tid = ".$tid;
+ 		//echo $sql;
+		$this->con->query($sql);
+		//Update specimen records
+		$sql2 = "UPDATE omoccurrences o SET o.LocalitySecurity = 0 WHERE o.tidinterpreted = ".$tid;
 		$this->con->query($sql2);
 	}
  }

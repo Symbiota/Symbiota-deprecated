@@ -606,7 +606,7 @@
  		return Array($sciName => $googleUrlLocal);
  	}
 
-	public function echoDescriptionBlock(){
+	public function getDescriptions(){
 		$descriptionsStr = "There is no description set for this taxon.";
 		$descriptions = Array();
 		$sql = "SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, ".
@@ -628,60 +628,7 @@
 			$descriptions[$tdbId]["desc"][$row->tdsid] = $header.$row->statement;
 		}
 		$result->close();
-		if($descriptions){
-			?>
-			<div id='tabs'>
-				<ul id='desctabs' class='shadetabs'>
-					<?php 
-					$capCnt = 1;
-					foreach($descriptions as $k => $vArr){
-						$cap = $vArr["caption"];
-						if(!$cap) $cap = "Description #".$capCnt;
-						echo "<li><a href='#' rel='tab".$k."' class='selected'>".$cap."</a></li>\n";
-						$capCnt++;
-					}
-					?>
-				</ul>
-				<div style='border:1px solid gray;height:83%;width:95%;margin-bottom:5px;padding:10px;overflow:auto;'>
-					<?php 
-					foreach($descriptions as $k => $vArr){
-					?>
-						<div id='tab<?php echo $k; ?>' class='tabcontent' style='margin:10px;'>
-							<?php 
-							if($vArr["source"]){
-								echo "<div id='descsource' style='float:right;'>";
-								if($vArr["url"]){
-									echo "<a href='".$vArr["url"]."' target='_blank'>";
-								}
-								echo $vArr["source"];
-								if($vArr["url"]){
-									echo "</a>";
-								}
-								echo "</div>\n";
-							}
-							$descArr = $vArr["desc"];
-							?>
-							<div style='clear:both;'>
-								<?php 
-								foreach($descArr as $tdsId => $stmt){
-									echo $stmt." ";
-								}
-								if($this->clInfo){
-									echo "<div id='clinfo'><b>Local Notes:</b> ".$clInfo."</div>";
-								}
-								?>
-							</div>
-						</div>
-					<?php 
-					}
-					?>
-				</div>
-			</div>
-			<?php
-		}
-		else{
-			echo "<div style='margin:70px 0px 20px 50px '>Description Not Yet Available</div>";
-		}
+		return $descriptions;
 	}
 
 	public function getFamily(){

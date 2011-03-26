@@ -64,7 +64,7 @@ if($isEditable){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Specimen Uploader</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script language=javascript>
 		
 		function toggle(target){

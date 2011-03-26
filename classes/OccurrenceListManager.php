@@ -33,7 +33,10 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
 		$sql .= "ORDER BY c.sortseq, c.collectionname ";
-		if(strpos($sqlWhere,"(o.SciName Like") == 0 || strpos($sqlWhere,"o.family =") == 0) $sql .= ", o.recordedBy, o.recordNumber ";
+		if(strpos($sqlWhere,"(o.sciname") || strpos($sqlWhere,"o.family")){
+			$sql .= ",o.sciname ";
+		}
+		$sql .= ",o.recordedBy,o.recordNumber ";			
 		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $conn->query($sql);
