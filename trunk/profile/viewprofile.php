@@ -119,24 +119,20 @@ if($isEditable){
 <head>
 	<title><?php echo $defaultTitle; ?> - View User Profile</title>
 	<link href="../css/main.css" rel="stylesheet" type="text/css"/>
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
 
-	<link rel="stylesheet" type="text/css" href="../css/tabcontent.css" />
-	<script type="text/javascript" src="../js/tabcontent.js"></script>
 	<script type="text/javascript" language="JavaScript">
-		var dlXmlHttp;
+		$(document).ready(function() {
+			$('#tabs').tabs();
+		});
 
 		function openMappingAid(targetForm,targetLat,targetLong) {
 		    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
-		function initTabs(tabObjId){
-			var dTabs=new ddtabcontent(tabObjId); 
-			dTabs.setpersist(true);
-			dTabs.setselectedClassTarget("link"); 
-			dTabs.init();
-		}
-		
 		function checkEditForm(f){
 	        var errorText = "";
 	        if(f.firstname.value.replace(/\s/g, "") == "" ){
@@ -289,80 +285,181 @@ if(isset($profile_viewprofileCrumbs)){
 		}
 		$person = $pHandler->getPersonByUid($userId);
 		?>
-		<div style="margin:10px;">
-		    <ul id="profiletabs" class="shadetabs">
-		        <li><a href="#" rel="viewprofilediv" class="selected">View Profile</a></li>
-		        <li><a href="#" rel="editprofilediv">Edit Profile</a></li>
-		        <li><a href="#" rel="editpassworddiv">Edit Password</a></li>
-		        <li><a href="#" rel="checklistdiv">Personal Checklists</a></li>
+		<div id="tabs" style="margin:10px;">
+		    <ul>
+		        <li><a href="#viewprofilediv" class="selected">View Profile</a></li>
+		        <li><a href="#editprofilediv">Edit Profile</a></li>
+		        <li><a href="#editpassworddiv">Edit Password</a></li>
+		        <li><a href="#checklistdiv">Personal Checklists</a></li>
 		    </ul>
-			<div style="border:1px solid gray; width:95%; margin-bottom: 1em; padding: 10px">
-				<div id="viewprofilediv" class="tabcontent" style="margin:10px;">
+			<div id="viewprofilediv">
+				<table cellspacing='3'>
+				    <tr>
+				        <td><b>First Name:</b></td>
+				        <td>
+				        	<?php echo $person->getFirstName();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Last Name:</b></td>
+				        <td>
+				        	<?php echo $person->getLastName();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Title:</b></td>
+				        <td>
+				        	<?php echo $person->getTitle(); ?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Institution:</b></td>
+				        <td>
+				        	<?php echo $person->getInstitution();?>
+						</td>
+				    </tr>
+				    <tr>
+				        <td><b>City:</b></td>
+				        <td>
+				        	<?php echo $person->getCity();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>State:</b></td>
+				        <td>
+				        	<?php echo $person->getState();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Zip Code:</b></td>
+				        <td>
+				        	<?php echo $person->getZip();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Country:</b></td>
+				        <td>
+				        	<?php echo $person->getCountry();?>
+						</td>
+				    </tr>
+				    <tr>
+				        <td><b>Email Address:</b></td>
+				        <td>
+				        	<?php echo $person->getEmail();?>
+			            </td>
+				    </tr>
+				    <tr>
+				        <td><b>Url:</b></td>
+				        <td>
+				        	<?php echo $person->getUrl();?>
+						</td>
+				    </tr>
+				    <tr>
+				        <td><b>Biography:</b></td>
+				        <td>
+				        	<?php echo $person->getBiography();?>
+						</td>
+				    </tr>
+				    <tr>
+				        <td><b>Logins:</b></td>
+				        <td>
+							<?php 
+								$loginArr = $person->getLoginArr();
+								if($loginArr){
+									$isFirst = true;
+									foreach($loginArr as $login){
+										echo ($isFirst?"":"; ").$login;
+										$isFirst = false;
+									}
+								}
+								else{
+									echo "No logins are registered";
+								}
+							?>
+							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+						</td>
+				    </tr>
+				    <tr>
+				        <td colspan="2">
+			        		<?php 
+			        			if($person->getIsPublic()){
+									echo "User information is displayable to public (e.g. photographer listing)";
+			        			}
+			        			else{
+			        				echo "User information is hidden from public";
+			        			}
+			        		?>	
+						</td>
+				    </tr>
+				</table>
+			</div>
+			<div id="editprofilediv">
+				<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
 					<table cellspacing='3'>
 					    <tr>
 					        <td><b>First Name:</b></td>
 					        <td>
-					        	<?php echo $person->getFirstName();?>
+					            <input id="firstname" name="firstname" size="40" value="<?php echo $person->getFirstName();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Last Name:</b></td>
 					        <td>
-					        	<?php echo $person->getLastName();?>
+					            <input id="lastname" name="lastname" size="40" value="<?php echo $person->getLastName();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Title:</b></td>
 					        <td>
-					        	<?php echo $person->getTitle(); ?>
+					            <input name="title"  size="40" value="<?php echo $person->getTitle();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Institution:</b></td>
 					        <td>
-					        	<?php echo $person->getInstitution();?>
+								<input name="institution"  size="40" value="<?php echo $person->getInstitution();?>">
 							</td>
 					    </tr>
 					    <tr>
 					        <td><b>City:</b></td>
 					        <td>
-					        	<?php echo $person->getCity();?>
+				            	<input id="city" name="city" size="40" value="<?php echo $person->getCity();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>State:</b></td>
 					        <td>
-					        	<?php echo $person->getState();?>
+					            <input id="state" name="state" size="40" value="<?php echo $person->getState();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Zip Code:</b></td>
 					        <td>
-					        	<?php echo $person->getZip();?>
+					            <input name="zip" size="40" value="<?php echo $person->getZip();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Country:</b></td>
 					        <td>
-					        	<?php echo $person->getCountry();?>
+								<input id="country" name="country" size="40" value="<?php echo $person->getCountry();?>">
 							</td>
 					    </tr>
 					    <tr>
 					        <td><b>Email Address:</b></td>
 					        <td>
-					        	<?php echo $person->getEmail();?>
+					            <input id="email" name="email" size="40" value="<?php echo $person->getEmail();?>">
 				            </td>
 					    </tr>
 					    <tr>
 					        <td><b>Url:</b></td>
 					        <td>
-					        	<?php echo $person->getUrl();?>
+								<input name="url"  size="40" value="<?php echo $person->getUrl();?>">
 							</td>
 					    </tr>
 					    <tr>
 					        <td><b>Biography:</b></td>
 					        <td>
-					        	<?php echo $person->getBiography();?>
+								<textarea name="biography" rows="4" cols="40"><?php echo $person->getBiography();?></textarea>
 							</td>
 					    </tr>
 					    <tr>
@@ -373,7 +470,10 @@ if(isset($profile_viewprofileCrumbs)){
 									if($loginArr){
 										$isFirst = true;
 										foreach($loginArr as $login){
-											echo ($isFirst?"":"; ").$login;
+											echo "<span id='un-".$login."'>".($isFirst?"":"; ").$login;
+											echo "<span onclick=\"deleteLogin($userId,'$login');\"> ";
+											echo "<img src='../images/del.gif' title='Delete $login' />";
+											echo "</span></span>";
 											$isFirst = false;
 										}
 									}
@@ -381,335 +481,229 @@ if(isset($profile_viewprofileCrumbs)){
 										echo "No logins are registered";
 									}
 								?>
-								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
 							</td>
 					    </tr>
 					    <tr>
 					        <td colspan="2">
-				        		<?php 
-				        			if($person->getIsPublic()){
-										echo "User information is displayable to public (e.g. photographer listing)";
-				        			}
-				        			else{
-				        				echo "User information is hidden from public";
-				        			}
-				        		?>	
+								<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
+								Make user information displayable to public  
 							</td>
 					    </tr>
+					    <tr>
+							<td colspan='2' align="right">
+								<div style="margin:10px;">
+									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+									<input type="submit" name="action" value="Submit Edits" id="editprofile">
+								</div>
+							</td>
+						</tr>
 					</table>
-				</div>
-				<div id="editprofilediv" class="tabcontent">
-					<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
-						<table cellspacing='3'>
-						    <tr>
-						        <td><b>First Name:</b></td>
-						        <td>
-						            <input id="firstname" name="firstname" size="40" value="<?php echo $person->getFirstName();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Last Name:</b></td>
-						        <td>
-						            <input id="lastname" name="lastname" size="40" value="<?php echo $person->getLastName();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Title:</b></td>
-						        <td>
-						            <input name="title"  size="40" value="<?php echo $person->getTitle();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Institution:</b></td>
-						        <td>
-									<input name="institution"  size="40" value="<?php echo $person->getInstitution();?>">
-								</td>
-						    </tr>
-						    <tr>
-						        <td><b>City:</b></td>
-						        <td>
-					            	<input id="city" name="city" size="40" value="<?php echo $person->getCity();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>State:</b></td>
-						        <td>
-						            <input id="state" name="state" size="40" value="<?php echo $person->getState();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Zip Code:</b></td>
-						        <td>
-						            <input name="zip" size="40" value="<?php echo $person->getZip();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Country:</b></td>
-						        <td>
-									<input id="country" name="country" size="40" value="<?php echo $person->getCountry();?>">
-								</td>
-						    </tr>
-						    <tr>
-						        <td><b>Email Address:</b></td>
-						        <td>
-						            <input id="email" name="email" size="40" value="<?php echo $person->getEmail();?>">
-					            </td>
-						    </tr>
-						    <tr>
-						        <td><b>Url:</b></td>
-						        <td>
-									<input name="url"  size="40" value="<?php echo $person->getUrl();?>">
-								</td>
-						    </tr>
-						    <tr>
-						        <td><b>Biography:</b></td>
-						        <td>
-									<textarea name="biography" rows="4" cols="40"><?php echo $person->getBiography();?></textarea>
-								</td>
-						    </tr>
-						    <tr>
-						        <td><b>Logins:</b></td>
-						        <td>
-									<?php 
-										$loginArr = $person->getLoginArr();
-										if($loginArr){
-											$isFirst = true;
-											foreach($loginArr as $login){
-												echo "<span id='un-".$login."'>".($isFirst?"":"; ").$login;
-												echo "<span onclick=\"deleteLogin($userId,'$login');\"> ";
-												echo "<img src='../images/del.gif' title='Delete $login' />";
-												echo "</span></span>";
-												$isFirst = false;
-											}
-										}
-										else{
-											echo "No logins are registered";
-										}
-									?>
-								</td>
-						    </tr>
-						    <tr>
-						        <td colspan="2">
-									<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
-									Make user information displayable to public  
-								</td>
-						    </tr>
-						    <tr>
-								<td colspan='2' align="right">
-									<div style="margin:10px;">
-										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-										<input type="submit" name="action" value="Submit Edits" id="editprofile">
-									</div>
-								</td>
-							</tr>
-						</table>
-					</form>
-				</div>
-				<div id="editpassworddiv" class="tabcontent">
-					<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
-						<fieldset style='margin:5px;width:200px;'>
-					    	<legend>Change Password:</legend>
-							<?php if($isSelf){ ?>
-				            <div style="font-weight:bold;">
-				            	Current Password: 
-				            	<input id="oldpwd" name="oldpwd" type="password"/>
-				            </div> 
-							<?php }?>
-				            <div style="font-weight:bold;">
-				            	Choose a New Password: 
-				            	<input id="newpwd" name="newpwd" type="password"/>
-				            </div> 
-							<div style="font-weight:bold;">
-								New Password Again: 
-								<input id="newpwd2" name="newpwd2" type="password"/>
-							</div>
-							<div>
-								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-								<input type="submit" name="action" value="Change Password" id="editpwd"/>
-							</div>
-							<?php if($isSelf){ ?>
-							<div>
-								* Will change password for all logins
-							</div>
-							<?php }?>
-						</fieldset>
-					</form>
-
-					<form id="newloginform" name="newloginform" action="viewprofile.php" method="post" onsubmit="return checkNewLoginForm(this);">
-						<fieldset style='margin:5px;width:200px;'>
-					    	<legend>Create New Login</legend>
-				            <div style="font-weight:bold;">
-				            	New Login (no spaces): 
-				            	<input id="newlogin" name="newlogin" type="text">
-				            </div> 
-				            <div style="font-weight:bold;">
-				            	Choose a New Password: 
-				            	<input id="newloginpwd" name="newloginpwd" type="password">
-				            </div> 
-							<div style="font-weight:bold;">
-								New Password Again: 
-								<input id="newloginpwd2" name="newloginpwd2" type="password">
-							</div>
-							<div>
-								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-								<input type="submit" name="action" value="Create Login" id="newloginsubmit">
-							</div>
-						</fieldset>
-					</form>
-
-					<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
-						<fieldset style='margin:5px;width:200px;'>
-					    	<legend>Delete Profile:</legend>
+				</form>
+			</div>
+			<div id="editpassworddiv">
+				<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
+					<fieldset style='margin:5px;width:200px;'>
+				    	<legend>Change Password:</legend>
+						<?php if($isSelf){ ?>
+			            <div style="font-weight:bold;">
+			            	Current Password: 
+			            	<input id="oldpwd" name="oldpwd" type="password"/>
+			            </div> 
+						<?php }?>
+			            <div style="font-weight:bold;">
+			            	Choose a New Password: 
+			            	<input id="newpwd" name="newpwd" type="password"/>
+			            </div> 
+						<div style="font-weight:bold;">
+							New Password Again: 
+							<input id="newpwd2" name="newpwd2" type="password"/>
+						</div>
+						<div>
 							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-				    		<input type="submit" name="action" value="Delete Profile" id="submitdelete" />
-						</fieldset>
-					</form>
-				</div>
-				<div id="checklistdiv" class="tabcontent">
-					<div style="margin:10px;" class="fieldset">
-						<div class="legend"><b>Available Checklists</b></div>
-						<ul>
-						<?php 
-							$clArr = $pClManager->getChecklists($userId);
-							if($clArr){
-								foreach($clArr as $kClid => $vName){
-									?>
-									<li>
-										<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
-											<?php echo $vName; ?>
-										</a>
-										<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
-											<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
-										</a>
-										<form action="viewprofile.php" method="get" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
-											<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
-											<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-											<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
-										</form> 
-									</li>
-									
-									<?php 
-								}
+							<input type="submit" name="action" value="Change Password" id="editpwd"/>
+						</div>
+						<?php if($isSelf){ ?>
+						<div>
+							* Will change password for all logins
+						</div>
+						<?php }?>
+					</fieldset>
+				</form>
+
+				<form id="newloginform" name="newloginform" action="viewprofile.php" method="post" onsubmit="return checkNewLoginForm(this);">
+					<fieldset style='margin:5px;width:200px;'>
+				    	<legend>Create New Login</legend>
+			            <div style="font-weight:bold;">
+			            	New Login (no spaces): 
+			            	<input id="newlogin" name="newlogin" type="text">
+			            </div> 
+			            <div style="font-weight:bold;">
+			            	Choose a New Password: 
+			            	<input id="newloginpwd" name="newloginpwd" type="password">
+			            </div> 
+						<div style="font-weight:bold;">
+							New Password Again: 
+							<input id="newloginpwd2" name="newloginpwd2" type="password">
+						</div>
+						<div>
+							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+							<input type="submit" name="action" value="Create Login" id="newloginsubmit">
+						</div>
+					</fieldset>
+				</form>
+
+				<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
+					<fieldset style='margin:5px;width:200px;'>
+				    	<legend>Delete Profile:</legend>
+						<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+			    		<input type="submit" name="action" value="Delete Profile" id="submitdelete" />
+					</fieldset>
+				</form>
+			</div>
+			<div id="checklistdiv">
+				<div style="margin:10px;" class="fieldset">
+					<div class="legend"><b>Available Checklists</b></div>
+					<ul>
+					<?php 
+						$clArr = $pClManager->getChecklists($userId);
+						if($clArr){
+							foreach($clArr as $kClid => $vName){
+								?>
+								<li>
+									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
+										<?php echo $vName; ?>
+									</a>
+									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
+										<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
+									</a>
+									<form action="viewprofile.php" method="get" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
+										<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
+										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+										<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
+									</form> 
+								</li>
+								
+								<?php 
 							}
-							else{
-								echo "<h3>You have no personal checklists</h3>";
-							}
-						?>
-						</ul>
-					</div>
-					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
-						<fieldset>
-							<legend style="font-weight:bold;">Create a New Checklist</legend>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Checklist Name:
-								</div>
-								<div style="float:left;">
-									<input name="nclname" type="text" maxlength="50" size="60" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Authors:
-								</div>
-								<div style="float:left;">
-									<input name="nclauthors" type="text" maxlength="250" size="60" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Locality:
-								</div>
-								<div style="float:left;">
-									<input name="ncllocality" type="text" maxlength="500" size="60" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Publication:
-								</div>
-								<div style="float:left;">
-									<input name="nclpublication" type="text" maxlength="500" size="60" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Abstract:
-								</div>
-								<div style="float:left;">
-									<textarea name="nclabstract" rows="4" cols="45"></textarea>
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Parent Checklist:
-								</div>
-								<div style="float:left;">
-									<select name="nclparentclid">
-										<option value="">Select a Parent checklist</option>
-										<option value="">----------------------------------</option>
-										<?php $pClManager->echoParentSelect(); ?>
-									</select>
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Notes:
-								</div>
-								<div style="float:left;">
-									<input name="nclnotes" type="text" maxlength="500" size="60" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Latitude Centroid:
-								</div>
-								<div style="float:left;">
-									<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
-									<span style="cursor:pointer;" onclick="openMappingAid('checklistaddform','ncllatcentroid','ncllongcentroid');">
-										<img src="../images/world40.gif" style="width:12px;" />
-									</span>
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Longitude Centroid:
-								</div>
-								<div style="float:left;">
-									<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" size="10" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Point Radius (meters):
-								</div>
-								<div style="float:left;">
-									<input name="nclpointradiusmeters" type="text" maxlength="15" size="10" />
-								</div>
-							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Public Access:
-								</div>
-								<div style="float:left;">
-									<select name="nclaccess">
-										<option value="private">Private</option>
-										<option value="public limited">Public Limited</option>
-									<?php if($isAdmin){ ?>
-										<option value="public">Public Research Grade</option>
-									<?php } ?>
-									</select>
-								</div>
-							</div>
-							<div style="clear:both;">
-								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-								<div style="margin-left:20px;">
-									<input name="action" type="submit" value="Create Checklist" />
-								</div>
-							</div>
-						</fieldset>
-					</form>
+						}
+						else{
+							echo "<h3>You have no personal checklists</h3>";
+						}
+					?>
+					</ul>
 				</div>
+				<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
+					<fieldset>
+						<legend style="font-weight:bold;">Create a New Checklist</legend>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Checklist Name:
+							</div>
+							<div style="float:left;">
+								<input name="nclname" type="text" maxlength="50" size="60" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Authors:
+							</div>
+							<div style="float:left;">
+								<input name="nclauthors" type="text" maxlength="250" size="60" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Locality:
+							</div>
+							<div style="float:left;">
+								<input name="ncllocality" type="text" maxlength="500" size="60" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Publication:
+							</div>
+							<div style="float:left;">
+								<input name="nclpublication" type="text" maxlength="500" size="60" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Abstract:
+							</div>
+							<div style="float:left;">
+								<textarea name="nclabstract" rows="4" cols="45"></textarea>
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Parent Checklist:
+							</div>
+							<div style="float:left;">
+								<select name="nclparentclid">
+									<option value="">Select a Parent checklist</option>
+									<option value="">----------------------------------</option>
+									<?php $pClManager->echoParentSelect(); ?>
+								</select>
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Notes:
+							</div>
+							<div style="float:left;">
+								<input name="nclnotes" type="text" maxlength="500" size="60" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Latitude Centroid:
+							</div>
+							<div style="float:left;">
+								<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
+								<span style="cursor:pointer;" onclick="openMappingAid('checklistaddform','ncllatcentroid','ncllongcentroid');">
+									<img src="../images/world40.gif" style="width:12px;" />
+								</span>
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Longitude Centroid:
+							</div>
+							<div style="float:left;">
+								<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" size="10" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Point Radius (meters):
+							</div>
+							<div style="float:left;">
+								<input name="nclpointradiusmeters" type="text" maxlength="15" size="10" />
+							</div>
+						</div>
+						<div style="clear:both;">
+							<div style="width:130px;float:left;">
+								Public Access:
+							</div>
+							<div style="float:left;">
+								<select name="nclaccess">
+									<option value="private">Private</option>
+									<option value="public limited">Public Limited</option>
+								<?php if($isAdmin){ ?>
+									<option value="public">Public Research Grade</option>
+								<?php } ?>
+								</select>
+							</div>
+						</div>
+						<div style="clear:both;">
+							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+							<div style="margin-left:20px;">
+								<input name="action" type="submit" value="Create Checklist" />
+							</div>
+						</div>
+					</fieldset>
+				</form>
 			</div>
 		</div>
 	<?php 

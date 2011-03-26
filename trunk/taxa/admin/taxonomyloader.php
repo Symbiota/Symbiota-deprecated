@@ -34,12 +34,12 @@ if($submitAction == 'loadnewtaxon' && $editable){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Taxon Loader: </title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<script language="javascript" src="../../js/taxa.taxonomyloader.js"></script>
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
+	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyloader.js"></script>
 </head>
 <body>
 <?php
@@ -98,14 +98,6 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						<input type='text' id='unitind3' name='unitind3' style='width:40px;border:inset;' title='Rank: e.g. ssp., var., f.'/>
 						<input type='text' id='unitname3' name='unitname3' style='width:200px;border:inset;' title='infrasp. epithet'/>
 					</div>
-					<div id="uppertaxondiv" name="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
-						<div style="float:left;width:140px;">Upper Taxonomy:</div>
-						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" onfocus="initUpperTaxonList(this)" autocomplete="off" />
-					</div>
-					<div>
-						<div style="float:left;width:140px;">Family:</div>
-						<input type='text' id='family' name='family' style='width:200px;border:inset;' title='Family'/>
-					</div>
 					<div>
 						<div style="float:left;width:140px;">Parent Taxon:</div>
 						<input type="text" id="parentname" name="parentname" style="width:200px;border:inset;" onchange="checkParentExistance(this.form)" />
@@ -113,6 +105,10 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 							<a id="addparentanchor" href="taxonomyloader.php?target=" target="_blank">Add Parent</a>
 						</span>
 						<input type="hidden" id="parenttid" name="parenttid" value="" />
+					</div>
+					<div id="uppertaxondiv" name="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
+						<div style="float:left;width:140px;">Upper Taxonomic Grouping:</div>
+						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" />
 					</div>
 					<div>
 						<div style="float:left;width:140px;">Notes:</div>
@@ -137,7 +133,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						</div>
 						<div id="accdiv" style="display:none;">
 							Accepted Taxon:
-							<input type="text" name="acceptedstr" style="width:300px;" onfocus="initAcceptedList(this)" autocomplete="off" />
+							<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;" />
 							<input type="hidden" name="tidaccepted" /> 
 							<div>
 								<div style="float:left;width:150px;">UnacceptabilityReason:</div>

@@ -45,6 +45,7 @@ if($editable){
 		$tsArr["uppertaxonomy"] = $_REQUEST["uppertaxonomy"];
 		$tsArr["family"] = $_REQUEST["family"];
 		$tsArr["parenttid"] = $_REQUEST["parenttid"];
+		$tsArr["startparenttid"] = $_REQUEST["startparenttid"];
 		$taxonEditorObj->submitTaxstatusEdits($tsArr);
 	}
 	elseif(array_key_exists("synonymedits",$_REQUEST)){
@@ -84,15 +85,15 @@ if($editable){
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$target; ?></title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>"/>
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
+	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script language=javascript>
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 	</script>
-	<script language="javascript" src="../../js/taxa.taxonomyeditor.js"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js"></script>
 </head>
 <body>
 <?php
@@ -320,16 +321,15 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<?php echo $taxonEditorObj->getUpperTaxon(); ?>
 							</div>
 							<div id="uppertaxondiv" class="tsedit" style="display:none;margin:3px;">
-								<input name="uppertaxonomy" type="text" style="width:270px;" value="<?php echo $taxonEditorObj->getUpperTaxon();?>" onfocus="initUpperTaxonList(this)" autocomplete="off" />
+								<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:270px;" value="<?php echo $taxonEditorObj->getUpperTaxon();?>" />
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Family: </div>
 							<div style="">
 								<?php echo $taxonEditorObj->getFamily();?>&nbsp;
-							</div>
-							<div id="familydiv" style="display:none;">
-								<input name="family" type="text" value="<?php echo $taxonEditorObj->getFamily();?>" onfocus="initTaxaList(this,140,0,0,1)" autocomplete="off" />
+								<img src="../../images/qmark.jpg" style="border:0px;width:14px;" />
+								<input type="hidden" name="family" value="<?php echo $taxonEditorObj->getFamily(); ?>" />
 							</div>
 						</div>
 						<div style="clear:both;">
@@ -338,8 +338,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<?php echo $taxonEditorObj->getParentNameFull();?>
 							</div>
 							<div class="tsedit" style="display:none;margin:3px;">
-								<input name="parentstr" type="text" value="<?php echo $taxonEditorObj->getParentName(); ?>" onfocus="initTaxaList(this,0,0,<?php echo $taxonEditorObj->getRankId();?>,1)" autocomplete="off" />
+								<input id="parentstr" name="parentstr" type="text" value="<?php echo $taxonEditorObj->getParentName(); ?>" />
 								<input name="parenttid" type="hidden" value="<?php echo $taxonEditorObj->getParentTid(); ?>" />
+								<input type="hidden" name="startparenttid" value="<?php echo $taxonEditorObj->getParentTid(); ?>" />
 							</div>
 						</div>
 						<div class="tsedit" style="display:none;clear:both;">
@@ -351,7 +352,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							?>
 							<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():$aStr); ?>" />
 							<input type="hidden" name="submitaction" value="updatetaxstatus" />
-							<input type='button' name='taxstatuseditsubmit' value='Submit Upper/Family Edits' onclick="submitTaxStatusForm(this.form)" />
+							<input type='button' name='taxstatuseditsubmit' value='Submit Upper Taxonomy Edits' onclick="submitTaxStatusForm(this.form)" />
 						</div>
 					</form>
 				</div>
@@ -393,7 +394,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<form id="accepteditsform" name="accepteditsform" action="taxonomyeditor.php" method="get">
 									<div>
 										Accepted Taxon: 
-										<input name="acceptedstr" type="text" style="width:300px;" onfocus="initAcceptedList(this)" autocomplete="off" />
+										<input id="aefacceptedstr" name="acceptedstr" type="text" style="width:300px;" />
 										<input name="tidaccepted" type="hidden" />
 									</div>
 									<div>
@@ -503,7 +504,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<legend><b>Change to Not Accepted</b></legend>
 								<div style="margin:5px;">
 									<b>Accepted Name:</b> 
-									<input name="acceptedstr" type="text" style="width:270px;" onfocus="initAcceptedList(this)" autocomplete="off" />
+									<input id="ctnafacceptedstr" name="acceptedstr" type="text" style="width:270px;" />
 									<input name="tidaccepted" type="hidden" value="" />
 								</div>
 								<div style="margin:5px;">

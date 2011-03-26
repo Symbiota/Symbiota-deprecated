@@ -27,11 +27,11 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Observation Submission</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css">
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
-	<script language="javascript" src="../../js/collections.observationsubmit.js"></script>
+    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.observationsubmit.js"></script>
 </head>
 <body>
 
@@ -64,7 +64,8 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 					?>
 					<br/>
 					<div style="font:weight;font-size:120%;margin-top:10px;">
-						<a href="../individual/index.php?occid=<?php echo $occid; ?>">View Record</a>
+						Open  
+						<a href="../individual/index.php?occid=<?php echo $occid; ?>">Occurrence Details Viewer</a> to see the new record 
 					</div>
 					<?php
 				} 
@@ -86,20 +87,14 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							<span style="margin-left:315px;">
 								Author:
 							</span>
-							<span style="margin-left:120px;">
-								ID Qualifier:
-							</span>
 						</div>
 						<div style="clear:both;" class="p1">
 							<span>
-								<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onfocus="initTaxonList(this)" onchange="scinameChanged()" autocomplete="off" />
+								<input type="text" id="sciname" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onchange="scinameChanged()" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 							</span>
 							<span style="margin-left:10px;">
 								<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="" value="" />
-							</span>
-							<span style="margin-left:10px;">
-								<input type="text" name="identificationqualifier" tabindex="0" size="5" style="" value="" />
 							</span>
 						</div>
 						<div style="clear:both;margin-left:10px;padding:3px 0px 0px 10px;">
@@ -120,7 +115,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							</div>
 							<div style="clear:both;">
 								<span>
-									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" onfocus="verifySciName()" />
+									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" />
 								</span>
 								<span style="margin-left:10px;">
 									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />

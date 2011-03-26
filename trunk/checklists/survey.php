@@ -79,19 +79,19 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		if($proj) $keywordStr .= ",".$proj;
 		echo"<meta name='keywords' content='".$keywordStr."' />";
 	?>
-    <link rel="stylesheet" href="../css/jqac.css" type="text/css" />
-	<link type="text/css" href="../css/ui.tabs.css" rel="stylesheet" />
-	<link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
-	
-	<script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.autocomplete-1.4.2.js"></script>
-	<script type="text/javascript" src="../js/AutoCompleteDB.js"></script>
-	<script type="text/javascript" src="../js/ui.core.js"></script>
-	<script type="text/javascript" src="../js/ui.tabs.js"></script>
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script language=javascript>
-		var rtXmlHttp;
-		var sciNameDeletion;
-		
+		$(document).ready(function() {
+			//Filter autocomplete
+			var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
+			$("#taxonfilter").autocomplete({ source: taxonArr }, { delay: 0, minLength: 2 });
+	
+			$('#tabs').tabs();
+	
+		});
+
 		function toggle(target){
 		  	var divs = document.getElementsByTagName("div");
 		  	for (var i = 0; i < divs.length; i++) {
@@ -122,10 +122,15 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 
 		function openIndPu(occId){
 			urlStr = "<?php echo $clientRoot;?>/collections/individual/index.php?occid=" + occId;
-			newWindow = window.open(urlStr,"newind","toolbar=1,resizable=1,width=650,height=600,left=20,top=20");
+			newWindow = window.open(urlStr,"newind","toolbar=1,resizable=1,width=950,height=600,left=20,top=20");
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 	
+		function openMappingAid(targetForm,targetLat,targetLong) {
+		    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		    if (mapWindow.opener == null) mapWindow.opener = self;
+		}
+
 		function removeTaxon(tid, clid, sciName){
 	        if(window.confirm('Are you sure you want to delete this taxon?')){
 				rtXmlHttp = GetXmlHttpObject();
@@ -137,25 +142,23 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 				var url = "rpc/removetidfromchklst.php";
 				url=url + "?clid=" + clid + "&tid=" + tid;
 				url=url + "&sid="+Math.random();
-				rtXmlHttp.onreadystatechange=rtStateChanged;
+				rtXmlHttp.onreadystatechange=function(){
+					if (rtXmlHttp.readyState==4){
+						var tidDeleted = rtXmlHttp.responseText;
+						sciNameDeletion = sciNameDeletion.replace(/<.{1,2}>/gi,"");
+						if(tidDeleted == 0){
+							alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
+						}
+						else{
+							document.getElementById("tid-"+tidDeleted).style.display = "none";
+						}
+					}
+				};
 				rtXmlHttp.open("POST",url,true);
 				rtXmlHttp.send(null);
 	        }
 		} 
 		
-		function rtStateChanged(){
-			if (rtXmlHttp.readyState==4){
-				var tidDeleted = rtXmlHttp.responseText;
-				sciNameDeletion = sciNameDeletion.replace(/<.{1,2}>/gi,"");
-				if(tidDeleted == 0){
-					alert("FAILED: Delection of " + sciNameDeletion + " unsuccessful");
-				}
-				else{
-					document.getElementById("tid-"+tidDeleted).style.display = "none";
-				}
-			}
-		}
-	
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
@@ -208,55 +211,21 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			var url="rpc/gettid.php";
 			url=url+"?sciname="+sciname;
 			url=url+"&sid="+Math.random();
-			cseXmlHttp.onreadystatechange=cseStateChanged;
+			cseXmlHttp.onreadystatechange=function(){
+				if (cseXmlHttp.readyState==4){
+					renameTid = cseXmlHttp.responseText;
+					if(renameTid == ""){
+						alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+					}
+					else{
+						document.getElementById("tidtoadd").value = renameTid;
+						document.forms["addspeciesform"].submit();
+					}
+				}
+			};
 			cseXmlHttp.open("POST",url,true);
 			cseXmlHttp.send(null);
 		} 
-		
-		function cseStateChanged(){
-			if (cseXmlHttp.readyState==4){
-				renameTid = cseXmlHttp.responseText;
-				if(renameTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
-				}
-				else{
-					document.getElementById("tidtoadd").value = renameTid;
-					document.forms["addspeciesform"].submit();
-				}
-			}
-		}
-
-		function initFilterList(input){
-		    //process lookup list for fast access
-			if(!db){
-				db = new AutoCompleteDB();
-				var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
-				var arLen=taxonArr.length;
-				if(arLen > 0){
-					$(input).autocomplete({ get:getFilterSuggs, minchars:1, timeout:10000 });
-					for ( var i=0; i<arLen; ++i ){
-						db.add(taxonArr[i]);
-					}
-				}
-			}
-		}
-
-		function getFilterSuggs(v){ 
-			// get all the matching strings from the AutoCompleteDB
-			var matchArr = new Array();
-			db.getStrings(v, "", matchArr);
-			matchArr = matchArr.unique();
-			// add each string to the popup-div
-			var displayArr = new Array();
-			for( i = 0; i < matchArr.length; i++ ){
-				displayArr.push({id:i, value:matchArr[i] });
-			}
-			return displayArr;
-		}
-				
-		$(document).ready(function(){
-			$("#tabs").tabs();
-		});
 
 		Array.prototype.unique = function() {
 			var a = [];
@@ -270,17 +239,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			return a;
 		};
 	</script>
-	<script type="text/javascript">
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '<?php echo $googleAnalyticsKey; ?>']);
-		_gaq.push(['_trackPageview']);
-	
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
-	</script>
+	<script type="text/javascript" src="../js/googleanalytics.js"></script>
 </head>
  
 <body>
@@ -359,7 +318,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			        <li><a href="#editors"><span>Editors</span></a></li>
 			    </ul>
 				<div id="metadata">
-					<form id="editform" action='survey.php' method='get' name='editmatadata' target='_self'>
+					<form id="editform" action='survey.php' method='post' name='editmetadata' target='_self'>
 						<fieldset style='margin:5px 0px 5px 5px;'>
 							<legend>Edit Survey Details:</legend>
 							<div>
@@ -381,7 +340,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 							<div>
 								<span>Latitude Centroid: </span>
 								<input id="latdec" type='text' name='ecllatcentroid' value='<?php echo $mdArray["latcentroid"]; ?>' />
-								<span style="cursor:pointer;" onclick="openPointMap();">
+								<span style="cursor:pointer;" onclick="openMappingAid('editmetadata','ecllatcentroid','ecllongcentroid');">
 									<img src="../images/world40.gif" style="width:12px;" />
 								</span>
 							</div>
@@ -397,7 +356,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 							<div>
 								<input type='submit' name='action' id='editsubmit' value='Submit Changes' />
 							</div>
-							<input type='hidden' name='survey' value='<?php echo $surveyId; ?>' />
+							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
 							<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
 							<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 							<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
@@ -427,14 +386,14 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		<div>
 			<!-- Option box -->
 			<div id="cloptiondiv">
-				<form id='changetaxonomy' name='changetaxonomy' action='survey.php' method='get'>
+				<form id='changetaxonomy' name='changetaxonomy' action='survey.php' method='post'>
 					<fieldset>
 					    <legend>Options</legend>
 						<!-- Taxon Filter option -->
 					    <div id="taxonfilterdiv" title="Filter species list by family or genus">
 					    	<div>
 					    		<b>Search:</b> 
-								<input type="text" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" onfocus="initFilterList(this)" autocomplete="off" />
+								<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
 							</div>
 							<div>
 								<?php 
@@ -448,7 +407,6 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 					    <!-- Thesaurus Filter -->
 					    <div><b>Filter:</b>
 					    	<select id='thesfilter' name='thesfilter'>
-								<option value='0'>Original Checklist</option>
 								<?php 
 									$taxonAuthList = Array();
 									$taxonAuthList = $clManager->getTaxonAuthorityList();

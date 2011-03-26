@@ -34,7 +34,7 @@ if($tEditor->getTid()){
 	if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 		$editable = true;
 	}
-	 
+
 	$status = "";
 	if($editable){
 		if($action == "Edit Synonym Sort Order"){
@@ -81,10 +81,19 @@ if($tEditor->getTid()){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<link rel="stylesheet" href="../../css/speciesprofile.css" type="text/css"/>
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css" />
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#sninput").autocomplete({
+				source: function( request, response ) {
+					$.getJSON( "rpc/gettaxalist.php", { "term": request.term, "taid": "1" }, response );
+				}
+			},{ minLength: 3, autoFocus: true }
+			);
+		});
+
 		function toggle(target){
 			var spanObjs = document.getElementsByTagName("span");
 			for (i = 0; i < spanObjs.length; i++) {
@@ -120,27 +129,6 @@ if($tEditor->getTid()){
 			}
 			return true;
 		}
-
-		function initTaxonList(input){
-			$(input).autocomplete({ ajax_get:getTaxonList, minchars:4 });
-		}
-
-		function getTaxonList(key,cont){ 
-		   	var script_name = 'rpc/gettaxalist.php';
-		   	var params = { 'q':key , 'taid':'1' };
-		   	$.get(script_name,params,
-				function(obj){ 
-					// obj is just array of strings
-					var res = [];
-					for(var i=0;i<obj.length;i++){
-						res.push({ id:i , value:obj[i]});
-					}
-					// will build suggestions list
-					cont(res); 
-				},
-			'json');
-		}
-
 	</script>
 </head>
 <body>
@@ -303,7 +291,7 @@ else{
 		?>
 		</div>
 		<form name="gettidform" action="tpeditor.php" method="post" onsubmit="return checkGetTidForm(this);">
-			<input id="sninput" name="taxon" value="<?php echo $taxon; ?>" size="40" onfocus="initTaxonList(this)" autocomplete="off" />
+			<input id="sninput" name="taxon" value="<?php echo $taxon; ?>" size="40" />
 			<input type="hidden" name="category" value="<?php echo $category; ?>" />
 			<input type="hidden" name="lang" value="<?php echo $lang; ?>" />
 			<input type="submit" name="action" value="Edit Taxon" />

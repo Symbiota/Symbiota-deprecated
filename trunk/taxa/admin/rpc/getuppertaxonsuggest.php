@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-$q = $_REQUEST['q'];
+$q = $_REQUEST['term'];
 
 $upperTax = Array();
 $con = MySQLiConnectionFactory::getCon("readonly");
@@ -19,5 +19,5 @@ $result->close();
 if(!($con === false)) $con->close();
 
 //output the response
-echo "['".implode("','",$upperTax)."']";
+echo json_encode($upperTax);
 ?>

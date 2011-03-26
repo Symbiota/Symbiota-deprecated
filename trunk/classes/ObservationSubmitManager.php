@@ -76,7 +76,7 @@ class ObservationSubmitManager {
 
 				$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificname, '.
 					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
-					'identificationReferences, identificationQualifier, recordedBy, recordNumber, '.
+					'identificationReferences, recordedBy, recordNumber, '.
 					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
 					'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
@@ -89,7 +89,6 @@ class ObservationSubmitManager {
 				($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
 				($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
 				($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
-				($occArr['identificationqualifier']?'"'.$occArr['identificationqualifier'].'"':'NULL').','.
 				'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
 				($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
 				'"'.$eventDate.'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.

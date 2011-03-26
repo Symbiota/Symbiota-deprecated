@@ -1,3 +1,46 @@
+$(document).ready(function() {
+	$("#sciname").autocomplete({ 
+		source: "rpc/getspeciessuggest.php",
+		change: function(event, ui) { 
+			verifySciName();
+		}
+	},{ minLength: 3, autoFocus: true });
+});
+
+function verifySciName(){
+	var sciNameStr = document.obsform.sciname.value;
+	if(sciNameStr){
+		snXmlHttp = GetXmlHttpObject();
+		if(snXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/verifysciname.php";
+		url=url + "?sciname=" + sciNameStr;
+		snXmlHttp.onreadystatechange=function(){
+			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+				if(snXmlHttp.responseText){
+					var retObj = eval("("+snXmlHttp.responseText+")");
+					document.obsform.scientificnameauthorship.value = retObj.author;
+					document.obsform.family.value = retObj.family;
+				}
+				else{
+					document.obsform.scientificnameauthorship.value = "";
+					document.obsform.family.value = "";
+					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
+					snXmlHttp = null;
+				}
+			}
+		};
+		snXmlHttp.open("POST",url,true);
+		snXmlHttp.send(null);
+	}
+	else{
+		document.obsform.scientificnameauthorship.value = "";
+		document.obsform.family.value = "";
+	}
+} 
+
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
@@ -117,61 +160,6 @@ function submitObsForm(f){
 		return false;
     }
     return true;
-}
-
-function initTaxonList(input){
-	$(input).autocomplete({ ajax_get:getTaxonSuggs, minchars:3 });
-}
-
-function getTaxonSuggs(key,cont){ 
-   	var script_name = 'rpc/getspecies.php';
-   	var params = { 'q':key }
-   	$.get(script_name,params,
-		function(obj){
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res);
-		},
-	'json');
-}
-
-function verifySciName(){
-	if(document.obsform.family.value == ""){
-		var sciNameStr = document.obsform.sciname.value;
-		snXmlHttp = GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/verifysciname.php";
-		url=url + "?sciname=" + sciNameStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				if(snXmlHttp.responseText){
-					var retObj = eval("("+snXmlHttp.responseText+")");
-					document.obsform.scientificnameauthorship.value = retObj.author;
-					document.obsform.family.value = retObj.family;
-				}
-				else{
-					document.obsform.scientificnameauthorship.value = "";
-					document.obsform.family.value = "";
-					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
-					snXmlHttp = null;
-				}
-			}
-		};
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
-} 
-
-function scinameChanged(){
-	document.obsform.scientificnameauthorship.value = "";
-	document.obsform.family.value = "";
 }
 
 function verifyDate(eventDateInput){

@@ -51,7 +51,7 @@ $imgloc = "../images/games/namegame/";
 		.question{font-size:30px}
 		#rw{margin-left:auto;margin-right:auto}
 	</style>
-	<script type="text/javascript" src="../js/namegamecsspopup.js" charset="utf-8"></script>
+	<script type="text/javascript" src="../js/symb/namegamecsspopup.js" charset="utf-8"></script>
 	<script language="javascript"> 
 		//COLLAPSE MENU
 		function toggle(divID, linkID) {

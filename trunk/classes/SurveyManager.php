@@ -63,7 +63,7 @@ class SurveyManager {
 	
 	public function getMetaData(){
 		if(!$this->metaData){
-			$sql = "SELECT s.projectname, s.locality, s.managers, s.latcentroid, s.longcentroid, s.notes ".
+			$sql = "SELECT s.projectname, s.locality, s.managers, s.latcentroid, s.longcentroid, s.notes, s.ispublic ".
 				"FROM omsurveys s WHERE s.surveyid = ".$this->surveyId;
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
@@ -73,7 +73,8 @@ class SurveyManager {
 				$this->metaData["latcentroid"] = $row->latcentroid;
 				$this->metaData["longcentroid"] = $row->longcentroid;
 				$this->metaData["notes"] = $row->notes;
-	    	}
+				$this->metaData["ispublic"] = $row->ispublic;
+			}
 	    	$result->close();
 		}
 		return $this->metaData;

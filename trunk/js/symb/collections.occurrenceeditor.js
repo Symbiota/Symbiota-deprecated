@@ -1,9 +1,91 @@
-function initTabs(tabObjId){
-	var dTabs=new ddtabcontent(tabObjId); 
-	dTabs.setpersist(true);
-	dTabs.setselectedClassTarget("link"); 
-	dTabs.init();
-}
+$(document).ready(function() {
+	$("#occedittabs").tabs({
+		select: function(event, ui) {
+			statusObj = document.getElementById("statusdiv");
+			if(statusObj){
+				statusObj.style.display = "none";
+			}
+			return true;
+		}
+	});
+
+	$("#ffsciname").autocomplete({ 
+		source: "rpc/getspeciessuggest.php", 
+		change: function(event, ui) { 
+			verifyFullformSciName();
+			fieldChanged('sciname');
+			fieldChanged('scientificnameauthorship');
+			fieldChanged('family');
+		}
+	},
+	{ minLength: 3, autoFocus: true });
+
+	//Determination add form
+	$("#dafsciname").autocomplete({ 
+		source: "rpc/getspeciessuggest.php",
+		change: function(event, ui) { 
+			verifyDetSciName(document.detaddform);
+		}
+	},
+	{ minLength: 3, autoFocus: true });
+	
+	//Determination edit form
+	$("#defsciname").autocomplete({ 
+		source: "rpc/getspeciessuggest.php",
+		change: function(event, ui) { 
+			verifyDetSciName(document.deteditform);
+		}
+	},
+	{ minLength: 3, autoFocus: true });
+	
+	//Misc pulldown fields
+	$("#ffcountry").autocomplete( { source: countryArr },{ minLength: 2, autoFocus: true } );
+
+	$("#ffstate").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/statesuggest.php", { term: request.term, "collid": collId, "country": document.fullform.country.value }, response );
+		}
+	},{ minLength: 2, autoFocus: true }
+	);
+
+	$("#ffcounty").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/countysuggest.php", { term: request.term, "collid": collId, "state": document.fullform.stateprovince.value }, response );
+		}
+	},{ minLength: 2, autoFocus: true }
+	);
+});
+
+function verifyFullformSciName(){
+	var f = document.fullform;
+	var sciNameStr = f.sciname.value;
+	snXmlHttp = GetXmlHttpObject();
+	if(snXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/verifysciname.php";
+	url=url + "?sciname=" + sciNameStr;
+	snXmlHttp.onreadystatechange=function(){
+		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+			if(snXmlHttp.responseText){
+				var retObj = eval("("+snXmlHttp.responseText+")");
+				f.scientificnameauthorship.value = retObj.author;
+				f.family.value = retObj.family;
+			}
+			else{
+				f.scientificnameauthorship.value = "";
+				f.family.value = "";
+				alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
+				f.sciname.focus();
+			}
+			fieldChanged('scientificnameauthorship');
+			fieldChanged('family');
+		}
+	};
+	snXmlHttp.open("POST",url,true);
+	snXmlHttp.send(null);
+} 
 
 function toggle(target){
 	var ele = document.getElementById(target);
@@ -58,8 +140,8 @@ function toggleIdDetails(){
 	toggle("idremdiv");
 }
 
-function openMappingAid(targetForm,targetLat,targetLong,latDef,lngDef,zoom) {
-    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong+"&latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+function openMappingAid(latDef,lngDef,zoom) {
+    mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
     if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
@@ -190,12 +272,100 @@ function insertElevFt(f){
 	f.verbatimelevation.value = verbStr;
 }
 
+function catalogNumberChanged(cnValue){
+	fieldChanged('catalognumber');
+
+	if(cnValue){
+		cnXmlHttp = GetXmlHttpObject();
+		if(cnXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId;
+		cnXmlHttp.onreadystatechange=function(){
+			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
+				var resObj = eval('(' + cnXmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					alert("Record(s) of same catalog number already exists: " + resObj);
+				}
+			}
+		};
+		cnXmlHttp.open("POST",url,true);
+		cnXmlHttp.send(null);
+	}
+}
+
+function occurrenceIdChanged(oiValue){
+	fieldChanged('occurrenceid');
+
+	if(oiValue){
+		oiXmlHttp = GetXmlHttpObject();
+		if(oiXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue;
+		oiXmlHttp.onreadystatechange=function(){
+			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
+				var resObj = eval('(' + oiXmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					alert("Record(s) of same catalog number already exists: " + resObj);
+				}
+			}
+		};
+		oiXmlHttp.open("POST",url,true);
+		oiXmlHttp.send(null);
+	}
+}
+
+function lookForDups(f){
+	var collName = f.recordedby.value;
+	var collNum = f.recordnumber.value;
+	var collDate = f.eventdate.value;
+	if(collName && collNum){
+		//Parse last name of collector
+		var lastName = "";
+		var lastNameArr = collName.split(",");
+		lastNameArr = lastNameArr[0].split(";");
+		lastNameArr = lastNameArr[0].split("&");
+		lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
+		if(lastNameArr.length == 1){
+			lastName = lastNameArr[0];
+		}
+		else if(lastNameArr.length > 1){
+			lastName = lastNameArr[1];
+		}
+		
+		//Check for matching records
+		dupXmlHttp = GetXmlHttpObject();
+		if(dupXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/querydups.php?cname=" + lastName + "&cnum=" + collNum;
+		if(collDate) url = url + "&cdate=" + collDate;
+		dupXmlHttp.onreadystatechange=function(){
+			if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
+				var resObj = eval('(' + dupXmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					alert("Duplicate records have been found: " + resObj);
+				}
+				else{
+					alert("No duplicates found.");
+				}
+			}
+		};
+		dupXmlHttp.open("POST",url,true);
+		dupXmlHttp.send(null);
+	}
+}
+
 function fieldChanged(fieldName){
 	document.fullform.editedfields.value = document.fullform.editedfields.value + fieldName + ";"; 
 }
 
 //Form verification code
-function submitFullForm(f){
+function verifyFullForm(f){
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
 		return false;
@@ -219,7 +389,6 @@ function submitFullForm(f){
 		alert("Locality field must have a value");
 		return false;
 	}
-
 	return true;
 }
 
@@ -230,92 +399,7 @@ function verifyGotoNew(f){
 	return true;
 }
 
-function submitDetEditForm(f){
-	if(f.sciname.value == ""){
-		alert("Scientific Name field must have a value");
-		return false;
-	}
-	if(f.identifiedby.value == ""){
-		alert("Determiner field must have a value");
-		return false;
-	}
-	if(f.dateidentified.value == ""){
-		alert("Determination Data field must have a value");
-		return false;
-	}
-	if(!isNumeric(f.sortsequence.value)){
-		alert("Sort Sequence field must be a numeric value only");
-		return false;
-	}
-	return true;
-}
-
-function submitImgAddForm(f){
-    if(f.elements["imgfile"].value.replace(/\s/g, "") == "" ){
-        if(f.elements["imgurl"].value.replace(/\s/g, "") == ""){
-        	window.alert("Select an image file or enter a URL to an existing image");
-			return false;
-        }
-    }
-    return true;
-}
-
-function submitImgEditForm(f){
-	if(f.url.value == ""){
-		alert("Web URL field must have a value");
-		return false;
-	}
-	return true;
-}
-
-function submitImgDelForm(f){
-	if(confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.')){
-		return true;
-	}
-	return false;
-}
-
 //Occurrence field checks
-function verifySciName(f){
-	if(f.scientificnameauthorship.value == ""){
-		var sciNameStr = f.sciname.value;
-		snXmlHttp = GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/verifysciname.php";
-		url=url + "?sciname=" + sciNameStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				if(snXmlHttp.responseText){
-					var retObj = eval("("+snXmlHttp.responseText+")");
-					f.scientificnameauthorship.value = retObj.author;
-					f.family.value = retObj.family;
-				}
-				else{
-					f.scientificnameauthorship.value = "";
-					f.family.value = "";
-					f.identifiedby.focus();
-					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
-				}
-				fieldChanged('scientificnameauthorship');
-				fieldChanged('family');
-			}
-		};
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
-} 
-
-function scinameChanged(){
-	document.fullform.scientificnameauthorship.value = "";
-	document.fullform.family.value = "";
-	fieldChanged('sciname');
-	fieldChanged('scientificnameauthorship');
-	fieldChanged('family');
-}
-
 function verifyDate(eventDateInput){
 	var dateStr = eventDateInput.value;
 	if(dateStr == "") return true;
@@ -326,6 +410,141 @@ function verifyDate(eventDateInput){
 		return false;
 	}
 	return true;
+}
+
+//Determination form methods 
+function verifyDetSciName(f){
+	var sciNameStr = f.sciname.value;
+	snXmlHttp = GetXmlHttpObject();
+	if(snXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/verifysciname.php";
+	url=url + "?sciname=" + sciNameStr;
+	snXmlHttp.onreadystatechange=function(){
+		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+			if(snXmlHttp.responseText){
+				var retObj = eval("("+snXmlHttp.responseText+")");
+				f.scientificnameauthorship.value = retObj.author;
+				f.tidtoadd.value = retObj.tid;
+			}
+			else{
+				f.scientificnameauthorship.value = "";
+				alert("Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name.");
+				f.sciname.focus();
+			}
+		}
+	};
+	snXmlHttp.open("POST",url,true);
+	snXmlHttp.send(null);
+} 
+
+function detDateChanged(f){
+	var isNew = false;
+	var newDateStr = f.dateidentified.value;
+	if(newDateStr){
+		dateIdentified = document.fullform.dateidentified.value;
+		if(dateIdentified){
+			var yearPattern = /[1,2]{1}\d{3}/;
+			var newYear = newDateStr.match(yearPattern);
+			var curYear = dateIdentified.match(yearPattern);
+			if(newYear[0] > curYear[0]){
+				isNew = true;
+			}
+		}
+		else{
+			isNew = true;
+		}
+	}
+	f.makecurrent.checked = isNew;
+	f.remapimages.checked = isNew;
+}
+
+function verifyDetAddForm(f){
+	if(f.sciname.value == ""){
+		alert("Scientific Name field must have a value");
+		return false;
+	}
+	if(f.identifiedby.value == ""){
+		alert("Determiner field must have a value");
+		return false;
+	}
+	if(f.dateidentified.value == ""){
+		alert("Determination Date field must have a value");
+		return false;
+	}
+	if(!isNumeric(f.sortsequence.value)){
+		alert("Sort Sequence field must be a numeric value only");
+		return false;
+	}
+	return true;
+}
+
+function verifyDetEditForm(f){
+	if(f.sciname.value == ""){
+		alert("Scientific Name field must have a value");
+		return false;
+	}
+	if(f.identifiedby.value == ""){
+		alert("Determiner field must have a value");
+		return false;
+	}
+	if(f.dateidentified.value == ""){
+		alert("Determination Date field must have a value");
+		return false;
+	}
+	if(!isNumeric(f.sortsequence.value)){
+		alert("Sort Sequence field must be a numeric value only");
+		return false;
+	}
+	return true;
+}
+
+//Determination form methods 
+function verifyImgAddForm(f){
+    if(f.elements["imgfile"].value.replace(/\s/g, "") == "" ){
+        if(f.elements["imgurl"].value.replace(/\s/g, "") == ""){
+        	window.alert("Select an image file or enter a URL to an existing image");
+			return false;
+        }
+    }
+    return true;
+}
+
+function verifyImgEditForm(f){
+	if(f.url.value == ""){
+		alert("Web URL field must have a value");
+		return false;
+	}
+	return true;
+}
+
+function verifyImgDelForm(f){
+	if(confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.')){
+		return true;
+	}
+	return false;
+}
+
+
+//Misc
+function GetXmlHttpObject(){
+	var xmlHttp=null;
+	try{
+		// Firefox, Opera 8.0+, Safari, IE 7.x
+  		xmlHttp=new XMLHttpRequest();
+  	}
+	catch (e){
+  		// Internet Explorer
+  		try{
+    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+  		catch(e){
+    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+    	}
+  	}
+	return xmlHttp;
 }
 
 function inputIsNumeric(inputObj, titleStr){
@@ -347,48 +566,4 @@ function isNumeric(sText){
       	}
    	}
 	return isNumber;
-}
-
-
-//Misc
-function initTaxonList(input){
-	$(input).autocomplete({ ajax_get:getTaxonSuggs, minchars:3 });
-}
-
-function initDetTaxonList(input){
-	$(input).autocomplete({ ajax_get:getTaxonSuggs, minchars:3 });
-}
-
-function getTaxonSuggs(key,cont){ 
-   	var script_name = 'rpc/getspecies.php';
-   	var params = { 'q':key }
-   	$.get(script_name,params,
-		function(obj){
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res);
-		},
-	'json');
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

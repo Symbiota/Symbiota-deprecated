@@ -2,29 +2,50 @@
 * key: input for LOOK(1)
 * cont: function(res) for return of suggest results
 */ 
-function getSuggs(key,cont){
-	var taxonType = 1;
-	var taxonTypeObj = document.getElementById("taxontype");
-	if(taxonTypeObj){
-		taxonType = taxonTypeObj.value;
+
+$(document).ready(function() {
+	function split( val ) {
+		return val.split( /,\s*/ );
 	}
-	var script_name = 'rpc/taxalist.php';
-	var params = { 'q':key , 't':taxonType }
-	$.get(script_name,params,
-		function(obj){ 
-           // obj is just array of strings
-           var res = [];
-           for(var i=0;i<obj.length;i++){
-        	   res.push({ id:i , value:obj[i]});
-           }
-        // will build suggestions list
-        cont(res); 
-     	},
-	'json');
-}
-		
-$(document).ready(function(){
-	$('input.complete').autocomplete({ ajax_get : getSuggs, multi: true});
+	function extractLast( term ) {
+		return split( term ).pop();
+	}
+
+	$( "#taxa" )
+		// don't navigate away from the field on tab when selecting an item
+		.bind( "keydown", function( event ) {
+			if ( event.keyCode === $.ui.keyCode.TAB &&
+					$( this ).data( "autocomplete" ).menu.active ) {
+				event.preventDefault();
+			}
+		})
+		.autocomplete({
+			source: function( request, response ) {
+				$.getJSON( "rpc/taxalist.php", {
+					term: extractLast( request.term ), t: function() { return document.harvestparams.taxontype.value; }
+				}, response );
+			},
+			search: function() {
+				// custom minLength
+				var term = extractLast( this.value );
+				if ( term.length < 3 ) {
+					return false;
+				}
+			},
+			focus: function() {
+				// prevent value inserted on focus
+				return false;
+			},
+			select: function( event, ui ) {
+				var terms = split( this.value );
+				// remove the current input
+				terms.pop();
+				// add the selected item
+				terms.push( ui.item.value );
+				this.value = terms.join( ", " );
+				return false;
+			}
+		},{ autoFocus: true });
 });
 
 function checkUpperLat(){
@@ -49,50 +70,49 @@ function checkBottomLat(){
 	}
 }
 
-	function checkRightLong(){
-		if(document.harvestparams.rightlong.value != ""){
-			if(document.harvestparams.rightlong_EW.value=='E'){
-				document.harvestparams.rightlong.value = Math.abs(parseFloat(document.harvestparams.rightlong.value));
-			}
-			else{
-				document.harvestparams.rightlong.value = -1*Math.abs(parseFloat(document.harvestparams.rightlong.value));
-			}
+function checkRightLong(){
+	if(document.harvestparams.rightlong.value != ""){
+		if(document.harvestparams.rightlong_EW.value=='E'){
+			document.harvestparams.rightlong.value = Math.abs(parseFloat(document.harvestparams.rightlong.value));
+		}
+		else{
+			document.harvestparams.rightlong.value = -1*Math.abs(parseFloat(document.harvestparams.rightlong.value));
 		}
 	}
+}
 
-	function checkLeftLong(){
-		if(document.harvestparams.leftlong.value != ""){
-			if(document.harvestparams.leftlong_EW.value=='E'){
-				document.harvestparams.leftlong.value = Math.abs(parseFloat(document.harvestparams.leftlong.value));
-			}
-			else{
-				document.harvestparams.leftlong.value = -1*Math.abs(parseFloat(document.harvestparams.leftlong.value));
-			}
+function checkLeftLong(){
+	if(document.harvestparams.leftlong.value != ""){
+		if(document.harvestparams.leftlong_EW.value=='E'){
+			document.harvestparams.leftlong.value = Math.abs(parseFloat(document.harvestparams.leftlong.value));
+		}
+		else{
+			document.harvestparams.leftlong.value = -1*Math.abs(parseFloat(document.harvestparams.leftlong.value));
 		}
 	}
+}
 
-	function checkPointLat(){
-		if(document.harvestparams.pointlat.value != ""){
-			if(document.harvestparams.pointlat_NS.value=='N'){
-				document.harvestparams.pointlat.value = Math.abs(parseFloat(document.harvestparams.pointlat.value));
-			}
-			else{
-				document.harvestparams.pointlat.value = -1*Math.abs(parseFloat(document.harvestparams.pointlat.value));
-			}
+function checkPointLat(){
+	if(document.harvestparams.pointlat.value != ""){
+		if(document.harvestparams.pointlat_NS.value=='N'){
+			document.harvestparams.pointlat.value = Math.abs(parseFloat(document.harvestparams.pointlat.value));
+		}
+		else{
+			document.harvestparams.pointlat.value = -1*Math.abs(parseFloat(document.harvestparams.pointlat.value));
 		}
 	}
+}
 
-	function checkPointLong(){
-		if(document.harvestparams.pointlong.value != ""){
-			if(document.harvestparams.pointlong_EW.value=='E'){
-				document.harvestparams.pointlong.value = Math.abs(parseFloat(document.harvestparams.pointlong.value));
-			}
-			else{
-				document.harvestparams.pointlong.value = -1*Math.abs(parseFloat(document.harvestparams.pointlong.value));
-			}
+function checkPointLong(){
+	if(document.harvestparams.pointlong.value != ""){
+		if(document.harvestparams.pointlong_EW.value=='E'){
+			document.harvestparams.pointlong.value = Math.abs(parseFloat(document.harvestparams.pointlong.value));
+		}
+		else{
+			document.harvestparams.pointlong.value = -1*Math.abs(parseFloat(document.harvestparams.pointlong.value));
 		}
 	}
-
+}
 
 function checkForm(){
 	var frm = document.harvestparams;

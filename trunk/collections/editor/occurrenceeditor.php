@@ -5,6 +5,7 @@ include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
+$tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $gotoMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:1;
 $carryLoc = array_key_exists('carryloc',$_REQUEST)?$_REQUEST['carryloc']:0;
@@ -68,15 +69,19 @@ if($symbUid){
 				$statusStr = $occManager->editDetermination($_REQUEST);
 			}
 			elseif($action == "Delete Determination"){
-				$statusStr = $occManager->deleteDetermination($_REQUEST["detid"]);
+				$statusStr = $occManager->deleteDetermination($_REQUEST['detid']);
+			}
+			elseif($action == "Make Current"){
+				$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
+				$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
 			}
 		}
 	}
 	if($occId && !$occArr){
 		$occArr = $occManager->getOccurArr();
 	}
-	elseif($collId){
-		$occArr = $occManager->setCollId($collId);
+	else if($collId){
+		$occArr = array_merge($occArr,$occManager->setCollId($collId));
 	}
 }
 ?>
@@ -84,15 +89,17 @@ if($symbUid){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
-    <link rel="stylesheet" href="../../css/main.css" type="text/css">
-	<link rel="stylesheet" type="text/css" href="../../css/tabcontent.css" />
-    <link rel="stylesheet" href="../../css/jqac.css" type="text/css">
-	<script type="text/javascript" src="../../js/tabcontent.js"></script>
-	<script type="text/javascript" src="../../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery.autocomplete-1.4.2.js"></script>
-	<script language="javascript" src="../../js/collections.occurrenceeditor.js"></script>
+    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript">
+		var collId = "<?php echo $collId; ?>";
+		var countryArr = new Array(<?php $occManager->echoCountryList($collId);?>);
+	</script>
+	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
 </head>
-<body onload="initTabs('occedittabs');">
+<body>
 
 	<?php
 	$displayLeftMenu = (isset($collections_editor_occurrenceeditorMenu)?$collections_individual_occurrenceeditorMenu:false);
@@ -119,15 +126,17 @@ if($symbUid){
 			}
 			if($statusStr){
 				?>
-				<fieldset style="margin:10px;padding:10px;">
-					<legend>Action Status</legend>
-					<div style="margin:10px;color:red;">
-						<?php echo $statusStr; ?>
-					</div>
-					<div style="margin:10px;">
-						Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
-					</div>
-				</fieldset>
+				<div id="statusdiv">
+					<fieldset style="margin:10px;padding:10px;">
+						<legend><b>Action Status</b></legend>
+						<div style="margin:10px;color:red;">
+							<?php echo $statusStr; ?>
+						</div>
+						<div style="margin:10px;">
+							Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
+						</div>
+					</fieldset>
+				</div>
 				<?php 
 			}
 			if($occId || $isEditor){
@@ -162,23 +171,105 @@ if($symbUid){
 				}
 				else{
 					?>
-					<ul id="occedittabs" class="shadetabs">
-						<li><a href="#" rel="occdiv" class="selected"><?php echo ($occId?'Occurrence Data':'Add a New Occurrence Record'); ?></a></li>
-						<?php
-						if($occId && $isEditor){
-							?>
-							<li><a href="#" rel="determdiv">Determination History</a></li>
-							<li><a href="#" rel="imagediv">Images</a></li>
+					<div id="occedittabs">
+						<ul>
+							<li>
+								<a href="#occdiv" <?php echo (!$tabTarget||$tabTarget=='occdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+									<?php echo ($occId?'Occurrence Data':'Add a New Occurrence Record'); ?>
+								</a>
+							</li>
 							<?php
-						}
-						?>
-					</ul>
-					<div style="border:1px solid gray;width:96%;margin-bottom:1em;padding:5px;">
-						<div id="occdiv" class="tabcontent" style="margin:10px;">
-							<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return submitFullForm(this)">
+							if($occId && $isEditor){
+								?>
+								<li>
+									<a href="#determdiv" <?php echo ($tabTarget=='determdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+									Determination History
+									</a>
+								</li>
+								<li>
+									<a href="#imagediv" <?php echo ($tabTarget=='imagediv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+										Images
+									</a>
+								</li>
+								<?php
+							}
+							?>
+						</ul>
+						<div id="occdiv" style="">
+							<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this)">
+								<fieldset>
+									<legend><b>Collector Info</b></legend>
+									<div style="float:left;">
+										<div style="clear:both;">
+											<span style="margin-left:2px;">
+												Catalog Number
+											</span>
+											<span style="margin-left:8px;">
+												Occurrence ID
+											</span>
+											<span style="margin-left:32px;">
+												Collector
+											</span>
+											<span style="margin-left:182px;">
+												Number
+											</span>
+											<span style="margin-left:25px;">
+												Date
+											</span>
+										</div>
+										<div style="clear:both;">
+											<span>
+												<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:100px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.value)" />
+											</span>
+											<span>
+												<input type="text" name="occurrenceid" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="occurrenceIdChanged(this.value);" title="Global Unique Identifier (GUID)" />
+											</span>
+											<span>
+												<input type="text" name="recordedby" tabindex="6" maxlength="255" style="width:220px;background-color:lightyellow;" value="<?php echo array_key_exists('recordedby',$occArr)?$occArr['recordedby']:''; ?>" onchange="fieldChanged('recordedby');" />
+											</span>
+											<span style="margin-left:10px;">
+												<input type="text" name="recordnumber" tabindex="8" maxlength="45" style="width:60px;" value="<?php echo array_key_exists('recordnumber',$occArr)?$occArr['recordnumber']:''; ?>" onchange="fieldChanged('recordnumber');" />
+											</span>
+											<span style="margin-left:10px;">
+												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="verifyDate(this);fieldChanged('eventdate');" />
+											</span>
+											<span style="margin-left:5px;cursor:pointer;" onclick="">
+												<input type="button" value="dups" tabindex="12" onclick="lookForDups(this.form);" />
+											</span>
+										</div>
+										<div style="clear:both;margin-top:5px;">
+											Associated Collectors:<br />
+											<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:430px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
+											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
+												<img src="../../images/showedit.png" style="width:15px;" />
+											</span>
+										</div>
+										<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
+											<span>
+												Verbatim Date:
+												<input type="text" name="verbatimeventdate" tabindex="16" maxlength="255" style="width:120px;" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="fieldChanged('verbatimeventdate');" />
+											</span>
+											<span style="margin-left:15px;">
+												MM/DD/YYYY:
+												<span style="margin:8px;">
+													<input type="text" name="month" tabindex="18" style="width:30px;" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />/
+													<input type="text" name="day" tabindex="20" style="width:30px;" value="<?php echo array_key_exists('day',$occArr)?$occArr['day']:''; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />/
+													<input type="text" name="year" tabindex="22" style="width:45px;" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />
+												</span>
+											</span>
+											<span style="margin-left:15px;">
+												Day of Year:
+												<span style="margin:16px;">
+													<input type="text" name="startdayofyear" tabindex="24" style="width:40px;" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
+													<input type="text" name="enddayofyear" tabindex="26" style="width:40px;" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
+												</span>
+											</span>
+										</div>
+									</div>
+								</fieldset>
 								<fieldset>
 									<legend><b>Latest Identification</b></legend>
-									<div style="clear:both;" class="p1">
+									<div style="clear:both;">
 										<span style="width:125px;">
 											Scientific Name:
 										</span>
@@ -186,41 +277,35 @@ if($symbUid){
 											Author:
 										</span>
 									</div>
-									<div style="clear:both;" class="p1">
+									<div style="clear:both;">
 										<span>
-											<?php $hasValue = array_key_exists("sciname",$occArr)&&$occArr["sciname"]?1:0; ?>
-											<input type="text" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["sciname"]:""; ?>" onfocus="initTaxonList(this)" autocomplete="off" onchange="scinameChanged()" <?php echo ($isEditor?'':'disabled '); ?> />
+											<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" style="width:390px;background-color:lightyellow;" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo ($isEditor?'':'disabled '); ?> />
 											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 										</span>
 										<span style="margin-left:10px;">
-											<?php $hasValue = array_key_exists("scientificnameauthorship",$occArr)&&$occArr["scientificnameauthorship"]?1:0; ?>
-											<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["scientificnameauthorship"]:""; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
+											<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 										</span>
 										<?php if(!$isEditor) echo '<div style="color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>' ?>
 										<div></div>
 									</div>
-									<div style="clear:both;padding:3px 0px 0px 10px;" class="p1">
+									<div style="clear:both;padding:3px 0px 0px 10px;">
 										<div style="float:left;">
-											<?php $hasValue = array_key_exists("identificationqualifier",$occArr)&&$occArr["identificationqualifier"]?1:0; ?>
 											<span>ID Qualifier:</span>
-											<input type="text" name="identificationqualifier" tabindex="4" size="5" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationqualifier"]:""; ?>" onfocus="verifySciName(this.form)" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
+											<input type="text" name="identificationqualifier" tabindex="30" size="5" style="" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 										</div>
 										<div style="float:left;margin-left:160px;">
-											<?php $hasValue = array_key_exists("family",$occArr)&&$occArr["family"]?1:0; ?>
 											<span>Family:</span>
-											<input type="text" name="family" size="30" maxlength="50" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" tabindex="0" value="<?php echo $hasValue?$occArr["family"]:""; ?>" onchange="fieldChanged('family');" />
+											<input type="text" name="family" size="30" maxlength="50" style="" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
 										</div>
 									</div>
-									<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;" class="p1">
+									<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;">
 										<div style="float:left;">
-											<?php $hasValue = array_key_exists("identifiedby",$occArr)&&$occArr["identifiedby"]?1:0; ?>
 											Identified By:
-											<input type="text" name="identifiedby" maxlength="255" tabindex="6" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identifiedby"]:""; ?>" onchange="fieldChanged('identifiedby');" />
+											<input type="text" name="identifiedby" maxlength="255" tabindex="32" style="" value="<?php echo array_key_exists('identifiedby',$occArr)?$occArr['identifiedby']:''; ?>" onchange="fieldChanged('identifiedby');" />
 										</div>
 										<div style="float:left;margin-left:15px;padding:3px 0px 0px 10px;">
-											<?php $hasValue = array_key_exists("dateidentified",$occArr)&&$occArr["dateidentified"]?1:0; ?>
 											Date Identified:
-											<input type="text" name="dateidentified" maxlength="45" tabindex="8" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["dateidentified"]:""; ?>" onchange="fieldChanged('dateidentified');" />
+											<input type="text" name="dateidentified" maxlength="45" tabindex="34" style="" value="<?php echo array_key_exists('dateidentified',$occArr)?$occArr['dateidentified']:''; ?>" onchange="fieldChanged('dateidentified');" />
 										</div>
 										<div style="float:left;margin-left:15px;cursor:pointer;" onclick="toggleIdDetails();">
 											<img src="../../images/showedit.png" style="width:15px;" />
@@ -228,79 +313,12 @@ if($symbUid){
 									</div>
 									<div style="clear:both;">
 										<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
-											<?php $hasValue = array_key_exists("identificationreferences",$occArr)&&$occArr["identificationreferences"]?1:0; ?>
 											ID References:
-											<input type="text" name="identificationreferences" tabindex="10" style="width:450px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationreferences"]:""; ?>" onchange="fieldChanged('identificationreferences');" />
+											<input type="text" name="identificationreferences" tabindex="36" style="width:450px;" value="<?php echo array_key_exists('identificationreferences',$occArr)?$occArr['identificationreferences']:''; ?>" onchange="fieldChanged('identificationreferences');" />
 										</div>
 										<div id="idremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
-											<?php $hasValue = array_key_exists("identificationremarks",$occArr)&&$occArr["identificationremarks"]?1:0; ?>
 											ID Remarks:
-											<input type="text" name="identificationremarks" tabindex="12" style="width:500px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["identificationremarks"]:""; ?>" onchange="fieldChanged('identificationremarks');" />
-										</div>
-									</div>
-								</fieldset>
-								<fieldset>
-									<legend><b>Collector Info</b></legend>
-									<div style="float:left;">
-										<div style="clear:both;" class="p1">
-											<span>
-												Collector:
-											</span>
-											<span style="margin-left:180px;">
-												Number:
-											</span>
-											<span style="margin-left:20px;">
-												Date:
-											</span>
-										</div>
-										<div style="clear:both;" class="p1">
-											<span>
-												<?php $hasValue = array_key_exists("recordedby",$occArr)&&$occArr["recordedby"]?1:0; ?>
-												<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:220px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordedby"]:""; ?>" onchange="fieldChanged('recordedby');" />
-											</span>
-											<span style="margin-left:10px;">
-												<?php $hasValue = array_key_exists("recordnumber",$occArr)&&$occArr["recordnumber"]?1:0; ?>
-												<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:60px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["recordnumber"]:""; ?>" onchange="fieldChanged('recordnumber');" />
-											</span>
-											<span style="margin-left:10px;">
-												<?php $hasValue = array_key_exists("eventdate",$occArr)&&$occArr["eventdate"]?1:0; ?>
-												<input type="text" name="eventdate" tabindex="18" style="width:130px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["eventdate"]:""; ?>" onchange="verifyDate(this);fieldChanged('eventdate');" />
-											</span>
-											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
-												<img src="../../images/showedit.png" style="width:15px;" />
-											</span>
-										</div>
-										<div style="clear:both;margin-top:5px;" class="p1">
-											<?php $hasValue = array_key_exists("associatedcollectors",$occArr)&&$occArr["associatedcollectors"]?1:0; ?>
-											Associated Collectors:<br />
-											<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" style="width:430px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedcollectors"]:""; ?>" onchange="fieldChanged('associatedcollectors');" />
-										</div>
-									</div>
-									<div id="dateextradiv" style="float:left;padding:5px;margin-left:10px;border:1px solid gray;display:none;">
-										<div>
-											Verbatim Date:
-											<?php $hasValue = array_key_exists("verbatimeventdate",$occArr)&&$occArr["verbatimeventdate"]?1:0; ?>
-											<input type="text" name="verbatimeventdate" tabindex="20" maxlength="255" style="width:120px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimeventdate"]:""; ?>" onchange="fieldChanged('verbatimeventdate');" />
-										</div>
-										<div>
-											MM/DD/YYYY:
-											<span style="margin:8px;">
-												<?php $hasValue = array_key_exists("month",$occArr)&&$occArr["month"]?1:0; ?>
-												<input type="text" name="month" tabindex="22" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["month"]:""; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />/
-												<?php $hasValue = array_key_exists("day",$occArr)&&$occArr["day"]?1:0; ?>
-												<input type="text" name="day" tabindex="24" style="width:30px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["day"]:""; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />/
-												<?php $hasValue = array_key_exists("year",$occArr)&&$occArr["year"]?1:0; ?>
-												<input type="text" name="year" tabindex="26" style="width:45px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["year"]:""; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />
-											</span>
-										</div>
-										<div>
-											Day of Year:
-											<span style="margin:16px;">
-												<?php $hasValue = array_key_exists("startdayofyear",$occArr)&&$occArr["startdayofyear"]?1:0; ?>
-												<input type="text" name="startdayofyear" tabindex="28" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["startdayofyear"]:""; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
-												<?php $hasValue = array_key_exists("enddayofyear",$occArr)&&$occArr["enddayofyear"]?1:0; ?>
-												<input type="text" name="enddayofyear" tabindex="30" style="width:40px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["enddayofyear"]:""; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
-											</span>
+											<input type="text" name="identificationremarks" tabindex="38" style="width:500px;" value="<?php echo array_key_exists('identificationremarks',$occArr)?$occArr['identificationremarks']:''; ?>" onchange="fieldChanged('identificationremarks');" />
 										</div>
 									</div>
 								</fieldset>
@@ -319,30 +337,26 @@ if($symbUid){
 									</div>
 									<div>
 										<span>
-											<?php $hasValue = array_key_exists("country",$occArr)&&$occArr["country"]?1:0; ?>
-											<input type="text" name="country" tabindex="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["country"]:""; ?>" onchange="fieldChanged('country');" />
+											<input type="text" id="ffcountry" name="country" tabindex="40" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('country',$occArr)?$occArr['country']:''; ?>" onchange="fieldChanged('country');" />
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("stateprovince",$occArr)&&$occArr["stateprovince"]?1:0; ?>
-											<input type="text" name="stateprovince" tabindex="34" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["stateprovince"]:""; ?>" onchange="fieldChanged('stateprovince');" />
+											<input type="text" id="ffstate" name="stateprovince" tabindex="42" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="fieldChanged('stateprovince');" />
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("county",$occArr)&&$occArr["county"]?1:0; ?>
-											<input type="text" name="county" tabindex="36" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["county"]:""; ?>" onchange="fieldChanged('county');" />
+											<input type="text" id="ffcounty" name="county" tabindex="44" style="width:150px;" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="fieldChanged('county');" />
 										</span>
 									</div>
 									<div style="margin:4px 0px 2px 0px;">
 										Locality:<br />
-										<?php $hasValue = array_key_exists("locality",$occArr)&&$occArr["locality"]?1:0; ?>
-										<input type="text" name="locality" tabindex="40" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["locality"]:""; ?>" onchange="fieldChanged('locality');" />
+										<input type="text" name="locality" tabindex="46" style="width:600px;background-color:lightyellow;" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 									</div>
 									<div style="margin-bottom:5px;">
 										<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
-										<input type="checkbox" name="localitysecurity" tabindex="42" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toogleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
+										<input type="checkbox" name="localitysecurity" tabindex="0" style="" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toogleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
 										Locality Security
 										<span id="locsecreason" style="margin-left:40px;display:<?php echo ($hasValue?'inline':'none') ?>">
 											<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
-											Security Reason Override: <input type="text" name="localitysecurityreason" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
+											Security Reason Override: <input type="text" name="localitysecurityreason" tabindex="0" onchange="fieldChanged('localitysecurityreason');" value="<?php echo $lsrValue; ?>" title="Leave blank for default rare, threatened, or sensitive status" />
 										</span>
 									</div>
 									<div>
@@ -373,7 +387,7 @@ if($symbUid){
 												$latValue = $occArr["decimallatitude"];
 											}
 											?>
-											<input type="text" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:<?php echo $latValue!==""?"lightyellow":"white"; ?>;" value="<?php echo $latValue; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude');fieldChanged('decimallatitude');" />
+											<input type="text" name="decimallatitude" tabindex="50" maxlength="10" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude');fieldChanged('decimallatitude');" />
 										</span>
 										<span>
 											<?php
@@ -386,36 +400,31 @@ if($symbUid){
 												$zoomValue = 9;
 											} 
 											?>
-											<input type="text" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:<?php echo $longValue!==""?"lightyellow":"white"; ?>;" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
+											<input type="text" name="decimallongitude" tabindex="52" maxlength="13" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("coordinateuncertaintyinmeters",$occArr)&&$occArr["coordinateuncertaintyinmeters"]?1:0; ?>
-											<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["coordinateuncertaintyinmeters"]:""; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
+											<input type="text" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
 										</span>
-										<span style="cursor:pointer;padding:3px;" onclick="openMappingAid('fullform','decimallatitude','decimallongitude',<?php echo $latValue.','.$longValue.','.$zoomValue; ?>);">
+										<span style="cursor:pointer;padding:3px;" onclick="openMappingAid(<?php echo ($latValue?$latValue:'0').','.($longValue?$longValue:'0').','.$zoomValue; ?>);">
 											<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
 										</span>
 										<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleCoordDiv();">
 											UTM
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("geodeticdatum",$occArr)&&$occArr["geodeticdatum"]?1:0; ?>
-											<input type="text" name="geodeticdatum" tabindex="50" maxlength="255" style="width:80px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["geodeticdatum"]:""; ?>" onchanged="fieldChanged('geodeticdatum');" />
+											<input type="text" name="geodeticdatum" tabindex="56" maxlength="255" style="width:80px;" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchanged="fieldChanged('geodeticdatum');" />
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("minimumelevationinmeters",$occArr)&&$occArr["minimumelevationinmeters"]?1:0; ?>
-											<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:55px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["minimumelevationinmeters"]:""; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation');fieldChanged('minimumelevationinmeters');" title="Minumum Elevation In Meters" />
+											<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation');fieldChanged('minimumelevationinmeters');" title="Minumum Elevation In Meters" />
 										</span> -
 										<span>
-											<?php $hasValue = array_key_exists("maximumelevationinmeters",$occArr)&&$occArr["maximumelevationinmeters"]?1:0; ?>
-											<input type="text" name="maximumelevationinmeters" tabindex="54" maxlength="6" style="width:55px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["maximumelevationinmeters"]:""; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation');fieldChanged('maximumelevationinmeters');" title="Maximum Elevation In Meters" />
+											<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation');fieldChanged('maximumelevationinmeters');" title="Maximum Elevation In Meters" />
 										</span>
 										<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('elevaiddiv');">
 											ft.
 										</span>
 										<span>
-											<?php $hasValue = array_key_exists("verbatimelevation",$occArr)&&$occArr["verbatimelevation"]?1:0; ?>
-											<input type="text" name="verbatimelevation" tabindex="56" maxlength="255" style="width:100px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimelevation"]:""; ?>" onchange="fieldChanged('verbatimelevation');" title="" />
+											<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" style="width:100px;" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="fieldChanged('verbatimelevation');" title="" />
 										</span>
 										<span style="margin-left:5px;cursor:pointer;" onclick="toggle('locextradiv1');toggle('locextradiv2');">
 											<img src="../../images/showedit.png" style="width:15px;" />
@@ -498,16 +507,13 @@ if($symbUid){
 										</div>
 										<div>
 											<span>
-												<?php $hasValue = array_key_exists("verbatimcoordinates",$occArr)&&$occArr["verbatimcoordinates"]?1:0; ?>
-												<input type="text" name="verbatimcoordinates" tabindex="58" maxlength="255" style="width:250px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["verbatimcoordinates"]:""; ?>" onchange="fieldChanged('verbatimcoordinates');" title="" />
+												<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" style="width:250px;" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="fieldChanged('verbatimcoordinates');" title="" />
 											</span>
 											<span>
-												<?php $hasValue = array_key_exists("georeferencedby",$occArr)&&$occArr["georeferencedby"]?1:0; ?>
-												<input type="text" name="georeferencedby" tabindex="62" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencedby"]:""; ?>" onchange="fieldChanged('georeferencedby');" />
+												<input type="text" name="georeferencedby" tabindex="66" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
 											</span>
 											<span>
-												<?php $hasValue = array_key_exists("georeferenceprotocol",$occArr)&&$occArr["georeferenceprotocol"]?1:0; ?>
-												<input type="text" name="georeferenceprotocol" tabindex="64" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceprotocol"]:""; ?>" onchange="fieldChanged('georeferenceprotocol');" />
+												<input type="text" name="georeferenceprotocol" tabindex="68" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
 											</span>
 										</div>
 									</div>
@@ -537,16 +543,13 @@ if($symbUid){
 										</div>
 										<div>
 											<span>
-												<?php $hasValue = array_key_exists("georeferencesources",$occArr)&&$occArr["georeferencesources"]?1:0; ?>
-												<input type="text" name="georeferencesources" tabindex="66" maxlength="255" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferencesources"]:""; ?>" onchange="fieldChanged('georeferencesources');" />
+												<input type="text" name="georeferencesources" tabindex="70" maxlength="255" style="width:160px;" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
 											</span>
 											<span>
-												<?php $hasValue = array_key_exists("georeferenceverificationstatus",$occArr)&&$occArr["georeferenceverificationstatus"]?1:0; ?>
-												<input type="text" name="georeferenceverificationstatus" tabindex="68" maxlength="32" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceverificationstatus"]:""; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
+												<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" style="width:160px;" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
 											</span>
 											<span>
-												<?php $hasValue = array_key_exists("georeferenceremarks",$occArr)&&$occArr["georeferenceremarks"]?1:0; ?>
-												<input type="text" name="georeferenceremarks" tabindex="70" maxlength="255" style="width:160px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["georeferenceremarks"]:""; ?>" onchange="fieldChanged('georeferenceremarks');" />
+												<input type="text" name="georeferenceremarks" tabindex="74" maxlength="255" style="width:160px;" value="<?php echo array_key_exists('georeferenceremarks',$occArr)?$occArr['georeferenceremarks']:''; ?>" onchange="fieldChanged('georeferenceremarks');" />
 											</span>
 										</div>
 									</div>
@@ -554,79 +557,57 @@ if($symbUid){
 								<fieldset>
 									<legend><b>Misc</b></legend>
 									<div style="padding:3px;">
-										<?php $hasValue = array_key_exists("habitat",$occArr)&&$occArr["habitat"]?1:0; ?>
 										Habitat:
-										<input type="text" name="habitat" tabindex="82" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["habitat"]:""; ?>" onchange="fieldChanged('habitat');" />
+										<input type="text" name="habitat" tabindex="82" style="width:600px;" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 									</div>
 									<div style="padding:3px;">
-										<?php $hasValue = array_key_exists("associatedtaxa",$occArr)&&$occArr["associatedtaxa"]?1:0; ?>
 										Associated Taxa:
-										<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["associatedtaxa"]:""; ?>" onchange="fieldChanged('associatedtaxa');" />
+										<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" />
 									</div>
 									<div style="padding:3px;">
-										<?php $hasValue = array_key_exists("dynamicproperties",$occArr)&&$occArr["dynamicproperties"]?1:0; ?>
 										Description:
-										<input type="text" name="dynamicproperties" tabindex="86" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["dynamicproperties"]:""; ?>" onchange="fieldChanged('dynamicproperties');" />
+										<input type="text" name="dynamicproperties" tabindex="86" style="width:600px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
 									</div>
 									<div style="padding:3px;">
-										<?php $hasValue = array_key_exists("occurrenceremarks",$occArr)&&$occArr["occurrenceremarks"]?1:0; ?>
 										Notes:
-										<input type="text" name="occurrenceremarks" tabindex="88" style="width:600px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceremarks"]:""; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
+										<input type="text" name="occurrenceremarks" tabindex="88" style="width:600px;" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
 									</div>
 								</fieldset>
 								<fieldset>
 									<legend><b>Curation</b></legend>
 									<div style="padding:3px;">
 										<span>
-											<?php $hasValue = array_key_exists("catalognumber",$occArr)&&$occArr["catalognumber"]?1:0; ?>
-											Catalog Number:
-											<input type="text" name="catalognumber" tabindex="90" maxlength="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["catalognumber"]:""; ?>" onchange="fieldChanged('catalognumber');" />
-										</span>
-										<span style="margin-left:30px;">
-											<?php $hasValue = array_key_exists("occurrenceid",$occArr)&&$occArr["occurrenceid"]?1:0; ?>
-											Occurrence ID (GUID):
-											<input type="text" name="occurrenceid" tabindex="92" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["occurrenceid"]:""; ?>" onchange="fieldChanged('occurrenceid');" title="Global Unique Identifier" />
-										</span>
-									</div>
-									<div style="padding:3px;">
-										<span>
-											<?php $hasValue = array_key_exists("typestatus",$occArr)&&$occArr["typestatus"]?1:0; ?>
 											Type Status:
-											<input type="text" name="typestatus" tabindex="94" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["typestatus"]:""; ?>" onchange="fieldChanged('typestatus');" />
+											<input type="text" name="typestatus" tabindex="94" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
 										</span>
 										<span style="margin-left:30px;">
-											<?php $hasValue = array_key_exists("disposition",$occArr)&&$occArr["disposition"]?1:0; ?>
 											Disposition:
-											<input type="text" name="disposition" tabindex="96" maxlength="32" style="width:200px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["disposition"]:""; ?>" onchange="fieldChanged('disposition');" />
+											<input type="text" name="disposition" tabindex="96" maxlength="32" style="width:200px;" value="<?php echo array_key_exists('disposition',$occArr)?$occArr['disposition']:''; ?>" onchange="fieldChanged('disposition');" />
 										</span>
 									</div>
 									<div style="padding:3px;">
 										<span>
-											<?php $hasValue = array_key_exists("reproductivecondition",$occArr)&&$occArr["reproductivecondition"]?1:0; ?>
 											Reproductive Condition:
-											<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["reproductivecondition"]:""; ?>" onchange="fieldChanged('reproductivecondition');" />
+											<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
 										</span>
 										<span style="margin-left:30px;">
-											<?php $hasValue = array_key_exists("establishmentmeans",$occArr)&&$occArr["establishmentmeans"]?1:0; ?>
 											Establishment Means:
-											<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["establishmentmeans"]:""; ?>" onchange="fieldChanged('establishmentmeans');" />
+											<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
 										</span>
 										<span style="margin-left:15px;">
 											<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]?1:0; ?>
-											<input type="checkbox" name="cultivationstatus" tabindex="102" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
+											<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
 											Cultivated
 										</span>
 									</div>
 									<div style="padding:3px;">
 										<span>
-											<?php $hasValue = array_key_exists("ownerinstitutioncode",$occArr)&&$occArr["ownerinstitutioncode"]?1:0; ?>
 											Owner InstitutionCode:
-											<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["ownerinstitutioncode"]:""; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
+											<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 										</span>
 										<span style="margin-left:30px;">
-											<?php $hasValue = array_key_exists("othercatalognumbers",$occArr)&&$occArr["othercatalognumbers"]?1:0; ?>
 											Other Catalog Numbers:
-											<input type="text" name="othercatalognumbers" tabindex="106" maxlength="255" style="width:150px;background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["othercatalognumbers"]:""; ?>" onchange="fieldChanged('othercatalognumbers');" />
+											<input type="text" name="othercatalognumbers" tabindex="106" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');" />
 										</span>
 									</div>
 								</fieldset>
@@ -634,14 +615,12 @@ if($symbUid){
 									<legend><b>Other</b></legend>
 									<div style="padding:3px;">
 										<span>
-											<?php $hasValue = array_key_exists("basisofrecord",$occArr)&&$occArr["basisofrecord"]?1:0; ?>
 											Basis of Record:
-											<input type="text" name="basisofrecord" tabindex="108" maxlength="32" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["basisofrecord"]:""; ?>" onchange="fieldChanged('basisofrecord');" />
+											<input type="text" name="basisofrecord" tabindex="108" maxlength="32" style="" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
 										</span>
 										<span style="margin-left:20px;">
-											<?php $hasValue = array_key_exists("language",$occArr)&&$occArr["language"]?1:0; ?>
 											Language:
-											<input type="text" name="language" tabindex="110" maxlength="20" style="background-color:<?php echo $hasValue?"lightyellow":"white"; ?>;" value="<?php echo $hasValue?$occArr["language"]:""; ?>" onchange="fieldChanged('language');" />
+											<input type="text" name="language" tabindex="110" maxlength="20" style="" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 										</span>
 									</div>
 								</fieldset>
@@ -679,12 +658,12 @@ if($symbUid){
 						<?php
 						if($occId && $isEditor){
 							?>
-							<div id="determdiv" class="tabcontent" style="margin:10px;">
+							<div id="determdiv" style="">
 								<div style="text-align:right;width:100%;">
 									<img style="border:0px;width:12px;cursor:pointer;" src="../../images/add.png" onclick="toggle('newdetdiv');" title="Add New Determination" />
 								</div>
 								<div id="newdetdiv" style="display:none;">
-									<form name="detaddform" action="occurrenceeditor.php" method="get" onsubmit="return submitDetForm(this)">
+									<form name="detaddform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetAddForm(this)">
 										<fieldset>
 											<legend><b>Add a New Determination</b></legend>
 											<div style='margin:3px;'>
@@ -693,13 +672,13 @@ if($symbUid){
 											</div>
 											<div style='margin:3px;'>
 												<b>Scientific Name:</b> 
-												<input type="text" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initDetTaxonList(this)" autocomplete="off" onchange="document.detaddform.scientificnameauthorship.value = '';" />
-												<input type="hidden" id="dettidtoadd" name="tidtoadd" value="" />
+												<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" />
+												<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
 												<input type="hidden" name="family" value="" />
 											</div>
 											<div style='margin:3px;'>
 												<b>Author:</b> 
-												<input type="text" name="scientificnameauthorship" style="width:200px;" onfocus="verifySciName(this.form);" />
+												<input type="text" name="scientificnameauthorship" style="width:200px;" />
 											</div>
 											<div style='margin:3px;'>
 												<b>Determiner:</b> 
@@ -707,7 +686,7 @@ if($symbUid){
 											</div>
 											<div style='margin:3px;'>
 												<b>Date:</b> 
-												<input type="text" name="dateidentified" style="background-color:lightyellow;" />
+												<input type="text" name="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
 											</div>
 											<div style='margin:3px;'>
 												<b>Reference:</b> 
@@ -717,53 +696,18 @@ if($symbUid){
 												<b>Notes:</b> 
 												<input type="text" name="identificationremarks" style="width:350px;" />
 											</div>
-											<div style='margin:3px;'>
-												<b>Sort Sequence:</b> 
-												<input type="text" name="sortsequence" value="" />
-											</div>
 											<div style='margin:15px;'>
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-												<input type="submit" name="submitaction" value="Add New Determination" />
-												<span>
-													<input type="checkbox" name="makecurrent" value="1" CHECKED /> Make this the current determination
-												</span>
+												<div style="float:left;">
+													<input type="submit" name="submitaction" value="Add New Determination" />
+												</div>
+												<div style="float:left;margin-left:30px;">
+													<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination <br/>
+													<input type="checkbox" name="remapimages" value="1" /> Remap images to new taxonomic name
+												</div>
 											</div>
 										</fieldset>
 									</form>
-								</div>
-								<div class="fieldset">
-									<div class="legend"><b>Current Determination</b></div>
-									<div>
-										<?php 
-										if($occArr['identificationqualifier']) echo $occArr['identificationqualifier'].' ';
-										echo '<b><i>'.$occArr['sciname'].'</i></b> '.$occArr['scientificnameauthorship'];
-										?>
-									</div>
-									<div style='margin:3px 0px 0px 15px;'>
-										<b>Determiner:</b> <?php echo ($occArr['identifiedby']?$occArr['identifiedby']:$occArr['recordedby']); ?>
-										<span style="margin-left:40px;">
-											<b>Date:</b> <?php echo $occArr['dateidentified']; ?>
-										</span>
-									</div>
-									<?php 
-									if($occArr['identificationreferences']){
-										?>
-										<div style='margin:3px 0px 0px 15px;'>
-											<b>Reference:</b> <?php echo $occArr['identificationreferences']; ?>
-										</div>
-										<?php 
-									}
-									if($occArr['identificationremarks']){
-										?>
-										<div style='margin:3px 0px 0px 15px;'>
-											<b>Notes:</b> <?php echo $occArr['identificationremarks']; ?>
-										</div>
-										<?php 
-									}
-									?>
-									<div style="margin:10px 0px 0px 15px;">
-										* Edit current determination from Occurrence Tab
-									</div>
 								</div>
 								<div class="fieldset">
 									<div class="legend"><b>Determination History</b></div>
@@ -771,15 +715,22 @@ if($symbUid){
 									if(array_key_exists('dets',$occArr)){
 										$detArr = $occArr['dets'];
 										foreach($detArr as $detId => $detRec){
+											if(!array_key_exists('iscurrent',$detRec)){
+												?>
+												<div style="float:right;cursor:pointer;margin:10px;" onclick="toggle('editdetdiv-<?php echo $detId;?>');" title="Edit Determination">
+													<img style="border:0px;width:12px;" src="../../images/edit.png" />
+												</div>
+												<?php 
+											} 
 											?>
-											<div style="float:right;cursor:pointer;margin:10px;" onclick="toggle('editdetdiv-<?php echo $detId;?>');toggle('detdiv-<?php echo $detId;?>');" title="Edit Determination">
-												<img style="border:0px;width:12px;" src="../../images/edit.png" />
-											</div>
 											<div id="detdiv-<?php echo $detId;?>">
 												<div>
 													<?php 
 													if($detRec['identificationqualifier']) echo $detRec['identificationqualifier'].' ';
 													echo '<b><i>'.$detRec['sciname'].'</i></b> '.$detRec['scientificnameauthorship'];
+													if(array_key_exists('iscurrent',$detRec)){
+														echo '<span style="margin-left:10px;color:red;">CURRENT DETERMINATION</span>';	
+													}
 													?>
 												</div>
 												<div style='margin:3px 0px 0px 15px;'>
@@ -805,9 +756,10 @@ if($symbUid){
 												}
 												?>
 											</div>
+											<?php if(!array_key_exists('iscurrent',$detRec)){ ?>
 											<div id="editdetdiv-<?php echo $detId;?>" style="display:none;">
 												<fieldset>
-													<form name="deteditform" action="occurrenceeditor.php" method="post" onsubmit="return submitDetEditForm(this);">
+													<form name="deteditform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetEditForm(this);">
 														<legend><b>Edit Determination</b></legend>
 														<div style='margin:3px;'>
 															<b>Identification Qualifier:</b>
@@ -815,12 +767,12 @@ if($symbUid){
 														</div>
 														<div style='margin:3px;'>
 															<b>Scientific Name:</b> 
-															<input type="text" name="sciname" value="<?php echo $detRec['sciname']; ?>" style="background-color:lightyellow;width:350;" onfocus="initDetTaxonList(this)" autocomplete="off" onchange="document.deteditform.scientificnameauthorship.value = '';" />
-															<input type="hidden" id="dettidtoadd" name="tidtoadd" value="" />
+															<input type="text" id="defsciname" name="sciname" value="<?php echo $detRec['sciname']; ?>" style="background-color:lightyellow;width:350;" />
+															<input type="hidden" id="deftidtoadd" name="tidtoadd" value="" />
 														</div>
 														<div style='margin:3px;'>
 															<b>Author:</b> 
-															<input type="text" name="scientificnameauthorship" value="<?php echo $detRec['scientificnameauthorship']; ?>" style="width:200;" onfocus="verifySciName(this.form);" />
+															<input type="text" name="scientificnameauthorship" value="<?php echo $detRec['scientificnameauthorship']; ?>" style="width:200;" />
 														</div>
 														<div style='margin:3px;'>
 															<b>Determiner:</b> 
@@ -843,20 +795,29 @@ if($symbUid){
 															<input type="text" name="sortsequence" value="<?php echo $detRec['sortsequence']; ?>" style="width:40px;" />
 														</div>
 														<div style='margin:3px;margin:15px;'>
-															<input type="hidden" name="occid" value="<?php echo $occId?>" />
-															<input type="hidden" name="detid" value="<?php echo $detId?>" />
+															<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+															<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 															<input type="submit" name="submitaction" value="Submit Determination Edits" />
 														</div>
 													</form>
 													<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete this specimen determination?');">
-														<div style="padding:15px;background-color:blue;width:155px;margin:15px;">
-															<input type="hidden" name="occid" value="<?php echo $occId?>" />
-															<input type="hidden" name="detid" value="<?php echo $detId?>" />
+														<div style="padding:15px;background-color:lightblue;width:155px;margin:15px;">
+															<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+															<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 															<input type="submit" name="submitaction" value="Delete Determination" />
+														</div>
+													</form>
+													<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to make this the most current determination?');">
+														<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
+															<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+															<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
+															<input type="submit" name="submitaction" value="Make Current" /><br/>
+															<input type="checkbox" name="remapimages" value="1" CHECKED /> Remap images to this taxonomic name
 														</div>
 													</form>
 												</fieldset>
 											</div>
+											<?php } ?>
 											<hr style='margin:10px 0px 10px 0px;' />
 											<?php 
 										}
@@ -869,12 +830,12 @@ if($symbUid){
 									?>
 								</div>
 							</div>
-							<div id="imagediv" class="tabcontent" style="margin:10px;">
+							<div id="imagediv" style="">
 								<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
 									<img style="border:0px;width:12px;" src="../../images/add.png" />
 								</div>
 								<div id="addimgdiv" style="display:none;">
-									<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return submitImgAddForm(this);">
+									<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
 										<fieldset>
 											<legend><b>Add a New Image</b></legend>
 											<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
@@ -993,10 +954,10 @@ if($symbUid){
 													?>
 												</td>
 												<td style="text-align:left;padding:10px;">
-													<div style="float:right;cursor:pointer;" onclick="toggle('img<?php echo $imgId; ?>div');toggle('img<?php echo $imgId; ?>editdiv');" title="Edit Image MetaData">
+													<div style="float:right;cursor:pointer;" onclick="toggle('img<?php echo $imgId; ?>editdiv');" title="Edit Image MetaData">
 														<img style="border:0px;width:12px;" src="../../images/edit.png" />
 													</div>
-													<div id="img<?php echo $imgId; ?>div" style="margin-top:30px;">
+													<div style="margin-top:30px;">
 														<div>
 															<b>Caption:</b> 
 															<?php echo $imgArr["caption"]; ?>
@@ -1043,13 +1004,17 @@ if($symbUid){
 															</a>
 														</div>
 													</div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
 													<div id="img<?php echo $imgId; ?>editdiv" style="display:none;clear:both;">
-														<form name="img<?php echo $imgId; ?>editform" action="occurrenceeditor.php" method="post" onsubmit="return submitImgEditForm(this);">
+														<form name="img<?php echo $imgId; ?>editform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgEditForm(this);">
 															<fieldset>
 																<legend><b>Edit Image Data</b></legend>
 																<div>
 																	<b>Caption:</b><br/> 
-																	<input name="caption" type="text" value="<?php echo $imgArr["caption"]; ?>" style="width:250px;" />
+																	<input name="caption" type="text" value="<?php echo $imgArr["caption"]; ?>" style="width:300px;" />
 																</div>
 																<div>
 																	<b>Photographer:</b><br/> 
@@ -1068,19 +1033,19 @@ if($symbUid){
 																</div>
 																<div>
 																	<b>Notes:</b><br/>
-																	<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:350px;" />
+																	<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:90%;" />
 																</div>
 																<div>
 																	<b>Copyright:</b><br/>
-																	<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:350px;" />
+																	<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:90%;" />
 																</div>
 																<div>
 																	<b>Source Webpage:</b><br/>
-																	<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:350px;" />
+																	<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:90%;" />
 																</div>
 																<div>
 																	<b>Web URL: </b><br/>
-																	<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:350px;" />
+																	<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:90%;" />
 																	<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 																		<div style="margin-left:10px;">
 																			<input type="checkbox" name="renameweburl" value="1" />
@@ -1091,7 +1056,7 @@ if($symbUid){
 																</div>
 																<div>
 																	<b>Large Image URL: </b><br/>
-																	<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:350px;" />
+																	<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:90%;" />
 																	<?php if(stripos($imgArr["origurl"],$imageRootUrl) === 0){ ?>
 																		<div style="margin-left:10px;">
 																			<input type="checkbox" name="renameorigurl" value="1" />
@@ -1102,7 +1067,7 @@ if($symbUid){
 																</div>
 																<div>
 																	<b>Thumbnail URL: </b><br/>
-																	<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:350px;" />
+																	<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:90%;" />
 																	<?php if(stripos($imgArr["tnurl"],$imageRootUrl) === 0){ ?>
 																		<div style="margin-left:10px;">
 																			<input type="checkbox" name="renametnurl" value="1" />
@@ -1118,7 +1083,7 @@ if($symbUid){
 																</div>
 															</fieldset>
 														</form>
-														<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return submitImgDelForm(this);">
+														<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
 															<fieldset>
 																<legend><b>Delete Image</b></legend>
 																<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
@@ -1131,6 +1096,7 @@ if($symbUid){
 															</fieldset>
 														</form>
 													</div>
+													<hr/>
 												</td>
 											</tr>
 											<?php 
@@ -1151,7 +1117,7 @@ if($symbUid){
 						}
 						?>
 					</div>
-					<?php
+				<?php 
 				}
 			}
 			else{

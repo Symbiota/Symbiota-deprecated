@@ -108,22 +108,15 @@
 		if($proj) $keywordStr .= ",".$proj;
 		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
 	?>
-    <link rel="stylesheet" href="../css/jqac.css" type="text/css" />
-	<link type="text/css" href="../css/ui.tabs.css" rel="stylesheet" />
-	<link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
-	
-	<script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.autocomplete-1.4.2.js"></script>
-	<script type="text/javascript" src="../js/AutoCompleteDB.js"></script>
-	<script type="text/javascript" src="../js/ui.core.js"></script>
-	<script type="text/javascript" src="../js/ui.tabs.js"></script>
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script type="text/javascript" src="../js/googleanalytics.js"></script>
 	<script type="text/javascript">
-		taxonArr = new Array(<?php $clManager->echoFilterList();?>);
-		clid = <?php echo $clManager->getClid(); ?>;
+		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
+		var clid = <?php echo $clManager->getClid(); ?>;
 	</script>
-	
-	<script type="text/javascript" src="../js/checklists.checklist.js"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -433,14 +426,14 @@
 			<div>
 				<!-- Option box -->
 				<div id="cloptiondiv">
-					<form id='changetaxonomy' name='changetaxonomy' action='checklist.php' method='get'>
+					<form id='changetaxonomy' name='changetaxonomy' action='checklist.php' method='post'>
 						<fieldset>
 						    <legend><b>Options</b></legend>
 							<!-- Taxon Filter option -->
 						    <div id="taxonfilterdiv" title="Filter species list by family or genus">
 						    	<div>
 						    		<b>Search:</b> 
-									<input type="text" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" onfocus="initFilterList(this)" autocomplete="off" />
+									<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
 								</div>
 								<div>
 									<?php 
@@ -508,7 +501,7 @@
 										Taxon:
 									</div>
 									<div style="float:left;">
-										<input type="text" id="speciestoadd" name="speciestoadd" onfocus="initAddList(this)" autocomplete="off" />
+										<input type="text" id="speciestoadd" name="speciestoadd" />
 										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 									</div>
 								</div>
@@ -533,18 +526,7 @@
 										Abundance:
 									</div>
 									<div style="float:left;">
-										<select name="abundance">
-											<option value="">undefined</option>
-											<option>abundant</option>
-											<option>locally abundant</option>
-											<option>seasonal abundant</option>
-											<option>frequent</option>
-											<option>locally frequent</option>
-											<option>seasonal frequent</option>
-											<option>occasional</option>
-											<option>infrequent</option>
-											<option>rare</option>
-										</select>
+										<input type="text" name="abundance" />
 									</div>
 								</div>
 								<div style="clear:left;">

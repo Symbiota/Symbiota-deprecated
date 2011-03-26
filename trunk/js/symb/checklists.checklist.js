@@ -1,3 +1,19 @@
+$(document).ready(function() {
+	//Filter autocomplete
+	$("#taxonfilter").autocomplete({ source: taxonArr }, { delay: 0, minLength: 2 });
+
+	//Species add form
+	$("#speciestoadd").autocomplete({
+		source: function( request, response ) {
+			$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: clid }, response );
+		}
+	},{ minLength: 3, autoFocus: true }
+	);
+
+	$('#tabs').tabs();
+
+});
+
 function toggle(target){
 	var objDiv = document.getElementById("gamediv");
 	if(objDiv){
@@ -150,8 +166,8 @@ function validateAddSpecies(f){
 					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data adminitrator to add this species to the Taxonomic Thesaurus.");
 				}
 				else{
-					document.getElementById("tidtoadd").value = testTid;
-					document.forms["addspeciesform"].submit();
+					f.tidtoadd.value = testTid;
+					f.submit();
 				}
 			}
 		};
@@ -159,53 +175,6 @@ function validateAddSpecies(f){
 		cseXmlHttp.send(null);
 		return false;
 	}
-}
-
-function initAddList(input){
-	$(input).autocomplete({ ajax_get:getAddSuggs, minchars:3 });
-}
-
-function getAddSuggs(key,cont){ 
-   	var script_name = 'rpc/getspecies.php';
-   	var params = { 'q':key,'cl':clid }
-   	$.get(script_name,params,
-		function(obj){
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res);
-		},
-	'json');
-}
-
-function initFilterList(input){
-    //process lookup list for fast access
-	if(!db){
-		db = new AutoCompleteDB();
-		var arLen=taxonArr.length;
-		if(arLen > 0){
-			$(input).autocomplete({ get:getFilterSuggs, minchars:1, timeout:10000 });
-			for ( var i=0; i<arLen; ++i ){
-				db.add(taxonArr[i]);
-			}
-		}
-	}
-}
-
-function getFilterSuggs(v){ 
-	// get all the matching strings from the AutoCompleteDB
-	var matchArr = new Array();
-	db.getStrings(v, "", matchArr);
-	matchArr = matchArr.unique();
-	// add each string to the popup-div
-	var displayArr = new Array();
-	for( i = 0; i < matchArr.length; i++ ){
-		displayArr.push({id:i, value:matchArr[i] });
-	}
-	return displayArr;
 }
 
 function updateSql(){
@@ -265,10 +234,6 @@ function testSql(){
 	tsXmlHttp.open("POST",url,true);
 	tsXmlHttp.send(null);
 }
-		
-$(document).ready(function(){
-	$("#tabs").tabs();
-});
 
 Array.prototype.unique = function() {
 	var a = [];

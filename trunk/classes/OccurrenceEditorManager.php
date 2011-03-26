@@ -128,6 +128,9 @@ class OccurrenceEditorManager {
 			$this->occurrenceMap["dets"][$detId]["identificationreferences"] = $row->identificationReferences;
 			$this->occurrenceMap["dets"][$detId]["identificationremarks"] = $row->identificationRemarks;
 			$this->occurrenceMap["dets"][$detId]["sortsequence"] = $row->sortsequence;
+			if($row->identifiedBy == $this->occurrenceMap["identifiedby"] && $row->dateIdentified == $this->occurrenceMap["dateidentified"] && $row->sciname == $this->occurrenceMap["sciname"]){
+				$this->occurrenceMap["dets"][$detId]["iscurrent"] = "1";
+			}
 		}
 		$result->close();
 	}
@@ -155,9 +158,19 @@ class OccurrenceEditorManager {
 			if($autoCommit){
 				$status = 'SUCCESS: edits submitted and activated';
 				$sql = '';
-				foreach($editArr as $k => $v){
+				foreach($editArr as $v){
 					if($v){
 						$sql .= ','.$v.' = '.($occArr[$v]!==''?'"'.$occArr[$v].'"':'NULL');
+					}
+				}
+				if(in_array('sciname',$editArr)){
+					$sqlTid = 'SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"';
+					$rsTid = $this->conn->query($sqlTid);
+					if($r = $rsTid->fetch_object()){
+						$sql .= ',tidinterpreted = '.$r->tid;
+					}
+					else{
+						$sql .= ',tidinterpreted = NULL';
 					}
 				}
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE occid = '.$occArr['occid'];
@@ -185,10 +198,10 @@ class OccurrenceEditorManager {
 			$pkSql = 'SELECT MAX(dbpk+1) AS maxpk FROM omoccurrences WHERE collid = '.$occArr["collid"];
 			$pkRs = $this->conn->query($pkSql);
 			if($r = $pkRs->fetch_object()){
-				$dbpk = $r->maxpk;
+				$dbpk = $r->maxpk.'-symb';
 			}
 			$pkRs->close();
-			if(!$dbpk) $dbpk = 'symb1';
+			if(!$dbpk) $dbpk = '1-symb';
 		}
 		if($occArr){
 			$sql = "INSERT INTO omoccurrences(collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
@@ -271,13 +284,9 @@ class OccurrenceEditorManager {
 		$status = "Determination submitted successfully!";
 		$isCurrent = false;
 		if(array_key_exists('makecurrent',$detArr) && $detArr['makecurrent'] == "1") $isCurrent = true;
-		$sortSeq = 10;
-		if($isCurrent){
-			$sortSeq = 1;
-			$sqlSort = 'UPDATE omoccurdeterminations '.
-				'SET sortsequence = (sortsequence + 10) '.
-				'WHERE occid = '.$detArr['occid'];
-			$this->conn->query($sqlSort);
+		$sortSeq = 1;
+		if(preg_match('/([1,2]{1}\d{3})/',$detArr['dateidentified'],$matches)){
+			$sortSeq = 2100-$matches[1];
 		}
 		//Load new determination into omoccurdeterminations
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
@@ -286,8 +295,7 @@ class OccurrenceEditorManager {
 			$detArr['sciname'].'",'.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
 			($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
 			($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
-			($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.
-			($detArr['sortsequence']?$detArr['sortsequence']:$sortSeq).')';
+			($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.$sortSeq.')';
 		//echo "<div>".$sql."</div>";
 		if($this->conn->query($sql)){
 			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
@@ -298,7 +306,7 @@ class OccurrenceEditorManager {
 					'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
 					'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 					'FROM omoccurrences WHERE occid = '.$detArr['occid'];
-				$rs = $this->conn->query($sqlInsert);
+				$this->conn->query($sqlInsert);
 				//echo "<div>".$sqlInsert."</div>";
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
@@ -308,10 +316,23 @@ class OccurrenceEditorManager {
 					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
 					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
 					'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
-					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').' '.
+					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').', '.
+					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' '.
 					'WHERE occid = '.$detArr['occid'];
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
+			}
+			$remapImages = false;
+			if(array_key_exists('remapimages',$detArr) && $detArr['remapimages'] == "1") $remapImages = true;
+			if($remapImages){
+				if($detArr['tidtoadd']){
+					$sql = 'UPDATE images SET tid = '.$detArr['tidtoadd'].' WHERE occid = '.$detArr['occid'];
+					//echo $sql;
+					$this->conn->query($sql);
+				}
+				else{
+					$status = 'ERROR: Annotation added but failed to remap image because taxon name not in taxonomic thesaurus.';
+				}
 			}
 		}
 		else{
@@ -343,6 +364,53 @@ class OccurrenceEditorManager {
 			$status = "ERROR - failed to delete determination: ".$this->conn->error;
 		}
 		return $status;
+	}
+
+	public function makeDeterminationCurrent($detId,$remapImages){
+		$status = 'Determination is now current!';
+		//Make sure current is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
+		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
+			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
+			'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
+			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
+			'FROM omoccurrences WHERE occid = '.$this->occId;
+		$this->conn->query($sqlInsert);
+		//echo "<div>".$sqlInsert."</div>";
+		//Update omoccurrences to reflect this determination
+		$tid = 0;
+		$sqlTid = 'SELECT t.tid FROM omoccurdeterminations d INNER JOIN taxa t ON d.sciname = t.sciname WHERE d.detid = '.$detId;
+		$rs = $this->conn->query($sqlTid);
+		if($r = $rs->fetch_object()){
+			$tid = $r->tid;
+		}
+		$rs->close();
+		$family = '';
+		if($tid){
+			$sqlFam = 'SELECT family FROM taxstatus WHERE taxauthid = 1 AND tid = '.$tid;
+			$rs = $this->conn->query($sqlFam);
+			if($r = $rs->fetch_object()){
+				$family = $r->family;
+			}
+		}
+		$sqlNewDet = 'UPDATE omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
+			'SET o.identifiedBy = d.identifiedBy, o.dateIdentified = d.dateIdentified,o.family = '.($family?'"'.$family.'"':'NULL').','.
+			'o.sciname = d.sciname,o.genus = NULL,o.specificEpithet = NULL,o.taxonRank = NULL,o.infraspecificepithet = NULL,o.scientificname = NULL,'.
+			'o.scientificNameAuthorship = d.scientificnameauthorship,o.identificationQualifier = d.identificationqualifier,'.
+			'o.identificationReferences = d.identificationreferences,o.identificationRemarks = d.identificationremarks,'.
+			'o.tidinterpreted = '.($tid?$tid:'NULL').' WHERE detid = '.$detId;
+		//echo "<div>".$sqlNewDet."</div>";
+		$this->conn->query($sqlNewDet);
+		
+		if($remapImages){
+			if($tid){
+				$sql = 'UPDATE images SET tid = '.$tid.' WHERE occid = '.$this->occId;
+				//echo $sql;
+				$this->conn->query($sql);
+			}
+			else{
+				$status = 'ERROR: Annotation made current but failed to remap image because taxon name not linked to taxonomic thesaurus.';
+			}
+		}
 	}
 
 	public function editImage(){
@@ -716,12 +784,23 @@ class OccurrenceEditorManager {
 		return $collList;
 	}
 	
+	public function echoCountryList($collId){
+		$retArr = Array();
+		$sql = 'SELECT DISTINCT country FROM omoccurrences WHERE collid = '.$collId;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->country;
+		}
+		$rs->close();
+		echo '"'.implode('","',$retArr).'"';
+	}
+
 	public function carryOverValues($fArr){
-		$locArr = Array('recordedby','recordnumber','associatedcollectors','eventdate','verbatimeventdate','month','day','year',
+		$locArr = Array('recordedby','associatedcollectors','eventdate','verbatimeventdate','month','day','year',
 			'startdayofyear','enddayofyear','country','stateprovince','county','locality','decimallatitude','decimallongitude',
-			'verbatimcoordinates','localitysecurity','coordinateuncertaintyinmeters','geodeticdatum','minimumelevationinmeters',
+			'verbatimcoordinates','coordinateuncertaintyinmeters','geodeticdatum','minimumelevationinmeters',
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
-			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa');
+			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord','language');
 		return array_intersect_key($fArr,array_flip($locArr)); 
 	}
 }

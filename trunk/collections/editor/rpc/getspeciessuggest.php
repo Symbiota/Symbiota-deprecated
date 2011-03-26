@@ -2,7 +2,7 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
-	$queryString = $con->real_escape_string($_REQUEST['q']);
+	$queryString = $con->real_escape_string($_REQUEST['term']);
 
 	$sql = "SELECT DISTINCT t.tid, t.sciname ". 
 		"FROM taxa t ".
@@ -14,5 +14,5 @@
 		$retArr[] = $row->sciname;
 	}
 	$con->close();
-	echo "['".implode("','",$retArr)."']";
+	echo json_encode($retArr);
 ?>

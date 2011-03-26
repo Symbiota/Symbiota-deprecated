@@ -50,10 +50,20 @@ class TaxonomyLoaderManager{
 			 	//Load accepteance status into taxstatus table
 				$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
 				$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
-			 	$upperTaxon = ($dataArr["newuppertaxon"]?$dataArr["newuppertaxon"]:$dataArr["uppertaxonomy"]);
+				//Get family from hierarchy
+				$family = '';
+				$sqlFam = 'SELECT t.sciname FROM taxa WHERE tid IN('.$hierarchy.') AND rankid = 140 ';
+				$rsFam = $this->conn->query($sqlFam);
+				if($rsFam){
+					if($r = $rsFam->fetch_object()){
+						$family = $r->sciname;
+					}
+				}
+				
+				//Load new record into taxstatus table
 				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-					"VALUES (".$tid.",".$tidAccepted.",1,".($dataArr["family"]?"\"".$dataArr["family"]."\"":"NULL").",".
-					($upperTaxon?"\"".$upperTaxon."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
+					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$family."\"":"NULL").",".
+					($dataArr["uppertaxonomy"]?"\"".$dataArr["uppertaxonomy"]."\"":"NULL").",".$dataArr["parenttid"].",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
 					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;

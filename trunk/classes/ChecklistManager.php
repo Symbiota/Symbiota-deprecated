@@ -40,7 +40,7 @@ class ChecklistManager {
 	}
 
 	public function echoFilterList(){
-		echo "'".implode("',\n'",$this->filterArr)."'";
+		echo "'".implode("','",$this->filterArr)."'";
 	}
 	
 	public function echoSpeciesAddList(){

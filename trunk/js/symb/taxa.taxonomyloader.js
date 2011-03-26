@@ -1,3 +1,9 @@
+$(document).ready(function() {
+	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3, autoFocus: true });
+
+	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+});
+
 function submitLoadForm(f){
 	var submitForm = true;
 	var errorStr = "";
@@ -14,7 +20,6 @@ function submitLoadForm(f){
 		var rankId = f.rankid.value;
 		if(rankId > 140){
 			if(f.uppertaxonomy.value == "") errorStr += "Upper Taxonomy \n"; 
-			if(f.family.value == "") errorStr += "family \n"; 
 			if(errorStr != ""){
 				submitForm = confirm("Following fields are recommended. Are you sure you want to leave them blank?\n"+errorStr);
 			}
@@ -106,11 +111,13 @@ function parseName(f){
 	}
 	if(unitName1.indexOf("aceae") == (unitName1.length - 5) || unitName1.indexOf("idae") == (unitName1.length - 4)){
 		rankId = 140;
-		f.family.value = unitName1;  
 	}
 	f.rankid.value = rankId;
 	if(rankId >= 140){
 		setUpperTaxonomy(f);
+	}
+	if(rankId > 180){
+		setParent(f);
 	}
 }
 
@@ -119,10 +126,7 @@ function setParent(f){
 	var unitName1 = f.unitname1.value;
 	var unitName2 = f.unitname2.value;
 	var parentName = "";
-	if(rankId == 180){
-		parentName = f.family.value;
-	}
-	else if(rankId == 220){
+	if(rankId == 220){
 		parentName = unitName1; 
 	}
 	else if(rankId > 220){
@@ -186,19 +190,13 @@ function setUpperTaxonomy(f){
 		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
 			var responseStr = sutXmlHttp.responseText; 
 			if(responseStr){
-				var responseArr = new Array();
-				responseArr = responseStr.split("|");
-				if(responseArr.length = 2){
-					f.uppertaxonomy.value = responseArr[0];
-					f.family.value = responseArr[1];
-				}
-				setParent(f);
+				f.uppertaxonomy.value = responseStr;
 			}
 		}
 	};
 	sutXmlHttp.open("POST",url,true);
 	sutXmlHttp.send(null);
-} 
+}
 
 function checkParentExistance(f){
 	parentStr = f.parentname.value;
@@ -247,46 +245,6 @@ function GetXmlHttpObject(){
     	}
   	}
 	return xmlHttp;
-}
-
-function initUpperTaxonList(input){
-	$(input).autocomplete({ ajax_get:getUpperTaxonList, minchars:3 });
-}
-
-function getUpperTaxonList(key,cont){ 
-   	var script_name = 'rpc/getuppertaxonsuggest.php';
-   	var params = { 'q':key };
-   	$.get(script_name,params,
-		function(obj){ 
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res); 
-		},
-	'json');
-}
-
-function initAcceptedList(input){
-	$(input).autocomplete({ ajax_get:getAcceptedList, minchars:3 });
-}
-
-function getAcceptedList(key,cont){ 
-   	var script_name = 'rpc/getacceptedsuggest.php';
-   	var params = { 'q':key };
-   	$.get(script_name,params,
-		function(obj){ 
-			// obj is just array of strings
-			var res = [];
-			for(var i=0;i<obj.length;i++){
-				res.push({ id:i , value:obj[i]});
-			}
-			// will build suggestions list
-			cont(res); 
-		},
-	'json');
 }
 
 function trim(stringToTrim) {
