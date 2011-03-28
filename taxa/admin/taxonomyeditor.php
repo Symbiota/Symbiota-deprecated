@@ -45,7 +45,6 @@ if($editable){
 		$tsArr["uppertaxonomy"] = $_REQUEST["uppertaxonomy"];
 		$tsArr["family"] = $_REQUEST["family"];
 		$tsArr["parenttid"] = $_REQUEST["parenttid"];
-		$tsArr["startparenttid"] = $_REQUEST["startparenttid"];
 		$taxonEditorObj->submitTaxstatusEdits($tsArr);
 	}
 	elseif(array_key_exists("synonymedits",$_REQUEST)){
@@ -328,7 +327,6 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							<div style="float:left;width:110px;font-weight:bold;">Family: </div>
 							<div style="">
 								<?php echo $taxonEditorObj->getFamily();?>&nbsp;
-								<img src="../../images/qmark.jpg" style="border:0px;width:14px;" />
 								<input type="hidden" name="family" value="<?php echo $taxonEditorObj->getFamily(); ?>" />
 							</div>
 						</div>
@@ -340,7 +338,6 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							<div class="tsedit" style="display:none;margin:3px;">
 								<input id="parentstr" name="parentstr" type="text" value="<?php echo $taxonEditorObj->getParentName(); ?>" />
 								<input name="parenttid" type="hidden" value="<?php echo $taxonEditorObj->getParentTid(); ?>" />
-								<input type="hidden" name="startparenttid" value="<?php echo $taxonEditorObj->getParentTid(); ?>" />
 							</div>
 						</div>
 						<div class="tsedit" style="display:none;clear:both;">

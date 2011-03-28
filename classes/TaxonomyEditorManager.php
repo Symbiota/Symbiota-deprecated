@@ -221,42 +221,32 @@ class TaxonomyEditorManager{
 	
 	public function submitTaxstatusEdits($tsArr){
 		$status = '';
-		//See if parent changed
-		$currentParentTid = 0;
-		$sqlParent = "SELECT ts.parenttid FROM taxstatus ts WHERE ts.taxauthid = ".$this->taxAuthId." AND ts.tid = ".$tsArr["tid"];
-		$rs = $this->conn->query($sqlParent);
-		if($row = $rs->fetch_object()){
-			$currentParentTid = $row->parenttid;
-		}
-		$rs->close();
-
-		$famStr = '';
-		if($tsArr["startparenttid"] != $tsArr["parenttid"]){
-			$this->rebuildHierarchy($tsArr["tid"],$tsArr["parenttid"]);
-		}
+		$this->setTaxon();
 		$sql = 'UPDATE taxstatus '.
 			'SET uppertaxonomy = "'.trim($tsArr['uppertaxonomy']).'",parenttid = '.$tsArr["parenttid"].' '.
 			'WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tsArr['tid'].' AND tidaccepted = '.$tsArr['tidaccepted'];
-		if(!$this->conn->query($sql)){
+		if($this->conn->query($sql)){
+			$this->rebuildHierarchy($tsArr["tid"]);
+		}
+		else{
 			$status = 'Unable to edit taxonomic placement'; 
 		}
 		return $status;
 	}
-	
-	public function rebuildHierarchy($tid, $pTid = 0){
+
+	public function rebuildHierarchy($tid){
+		if(!$this->rankId) $this->setTaxon(); 
 		$parentArr = Array();
 		$parCnt = 0;
 		$targetTid = $tid;
-		if($pTid){
-			$parentArr[$pTid] = $pTid;
-			$targetTid = $pTid;
-		}
 		do{
-			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid, hierarchystr FROM taxstatus ts WHERE ts.taxauthid = ".$this->taxAuthId." AND ts.tid = ".$targetTid;
+			$sqlParents = 'SELECT IFNULL(ts.parenttid,0) AS parenttid, hierarchystr '.
+				'FROM taxstatus ts WHERE ts.taxauthid = '.$this->taxAuthId.' AND ts.tid = '.$targetTid;
+			//echo $sqlParents;
 			$resultParent = $this->conn->query($sqlParents);
 			if($rowParent = $resultParent->fetch_object()){
 				$hStr = $rowParent->hierarchystr;
-				if($hStr){
+				if($targetTid <> $tid && $hStr){
 					$parentArr[] = $hStr;
 					break;
 				}
@@ -277,48 +267,43 @@ class TaxonomyEditorManager{
 		}while($targetTid && $parCnt < 16);
 		//Add hierarchy string to taxa table
 		$hierarchyStr = implode(",",array_reverse($parentArr));
-		$oldHierarchy = '';
-		$sqlOld = 'SELECT hierarchystr FROM taxstatus WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tid;
-		$rsOld = $this->conn->query($sqlOld);
-		if($r = $rsOld->fetch_object()){
-			$oldHierarchy = $r->hierarchystr;
-		}
-		$rsOld->close();
-		if($hierarchyStr <> $oldHierarchy){
+		if($hierarchyStr <> $this->hierarchy){
+			//First, reset hierarchy for all children
+			if($hierarchyStr && $this->hierarchy){
+				$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = REPLACE(hierarchystr,"'.$this->hierarchy.'","'.$hierarchyStr.'") '.
+					'WHERE taxauthid = '.$this->taxAuthId.' AND hierarchystr LIKE "'.$this->hierarchy.','.$tid.'%"';
+				$this->conn->query($sqlUpdate);
+			}
 			//Reset hierarchy for target taxon
 			$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = "'.$hierarchyStr.'" '.
 				'WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tid;
 			$this->conn->query($sqlUpdate);
 			
-			//Reset hierarchy for all children
-			if($hierarchyStr && $oldHierarchy){
-				$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = REPLACE(hierarchystr,"'.$oldHierarchy.'","'.$hierarchyStr.'") '.
-					'WHERE taxauthid = '.$this->taxAuthId.' AND hierarchystr LIKE "'.$oldHierarchy.','.$tid.'%"';
-				$this->conn->query($sqlUpdate);
+		}
+		if($this->rankId > 140){
+			//Update family in taxstatus table
+			$newFam = '';
+			$sqlFam1 = 'SELECT sciname FROM taxa WHERE tid IN('.$hierarchyStr.') AND rankid = 140';
+			$rsFam1 = $this->conn->query($sqlFam1);
+			if($r1 = $rsFam1->fetch_object()){
+				$newFam = $r1->sciname;
 			}
-		}
-		//Return family
-		$newFam = '';
-		$sqlFam1 = 'SELECT sciname FROM taxa WHERE tid IN('.$hierarchyStr.') AND rankid = 140';
-		$rsFam1 = $this->conn->query($sqlFam1);
-		if($r1 = $rsFam1->fetch_object()){
-			$newFam = $r1->sciname;
-		}
-		$rsFam1->close();
-		
-		$sqlFam2 = 'SELECT family FROM taxstatus WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tid;
-		$rsFam2 = $this->conn->query($sqlFam2);
-		if($r2 = $rsFam2->fetch_object()){
-			if($newFam <> $r2->family){
-				//reset family of target and all it's children
-				$sql = 'UPDATE taxstatus SET family = "'.$newFam.'" '.
-					'WHERE taxauthid = '.$this->taxAuthId.' AND '.
-					'(tid = '.$tid.' OR hierarchystr LIKE "%,'.$tid.'" OR hierarchystr LIKE "%,'.$tid.',%" )';
-				//echo $sql;
-				$this->conn->query($sql);
+			$rsFam1->close();
+			
+			$sqlFam2 = 'SELECT family FROM taxstatus WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tid;
+			$rsFam2 = $this->conn->query($sqlFam2);
+			if($r2 = $rsFam2->fetch_object()){
+				if($newFam <> $r2->family){
+					//reset family of target and all it's children
+					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$newFam.'"':'Not assigned').' '.
+						'WHERE taxauthid = '.$this->taxAuthId.' AND '.
+						'(tid = '.$tid.' OR hierarchystr LIKE "%,'.$tid.'" OR hierarchystr LIKE "%,'.$tid.',%" )';
+					//echo $sql;
+					$this->conn->query($sql);
+				}
 			}
+			$rsFam2->close();
 		}
-		$rsFam2->close();
 	}
 
 	public function submitSynEdits($synEditArr){

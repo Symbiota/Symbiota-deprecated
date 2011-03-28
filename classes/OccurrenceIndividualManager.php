@@ -76,9 +76,9 @@ class OccurrenceIndividualManager {
 		$this->occArr = $result->fetch_assoc();
 		if(!$this->occId) $this->occId = $this->occArr['occid'];
 		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] == $this->occArr['institutioncode']){
-			$sqlSec = 'SELECT c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon '.
+			$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 			'FROM omcollsecondary '.
-			'WHERE collid = '.$this->collId;
+			'WHERE collid = '.$this->occArr['collid'];
 			$rsSec = $this->conn->query($sqlSec);
 			if($r = $rsSec->fetch_object()){
 				$this->occArr['collectionname'] = $r->collectionname;
