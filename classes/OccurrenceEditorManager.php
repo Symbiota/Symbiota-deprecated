@@ -881,7 +881,7 @@ class OccurrenceEditorManager {
  		while($row = $rs->fetch_object()){
  			$occId = $row->occid;
  			$returnArr[$occId]['occurrenceid'] = $row->occurrenceid;
- 			$returnArr[$occId]['sciname'] = $row->recordedby;
+ 			$returnArr[$occId]['sciname'] = $row->sciname;
  			$returnArr[$occId]['recordedby'] = $row->recordedby;
  			$returnArr[$occId]['recordnumber'] = $row->recordnumber;
  			$returnArr[$occId]['locality'] = $row->locality;
