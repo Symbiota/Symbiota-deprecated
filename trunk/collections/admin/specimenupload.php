@@ -7,7 +7,6 @@ $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
-$doFullReplace = array_key_exists("dofullreplace",$_REQUEST)?$_REQUEST["dofullreplace"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
 $recLimit = array_key_exists("reclimit",$_REQUEST)?$_REQUEST["reclimit"]:1000;
@@ -36,7 +35,6 @@ else{
 if($collId) $duManager->setCollId($collId);
 if($uploadType) $duManager->setUploadType($uploadType);
 if($uspid) $duManager->setUspid($uspid);
-if($doFullReplace) $duManager->setDoFullReplace($doFullReplace);
 
 $isEditable = 0;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -613,14 +611,6 @@ else{
 					</div>
  					<div style="margin:5px;"> 
  						If upload number sounds correct, transfer to central specimen table using this form.  
-					</div>
-					<div>
-						<input name="dofullreplace" type="radio" value="0" <?php if(!$doFullReplace) echo "SELECTED"; ?> /> 
-						Append New / Update Modified Records
-					</div>
-					<div>
-						<input name="dofullreplace" type="radio" value="1" <?php if($doFullReplace) echo "SELECTED"; ?> /> 
-						Replace All Records
 					</div>
  					<div style="margin:5px;"> 
  						<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />

@@ -309,8 +309,8 @@ if($editable && $tid){
 						$tnUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["thumbnailurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["thumbnailurl"];
 						if(!$tnUrl) $tnUrl = $webUrl;
 						?>
-						<a href="../../imagelib/imgdetails.php?imgid=<?php echo $webUrl;?>&emode=1">
-							<img src="<?php echo $imgArr['imgid'];?>" style="width:200px;"/>
+						<a href="../../imagelib/imgdetails.php?imgid=<?php echo $imgArr['imgid']; ?>">
+							<img src="<?php echo $tnUrl;?>" style="width:200px;"/>
 						</a>
 						<?php 
 						if($imgArr["originalurl"]){
@@ -328,7 +328,7 @@ if($editable && $tid){
 						?>
 						<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
 							<a href="../../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=imagediv">
-								<img src="../../images/edit.png" />
+								<img src="../../images/edit.png" style="border:0px;"/>
 							</a>
 						</div>
 						<?php
@@ -337,7 +337,7 @@ if($editable && $tid){
 						?>
 						<div style='float:right;margin-right:10px;'>
 							<a href="../../imagelib/imgdetails.php?imgid=<?php echo $imgArr["imgid"];?>&emode=1">
-								<img src="../../images/edit.png" />
+								<img src="../../images/edit.png" style="border:0px;" />
 							</a>
 						</div>
 						<?php 

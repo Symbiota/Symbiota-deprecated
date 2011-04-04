@@ -322,42 +322,50 @@ function lookForDups(f){
 	var collName = f.recordedby.value;
 	var collNum = f.recordnumber.value;
 	var collDate = f.eventdate.value;
-	if(collName && collNum){
-		//Parse last name of collector
-		var lastName = "";
-		var lastNameArr = collName.split(",");
-		lastNameArr = lastNameArr[0].split(";");
-		lastNameArr = lastNameArr[0].split("&");
-		lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
-		if(lastNameArr.length == 1){
-			lastName = lastNameArr[0];
-		}
-		else if(lastNameArr.length > 1){
-			lastName = lastNameArr[1];
-		}
-		
-		//Check for matching records
-		dupXmlHttp = GetXmlHttpObject();
-		if(dupXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/querydups.php?cname=" + lastName + "&cnum=" + collNum;
-		if(collDate) url = url + "&cdate=" + collDate;
-		dupXmlHttp.onreadystatechange=function(){
-			if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
-				var resObj = eval('(' + dupXmlHttp.responseText + ')')
-				if(resObj.length > 0){
-					alert("Duplicate records have been found: " + resObj);
-				}
-				else{
-					alert("No duplicates found.");
-				}
-			}
-		};
-		dupXmlHttp.open("POST",url,true);
-		dupXmlHttp.send(null);
+	if(!collName || !collNum){
+		alert("Collector name and number must have a value to search for duplicates");
 	}
+	toggle("dupspan");
+
+	//Parse last name of collector
+	var lastName = "";
+	var lastNameArr = collName.split(",");
+	lastNameArr = lastNameArr[0].split(";");
+	lastNameArr = lastNameArr[0].split("&");
+	lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
+	if(lastNameArr.length == 1){
+		lastName = lastNameArr[0];
+	}
+	else if(lastNameArr.length > 1){
+		lastName = lastNameArr[1];
+	}
+	
+	//Check for matching records
+	dupXmlHttp = GetXmlHttpObject();
+	if(dupXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/querydups.php?cname=" + lastName + "&cnum=" + collNum;
+	if(collDate) url = url + "&cdate=" + collDate;
+	dupXmlHttp.onreadystatechange=function(){
+		if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
+			var resObj = eval('(' + dupXmlHttp.responseText + ')')
+			if(resObj.length > 0){
+				toggle("dupsearchspan");
+				toggle("dupdisplayspan");
+				//alert("Duplicate records have been found: " + resObj);
+				dupWindow=open("dupsearch.php?occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=700,height=700,left=20,top=20");
+				if(dupWindow.opener == null) dupWindow.opener = self;
+			}
+			else{
+				toggle("dupsearchspan");
+				toggle("dupnonespan");
+			}
+		}
+	};
+	dupXmlHttp.open("POST",url,true);
+	dupXmlHttp.send(null);
 }
 
 function fieldChanged(fieldName){
