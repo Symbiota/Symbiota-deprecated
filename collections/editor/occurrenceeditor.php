@@ -15,6 +15,7 @@ if(!$action){
 }
 
 $occManager = new OccurrenceEditorManager($occId);
+if($occId) $occManager->setOccId($occId); 
 if($occId && !$collId){
 	$collId = $occManager->getCollId();
 }
@@ -52,6 +53,10 @@ if($symbUid){
 				}
 				$occId = 0;
 			}
+			elseif($action == "carryoverdup"){
+				$occArr = $occManager->carryOverDuplicate($_REQUEST['targetoccid']);
+				$occId = 0;
+			}
 			elseif($action == "Submit Image Edits"){
 				$statusStr = $occManager->editImage($_REQUEST);
 			}
@@ -78,7 +83,7 @@ if($symbUid){
 		}
 	}
 	if($occId && !$occArr){
-		$occArr = $occManager->getOccurArr();
+		$occArr = $occManager->getOccurMap();
 	}
 	else if($collId){
 		$occArr = array_merge($occArr,$occManager->setCollId($collId));
@@ -233,9 +238,11 @@ if($symbUid){
 											<span style="margin-left:10px;">
 												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="verifyDate(this);fieldChanged('eventdate');" />
 											</span>
+											<?php if(!$occId){ ?>
 											<span style="margin-left:5px;cursor:pointer;" onclick="">
-												<input type="button" value="dups" tabindex="12" onclick="lookForDups(this.form);" />
+												<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
 											</span>
+											<?php } ?>
 										</div>
 										<div style="clear:both;margin-top:5px;">
 											Associated Collectors:<br />
@@ -243,6 +250,11 @@ if($symbUid){
 											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 												<img src="../../images/showedit.png" style="width:15px;" />
 											</span>
+											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;padding:3px;font-weight:bold;">
+												<span id="dupsearchspan">Looking for Dups...</span>
+												<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
+												<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>
+											</div>
 										</div>
 										<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
 											<span>

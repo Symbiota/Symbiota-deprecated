@@ -16,10 +16,7 @@ class OccurrenceEditorManager {
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
 	
-	public function __construct($id){
-		if($id){
-			$this->occId = $id;
-		}
+	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
@@ -27,14 +24,14 @@ class OccurrenceEditorManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 	
-	public function getOccId(){
-		return $this->occId;
-	}
-
 	public function setOccId($id){
 		$this->occId = $id;
 	}
 	
+	public function getOccId(){
+		return $this->occId;
+	}
+
 	public function getCollId(){
 		if(!$this->occId) return;
 		$collId = 0;
@@ -59,14 +56,22 @@ class OccurrenceEditorManager {
 		return $this->occurrenceMap;
 	}
 	
-	public function getOccurArr(){
-		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+	public function getOccurMap(){
+		$this->occurrenceMap = $this->getOccurArr();
+		$this->setImages();
+		$this->setDeterminations();
+		return $this->occurrenceMap;
+	}
+	
+	private function getOccurArr($oid = 0){
+		$retArr = Array();
+		$sql = 'SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
 			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
 			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
 			'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 			'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
-			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, o.CollectorFamilyName, '.
-			'o.CollectorInitials, o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
+			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+			'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
 			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
 			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
 			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
@@ -75,20 +80,16 @@ class OccurrenceEditorManager {
 			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
 			'o.verbatimElevation, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'WHERE o.occid = '.$this->occId;
+			'WHERE o.occid = '.($oid?$oid:$this->occId);
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
 			foreach($row as $k => $v){
-				$this->occurrenceMap[strtolower($k)] = $v;
+				$retArr[strtolower($k)] = $v;
 			}
 		}
 		$rs->close();
-
-		$this->setImages();
-		$this->setDeterminations();
-
-		return $this->occurrenceMap;
+		return $retArr;
 	}
 
 	private function setImages(){
@@ -802,6 +803,35 @@ class OccurrenceEditorManager {
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
 			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord','language');
 		return array_intersect_key($fArr,array_flip($locArr)); 
+	}
+	
+	public function carryOverDuplicate($tOccId){
+		return $this->getOccurArr($tOccId);
+	}
+
+	public function getDupOccurrences($occidStr){
+		$occurrenceMap = Array();
+		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+			'o.ownerInstitutionCode, o.family, o.sciname, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
+			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
+			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+			'WHERE occid IN('.$occidStr.')';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$occId = $row->occid;
+			foreach($row as $k => $v){
+				$occurrenceMap[$occId][strtolower($k)] = $v;
+			}
+		}
+		$rs->close();
+		return $occurrenceMap;
 	}
 }
 

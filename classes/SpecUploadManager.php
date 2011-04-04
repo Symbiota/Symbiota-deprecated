@@ -11,8 +11,7 @@ class SpecUploadManager{
 	protected $collMetadataArr = Array();
 	protected $uploadType;
 	protected $uspid = 0;
-	protected $doFullReplace = false;
-	
+
 	protected $title = "";
 	protected $platform = 0;
 	protected $server;
@@ -31,9 +30,9 @@ class SpecUploadManager{
 	protected $sourceArr = Array();
 	protected $fieldMap = Array();
 	protected $symbFields = Array();
-	
+
 	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -69,10 +68,6 @@ class SpecUploadManager{
 	
 	public function setFieldMap($fm){
 		$this->fieldMap = $fm;
-	}
-	
-	public function setDoFullReplace($dfr){
-		$this->doFullReplace = $dfr;
 	}
 
 	public function getCollectionList(){
@@ -427,7 +422,7 @@ class SpecUploadManager{
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
-		$spCallStr = "CALL TransferUploads(".$this->collId.",".($this->doFullReplace?"1":"0").");";
+		$spCallStr = "CALL TransferUploads(".$this->collId.",0);";
 		if($this->conn->query($spCallStr)){
 			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."</li>";
 		}

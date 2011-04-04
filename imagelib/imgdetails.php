@@ -106,7 +106,7 @@ if($isEditor){
 							?>
 							<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
 								<a href="../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=imagediv">
-									<img src="../images/edit.png" />
+									<img src="../images/edit.png" style="border:0px;" />
 								</a>
 							</div>
 							<?php
@@ -115,7 +115,7 @@ if($isEditor){
 							if($isEditor){ 
 								?>
 								<div style='float:right;margin-right:10px;cursor:pointer;'>
-									<img src="../images/edit.png" onclick="toggle('imageedit');" />
+									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
 								</div>
 								<?php 
 							}

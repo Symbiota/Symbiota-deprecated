@@ -107,7 +107,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						<input type="hidden" id="parenttid" name="parenttid" value="" />
 					</div>
 					<div id="uppertaxondiv" name="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
-						<div style="float:left;width:140px;">Upper Taxonomic Grouping:</div>
+						<div style="float:left;width:140px;">Upper Taxon Grouping:</div>
 						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" />
 					</div>
 					<div>
