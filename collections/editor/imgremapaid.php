@@ -60,7 +60,8 @@ $occManager = new OccurrenceEditorManager();
 				<div style="margin:10px;">
 					<?php 
 					echo '<b>OccId <a href="../individual/index.php?occid='.$occId.'">'.$occId.'</a>:</b> '.$vArr["sciname"].'; ';
-					echo $vArr['occurrenceid'].'; '.$vArr['recordedby'].' ['.($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];
+					if($vArr['occurrenceid']) echo $vArr['occurrenceid'].'; ';
+					echo $vArr['recordedby'].' ['.($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];
 					?>
 					<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
 						Select Occurrence Record
