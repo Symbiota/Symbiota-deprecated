@@ -509,7 +509,7 @@ function verifyDetEditForm(f){
 	return true;
 }
 
-//Determination form methods 
+//Image form methods 
 function verifyImgAddForm(f){
     if(f.elements["imgfile"].value.replace(/\s/g, "") == "" ){
         if(f.elements["imgurl"].value.replace(/\s/g, "") == ""){
@@ -535,6 +535,11 @@ function verifyImgDelForm(f){
 	return false;
 }
 
+function openOccurrenceSearch(target) {
+	collId = document.fullform.collid.value;
+	occWindow=open("imgremapaid.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+	if (occWindow.opener == null) occWindow.opener = self;
+}
 
 //Misc
 function GetXmlHttpObject(){
