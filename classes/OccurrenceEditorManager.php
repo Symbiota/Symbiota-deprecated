@@ -93,7 +93,7 @@ class OccurrenceEditorManager {
 	}
 
 	private function setImages(){
-		$sql = "SELECT imgid, url, thumbnailurl, originalurl, caption, photographeruid, sourceurl, copyright, notes, sortsequence ".
+		$sql = "SELECT imgid, url, thumbnailurl, originalurl, caption, photographeruid, sourceurl, copyright, notes, occid, sortsequence ".
 			"FROM images ".
 			"WHERE occid = ".$this->occId." ORDER BY sortsequence";
 		$result = $this->conn->query($sql);
@@ -107,6 +107,7 @@ class OccurrenceEditorManager {
 			$this->occurrenceMap["images"][$imgId]["sourceurl"] = $row->sourceurl;
 			$this->occurrenceMap["images"][$imgId]["copyright"] = $row->copyright;
 			$this->occurrenceMap["images"][$imgId]["notes"] = $row->notes;
+			$this->occurrenceMap["images"][$imgId]["occid"] = $row->occid;
 			$this->occurrenceMap["images"][$imgId]["sortseq"] = $row->sortsequence;
 		}
 		$result->close();
@@ -724,7 +725,22 @@ class OccurrenceEditorManager {
 		$this->setPrimaryImageSort();
 		return $status;
 	}
-	
+
+	public function remapImage($imgId, $occId){
+		$statusStr = '';
+		$sql = 'UPDATE images SET occid = '.$occId.' WHERE imgid = '.$imgId;
+		if($this->conn->query($sql)){
+			$imgSql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'SET i.tid = o.tidinterpreted WHERE i.imgid = '.$imgId;
+			//echo $imgSql;
+			$this->conn->query($imgSql);
+		}
+		else{
+			$statusStr = 'ERROR: Unalbe to remap image to another occurrence record. Error msg: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+
 	public function getPhotographerArr(){
 		if(!$this->photographerArr){
 			$sql = "SELECT u.uid, CONCAT_WS(', ',u.lastname,u.firstname) AS fullname ".
@@ -809,6 +825,7 @@ class OccurrenceEditorManager {
 		return $this->getOccurArr($tOccId);
 	}
 
+	//Used in dupsearch.php
 	public function getDupOccurrences($occidStr){
 		$occurrenceMap = Array();
 		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
@@ -833,6 +850,45 @@ class OccurrenceEditorManager {
 		$rs->close();
 		return $occurrenceMap;
 	}
+	
+	//Used in imgremapaid.php
+ 	public function getOccurrenceList($collId, $identifier, $collector, $collNumber){
+ 		$returnArr = Array();
+ 		if(!$identifier && !$collector && !$collNumber) return $returnArr;
+ 		$sql = '';
+ 		if($collId){
+ 			$sql .= 'AND o.collid = '.$collId.' ';
+ 		}
+ 		if($identifier){
+ 			if(strpos($identifier,'%') !== false){
+	 			$sql .= 'AND (o.occurrenceId LIKE "'.$identifier.'" OR o.catalognumber LIKE "'.$identifier.'" OR o.othercatalognumber LIKE "'.$identifier.'")';
+ 			}
+ 			else{
+	 			$sql .= 'AND (o.occurrenceId = "'.$identifier.'" OR o.catalognumber = "'.$identifier.'" OR o.othercatalognumber = "'.$identifier.'")';
+ 			}
+ 		}
+ 		if($collector){
+ 			$sql .= 'AND o.recordedby LIKE "%'.$collector.'%" ';
+ 		}
+ 		if($collNumber){
+ 			$sql .= 'AND o.recordnumber LIKE "%'.$collNumber.'%" ';
+ 		}
+ 		$sql = 'SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, o.sciname, '.
+ 			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
+ 			'FROM omoccurrences o WHERE '.substr($sql,4);
+ 		//echo $sql;
+ 		$rs = $this->conn->query($sql);
+ 		while($row = $rs->fetch_object()){
+ 			$occId = $row->occid;
+ 			$returnArr[$occId]['occurrenceid'] = $row->occurrenceid;
+ 			$returnArr[$occId]['sciname'] = $row->recordedby;
+ 			$returnArr[$occId]['recordedby'] = $row->recordedby;
+ 			$returnArr[$occId]['recordnumber'] = $row->recordnumber;
+ 			$returnArr[$occId]['locality'] = $row->locality;
+ 		}
+ 		$rs->close();
+ 		return $returnArr;
+ 	}
 }
 
 ?>

@@ -14,7 +14,7 @@ if(!$action){
 	$action = array_key_exists("gotonew",$_REQUEST)?$_REQUEST["gotonew"]:"";
 }
 
-$occManager = new OccurrenceEditorManager($occId);
+$occManager = new OccurrenceEditorManager();
 if($occId) $occManager->setOccId($occId); 
 if($occId && !$collId){
 	$collId = $occManager->getCollId();
@@ -66,6 +66,9 @@ if($symbUid){
 			elseif($action == "Delete Image"){
 				$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
 				$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
+			}
+			elseif($action == "Remap Image"){
+				$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
 			}
 			elseif($action == "Add New Determination"){
 				$statusStr = $occManager->addDetermination($_REQUEST);
@@ -1105,6 +1108,23 @@ if($symbUid){
 																	(Note: leaving unchecked removes image from database w/o removing from server)
 																</div>
 																<input type="submit" name="submitaction" value="Delete Image" />
+															</fieldset>
+														</form>
+														<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
+															<fieldset>
+																<legend><b>Remap to Another Specimen</b></legend>
+																<div>
+																	<b>Occurrence Record #:</b> 
+																	<input id="imgoccid" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
+																	<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid')">
+																		Open Occurrence Linking Aid
+																	</span>
+																</div>
+																<div style="margin-left:20px;">
+																	* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
+																	<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+																	<input type="submit" name="submitaction" value="Remap Image" />
+																</div>
 															</fieldset>
 														</form>
 													</div>
