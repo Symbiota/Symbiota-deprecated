@@ -13,7 +13,7 @@
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<meta name='keywords' content='checklists,species lists' />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		function toggle(target){

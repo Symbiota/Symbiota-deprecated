@@ -14,7 +14,7 @@ $mapManager = new OccurrenceMapManager();
 <body onload="load()" onunload="GUnload()">
 	<script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
       //<![CDATA[

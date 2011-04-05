@@ -240,7 +240,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		};
 	</script>
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 </head>
  

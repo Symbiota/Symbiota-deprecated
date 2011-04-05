@@ -28,7 +28,7 @@ $imgloc = "../images/games/namegame/";
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<link rel="stylesheet" href="../css/namegamestyle.css" type="text/css" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<style type="text/css">
 		#blanket {background-color:#111;opacity: 0.65;position:absolute;z-index: 9001; /*ooveeerrrr nine thoussaaaannnd*/top:0px;left:0px;width:100%;}

@@ -37,7 +37,7 @@
 		<title><?php echo $defaultTitle; ?> Collections Search</title>
 	    <link type="text/css" href="../css/main.css" rel="stylesheet" />
 		<script type="text/javascript">
-			<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 		</script>
 		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>

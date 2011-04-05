@@ -14,7 +14,7 @@ $imgLibManager = new ImageLibraryManager();
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 </head>
 <body>
