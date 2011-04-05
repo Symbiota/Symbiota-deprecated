@@ -12,7 +12,9 @@
 	<title><?php echo $defaultTitle; ?> Species Lists</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<meta name='keywords' content='checklists,species lists' />
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<script type="text/javascript">
 		function toggle(target){
 			var divObjs = document.getElementsByTagName("div");

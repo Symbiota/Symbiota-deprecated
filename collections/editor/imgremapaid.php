@@ -54,30 +54,41 @@ $occManager = new OccurrenceEditorManager();
 			</fieldset>
 		</form>
 		<?php 
-			$occArr = $occManager->getOccurrenceList($collId, $identifier, $collector, $collNumber);
-			foreach($occArr as $occId => $vArr){
-				?>
-				<div style="margin:10px;">
-					<?php 
-					echo '<b>OccId <a href="../individual/index.php?occid='.$occId.'">'.$occId.'</a>:</b> '.$vArr["sciname"].'; ';
-					if($vArr['occurrenceid']) echo $vArr['occurrenceid'].'; ';
-					echo $vArr['recordedby'].' ['.($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];
+			if($identifier || $collector || $collNumber){
+				$occArr = $occManager->getOccurrenceList($collId, $identifier, $collector, $collNumber);
+				if($occArr){
+					foreach($occArr as $occId => $vArr){
+						?>
+						<div style="margin:10px;">
+							<?php 
+							echo '<b>OccId <a href="../individual/index.php?occid='.$occId.'">'.$occId.'</a>:</b> <i>'.$vArr["sciname"].'</i>; ';
+							if($vArr['occurrenceid']) echo $vArr['occurrenceid'].'; ';
+							echo $vArr['recordedby'].' ['.($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];
+							?>
+							<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
+								Select Occurrence Record
+							</div>
+						</div>
+						<hr />
+						<?php 
+					}
+				}
+				else{
 					?>
-					<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
-						Select Occurrence Record
+					<div style="margin:10px;">
+						No records were returned. Please modify your search and try again. 
 					</div>
-				</div>
-				<hr />
-				<?php 
+					<?php 
+				}
 			}
-			if(!$occArr){
+			else{
 				?>
-				<div style="margin:10px;">
-					No records were returned. Please modify your search and try again. 
+				<div style="margin:10px;font-weight:bold;">
+					Use fields above to query and select the occurrence record to which you wish to link the image. 
 				</div>
 				<?php 
 			}
-		?>
+			?>
 	</div>
 </body>
 </html> 

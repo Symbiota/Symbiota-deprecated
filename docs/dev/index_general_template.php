@@ -14,6 +14,9 @@
 	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 	<meta name="keywords" content="" />
 	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
+	<script type="text/javascript">
 	</script>
 </head>
 
@@ -42,16 +45,6 @@
 		include($serverRoot."/footer.php");
 	?>
 
-	<script type="text/javascript">
-		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-		try {
-			var pageTracker = _gat._getTracker("<?php echo $googleAnalyticsKey; ?>");
-			pageTracker._trackPageview();
-		} catch(err) {}
-	</script>
 </body>
 </html>
 <?php

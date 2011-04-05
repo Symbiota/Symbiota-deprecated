@@ -239,7 +239,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			return a;
 		};
 	</script>
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 </head>
  
 <body>

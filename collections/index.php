@@ -36,6 +36,9 @@
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> Collections Search</title>
 	    <link type="text/css" href="../css/main.css" rel="stylesheet" />
+		<script type="text/javascript">
+			<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		</script>
 		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
 		<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
