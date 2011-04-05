@@ -68,7 +68,9 @@ if($chars){
 	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo $projValue; ?></title>
 	<link rel='stylesheet' href='../css/main.css' type='text/css' />
 	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
 </head>
  

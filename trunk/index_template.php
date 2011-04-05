@@ -10,6 +10,9 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
     <title><?php echo $defaultTitle?> Home</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" />
     <meta name='keywords' content='' />
+	<script type="text/javascript">
+		<?php include_once('config/js/googleanalytics.php'); ?>
+	</script>
 </head>
 
 <body>

@@ -48,7 +48,9 @@
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<script type="text/javascript">
 
 		var imageArr = new Array();

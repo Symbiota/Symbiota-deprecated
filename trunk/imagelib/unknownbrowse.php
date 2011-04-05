@@ -9,7 +9,9 @@ $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"
 <head>
 <title><?php echo $defaultTitle; ?> - Community Identifications</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<meta name='keywords' content='' />
 </head>
 

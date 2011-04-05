@@ -1,10 +1,10 @@
 <?php
- include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/OccurrenceChecklistManager.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/OccurrenceChecklistManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
- $checklistManager = new OccurrenceChecklistManager();
- $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$checklistManager = new OccurrenceChecklistManager();
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
 
 ?>
 
@@ -13,7 +13,9 @@
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
         <title><?php echo $defaultTitle; ?> Dynamic Checklist</title>
         <link rel="stylesheet" href="../css/main.css" type="text/css">
-		<script type="text/javascript" src="../js/googleanalytics.js"></script>
+		<script type="text/javascript">
+			<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		</script>
     </head>
     <body>
 <?php

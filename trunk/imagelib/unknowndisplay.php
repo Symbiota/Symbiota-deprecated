@@ -11,7 +11,9 @@ $unkDisplayManager = new UnknownDisplayManager();
 <title><?php echo $defaultTitle; ?> - Unknown Display</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<meta name='keywords' content='' />
 </head>
 

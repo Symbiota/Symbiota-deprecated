@@ -13,7 +13,9 @@ $dynClManager = new DynamicChecklistManager();
 <head>
 	<title><?php echo $defaultTitle; ?> - Dynamic Checklist Generator</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<script type="text/javascript">
 	    //<![CDATA[
 	    

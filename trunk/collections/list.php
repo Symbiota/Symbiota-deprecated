@@ -14,7 +14,9 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
     <title><?php echo $defaultTitle; ?> Collections Search Results</title>
     <link rel="stylesheet" href="../css/main.css" type="text/css">
-	<script type="text/javascript" src="../js/googleanalytics.js"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 	<script type="text/javascript">
 
 		function addVoucherToCl(occid,clid,tid){

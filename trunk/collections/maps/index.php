@@ -7,6 +7,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
     <title><?php echo $defaultTitle; ?> - Collections Search Maps</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+	</script>
 </head>
 <body>
 
