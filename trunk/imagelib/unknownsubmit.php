@@ -19,9 +19,6 @@ if($tid){
 <head>
 <title><?php echo $defaultTitle; ?> - Submit to Community Identification</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
-	</script>
 	<meta name='keywords' content='' />
 </head>
 

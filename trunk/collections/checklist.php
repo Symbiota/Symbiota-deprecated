@@ -14,7 +14,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
         <title><?php echo $defaultTitle; ?> Dynamic Checklist</title>
         <link rel="stylesheet" href="../css/main.css" type="text/css">
 		<script type="text/javascript">
-			<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 		</script>
     </head>
     <body>

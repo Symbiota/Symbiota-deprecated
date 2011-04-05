@@ -69,7 +69,7 @@ if($chars){
 	<link rel='stylesheet' href='../css/main.css' type='text/css' />
 	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
 </head>

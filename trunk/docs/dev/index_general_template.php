@@ -14,7 +14,7 @@
 	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 	<meta name="keywords" content="" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/js/googleanalytics.php'); ?>
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 	</script>
