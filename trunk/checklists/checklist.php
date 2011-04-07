@@ -465,7 +465,6 @@
 								    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/> Common Names";
 								?>
 							</div>
-							<div class="button" style='margin:5px;float:right;width:13px;height:13px;' title="Download Checklist"><input type="image" name="action" value="Download List" src="../images/dl.png" /></div>
 							<div>
 								<!-- Display as Images: 0 = false, 1 = true  --> 
 							    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
@@ -478,16 +477,19 @@
 								    Notes &amp; Vouchers
 								</div>
 							<?php } ?>
-							<div style="float:right;">
-								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
-								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-								<input type="submit" name="action" value="Rebuild List" />
-							</div>
 							<div>
 								<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
 							    <input id='showauthors' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
 							    Taxon Authors
+							</div>
+							<div style="margin:5px 0px 0px 5px;">
+								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
+								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
+								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
+								<input type="submit" name="action" value="Rebuild List" />
+								<div class="button" style='float:right;margin-right:15px;width:13px;height:13px;' title="Download Checklist">
+									<input type="image" name="action" value="Download List" src="../images/dl.png" />
+								</div>
 							</div>
 						</fieldset>
 					</form>
