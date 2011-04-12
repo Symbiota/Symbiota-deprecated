@@ -179,11 +179,11 @@ if($symbUid){
 				}
 				else{
 					?>
-					<div id="occedittabs">
+					<div id="occedittabs" style="background-color:<?php echo ($occId?'':'#66CC99'); ?>;">
 						<ul>
 							<li>
 								<a href="#occdiv" <?php echo (!$tabTarget||$tabTarget=='occdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
-									<?php echo ($occId?'Occurrence Data':'Add a New Occurrence Record'); ?>
+									<?php echo ($occId?'Occurrence Data':'New Occurrence Record Form'); ?>
 								</a>
 							</li>
 							<?php
@@ -253,7 +253,7 @@ if($symbUid){
 											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 												<img src="../../images/showedit.png" style="width:15px;" />
 											</span>
-											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;padding:3px;font-weight:bold;">
+											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
 												<span id="dupsearchspan">Looking for Dups...</span>
 												<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
 												<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>

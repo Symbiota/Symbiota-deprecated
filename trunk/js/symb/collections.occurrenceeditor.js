@@ -325,7 +325,10 @@ function lookForDups(f){
 	if(!collName || !collNum){
 		alert("Collector name and number must have a value to search for duplicates");
 	}
-	toggle("dupspan");
+	document.getElementById("dupdisplayspan").style.display = "none";
+	document.getElementById("dupnonespan").style.display = "none";
+	document.getElementById("dupsearchspan").style.display = "block";
+	document.getElementById("dupspan").style.display = "block";
 
 	//Parse last name of collector
 	var lastName = "";
@@ -352,15 +355,16 @@ function lookForDups(f){
 		if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
 			var resObj = eval('(' + dupXmlHttp.responseText + ')')
 			if(resObj.length > 0){
-				toggle("dupsearchspan");
-				toggle("dupdisplayspan");
+				document.getElementById("dupsearchspan").style.display = "none";
+				document.getElementById("dupdisplayspan").style.display = "block";
 				//alert("Duplicate records have been found: " + resObj);
 				dupWindow=open("dupsearch.php?occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=700,height=700,left=20,top=20");
 				if(dupWindow.opener == null) dupWindow.opener = self;
+				document.getElementById("dupspan").style.display = "none";
 			}
 			else{
-				toggle("dupsearchspan");
-				toggle("dupnonespan");
+				document.getElementById("dupsearchspan").style.display = "none";
+				document.getElementById("dupnonespan").style.display = "block";
 			}
 		}
 	};
