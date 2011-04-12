@@ -7,17 +7,17 @@ $(document).ready(function() {
 function submitLoadForm(f){
 	var submitForm = true;
 	var errorStr = "";
+	var rankId = f.rankid.value;
 	if(f.sciname.value == "") errorStr += ", Scientific Name"; 
 	if(f.unitname1.value == "") errorStr += ", Base Name (eg Genus)"; 
-	if(f.rankid.value == 0 || f.rankid.value == "") errorStr += ", Taxon Rank"; 
-	if(f.parenttid.value == "") errorStr += ", Parent Taxon"; 
+	if(rankId == 0 || rankId == "") errorStr += ", Taxon Rank"; 
+	if(f.parenttid.value == "" && rankId != "10") errorStr += ", Parent Taxon"; 
 	if(errorStr != ""){
 		alert("Following Fields Required: "+errorStr.substring(2));
 		submitForm = false;
 	}
 
 	if(submitForm){
-		var rankId = f.rankid.value;
 		if(rankId > 140){
 			if(f.uppertaxonomy.value == "") errorStr += "Upper Taxonomy \n"; 
 			if(errorStr != ""){

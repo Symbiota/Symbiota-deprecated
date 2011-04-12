@@ -179,7 +179,7 @@ header("Content-Type: text/html; charset=".$charset);
 											Review Status: 
 											<select name="frstatus">
 												<option value="0">All Records</option>
-												<option value="1-2 <?php echo (!$frStatus||$frStatus=='1-2'?'SELECTED':''); ?>">Open/Pending</option>
+												<option value="1-2" <?php echo (!$frStatus||$frStatus=='1-2'?'SELECTED':''); ?>>Open/Pending</option>
 												<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
 												<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
 												<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
@@ -206,11 +206,12 @@ header("Content-Type: text/html; charset=".$charset);
 											<?php } ?>
 											<th>Record #</th>
 											<th>Field Name</th>
-											<th>New Value</th>
 											<th>Old Value</th>
+											<th>New Value</th>
 											<th>Review Status</th>
 											<th>Applied Status</th>
 											<th>Editor</th>
+											<th>Timestamp</th>
 										</tr>
 										<?php 
 										$editArr = $reviewManager->getEditArr($faStatus, $frStatus);
@@ -245,13 +246,13 @@ header("Content-Type: text/html; charset=".$charset);
 															</div>
 														</td>
 														<td>
-															<div title="New Status">
-																<?php echo $edObj['fvaluenew']; ?>
+															<div title="Old Value">
+																<?php echo $edObj['fvalueold']; ?>
 															</div>
 														</td>
 														<td>
-															<div title="Old Value">
-																<?php echo $edObj['fvalueold']; ?>
+															<div title="New Status">
+																<?php echo $edObj['fvaluenew']; ?>
 															</div>
 														</td>
 														<td>
@@ -291,6 +292,11 @@ header("Content-Type: text/html; charset=".$charset);
 																<?php echo $edObj['uname']; ?>
 															</div>
 														</td>
+														<td>
+															<div title="Timestamp">
+																<?php echo $edObj['tstamp']; ?>
+															</div>
+														</td>
 													</tr>
 													<?php 
 												}
@@ -298,7 +304,7 @@ header("Content-Type: text/html; charset=".$charset);
 											}
 											if($mode != 'printmode'){ 
 												?>
-												<tr><td colspan="8" valign="bottom">
+												<tr><td colspan="9" valign="bottom">
 													<div style="margin:10px;">
 														<span>
 															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits
@@ -323,7 +329,7 @@ header("Content-Type: text/html; charset=".$charset);
 													</div>
 													<hr/>
 													<div>
-														<b>Other Actions:</b>
+														<b>Additional Actions:</b>
 													</div>
 													<div style="margin:5px 0px 10px 15px;">
 														<a href="javascript: var f = submitDownload();">
@@ -342,7 +348,7 @@ header("Content-Type: text/html; charset=".$charset);
 										else{
 											?>
 											<tr>
-												<td colspan="7">
+												<td colspan="9">
 													<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria</div>
 												</td>
 											</tr>

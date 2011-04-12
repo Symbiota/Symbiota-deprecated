@@ -42,11 +42,12 @@ class SpecEditReviewManager {
 	public function getEditArr($aStatus, $rStatus){
 		if(!$this->collId) return;
 		$retArr = Array();
-		$sql = 'SELECT e.ocedid,e.occid,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,CONCAT_WS(" ",u.firstname,u.lastname) AS username '.
+		$sql = 'SELECT e.ocedid,e.occid,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
+			'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
 			'WHERE o.collid = '.$this->collId;
-		if($aStatus === 0 || $aStatus === 1) $sql .= ' AND e.appliedstatus = '.$aStatus.' ';
+		if($aStatus === '0' || $aStatus == 1) $sql .= ' AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
 			if($rStatus == '1-2'){
 				$sql .= ' AND e.reviewstatus IN(1,2) ';
@@ -67,6 +68,7 @@ class SpecEditReviewManager {
 			$retArr[$occId][$ocedid]['rstatus'] = $r->reviewstatus;
 			$retArr[$occId][$ocedid]['astatus'] = $r->appliedstatus;
 			$retArr[$occId][$ocedid]['uname'] = $r->username;
+			$retArr[$occId][$ocedid]['tstamp'] = $r->initialtimestamp;
 		}
 		$rs->close();
 		return $retArr;

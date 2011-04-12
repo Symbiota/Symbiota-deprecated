@@ -487,7 +487,7 @@
 								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 								<input type="submit" name="action" value="Rebuild List" />
-								<div class="button" style='float:right;margin-right:15px;width:13px;height:13px;' title="Download Checklist">
+								<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
 									<input type="image" name="action" value="Download List" src="../images/dl.png" />
 								</div>
 							</div>

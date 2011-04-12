@@ -224,8 +224,8 @@ if($editable){
 								* Fields in yellow have not yet been verified
 							</div>
 							<div style="margin:10px;">
-								<input type="submit" name="action" value="Upload Taxa" />
 								<input type="submit" name="action" value="Verify Mapping" />
+								<input type="submit" name="action" value="Upload Taxa" />
 							</div>
 						</div>
 					<?php } ?>
