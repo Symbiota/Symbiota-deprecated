@@ -51,15 +51,16 @@ class ProfileManager{
     	}
     }
     
-    public function authenticate($userNameStr, $pwdStr = ""){
+    public function authenticate($userNameStr, $pwdStr = ''){
         $authStatus = false;
         $this->userName = $userNameStr;
 		//check login
-        $sql = "SELECT u.uid, u.firstname, u.lastname ".
-			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-            "WHERE (ul.username = \"".$userNameStr."\") ";
+        $sql = 'SELECT u.uid, u.firstname, u.lastname '.
+			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+            'WHERE (ul.username = "'.$this->con->real_escape_string($userNameStr).'") ';
         if($pwdStr){
-			$sql .= "AND (ul.password = PASSWORD(\"".$pwdStr."\") OR ul.password = OLD_PASSWORD(\"".$pwdStr."\"))";
+			$sql .= 'AND (ul.password = PASSWORD("'.$this->con->real_escape_string($pwdStr).'") '.
+				'OR ul.password = OLD_PASSWORD("'.$this->con->real_escape_string($pwdStr).'"))';
         }
 		//echo $sql;
         $result = $this->con->query($sql);
@@ -71,7 +72,7 @@ class ProfileManager{
 		
         if($authStatus){
 			//Get Admin Rights 
-	        $sql = "SELECT up.pname FROM userpermissions up WHERE up.uid = ".$this->uid;
+	        $sql = 'SELECT up.pname FROM userpermissions up WHERE up.uid = '.$this->con->real_escape_string($this->uid);
 	        //echo $sql;
 	        $result = $this->con->query($sql);
     	    while($row = $result->fetch_object()){
@@ -82,22 +83,22 @@ class ProfileManager{
             
 	        //Upadate last login data
 	        $conn = $this->getConnection("write");
-	        $sql = "UPDATE userlogin SET lastlogindate = NOW() WHERE username = \"".$userNameStr."\"";
+	        $sql = 'UPDATE userlogin SET lastlogindate = NOW() WHERE username = "'.$this->con->real_escape_string($userNameStr).'"';
 	        $conn->query($sql); 
 	        
         	return "success";
         }
         else{
                 //Check and see why authentication failed
-        	$sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.email, ul.password ".
-            	"FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid ".
-				"WHERE (ul.username = \"".$userNameStr."\")";
+        	$sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.email, ul.password '.
+            	'FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid '.
+				'WHERE (ul.username = "'.$this->con->real_escape_string($userNameStr).'")';
             //echo $sqlStr;
 	        $result = $this->con->query($sqlStr);
 			if($row = $result->fetch_object()){
-                    return "badPassword";
+                    return 'badPassword';
 	        }
-                return "badUserId";
+                return 'badUserId';
         }
     }
     
@@ -106,16 +107,16 @@ class ProfileManager{
         	"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
         	"u.url, u.biography, u.ispublic, u.notes, ul.username ".
             "FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
-            "WHERE (u.uid = ".$userId.")";
+            "WHERE (u.uid = ".$this->con->real_escape_string($userId).")";
         return $this->getPersonBySql($sqlStr);
     }
         
     public function getPerson ($userName){
-        $sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, ".
-        	"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
-        	"u.url, u.biography, u.ispublic, u.notes, ul.username ".
-            "FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid ".
-            "WHERE (ul.username = \"".$userName."\")";
+        $sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, '.
+        	'u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, '.
+        	'u.url, u.biography, u.ispublic, u.notes, ul.username '.
+            'FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid '.
+            'WHERE (ul.username = "'.$this->con->real_escape_string($userName).'")';
         return $this->getPersonBySql($sqlStr);
     }
         
@@ -146,7 +147,7 @@ class ProfileManager{
             	$person->addLogin($row->username);
             }
         }
-        $result->free();
+        $result->close();
         //if($person) $this->setPersonProps();
         return $person;
     }
@@ -179,24 +180,23 @@ class ProfileManager{
         $success = false;
     	if($person){
         	$editCon = $this->getConnection("write");
-    		$fields = "UPDATE users SET ";
-            $where = "WHERE uid = ".$person->getUid();
-            $values = "firstname = \"".$person->getFirstName()."\"";
-            $values .= ", lastname= \"".$person->getLastName()."\"";
-
-            $values .= ", title= \"".$person->getTitle()."\"";
-            $values .= ", institution=\"".$person->getInstitution()."\"";
-            $values .= ", department= \"".$person->getDepartment()."\"";
-            $values .= ", address= \"".$person->getAddress()."\"";
-            $values .= ", city=\"".$person->getCity()."\"";
-            $values .= ", state=\"".$person->getState()."\"";
-            $values .= ", zip=\"".$person->getZip()."\"";
-            $values .= ", country= \"".$person->getCountry()."\"";
-            $values .= ", phone=\"".$person->getPhone()."\"";
-            $values .= ", email=\"".$person->getEmail()."\"";
-            $values .= ", url=\"".$person->getUrl()."\"";
-            $values .= ", biography=\"".$person->getBiography()."\"";
-            $values .= ", ispublic=".$person->getIsPublic()." ";
+    		$fields = 'UPDATE users SET ';
+            $where = 'WHERE uid = '.$this->con->real_escape_string($person->getUid());
+            $values = 'firstname = "'.$this->con->real_escape_string($person->getFirstName()).'"';
+            $values .= ', lastname= "'.$this->con->real_escape_string($person->getLastName()).'"';
+            $values .= ', title= "'.$this->con->real_escape_string($person->getTitle()).'"';
+            $values .= ', institution="'.$this->con->real_escape_string($person->getInstitution()).'"';
+            $values .= ', department= "'.$this->con->real_escape_string($person->getDepartment()).'"';
+            $values .= ', address= "'.$this->con->real_escape_string($person->getAddress()).'"';
+            $values .= ', city="'.$this->con->real_escape_string($person->getCity()).'"';
+            $values .= ', state="'.$this->con->real_escape_string($person->getState()).'"';
+            $values .= ', zip="'.$this->con->real_escape_string($person->getZip()).'"';
+            $values .= ', country= "'.$this->con->real_escape_string($person->getCountry()).'"';
+            $values .= ', phone="'.$this->con->real_escape_string($person->getPhone()).'"';
+            $values .= ', email="'.$this->con->real_escape_string($person->getEmail()).'"';
+            $values .= ', url="'.$this->con->real_escape_string($person->getUrl()).'"';
+            $values .= ', biography="'.$this->con->real_escape_string($person->getBiography()).'"';
+            $values .= ', ispublic='.$this->con->real_escape_string($person->getIsPublic()).' ';
             $sql = $fields." ".$values." ".$where;
 			//echo $sql;
             $success = $editCon->query($sql);
@@ -209,7 +209,7 @@ class ProfileManager{
         $success = false;
         if($uid){
         	$editCon = $this->getConnection("write");
-        	$sql = "DELETE FROM users WHERE uid = ".$uid;
+        	$sql = "DELETE FROM users WHERE uid = ".$this->con->real_escape_string($uid);
 			$success = $editCon->query($sql);
         	$editCon->close();
         }
@@ -222,7 +222,9 @@ class ProfileManager{
     	if($newPwd){
         	$editCon = $this->getConnection("write");
         	if($isSelf){
-	        	$sqlTest = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$id."\" AND (ul.password = PASSWORD(\"".$oldPwd."\") OR ul.password = OLD_PASSWORD(\"".$oldPwd."\"))";
+	        	$sqlTest = 'SELECT ul.uid FROM userlogin ul WHERE ul.username = "'.$this->con->real_escape_string($id).
+	        		'" AND (ul.password = PASSWORD("'.$this->con->real_escape_string($oldPwd).
+	        		'") OR ul.password = OLD_PASSWORD("'.$this->con->real_escape_string($oldPwd).'"))';
 	        	$rsTest = $editCon->query($sqlTest);
 	        	if(!$rsTest->num_rows) return false;
         	}

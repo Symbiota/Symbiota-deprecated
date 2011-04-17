@@ -828,8 +828,8 @@ class OccurrenceEditorManager {
 	//Used in dupsearch.php
 	public function getDupOccurrences($occidStr){
 		$occurrenceMap = Array();
-		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
-			'o.ownerInstitutionCode, o.family, o.sciname, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, '.
+			'o.family, o.sciname, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
 			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
 			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.

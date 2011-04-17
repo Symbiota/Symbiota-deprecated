@@ -13,7 +13,8 @@ class KeyMassUpdateManager{
 	private $removes = Array();
 	private $childrenStr;
 	private $tidUsed = Array();
-	private $proj;
+	private $pid;
+	private $projName;
 	private $lang = "English";
   	private $username;
 	
@@ -42,7 +43,21 @@ class KeyMassUpdateManager{
 	}
 	
 	public function setProj($p){
-		$this->proj = $p;
+		$sql = 'SELECT pid, projname FROM fmprojects WHERE pid = "'.$p.'" OR projname = "'.$p.'"';
+		$rs = $this->con->query($sql);
+		while($r = $rs->fetch_object()){
+			$this->pid = $r->pid;
+			$this->projName = $r->projname;
+		}
+		$rs->close();
+	}
+	
+	public function setProjName($p){
+		$this->projName = $p;
+	}
+	
+	public function setPid($p){
+		$this->pid = $p;
 	}
 	
 	public function setLang($l){
@@ -55,33 +70,29 @@ class KeyMassUpdateManager{
 
   	public function getClQueryList(){
 		$returnList = Array();
-		$sql = "SELECT cl.CLID, cl.Name FROM (fmchecklists cl ";
-		if($this->proj) {
-			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.CLID = cpl.clid) INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-				"WHERE p.projname = '$this->proj' ";
-		}
-		else{
-			$sql .= ") ";
+		$sql = "SELECT cl.CLID, cl.Name FROM fmchecklists cl ";
+		if($this->pid) {
+			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.CLID = cpl.clid ".
+				"WHERE cpl.pid = ".$this->pid." ";
 		}
 		$sql .= "ORDER BY cl.Name";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$returnList[$row->CLID] = $row->Name;
 		}
-		$result->free();
+		$result->close();
 		return $returnList;
 	}
 	
 	public function getTaxaQueryList(){
 		$returnList = Array();
 		$sql = "SELECT DISTINCT ts.UpperTaxonomy, ts.Family, t.UnitName1 
-			FROM (((fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid) 
-			INNER JOIN fmchklsttaxalink ctl ON cpl.clid = ctl.CLID) ".
+			FROM ((fmchklstprojlink cpl INNER JOIN fmchklsttaxalink ctl ON cpl.clid = ctl.CLID) ".
 			"INNER JOIN taxstatus ts ON ctl.tid = ts.tid) 
 			INNER JOIN taxa t ON ts.tidaccepted = t.TID ";
 		$sqlWhere = "";
 		if($this->clidFilter && $this->clidFilter != "all") $sqlWhere .= "ctl.CLID = ".$this->clidFilter." ";
-		if($this->proj) $sqlWhere .= ($sqlWhere?"AND ":"")."(p.projname = '".$this->proj."') ";
+		if($this->pid) $sqlWhere .= ($sqlWhere?"AND ":"")."(cpl.pid = '".$this->pid."') ";
 		if($sqlWhere) $sql = $sql."WHERE ".$sqlWhere;
 		//echo $sql;
 		$result = $this->con->query($sql);

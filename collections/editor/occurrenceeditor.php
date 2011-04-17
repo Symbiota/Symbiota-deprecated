@@ -179,11 +179,18 @@ if($symbUid){
 				}
 				else{
 					?>
-					<div id="occedittabs" style="background-color:<?php echo ($occId?'':'#66CC99'); ?>;">
+					<div id="occedittabs" style="">
 						<ul>
 							<li>
 								<a href="#occdiv" <?php echo (!$tabTarget||$tabTarget=='occdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
-									<?php echo ($occId?'Occurrence Data':'New Occurrence Record Form'); ?>
+									<?php
+									if($occId){
+										echo 'Occurrence Data';
+									}
+									else{
+										echo '<span style="color:red;">New Occurrence Record</span>';
+									}
+									?>
 								</a>
 							</li>
 							<?php

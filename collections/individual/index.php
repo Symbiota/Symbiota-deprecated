@@ -432,7 +432,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				For additional information on this specimen, please contact: 
 				<?php 
 				$emailSubject = $defaultTitle.' occurrence #'.$occArr['occid'];
-				$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/individual.php?occid='.$occArr['occid'];
+				$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
 				$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 				?>
 				<a href="mailto:<?php echo $occArr['email'].'?'.$emailRef; ?>">
