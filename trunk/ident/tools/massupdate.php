@@ -106,8 +106,8 @@ header("Content-Type: text/html; charset=".$charset);
 	 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
 	 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
 	 
-	if($projValue) $muManager->setProj();
-	if($langValue) $muManager->setLang();
+	if($projValue) $muManager->setProj($projValue);
+	if($langValue) $muManager->setLang($langValue);
 	if($clFilter) $muManager->setClFilter($clFilter);
 	if($taxonFilter) $muManager->setTaxonFilter($taxonFilter);
 	if($generaOnly) $muManager->setGeneraOnly($generaOnly);

@@ -7,11 +7,11 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
-$submit = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
-$resetPwd = array_key_exists("resetpwd",$_REQUEST)?$_REQUEST["resetpwd"]:""; 
-$login = array_key_exists("login",$_REQUEST)?$_REQUEST["login"]:""; 
-$remMe = array_key_exists("remember",$_REQUEST)?$_REQUEST["remember"]:"";
+$action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
+$submit = array_key_exists("submit",$_POST)?$_POST["submit"]:"";
+$resetPwd = array_key_exists("resetpwd",$_REQUEST)?$_REQUEST["resetpwd"]:"";
+$login = array_key_exists("login",$_REQUEST)?$_REQUEST["login"]:"";
+$remMe = array_key_exists("remember",$_POST)?$_POST["remember"]:"";
 $refUrl = "";
 if(array_key_exists("refurl",$_REQUEST)){
 	$refGetStr = "";
@@ -44,7 +44,7 @@ if($submit == "logout"){
     $pHandler->reset();
 }
 elseif($action == "Login"){
-	$password = $_REQUEST["password"];
+	$password = $_POST["password"];
 	if(!$password) $password = "emptypwd"; 
 	$statusStr = $pHandler->authenticate($login, $password);
     if($statusStr == "success"){

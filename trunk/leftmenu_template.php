@@ -76,6 +76,9 @@
 	<?php
 	}
 	?>
+	<div class='menuitem'>
+		<a href='<?php echo $clientRoot; ?>/sitemap.php'>Sitemap</a>
+	</div>
 </div>
 
 

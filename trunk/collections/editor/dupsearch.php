@@ -140,12 +140,12 @@ $occArr = $dupManager->getDupOccurrences($occidStr);
 					<div style="margin:10px;">
 						<span>
 							<a href="" onclick="transferRecord(<?php echo $occId; ?>,false);">
-								Use Full Data
+								Import Full Record
 							</a>
 						</span>
 						<span style="margin-left:30px;">
 							<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
-								Append Data
+								Append Record
 							</a>
 						</span>
 					<?php if($collId == $occObj['collid']){ ?>
