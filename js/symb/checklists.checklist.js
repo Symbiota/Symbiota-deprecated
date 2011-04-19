@@ -129,21 +129,6 @@ function validateMetadataForm(f){
 	return true;
 }
 
-function isNumeric(sText){
-   	var ValidChars = "0123456789-.";
-   	var IsNumber = true;
-   	var Char;
- 
-   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
-	   Char = sText.charAt(i); 
-		if (ValidChars.indexOf(Char) == -1){
-			IsNumber = false;
-			break;
-      	}
-   	}
-	return IsNumber;
-}
-
 function validateAddSpecies(f){ 
 	var sciName = f.speciestoadd.value;
 	if(sciName == ""){
@@ -177,62 +162,30 @@ function validateAddSpecies(f){
 	}
 }
 
-function updateSql(){
-	country = document.getElementById("countryinput").value;
-	state = document.getElementById("stateinput").value;
-	county = document.getElementById("countyinput").value;
-	locality = document.getElementById("localityinput").value;
-	latNorth = document.getElementById("latnorthinput").value;
-	lngWest = document.getElementById("lngwestinput").value;
-	lngEast = document.getElementById("lngeastinput").value;
-	latSouth = document.getElementById("latsouthinput").value;
-	sqlFragStr = "";
-	if(country){
-		sqlFragStr = "AND (o.country = \"" + country + "\") ";
+function validateSqlFragForm(f){
+	if(!isNumeric(f.latnorth.value) || !isNumeric(f.latsouth.value) || !isNumeric(f.lngwest.value) || !isNumeric(f.lngeast.value)){
+		alert("Latitude and longitudes values muct be numeric values only");
+		return false;
 	}
-	if(state){
-		sqlFragStr = sqlFragStr + "AND (o.stateprovince = \"" + state + "\") ";
+	if(confirm("If an SQL fragment already exists, you will replace it with the new one. Are you sure you want to continue?")){
+		return true;
 	}
-	if(county){
-		sqlFragStr = sqlFragStr + "AND (o.county LIKE \"%" + county + "%\") ";
-	}
-	if(locality){
-		sqlFragStr = sqlFragStr + "AND (o.locality LIKE \"%" + locality + "%\"') ";
-	}
-	if(latNorth && latSouth){
-		sqlFragStr = sqlFragStr + "AND (o.decimallatitude BETWEEN " + latSouth + " AND " + latNorth + ") ";
-	}
-	if(lngWest && lngEast){
-		sqlFragStr = sqlFragStr + "AND (o.decimallongitude BETWEEN " + lngWest + " AND " + lngEast + ") ";
-	}
-	document.getElementById("sqlfrag").value = sqlFragStr.substring(4);
-}
-
-function buildSql(){
-	updateSql();
 	return false;
 }
 
-function testSql(){
-	tsXmlHttp=GetXmlHttpObject();
-	if (tsXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	sqlValue = document.getElementById("sqlfrag").value;
-	var url="rpc/testsql.php?clid=" + clid + "&sql="+sqlValue;
-	tsXmlHttp.onreadystatechange=function(){
-		if(tsXmlHttp.readyState==4 && tsXmlHttp.status==200){
-			if(tsXmlHttp.responseText == "1"){
-				alert("SUCCESS: SQL frament good to go");
-			}
-			else{
-				alert("ERROR: SQL fragment failed");
-			}
-		}
-	};
-	tsXmlHttp.open("POST",url,true);
-	tsXmlHttp.send(null);
+function isNumeric(sText){
+   	var ValidChars = "0123456789-.";
+   	var IsNumber = true;
+   	var Char;
+ 
+   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
+	   Char = sText.charAt(i); 
+		if (ValidChars.indexOf(Char) == -1){
+			IsNumber = false;
+			break;
+      	}
+   	}
+	return IsNumber;
 }
 
 Array.prototype.unique = function() {

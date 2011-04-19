@@ -22,9 +22,12 @@ class OccurrenceMapManager extends OccurrenceManager{
 		$this->iconUrls[] = $clientRoot."/images/google/purple-dot.png";
     }
 
-	public function getGeoCoords($limit = 1000, $includeDescr= false){
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+
+    public function getGeoCoords($limit = 1000, $includeDescr= false){
 		global $userRights;
-		$conn = $this->getConnection();
         $querySql = "";
         $sql = "SELECT o.occid, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.dbpk, o.occurrenceID ";
         if($includeDescr){
@@ -68,7 +71,7 @@ class OccurrenceMapManager extends OccurrenceManager{
         	}
         }
 		//echo "<div>SQL: ".$sql."</div>";
-        $result = $conn->query($sql);
+        $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
 			$occId = $row->occid;
 			$sciName = $row->sciname;
@@ -97,7 +100,6 @@ class OccurrenceMapManager extends OccurrenceManager{
 			$coordArr["undefined"]["icon"] = $this->iconUrls[7];
 		}
 		$result->close();
-		$conn->close();
 		return $coordArr;
 	}
 

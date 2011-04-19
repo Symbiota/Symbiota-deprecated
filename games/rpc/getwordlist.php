@@ -2,10 +2,10 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
 
-$clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:"";
-$dynClid = array_key_exists('dynclid',$_REQUEST)?$_REQUEST['dynclid']:"";
-
 $con = MySQLiConnectionFactory::getCon("readonly");
+
+$clid = array_key_exists('clid',$_REQUEST)?$con->real_escape_string($_REQUEST['clid']):"";
+$dynClid = array_key_exists('dynclid',$_REQUEST)?$con->real_escape_string($_REQUEST['dynclid']):"";
 
 $linkQuery = '';
 if($clid){
@@ -29,4 +29,5 @@ if($linkQuery){
 	}
 	echo "mainList=[".substr($retStr,1)."\n]";
 }
+$con->close();
 ?>

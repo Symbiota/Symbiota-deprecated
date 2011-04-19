@@ -2,8 +2,8 @@
 	include_once('../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$queryString = $_REQUEST['term'];
-	$taxonType = array_key_exists('t',$_REQUEST)?$_REQUEST['t']:1;
+	$queryString = $con->real_escape_string($_REQUEST['term']);
+	$taxonType = array_key_exists('t',$_REQUEST)?$con->real_escape_string($_REQUEST['t']):1;
 	// Is the string length greater than 0?
 	if($queryString) {
 //		$sql = "SELECT DISTINCT o.sciname FROM omoccurrences o WHERE o.TidInterpreted IS NOT NULL AND o.sciname LIKE '".$queryString."%' ORDER BY o.sciname LIMIT 8";

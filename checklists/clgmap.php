@@ -95,10 +95,10 @@ class ChecklistMapper{
         $this->conn = MySQLiConnectionFactory::getCon("readonly");
         $sql = "SELECT p.pid, p.projname FROM fmprojects p ";
         if(is_numeric($projValue)){
-            $sql .= " WHERE p.pid = ".$projValue;
+            $sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
         }
         else{
-            $sql .= " WHERE p.projname = '".$projValue."'";
+            $sql .= " WHERE p.projname = '".$this->conn->real_escape_string($projValue)."'";
         }
         $result = $this->conn->query($sql);
         if($row = $result->fetch_object()){
@@ -132,7 +132,7 @@ class ChecklistMapper{
     	$sql = "SELECT c.clid, c.Name, c.LongCentroid, c.LatCentroid ".
             "FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ". 
             "INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-            "WHERE c.access = 'public' AND p.ispublic = 1 AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->pid;
+            "WHERE c.access = 'public' AND p.ispublic = 1 AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->conn->real_escape_string($this->pid);
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $idStr = $row->clid;
@@ -150,7 +150,7 @@ class ChecklistMapper{
     private function echoSurveyPoints(){
         $sql = "SELECT s.surveyid, s.projectname, s.longcentroid, s.latcentroid ".
             "FROM omsurveys s INNER JOIN omsurveyprojlink spl ON s.surveyid = spl.surveyid ". 
-        	"WHERE s.ispublic = 1 AND s.longcentroid IS NOT NULL AND spl.pid = ".$this->pid;
+        	"WHERE s.ispublic = 1 AND s.longcentroid IS NOT NULL AND spl.pid = ".$this->conn->real_escape_string($this->pid);
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $idStr = $row->surveyid;

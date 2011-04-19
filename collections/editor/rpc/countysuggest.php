@@ -2,9 +2,9 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
-	$queryString = $_REQUEST['term'];
-	$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-	$stateStr = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:0;
+	$queryString = $con->real_escape_string($_REQUEST['term']);
+	$collId = array_key_exists('collid',$_REQUEST)?$con->real_escape_string($_REQUEST['collid']):0;
+	$stateStr = array_key_exists('state',$_REQUEST)?$con->real_escape_string($_REQUEST['state']):0;
 
 	$sql = 'SELECT DISTINCT county FROM omoccurrences '.
 		'WHERE county LIKE "'.$queryString.'%" ';

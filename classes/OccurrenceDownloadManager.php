@@ -7,13 +7,11 @@ include_once("OccurrenceManager.php");
 
 class OccurrenceDownloadManager extends OccurrenceManager{
 	
- 	private $conn;
 	private $securityArr = Array();
  	private $dwcSql = "";
     
  	public function __construct(){
  		parent::__construct();
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 
  		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision",
@@ -37,10 +35,10 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  	}
 
 	public function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+ 		parent::__destruct();
 	}
 
-	public function downloadDarwinCoreCsv(){
+ 	public function downloadDarwinCoreCsv(){
     	global $defaultTitle, $userRights, $isAdmin;
 		$canReadRareSpp = false;
 		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
@@ -106,7 +104,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		else{
 			echo "Recordset is empty.\n";
 		}
-        $result->close();
+        if($result) $result->close();
 	}
 
 	public function downloadDarwinCoreXml(){
@@ -314,13 +312,12 @@ class OccurrenceDownloadManager extends OccurrenceManager{
   
     private function writeTextFile($sql){
     	global $isAdmin;
-		$conn = $this->getConnection();
     	
 		$this->downloadPath .= ".txt";
 		$this->downloadUrl .= ".txt";
 
 		$fh = fopen($this->downloadPath, 'w') or die("can't open file");
-		$result = $conn->query($sql);
+		$result = $this->conn->query($sql);
 		//Write column names out to file
 		if($row = $result->fetch_assoc()){
 	 		foreach($row as $colName => $value){
@@ -349,10 +346,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		$fh->flush();
 		$fw->close();
         $result->close();
-		$conn->close();
     }
      private function writeXmlFile($sql){
-		$conn = $this->getConnection();
 		//$this->downloadPath .= ".xml";
 		//$this->downloadUrl .= ".xml";
 		
@@ -436,7 +431,6 @@ xmlwriter_end_attribute($xml_resource);
         }
         this.closeConnection();
         $result->close();
-		$conn->close();
     }*/
 }
 ?>

@@ -5,11 +5,10 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-//get the q parameter from URL
-$sciName = $_REQUEST["sciname"]; 
+$con = MySQLiConnectionFactory::getCon("readonly");
+$sciName = $con->real_escape_string($_REQUEST["sciname"]); 
 
 $responseStr = "";
-$con = MySQLiConnectionFactory::getCon("readonly");
 $sql = "SELECT t.tid FROM taxa t ".
 	"WHERE (t.sciname = '".$sciName."')";
 $result = $con->query($sql);

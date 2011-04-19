@@ -5,12 +5,11 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-//get the q parameter from URL
-$sciName = $_REQUEST['sciname']; 
-$taxAuthId = array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:0;
+$con = MySQLiConnectionFactory::getCon("readonly");
+$sciName = $con->real_escape_string($_REQUEST['sciname']); 
+$taxAuthId = array_key_exists('taxauthid',$_REQUEST)?$con->real_escape_string($_REQUEST['taxauthid']):0;
 
 $responseStr = "";
-$con = MySQLiConnectionFactory::getCon("readonly");
 $sql = 'SELECT t.tid FROM taxa t ';
 if($taxAuthId){
 	$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tid ';

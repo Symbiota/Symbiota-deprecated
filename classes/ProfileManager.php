@@ -228,12 +228,12 @@ class ProfileManager{
 	        	$rsTest = $editCon->query($sqlTest);
 	        	if(!$rsTest->num_rows) return false;
         	}
-    		$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$newPwd."\") "; 
+    		$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$this->con->real_escape_string($newPwd)."\") "; 
     		if($isSelf){
-    			$sql .= "WHERE ul.username = \"".$id."\"";
+    			$sql .= "WHERE ul.username = \"".$this->con->real_escape_string($id)."\"";
     		}
     		else{
-    			$sql .= "WHERE uid = ".$id;
+    			$sql .= "WHERE uid = ".$this->con->real_escape_string($id);
     		}
 			$successCnt = $editCon->query($sql);
         	$editCon->close();
@@ -249,7 +249,7 @@ class ProfileManager{
         $returnStr = "";
         if($un){
         	$editCon = $this->getConnection('write');
-			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$newPassword.'") '. 
+			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->con->real_escape_string($newPassword).'") '. 
                     'WHERE ul.username = "'.$this->con->real_escape_string($un).'"';
 			$status = $editCon->query($sql);
         	$editCon->close();
@@ -365,7 +365,7 @@ class ProfileManager{
             }
             if($person->getUrl()){
             	$fields .= ', url';
-				$values .= ', "'.$this->con->real_escape_string($person->getUrl()).'"';
+				$values .= ', "'.$person->getUrl().'"';
             }
             if($person->getBiography()){
             	$fields .= ', biography';
@@ -387,7 +387,9 @@ class ProfileManager{
         
         //Add userlogin
         $sql = 'INSERT INTO userlogin (uid, username, password) '.
-			'VALUES ('.$person->getUid().', "'.$this->con->real_escape_string($person->getUserName()).'", PASSWORD("'.$this->con->real_escape_string($person->getPassword()).'"))';
+			'VALUES ('.$this->con->real_escape_string($person->getUid()).', "'.
+        	$this->con->real_escape_string($person->getUserName()).
+        	'", PASSWORD("'.$this->con->real_escape_string($person->getPassword()).'"))';
         $editCon = $this->getConnection('write');
         $insertStatus = $editCon->query($sql);
         $editCon->close();
@@ -425,7 +427,9 @@ class ProfileManager{
     	
     	//Create new login
     	$sql = 'INSERT INTO userlogin (uid, username, password) '.
-    		'VALUES ('.$userId.',"'.$this->con->real_escape_string($newLogin).'",PASSWORD("'.$this->con->real_escape_string($newPwd).'"))';
+    		'VALUES ('.$this->con->real_escape_string($userId).',"'.
+    		$this->con->real_escape_string($newLogin).
+    		'",PASSWORD("'.$this->con->real_escape_string($newPwd).'"))';
     	//echo $sql;
         $editCon = $this->getConnection('write');
     	if($editCon->query($sql)) $statusStr = '<span color="green">Creation of New Login successful!</span>';

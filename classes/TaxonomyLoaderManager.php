@@ -37,12 +37,15 @@ class TaxonomyLoaderManager{
 		$tid = 0;
 		$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
 			"source, notes, securitystatus) ".
-			"VALUES (\"".$dataArr["sciname"]."\",".($dataArr["author"]?"\"".$dataArr["author"]."\"":"NULL").",".$dataArr["rankid"].
-			",".($dataArr["unitind1"]?"\"".$dataArr["unitind1"]."\"":"NULL").",\"".$dataArr["unitname1"]."\",".
-			($dataArr["unitind2"]?"\"".$dataArr["unitind2"]."\"":"NULL").",".($dataArr["unitname2"]?"\"".$dataArr["unitname2"]."\"":"NULL").
-			",".($dataArr["unitind3"]?"\"".$dataArr["unitind3"]."\"":"NULL").",".($dataArr["unitname3"]?"\"".$dataArr["unitname3"]."\"":"NULL").
-			",".($dataArr["source"]?"\"".$dataArr["source"]."\"":"NULL").",".($dataArr["notes"]?"\"".$dataArr["notes"]."\"":"NULL").
-			",".$dataArr["securitystatus"].")";
+			"VALUES (\"".$this->conn->real_escape_string($dataArr["sciname"])."\",".($dataArr["author"]?"\"".$this->conn->real_escape_string($dataArr["author"])."\"":"NULL").
+			",".$dataArr["rankid"].",".($dataArr["unitind1"]?"\"".$this->conn->real_escape_string($dataArr["unitind1"])."\"":"NULL").
+			",\"".$this->conn->real_escape_string($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->conn->real_escape_string($dataArr["unitind2"])."\"":"NULL").
+			",".($dataArr["unitname2"]?"\"".$this->conn->real_escape_string($dataArr["unitname2"])."\"":"NULL").
+			",".($dataArr["unitind3"]?"\"".$this->conn->real_escape_string($dataArr["unitind3"])."\"":"NULL").
+			",".($dataArr["unitname3"]?"\"".$this->conn->real_escape_string($dataArr["unitname3"])."\"":"NULL").
+			",".($dataArr["source"]?"\"".$this->conn->real_escape_string($dataArr["source"])."\"":"NULL").",".
+			($dataArr["notes"]?"\"".$this->conn->real_escape_string($dataArr["notes"])."\"":"NULL").
+			",".$this->conn->real_escape_string($dataArr["securitystatus"]).")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
@@ -51,7 +54,7 @@ class TaxonomyLoaderManager{
 			if($dataArr["parenttid"]) $hierarchy = $this->getHierarchy($dataArr["parenttid"]);
 			//Get family from hierarchy
 			$family = '';
-			$sqlFam = 'SELECT t.sciname FROM taxa WHERE tid IN('.$hierarchy.') AND rankid = 140 ';
+			$sqlFam = 'SELECT t.sciname FROM taxa WHERE tid IN('.$this->conn->real_escape_string($hierarchy).') AND rankid = 140 ';
 			$rsFam = $this->conn->query($sqlFam);
 			if($rsFam){
 				if($r = $rsFam->fetch_object()){
@@ -61,8 +64,10 @@ class TaxonomyLoaderManager{
 			
 			//Load new record into taxstatus table
 			$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-				"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$family."\"":"NULL").",".
-				($dataArr["uppertaxonomy"]?"\"".$dataArr["uppertaxonomy"]."\"":"NULL").",".($dataArr["parenttid"]?$dataArr["parenttid"]:"NULL").",\"".$dataArr["unacceptabilityreason"]."\",\"".$hierarchy."\") ";
+				"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
+				($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
+				",".($dataArr["parenttid"]?$this->conn->real_escape_string($dataArr["parenttid"]):"NULL").",\"".
+				$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$this->conn->real_escape_string($hierarchy)."\") ";
 			//echo "sqlTaxStatus: ".$sqlTaxStatus;
 			if(!$this->conn->query($sqlTaxStatus)){
 				return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
@@ -71,7 +76,7 @@ class TaxonomyLoaderManager{
 			//Link new name to existing specimens and set locality secirity if needed
 			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
 			if($dataArr['securitystatus']) $sql1 .= ',localitysecurity = 1 '; 
-			$sql1 .= 'WHERE sciname = "'.$dataArr["sciname"].'"';
+			$sql1 .= 'WHERE sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'"';
 			$this->conn->query($sql1);
 			//Add their geopoints to omoccurgeoindex 
 			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
@@ -92,7 +97,7 @@ class TaxonomyLoaderManager{
 		$parCnt = 0;
 		$targetTid = $tid;
 		do{
-			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE ts.tid = ".$targetTid;
+			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE ts.tid = ".$this->conn->real_escape_string($targetTid);
 			//echo "<div>".$sqlParents."</div>";
 			$resultParent = $this->conn->query($sqlParents);
 			if($rowParent = $resultParent->fetch_object()){

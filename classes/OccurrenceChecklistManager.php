@@ -13,14 +13,17 @@ class OccurrenceChecklistManager extends OccurrenceManager{
  		parent::__construct();
  	}
 
-	public function getChecklistTaxaCnt(){
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+
+ 	public function getChecklistTaxaCnt(){
 		return $this->checklistTaxaCnt;
 	}
 
 	public function getChecklist($taxonAuthorityId){
 		$returnVec = Array();
 		$this->checklistTaxaCnt = 0;
-		$conn = $this->getConnection();
 		$sql = "";
         if($taxonAuthorityId){
 			$sql = "SELECT DISTINCT ts.Family, t.SciName ".
@@ -35,7 +38,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 				"ORDER BY o.family, o.SciName ";
         }
         //echo "<div>".$sql."</div>";
-        $result = $conn->query($sql);
+        $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->Family);
 			$sciName = $row->SciName;
@@ -47,7 +50,6 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			}
 			$this->checklistTaxaCnt++;
         }
-        $conn->close();
         return $returnVec;
 	}
 
@@ -66,8 +68,8 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$dynClid = 0;
 		$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
 			"VALUES ('Dynamic Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'Specimen Checklist', '', '".$expirationTime."') ";
-		if($conn->query($sqlCreateCl)){
-			$dynClid = $conn->insert_id;
+		if($this->conn->query($sqlCreateCl)){
+			$dynClid = $this->conn->insert_id;
 			//Get checklist and append to dyncltaxalink
 			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
 			if(!$taxonAuthorityId){

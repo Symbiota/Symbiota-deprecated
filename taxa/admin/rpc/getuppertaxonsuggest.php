@@ -5,10 +5,10 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-$q = $_REQUEST['term'];
+$con = MySQLiConnectionFactory::getCon("readonly");
+$q = $con->real_escape_string($_REQUEST['term']);
 
 $upperTax = Array();
-$con = MySQLiConnectionFactory::getCon("readonly");
 $sql = 'SELECT DISTINCT uppertaxonomy FROM taxstatus '.
 	'WHERE uppertaxonomy LIKE "'.$q.'%" ORDER BY uppertaxonomy LIMIT 10';
 $result = $con->query($sql);
