@@ -32,7 +32,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 		"o.disposition, o.modified, o.language, o.CollID, o.localitySecurity ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
- 		$this->dwcSql .= $this->conn->real_escape_string($this->getSqlWhere());
+ 		$this->dwcSql .= $this->getSqlWhere();
 		$this->dwcSql .= "ORDER BY c.institutioncode, o.SciName";
  	}
 
@@ -130,7 +130,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		$sql .= $this->conn->real_escape_string($this->getSqlWhere());
+		$sql .= $this->getSqlWhere();
 		$sql .= "ORDER BY c.institutioncode, o.SciName";
 		//echo $sql;
 		$canReadRareSpp = false;
@@ -209,7 +209,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"c.CollectionName, c.institutioncode, o.occurrenceID, o.occid ".
 		"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		$sql .= $this->conn->real_escape_string($this->getSqlWhere());
+		$sql .= $this->getSqlWhere();
 		$sql .= " AND o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL ";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -261,7 +261,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS specificepithet, t.unitind3 AS infrarank, t.unitname3 AS infraspepithet, t.author ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-            $sql .= $this->conn->real_escape_string($this->getSqlWhere())."AND t.RankId > 140 AND ts.taxauthid = ".$taxonFilterCode." ORDER BY ts.family, t.SciName ";
+            $sql .= $this->getSqlWhere()."AND t.RankId > 140 AND ts.taxauthid = ".$taxonFilterCode." ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = "SELECT DISTINCT o.family, o.sciname, o.genus, IFNULL(o.specificepithet,'') AS specificepithet, ".
@@ -269,7 +269,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"IFNULL(o.infraspecificepithet,'') AS infraspepithet, IFNULL(t.author, o.scientificnameauthorship) AS author ".
 				"FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			$sql .= $this->conn->real_escape_string($this->getSqlWhere())."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
+			$sql .= $this->getSqlWhere()."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
                 "ORDER BY o.family, o.SciName ";
         }
 		//Output checklist
