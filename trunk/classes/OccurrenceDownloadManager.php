@@ -24,7 +24,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
  			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
 	 		"o.verbatimEventDate, o.habitat, o.fieldNotes, CONCAT_WS('; ',occurrenceRemarks,attributes) AS occurrenceRemarks, ".
- 			"o.associatedOccurrences, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
+ 			"o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
  			"o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
 	 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
  			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
@@ -32,7 +32,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 		"o.disposition, o.modified, o.language, o.CollID, o.localitySecurity ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
- 		$this->dwcSql .= $this->getSqlWhere();
+ 		$this->dwcSql .= $this->conn->real_escape_string($this->getSqlWhere());
 		$this->dwcSql .= "ORDER BY c.institutioncode, o.SciName";
  	}
 
@@ -69,7 +69,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  			"\"taxonRemarks\",\"identifiedBy\",\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"identificationQualifier\",".
  			"\"typeStatus\",\"recordedBy\",\"recordNumber\",\"eventDate\",\"year\",\"month\",\"day\",\"startDayOfYear\",\"endDayOfYear\",".
 	 		"\"verbatimEventDate\",\"habitat\",\"fieldNotes\",\"occurrenceRemarks\",".
- 			"\"associatedOccurrences\",\"associatedTaxa\",\"reproductiveCondition\",\"cultivationStatus\",\"establishmentMeans\",\"country\",".
+ 			"\"associatedTaxa\",\"reproductiveCondition\",\"cultivationStatus\",\"establishmentMeans\",\"country\",".
  			"\"stateProvince\",\"county\",\"municipality\",\"locality\",\"decimalLatitude\",\"decimalLongitude\",".
 	 		"\"geodeticDatum\",\"coordinateUncertaintyInMeters\",\"coordinatePrecision\",\"locationRemarks\",\"verbatimCoordinates\",".
  			"\"verbatimCoordinateSystem\",\"georeferencedBy\",\"georeferenceProtocol\",\"georeferenceSources\",\"georeferenceVerificationStatus\",".
@@ -85,7 +85,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["identificationRemarks"]."\",\"".$row["identificationQualifier"]."\",\"".$row["typeStatus"]."\",\"".$row["recordedBy"]."\",\"".
 					$row["recordNumber"]."\",".$row["eventDate"].",".$row["year"].",".$row["month"].",".$row["day"].",".$row["startDayOfYear"].",".
 					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["fieldNotes"])."\",\"".
-					$row["occurrenceRemarks"]."\",\"".$row["associatedOccurrences"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
+					$row["occurrenceRemarks"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
 					$row["cultivationStatus"]."\",\"".$row["establishmentMeans"]."\",\"".$row["country"]."\",\"".$row["stateProvince"]."\",\"".
 					$row["county"]."\",\"".$row["municipality"]."\",";
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
@@ -121,7 +121,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, o.recordNumber, ".
 			"o.eventDate, o.year, o.month, o.day, o.startDayOfYear, ".
 			"o.endDayOfYear, o.verbatimEventDate, o.habitat, o.fieldNotes, occurrenceRemarks, attributes, ".
-			"o.associatedOccurrences, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
+			"o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
 			"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
 			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
@@ -130,7 +130,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		$sql .= $this->getSqlWhere();
+		$sql .= $this->conn->real_escape_string($this->getSqlWhere());
 		$sql .= "ORDER BY c.institutioncode, o.SciName";
 		//echo $sql;
 		$canReadRareSpp = false;
@@ -160,7 +160,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  			"\"identificationRemarks\",\"identificationQualifier\",\"typeStatus\",\"recordedBy\",\"associatedCollectors\",".
  			"\"recordNumber\",\"eventDate\",\"year\",\"month\",\"day\",\"startDayOfYear\",\"endDayOfYear\",".
 	 		"\"verbatimEventDate\",\"habitat\",\"fieldNotes\",\"occurrenceRemarks\",\"attributes\",".
- 			"\"associatedOccurrences\",\"associatedTaxa\",\"reproductiveCondition\",\"cultivationStatus\",\"establishmentMeans\",\"country\",".
+ 			"\"associatedTaxa\",\"reproductiveCondition\",\"cultivationStatus\",\"establishmentMeans\",\"country\",".
  			"\"stateProvince\",\"county\",\"municipality\",\"locality\",\"decimalLatitude\",\"decimalLongitude\",".
 	 		"\"geodeticDatum\",\"coordinateUncertaintyInMeters\",\"coordinatePrecision\",\"locationRemarks\",\"verbatimCoordinates\",".
  			"\"verbatimCoordinateSystem\",\"georeferencedBy\",\"georeferenceProtocol\",\"georeferenceSources\",\"georeferenceVerificationStatus\",".
@@ -178,7 +178,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["identificationRemarks"]."\",\"".$row["identificationQualifier"]."\",\"".$row["typeStatus"]."\",\"".$row["recordedBy"]."\",\"".$row["associatedCollectors"]."\",\"".
 					$row["recordNumber"]."\",".$row["eventDate"].",".$row["year"].",".$row["month"].",".$row["day"].",".$row["startDayOfYear"].",".
 					$row["endDayOfYear"].",\"".$row["verbatimEventDate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["fieldNotes"])."\",\"".
-					$row["occurrenceRemarks"]."\",\"".$row["attributes"]."\",\"".$row["associatedOccurrences"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
+					$row["occurrenceRemarks"]."\",\"".$row["attributes"]."\",\"".$row["associatedTaxa"]."\",\"".$row["reproductiveCondition"]."\",\"".
 					$row["cultivationStatus"]."\",\"".$row["establishmentMeans"]."\",\"".$row["country"]."\",\"".$row["stateProvince"]."\",\"".
 					$row["county"]."\",\"".$row["municipality"]."\",";
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
@@ -209,7 +209,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"c.CollectionName, c.institutioncode, o.occurrenceID, o.occid ".
 		"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		$sql .= $this->getSqlWhere();
+		$sql .= $this->conn->real_escape_string($this->getSqlWhere());
 		$sql .= " AND o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL ";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -261,7 +261,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS specificepithet, t.unitind3 AS infrarank, t.unitname3 AS infraspepithet, t.author ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-            $sql .= $this->getSqlWhere()."AND t.RankId > 140 AND ts.taxauthid = ".$taxonFilterCode." ORDER BY ts.family, t.SciName ";
+            $sql .= $this->conn->real_escape_string($this->getSqlWhere())."AND t.RankId > 140 AND ts.taxauthid = ".$taxonFilterCode." ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = "SELECT DISTINCT o.family, o.sciname, o.genus, IFNULL(o.specificepithet,'') AS specificepithet, ".
@@ -269,7 +269,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"IFNULL(o.infraspecificepithet,'') AS infraspepithet, IFNULL(t.author, o.scientificnameauthorship) AS author ".
 				"FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
+			$sql .= $this->conn->real_escape_string($this->getSqlWhere())."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
                 "ORDER BY o.family, o.SciName ";
         }
 		//Output checklist

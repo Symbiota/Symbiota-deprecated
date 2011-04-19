@@ -8,7 +8,7 @@ include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
-$submit = array_key_exists("submit",$_POST)?$_POST["submit"]:"";
+$submit = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:"";
 $resetPwd = array_key_exists("resetpwd",$_REQUEST)?$_REQUEST["resetpwd"]:"";
 $login = array_key_exists("login",$_REQUEST)?$_REQUEST["login"]:"";
 $remMe = array_key_exists("remember",$_POST)?$_POST["remember"]:"";
@@ -41,7 +41,8 @@ if($remMe) $pHandler->setRememberMe(true);
 
 $statusStr = "";
 if($submit == "logout"){
-    $pHandler->reset();
+	$pHandler->reset();
+	header("Location: ../index.php");
 }
 elseif($action == "Login"){
 	$password = $_POST["password"];

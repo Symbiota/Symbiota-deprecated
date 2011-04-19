@@ -248,17 +248,17 @@ class ProfileManager{
         $status = false;
         $returnStr = "";
         if($un){
-        	$editCon = $this->getConnection("write");
-        	$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$newPassword."\") ". 
-                    "WHERE ul.username = \"".$un."\"";
+        	$editCon = $this->getConnection('write');
+			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$newPassword.'") '. 
+                    'WHERE ul.username = "'.$this->con->real_escape_string($un).'"';
 			$status = $editCon->query($sql);
         	$editCon->close();
         }
 		if($status){
 			//Get email address
 			$emailStr = ""; 
-        	$sql = "SELECT u.email FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-        		"WHERE ul.username = \"".$un."\"";
+        	$sql = 'SELECT u.email FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+        		'WHERE ul.username = "'.$this->con->real_escape_string($un).'"';
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$emailStr = $row->email;
@@ -305,7 +305,7 @@ class ProfileManager{
 
         //Test to see if user already exists
         if($person->getEmail()){
-        	$sql = "SELECT u.uid FROM users u WHERE u.email = \"".$person->getEmail()."\" AND u.lastname = \"".$person->getLastName()."\"";
+        	$sql = 'SELECT u.uid FROM users u WHERE u.email = "'.$person->getEmail().'" AND u.lastname = "'.$person->getLastName().'"';
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$person->setUid($row->uid);
@@ -317,69 +317,68 @@ class ProfileManager{
         
         //If newuser, add to users table
         if($userNew){
-			$fields = "INSERT INTO users (";
-			$values = "VALUES (";
-			$fields .= "firstname ";
-            $values .= "\"".$person->getFirstName()."\"";
-			$fields .= ", lastname";
-			$values .= ", \"".$person->getLastName()."\"";
+			$fields = 'INSERT INTO users (';
+			$values = 'VALUES (';
+			$fields .= 'firstname ';
+            $values .= '"'.$this->con->real_escape_string($person->getFirstName()).'"';
+			$fields .= ', lastname';
+			$values .= ', "'.$this->con->real_escape_string($person->getLastName()).'"';
             if($person->getTitle()){
-	            $fields .=", title";
-                $values .= ", \"".$person->getTitle()."\"";
+	            $fields .= ', title';
+                $values .= ', "'.$this->con->real_escape_string($person->getTitle()).'"';
             }
             if($person->getInstitution()){
-            	$fields .=", institution";
-                $values .= ", \"".$person->getInstitution()."\"";
+            	$fields .= ', institution';
+                $values .= ', "'.$this->con->real_escape_string($person->getInstitution()).'"';
             }
-
             if($person->getDepartment()){
-            	$fields .=", department";
-                $values .= ", \"".$person->getDepartment()."\"";
+            	$fields .= ', department';
+                $values .= ', "'.$this->con->real_escape_string($person->getDepartment()).'"';
             }
             if($person->getAddress()){
-				$fields .=", address";
-                $values .= ", \"".$person->getAddress()."\"";
+				$fields .= ', address';
+                $values .= ', "'.$this->con->real_escape_string($person->getAddress()).'"';
             }
             if($person->getCity()){
-				$fields .=", city";
-                $values .= ", \"".$person->getCity()."\"";
+				$fields .= ', city';
+                $values .= ', "'.$this->con->real_escape_string($person->getCity()).'"';
             }
             if($person->getState()){
-				$fields .=", state";
-                $values .= ", \"".$person->getState()."\"";
+				$fields .= ', state';
+                $values .= ', "'.$this->con->real_escape_string($person->getState()).'"';
             }
             if($person->getZip()){
-            	$fields .=", zip";
-				$values .= ", \"".$person->getZip()."\"";
+            	$fields .= ', zip';
+				$values .= ', "'.$this->con->real_escape_string($person->getZip()).'"';
             }
             if($person->getCountry()){
-            	$fields .=", country";
-                $values .= ", \"".$person->getCountry()."\"";
+            	$fields .= ', country';
+                $values .= ', "'.$this->con->real_escape_string($person->getCountry()).'"';
             }
             if($person->getPhone()){
-            	$fields .=", phone";
-                $values .= ", \"".$person->getPhone()."\"";
+            	$fields .= ', phone';
+                $values .= ', "'.$this->con->real_escape_string($person->getPhone()).'"';
             }
             if($person->getEmail()){
-	            $fields .= ", email";
-                $values .= ", \"".$person->getEmail()."\"";
+	            $fields .= ', email';
+                $values .= ', "'.$this->con->real_escape_string($person->getEmail()).'"';
             }
             if($person->getUrl()){
-            	$fields .=", url";
-				$values .= ", \"".$person->getUrl()."\"";
+            	$fields .= ', url';
+				$values .= ', "'.$this->con->real_escape_string($person->getUrl()).'"';
             }
             if($person->getBiography()){
-            	$fields .=", biography";
-				$values .= ", \"".$person->getBiography()."\"";
+            	$fields .= ', biography';
+				$values .= ', "'.$this->con->real_escape_string($person->getBiography()).'"';
             }
             if($person->getIsPublic()){
-            	$fields .=", ispublic";
-				$values .= ", ".$person->getIsPublic();
+				$fields .= ', ispublic';
+				$values .= ', '.$person->getIsPublic();
             }
             
-			$sql = $fields.") ".$values.")";
+			$sql = $fields.') '.$values.')';
             //echo "SQL: ".sql;
-        	$editCon = $this->getConnection("write");
+        	$editCon = $this->getConnection('write');
 			if($editCon->query($sql)){
 				$person->setUid($editCon->insert_id);
             }
@@ -387,25 +386,25 @@ class ProfileManager{
         }
         
         //Add userlogin
-        $sql = "INSERT INTO userlogin (uid, username, password) ".
-			"VALUES (".$person->getUid().", \"".$person->getUserName()."\", PASSWORD(\"".$person->getPassword()."\"))";
-        $editCon = $this->getConnection("write");
+        $sql = 'INSERT INTO userlogin (uid, username, password) '.
+			'VALUES ('.$person->getUid().', "'.$this->con->real_escape_string($person->getUserName()).'", PASSWORD("'.$this->con->real_escape_string($person->getPassword()).'"))';
+        $editCon = $this->getConnection('write');
         $insertStatus = $editCon->query($sql);
         $editCon->close();
         if($insertStatus > 0){
-        	$returnStr = "SUCCESS: new user added successfully. ".$returnStr;
+        	$returnStr = 'SUCCESS: new user added successfully. '.$returnStr;
         }
         else{
-        	$returnStr = "FAILED: Unable to create user.<div style='margin-left:55px;'>Please contact system administrator for assistance.</div>";
+        	$returnStr = 'FAILED: Unable to create user.<div style="margin-left:55px;">Please contact system administrator for assistance.</div>';
         }
         return $returnStr;
     }
     
     public function lookupLogin($emailAddr){
-    	$returnStr = "";
-    	$sql = "SELECT u.uid, ul.username ".
-			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-			"WHERE (u.email = \"".$emailAddr."\")";
+    	$returnStr = '';
+    	$sql = 'SELECT u.uid, ul.username '.
+			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+			'WHERE (u.email = "'.$emailAddr.'")';
     	$result = $this->con->query($sql);
     	if($row = $result->fetch_object()){
     		$returnStr = $row->username;
@@ -414,32 +413,32 @@ class ProfileManager{
     }
     
     public function createNewLogin($userId, $newLogin, $newPwd){
-    	$statusStr = "<span color='red'>Creation of New Login failed!</span>";
+    	$statusStr = '<span color="red">Creation of New Login failed!</span>';
     	$newLogin = trim($newLogin);
     	
     	//Test if login exists
-    	$sqlTestLogin = "SELECT ul.uid FROM userlogin ul WHERE ul.username = \"".$newLogin."\" ";
+    	$sqlTestLogin = 'SELECT ul.uid FROM userlogin ul WHERE ul.username = "'.$this->con->real_escape_string($newLogin).'" ';
     	$rs = $this->con->query($sqlTestLogin);
     	$numRows = $rs->num_rows;
     	$rs->close();
     	if($numRows) return "<span color='red'>FAILED! Login $newLogin is already being used by another user. Please try a new login.</span>";
     	
     	//Create new login
-    	$sql = "INSERT INTO userlogin (uid, username, password) ".
-    		"VALUES ($userId,\"".$newLogin."\",PASSWORD(\"".$newPwd."\"))";
+    	$sql = 'INSERT INTO userlogin (uid, username, password) '.
+    		'VALUES ('.$userId.',"'.$this->con->real_escape_string($newLogin).'",PASSWORD("'.$this->con->real_escape_string($newPwd).'"))';
     	//echo $sql;
-        $editCon = $this->getConnection("write");
-    	if($editCon->query($sql)) $statusStr = "<span color='green'>Creation of New Login successful!</span>";
+        $editCon = $this->getConnection('write');
+    	if($editCon->query($sql)) $statusStr = '<span color="green">Creation of New Login successful!</span>';
     	$editCon->close();
     	return $statusStr;
     }
     
     public function checkLogin($username, $email){
         //Check to see if userlogin already exists 
-        $returnStr = "";
-       	$sql = "SELECT u.uid, u.email ".
-			"FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid ".
-			"WHERE (ul.username = \"".$username."\")";
+        $returnStr = '';
+       	$sql = 'SELECT u.uid, u.email '.
+			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
+			'WHERE (ul.username = "'.$this->con->real_escape_string($username).'")';
 		$result = $this->con->query($sql);
         if($row = $result->fetch_object()){
             $loginEmail = $row->email;
