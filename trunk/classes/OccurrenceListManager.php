@@ -15,13 +15,16 @@ class OccurrenceListManager extends OccurrenceManager{
  		parent::__construct();
  	}
 
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+
 	public function getSpecimenMap($pageRequest){
 		global $userRights;
 		$returnArr = Array();
-		$conn = $this->getConnection();
 		$sqlWhere = $this->getSqlWhere();
 		if(!$this->recordCount || $this->reset){
-			$this->setRecordCnt($sqlWhere,$conn);
+			$this->setRecordCnt($sqlWhere);
 		}
 		$sql = "SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, o.tidinterpreted, ".
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
@@ -39,7 +42,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		$sql .= ",o.recordedBy,o.recordNumber ";			
 		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
-		$result = $conn->query($sql);
+		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
 		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
 			$canReadRareSpp = true;
@@ -80,18 +83,17 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$dbpk]["dbpk"] = $row->dbpk;
 		}
 		$result->close();
-		$conn->close();
 		return $returnArr;
 	}
 
-	private function setRecordCnt($sqlWhere, $conn){
+	private function setRecordCnt($sqlWhere){
 		global $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			$sql .= $sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
-			$result = $conn->query($sql);
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->recordCount = $row->cnt;
 			}

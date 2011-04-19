@@ -7,7 +7,8 @@
 include_once($serverRoot.'/config/dbconnection.php');
 
 class OccurrenceManager{
-	
+
+	protected $conn;
 	protected $taxaArr = Array();
 	private $taxaSearchType;
 	protected $searchTermsArr = Array();
@@ -19,6 +20,7 @@ class OccurrenceManager{
 	private $clName;
 	
  	public function __construct(){
+		$this->conn = MySQLiConnectionFactory::getCon('readonly');
  		$this->useCookies = array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?false:true; 
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
@@ -29,6 +31,10 @@ class OccurrenceManager{
  		}
 		$this->readRequestVariables();
  	}
+
+	public function __destruct(){
+ 		if(!($this->conn === false)) $this->conn->close();
+	}
 
  	protected function getConnection($conType = "readonly"){
 		return MySQLiConnectionFactory::getCon($conType);
@@ -126,27 +132,26 @@ class OccurrenceManager{
 			foreach($taxaArr as $sName){
 				$this->taxaArr[trim($sName)] = Array();
 			}
-			$conn = $this->getConnection();
 			if($this->taxaSearchType == 5){
 				//Common name search
-				$this->setSciNamesByVerns($conn);
+				$this->setSciNamesByVerns();
 			}
 			else{
 				if($useThes){ 
-					$this->setSynonyms($conn);
+					$this->setSynonyms();
 				}
 			}
 
 			//Build sql
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
-					$rs1 = $conn->query("SELECT tid FROM taxa WHERE sciname = '".$key."'");
+					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE sciname = '".$key."'");
 					if($r1 = $rs1->fetch_object()){
 						$fStr = "";
 						$sql2 = "SELECT DISTINCT ts.family ".
 							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 							"WHERE ts.taxauthid = 1 AND ts.hierarchystr LIKE '%,".$r1->tid.",%'";
-						$rs2 = $conn->query($sql2);
+						$rs2 = $this->conn->query($sql2);
 						while($r2 = $rs2->fetch_object()){
 							$fStr .= "','".$r2->family;
 						}
@@ -193,7 +198,6 @@ class OccurrenceManager{
 				}
 			}
 			$sqlWhere .= "AND (".substr($sqlWhereTaxa,3).") ";
-			$conn->close();
 		}
 
 		if(array_key_exists("country",$this->searchTermsArr)){
@@ -279,13 +283,11 @@ class OccurrenceManager{
 			if($clid){
 				$sql = "SELECT dynamicsql, name ".
 					"FROM fmchecklists WHERE clid = ".$clid;
-				$con = $this->getConnection();
-				$result = $con->query($sql);
+				$result = $this->conn->query($sql);
 				if($row = $result->fetch_object()){
 					$clSql = $row->dynamicsql;
 					$this->clName = $row->name;
 				}
-				$con->close();
 				if($clSql){
 					$sqlWhere .= "AND (".$clSql.")";
 					$this->localSearchArr[] = "SQL: ".$clSql;
@@ -301,7 +303,7 @@ class OccurrenceManager{
 		return "WHERE ".substr($sqlWhere,4);
 	}
 	
-    protected function setSciNamesByVerns($conn){
+    protected function setSciNamesByVerns(){
         $sql = "SELECT DISTINCT v.VernacularName, t.sciname, ts.family, t.rankid ".
             "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
             "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
@@ -311,7 +313,7 @@ class OccurrenceManager{
 		}
 		$sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
 		//echo "<div>sql: ".$sql."</div>";
-		$result = $conn->query($sql);
+		$result = $this->conn->query($sql);
 		if($result->num_rows){
 			while($row = $result->fetch_object()){
 				$vernName = $row->VernacularName;
@@ -329,13 +331,13 @@ class OccurrenceManager{
 		$result->close();
     }
     
-    protected function setSynonyms($conn){
+    protected function setSynonyms(){
     	foreach($this->taxaArr as $key => $value){
     		if(array_key_exists("scinames",$value) && !in_array("no records",$value["scinames"])){
     			$this->taxaArr = $value["scinames"];
     			foreach($this->taxaArr as $sciname){
 	        		$sql = "call ReturnSynonyms('".$sciname."',1)";
-	        		$result = $conn->query($sql);
+	        		$result = $this->conn->query($sql);
 	        		while($row = $result->fetch_object()){
 	        			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
 	        		}
@@ -344,19 +346,18 @@ class OccurrenceManager{
     		}
     		else{
     			$sql = "call ReturnSynonyms('".$key."',1)";
-    			$result = $conn->query($sql);
+    			$result = $this->conn->query($sql);
         		while($row = $result->fetch_object()){
         			$this->taxaArr[$key]["synonyms"][] = $row->sciname;
         		}
         		$result->close();
-        		$conn->next_result();
+        		$this->conn->next_result();
     		}
     	}
     }
 	
 	public function getCollectionArr($catId = ""){
 		if(!$this->collectionArr) {
-			$conn = $this->getConnection();
 			$tempCollArr = Array();
 			if(array_key_exists("db",$this->searchTermsArr)) $tempCollArr = explode(";",$this->searchTermsArr["db"]);
 			$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.Homepage, ".
@@ -367,7 +368,7 @@ class OccurrenceManager{
 			}
 			$sql .= "ORDER BY c.SortSeq, c.CollectionName ";
 			//echo "<div>SQL: ".$sql."</div>";
-			$result = $conn->query($sql);
+			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$collId = $row->collid;
 				$this->collectionArr[$collId]["institutioncode"] = $row->institutioncode;
@@ -380,7 +381,6 @@ class OccurrenceManager{
 				if(in_array($collId,$tempCollArr) || in_array("all",$tempCollArr)) $this->collectionArr[$collId]["isselected"] = 1;
 			}
 			$result->close();
-			$conn->close();
 		}
 		return $this->collectionArr;
 	}
@@ -393,13 +393,11 @@ class OccurrenceManager{
 			"WHERE p.occurrencesearch = 1 ".
 			"ORDER BY p.sortsequence, p.projname, s.projectname"; 
 		//echo "<div>$sql</div>";
-		$conn = $this->getConnection();
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->projname][$row->surveyid] = $row->projectname;
 		}
 		$rs->close();
-		$conn->close();
 		return $returnArr;
 	}
 	
@@ -428,12 +426,10 @@ class OccurrenceManager{
 	private function getSurveyStr(){
 		$returnStr = "";
 		$sql = "SELECT projectname FROM omsurveys WHERE surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).") ";
-		$conn = $this->getConnection();
-		$rs = $conn->query($sql);
+		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnStr .= " ;".$row->projectname; 
 		}
-		$conn->close();
 		return substr($returnStr,2);
 	}
 
@@ -457,27 +453,25 @@ class OccurrenceManager{
 	}
 	
 	public function getTaxonAuthorityList(){
-		$conn = $this->getConnection();
 		$taxonAuthorityList = Array();
 		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
-		$result = $conn->query($sql);
+		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$taxonAuthorityList[$row->taxauthid] = $row->name;
 		}
-		$conn->close();
 		return $taxonAuthorityList;
 	}
 
 	private function readRequestVariables(){
 		global $clientRoot;
 		if(array_key_exists("db",$_REQUEST)){
-			$dbs = $_GET["db"];
+			$dbs = $_REQUEST["db"];
 			if(is_string($dbs)) $dbs = Array($dbs); 
 		 	$dbStr = "";
 		 	if(in_array("all",$dbs)){
 		 		$dbStr = "all";
 		 		if(array_key_exists('catid',$_REQUEST) && $_REQUEST['catid']){
-		 			$dbStr .= ";catid:".$_REQUEST['catid'];
+		 			$dbStr .= ";catid:".$this->conn->real_escape_string($_REQUEST['catid']);
 		 		}
 		 	}
 		 	else{
@@ -488,7 +482,7 @@ class OccurrenceManager{
 			$this->searchTermsArr["db"] = $dbStr;
 		}
 		elseif(array_key_exists("surveyid",$_REQUEST)){
-			$surveyidArr = $_GET["surveyid"];
+			$surveyidArr = $_REQUEST["surveyid"];
 			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
 		 	$surveyidStr = implode(";",$surveyidArr);
 		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,$clientRoot);
@@ -496,20 +490,18 @@ class OccurrenceManager{
 			$this->searchTermsArr["surveyid"] = $surveyidStr;
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
-			$taxa = $_REQUEST["taxa"];
+			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
 					$sql = "SELECT t.sciname ". 
 						"FROM taxa t ".
 						"WHERE t.tid = ".$taxa;
-					$conn = $this->getConnection();
-					$rs = $conn->query($sql);
+					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
 						$taxaStr = $row->sciname;
 					}
 					$rs->close();
-					$conn->close();
 				}
 				else{
 					$taxaStr = str_replace(",",";",$taxa);
@@ -521,7 +513,7 @@ class OccurrenceManager{
 				}
 				$collTaxa = "taxa:".$taxaStr;
 				$this->searchTermsArr["taxa"] = $taxaStr;
-				$useThes = array_key_exists("thes",$_REQUEST)?$_REQUEST["thes"]:0; 
+				$useThes = array_key_exists("thes",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["thes"]):0; 
 				if($useThes){
 					$collTaxa .= "&usethes:true";
 					$this->searchTermsArr["usethes"] = true;
@@ -529,7 +521,7 @@ class OccurrenceManager{
 				else{
 					$this->searchTermsArr["usethes"] = false;
 				}
-				$searchType = array_key_exists("type",$_REQUEST)?$_REQUEST["type"]:1;
+				$searchType = array_key_exists("type",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["type"]):1;
 				if($searchType){
 					$collTaxa .= "&taxontype:".$searchType;
 					$this->searchTermsArr["taxontype"] = $searchType;
@@ -544,7 +536,7 @@ class OccurrenceManager{
 		$searchArr = Array();
 		$searchFieldsActivated = false;
 		if(array_key_exists("country",$_REQUEST)){
-			$country = $_REQUEST["country"];
+			$country = $this->conn->real_escape_string($_REQUEST["country"]);
 			if($country){
 				$str = str_replace(",",";",$country);
 				if(stripos($str, "USA") !== false && stripos($str, "United States") === false){
@@ -562,7 +554,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("state",$_REQUEST)){
-			$state = $_REQUEST["state"];
+			$state = $this->conn->real_escape_string($_REQUEST["state"]);
 			if($state){
 				$str = str_replace(",",";",$state);
 				$searchArr[] = "state:".$str;
@@ -574,7 +566,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("county",$_REQUEST)){
-			$county = $_REQUEST["county"];
+			$county = $this->conn->real_escape_string($_REQUEST["county"]);
 			$county = str_replace(" Co.","",$county);
 			$county = str_replace(" County","",$county);
 			if($county){
@@ -588,7 +580,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("local",$_REQUEST)){
-			$local = $_REQUEST["local"];
+			$local = $this->conn->real_escape_string($_REQUEST["local"]);
 			if($local){
 				$str = str_replace(",",";",$local);
 				$searchArr[] = "local:".$str;
@@ -600,7 +592,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collector",$_REQUEST)){
-			$collector = $_REQUEST["collector"];
+			$collector = $this->conn->real_escape_string($_REQUEST["collector"]);
 			if($collector){
 				$str = str_replace(",",";",$collector);
 				$searchArr[] = "collector:".$str;
@@ -612,7 +604,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collnum",$_REQUEST)){
-			$collNum = $_REQUEST["collnum"];
+			$collNum = $this->conn->real_escape_string($_REQUEST["collnum"]);
 			if($collNum){
 				$str = str_replace(",",";",$collNum);
 				$searchArr[] = "collnum:".$str;
@@ -624,23 +616,23 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("clid",$_REQUEST)){
-			$clid = $_REQUEST["clid"];
+			$clid = $this->conn->real_escape_string($_REQUEST["clid"]);
 			$searchArr[] = "clid:".$clid;
 			$this->searchTermsArr["clid"] = $clid;
 			$searchFieldsActivated = true;
 		}
 		$latLongArr = Array();
 		if(array_key_exists("upperlat",$_REQUEST)){
-			$upperLat = $_REQUEST["upperlat"];
+			$upperLat = $this->conn->real_escape_string($_REQUEST["upperlat"]);
 			if($upperLat || $upperLat === "0") $latLongArr[] = $upperLat;
 		
-			$bottomlat = $_REQUEST["bottomlat"];
+			$bottomlat = $this->conn->real_escape_string($_REQUEST["bottomlat"]);
 			if($bottomlat || $bottomlat === "0") $latLongArr[] = $bottomlat;
 		
-			$leftLong = $_REQUEST["leftlong"];
+			$leftLong = $this->conn->real_escape_string($_REQUEST["leftlong"]);
 			if($leftLong || $leftLong === "0") $latLongArr[] = $leftLong;
 		
-			$rightlong = $_REQUEST["rightlong"];
+			$rightlong = $this->conn->real_escape_string($_REQUEST["rightlong"]);
 			if($rightlong || $rightlong === "0") $latLongArr[] = $rightlong;
 
 			if(count($latLongArr) == 4){
@@ -653,13 +645,13 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("pointlat",$_REQUEST)){
-			$pointLat = $_REQUEST["pointlat"];
+			$pointLat = $this->conn->real_escape_string($_REQUEST["pointlat"]);
 			if($pointLat || $pointLat === "0") $latLongArr[] = $pointLat;
 			
-			$pointLong = $_REQUEST["pointlong"];
+			$pointLong = $this->conn->real_escape_string($_REQUEST["pointlong"]);
 			if($pointLong || $pointLong === "0") $latLongArr[] = $pointLong;
 		
-			$radius = $_REQUEST["radius"];
+			$radius = $this->conn->real_escape_string($_REQUEST["radius"]);
 			if($radius) $latLongArr[] = $radius;
 			if(count($latLongArr) == 3){
 				$searchArr[] = "llpoint:".implode(";",$latLongArr);

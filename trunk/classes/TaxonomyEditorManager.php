@@ -41,7 +41,7 @@ class TaxonomyEditorManager{
 			$this->tid = $target;
 		}
 		else{
-			$sql = "SELECT T.tid FROM taxa t WHERE t.sciname = '".$target."'";
+			$sql = "SELECT T.tid FROM taxa t WHERE t.sciname = '".$this->conn->real_escape_string($target)."'";
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->tid = $row->tid;
@@ -202,18 +202,18 @@ class TaxonomyEditorManager{
 				$sql .= $key." = \"".$v."\",";
 			}
 		}
-		$sql .= "sciname = \"".($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
+		$sql .= "sciname = \"".$this->conn->real_escape_string(($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
 			$taxonEditArr["unitname1"].($taxonEditArr["unitind2"]?" ".$taxonEditArr["unitind2"]:"").
 			($taxonEditArr["unitname2"]?" ".$taxonEditArr["unitname2"]:"").
 			($taxonEditArr["unitind3"]?" ".$taxonEditArr["unitind3"]:"").
-			($taxonEditArr["unitname3"]?" ".$taxonEditArr["unitname3"]:"")."\"";
+			($taxonEditArr["unitname3"]?" ".$taxonEditArr["unitname3"]:""))."\"";
 		$sql .= " WHERE tid = ".$tid;
 		//echo $sql;
 		$status = $this->conn->query($sql);
 		
 		//If SecurityStatus was changed, set security status within omoccurrence table 
 		if($taxonEditArr['securitystatus'] != $_REQUEST['securitystatusstart']){
-			$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$taxonEditArr['securitystatus'].' WHERE tidinterpreted = '.$tid;
+			$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$this->conn->real_escape_string($taxonEditArr['securitystatus']).' WHERE tidinterpreted = '.$tid;
 			$this->conn->query($sql2);
 		}
 		return $status;
@@ -223,7 +223,8 @@ class TaxonomyEditorManager{
 		$status = '';
 		$this->setTaxon();
 		$sql = 'UPDATE taxstatus '.
-			'SET uppertaxonomy = "'.trim($tsArr['uppertaxonomy']).'",parenttid = '.$tsArr["parenttid"].' '.
+			'SET uppertaxonomy = "'.$this->conn->real_escape_string(trim($tsArr['uppertaxonomy'])).'",parenttid = '.
+			$this->conn->real_escape_string($tsArr["parenttid"]).' '.
 			'WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tsArr['tid'].' AND tidaccepted = '.$tsArr['tidaccepted'];
 		if($this->conn->query($sql)){
 			$this->rebuildHierarchy($tsArr["tid"]);
@@ -271,19 +272,20 @@ class TaxonomyEditorManager{
 			//First, reset hierarchy for all children
 			if($hierarchyStr && $this->hierarchy){
 				$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = REPLACE(hierarchystr,"'.$this->hierarchy.'","'.$hierarchyStr.'") '.
-					'WHERE taxauthid = '.$this->taxAuthId.' AND hierarchystr LIKE "'.$this->hierarchy.','.$tid.'%"';
+					'WHERE taxauthid = '.$this->conn->real_escape_string($this->taxAuthId).' AND hierarchystr LIKE "'.
+					$this->conn->real_escape_string($this->hierarchy).','.$tid.'%"';
 				$this->conn->query($sqlUpdate);
 			}
 			//Reset hierarchy for target taxon
-			$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = "'.$hierarchyStr.'" '.
-				'WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.$tid;
+			$sqlUpdate = 'UPDATE taxstatus SET hierarchystr = "'.$this->conn->real_escape_string($hierarchyStr).'" '.
+				'WHERE taxauthid = '.$this->conn->real_escape_string($this->taxAuthId).' AND tid = '.$tid;
 			$this->conn->query($sqlUpdate);
 			
 		}
 		if($this->rankId > 140){
 			//Update family in taxstatus table
 			$newFam = '';
-			$sqlFam1 = 'SELECT sciname FROM taxa WHERE tid IN('.$hierarchyStr.') AND rankid = 140';
+			$sqlFam1 = 'SELECT sciname FROM taxa WHERE tid IN('.$this->conn->real_escape_string($hierarchyStr).') AND rankid = 140';
 			$rsFam1 = $this->conn->query($sqlFam1);
 			if($r1 = $rsFam1->fetch_object()){
 				$newFam = $r1->sciname;
@@ -295,7 +297,7 @@ class TaxonomyEditorManager{
 			if($r2 = $rsFam2->fetch_object()){
 				if($newFam <> $r2->family){
 					//reset family of target and all it's children
-					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$newFam.'"':'Not assigned').' '.
+					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$this->conn->real_escape_string($newFam).'"':'Not assigned').' '.
 						'WHERE taxauthid = '.$this->taxAuthId.' AND '.
 						'(tid = '.$tid.' OR hierarchystr LIKE "%,'.$tid.'" OR hierarchystr LIKE "%,'.$tid.',%" )';
 					//echo $sql;
@@ -314,10 +316,11 @@ class TaxonomyEditorManager{
 		$sql = "UPDATE taxstatus SET ";
 		$sqlSet = "";
 		foreach($synEditArr as $key => $value){
-			$sqlSet .= ",".$key." = '".trim($value)."'";
+			$sqlSet .= ",".$this->conn->real_escape_string($key)." = '".$this->conn->real_escape_string(trim($value))."'";
 		}
 		$sql .= substr($sqlSet,1);
-		$sql .= " WHERE taxauthid = ".$this->taxAuthId." AND tid = ".$tid." AND tidaccepted = ".$tidAccepted;
+		$sql .= " WHERE taxauthid = ".$this->conn->real_escape_string($this->taxAuthId).
+			" AND tid = ".$this->conn->real_escape_string($tid)." AND tidaccepted = ".$this->conn->real_escape_string($tidAccepted);
 		//echo $sql;
 		$status = $this->conn->query($sql);
 		return $status;
@@ -326,7 +329,8 @@ class TaxonomyEditorManager{
 	public function submitAddAcceptedLink($tid, $tidAcc, $deleteOther = true){
 		$upperTax = "";$family = "";$parentTid = 0;$hierarchyStr = "";
 		$sqlFam = "SELECT ts.uppertaxonomy, ts.family, ts.parenttid, ts.hierarchystr ".
-			"FROM taxstatus ts WHERE ts.tid = $tid AND ts.taxauthid = ".$this->taxAuthId;
+			"FROM taxstatus ts WHERE ts.tid = ".$this->conn->real_escape_string($tid).
+			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->taxAuthId);
 		$rs = $this->conn->query($sqlFam);
 		if($row = $rs->fetch_object()){
 			$upperTax = $row->uppertaxonomy;
@@ -337,12 +341,16 @@ class TaxonomyEditorManager{
 		$rs->close();
 		
 		if($deleteOther){
-			$sqlDel = "DELETE FROM taxstatus WHERE tid = $tid AND taxauthid = ".$this->taxAuthId;
+			$sqlDel = "DELETE FROM taxstatus WHERE tid = ".$this->conn->real_escape_string($tid).
+				" AND taxauthid = ".$this->conn->real_escape_string($this->taxAuthId);
 			$this->conn->query($sqlDel);
 		}
 		$sql = "INSERT INTO taxstatus (tid,tidaccepted,taxauthid,uppertaxonomy,family,parenttid,hierarchystr) ".
-			"VALUES ($tid, $tidAcc, $this->taxAuthId,".($upperTax?"\"".$upperTax."\"":"NULL").",".
-			($family?"\"".$family."\"":"NULL").",".$parentTid.",'".$hierarchyStr."') ";
+			"VALUES (".$this->conn->real_escape_string($tid).", ".$this->conn->real_escape_string($tidAcc).
+			", ".$this->conn->real_escape_string($this->taxAuthId).",".
+			($upperTax?"\"".$this->conn->real_escape_string($upperTax)."\"":"NULL").",".
+			($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
+			$this->conn->real_escape_string($parentTid).",'".$this->conn->real_escape_string($hierarchyStr)."') ";
 		//echo $sql;
 		$status = $this->conn->query($sql);
 		return $status;
@@ -350,11 +358,15 @@ class TaxonomyEditorManager{
 	
 	public function submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance = true){
 		
-		$sql = "UPDATE taxstatus SET tidaccepted = $tid WHERE tid = $tid AND taxauthid = $this->taxAuthId";
+		$sql = "UPDATE taxstatus SET tidaccepted = ".$this->conn->real_escape_string($tid).
+			" WHERE tid = ".$this->conn->real_escape_string($tid).
+			" AND taxauthid = ".$this->conn->real_escape_string($this->taxAuthId);
 		$status = $this->conn->query($sql);
 
 		if($switchAcceptance){
-			$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE tidaccepted = '.$tidAccepted.' AND taxauthid = '.$this->taxAuthId;
+			$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$this->conn->real_escape_string($tid).
+				' WHERE tidaccepted = '.$this->conn->real_escape_string($tidAccepted).
+				' AND taxauthid = '.$this->conn->real_escape_string($this->taxAuthId);
 			$status = $this->conn->query($sqlSwitch);
 			
 			$this->updateDependentData($tidAccepted,$tid);
@@ -364,11 +376,15 @@ class TaxonomyEditorManager{
 	
 	public function submitChangeToNotAccepted($tid,$tidAccepted){
 		//Change subject taxon to Not Accepted
-		$sql = "UPDATE taxstatus SET tidaccepted = $tidAccepted WHERE tid = $tid AND taxauthid = $this->taxAuthId";
+		$sql = "UPDATE taxstatus SET tidaccepted = ".$this->conn->real_escape_string($tidAccepted).
+			" WHERE tid = ".$this->conn->real_escape_string($tid)." AND taxauthid = ".
+			$this->conn->real_escape_string($this->taxAuthId);
 		$status = $this->conn->query($sql);
 
 		//Switch synonyms of subject to Accepted Taxon 
-		$sqlSyns = "UPDATE taxstatus SET tidaccepted = $tidAccepted WHERE tidaccepted = $tid AND taxauthid = $this->taxAuthId";
+		$sqlSyns = "UPDATE taxstatus SET tidaccepted = ".$this->conn->real_escape_string($tidAccepted).
+			" WHERE tidaccepted = ".$this->conn->real_escape_string($tid)." AND taxauthid = ".
+			$this->conn->real_escape_string($this->taxAuthId);
 		$status = $this->conn->query($sqlSyns);
 		
 		$this->updateDependentData($tid,$tidAccepted);
@@ -379,19 +395,23 @@ class TaxonomyEditorManager{
 	private function updateDependentData($tid, $tidNew){
 		//method to update descr, vernaculars,
 
-		$this->conn->query("DELETE FROM kmdescr WHERE inherited IS NOT NULL AND tid = ".$tid);
-		$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$tidNew." WHERE tid = ".$tid);
-		$this->conn->query("DELETE FROM kmdescr WHERE tid = ".$tid);
+		$this->conn->query("DELETE FROM kmdescr WHERE inherited IS NOT NULL AND tid = ".$this->conn->real_escape_string($tid));
+		$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$this->conn->real_escape_string($tidNew)." WHERE tid = ".$this->conn->real_escape_string($tid));
+		$this->conn->query("DELETE FROM kmdescr WHERE tid = ".$this->conn->real_escape_string($tid));
 		$this->resetCharStateInheritance($tidNew);
 		
-		$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE tid = ".$tid;
+		$sqlVerns = "UPDATE taxavernaculars SET tid = ".$this->conn->real_escape_string($tidNew).
+			" WHERE tid = ".$this->conn->real_escape_string($tid);
 		$this->conn->query($sqlVerns);
 		
-		$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE tid = '.$tidNew.') lj ON tb.caption = lj.caption '.
-			'SET tid = '.$tidNew.' WHERE tid = '.$tid.' AND lj.caption IS NULL';
+		$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE tid = '.
+			$this->conn->real_escape_string($tidNew).') lj ON tb.caption = lj.caption '.
+			'SET tid = '.$this->conn->real_escape_string($tidNew).' WHERE tid = '.
+			$this->conn->real_escape_string($tid).' AND lj.caption IS NULL';
 		$this->conn->query($sqltd);
 
-		$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE tid = ".$tid;
+		$sqltl = "UPDATE taxalinks SET tid = ".$this->conn->real_escape_string($tidNew).
+			" WHERE tid = ".$this->conn->real_escape_string($tid);
 		$this->conn->query($sqltl);
 		
 	}
@@ -407,7 +427,7 @@ class TaxonomyEditorManager{
 			"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 			"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
 			"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-			"AND (t2.tid = $tid) And (d2.CID Is Null)";
+			"AND (t2.tid = ".$this->conn->real_escape_string($tid).") And (d2.CID Is Null)";
 		$this->conn->query($sqlAdd1);
 
 		//Set inheritance for all children of target
@@ -421,7 +441,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
 				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-				"AND (t2.RankId = 180) AND (t1.tid = $tid) AND (d2.CID Is Null)";
+				"AND (t2.RankId = 180) AND (t1.tid = ".$this->conn->real_escape_string($tid).") AND (d2.CID Is Null)";
 			//echo $sqlAdd2a;
 			$this->conn->query($sqlAdd2a);
 			$sqlAdd2b = "INSERT INTO kmdescr ( TID, CID, CS, Modifier, X, TXT, Seq, Notes, Inherited ) ".
@@ -432,7 +452,8 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".$this->sciName."') AND (ts2.tid = ts2.tidaccepted) ".
+				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".
+				$this->conn->real_escape_string($this->sciName)."') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 220) AND (d2.CID Is Null)";
 			$this->conn->query($sqlAdd2b);
 		}
@@ -447,7 +468,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
 				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-				"AND (t2.RankId = 220) AND (t1.tid = $tid) AND (d2.CID Is Null)";
+				"AND (t2.RankId = 220) AND (t1.tid = ".$this->conn->real_escape_string($tid).") AND (d2.CID Is Null)";
 			//echo $sqlAdd2b;
 			$this->conn->query($sqlAdd3);
 		}

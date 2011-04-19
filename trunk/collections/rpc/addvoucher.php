@@ -5,9 +5,10 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
  
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
-$occid = array_key_exists("occid",$_REQUEST)?$_REQUEST["occid"]:0; 
-$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0; 
+$con = MySQLiConnectionFactory::getCon("write");
+$clid = array_key_exists("clid",$_REQUEST)?$con->real_escape_string($_REQUEST["clid"]):0; 
+$occid = array_key_exists("occid",$_REQUEST)?$con->real_escape_string($_REQUEST["occid"]):0; 
+$tid = array_key_exists("tid",$_REQUEST)?$con->real_escape_string($_REQUEST["tid"]):0; 
 
 if(!$clid){
 	echo "ERROR: Checklist ID is null";
@@ -23,7 +24,6 @@ elseif(!($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,
 }
 else{
 	$collStr = "";
-	$con = MySQLiConnectionFactory::getCon("write");
 	$sql = "SELECT IFNULL(CONCAT(recordedby,' (',IFNULL(recordnumber,'s.n.'),')'),occurrenceid) AS collstr ".
 		"FROM omoccurrences ".
 		"WHERE TidInterpreted IS NOT NULL AND occid = ".$occid;
@@ -40,6 +40,6 @@ else{
 	else{
 		echo "Unknown Error";
 	}
-	$con->close();
 }
+$con->close();
 ?>

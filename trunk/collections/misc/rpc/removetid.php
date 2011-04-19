@@ -7,10 +7,10 @@
  include_once($serverRoot.'/config/dbconnection.php');
  header("Content-Type: text/html; charset=".$charset);
  
- $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
+$conn = MySQLiConnectionFactory::getCon("write");
+$tid = array_key_exists("tid",$_REQUEST)?$conn->real_escape_string($_REQUEST["tid"]):""; 
  
 if($tid && ($isAdmin)){
-	$conn = MySQLiConnectionFactory::getCon("write");
 
 	$delStatus = "false";
 	$sql = "UPDATE taxa t SET t.SecurityStatus = 1 WHERE t.tid = ".$tid;
@@ -25,8 +25,6 @@ if($tid && ($isAdmin)){
 	else{
 		echo "0";
 	}
-	
- 	$conn->close();
- }
-
+}
+$conn->close();
 ?>

@@ -43,7 +43,7 @@ class SpecProcessorManager {
 			$pkStr = $matches[1];
 			//Check to see if record with pk already exists
 			$occId = 0;
-			$sql = 'SELECT occid FROM omoccurrences WHERE dbpk = "'.$pkStr.'"';
+			$sql = 'SELECT occid FROM omoccurrences WHERE dbpk = "'.$this->conn->real_escape_string($pkStr).'"';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$occId = $row->occid;

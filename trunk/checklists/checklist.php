@@ -8,7 +8,7 @@
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-	$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
@@ -67,8 +67,17 @@
 			}
 	 		$clManager->editMetaData($editArr);
 	 	}
-		elseif($action == "Save SQL Fragment"){
-	 		$statusStr = $clManager->saveSql($sqlFrag);
+		elseif($action == "Create SQL Fragment"){
+			$sqlFragArr = Array();
+			if($_POST['country']) $sqlFragArr['country'] = $_POST['country'];
+			if($_POST['state']) $sqlFragArr['state'] = $_POST['state'];
+			if($_POST['county']) $sqlFragArr['county'] = $_POST['county'];
+			if($_POST['locality']) $sqlFragArr['locality'] = $_POST['locality'];
+			if($_POST['latsouth']) $sqlFragArr['latsouth'] = $_POST['latsouth'];
+			if($_POST['latnorth']) $sqlFragArr['latnorth'] = $_POST['latnorth'];
+			if($_POST['lngeast']) $sqlFragArr['lngeast'] = $_POST['lngeast'];
+			if($_POST['lngwest']) $sqlFragArr['lngwest'] = $_POST['lngwest'];
+			$statusStr = $clManager->saveSql($sqlFragArr);
 	 	}
 	 	
 	 	//Add species to checklist
@@ -314,96 +323,75 @@
 									</select>
 								</div>
 								<div>
-									<input type='submit' name='action' id='editsubmit' value='Submit Changes' />
+									<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
-								<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
-								<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
-								<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
-								<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
-								<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
-								<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
 							</fieldset>
 						</form>
 					</div>
 					<div id="dynsql">
 						<div style="margin:15px;">
-							This editing module will aid you in building an SQL fragment that will be used to help link vouchers to species names within the checklist. 
+							This editing module will aid you in building an SQL fragment that can be used to help link vouchers to species names within the checklist. 
 							When a dynamic SQL fragment exists, the checklist editors will have access to 
 							editing tools that will dynamically query occurrence records matching the criteria within the SQL statement. 
 							Editors can then go through the list and select the records that are to serve as specimen vouchers for that checklist.
 							See the Flora Voucher Mapping Tutorial for more details. 
+							Your data administrator can aid you in establishing more complex SQL fragments than can be created within this form.  
 						</div>
 						<fieldset style="padding:20px;">
 							<legend><b>Current Dynamic SQL Fragment</b></legend>
 							<?php echo $clManager->getDynamicSql()?$clManager->getDynamicSql():"SQL not set"?>
 						</fieldset>
-						<form name="sqlbuilder" action="" onsubmit="return buildSql();" style="margin-bottom:15px;">
+						<form name="sqlbuilder" action="checklist.php" method="post" onsubmit="return validateSqlFragForm(this);" style="margin-bottom:15px;">
 							<fieldset style="padding:15px;">
 								<legend><b>SQL Fragment Builder</b></legend>
 								<div style="margin:0px 10px 10px 10px;">
 									Use this form to aid in building the SQL fragment. 
-									Clicking the 'Build SQL' button will build the SQL using the terms 
-									supplied and place it in the form near the bottom of the page. 
+									Click the 'Create SQL Fragment' button to build and save the SQL using the terms 
+									supplied in the form. 
 								</div>
 								<div style="float:left;width:250px;">
 									<div style="margin:3px;">
 										<b>Country:</b>
-										<input id="countryinput" type="text" name="country" onchange="" />
+										<input type="text" name="country" onchange="" />
 									</div>
 									<div style="margin:3px;">
 										<b>State:</b>
-										<input id="stateinput" type="text" name="state" onchange="" />
+										<input type="text" name="state" onchange="" />
 									</div>
 									<div style="margin:3px;">
 										<b>County:</b>
-										<input id="countyinput" type="text" name="county" onchange="" />
+										<input type="text" name="county" onchange="" />
 									</div>
 									<div style="margin:3px;">
 										<b>Locality:</b>
-										<input id="localityinput" type="text" name="locality" onchange="" />
+										<input type="text" name="locality" onchange="" />
 									</div>
 								</div>
 								<div style="float:left;width:350px;">
 									<div>
 										<b>Latitude/Longitude:</b>
 										<span style="margin-left:75px;">
-											<input id="latnorthinput" type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
+											<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
 										</span>
 									</div>
 									<div style="margin-left:112px;">
 										<span style="">
-											<input id="lngwestinput" type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
+											<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
 										</span>
 										<span style="margin-left:70px;">
-											<input id="lngeastinput" type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
+											<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
 										</span>
 									</div>
 									<div style="margin-left:187px;">
-										<input id="latsouthinput" type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
+										<input type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
 									</div>
 									<div style="float:right;margin:20px 20px 0px 0px;">
-										<input type="submit" name="buildsql" value="Build SQL" />
+										<input type="submit" name="submitaction" value="Create SQL Fragment" />
+										<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
+										<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
 									</div>
-								</div>
-							</fieldset>
-						</form>
-						<form name="sqlform" action="checklist.php" method="post" style="margin-bottom:15px;">
-							<div style="margin:20px 20px 10px 20px;">
-								Once SQL fragment meets your requirements, click the 'Save SQL Fragment' button to transfer to the database. 
-								The 'Test SQL Fragment' button will test and verify your SQL syntax. 
-								Note that you can fine tune the SQL by hand before saving.
-							</div>
-							<fieldset style="padding:10px">
-								<legend><b>New SQL Fragment</b></legend>
-								<input type="hidden" name="cl" value="<?php echo $clValue; ?>"/>
-								<textarea id="sqlfrag" name="sqlfrag" rows="5" cols="90"><?php echo $sqlFrag?$sqlFrag:$clManager->getDynamicSql();?></textarea>
-								<div>
-									<input type="submit" name="action" value="Save SQL Fragment" />
-									<span style="margin-left:175px;cursor:pointer;color:blue;" onclick="testSql(<?php echo $clManager->getClid(); ?>);">
-										Test SQL Fragment
-									</span>
 								</div>
 							</fieldset>
 						</form>
@@ -486,9 +474,9 @@
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-								<input type="submit" name="action" value="Rebuild List" />
+								<input type="submit" name="submitaction" value="Rebuild List" />
 								<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
-									<input type="image" name="action" value="Download List" src="../images/dl.png" />
+									<input type="image" name="submitaction" value="Download List" src="../images/dl.png" />
 								</div>
 							</div>
 						</fieldset>

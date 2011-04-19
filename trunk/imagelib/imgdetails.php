@@ -305,12 +305,12 @@ if($isEditor){
 									<fieldset style="margin:5px 0px 5px 5px;">
 								    	<legend><b>Authorized to Remove this Image</b></legend>
 										<input name="imgid" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
+										<div style='margin-top:2px;'>
+											<input type='submit' name='submitaction' id='submit' value='Delete Image'/>
+										</div>
 										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 										<div style="margin-left:20px;color:red;">
 											(Note: if box is checked, image will be permanently deleted from server, as well as from database)
-										</div>
-										<div style='margin-top:2px;'>
-											<input type='submit' name='submitaction' id='submit' value='Delete Image'/>
 										</div>
 							    	</fieldset>
 							    </form>

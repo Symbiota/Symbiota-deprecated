@@ -40,11 +40,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 
 	public function deleteSpecies($tid){
- 		$sql = "UPDATE taxa t SET t.SecurityStatus = 0 WHERE t.tid = ".$tid;
+ 		$sql = "UPDATE taxa t SET t.SecurityStatus = 0 WHERE t.tid = ".$this->con->real_escape_string($tid);
  		//echo $sql;
 		$this->con->query($sql);
 		//Update specimen records
-		$sql2 = "UPDATE omoccurrences o SET o.LocalitySecurity = 0 WHERE o.tidinterpreted = ".$tid;
+		$sql2 = "UPDATE omoccurrences o SET o.LocalitySecurity = 0 WHERE o.tidinterpreted = ".
+			$this->con->real_escape_string($tid);
 		$this->con->query($sql2);
 	}
  }

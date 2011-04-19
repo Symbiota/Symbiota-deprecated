@@ -64,10 +64,10 @@
 			"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
 			"WHERE (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") ";
 		if(intval($t)){
-			$sql .= "AND t.TID = ".$t." ";
+			$sql .= "AND t.TID = ".$this->con->real_escape_string($t)." ";
 		}
 		else{
-			$sql .= "AND t.SciName = '".$t."' ";
+			$sql .= "AND t.SciName = '".$this->con->real_escape_string($t)."' ";
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -237,7 +237,7 @@
 				"INNER JOIN taxstatus ts2 ON t.Tid = ts2.tidaccepted) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID) ".
 				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
-				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = ".$this->pid.") AND ".
+				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = ".$this->con->real_escape_string($this->pid).") AND ".
 				"(ts.hierarchystr LIKE '%,".$this->tid.",%' OR ts.hierarchystr LIKE '%,".$this->tid."')";
 		}
 		else{
@@ -330,7 +330,8 @@
 		$this->vernaculars = Array();
 		$sql = "SELECT DISTINCT v.VernacularName ".
 			"FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted ".
-			"WHERE (ts.TID = $this->tid) AND (v.SortSequence < 90) AND (v.Language = '".$this->language."') ".
+			"WHERE (ts.TID = $this->tid) AND (v.SortSequence < 90) AND (v.Language = '".
+			$this->con->real_escape_string($this->language)."') ".
 			"ORDER BY v.SortSequence";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -361,7 +362,8 @@
 		$this->synonyms = Array();
 		$sql = "SELECT t.tid, t.SciName, t.Author ".
 			"FROM taxstatus ts INNER JOIN taxa t ON ts.Tid = t.TID ".
-			"WHERE (ts.TidAccepted = ".$this->tid.") AND (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") AND ts.SortSequence < 90 ".
+			"WHERE (ts.TidAccepted = ".$this->tid.") AND (ts.taxauthid = ".
+			($this->taxAuthId?$this->taxAuthId:"1").") AND ts.SortSequence < 90 ".
 			"ORDER BY ts.SortSequence, t.SciName";
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -614,7 +616,7 @@
 			"tds.tdsid, tds.heading, tds.statement, tds.displayheader ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
 			"INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->language."') ".
+			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->con->real_escape_string($this->language)."') ".
 			"ORDER BY tdb.displaylevel,tds.sortsequence";
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -661,10 +663,11 @@
 		$sql = "SELECT c.CLID, c.Name, c.parentclid, cp.name AS parentname ".
 			"FROM fmchecklists c LEFT JOIN fmchecklists cp ON cp.clid = c.parentclid ";
 		if(intval($clv)){
-			$sql .= "WHERE c.CLID = '".$clv."'";
+			$sql .= "WHERE c.CLID = '".$this->con->real_escape_string($clv)."'";
 		}
 		else{
-			$sql .= "WHERE c.Name = '".$clv."' OR c.Title = '".$clv."'";
+			$sql .= "WHERE c.Name = '".$this->con->real_escape_string($clv).
+				"' OR c.Title = '".$this->con->real_escape_string($clv)."'";
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -700,7 +703,7 @@
 	public function setProj($p){
 		if(is_numeric($p)){
 			$this->pid = $p;
-			$sql = "SELECT p.projname FROM fmprojects p WHERE p.pid = ".$p;
+			$sql = "SELECT p.projname FROM fmprojects p WHERE p.pid = ".$this->con->real_escape_string($p);
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->projName = $row->projname;
@@ -709,7 +712,7 @@
 		}
 		else{
 			$this->projName = $p;
-			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$p."'";
+			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$this->con->real_escape_string($p)."'";
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->pid = $row->pid;

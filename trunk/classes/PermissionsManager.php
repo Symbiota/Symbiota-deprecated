@@ -33,10 +33,10 @@ class PermissionsManager{
 		$sql = "SELECT u.uid, u.firstname, u.lastname ".
 			"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ";
 		if($keyword){
-			$sql .= "WHERE u.lastname LIKE '".$keyword."%' ";
-			if(strlen($keyword) > 1) $sql .= "OR ul.username LIKE '".$keyword."%' ";
+			$sql .= "WHERE u.lastname LIKE '".$this->conn->real_escape_string($keyword)."%' ";
+			if(strlen($keyword) > 1) $sql .= "OR ul.username LIKE '".$this->conn->real_escape_string($keyword)."%' ";
 		}
-		$sql .= "ORDER BY u.lastname, u.firstname";
+		$sql .= 'ORDER BY u.lastname, u.firstname';
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -51,7 +51,7 @@ class PermissionsManager{
 		$sql = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.city, u.state, ".
 			"u.zip, u.country, u.email, u.url, u.notes, ul.username ".
 			"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
-			"WHERE u.uid = ".$uid;
+			"WHERE u.uid = ".$this->conn->real_escape_string($uid);
 		//echo "<div>$sql</div>";
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
@@ -78,7 +78,7 @@ class PermissionsManager{
 	
 	public function getUserPermissions($uid){
 		$perArr = Array();
-		$sql = "SELECT up.pname FROM userpermissions up WHERE up.uid = ".$uid;
+		$sql = "SELECT up.pname FROM userpermissions up WHERE up.uid = ".$this->conn->real_escape_string($uid);
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$pName = $row->pname;
@@ -149,7 +149,8 @@ class PermissionsManager{
 	}
 
 	public function deletionPermissions($delStr, $id){
-		$sql = "DELETE FROM userpermissions WHERE uid = $id AND pname = '".$delStr."'";
+		$sql = "DELETE FROM userpermissions WHERE uid = ".$this->conn->real_escape_string($id).
+			" AND pname = '".$this->conn->real_escape_string($delStr)."'";
 		$this->conn->query($sql);
 	}
 	

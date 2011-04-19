@@ -26,12 +26,12 @@ class TPEditorManager {
 		if(is_numeric($t)){
 			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
 				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND t.TID = ".$t;
+				"WHERE (ts.taxauthid = 1) AND t.TID = ".$this->taxonCon->real_escape_string($t);
 		}
 		else{
 			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
 				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND t.sciname = \"".$t."\"";
+				"WHERE (ts.taxauthid = 1) AND t.sciname = \"".$this->taxonCon->real_escape_string($t)."\"";
 		}
 		$result = $this->taxonCon->query($sql);
 		if($row = $result->fetch_object()){
@@ -117,7 +117,8 @@ class TPEditorManager {
 	public function editSynonymSort($synSort){
 		$status = "";
 		foreach($synSort as $editKey => $editValue){
-			$sql = "UPDATE taxstatus SET SortSequence = ".$editValue." WHERE tid = ".$editKey." AND TidAccepted = ".$this->tid;
+			$sql = "UPDATE taxstatus SET SortSequence = ".$this->taxonCon->real_escape_string($editValue).
+				" WHERE tid = ".$this->taxonCon->real_escape_string($editKey)." AND TidAccepted = ".$this->tid;
 			//echo $sql."<br>";
 			if(!$this->taxonCon->query($sql)){
 				$status .= $this->taxonCon->error."\nSQL: ".$sql.";<br/> ";
@@ -132,7 +133,7 @@ class TPEditorManager {
 		$sql = "SELECT v.VID, v.VernacularName, v.Language, v.Source, v.username, v.notes, v.SortSequence ".
 			"FROM taxavernaculars v ".
 			"WHERE (v.tid = ".$this->tid.") ";
-		if($this->language) $sql .= "AND v.Language = '".$this->language."' ";
+		if($this->language) $sql .= "AND v.Language = '".$this->taxonCon->real_escape_string($this->language)."' ";
 		$sql .= "ORDER BY v.Language, v.SortSequence";
 		$result = $this->taxonCon->query($sql);
 		$vernCnt = 0;
@@ -159,7 +160,7 @@ class TPEditorManager {
 		foreach($editArr as $keyField => $value){
 			$setFrag .= ",".$keyField." = \"".$value."\" ";
 		}
-		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE VID = ".$vid;
+		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE VID = ".$this->taxonCon->real_escape_string($vid);
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
@@ -180,7 +181,7 @@ class TPEditorManager {
 	}
 	
 	public function deleteVernacular($delVid){
-		$sql = "DELETE FROM taxavernaculars WHERE VID = ".$delVid;
+		$sql = "DELETE FROM taxavernaculars WHERE VID = ".$this->taxonCon->real_escape_string($delVid);
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){

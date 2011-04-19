@@ -38,7 +38,7 @@ class TPImageEditorManager extends TPEditorManager{
 			"FROM ((images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid) ".
 			"LEFT JOIN users u ON ti.photographeruid = u.uid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.TID ".
-			"WHERE (ts.taxauthid = 1) AND (t.tid = ".$this->tid.") ".
+			"WHERE (ts.taxauthid = 1) AND (t.tid = ".$this->taxonCon->real_escape_string($this->tid).") ".
 			"ORDER BY ti.sortsequence";
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
@@ -78,7 +78,8 @@ class TPImageEditorManager extends TPEditorManager{
 	public function editImageSort($imgSortEdits){
 		$status = "";
 		foreach($imgSortEdits as $editKey => $editValue){
-			$sql = "UPDATE images SET sortsequence = ".$editValue." WHERE imgid = ".$editKey.";";
+			$sql = "UPDATE images SET sortsequence = ".$this->taxonCon->real_escape_string($editValue)." WHERE imgid = ".
+				$this->taxonCon->real_escape_string($editKey);
 			//echo $sql;
 			if(!$this->taxonCon->query($sql)){
 				$status .= $this->taxonCon->error."\nSQL: ".$sql."; ";
@@ -153,9 +154,13 @@ class TPImageEditorManager extends TPEditorManager{
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 				"owner, sourceurl, copyright, locality, occid, notes, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
-				$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
-				($occId?$occId:"NULL").",\"".$notes."\",".($sortSequence?$sortSequence:"50").")";
+				($photographer?"\"".$this->taxonCon->real_escape_string($photographer)."\"":"NULL").",".
+				($photographerUid?$photographerUid:"NULL").",\"".
+				$this->taxonCon->real_escape_string($caption)."\",\"".$this->taxonCon->real_escape_string($owner).
+				"\",\"".$this->taxonCon->real_escape_string($sourceUrl)."\",\"".$this->taxonCon->real_escape_string($copyRight).
+				"\",\"".$this->taxonCon->real_escape_string($locality)."\",".
+				($occId?$occId:"NULL").",\"".$this->taxonCon->real_escape_string($notes)."\",".
+				($sortSequence?$this->taxonCon->real_escape_string($sortSequence):"50").")";
 			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
@@ -164,9 +169,12 @@ class TPImageEditorManager extends TPEditorManager{
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 						"owner, sourceurl, copyright, locality, occid, notes) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-						($photographer?"\"".$photographer."\"":"NULL").",".($photographerUid?$photographerUid:"NULL").",\"".
-						$imageType."\",\"".$caption."\",\"".$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".
-						($occId?$occId:"NULL").",\"".$notes."\")";
+						($photographer?"\"".$this->taxonCon->real_escape_string($photographer)."\"":"NULL").
+						",".($photographerUid?$photographerUid:"NULL").",\"".
+						$this->taxonCon->real_escape_string($imageType)."\",\"".$this->taxonCon->real_escape_string($caption).
+						"\",\"".$this->taxonCon->real_escape_string($owner)."\",\"".$this->taxonCon->real_escape_string($sourceUrl).
+						"\",\"".$this->taxonCon->real_escape_string($copyRight)."\",\"".$this->taxonCon->real_escape_string($locality)."\",".
+						($occId?$occId:"NULL").",\"".$this->taxonCon->real_escape_string($notes)."\")";
 					//echo $sql;
 					if($this->taxonCon->query($sql)){
 						$this->setPrimaryImageSort($addToTid);

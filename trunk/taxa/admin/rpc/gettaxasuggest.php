@@ -3,11 +3,11 @@
 	include_once($serverRoot.'/config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$q = $_REQUEST['term'];
-	$taxAuthId = array_key_exists('taid',$_REQUEST)?$_REQUEST['taid']:0;
-	$rankLimit = array_key_exists('rlimit',$_REQUEST)?$_REQUEST['rlimit']:0;
-	$rankLow = array_key_exists('rlow',$_REQUEST)?$_REQUEST['rlow']:0;
-	$rankHigh = array_key_exists('rhigh',$_REQUEST)?$_REQUEST['rhigh']:0;
+	$q = $con->real_escape_string($_REQUEST['term']);
+	$taxAuthId = array_key_exists('taid',$_REQUEST)?$con->real_escape_string($_REQUEST['taid']):0;
+	$rankLimit = array_key_exists('rlimit',$_REQUEST)?$con->real_escape_string($_REQUEST['rlimit']):0;
+	$rankLow = array_key_exists('rlow',$_REQUEST)?$con->real_escape_string($_REQUEST['rlow']):0;
+	$rankHigh = array_key_exists('rhigh',$_REQUEST)?$con->real_escape_string($_REQUEST['rhigh']):0;
 
 	$sqlWhere = '';
 	$sql = 'SELECT t.tid, t.sciname FROM taxa t ';

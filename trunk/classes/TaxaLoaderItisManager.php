@@ -60,14 +60,20 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 
 	private function loadTaxonUnit($tuArr){
 		if(count($tuArr) > 24){
-			$unitInd3 = $tuArr[8]?$tuArr[8]:$tuArr[6];
-			$unitName3 = $tuArr[9]?$tuArr[9]:$tuArr[7];
-			$sciName = trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3);
+			$unitInd3 = $this->conn->real_escape_string($tuArr[8]?$tuArr[8]:$tuArr[6]);
+			$unitName3 = $this->conn->real_escape_string($tuArr[9]?$tuArr[9]:$tuArr[7]);
+			$sciName = $this->conn->real_escape_string(trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3));
 			$sql = "INSERT INTO uploadtaxa(SourceId,scinameinput,sciname,unitind1,unitname1,unitind2,unitname2,unitind3,unitname3,SourceParentId,author,kingdomid,rankid) ".
-				"VALUES (".$tuArr[1].",\"".$sciName."\",\"".$sciName."\",".($tuArr[2]?"\"".$tuArr[2]."\"":"NULL").",".
-				($tuArr[3]?"\"".$tuArr[3]."\"":"NULL").",".($tuArr[4]?"\"".$tuArr[4]."\"":"NULL").",".($tuArr[5]?"\"".$tuArr[5]."\"":"NULL").",".
-				($unitInd3?"\"".$unitInd3."\"":"NULL").",".($unitName3?"\"".$unitName3."\"":"NULL").",".($tuArr[18]?$tuArr[18]:"NULL").",".
-				($tuArr[20]?$tuArr[20]:"NULL").",".($tuArr[23]?$tuArr[23]:"NULL").",".($tuArr[24]?$tuArr[24]:"NULL").")";
+				"VALUES (".$this->conn->real_escape_string($tuArr[1]).",\"".$sciName."\",\"".$sciName."\",".
+				($tuArr[2]?"\"".$this->conn->real_escape_string($tuArr[2])."\"":"NULL").",".
+				($tuArr[3]?"\"".$this->conn->real_escape_string($tuArr[3])."\"":"NULL").",".
+				($tuArr[4]?"\"".$this->conn->real_escape_string($tuArr[4])."\"":"NULL").",".
+				($tuArr[5]?"\"".$this->conn->real_escape_string($tuArr[5])."\"":"NULL").",".
+				($unitInd3?"\"".$unitInd3."\"":"NULL").",".($unitName3?"\"".$unitName3."\"":"NULL").",".
+				($tuArr[18]?$this->conn->real_escape_string($tuArr[18]):"NULL").",".
+				($tuArr[20]?$this->conn->real_escape_string($tuArr[20]):"NULL").",".
+				($tuArr[23]?$this->conn->real_escape_string($tuArr[23]):"NULL").",".
+				($tuArr[24]?$this->conn->real_escape_string($tuArr[24]):"NULL").")";
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -75,7 +81,8 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 
 	private function loadSynonyms($synArr){
 		if(count($synArr) == 5){
-			$sql = "UPDATE uploadtaxa SET SourceAcceptedId = ".$synArr[3].", acceptance = 0 WHERE SourceId = ".$synArr[2];
+			$sql = "UPDATE uploadtaxa SET SourceAcceptedId = ".$this->conn->real_escape_string($synArr[3]).
+			", acceptance = 0 WHERE SourceId = ".$this->conn->real_escape_string($synArr[2]);
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -83,7 +90,8 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 
 	private function loadAuthors($aArr){
 		if(count($aArr) == 5 && $aArr[2]){
-			$sql = "UPDATE uploadtaxa SET author = \"".$aArr[2]."\" WHERE author = '".$aArr[1]."'";
+			$sql = "UPDATE uploadtaxa SET author = \"".$this->conn->real_escape_string($aArr[2]).
+				"\" WHERE author = '".$this->conn->real_escape_string($aArr[1])."'";
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -91,7 +99,8 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 
 	private function loadVernaculars($vArr){
 		if(count($vArr) == 8 && $vArr[3]){
-			$sql = "UPDATE uploadtaxa SET vernacular = \"".$vArr[3]."\", vernlang = \"".$vArr[5]."\" WHERE SourceId = ".$vArr[4];
+			$sql = "UPDATE uploadtaxa SET vernacular = \"".$this->conn->real_escape_string($vArr[3]).
+				"\", vernlang = \"".$this->conn->real_escape_string($vArr[5])."\" WHERE SourceId = ".$this->conn->real_escape_string($vArr[4]);
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}

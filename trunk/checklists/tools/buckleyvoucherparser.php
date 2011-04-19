@@ -150,10 +150,10 @@ class VoucherParserManager {
 						echo "<li>processing: ".$mStr;
 						$targetArr = explode(" ",$mStr);
 						$sql = "INSERT INTO fmvouchers(tid,clid,occid,collector) ".
-							"SELECT t.tid,".$this->clid.",o.occid,concat(o.recordedby,' (',o.recordnumber,')') as collector ".
+							"SELECT t.tid,".$this->conn->real_escape_string($this->clid).",o.occid,concat(o.recordedby,' (',o.recordnumber,')') as collector ".
 							"FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted ".
 							"INNER JOIN omcollections c ON o.collid = c.collid ".
-							"WHERE t.sciname = '".$sciName."' AND c.collectioncode = '".$targetArr[0]."' AND o.catalognumber = '".$targetArr[1]."'";
+							"WHERE t.sciname = '".$this->conn->real_escape_string($sciName)."' AND c.collectioncode = '".$this->conn->real_escape_string($targetArr[0])."' AND o.catalognumber = '".$this->conn->real_escape_string($targetArr[1])."'";
 						//echo $sql;
 						if($this->conn->query($sql)){
 							$successCnt++;

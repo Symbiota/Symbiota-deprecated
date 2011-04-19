@@ -5,11 +5,10 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-//get the q parameter from URL
-$sciname = $_REQUEST["sciname"]; 
+$con = MySQLiConnectionFactory::getCon("readonly");
+$sciname = $con->real_escape_string($_REQUEST["sciname"]);
 
 $responseStr = "";
-$con = MySQLiConnectionFactory::getCon("readonly");
 $sql = "SELECT ts.uppertaxonomy FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 	"WHERE (ts.taxauthid = 1) AND (t.sciname = '".$sciname."')";
 $result = $con->query($sql);

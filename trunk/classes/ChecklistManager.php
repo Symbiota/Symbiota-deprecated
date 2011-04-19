@@ -505,12 +505,34 @@ class ChecklistManager {
 		return $sqlStr;
 	}
 	
-	public function saveSql($sqlFrag){
-		$sqlFrag = $this->cleanStr($sqlFrag);
-		$sql = "UPDATE fmchecklists c SET c.dynamicsql = ".($sqlFrag?"\"".$sqlFrag."\"":"NULL")." WHERE c.clid = ".$this->clid;
-		//echo $sql;
+	public function saveSql($sqlFragArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$conn->query($sql);
+		$sqlFrag = "";
+		if(array_key_exists('country',$sqlFragArr)){
+			$sqlFrag = 'AND (o.country = "'.$conn->real_escape_string($sqlFragArr['country']).'") ';
+		}
+		if(array_key_exists('state',$sqlFragArr)){
+			$sqlFrag .= 'AND (o.stateprovince = "'.$conn->real_escape_string($sqlFragArr['state']).'") ';
+		}
+		if(array_key_exists('county',$sqlFragArr)){
+			$sqlFrag .= 'AND (o.county LIKE "%'.$conn->real_escape_string($sqlFragArr['county']).'%") ';
+		}
+		if(array_key_exists('locality',$sqlFragArr)){
+			$sqlFrag .= 'AND (o.locality LIKE "%'.$conn->real_escape_string($sqlFragArr['locality']).'%") ';
+		}
+		if(array_key_exists('latnorth',$sqlFragArr) && array_key_exists('latsouth',$sqlFragArr)){
+			$sqlFrag .= 'AND (o.decimallatitude BETWEEN '.$conn->real_escape_string($sqlFragArr['latsouth']).
+			' AND '.$conn->real_escape_string($sqlFragArr['latnorth']).') ';
+		}
+		if(array_key_exists('lngwest',$sqlFragArr) && array_key_exists('lngeast',$sqlFragArr)){
+			$sqlFrag .= 'AND (o.decimallongitude BETWEEN '.$conn->real_escape_string($sqlFragArr['lngwest']).
+			' AND '.$conn->real_escape_string($sqlFragArr['lngeast']).') ';
+		}
+		if($sqlFrag){
+			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".substr($sqlFrag,4)."' WHERE c.clid = ".$conn->real_escape_string($this->clid);
+			//echo $sql;
+			$conn->query($sql);
+		}
 		$conn->close();
 	}
 

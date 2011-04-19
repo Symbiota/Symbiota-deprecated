@@ -46,7 +46,8 @@ class SurveyManager {
 			"FROM ((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) ".
 			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid ".
-			"WHERE sol.surveyid = ".$this->surveyId." AND ts.taxauthid = ".$this->thesFilter." ";
+			"WHERE sol.surveyid = ".$this->conn->real_escape_string($this->surveyId).
+			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
 		//echo $sql;
 		$uArr = Array(); $fArr = Array(); $gArr = Array(); 
 		$rs = $this->conn->query($sql);
@@ -64,7 +65,7 @@ class SurveyManager {
 	public function getMetaData(){
 		if(!$this->metaData){
 			$sql = "SELECT s.projectname, s.locality, s.managers, s.latcentroid, s.longcentroid, s.notes, s.ispublic ".
-				"FROM omsurveys s WHERE s.surveyid = ".$this->surveyId;
+				"FROM omsurveys s WHERE s.surveyid = ".$this->conn->real_escape_string($this->surveyId);
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->surveyName = $row->projectname;
@@ -82,17 +83,17 @@ class SurveyManager {
 	
 	public function editMetaData($editArr){
 		$setSql = "";
+		$con = MySQLiConnectionFactory::getCon("write");
 		foreach($editArr as $key =>$value){
 			if($value){
-				$setSql .= ", ".$key." = '".$value."'";
+				$setSql .= ", ".$con->real_escape_string($key)." = '".$con->real_escape_string($value)."'";
 			}
 			else{
-				$setSql .= ", ".$key." = NULL";
+				$setSql .= ", ".$con->real_escape_string($key)." = NULL";
 			}
 		}
 		$sql = "UPDATE omsurveys SET ".substr($setSql,2)." WHERE surveyid = ".$this->surveyId;
 		//echo $sql;
-		$con = MySQLiConnectionFactory::getCon("write");
 		$con->query($sql);
 		$con->close();
 	}
@@ -220,20 +221,23 @@ class SurveyManager {
 			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid) ";
 		if($this->showCommon){
-			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".$this->language.
-				"' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
+			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".
+				$this->conn->real_escape_string($this->language)."' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
 		}
-		$sql .= "WHERE sol.surveyid = ".$this->surveyId." AND ts.taxauthid = ".$this->thesFilter." ";
+		$sql .= "WHERE sol.surveyid = ".$this->conn->real_escape_string($this->surveyId).
+			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
 		if($this->taxonFilter){
 			if($this->searchCommon){
-				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".$this->taxonFilter."%')) ";
+				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".
+					$this->conn->real_escape_string($this->taxonFilter)."%')) ";
 			}
 			else{
-				$sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR t.SciName Like '".$this->taxonFilter."%' ".
-					"OR ts.Family = '".$this->taxonFilter."' ";
+				$sql .= "AND (ts.UpperTaxonomy = '".$this->conn->real_escape_string($this->taxonFilter).
+					"' OR t.SciName Like '".$this->conn->real_escape_string($this->taxonFilter)."%' ".
+					"OR ts.Family = '".$this->conn->real_escape_string($this->taxonFilter)."' ";
 				if($this->searchSynonyms){
 					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
-						"WHERE ta.SciName Like '".$this->taxonFilter."%'))";
+						"WHERE ta.SciName Like '".$this->conn->real_escape_string($this->taxonFilter)."%'))";
 				}
 				$sql .= ")";
 			}

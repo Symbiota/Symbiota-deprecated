@@ -28,7 +28,7 @@ class SpecTaxCleanerManager{
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.tidinterpreted IS NULL ';
-		if($collId) $sql .= 'AND o.collid = '.$collId;
+		if($collId) $sql .= 'AND o.collid = '.$this->conn->real_escape_string($collId);
 		$this->conn->query($sql);
 	}
 
@@ -38,7 +38,7 @@ class SpecTaxCleanerManager{
 		$numBad = 0;
 		$sql = 'SELECT DISTINCT o.sciname FROM omoccurrences o '.
 			'WHERE o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
-		if($collId) $sql .= 'AND o.collid = '.$collId.' '; 
+		if($collId) $sql .= 'AND o.collid = '.$this->conn->real_escape_string($collId).' '; 
 		$sql .= 'ORDER BY o.sciname LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
