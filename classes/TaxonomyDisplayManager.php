@@ -29,11 +29,11 @@ class TaxonomyDisplayManager{
 				"INNER JOIN taxa t1 ON ts1.tid = t1.tid ".
 				"WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) ";
 			if(is_numeric($this->targetStr)){
-				$sql .= "AND (t.tid IN(".implode(",",$this->targetTids).") OR ts1.tid = ".$this->conn->real_escape_string($this->targetTid).")";
+				$sql .= "AND (t.tid IN(".implode(",",$this->targetTids).") OR ts1.tid = ".$conn->real_escape_string($this->targetTid).")";
 			}
 			else{
-				$sql .= "AND (t.sciname LIKE '".$this->conn->real_escape_string($this->targetStr).
-					"%' OR t1.sciname LIKE '".$this->conn->real_escape_string($this->targetStr)."%')";
+				$sql .= "AND (t.sciname LIKE '".$conn->real_escape_string($this->targetStr).
+					"%' OR t1.sciname LIKE '".$conn->real_escape_string($this->targetStr)."%')";
 			}
 			//echo "<div>".$sql."</div>";
 			$rs = $conn->query($sql);
