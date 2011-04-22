@@ -210,7 +210,7 @@ if($symbUid){
 							}
 							?>
 						</ul>
-						<div id="occdiv" style="">
+						<div id="occdiv" style="width:745px">
 							<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this)">
 								<fieldset>
 									<legend><b>Collector Info</b></legend>
@@ -409,7 +409,7 @@ if($symbUid){
 												$latValue = $occArr["decimallatitude"];
 											}
 											?>
-											<input type="text" name="decimallatitude" tabindex="50" maxlength="10" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude');fieldChanged('decimallatitude');" />
+											<input type="text" name="decimallatitude" tabindex="50" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude');fieldChanged('decimallatitude');" />
 										</span>
 										<span>
 											<?php
@@ -422,7 +422,7 @@ if($symbUid){
 												$zoomValue = 9;
 											} 
 											?>
-											<input type="text" name="decimallongitude" tabindex="52" maxlength="13" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
+											<input type="text" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
 										</span>
 										<span>
 											<input type="text" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
