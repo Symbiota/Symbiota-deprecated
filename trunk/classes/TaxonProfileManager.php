@@ -407,15 +407,22 @@
  	}
  	
 	private function setTaxaImages(){
-		$tidArr = Array($this->tid,$this->submittedTid);
-		if($this->synonyms) $tidArr = array_merge($tidArr,array_keys($this->synonyms));
+		$tidArr = Array($this->tid);
+		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
+			'WHERE taxauthid = 1 AND tid = tidaccepted AND (hierarchystr LIKE "%,'.$this->tid.',%" OR hierarchystr LIKE "%,'.$this->tid.'")';
+		$rs1 = $this->con->query($sql1);
+		while($r1 = $rs1->fetch_object()){
+			$tidArr[] = $r1->tid;
+		}
+		$rs1->close();
+		
 		$tidStr = implode(",",$tidArr);
 		$this->imageArr = Array();
 		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
 			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ".
-			"FROM ((images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
-			"INNER JOIN taxa t ON ti.tid = t.TID) INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE (ts.taxauthid = 1 AND t.TID IN ($tidStr)) AND ti.SortSequence < 500 ".
+			"FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
+			"INNER JOIN taxstatus ts ON ti.tid = ts.tid ".
+			"WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ($tidStr)) AND ti.SortSequence < 500 ".
 			"ORDER BY ti.sortsequence";
 		//echo $sql;
 		$result = $this->con->query($sql);
