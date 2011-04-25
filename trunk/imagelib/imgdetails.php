@@ -283,7 +283,7 @@ if($isEditor){
 									</div>
 								</fieldset>
 							</form>
-							<form name="changetaxonform" action='tpimageeditor.php' method='post' target='_self' onsubmit='return verifyChangeTaxonForm(this);'>
+							<form name="changetaxonform" action='imgdetails.php' method='post' target='_self' onsubmit='return verifyChangeTaxonForm(this);'>
 								<fieldset style='margin:5px 0px 5px 5px;'>
 							    	<legend><b>Transfer Image to a Different Scientific Name</b></legend>
 									<div style="font-weight:bold;">
@@ -301,7 +301,7 @@ if($isEditor){
 							<?php 
 							if($symbUid == $imgArr["photographeruid"] || $isAdmin){
 								?>
-								<form name="deleteform" action="tpimageeditor.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
+								<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
 									<fieldset style="margin:5px 0px 5px 5px;">
 								    	<legend><b>Authorized to Remove this Image</b></legend>
 										<input name="imgid" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
