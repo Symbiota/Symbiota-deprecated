@@ -23,7 +23,7 @@ $status = "";
 if($isEditor){
 	if($action == "Submit Image Edits"){
 		$status = $imgManager->editImage();
-		if(is_int($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
+		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
 	}
 	elseif($action == "Transfer Image"){
 		$imgManager->changeTaxon($tid,$_REQUEST["sourcetid"]);
@@ -33,7 +33,9 @@ if($isEditor){
 		$imgDel = $_REQUEST["imgid"];
 		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
 		$status = $imgManager->deleteImage($imgDel, $removeImg);
-		if(is_int($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
+		if(is_numeric($status)){
+			header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
+		}
 	}
 }
 
