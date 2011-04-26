@@ -30,7 +30,7 @@ if($isEditor){
 		header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$tid.'&category=images' );
 	}
 	elseif($action == "Delete Image"){
-		$imgDel = $_REQUEST["imgdel"];
+		$imgDel = $_REQUEST["imgid"];
 		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
 		$status = $imgManager->deleteImage($imgDel, $removeImg);
 		if(is_int($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
@@ -304,7 +304,7 @@ if($isEditor){
 								<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
 									<fieldset style="margin:5px 0px 5px 5px;">
 								    	<legend><b>Authorized to Remove this Image</b></legend>
-										<input name="imgid" type="hidden" value="<?php echo $imgArr["imgid"]; ?>" />
+										<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
 										<div style='margin-top:2px;'>
 											<input type='submit' name='submitaction' id='submit' value='Delete Image'/>
 										</div>
