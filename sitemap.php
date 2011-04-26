@@ -40,9 +40,9 @@ $smManager = new SiteMapManager();
 	            	
 	            <h2>Image Library</h2>
 	            	<ul>
-	            		<li><a href="imagelib/index.php">Image Library</a> - list of species images</li>
-	            		<li><a href="imagelib/photographers.php">Photographers</a> - list of individuals you have supplies images</li>
-	            		<li><a href="javascript:var popupReference=window.open('imagelib/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Usage Policy</a> - copyright information</li>
+	            		<li><a href="imagelib/index.php">Image Library</a></li>
+	            		<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
+	            		<li><a href="javascript:var popupReference=window.open('imagelib/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Usage Policy and Copyright Information</a></li>
 	            	</ul>
 	
 	            <h2>Projects</h2>
