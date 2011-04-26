@@ -505,7 +505,7 @@ class SpecUploadManager{
 
 	protected function encodeString($inStr){
  		global $charset;
-		if($charset == "utf8"){
+		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
 			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
 				//$value = utf8_encode($value);
 				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
