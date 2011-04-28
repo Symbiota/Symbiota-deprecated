@@ -24,7 +24,7 @@ $imgloc = "../images/games/namegame/";
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> SEINet Name Game</title>
+	<title><?php echo $defaultTitle; ?> Name Game</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
 	<link rel="stylesheet" href="../css/namegamestyle.css" type="text/css" />
 	<script type="text/javascript">
@@ -551,7 +551,7 @@ $imgloc = "../images/games/namegame/";
 				played++;
 				document.getElementById("plays").innerHTML=played;
 				var myNewString = RealName.replace(/\u00A0\u00A0\u00A0\u00A0/g, "%20");
-				document.getElementById("splash").innerHTML="<font color = \"red\">Too Bad</font><br><a href = \"#\" onClick=\"window.open('http://swbiodiversity.org/seinet/taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>"; // splash
+				document.getElementById("splash").innerHTML="<font color = \"red\">Too Bad</font><br><a href = \"#\" onClick=\"window.open('../taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>"; // splash
 				document.getElementById("splash").style.display="";  // splash
 				document.getElementById("rate").innerHTML=((won/played)*100).toFixed(2)+"%";
 				gameEnd(); // splash
@@ -570,9 +570,9 @@ $imgloc = "../images/games/namegame/";
 				else
 					document.getElementById("attempt").innerHTML=chosenWord.toUpperCase(); // change chosen word to uppercase
 				//if (secondWord!='')
-					//document.getElementById("splash").innerHTML=secondWord+"<br><font color = \"#336699\">You Win!</font><br><a href = \"#\" onClick=\"window.open('http://swbiodiversity.org/seinet/taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>" // splash
+					//document.getElementById("splash").innerHTML=secondWord+"<br><font color = \"#336699\">You Win!</font><br><a href = \"#\" onClick=\"window.open('../taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>" // splash
 				//else
-				document.getElementById("splash").innerHTML="<font color = \"#336699\">You Win!</font><br><a href = \"#\" onClick=\"window.open('http://swbiodiversity.org/seinet/taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>"; // splash
+				document.getElementById("splash").innerHTML="<font color = \"#336699\">You Win!</font><br><a href = \"#\" onClick=\"window.open('../taxa/index.php?taxon="+myNewString+"','mywindow','width=900,height=675')\"> <font size = \"4\" color = \"#0000FF\"><center><u><b><br>Click here for more about this plant</b></u></center></font></a><br>"; // splash
 				document.getElementById("hintdisplay").innerHTML=/*list+"<br>"+*/mainList[currentNum][1]; //show the family
 				document.getElementById("splash").style.display="";  // splash
 				document.getElementById("rate").innerHTML=((won/played)*100).toFixed(2)+"%";
@@ -682,7 +682,7 @@ $imgloc = "../images/games/namegame/";
 	
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h1>SEINet Name Game</h1>
+		<h1><?php echo $defaultTitle; ?> Name Game</h1>
 		<div style="margin:10px;">
 			I am thinking of a species found within the following checklist: <b><?php echo $clName;?></b><br/> 
 			What am I thinking of? 
