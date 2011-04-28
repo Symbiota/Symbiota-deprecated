@@ -17,5 +17,10 @@ if($sciName){
 	}
 }
 $con->close();
-echo json_encode($retArr);
+if($retArr){
+	echo json_encode($retArr);
+}
+else{
+	echo '';
+}
 ?>

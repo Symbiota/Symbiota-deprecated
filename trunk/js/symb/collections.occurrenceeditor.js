@@ -1,3 +1,5 @@
+var pauseSubmit = false;
+
 $(document).ready(function() {
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
@@ -11,11 +13,10 @@ $(document).ready(function() {
 
 	$("#ffsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php", 
-		change: function(event, ui) { 
-			verifyFullformSciName();
+		change: function(event, ui) {
+			pauseSubmit = true;
 			fieldChanged('sciname');
-			fieldChanged('scientificnameauthorship');
-			fieldChanged('family');
+			verifyFullformSciName();
 		}
 	},
 	{ minLength: 3, autoFocus: true });
@@ -24,6 +25,7 @@ $(document).ready(function() {
 	$("#dafsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php",
 		change: function(event, ui) { 
+			pauseSubmit = true;
 			verifyDetSciName(document.detaddform);
 		}
 	},
@@ -33,6 +35,7 @@ $(document).ready(function() {
 	$("#defsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php",
 		change: function(event, ui) { 
+			pauseSubmit = true;
 			verifyDetSciName(document.deteditform);
 		}
 	},
@@ -76,11 +79,12 @@ function verifyFullformSciName(){
 			else{
 				f.scientificnameauthorship.value = "";
 				f.family.value = "";
-				alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
+				alert("Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus.");
 				f.sciname.focus();
 			}
 			fieldChanged('scientificnameauthorship');
 			fieldChanged('family');
+			pauseSubmit = false;
 		}
 	};
 	snXmlHttp.open("POST",url,true);
@@ -401,6 +405,14 @@ function verifyFullForm(f){
 		alert("Locality field must have a value");
 		return false;
 	}
+	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
+	if(pauseSubmit){
+		var date = new Date();
+		var curDate = null;
+		do{ 
+			curDate = new Date(); 
+		}while(curDate - date < 5000 && pauseSubmit);
+	}
 	return true;
 }
 
@@ -446,6 +458,7 @@ function verifyDetSciName(f){
 				alert("Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name.");
 				f.sciname.focus();
 			}
+			pauseSubmit = false;
 		}
 	};
 	snXmlHttp.open("POST",url,true);
@@ -490,6 +503,14 @@ function verifyDetAddForm(f){
 		alert("Sort Sequence field must be a numeric value only");
 		return false;
 	}
+	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
+	if(pauseSubmit){
+		var date = new Date();
+		var curDate = null;
+		do{ 
+			curDate = new Date(); 
+		}while(curDate - date < 5000 && pauseSubmit);
+	}
 	return true;
 }
 
@@ -509,6 +530,14 @@ function verifyDetEditForm(f){
 	if(!isNumeric(f.sortsequence.value)){
 		alert("Sort Sequence field must be a numeric value only");
 		return false;
+	}
+	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
+	if(pauseSubmit){
+		var date = new Date();
+		var curDate = null;
+		do{ 
+			curDate = new Date(); 
+		}while(curDate - date < 5000 && pauseSubmit);
 	}
 	return true;
 }
