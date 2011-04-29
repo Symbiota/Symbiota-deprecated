@@ -26,8 +26,8 @@ if($isEditor){
 		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
 	}
 	elseif($action == "Transfer Image"){
-		$imgManager->changeTaxon($tid,$_REQUEST["sourcetid"]);
-		header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$tid.'&category=images' );
+		$imgManager->changeTaxon($_REQUEST["targettid"],$_REQUEST["sourcetid"]);
+		header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$_REQUEST["targettid"].'&category=images' );
 	}
 	elseif($action == "Delete Image"){
 		$imgDel = $_REQUEST["imgid"];
@@ -285,17 +285,18 @@ if($isEditor){
 									</div>
 								</fieldset>
 							</form>
-							<form name="changetaxonform" action='imgdetails.php' method='post' target='_self' onsubmit='return verifyChangeTaxonForm(this);'>
+							<form name="changetaxonform" action='imgdetails.php' method='post' target='_self' onsubmit='return verifyChangeTaxonForm(this);' >
 								<fieldset style='margin:5px 0px 5px 5px;'>
 							    	<legend><b>Transfer Image to a Different Scientific Name</b></legend>
 									<div style="font-weight:bold;">
 										Transfer to Taxon: 
 										<input type="text" id="targettaxon" name="targettaxon" size="40" />
-										<input type="hidden" id="targettid" name="tid" value="" />
+										<input type="hidden" id="targettid" name="targettid" value="" />
 		
-										<input name="sourcetid" type="hidden" value="<?php echo $imgArr["tid"];?>" />
-										<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
-										<input type="submit" name="submitaction" value="Transfer Image" />
+										<input type="hidden" name="sourcetid" value="<?php echo $imgArr["tid"];?>" />
+										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+										<input type="hidden" name="submitaction" value="Transfer Image" />
+										<input type="submit" name="submitbutton" value="Transfer Image" />
 									</div>
 							    </fieldset>
 							</form>
