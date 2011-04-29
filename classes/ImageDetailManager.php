@@ -143,9 +143,16 @@ class ImageDetailManager{
 		$status = '';
 		$sql = 'UPDATE images SET tid = '.$targetTid.', sortsequence = 50 WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
 		if(!$this->conn->query($sql)){
-			//Transfer is not happening because image is probably already mapped to that taxon  
-			$sql2 = 'DELETE FROM images WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
-			$this->conn->query($sql2);
+			$sql = 'SELECT i.imgid '.
+				'FROM images i INNER JOIN images i2 ON i.url = i2.url '.
+				'WHERE i.tid = '.$targetTid.' AND i2.imgid = '.$this->imgId;
+			$rs = $this->conn->query($sql);  
+			if($rs->num_rows){
+				//Transfer is not happening because image is already mapped to that taxon
+				$sql2 = 'DELETE FROM images WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
+				$this->conn->query($sql2);
+			}
+			$rs->close();
 		}
 		$this->setPrimaryImageSort($targetTid);
 		$this->setPrimaryImageSort($sourceTid);
