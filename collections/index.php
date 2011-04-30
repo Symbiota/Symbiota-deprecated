@@ -102,10 +102,18 @@
 	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:"true");
 	include($serverRoot."/header.php");
 	if(isset($collections_indexCrumbs)){
+		if($collections_indexCrumbs){
+			echo "<div class='navpath'>";
+			echo "<a href='../index.php'>Home</a> &gt; ";
+			echo $collections_indexCrumbs;
+			echo " <b>Collections</b>";
+			echo "</div>";
+		}
+	}
+	else{
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_indexCrumbs;
-		echo " <b>Collections</b>";
+		echo "<b>Collections</b>";
 		echo "</div>";
 	}
 	?>

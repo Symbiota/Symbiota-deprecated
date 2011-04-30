@@ -1,47 +1,13 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceChecklistManager.php');
-header("Content-Type: text/html; charset=".$charset);
 
 $checklistManager = new OccurrenceChecklistManager();
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
 
 ?>
 
-<html>
-    <head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-        <title><?php echo $defaultTitle; ?> Dynamic Checklist</title>
-        <link rel="stylesheet" href="../css/main.css" type="text/css">
-		<script type="text/javascript">
-			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
-		</script>
-    </head>
-    <body>
-<?php
-	$displayLeftMenu = (isset($collections_checklistMenu)?$collections_checklistMenu:true);
-	include($serverRoot.'/header.php');
-	if(isset($collections_checklistCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_checklistCrumbs;
-		echo "<b>Dynamic Checklist</b>";
-		echo "</div>";
-	}
-?>
-
-	<!-- This is inner text! -->
-	<div id='innertext'>
-		<div id="tabdiv">
-			<div class='backendleft' style='border-bottom:0px;height:100%;'>&nbsp;</div>
-			<div class='fronttab'>Species List</div>
-			<div class="midright" style='border-bottom:0px;height:100%;'>&nbsp;</div>
-			<div class='backtab'><a href='list.php'>Specimen List</a></div>
-			<div class="midright">&nbsp;</div>
-			<div class='backtab'><a href='maps/index.php'>Maps</a></div>
-			<div class='backendright'>&nbsp;</div>
-		</div>
-
+	<div>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Download Checklist Data'>
 			<a href='download/downloadhandler.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 				<img width='15px' src='../images/dl.png'/>
@@ -68,7 +34,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 		}
 		?>
 		<div style='margin:10px;float:right;'>
-			<form name="changetaxonomy" id="changetaxonomy" action="checklist.php" method="get">
+			<form name="changetaxonomy" id="changetaxonomy" action="list.php" method="post">
 				Taxonomic Filter:
 					<select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
 						<option value="0">Raw Data</option>
@@ -79,6 +45,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 							}
 	                        ?>
 					</select>
+					<input type="hidden" name="tabindex" value="0" />
 			</form>
 		</div>
 		<div style="clear:both;"><hr/></div>
@@ -101,9 +68,3 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 			}
 		?>
 	</div>
-	<?php 
-		include($serverRoot.'/footer.php');
-	?>
-</body>
-
-</html>

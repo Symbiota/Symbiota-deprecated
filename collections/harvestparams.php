@@ -24,11 +24,22 @@
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:"true");
 	include($serverRoot.'/header.php');
 	if(isset($collections_harvestparamsCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_harvestparamsCrumbs;
-		echo "<b>Search Criteria</b>";
-		echo "</div>";
+		if($collections_harvestparamsCrumbs){
+			echo "<div class='navpath'>";
+			echo "<a href='../index.php'>Home</a> &gt; ";
+			echo $collections_harvestparamsCrumbs;
+			echo "<b>Search Criteria</b>";
+			echo "</div>";
+		}
+	}
+	else{
+		?>
+		<div class='navpath'>
+			<a href='../index.php'>Home</a> &gt; 
+			<a href='index.php'>Collections</a> &gt; 
+			<b>Search Criteria</b>
+		</div>
+		<?php 
 	}
 	?>
 
