@@ -26,27 +26,34 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$this->checklistTaxaCnt = 0;
 		$sql = "";
         if($taxonAuthorityId){
-			$sql = "SELECT DISTINCT ts.Family, t.SciName ".
+			$sql = "SELECT DISTINCT ts.family, t.sciname ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
         }
         else{
-			$sql = "SELECT DISTINCT o.Family, o.SciName FROM omoccurrences o ";
+			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
+				'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()." AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
-				"ORDER BY o.family, o.SciName ";
+			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) ".
+				"ORDER BY IFNULL(ts.family,o.family), o.sciname ";
         }
         //echo "<div>".$sql."</div>";
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$family = strtoupper($row->Family);
-			$sciName = $row->SciName;
-			if($family){
-				$returnVec[$family][] = $sciName;
-			}
-			else{
-				$returnVec["undefined"][] = $sciName;
+			$family = strtoupper($row->family);
+			$sciName = $row->sciname;
+			if($sciName && substr($sciName,-5)!='aceae'){
+				if($family){
+					if(!array_key_exists($family,$returnVec) || !in_array($sciName,$returnVec[$family])){
+						$returnVec[$family][] = $sciName;
+					}
+				}
+				else{
+					if(!array_key_exists('undefined',$returnVec) || !in_array($sciName,$returnVec['undefined'])){
+						$returnVec['undefined'][] = $sciName;
+					}
+				}
 			}
 			$this->checklistTaxaCnt++;
         }

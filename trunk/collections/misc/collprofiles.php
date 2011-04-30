@@ -80,11 +80,22 @@ if($collId){
 	$displayLeftMenu = (isset($collections_misc_collprofilesMenu)?$collections_misc_collprofilesMenu:"true");
 	include($serverRoot.'/header.php');
 	if(isset($collections_misc_collprofilesCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_misc_collprofilesCrumbs;
-		echo " <b>".($collData?$collData["collectionname"]:"Collection Profile")."</b>";
-		echo "</div>";
+		if($collections_misc_collprofilesCrumbs){
+			echo "<div class='navpath'>";
+			echo "<a href='../../index.php'>Home</a> &gt; ";
+			echo $collections_misc_collprofilesCrumbs;
+			echo " <b>".($collData?$collData["collectionname"]:"Collection Profile")."</b>";
+			echo "</div>";
+		}
+	}
+	else{
+		?>
+		<div class='navpath'>
+			<a href='../../index.php'>Home</a> &gt; 
+			<a href='../index.php'>Collections</a> &gt; 
+			<b><?php echo ($collData?$collData['collectionname']:'').' Collection Profile'; ?></b>
+		</div>
+		<?php 
 	}
 	?>
 
@@ -114,11 +125,6 @@ if($collId){
 						</li>
 						<?php if($editCode > 1){ ?>
 							<li>
-								<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
-									Manage scientific names within collection 
-								</a>
-							</li>
-							<li>
 								<a href="#" onclick="toggleById('colledit');" >
 									Edit Metadata and Contact Information
 								</a>
@@ -126,6 +132,16 @@ if($collId){
 							<li>
 								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
 									Manage or Perform a Data Upload
+								</a>
+							</li>
+							<li>
+								<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
+									Review/Verify Specimen Edits 
+								</a>
+							</li>
+							<li>
+								<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
+									Manage/Clean Scientific Names 
 								</a>
 							</li>
 						<?php } ?>
@@ -138,16 +154,6 @@ if($collId){
 							<li>
 								<a href="collprofiles.php?newcoll=1">
 									Add New Collection Profile
-								</a>
-							</li>
-							<li>
-								<a href="../admin/spectaxcleaner.php?collid=all">
-									Manage scientific names within collections 
-								</a>
-							</li>
-							<li>
-								<a href="collprofiles.php?action=buildhierarchies">
-									Verify/Build Taxonomic Hierarchies
 								</a>
 							</li>
 						</ul>
@@ -262,16 +268,17 @@ if($collId){
 					<div style='margin-top:5px;'><b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)</div>
 					<?php 
 						if($collData["homepage"]) echo "<div style='margin-top:5px;'><b>Home Page:</b> <a href='".$collData["homepage"]."'>".$collData["homepage"]."</a></div>";
-						if($collData["uploaddate"]) echo "<div style='margin-top:5px;'><b>Last Upload Date:</b> ".$collData["uploaddate"]."</div>"; 
+						echo '<div style="margin-top:5px;"> ';
+						echo '<b>Management: </b> ';
+						if(stripos($collData['managementtype'],'live') !== false){
+							echo 'Live Data managed directly within data portal';
+						}
+						else{
+							echo 'Data snapshot of central database <br/>';
+							echo '<b>Last Update:</b> '.$collData['uploaddate'];
+						}
+						echo '</div>';
 					?>
-	<!-- 
-					<div style="margin-top:5px;">
-						<b>Index Herbariorum Link:</b> 
-						<a href="http://sweetgum.nybg.org/ih/herbarium_list.php?QueryName=DetailedQuery&StartAt=1&QueryPage=/ih/index.php&Restriction=NamPartyType='IH Herbarium'&col_NamOrganisationAcronym=<?php echo $collData["collectioncode"]; ?>">
-							<?php echo $collData["collectioncode"]; ?>
-						</a>
-					</div>
-	 -->
 	 				<?php if($collData["institutionname"]){ ?>
 						<div style="float:left;font-weight:bold;">Address:&nbsp;</div>
 						<div style="float:left;">

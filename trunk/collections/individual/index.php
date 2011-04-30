@@ -15,11 +15,16 @@ if($pk) $indManager->setDbpk($pk);
 $occArr = $indManager->getOccData();
 
 $displayLocality = false;
+$isEditor = false;
+
 if($symbUid){
 	if(array_key_exists("SuperAdmin",$userRights) 
 	|| (array_key_exists('CollAdmin',$userRights) && in_array($occArr['collid'],$userRights['CollAdmin']))
 	|| (array_key_exists('CollEditor',$userRights) && in_array($occArr['collid'],$userRights['CollEditor']))
-	|| $occArr['observeruid'] == $symbUid || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
+	|| $occArr['observeruid'] == $symbUid){
+		$isEditor = true;
+	}
+	if($isEditor || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
 	|| (array_key_exists("RareSppReader",$userRights) && in_array($occArr['collid'],$userRights["RareSppReader"]))){
 		$displayLocality = true;
 	}
@@ -94,7 +99,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						<b>Family:</b> <?php echo $occArr['family']; ?>
 					</div>
 					<div style='float:right;'>
-						<b>Accession #:</b> <?php echo $occArr['catalognumber']; ?>
+						<b>Catalog Number:</b> <?php echo $occArr['catalognumber']; ?>
 						<?php 
 						if($occArr['occurrenceid']){
 							?> 
@@ -106,8 +111,8 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						}
 						if($occArr['othercatalognumbers']){
 							?>
-							<div style="float:right;padding:2px;background-color:#EEEEEE;border:1px solid #AAC7E9;">
-								<b><?php echo $occArr['ownerinstitutioncode']; ?>:</b>
+							<div title="Other Catalog Numbers">
+								<b><?php echo $occArr['ownerinstitutioncode']; ?></b>
 								<?php echo $occArr['othercatalognumbers']; ?>
 							</div>
 							<?php 
@@ -209,40 +214,27 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					?>
 				</div>
 				<div style="clear:both;">
-					<div style="float:left;">
-						<b>Collector:</b> 
-						<?php 
-						echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
-						echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
-						?>
-					</div>
-					<div style="float:right;">
-						<?php
-						if($occArr['eventdate']){
-							?>
-							<div>
-								<b>Collection Date: </b> 
-								<?php 
-								echo $occArr['eventdate']; 
-								if($occArr['eventdateend']){
-									echo ' - '.$occArr['eventdateend'];
-								}
-								?>
-							</div>
-							<?php 
-						}
-						if($occArr['verbatimeventdate']){
-							?>
-							<div>
-								<b>Verbatim Date: </b> 
-								<?php echo $occArr['verbatimeventdate']; ?>
-							</div>
-							<?php 
-						}
-						?>
-					</div> 
+					<b>Collector:</b> 
+					<?php 
+					echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
+					echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
+					?>
 				</div>
-				<div style="clear:both;">
+				<div>
+					<?php
+					if($occArr['eventdate']){
+						echo '<b>Collection Date: </b>'; 
+						echo $occArr['eventdate']; 
+						if($occArr['eventdateend']){
+							echo ' - '.$occArr['eventdateend'];
+						}
+					}
+					if($occArr['verbatimeventdate']){
+						echo '<span style="margin-left:30px;"><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</span>';
+					}
+					?>
+				</div> 
+				<div>
 					<?php 
 					if($occArr['associatedcollectors']){ 
 						?>
@@ -444,16 +436,18 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				?>
 				<fieldset style="margin:10px 0px;padding:10px;">
 					<legend><b>User Input</b></legend>
-					Do you see an error that you would like to fix or would you like to comment on this occurrence record? 
+					Would you like to comment on this occurrence record?
 					<?php 
 					if($symbUid){
 						?>
 						<ul>
+							<?php if($isEditor || $occArr['publicedits'] !== 0){ ?>
 							<li>
 								<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
 									Open Occurrence Editor
 								</a>
 							</li>
+							<?php } ?>
 							<li>
 								Ability to submit <a href="">Comments</a> coming soon...
 							</li>

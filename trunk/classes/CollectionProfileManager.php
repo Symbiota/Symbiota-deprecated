@@ -44,7 +44,8 @@ class CollectionProfileManager {
 			"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 			"c.collid, c.CollectionCode, c.CollectionName, ".
 			"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, c.latitudedecimal, ".
-			"c.longitudedecimal, c.icon, c.sortseq, cs.uploaddate, IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
+			"c.longitudedecimal, c.icon, c.sortseq, c.managementtype, cs.uploaddate, ".
+			"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 			"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 			"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 			"LEFT JOIN institutions i ON c.iid = i.iid ".
@@ -73,6 +74,7 @@ class CollectionProfileManager {
 			$returnArr["longitudedecimal"] = $row->longitudedecimal;
 			$returnArr["icon"] = $row->icon;
 			$returnArr["sortseq"] = $row->sortseq;
+			$returnArr["managementtype"] = $row->managementtype;
 			$uDate = "";
 			if($row->uploaddate){
 				$uDate = $row->uploaddate;

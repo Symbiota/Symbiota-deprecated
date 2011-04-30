@@ -48,7 +48,7 @@ class OccurrenceIndividualManager {
 
 	private function setOccArr(){
     	$sql = 'SELECT o.occid, c.collid, c.institutioncode, o.institutioncode AS secondaryinstcode, c.collectioncode, '.
-    		'o.collectioncode AS secondarycollcode, c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon, '.
+    		'o.collectioncode AS secondarycollcode, c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon, c.publicedits, '.
     		'o.occurrenceid, o.catalognumber, o.occurrenceremarks, o.tidinterpreted, o.family, o.sciname, '.
     		'o.scientificnameauthorship, o.identificationqualifier, o.identificationremarks, o.identificationreferences, '.
 			'o.identifiedby, dateidentified, o.recordedby, o.associatedcollectors, o.recordnumber, '.

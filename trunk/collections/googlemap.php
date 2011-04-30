@@ -1,5 +1,5 @@
 <?php
-include_once('../../config/symbini.php');
+include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
@@ -41,7 +41,7 @@ $mapManager = new OccurrenceMapManager();
                 map.setCenter(new GLatLng( <?php echo $latCen.",".$longCen; ?> ), 3);
 
                 var tinyIcon = new GIcon(G_DEFAULT_ICON);
-                tinyIcon.shadow = "../../images/google/shadow.png";
+                tinyIcon.shadow = "../images/google/shadow.png";
                 tinyIcon.iconSize = new GSize(25, 25);
                 tinyIcon.infoWindowAnchor = new GPoint(12,0);
                 tinyIcon.shadowSize = new GSize(45, 25);
@@ -65,12 +65,12 @@ $mapManager = new OccurrenceMapManager();
                         $functionStr = "";
                         foreach($dataArr as $occId => $spArr){
 							if(count($dataArr) == 1){
-	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('../individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
+	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
 							}
 							else{
 								$gui = $spArr["gui"];
 								if(!$gui) $gui = "occurrence #".$occId;
-								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'../individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
+								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
 							}
                         }
                         if($spStr){
