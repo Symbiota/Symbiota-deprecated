@@ -37,7 +37,6 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			);
 		});
 
-
 		function addVoucherToCl(occid,clid,tid){
 			var vXmlHttp = GetXmlHttpObject();
 			if(vXmlHttp==null){

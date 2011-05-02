@@ -1,29 +1,28 @@
 <?php
-
 class SpecUploadDigir extends SpecUploadManager {
-	
+
 	//Search variables
 	private $searchStart = 0;
 	private $searchLimit = 1000;
 	private $defaultSchema = "";	//http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd
 	private $returnCount = true;
-	
+
 	//XML parser stuff
 	private $withinRecordElement = false;
 	private $activeFieldName = "";
 	private $activeFieldValue = "";
-	
+
 	//MySQL database stuff
 	private $fieldDataArr = Array();
 	private $symbTargetFields = Array();
 	private $dbpkSequence = 0;
-	
+
  	public function __construct(){
  		parent::__construct();
  		$this->defaultSchema = $GLOBALS["clientRoot"]."/collections/admin/darwinsymbiota.xsd";
  		set_time_limit(10000);
  	}
-	
+
  	public function uploadData($finalTransfer){
 	 	$this->readUploadParameters();
  		if($this->schemaName){

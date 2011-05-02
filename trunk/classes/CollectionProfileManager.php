@@ -108,6 +108,7 @@ class CollectionProfileManager {
 			'latitudedecimal = '.($editArr['latitudedecimal']?$editArr['latitudedecimal']:'NULL').','.
 			'longitudedecimal = '.($editArr['longitudedecimal']?$editArr['longitudedecimal']:'NULL').','.
 			'icon = '.($editArr['icon']?'"'.$editArr['icon'].'"':'NULL').','.
+			'managementtype = "'.$editArr['managementtype'].'",'.
 			'individualurl = '.($editArr['individualurl']?'"'.$editArr['individualurl'].'"':'NULL').' '.
 			($editArr['sortseq']?',sortseq = '.$editArr['sortseq']:'').' '.
 			'WHERE collid = '.$this->collId;
@@ -120,7 +121,7 @@ class CollectionProfileManager {
 		global $symbUid;
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,".
-			"contact,email,latitudedecimal,longitudedecimal,icon,individualurl,sortseq) ".
+			"contact,email,latitudedecimal,longitudedecimal,icon,managementtype,individualurl,sortseq) ".
 			"VALUES (".(array_key_exists("individualurl",$addArr)?"\"".$addArr["institutioncode"]."\"":"NULL").
 			",\"".$addArr["collectioncode"]."\",\"".$addArr["collectionname"]."\",".
 			($addArr["briefdescription"]?"\"".$addArr["briefdescription"]."\"":"NULL").",".
@@ -131,6 +132,7 @@ class CollectionProfileManager {
 			($addArr["latitudedecimal"]?$addArr["latitudedecimal"]:"NULL").",".
 			($addArr["longitudedecimal"]?$addArr["longitudedecimal"]:"NULL").",".
 			(array_key_exists("icon",$addArr)&&$addArr["icon"]?"\"".$addArr["icon"]."\"":"NULL").",".
+			(array_key_exists("managementtype",$addArr)?"\"".$addArr["managementtype"]."\"":"NULL").",".
 			(array_key_exists("individualurl",$addArr)&&$addArr["individualurl"]?"\"".$addArr["individualurl"]."\"":"NULL").",".
 			(array_key_exists("sortseq",$addArr)&&$addArr["sortseq"]?$addArr["sortseq"]:"NULL").") ";
 		//echo "<div>$sql</div>";

@@ -45,12 +45,14 @@ class OccurrenceEditorManager {
 	}
 	
 	public function setCollId($cid){
-		$sql = 'SELECT c.collectionname, c.institutioncode, c.collectioncode FROM omcollections c WHERE c.collid = '.$cid;
+		$sql = 'SELECT c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
+			'FROM omcollections c WHERE c.collid = '.$cid;
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
 			$this->occurrenceMap['collectionname'] = $row->collectionname;
 			$this->occurrenceMap['institutioncode'] = $row->institutioncode;
 			$this->occurrenceMap['collectioncode'] = $row->collectioncode;
+			$this->occurrenceMap['managementtype'] = $row->managementtype;
 		}
 		$rs->close();
 		return $this->occurrenceMap;
@@ -195,16 +197,19 @@ class OccurrenceEditorManager {
 
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully";
-		$dbpk = $occArr["catalognumber"];
-		if(!$dbpk){
-			$pkSql = 'SELECT MAX(dbpk+1) AS maxpk FROM omoccurrences WHERE collid = '.$occArr["collid"];
-			$pkRs = $this->conn->query($pkSql);
-			if($r = $pkRs->fetch_object()){
-				$dbpk = $r->maxpk.'-symb';
+		$dbpk = '1';
+		$pkSql = 'SELECT MAX(dbpk+1) AS maxpk FROM omoccurrences WHERE collid = '.$occArr["collid"];
+		$pkRs = $this->conn->query($pkSql);
+		if($r = $pkRs->fetch_object()){
+			if($r->maxpk){
+				$dbpk = $r->maxpk;
 			}
-			$pkRs->close();
-			if(!$dbpk) $dbpk = '1-symb';
 		}
+		$pkRs->close();
+		if(stripos($this->occurrenceMap['managementtype'],'snapshot') !== false){
+			$dbpk .= '-symb';
+		}
+
 		if($occArr){
 			$sql = "INSERT INTO omoccurrences(collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
 			"ownerInstitutionCode, family, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, ".

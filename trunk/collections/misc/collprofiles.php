@@ -131,7 +131,7 @@ if($collId){
 							</li>
 							<li>
 								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
-									Manage or Perform a Data Upload
+									Upload Data
 								</a>
 							</li>
 							<li>
@@ -226,6 +226,13 @@ if($collId){
 							<?php 
 							if($isAdmin){ 
 								?>
+								<div>
+									Management:
+									<select name="managementtype">
+										<option>Snapshot</option>
+										<option <?php echo ($collId && $collData["managementtype"]=='Live Date'?'SELECTED':''); ?>>Live Date</option>
+									</select>
+								</div>
 								<div>
 									Icon URL:
 									<input type="text" name="icon" style="width:320px;" value="<?php echo ($collId?$collData["icon"]:'');?>" title="Small url usually placed in /images/collicons/ folder" />

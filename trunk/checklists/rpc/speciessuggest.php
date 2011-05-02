@@ -9,9 +9,10 @@
 	$queryString = $con->real_escape_string($_REQUEST['term']);
 	$clid = $con->real_escape_string($_REQUEST['cl']);
 	
-	$sql = "SELECT DISTINCT t.tid, t.sciname ". 
-		"FROM taxa t LEFT JOIN (SELECT tid FROM fmchklsttaxalink WHERE clid = $clid) cl ON t.tid = cl.tid ".
-		"WHERE cl.tid IS NULL AND t.rankid > 140 AND t.sciname LIKE '".$queryString."%' ";
+	$sql = 'SELECT DISTINCT tid, sciname '. 
+		'FROM taxa '.
+		'WHERE tid NOT IN (SELECT tid FROM fmchklsttaxalink WHERE clid = '.$clid.') '.
+		'AND rankid > 140 AND sciname LIKE "'.$queryString.'%" ';
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
