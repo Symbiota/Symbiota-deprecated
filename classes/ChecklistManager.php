@@ -72,7 +72,7 @@ class ChecklistManager {
 		foreach($dataArr as $k =>$v){
 			$colSql .= ",".$k;
 			if($v){
-				$valueSql .= ",'".$v."'";
+				$valueSql .= ",'".trim($v)."'";
 			}
 			else{
 				$valueSql .= ",NULL";

@@ -28,7 +28,7 @@ $(document).ready(function() {
 			search: function() {
 				// custom minLength
 				var term = extractLast( this.value );
-				if ( term.length < 3 ) {
+				if ( term.length < 4 ) {
 					return false;
 				}
 			},

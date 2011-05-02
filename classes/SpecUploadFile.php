@@ -3,6 +3,7 @@ class SpecUploadFile extends SpecUploadManager{
 	
 	private $ulFileName;
 	private $zipFileName;
+	private $uploadTargetPath;
 	private $delimiter = ",";
 	private $isCsv = false;
 
@@ -19,7 +20,7 @@ class SpecUploadFile extends SpecUploadManager{
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
 	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$this->ulFileName);
 	        if(substr($this->ulFileName,-4) == ".zip"){
-	        	$zipFileName = $this->ulFileName;
+	        	$this->zipFileName = $this->ulFileName;
 				$zip = new ZipArchive;
 				$zip->open($targetPath."/".$this->ulFileName);
 				$this->ulFileName = $zip->getNameIndex(0);
@@ -157,7 +158,7 @@ class SpecUploadFile extends SpecUploadManager{
 			fclose($fh);
 			//Delete upload file 
 			if(file_exists($fullPath)) unlink($fullPath);
-			if($zipFileName) unlink($this->getUploadTargetPath()."/".$zipFileName);
+			if($this->zipFileName) unlink($this->getUploadTargetPath()."/".$this->zipFileName);
 			
 			$this->finalUploadSteps($finalTransfer);
 		}
@@ -212,6 +213,7 @@ class SpecUploadFile extends SpecUploadManager{
     }
 
     private function getUploadTargetPath(){
+    	if($this->uploadTargetPath) return $this->uploadTargetPath;
 		$tPath = $GLOBALS["tempDirRoot"];
 		if(!$tPath){
 			$tPath = $GLOBALS["serverRoot"]."/temp";
@@ -222,6 +224,7 @@ class SpecUploadFile extends SpecUploadManager{
 		if(file_exists($tPath."/downloads")){
 			$tPath .= "/downloads";
 		}
+		$this->uploadTargetPath = $tPath;
     	return $tPath;
     }
     

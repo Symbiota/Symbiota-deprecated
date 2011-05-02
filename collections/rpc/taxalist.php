@@ -15,9 +15,9 @@
 				"ORDER BY v.vernacularname";
 		}
 		elseif($taxonType == 4){
-			$sql = "SELECT DISTINCT t.sciname ".
-				"FROM taxa t  ".
-				"WHERE t.rankid > 20 AND t.rankid < 140 AND t.sciname LIKE '".$queryString."%' ";
+			$sql = "SELECT sciname ".
+				"FROM taxa ".
+				"WHERE rankid > 20 AND rankid < 140 AND sciname LIKE '".$queryString."%' ";
 		}
 		elseif($taxonType == 2){
 			$sql = "SELECT DISTINCT family AS sciname ".
@@ -25,14 +25,14 @@
 				"WHERE family LIKE '".$queryString."%' ";
 		}
 		else{
-			$sql = "SELECT DISTINCT t.sciname ".
-				"FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted ".
-				"WHERE o.sciname LIKE '".$queryString."%' ";
+			$sql = "SELECT DISTINCT sciname ".
+				"FROM taxa ".
+				"WHERE sciname LIKE '".$queryString."%' ";
 			if($taxonType == 3){
-				$sql .= "AND t.rankid > 140 ";
+				$sql .= "AND rankid > 140 ";
 			}
 			else{
-				$sql .= "AND t.rankid >= 140 ";
+				$sql .= "AND rankid >= 140 ";
 			}
 			//$sql .= "ORDER BY o.sciname";
 		}

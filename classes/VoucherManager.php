@@ -184,9 +184,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 		if($this->tid && $this->clid){
 			$occId = $editArr["occid"];
 			unset($editArr["occid"]);
-			$setStr = "";
+			$setStr = '';
 			foreach($editArr as $k => $v){
-				$setStr .= ", ".$k." = '".$v."'";
+				$setStr .= ", ".$k." = '".trim($v)."'";
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = 'UPDATE fmvouchers v '.

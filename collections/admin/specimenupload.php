@@ -320,6 +320,7 @@ else{
  	elseif(stripos($action,"initialize") !== false || stripos($action,"analyze") !== false || stripos($action,"map") !== false || stripos($action,"save") !== false){
 	 	$ulList = $duManager->getUploadList($uspid);
 	 	$uploadType = $ulList[$uspid]["uploadtype"];
+	 	$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
 	 	$ulArr = array_pop($ulList);
 	 	if($ulFileName || array_key_exists("uploadfile",$_FILES) || $uploadType == $DIRECTUPLOAD){
 			$duManager->analyzeFile();
@@ -345,32 +346,37 @@ else{
 							<input type="submit" name="action" value="Analyze Upload File" />
 						</div>
 					</div>
-				<?php } ?>
-				<?php if($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES)){ ?>
-				<div style="margin:20px;">
-					<b>Source Primary Key (required): </b>
-					<?php
-					$fm = $duManager->getFieldMap();
-					$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
-					$sFields = $duManager->getSourceArr();
+				<?php 
+				}
+				if($isSnapshot && ($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES))){ 
 					?>
-					<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged();">
-						<option value=''>Select Source Primary Key</option>
-						<option value=''>Delete Primary Key</option>
-						<option value=''>----------------------------------</option>
-						<?php 
-						sort($sFields);
-						foreach($sFields as $f){
-							echo "<option ".($dbpk==$f?"SELECTED":"").">".$f."</option>\n";
-						}
+					<div style="margin:20px;">
+						<b>Source Primary Key (required): </b>
+						<?php
+						$fm = $duManager->getFieldMap();
+						$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
+						$sFields = $duManager->getSourceArr();
 						?>
-					</select>
-					<div id="pkdiv" style="margin:5px 0px 0px 200px;display:<?php echo ($dbpk?"none":"block");?>";>
-						<input type="submit" name="action" value="Save Primary Key" />
+						<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged();">
+							<option value=''>Select Source Primary Key</option>
+							<option value=''>Delete Primary Key</option>
+							<option value=''>----------------------------------</option>
+							<?php 
+							sort($sFields);
+							foreach($sFields as $f){
+								echo "<option ".($dbpk==$f?"SELECTED":"").">".$f."</option>\n";
+							}
+							?>
+						</select>
+						<div id="pkdiv" style="margin:5px 0px 0px 200px;display:<?php echo ($dbpk?"none":"block");?>";>
+							<input type="submit" name="action" value="Save Primary Key" />
+						</div>
 					</div>
-				</div>
-				<?php } ?>
-				<?php if(($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD) && $dbpk){ ?>
+					<?php 
+				} 
+				
+				if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName)){ 
+					?>
 					<div id="mdiv">
 						<table border="1" cellpadding="2" style="border:1px solid black">
 							<tr>
@@ -397,7 +403,7 @@ else{
 						<hr />
 					</div>
 				<?php } ?>
-				<?php if((($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD) && $dbpk) || ($uploadType == $DIGIRUPLOAD) 
+				<?php if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName) || ($uploadType == $DIGIRUPLOAD) 
 					|| ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
 					<div id="uldiv">
 						<?php 
