@@ -11,13 +11,13 @@ $tempDirRoot = '';
 $logPath = '';						//If left NULL, <$tempDirRoot>/logs will be used
 
 //the root for the image directory
-$imageDomain = '';					//Domain path to images, if different from Virtual Flora path (e.g. http://swbiodiversity.org)
+$imageDomain = '';					//Domain path to images, if different from Virtual Flora portal 
 $imageRootUrl = '';					//URL path to images
 $imageRootPath = '';				//Writable path to images, especially needed for downloading images
 
 //Specimen Label and Batch Image Processor variables
 //Pixel variable also used in observation image, specimen image, and taxon image uploaders  
-$imgLoaderSourcePath = "C:/htdocs/symbiota/trunk/temp/images/toprocess";
+$imgLoaderSourcePath = "";
 $imgLoaderTargetPath = "";		//If null, $imageRootPath will be used
 $imgLoaderUrl = "";				//If null, $imageRootUrl will be used
 $tnPixWidth = 130;				//Preferred pixel width of thumbnail 
