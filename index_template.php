@@ -34,16 +34,5 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	include($serverRoot."/footer.php");
 	?> 
 
-	<script type="text/javascript">
-		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-		try {
-			var pageTracker = _gat._getTracker("<?php echo $googleAnalyticsKey; ?>");
-			pageTracker._trackPageview();
-		} catch(err) {}
-	</script>
-
 </body>
 </html>
