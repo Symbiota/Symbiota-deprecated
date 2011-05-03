@@ -21,7 +21,7 @@
 <body>
 
 <?php
-	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:"true");
+	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:false);
 	include($serverRoot.'/header.php');
 	if(isset($collections_harvestparamsCrumbs)){
 		if($collections_harvestparamsCrumbs){

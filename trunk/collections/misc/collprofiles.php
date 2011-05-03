@@ -77,7 +77,7 @@ if($collId){
 </head>
 <body>
 	<?php
-	$displayLeftMenu = (isset($collections_misc_collprofilesMenu)?$collections_misc_collprofilesMenu:"true");
+	$displayLeftMenu = (isset($collections_misc_collprofilesMenu)?$collections_misc_collprofilesMenu:true);
 	include($serverRoot.'/header.php');
 	if(isset($collections_misc_collprofilesCrumbs)){
 		if($collections_misc_collprofilesCrumbs){

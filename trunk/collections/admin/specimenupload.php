@@ -208,7 +208,7 @@ if($isEditable){
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_admin_specimenuploadMenu)?$collections_admin_specimenuploadMenu:"true");
+	$displayLeftMenu = (isset($collections_admin_specimenuploadMenu)?$collections_admin_specimenuploadMenu:true);
 	include($serverRoot.'/header.php');
 	if(isset($collections_admin_specimenuploadCrumbs)){
 		echo "<div class='navpath'>";

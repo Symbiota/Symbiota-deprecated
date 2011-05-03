@@ -99,7 +99,7 @@
 	<body>
 	
 	<?php
-	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:"true");
+	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:false);
 	include($serverRoot."/header.php");
 	if(isset($collections_indexCrumbs)){
 		if($collections_indexCrumbs){

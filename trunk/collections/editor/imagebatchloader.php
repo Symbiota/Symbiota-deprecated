@@ -45,7 +45,7 @@ if($isEditable){
 </head>
 <body>
 	<?php
-	$displayLeftMenu = (isset($collections_admin_observationuploaderMenu)?$collections_admin_observationuploaderMenu:"true");
+	$displayLeftMenu = (isset($collections_admin_observationuploaderMenu)?$collections_admin_observationuploaderMenu:false);
 	include($serverRoot.'/header.php');
 	if(isset($collections_admin_observationuploaderCrumbs)){
 		echo "<div class='navpath'>";
