@@ -597,12 +597,7 @@ else{
  		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
  		echo "<ol style='margin:10px;font-weight:bold;'>";
  		echo "<li>Starting Data Upload</li>";
- 		if($uploadType == $FILEUPLOAD){
-	 		$duManager->uploadData($finalTransfer);
- 		}
- 		else{
-	 		$duManager->uploadData($finalTransfer);
- 		}
+ 		$duManager->uploadData($finalTransfer);
 		echo "</ol>";
  		if($duManager->getTransferCount() && !$finalTransfer){
 			?>

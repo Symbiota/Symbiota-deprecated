@@ -393,10 +393,15 @@ class SpecUploadManager{
 	public function finalUploadSteps($finalTransfer){
 		//Run cleanup Stored Procedure, if one exists 
 		if($this->cleanupSP){
-			if($this->conn->query("CALL ".$this->cleanupSP.";")){
-				echo "<li>";
-				echo "Records cleaned: ".$this->cleanupSP;
-				echo "</li>";
+			try{
+				if($this->conn->query("CALL ".$this->cleanupSP.";")){
+					echo "<li>";
+					echo "Records cleaned: ".$this->cleanupSP;
+					echo "</li>";
+				}
+			}
+			catch(Exception $e){
+				echo '<li>ERROR: Record cleaning failed ('.$this->cleanupSP.')</li>';
 			}
 		}
 		if(!$this->transferCount){
