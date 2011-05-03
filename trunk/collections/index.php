@@ -199,7 +199,7 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank'>
+							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
 							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
 							    	</a>
 							    </td>
@@ -207,7 +207,7 @@
 						    		<input name="db[]" class="spec" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
 							    </td>
 							    <td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 						    		</a>
 							    </td>
