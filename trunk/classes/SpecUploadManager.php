@@ -200,25 +200,27 @@ class SpecUploadManager{
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
-    		if($this->uploadType == $this->DIGIRUPLOAD){
-				$this->fieldMap[$field]["field"] = $field;
-    		} 
-    		$type = $row->Type;
-    		$this->symbFields[] = $field;
-			if(array_key_exists($field,$this->fieldMap)){
-				if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
-					$this->fieldMap[$field]["type"] = "numeric";
-				}
-				elseif(strpos($type,"date") !== false){
-					$this->fieldMap[$field]["type"] = "date";
-				}
-				else{
-					$this->fieldMap[$field]["type"] = "string";
-					if(preg_match('/\(\d+\)$/', $type, $matches)){
-						$this->fieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid"){
+	    		if($this->uploadType == $this->DIGIRUPLOAD){
+					$this->fieldMap[$field]["field"] = $field;
+	    		} 
+	    		$type = $row->Type;
+	    		$this->symbFields[] = $field;
+				if(array_key_exists($field,$this->fieldMap)){
+					if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+						$this->fieldMap[$field]["type"] = "numeric";
+					}
+					elseif(strpos($type,"date") !== false){
+						$this->fieldMap[$field]["type"] = "date";
+					}
+					else{
+						$this->fieldMap[$field]["type"] = "string";
+						if(preg_match('/\(\d+\)$/', $type, $matches)){
+							$this->fieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+						}
 					}
 				}
-			}
+    		}
     	}
 
     	$rs->close();
@@ -300,24 +302,18 @@ class SpecUploadManager{
 				if($isAutoMapped){
 					//Source Field = Symbiota Field
 					foreach($this->symbFields as $sField){
-						if($sField != "dbpk"){
-							echo "<option ".(strtolower($fieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
-						}
+						echo "<option ".(strtolower($fieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
 					}
 				}
 				elseif(array_key_exists($fieldName,$sourceSymbArr)){
 					//Source Field is mapped to Symbiota Field
 					foreach($this->symbFields as $sField){
-						if($sField != "dbpk" && $sField != "initialTimestamp"){
-							echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
-						}
+						echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
 					}
 				}
 				else{
 					foreach($this->symbFields as $sField){
-						if($sField != "dbpk" && $sField != "initialTimestamp"){
-							echo "<option>".$sField."</option>\n";
-						}
+						echo "<option>".$sField."</option>\n";
 					}
 				}
 				echo "</select></td>\n";
