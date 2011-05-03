@@ -319,11 +319,12 @@ class SpecUploadDigir extends SpecUploadManager {
 				$datetime = strtotime($this->fieldDataArr["YEAR"]."-".$this->fieldDataArr["MONTH"]."-".$this->fieldDataArr["DAY"]);
 				if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
 			}
+			$dbpk = 0;
 			if($this->digirPKField){
-				$this->fieldDataArr["DBPK"] = $this->fieldDataArr[strtoupper($this->digirPKField)];
+				$dbpk = $this->fieldDataArr[strtoupper($this->digirPKField)];
 			}
 			else{
-				$this->fieldDataArr["DBPK"] = ++$this->dbpkSequence;
+				$dbpk = ++$this->dbpkSequence;
 			}
 			$sqlInsertFrag = "";
 			$sqlValuesFrag = "";
@@ -333,7 +334,7 @@ class SpecUploadDigir extends SpecUploadManager {
 					$sqlValuesFrag .= "\",\"".str_replace(chr(34),"'",$fieldValue);
 				}
 			}
-			$sql = "INSERT INTO uploadspectemp (collid,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",\"".substr($sqlValuesFrag,3)."\")";
+			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",".$dbpk.",\"".substr($sqlValuesFrag,3)."\")";
 			//echo "<div>SQL: ".$sql."</div>";
 			if(!$this->conn->query($sql)){
 				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>";
