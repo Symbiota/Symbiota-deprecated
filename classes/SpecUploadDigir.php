@@ -88,7 +88,7 @@ class SpecUploadDigir extends SpecUploadManager {
 				while(!feof($fp)){
 					$line = fgets($fp);
 					//echo "line: ".$line."\n";
-					$line = $this->cleanString($line);
+					$line = $this->cleanXmlStr($line);
 					if (!xml_parse($xml_parser, $line, feof($fp))){
 						echo "<div style='font-weight:bold;color:red;'>";
 						echo "XML error: %s at line %d".xml_error_string(xml_get_error_code($xml_parser)).xml_get_current_line_number($xml_parser);
@@ -331,14 +331,13 @@ class SpecUploadDigir extends SpecUploadManager {
 			foreach($this->fieldDataArr as $fieldName => $fieldValue){
 				if(array_key_exists(strtolower($fieldName),$this->fieldMap)){
 					$sqlInsertFrag .= ",".$fieldName;
-					$sqlValuesFrag .= "\",\"".str_replace(chr(34),"'",$fieldValue);
+					$sqlValuesFrag .= "\",\"".trim(str_replace(chr(34),"'",$fieldValue));
 				}
 			}
-			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",".$dbpk.",\"".substr($sqlValuesFrag,3)."\")";
-			//echo "<div>SQL: ".$sql."</div>";
+			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",\"".$dbpk."\",\"".substr($sqlValuesFrag,3)."\")";
 			if(!$this->conn->query($sql)){
-				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>";
-				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>";
+				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>\n";
+				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
 			}
 		}
 	}
@@ -359,5 +358,14 @@ class SpecUploadDigir extends SpecUploadManager {
 		return $this->searchLimit;
 	}
 	
+	private function cleanXmlStr($inStr){
+		$retStr = $inStr;
+		$retStr = str_replace(chr(10),' ',$retStr);
+		$retStr = str_replace(chr(11),' ',$retStr);
+		$retStr = str_replace(chr(13),' ',$retStr);
+		$retStr = str_replace(chr(20),' ',$retStr);
+		$retStr = str_replace(chr(30),' ',$retStr);
+		return $retStr;
+	}
 }
 ?>
