@@ -13,7 +13,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:"true");
+	$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:false);
 	include($serverRoot.'/header.php');
 	if(isset($collections_download_downloadCrumbs)){
 		if($collections_download_downloadCrumbs){

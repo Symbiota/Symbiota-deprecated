@@ -82,7 +82,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_listMenu)?$collections_listMenu:"true");
+	$displayLeftMenu = (isset($collections_listMenu)?$collections_listMenu:false);
 	include($serverRoot.'/header.php');
 	if(isset($collections_listCrumbs)){
 		if($collections_listCrumbs){

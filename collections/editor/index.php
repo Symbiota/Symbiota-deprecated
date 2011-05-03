@@ -11,7 +11,7 @@ header("Content-Type: text/html; charset=".$charset);
 	</head>
 	<body>
 		<?php
-		$displayLeftMenu = (isset($collections_editor_indexMenu)?$collections_editor_indexMenu:"true");
+		$displayLeftMenu = (isset($collections_editor_indexMenu)?$collections_editor_indexMenu:false);
 		include($serverRoot.'/header.php');
 		if(isset($collections_editor_indexCrumbs)){
 			echo "<div class='navpath'>";

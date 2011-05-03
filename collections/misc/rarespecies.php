@@ -113,7 +113,7 @@ if($editable){
 </head>
 <body>
 <?php
-	$displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_rarespeciesMenu:"true");
+	$displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_rarespeciesMenu:true);
 	include($serverRoot.'/header.php');
 	if(isset($collections_misc_rarespeciesCrumbs)){
 		echo "<div class='navpath'>";
