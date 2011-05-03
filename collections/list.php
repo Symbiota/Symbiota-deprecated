@@ -202,7 +202,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					<tr>
 						<td colspan='4'>
 							<h2>
-								<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
+								<a href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
 									<?php echo $dispName;?>
 					        	</a>
 				        	</h2>
@@ -219,7 +219,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 						?>
 						<tr>
 							<td rowspan="4" width='60' valign='top' align='center'>
-								<a target="_blank" href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
+								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
 			                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
 			                    </a>
 			                    <div style='font-weight:bold;font-size:75%;'>

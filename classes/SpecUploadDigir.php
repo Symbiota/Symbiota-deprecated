@@ -325,7 +325,6 @@ class SpecUploadDigir extends SpecUploadManager {
 			else{
 				$this->fieldDataArr["DBPK"] = ++$this->dbpkSequence;
 			}
-			$this->fieldDataArr["COLLID"] = $this->collId;
 			$sqlInsertFrag = "";
 			$sqlValuesFrag = "";
 			foreach($this->fieldDataArr as $fieldName => $fieldValue){
@@ -334,7 +333,7 @@ class SpecUploadDigir extends SpecUploadManager {
 					$sqlValuesFrag .= "\",\"".str_replace(chr(34),"'",$fieldValue);
 				}
 			}
-			$sql = "INSERT INTO uploadspectemp (".substr($sqlInsertFrag,1).") VALUES (\"".substr($sqlValuesFrag,3)."\")";
+			$sql = "INSERT INTO uploadspectemp (collid,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",\"".substr($sqlValuesFrag,3)."\")";
 			//echo "<div>SQL: ".$sql."</div>";
 			if(!$this->conn->query($sql)){
 				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>";
