@@ -147,18 +147,6 @@ if($collId){
 						<?php } ?>
 					</ul>
 				</fieldset>
-				<?php if($editCode == 3){ ?>
-					<fieldset style="padding:15px;">
-						<legend><b>Admin Control Panel</b></legend>
-						<ul>
-							<li>
-								<a href="collprofiles.php?newcoll=1">
-									Add New Collection Profile
-								</a>
-							</li>
-						</ul>
-					</fieldset>
-				<?php } ?>
 			</div>
 			<?php 
 		}

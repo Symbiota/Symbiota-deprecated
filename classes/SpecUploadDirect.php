@@ -57,9 +57,9 @@ class SpecUploadDirect extends SpecUploadManager {
 				
 				echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
 				set_time_limit(800);
-				$sourceConn->query("SET NAMES ".$charset.";");
+				$sourceConn->query("SET NAMES ".str_replace('-','',strtolower($charset)).";");
 				//echo "<div>".$this->queryStr."</div><br/>";
-				if($result = $sourceConn->query($this->queryStr)){
+				if($result = $sourceConn->query(strtolower($this->queryStr))){
 					echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
 					$recCnt = 1;
 					while($row = $result->fetch_assoc()){
