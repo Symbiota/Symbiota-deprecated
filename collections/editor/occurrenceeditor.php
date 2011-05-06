@@ -34,7 +34,11 @@ if($symbUid){
 			$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		}
 		if($isEditor){
-			if($action == "Add Record"){
+			if($action == 'Delete Occurrence'){
+				$statusStr = $occManager->deleteOccurrence($occId);
+				if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
+			}
+			elseif($action == 'Add Record'){
 				$statusStr = $occManager->addOccurrence($_REQUEST);
 				$occId = $occManager->getOccId();
 				if($gotoMode <= 2){
@@ -140,14 +144,27 @@ if($symbUid){
 						<div style="margin:10px;color:red;">
 							<?php echo $statusStr; ?>
 						</div>
-						<div style="margin:10px;">
-							Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
-						</div>
+						<?php 
+						if($action == 'Delete Occurrence'){
+							?>
+							<a href="" style="margin:10px;" onclick="window.opener.location.href = window.opener.location.href;window.close();">
+								Return to Search Page
+							</a>
+							<?php
+						}
+						else{
+							?>
+							<div style="margin:10px;">
+								Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
+							</div>
+							<?php 
+						} 
+						?>
 					</fieldset>
 				</div>
 				<?php 
 			}
-			if($occId || $isEditor){
+			if(($occId || $isEditor) && $action != 'Delete Occurrence'){
 				if(!$occId && !$collId){
 					?>
 					<div style="margin:10px;">
@@ -206,6 +223,11 @@ if($symbUid){
 										Images
 									</a>
 								</li>
+								<li>
+									<a href="#admindiv" <?php echo ($tabTarget=='admindiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+										Admin
+									</a>
+								</li>
 								<?php
 							}
 							?>
@@ -255,16 +277,26 @@ if($symbUid){
 											<?php } ?>
 										</div>
 										<div style="clear:both;margin-top:5px;">
-											Associated Collectors:<br />
-											<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:430px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
-											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
-												<img src="../../images/showedit.png" style="width:15px;" />
+											<span>
+												Associated Collectors
+											</span>
+											<span style="margin-left:220px;">
+												Other Catalog Numbers
 											</span>
 											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
 												<span id="dupsearchspan">Looking for Dups...</span>
 												<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
 												<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>
 											</div>
+										</div>
+										<div>
+											<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:330px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
+											<span style="margin-left:10px;">
+												<input type="text" name="othercatalognumbers" tabindex="15" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');" />
+											</span>
+											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
+												<img src="../../images/showedit.png" style="width:15px;" />
+											</span>
 										</div>
 										<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
 											<span>
@@ -626,10 +658,6 @@ if($symbUid){
 										<span>
 											Owner InstitutionCode:
 											<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
-										</span>
-										<span style="margin-left:30px;">
-											Other Catalog Numbers:
-											<input type="text" name="othercatalognumbers" tabindex="106" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');" />
 										</span>
 									</div>
 								</fieldset>
@@ -1152,6 +1180,74 @@ if($symbUid){
 									?>
 								</div>
 							</div>
+							<div id="admindiv" style="">
+								<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
+									<fieldset>
+										<legend>Delete Occurrence Record</legend>
+										<div style="margin:15px">
+											Record first needs to be evaluated before it can be deleted from the system. 
+											The evaluation ensures that the deletion of this record will not interfer with 
+											the integrity of other data linked to this record. Note that all determination and 
+											comments for this occurrence will be automatically deleted. Links to images, checklist vouchers, 
+											and surveys will have to be individually addressed before can be deleted.      
+											<div style="margin:15px;display:block;">
+												<input name="verifydelete" type="button" value="Evaluate record for deletion" onclick="verifyDeletion(this.form);" />
+											</div>
+											<div id="delverimgdiv" style="margin:15px;">
+												<b>Image Links: </b>
+												<span id="delverimgspan" style="color:orange;display:none;">checking image links...</span>
+												<span id="delimgfailspan" style="display:none;">
+													<span style="color:red;">Warning:</span> 
+													One or more images are linked to this occurrence. 
+													Before this specimen can be deleted, images have to be deleted or disassociated 
+													with this occurrence record. Continuing will remove associations to 
+													the occurrence record being deleted but leave image in system linked to the scientific name.  
+												</span>
+												<span id="delimgappdiv" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No images are directly associated with this occurrence record.  
+												</span>
+											</div>
+											<div id="delvervoucherdiv" style="margin:15px;">
+												<b>Checklist Voucher Links: </b>
+												<span id="delvervouspan" style="color:orange;display:none;">checking checklist links...</span>
+												<span id="delvouappdiv" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No checklists have been linked to this occurrence record. 
+												</span>
+												<div id="delvoulistdiv" style="display:none;">
+													<span style="color:red;">Warning:</span> 
+													This occurrence serves as an occurrence voucher for the following species checklists.
+													Deleting this occurrence will remove these association. 
+													You may want to first verify this action with the checklist administrators.
+													<ul id="voucherlist">
+													</ul> 
+												</div>
+											</div>
+											<div id="delversurveydiv" style="margin:15px;">
+												<b>Survey Voucher Links: </b>
+												<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
+												<span id="delsurappdiv" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No survey projects have been linked to this occurrence record. 
+												</span>
+												<div id="delsurlistdiv" style="display:none;">
+													<span style="color:red;">Warning:</span> 
+													This occurrence serves as an occurrence voucher for the following survey projects.
+													Deleting this occurrence will remove these association. 
+													You may want to first verify this action with the project administrators.
+													<ul id="surveylist">
+													</ul> 
+												</div>
+											</div>
+											<div id="delapprovediv" style="margin:15px;display:none;">
+												<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+												<input name="submitaction" type="submit" value="Delete Occurrence" />
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
 							<?php
 						}
 						?>
@@ -1160,7 +1256,9 @@ if($symbUid){
 				}
 			}
 			else{
-				echo '<h2>You are not authorized to add occurrence records</h2>';
+				if(!$isEditor){
+					echo '<h2>You are not authorized to add occurrence records</h2>';
+				}
 			}
 		}
 		?>

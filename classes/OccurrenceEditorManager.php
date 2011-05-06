@@ -286,6 +286,18 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
+	
+	public function deleteOccurrence($occId){
+		$status = '';
+		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$occId;
+		if($this->conn->query($sql)){
+			$status = 'SUCCESS: Occurrence Record Deleted!';
+		}
+		else{
+			$status = 'FAILED: unable to delete occurrence record';
+		}
+		return $status;
+	}
 
 	public function addDetermination($detArr){
 		$status = "Determination submitted successfully!";
