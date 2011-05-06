@@ -82,7 +82,7 @@
 				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
-				County/Municipio: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Seperate multiple terms w/ commas" />
+				County/Municipality: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Seperate multiple terms w/ commas" />
 			</div>
 			<div>
 				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />

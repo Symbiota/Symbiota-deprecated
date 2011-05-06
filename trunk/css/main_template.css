@@ -123,21 +123,21 @@ div.menuitem a:hover {
 
 
 /*Central div in the middle center table div */
-div#innertext{
+#innertext{
 	margin:	15px;	
 	font-size: 12px;
 }
 
-div#innertext div{
+#innertext div{
 	font: inherit;
 }
 
-div#innertext a{
+#innertext a{
 	font-family: Arial, Helvetica, sans-serif;
 	color: 		#2C405E;
     text-decoration: none;	
 }
-div#innertext a:hover{
+#innertext a:hover{
 	color: black;
     text-decoration: underline;
 }

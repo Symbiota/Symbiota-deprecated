@@ -1,4 +1,8 @@
 var pauseSubmit = false;
+var imgAssocCleared = false;
+var voucherAssocCleared = false;
+var surveyAssocCleared = false;
+
 
 $(document).ready(function() {
 	$("#occedittabs").tabs({
@@ -328,6 +332,7 @@ function lookForDups(f){
 	var collDate = f.eventdate.value;
 	if(!collName || !collNum){
 		alert("Collector name and number must have a value to search for duplicates");
+		return;
 	}
 	document.getElementById("dupdisplayspan").style.display = "none";
 	document.getElementById("dupnonespan").style.display = "none";
@@ -423,6 +428,113 @@ function verifyGotoNew(f){
 	return true;
 }
 
+function verifyDeletion(f){
+	var occId = f.occid.value;
+	//Restriction when images are linked
+	document.getElementById("delverimgspan").style.display = "block";
+	verifyAssocImages(occId);
+	
+	//Restriction when vouchers are linked
+	document.getElementById("delvervouspan").style.display = "block";
+	verifyAssocVouchers(occId);
+	
+	//Restriction when surveys are linked
+	document.getElementById("delversurspan").style.display = "block";
+	verifyAssocSurveys(occId);
+}
+
+function verifyAssocImages(occid){
+	var iXmlHttp = GetXmlHttpObject();
+	if(iXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/getassocimgcnt.php?occid=" + occid;
+	iXmlHttp.onreadystatechange=function(){
+		if(iXmlHttp.readyState==4 && iXmlHttp.status==200){
+			var imgCnt = iXmlHttp.responseText;
+			document.getElementById("delverimgspan").style.display = "none";
+			if(imgCnt > 0){
+				document.getElementById("delimgfailspan").style.display = "inline";
+			}
+			else{
+				document.getElementById("delimgappdiv").style.display = "inline";
+			}
+			imgAssocCleared = true;
+			displayDeleteSubmit();
+		}
+	};
+	iXmlHttp.open("POST",url,true);
+	iXmlHttp.send(null);
+}
+
+function verifyAssocVouchers(occid){
+	var vXmlHttp = GetXmlHttpObject();
+	if(vXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/getassocvouchers.php?occid=" + occid;
+	vXmlHttp.onreadystatechange=function(){
+		if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
+			var vList = eval("("+vXmlHttp.responseText+")");;
+			document.getElementById("delvervouspan").style.display = "none";
+			if(vList != ''){
+				document.getElementById("delvoulistdiv").style.display = "block";
+				var strOut = "";
+				for(var key in vList){
+					strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"'>"+vList[key]+"</a></li>";
+				}
+				document.getElementById("voucherlist").innerHTML = strOut;
+			}
+			else{
+				document.getElementById("delvouappdiv").style.display = "inline";
+			}
+			voucherAssocCleared = true;
+			displayDeleteSubmit();
+		}
+	};
+	vXmlHttp.open("POST",url,true);
+	vXmlHttp.send(null);
+}
+
+function verifyAssocSurveys(occid){
+	var sXmlHttp = GetXmlHttpObject();
+	if(sXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url = "rpc/getassocsurveys.php?occid=" + occid;
+	sXmlHttp.onreadystatechange=function(){
+		if(sXmlHttp.readyState==4 && sXmlHttp.status==200){
+			var sList = eval("("+sXmlHttp.responseText+")");;
+			document.getElementById("delversurspan").style.display = "none";
+			if(sList != ''){
+				document.getElementById("delsurlistdiv").style.display = "block";
+				var strOut = "";
+				for(var key in sList){
+					strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"'>"+sList[key]+"</a></li>";
+				}
+				document.getElementById("surveylist").innerHTML = strOut;
+			}
+			else{
+				document.getElementById("delsurappdiv").style.display = "inline";
+			}
+			surveyAssocCleared = true;
+			displayDeleteSubmit();
+		}
+	};
+	sXmlHttp.open("POST",url,true);
+	sXmlHttp.send(null);
+}
+
+function displayDeleteSubmit(){
+	if(imgAssocCleared && voucherAssocCleared && surveyAssocCleared){
+		var elem = document.getElementById("delapprovediv");
+		elem.style.display = "block";
+	}
+}
+
 //Occurrence field checks
 function verifyDate(eventDateInput){
 	var dateStr = eventDateInput.value;
@@ -444,8 +556,7 @@ function verifyDetSciName(f){
   		alert ("Your browser does not support AJAX!");
   		return;
   	}
-	var url = "rpc/verifysciname.php";
-	url=url + "?sciname=" + sciNameStr;
+	var url = "rpc/verifysciname.php?sciname=" + sciNameStr;
 	snXmlHttp.onreadystatechange=function(){
 		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
 			if(snXmlHttp.responseText){
