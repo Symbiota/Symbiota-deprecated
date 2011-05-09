@@ -39,6 +39,11 @@ if($editable){
 		$status .= "<li>Taxa upload appears to have been successful.</li>";
 		$status .= "<li>Go to <a href='taxonomydisplay.php'>Taxonomic Tree Search</a> page to query for a loaded name.</li>";
 	}
+	elseif($action == "Clean and Transfer Taxa"){
+		$loaderManager->cleanUpload();
+		$loaderManager->transferUpload();
+		$status = "Taxa apparently cleaned and loaded into the taxonomic hierarchy";
+	}
 	if(array_key_exists("sf",$_REQUEST)){
 		//Grab field mapping, if mapping form was submitted
  		$targetFields = $_REQUEST["tf"];
@@ -231,7 +236,6 @@ if($editable){
 					<?php } ?>
 				</fieldset>
 			</form>
-		
 		</div>
 		<div>
 			<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
@@ -251,6 +255,20 @@ if($editable){
 					</div>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Upload ITIS File" />
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<div>
+			<form name="cleantransferform" action="taxaloader.php" method="post">
+				<fieldset style="width:450px;">
+					<legend style="font-weight:bold;font-size:120%;">Clean and Transfer Taxa To Central Table</legend>
+					<div style="margin:10px;">
+						If taxa information was loaded into the UploadTaxa table using other means, 
+						one can use this form to clean and transfer the taxa names into the taxonomic tables (taxa, tastatus).  
+					</div>
+					<div style="margin:10px;">
+						<input type="submit" name="action" value="Clean and Transfer Taxa" />
 					</div>
 				</fieldset>
 			</form>
