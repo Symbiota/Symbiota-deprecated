@@ -258,11 +258,11 @@
 			<div class="editmd" style="display:none;">
 				<div id="tabs" style="margin:10px;">
 				    <ul>
-				        <li><a href="#metadata"><span>Metadata</span></a></li>
-				        <li><a href="#dynsql"><span>Dynamic SQL</span></a></li>
-				        <li><a href="#editors"><span>Editors</span></a></li>
+				        <li><a href="#mdtab"><span>Metadata</span></a></li>
+				        <li><a href="#admintab"><span>Admin</span></a></li>
+				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
-					<div id="metadata">
+					<div id="mdtab">
 						<form id="checklisteditform" action="checklist.php" method="post" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
 							<fieldset style="margin:5px 0px 5px 5px;">
 								<legend>Edit Checklist Details:</legend>
@@ -331,7 +331,7 @@
 							</fieldset>
 						</form>
 					</div>
-					<div id="dynsql">
+					<div id="admintab">
 						<div style="margin:15px;">
 							This editing module will aid you in building an SQL fragment that can be used to help link vouchers to species names within the checklist. 
 							When a dynamic SQL fragment exists, the checklist editors will have access to 
@@ -397,7 +397,7 @@
 							</fieldset>
 						</form>
 					</div>
-					<div id="editors">
+					<div id="editortab">
 						Editors
 						<div style="margin:10px;">
 							<?php 

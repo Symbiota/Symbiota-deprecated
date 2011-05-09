@@ -1,7 +1,7 @@
 <?php
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
-	$retCnt = Array();
+	$retCnt = 0;
 	$occId = $con->real_escape_string($_REQUEST['occid']);
 
 	$sql = 'SELECT count(*) AS imgcnt FROM images WHERE occid = '.$occId;
@@ -12,5 +12,5 @@
 	}
 	$result->close();
 	$con->close();
-	$retCnt;
+	echo $retCnt;
 ?>
