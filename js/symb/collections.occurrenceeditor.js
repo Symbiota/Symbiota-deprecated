@@ -455,10 +455,10 @@ function verifyAssocImages(occid){
 			var imgCnt = iXmlHttp.responseText;
 			document.getElementById("delverimgspan").style.display = "none";
 			if(imgCnt > 0){
-				document.getElementById("delimgfailspan").style.display = "inline";
+				document.getElementById("delimgfailspan").style.display = "block";
 			}
 			else{
-				document.getElementById("delimgappdiv").style.display = "inline";
+				document.getElementById("delimgappdiv").style.display = "block";
 			}
 			imgAssocCleared = true;
 			displayDeleteSubmit();
@@ -483,12 +483,12 @@ function verifyAssocVouchers(occid){
 				document.getElementById("delvoulistdiv").style.display = "block";
 				var strOut = "";
 				for(var key in vList){
-					strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"'>"+vList[key]+"</a></li>";
+					strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"' target='_blank'>"+vList[key]+"</a></li>";
 				}
 				document.getElementById("voucherlist").innerHTML = strOut;
 			}
 			else{
-				document.getElementById("delvouappdiv").style.display = "inline";
+				document.getElementById("delvouappdiv").style.display = "block";
 			}
 			voucherAssocCleared = true;
 			displayDeleteSubmit();
@@ -513,12 +513,12 @@ function verifyAssocSurveys(occid){
 				document.getElementById("delsurlistdiv").style.display = "block";
 				var strOut = "";
 				for(var key in sList){
-					strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"'>"+sList[key]+"</a></li>";
+					strOut = strOut + "<li><a href='../../checklists/survey.php?surveyid="+key+"' target='_blank'>"+sList[key]+"</a></li>";
 				}
 				document.getElementById("surveylist").innerHTML = strOut;
 			}
 			else{
-				document.getElementById("delsurappdiv").style.display = "inline";
+				document.getElementById("delsurappdiv").style.display = "block";
 			}
 			surveyAssocCleared = true;
 			displayDeleteSubmit();

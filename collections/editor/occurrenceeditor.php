@@ -1196,26 +1196,26 @@ if($symbUid){
 											<div id="delverimgdiv" style="margin:15px;">
 												<b>Image Links: </b>
 												<span id="delverimgspan" style="color:orange;display:none;">checking image links...</span>
-												<span id="delimgfailspan" style="display:none;">
+												<div id="delimgfailspan" style="display:none;style:0px 10px 10px 10px;">
 													<span style="color:red;">Warning:</span> 
 													One or more images are linked to this occurrence. 
 													Before this specimen can be deleted, images have to be deleted or disassociated 
 													with this occurrence record. Continuing will remove associations to 
 													the occurrence record being deleted but leave image in system linked to the scientific name.  
-												</span>
-												<span id="delimgappdiv" style="display:none;">
+												</div>
+												<div id="delimgappdiv" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
 													No images are directly associated with this occurrence record.  
-												</span>
+												</div>
 											</div>
 											<div id="delvervoucherdiv" style="margin:15px;">
 												<b>Checklist Voucher Links: </b>
 												<span id="delvervouspan" style="color:orange;display:none;">checking checklist links...</span>
-												<span id="delvouappdiv" style="display:none;">
+												<div id="delvouappdiv" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
 													No checklists have been linked to this occurrence record. 
-												</span>
-												<div id="delvoulistdiv" style="display:none;">
+												</div>
+												<div id="delvoulistdiv" style="display:none;style:0px 10px 10px 10px;">
 													<span style="color:red;">Warning:</span> 
 													This occurrence serves as an occurrence voucher for the following species checklists.
 													Deleting this occurrence will remove these association. 
@@ -1227,11 +1227,11 @@ if($symbUid){
 											<div id="delversurveydiv" style="margin:15px;">
 												<b>Survey Voucher Links: </b>
 												<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
-												<span id="delsurappdiv" style="display:none;">
+												<div id="delsurappdiv" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
 													No survey projects have been linked to this occurrence record. 
-												</span>
-												<div id="delsurlistdiv" style="display:none;">
+												</div>
+												<div id="delsurlistdiv" style="display:none;style:0px 10px 10px 10px;">
 													<span style="color:red;">Warning:</span> 
 													This occurrence serves as an occurrence voucher for the following survey projects.
 													Deleting this occurrence will remove these association. 
