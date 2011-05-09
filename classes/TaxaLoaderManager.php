@@ -79,7 +79,7 @@ class TaxaLoaderManager{
 		return $statusStr;
 	}
 
-	protected function cleanUpload(){
+	public function cleanUpload(){
 		set_time_limit(600);
 		
 		$sspStr = 'ssp.';$inSspStr = 'subsp.';
