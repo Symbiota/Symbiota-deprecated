@@ -585,11 +585,11 @@
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
 			"WHERE (gi.tid IN ($tidStr)) ";
 		if($latlonArr){
-			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ";
+			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
 				"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
 		}
 		$sql .= "LIMIT 50";
-				//echo "<div>".$sql."</div>";
+		//echo "<div>".$sql."</div>";
 		$result = $this->con->query($sql);
  		$sciName = "";
 		while($row = $result->fetch_object()){
