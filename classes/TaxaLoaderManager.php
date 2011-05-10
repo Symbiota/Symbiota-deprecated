@@ -117,6 +117,7 @@ class TaxaLoaderManager{
 			'WHERE u.AcceptedStr IS NOT NULL AND ul2.scinameinput IS NULL';
 		$this->conn->query($sql);
 		
+		//Clean sciname field (sciname input gets cleaned later) 
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.$inSspStr.' "," '.$sspStr.' ") WHERE sciname like "% '.$inSspStr.' %"';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %"';
@@ -140,6 +141,7 @@ class TaxaLoaderManager{
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname,"  "," ") WHERE sciname like "%  %"';
 		$this->conn->query($sql);
 		
+		//Clean scinameinput field
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," '.$inSspStr.' "," '.$sspStr.' ") '.
 			'WHERE scinameinput like "% '.$inSspStr.' %"';
 		$this->conn->query($sql);
@@ -201,8 +203,16 @@ class TaxaLoaderManager{
 			'SET sciname = CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3, unitname3) '.
 			'WHERE sciname IS NULL';
 		$this->conn->query($sql);
+		//Delete taxa where sciname can't be inserted. These are taxa where sciname already exists
+		$sql = 'DELETE FROM uploadtaxa WHERE sciname IS NULL';
+		$this->conn->query($sql);
+		//Link names already in theusaurus 
 		$sql = 'UPDATE uploadtaxa u INNER JOIN taxa t ON u.sciname = t.sciname '.
 			'SET u.tid = t.tid WHERE u.tid IS NULL';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedstr = u2.scinameinput '.
+			'SET u1.tidaccepted = u2.tid '. 
+			'WHERE u1.tidaccepted IS NULL AND u2.tid IS NOT NULL';
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
@@ -214,7 +224,7 @@ class TaxaLoaderManager{
 			'SET u0.family = u1.family '.
 			'WHERE u0.family IS NULL AND u1.family IS NOT NULL';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.sciname = u1.acceptedstr '.
+		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.scinameinput = u1.acceptedstr '.
 			'SET u0.family = u1.family '.
 			'WHERE u0.family IS NULL AND u1.family IS NOT NULL';
 		$this->conn->query($sql);
@@ -355,12 +365,18 @@ class TaxaLoaderManager{
 				'SET ut.tid = t.tid WHERE ut.tid IS NULL';
 			$this->conn->query($sql);
 			
-			$sql = 'UPDATE uploadtaxa SET tidaccepted = tid '.
-				'WHERE (acceptance = 1 OR acceptance IS NULL) AND tid IS NOT NULL';
+			$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedstr = u2.scinameinput '.
+				'SET u1.tidaccepted = u2.tid '. 
+				'WHERE u1.tidaccepted IS NULL AND u2.tid IS NOT NULL';
+			$this->conn->query($sql);
+			
+			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname '.
+				'SET ut.tidaccepted = t.tid '.
+				'WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL AND ut.acceptedstr IS NOT NULL';
 			$this->conn->query($sql);
 
-			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname SET ut.tidaccepted = t.tid '.
-				'WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL AND ut.acceptedstr IS NOT NULL';
+			$sql = 'UPDATE uploadtaxa SET tidaccepted = tid '.
+				'WHERE tidaccepted IS NULL AND tid IS NOT NULL';
 			$this->conn->query($sql);
 
 			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
