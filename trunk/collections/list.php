@@ -5,7 +5,6 @@ header("Content-Type: text/html; charset=".$charset);
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
-$clid = (array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"");
 
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
@@ -313,7 +312,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 	        	<h2>Google Map</h2>
 	        </div>
 			<div style='margin:10 0 0 20;'>
-			    <a href='javascript:var popupReference=window.open("googlemap.php?clid=<?php echo $clid; ?>","gmap","toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20");'>
+			    <a href='javascript:var popupReference=window.open("googlemap.php","gmap","toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20");'>
 			        Display coordinates in Google Map
 			    </a>
 			</div>
