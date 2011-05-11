@@ -75,8 +75,8 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$dynClid = 0;
 		$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
 			"VALUES ('Dynamic Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'Specimen Checklist', '', '".$expirationTime."') ";
-		if($this->conn->query($sqlCreateCl)){
-			$dynClid = $this->conn->insert_id;
+		if($conn->query($sqlCreateCl)){
+			$dynClid = $conn->insert_id;
 			//Get checklist and append to dyncltaxalink
 			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
 			if(!$taxonAuthorityId){
