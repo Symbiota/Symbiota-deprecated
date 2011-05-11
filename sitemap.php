@@ -153,8 +153,8 @@ $smManager = new SiteMapManager();
 	            		<h3>Collections</h3>
 							<ul>
 								<li>
-									<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?emode=2">
-										Add a New Collection
+									<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?newcoll=1">
+										Create a New Collection Profile
 									</a>
 								</li>
 								<li>
