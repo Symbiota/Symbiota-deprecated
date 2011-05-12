@@ -136,150 +136,150 @@ if($isAdmin){
 						<div style="clear:both;margin:0px 0px 20px 30px;">
 							<a href="usermanagement.php?loginas=<?php echo array_shift($loginArr); ?>">Login</a> as this user
 						</div>
-						<div style="clear:both;margin:10px;" class="fieldset">
-							<div class="legend">Current Permissions</div>
+						<fieldset style="clear:both;margin:10px;">
+							<legend><b>Current Permissions</b></legend>
 							<?php 
-								$userPermissions = $userManager->getUserPermissions($userId);
-								if($userPermissions){
-									?>
-									<div>
-										<ul>
+							$userPermissions = $userManager->getUserPermissions($userId);
+							if($userPermissions){
+								?>
+								<div>
+									<ul>
+									<?php 
+									if(array_key_exists("SuperAdmin",$userPermissions)){ 
+										?>
+										<li>
+											<b>Super Administrator</b> 
+											<a href="usermanagement.php?del=SuperAdmin&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
 										<?php 
-										if(array_key_exists("SuperAdmin",$userPermissions)){ 
-											?>
-											<li>
-												<b>Super Administrator</b> 
-												<a href="usermanagement.php?del=SuperAdmin&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
+									}
+									if(array_key_exists("Taxonomy",$userPermissions)){ 
+										?>
+										<li>
+											<b>Taxonomy Editor</b> 
+											<a href="usermanagement.php?del=Taxonomy&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
+									if(array_key_exists("TaxonProfile",$userPermissions)){ 
+										?>
+										<li>
+											<b>Taxon Profile Editor</b> 
+											<a href="usermanagement.php?del=TaxonProfile&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
+									if(array_key_exists("KeyEditor",$userPermissions)){ 
+										?>
+										<li>
+											<b>Identification Keys Editor</b>
+											<a href="usermanagement.php?del=KeyEditor&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
+									if(array_key_exists("RareSppAdmin",$userPermissions)){ 
+										?>
+										<li>
+											<b>Rare Species List Administrator</b>
+											<a href="usermanagement.php?del=RareSppAdmin&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
+									if(array_key_exists("RareSppReadAll",$userPermissions)){ 
+										?>
+										<li>
+											<b>View and Map Specimens of Rare Species from all Collections</b>
+											<a href="usermanagement.php?del=RareSppReadAll&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
+									//Collections Admin
+									if(array_key_exists("CollAdmin",$userPermissions)){
+										echo "<li><b>Collection Administrator for following collections</b></li>";
+										$collList = $userPermissions["CollAdmin"];
+										echo "<ul>";
+										foreach($collList as $k => $v){
+											echo "<li>$v ";
+											echo "<a href='usermanagement.php?del=CollAdmin-$k&userid=$userId'>";
+											echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+											echo "</a></li>";
+										}
+										echo "</ul>";
+									}
+									//Collections Editor
+									if(array_key_exists("CollEditor",$userPermissions)){
+										echo "<li><b>Collection Editor for following collections</b></li>";
+										$collList = $userPermissions["CollEditor"];
+										echo "<ul>";
+										foreach($collList as $k => $v){
+											echo "<li>$v ";
+											echo "<a href='usermanagement.php?del=CollEditor-$k&userid=$userId'>";
+											echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+											echo "</a></li>";
+										}
+										echo "</ul>";
+									}
+									if(array_key_exists("RareSppReader",$userPermissions)){ 
+										?>
+										<li>
+											<b>View and Map Specimens of Rare Species from following Collections</b>
+											<ul>
 											<?php 
-										}
-										if(array_key_exists("Taxonomy",$userPermissions)){ 
-											?>
-											<li>
-												<b>Taxonomy Editor</b> 
-												<a href="usermanagement.php?del=Taxonomy&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
-											<?php 
-										}
-										if(array_key_exists("TaxonProfile",$userPermissions)){ 
-											?>
-											<li>
-												<b>Taxon Profile Editor</b> 
-												<a href="usermanagement.php?del=TaxonProfile&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
-											<?php 
-										}
-										if(array_key_exists("KeyEditor",$userPermissions)){ 
-											?>
-											<li>
-												<b>Identification Keys Editor</b>
-												<a href="usermanagement.php?del=KeyEditor&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
-											<?php 
-										}
-										if(array_key_exists("RareSppAdmin",$userPermissions)){ 
-											?>
-											<li>
-												<b>Rare Species List Administrator</b>
-												<a href="usermanagement.php?del=RareSppAdmin&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
-											<?php 
-										}
-										if(array_key_exists("RareSppReadAll",$userPermissions)){ 
-											?>
-											<li>
-												<b>View and Map Specimens of Rare Species from all Collections</b>
-												<a href="usermanagement.php?del=RareSppReadAll&userid=<?php echo $userId; ?>">
-													<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-												</a>
-											</li>
-											<?php 
-										}
-										//Collections Admin
-										if(array_key_exists("CollAdmin",$userPermissions)){
-											echo "<li><b>Collection Administrator for following collections</b></li>";
-											$collList = $userPermissions["CollAdmin"];
-											echo "<ul>";
-											foreach($collList as $k => $v){
-												echo "<li>$v ";
-												echo "<a href='usermanagement.php?del=CollAdmin-$k&userid=$userId'>";
-												echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
-												echo "</a></li>";
-											}
-											echo "</ul>";
-										}
-										//Collections Editor
-										if(array_key_exists("CollEditor",$userPermissions)){
-											echo "<li><b>Collection Editor for following collections</b></li>";
-											$collList = $userPermissions["CollEditor"];
-											echo "<ul>";
-											foreach($collList as $k => $v){
-												echo "<li>$v ";
-												echo "<a href='usermanagement.php?del=CollEditor-$k&userid=$userId'>";
-												echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
-												echo "</a></li>";
-											}
-											echo "</ul>";
-										}
-										if(array_key_exists("RareSppReader",$userPermissions)){ 
-											?>
-											<li>
-												<b>View and Map Specimens of Rare Species from following Collections</b>
-												<ul>
+											$rsrArr = $userPermissions["RareSppReader"];
+											foreach($rsrArr as $collId => $collName){
+												?>
+												<li>
+													<?php echo $collName; ?>
+													<a href="usermanagement.php?del=RareSppReader-<?php echo $collId?>&userid=<?php echo $userId; ?>">
+														<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+													</a>
+												</li>
 												<?php 
-												$rsrArr = $userPermissions["RareSppReader"];
-												foreach($rsrArr as $collId => $collName){
-													?>
-													<li>
-														<?php echo $collName; ?>
-														<a href="usermanagement.php?del=RareSppReader-<?php echo $collId?>&userid=<?php echo $userId; ?>">
-															<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
-														</a>
-													</li>
-													<?php 
+											}
+											?>
+											</ul>
+										</li>
+										<?php 
+									}
+									//Checklists
+									if(array_key_exists("ClAdmin",$userPermissions)){
+										?>
+										<li>
+											<b>Checklist Administrator for following checklists</b>
+											<ul>
+												<?php 
+												$clList = $userPermissions["ClAdmin"];
+												foreach($clList as $k => $v){
+													echo "<li>$v";
+													echo "<a href='usermanagement.php?del=ClAdmin-$k&userid=$userId'>";
+													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+													echo "</a></li>";
 												}
 												?>
-												</ul>
-											</li>
-											<?php 
-										}
-										//Checklists
-										if(array_key_exists("ClAdmin",$userPermissions)){
-											?>
-											<li>
-												<b>Checklist Administrator for following checklists</b>
-												<ul>
-													<?php 
-													$clList = $userPermissions["ClAdmin"];
-													foreach($clList as $k => $v){
-														echo "<li>$v";
-														echo "<a href='usermanagement.php?del=ClAdmin-$k&userid=$userId'>";
-														echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
-														echo "</a></li>";
-													}
-													?>
-												</ul>
-											</li>
-											<?php 
-										}
-										?>
-										</ul>
-									</div>
-									<?php 									
-								}
-								else{
-									echo "<h3 style='margin:20px;'>No permissions have to been assigned to this user</h3>";
-								}
+											</ul>
+										</li>
+										<?php 
+									}
+									?>
+									</ul>
+								</div>
+								<?php 									
+							}
+							else{
+								echo "<h3 style='margin:20px;'>No permissions have to been assigned to this user</h3>";
+							}
 							?>
 							<form name="addpermissions" action="usermanagement.php" method="post"/>
 								<fieldset style="background-color:#FFFFCC;padding:0px 10px 10px 10px;">
@@ -298,38 +298,41 @@ if($isAdmin){
 											echo "<div><input type='checkbox' name='p[]' value='TaxonProfile' /> Taxon Profile Editor</div>";
 										}
 										if(!array_key_exists("KeyEditor",$userPermissions)){
-											echo "<div><input type='checkbox' name='p[]' value='KeyEditor' /> Identification Key Editor (add/modify to rare species list</div>";
+											echo "<div><input type='checkbox' name='p[]' value='KeyEditor' /> Identification Key Editor</div>";
 										}
 										echo "</div>";
 										?>
 										<hr/>
-										<h3>Collection Management</h3>
+										<div style="float:right;">
+											<input type='submit' name='apsubmit' value='Add Permission' />
+										</div>
+										<h2>Occurrence Management</h2>
 										<?php
 										$showRareSppOption = true;
- 										if(!array_key_exists("RareSppAdmin",$userPermissions)){
- 											$isRareSppDude = false;
+	 									if(!array_key_exists("RareSppAdmin",$userPermissions)){
+	 										$isRareSppDude = false;
 											?>
 											<div style="margin-left:5px;">
 												<input type='checkbox' name='p[]' value='RareSppAdmin' />
-												Rare Species Administrator
+												Rare Species Administrator (add/remove species from list)
 											</div>
 											<?php 
- 										}
- 										else{
+	 									}
+	 									else{
 											$showRareSppOption = false;
- 										}
- 										if(!array_key_exists("RareSppReadAll",$userPermissions)){
+	 									}
+	 									if(!array_key_exists("RareSppReadAll",$userPermissions)){
 										?>
 										<div style="margin-left:5px;">
 											<input type='checkbox' name='p[]' value='RareSppReadAll' />
 											Can read Rare Species data for all collections
 										</div>
 										<?php 
- 										}
- 										else{
+	 									}
+	 									else{
 											$showRareSppOption = false;
- 										}
- 										$rareSppReader = Array();
+	 									}
+	 									$rareSppReader = Array();
 										if($showRareSppOption && array_key_exists("RareSppReader",$userPermissions)){
 											$rareSppReader = array_keys($userPermissions["RareSppReader"]);
 										}
@@ -341,43 +344,94 @@ if($isAdmin){
 										if(array_key_exists("CollAdmin",$userPermissions)){
 											$collAdminArr = array_keys($userPermissions["CollAdmin"]);
 										}
-										$collectionArr = $userManager->getAddCollectionArr($collAdminArr);
+										//Collection projects
+										$collectionArr = $userManager->getCollectionArr($collAdminArr);
 										if($collectionArr){
 	 										?>
-											<div style='margin:10px 0px 0px 3px;font-weight:bold;'>
-												Admin&nbsp;Editor&nbsp;<?php if($showRareSppOption) echo "Rare"; ?>
-											</div>
-											<?php
-											foreach($collectionArr as $k=>$v){
+	 										<h3>Specimen Collections</h3>
+	 										<table>
+	 											<tr>
+	 												<th>Admin</th>
+	 												<th>Editor</th>
+	 												<?php if($showRareSppOption) echo '<th>Rare</th>'; ?>
+	 												<th>&nbsp;</th>
+	 											</tr>
+												<?php
+												foreach($collectionArr as $k=>$v){
+													?>
+													<tr>
+														<td align="center">
+															<input type='checkbox' name='p[]' value='CollAdmin-<?php echo $k;?>' title='Collection Administrator' />
+														</td>
+														<td align="center">
+															<input type='checkbox' name='p[]' value='CollEditor-<?php echo $k;?>' title='Able to add and edit specimen data' <?php if(in_array($k,$collEditorArr)) echo "DISABLED";?> />
+														</td>
+														<?php if($showRareSppOption){ ?>
+															<td align="center">
+																<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $k;?>' title='Able to read specimen details for rare species' <?php if(in_array($k,$rareSppReader)) echo "DISABLED";?> />
+															</td>
+														<?php } ?>
+														<td>
+															<?php echo $v; ?>
+														</td>
+													</tr>
+													<?php 
+												}
 												?>
-												<div style='clear:left;;margin-left:15px;'>
-													<div style="float:left">
-														<input type='checkbox' name='p[]' value='CollAdmin-<?php echo $k;?>' title='Collection Administrator' />
-													</div>
-													<div style="float:left;margin-left:15px;">
-														<input type='checkbox' name='p[]' value='CollEditor-<?php echo $k;?>' title='Able to add and edit specimen data' <?php if(in_array($k,$collEditorArr)) echo "DISABLED";?> />
-													</div>
-													<?php if($showRareSppOption){ ?>
-														<div style="float:left;margin-left:15px;">
-															<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $k;?>' title='Able to read specimen details for rare species' <?php if(in_array($k,$rareSppReader)) echo "DISABLED";?> />
-														</div>
-													<?php } ?>
-													<div style="float:left;margin-left:15px;width:300px;">
-														<?php echo $v; ?>
-													</div>
-												</div>
-												<?php 
-											}
-											echo "<div style='clear:both;'><hr/></div>";
+											</table>
+											<?php 
 										}
+										//Observation projects
+										$obserArr = $userManager->getObservationArr($collAdminArr);
+										if($obserArr){
+	 										?>
+	 										<h3>Observation Projects</h3>
+	 										<table>
+	 											<tr>
+	 												<th>Admin</th>
+	 												<th>Editor</th>
+	 												<?php if($showRareSppOption) echo '<th>Rare</th>'; ?>
+	 												<th>&nbsp;</th>
+	 											</tr>
+												<?php
+												foreach($obserArr as $k=>$v){
+													?>
+													<tr>
+														<td align="center">
+															<input type='checkbox' name='p[]' value='CollAdmin-<?php echo $k;?>' title='Collection Administrator' />
+														</td>
+														<td align="center">
+															<input type='checkbox' name='p[]' value='CollEditor-<?php echo $k;?>' title='Able to add and edit specimen data' <?php if(in_array($k,$collEditorArr)) echo "DISABLED";?> />
+														</td>
+														<?php if($showRareSppOption){ ?>
+															<td align="center">
+																<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $k;?>' title='Able to read specimen details for rare species' <?php if(in_array($k,$rareSppReader)) echo "DISABLED";?> />
+															</td>
+														<?php } ?>
+														<td>
+															<?php echo $v; ?>
+														</td>
+													</tr>
+													<?php 
+												}
+												?>
+											</table>
+											<?php 
+										}
+										?>
+										<div><hr/></div>
+										<div style="float:right;">
+											<input type='submit' name='apsubmit' value='Add Permission' />
+										</div>
+										<?php 
 										//Get checklists
 										$cidArr = Array();
 										if(array_key_exists("ClAdmin",$userPermissions)){
 											$cidArr = array_keys($userPermissions["ClAdmin"]);
 										}
-										$checklistArr = $userManager->getAddChecklistArr($cidArr);
+										$checklistArr = $userManager->getChecklistArr($cidArr);
 										if($checklistArr){
-											echo "<h3>Checklist Management</h3>";
+											echo "<h2>Checklist Management</h2>";
 											foreach($checklistArr as $k=>$v){
 												?>
 												<div style='margin-left:15px;'>
@@ -386,15 +440,18 @@ if($isAdmin){
 												<?php 
 											}
 										}
-										echo "<div style='margin:10px;'><input type='submit' name='apsubmit' value='Add Permission' /></div>";
+										?>
+										<div style='margin:10px;'>
+											<input type='submit' name='apsubmit' value='Add Permission' />
+										</div>
+										<?php 
 									}
 									?>
 									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
 								</fieldset>
 							</form>
-						</div>
+						</fieldset>
 						<?php
-							
 					}
 					else{
 		            	$users = $userManager->getUsers($searchTerm);
