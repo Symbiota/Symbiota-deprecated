@@ -31,11 +31,11 @@ class SiteMapManager{
 		return $returnArr;
 	}
 	
-	public function getChecklistList($clArr = ""){
+	public function getChecklistList($isAdmin, $clArr){
 		$returnArr = Array();
 		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
 			"WHERE cl.access = 'public' ";
-		if($clArr){
+		if(!$isAdmin && $clArr){
 			$sql .= "AND cl.clid IN(".implode(",",$clArr).") ";
 		}
 		$sql .= "ORDER BY cl.name";

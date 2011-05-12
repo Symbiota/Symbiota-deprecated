@@ -10,6 +10,7 @@ $showFamilyList = array_key_exists("sfl",$_REQUEST)?$_REQUEST["sfl"]:0;
 $showCountryList = array_key_exists("scl",$_REQUEST)?$_REQUEST["scl"]:0;
 $showStateList = array_key_exists("ssl",$_REQUEST)?$_REQUEST["ssl"]:0;
 $newCollRec = array_key_exists("newcoll",$_REQUEST)?1:0;
+$eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
 $collManager = new CollectionProfileManager();
 if($collId){
@@ -84,7 +85,7 @@ if($collId){
 			echo "<div class='navpath'>";
 			echo "<a href='../../index.php'>Home</a> &gt; ";
 			echo $collections_misc_collprofilesCrumbs;
-			echo " <b>".($collData?$collData["collectionname"]:"Collection Profile")."</b>";
+			echo " <b>".($collData?$collData["collectionname"]:"Collection Profiles")."</b>";
 			echo "</div>";
 		}
 	}
@@ -93,7 +94,7 @@ if($collId){
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt; 
 			<a href='../index.php'>Collections</a> &gt; 
-			<b><?php echo ($collData?$collData['collectionname']:'').' Collection Profile'; ?></b>
+			<b><?php echo ($collData?$collData['collectionname']:'Collection Profiles'); ?></b>
 		</div>
 		<?php 
 	}
@@ -102,7 +103,7 @@ if($collId){
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
-		if($editCode > 0){
+		if($editCode > 0 && $collId){
 			?>
 			<div style="float:right;margin:3px;cursor:pointer;" onclick="toggleById('controlpanel');" title="Toggle Manager's Control Panel">
 				<img style='border:0px;' src='../../images/edit.png' />
@@ -112,9 +113,9 @@ if($collId){
 		?>
 		<h1><?php echo ($collId?$collData['collectionname']:'');?></h1>
 		<?php
-		if($editCode > 0){
+		if($editCode > 0 && $collId){
 			?>
-			<div id="controlpanel" style="clear:both;display:none;">
+			<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
 				<fieldset style="padding:15px;">
 					<legend><b><?php echo ($collId?$collData['collectionname']:'');?> Management Control Panel</b></legend>
 					<ul>
