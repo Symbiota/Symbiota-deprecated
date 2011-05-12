@@ -62,59 +62,80 @@ $smManager = new SiteMapManager();
 	            		<li><a href="checklists/index.php">Species Lists</a> - all species checklists registered within the system</li>
 	            	</ul>
 	            	
-		        <fieldset style="margin:30px 0px 10px 10px;">
-		            <legend>Data Editing Tools</legend>
+		        <fieldset style="margin:30px 0px 10px 10px;padding:15px;">
+		            <legend><b>Data Editing Tools</b></legend>
 	            	<?php if($symbUid){ ?>
 	            		<h3>Identification Keys</h3>
-							<ul>
-			            		<?php if($isAdmin || array_key_exists("KeyEditor",$userRights)){ ?>
-									<li>
-										You are authorized to edit Identification Keys
-									</li>
-				            		<li>
-				            			To add or remove species names with a keys checklist, access the checklist editor that is aligned with the key. 
-				            			Note that you must have editing rights for that checklist.
-				            		</li>
-				            		<li>
-				            			To edit morphological characters, login and go any key. Open the 
-				            			morphological character editor by clicking on the 
-				            			editing symbol to the right of Scientific Name that you wish to modify. 
-				            		</li>
-									<li>
-										Click on check project name below to open the  
-										<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a>
-										for that project  
-										<ul>
-											<?php 
-											foreach($projList as $pid => $pArr){
-												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
-					            			}
-					            			?>
-			            				</ul>
-									</li>
-				            		<?php
-			            		}
-	            				else{?>
-									<li>You are not authorized to edit Identification Keys</li>
-	            				<?php }?>
-							</ul>
+						<ul>
+		            		<?php if($isAdmin || array_key_exists("KeyEditor",$userRights)){ ?>
+								<li>
+									You are authorized to edit Identification Keys
+								</li>
+			            		<li>
+			            			To add or remove species names with a keys checklist, access the checklist editor that is aligned with the key. 
+			            			Note that you must have editing rights for that checklist.
+			            		</li>
+			            		<li>
+			            			To edit morphological characters, login and go any key. Open the 
+			            			morphological character editor by clicking on the 
+			            			editing symbol to the right of Scientific Name that you wish to modify. 
+			            		</li>
+								<li>
+									Click on check project name below to open the  
+									<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a>
+									for that project  
+									<ul>
+										<?php 
+										foreach($projList as $pid => $pArr){
+											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
+				            			}
+				            			?>
+		            				</ul>
+								</li>
+			            		<?php
+		            		}
+            				else{?>
+								<li>You are not authorized to edit Identification Keys</li>
+            				<?php }?>
+						</ul>
+						
+						<h3>Images</h3>
+						<div style="margin:10px;">
+							See the Symbiota documentation on 
+							<a href="http://symbiota.org/tiki/tiki-index.php?page=Image+Submission">Image Submission</a> 
+							for an overview of how images are managed within a Symbiota data portal. Field images without 
+							detailed locality information can be uploaded using the Taxon Species Profile page (see below).
+							Specimen images are loaded through the Specimen Editing page or through a batch upload process 
+							established by a portal manager. Image Observations (Image Vouchers) with detailed locality information can be 
+							uploaded using the link below. Note that you will need the necessary permissions to use this 
+							feature. 
+						</div>
+						<ul>
+							<li><a href="collections/editor/observationsubmit.php">Image Observation Submission Module</a></li>
+						</ul>
+						
+						<h3>Floristic Projects</h3>
+						<ul>
+							<?php 
+	            			if($isAdmin){
+								foreach($projList as $pid => $pArr){
+									echo '<li><a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
+		            			}
+							}
+							else{
+								echo '<li>You are not authorized to edit any of the Projects</li>';
+	            			}
+							?>
+						</ul>
 	
-	            		<h3>Projects</h3>
-		            		<?php 
-		            			if($isAdmin){
-			            			echo "<ul>";
-		            				foreach($projList as $pid => $pArr){
-			            				echo "<li><a href='".$clientRoot."/projects/index.php?proj=".$pid."&emode=1'>".$pArr["name"]."</a></li>";
-			            			}
-			            			echo "</ul>";
-		            			}
-		            			else{
-		            				echo "<div style='margin:15px;'>You are not authorized to edit any of the Projects</div>";
-		            			}
-		            		?>
-	            		
 	            		<h3>Taxon Profile Page</h3>
-						<?php if($isAdmin || array_key_exists("TaxonProfile",$userRights)){?>
+						<?php 
+						if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+							?>
+							<div style="margin:10px;">
+								The following Species Profile page editing features are also available to editors via an
+								editing link located in the upper right of each Species Profile page. 
+							</div>
 	            			<ul>
 	            				<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
 								<li><a href="taxa/admin/tpdesceditor.php?taxon=&category=textdescr">Text Descriptions</a></li>
@@ -124,33 +145,81 @@ $smManager = new SiteMapManager();
 									<li><a href="taxa/admin/tpimageeditor.php?taxon=&category=imageadd">Add a New Image</a></li>
 								</ul>
 	            			</ul>
-		            	<?php 
-							}
-							else{
-								echo "<div>You are not yet authorized to edit the Taxon Profile</div>";
-							}
+			            	<?php 
+						}
+						else{
+							?>
+							<ul>
+								<li>You are not yet authorized to edit the Taxon Profile</li>
+							</ul>
+							<?php 
+						}
 		            	?>
-	
-	            		<h3>Taxonomy</h3>
-						<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){?>
-	            			<ul>
+						<h3>Taxonomy</h3>
+						<ul>
+							<?php 
+							if($isAdmin || array_key_exists("Taxonomy",$userRights)){
+								?>
 								<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
 								<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
 								<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
 								<li><a href="taxa/admin/taxaloader.php">Bathc Upload a Taxonomic Data File</a></li>
-	            			</ul>
-		            	<?php 
+								<?php 
 							}
 							else{
-								echo "<div>You are not yet authorized to edit taxonomy</div>";
+								echo '<li>You are not authorized to edit taxonomy</li>';
 							}
-		            	?>
+							?>
+						</ul>
 		            	
-		            	<h3>Misc</h3>
-		            		<ul>
+						<h3>Misc</h3>
+						<ul>
+							<?php 
+							if($isAdmin){
+								?>
 		            			<li><a href="profile/usermanagement.php">User Permissions</a></li>
-	            			</ul>
-	            		<h3>Collections</h3>
+		            			<?php
+							}
+							else{
+								?>
+		            			<li>You are not authorized to manage permissions</li>
+		            			<?php
+							}
+	            			?>
+						</ul>
+
+						<h3>Checklists</h3>
+						<div style="margin:10px;">
+							Tools for managing Checklists are available from each checklist display page.
+							Editing symbols located in the upper right of the page will display 
+							editing options for that checklist.  
+							Below is a list of the checklists you are authorized to edit. 
+						</div>
+						<ul>
+		            		<?php 
+	            			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
+	            				$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
+	            				foreach($clList as $k => $v){
+		            				echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
+		            			}
+	            			}
+	            			else{
+								echo "<li>You are not authorized to edit any of the Checklists</li>";
+	            			}
+	            			?>
+	            		</ul>
+
+						<h3>Collections</h3>
+						<div style="margin:10px;">
+							Tools for managing collection data are available through each Collection Profile page, 
+							which is generally accessed by clicking on the collection name within the specimen search engine.
+							Clicking on the editing symbol located in the upper right of Collection Profile page will open 
+							the editing pane and display a list of editing options.  
+							Click on a collecion in the list below to go directly to this page. 
+						</div>
+						<?php 
+						if($isAdmin){
+							?>
 							<ul>
 								<li>
 									<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?newcoll=1">
@@ -163,37 +232,33 @@ $smManager = new SiteMapManager();
 									</a>
 								</li>
 	            			</ul>
-		            		<?php 
-		            			if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-		            				$collList = $smManager->getCollectionList((array_key_exists("CollAdmin",$userRights)?$userRights["CollAdmin"]:""));
-		            				echo "<ul>";
-			            			foreach($collList as $k => $v){
-			            				echo "<li>$v</li>";
-			            				echo "<ul>";
-			            				echo "<li><a href='".$clientRoot."/collections/misc/collprofiles.php?collid=".$k."&emode=1'>View/Edit Metadata</a></li>";
-			            				echo "<li><a href='".$clientRoot."/collections/admin/specimenupload.php?collid=".$k."'>Upload Records</a></li>";
-			            				echo "</ul>";
-			            			}
-			            			echo "</ul>";
+	            			<?php
+						}
+						?>
+						<div style="margin:10px;">
+							<div style="font-weight:bold;">
+								List of collections you have permissions to edit
+							</div>
+	            			<ul>
+	            			<?php 
+							if($isAdmin || array_key_exists("CollAdmin",$userRights)){
+	            				$collList = $smManager->getCollectionList((array_key_exists("CollAdmin",$userRights)?$userRights["CollAdmin"]:""));
+		            			foreach($collList as $k => $v){
+		            				echo '<li>';
+		            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
+		            				echo $v;
+		            				echo '</a>';
+		            				echo '</li>';
 		            			}
-		            			else{
-		            				echo "<div style='margin:15px;'>You are not authorized to edit any of the Collections</div>";
-		            			}
-		            		?>
-	
-	            		<h3>Checklists</h3>
-		            		<?php 
-	            			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
-	            				$clList = $smManager->getChecklistList((array_key_exists("ClAdmin",$userRights)?$userRights["ClAdmin"]:""));
-	            				echo "<ul>";
-	            				foreach($clList as $k => $v){
-		            				echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
-		            			}
-		            			echo "</ul>";
 	            			}
 	            			else{
-	            				echo "<div style='margin:15px;'>You are not authorized to edit any of the Checklists</div>";
+	            				echo "<li>You are not authorized to edit any of the Collections</li>";
 	            			}
+	            			?>
+							</ul>
+						</div>
+
+	            		<?php 
 					}
 					else{
 						echo '<a href="'.$clientRoot.'/profile/index.php">Login</a> to view editing tools that you have permission to access. Please see you data administrator for editing permissions assignment procedures.';

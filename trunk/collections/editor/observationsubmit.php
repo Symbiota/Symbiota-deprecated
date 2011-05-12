@@ -382,7 +382,8 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 			<?php 
 			}
 			else{
-				echo "There are no observation projects that you are authorized to submit to. Please contact an administrator to obtain access. ";
+				echo 'There are no observation projects that you are authorized to submit to. ';
+				echo '<br/><b>Please contact an administrator to obtain access.</b> ';
 			}
 		}
 		else{

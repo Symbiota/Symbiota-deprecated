@@ -346,12 +346,10 @@ class ObservationSubmitManager {
 	public function getCollArr($collArr){
 		$retArr = Array();
 		$sql = "SELECT collid,collectionname,colltype FROM omcollections WHERE colltype LIKE '%observation%' ";
-		if(!$collArr || !in_array("all",$collArr)){
-			$sql .= "AND (colltype = 'General Observations' ";
+		if(!in_array("all",$collArr)){
 			if($collArr){
-				$sql .= "OR (collide IN(".implode(",",$collArr).") ";
+				$sql .= "AND collid IN(".implode(",",$collArr).") ";
 			}
-			$sql .= ")";
 		}
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
