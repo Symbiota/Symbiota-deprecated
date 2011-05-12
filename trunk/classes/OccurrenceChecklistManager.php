@@ -74,7 +74,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		//$nameStr = substr($searchStr,0,35)."-".time();
 		$dynClid = 0;
 		$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
-			"VALUES ('Dynamic Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'Specimen Checklist', '', '".$expirationTime."') ";
+			"VALUES ('Specimen Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'Specimen Checklist', '', '".$expirationTime."') ";
 		if($conn->query($sqlCreateCl)){
 			$dynClid = $conn->insert_id;
 			//Get checklist and append to dyncltaxalink
