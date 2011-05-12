@@ -4,14 +4,14 @@
  * By E.E. Gilbert
  */
 //error_reporting(E_ALL);
- include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/KeyDataManager.php');
- header("Content-Type: text/html; charset=".$charset);
- $editable = false;
- if($isAdmin || array_key_exists("KeyEditor",$userRights)){
- 	$editable = true;
- }
- ?> 
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/KeyDataManager.php');
+header("Content-Type: text/html; charset=".$charset);
+$editable = false;
+if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+	$editable = true;
+}
+?> 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -40,28 +40,27 @@ $displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"
 if(!$action){
 	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
 }
-$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
- 
- $dataManager = new KeyDataManager();
- if(!$langValue) $langValue = $defaultLang;
- if($displayMode) $dataManager->setCommonDisplay(true);;  
- $dataManager->setLanguage($langValue);
- if($projValue) $dataManager->setProject($projValue);
- if($dynClid) $dataManager->setDynClid($dynClid);
- $dataManager->setClValue($clValue);
- if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
- if($attrsValues) $dataManager->setAttrs($attrsValues);
- if($rv) $dataManager->setRelevanceValue($rv);
- $data = $dataManager->getData();
- $chars = $data["chars"];  				//$chars = Array(HTML Strings)
- $taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
- 
- 
+
+$dataManager = new KeyDataManager();
+if(!$langValue) $langValue = $defaultLang;
+if($displayMode) $dataManager->setCommonDisplay(true);;  
+$dataManager->setLanguage($langValue);
+if($projValue) $dataManager->setProject($projValue);
+if($dynClid) $dataManager->setDynClid($dynClid);
+$dataManager->setClValue($clValue);
+if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
+if($attrsValues) $dataManager->setAttrs($attrsValues);
+if($rv) $dataManager->setRelevanceValue($rv);
+$data = $dataManager->getData();
+$chars = $data["chars"];  				//$chars = Array(HTML Strings)
+$taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
+
+
 //Harevest and remove language list from $chars
 $languages = Array();
 if($chars){
-    $languages = $chars["Languages"];
-    unset($chars["Languages"]);
+	$languages = $chars["Languages"];
+	unset($chars["Languages"]);
 }
 ?>
 <head>
@@ -77,21 +76,38 @@ if($chars){
 <body>
 
 <?php 
-	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:"true");
+	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:true);
 	include($serverRoot.'/header.php');
-	if($crumbLink || isset($ident_keyCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		if($crumbLink == "occurcl"){
-			echo "<a href='".$clientRoot."/collections/checklist.php'>";
-			echo "Occurrence Checklist";
-			echo "</a> &gt; ";
+	if(isset($ident_keyCrumbs)){
+		if($ident_keyCrumbs){
+			echo '<div class="navpath">';
+			echo '<a href="../index.php">Home</a> &gt; ';
+			if($dynClid){
+				if($dataManager->getClType() == 'Specimen Checklist'){
+					echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+					echo 'Occurrence Checklist';
+					echo '</a> &gt; ';
+				}
+			}
+			else{
+				echo $ident_keyCrumbs;
+			}
+			echo ' <b>'.$dataManager->getClName().' Key</b>';
+			echo '</div>';
 		}
-		elseif(!$dynClid){
-			echo $ident_keyCrumbs;
+	}
+	else{
+		echo '<div class="navpath">';
+		echo '<a href="../index.php">Home</a> &gt; ';
+		if($dynClid){
+			if($dataManager->getClType() == 'Specimen Checklist'){
+				echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+				echo 'Occurrence Checklist';
+				echo '</a> &gt; ';
+			}
 		}
-		echo " <b>".$dataManager->getClName()." Key</b>";
-		echo "</div>";
+		echo '<b>'.$dataManager->getClName().' Key</b>';
+		echo '</div>';
 	}
 	
 ?>
@@ -173,7 +189,7 @@ if($chars){
 					<h2>
 						<?php 
 						if($floraModIsActive){
-							echo "<a href='../checklists/checklist.php?cl=".$clValue."&dynclid=".$dynClid."&crumblink=".$crumbLink."'>";
+							echo "<a href='../checklists/checklist.php?cl=".$clValue."&dynclid=".$dynClid."'>";
 						}
 						echo $dataManager->getClName()." ";
 						if($floraModIsActive){

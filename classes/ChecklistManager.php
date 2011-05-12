@@ -122,11 +122,11 @@ class ChecklistManager {
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
-				"c.dynamicsql, c.datelastmodified, c.uid, c.initialtimestamp ".
+				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
 				"FROM fmchecklists c WHERE c.clid = ".$this->clid;
 		}
 		elseif($this->dynClid){
-			$sql = "SELECT c.dynclid AS clid, c.name, c.details AS locality, c.notes, c.uid, c.initialtimestamp ".
+			$sql = "SELECT c.dynclid AS clid, c.name, c.details AS locality, c.notes, c.uid, c.type, c.initialtimestamp ".
 				"FROM fmdynamicchecklists c WHERE c.dynclid = ".$this->dynClid;
 		}
  		$result = $this->clCon->query($sql);
@@ -134,6 +134,7 @@ class ChecklistManager {
 			$this->clName = $row->name;
 			$this->clMetaData["locality"] = $row->locality; 
 			$this->clMetaData["notes"] = $row->notes;
+			$this->clMetaData["type"] = $row->type;
 			if($this->clid){
 				$this->clMetaData["publication"] = $row->publication;
 				$this->clMetaData["abstract"] = $row->abstract;

@@ -22,7 +22,6 @@
 	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
-	$crumbLink = array_key_exists("crumblink",$_REQUEST)?$_REQUEST["crumblink"]:""; 
 	$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 	
 	//Search Synonyms is default
@@ -145,21 +144,38 @@
 
 <body>
 <?php
-	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:"true");
+	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:true);
 	include($serverRoot.'/header.php');
-	if($crumbLink || isset($checklists_checklistCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		if($crumbLink == "occurcl"){
-			echo "<a href='".$clientRoot."/collections/checklist.php'>";
-			echo "Occurrence Checklist";
-			echo "</a> &gt; ";
+	if(isset($checklists_checklistCrumbs)){
+		if($checklists_checklistCrumbs){
+			echo "<div class='navpath'>";
+			echo "<a href='../index.php'>Home</a> &gt; ";
+			if($dynClid){
+				if($clArray["type"] == "Specimen Checklist"){
+					echo "<a href='".$clientRoot."/collections/list.php?tabindex=0'>";
+					echo "Occurrence Checklist";
+					echo "</a> &gt; ";
+				}
+			}
+			else{
+				echo $checklists_checklistCrumbs;
+			}
+			echo " <b>".$clManager->getClName()."</b>";
+			echo "</div>";
 		}
-		elseif(!$dynClid){
-			echo $checklists_checklistCrumbs;
+	}
+	else{
+		echo '<div class="navpath">';
+		echo '<a href="../index.php">Home</a> &gt; ';
+		if($dynClid){
+			if($clArray['type'] == 'Specimen Checklist'){
+				echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+				echo 'Occurrence Checklist';
+				echo '</a> &gt; ';
+			}
 		}
-		echo " <b>".$clManager->getClName()."</b>";
-		echo "</div>";
+		echo ' <b>'.$clManager->getClName().'</b>';
+		echo '</div>';
 	}
 	?>
 	<!-- This is inner text! -->
@@ -186,7 +202,7 @@
 			if($keyModIsActive){
 				?>
 				<div style="float:left;padding-top:5px;">
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid."&crumblink=".$crumbLink;?>&taxon=All+Species">
+					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid;?>&taxon=All+Species">
 						<img src='../images/key.jpg' style="width:15px;border:0px;" title='Open Symbiota Key' />
 					</a>&nbsp;&nbsp;&nbsp;
 				</div>

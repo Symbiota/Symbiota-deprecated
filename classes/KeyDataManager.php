@@ -2,10 +2,10 @@
 /*
  * Created on May 16, 2006
  * E.E.Gilbert
- */
- include_once($serverRoot.'/config/dbconnection.php');
+*/
+include_once($serverRoot.'/config/dbconnection.php');
 
- class KeyDataManager {
+class KeyDataManager {
 
 	private $sql;
 	private $relevanceValue;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed
@@ -27,13 +27,13 @@
 	
 	function __construct() {
 		$this->relevanceValue = .9;
- 		$this->keyCon = MySQLiConnectionFactory::getCon("readonly");
+		$this->keyCon = MySQLiConnectionFactory::getCon("readonly");
 		$this->sql = "";
 	}
 
- 	public function __destruct(){
- 		if(!($this->keyCon === false)) $this->keyCon->close();
- 	}
+	public function __destruct(){
+		if(!($this->keyCon === false)) $this->keyCon->close();
+	}
 
 	function setProject($projValue){
 		if(is_numeric($projValue)){
@@ -57,7 +57,7 @@
 		$this->commonDisplay = $bool;
 	}
 	
- 	function getClFilterList($userid){
+	function getClFilterList($userid){
 		$returnList = Array();
 		
 		//Get personal checklist
@@ -135,10 +135,12 @@
 	function setClValue($clv){
 		$sql = "";
 		if($this->dynClid){
-			$sql = "SELECT d.name, d.details FROM fmdynamicchecklists d WHERE dynclid = $this->dynClid";
+			$sql = 'SELECT d.name, d.details, d.type '.
+				'FROM fmdynamicchecklists d WHERE dynclid = '.$this->dynClid;
 			$result = $this->keyCon->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
+				$this->clType = $row->type;
 			}
 		}
 		else{
