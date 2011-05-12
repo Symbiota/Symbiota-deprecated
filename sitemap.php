@@ -104,17 +104,20 @@ $smManager = new SiteMapManager();
 							See the Symbiota documentation on 
 							<a href="http://symbiota.org/tiki/tiki-index.php?page=Image+Submission">Image Submission</a> 
 							for an overview of how images are managed within a Symbiota data portal. Field images without 
-							detailed locality information can be uploaded using the Taxon Species Profile page (see below).
+							detailed locality information can be uploaded using the Taxon Species Profile page (details below).
 							Specimen images are loaded through the Specimen Editing page or through a batch upload process 
 							established by a portal manager. Image Observations (Image Vouchers) with detailed locality information can be 
-							uploaded using the link below. Note that you will need the necessary permissions to use this 
+							uploaded using the link below. Note that you will need the necessary permission assignments to use this 
 							feature. 
 						</div>
 						<ul>
 							<li><a href="collections/editor/observationsubmit.php">Image Observation Submission Module</a></li>
 						</ul>
-						
+
 						<h3>Floristic Projects</h3>
+						<div style="margin:10px;">
+							Click on any project below to edit the metadata for that project. 
+						</div>
 						<ul>
 							<?php 
 	            			if($isAdmin){
@@ -241,8 +244,8 @@ $smManager = new SiteMapManager();
 							</div>
 	            			<ul>
 	            			<?php 
-							if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-	            				$collList = $smManager->getCollectionList((array_key_exists("CollAdmin",$userRights)?$userRights["CollAdmin"]:""));
+							if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("CollEditor",$userRights)){
+	            				$collList = $smManager->getCollectionList($userRights);
 		            			foreach($collList as $k => $v){
 		            				echo '<li>';
 		            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';

@@ -13,11 +13,18 @@ class SiteMapManager{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getCollectionList($collArr = ""){
+	public function getCollectionList($userRights){
 		$returnArr = Array();
 		$sql = "SELECT c.collid, c.collectioncode, c.collectionname FROM omcollections c ";
+		$collArr = Array();
+		if(array_key_exists("CollAdmin",$userRights)){
+			$collArr = $userRights['CollAdmin'];
+		}
+		if(array_key_exists("CollEditor",$userRights)){
+			$collArr = array_merge($collArr,$userRights['CollEditor']);
+		}
 		if($collArr){
-			$sql .= "WHERE c.collid IN(".implode(",",$collArr).")";
+			$sql .= "WHERE c.collid IN(".implode(",",$collArr).") ";
 		}
 		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
@@ -54,7 +61,7 @@ class SiteMapManager{
 		$returnArr = Array();
 		$sql = "SELECT p.pid, p.projname, p.managers FROM fmprojects p ";
 		if($projArr){
-			$sql .= "WHERE p.pid IN(".implode(",",$projArr).")";
+			$sql .= "WHERE p.pid IN(".implode(",",$projArr).") ";
 		}
 		$sql .= "ORDER BY p.projname";
 		//echo "<div>".$sql."</div>";

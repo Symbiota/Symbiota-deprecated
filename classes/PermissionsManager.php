@@ -162,11 +162,12 @@ class PermissionsManager{
 			$this->conn->query($sql);
 		}
 	}
-	
-	public function getAddCollectionArr($collKey){
+
+	public function getCollectionArr($collKey){
 		$returnArr = Array();
-		$sql = 'SELECT c.collid, c.collectionname FROM omcollections c ';
-		if($collKey) $sql .= 'WHERE c.collid NOT IN('.implode(',',$collKey).') ';
+		$sql = 'SELECT c.collid, c.collectionname FROM omcollections c '.
+			'WHERE colltype LIKE "%specimen%" ';
+		if($collKey) $sql .= 'AND c.collid NOT IN('.implode(',',$collKey).') ';
 		$sql .= 'ORDER BY c.collectionname';
 		//echo $sql;
 		$result = $this->conn->query($sql);
@@ -176,7 +177,21 @@ class PermissionsManager{
 		return $returnArr;
 	} 
 
-	public function getAddChecklistArr($clKeys){
+	public function getObservationArr($collKey){
+		$returnArr = Array();
+		$sql = 'SELECT c.collid, c.collectionname FROM omcollections c '.
+			'WHERE colltype LIKE "%observation%" ';
+		if($collKey) $sql .= 'AND c.collid NOT IN('.implode(',',$collKey).') ';
+		$sql .= 'ORDER BY c.collectionname';
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$returnArr[$row->collid] = $row->collectionname;
+		}
+		return $returnArr;
+	} 
+
+	public function getChecklistArr($clKeys){
 		$returnArr = Array();
 		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl ';
 		if($clKeys) $sql .= 'WHERE cl.clid NOT IN('.implode(',',$clKeys).') ';
