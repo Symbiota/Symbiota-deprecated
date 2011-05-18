@@ -25,7 +25,7 @@
 	$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 	
 	//Search Synonyms is default
-	if($action != "Rebuild List") $searchSynonyms = 1;
+	if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
 
 	$clManager = new ChecklistManager();
 	if($clValue){
@@ -46,7 +46,7 @@
 	if($showImages) $clManager->setShowImages();
 	if($showVouchers) $clManager->setShowVouchers();
 
-	if($action == "Download List"){
+	if(array_key_exists('dllist_x',$_POST)){
 		$clManager->downloadChecklistCsv();
 		exit();
 	}
@@ -493,7 +493,7 @@
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 								<input type="submit" name="submitaction" value="Rebuild List" />
 								<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
-									<input type="image" name="submitaction" value="Download List" src="../images/dl.png" />
+									<input type="image" name="dllist" value="Download List" src="../images/dl.png" />
 								</div>
 							</div>
 						</fieldset>

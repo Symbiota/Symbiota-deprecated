@@ -153,6 +153,11 @@ function openMappingAid(latDef,lngDef,zoom) {
     if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
+function dwcDoc(dcTag){
+    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=900,height=300,left=20,top=20,scrollbars=1");
+    if(dwcWindow.opener == null) dwcWindow.opener = self;
+}
+
 function insertUtm(f) {
 	var zValue = document.getElementById("utmzone").value.replace(/^\s+|\s+$/g,"");
 	var eValue = document.getElementById("utmeast").value.replace(/^\s+|\s+$/g,"");

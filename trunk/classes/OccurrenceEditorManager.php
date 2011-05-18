@@ -5,6 +5,8 @@ class OccurrenceEditorManager {
 
 	private $conn;
 	private $occId;
+	private $collId;
+	private $collMap = Array();
 	private $occurrenceMap = Array();
 
 	private $photographerArr = Array();
@@ -32,30 +34,35 @@ class OccurrenceEditorManager {
 		return $this->occId;
 	}
 
-	public function getCollId(){
-		if(!$this->occId) return;
-		$collId = 0;
-		$sql = 'SELECT collid FROM omoccurrences WHERE occid = '.$this->occId;
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$collId = $r->collid;
-		}
-		$rs->close();
-		return $collId;
+	public function setCollId($id){
+		$this->collId = $id;
 	}
-	
-	public function setCollId($cid){
-		$sql = 'SELECT c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
-			'FROM omcollections c WHERE c.collid = '.$cid;
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$this->occurrenceMap['collectionname'] = $row->collectionname;
-			$this->occurrenceMap['institutioncode'] = $row->institutioncode;
-			$this->occurrenceMap['collectioncode'] = $row->collectioncode;
-			$this->occurrenceMap['managementtype'] = $row->managementtype;
+
+	public function getCollMap(){
+		if(!$this->collMap){
+			$sql = '';
+			if($this->collId){
+				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
+					'FROM omcollections c WHERE c.collid = '.$this->collId;
+			}
+			elseif($this->occId){
+				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
+					'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+					'WHERE o.occid = '.$this->occId;
+			}
+			if($sql){
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_object()){
+					$this->collMap['collid'] = $row->collid;
+					$this->collMap['collectionname'] = $row->collectionname;
+					$this->collMap['institutioncode'] = $row->institutioncode;
+					$this->collMap['collectioncode'] = $row->collectioncode;
+					$this->collMap['managementtype'] = $row->managementtype;
+				}
+				$rs->close();
+			}
 		}
-		$rs->close();
-		return $this->occurrenceMap;
+		return $this->collMap;
 	}
 	
 	public function getOccurMap(){
@@ -67,10 +74,9 @@ class OccurrenceEditorManager {
 	
 	private function getOccurArr($oid = 0){
 		$retArr = Array();
-		$sql = 'SELECT c.CollectionName, o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+		$sql = 'SELECT o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
 			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
 			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
-			'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 			'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
 			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
@@ -81,7 +87,7 @@ class OccurrenceEditorManager {
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
 			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
 			'o.verbatimElevation, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified '.
-			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+			'FROM omoccurrences o '.
 			'WHERE o.occid = '.($oid?$oid:$this->occId);
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
@@ -206,7 +212,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		$pkRs->close();
-		if(stripos($this->occurrenceMap['managementtype'],'snapshot') !== false){
+		if(stripos($this->collMap['managementtype'],'snapshot') !== false){
 			$dbpk .= '-symb';
 		}
 
@@ -221,7 +227,7 @@ class OccurrenceEditorManager {
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
-			"verbatimElevation, disposition, language) ".
+			"verbatimElevation, disposition, language, recordEnteredBy) ".
 
 			"VALUES (".$occArr["collid"].",\"".$dbpk."\",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
@@ -275,7 +281,8 @@ class OccurrenceEditorManager {
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
 			($occArr["verbatimelevation"]?"\"".$occArr["verbatimelevation"]."\"":"NULL").",".
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
-			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").") ";
+			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",\"".
+			$occArr["userid"]."\") ";
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
 				$this->occId = $this->conn->insert_id;
@@ -836,10 +843,6 @@ class OccurrenceEditorManager {
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
 			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord','language');
 		return array_intersect_key($fArr,array_flip($locArr)); 
-	}
-	
-	public function carryOverDuplicate($tOccId){
-		return $this->getOccurArr($tOccId);
 	}
 
 	//Used in dupsearch.php
