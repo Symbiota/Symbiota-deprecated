@@ -99,7 +99,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			}
 			$result->close();
 		}
-		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,$clientRoot);
+		setCookie("collvars","reccnt:".$this->recordCount,time()+64800,($clientRoot?$clientRoot:'/'));
 	}
 
 	public function getRecordCnt(){
