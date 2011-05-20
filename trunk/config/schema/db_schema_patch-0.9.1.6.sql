@@ -250,6 +250,6 @@ UPDATE omcollectionstats cs SET cs.speciescnt = (SELECT count(DISTINCT t.unitnam
 
 UPDATE omcollectionstats cs SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o  WHERE (o.CollID = collectionid) AND (o.DecimalLatitude Is Not Null) AND (o.DecimalLongitude Is Not Null)) WHERE cs.collid = collectionid; select * from omcollectionstats; 
 
-END 
+END$$  
 
-$$  DELIMITER ; 
+DELIMITER ; 
