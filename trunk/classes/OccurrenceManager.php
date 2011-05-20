@@ -42,9 +42,9 @@ class OccurrenceManager{
  	
 	public function reset(){
 		global $clientRoot;
-		setCookie("colltaxa","",time()-3600,$clientRoot);
-		setCookie("collsearch","",time()-3600,$clientRoot);
-		setCookie("collvars","",time()-3600,$clientRoot);
+		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
+		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
+		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
 			//reset all other search terms except maintain the db terms 
 			$dbsTemp = "";
@@ -477,16 +477,16 @@ class OccurrenceManager{
 		 	else{
 		 		$dbStr = implode(";",$dbs);
 		 	}
-		 	if($this->useCookies) setCookie("colldbs",$dbStr,0,$clientRoot);
-			setCookie("collsurveyid","",time()-3600,$clientRoot);
+		 	if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
+			setCookie("collsurveyid","",time()-3600,($clientRoot?$clientRoot:'/'));
 			$this->searchTermsArr["db"] = $dbStr;
 		}
 		elseif(array_key_exists("surveyid",$_REQUEST)){
 			$surveyidArr = $_REQUEST["surveyid"];
 			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
 		 	$surveyidStr = implode(";",$surveyidArr);
-		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,$clientRoot);
-			setCookie("colldbs","",time()-3600,$clientRoot);
+		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,($clientRoot?$clientRoot:'/'));
+			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'));
 			$this->searchTermsArr["surveyid"] = $surveyidStr;
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
@@ -526,10 +526,10 @@ class OccurrenceManager{
 					$collTaxa .= "&taxontype:".$searchType;
 					$this->searchTermsArr["taxontype"] = $searchType;
 				}
-				if($this->useCookies) setCookie("colltaxa",$collTaxa,0,$clientRoot);
+				if($this->useCookies) setCookie("colltaxa",$collTaxa,0,($clientRoot?$clientRoot:'/'));
 			}
 			else{
-				if($this->useCookies) setCookie("colltaxa","",time()-3600,$clientRoot);
+				if($this->useCookies) setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
 				unset($this->searchTermsArr["taxa"]);
 			}
 		}
@@ -665,10 +665,10 @@ class OccurrenceManager{
 
 		$searchStr = implode("&",$searchArr);
 		if($searchStr){
-			if($this->useCookies) setCookie("collsearch",$searchStr,0,$clientRoot);
+			if($this->useCookies) setCookie("collsearch",$searchStr,0,($clientRoot?$clientRoot:'/'));
 		}
 		elseif($searchFieldsActivated){
-			if($this->useCookies) setCookie("collsearch","",time()-3600,$clientRoot);
+			if($this->useCookies) setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 	}
 	

@@ -32,8 +32,8 @@ class ProfileManager{
     
     public function reset(){
 		//Delete cookies
-        setcookie("SymbiotaBase", "", time() - 3600, $GLOBALS["clientRoot"]);
-        setcookie("SymbiotaRights", "", time() - 3600, $GLOBALS["clientRoot"]);
+        setcookie("SymbiotaBase", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
+        setcookie("SymbiotaRights", "", time() - 3600, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
     }
     
     public function setCookies(){
@@ -44,10 +44,10 @@ class ProfileManager{
         if($this->rememberMe){
         	$cookieExpire = time()+60*60*24*30;
         }
-        setcookie("SymbiotaBase", $cookieStr, $cookieExpire, $GLOBALS["clientRoot"]);
+        setcookie("SymbiotaBase", $cookieStr, $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
         //Set admin cookie
         if($this->userRights){
-        	setcookie("SymbiotaRights", implode("&",$this->userRights), $cookieExpire, $GLOBALS["clientRoot"]);
+        	setcookie("SymbiotaRights", implode("&",$this->userRights), $cookieExpire, ($GLOBALS["clientRoot"]?$GLOBALS["clientRoot"]:'/'));
     	}
     }
     
