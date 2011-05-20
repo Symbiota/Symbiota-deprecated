@@ -38,6 +38,9 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
 
+ALTER TABLE `uploadspectemp` 
+  ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
+
 
 -- =============================================
 -- Cleanup and transfer scripts used for updating a collection 
