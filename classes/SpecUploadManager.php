@@ -462,7 +462,7 @@ class SpecUploadManager{
 		
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
-		$spCallStr = "CALL TransferUploads(".$this->collId.",0)";
+		$spCallStr = "CALL TransferUploads(".$this->collId.")";
 		if($this->conn->query($spCallStr)){
 			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."</li>";
 		}

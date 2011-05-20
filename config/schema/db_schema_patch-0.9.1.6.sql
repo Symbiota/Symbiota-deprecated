@@ -1,14 +1,22 @@
 ALTER TABLE `omoccurrences` 
-  ADD COLUMN `informationWithheld` VARCHAR(250) NULL AFTER `occurrenceRemarks`,
-  ADD COLUMN `recordEnteredBy` VARCHAR(250) NULL AFTER `processingStatus`,
+  ADD COLUMN `informationWithheld` VARCHAR(250) NULL AFTER `occurrenceRemarks`; 
+
+ALTER TABLE `omoccurrences` 
+  ADD COLUMN `recordEnteredBy` VARCHAR(250) NULL AFTER `processingStatus`; 
+
+ALTER TABLE `omoccurrences` 
   ADD COLUMN `duplicateQuantity` INT UNSIGNED NULL AFTER `recordEnteredBy`; 
 
 ALTER TABLE `uploadspectemp` 
-  ADD COLUMN `informationWithheld` VARCHAR(250) NULL AFTER `occurrenceRemarks`,
+  ADD COLUMN `informationWithheld` VARCHAR(250) NULL AFTER `occurrenceRemarks`; 
+
+ALTER TABLE `uploadspectemp` 
   ADD COLUMN `localitySecurityReason` VARCHAR(100) NULL  AFTER `localitySecurity`; 
 
 ALTER TABLE `uploadspectemp` 
-  ADD COLUMN `recordEnteredBy` VARCHAR(250) NULL AFTER `language`,
+  ADD COLUMN `recordEnteredBy` VARCHAR(250) NULL AFTER `language`; 
+
+ALTER TABLE `uploadspectemp` 
   ADD COLUMN `duplicateQuantity` INT UNSIGNED NULL AFTER `recordEnteredBy`; 
 
 ALTER TABLE `omcollections` 
@@ -37,6 +45,9 @@ ALTER TABLE `omoccurrences`
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
+
+ALTER TABLE `omoccurrences` 
+  ADD COLUMN `associatedOccurrences` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
 
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
@@ -251,7 +262,7 @@ UPDATE omcollectionstats cs SET cs.genuscnt = (SELECT count(DISTINCT t.unitname1
 
 UPDATE omcollectionstats cs SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1,t.unitname2) as sppcnt FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted WHERE o.collid = collectionid) WHERE cs.collid = collectionid;  
 
-UPDATE omcollectionstats cs SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o  WHERE (o.CollID = collectionid) AND (o.DecimalLatitude Is Not Null) AND (o.DecimalLongitude Is Not Null)) WHERE cs.collid = collectionid; select * from omcollectionstats; 
+UPDATE omcollectionstats cs SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o  WHERE (o.CollID = collectionid) AND (o.DecimalLatitude Is Not Null) AND (o.DecimalLongitude Is Not Null)) WHERE cs.collid = collectionid; 
 
 END$$  
 
