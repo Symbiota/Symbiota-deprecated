@@ -571,7 +571,7 @@ class OccurrenceEditorManager {
 			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, '.
 				'owner, sourceurl, copyright, occid, notes) '.
-				'VALUES ('.$_REQUEST['tid'].',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
 				($photographerUid?$photographerUid:'NULL').','.($caption?'"'.$caption.'"':'NULL').','.
 				($owner?'"'.$owner.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
 				($copyRight?'"'.$copyRight.'"':'NULL').','.($occId?$occId:'NULL').','.($notes?'"'.$notes.'"':'NULL').')';

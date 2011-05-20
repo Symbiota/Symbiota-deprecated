@@ -19,6 +19,7 @@ if($occId) $occManager->setOccId($occId);
 if($collId) $occManager->setCollId($collId);
 $occArr = Array();
 $collMap = $occManager->getCollMap();
+if(!$collId) $collId = $collMap['collid'];
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $statusStr = '';
 if($symbUid){
