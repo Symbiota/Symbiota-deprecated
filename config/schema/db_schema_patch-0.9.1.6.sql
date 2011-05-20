@@ -46,12 +46,12 @@ ALTER TABLE `omoccurrences`
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
 
-ALTER TABLE `omoccurrences` 
-  ADD COLUMN `associatedOccurrences` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
-
 ALTER TABLE `uploadspectemp` 
   ADD COLUMN `dataGeneralizations` VARCHAR(250) NULL  AFTER `informationWithheld` ; 
 
+ALTER TABLE `taxonunits` 
+  ADD COLUMN `suffix` VARCHAR(45) NULL  AFTER `rankname`, 
+  CHANGE COLUMN `reqparentrankid` `reqparentrankid` SMALLINT(6) NULL ; 
 
 -- =============================================
 -- Cleanup and transfer scripts used for updating a collection 
