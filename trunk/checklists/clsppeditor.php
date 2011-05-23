@@ -9,55 +9,55 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/VoucherManager.php');
 header("Content-Type: text/html; charset=".$charset);
  
- $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
- $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
- $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
  
- $editable = false;
- if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
- 	$editable = true;
- }
+$editable = false;
+if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+	$editable = true;
+}
  
- $vManager = new VoucherManager();
+$vManager = new VoucherManager();
  
- $status = "";
- $vManager->setTid($tid);
- $vManager->setClid($clid);
+$status = "";
+$vManager->setTid($tid);
+$vManager->setClid($clid);
 
- if($action == "Rename Taxon"){
- 	$vManager->renameTaxon($_REQUEST["renametid"]);
- }
- elseif($action == "Submit Checklist Edits"){
- 	$eArr = Array();
- 	$eArr["habitat"] = $_REQUEST["habitat"];
- 	$eArr["abundance"] = $_REQUEST["abundance"];
- 	$eArr["notes"] = $_REQUEST["notes"];
- 	$eArr["internalnotes"] = $_REQUEST["internalnotes"];
- 	$eArr["source"] = $_REQUEST["source"];
- 	$eArr["familyoverride"] = $_REQUEST["familyoverride"];
+if($action == "Rename Taxon"){
+	$vManager->renameTaxon($_REQUEST["renametid"]);
+}
+elseif($action == "Submit Checklist Edits"){
+	$eArr = Array();
+	$eArr["habitat"] = $_REQUEST["habitat"];
+	$eArr["abundance"] = $_REQUEST["abundance"];
+	$eArr["notes"] = $_REQUEST["notes"];
+	$eArr["internalnotes"] = $_REQUEST["internalnotes"];
+	$eArr["source"] = $_REQUEST["source"];
+	$eArr["familyoverride"] = $_REQUEST["familyoverride"];
 	$status = $vManager->editClData($eArr);
- }
- elseif($action == "Delete Taxon From Checklist"){
- 	$status = $vManager->deleteTaxon();
- 	$action = "close";
- }
- elseif($action == "Submit Voucher Edits"){
- 	$vStrings = Array();
- 	$vStrings["occid"] = $_REQUEST["occid"];
- 	$vStrings["collector"] = $_REQUEST["collector"];
+}
+elseif($action == "Delete Taxon From Checklist"){
+	$status = $vManager->deleteTaxon();
+	$action = "close";
+}
+elseif($action == "Submit Voucher Edits"){
+	$vStrings = Array();
+	$vStrings["occid"] = $_REQUEST["occid"];
+	$vStrings["collector"] = $_REQUEST["collector"];
 	$vStrings["notes"] = $_REQUEST["notes"];
- 	$vStrings["editornotes"] = $_REQUEST["editornotes"];
+	$vStrings["editornotes"] = $_REQUEST["editornotes"];
 	$status = $vManager->editVoucher($vStrings);
- }
- elseif($action == "Delete Voucher"){
- 	$status = $vManager->removeVoucher($_REQUEST["oiddel"]);
- }
- elseif($action == "Add Voucher"){
- 	//For processing requests sent from /collections/individual/index.php
- 	$status = $vManager->addVoucher($_REQUEST["voccid"],$_REQUEST["vnotes"],$_REQUEST["veditnotes"]);
- }
- $clArray = $vManager->getChecklistData();
- ?>
+}
+elseif(array_key_exists('oiddel',$_REQUEST)){
+	$status = $vManager->removeVoucher($_REQUEST['oiddel']);
+}
+elseif( $action == "Add Voucher"){
+	//For processing requests sent from /collections/individual/index.php
+	$status = $vManager->addVoucher($_REQUEST["voccid"],$_REQUEST["vnotes"],$_REQUEST["veditnotes"]);
+}
+$clArray = $vManager->getChecklistData();
+?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
