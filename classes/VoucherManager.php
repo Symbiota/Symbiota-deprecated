@@ -250,7 +250,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 
 	public function removeVoucher($delOid){
-		$sqlDel = "DELETE FROM fmvouchers WHERE occid = ".$this->conn->real_escape_string($delOid)." AND TID = ".$this->tid." AND CLID = ".$this->clid;
+		$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$this->conn->real_escape_string($delOid).
+			' AND TID = '.$this->tid.' AND CLID = '.$this->clid;
 		$this->conn->query($sqlDel);
 	}
 }
