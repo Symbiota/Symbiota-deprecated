@@ -1,5 +1,6 @@
 <?php
-	include_once('../../../config/dbconnection.php');
+/*
+ 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['term']);
@@ -21,5 +22,7 @@
 	}
 	$result->close();
 	$con->close();
+*/
+	$retArr = Array();
 	echo json_encode($retArr);
 ?>

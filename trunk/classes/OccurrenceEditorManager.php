@@ -218,7 +218,7 @@ class OccurrenceEditorManager {
 
 		if($occArr){
 			$sql = "INSERT INTO omoccurrences(collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
-			"ownerInstitutionCode, family, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, ".
+			"ownerInstitutionCode, family, sciname, tidinterpreted, scientificNameAuthorship, identifiedBy, dateIdentified, ".
 			"identificationReferences, identificationremarks, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
 			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, ".
@@ -228,7 +228,6 @@ class OccurrenceEditorManager {
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
 			"verbatimElevation, disposition, language, recordEnteredBy) ".
-
 			"VALUES (".$occArr["collid"].",\"".$dbpk."\",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
 			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
@@ -237,6 +236,7 @@ class OccurrenceEditorManager {
 			($occArr["ownerinstitutioncode"]?"\"".$occArr["ownerinstitutioncode"]."\"":"NULL").",".
 			($occArr["family"]?"\"".$occArr["family"]."\"":"NULL").",".
 			"\"".$occArr["sciname"]."\",".
+			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").",".
 			($occArr["scientificnameauthorship"]?"\"".$occArr["scientificnameauthorship"]."\"":"NULL").",".
 			($occArr["identifiedby"]?"\"".$occArr["identifiedby"]."\"":"NULL").",".
 			($occArr["dateidentified"]?"\"".$occArr["dateidentified"]."\"":"NULL").",".
@@ -329,7 +329,7 @@ class OccurrenceEditorManager {
 				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
 				$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-					'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
+					'SELECT occid, identifiedby, IFNULL(IFNULL(dateidentified,eventdate),"unknown"), sciname, scientificnameauthorship, '.
 					'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 					'FROM omoccurrences WHERE occid = '.$detArr['occid'];
 				$this->conn->query($sqlInsert);
@@ -848,8 +848,8 @@ class OccurrenceEditorManager {
 	//Used in dupsearch.php
 	public function getDupOccurrences($occidStr){
 		$occurrenceMap = Array();
-		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid, '.
-			'o.family, o.sciname, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
+			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
 			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
 			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
@@ -864,7 +864,9 @@ class OccurrenceEditorManager {
 		while($row = $rs->fetch_object()){
 			$occId = $row->occid;
 			foreach($row as $k => $v){
-				$occurrenceMap[$occId][strtolower($k)] = $v;
+				if($k != 'occid'){
+					$occurrenceMap[$occId][strtolower($k)] = $v;
+				}
 			}
 		}
 		$rs->close();

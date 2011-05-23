@@ -1,11 +1,11 @@
 <?php
+/*
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['term']);
 	$collId = array_key_exists('collid',$_REQUEST)?$con->real_escape_string($_REQUEST['collid']):0;
 	$countryStr = array_key_exists('country',$_REQUEST)?$con->real_escape_string($_REQUEST['country']):0;
-
 	$sql = 'SELECT DISTINCT stateprovince FROM omoccurrences '.
 		'WHERE stateprovince LIKE "'.$queryString.'%" ';
 	if($collId){
@@ -21,5 +21,7 @@
 	}
 	$result->close();
 	$con->close();
+*/
+	$retArr = Array();
 	echo json_encode($retArr);
 ?>
