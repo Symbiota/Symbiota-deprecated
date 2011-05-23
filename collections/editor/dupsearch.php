@@ -33,7 +33,7 @@ $occArr = $dupManager->getDupOccurrences($occidStr);
 					try{
 						var elem = openerForm.elements[k];
 						if(appendMode == false || elem.value == ""){
-							if(elem.type != "hidden") elem.value = tArr[k];
+							elem.value = tArr[k];
 						}
 					}
 					catch(err){
@@ -58,7 +58,7 @@ $occArr = $dupManager->getDupOccurrences($occidStr);
 					<div style="font-weight:bold;font-size:120%;">
 						<?php echo $occObj['institutioncode'].($occObj['collectioncode']?':'.$occObj['collectioncode']:''); ?>
 					</div>
-					<?php if($collId == $occObj['collid']){ ?>
+					<?php if($collId == $occObj['colliddup']){ ?>
 						<div style="color:red;">
 							NOTICE: Matches target collection. May already exist in this collection.
 						</div>
@@ -148,7 +148,7 @@ $occArr = $dupManager->getDupOccurrences($occidStr);
 								Append Record
 							</a>
 						</span>
-					<?php if($collId == $occObj['collid']){ ?>
+					<?php if($collId == $occObj['colliddup']){ ?>
 						<span style="margin-left:30px;">
 							<a href="" onclick="gotoRecord(<?php echo $occId; ?>);">
 								Go To Record
