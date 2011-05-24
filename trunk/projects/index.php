@@ -218,9 +218,15 @@ header("Content-Type: text/html; charset=".$charset);
 						<a href='../checklists/checklist.php?cl=<?php echo $key."&proj=".$projManager->getProjectId(); ?>'>
 							<?php echo $value; ?>
 						</a> 
-						<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
-							<img style='width:12px;border:0px;' src='../images/key.jpg'/>
-						</a>
+						<?php 
+						if($keyModIsActive){
+							?>
+							<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
+								<img style='width:12px;border:0px;' src='../images/key.jpg'/>
+							</a>
+							<?php
+						}
+						?>
 					</li>
 					<?php } ?>
 				</ul>
