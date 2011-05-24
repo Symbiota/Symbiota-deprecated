@@ -175,7 +175,7 @@ class OccurrenceManager{
 					}
 					else{
 						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (substr($key,-5) == "aceae" || substr($key,-4) == "idae"))){
-							$sqlWhereTaxa .= "OR (o.family = '".$key."') OR (o.sciname = '".$key."') ";
+							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
 						}
 						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && substr($key,-5) != "aceae" && substr($key,-4) != "idae")){
 							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
@@ -204,7 +204,7 @@ class OccurrenceManager{
 			$countryArr = explode(";",$this->searchTermsArr["country"]);
 			$tempArr = Array();
 			foreach($countryArr as $value){
-				$tempArr[] = "(o.Country LIKE '%".trim($value)."%')";
+				$tempArr[] = "(o.Country = '".trim($value)."')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$countryArr);
@@ -213,7 +213,7 @@ class OccurrenceManager{
 			$stateAr = explode(";",$this->searchTermsArr["state"]);
 			$tempArr = Array();
 			foreach($stateAr as $value){
-				$tempArr[] = "(o.StateProvince LIKE '%".trim($value)."%')";
+				$tempArr[] = "(o.StateProvince = '".trim($value)."')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$stateAr);
@@ -272,7 +272,7 @@ class OccurrenceManager{
 			$collNumArr = explode(";",$this->searchTermsArr["collnum"]);
 			$tempArr = Array();
 			foreach($collNumArr as $value){
-				$tempArr[] = "(o.recordNumber LIKE '%".trim($value)."%')";
+				$tempArr[] = "(o.recordNumber LIKE '".trim($value)."%')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(", ",$collNumArr);

@@ -51,10 +51,15 @@ $dataManager->setClValue($clValue);
 if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
 if($attrsValues) $dataManager->setAttrs($attrsValues);
 if($rv) $dataManager->setRelevanceValue($rv);
-$data = $dataManager->getData();
-$chars = $data["chars"];  				//$chars = Array(HTML Strings)
-$taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
 
+$data = Array();
+$chars = Array();
+$taxa = Array();
+if($keyModIsActive){
+	$data = $dataManager->getData();
+	$chars = $data["chars"];  				//$chars = Array(HTML Strings)
+	$taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
+}
 
 //Harevest and remove language list from $chars
 $languages = Array();
@@ -112,6 +117,9 @@ if($chars){
 	
 ?>
 <div id="innertext">
+<?php 
+if($keyModIsActive){
+?>
 <form name="keyform" id="keyform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
   <table border="0" width="590">
     <tr>
@@ -239,6 +247,12 @@ if($chars){
   	if(array_key_exists("crumbtitle",$_REQUEST)) echo "<input type='hidden' name='crumbtitle' value='".$_REQUEST["crumbtitle"]."' />";
   ?>
   </form>
+<?php 
+}
+else{
+	echo '<h1>Identification key module has not been activated for this data portal</h1>';
+}
+?>
 </div>
 <?php
 	include($serverRoot.'/footer.php');
