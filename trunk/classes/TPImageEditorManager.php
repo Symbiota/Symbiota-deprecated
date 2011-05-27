@@ -85,7 +85,6 @@ class TPImageEditorManager extends TPEditorManager{
 				$status .= $this->taxonCon->error."\nSQL: ".$sql."; ";
 			}
 		}
-		$this->setPrimaryImageSort($this->tid);
 		if($status) $status = "with editImageSort method: ".$status;
 		return $status;
 	}
@@ -164,7 +163,6 @@ class TPImageEditorManager extends TPEditorManager{
 			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
-				$this->setPrimaryImageSort($this->tid);
 				if($addToTid){
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 						"owner, sourceurl, copyright, locality, occid, notes) ". 
@@ -176,10 +174,7 @@ class TPImageEditorManager extends TPEditorManager{
 						"\",\"".$this->taxonCon->real_escape_string($copyRight)."\",\"".$this->taxonCon->real_escape_string($locality)."\",".
 						($occId?$occId:"NULL").",\"".$this->taxonCon->real_escape_string($notes)."\")";
 					//echo $sql;
-					if($this->taxonCon->query($sql)){
-						$this->setPrimaryImageSort($addToTid);
-					}
-					else{
+					if(!$this->taxonCon->query($sql)){
 						$status = "Error: unable to upload image for related taxon";
 						//$status = "Error:loadImageData:loading the parent data: ".$this->taxonCon->error."<br/>SQL: ".$sql;
 					}
@@ -320,16 +315,6 @@ class TPImageEditorManager extends TPEditorManager{
 	    }
 	    imagedestroy($tmpImg);
 	    return $successStatus;
-	}
-
-	private function setPrimaryImageSort($subjectTid){
-		$sql = "UPDATE images ti INNER JOIN ".
-			"(SELECT ti.imgid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
-			"INNER JOIN images ti ON ts2.tid = ti.tid WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ".
-			"AND (ts1.tidaccepted=".$subjectTid.") ORDER BY ti.SortSequence LIMIT 1) innertab ON ti.imgid = innertab.imgid ".
-			"SET ti.SortSequence = 1";
-		//echo $sql2;
-		$this->taxonCon->query($sql);
 	}
 
 	private function url_exists($url) {

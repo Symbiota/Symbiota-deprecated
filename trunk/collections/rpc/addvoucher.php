@@ -24,21 +24,34 @@ elseif(!($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,
 }
 else{
 	$collStr = "";
-	$sql = "SELECT IFNULL(CONCAT(recordedby,' (',IFNULL(recordnumber,'s.n.'),')'),occurrenceid) AS collstr ".
-		"FROM omoccurrences ".
-		"WHERE TidInterpreted IS NOT NULL AND occid = ".$occid;
+	$sql = 'SELECT recordedby, recordnumber '.
+		'FROM omoccurrences '.
+		'WHERE TidInterpreted IS NOT NULL AND occid = '.$occid;
 	$rs = $con->query($sql);
 	if($row = $rs->fetch_object()){
-		$collStr = $row->collstr;
+		$recNum = trim($row->recordnumber);
+		$collStr = $row->recordedby.' ('.($recNum?$recNum:'s.n.').')';
 	}
+	$insSql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) VALUES('.$tid.','.$clid.','.$occid.',"'.$collStr.'")';
 	if(!$collStr){
-		echo "ERROR: Collector must not be NULL for occurrence record";
+		echo 'ERROR: Collector must not be NULL for occurrence record';
 	}
-	elseif($con->query("INSERT INTO fmvouchers(tid,clid,occid,collector) VALUES($tid,$clid,$occid,\"".$collStr."\")")){
-		echo "1";
+	elseif($con->query($insSql)){
+		echo '1';
 	}
 	else{
-		echo "Unknown Error";
+		$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid) VALUES('.$tid.','.$clid.')';
+		if($con->query($sql2)){
+			if($con->query($insSql)){
+				echo '1';
+			}
+			else{
+				echo 'Name added to list, though still unable to link voucher: SQL = '.$insSql;
+			}
+		}
+		else{
+			echo 'Unknown Error: SQL = '.$sql2;
+		}
 	}
 }
 $con->close();

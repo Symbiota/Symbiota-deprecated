@@ -1,6 +1,5 @@
 <?php
 /*
- * 15 Jan 2010
  * E.E. Gilbert
  */
 
@@ -138,6 +137,22 @@ $clArray = $vManager->getChecklistData();
 
 			});
 
+			function openPopup(urlStr,windowName){
+				var wWidth = 750;
+				try{
+					if(opener.document.getElementById('maintable').offsetWidth){
+						wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
+					}
+					else if(opener.document.body.offsetWidth){
+						wWidth = opener.document.body.offsetWidth*0.9;
+					}
+				}
+				catch(err){
+				}
+				newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=650,left=20,top=20');
+				if (newWindow.opener == null) newWindow.opener = self;
+			}
+
 			function closeEditor(){
 				//if(parent.opener.name != "gmap") parent.opener.location.reload();
 				//var URL = unescape(window.opener.location.pathname);
@@ -166,21 +181,6 @@ $clArray = $vManager->getChecklistData();
 			if($editable){ 
 			?>
 			<div style=width:600px;>
-				<?php
-				$habitat = (array_key_exists("habitat",$clArray)?$clArray["habitat"]:"");
-				$abundance = (array_key_exists("abundance",$clArray)?$clArray["abundance"]:"");
-				$notes = (array_key_exists("notes",$clArray)?$clArray["notes"]:"");
-				$internalNotes = (array_key_exists("internalnotes",$clArray)?$clArray["internalnotes"]:"");
-				$source = (array_key_exists("source",$clArray)?$clArray["source"]:"");
-				$familyOverride = (array_key_exists("familyoverride",$clArray)?$clArray["familyoverride"]:"");
-				?>
-				<div style="font-weight:bold;">
-					<?php 
-						
-						unset($clArray["familyoverride"]);
-						echo implode("; ",$clArray); 
-					?>
-				</div>
 				<form action="clsppeditor.php" method='post' name='editcl' target='_self'>
 					<fieldset style='margin:5px 0px 5px 5px;'>
 		    			<legend>Edit Checklist Information:</legend>
@@ -189,7 +189,7 @@ $clArray = $vManager->getChecklistData();
 								Habitat:
 							</div>
 							<div style='float:left;'>
-								<input name='habitat' type='text' value="<?php echo $habitat;?>" size='70' maxlength='250' />
+								<input name='habitat' type='text' value="<?php echo (array_key_exists("habitat",$clArray)?$clArray["habitat"]:"");?>" size='70' maxlength='250' />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -197,7 +197,7 @@ $clArray = $vManager->getChecklistData();
 								Abundance:
 							</div>
 							<div style='float:left;'>
-								<input type="text"  name="abundance" value="<?php echo $abundance; ?>" />
+								<input type="text"  name="abundance" value="<?php echo (array_key_exists("abundance",$clArray)?$clArray["abundance"]:""); ?>" />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -205,7 +205,7 @@ $clArray = $vManager->getChecklistData();
 								Notes:
 							</div>
 							<div style='float:left;'>
-								<input name='notes' type='text' value="<?php echo $notes;?>" size='65' maxlength='2000' />
+								<input name='notes' type='text' value="<?php echo (array_key_exists("notes",$clArray)?$clArray["notes"]:"");?>" size='65' maxlength='2000' />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -213,7 +213,7 @@ $clArray = $vManager->getChecklistData();
 								Editor Notes:
 							</div>
 							<div style='float:left;'>
-								<input name='internalnotes' type='text' value="<?php echo $internalNotes;?>" size='65' maxlength='250' />
+								<input name='internalnotes' type='text' value="<?php echo (array_key_exists("internalnotes",$clArray)?$clArray["internalnotes"]:"");?>" size='65' maxlength='250' />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -221,7 +221,7 @@ $clArray = $vManager->getChecklistData();
 								Source:
 							</div>
 							<div style='float:left;'>
-								<input name='source' type='text' value="<?php echo $source;?>" size='65' maxlength='250' />
+								<input name='source' type='text' value="<?php echo (array_key_exists("source",$clArray)?$clArray["source"]:"");?>" size='65' maxlength='250' />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -229,7 +229,7 @@ $clArray = $vManager->getChecklistData();
 								Family Override: 
 							</div>
 							<div style='float:left;'>
-								<input name='familyoverride' type='text' value="<?php echo $familyOverride;?>" size='65' maxlength='250' />
+								<input name='familyoverride' type='text' value="<?php echo (array_key_exists("familyoverride",$clArray)?$clArray["familyoverride"]:"");?>" size='65' maxlength='250' />
 							</div>
 						</div>
 						<div style='clear:both;'>
@@ -295,8 +295,7 @@ $clArray = $vManager->getChecklistData();
 					foreach($vArray as $occId => $iArray){
 					?>
 						<li><?php
-							$url = "javascript:var popupReference=window.open('../collections/individual/index.php?occid=".$occId."','indpane','toolbar=1,resizable=1,width=650,height=600,left=20,top=20');";
-							echo "<a href=\"$url\">".$occId."</a>: ";
+							echo "<a style=\"cursor:pointer\" onclick=\"openPopup('../collections/individual/index.php?occid=".$occId."','indpane')\">".$occId."</a>: \n";
 							echo $iArray["collector"].($iArray["notes"]?"; ".$iArray["notes"]:"").($iArray["editornotes"]?"; ".$iArray["editornotes"]:"");
 							?>
 							<form action="clsppeditor.php" method='post' name='delform' style="display:inline;;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">

@@ -72,7 +72,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 	public function editClData($eArr){
 		$innerSql = "";
 		foreach($eArr as $k => $v){
-			$innerSql .= ",".$k."=".($v?"\"".$v."\" ":"NULL ");
+			$valStr = trim($v);
+			$innerSql .= ",".$k."=".($valStr?"\"".$valStr."\" ":"NULL ");
 		}
 		$sqlClUpdate = "UPDATE fmchklsttaxalink SET ".substr($innerSql,1).
 			"WHERE tid = ".$this->conn->real_escape_string($this->tid)." AND clid = ".$this->conn->real_escape_string($this->clid);
@@ -95,12 +96,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 				$this->conn->real_escape_string($this->clid);
 			$rsTarget = $this->conn->query($sqlTarget);
 			if($row = $rsTarget->fetch_object()){
-				$habitatTarget = $row->Habitat; 
-				$abundTarget = $row->Abundance;
-				$notesTarget = $row->Notes;
-				$internalNotesTarget = $row->internalnotes;
-				$sourceTarget = $row->source;
-				$nativeTarget = $row->Nativity;
+				$habitatTarget = $this->cleanStr($row->Habitat);
+				$abundTarget = $this->cleanStr($row->Abundance);
+				$notesTarget = $this->cleanStr($row->Notes);
+				$internalNotesTarget = $this->cleanStr($row->internalnotes);
+				$sourceTarget = $this->cleanStr($row->source);
+				$nativeTarget = $this->cleanStr($row->Nativity);
 			
 				//Move all vouchers to new name
 				$sqlVouch = "UPDATE fmvouchers SET TID = ".$newTaxon." ".
@@ -116,12 +117,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 					"FROM fmchklsttaxalink ctl WHERE ctl.TID = ".$this->conn->real_escape_string($this->tid)." AND ctl.CLID = ".$this->conn->real_escape_string($this->clid);
 				$rsSourceCl =  $this->conn->query($sqlSourceCl);
 				if($row = $rsSourceCl->fetch_object()){
-					$habitatSource = $row->Habitat;
-					$abundSource = $row->Abundance;
-					$notesSource = $row->Notes;
-					$internalNotesSource = $row->internalnotes;
-					$sourceSource = $row->source;
-					$nativeSource = $row->Nativity;
+					$habitatSource = $this->cleanStr($row->Habitat);
+					$abundSource = $this->cleanStr($row->Abundance);
+					$notesSource = $this->cleanStr($row->Notes);
+					$internalNotesSource = $this->cleanStr($row->internalnotes);
+					$sourceSource = $this->cleanStr($row->source);
+					$nativeSource = $this->cleanStr($row->Nativity);
 				}
 				$rsSourceCl->close();
 				//Transfer source chklsttaxalink data to target record
@@ -182,11 +183,11 @@ include_once($serverRoot.'/config/dbconnection.php');
 	
 	public function editVoucher($editArr){
 		if($this->tid && $this->clid){
-			$occId = $editArr["occid"];
-			unset($editArr["occid"]);
+			$occId = $editArr['occid'];
+			unset($editArr['occid']);
 			$setStr = '';
 			foreach($editArr as $k => $v){
-				$setStr .= ", ".$k." = '".trim($v)."'";
+				$setStr .= ', '.$k.' = "'.trim($v).'"';
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = 'UPDATE fmvouchers v '.
@@ -198,12 +199,14 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 	
 	public function addVoucher($vOccId, $vNotes, $vEditNotes){
+		$vNotes = $this->cleanStr($vNotes);
+		$vEditNotes = $this->cleanStr($vEditNotes);
 		if($vOccId && $this->clid){
 			$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
 			if($status){
-				$sqlInsertCl = "INSERT INTO fmchklsttaxalink ( clid, TID ) ".
-					"SELECT ".$this->conn->real_escape_string($this->clid)." AS clid, o.TidInterpreted ".
-					"FROM omoccurrences o WHERE o.occid = ".$this->conn->real_escape_string($vOccId);
+				$sqlInsertCl = 'INSERT INTO fmchklsttaxalink ( clid, TID ) '.
+					'SELECT '.$this->conn->real_escape_string($this->clid).' AS clid, o.TidInterpreted '.
+					'FROM omoccurrences o WHERE o.occid = '.$this->conn->real_escape_string($vOccId);
 				//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
 				if($this->conn->query($sqlInsertCl)){
 					return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
@@ -215,26 +218,26 @@ include_once($serverRoot.'/config/dbconnection.php');
 	private function addVoucherRecord($vOccId, $vNotes, $vEditNotes){
 		$insertArr = Array();
 		//Checklist-taxon combination already exists
-		$sql = "SELECT DISTINCT o.occid, o.occurrenceID, ctl.tid, ctl.clid, ".
-			"CONCAT_WS('',o.recordedby, CONCAT(' (',IFNULL(o.recordnumber,o.occurrenceid),')')) AS Collector, ".
-			"'".$this->conn->real_escape_string($vNotes)."' AS Notes, '".$this->conn->real_escape_string($vEditNotes)."' AS editnotes ".
-			"FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) ".
-			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
-			"INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid ".
-			"WHERE ctl.clid = ".$this->conn->real_escape_string($this->clid)." AND o.occid = ".
-			$this->conn->real_escape_string($vOccId)." AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 ".
-			"LIMIT 1";
+		$sql = 'SELECT DISTINCT o.occid, o.occurrenceID, ctl.tid, ctl.clid, o.recordedby, o.recordnumber, '.
+			'"'.$vNotes.'" AS Notes, "'.$vEditNotes.'" AS editnotes '.
+			'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) '.
+			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) '.
+			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
+			'WHERE ctl.clid = '.$this->clid.' AND o.occid = '.
+			$vOccId.' AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+			'LIMIT 1';
 		//echo "addVoucherSql: ".$sql."<br/>";
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
-			$occId = str_replace("\"","''",$row->occid);
-			$collector = str_replace("\"","''",$row->Collector);
-			$notes = str_replace("\"","''",$row->Notes);
-			$editNotes = str_replace("\"","''",$row->editnotes);
+			$occId = $row->occid;
+			$recNum = $this->cleanStr($row->recordnumber);
+			$collector = $this->cleanStr($row->recordedby).' ('.($recNum?$recNum:'s.n.').')';
+			$notes = $this->cleanStr($row->Notes);
+			$editNotes = $this->cleanStr($row->editnotes);
 			
-			$sqlInsert = "INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) ".
-				"VALUES (\"".$this->conn->real_escape_string($occId)."\",".$row->tid.",".$row->clid.",\"".$collector."\",\"".
-				$notes."\",\"".$editNotes."\") ";
+			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) '.
+				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"'.$collector.'","'.
+				$notes.'","'.$editNotes.'") ';
 			//echo "<div>".$sqlInsert."</div>";
 			if(!$this->conn->query($sqlInsert)){
 				$rs->close();
@@ -253,6 +256,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 		$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$this->conn->real_escape_string($delOid).
 			' AND TID = '.$this->tid.' AND CLID = '.$this->clid;
 		$this->conn->query($sqlDel);
+	}
+	
+	private function cleanStr($inStr){
+		$outStr = trim($inStr);
+		$outStr = str_replace(chr('34'),"&quot;",$outStr);
+		return $outStr;
 	}
 }
 ?>

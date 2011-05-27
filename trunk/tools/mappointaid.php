@@ -77,6 +77,8 @@ if(!$latDef && !$lngDef){
 			catch(myErr){
 				alert("Unable to transfer data. Please let an administrator know.");
 			}
+            self.close();
+            return false;
         }
 
         //]]>

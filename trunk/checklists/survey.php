@@ -121,8 +121,15 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		}
 
 		function openIndPu(occId){
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
 			urlStr = "<?php echo $clientRoot;?>/collections/individual/index.php?occid=" + occId;
-			newWindow = window.open(urlStr,"newind","toolbar=1,resizable=1,width=950,height=600,left=20,top=20");
+			newWindow = window.open(urlStr,"newind","toolbar=1,resizable=1,width="+(wWidth)+",height=600,left=20,top=20");
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 	

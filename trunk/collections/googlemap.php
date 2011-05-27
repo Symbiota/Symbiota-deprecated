@@ -65,12 +65,12 @@ $mapManager = new OccurrenceMapManager();
                         $functionStr = "";
                         foreach($dataArr as $occId => $spArr){
 							if(count($dataArr) == 1){
-	                        	$functionStr = "window.location.href = \"javascript:var indpopup=window.open('individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."','indspec','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');\";";
+	                        	$functionStr = "openIndPU(".$occId.",".(array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"0").")";
 							}
 							else{
 								$gui = $spArr["gui"];
 								if(!$gui) $gui = "occurrence #".$occId;
-								$spStr .= "<div style='color:blue;cursor:pointer;' onclick=\\\"javascript:var indpopup=window.open(\\'individual/index.php?occid=".$occId.(array_key_exists("clid",$_REQUEST)?"&clid=".$_REQUEST["clid"]:"")."\\',\\'indspec\\',\\'toolbar=0,scrollbars=1,width=650,height=600,left=20,top=20\\');\\\">".$gui."</div>";
+								$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".(array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"0").")'>".$gui."</a><br/>";
 							}
                         }
                         if($spStr){
@@ -191,26 +191,41 @@ $mapManager = new OccurrenceMapManager();
         }
         
 	function toggleLatLongDivs(){
-            var divs = document.getElementsByTagName("div");
-            for (i = 0; i < divs.length; i++) {
-                var obj = divs[i];
-                if(obj.getAttribute("class") == "latlongdiv" || obj.getAttribute("className") == "latlongdiv"){
-                    if(obj.style.display=="none"){
-                        obj.style.display="block";
-                    }
-                    else{
-                        obj.style.display="none";
-                    }
-                }
-            }
-            if(useLLDecimal){
-                useLLDecimal = false;
-            }
-            else{
-                useLLDecimal = true;
-            }
+		var divs = document.getElementsByTagName("div");
+		for (i = 0; i < divs.length; i++) {
+			var obj = divs[i];
+			if(obj.getAttribute("class") == "latlongdiv" || obj.getAttribute("className") == "latlongdiv"){
+				if(obj.style.display=="none"){
+					obj.style.display="block";
+				}
+				else{
+					obj.style.display="none";
+				}
+			}
+		}
+		if(useLLDecimal){
+			useLLDecimal = false;
+		}
+		else{
+			useLLDecimal = true;
+		}
 	}
-        
+
+	function openIndPU(occId,clid){
+		var wWidth = 900;
+		try{
+			if(opener.document.getElementById('maintable').offsetWidth){
+				wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(opener.document.body.offsetWidth){
+				wWidth = opener.document.body.offsetWidth*0.9;
+			}
+		}
+		catch(err){
+		}
+		newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+		if (newWindow.opener == null) newWindow.opener = self;
+	}
       //]]>
     </script>
 <?php

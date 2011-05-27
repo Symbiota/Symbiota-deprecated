@@ -69,7 +69,7 @@ if($chars){
 }
 ?>
 <head>
-	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo $projValue; ?></title>
+	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo $dataManager->getClName(); ?></title>
 	<link rel='stylesheet' href='../css/main.css' type='text/css' />
 	<meta name="keywords" content="interactive key,plants identification,<?php echo $dataManager->getClName(); ?>" />
 	<script type="text/javascript">

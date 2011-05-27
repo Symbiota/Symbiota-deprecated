@@ -124,10 +124,7 @@ class ImageDetailManager{
 					($photographer?"\"".$photographer."\"":"NULL").",".$photographerUid.",\"".$caption."\",\"".
 					$owner."\",\"".$sourceUrl."\",\"".$copyRight."\",\"".$locality."\",".($occId?$occId:"NULL").",\"".$notes."\")";
 				//echo $sql;
-				if($this->conn->query($sql)){
-					$this->setPrimaryImageSort($addToTid);
-				}
-				else{
+				if(!$this->conn->query($sql)){
 					$status = "unable to upload image for related taxon";
 					//$status = "Error:editImage:loading the parent data: ".$this->conn->error."<br/>SQL: ".$sql;
 				}
@@ -154,8 +151,6 @@ class ImageDetailManager{
 			}
 			$rs->close();
 		}
-		$this->setPrimaryImageSort($targetTid);
-		$this->setPrimaryImageSort($sourceTid);
 		return $status;
 	}
 
@@ -204,7 +199,6 @@ class ImageDetailManager{
 					}
 				}
 			}
-			$this->setPrimaryImageSort($tid);
 		}
 		else{
 			$status = 'ERROR: Unable to delete image record: '.$this->conn->error;
@@ -224,16 +218,6 @@ class ImageDetailManager{
 		return true;
 	}
 
-	private function setPrimaryImageSort($subjectTid){
-		$sql = "UPDATE images ti INNER JOIN ".
-			"(SELECT ti.imgid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
-			"INNER JOIN images ti ON ts2.tid = ti.tid WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ".
-			"AND (ts1.tidaccepted=".$subjectTid.") ORDER BY ti.SortSequence LIMIT 1) innertab ON ti.imgid = innertab.imgid ".
-			"SET ti.SortSequence = 1";
-		//echo $sql2;
-		$this->conn->query($sql);
-	}
-	
 	public function getChildrenArr($tid){
 		$childrenArr = Array();
 		$sql = "SELECT t.Tid, t.SciName, t.Author ".

@@ -498,10 +498,7 @@ class OccurrenceEditorManager {
 			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
 			" WHERE imgid = ".$imgId;
 		//echo $sql;
-		if($this->conn->query($sql)){
-			$this->setPrimaryImageSort();
-		}
-		else{
+		if(!$this->conn->query($sql)){
 			$status .= "ERROR: image not changed, ".$this->conn->error."SQL: ".$sql;
 		}
 		return $status;
@@ -576,10 +573,7 @@ class OccurrenceEditorManager {
 				($owner?'"'.$owner.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
 				($copyRight?'"'.$copyRight.'"':'NULL').','.($occId?$occId:'NULL').','.($notes?'"'.$notes.'"':'NULL').')';
 			//echo $sql;
-			if($this->conn->query($sql)){
-				$this->setPrimaryImageSort();
-			}
-			else{
+			if(!$this->conn->query($sql)){
 				$status = "ERROR Loading Image Data: ".$this->conn->error."<br/>SQL: ".$sql;
 			}
 		}
@@ -746,7 +740,6 @@ class OccurrenceEditorManager {
 		else{
 			$status = "deleteImage: ".$this->conn->error."\nSQL: ".$sql;
 		}
-		$this->setPrimaryImageSort();
 		return $status;
 	}
 
@@ -776,16 +769,6 @@ class OccurrenceEditorManager {
 			$result->close();
 		}
 		return $this->photographerArr;
-	}
-
-	private function setPrimaryImageSort(){
-		$sql = "UPDATE images ti2 INNER JOIN ".
-			"(SELECT ti.imgid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid ".
-			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted INNER JOIN images ti ON ts2.tid = ti.tid ".
-			"WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.occid = ".$this->occId." ORDER BY ti.SortSequence LIMIT 1) innertab ".
-			"ON ti2.imgid = innertab.imgid SET ti2.SortSequence = 1";
-		//echo $sql;
-		$this->conn->query($sql);
 	}
 
 	private function cleanStr($str){
