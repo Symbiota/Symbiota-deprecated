@@ -11,6 +11,23 @@ $smManager = new SiteMapManager();
 <head>
     <title><?php echo $defaultTitle; ?> Site Map</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" />
+    <script type="text/javascript">
+	    function openPopup(urlStr,windowName){
+	    	var wWidth = 900;
+	    	try{
+		    	if(document.getElementById('maintable').offsetWidth){
+		    		wWidth = document.getElementById('maintable').offsetWidth*1.05;
+		    	}
+		    	else if(document.body.offsetWidth){
+		    		wWidth = document.body.offsetWidth*0.9;
+		    	}
+	    	}
+	    	catch(e){
+	    	}
+	    	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	    	if (newWindow.opener == null) newWindow.opener = self;
+	    }
+    </script>
 </head>
 
 <body>
@@ -42,7 +59,11 @@ $smManager = new SiteMapManager();
 	            	<ul>
 	            		<li><a href="imagelib/index.php">Image Library</a></li>
 	            		<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
-	            		<li><a href="javascript:var popupReference=window.open('imagelib/imageusagepolicy.php','crwindow','toolbar=1,location=0,directories=0,status=1,menubar=0,scrollbars=1,resizable=1,width=700,height=550,left=20,top=20');">Usage Policy and Copyright Information</a></li>
+	            		<li>
+	            			<a href="#" onclick="openPopup('imagelib/imageusagepolicy.php','crwindow'">
+	            				Usage Policy and Copyright Information
+	            			</a>
+	            		</li>
 	            	</ul>
 	
 	            <h2>Projects</h2>

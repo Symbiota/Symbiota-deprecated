@@ -9,6 +9,7 @@
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
+	$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
@@ -76,6 +77,7 @@
 			if($_POST['latnorth']) $sqlFragArr['latnorth'] = $_POST['latnorth'];
 			if($_POST['lngeast']) $sqlFragArr['lngeast'] = $_POST['lngeast'];
 			if($_POST['lngwest']) $sqlFragArr['lngwest'] = $_POST['lngwest'];
+			$sqlFragArr['latlngor'] = (array_key_exists('latlngor',$_POST)?$_POST['latlngor']:0);
 			$statusStr = $clManager->saveSql($sqlFragArr);
 	 	}
 	 	
@@ -126,6 +128,7 @@
 	<script type="text/javascript">
 		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
 		var clid = <?php echo $clManager->getClid(); ?>;
+		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js"></script>
 	<style type="text/css">
@@ -271,11 +274,11 @@
 			if($clValue && $clManager->getEditable()){
 			?>
 			<!-- Checklist editing div  -->
-			<div class="editmd" style="display:none;">
+			<div class="editmd" style="display:<?php echo ($editMode==2?'block':'none'); ?>;">
 				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
-				        <li><a href="#admintab"><span>Admin</span></a></li>
+				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().'&submitaction='.$action; ?>"><span>Voucher Admin</span></a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
 					<div id="mdtab">
@@ -344,72 +347,6 @@
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
-							</fieldset>
-						</form>
-					</div>
-					<div id="admintab">
-						<div style="margin:15px;">
-							This editing module will aid you in building an SQL fragment that can be used to help link vouchers to species names within the checklist. 
-							When a dynamic SQL fragment exists, the checklist editors will have access to 
-							editing tools that will dynamically query occurrence records matching the criteria within the SQL statement. 
-							Editors can then go through the list and select the records that are to serve as specimen vouchers for that checklist.
-							See the Flora Voucher Mapping Tutorial for more details. 
-							Your data administrator can aid you in establishing more complex SQL fragments than can be created within this form.  
-						</div>
-						<fieldset style="padding:20px;">
-							<legend><b>Current Dynamic SQL Fragment</b></legend>
-							<?php echo $clManager->getDynamicSql()?$clManager->getDynamicSql():"SQL not set"?>
-						</fieldset>
-						<form name="sqlbuilder" action="checklist.php" method="post" onsubmit="return validateSqlFragForm(this);" style="margin-bottom:15px;">
-							<fieldset style="padding:15px;">
-								<legend><b>SQL Fragment Builder</b></legend>
-								<div style="margin:0px 10px 10px 10px;">
-									Use this form to aid in building the SQL fragment. 
-									Click the 'Create SQL Fragment' button to build and save the SQL using the terms 
-									supplied in the form. 
-								</div>
-								<div style="float:left;width:250px;">
-									<div style="margin:3px;">
-										<b>Country:</b>
-										<input type="text" name="country" onchange="" />
-									</div>
-									<div style="margin:3px;">
-										<b>State:</b>
-										<input type="text" name="state" onchange="" />
-									</div>
-									<div style="margin:3px;">
-										<b>County:</b>
-										<input type="text" name="county" onchange="" />
-									</div>
-									<div style="margin:3px;">
-										<b>Locality:</b>
-										<input type="text" name="locality" onchange="" />
-									</div>
-								</div>
-								<div style="float:left;width:350px;">
-									<div>
-										<b>Latitude/Longitude:</b>
-										<span style="margin-left:75px;">
-											<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
-										</span>
-									</div>
-									<div style="margin-left:112px;">
-										<span style="">
-											<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
-										</span>
-										<span style="margin-left:70px;">
-											<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
-										</span>
-									</div>
-									<div style="margin-left:187px;">
-										<input type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
-									</div>
-									<div style="float:right;margin:20px 20px 0px 0px;">
-										<input type="submit" name="submitaction" value="Create SQL Fragment" />
-										<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-										<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
-									</div>
-								</div>
 							</fieldset>
 						</form>
 					</div>
@@ -501,7 +438,7 @@
 					<?php 
 					if($clValue && $clManager->getEditable()){
 					?>
-					<div class="editspp" style="display:<?php echo ($editMode?"block":"none");?>;width:250px;margin-top:10px;">
+					<div class="editspp" style="display:<?php echo ($editMode==1?"block":"none");?>;width:250px;margin-top:10px;">
 						<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 							<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 								<legend><b>Add New Species to Checklist</b></legend>
@@ -632,84 +569,89 @@
 						}
 						echo "</div><hr />";
 					}
-	
+					$prevfam = ''; 
 					if($showImages){
-						foreach($taxaArray as $family => $sppArr){
+						foreach($taxaArray as $tid => $sppArr){
+							$family = $sppArr['family'];
+							if($family != $prevfam){
+								?>
+								<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
+									<h3><?php echo $family; ?></h3>
+								</div>
+								<?php
+								$prevfam = $family;
+							}
 							?>
-							<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
-								<h3><?php echo $family; ?></h3>
-							</div>
 							<div>
-							<?php 
-								foreach($sppArr as $tid => $imgArr){
-									echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
-									$imgSrc = ($imgArr["tnurl"]?$imgArr["tnurl"]:$imgArr["url"]);
-									echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
-									if($imgSrc){
-										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
-										echo "<a href='".$spUrl."'>";
-										list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
-										$dim = ($width > $height?"width":"height"); 
-										echo "<img src='".$imgSrc."' style='$dim:196px;' />";
-										echo "</a>";
-									}
-									else{
-										echo "<div style='margin-top:50px;'><b>Image<br/>not yet<br/>available</b></div>";
-									}
-									echo "</div>";
-									echo "<div><a href='".$spUrl."'><b>".$imgArr["sciname"]."</b></a></div>";
-									echo "</div>\n";
+								<?php 
+								echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
+								$imgSrc = ($sppArr["tnurl"]?$sppArr["tnurl"]:$sppArr["url"]);
+								echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
+								$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+								if($imgSrc){
+									$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
+									echo "<a href='".$spUrl."'>";
+									list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
+									$dim = ($width > $height?"width":"height"); 
+									echo "<img src='".$imgSrc."' style='$dim:196px;' />";
+									echo "</a>";
 								}
-							?>
+								else{
+									echo "<div style='margin-top:50px;'><b>Image<br/>not yet<br/>available</b></div>";
+								}
+								echo "</div>";
+								echo "<div><a href='".$spUrl."'><b>".$sppArr["sciname"]."</b></a></div>";
+								echo "</div>\n";
+								?>
 							</div>
 							<?php 
 						}
 					}
 					else{
-						$voucherArr = Array();
-						if($showVouchers) $voucherArr = $clManager->getVoucherArr();
-						foreach($taxaArray as $family => $sppArr){
-							?>
-							<div class="familydiv" id="<?php echo $family;?>" style="margin-top:30px;">
-								<h3><?php echo $family;?></h3>
-							</div>
-							<div>
-								<?php 
-								foreach($sppArr as $tid => $taxonArr){
-									$voucherLink = "";
-									$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
-									echo "<div id='tid-$tid'>";
-									echo "<div>";
-									if(!preg_match('/\ssp\d/',$taxonArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
-									echo "<b><i>".$taxonArr["sciname"]."</b></i> ";
-									if(array_key_exists("author",$taxonArr)) echo $taxonArr["author"];
-									if(!preg_match('/\ssp\d/',$taxonArr["sciname"])) echo "</a>";
-									if($clManager->getEditable()){
-										//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
-										?> 
-										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
-											<img src='../images/edit.png' style='width:13px;' title='edit details' />
-										</span>
-										<?php if($showVouchers && $dynSqlExists){ ?>
-										<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $taxonArr["sciname"]."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
-											<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
-										</span>
-										<?php
-										} 
-									}
-									echo "</div>\n";
-									if(array_key_exists("vern",$taxonArr)){
-										echo "<div style='margin-left:10px;font-weight:bold;'>".$taxonArr["vern"]."</div>";
-									}
-									if($showVouchers && array_key_exists($tid,$voucherArr)){
-										echo "<div style='margin-left:10px;'>".$voucherArr[$tid]."</div>";
-									}
-									echo "</div>\n";
-								}
+						foreach($taxaArray as $tid => $sppArr){
+							$family = $sppArr['family'];
+							if($family != $prevfam){
 								?>
-							</div>
-							<?php 
+								<div class="familydiv" id="<?php echo $family;?>" style="margin-top:30px;">
+									<h3><?php echo $family;?></h3>
+								</div>
+								<?php
+								$prevfam = $family;
+							}
+							$voucherLink = "";
+							$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+							echo "<div id='tid-$tid' style='margin-left:10px;'>";
+							echo "<div>";
+							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
+							echo "<b><i>".$sppArr["sciname"]."</b></i> ";
+							if(array_key_exists("author",$sppArr)) echo $sppArr["author"];
+							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "</a>";
+							if($clManager->getEditable()){
+								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
+								?> 
+								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
+									<img src='../images/edit.png' style='width:13px;' title='edit details' />
+								</span>
+								<?php if($showVouchers && $dynSqlExists){ ?>
+								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $sppArr["sciname"]."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
+									<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
+								</span>
+								<?php
+								} 
+							}
+							echo "</div>\n";
+							if(array_key_exists('vern',$sppArr)){
+								echo "<div style='margin-left:10px;font-weight:bold;'>".$sppArr["vern"]."</div>";
+							}
+							if($showVouchers && array_key_exists('vouchers',$sppArr)){
+								$vArr = $sppArr['vouchers'];
+								$voucStr = '';
+								foreach($vArr as $occid => $collName){
+									$voucStr .= ", <a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
+								}
+								echo "<div style='margin-left:10px;'>".substr($voucStr,2)."</div>";
+							}
+							echo "</div>\n";
 						}
 					}
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());

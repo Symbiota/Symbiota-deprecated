@@ -115,10 +115,17 @@ header("Content-Type: text/html; charset=".$charset);
 		}
 
 		function tellMe(){
-			window.open("../taxa/index.php?taxon="+sciNameArr[activeIndex],"activetaxon",'width=850,height=600');
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
+			newWindow = window.open("../taxa/index.php?taxon="+sciNameArr[activeIndex],"activetaxon",'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if (newWindow.opener == null) newWindow.opener = self;
 			firstTry = false;
 		}
-		
 	</script>
 </head>
 

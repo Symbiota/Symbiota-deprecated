@@ -35,28 +35,6 @@ header("Content-Type: text/html; charset=".$charset);
 	<head>
 		<title>Specimen Edit Reviewer</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
-		<style type="text/css">
-			#edittab{
-				width:100%;
-				border-collapse:collapse;
-			}
-			#edittab td, #edittab th {
-				font-size:1em;
-				border:1px solid #98bf21;
-				padding:3px 7px 2px 7px;
-			}
-			#edittab th {
-				text-align:left;
-				padding-top:5px;
-				padding-bottom:4px;
-				background-color:#A7C942;
-				color:#ffffff;
-			}
-			#edittab tr.alt td {
-				color:#000000;
-				background-color:#EAF2D3;
-			}
-		</style>
 		<script language="javascript">
 			function toggle(divName){
 				divObj = document.getElementById(divName);
@@ -199,7 +177,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<tr>
 							<td colspan="2">
 								<form name="editform" action="editreviewer.php" method="get" onsubmit="return validateEditForm(this);">
-									<table id="edittab" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
+									<table id="edittable" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
 										<tr>
 											<?php if($mode != 'printmode'){ ?>
 												<th></th>

@@ -64,7 +64,7 @@ $imgLibManager = new ImageLibraryManager();
 			</div>
 			<div style='font-weight:bold;margin:15px 10px 0px 20px;'>
 				<div>
-					<a href="imageusagepolicy.php">Image Copyright Policy</a>
+					<a href="../misc/usagepolicy.php#images">Image Copyright Policy</a>
 				</div>
 				<div>
 					<a href="photographers.php">Contributing Photographers</a>

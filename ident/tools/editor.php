@@ -76,8 +76,20 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
 	}
 	
 	function showSearch(){
-	  document.getElementById("searchDiv").style.display="block";
-	  document.getElementById("searchDisplay").style.display="none";
+		document.getElementById("searchDiv").style.display="block";
+		document.getElementById("searchDisplay").style.display="none";
+	}
+	
+	function openPopup(urlStr,windowName){
+		var wWidth = 900;
+		if(document.getElementById('maintable').offsetWidth){
+			wWidth = document.getElementById('maintable').offsetWidth*1.05;
+		}
+		else if(document.body.offsetWidth){
+			wWidth = document.body.offsetWidth*0.9;
+		}
+		newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+		if (newWindow.opener == null) newWindow.opener = self;
 	}
 </script>
  </head>
@@ -145,7 +157,11 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
 					if(!$charValue || $charValue == $cidKey){
 						echo "<div id='chardiv".$cidKey."' style='display:".(array_key_exists($cidKey,$depArr)?"hidden":"block").";'>";
 						echo "<div style='margin-top:1em;'><span style='font-weight:bold; font-size:larger;'>$charNameStr</span>\n";
-						if($editorManager->getRankId() > 140) echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size:smaller;'><a href=\"javascript:var popupReference=window.open('editor.php?taxon=".$editorManager->getParentTid()."&action=Get+Character+Info&char=".$cidKey."','technical','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=600,height=450,left=20,top=20');\">parent</a></span>\n";
+						if($editorManager->getRankId() > 140){
+							echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-size:smaller;'>";
+							echo "<a href=\"#\" onclick=\"openPopup('editor.php?taxon=".$editorManager->getParentTid()."&action=Get+Character+Info&char=".$cidKey."','technical');\">parent</a>";
+							echo "</span>\n";
+						}
 						echo "</div>\n";
 						echo "<div style='font-size:smaller; text-indent:2.5em;'>Add&nbsp;&nbsp;Remove</div>\n";
 						$cStates = $charStatesList[$cidKey];

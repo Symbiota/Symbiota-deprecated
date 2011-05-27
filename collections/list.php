@@ -42,8 +42,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		  		alert ("Your browser does not support AJAX!");
 		  		return;
 		  	}
-			var url = "rpc/addvoucher.php";
-			url=url + "?occid=" + occid + "&clid=" + clid + "&tid=" + tid; 
+			var url = "rpc/addvoucher.php" + "?occid=" + occid + "&clid=" + clid + "&tid=" + tid;
 			vXmlHttp.onreadystatechange=function(){
 				if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
 					var rStr = vXmlHttp.responseText;
@@ -77,6 +76,17 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			return xmlHttp;
 		}
 
+		function openIndPU(occId,clid){
+			var wWidth = 900;
+			if(document.getElementById('maintable').offsetWidth){
+				wWidth = document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(document.body.offsetWidth){
+				wWidth = document.body.offsetWidth*0.9;
+			}
+			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if (newWindow.opener == null) newWindow.opener = self;
+		}
 	</script>
 </head>
 <body>
@@ -278,7 +288,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			            <tr>
 			            	<td colspan='3'>
 					            <b>
-					            	<a href="javascript:var puRef=window.open('individual/index.php?occid=<?php echo $fieldArr["occid"]."&clid=".$collManager->getSearchTerm("clid")."','indspec".$fieldArr["occid"]?>','toolbar=1,scrollbars=1,width=870,height=600,left=20,top=20');">
+					            	<a href="#" onclick="openIndPU(<?php echo $fieldArr["occid"].",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>)">
 				            			Full Record Details
 				            		</a>
 				            	</b>

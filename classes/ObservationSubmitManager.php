@@ -194,10 +194,7 @@ class ObservationSubmitManager {
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
 					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
 				//echo $sql;
-				if($this->conn->query($sql)){
-					$this->setPrimaryImageSort();
-				}
-				else{
+				if(!$this->conn->query($sql)){
 					$status = 'ERROR loadImageData: '.$this->conn->error;
 					//$status .= '<br/>SQL: '.$sql;
 				}
@@ -320,16 +317,6 @@ class ObservationSubmitManager {
 			$result->close();
 		}
 		return $this->photographerArr;
-	}
-
-	private function setPrimaryImageSort(){
-		$sql = "UPDATE images ti2 INNER JOIN ".
-			"(SELECT ti.imgid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid ".
-			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted INNER JOIN images ti ON ts2.tid = ti.tid ".
-			"WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND o.occid = ".$this->occId." ORDER BY ti.SortSequence LIMIT 1) innertab ".
-			"ON ti2.imgid = innertab.imgid SET ti2.SortSequence = 1";
-		//echo $sql;
-		$this->conn->query($sql);
 	}
 
 	private function cleanStr($str){

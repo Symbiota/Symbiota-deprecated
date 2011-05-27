@@ -28,11 +28,28 @@
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
- <head>
-  <title><?php echo $defaultTitle; ?> Character Deficit Finder</title>
-  <link rel="stylesheet" href="../../css/main.css" type="text/css" />
- </head>
- <body>
+<head>
+	<title><?php echo $defaultTitle; ?> Character Deficit Finder</title>
+	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<script type="text/javascript">
+		function openPopup(urlStr,windowName){
+			var wWidth = 900;
+			try{
+				if(document.getElementById('maintable').offsetWidth){
+					wWidth = document.getElementById('maintable').offsetWidth*1.05;
+				}
+				else if(document.body.offsetWidth){
+					wWidth = document.body.offsetWidth*0.9;
+				}
+			}
+			catch(e){
+			}
+			newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			if (newWindow.opener == null) newWindow.opener = self;
+		}
+	</script>
+</head>
+<body>
 <?php
 	$displayLeftMenu = (isset($ident_tools_chardeficitMenu)?$ident_tools_chardeficitMenu:"true");
 	include($serverRoot.'/header.php');
@@ -113,7 +130,7 @@
 	      				echo "<div style='margin-top:1em;font-size:125%;'>$f</div>\n";
 	      				foreach($sArr as $idValue => $spValue){
 	      					echo "<div style=''>&nbsp;&nbsp;<a href='editor.php?tid=".$idValue."&action=Get+Character+Info&lang=English&lang=English' target='_blank'>$spValue</a> ";
-	      					echo "(<a href=\"javascript:var popupReference=window.open('editor.php?taxon=".$idValue."&action=Get+Character+Info&char=".$cidValue."','technical','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=600,height=450,left=20,top=20');\">@</a>)</div>\n";
+	      					echo "(<a href=\"#\" onclick=\"openPopup('editor.php?taxon=".$idValue."&action=Get+Character+Info&char=".$cidValue."','technical');\">@</a>)</div>\n";
 	      				}
 	      			}
 	      		}
