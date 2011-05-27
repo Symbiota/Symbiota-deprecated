@@ -8,7 +8,13 @@
 	
 	if($collName && $collNum){
 		$sql = 'SELECT occid FROM omoccurrences '.
-			'WHERE recordedby LIKE "%'.$collName.'%" AND recordnumber = "'.$collNum.'" ';
+			'WHERE recordedby LIKE "%'.$collName.'%" ';
+		if(preg_match('/(\d+)\D*([a-zA-Z]+)$/',$collNum,$m)){
+			$sql .= 'AND recordnumber LIKE "'.$m[1].'%'.$m[2].'" ';
+		}
+		else{
+			$sql .= 'AND recordnumber = "'.$collNum.'" ';
+		}
 		if($collDate) $sql .= ' AND eventdate = "'.$collDate.'"';
 		//echo $sql;
 		$result = $con->query($sql);

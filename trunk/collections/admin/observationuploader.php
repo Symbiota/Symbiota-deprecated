@@ -407,6 +407,20 @@ class DataLoader{
 			$recordCnt++;
 		}
 		fclose($fh);
+		//Update taxa links and families values
+		$sql1 = 'UPDATE uploadspectemp s INNER JOIN taxa t ON s.sciname = t.sciname SET s.TidInterpreted = t.tid '.
+			'WHERE s.TidInterpreted IS NULL';
+		$this->conn->query($sql1);
+		$sql2 = 'UPDATE omoccurrences u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
+			'SET u.family = ts.family '.
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+		$this->conn->query($sql2);
+		$sql3 = 'UPDATE omoccurrences u INNER JOIN taxa t ON u.genus = t.unitname1 '.
+			'INNER JOIN taxstatus ts on t.tid = ts.tid '.
+			'SET u.family = ts.family '.
+			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+		$this->conn->query($sql3);
+		
 		$this->conn->query("Call UpdateCollectionStats(".$collId.");");
 		$this->conn->close();
 	}
