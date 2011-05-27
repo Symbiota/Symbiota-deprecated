@@ -420,6 +420,10 @@ class DataLoader{
 			'SET u.family = ts.family '.
 			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
 		$this->conn->query($sql3);
+		$sql4 = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'SET o.scientificnameauthorship = t.author '.
+			'WHERE t.author is not null and (o.scientificnameauthorship IS NULL or o.scientificnameauthorship = "")';
+		$this->conn->query($sql4);
 		
 		$this->conn->query("Call UpdateCollectionStats(".$collId.");");
 		$this->conn->close();
