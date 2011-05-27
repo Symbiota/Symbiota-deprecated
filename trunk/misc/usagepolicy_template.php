@@ -49,7 +49,7 @@
 			<div>
 			</div>
 
-			<a href="#occurrences"></a>
+			<a name="occurrences"></a>
 			<h2>Occurrence Records</h2>
 		    <div>
 				<ul>
@@ -83,7 +83,7 @@
 				</ul>
 		    </div>
 		
-			<a href="#images"></a>
+			<a name="images"></a>
 			<h2>Images</h2>
 		    <div style="margin:15px;">
 		    	Images within this website have been generously contributed by their owners to 
