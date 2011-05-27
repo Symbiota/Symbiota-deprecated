@@ -147,18 +147,18 @@ class OccurrenceManager{
 				if($this->taxaSearchType == 4){
 					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE sciname = '".$key."'");
 					if($r1 = $rs1->fetch_object()){
-						//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(SELECT tid FROM taxstatus WHERE taxauthid = 1 AND hierarchystr LIKE '%,".$r1->tid.",%')) ";
+						$sqlWhereTaxa .= "OR (o.tidinterpreted IN(SELECT tid FROM taxstatus WHERE taxauthid = 1 AND hierarchystr LIKE '%,".$r1->tid.",%')) ";
 						
-						$fStr = "";
-						$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
-							"WHERE ts.taxauthid = 1 AND ts.hierarchystr LIKE '%,".$r1->tid.",%' AND ts.family IS NOT NULL AND ts.family <> '' ";
-						$rs2 = $this->conn->query($sql2);
-						while($r2 = $rs2->fetch_object()){
-							$fStr .= "','".$r2->family;
-						}
-						if($fStr){
-							$sqlWhereTaxa .= "OR (o.family IN('".substr($fStr,3)."')) ";
-						}
+//						$fStr = "";
+//						$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
+//							"WHERE ts.taxauthid = 1 AND ts.hierarchystr LIKE '%,".$r1->tid.",%' AND ts.family IS NOT NULL AND ts.family <> '' ";
+//						$rs2 = $this->conn->query($sql2);
+//						while($r2 = $rs2->fetch_object()){
+//							$fStr .= "','".$r2->family;
+//						}
+//						if($fStr){
+//							$sqlWhereTaxa .= "OR (o.family IN('".substr($fStr,3)."')) ";
+//						}
 					}
 				}
 				else{
