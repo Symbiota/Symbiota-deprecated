@@ -132,7 +132,7 @@ if($keyModIsActive){
 	  			echo "<div style='font-weight:bold;'>Checklist:</div>";
 				echo "<select name='cl'>";
 	  			$selectList = Array();
-	  			$selectList = $dataManager->getClFilterList($paramsArr["uid"]);
+	  			$selectList = $dataManager->getClFilterList($symbUid);
 	  			foreach($selectList as $key => $value){
 	  				$selectStr = ($key==$clValue?"SELECTED":"");
 	  				echo "<option value='".$key."' $selectStr>$value</option>\n";
