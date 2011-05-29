@@ -210,38 +210,56 @@ header("Content-Type: text/html; charset=".$charset);
 		            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
 		            can inspect these specimens for verification or annotate the identification when necessary.
 				</div>
-				<ul>
-				<?php 	
-					foreach($researchList as $key=>$value){
-	            ?>
-					<li>
-						<a href='../checklists/checklist.php?cl=<?php echo $key."&proj=".$projManager->getProjectId(); ?>'>
-							<?php echo $value; ?>
-						</a> 
-						<?php 
-						if($keyModIsActive){
+				<?php 
+				$gMapUrl = $projManager->getGoogleStaticMap("research");
+				if($gMapUrl){
+					?>
+					<div style="float:right;">
+						<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
+							<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
+							<br/>
+							Click to Open Map
+						</a>
+					</div>
+					<?php
+				} 
+				?>
+				<div style="float:left;">
+					<ul>
+					<?php 	
+						foreach($researchList as $key=>$value){
+		            ?>
+						<li>
+							<a href='../checklists/checklist.php?cl=<?php echo $key."&proj=".$projManager->getProjectId(); ?>'>
+								<?php echo $value; ?>
+							</a> 
+							<?php 
+							if($keyModIsActive){
+								?>
+								<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
+									<img style='width:12px;border:0px;' src='../images/key.jpg'/>
+								</a>
+								<?php
+							}
 							?>
-							<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
-								<img style='width:12px;border:0px;' src='../images/key.jpg'/>
-							</a>
-							<?php
-						}
-						?>
-					</li>
-					<?php } ?>
-				</ul>
+						</li>
+						<?php } ?>
+					</ul>
+				</div>
 			<?php }
                 $surveyList = $projManager->getSurveyLists();
 			if($surveyList){
 			?>
-				<h3>Dynamic Survey Species Lists 
-					<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
-						<img src="../images/qmark.jpg" style="height:15px;"/>
-					</span> 
-					<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
-						<img src="../images/world40.gif" style="width:14px;border:0" />
-					</a>
-				</h3>
+				<div style="clear:both;">
+					<h3>Dynamic Survey Species Lists 
+						<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
+							<img src="../images/qmark.jpg" style="height:15px;"/>
+						</span> 
+						<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
+							<img src="../images/world40.gif" style="width:14px;border:0" />
+						</a>
+					</h3>
+				</div>
 				<div id="surveylistpopup" class="genericpopup" style="display:none;">
 					<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
 		            Dynamic Survey Species Lists are defined through the linkage of species occurrences 
@@ -253,16 +271,32 @@ header("Content-Type: text/html; charset=".$charset);
 					will automatically adjust the species. Explicit maintenance of the species list is unnecessary since the checklist is 
 					dynamically generated from the vouchers on demand. 
 				</div>
-				<ul>
-				<?php 	
-				foreach($surveyList as $key=>$value){
-	            ?>
-            
-					<li>
-						<a href='../checklists/survey.php?surveyid=<?php echo $key;?>'><?php echo $value;?></a> 
-					</li>
-					<?php } ?>
-				</ul>
+				<?php 
+				$gMapUrl = $projManager->getGoogleStaticMap("survey");
+				if($gMapUrl){
+					?>
+					<div style="float:right;">
+						<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
+							<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
+							<br/>
+							Click to Open Map
+						</a>
+					</div>
+					<?php
+				} 
+				?>
+				<div style="float:left;">
+					<ul>
+					<?php 	
+					foreach($surveyList as $key=>$value){
+		            ?>
+	            
+						<li>
+							<a href='../checklists/survey.php?surveyid=<?php echo $key;?>'><?php echo $value;?></a> 
+						</li>
+						<?php } ?>
+					</ul>
+				</div>
 			<?php } ?>
 		</div>
 	<?php
