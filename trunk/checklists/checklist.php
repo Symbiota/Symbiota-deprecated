@@ -353,6 +353,7 @@
 					<div id="editortab">
 						Editors
 						<div style="margin:10px;">
+							<b>To be added</b>
 							<?php 
 								$clManager->echoEditorList();
 							
@@ -618,7 +619,6 @@
 								<?php
 								$prevfam = $family;
 							}
-							$voucherLink = "";
 							$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
 							echo "<div id='tid-$tid' style='margin-left:10px;'>";
 							echo "<div>";
@@ -643,13 +643,22 @@
 							if(array_key_exists('vern',$sppArr)){
 								echo "<div style='margin-left:10px;font-weight:bold;'>".$sppArr["vern"]."</div>";
 							}
-							if($showVouchers && array_key_exists('vouchers',$sppArr)){
-								$vArr = $sppArr['vouchers'];
+							if($showVouchers){
 								$voucStr = '';
-								foreach($vArr as $occid => $collName){
-									$voucStr .= ", <a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
+								if(array_key_exists('vouchers',$sppArr)){
+									$vArr = $sppArr['vouchers'];
+									foreach($vArr as $occid => $collName){
+										$voucStr .= ", <a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
+									}
+									$voucStr = substr($voucStr,2);
 								}
-								echo "<div style='margin-left:10px;'>".substr($voucStr,2)."</div>";
+								$noteStr = '';
+								if(array_key_exists('notes',$sppArr)){
+									$noteStr = $sppArr['notes'];
+								}
+								if($noteStr || $voucStr){
+									echo "<div style='margin-left:10px;'>".$noteStr.($noteStr && $voucStr?'; ':'').$voucStr."</div>";
+								}
 							}
 							echo "</div>\n";
 						}

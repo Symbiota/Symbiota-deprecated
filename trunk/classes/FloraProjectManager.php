@@ -5,9 +5,14 @@ include_once($serverRoot.'/config/dbconnection.php');
 
 	private $con;
 	private $projId;
-
+	private $googleUrl;
+	private $researchCoord = Array();
+	private $surveyCoord = Array();
+	
  	public function __construct($proj){
+		global $googleMapKey;
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
+		$this->googleUrl = "http://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain&sensor=false";
 		if(is_numeric($proj)){
 			$this->projId = $proj;
 		}
@@ -80,7 +85,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 	
 	public function getResearchChecklists(){
 		$returnArr = Array();
-		$sql = "SELECT c.clid, c.name ".
+		$sql = "SELECT c.clid, c.name, c.latcentroid, c.longcentroid ".
 			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".
 			"WHERE (c.access = 'public') AND (cpl.pid = ".$this->projId.") ".
 			"ORDER BY c.SortSequence, c.name";
@@ -88,6 +93,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->clid] = $row->name;
+			if($row->latcentroid){
+				$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
+			}
 		}
 		echo "</ul>";
 		$rs->close();
@@ -96,7 +104,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 	
 	public function getSurveyLists(){
 		$returnArr = Array();
-		$sql = "SELECT s.surveyid, s.projectname ".
+		$sql = "SELECT s.surveyid, s.projectname, s.latcentroid, s.longcentroid ".
 			"FROM omsurveyprojlink spl INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
 			"WHERE (spl.pid = ".$this->projId.") ".
 			"ORDER BY s.SortSequence, s.projectname";
@@ -104,11 +112,28 @@ include_once($serverRoot.'/config/dbconnection.php');
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->surveyid] = $row->projectname;
+			if($row->latcentroid){
+				$this->surveyCoord[] = $row->latcentroid.','.$row->longcentroid;
+			}
 		}
 		echo "</ul>";
 		$rs->close();
 		return $returnArr;
 	}
- }
 
- ?>
+	public function getGoogleStaticMap($type){
+		$googleUrlLocal = $this->googleUrl;
+		//$googleUrlLocal .= "&zoom=6";
+		$coordStr = '';
+		if($type == 'research'){
+			$coordStr = implode('%7C',$this->researchCoord);
+		}
+		else{
+			$coordStr = implode('%7C',$this->surveyCoord);
+		}
+		if(!$coordStr) return ""; 
+		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
+		return $googleUrlLocal;
+	}
+}
+?>

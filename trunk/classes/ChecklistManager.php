@@ -229,9 +229,9 @@ class ChecklistManager {
 					if($row->abundance) $clStr .= ", ".$row->abundance;
 					if($row->notes) $clStr .= ", ".$row->notes;
 					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
+					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
 					if(array_key_exists($tid,$voucherArr)){
 						$this->taxaList[$tid]["vouchers"] = $voucherArr[$tid];  
-						//$clStr .= "; ".(is_array($this->voucherArr[$tid])?implode(", ",$this->voucherArr[$tid]):$this->voucherArr[$tid]);
 					}
 				}
 				$this->taxaList[$tid]["sciname"] = $sciName;
