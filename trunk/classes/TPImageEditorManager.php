@@ -32,14 +32,24 @@ class TPImageEditorManager extends TPEditorManager{
  	
 	public function getImages(){
 		$imageArr = Array();
-		$sql = "SELECT DISTINCT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.photographer, ti.photographeruid, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ti.caption, ti.owner, ".
-			"ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright ".
-			"FROM ((images ti INNER JOIN taxstatus ts ON ti.tid = ts.tid) ".
-			"LEFT JOIN users u ON ti.photographeruid = u.uid) ".
-			"INNER JOIN taxa t ON ts.tidaccepted = t.TID ".
-			"WHERE (ts.taxauthid = 1) AND (t.tid = ".$this->taxonCon->real_escape_string($this->tid).") ".
-			"ORDER BY ti.sortsequence";
+		$tidArr = Array($this->tid);
+		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
+			'WHERE taxauthid = 1 AND tid = tidaccepted AND (hierarchystr LIKE "%,'.$this->tid.',%" OR hierarchystr LIKE "%,'.$this->tid.'")';
+		$rs1 = $this->taxonCon->query($sql1);
+		while($r1 = $rs1->fetch_object()){
+			$tidArr[] = $r1->tid;
+		}
+		$rs1->close();
+		
+		$tidStr = implode(",",$tidArr);
+		$this->imageArr = Array();
+		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.photographer, ti.photographeruid, '.
+			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographerdisplay, ti.owner, '.
+			'ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright '.
+			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
+			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
+			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
+			'ORDER BY ti.sortsequence'; 
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
 		$imgCnt = 0;
