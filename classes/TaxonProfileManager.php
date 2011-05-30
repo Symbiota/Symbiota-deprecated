@@ -293,7 +293,17 @@
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) ".
 				"INNER JOIN taxa t ON ts2.tid = t.tid ".
 				"WHERE t.tid IN(".implode(",",$tids).") AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ti.sortsequence = 1) ";
-			//echo $sql;
+/*			$sql_old = 'SELECT t.sciname, t.tid, i.imgid, i.url, i.thumbnailurl, i.caption, '.
+				'IFNULL(i.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
+				'FROM images i INNER JOIN '.
+				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN images i ON ts2.tid = i.tid '.
+				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tid IN('.implode(',',$tids).') '.
+				'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid '.
+				'INNER JOIN taxa t ON i2.tid = t.tid '.
+				'LEFT JOIN users u ON i.photographeruid = u.uid ';
+*/			//echo $sql;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
 				$sciName = ucfirst(strtolower($row->sciname));

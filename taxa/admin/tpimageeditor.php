@@ -264,28 +264,6 @@ if($editable && $tid){
 						<input id="occidadd" name="occid" type="text" value="" READONLY/>
 						<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
 					</div>
-					<?php if($imageEditor->getRankId() > 220 && !$imageEditor->getSubmittedTid()){ ?>
-					<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-						<input type='checkbox' name='addtoparent' value='1' /> 
-						Add Image to Species Rank 
-						<div style='margin-left:10px;'>
-							* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
-						</div>
-					</div>
-					<?php }elseif($cArr = $imageEditor->getChildrenArr()){ ?>
-					<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-						Add Image to a Child Taxon 
-						<select name='addtotid'>
-							<option value='0'>Child Taxon</option>
-							<option value='0'>-----------------------</option>
-							<?php 
-								foreach($cArr as $t => $sn){
-									?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
-								}
-							?>
-						</select> 
-					</div>
-					<?php } ?>
 				</div>
 				<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
 				<input name='category' type='hidden' value='images'>
