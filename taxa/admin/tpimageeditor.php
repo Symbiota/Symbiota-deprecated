@@ -80,13 +80,6 @@ if($editable && $tid){
 						<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
 					</ul>
 					<li><a href="tpdesceditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
-					<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){ ?>
-					<li><a href="taxonomydisplay.php?target=<?php echo $imageEditor->getSciName(); ?>">View Taxonomic Tree</a></li>
-					<ul>
-						<li><a href="taxonomyeditor.php?target=<?php echo $imageEditor->getTid(); ?>">Edit Taxonomic Placement</a></li>
-						<li><a href="taxonomyloader.php">Add New Taxonomic Name</a></li>
-					</ul>
-					<?php } ?>
 				</ul>
 			</div>
 			<?php 
@@ -98,20 +91,38 @@ if($editable && $tid){
 		 		<?php  
 		 	}
 		 	?>
-			<div style='font-size:16px;margin-top:15px;margin-left:10px;'>
-				<a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>" style="color:#990000;text-decoration:none;">
-					<b><i><?php echo $imageEditor->getSciName(); ?></i></b>
-				</a> 
-				<?php echo $imageEditor->getAuthor(); ?>
+			<div>
+				<span style='font-size:16px;margin-top:15px;margin-left:10px;'>
+					<a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>" style="color:#990000;text-decoration:none;">
+						<b><i><?php echo $imageEditor->getSciName(); ?></i></b>
+					</a> 
+					<?php echo $imageEditor->getAuthor(); ?>
+				</span>
 				<?php 
 				if($imageEditor->getRankId() > 140){
 					?>
-					<a href='tpeditor.php?tid=<?php echo $imageEditor->getParentTid(); ?>'>
-						<img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' />
-					</a>
+					<a href='tpeditor.php?tid=<?php echo $imageEditor->getParentTid(); ?>'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a> 
 					<?php 
 				}
-			?>
+				if($imageEditor->getRankId() == 220 && $childArr = $imageEditor->getChildrenArr()){
+					?>
+					<a href="#" onclick="toggle('childrendiv')"><img border='0' height='10px' src='../../images/tochild.png' title='Go to a child taxon' /></a>
+					<div id="childrendiv" style="width:300px;margin-left:325px;padding:10px;border:2px solid green;display:none;">
+						<b>Go To:</b><br/>
+						<?php 
+						foreach($childArr as $id => $sn){
+							?>
+							<a href='tpeditor.php?tid=<?php echo $id; ?>'>
+								<?php echo $sn; ?>
+							</a>
+							<br/>
+							<?php 
+						}
+						?>
+					</div>
+					<?php 
+				}
+				?>
 			</div>
 			<div id='family' style='margin-left:20px;margin-top:0.25em;'>
 				<b>Family:</b> <?php echo $imageEditor->getFamily();?>
