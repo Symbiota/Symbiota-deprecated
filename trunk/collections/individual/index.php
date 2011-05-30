@@ -401,7 +401,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						foreach($iArr as $imgId => $imgArr){
 							?>
 							<div style='float:left;text-align:center;padding:5px;'>
-								<a href='../../imagelib/imgdetails.php?imgid=<?php echo $imgId; ?>'>
+								<a href='<?php echo $imgArr['url']; ?>'>
 									<img border=1 width='150' src='<?php echo ($imgArr['tnurl']?$imgArr['tnurl']:$imgArr['url']); ?>' title='<?php echo $imgArr['caption']; ?>'/>
 								</a>
 								<?php if($imgArr['lgurl']) echo '<br/><a href="'.$imgArr['lgurl'].'">Large Version</a>'; ?>
