@@ -193,12 +193,10 @@ class TPEditorManager {
 		return $status;
 	}
 
-	public function getChildrenArr($url = ""){
+	public function getChildrenArr(){
 		$returnArr = Array();
-		$sql = "SELECT t.tid, t.sciname FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ";
-		if($url) $sql .= "LEFT JOIN (SELECT i2.tid FROM images i2 WHERE i2.url = '".$url."' ) i ON t.tid = i.tid "; 
-		$sql .= "WHERE ts.taxauthid = 1 AND ts.parenttid = ".$this->tid;
-		if($url) $sql .= " AND i.tid IS NULL ";
+		$sql = 'SELECT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE ts.taxauthid = 1 AND ts.parenttid = '.$this->tid;
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
 		while($row = $result->fetch_object()){
