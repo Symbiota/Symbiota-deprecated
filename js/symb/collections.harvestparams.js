@@ -3,10 +3,33 @@
 * cont: function(res) for return of suggest results
 */ 
 
+
 $(document).ready(function() {
-	function split( val ) {
-		return val.split( /,\s*/ );
-	}
+
+	var cache = {}, lastXhr;
+	$( "#taxa" ).autocomplete({
+		minLength: 2,
+		source: function( request, response ) {
+			var term = request.term;
+			if ( term in cache ) {
+				response( cache[ term ] );
+				return;
+			}
+
+			lastXhr = $.getJSON( "rpc/taxalist.php", request, function( data, status, xhr ) {
+				cache[ term ] = data;
+				if ( xhr === lastXhr ) {
+					response( data );
+				}
+			});
+		}
+	},{ autoFocus: true });
+});
+
+//$(document).ready(function() {
+//	function split( val ) {
+//		return val.split( /,\s*/ );
+/*	}
 	function extractLast( term ) {
 		return split( term ).pop();
 	}
@@ -45,8 +68,8 @@ $(document).ready(function() {
 				this.value = terms.join( ", " );
 				return false;
 			}
-		},{ autoFocus: true, delay: 400 });
-});
+		},{ autoFocus: true });
+}); */
 
 function checkUpperLat(){
 	if(document.harvestparams.upperlat.value != ""){
