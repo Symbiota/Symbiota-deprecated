@@ -100,7 +100,7 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
-		var countryArr = new Array(<?php $occManager->echoCountryList($collId);?>);
+		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
 </head>

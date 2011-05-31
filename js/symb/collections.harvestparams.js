@@ -45,7 +45,7 @@ $(document).ready(function() {
 				this.value = terms.join( ", " );
 				return false;
 			}
-		},{ autoFocus: true });
+		},{ autoFocus: true, delay: 400 });
 });
 
 function checkUpperLat(){
