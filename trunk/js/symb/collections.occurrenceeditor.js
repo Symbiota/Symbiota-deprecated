@@ -46,20 +46,20 @@ $(document).ready(function() {
 	{ minLength: 3, autoFocus: true });
 	
 	//Misc pulldown fields
-	$("#ffcountry").autocomplete( { source: countryArr },{ minLength: 2, autoFocus: true } );
+	$("#ffcountry").autocomplete( { source: countryArr },{ minLength: 1, autoFocus: true, matchContains: false } );
 
 	$("#ffstate").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/statesuggest.php", { term: request.term, "collid": collId, "country": document.fullform.country.value }, response );
+			$.getJSON( "rpc/statesuggest.php", { term: request.term, "country": document.fullform.country.value }, response );
 		}
-	},{ minLength: 2, autoFocus: true }
+	},{ minLength: 1, autoFocus: true, matchContains: false }
 	);
 
 	$("#ffcounty").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/countysuggest.php", { term: request.term, "collid": collId, "state": document.fullform.stateprovince.value }, response );
+			$.getJSON( "rpc/countysuggest.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
 		}
-	},{ minLength: 2, autoFocus: true }
+	},{ minLength: 1, autoFocus: true, matchContains: false }
 	);
 });
 

@@ -808,12 +808,12 @@ class OccurrenceEditorManager {
 		return $collList;
 	}
 	
-	public function echoCountryList($collId){
+	public function echoCountryList(){
 		$retArr = Array();
-		$sql = 'SELECT DISTINCT country FROM omoccurrences WHERE collid = '.$collId;
+		$sql = 'SELECT countryname FROM lkupcountry ORDER BY countryname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[] = $r->country;
+			$retArr[] = $r->countryname;
 		}
 		$rs->close();
 		echo '"'.implode('","',$retArr).'"';
