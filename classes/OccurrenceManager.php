@@ -36,10 +36,10 @@ class OccurrenceManager{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
- 	protected function getConnection($conType = "readonly"){
+	protected function getConnection($conType = "readonly"){
 		return MySQLiConnectionFactory::getCon($conType);
- 	}
- 	
+	}
+
 	public function reset(){
 		global $clientRoot;
 		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
@@ -223,7 +223,7 @@ class OccurrenceManager{
 			$countyArr = explode(";",$this->searchTermsArr["county"]);
 			$tempArr = Array();
 			foreach($countyArr as $value){
-				$tempArr[] = "(o.county LIKE '".trim($value)."%' OR o.municipality LIKE '".trim($value)."%')";
+				$tempArr[] = "(o.county LIKE '".trim($value)."%')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$countyArr);
@@ -232,7 +232,7 @@ class OccurrenceManager{
 			$localArr = explode(";",$this->searchTermsArr["local"]);
 			$tempArr = Array();
 			foreach($localArr as $value){
-				$tempArr[] = "(o.Locality LIKE '%".trim($value)."%')";
+				$tempArr[] = "(o.municipality LIKE '".trim($value)."%' OR o.Locality LIKE '%".trim($value)."%')";
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$localArr);
@@ -568,8 +568,8 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("county",$_REQUEST)){
 			$county = $this->conn->real_escape_string($_REQUEST["county"]);
-			$county = str_replace(" Co.","",$county);
-			$county = str_replace(" County","",$county);
+			$county = str_ireplace(" Co.","",$county);
+			$county = str_ireplace(" County","",$county);
 			if($county){
 				$str = str_replace(",",";",$county);
 				$searchArr[] = "county:".$str;

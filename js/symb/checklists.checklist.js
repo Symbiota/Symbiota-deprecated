@@ -17,7 +17,7 @@ $(document).ready(function() {
 });
 
 function toggle(target){
-	var objDiv = document.getElementById("gamediv");
+	var objDiv = document.getElementById(target);
 	if(objDiv){
 		if(objDiv.style.display=="none"){
 			objDiv.style.display = "block";

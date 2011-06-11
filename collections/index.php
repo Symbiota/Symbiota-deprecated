@@ -54,16 +54,16 @@
 		        document.collections.onkeydown = checkKey;
 			});
 		
-			function selectAll(thisCB){
-				cName = thisCB.className;
+			function selectAll(cb){
 				boxesChecked = true;
-				if(!thisCB.checked){
+				if(!cb.checked){
 					boxesChecked = false;
 				}
+				cName = cb.className;
 				var dbElements = document.getElementsByName("db[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];
-					if(dbElement.className = cName){
+					if(dbElement.className == cName){
 						dbElement.checked = boxesChecked;
 					}
 					else{
@@ -71,7 +71,7 @@
 					}
 				}
 			}
-		
+
 		    function checkForm(){
 				var dbElements = document.getElementsByName("db[]");
 				for(i = 0; i < dbElements.length; i++){
@@ -141,7 +141,7 @@
 						<tr>
 							<td colspan="4">
 					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
+					         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this,'specobs');" />
 					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 					        	</div>
 							</td>
@@ -152,7 +152,7 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank'>
+							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
 							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
 							    	</a>
 							    </td>
@@ -160,7 +160,7 @@
 						    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
 							    </td>
 							    <td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 						    		</a>
 							    </td>
@@ -188,7 +188,7 @@
 						<tr>
 							<td colspan="4">
 					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input name="db[]" class="spec" value='' type="checkbox" onclick="javascript:selectAll(this);" />
+					         		<input name="db[]" class="spec" value='' type="checkbox" onclick="selectAll(this,'spec');" />
 					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 					        	</div>
 							</td>
@@ -235,7 +235,7 @@
 						<tr>
 							<td colspan="4">
 					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input name="db[]" class="obs" value='' type="checkbox" onclick="javascript:selectAll(this,'obstable');" />
+					         		<input name="db[]" class="obs" value='' type="checkbox" onclick="selectAll(this,'obs');" />
 					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 					        	</div>
 							</td>
@@ -246,7 +246,7 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank'>
+							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
 							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
 							    	</a>
 							    </td>
@@ -254,7 +254,7 @@
 						    		<input name="db[]" class="obs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
 							    </td>
 								<td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' target='_blank' style='text-decoration:none;color:black;font-size:120%;'>
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 						    		</a>
 								</td>

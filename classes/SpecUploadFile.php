@@ -71,7 +71,7 @@ class SpecUploadFile extends SpecUploadManager{
 			}
 			//Grab data 
 			$sqlBase = "INSERT INTO uploadspectemp(collid,".implode(",",$targetArr).") ";
-			$this->transferCount = 1;
+			$this->transferCount = 0;
 			$reqFieldsNullCnt = 0;
 			while($recordArr = $this->getRecordArr($fh)){
 				if(count($recordArr) == count($headerArr)){

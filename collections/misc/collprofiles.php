@@ -68,11 +68,50 @@ if($collId){
 			 		obj.style.display="none";
 			 	}
 			}
+			return false;
 		}
 
 		function openMappingAid(targetForm,targetLat,targetLong) {
 		    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
+		}
+
+		function verifyCollEditForm(f){
+			if(f.institutioncode.value == ''){
+				alert("Institution Code must have a value");
+				return false;
+			}
+			else if(f.collectionname.value == ''){
+				alert("Collection Name must have a value");
+				return false;
+			}
+			else if(!isNumeric(f.latdec.value) || !isNumeric(f.lngdec.value)){
+				alert("Latitdue and longitude values must be in the decimal format (numeric only)");
+				return false;
+			}
+			try{
+				if(!isNumeric(f.sortseq.value)){
+					alert("Sort sequence must be numeric only");
+					return false;
+				}
+			}
+			catch(ex){}
+			return true;
+		}
+
+		function isNumeric(sText){
+		   	var ValidChars = "0123456789-.";
+		   	var IsNumber = true;
+		   	var Char;
+		 
+		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
+			   Char = sText.charAt(i); 
+				if(ValidChars.indexOf(Char) == -1){
+					IsNumber = false;
+					break;
+		      	}
+		   	}
+			return IsNumber;
 		}
 	</script>
 </head>
@@ -166,92 +205,176 @@ if($collId){
 			if($editCode > 1){
 				?>
 				<div id="colledit" style="display:<?php echo ($newCollRec?'block':'none'); ?>;">
-					<form id="colleditform" name="colleditform" action="collprofiles.php" method="post">
+					<form id="colleditform" name="colleditform" action="collprofiles.php" method="post" onsubmit="return verifyCollEditForm(this)">
 						<fieldset style="background-color:#FFF380;">
 							<legend><b><?php echo ($newCollRec?'Add New':'Edit'); ?> Collection Information</b></legend>
-							<div>
-								Institution Code:
-								<input type="text" name="institutioncode" value="<?php echo ($collId?$collData["institutioncode"]:'');?>" style="width:75px;" />
-							</div>
-							<div>
-								Collection Code:
-								<input type="text" name="collectioncode" value="<?php echo ($collId?$collData["collectioncode"]:'');?>" style="width:75px;" />
-							</div>	
-							<div>
-								Collection Name: 
-								<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:300px;" />
-							</div>
-							<div>
-								Brief Description (300 character max): 
-								<textarea rows="2" cols="45" name="briefdescription"><?php echo ($collId?$collData["briefdescription"]:'');?></textarea>
-							</div>
-							<div>
-								Full Description (1000 character max): 
-								<textarea rows="3" cols="45" name="fulldescription"><?php echo ($collId?$collData["fulldescription"]:'');?></textarea>
-							</div>
-							<div>
-								Homepage:
-								<input type="text" name="homepage" value="<?php echo ($collId?$collData["homepage"]:'');?>" style="width:300;" />
-							</div>
-							<div>
-								Contact: 
-								<input type="text" name="contact" value="<?php echo ($collId?$collData["contact"]:'');?>" style="width:200;" />
-							</div>
-							<div>
-								Email:
-								<input type="text" name="email" value="<?php echo ($collId?$collData["email"]:'');?>" style="width:200;" />
-							</div>
-							<div>
-								Latitude:
-								<input id="latdec" type="text" name="latitudedecimal" value="<?php echo ($collId?$collData["latitudedecimal"]:'');?>" />
-								<span style="cursor:pointer;" onclick="openMappingAid('colleditform','latitudedecimal','longitudedecimal');">
-									<img src="../../images/world40.gif" style="width:12px;" />
-								</span>
-							</div>
-							<div>
-								Longitude:
-								<input id="lngdec" type="text" name="longitudedecimal" value="<?php echo ($collId?$collData["longitudedecimal"]:'');?>" />
-							</div>
-							<?php 
-							if($isAdmin){ 
-								?>
-								<div>
-									Management:
-									<select name="managementtype">
-										<option>Snapshot</option>
-										<option <?php echo ($collId && $collData["managementtype"]=='Live Date'?'SELECTED':''); ?>>Live Date</option>
-									</select>
-								</div>
-								<div>
-									Icon URL:
-									<input type="text" name="icon" style="width:320px;" value="<?php echo ($collId?$collData["icon"]:'');?>" title="Small url usually placed in /images/collicons/ folder" />
-								</div>
-								<div>
-									Source Record URL:
-									<input type="text" name="individualurl" style="width:270px;" value="<?php echo ($collId?$collData["individualurl"]:'');?>" title="Dynamic link to source database individual record page" />
-								</div>
-								<div>
-									Sort Sequence:
-									<input type="text" name="sortseq" value="<?php echo ($collId?$collData["sortseq"]:'');?>" />
-								</div>
+							<table style="width:100%;">
+								<tr>
+									<td>
+										Institution Code:
+									</td>
+									<td>
+										<input type="text" name="institutioncode" value="<?php echo ($collId?$collData["institutioncode"]:'');?>" style="width:75px;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Collection Code:
+									</td>
+									<td>
+										<input type="text" name="collectioncode" value="<?php echo ($collId?$collData["collectioncode"]:'');?>" style="width:75px;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Collection Name: 
+									</td>
+									<td>
+										<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:350px;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Brief Description<br/> 
+										(300 character max): 
+									</td>
+									<td>
+										<textarea name="briefdescription" style="width:95%;height:60px;"><?php echo ($collId?$collData["briefdescription"]:'');?></textarea>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Full Description<br/>
+										(1000 character max): 
+									</td>
+									<td>
+										<textarea name="fulldescription" style="width:95%;height:90px;"><?php echo ($collId?$collData["fulldescription"]:'');?></textarea>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Homepage:
+									</td>
+									<td>
+										<input type="text" name="homepage" value="<?php echo ($collId?$collData["homepage"]:'');?>" style="width:350;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+									Contact: 
+										</td>
+									<td>
+										<input type="text" name="contact" value="<?php echo ($collId?$collData["contact"]:'');?>" style="width:350;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Email:
+									</td>
+									<td>
+										<input type="text" name="email" value="<?php echo ($collId?$collData["email"]:'');?>" style="width:350;" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Latitude:
+									</td>
+									<td>
+										<input id="latdec" type="text" name="latitudedecimal" value="<?php echo ($collId?$collData["latitudedecimal"]:'');?>" />
+										<span style="cursor:pointer;" onclick="openMappingAid('colleditform','latitudedecimal','longitudedecimal');">
+											<img src="../../images/world40.gif" style="width:12px;" />
+										</span>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Longitude:
+									</td>
+									<td>
+										<input id="lngdec" type="text" name="longitudedecimal" value="<?php echo ($collId?$collData["longitudedecimal"]:'');?>" />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Allow Public Edits:
+									</td>
+									<td>
+										<input type="checkbox" name="publicedits" value="1" <?php echo ($collData && $collData['publicedits']?'CHECKED':''); ?> />
+									</td>
+								</tr>
 								<?php 
-							} 
-							?>
-							<div>
-								<?php 
-								if($newCollRec){ 
+								if($isAdmin){ 
 									?>
-									<input type="submit" name="action" value="Add New Profile" />
-									<?php
-								}
-								else{
-									?>
-									<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-									<input type="submit" name="action" value="Submit Edits" />
+									<tr>
+										<td>
+											Collection Type:
+										</td>
+										<td>
+											<select name="colltype">
+												<option>Preserved Specimens</option>
+												<option <?php echo ($collId && $collData["colltype"]=='Observations'?'SELECTED':''); ?>>Observations</option>
+												<option <?php echo ($collId && $collData["colltype"]=='General Observations'?'SELECTED':''); ?>>General Observations</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Management:
+										</td>
+										<td>
+											<select name="managementtype">
+												<option>Snapshot</option>
+												<option <?php echo ($collId && $collData["managementtype"]=='Live Date'?'SELECTED':''); ?>>Live Date</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Icon URL:
+										</td>
+										<td>
+											<input type="text" name="icon" style="width:350px;" value="<?php echo ($collId?$collData["icon"]:'');?>" title="Small url representing the collection" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Source Record URL:
+										</td>
+										<td>
+											<input type="text" name="individualurl" style="width:350px;" value="<?php echo ($collId?$collData["individualurl"]:'');?>" title="Dynamic link to source database individual record page" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Sort Sequence:
+										</td>
+										<td>
+											<input type="text" name="sortseq" value="<?php echo ($collId?$collData["sortseq"]:'');?>" />
+										</td>
+									</tr>
 									<?php 
-								}
+								} 
 								?>
-							</div>
+								<tr>
+									<td colspan="2">
+										<div style="margin:20px;">
+											<?php 
+											if($newCollRec){ 
+												?>
+												<input type="submit" name="action" value="Add New Profile" />
+												<?php
+											}
+											else{
+												?>
+												<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+												<input type="submit" name="action" value="Submit Edits" />
+												<?php 
+											}
+											?>
+										</div>
+									</td>
+								</tr>
+							</table>
 						</fieldset>
 					</form>
 				</div>
@@ -260,7 +383,14 @@ if($collId){
 			if(!$newCollRec){
 				?>
 				<div style='margin:10px;'>
-					<div><?php echo $collData["briefdescription"];?></div>
+					<div><?php 
+					if($collData["fulldescription"]){
+						echo $collData["fulldescription"];
+					}
+					else{
+						echo $collData["briefdescription"];
+					}	
+					?></div>
 					<div style='margin-top:5px;'><b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)</div>
 					<?php 
 						if($collData["homepage"]) echo "<div style='margin-top:5px;'><b>Home Page:</b> <a href='".$collData["homepage"]."'>".$collData["homepage"]."</a></div>";
@@ -377,7 +507,7 @@ if($collId){
 					<tr>
 						<td style='text-align:center;vertical-align:top;'>
 							<img src='../../<?php echo $collArr['icon']; ?>' style='border-size:1px;height:30;width:30;' /><br/>
-							<?php echo $collArr['collectioncode']; ?>
+							<?php echo $collArr['institutioncode']; ?>
 						</td>
 						<td>
 							<h3>

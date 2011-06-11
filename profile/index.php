@@ -109,41 +109,44 @@ if(isset($profile_indexCrumbs)){
 ?>
 <!-- inner text -->
 <div id="innertext">
-	<h1 style="margin: 1em 0em 0em 0em;">Please Login</h1>
 	
 	<?php
 	if($statusStr){
-		echo "<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>";
-		if($statusStr == "badUserId"){
-		   	echo "We do not have a record of your User ID in the database.";
-		}
-		elseif($statusStr == "badPassword"){
-			echo "Your password was incorrect. Please try again.<br />";
-		    echo "Would you like to <a href='index.php?resetpwd=1&login=".$login."'>reset your password?</a>";
-		}
-		else{
-		    echo $statusStr;
-		}
-		echo "</div>";
+		?>
+		<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>
+			<?php 
+			if($statusStr == "badUserId"){
+			   	echo "We do not have a record of your User ID in the database.";
+			}
+			elseif($statusStr == "badPassword"){
+				echo "Your password was incorrect. Please try again.<br />";
+			    echo "Click <a href='index.php?resetpwd=1&login=".$login."'><b>here</b></a> to reset your password.";
+			}
+			else{
+			    echo $statusStr;
+			}
+			?>
+		</div>
+		<?php 
 	}
 	?>
 	
 	<form id="loginform" name="loginform" action="index.php" method="post">
-	  	<fieldset style='margin:20px;width:300px;background-color:#FFFFCC;border:2px outset #E8EEFA;'>
-			<div style="margin: 1em 1em 0em 2em;font-weight:bold;">
+	  	<fieldset style='padding:25px;margin:20px;width:300px;background-color:#FFFFCC;border:2px outset #E8EEFA;'>
+			<div style="margin: 10px;font-weight:bold;">
 				Login:&nbsp;&nbsp;&nbsp;<input id="login" name="login" value="<?php echo $login; ?>" style="border-style:inset;" />
 			</div>
 			
-			<div style="margin: 1em 1em 0em 2em;font-weight:bold;">
+			<div style="margin:10px;font-weight:bold;">
 			    Password:&nbsp;&nbsp;<input type="password" name="password"  style="border-style:inset;"/>
 			</div>
 			
-			<div style="margin: 1em 1em 0em 2em">
+			<div style="margin:10px">
 			    <input type="checkbox" value='1' name="remember" >
 			    Remember me on this computer
 			</div>
 			
-			<div style="margin: 1em 1em 0em 2em;text-align:right;">
+			<div style="margin:20px 0px 10px 140px;">
 				<?php 
 					if($refUrl) echo "<input type='hidden' name='refurl' value='".$refUrl."'/>";
 				?>

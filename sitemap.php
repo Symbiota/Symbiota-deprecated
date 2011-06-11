@@ -4,6 +4,7 @@ include_once('config/symbini.php');
 include_once($serverRoot.'/classes/SiteMapManager.php');
 
 header("Content-Type: text/html; charset=".$charset);
+$submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:''; 
 
 $smManager = new SiteMapManager();
 ?>
@@ -27,6 +28,13 @@ $smManager = new SiteMapManager();
 	    	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 	    	if (newWindow.opener == null) newWindow.opener = self;
 	    }
+
+	    function verifyTaxaNoImgForm(f){
+			if(f.clid.value != ""){
+				return true;
+			}
+			return false;
+	    }
     </script>
 </head>
 
@@ -49,40 +57,58 @@ $smManager = new SiteMapManager();
             <h1>Site Map</h1>
             <div style="margin:10px;">
 	            <h2>Collections</h2>
-	            	<ul>
-	            		<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
-	            		<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
-	            		<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
-	            	</ul>
+            	<ul>
+            		<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
+            		<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
+            		<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
+            	</ul>
 	            	
 	            <h2>Image Library</h2>
-	            	<ul>
-	            		<li><a href="imagelib/index.php">Image Library</a></li>
-	            		<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
-	            		<li>
-	            			<a href="#" onclick="openPopup('imagelib/imageusagepolicy.php','crwindow'">
-	            				Usage Policy and Copyright Information
-	            			</a>
-	            		</li>
-	            	</ul>
+            	<ul>
+            		<li><a href="imagelib/index.php">Image Library</a></li>
+            		<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
+            		<li><a href="misc/usagepolicy.php">Usage Policy and Copyright Information</a></li>
+            	</ul>
 	
-	            <h2>Projects</h2>
-	            	<ul>
-	            		<?php 
-	            		$projList = $smManager->getProjectList();
-	            		foreach($projList as $pid => $pArr){
-	            			echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
-	            			echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
-	            		}
-	            		?>
-	            	</ul>
-	            	
-	            <h2>Misc Features</h2>
-	            	<ul>
-	            		<li><a href="ident/index.php">Identification Keys</a> - all keys registered within the system</li>
-	            		<li><a href="checklists/index.php">Species Lists</a> - all species checklists registered within the system</li>
-	            	</ul>
-	            	
+	            <h2>Floristic Projects</h2>
+            	<ul>
+            		<?php 
+            		$projList = $smManager->getProjectList();
+            		foreach($projList as $pid => $pArr){
+            			echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
+            			echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
+            		}
+            		?>
+            	</ul>
+
+				<h2>Dynamic Floras</h2>
+            	<ul>
+					<li>
+						<a href="checklists/dynamicmap.php?interface=checklist">
+							Checklist
+						</a> 
+						- dynamically build a checklist using georeferenced specimen records
+					</li>
+					<li>
+						<a href="checklists/dynamicmap.php?interface=key">
+							Dynamic Key
+						</a> 
+						- dynamically build a key using georeferenced specimen records
+					</li>
+				</ul>
+
+				<h2>Misc Features</h2>
+				<ul>
+					<li>
+						<a href="ident/index.php">Identification Keys</a> 
+						- all keys registered within the system
+					</li>
+					<li>
+						<a href="checklists/index.php">Species Lists</a> 
+						- all species checklists registered within the system
+					</li>
+				</ul>
+
 		        <fieldset style="margin:30px 0px 10px 10px;padding:15px;">
 		            <legend><b>Data Editing Tools</b></legend>
 	            	<?php if($symbUid){ ?>
@@ -132,7 +158,64 @@ $smManager = new SiteMapManager();
 							feature. 
 						</div>
 						<ul>
-							<li><a href="collections/editor/observationsubmit.php">Image Observation Submission Module</a></li>
+							<li>
+								<a href="collections/editor/observationsubmit.php">
+									Image Observation Submission Module
+								</a>
+							</li>
+		            		<?php if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ ?>
+								<li>
+									<b>Taxa without images:</b>
+									<form name="taxanoimg"> 
+										<select name="clid" onchange="return verifyTaxaNoImgForm(this.form);">
+											<option value="">Select a Checklist</option>
+											<option value="">-------------------------------</option>
+											<?php 
+	            								$clArr = $smManager->getChecklistList(true);
+												foreach($clArr as $clid => $clname){
+													echo '<option value="'.$clid.'">'.$clname."</option>\n";
+												}
+											?>
+										</select>
+										<input type="hidden" name="submitaction" value="taxanoimages" />
+									</form>
+									<?php 
+									if($submitAction == 'taxanoimages'){
+										echo "<ul>\n";
+										$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid']);
+										foreach($tArr as $tid => $sn){
+											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd'>".$sn."</a></li>\n";
+										}
+										echo "</ul>\n";
+									}
+									?>
+								</li>
+								<li>
+									<b>Taxa without field images:</b> 
+									<form name="taxanofieldimg"> 
+										<select name="clid" onchange="return verifyTaxaNoImgForm(this.form);">
+											<option value="">Select a Checklist</option>
+											<option value="">--------------------------------</option>
+											<?php 
+												foreach($clArr as $clid => $clname){
+													echo '<option value="'.$clid.'">'.$clname."</option>\n";
+												}
+											?>
+										</select>
+										<input type="hidden" name="submitaction" value="taxanofieldimages" />
+									</form>
+									<?php 
+									if($submitAction == 'taxanofieldimages'){
+										echo "<ul>\n";
+										$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid'],true);
+										foreach($tArr as $tid => $sn){
+											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd'>".$sn."</a></li>\n";
+										}
+										echo "</ul>\n";
+									}
+									?>
+								</li>
+            				<?php }?>
 						</ul>
 
 						<h3>Floristic Projects</h3>
@@ -187,7 +270,8 @@ $smManager = new SiteMapManager();
 								<li><a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer</a></li>
 								<li>Edit Taxonomic Placement (use <a href="taxa/admin/taxonomydisplay.php">Taxonomic Tree Viewer)</a></li>
 								<li><a href="taxa/admin/taxonomyloader.php">Add New Taxonomic Name</a></li>
-								<li><a href="taxa/admin/taxaloader.php">Bathc Upload a Taxonomic Data File</a></li>
+								<li><a href="taxa/admin/taxaloader.php">Batch
+								 Upload a Taxonomic Data File</a></li>
 								<?php 
 							}
 							else{

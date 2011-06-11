@@ -84,9 +84,6 @@ if($action == "Submit Profile"){
 	        }
 	
 	        var errorText = "";
-	        if(f.firstname.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nFirst Name";
-	        }
 	        if(f.lastname.value.replace(/\s/g, "") == "" ){
 	            errorText += "\nLast Name";
 	        }

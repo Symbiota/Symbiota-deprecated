@@ -214,7 +214,7 @@ header("Content-Type: text/html; charset=".$charset);
 				$gMapUrl = $projManager->getGoogleStaticMap("research");
 				if($gMapUrl){
 					?>
-					<div style="float:right;">
+					<div style="float:right;text-align:center;">
 						<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
 							<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
 							<br/>
@@ -275,7 +275,7 @@ header("Content-Type: text/html; charset=".$charset);
 				$gMapUrl = $projManager->getGoogleStaticMap("survey");
 				if($gMapUrl){
 					?>
-					<div style="float:right;">
+					<div style="float:right;text-align:center;">
 						<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
 							<img src="<?php echo $gMapUrl; ?>" title="Map representation of checklists" alt="Map representation of checklists" />
 							<br/>

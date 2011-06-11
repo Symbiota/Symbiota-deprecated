@@ -329,8 +329,8 @@ class OccurrenceEditorManager {
 				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
 				$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-					'SELECT occid, identifiedby, IFNULL(IFNULL(dateidentified,eventdate),"unknown"), sciname, scientificnameauthorship, '.
-					'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
+					'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, IFNULL(dateidentified,"assumed to be collection date") AS di, '.
+					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 					'FROM omoccurrences WHERE occid = '.$detArr['occid'];
 				$this->conn->query($sqlInsert);
 				//echo "<div>".$sqlInsert."</div>";

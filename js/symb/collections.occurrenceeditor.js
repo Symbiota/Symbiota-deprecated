@@ -83,7 +83,7 @@ function verifyFullformSciName(){
 			else{
 				f.scientificnameauthorship.value = "";
 				f.family.value = "";
-				alert("Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus.");
+				alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus.");
 				f.sciname.focus();
 			}
 			fieldChanged('scientificnameauthorship');
@@ -156,6 +156,7 @@ function openMappingAid(latDef,lngDef,zoom) {
 function dwcDoc(dcTag){
     dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=900,height=300,left=20,top=20,scrollbars=1");
     if(dwcWindow.opener == null) dwcWindow.opener = self;
+    return false;
 }
 
 function insertUtm(f) {
@@ -572,7 +573,7 @@ function verifyDetSciName(f){
 			}
 			else{
 				f.scientificnameauthorship.value = "";
-				alert("Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name.");
+				alert("WARNING: Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name.");
 				f.sciname.focus();
 			}
 			pauseSubmit = false;

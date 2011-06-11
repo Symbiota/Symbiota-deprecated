@@ -55,9 +55,9 @@ class OccurrenceIndividualManager {
 			'DATE_FORMAT(o.eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
     		'o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality, '.
     		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
-			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, '.
-			'o.verbatimcoordinates, o.georeferenceremarks, o.dynamicproperties, o.typestatus, o.dbpk, '.
-			'o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
+			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
+			'o.georeferenceremarks, IFNULL(o.dynamicproperties,o.attributes) AS dynamicproperties, '.
+			'o.typestatus, o.dbpk, o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
 			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, observeruid '.
 			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';
 		if($this->occId){
@@ -90,12 +90,12 @@ class OccurrenceIndividualManager {
 			}
 			$rsSec->close();
 		}
-		$this->addDeterminations();
-		$this->addImages();
+		$this->setImages();
+		$this->setDeterminations();
 		$result->close();
     }
 
-    private function addImages(){
+    private function setImages(){
     	global $imageDomain;
         $sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
 			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
@@ -118,7 +118,7 @@ class OccurrenceIndividualManager {
 		$result->close();
     }
 
-	private function addDeterminations(){
+	private function setDeterminations(){
         $sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
         	'identificationreferences, identificationremarks '.
         	'FROM omoccurdeterminations '.
@@ -135,6 +135,30 @@ class OccurrenceIndividualManager {
 			$this->occArr['dets'][$detId]['notes'] = $row->identificationremarks;
 		}
 		$result->close();
+	}
+
+	private function setComments(){
+        $sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
+			'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
+			'WHERE c.occid = '.$this->occId.' AND c.reviewstatus = 1 '.
+			'ORDER BY  c.initialtimestamp, u.lastlogin';
+        $result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$comId = $row->comid;
+			$this->occArr['comments'][$comId]['comment'] = $row->comment;
+			$this->occArr['comments'][$comId]['username'] = $row->username;
+			$this->occArr['comments'][$comId]['initialtimestamp'] = $row->initialtimestamp;
+		}
+		$result->close();
+	}
+
+	public function addComment($commentStr,$autoApprove){
+		global $symbUid;
+		$statusStr = '';
+		$sql = 'INSERT INTO omoccurcomments(comment,uid,reviewstatus) '.
+			'VALUES("'.$commentStr.'",'.$symbUid.','.($autoApprove?'1':'0').')';
+		$statudStr = $this->conn->query($sql);
+		return $statudStr;
 	}
 
 	public function getChecklists($uRights){
@@ -154,6 +178,17 @@ class OccurrenceIndividualManager {
 		}
 		$result->close();
 		return $returnArr;
+	}
+	
+	private function cleanString($inStr){
+		$retStr = trim($inStr);
+		$retStr = str_replace("\"","'",$retStr);
+		$retStr = str_replace(chr(10),' ',$retStr);
+		$retStr = str_replace(chr(11),' ',$retStr);
+		$retStr = str_replace(chr(13),' ',$retStr);
+		$retStr = str_replace(chr(20),' ',$retStr);
+		$retStr = str_replace(chr(30),' ',$retStr);
+		return $retStr;
 	}
 }
 
