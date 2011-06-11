@@ -14,6 +14,8 @@ if($pk) $indManager->setDbpk($pk);
 
 $occArr = $indManager->getOccData();
 
+$statusStr = '';
+
 $displayLocality = false;
 $isEditor = false;
 
@@ -28,6 +30,10 @@ if($symbUid){
 	|| (array_key_exists("RareSppReader",$userRights) && in_array($occArr['collid'],$userRights["RareSppReader"]))){
 		$displayLocality = true;
 	}
+	
+	if(array_key_exists('commentstr',$_REQUEST)){
+		$statusStr = $indManager->addComment($_REQUEST('commentstr'),$isEditor);
+	}
 }
 if(!$occArr['localitysecurity']) $displayLocality = true;
 ?>
@@ -37,7 +43,33 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
 	<script type="text/javascript">
 
-	    function checkVoucherForm(f){
+		function toggle(target){
+			var objDiv = document.getElementById(target);
+			if(objDiv){
+				if(objDiv.style.display=="none"){
+					objDiv.style.display = "block";
+				}
+				else{
+					objDiv.style.display = "none";
+				}
+			}
+			else{
+				var divObjs = document.getElementsByTagName("div");
+			  	for (i = 0; i < divObjs.length; i++) {
+			  		var obj = divObjs[i];
+			  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
+							if(obj.style.display=="none"){
+								obj.style.display="inline";
+							}
+					 	else {
+					 		obj.style.display="none";
+					 	}
+					}
+				}
+			}
+		}
+
+		function verifyVoucherForm(f){
 			var clTarget = f.elements["clid"].value; 
 	        if(clTarget == "0"){
 	            window.alert("Please select a checklist");
@@ -46,20 +78,14 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
             return true;
 	    }
 
-		function toggle(target){
-			var divObjs = document.getElementsByTagName("div");
-		  	for (i = 0; i < divObjs.length; i++) {
-		  		var obj = divObjs[i];
-		  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-						if(obj.style.display=="none"){
-							obj.style.display="inline";
-						}
-				 	else {
-				 		obj.style.display="none";
-				 	}
-				}
-			}
-		}
+		function verifyCommentForm(f){
+	        if(f.commentstr.value.replace(/^\s+|\s+$/g,"")){
+	            return true;
+	        }
+			alert("Please enter a comment");
+            return false;
+	    }
+	    
 	</script>
 </head>
 
@@ -70,6 +96,21 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 ?>
 	<!-- This is inner text! -->
 	<div id="innertext" style="width:600px;">
+		<div>
+			<?php 
+			if($statusStr){
+				echo '<hr/>';
+				if(array_key_exists('commentstr',$_REQUEST)){
+					echo '<div style="padding:15px;">';
+					if($isEditor){
+						echo 'Comment add successfully. Once reviewed, comment will be made public.';
+					}
+					echo '</div>';
+				}
+				echo "<hr/>\n";
+			}
+			?>
+		</div>
 		<?php
 		if($occArr){
 			?>
@@ -420,7 +461,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				echo '<div style="margin-top:10px;clear:both;">'.$occArr['collectionname'].' <a href="'.$indUrl.'"> display page</a></div>';
 			}
 			?>
-			<div style="margin-top:10px;clear:both;">
+			<div style="margin:10px 0px 15px 0px;clear:both;">
 				For additional information on this specimen, please contact: 
 				<?php 
 				$emailSubject = $defaultTitle.' occurrence #'.$occArr['occid'];
@@ -432,25 +473,56 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				</a>
 			</div>
 			<?php 
+			if(array_key_exists('comments',$occArr)){
+				$comments = $occArr['comments'];
+				echo '<div><b>'.count($comments).' Comments</b></div>';
+				foreach($comments as $comId => $comArr){
+					?>
+					<hr style="color:gray;"/>
+					<div style="margin:15px;">
+						<?php 
+						echo '<div>';
+						echo '<b>'.$comArr['username'].'</b> <span style="color:gray;">posted '.$comArr['initialtimestamp'].'</span>';
+						echo '</div>';
+						echo $comArr['comment'];
+						?>
+					</div>
+					<?php 
+				}
+			}
 			if($displayLocality){
 				?>
 				<fieldset style="margin:10px 0px;padding:10px;">
 					<legend><b>User Input</b></legend>
-					Would you like to comment on this occurrence record?
 					<?php 
 					if($symbUid){
 						?>
 						<ul>
 							<?php if($isEditor || $occArr['publicedits'] !== 0){ ?>
 							<li>
+								Do you see an obvious error? If so, errors can fixed using the  
 								<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
-									Open Occurrence Editor
+									Occurrence Editor.
 								</a>
 							</li>
 							<?php } ?>
-							<li>
-								Ability to submit <a href="">Comments</a> coming soon...
-							</li>
+							<div style="display:none;">
+								<li>
+									<a href="#" onclick="toggle('commentform');return false;">
+										Submit a Comment
+									</a>
+									<form name="commentform" action="index.php" method="post" onsubmit="return verifyCommentForm(this);">
+										<b>Comment: </b>
+										<textarea name="commentstr" rows="8" style="background:#f7f7f7; border:1px solid #999;"></textarea>
+										<div style="text-alignment:right;">
+											<input type="submit" name="submitaction" value="Submit Comment" />
+										</div>
+										<div>
+											Messages over 500 words long may be automatically truncated. All comments are moderated.
+										</div>
+									</form>
+								</li>
+							</div>
 						</ul>
 						<?php
 					}
@@ -488,7 +560,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				    		if($occArr['tidinterpreted']){
 								if($clArr = $indManager->getChecklists($paramsArr)){
 									?>
-									<form action="../../checklists/clsppeditor.php" onsubmit="return checkVoucherForm(this);">
+									<form action="../../checklists/clsppeditor.php" onsubmit="return verifyVoucherForm(this);">
 										<div style='margin:5px 0px 0px 10px;'>
 											Add as voucher to checklist: 
 											<input name='voccid' type='hidden' value='<?php echo $occArr['occid']; ?>'>

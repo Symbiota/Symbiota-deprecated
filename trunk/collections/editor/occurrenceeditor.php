@@ -95,7 +95,10 @@ if($symbUid){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
+	<style type="text/css">
+		img.dwcimg {border:0px;width:9px;margin-bottom:2px;}
+	</style>
 	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script type="text/javascript">
@@ -231,14 +234,14 @@ if($symbUid){
 										<div style="clear:both;">
 											<span style="margin-left:2px;">
 												Catalog Number
-												<a href="#" onclick="dwcDoc('catalogNumber')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('catalogNumber')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 											<span style="margin-left:3px;">
 												Occurrence ID
-												<a href="#" onclick="dwcDoc('occurrenceID')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('occurrenceID')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 											<span style="margin-left:18px;">
@@ -267,11 +270,15 @@ if($symbUid){
 											<span style="margin-left:10px;">
 												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="verifyDate(this);fieldChanged('eventdate');" />
 											</span>
-											<?php if(!$occId){ ?>
-											<span style="margin-left:5px;cursor:pointer;" onclick="">
-												<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
-											</span>
-											<?php } ?>
+											<?php 
+											if(!$occId){ 
+												?>
+												<span style="margin-left:5px;cursor:pointer;" onclick="">
+													<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
+												</span>
+												<?php 
+											} 
+											?>
 										</div>
 										<div style="clear:both;margin-top:5px;">
 											<span>
@@ -279,8 +286,8 @@ if($symbUid){
 											</span>
 											<span style="margin-left:226px;">
 												Other Catalog Numbers
-												<a href="#" onclick="dwcDoc('otherCatalogNumbers')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
@@ -345,8 +352,8 @@ if($symbUid){
 									<div style="clear:both;padding:3px 0px 0px 10px;">
 										<div style="float:left;">
 											<span>ID Qualifier:</span>
-											<a href="#" onclick="dwcDoc('identificationQualifier')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('identificationQualifier')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="identificationqualifier" tabindex="30" size="25" style="" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 										</div>
@@ -371,8 +378,8 @@ if($symbUid){
 									<div style="clear:both;">
 										<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
 											ID References:
-											<a href="#" onclick="dwcDoc('identificationReferences')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('identificationReferences')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="identificationreferences" tabindex="36" style="width:450px;" value="<?php echo array_key_exists('identificationreferences',$occArr)?$occArr['identificationreferences']:''; ?>" onchange="fieldChanged('identificationreferences');" />
 										</div>
@@ -434,14 +441,14 @@ if($symbUid){
 										</span>
 										<span style="margin-left:36px;">
 											Uncertainty
-											<a href="#" onclick="dwcDoc('coordinateUncertaintyInMeters')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('coordinateUncertaintyInMeters')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 										</span>
 										<span style="margin-left:58px;">
 											Datum
-											<a href="#" onclick="dwcDoc('geodeticDatum')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('geodeticDatum')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 										</span>
 										<span style="margin-left:30px;">
@@ -575,8 +582,8 @@ if($symbUid){
 											</span>
 											<span style="margin-left:52px;">
 												Georeference Protocol
-												<a href="#" onclick="dwcDoc('georeferenceProtocol')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('georeferenceProtocol')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 										</div>
@@ -608,14 +615,14 @@ if($symbUid){
 										<div>
 											<span style="">
 												Georeference Sources
-												<a href="#" onclick="dwcDoc('georeferenceSources')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('georeferenceSources')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 											<span style="margin-left:30px;">
 												Georef Verification Status
-												<a href="#" onclick="dwcDoc('georeferenceVerificationStatus')">
-													<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+												<a href="#" onclick="return dwcDoc('georeferenceVerificationStatus')">
+													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
 											<span style="margin-left:10px;">
@@ -659,15 +666,15 @@ if($symbUid){
 									<div style="padding:3px;">
 										<span>
 											Type Status:
-											<a href="#" onclick="dwcDoc('typeStatus')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('typeStatus')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="typestatus" tabindex="94" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
 										</span>
 										<span style="margin-left:30px;">
 											Disposition:
-											<a href="#" onclick="dwcDoc('disposition')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('disposition')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="disposition" tabindex="96" maxlength="32" style="width:200px;" value="<?php echo array_key_exists('disposition',$occArr)?$occArr['disposition']:''; ?>" onchange="fieldChanged('disposition');" />
 										</span>
@@ -675,15 +682,15 @@ if($symbUid){
 									<div style="padding:3px;">
 										<span>
 											Reproductive Condition:
-											<a href="#" onclick="dwcDoc('reproductiveCondition')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('reproductiveCondition')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
 										</span>
 										<span style="margin-left:30px;">
 											Establishment Means:
-											<a href="#" onclick="dwcDoc('establishmentMeans')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('establishmentMeans')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
 										</span>
@@ -696,8 +703,8 @@ if($symbUid){
 									<div style="padding:3px;">
 										<span>
 											Owner Institution Code:
-											<a href="#" onclick="dwcDoc('ownerInstitutionCode')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('ownerInstitutionCode')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 										</span>
@@ -708,8 +715,8 @@ if($symbUid){
 									<div style="padding:3px;">
 										<span>
 											Basis of Record:
-											<a href="#" onclick="dwcDoc('basisOfRecord')">
-												<img src="../../images/qmark.png" style="width:9px;margin-bottom:2px;" />
+											<a href="#" onclick="return dwcDoc('basisOfRecord')">
+												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
 											<input type="text" name="basisofrecord" tabindex="108" maxlength="32" style="" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
 										</span>

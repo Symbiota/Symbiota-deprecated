@@ -74,7 +74,7 @@ class ObservationSubmitManager {
 					if($row->maxpk) $dbpk = $row->maxpk;
 				}
 
-				$sql = 'INSERT INTO omoccurrences(collid, dbpk, family, sciname, scientificname, '.
+				$sql = 'INSERT INTO omoccurrences(collid, dbpk, basisofrecord, family, sciname, scientificname, '.
 					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 					'identificationReferences, recordedBy, recordNumber, '.
 					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
@@ -82,7 +82,7 @@ class ObservationSubmitManager {
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
 	
-				'VALUES ('.$collId.',"'.$dbpk.'",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+				'VALUES ('.$collId.',"'.$dbpk.'","Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
 				'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
 				($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
 				$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
@@ -114,6 +114,11 @@ class ObservationSubmitManager {
 					$imgStatus = $this->dbImages($nameArr,$occArr,$this->conn->insert_id,$tid);
 					if($imgStatus){
 						$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
+					}
+					else{
+						$sql = 'INSERT INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
+							'VALUE('.$tid.','.round($occArr['decimallatitude'],2).','.round($occArr['decimallongitude'],2).')';
+						$this->conn->query($sql);
 					}
 				}
 				else{
@@ -190,9 +195,9 @@ class ObservationSubmitManager {
 			if($imgWebUrl){
 				$caption = $this->cleanStr($occArr['caption']);
 				$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
-				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, occid, notes, sortsequence) '.
+				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
-					','.$GLOBALS['symbUid'].','.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
+					','.$GLOBALS['symbUid'].',"Observation",'.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR loadImageData: '.$this->conn->error;

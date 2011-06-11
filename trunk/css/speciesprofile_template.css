@@ -20,7 +20,7 @@ table#innertable{
 	border: 1px solid #0000ff;
 }
 
-div#centralimage div.photographer{
+#centralimage div.photographer{
 	text-align:			right;
   	margin: 		2px;
 	margin-right:	20px;

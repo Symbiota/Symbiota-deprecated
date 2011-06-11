@@ -4,7 +4,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 class SiteMapManager{
 	
 	private $conn;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
@@ -56,24 +56,50 @@ class SiteMapManager{
 		}
 		return $returnArr;
 	}
-	
+
 	public function getProjectList($projArr = ""){
 		$returnArr = Array();
-		$sql = "SELECT p.pid, p.projname, p.managers FROM fmprojects p ";
+		$sql = 'SELECT p.pid, p.projname, p.managers FROM fmprojects p '.
+			'WHERE p.ispublic = 1 ';
 		if($projArr){
-			$sql .= "WHERE p.pid IN(".implode(",",$projArr).") ";
+			$sql .= 'AND p.pid IN('.implode(',',$projArr).') ';
 		}
-		$sql .= "ORDER BY p.projname";
-		//echo "<div>".$sql."</div>";
+		$sql .= 'ORDER BY p.projname';
+		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		if($rs){
 			while($row = $rs->fetch_object()){
-				$returnArr[$row->pid]["name"] = $row->projname;
-				$returnArr[$row->pid]["managers"] = $row->managers;
+				$returnArr[$row->pid]['name'] = $row->projname;
+				$returnArr[$row->pid]['managers'] = $row->managers;
 			}
 			$rs->close();
 		}
 		return $returnArr;
+	}
+	
+	public function getTaxaWithoutImages($clid, $fieldImagesOnly=false){
+		$retArr = Array();
+		if($clid){
+			$sql = 'SELECT DISTINCT t.tid, t.sciname '.
+				'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
+				'LEFT JOIN (SELECT ts2.tid '.
+				'FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+				($fieldImagesOnly?'AND imagetype NOT LIKE "%specimen%" ':'').
+				') i ON t.tid = i.tid '.
+				'WHERE ctl.clid = '.$clid.' AND i.tid IS NULL '.
+				'ORDER BY t.sciname';
+			//echo '<div>'.$sql.'</div>';
+			$rs = $this->conn->query($sql);
+			if($rs){
+				while($row = $rs->fetch_object()){
+					$retArr[$row->tid] = $row->sciname;
+				}
+				$rs->close();
+			}
+		}
+		return $retArr;
 	}
 }
 ?>

@@ -146,7 +146,7 @@ if($isEditor){
 								}
 							}
 							else{
-								echo "<a href='imageusagepolicy.php'>Copyright Details</a>";
+								echo "<a href='../misc/usagepolicy.php#images'>Copyright Details</a>";
 							}
 							echo "</div>";
 							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
