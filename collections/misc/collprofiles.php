@@ -359,7 +359,7 @@ if($collId){
 									<td colspan="2">
 										<div style="margin:20px;">
 											<?php 
-											if($newCollRec){ 
+											if($newCollRec){
 												?>
 												<input type="submit" name="action" value="Add New Profile" />
 												<?php

@@ -219,15 +219,21 @@ $smManager = new SiteMapManager();
 						</ul>
 
 						<h3>Floristic Projects</h3>
-						<div style="margin:10px;">
-							Click on any project below to edit the metadata for that project. 
-						</div>
 						<ul>
 							<?php 
 	            			if($isAdmin){
-								foreach($projList as $pid => $pArr){
-									echo '<li><a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
-		            			}
+	            				echo '<li><a href="projects/index.php?newproj=1">Add a New Project</a></li>';
+	            				if($projList){
+	            					echo '<li><b>List of Current Projects</b> (click to edit)</li>';
+	            					echo '<ul>';
+									foreach($projList as $pid => $pArr){
+										echo '<li><a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
+			            			}
+	            					echo '</ul>';
+	            				}
+	            				else{
+	            					echo '<li>There are no projects in the system</li>';	
+	            				}
 							}
 							else{
 								echo '<li>You are not authorized to edit any of the Projects</li>';

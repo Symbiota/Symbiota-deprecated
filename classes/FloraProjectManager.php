@@ -52,35 +52,57 @@ include_once($serverRoot.'/config/dbconnection.php');
 	
 	public function getProjectData(){
 		$returnArr = Array();
-		$sql = "SELECT p.pid, p.projname, p.managers, p.briefdescription, p.fulldescription, p.notes, p.sortsequence ".
-			"FROM fmprojects p ".
-			"WHERE (p.pid = ".$this->projId.") ".
-			"ORDER BY p.SortSequence, p.projname";
-		//echo $sql;
-		$rs = $this->con->query($sql);
-		if($row = $rs->fetch_object()){
-			$this->projId = $row->pid;
-			$returnArr[$this->projId]["projname"] = $row->projname;
-			$returnArr[$this->projId]["managers"] = $row->managers;
-			$returnArr[$this->projId]["briefdescription"] = $row->briefdescription;
-			$returnArr[$this->projId]["fulldescription"] = $row->fulldescription;
-			$returnArr[$this->projId]["notes"] = $row->notes;
-			$returnArr[$this->projId]["sortsequence"] = $row->sortsequence;
+		if($this->projId){
+			$sql = 'SELECT p.pid, p.projname, p.managers, p.briefdescription, p.fulldescription, p.notes, '.
+				'p.occurrencesearch, p.ispublic, p.sortsequence '.
+				'FROM fmprojects p '.
+				'WHERE (p.pid = '.$this->projId.') '.
+				'ORDER BY p.SortSequence, p.projname';
+			//echo $sql;
+			$rs = $this->con->query($sql);
+			if($row = $rs->fetch_object()){
+				$this->projId = $row->pid;
+				$returnArr['projname'] = $row->projname;
+				$returnArr['managers'] = $row->managers;
+				$returnArr['briefdescription'] = $row->briefdescription;
+				$returnArr['fulldescription'] = $row->fulldescription;
+				$returnArr['notes'] = $row->notes;
+				$returnArr['occurrencesearch'] = $row->occurrencesearch;
+				$returnArr['ispublic'] = $row->ispublic;
+				$returnArr['sortsequence'] = $row->sortsequence;
+			}
+			$rs->close();
 		}
-		$rs->close();
 		return $returnArr;
 	}
 
 	public function submitProjEdits($projArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "";
-		foreach($projArr as $field=>$value){
-			$sql .= ",$field = \"".$value."\"";
+		foreach($projArr as $field => $value){
+			$v = $this->cleanString($value);
+			$sql .= ','.$field.' = "'.$v.'"';
 		}
-		$sql = "UPDATE fmprojects SET ".substr($sql,1)." WHERE pid = ".$this->projId;
+		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE pid = '.$this->projId;
 		//echo $sql;
 		$conn->query($sql);
 		$conn->close();
+	}
+	
+	public function addNewProject($projArr){
+		$pid = 0;
+		$conn = MySQLiConnectionFactory::getCon("write");
+		$sql = 'INSERT INTO fmprojects(projname,managers,briefdescription,fulldescription,notes,occurrencesearch,ispublic,sortsequence) '.
+			'VALUES("'.$this->cleanString($projArr['projname']).'","'.$this->cleanString($projArr['managers']).'","'.
+			$this->cleanString($projArr['briefdescription']).'","'.$this->cleanString($projArr['fulldescription']).'","'.
+			$this->cleanString($projArr['notes']).'",'.$projArr['occurrencesearch'].','.$projArr['ispublic'].','.
+			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
+		//echo $sql;
+		if($conn->query($sql)){
+			$pid = $conn->insert_id;
+		}
+		$conn->close();
+		return $pid;
 	}
 	
 	public function getResearchChecklists(){
@@ -134,6 +156,16 @@ include_once($serverRoot.'/config/dbconnection.php');
 		if(!$coordStr) return ""; 
 		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
 		return $googleUrlLocal;
+	}
+
+	private function cleanString($inStr){
+		$retStr = trim($inStr);
+
+		$retStr = str_replace('"',"'",$retStr);
+		$retStr = str_replace(chr(10),' ',$retStr);
+		$retStr = str_replace(chr(11),' ',$retStr);
+		$retStr = str_replace(chr(13),' ',$retStr);
+		return $retStr;
 	}
 }
 ?>
