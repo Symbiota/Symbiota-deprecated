@@ -54,7 +54,7 @@ class TaxonomyLoaderManager{
 			if($dataArr["parenttid"]) $hierarchy = $this->getHierarchy($dataArr["parenttid"]);
 			//Get family from hierarchy
 			$family = '';
-			$sqlFam = 'SELECT t.sciname FROM taxa WHERE tid IN('.$this->conn->real_escape_string($hierarchy).') AND rankid = 140 ';
+			$sqlFam = 'SELECT sciname FROM taxa WHERE tid IN('.$this->conn->real_escape_string($hierarchy).') AND rankid = 140 ';
 			$rsFam = $this->conn->query($sqlFam);
 			if($rsFam){
 				if($r = $rsFam->fetch_object()){
