@@ -49,12 +49,12 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 		</div>
 		<div>
 			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
-				<fieldset style="padding:10px;width:200px;">
-					<legend>Enter a taxon</legend>
+				<fieldset style="padding:10px;width:500px;">
+					<legend><b>Enter a taxon</b></legend>
 					<div>
-						Taxon: <input type="text" name="target" value="<?php echo $taxonDisplayObj->getTargetStr();; ?>"/>
+						<b>Taxon:</b> <input type="text" name="target" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
 					</div>
-					<div>
+					<div style="margin:15px 0px 15px 300px;">
 						<input type="submit" name="tdsubmit" value="Display Taxon Tree"/>
 					</div>
 				</fieldset>

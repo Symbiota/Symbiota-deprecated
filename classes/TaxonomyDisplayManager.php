@@ -153,7 +153,9 @@ class TaxonomyDisplayManager{
 				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
 				echo "</div>";
 				if(array_key_exists($key,$this->taxaArr) && array_key_exists("synonyms",$this->taxaArr[$key])){
-					foreach($this->taxaArr[$key]["synonyms"] as $synTid => $synName){
+					$synNameArr = $this->taxaArr[$key]["synonyms"];
+					asort($synNameArr);
+					foreach($synNameArr as $synTid => $synName){
 						$synName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$synName);
 						echo "<div style='margin-left:".($indent+20).";'>";
 						echo "[<a href='taxonomyeditor.php?target=".$synTid."'><i>".$synName."</i></a>]";

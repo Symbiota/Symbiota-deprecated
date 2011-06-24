@@ -234,10 +234,10 @@ class SpecUploadDigir extends SpecUploadManager {
 			elseif($this->activeFieldName == "COORDINATEPRECISION" && !array_key_exists("COORDINATEUNCERTAINTYINMETERS",$this->fieldDataArr)){
 				$this->fieldDataArr["COORDINATEUNCERTAINTYINMETERS"] = $this->activeFieldValue;
 			}
-			elseif(($this->activeFieldName == "MINIMUMELEVATION" || $this->activeFieldName == "MINIMUMELEVATIONINMETERS") && !array_key_exists("MINIMUMELEVATIONINMETERS",$this->fieldDataArr)){
+			elseif(($this->activeFieldName == "MINIMUMELEVATION" || $this->activeFieldName == "MINIMUMELEVATIONINMETERS") && !array_key_exists("MINIMUMELEVATIONINMETERS",$this->fieldDataArr) && $this->activeFieldValue != ''){
 				$this->fieldDataArr["MINIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
 			}
-			elseif(($this->activeFieldName == "MAXIMUMELEVATION" || $this->activeFieldName == "MAXIMUMELEVATIONINMETERS") && !array_key_exists("MAXIMUMELEVATIONINMETERS",$this->fieldDataArr)){
+			elseif(($this->activeFieldName == "MAXIMUMELEVATION" || $this->activeFieldName == "MAXIMUMELEVATIONINMETERS") && !array_key_exists("MAXIMUMELEVATIONINMETERS",$this->fieldDataArr) && $this->activeFieldValue != ''){
 				$this->fieldDataArr["MAXIMUMELEVATIONINMETERS"] = (int) $this->activeFieldValue;
 			}
 			elseif($this->activeFieldName == "NOTES" && !array_key_exists("OCCURRANCEREMARKS",$this->fieldDataArr)){
@@ -260,8 +260,9 @@ class SpecUploadDigir extends SpecUploadManager {
 	}
 
 	private function characterData($parser, $data){
-		if($this->withinRecordElement){
-			$this->activeFieldValue .= $this->encodeString($data);
+		$value = $this->cleanString($this->encodeString($data));
+		if($this->withinRecordElement && $value != ""){
+			$this->activeFieldValue .= $value;
 		}
 	}
 
@@ -321,20 +322,19 @@ class SpecUploadDigir extends SpecUploadManager {
 			}
 			$dbpk = 0;
 			if($this->digirPKField){
-				$dbpk = $this->fieldDataArr[strtoupper($this->digirPKField)];
-			}
-			else{
-				$dbpk = ++$this->dbpkSequence;
+				$dbpk = trim($this->fieldDataArr[strtoupper($this->digirPKField)]);
 			}
 			$sqlInsertFrag = "";
 			$sqlValuesFrag = "";
 			foreach($this->fieldDataArr as $fieldName => $fieldValue){
-				if(array_key_exists(strtolower($fieldName),$this->fieldMap)){
+				$valStr = trim(str_replace(chr(34),"'",$fieldValue));
+				if(array_key_exists(strtolower($fieldName),$this->fieldMap) && $valStr != ""){
 					$sqlInsertFrag .= ",".$fieldName;
-					$sqlValuesFrag .= "\",\"".trim(str_replace(chr(34),"'",$fieldValue));
+					$sqlValuesFrag .= "\",\"".$valStr;
 				}
 			}
-			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",\"".$dbpk."\",\"".substr($sqlValuesFrag,3)."\")";
+			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",".($dbpk?'"'.$dbpk.'"':'NULL').",\"".substr($sqlValuesFrag,3)."\")";
+			//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
 			if(!$this->conn->query($sql)){
 				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>\n";
 				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
