@@ -107,7 +107,7 @@ class TaxaLoaderManager{
 		//Value if only a Source Id was supplied
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
 			'SET u.AcceptedStr = u2.scinameinput '.
-			'WHERE u.AcceptedStr IS NULL';
+			'WHERE u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL AND u.AcceptedStr IS NULL';
 		$this->conn->query($sql);
 		
 		//Insert into uploadtaxa table all accepted taxa not already present in scinameinput. If they turn out to be in taxa table, they will be deleted later 
