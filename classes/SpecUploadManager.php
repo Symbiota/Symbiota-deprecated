@@ -430,12 +430,10 @@ class SpecUploadManager{
 				$recCnt = $r->reccnt;
 				if($recCnt > 0){
 					$newPk = 1;
-					$sqlMax = 'SELECT MAX(dbpk+1) AS maxpk FROM omoccurrences WHERE collid = '.$this->collId;
+					$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE collid = '.$this->collId;
 					$rsMax = $this->conn->query($sqlMax);
 					if($rMax = $rsMax->fetch_object()){
-						if($rMax->maxpk){
-							$newPk = $rMax->maxpk;
-						}
+						$newPk = $rMax->maxpk;
 					}
 					$rsMax->close();
 					for($x = 0;$x < $recCnt; $x++){
