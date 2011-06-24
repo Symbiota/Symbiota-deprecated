@@ -422,47 +422,44 @@ class SpecUploadManager{
 	}
 
 	public function performFinalTransfer(){
-		//
-		if(stripos($this->collMetadataArr["managementtype"],'live') !== false){
-			$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$recCnt = $r->reccnt;
-				if($recCnt > 0){
-					$newPk = 1;
-					$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE collid = '.$this->collId;
-					$rsMax = $this->conn->query($sqlMax);
-					if($rMax = $rsMax->fetch_object()){
-						$newPk = $rMax->maxpk;
-					}
-					$rsMax->close();
-					for($x = 0;$x < $recCnt; $x++){
-						$sqlI = 'UPDATE uploadspectemp SET dbpk = '.$newPk.' WHERE dbpk IS NULL LIMIT 1';
-						$this->conn->query($sqlI);
-						$newPk++;
-					}
+		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$recCnt = $r->reccnt;
+			if($recCnt > 0){
+				$newPk = 1;
+				$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE collid = '.$this->collId;
+				$rsMax = $this->conn->query($sqlMax);
+				if($rMax = $rsMax->fetch_object()){
+					$newPk = $rMax->maxpk;
+				}
+				$rsMax->close();
+				for($x = 0;$x < $recCnt; $x++){
+					$sqlI = 'UPDATE uploadspectemp SET dbpk = '.$newPk.' WHERE dbpk IS NULL LIMIT 1';
+					$this->conn->query($sqlI);
+					$newPk++;
 				}
 			}
-			$rs->close();
-			//Verify that dbpk is unique; should be but let's make sure 
-			$sql = 'SELECT count(u.dbpk) AS mcnt '.
-				'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
-				'WHERE o.collid = '.$this->collId.' AND u.collid = '.$this->collId;
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				if($r->mcnt > 0){
-					echo 'ERROR: DBPKs are not unique; necessary for importing into a Live dataset ';
-					return;
-				}
-			}
-			$rs->close();
 		}
+		$rs->close();
+		//Verify that dbpk is unique; should be but let's make sure 
+		$sql = 'SELECT count(u.dbpk) AS mcnt '.
+			'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
+			'WHERE o.collid = '.$this->collId.' AND u.collid = '.$this->collId;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			if($r->mcnt > 0){
+				echo 'ERROR: DBPKs are not unique; necessary for importing into a Live dataset ';
+				return;
+			}
+		}
+		$rs->close();
 		
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
 		$spCallStr = "CALL TransferUploads(".$this->collId.")";
 		if($this->conn->query($spCallStr)){
-			echo "<li>Upload Procedure Complete: ".($this->transferCount?$this->transferCount." ":"")."</li>";
+			echo "<li>Upload Procedure Complete! </li>";
 		}
 		else{
 			echo "<li>Unable to complete transfer. Please contact system administrator</li>";
