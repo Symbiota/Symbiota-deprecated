@@ -434,11 +434,13 @@ class SpecUploadManager{
 					$newPk = $rMax->maxpk;
 				}
 				$rsMax->close();
+				$this->conn->query('ALTER TABLE uploadspectemp DISABLE KEYS');
 				for($x = 0;$x < $recCnt; $x++){
 					$sqlI = 'UPDATE uploadspectemp SET dbpk = '.$newPk.' WHERE dbpk IS NULL LIMIT 1';
 					$this->conn->query($sqlI);
 					$newPk++;
 				}
+				$this->conn->query('ALTER TABLE uploadspectemp ENABLE KEYS');
 			}
 		}
 		$rs->close();
