@@ -373,11 +373,7 @@ class SpecUploadManager{
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
  		if($this->uploadType == $this->STOREDPROCEDURE){
-			if($this->conn->query("CALL ".$this->queryStr)){
-				echo "<li style='font-weight:bold;'>Stored Procedure executed.</li>";
-				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
-				$this->finalUploadSteps($finalTransfer);
-			}
+			$this->finalUploadSteps($finalTransfer);
  		}
  		elseif($this->uploadType == $this->SCRIPTUPLOAD){
  			if(system($this->queryStr)){
@@ -394,7 +390,7 @@ class SpecUploadManager{
 			try{
 				if($this->conn->query("CALL ".$this->storedProcedure.";")){
 					echo "<li>";
-					echo "Records cleaned: ".$this->storedProcedure;
+					echo "Stored procedure executed: ".$this->storedProcedure;
 					echo "</li>";
 				}
 			}
