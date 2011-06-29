@@ -554,9 +554,9 @@ else{
 					<?php } ?>
 					<div style="clear:both;">
 						<div style="width:200px;font-weight:bold;float:left;">Stored Procedure (clean/transfer): </div>
-						<div class="editdiv" style=""><?php echo $duManager->getCleanupSP(); ?></div>
+						<div class="editdiv" style=""><?php echo $duManager->getStoredProcedure(); ?></div>
 						<div class="editdiv" style="display:none;">
-							<input name="eupcleanupsp" type="text" size="40" value="<?php echo $duManager->getCleanupSP(); ?>" />
+							<input name="eupcleanupsp" type="text" size="40" value="<?php echo $duManager->getStoredProcedure(); ?>" />
 						</div>
 					</div>
 					<?php if($uploadType == 1 || $uploadType == 2 || $uploadType == 4 || $uploadType == 5){ ?>

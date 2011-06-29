@@ -23,7 +23,7 @@ class SpecUploadManager{
 	protected $digirPKField;
 	protected $schemaName;
 	protected $queryStr;
-	protected $cleanupSP;
+	protected $storedProcedure;
 	protected $lastUploadDate;
 
 	protected $transferCount = 0;
@@ -174,7 +174,7 @@ class SpecUploadManager{
     		$this->digirPath = $row->digirpath;
     		$this->digirPKField = $row->digirpkfield;
     		$this->queryStr = $row->querystr;
-    		$this->cleanupSP = $row->cleanupsp;
+    		$this->storedProcedure = $row->cleanupsp;
     		$this->lastUploadDate = $row->uploaddate;
 			if(!$this->lastUploadDate) $this->lastUploadDate = date('Y-m-d H:i:s');
     	}
@@ -372,36 +372,34 @@ class SpecUploadManager{
  	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
-	 	if($this->queryStr){
-	 		if($this->uploadType == $this->STOREDPROCEDURE){
-				if($this->conn->query("CALL ".$this->queryStr)){
-					echo "<li style='font-weight:bold;'>Stored Procedure executed.</li>";
-					echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
-					$this->finalUploadSteps($finalTransfer);
-				}
-	 		}
-	 		elseif($this->uploadType == $this->SCRIPTUPLOAD){
-	 			if(system($this->queryStr)){
-					echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
-					echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
-	 				$this->finalUploadSteps($finalTransfer);
-	 			}
-	 		}
-	 	}
+ 		if($this->uploadType == $this->STOREDPROCEDURE){
+			if($this->conn->query("CALL ".$this->queryStr)){
+				echo "<li style='font-weight:bold;'>Stored Procedure executed.</li>";
+				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+				$this->finalUploadSteps($finalTransfer);
+			}
+ 		}
+ 		elseif($this->uploadType == $this->SCRIPTUPLOAD){
+ 			if(system($this->queryStr)){
+				echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
+				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+ 				$this->finalUploadSteps($finalTransfer);
+ 			}
+ 		}
 	}
 
 	public function finalUploadSteps($finalTransfer){
 		//Run cleanup Stored Procedure, if one exists 
-		if($this->cleanupSP){
+		if($this->storedProcedure){
 			try{
-				if($this->conn->query("CALL ".$this->cleanupSP.";")){
+				if($this->conn->query("CALL ".$this->storedProcedure.";")){
 					echo "<li>";
-					echo "Records cleaned: ".$this->cleanupSP;
+					echo "Records cleaned: ".$this->storedProcedure;
 					echo "</li>";
 				}
 			}
 			catch(Exception $e){
-				echo '<li>ERROR: Record cleaning failed ('.$this->cleanupSP.')</li>';
+				echo '<li>ERROR: Record cleaning failed ('.$this->storedProcedure.')</li>';
 			}
 		}
 		if(!$this->transferCount){
@@ -520,8 +518,8 @@ class SpecUploadManager{
 		return $this->queryStr;
 	}
 
-	public function getCleanupSP(){
-		return $this->cleanupSP;
+	public function getStoredProcedure(){
+		return $this->storedProcedure;
 	}
 	
 	public function getTransferCount(){
