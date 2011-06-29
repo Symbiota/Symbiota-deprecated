@@ -438,18 +438,20 @@ class SpecUploadManager{
 			}
 		}
 		$rs->close();
-		//Verify that dbpk is unique; should be but let's make sure 
-		$sql = 'SELECT count(u.dbpk) AS mcnt '.
-			'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
-			'WHERE o.collid = '.$this->collId.' AND u.collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			if($r->mcnt > 0){
-				echo 'ERROR: DBPKs are not unique; necessary for importing into a Live dataset ';
-				return;
+		if(strpos($this->collMetadataArr["managementtype"],'Live') !== false){
+			//Verify that dbpk is unique; should be but let's make sure 
+			$sql = 'SELECT count(u.dbpk) AS mcnt '.
+				'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
+				'WHERE o.collid = '.$this->collId.' AND u.collid = '.$this->collId;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				if($r->mcnt > 0){
+					echo 'ERROR: DBPKs are not unique; necessary for importing into a Live Dataset ';
+					return;
+				}
 			}
+			$rs->close();
 		}
-		$rs->close();
 		
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
