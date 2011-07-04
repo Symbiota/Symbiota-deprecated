@@ -324,7 +324,7 @@ if($collId){
 										<td>
 											<select name="managementtype">
 												<option>Snapshot</option>
-												<option <?php echo ($collId && $collData["managementtype"]=='Live Date'?'SELECTED':''); ?>>Live Date</option>
+												<option <?php echo ($collId && $collData["managementtype"]=='Live Data'?'SELECTED':''); ?>>Live Data</option>
 											</select>
 										</td>
 									</tr>

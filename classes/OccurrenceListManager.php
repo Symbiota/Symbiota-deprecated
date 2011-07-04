@@ -30,7 +30,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
 			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
 			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
-			"IFNULL(o.locality,'') AS locality, o.dbpk, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
+			"IFNULL(o.locality,'') AS locality, IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
 			"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
@@ -49,26 +49,25 @@ class OccurrenceListManager extends OccurrenceManager{
 		}
 		while($row = $result->fetch_object()){
 			$collIdStr = $row->CollID;
-			$dbpk = $row->dbpk;
-			$returnArr[$collIdStr][$dbpk]["occid"] = $row->occid;
-			$returnArr[$collIdStr][$dbpk]["institutioncode"] = $row->institutioncode;
-			$returnArr[$collIdStr][$dbpk]["collectioncode"] = $row->collectioncode;
-			$returnArr[$collIdStr][$dbpk]["accession"] = $row->catalognumber;
-			$returnArr[$collIdStr][$dbpk]["family"] = $row->family;
-			$returnArr[$collIdStr][$dbpk]["sciname"] = $row->sciname;
-			$returnArr[$collIdStr][$dbpk]["tid"] = $row->tidinterpreted;
-			$returnArr[$collIdStr][$dbpk]["author"] = $row->author;
-			$returnArr[$collIdStr][$dbpk]["collector"] = $row->recordedby;
-			$returnArr[$collIdStr][$dbpk]["collnumber"] = $row->recordnumber;
-			$returnArr[$collIdStr][$dbpk]["date1"] = $row->date1;
-			$returnArr[$collIdStr][$dbpk]["date2"] = $row->date2;
-			$returnArr[$collIdStr][$dbpk]["country"] = $row->country;
-			$returnArr[$collIdStr][$dbpk]["state"] = $row->state;
-			$returnArr[$collIdStr][$dbpk]["county"] = $row->county;
-			$returnArr[$collIdStr][$dbpk]["observeruid"] = $row->observeruid;
+			$occId = $row->occid;
+			$returnArr[$collIdStr][$occId]["institutioncode"] = $row->institutioncode;
+			$returnArr[$collIdStr][$occId]["collectioncode"] = $row->collectioncode;
+			$returnArr[$collIdStr][$occId]["accession"] = $row->catalognumber;
+			$returnArr[$collIdStr][$occId]["family"] = $row->family;
+			$returnArr[$collIdStr][$occId]["sciname"] = $row->sciname;
+			$returnArr[$collIdStr][$occId]["tid"] = $row->tidinterpreted;
+			$returnArr[$collIdStr][$occId]["author"] = $row->author;
+			$returnArr[$collIdStr][$occId]["collector"] = $row->recordedby;
+			$returnArr[$collIdStr][$occId]["collnumber"] = $row->recordnumber;
+			$returnArr[$collIdStr][$occId]["date1"] = $row->date1;
+			$returnArr[$collIdStr][$occId]["date2"] = $row->date2;
+			$returnArr[$collIdStr][$occId]["country"] = $row->country;
+			$returnArr[$collIdStr][$occId]["state"] = $row->state;
+			$returnArr[$collIdStr][$occId]["county"] = $row->county;
+			$returnArr[$collIdStr][$occId]["observeruid"] = $row->observeruid;
 			$localitySecurity = $row->LocalitySecurity;
 			if(!$localitySecurity || $canReadRareSpp || (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
-				$returnArr[$collIdStr][$dbpk]["locality"] = $row->locality;
+				$returnArr[$collIdStr][$occId]["locality"] = $row->locality;
 			}
 			else{
 				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
@@ -78,9 +77,8 @@ class OccurrenceListManager extends OccurrenceManager{
 				else{
 					$securityStr .= 'This is typically done to protect rare or threatened species localities.';
 				}
-				$returnArr[$collIdStr][$dbpk]["locality"] = $securityStr.'</span>';
+				$returnArr[$collIdStr][$occId]["locality"] = $securityStr.'</span>';
 			}
-			$returnArr[$collIdStr][$dbpk]["dbpk"] = $row->dbpk;
 		}
 		$result->close();
 		return $returnArr;

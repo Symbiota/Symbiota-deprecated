@@ -29,7 +29,7 @@ class OccurrenceMapManager extends OccurrenceManager{
     public function getGeoCoords($limit = 1000, $includeDescr= false){
 		global $userRights;
         $querySql = "";
-        $sql = "SELECT o.occid, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.dbpk, o.occurrenceID ";
+        $sql = "SELECT o.occid, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.occurrenceID ";
         if($includeDescr){
         	$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
         }
@@ -90,7 +90,6 @@ class OccurrenceMapManager extends OccurrenceManager{
 			}
 			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
 			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["dbpk"] = $row->dbpk;
 			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["gui"] = $row->occurrenceID;
 			if($includeDescr){
 				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;

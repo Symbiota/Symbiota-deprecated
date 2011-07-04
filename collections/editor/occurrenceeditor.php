@@ -230,102 +230,96 @@ if($symbUid){
 							<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this)">
 								<fieldset>
 									<legend><b>Collector Info</b></legend>
-									<div style="float:left;">
-										<div style="clear:both;">
-											<span style="margin-left:2px;">
-												Catalog Number
-												<a href="#" onclick="return dwcDoc('catalogNumber')">
-													<img class="dwcimg" src="../../images/qmark.png" />
-												</a>
-											</span>
-											<span style="margin-left:3px;">
-												Occurrence ID
-												<a href="#" onclick="return dwcDoc('occurrenceID')">
-													<img class="dwcimg" src="../../images/qmark.png" />
-												</a>
-											</span>
-											<span style="margin-left:18px;">
-												Collector
-											</span>
-											<span style="margin-left:184px;">
-												Number
-											</span>
-											<span style="margin-left:25px;">
-												Date
-											</span>
-										</div>
-										<div style="clear:both;">
-											<span>
-												<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:100px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.value)" />
-											</span>
-											<span>
-												<input type="text" name="occurrenceid" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="occurrenceIdChanged(this.value);" title="Global Unique Identifier (GUID)" />
-											</span>
-											<span>
-												<input type="text" name="recordedby" tabindex="6" maxlength="255" style="width:220px;background-color:lightyellow;" value="<?php echo array_key_exists('recordedby',$occArr)?$occArr['recordedby']:''; ?>" onchange="fieldChanged('recordedby');" />
-											</span>
-											<span style="margin-left:10px;">
-												<input type="text" name="recordnumber" tabindex="8" maxlength="45" style="width:60px;" value="<?php echo array_key_exists('recordnumber',$occArr)?$occArr['recordnumber']:''; ?>" onchange="fieldChanged('recordnumber');" />
-											</span>
-											<span style="margin-left:10px;">
-												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="verifyDate(this);fieldChanged('eventdate');" />
+									<div>
+										<span style="margin-left:2px;">
+											Catalog Number
+											<a href="#" onclick="return dwcDoc('catalogNumber')">
+												<img class="dwcimg" src="../../images/qmark.png" />
+											</a>
+										</span>
+										<span style="margin-left:3px;">
+											Occurrence ID
+											<a href="#" onclick="return dwcDoc('occurrenceID')">
+												<img class="dwcimg" src="../../images/qmark.png" />
+											</a>
+										</span>
+										<span style="margin-left:18px;">
+											Collector
+										</span>
+										<span style="margin-left:184px;">
+											Number
+										</span>
+										<span style="margin-left:25px;">
+											Date
+										</span>
+									</div>
+									<div>
+										<span>
+											<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:100px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.value)" />
+										</span>
+										<span>
+											<input type="text" name="occurrenceid" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="occurrenceIdChanged(this.value);" title="Global Unique Identifier (GUID)" />
+										</span>
+										<span>
+											<input type="text" name="recordedby" tabindex="6" maxlength="255" style="width:220px;background-color:lightyellow;" value="<?php echo array_key_exists('recordedby',$occArr)?$occArr['recordedby']:''; ?>" onchange="fieldChanged('recordedby');" />
+										</span>
+										<span style="margin-left:10px;">
+											<input type="text" name="recordnumber" tabindex="8" maxlength="45" style="width:60px;" value="<?php echo array_key_exists('recordnumber',$occArr)?$occArr['recordnumber']:''; ?>" onchange="fieldChanged('recordnumber');" />
+										</span>
+										<span style="margin-left:10px;" title="Earliest Date Collected">
+											<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateModified(this);" />
+										</span>
+										<?php 
+										if(!$occId){ 
+											?>
+											<span style="margin-left:5px;cursor:pointer;" onclick="">
+												<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
 											</span>
 											<?php 
-											if(!$occId){ 
-												?>
-												<span style="margin-left:5px;cursor:pointer;" onclick="">
-													<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
-												</span>
-												<?php 
-											} 
-											?>
+										} 
+										?>
+									</div>
+									<div style="margin-top:5px;">
+										<span>
+											Associated Collectors
+										</span>
+										<span style="margin-left:226px;">
+											Other Catalog Numbers
+											<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
+												<img class="dwcimg" src="../../images/qmark.png" />
+											</a>
+										</span>
+										<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
+											<span id="dupsearchspan">Looking for Dups...</span>
+											<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
+											<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>
 										</div>
-										<div style="clear:both;margin-top:5px;">
-											<span>
-												Associated Collectors
-											</span>
-											<span style="margin-left:226px;">
-												Other Catalog Numbers
-												<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
-													<img class="dwcimg" src="../../images/qmark.png" />
-												</a>
-											</span>
-											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
-												<span id="dupsearchspan">Looking for Dups...</span>
-												<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
-												<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>
-											</div>
-										</div>
-										<div>
-											<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:330px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
-											<span style="margin-left:10px;">
-												<input type="text" name="othercatalognumbers" tabindex="15" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');" />
-											</span>
-											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
-												<img src="../../images/showedit.png" style="width:15px;" />
-											</span>
-										</div>
-										<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
-											<span>
-												Verbatim Date:
-												<input type="text" name="verbatimeventdate" tabindex="16" maxlength="255" style="width:120px;" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="fieldChanged('verbatimeventdate');" />
-											</span>
-											<span style="margin-left:15px;">
-												MM/DD/YYYY:
-												<span style="margin:8px;">
-													<input type="text" name="month" tabindex="18" style="width:30px;" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />/
-													<input type="text" name="day" tabindex="20" style="width:30px;" value="<?php echo array_key_exists('day',$occArr)?$occArr['day']:''; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />/
-													<input type="text" name="year" tabindex="22" style="width:45px;" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />
-												</span>
-											</span>
-											<span style="margin-left:15px;">
-												Day of Year:
-												<span style="margin:16px;">
-													<input type="text" name="startdayofyear" tabindex="24" style="width:40px;" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
-													<input type="text" name="enddayofyear" tabindex="26" style="width:40px;" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
-												</span>
-											</span>
-										</div>
+									</div>
+									<div>
+										<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:330px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
+										<span style="margin-left:10px;">
+											<input type="text" name="othercatalognumbers" tabindex="15" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');" />
+										</span>
+										<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
+											<img src="../../images/showedit.png" style="width:15px;" />
+										</span>
+									</div>
+									<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
+										<span>
+											Verbatim Date:
+											<input type="text" name="verbatimeventdate" tabindex="16" maxlength="255" style="width:200px;" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
+										</span>
+										<span style="margin-left:10px;">
+											YYYY-MM-DD:
+											<input type="text" name="year" tabindex="18" style="width:45px;" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />-
+											<input type="text" name="month" tabindex="20" style="width:30px;" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />-
+											<input type="text" name="day" tabindex="22" style="width:30px;" value="<?php echo array_key_exists('day',$occArr)?$occArr['day']:''; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />
+										</span>
+										<span style="margin-left:10px;">
+											Day of Year:
+											<input type="text" name="startdayofyear" tabindex="24" style="width:40px;" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
+											<input type="text" name="enddayofyear" tabindex="26" style="width:40px;" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
+										</span>
 									</div>
 								</fieldset>
 								<fieldset>
@@ -474,24 +468,20 @@ if($symbUid){
 											if(array_key_exists("decimallongitude",$occArr) && $occArr["decimallongitude"] != "") {
 												$longValue = $occArr["decimallongitude"];
 											}
-											$zoomValue = 5;
-											if($latValue || $longValue){
-												$zoomValue = 9;
-											} 
 											?>
 											<input type="text" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
 										</span>
 										<span>
 											<input type="text" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
 										</span>
-										<span style="cursor:pointer;padding:3px;" onclick="openMappingAid(<?php echo ($latValue?$latValue:'0').','.($longValue?$longValue:'0').','.$zoomValue; ?>);">
+										<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
 											<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
 										</span>
-										<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleCoordDiv();">
-											UTM
+										<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleCoordDiv();" title="Other Coordinate Formats">
+											Tools
 										</span>
 										<span>
-											<input type="text" name="geodeticdatum" tabindex="56" maxlength="255" style="width:80px;" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchanged="fieldChanged('geodeticdatum');" />
+											<input type="text" name="geodeticdatum" tabindex="56" maxlength="255" style="width:80px;" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchange="fieldChanged('geodeticdatum');" />
 										</span>
 										<span>
 											<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation');fieldChanged('minimumelevationinmeters');" title="Minumum Elevation In Meters" />
@@ -499,7 +489,7 @@ if($symbUid){
 										<span>
 											<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation');fieldChanged('maximumelevationinmeters');" title="Maximum Elevation In Meters" />
 										</span>
-										<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('elevaiddiv');">
+										<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleElevDiv()">
 											ft.
 										</span>
 										<span>
@@ -523,18 +513,6 @@ if($symbUid){
 									?>
 									<div>
 										<div id="coordaiddiv" style="display:none;">
-											<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:150px;margin-bottom:10px;">
-												Zone: <input id="utmzone" style="width:40px;" />
-												<select id="zonens" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-													<option>N</option>
-													<option>S</option>
-												</select><br/>
-												East: <input id="utmeast" type="text" style="width:100px;" /><br/>
-												North: <input id="utmnorth" type="text" style="width:100px;" /><br/>
-												<div style="margin:5px;">
-													<input type="button" value="Insert UTM Values" onclick="insertUtm(this.form)" />
-												</div>
-											</div>
 											<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:270px;">
 												<div>
 													Latitude: 
@@ -558,6 +536,66 @@ if($symbUid){
 												</div>
 												<div style="margin:5px;">
 													<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
+												</div>
+											</div>
+											<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:150px;margin-bottom:10px;">
+												Zone: <input id="utmzone" style="width:40px;" />
+												<select id="zonens" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
+													<option>N</option>
+													<option>S</option>
+												</select><br/>
+												East: <input id="utmeast" type="text" style="width:100px;" /><br/>
+												North: <input id="utmnorth" type="text" style="width:100px;" /><br/>
+												<div style="margin:5px;">
+													<input type="button" value="Insert UTM Values" onclick="insertUtm(this.form)" />
+												</div>
+											</div>
+											<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;">
+												T<input id="township" style="width:30px;" title="Township" />
+												<select id="townshipNS">
+													<option>N</option>
+													<option>S</option>
+												</select>&nbsp;&nbsp;&nbsp;&nbsp;
+												R<input id="range" style="width:30px;" title="Range" />
+												<select id="rangeEW">
+													<option>E</option>
+													<option>W</option>
+												</select><br/>
+												Sec: 
+												<input id="section" style="width:30px;" title="Section" />&nbsp;&nbsp;&nbsp; 
+												Details: 
+												<input id="secdetails" style="width:90px;" title="Section Details" /><br/>
+												<select id="meridian" title="Meridian">
+													<option value="G-AZ">Arizona, Gila &amp; Salt River</option>
+													<option value="NAAZ">Arizona, Navajo</option>
+													<option value="F-AR">Arkansas, Fifth Principal</option> 
+													<option value="H-CA">California, Humboldt</option>
+													<option value="M-CA">California, Mt. Diablo</option>
+													<option value="S-CA">California, San Bernardino</option>
+													<option value="NMCO">Colorado, New Mexico</option>
+													<option value="SPCO">Colorado, Sixth Principal</option>
+													<option value="UTCO">Colorado, Ute</option>
+													<option value="B-ID">Idaho, Boise</option>
+													<option value="SPKS">Kansas, Sixth Principal</option>
+													<option value="P-MT">Montana, Principal</option>
+													<option value="SPNE">Nebraska, Sixth Principal</option>
+													<option value="M-NV">Nevada, Mt. Diablo</option>
+													<option value="NMNM">New Mexico, New Mexico</option>
+													<option value="F-ND">North Dakota, Fifth Principal</option>
+													<option value="C-OK">Oklahoma, Cimarron</option>
+													<option value="I-OK">Oklahoma, Indian</option>
+													<option value="W-OR">Oregon, Willamette</option>
+													<option value="BHSD">South Dakota, Black Hills</option>
+													<option value="F-SD">South Dakota, Fifth Principal</option>
+													<option value="SPSD">South Dakota, Sixth Principal</option>
+													<option value="SLUT">Utah, Salt Lake</option>
+													<option value="U-UT">Utah, Uinta</option>
+													<option value="W-WA">Washington, Willamette</option>
+													<option value="SPWY">Wyoming, Sixth Principal</option>
+													<option value="WRWY">Wyoming, Wind River</option>
+												</select>
+												<div style="margin:5px;">
+													<input type="button" value="Insert TRS Values" onclick="insertTRS()" />
 												</div>
 											</div>
 										</div>
@@ -589,7 +627,7 @@ if($symbUid){
 										</div>
 										<div>
 											<span>
-												<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" style="width:250px;" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="fieldChanged('verbatimcoordinates');" title="" />
+												<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" style="width:300px;" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="fieldChanged('verbatimcoordinates');" title="" />
 											</span>
 											<span>
 												<input type="text" name="georeferencedby" tabindex="66" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
@@ -654,7 +692,7 @@ if($symbUid){
 									</div>
 									<div style="padding:3px;">
 										Description:
-										<input type="text" name="dynamicproperties" tabindex="86" style="width:600px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
+										<input type="text" name="verbatimattributes" tabindex="86" style="width:600px;" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 									</div>
 									<div style="padding:3px;">
 										Notes:
@@ -718,11 +756,28 @@ if($symbUid){
 											<a href="#" onclick="return dwcDoc('basisOfRecord')">
 												<img class="dwcimg" src="../../images/qmark.png" />
 											</a>
-											<input type="text" name="basisofrecord" tabindex="108" maxlength="32" style="" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
+											<input type="text" name="basisofrecord" tabindex="108" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
 										</span>
 										<span style="margin-left:20px;">
 											Language:
-											<input type="text" name="language" tabindex="110" maxlength="20" style="" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+											<input type="text" name="language" tabindex="110" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+										</span>
+										<span style="margin-left:20px;">
+											Label Project:
+											<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" />
+										</span>
+									</div>
+									<div style="padding:3px;">
+										<span>
+											Dynamic Properties:
+											<a href="#" onclick="return dwcDoc('dynamicProperties')">
+												<img class="dwcimg" src="../../images/qmark.png" />
+											</a>
+											<input type="text" name="dynamicproperties" tabindex="114" style="width:350px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
+										</span>
+										<span style="margin-left:20px;" title="aka label quantity">
+											Duplicate Quantity:
+											<input type="text" name="duplicatequantity" tabindex="116" style="width:35px;" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" />
 										</span>
 									</div>
 								</fieldset>
@@ -862,8 +917,8 @@ if($symbUid){
 											<?php if(!array_key_exists('iscurrent',$detRec)){ ?>
 											<div id="editdetdiv-<?php echo $detId;?>" style="display:none;">
 												<fieldset>
+													<legend><b>Edit Determination</b></legend>
 													<form name="deteditform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetEditForm(this);">
-														<legend><b>Edit Determination</b></legend>
 														<div style='margin:3px;'>
 															<b>Identification Qualifier:</b>
 															<input type="text" name="identificationqualifier" value="<?php echo $detRec['identificationqualifier']; ?>" title="e.g. cf, aff, etc" />
@@ -998,6 +1053,14 @@ if($symbUid){
 														}
 													?>
 												</select>
+												<a href="#" onclick="toggle('imgaddoverride');return false;" title="Display photographer override field">
+													<img src="../../images/showedit.png" style="border:0px;width:13px;" />
+												</a>
+											</div>
+											<div id="imgaddoverride" style="margin:0px 0px 5px 10px;display:none;">
+												<b>Photographer (override):</b> 
+												<input name='photographer' type='text' style="width:300px;" maxlength='100'>
+												* Will override above selection
 											</div>
 											<div style="margin:0px 0px 5px 10px;">
 												<b>Notes:</b> 
@@ -1014,7 +1077,7 @@ if($symbUid){
 											<div style="margin:10px 0px 10px 20px;">
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 												<input type="hidden" name="tid" value="<?php echo $occArr["tidinterpreted"]; ?>" />
-												<input type="hidden" name="institutioncode" value="<?php echo $occArr["institutioncode"]; ?>" />
+												<input type="hidden" name="institutioncode" value="<?php echo $collMap['institutioncode']; ?>" />
 												<input type="submit" name="submitaction" value="Submit New Image" />
 											</div>
 										</fieldset>
@@ -1067,8 +1130,11 @@ if($symbUid){
 														</div>
 														<div>
 															<b>Photographer:</b> 
-															<?php 
-															if($imgArr["photographeruid"]){
+															<?php
+															if($imgArr["photographer"]){
+																echo $imgArr["photographer"];
+															}
+															else if($imgArr["photographeruid"]){
 																$pArr = $occManager->getPhotographerArr();
 																echo $pArr[$imgArr["photographeruid"]];
 															} 
@@ -1133,6 +1199,14 @@ if($symbUid){
 																		}
 																		?>
 																	</select>
+																	<a href="#" onclick="toggle('imgeditoverride<?php echo $imgId; ?>');return false;" title="Display photographer override field">
+																		<img src="../../images/showedit.png" style="border:0px;width:13px;" />
+																	</a>
+																</div>
+																<div id="imgeditoverride<?php echo $imgId; ?>" style="display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
+																	<b>Photographer (override):</b><br/> 
+																	<input name='photographer' type='text' value="<?php echo $imgArr["photographer"]; ?>" style="width:300px;" maxlength='100'>
+																	* Warning: value will override above selection
 																</div>
 																<div>
 																	<b>Notes:</b><br/>

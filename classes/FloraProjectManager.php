@@ -1,17 +1,17 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
  
- class FloraProjectManager {
+class FloraProjectManager {
 
 	private $con;
 	private $projId;
 	private $googleUrl;
 	private $researchCoord = Array();
 	private $surveyCoord = Array();
-	
- 	public function __construct($proj){
+
+	public function __construct($proj){
 		global $googleMapKey;
- 		$this->con = MySQLiConnectionFactory::getCon("readonly");
+		$this->con = MySQLiConnectionFactory::getCon("readonly");
 		$this->googleUrl = "http://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain&sensor=false";
 		if(is_numeric($proj)){
 			$this->projId = $proj;
@@ -24,16 +24,16 @@ include_once($serverRoot.'/config/dbconnection.php');
 			}
 			$rs->close();
 		}
- 	}
- 	
- 	public function __destruct(){
+	}
+
+	public function __destruct(){
 		if(!($this->con === null)) $this->con->close();
 	}
-	
+
 	public function getProjectId(){
 		return $this->projId;
 	}
-	
+
 	public function getProjectList(){
 		$returnArr = Array();
 		$sql = "SELECT p.pid, p.projname, p.managers, p.briefdescription ".
@@ -49,7 +49,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 		$rs->close();
 		return $returnArr;
 	}
-	
+
 	public function getProjectData(){
 		$returnArr = Array();
 		if($this->projId){
@@ -156,6 +156,54 @@ include_once($serverRoot.'/config/dbconnection.php');
 		if(!$coordStr) return ""; 
 		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
 		return $googleUrlLocal;
+	}
+
+	public function getClAddArr(){
+		$returnArr = Array();
+		$sql = 'SELECT c.clid, c.name '.
+			'FROM fmchecklists c LEFT JOIN (SELECT clid FROM fmchklstprojlink WHERE pid = '.$this->projId.') pl ON c.clid = pl.clid '.
+			'WHERE pl.clid IS NULL AND c.access = "public" '.
+			'ORDER BY name';
+		$rs = $this->con->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->clid] = $row->name;
+		}
+		$rs->close();
+		return $returnArr;
+	}
+
+	public function getClDeleteArr(){
+		$returnArr = Array();
+		$sql = 'SELECT c.clid, c.name '.
+			'FROM fmchecklists c INNER JOIN fmchklstprojlink pl ON c.clid = pl.clid '.
+			'WHERE pl.pid = '.$this->projId.' '.
+			'ORDER BY name';
+		$rs = $this->con->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->clid] = $row->name;
+		}
+		$rs->close();
+		return $returnArr;
+	}
+
+	public function addChecklist($clid){
+		$sql = 'INSERT INTO fmchklstprojlink(pid,clid) VALUES('.$this->projId.','.$clid.') ';
+		if($this->con->query($sql)){ 
+			return 'SUCCESS: Checklist has been added to project';
+		}
+		else{
+			return 'FAILED: Unable to add checklist to project';
+		}
+	}
+
+	public function deleteChecklist($clid){
+		$sql = 'DELETE FROM fmchklstprojlink WHERE pid = '.$this->projId.' AND clid = '.$clid;
+		if($this->con->query($sql)){ 
+			return 'SUCCESS: Checklist has been deleted from project';
+		}
+		else{
+			return 'FAILED: Unable to checklist from project';
+		}
 	}
 
 	private function cleanString($inStr){

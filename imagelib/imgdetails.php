@@ -79,95 +79,6 @@ if($isEditor){
 		if($imgArr){
 			?>
 			<table>
-				<tr>
-					<td style="width:50%;text-align:center;padding:10px;">
-						<?php 
-							$imgUrl = $imgArr["url"];
-							$origUrl = $imgArr["originalurl"];
-							if(array_key_exists("imageDomain",$GLOBALS)){
-								if(substr($imgUrl,0,1)=="/"){
-									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-								}
-								if($origUrl && substr($origUrl,0,1)=="/"){
-									$origUrl = $GLOBALS["imageDomain"].$origUrl;
-								}
-							}
-						?>
-						<a href="<?php echo $imgUrl;?>">
-							<img src="<?php echo $imgUrl;?>" style="width:90%;" />
-						</a>
-						<?php 
-						if($origUrl){
-							echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
-						}
-						?>
-					</td>
-					<td style="padding:10px 5px 10px 5px;">
-						<?php
-						if($imgArr['occid']){
-							?>
-							<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
-								<a href="../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=imagediv">
-									<img src="../images/edit.png" style="border:0px;" />
-								</a>
-							</div>
-							<?php
-						}
-						else{
-							if($isEditor){ 
-								?>
-								<div style='float:right;margin-right:10px;cursor:pointer;'>
-									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
-								</div>
-								<?php 
-							}
-						} 
-						?>
-						<div style="clear:both;margin-top:80px;">
-							<b>Scientific Name:</b> <?php echo '<i>'.$imgArr["sciname"].'</i> '.$imgArr["author"]; ?>
-						</div>
-						<?php 
-							if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
-							if($imgArr["photographer"]){
-								if($imgArr["photographeruid"]) echo '<a href="photographers.php?phuid='.$imgArr["photographeruid"].'">';
-								echo "<div><b>Photographer:</b> ".$imgArr["photographer"]."</div>";
-								if($imgArr["photographeruid"]) echo '</a>';
-							}
-							if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
-							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
-							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
-							echo "<div>";
-							if($imgArr["copyright"]){
-								if(stripos($imgArr["copyright"],"http") === 0){
-									echo "<a href='".$imgArr["copyright"]."'>Copyright Details</a>";
-								}
-								else{
-									echo $imgArr["copyright"];
-								}
-							}
-							else{
-								echo "<a href='../misc/usagepolicy.php#images'>Copyright Details</a>";
-							}
-							echo "</div>";
-							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
-							if($imgArr["occid"]) echo "<div><a href='../collections/individual/index.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
-							echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
-							if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";
-						?>
-						<div style="margin-top:20px;">
-							Do you see an error or have a comment about this image? <br/>If so, send email to: 
-							<?php 
-							$emailSubject = $defaultTitle.' Image #'.$imgId;
-							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId;
-							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
-							?>
-							<a href="mailto:<?php echo $adminEmail.'?'.$emailRef; ?>">
-								<?php echo $adminEmail; ?>
-							</a>
-							
-						</div>
-					</td>
-				</tr>
 				<?php 
 				if($isEditor){
 					?>
@@ -188,9 +99,12 @@ if($isEditor){
 											<option value="">---------------------------------------</option>
 											<?php $imgManager->echoPhotographerSelect($imgArr["photographeruid"]); ?>
 										</select>
-										* Users registered within system
+										* Users registered within system 
+										<a href="#" onclick="toggle('iepor');return false;" title="Display photographer override field">
+											<img src="../images/showedit.png" style="border:0px;width:12px;" />
+										</a>
 									</div>
-									<div style='margin-top:2px;'>
+									<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
 										<b>Photographer (override):</b> 
 										<input name='photographer' type='text' value='<?php echo $imgArr["photographer"];?>' style="width:250px;" maxlength='100'>
 										* Will override above selection
@@ -326,6 +240,97 @@ if($isEditor){
 					<?php 
 				}
 				?>
+				<tr>
+					<td style="width:50%;text-align:center;padding:10px;">
+						<?php 
+							$imgUrl = $imgArr["url"];
+							$origUrl = $imgArr["originalurl"];
+							if(array_key_exists("imageDomain",$GLOBALS)){
+								if(substr($imgUrl,0,1)=="/"){
+									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+								}
+								if($origUrl && substr($origUrl,0,1)=="/"){
+									$origUrl = $GLOBALS["imageDomain"].$origUrl;
+								}
+							}
+						?>
+						<a href="<?php echo $imgUrl;?>">
+							<img src="<?php echo $imgUrl;?>" style="width:90%;" />
+						</a>
+						<?php 
+						if($origUrl){
+							echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
+						}
+						?>
+					</td>
+					<td style="padding:10px 5px 10px 5px;">
+						<?php
+						if($imgArr['occid']){
+							?>
+							<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
+								<a href="../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=imagediv">
+									<img src="../images/edit.png" style="border:0px;" />
+								</a>
+							</div>
+							<?php
+						}
+						else{
+							if($isEditor){ 
+								?>
+								<div style='float:right;margin-right:10px;cursor:pointer;'>
+									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
+								</div>
+								<?php 
+							}
+						} 
+						?>
+						<div style="clear:both;margin-top:80px;">
+							<b>Scientific Name:</b> <?php echo '<i>'.$imgArr["sciname"].'</i> '.$imgArr["author"]; ?>
+						</div>
+						<?php 
+							if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
+							if($imgArr["photographerdisplay"]){
+								echo "<div><b>Photographer:</b> ";
+								if(!$imgArr["photographer"]) echo '<a href="photographers.php?phuid='.$imgArr["photographeruid"].'">';
+								echo $imgArr["photographerdisplay"];
+								if(!$imgArr["photographer"]) echo '</a>';
+								echo "</div>";
+							}
+							if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
+							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
+							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
+							echo "<div>";
+							if($imgArr["copyright"]){
+								if(stripos($imgArr["copyright"],"http") === 0){
+									echo "<a href='".$imgArr["copyright"]."'>Copyright Details</a>";
+								}
+								else{
+									echo $imgArr["copyright"];
+								}
+							}
+							else{
+								echo "<a href='../misc/usagepolicy.php#images'>Copyright Details</a>";
+							}
+							echo "</div>";
+							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
+							if($imgArr["occid"]) echo "<div><a href='../collections/individual/index.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
+							echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
+							if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";
+						?>
+						<div style="margin-top:20px;">
+							Do you see an error or have a comment about this image? <br/>If so, send email to: 
+							<?php 
+							$emailSubject = $defaultTitle.' Image #'.$imgId;
+							$emailBody = 'Image being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/imagelib/imgdetails.php?imgid='.$imgId;
+							$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
+							?>
+							<a href="mailto:<?php echo $adminEmail.'?'.$emailRef; ?>">
+								<?php echo $adminEmail; ?>
+							</a>
+							
+						</div>
+					</td>
+				</tr>
 			</table>
 			<?php
 		}

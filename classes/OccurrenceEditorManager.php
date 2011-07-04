@@ -74,19 +74,19 @@ class OccurrenceEditorManager {
 	
 	private function getOccurArr($oid = 0){
 		$retArr = Array();
-		$sql = 'SELECT o.occid, o.collid, o.dbpk, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+		$sql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
 			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
 			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
 			'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
 			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
+			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
 			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
 			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
 			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
-			'o.verbatimElevation, o.disposition, o.modified, o.language, o.observeruid, o.dateLastModified '.
+			'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, o.dateLastModified '.
 			'FROM omoccurrences o '.
 			'WHERE o.occid = '.($oid?$oid:$this->occId);
 		//echo "<div>".$sql."</div>";
@@ -101,9 +101,10 @@ class OccurrenceEditorManager {
 	}
 
 	private function setImages(){
-		$sql = "SELECT imgid, url, thumbnailurl, originalurl, caption, photographeruid, sourceurl, copyright, notes, occid, sortsequence ".
-			"FROM images ".
-			"WHERE occid = ".$this->occId." ORDER BY sortsequence";
+		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
+			'sourceurl, copyright, notes, occid, sortsequence '.
+			'FROM images '.
+			'WHERE occid = '.$this->occId.' ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
@@ -111,6 +112,7 @@ class OccurrenceEditorManager {
 			$this->occurrenceMap["images"][$imgId]["tnurl"] = $row->thumbnailurl;
 			$this->occurrenceMap["images"][$imgId]["origurl"] = $row->originalurl;
 			$this->occurrenceMap["images"][$imgId]["caption"] = $row->caption;
+			$this->occurrenceMap["images"][$imgId]["photographer"] = $row->photographer;
 			$this->occurrenceMap["images"][$imgId]["photographeruid"] = $row->photographeruid;
 			$this->occurrenceMap["images"][$imgId]["sourceurl"] = $row->sourceurl;
 			$this->occurrenceMap["images"][$imgId]["copyright"] = $row->copyright;
@@ -203,32 +205,20 @@ class OccurrenceEditorManager {
 
 	public function addOccurrence($occArr){
 		$status = "SUCCESS: new occurrence record submitted successfully";
-		$dbpk = '1';
-		$pkSql = 'SELECT MAX(dbpk+1) AS maxpk FROM omoccurrences WHERE collid = '.$occArr["collid"];
-		$pkRs = $this->conn->query($pkSql);
-		if($r = $pkRs->fetch_object()){
-			if($r->maxpk){
-				$dbpk = $r->maxpk;
-			}
-		}
-		$pkRs->close();
-		if(stripos($this->collMap['managementtype'],'snapshot') !== false){
-			$dbpk .= '-symb';
-		}
 
 		if($occArr){
-			$sql = "INSERT INTO omoccurrences(collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
+			$sql = "INSERT INTO omoccurrences(collid, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
 			"ownerInstitutionCode, family, sciname, tidinterpreted, scientificNameAuthorship, identifiedBy, dateIdentified, ".
 			"identificationReferences, identificationremarks, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
-			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, ".
+			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, verbatimattributes, ".
 			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, ".
 			"stateProvince, county, locality, localitySecurity, localitysecurityreason, decimalLatitude, decimalLongitude, ".
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
-			"verbatimElevation, disposition, language, recordEnteredBy) ".
-			"VALUES (".$occArr["collid"].",\"".$dbpk."\",".
+			"verbatimElevation, disposition, language, recordEnteredBy, duplicateQuantity, labelProject) ".
+			"VALUES (".$occArr["collid"].",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
 			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
 			($occArr["catalognumber"]?"\"".$occArr["catalognumber"]."\"":"NULL").",".
@@ -257,6 +247,7 @@ class OccurrenceEditorManager {
 			($occArr["habitat"]?"\"".$occArr["habitat"]."\"":"NULL").",".
 			($occArr["occurrenceremarks"]?"\"".$occArr["occurrenceremarks"]."\"":"NULL").",".
 			($occArr["associatedtaxa"]?"\"".$occArr["associatedtaxa"]."\"":"NULL").",".
+			($occArr["verbatimattributes"]?"\"".$occArr["verbatimattributes"]."\"":"NULL").",".
 			($occArr["dynamicproperties"]?"\"".$occArr["dynamicproperties"]."\"":"NULL").",".
 			($occArr["reproductivecondition"]?"\"".$occArr["reproductivecondition"]."\"":"NULL").",".
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
@@ -281,7 +272,9 @@ class OccurrenceEditorManager {
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
 			($occArr["verbatimelevation"]?"\"".$occArr["verbatimelevation"]."\"":"NULL").",".
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
-			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",\"".
+			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",".
+			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
+			($occArr["labelproject"]?"\"".$occArr["labelproject"]."\"":"NULL").",\"".
 			$occArr["userid"]."\") ";
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
@@ -484,7 +477,8 @@ class OccurrenceEditorManager {
 		}
 		$occId = $_REQUEST["occid"];
 		$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographerUid = $_REQUEST["photographeruid"];
+		$photographer = $_REQUEST["photographer"];
+		$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST['photographeruid']:'');
 		$notes = $this->cleanStr($_REQUEST["notes"]);
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
@@ -492,7 +486,9 @@ class OccurrenceEditorManager {
 		$sql = "UPDATE images ".
 			"SET url = \"".$url."\", thumbnailurl = ".($tnUrl?"\"".$tnUrl."\"":"NULL").
 			",originalurl = ".($origUrl?"\"".$origUrl."\"":"NULL").",occid = ".$occId.",caption = ".
-			($caption?"\"".$caption."\"":"NULL").",photographeruid = ".($photographerUid?$photographerUid:"NULL").
+			($caption?"\"".$caption."\"":"NULL").
+			",photographer = ".($photographer?'"'.$photographer.'"':"NULL").
+			",photographeruid = ".($photographerUid?$photographerUid:"NULL").
 			",notes = ".($notes?"\"".$notes."\"":"NULL").
 			",copyright = ".($copyRight?"\"".$copyRight."\"":"NULL").",imagetype = \"specimen\",sourceurl = ".
 			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
@@ -562,14 +558,19 @@ class OccurrenceEditorManager {
 			$occId = $_REQUEST["occid"];
 			$owner = $_REQUEST["institutioncode"];
 			$caption = $this->cleanStr($_REQUEST["caption"]);
-			$photographerUid = $_REQUEST["photographeruid"];
+			$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST["photographeruid"]:'');
+			$photographer = (array_key_exists('photographer',$_REQUEST)?$_REQUEST["photographer"]:'');
 			$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
 			$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
-			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, caption, '.
+			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
 				'owner, sourceurl, copyright, occid, notes) '.
-				'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
-				($photographerUid?$photographerUid:'NULL').','.($caption?'"'.$caption.'"':'NULL').','.
+				'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$imgWebUrl.'",'.
+				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
+				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				($photographer?'"'.$photographer.'"':'NULL').','.
+				($photographerUid?$photographerUid:'NULL').','.
+				($caption?'"'.$caption.'"':'NULL').','.
 				($owner?'"'.$owner.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
 				($copyRight?'"'.$copyRight.'"':'NULL').','.($occId?$occId:'NULL').','.($notes?'"'.$notes.'"':'NULL').')';
 			//echo $sql;

@@ -134,6 +134,7 @@ function toogleLocSecReason(f){
 function toggleCoordDiv(){
 	coordObj = document.getElementById("coordaiddiv");
 	if(coordObj.style.display == "none"){
+		document.getElementById("elevaiddiv").style.display = "none";
 		document.getElementById("locextradiv1").style.display = "block";
 		document.getElementById("locextradiv2").style.display = "block";
 		coordObj.style.display = "block";
@@ -143,12 +144,28 @@ function toggleCoordDiv(){
 	}
 }
 
+function toggleElevDiv(){
+	elevObj = document.getElementById("elevaiddiv");
+	if(elevObj.style.display == "none"){
+		document.getElementById("coordaiddiv").style.display = "none";
+		elevObj.style.display = "block";
+	}
+	else{
+		elevObj.style.display = "none";
+	}
+}
+
 function toggleIdDetails(){
 	toggle("idrefdiv");
 	toggle("idremdiv");
 }
 
-function openMappingAid(latDef,lngDef,zoom) {
+function openMappingAid() {
+	var f = document.fullform;
+	var latDef = f.decimallatitude.value;
+	var lngDef = f.decimallongitude.value;
+	var zoom = 5;
+	if(latDef && lngDef) zoom = 9;
     mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
     if (mapWindow.opener == null) mapWindow.opener = self;
 }
@@ -174,7 +191,7 @@ function insertUtm(f) {
 			if(vcStr != ""){
 				vcStr = vcStr + "; ";
 			}
-			var utmStr = "(UTM: " + zValue + " " + eValue + "E " + nValue + "N)";
+			var utmStr = "UTM: " + zValue + " " + eValue + "E " + nValue + "N";
 			f.verbatimcoordinates.value = vcStr + utmStr;
 			//Convert to Lat/Lng values
 			var latLngStr = utm2LatLng(zValue,eValue,nValue);
@@ -252,11 +269,11 @@ function insertLatLng(f) {
 				if(vcStr != ""){
 					vcStr = vcStr + "; ";
 				}
-				var dmsStr = "(Lat: " + latDeg + "d " + latMin + "m ";
+				var dmsStr = "Lat: " + latDeg + "d " + latMin + "m ";
 				if(latSec > 0) dmsStr += latSec + "s ";
 				dmsStr += latNS + "; Long: " + lngDeg + "d " + lngMin + "m ";
 				if(lngSec) dmsStr += lngSec + "s ";
-				dmsStr += lngEW + ")";
+				dmsStr += lngEW;
 				f.verbatimcoordinates.value = vcStr + dmsStr;
 				var latDec = parseInt(latDeg) + (parseFloat(latMin)/60) + (parseFloat(latSec)/3600);
 				var lngDec = parseInt(lngDeg) + (parseFloat(lngMin)/60) + (parseFloat(lngSec)/3600);
@@ -272,6 +289,39 @@ function insertLatLng(f) {
 	}
 	else{
 		alert("DMS fields must contain a value");
+	}
+}
+
+function insertTRS(f) {
+	var township = document.getElementById("township").value.replace(/^\s+|\s+$/g,"");
+	var townshipNS = document.getElementById("townshipNS").value.replace(/^\s+|\s+$/g,"");
+	var range = document.getElementById("range").value.replace(/^\s+|\s+$/g,"");
+	var rangeEW = document.getElementById("rangeEW").value.replace(/^\s+|\s+$/g,"");
+	var section = document.getElementById("section").value.replace(/^\s+|\s+$/g,"");
+	var secdetails = document.getElementById("secdetails").value.replace(/^\s+|\s+$/g,"");
+	var meridian = document.getElementById("meridian").value.replace(/^\s+|\s+$/g,"");
+	
+	if(!isNumeric(township)){
+		alert("Numeric value expected for Township field. If non-standardize format is used, enter directly into the Verbatim Coordinate Field");
+		return false;
+	}
+	else if(!isNumeric(range)){
+		alert("Numeric value expected for Range field. If non-standardize format is used, enter directly into the Verbatim Coordinate Field");
+		return false;
+	}
+	else if(!isNumeric(section)){
+		alert("Numeric value expected for Section field. If non-standardize format is used, enter directly into the Verbatim Coordinate Field");
+		return false;
+	}
+	else if(section > 36){
+		alert("Section field must contain a numeric value between 1-36");
+		return false;
+	}
+	else{
+		//Insert into verbatimCoordinate field
+		vCoord = document.fullform.verbatimcoordinates;
+		if(vCoord.value) vCoord.value = vCoord.value + "; "; 
+		vCoord.value = vCoord.value + "TRS: T"+township+townshipNS+" R"+range+rangeEW+" sec "+section+" "+secdetails+" "+meridian;
 	}
 }
 
@@ -543,16 +593,162 @@ function displayDeleteSubmit(){
 }
 
 //Occurrence field checks
-function verifyDate(eventDateInput){
+function eventDateModified(eventDateInput){
 	var dateStr = eventDateInput.value;
 	if(dateStr == "") return true;
-	//test date and return mysqlformat
-	var validformat=/^\d{4}-\d{2}-\d{2}$/ //Format: yyyy-mm-dd
-	if(!validformat.test(dateStr)){
-		alert("Invalid Date Format. Please correct to follow this format: yyyy-mm-dd");
+	var dateArr = parseDate(dateStr);
+
+	if(dateArr['y'] == 0){
+		alert("Unable to interpret Date. Please following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
 		return false;
 	}
+	else{
+		var mStr = dateArr['m'];
+		if(mStr.length == 1){
+			mStr = "0" + mStr;
+		}
+		var dStr = dateArr['d'];
+		if(dStr.length == 1){
+			dStr = "0" + dStr;
+		}
+		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+		fieldChanged('eventdate');
+		if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
+	}
 	return true;
+}
+
+function distributeEventDate(y,m,d){
+	var f = document.fullform;
+	if(y != "0000"){
+		f.year.value = y;
+		fieldChanged("year");
+	}
+	if(m == "00"){
+		f.month.value = "";
+	}
+	else{
+		f.month.value = m;
+		fieldChanged("year");
+	}
+	if(d == "00"){
+		f.day.value = "";
+	}
+	else{
+		f.day.value = d;
+		fieldChanged("day");
+	}
+	f.startdayofyear.value = "";
+	try{
+		if(m == 0 || d == 0){
+			f.startdayofyear.value = "";
+		}
+		else{
+			eDate = new Date(y,m-1,d);
+			if(eDate instanceof Date && eDate != "Invalid Date"){
+				var onejan = new Date(y,0,1);
+				f.startdayofyear.value = Math.ceil((eDate - onejan) / 86400000) + 1;
+				fieldChanged("startdayofyear");
+			}
+		}
+	}
+	catch(e){
+	}
+}
+
+function verbatimEventDateChanged(vedInput){
+	fieldChanged('verbatimeventdate');
+
+	vedValue = vedInput.value;
+	var f = document.fullform;
+	
+	if(vedValue.indexOf(" to ") > -1){
+		if(f.eventdate.value == ""){
+			var startDate = vedValue.substring(0,vedValue.indexOf(" to "));
+			var startDateArr = parseDate(startDate);
+			var mStr = startDateArr['m'];
+			if(mStr.length == 1){
+				mStr = "0" + mStr;
+			}
+			var dStr = startDateArr['d'];
+			if(dStr.length == 1){
+				dStr = "0" + dStr;
+			}
+			f.eventdate.value = startDateArr['y'] + "-" + mStr + "-" + dStr;
+			distributeEventDate(startDateArr['y'],mStr,dStr);
+		}
+		var endDate = vedValue.substring(vedValue.indexOf(" to ")+4);
+		var endDateArr = parseDate(endDate);
+		try{
+			var eDate = new Date(endDateArr["y"],endDateArr["m"]-1,endDateArr["d"]);
+			if(eDate instanceof Date && eDate != "Invalid Date"){
+				var onejan = new Date(endDateArr["y"],0,1);
+				f.enddayofyear.value = Math.ceil((eDate - onejan) / 86400000) + 1;
+				fieldChanged("enddayofyear");
+			}
+		}
+		catch(e){
+		}
+	}
+}
+
+function parseDate(dateStr){
+	var y = 0;
+	var m = 0;
+	var d = 0;
+	try{
+		var validformat1 = /^\d{4}-\d{2}-\d{2}$/ //Format: yyyy-mm-dd
+		var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/ //Format: mm/dd/yyyy
+		var validformat3 = /^\d{1,2} \D+ \d{2,4}$/ //Format: dd mmm yyyy
+		if(validformat1.test(dateStr)){
+			y = dateStr.substring(0,4);
+			m = dateStr.substring(5,7);
+			d = dateStr.substring(8);
+		}
+		else if(validformat2.test(dateStr)){
+			y = dateStr.substring(dateStr.lastIndexOf("/")+1);
+			if(y.length == 2){
+				if(y < 15){
+					y = "20" + y;
+				}
+				else{
+					y = "19" + y;
+				}
+			}
+			m = dateStr.substring(0,dateStr.indexOf("/"));
+			d = dateStr.substring(dateStr.indexOf("/")+1,dateStr.lastIndexOf("/"));;
+		}
+		else if(validformat3.test(dateStr)){
+			y = dateStr.substring(dateStr.lastIndexOf(" ")+1);
+			if(y.length == 2){
+				if(y < 15){
+					y = "20" + y;
+				}
+				else{
+					y = "19" + y;
+				}
+			}
+			mText = dateStr.substring(dateStr.indexOf(" ")+1,dateStr.lastIndexOf(" "));
+			mText = mText.substring(0,3);
+			mText = mText.toLowerCase();
+			var mNames = new Array("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
+			m = mNames.indexOf(mText)+1;
+			d = dateStr.substring(0,dateStr.indexOf(" "));
+		}
+		else if(dateObj instanceof Date && dateObj != "Invalid Date"){
+			var dateObj = new Date(dateStr);
+			y = dateObj.getFullYear();
+			m = dateObj.getMonth() + 1;
+			d = dateObj.getDate();
+		}
+	}
+	catch(ex){
+	}
+	var retArr = new Array();
+	retArr["y"] = y;
+	retArr["m"] = m;
+	retArr["d"] = d;
+	return retArr;
 }
 
 //Determination form methods 

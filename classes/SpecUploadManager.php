@@ -410,13 +410,15 @@ class SpecUploadManager{
 			$this->performFinalTransfer();
 		}
 		else{
-			echo "<li>Upload Procedure Complete: ".$this->transferCount." records</li>";
-			echo "<li>Records transferred only to temporary specimen table; use controls below to transfer to specimen table</li>";
+			echo '<li>Upload Procedure Complete';
+			if($this->transferCount) echo ': '.$this->transferCount.' records';
+			echo '</li>';
+			if($this->transferCount) echo '<li>Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
 		}
 	}
 
 	public function performFinalTransfer(){
-		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
+/*		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$recCnt = $r->reccnt;
@@ -452,7 +454,7 @@ class SpecUploadManager{
 			}
 			$rs->close();
 		}
-		
+*/		
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
 		$spCallStr = "CALL TransferUploads(".$this->collId.")";

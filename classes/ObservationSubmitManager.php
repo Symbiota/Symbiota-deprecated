@@ -68,13 +68,13 @@ class ObservationSubmitManager {
 					return 'ERROR: scientific name failed, contact admin to add name to thesaurus';
 				}
 				//Get PK for that collection
-				$dbpk = 1;
-				$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);
-				if($rs && $row = $rs->fetch_object()){
-					if($row->maxpk) $dbpk = $row->maxpk;
-				}
+				//$dbpk = 1;
+				//$rs = $this->conn->query('SELECT MAX(dbpk+1) as maxpk FROM omoccurrences o WHERE o.collid = '.$collId);
+				//if($rs && $row = $rs->fetch_object()){
+				//	if($row->maxpk) $dbpk = $row->maxpk;
+				//}
 
-				$sql = 'INSERT INTO omoccurrences(collid, dbpk, basisofrecord, family, sciname, scientificname, '.
+				$sql = 'INSERT INTO omoccurrences(collid, basisofrecord, family, sciname, scientificname, '.
 					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 					'identificationReferences, recordedBy, recordNumber, '.
 					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
@@ -82,7 +82,7 @@ class ObservationSubmitManager {
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
 	
-				'VALUES ('.$collId.',"'.$dbpk.'","Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+				'VALUES ('.$collId.',"Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
 				'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
 				($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
 				$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
