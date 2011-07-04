@@ -21,8 +21,8 @@ class ImageDetailManager{
  	
 	public function getImageMetadata(){
 		$retArr = Array();
-		$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, ".
-			"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer, ".
+		$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.photographer, ".
+			"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ".
 			"i.caption, i.owner, i.sourceurl, i.copyright, i.locality, i.notes, i.occid, i.sortsequence, ".
 			"t.sciname, t.author, t.rankid ".
 			"FROM images i INNER JOIN taxa t ON i.tid = t.tid ".
@@ -39,6 +39,7 @@ class ImageDetailManager{
 			$retArr["thumbnailurl"] = $row->thumbnailurl;
 			$retArr["originalurl"] = $row->originalurl;
 			$retArr["photographer"] = $row->photographer;
+			$retArr["photographerdisplay"] = $row->photographerdisplay;
 			$retArr["photographeruid"] = $row->photographeruid;
 			$retArr["caption"] = $row->caption;
 			$retArr["owner"] = $row->owner;

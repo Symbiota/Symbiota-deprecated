@@ -219,7 +219,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 						</td>
 					</tr>
 					<?php 
-			        foreach($specData as $dbpk => $fieldArr){
+			        foreach($specData as $occId => $fieldArr){
 						$instCode2 = "";
 						if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
 							$instCode2 = $fieldArr["institutioncode"];
@@ -229,7 +229,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 						<tr>
 							<td rowspan="4" width='60' valign='top' align='center'>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-			                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?>' Collection Statistics' />
+			                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
 			                    </a>
 			                    <div style='font-weight:bold;font-size:75%;'>
 			                    	<?php 
@@ -241,12 +241,12 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 							<td colspan='3'>
 								<?php if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ ?>
 								<div style="float:right;" title="Edit Occurrence Record">
-									<a href="editor/occurrenceeditor.php?occid=<?php echo $fieldArr["occid"]; ?>" target="_blank">
+									<a href="editor/occurrenceeditor.php?occid=<?php echo $occId; ?>" target="_blank">
 										<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
 									</a>
 								</div>
 								<?php if($collManager->getClName() && $_REQUEST["targettid"]){ ?>
-								<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $fieldArr["occid"].",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+								<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
 									<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
 								</div>
 								<?php } ?>
@@ -288,7 +288,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			            <tr>
 			            	<td colspan='3'>
 					            <b>
-					            	<a href="#" onclick="openIndPU(<?php echo $fieldArr["occid"].",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>)">
+					            	<a href="#" onclick="openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>)">
 				            			Full Record Details
 				            		</a>
 				            	</b>

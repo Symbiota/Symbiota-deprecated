@@ -129,7 +129,8 @@ class SpecEditReviewManager {
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 		//Get Records
-		$sql = 'SELECT e.ocedid,e.occid,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,CONCAT_WS(" ",u.firstname,u.lastname) AS username '.
+		$sql = 'SELECT e.ocedid,e.occid,e.dbpk, e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
+			'CONCAT_WS(" ",u.firstname,u.lastname) AS username '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
 			'WHERE o.collid = '.$this->collId.' AND ocedid IN('.implode(',',$ocedidArr).') '.
@@ -137,7 +138,7 @@ class SpecEditReviewManager {
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		if($rs){
-			echo "EditId,\"RecordNumber\",\"FieldName\",\"NewValue\",\"OldValue\",\"ReviewStatus\",\"AppliedStatus\",\"UserName\"\n";
+			echo "EditId,\"RecordNumber\",\"dbpk\",\"FieldName\",\"NewValue\",\"OldValue\",\"ReviewStatus\",\"AppliedStatus\",\"UserName\"\n";
 			while($r = $rs->fetch_assoc()){
 				$reviewStr = '';
 				if($r['reviewstatus'] == 1){
@@ -149,7 +150,7 @@ class SpecEditReviewManager {
 				elseif($r['reviewstatus'] == 3){
 					$reviewStr = 'CLOSED';
 				}
-				echo $r['ocedid'].",".$r['occid'].",\"".$r['fieldname']."\",\"".$r['fieldvaluenew']."\",\"".$r['fieldvalueold']."\",\"".
+				echo $r['ocedid'].",".$r['occid'].",\"".$r['dbpk']."\",\"".$r['fieldname']."\",\"".$r['fieldvaluenew']."\",\"".$r['fieldvalueold']."\",\"".
 				$reviewStr."\",\"".($r['appliedstatus']?"APPLIED":"NOT APPLIED")."\",\"".$r['username']."\"\n";
 			}
 			$rs->close();

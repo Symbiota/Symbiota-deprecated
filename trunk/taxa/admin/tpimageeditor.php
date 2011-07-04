@@ -234,7 +234,9 @@ if($editable && $tid){
 						<option value="">---------------------------------------</option>
 						<?php $imageEditor->echoPhotographerSelect($paramsArr["uid"]); ?>
 					</select>
-					<img style="border:0px;cursor:pointer;" src="../../images/add.png" onclick="toggle('photooveridediv');" title="Photographer Override"/>
+					<a href="#" onclick="toggle('photooveridediv');return false;" title="Display photographer override field">
+						<img src="../../images/showedit.png" style="border:0px;width:12px;" />
+					</a>
 				</div>
 				<div id="photooveridediv" style='margin:2px 0px 5px 10px;display:none;'>
 					<b>Photographer Override:</b> 

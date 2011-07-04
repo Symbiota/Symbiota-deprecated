@@ -4,23 +4,23 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
+$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 
 $specManager;
 if($action == 'Upload ABBYY File'){
-	$specManager = new SpecProcessorAbbyy();
+	$specManager = new SpecProcessorAbbyy($logPath);
 }
-elseif($action == "Upload Images"){
-	$specManager = new SpecProcessorImage();
+elseif($action == 'Process Images'){
+	$specManager = new SpecProcessorImage($logPath);
 }
 else{
-	$specManager = new SpecProcessorManager();
+	$specManager = new SpecProcessorManager($logPath);
 }
 
 $specManager->setCollId($collId);
-$specProjects = $specManager->getProjects($spprId);
+if($spprId) $specManager->setSpprId($spprId);
 
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -29,25 +29,20 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 
 $status = "";
 if($editable){
-	if($action == 'Upload ABBYY File'){
-		$statusArr = $specManager->loadLabelFile();
-		if($statusArr){
-			$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
-		}
-	}
-	elseif($action == "Upload Images"){
-		$specManager->batchLoadImages($mapTn,$mapLarge);
-	}
-	elseif($action == "Add New Project"){
+	if($action == 'Add New Project'){
 		$specManager->addProject($_REQUEST);
 	}
-	elseif($action == "Edit Project"){
+	elseif($action == 'Edit Project'){
 		$specManager->editProject($_REQUEST);
 	}
-	elseif($action == "Delete Project"){
-		$specManager->deleteProject($spprId);
+	elseif($action == 'Delete Project'){
+		$specManager->deleteProject($_REQUEST['sppriddel']);
 	}
-	
+}
+$specProjects = $specManager->getProjects();
+if(!$spprId && count($specProjects) == 1){
+	$spprId = array_shift(array_keys($specProjects));
+	$specManager->setSpprId($spprId);
 }
 
 ?>
@@ -105,18 +100,55 @@ if($editable){
 				return false;
 			}
 
-			function validateAddForm(f){
-
-				return true;
+			function validateSppridForm(f){
+				if(f.spprid.length == null){
+					if(f.spprid.checked) return true;
+				}
+				else{
+					var radioCnt = f.spprid.length;
+					for(var counter = 0; counter < radioCnt; counter++){
+						if (f.spprid[counter].checked) return true; 
+					}
+				}
+				alert("Please select a Specimen Processing Project");
+				return false;
 			}
 
-			function validateEditForm(f){
-
+			function validateProjectForm(f){
+				if(!isNumeric(f.webpixwidth.value)){
+					alert("Central image pixel width can only be a numeric value");
+					return false;
+				}
+				else if(!isNumeric(f.tnpixwidth.value)){
+					alert("Thumbnail pixel width can only be a numeric value");
+					return false;
+				}
+				else if(!isNumeric(f.lgpixwidth.value)){
+					alert("Large image pixel width can only be a numeric value");
+					return false;
+				}
+				else if(f.title.value == ""){
+					alert("Title cannot be empty");
+					return false;
+				}
+				else if(!isNumeric(f.jpgcompression.value) || f.jpgcompression.value < 20 || f.jpgcompression.value > 100){
+					alert("JPG compression needs to be a numeric value between 20 and 100");
+					return false;
+				}
 				return true;
 			}
 
 			function validateDelForm(f){
-
+			}
+			
+			function isNumeric(sText){
+			   	var validChars = "0123456789-.";
+			   	var ch;
+			 
+			   	for(var i = 0; i < sText.length; i++){ 
+					ch = sText.charAt(i);
+					if(validChars.indexOf(ch) == -1) return false;
+			   	}
 				return true;
 			}
 		</script>
@@ -128,14 +160,36 @@ if($editable){
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<div style="float:right;margin:10px;" onclick="toggle('adddiv');">
-				<img src="../../images/add.png" style="border:0px" />
-			</div>
-			<div style="float:right;margin:10px;" onclick="toggle('editdiv');">
-				<img src="../../images/edit.png" style="border:0px" />
-			</div>
+			<?php
+			if($editable && $collId){ 
+				?>
+				<div style="float:right;margin:10px;" onclick="toggle('adddiv');">
+					<img src="../../images/add.png" style="border:0px" />
+				</div>
+				<?php
+			}
+			?>
+			<h1>Specimen Processor Control Panel</h1>
 			<div style="clear:both;">
-				<h1>Specimen Processor Control Panel</h1>
+				<?php 
+				if($action == 'Upload ABBYY File'){
+					$statusArr = $specManager->loadLabelFile();
+					if($statusArr){
+						$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
+					}
+				}
+				elseif($action == 'Process Images'){
+					echo '<h3>Batch Processing Images</h3>';
+					echo '<ul>';
+					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
+					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
+					if(array_key_exists('maptn',$_REQUEST)) $specManager->setCreateTnImg($_REQUEST['maptn']);
+					if(array_key_exists('maplarge',$_REQUEST)) $specManager->setCreateLgImg($_REQUEST['maplarge']);
+					$specManager->batchLoadImages();
+					echo '</ul>';
+				}
+				?>
+				&nbsp;
 			</div>
 			<?php 
 			if($symbUid){
@@ -149,185 +203,408 @@ if($editable){
 					<?php 
 				}
 				if($collId){
-					if(count($specProjects) <= 1){
+					?>
+					<div id="adddiv" style="display:<?php echo ($specProjects?'none':'block'); ?>;">
+						<form name="addproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
+							<fieldset>
+								<legend><b>New Project</b></legend>
+								<table>
+									<tr>
+										<td>
+											<b>Title:</b>
+										</td>
+										<td>
+											<input name="title" type="text" style="width:300px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>PK matching pattern:</b> 
+										</td>
+										<td> 
+											<input name="speckeypattern" type="text" style="width:300px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Retrieve PK from:</b> 
+										</td>
+										<td> 
+											<input name="speckeyretrieval" type="radio" value="filename" checked /> Image File Name<br/>
+											<input name="speckeyretrieval" type="radio" value="ocr" /> OCR from image
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Image source path:</b>
+										</td>
+										<td> 
+											<input name="sourcepath" type="text" style="width:400px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Image target path:</b>
+										</td>
+										<td> 
+											<input name="targetpath" type="text" style="width:400px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Image URL base:</b>
+										</td>
+										<td> 
+											<input name="imgurl" type="text" style="width:400px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Central pixel width:</b>
+										</td>
+										<td> 
+											<input name="webpixwidth" type="text" style="width:50px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Thumbnail pixel width:</b> 
+										</td>
+										<td> 
+											<input name="tnpixwidth" type="text" style="width:50px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Large pixel width:</b>
+										</td>
+										<td> 
+											<input name="lgpixwidth" type="text" style="width:50px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>JPG compression:</b>
+										</td>
+										<td> 
+											<input name="jpgcompression" type="text" style="width:50px;" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Create thumbnail:</b>
+										</td>
+										<td> 
+											<input name="createtnimg" type="checkbox" value="1" CHECKED />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Create large image:</b>
+										</td>
+										<td> 
+											<input name="createlgimg" type="checkbox" value="1" CHECKED />
+										</td>
+									</tr>
+									<tr>
+										<td colspan="2">
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+											<input name="submitaction" type="submit" value="Add New Project" />
+										</td>
+									</tr>
+								</table>
+							</fieldset>
+						</form>
+					</div>
+					<?php 
+					if($spprId){
 						?>
-						<div id="adddiv" style="display:<?php echo ($specProjects?'none':'block'); ?>;">
-							<form name="addproj" action="index.php" method="post" onsubmit="return verifyAddForm(this);">
+						<div style="">
+							<div id="editdiv" style="display:none;">
+								<form id="editform" action="index.php" method="post" onsubmit="return validateProjectForm(this);" >
+									<fieldset>
+										<legend><b>Edit Project</b></legend>
+										<table>
+											<tr>
+												<td>
+													<b>Title:</b>
+												</td>
+												<td>
+													<input name="title" type="text" value="<?php echo $specManager->getTitle(); ?>" style="width:300px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>PK matching pattern:</b> 
+												</td>
+												<td> 
+													<input name="speckeypattern" type="text" value="<?php echo $specManager->getSpecKeyPattern(); ?>" style="width:300px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Retrieve PK from:</b> 
+												</td>
+												<td> 
+													<input name="speckeyretrieval" type="radio" value="filename" <?php echo ($specManager->getSpecKeyRetrieval()=='filename'?'checked':''); ?> /> Image File Name<br/>
+													<input name="speckeyretrieval" type="radio" value="ocr" <?php echo ($specManager->getSpecKeyRetrieval()=='ocr'?'checked':''); ?> /> OCR from image
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Image source path:</b>
+												</td>
+												<td> 
+													<input name="sourcepath" type="text" value="<?php echo $specManager->getSourcePath(); ?>" style="width:400px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Image target path:</b>
+												</td>
+												<td> 
+													<input name="targetpath" type="text" value="<?php echo $specManager->getTargetPath(); ?>" style="width:400px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Image URL base:</b>
+												</td>
+												<td> 
+													<input name="imgurl" type="text" value="<?php echo $specManager->getImgUrl(); ?>" style="width:400px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Central pixel width:</b>
+												</td>
+												<td> 
+													<input name="webpixwidth" type="text" value="<?php echo $specManager->getWebPixWidth(); ?>" style="width:50px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Thumbnail pixel width:</b> 
+												</td>
+												<td> 
+													<input name="tnpixwidth" type="text" value="<?php echo $specManager->getTnPixWidth(); ?>" style="width:50px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Large pixel width:</b>
+												</td>
+												<td> 
+													<input name="lgpixwidth" type="text" value="<?php echo $specManager->getLgPixWidth(); ?>" style="width:50px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>JPG compression:</b>
+												</td>
+												<td> 
+													<input name="jpgcompression" type="text" value="<?php echo $specManager->getJpgCompression(); ?>" style="width:50px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Create thumbnail:</b>
+												</td>
+												<td> 
+													<input name="createtnimg" type="checkbox" value="1" <?php echo ($specManager->getCreateTnImg()?'CHECKED':''); ?> />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Create large image:</b>
+												</td>
+												<td> 
+													<input name="createlgimg" type="checkbox" value="1" <?php echo ($specManager->getCreateLgImg()?'CHECKED':''); ?> />
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
+													<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+													<input name="submitaction" type="submit" value="Edit Project" />
+												</td>
+											</tr>
+										</table>
+									</fieldset>
+								</form>
+								<form id="delform" action="index.php" method="post" onsubmit="return validateDelForm(this);" >
+									<fieldset>
+										<legend><b>Delete Project</b></legend>
+										<div>
+											<input name="sppriddel" type="hidden" value="<?php echo $spprId; ?>" />
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+											<input name="submitaction" type="submit" value="Delete Project" />
+										</div>
+									</fieldset>
+								</form>
+							</div>
+							<form name="imgprocessform" action="index.php" method="post">
 								<fieldset>
-									<legend><b>New Project</b></legend>
-									<div>
-										Title: <br/>
-										<input name="title" type="text" />
+									<legend><b>Image Processor</b></legend>
+									<div style="float:right;margin:10px;" onclick="toggle('editdiv');">
+										<img src="../../images/edit.png" style="border:0px" />
 									</div>
-									<div>
-										Specimen PK matching pattern:<br/> 
-										<input name="speckeypattern" type="text" /></div>
-									<div>
-										Retrieve specimen PK from: 
-										<input name="speckeyretrieval" type="radio" value="filename" checked /> Image File Name<br/>
-										<input name="speckeyretrieval" type="radio" value="ocr" /> OCR from image
+									<div style="font-size:120%;font-weight:bold;">
+										<?php echo $specManager->title; ?>
 									</div>
-									<div>
-										Image source path:<br/>
-										<input name="sourcepath" type="text" />
+									<div style="margin:10px;">
+										This process will create web quality versions of the specimen images found within 
+										the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
+										and link them to their prespective specimen record. 
 									</div>
-									<div>
-										Image target path:<br/>
-										<input name="targetpath" type="text" />
+									<div style="margin:15px;">
+										<b>Action if specimen record is not found:</b> 
+										<div style="margin:0px 0px 10px 10px;">
+											<input type="radio" name="createnewrec" value="0" /> 
+											Leave image and go to next<br/>
+											<input type="radio" name="createnewrec" value="1" CHECKED /> 
+											Create empty record and link image
+										</div>
+										<b>Action if image file exists with same name:</b> 
+										<div style="margin:0px 0px 10px 10px;">
+											<input type="radio" name="copyoverimg" value="0" /> 
+											Rename image and save<br/>
+											<input type="radio" name="copyoverimg" value="1" CHECKED /> 
+											Copy over existing image
+										</div>
+										<b>Image versions:</b> 
+										<div style="margin:0px 0px 10px 10px;">
+											<input type="checkbox" name="maptn" value="1" <?php echo ($specManager->getCreateTnImg()?'CHECKED':'') ?> /> 
+											Create Thumbnails<br/>
+											<input type="checkbox" name="maplarge" value="1" <?php echo ($specManager->getCreateLgImg()?'CHECKED':'') ?> /> 
+											Create Large Versions
+										</div>
 									</div>
-									<div>
-										Image URL base:<br/>
-										<input name="imgurl" type="text" />
+									<div style="margin:15px;">
+										<table>
+											<tr>
+												<td>
+													<b>Source folder:</b>
+												</td>
+												<td> 
+													<?php echo $specManager->getSourcePath();?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Target folder:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->getTargetPath;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>URL prefix:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->imgUrl;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Web image width:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->webPixWidth;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Thumbnail width:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->tnPixWidth;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Large image width:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->lgPixWidth;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>JPG compression:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->jpgCompression;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>PK pattern match term:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->specKeyPattern;?><br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>PK obtained from:</b> 
+												</td>
+												<td> 
+													<?php echo $specManager->specKeyRetrieval;?><br/>
+												</td>
+											</tr>
+										</table>
 									</div>
-									<div>
-										Central image pixel width:<br/>
-										<input name="webpixwidth" type="text" />
+									<div style="margin:15px 0px 0px 15px;">
+										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+										<input name="submitaction" type="submit" value="Process Images" />
 									</div>
-									<div>
-										Thumbnail pixel width:<br/>
-										<input name="tnpixwidth" type="text" />
-									</div>
-									<div>
-										Thumbnail pixel width:<br/>
-										<input name="lgpixwidth" type="text" />
-									</div>
-									<div>
-										Create thumbnail:<br/>
-										<input name="createtnimg" type="text" />
-									</div>
-									<div>
-										Create large image:<br/>
-										<input name="createlgimg" type="text" />
-									</div>
-									<div>
-										<input name="action" type="submit" value="Add New Project" />
+									<div style="margin:20px;">
+										<!-- <a href="logs/">Log Files</a>  -->
 									</div>
 								</fieldset>
 							</form>
 						</div>
+						<div style="">
+							<form name="abbyyloaderform" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateAbbyyForm(this);">
+								<fieldset>
+									<legend><b>ABBYY OCR File Loader</b></legend>
+									<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+									<div style="font-weight:bold;margin:10px;">
+										File: 
+										<input id="abbyyfile" name="abbyyfile" type="file" size="45" />
+									</div>
+									<div style="margin:10px;">
+										<input type="hidden" name="spprid" value="<?php echo $spprId; ?>" />
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" >
+										<input type="submit" name="action" value="Upload ABBYY File" />
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<?php
+					}
+					elseif($specProjects){
+						?> 
+						<form name="sppridform" action="index.php" method="post" onsubmit="return validateSppridForm(this);">
+							<fieldset>
+								<legend><b>Specimen Loading Projects</b></legend>
+								<div style="margin:15px;">
+									<?php 
+									foreach($specProjects as $spprid => $projTitle){
+										echo '<input type="radio" name="spprid" value="'.$spprid.'" /> '.$projTitle.'<br/>';
+									}
+									?>
+								</div>
+								<div style="margin:15px;">
+									<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+									<input type="submit" name="action" value="Select Collection Project" />
+								</div>
+							</fieldset>
+						</form>
 						<?php 
-						if($specProjects){
-							if(!$spprId) $spprId = array_shift(array_keys($specProjects));
-							$projVars = array_shift($specProjects);
-							?>
-							<div id="editdiv" style="display:none;">
-								<form id="editform" action="index.php" method="post" onsubmit="return verifyEditForm(this);" >
-									<fieldset>
-										<legend><b>Edit Project</b></legend>
-										<div>
-											Title: <br/>
-											<input name="title" type="text" value="<?php echo $projVars['title']; ?>" />
-										</div>
-										<div>
-											Specimen PK matching pattern:<br/> 
-											<input name="speckeypattern" type="text" value="<?php echo $projVars['speckeypattern']; ?>" /></div>
-										<div>
-											Retrieve specimen PK from: 
-											<input name="speckeyretrieval" type="radio" value="filename" <?php echo ($projVars['speckeyretrieval']=='filename'?'checked':''); ?> /> Image File Name<br/>
-											<input name="speckeyretrieval" type="radio" value="ocr" <?php echo ($projVars['speckeyretrieval']=='ocr'?'checked':''); ?> /> OCR from image
-										</div>
-										<div>
-											Image source path:<br/>
-											<input name="sourcepath" type="text" value="<?php echo $projVars['sourcepath']; ?>" />
-										</div>
-										<div>
-											Image target path:<br/>
-											<input name="targetpath" type="text" value="<?php echo $projVars['targetpath']; ?>" />
-										</div>
-										<div>
-											Image URL base:<br/>
-											<input name="imgurl" type="text" value="<?php echo $projVars['imgurl']; ?>" />
-										</div>
-										<div>
-											Central image pixel width:<br/>
-											<input name="webpixwidth" type="text" value="<?php echo $projVars['webpixwidth']; ?>" />
-										</div>
-										<div>
-											Thumbnail pixel width:<br/>
-											<input name="tnpixwidth" type="text" value="<?php echo $projVars['tnpixwidth']; ?>" />
-										</div>
-										<div>
-											Thumbnail pixel width:<br/>
-											<input name="lgpixwidth" type="text" value="<?php echo $projVars['lgpixwidth']; ?>" />
-										</div>
-										<div>
-											Create thumbnail:<br/>
-											<input name="createtnimg" type="text" value="<?php echo $projVars['createtnimg']; ?>" />
-										</div>
-										<div>
-											Create large image:<br/>
-											<input name="createlgimg" type="text" value="<?php echo $projVars['createlgimg']; ?>" />
-										</div>
-										<div>
-											<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
-											<input name="action" type="submit" value="Add New Project" />
-										</div>
-									</fieldset>
-								</form>
-								<form id="delform" action="index.php" method="post" onsubmit="return verifyDelForm(this);" >
-									<fieldset>
-										<legend><b>Delete Project</b></legend>
-										<div>
-											<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
-											<input name="action" type="submit" value="Delete Project" />
-										</div>
-									</fieldset>
-								</form>
-							</div>
-							<div style="margin:10px;">
-								<form name="imgprocessform" action="index.php" method="get">
-									<fieldset>
-										<legend><b>Image Processor</b></legend>
-										<div style="margin:10px;">
-											This process will create web quality versions of the specimen images found within 
-											the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
-											and link them to their prespective specimen record.
-										</div>
-										<div style="margin:15px;">
-											<input type="checkbox" name="maptn" value="1" CHECKED /> 
-											Create Thumbnails<br/>
-											<input type="checkbox" name="maplarge" value="1" CHECKED /> 
-											Create Large Versions
-										</div>
-										<div style="margin:15px;">
-											<b>Source Folder:</b> 
-											<?php echo $projVars['sourcepath'];?><br/>
-											<b>Target Folder:</b> 
-											<?php echo $projVars['targetpath'];?><br/>
-										</div>
-										<div style="margin:15px 0px 0px 15px;">
-											<input type="submit" name="action" value="Process Images" />
-										</div>
-										<div style="margin:5px 0px 10px 80px;">
-											<a href="logs/">Log Files</a>
-										</div>
-									</fieldset>
-								</form>
-							</div>
-							<div style="margin:10px;">
-								<form name="abbyyloaderform" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateAbbyyForm(this);">
-									<fieldset>
-										<legend><b>ABBYY OCR File Loader</b></legend>
-										<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
-										<div style="font-weight:bold;margin:10px;">
-											File: 
-											<input id="abbyyfile" name="abbyyfile" type="file" size="45" />
-										</div>
-										<div style="margin:10px;">
-											<input type="hidden" name="collid" value="<?php echo $collId; ?>" >
-											<input type="submit" name="action" value="Upload ABBYY File" />
-										</div>
-									</fieldset>
-								</form>
-							</div>
-							<?php
-						}
-					}
-					elseif(count($specProjects) == 0){
-						//Display form to add a project profile 
-					}
-					elseif(count($specProjects) == 0){
-						//Display form to pick a project from list 
 					}
 				}
 				else{

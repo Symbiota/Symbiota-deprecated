@@ -8,6 +8,7 @@ $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 
 $newProj = array_key_exists("newproj",$_REQUEST)?1:0;
 $projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:""; 
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
 $projManager = new FloraProjectManager($proj);
 
@@ -17,20 +18,28 @@ if($isAdmin){
 }
 
 if($isEditable && $projSubmit){
-	$projEditArr = Array();
-	$projEditArr["projname"] = $_REQUEST["projname"];
-	$projEditArr["managers"] = $_REQUEST["managers"];
-	$projEditArr["briefdescription"] = $_REQUEST["briefdescription"];
-	$projEditArr["fulldescription"] = $_REQUEST["fulldescription"];
-	$projEditArr["notes"] = $_REQUEST["notes"];
-	$projEditArr["occurrencesearch"] = $_REQUEST["occurrencesearch"];
-	$projEditArr["ispublic"] = $_REQUEST["ispublic"];
-	$projEditArr["sortsequence"] = $_REQUEST["sortsequence"];
-	if($projSubmit == 'Submit Edits'){
-		$projManager->submitProjEdits($projEditArr);
+	if($projSubmit == 'Add Checklist'){
+		$projManager->addChecklist($_REQUEST['clid']);
 	}
-	else if($projSubmit == 'Add New Project'){
-		$projManager->addNewProject($projEditArr);
+	else if($projSubmit == 'Delete Checklist'){
+		$projManager->deleteChecklist($_REQUEST['clid']);
+	}
+	else{
+		$projEditArr = Array();
+		$projEditArr["projname"] = $_REQUEST["projname"];
+		$projEditArr["managers"] = $_REQUEST["managers"];
+		$projEditArr["briefdescription"] = $_REQUEST["briefdescription"];
+		$projEditArr["fulldescription"] = $_REQUEST["fulldescription"];
+		$projEditArr["notes"] = $_REQUEST["notes"];
+		$projEditArr["occurrencesearch"] = $_REQUEST["occurrencesearch"];
+		$projEditArr["ispublic"] = $_REQUEST["ispublic"];
+		$projEditArr["sortsequence"] = $_REQUEST["sortsequence"];
+		if($projSubmit == 'Submit Edits'){
+			$projManager->submitProjEdits($projEditArr);
+		}
+		else if($projSubmit == 'Add New Project'){
+			$projManager->addNewProject($projEditArr);
+		}
 	}
 }
  
@@ -38,20 +47,32 @@ if($isEditable && $projSubmit){
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Species Lists</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<link type="text/css" href="../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 	
+		var tabIndex = <?php echo $tabIndex; ?>;
+
+		$(document).ready(function() {
+			$('#tabs').tabs(
+				{ selected: tabIndex }
+			);
+	
+		});
+
 		function toggleById(target){
-		  	var obj = document.getElementById(target);
+			var obj = document.getElementById(target);
 			if(obj.style.display=="none"){
 				obj.style.display="block";
 			}
-		 	else {
-		 		obj.style.display="none";
-		 	}
+			else {
+				obj.style.display="none";
+			}
 		}
 
 		function toggleResearchInfoBox(anchorObj){
@@ -102,7 +123,48 @@ if($isEditable && $projSubmit){
 				}while(obj = obj.offsetParent);
 			}
 			return [curleft,curtop];
-		}	
+		}
+
+		function validateProjectForm(f){
+			if(f.projname.value == ""){
+				alert("Project name field cannot be empty.");
+				return false;
+			}
+			else if(!isNumeric(f.sortsequence.value)){
+				alert("Sort sequence can only be a numeric value.");
+				return false;
+			}
+			else if(f.briefdescription.value.length > 300){
+				alert("Brief description can only have a maximum of 300 characters. The description is currently " + f.briefdescription.value.length + " characters long.");
+				return false;
+			}
+			else if(f.fulldescription.value.length > 1000){
+				alert("Full description can only have a maximum of 1000 characters. The description is currently " + f.fulldescription.value.length + " characters long.");
+				return false;
+			}
+			return true;
+		}
+
+		function validateChecklistAddForm(){
+
+			return true;
+		}
+
+		function validateChecklistDeleteForm(){
+
+			return true;
+		}
+
+		function isNumeric(sText){
+		   	var validChars = "0123456789-.";
+		   	var ch;
+		 
+		   	for(var i = 0; i < sText.length; i++){ 
+				ch = sText.charAt(i);
+				if(validChars.indexOf(ch) == -1) return false;
+		   	}
+			return true;
+		}
 	</script>
 </head>
 
@@ -126,11 +188,10 @@ if($isEditable && $projSubmit){
 	<div id="innertext">
 
 	<?php
-	
 	if($proj || $newProj){
 		if($isEditable && !$newProj){
 			?>
-			<div style="float:right;cursor:pointer;" onclick="toggleById('projeditor');" title="Toggle Editing Functions">
+			<div style="float:right;cursor:pointer;" onclick="toggleById('tabs');" title="Toggle Editing Functions">
 				<img style="border:0px;" src="../images/edit.png"/>
 			</div>
 			<?php 
@@ -154,102 +215,150 @@ if($isEditable && $projSubmit){
 		}
 
 		if($isEditable){ ?>
-			<form name='projeditorform' action='index.php' method='post'>
-				<fieldset id="projeditor" style="display:<?php echo ($newProj||$editMode?'block':'none'); ?>;background-color:#FFF380;">
-					<legend><b><?php echo ($newProj?'Add New':'Edit'); ?> Project</b></legend>
-					<table>
-						<tr>
-							<td>
-								Project Name:
-							</td>
-							<td>
-								<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:300px;"/>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Managers: 
-							</td>
-							<td>
-								<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:300px;"/>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Brief Description: 
-							</td>
-							<td>
-								<textarea rows="2" cols="45" name="briefdescription" maxsize="300"><?php if($projArr) echo $projArr["briefdescription"];?></textarea>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Full Description: 
-							</td>
-							<td>
-								<textarea rows="3" cols="45" name="fulldescription" maxsize="1000"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Notes:
-							</td>
-							<td>
-								<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:300;"/>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Occurrence Search: 
-							</td>
-							<td>
-								<select name="occurrencesearch">
-									<option value="0">Exclude in Occurrence Search Engine</option>
-									<option value="1" <?php echo ($projArr&&$projArr['occurrencesearch']?'SELECTED':''); ?>>Include in Occurrence Search Engine</option>
-								</select>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Public: 
-							</td>
-							<td>
-								<select name="ispublic">
-									<option value="0">Not Public</option>
-									<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Is Public</option>
-								</select>
-							</td>
-						</tr>	
-						<tr>
-							<td>
-								Sort Sequence: 
-							</td>
-							<td>
-								<input type="text" name="sortsequence" value="<?php if($projArr) echo $projArr["sortsequence"];?>" style="width:40;"/>
-							</td>
-						</tr>	
-						<tr>
-							<td colspan="2">
-								<div style="margin:15px;">
+			<div id="tabs" style="margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
+			    <ul>
+			        <li><a href="#mdtab"><span>Metadata</span></a></li>
+			        <li><a href="#cltab"><span>Checklist Management</span></a></li>
+			    </ul>
+				<div id="mdtab">
+					<form name='projeditorform' action='index.php' method='post' onsubmit="return validateProjectForm(this)">
+						<fieldset id="projeditor" style="background-color:#FFF380;">
+							<legend><b><?php echo ($newProj?'Add New':'Edit'); ?> Project</b></legend>
+							<table style="width:100%;">
+								<tr>
+									<td>
+										Project Name:
+									</td>
+									<td>
+										<input type="text" name="projname" value="<?php if($projArr) echo $projArr["projname"]; ?>" style="width:95%;"/>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Managers: 
+									</td>
+									<td>
+										<input type="text" name="managers" value="<?php if($projArr) echo $projArr["managers"]; ?>" style="width:95%;"/>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Brief Description: 
+									</td>
+									<td>
+										<textarea rows="2" cols="45" name="briefdescription" style="width:95%" ><?php if($projArr) echo $projArr["briefdescription"];?></textarea>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Full Description: 
+									</td>
+									<td>
+										<textarea rows="3" cols="45" name="fulldescription" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Notes:
+									</td>
+									<td>
+										<input type="text" name="notes" value="<?php if($projArr) echo $projArr["notes"];?>" style="width:95%;"/>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Occurrence Search: 
+									</td>
+									<td>
+										<select name="occurrencesearch">
+											<option value="0">Exclude in Occurrence Search Engine</option>
+											<option value="1" <?php echo ($projArr&&$projArr['occurrencesearch']?'SELECTED':''); ?>>Include in Occurrence Search Engine</option>
+										</select>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Public: 
+									</td>
+									<td>
+										<select name="ispublic">
+											<option value="0">Not Public</option>
+											<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Is Public</option>
+										</select>
+									</td>
+								</tr>	
+								<tr>
+									<td>
+										Sort Sequence: 
+									</td>
+									<td>
+										<input type="text" name="sortsequence" value="<?php if($projArr) echo $projArr["sortsequence"];?>" style="width:40;"/>
+									</td>
+								</tr>	
+								<tr>
+									<td colspan="2">
+										<div style="margin:15px;">
+											<?php 
+											if($newProj){
+												?>
+												<input type="submit" name="projsubmit" value="Add New Project" />
+												<?php
+											}
+											else{
+												?>
+												<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
+												<input type="submit" name="projsubmit" value="Submit Edits" />
+												<?php 
+											}
+											?>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</fieldset>
+					</form>
+				</div>
+				<div id="cltab">
+					<div style="margin:10px;">
+						<form name='claddform' action='index.php' method='post' onsubmit="return validateChecklistAddForm(this)">
+							<fieldset style="padding:15px;background-color:#FFF380;">
+								<legend><b>Add a Checklist</b></legend>
+								<select name="clid">
+									<option value="">Select Checklist to Add</option>
+									<option value="">-----------------------------------------</option>
 									<?php 
-									if($newProj){
-										?>
-										<input type="submit" name="projsubmit" value="Add New Project" />
-										<?php
-									}
-									else{
-										?>
-										<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
-										<input type="submit" name="projsubmit" value="Submit Edits" />
-										<?php 
+									$addArr = $projManager->getClAddArr();
+									foreach($addArr as $clid => $clName){
+										echo "<option value='".$clid."'>".$clName."</option>\n";
 									}
 									?>
-								</div>
-							</td>
-						</tr>
-					</table>
-				</fieldset>
-			</form>
+								</select>
+								<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
+								<input type="submit" name="projsubmit" value="Add Checklist" />
+							</fieldset>
+						</form>
+					</div>
+					<div style="margin:10px;">
+						<form name='cldeleteform' action='index.php' method='post' onsubmit="return validateChecklistDeleteForm(this)">
+							<fieldset style="padding:15px;background-color:#FFF380;">
+								<legend><b>Delete a Checklist</b></legend>
+								<select name="clid">
+									<option value="">Select Checklist to Delete</option>
+									<option value="">-----------------------------------------</option>
+									<?php 
+									$delArr = $projManager->getClDeleteArr();
+									foreach($delArr as $clid => $clName){
+										echo "<option value='".$clid."'>".$clName."</option>\n";
+									}
+									?>
+								</select>
+								<input type="hidden" name="proj" value="<?php echo $projManager->getProjectId();?>">
+								<input type="submit" name="projsubmit" value="Delete Checklist" />
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
 		<?php 
 		}
 		if($proj){
@@ -312,11 +421,11 @@ if($isEditable && $projSubmit){
 						</ul>
 					</div>
 				<?php }
-	                $surveyList = $projManager->getSurveyLists();
+				$surveyList = $projManager->getSurveyLists();
 				if($surveyList){
 				?>
 					<div style="clear:both;">
-						<h3>Dynamic Survey Species Lists 
+						<h3>Survey Species Lists 
 							<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
 								<img src="../images/qmark.jpg" style="height:15px;"/>
 							</span> 
@@ -327,7 +436,7 @@ if($isEditable && $projSubmit){
 					</div>
 					<div id="surveylistpopup" class="genericpopup" style="display:none;">
 						<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
-			            Dynamic Survey Species Lists are defined through the linkage of species occurrences 
+			            Survey Species Lists are defined through the linkage of species occurrences 
 			            to a survey project name. This method allows long-term biological surveys to be conducted through group participation. 
 			            If a team member comes across a new species, they document the occurrence through a specimen collection or a
 			            photo observation. Linking the occurrence to a survey project automatically adds the species to the checklist. 
@@ -377,7 +486,6 @@ if($isEditable && $projSubmit){
 		}
 	}
 	?>
-	
 	</div>
 	<?php
 	include($serverRoot.'/footer.php');

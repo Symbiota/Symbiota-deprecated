@@ -27,15 +27,29 @@ if($isEditable){
 	<meta http-equiv="Content-Type" content="text/html; charset="<?php echo $charset;?>>
 	<script type="text/javascript">
 	
-	function validateForm(thisForm){
-		var testStr = document.getElementById("uploadimg").value;
-		if(testStr == ""){
-			alert("Please select an image file to upload");
+	function toggle(target){
+		var obj = document.getElementById(target);
+		if(obj){
+			if(obj.style.display=="none"){
+				obj.style.display="block";
+			}
+			else {
+				obj.style.display="none";
+			}
+		}
+	}
+
+	function validateQueryForm(f){
+		if(f.qgui.value == "" && f.qloaddate.value == "" && f.qobserver.value == "" && f.qfamily.value == "" && f.qsciname.value == ""){
+			alert("Please enter a search term in at least one of the fields below ");
 			return false;
 		}
-		testStr = testStr.toLowerCase();
-		if((testStr.indexOf(".jpg") == -1) && (testStr.indexOf(".JPG") == -1)){
-			alert("Document "+testStr+" must be a JPG file (with a .jpg extension)");
+		return true;
+	}
+
+	function validateImageSubmitForm(f){
+		if(f.imgfile.value == ""){
+			alert("You must first select an image to upload");
 			return false;
 		}
 		return true;
@@ -61,8 +75,12 @@ if($isEditable){
 	    <?php
 		if($isEditable){
 			?>
-			<form id="imgloader" name="imgloader" action="imagebatchloader.php" method="get">
-				<fieldset>
+			<div style="margin:15px;">
+				Use the form in the box below to define a subset of occurrence records 
+				to which you want link images. Use the default box to define default values for the image loading form.
+			</div>   
+			<form id="imgloader" name="imgloader" action="imagebatchloader.php" method="get" onsubmit="return validateQueryForm(this)">
+				<fieldset style="width:650px;padding:20px;">
 					<legend><b>Query Criteria</b></legend>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Collection/Observation:</div> 
@@ -84,21 +102,24 @@ if($isEditable){
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Observer:</div> 
-						<div style="float:left;"><input type="text" name="qobserver" /></div>
+						<div style="float:left;"><input type="text" name="qobserver" style="width:250px;" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Family:</div> 
-						<div style="float:left;"><input type="text" name="qfamily" /></div>
+						<div style="float:left;"><input type="text" name="qfamily" style="width:250px;" /></div>
 					</div>
-					<div style="clear:both;margin-bottom:20px;">
+					<div style="clear:both;">
 						<div style="float:left;width:130px;">Scientific Name:</div> 
-						<div style="float:left;"><input type="text" name="qsciname" /></div>
+						<div style="float:left;"><input type="text" name="qsciname" style="width:250px;" /></div>
 					</div>
-					<div style="clear:both;margin:5px">
-						<fieldset style="margin:10px 2px 10px 2px;">
+					<div style="clear:both;margin:20px;">
+						<input type="submit" name="action" value="Query Records" />
+					</div>
+					<div style="clear:both;margin-top:20px;">
+						<fieldset style="margin:20px;width:550px;padding:15px;background-color:#FFF380;">
 							<legend><b>Default Upload Parameters</b></legend>
-							<div style='margin:3px;clear:both;'>
-								<div style="float:left;width:150px;">Image Type:</div>
+							<div style='clear:both;'>
+								<div style="float:left;width:120px;">Image Type:</div>
 								<select name='dimagetype'>
 									<option value='observation'>
 										Observation Image
@@ -112,7 +133,7 @@ if($isEditable){
 								</select>
 							</div>
 							<div style="clear:both;">
-								<div style="float:left;width:150px;">Photographer:</div>
+								<div style="float:left;width:120px;">Photographer:</div>
 								<select name="dphotographeruid">
 									<option value="">Select a photographer</option>
 									<option value="">--------------------------------</option>
@@ -120,44 +141,38 @@ if($isEditable){
 								</select>
 							</div>
 							<div style="clear:both;">
-								<div style="float:left;width:150px;">Manager:</div>
-								<div style="float:left;"><input name="downer" value="" /></div>
+								<div style="float:left;width:120px;">Manager:</div>
+								<div style="float:left;"><input name="downer" style="width:400px;" /></div>
 							</div>
 							<div style="clear:both;">
-								<div style="float:left;width:150px;">Copyright URL:</div>
-								<div style="float:left;"><input name="dcopyright" value="" /></div>
-							</div>
-							<div style="clear:both;">
-								<div style="float:left;width:150px;">Sort Sequence:</div>
-								<div style="float:left;"><input name="dsortsequence" value="50" /></div>
+								<div style="float:left;width:120px;">Copyright URL:</div>
+								<div style="float:left;"><input name="dcopyright" style="width:400px;" /></div>
 							</div>
 						</fieldset>
-					</div>
-					<div style="clear:both;">
-						<div style="float:right;">
-							<input type="submit" name="action" value="Query Records" />
-						</div>
 					</div>
 				</fieldset>
 			</form>
 			<hr />
 			<?php
-				if($action == "Query Records" && $collId){
-					$queryArr = Array("collid"=>$collId);
-					$queryArr["gui"] = $_REQUEST["qgui"];
-					$queryArr["loaddate"] = $_REQUEST["qloaddate"];
-					$queryArr["observer"] = $_REQUEST["qobserver"];
-					$queryArr["family"] = $_REQUEST["qfamily"];
-					$queryArr["sciname"] = $_REQUEST["qsciname"];
-					$recArr = $uploadManager->getOccurrenceRecords($queryArr);
+			if($action == "Query Records" && $collId){
+				$queryArr = Array("collid"=>$collId);
+				$queryArr["gui"] = $_REQUEST["qgui"];
+				$queryArr["loaddate"] = $_REQUEST["qloaddate"];
+				$queryArr["observer"] = $_REQUEST["qobserver"];
+				$queryArr["family"] = $_REQUEST["qfamily"];
+				$queryArr["sciname"] = $_REQUEST["qsciname"];
+				$recArr = $uploadManager->getOccurrenceRecords($queryArr);
+				if($recArr){
 					foreach($recArr as $occId => $v){
 						?>
 						<div>
-							<form action="<?php echo $clientRoot;?>/taxa/admin/tpimageeditor.php" method="post" enctype='multipart/form-data' target="_blank">
+							<form action="<?php echo $clientRoot;?>/collections/editor/occurrenceeditor.php" method="post" enctype='multipart/form-data' target="_blank" onsubmit="return validateImageSubmitForm(this)">
 								<fieldset>
 									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
 									<div style="margin:3px;">
-										<a href="<?php echo $clientRoot."/collections/individual/index.php?occid=".$occId;?>"><?php echo $occId;?></a>
+										<a href="<?php echo $clientRoot."/collections/individual/index.php?occid=".$occId;?>" target="_blank">
+											<?php echo $occId;?>
+										</a>
 										<?php 
 										echo $v["recordedby"];
 										if($v["recordnumber"]) echo " [".$v["recordnumber"]."] ";
@@ -168,84 +183,133 @@ if($isEditable){
 										echo "; ".$v["locality"];
 										?>
 									</div>
-									<?php 
-									if(array_key_exists("images",$v)){
-										$imgArr = $v["images"];
-										foreach($imgArr as $imgId => $iArr){
-											$tnUrl = (array_key_exists("tnurl",$iArr)?$iArr["tnurl"]:"");
-											$url = (array_key_exists("url",$iArr)?$iArr["url"]:"");
-											if(!$tnUrl) $tnUrl = $url;
-											if(array_key_exists("imageDomain",$GLOBALS)){
-												if(substr($url,0,1)=="/") $url = $GLOBALS["imageDomain"].$url;
-												if(substr($tnUrl,0,1)=="/") $url = $GLOBALS["imageDomain"].$tnUrl;
-											}
-											?>
-											<div style="margin:3px;float:left;">
-												<a href="<?php echo $url;?>">
-													<img src="<?php echo $tnUrl;?>" />
-												</a>
-											</div>
-											<?php
+									<div style="padding:15px;">
+										<?php 
+										if(array_key_exists("images",$v)){
+											$imgArr = $v["images"];
+											foreach($imgArr as $imgId => $iArr){
+												$tnUrl = (array_key_exists("tnurl",$iArr)?$iArr["tnurl"]:"");
+												$url = (array_key_exists("url",$iArr)?$iArr["url"]:"");
+												if(!$tnUrl) $tnUrl = $url;
+												if(array_key_exists("imageDomain",$GLOBALS)){
+													if(substr($url,0,1)=="/") $url = $GLOBALS["imageDomain"].$url;
+													if(substr($tnUrl,0,1)=="/") $url = $GLOBALS["imageDomain"].$tnUrl;
+												}
+												?>
+												<div style="margin:3px;float:left;">
+													<a href="<?php echo $url;?>">
+														<img src="<?php echo $tnUrl;?>" style="width:150px;" />
+													</a>
+												</div>
+												<?php
+											} 
 										} 
-									} 
-									?>
-									<div style="clear:both;font-weight:bold;margin:3px;">
-										<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
-										File: <input id="userfile" name="userfile" type="file" size="45" />
+										?>
 									</div>
-									<div style="margin:3px;clear:both;">
-										<div style="float:left;width:100px;font-weight:bold;">Caption:</div>
-										<div style="float:left;">
-											<input name="caption" value="" />
-										</div>
-									</div>
-									<div style="margin:3px;clear:both;">
-										<div style="float:left;width:100px;font-weight:bold;">Photographer:</div>
-										<select name="photographeruid">
-											<option value="">Select a photographer</option>
-											<option value="">--------------------------------</option>
-											<?php $uploadManager->echoPhotographerSelect($_REQUEST["dphotographeruid"]); ?>
-										</select>
-									</div>
-									<div style='margin:3px;clear:both;'>
-										<div style="float:left;width:100px;font-weight:bold;">Image Type:</div> 
-										<div style="float:left;">
-											<select name='imagetype'>
-												<option value='observation'>
-													Observation Image
-												</option>
-												<option value='specimen' <?php echo ($_REQUEST["dimagetype"]=="specimen"?"SELECTED":"");?>>
-													Specimen Image
-												</option>
-												<option value='field' <?php echo ($_REQUEST["dimagetype"]=="field"?"SELECTED":"");?>>
-													Field Image
-												</option>
-											</select>
-										</div>
-									</div>
-									<div style="margin:3px;clear:both;">
-										<div style="float:left;width:100px;font-weight:bold;">Manager:</div>
-										<div style="float:left;">
-											<input name="owner" value="<?php echo $_REQUEST["downer"]; ?>" />
-										</div>
-									</div>
-									<div style="margin:3px;clear:both;">
-										<div style="float:left;width:100px;font-weight:bold;">Copyright URL:</div>
-										<div style="float:left;">
-											<input name="copyright" value="<?php echo $_REQUEST["dcopyright"]; ?>" />
-										</div>
-									</div>
-									<div style="margin:3px;float:right;">
-										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-										<input type="hidden" name="tid" value="<?php echo $v["tid"]; ?>" />
-										<input type="hidden" name="catagory" value="imagequicksort" />
-										<input type="submit" name="action" value="Upload Image" />
-									</div>
-									<div style="margin:3px;">
-										<div style="float:left;width:100px;font-weight:bold;">Sort Sequence:</div>
-										<div style="float:left;">
-											<input name="sortsequence" value="<?php echo $_REQUEST["dsortsequence"]; ?>" />
-										</div>
+									<div style="clear:both;">
+										<table>
+											<tr>
+												<td>
+													<b>File:</b>
+												</td>
+												<td>
+													<input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
+													<input name="imgfile" type="file" size="60" />
+													<div style="margin-left:10px;">
+														<input type="checkbox" name="createlargeimg" value="1" /> 
+														Create a large version of image, when applicable<br/>
+														* Upload image size can not be greater than 1MB
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Caption:</b>
+												</td>
+												<td>
+													<input name="caption" value=""  style="width:300px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Photographer:</b>
+												</td>
+												<td>
+													<select name="photographeruid">
+														<option value="">Select a photographer</option>
+														<option value="">--------------------------------</option>
+														<?php $uploadManager->echoPhotographerSelect($_REQUEST["dphotographeruid"]); ?>
+													</select>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Photographer override:</b> 
+												</td>
+												<td>
+													<input name='photographer' type='text' style="width:300px;" maxlength='100' />
+													* Warning: value will override above selection
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Image Type:</b> 
+												</td>
+												<td>
+													<select name='imagetype'>
+														<option value='observation'>
+															Observation Image
+														</option>
+														<option value='specimen' <?php echo ($_REQUEST["dimagetype"]=="specimen"?"SELECTED":"");?>>
+															Specimen Image
+														</option>
+														<option value='field' <?php echo ($_REQUEST["dimagetype"]=="field"?"SELECTED":"");?>>
+															Field Image
+														</option>
+													</select>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Manager:</b>
+												</td>
+												<td>
+													<input name="institutioncode" value="<?php echo $_REQUEST["downer"]; ?>"  style="width:300px;"/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Copyright URL:</b>
+												</td>
+												<td>
+													<input name="copyright" value="<?php echo $_REQUEST["dcopyright"]; ?>" style="width:300px;" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Source Webpage:</b>
+												</td>
+												<td>
+													<input name="sourceurl" type="text" size="40" value="" />
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Notes:</b> 
+												</td>
+												<td>
+													<input name="notes" type="text" size="40" value="" />
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2" align="right">
+													<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+													<input type="hidden" name="tid" value="<?php echo $v["tid"]; ?>" />
+													<input type="hidden" name="submitaction" value="Submit New Image" />
+													<input type="submit" name="action" value="Upload Image" />
+												</td>
+											</tr>
+										</table>
 									</div>
 								</fieldset>
 							</form>
@@ -253,7 +317,7 @@ if($isEditable){
 						<?php 
 					}
 				}
-
+			}
 		}
 		else{
 			echo "<div>You must be logged in and authorized to view this page. Please login.</div>";
@@ -311,16 +375,18 @@ class ImageUploadManager{
 		}
 		$result->close();
 		//Grab images
-		$sql = "SELECT i.imgid, i.occid, i.url, i.thumbnailurl ".
-			"FROM images i ".
-			"WHERE i.occid IN (".implode(",",array_keys($returnArr)).")";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$occId = $row->occid;
-			if($row->url) $returnArr[$occId]["images"][$row->imgid]["url"] = $row->url;
-			if($row->thumbnailurl) $returnArr[$occId]["images"][$row->imgid]["tnurl"] = $row->thumbnailurl;
+		if($returnArr){
+			$sql = "SELECT i.imgid, i.occid, i.url, i.thumbnailurl ".
+				"FROM images i ".
+				"WHERE i.occid IN (".implode(",",array_keys($returnArr)).")";
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$occId = $row->occid;
+				if($row->url) $returnArr[$occId]["images"][$row->imgid]["url"] = $row->url;
+				if($row->thumbnailurl) $returnArr[$occId]["images"][$row->imgid]["tnurl"] = $row->thumbnailurl;
+			}
+			$rs->close();
 		}
-		$rs->close();
 		return $returnArr;	
 	}
 
