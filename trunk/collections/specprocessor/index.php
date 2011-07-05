@@ -20,7 +20,7 @@ else{
 }
 
 $specManager->setCollId($collId);
-if($spprId) $specManager->setSpprId($spprId);
+$specManager->setSpprId($spprId);
 
 $editable = false;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
@@ -39,10 +39,16 @@ if($editable){
 		$specManager->deleteProject($_REQUEST['sppriddel']);
 	}
 }
-$specProjects = $specManager->getProjects();
-if(!$spprId && count($specProjects) == 1){
-	$spprId = array_shift(array_keys($specProjects));
-	$specManager->setSpprId($spprId);
+$specProjects = Array();
+if(!$spprId){
+	$specProjects = $specManager->getProjects();
+	if(count($specProjects) == 1){
+		$spprId = array_shift(array_keys($specProjects));
+		$specManager->setSpprId($spprId);
+	}
+}
+if($spprId){
+	$specManager->setProjVariables();
 }
 
 ?>
@@ -179,14 +185,14 @@ if(!$spprId && count($specProjects) == 1){
 					}
 				}
 				elseif($action == 'Process Images'){
-					echo '<h3>Batch Processing Images</h3>';
-					echo '<ul>';
+					echo '<h3>Batch Processing Images</h3>'."\n";
+					echo '<ul>'."\n";
 					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
 					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
-					if(array_key_exists('maptn',$_REQUEST)) $specManager->setCreateTnImg($_REQUEST['maptn']);
-					if(array_key_exists('maplarge',$_REQUEST)) $specManager->setCreateLgImg($_REQUEST['maplarge']);
+					$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:0);
+					$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maptn']:0);
 					$specManager->batchLoadImages();
-					echo '</ul>';
+					echo '</ul>'."\n";
 				}
 				?>
 				&nbsp;
@@ -204,7 +210,7 @@ if(!$spprId && count($specProjects) == 1){
 				}
 				if($collId){
 					?>
-					<div id="adddiv" style="display:<?php echo ($specProjects?'none':'block'); ?>;">
+					<div id="adddiv" style="display:<?php echo ($spprId||$specProjects?'none':'block'); ?>;">
 						<form name="addproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
 							<fieldset>
 								<legend><b>New Project</b></legend>
@@ -371,7 +377,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>Image URL base:</b>
 												</td>
 												<td> 
-													<input name="imgurl" type="text" value="<?php echo $specManager->getImgUrl(); ?>" style="width:400px;" />
+													<input name="imgurl" type="text" value="<?php echo $specManager->getImgUrlBase(); ?>" style="width:400px;" />
 												</td>
 											</tr>
 											<tr>
@@ -450,7 +456,7 @@ if(!$spprId && count($specProjects) == 1){
 										<img src="../../images/edit.png" style="border:0px" />
 									</div>
 									<div style="font-size:120%;font-weight:bold;">
-										<?php echo $specManager->title; ?>
+										<?php echo $specManager->getTitle(); ?>
 									</div>
 									<div style="margin:10px;">
 										This process will create web quality versions of the specimen images found within 
@@ -495,7 +501,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>Target folder:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getTargetPath;?><br/>
+													<?php echo $specManager->getTargetPath();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -503,7 +509,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>URL prefix:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->imgUrl;?><br/>
+													<?php echo $specManager->getImgUrlBase();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -511,7 +517,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>Web image width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->webPixWidth;?><br/>
+													<?php echo $specManager->getWebPixWidth();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -519,7 +525,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>Thumbnail width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->tnPixWidth;?><br/>
+													<?php echo $specManager->getTnPixWidth();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -527,7 +533,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>Large image width:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->lgPixWidth;?><br/>
+													<?php echo $specManager->getLgPixWidth();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -535,7 +541,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>JPG compression:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->jpgCompression;?><br/>
+													<?php echo $specManager->getJpgCompression();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -543,7 +549,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>PK pattern match term:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->specKeyPattern;?><br/>
+													<?php echo $specManager->getSpecKeyPattern();?><br/>
 												</td>
 											</tr>
 											<tr>
@@ -551,7 +557,7 @@ if(!$spprId && count($specProjects) == 1){
 													<b>PK obtained from:</b> 
 												</td>
 												<td> 
-													<?php echo $specManager->specKeyRetrieval;?><br/>
+													<?php echo $specManager->getSpecKeyRetrieval();?><br/>
 												</td>
 											</tr>
 										</table>

@@ -1,9 +1,9 @@
 <?php
- 
+
 class SpecProcessorImage extends SpecProcessorManager{
 
 	function __construct($logPath){
- 		parent::__construct($logPath);
+		parent::__construct($logPath);
 	}
 
 	public function batchLoadImages(){
@@ -19,9 +19,9 @@ class SpecProcessorImage extends SpecProcessorManager{
 				if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
 			}
 		}
-		echo "<li>Starting Image Processing</li>";
+		echo "<li>Starting Image Processing</li>\n";
 		$this->processFolder();
-		echo "<li>Image upload complete</li>";
+		echo "<li>Image upload complete</li>\n";
 		if($this->logFH){
 			fwrite($this->logFH, "Image upload complete\n");
 			fwrite($this->logFH, "----------------------------\n\n");
@@ -102,7 +102,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 									}
 								}
 								list($width, $height) = getimagesize($sourcePath.$pathFrag.$file);
-								echo "<li>Starting to load: ".$file."</li>";
+								echo "<li>Starting to load: ".$file."</li>\n";
 								if($this->logFH) fwrite($this->logFH, "Starting to load: ".$file."\n");
 								//Create web image
 								$webImgCreated = false;
@@ -117,7 +117,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 									if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
 									$tnUrl = "";$lgUrl = "";
 									//Create Large Image
-									if(array_key_exists($mapLarge) && $width > ($webPixWidth*1.2)){
+									if($this->createLgImg && $width > ($webPixWidth*1.2)){
 										$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg";
 										if($width < $lgPixWidth){
 											if(copy($sourcePath.$pathFrag.$file,$targetPath.$lgTargetFileName)){
@@ -131,7 +131,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 										}
 									}
 									//Create Thumbnail Image
-									if(array_key_exists($mapTn)){
+									if($this->createTnImg){
 										$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg";
 										if($this->createNewImage($sourcePath.$pathFrag.$file,$targetPath.$tnTargetFileName,$tnPixWidth,round($tnPixWidth*$height/$width),$width,$height)){
 											$tnUrl = $tnTargetFileName;
@@ -141,7 +141,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 									if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
 									if($this->recordImageMetadata($specPk,$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
 										if(file_exists($sourcePath.$pathFrag.$file)) unlink($sourcePath.$pathFrag.$file);
-										echo "<li style='margin-left:20px;'>Image processed successfully!</li>";
+										echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
 										if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
 									}
 								}
@@ -149,7 +149,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 							else{
 								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
 								if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to locate specimen record \n");
-								echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>";
+								echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
 							}
         				}
 						else{
@@ -166,24 +166,24 @@ class SpecProcessorImage extends SpecProcessorManager{
 		}
    		closedir($imgFH);
 	}
-	
+
 	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
 		$status = false;
-       	$sourceImg = imagecreatefromjpeg($sourcePath);
-   		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		$sourceImg = imagecreatefromjpeg($sourcePath);
+		//ini_set('memory_limit','512M');
+		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
-        if(imagejpeg($tmpImg, $targetPath)){
-        	$status = true;
-        }
-        else{
+		if(imagejpeg($tmpImg, $targetPath, $this->jpgCompression)){
+			$status = true;
+		}
+		else{
 			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-        	echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>";
-        }
+			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
+		}
 		imagedestroy($sourceImg);
 		imagedestroy($tmpImg);
 		return $status;
 	}
-
 }
 ?>
  

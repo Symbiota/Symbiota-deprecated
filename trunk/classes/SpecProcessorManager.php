@@ -27,7 +27,7 @@ class SpecProcessorManager {
 	protected $webPixWidth;
 	protected $tnPixWidth;
 	protected $lgPixWidth;
-	protected $jpgCompression;
+	protected $jpgCompression= 60;
 	protected $createTnImg;
 	protected $createLgImg;
 	
@@ -48,8 +48,10 @@ class SpecProcessorManager {
 		if(!$this->logPath && array_key_exists('serverRoot',$GLOBALS)){
 			$this->logPath = $GLOBALS['serverRoot'].'/temp/';
 		}
-		if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
-		$this->logPath .= 'logs/';
+		if($this->logPath){
+			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
+			$this->logPath .= 'logs/';
+		}
 	}
 
 	function __destruct(){
@@ -70,10 +72,7 @@ class SpecProcessorManager {
 	}
 
 	public function setSpprId($id) {
-		$this->spprid = $id;
-		if($this->spprid){
-			$this->setProjVariables();
-		}
+		if($id) $this->spprid = $id;
 	}
 	
 	protected function getPrimaryKey($str){
@@ -105,9 +104,11 @@ class SpecProcessorManager {
 		$status = true; 
 		$sql = 'INSERT INTO specprocessorrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
 		if(!$this->conn->query($sql)){
-			fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
-			fwrite($this->logErrFH, $this->conn->error." \n");
-			fwrite($this->logErrFH, "\tSQL: $sql \n");
+			if($this->logErrFH){
+				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
+				fwrite($this->logErrFH, $this->conn->error." \n");
+				fwrite($this->logErrFH, "\tSQL: $sql \n");
+			}
 			$status = false;
 		}
 		return $status;
@@ -134,12 +135,14 @@ class SpecProcessorManager {
 	}
 	
 	protected function recordImageMetadata($specPk,$webUrl,$tnUrl,$oUrl){
-		if($this->dbMetadata == 'database'){
-			$this->databaseImage($specPk,$webUrl,$tnUrl,$oUrl);
+		$status = false;
+		if($this->dbMetadata){
+			$status = $this->databaseImage($specPk,$webUrl,$tnUrl,$oUrl);
 		}
 		else{
-			$this->writeToFile($specPk,$webUrl,$tnUrl,$oUrl);
+			$status = $this->writeToFile($specPk,$webUrl,$tnUrl,$oUrl);
 		}
+		return $status;
 	}
 	
 	private function databaseImage($specPk,$webUrl,$tnUrl,$oUrl){
@@ -147,8 +150,8 @@ class SpecProcessorManager {
 		if($specPk){
 			$occId = $this->getOccId($specPk);
 			
-	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>";
-			fwrite($this->logFH, "Preparing to load record into database\n");
+	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
+			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
@@ -160,7 +163,7 @@ class SpecProcessorManager {
 				$rs->close();
 			}
 			if($recCnt){
-				fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
+				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
 			}
 			else{
 				$sql1 = 'INSERT images(occid,url';
@@ -177,21 +180,21 @@ class SpecProcessorManager {
 				$sql2 .= ',"specimen","'.$this->collectionName.'")';
 				if(!$this->conn->query($sql1.$sql2)){
 					$status = false;
-					fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
+					if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
 				}
 			}
 		}
 		else{
 			$status = false;
-			fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
+			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
 		}
 		if($status){
-			echo "<li style='margin-left:20px;'>Image record loaded into database</li>";
-			fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
+			echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
+			if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
 		}
 		else{
-			fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
-	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>";
+			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
+	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>\n";
 		}
 		return $status;
 	}
@@ -232,7 +235,7 @@ class SpecProcessorManager {
 		$this->conn->query($sql);
 	}
 
-	private function setProjVariables(){
+	public function setProjVariables(){
 		if($this->spprid){
 			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
 				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
