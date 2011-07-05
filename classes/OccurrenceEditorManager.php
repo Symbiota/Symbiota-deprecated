@@ -161,7 +161,8 @@ class OccurrenceEditorManager {
 						//Field is a checkbox that is unchecked
 						$occArr[$v] = 0;
 					}
-					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$occArr[$v].'" AS fvn,'.$v.' FROM omoccurrences WHERE occid = '.$occArr['occid'];
+					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$occArr[$v].'" AS fvn,'.$v.' FROM omoccurrences '.
+						'WHERE occid = '.$occArr['occid'].' AND trim('.$v.') <> "'.trim($occArr[$v]).'"';
 					//echo '<div>'.$sqlEdit.'</div>';
 					$this->conn->query($sqlEdit);
 				}

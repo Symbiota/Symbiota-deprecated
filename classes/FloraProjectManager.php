@@ -187,23 +187,27 @@ class FloraProjectManager {
 	}
 
 	public function addChecklist($clid){
+		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO fmchklstprojlink(pid,clid) VALUES('.$this->projId.','.$clid.') ';
-		if($this->con->query($sql)){ 
+		if($conn->query($sql)){
 			return 'SUCCESS: Checklist has been added to project';
 		}
 		else{
 			return 'FAILED: Unable to add checklist to project';
 		}
+		if(!($conn === null)) $conn->close();
 	}
 
 	public function deleteChecklist($clid){
+		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'DELETE FROM fmchklstprojlink WHERE pid = '.$this->projId.' AND clid = '.$clid;
-		if($this->con->query($sql)){ 
+		if($conn->query($sql)){
 			return 'SUCCESS: Checklist has been deleted from project';
 		}
 		else{
 			return 'FAILED: Unable to checklist from project';
 		}
+		if(!($conn === null)) $conn->close();
 	}
 
 	private function cleanString($inStr){

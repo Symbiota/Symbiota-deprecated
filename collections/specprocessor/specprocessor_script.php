@@ -1,15 +1,16 @@
 <?php
+date_default_timezone_set('America/Phoenix');
 
 //Pattern matching tern used to locate primary key (PK) of specimen record
-$specKeyPattern = '';	
+$specKeyPattern = '/ASU\d{7}/';
 //filename = grab PK from file name; ocr = attempt to retrieve PK from image using OCR
-$specKeyRetrieval;		 
+$specKeyRetrieval = 'filename';
 //Folder containing unprecessed images; read access needed
-$sourcePath = '';		
+$sourcePath = 'C:/htdocs/symbiota/trunk/temp/images/toprocess/';
 //Folder where images are to be placed; write access needed
-$targetPath = '';		
+$targetPath = 'C:/htdocs/symbiota/trunk/temp/images/';
 //Url base needed to build image URL that will be save in DB
-$imgUrlBase = '';		
+$imgUrlBase = '/seinet/temp/images/';
 $webPixWidth = 1200;
 $tnPixWidth = 130;
 $lgPixWidth = 3000;
@@ -26,17 +27,18 @@ $createLgImg = 1;
 $logPath = '';
 
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
-$dbMetadata = 1;		
+$dbMetadata = 0;		
 
 //Variables below needed only if connecting directly with database
 //If record matching PK is not found, should a new blank record be created?
 $collId = 1;
 $createNewRec = 1;
+$copyOverImg = 1;
 
 //-------------------------------------------------------------------------------------------//
 //End of variable assignment. Don't modify code below.
 //Create processor and procede with processing images  
-$specManager = new SpecProcessorImage();
+$specManager = new SpecProcessorImage($logPath);
 
 //Set variables
 $specManager->setSpecKeyPattern($specKeyPattern);	
@@ -52,6 +54,7 @@ $specManager->setJpgCompression($jpgCompression);
 $specManager->setCreateTnImg($createTnImg);		
 $specManager->setCreateLgImg($createLgImg);		
 $specManager->setCreateNewRec($createNewRec);
+$specManager->setCopyOverImg($copyOverImg);
 
 
 $specManager->setDbMetadata($dbMetadata);
@@ -60,29 +63,53 @@ if($dbMetadata){
 }
 
 //Run process
-$specManager->batchLoadImages($logPath);
-
-	
+$specManager->batchLoadImages();
 
 class SpecProcessorManager {
 
 	protected $conn;
 	protected $collId = 0;
-	protected $spprid = 0;
-
+	protected $spprId = 0;
+	protected $title;
+	protected $collectionName;
+	protected $managementType;
+	protected $specKeyPattern;
+	protected $specKeyRetrieval;
+	protected $coordX1;
+	protected $coordX2;
+	protected $coordY1;
+	protected $coordY2;
+	protected $sourcePath;
+	protected $targetPath;
+	protected $imgUrlBase;
+	protected $webPixWidth;
+	protected $tnPixWidth;
+	protected $lgPixWidth;
+	protected $jpgCompression= 60;
+	protected $createTnImg;
+	protected $createLgImg;
+	
+	protected $createNewRec = true;
+	protected $copyOverImg = true;
+	protected $dbMetadata = 1;
+	
 	protected $logPath;
 	protected $logFH;
 	protected $logErrFH;
 	
-	protected $projVars = Array();
-
-	function __construct() {
-		global $logPath, $tempDirRoot;
+	function __construct($logPath) {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->logPath = $logPath;
-		if(!$this->logPath) $this->logPath .= $tempDirRoot;
-		if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
-		$this->logPath .= 'logs/';
+		if(!$this->logPath && array_key_exists('tempDirRoot',$GLOBALS)){
+			$this->logPath = $GLOBALS['tempDirRoot'];
+		}
+		if(!$this->logPath && array_key_exists('serverRoot',$GLOBALS)){
+			$this->logPath = $GLOBALS['serverRoot'].'/temp/';
+		}
+		if($this->logPath){
+			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
+			$this->logPath .= 'logs/';
+		}
 	}
 
 	function __destruct(){
@@ -90,7 +117,16 @@ class SpecProcessorManager {
 	}
 
 	public function setCollId($id) {
-		if($id) $this->collId = $id;
+		$this->collId = $id;
+		if($this->collId && !$this->collectionName){
+			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE collid = '.$this->collId; 
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$this->collectionName = $row->collectionname;
+				$this->managementType = $row->managementtype;
+			}
+			$rs->close();
+		}
 	}
 
 	public function setSpprId($id) {
@@ -99,7 +135,7 @@ class SpecProcessorManager {
 	
 	protected function getPrimaryKey($str){
 		$specPk = '';
-		$pkPattern = $this->projVars['speckeypattern'];
+		$pkPattern = $this->specKeyPattern;
 		if(preg_match($pkPattern,$str,$matchArr)){
 			$specPk = $matchArr[0];
 		}
@@ -126,9 +162,11 @@ class SpecProcessorManager {
 		$status = true; 
 		$sql = 'INSERT INTO specprocessorrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
 		if(!$this->conn->query($sql)){
-			fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
-			fwrite($this->logErrFH, $this->conn->error." \n");
-			fwrite($this->logErrFH, "\tSQL: $sql \n");
+			if($this->logErrFH){
+				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
+				fwrite($this->logErrFH, $this->conn->error." \n");
+				fwrite($this->logErrFH, "\tSQL: $sql \n");
+			}
 			$status = false;
 		}
 		return $status;
@@ -143,10 +181,10 @@ class SpecProcessorManager {
 			$occId = $row->occid;
 		}
 		$rs->close();
-		if(!$occId && $_REQUEST['createnewrec']){
+		if(!$occId && $this->createNewRec){
 			//Records does not exist, create a new one to which image will be linked
-			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->projVars['managementtype'],'Live')!==false?'':',dbpk').',processingstatus) '.
-				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->projVars['managementtype'],'Live')!==false?'':',"'.$specPk.'"').',"unparsed")';
+			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
+				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unparsed")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
 			} 
@@ -154,12 +192,25 @@ class SpecProcessorManager {
 		return $occId;
 	}
 	
-	protected function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
+	protected function recordImageMetadata($specPk,$webUrl,$tnUrl,$oUrl){
+		$status = false;
+		if($this->dbMetadata){
+			$status = $this->databaseImage($specPk,$webUrl,$tnUrl,$oUrl);
+		}
+		else{
+			$status = $this->writeToFile($specPk,$webUrl,$tnUrl,$oUrl);
+		}
+		return $status;
+	}
+	
+	private function databaseImage($specPk,$webUrl,$tnUrl,$oUrl){
 		$status = true;
-		if($occId){
+		if($specPk){
+			$occId = $this->getOccId($specPk);
+		
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>";
-			fwrite($this->logFH, "Preparing to load record into database\n");
-			$imgUrl = $this->projVars['imgurl'];
+			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
+			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
 			$recCnt = 0;
@@ -170,7 +221,7 @@ class SpecProcessorManager {
 				$rs->close();
 			}
 			if($recCnt){
-				fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
+				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
 			}
 			else{
 				$sql1 = 'INSERT images(occid,url';
@@ -184,28 +235,33 @@ class SpecProcessorManager {
 					$sql2 .= ',"'.$imgUrl.$oUrl.'"'; 
 				}
 				$sql1 .= ',imagetype,owner) ';
-				$sql2 .= ',"specimen","'.$this->projVars['collectionname'].'")';
+				$sql2 .= ',"specimen","'.$this->collectionName.'")';
 				if(!$this->conn->query($sql1.$sql2)){
 					$status = false;
-					fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
+					if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
 				}
 			}
 		}
 		else{
 			$status = false;
-			fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
+			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
 		}
 		if($status){
-			echo "<li style='margin-left:20px;'>Image record loaded into database</li>";
-			fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
+			echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
+			if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
 		}
 		else{
-			fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
-	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>";
+			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
+	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>\n";
 		}
 		return $status;
 	}
 
+	private function writeToFile($specPk,$webUrl,$tnUrl,$oUrl){
+		
+		
+	}
+	
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
@@ -237,49 +293,39 @@ class SpecProcessorManager {
 		$this->conn->query($sql);
 	}
 
-	protected function setProjVariables(){
+	public function setProjVariables(){
 		if($this->spprid){
-			$sql = 'SELECT c.collid, c.collectionname, c.managementtype, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
+			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
 				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
-				'FROM specprocessorprojects p INNER JOIN omcollections c ON p.collid = c.collid '.
+				'FROM specprocessorprojects p '.
 				'WHERE p.spprid = '.$this->spprid; 
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
-				if(!$this->collId) $this->collId = $row->collid; 
-				$this->projVars['title'] = $row->title;
-				$this->projVars['collectionname'] = $row->collectionname;
-				$this->projVars['managementtype'] = $row->managementtype;
-				$this->projVars['speckeypattern'] = $row->speckeypattern;
-				$this->projVars['speckeyretrieval'] = $row->speckeyretrieval;
-				$this->projVars['coordx1'] = $row->coordx1;
-				$this->projVars['coordx2'] = $row->coordx2;
-				$this->projVars['coordy1'] = $row->coordy1;
-				$this->projVars['coordy2'] = $row->coordy2;
-				$sourcePath = $row->sourcepath;
-				if(substr($sourcePath,-1) != '/') $sourcePath .= '/'; 
-				$this->projVars['sourcepath'] = $sourcePath;
-				$targetPath = $row->targetpath;
-				if(substr($targetPath,-1) != '/') $targetPath .= '/'; 
-				$this->projVars['targetpath'] = $targetPath;
-				$imgUrl = $row->imgurl;
-				if(substr($imgUrl,-1) != '/') $imgUrl .= '/'; 
-				$this->projVars['imgurl'] = $imgUrl;
-				$this->projVars['tnpixwidth'] = $row->tnpixwidth;
-				$this->projVars['webpixwidth'] = $row->webpixwidth;
-				$this->projVars['lgpixwidth'] = $row->lgpixwidth;
-				$this->projVars['jpgcompression'] = $row->jpgcompression;
-				$this->projVars['createtnimg'] = $row->createtnimg;
-				$this->projVars['createlgimg'] = $row->createlgimg;
+				if(!$this->collId) $this->setCollId($row->collid); 
+				$this->title = $row->title;
+				$this->specKeyPattern = $row->speckeypattern;
+				$this->specKeyRetrieval = $row->speckeyretrieval;
+				$this->coordX1 = $row->coordx1;
+				$this->coordX2 = $row->coordx2;
+				$this->coordY1 = $row->coordy1;
+				$this->coordY2 = $row->coordy2;
+				$this->sourcePath = $row->sourcepath;
+				if(substr($this->sourcePath,-1) != '/') $this->sourcePath .= '/'; 
+				$this->targetPath = $row->targetpath;
+				if(substr($this->targetPath,-1) != '/') $this->targetPath .= '/'; 
+				$this->imgUrlBase = $row->imgurl;
+				if(substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
+				$this->webPixWidth = $row->webpixwidth;
+				$this->tnPixWidth = $row->tnpixwidth;
+				$this->lgPixWidth = $row->lgpixwidth;
+				$this->jpgCompression = $row->jpgcompression;
+				$this->createTnImg = $row->createtnimg;
+				$this->createLgImg = $row->createlgimg;
 			}
 			$rs->close();
 		}
 	}
 	
-	public function getProjVariables(){
-		if(!$this->projVars) $this->setProjVariables();
-		return $this->projVars;
-	}
-
 	public function getProjects(){
 		$projArr = array();
 		if($this->collId){
@@ -320,49 +366,205 @@ class SpecProcessorManager {
 		return $this->logPath;
 	}
 
-	public function getErrLogPath(){
-		return $this->logErrPath;
+	public function getLogFH(){
+		return $this->logFH;
+	}
+
+	public function getLogErrFH(){
+		return $this->logErrFH;
+	}
+
+
+	public function setTitle($t){
+		$this->title = $t;
+	}
+
+	public function getTitle(){
+		return $this->title;
+	}
+
+	public function setCollectionName($cn){
+		$this->collectionName = $cn;
+	}
+
+	public function getCollectionName(){
+		return $this->collectionName;
+	}
+
+	public function setManagementType($t){
+		$this->managementType = $t;
+	}
+
+	public function getManagementType(){
+		return $this->managementType;
+	}
+
+	public function setSpecKeyPattern($p){
+		$this->specKeyPattern = $p;
+	}
+
+	public function getSpecKeyPattern(){
+		return $this->specKeyPattern;
+	}
+
+	public function setSpecKeyRetrieval($p){
+		$this->specKeyRetrieval = $p;
+	}
+
+	public function getSpecKeyRetrieval(){
+		return $this->specKeyRetrieval;
+	}
+
+	public function setCoordX1($x){
+		$this->coordX1 = $x;
+	}
+
+	public function getCoordX1(){
+		return $this->coordX1;
+	}
+	
+	public function setCoordX2($x){
+		$this->coordX2 = $x;
+	}
+
+	public function getCoordX2(){
+		return $this->coordX2;
+	}
+
+	public function setCoordY1($y){
+		$this->coordY1 = $y;
+	}
+
+	public function getCoordY1(){
+		return $this->coordY1;
+	}
+
+	public function setCoordY2($y){
+		$this->coordY2 = $y;
+	}
+
+	public function getCoordY2(){
+		return $this->coordY2;
+	}
+
+	public function setSourcePath($p){
+		$this->sourcePath = $p;
+	}
+
+	public function getSourcePath(){
+		return $this->sourcePath;
+	}
+
+	public function setTargetPath($p){
+		$this->targetPath = $p;
+	}
+
+	public function getTargetPath(){
+		return $this->targetPath;
+	}
+
+	public function setImgUrlBase($u){
+		$this->imgUrlBase = $u;
+	}
+
+	public function getImgUrlBase(){
+		return $this->imgUrlBase;
+	}
+
+	public function setWebPixWidth($w){
+		$this->webPixWidth = $w;
+	}
+
+	public function getWebPixWidth(){
+		return $this->webPixWidth;
+	}
+
+	public function setTnPixWidth($tn){
+		$this->tnPixWidth = $tn;
+	}
+
+	public function getTnPixWidth(){
+		return $this->tnPixWidth;
+	}
+
+	public function setLgPixWidth($lg){
+		$this->lgPixWidth = $lg;
+	}
+
+	public function getLgPixWidth(){
+		return $this->lgPixWidth;
+	}
+
+	public function setJpgCompression($jc){
+		$this->jpgCompression = $jc;
+	}
+
+	public function getJpgCompression(){
+		return $this->jpgCompression;
+	}
+
+	public function setCreateTnImg($c){
+		$this->createTnImg = $c;
+	}
+
+	public function getCreateTnImg(){
+		return $this->createTnImg;
+	}
+
+	public function setCreateLgImg($c){
+		$this->createLgImg = $c;
+	}
+
+	public function getCreateLgImg(){
+		return $this->createLgImg;
+	}
+	
+	public function setCreateNewRec($c){
+		$this->createNewRec = $c;
+	}
+
+	public function getCreateNewRec(){
+		return $this->createNewRec;
+	}
+	
+	public function setCopyOverImg($c){
+		$this->copyOverImg = $c;
+	}
+
+	public function getCopyOverImg(){
+		return $this->copyOverImg;
+	}
+	
+	public function setDbMetadata($v){
+		$this->dbMetadata = $v;
 	}
 
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
 	}
-	
-	public function getSourcePath(){
-		return $this->sourcePath;
-	}
-	
-	public function getTargetBase(){
-		return $this->targetBasePath;
-	}
 }
 
 class SpecProcessorImage extends SpecProcessorManager{
 
-	function __construct() {
- 		parent::__construct();
+	function __construct($logPath){
+ 		parent::__construct($logPath);
 	}
 
 	public function batchLoadImages(){
-		$this->setProjVariables();
 		//Create log Files
-		if(file_exists($this->logPath)){
-			if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
-			if(file_exists($this->logPath.'specprocessor/')){
-				$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
-				$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
-				$this->logFH = fopen($logFile, 'a') 
-					or die("Can't open file: ".$logFile);
-				$this->logErrFH = fopen($errFile, 'a') 
-					or die("Can't open file: ".$errFile);
-				fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
-				fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
-			}
+		if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
+		if(file_exists($this->logPath.'specprocessor/')){
+			$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
+			$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
+			$this->logFH = fopen($logFile, 'a');
+			$this->logErrFH = fopen($errFile, 'a');
+			if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
 		}
-		echo "<li>Starting Image Processing</li>";
+		echo "<li>Starting Image Processing</li>\n";
 		$this->processFolder();
-		echo "<li>Image upload complete</li>";
+		echo "<li>Image upload complete</li>\n";
 		if($this->logFH){
 			fwrite($this->logFH, "Image upload complete\n");
 			fwrite($this->logFH, "----------------------------\n\n");
@@ -376,10 +578,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 
 	private function processFolder($pathFrag = ''){
 		set_time_limit(800);
-		$sourcePath = $this->projVars['sourcepath'];
-		$webPixWidth = $this->projVars['webpixwidth']?$this->projVars['webpixwidth']:1200;
-		$tnPixWidth = $this->projVars['tnpixwidth']?$this->projVars['tnpixwidth']:130;
-		$lgPixWidth = $this->projVars['lgpixwidth']?$this->projVars['lgpixwidth']:2400;
+		$sourcePath = $this->sourcePath;
+		$webPixWidth = $this->webPixWidth?$this->webPixWidth:1200;
+		$tnPixWidth = $this->tnPixWidth?$this->tnPixWidth:130;
+		$lgPixWidth = $this->lgPixWidth?$this->lgPixWidth:2400;
 		if($imgFH = opendir($sourcePath.$pathFrag)){
 			while($file = readdir($imgFH)){
         		if($file != "." && $file != ".." && $file != ".svn"){
@@ -391,29 +593,25 @@ class SpecProcessorImage extends SpecProcessorManager{
 						if($fileExt == ".jpg"){
 							//Grab Primary Key
 							$specPk = '';
-							$occId = 0;
-							if($this->projVars['speckeyretrieval'] == 'filename'){
+							if($this->specKeyRetrieval == 'filename'){
 								//Grab Primary Key from filename
 								$specPk = $this->getPrimaryKey($file);
 	        					if($specPk){
 									//Get occid (Symbiota occurrence record primary key)
-									$occId = $this->getOccId($specPk);
 	        					}
 							}
-	        				elseif($this->projVars['speckeyretrieval'] == 'ocr'){
+	        				elseif($this->specKeyRetrieval == 'ocr'){
 	        					//OCR process image and grab primary key from OCR return
 	        					$labelBlock = $this->ocrImage();
 	        					$specPk = $this->getPrimaryKey($file);
 	        					if($specPk){
 		        					//Get occid (Symbiota occurrence record primary key)
-									$occId = $this->getOccId($specPk);
-	        						$this->loadRawFragment($occId,$labelBlock);
 	        					}
 	        				}
 	        				//If Primary Key is found, continue with processing image
-	        				if($occId){
+	        				if($specPk){
 	        					//Setup path and file name in prep for loading image
-		        				$targetPath = $this->projVars['targetpath'];
+		        				$targetPath = $this->targetPath;
 								$targetFolder = '';
 		        				if($pathFrag){
 									$targetFolder = $pathFrag;
@@ -428,7 +626,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	        					$targetFileName = $file;
 								if(file_exists($targetPath.$targetFileName)){
 									//Image already exists at target
-									if($_REQUEST['copyoverimg']){
+									if($this->copyOverImg){
 			        					unlink($targetPath.$targetFileName);
 			        					if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
 				        					unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
@@ -447,8 +645,8 @@ class SpecProcessorImage extends SpecProcessorManager{
 									}
 								}
 								list($width, $height) = getimagesize($sourcePath.$pathFrag.$file);
-								echo "<li>Starting to load: ".$file."</li>";
-								fwrite($this->logFH, "Starting to load: ".$file."\n");
+								echo "<li>Starting to load: ".$file."</li>\n";
+								if($this->logFH) fwrite($this->logFH, "Starting to load: ".$file."\n");
 								//Create web image
 								$webImgCreated = false;
 								if($width > $webPixWidth){
@@ -459,10 +657,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 								}
 								if($webImgCreated){
 		        					//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
-									fwrite($this->logFH, "\tWeb image copied to target folder\n");
+									if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
 									$tnUrl = "";$lgUrl = "";
 									//Create Large Image
-									if(array_key_exists('maplarge',$_REQUEST) && $width > ($webPixWidth*1.2)){
+									if($this->createLgImg && $width > ($webPixWidth*1.2)){
 										$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg";
 										if($width < $lgPixWidth){
 											if(copy($sourcePath.$pathFrag.$file,$targetPath.$lgTargetFileName)){
@@ -476,7 +674,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 										}
 									}
 									//Create Thumbnail Image
-									if(array_key_exists('maptn',$_REQUEST)){
+									if($this->createTnImg){
 										$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg";
 										if($this->createNewImage($sourcePath.$pathFrag.$file,$targetPath.$tnTargetFileName,$tnPixWidth,round($tnPixWidth*$height/$width),$width,$height)){
 											$tnUrl = $tnTargetFileName;
@@ -484,22 +682,22 @@ class SpecProcessorImage extends SpecProcessorManager{
 									}
 									if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
 									if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
-									if($this->databaseImage($occId,$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
+									if($this->recordImageMetadata($specPk,$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
 										if(file_exists($sourcePath.$pathFrag.$file)) unlink($sourcePath.$pathFrag.$file);
-										echo "<li style='margin-left:20px;'>Image processed successfully!</li>";
-										fwrite($this->logFH, "\tImage processed successfully!\n");
+										echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
+										if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
 									}
 								}
 							}
 							else{
-								fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
-								fwrite($this->logFH, "\tERROR: File skipped, unable to locate specimen record \n");
-								echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>";
+								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
+								if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to locate specimen record \n");
+								echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
 							}
         				}
 						else{
 							//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
-							fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
+							if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
 							//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
 						}
 					}
@@ -511,40 +709,40 @@ class SpecProcessorImage extends SpecProcessorManager{
 		}
    		closedir($imgFH);
 	}
-	
+
 	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
 		$status = false;
-       	$sourceImg = imagecreatefromjpeg($sourcePath);
-   		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		$sourceImg = imagecreatefromjpeg($sourcePath);
+		ini_set('memory_limit','512M');
+		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
-        if(imagejpeg($tmpImg, $targetPath)){
-        	$status = true;
-        }
-        else{
-			fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-        	echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>";
-        }
+		if(imagejpeg($tmpImg, $targetPath, $this->jpgCompression)){
+			$status = true;
+		}
+		else{
+			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
+			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
+		}
 		imagedestroy($sourceImg);
 		imagedestroy($tmpImg);
 		return $status;
 	}
-
 }
 
 class MySQLiConnectionFactory {
 	static $SERVERS = array(
 		array(
 			'type' => 'readonly',
-			'host' => 'sod84.asu.edu',
-			'username' => '',
-			'password' => '',
+			'host' => 'localhost',
+			'username' => 'root',
+			'password' => 'bolivia15',
 			'database' => 'symbiotaseinet'
 		),
 		array(
 			'type' => 'write',
-			'host' => 'sod84.asu.edu',
-			'username' => '',
-			'password' => '',
+			'host' => 'localhost',
+			'username' => 'root',
+			'password' => 'bolivia15',
 			'database' => 'symbiotaseinet'
 		)
 	);
