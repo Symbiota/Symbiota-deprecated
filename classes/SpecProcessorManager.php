@@ -24,20 +24,22 @@ class SpecProcessorManager {
 	protected $sourcePath;
 	protected $targetPath;
 	protected $imgUrlBase;
-	protected $webPixWidth;
-	protected $tnPixWidth;
-	protected $lgPixWidth;
+	protected $webPixWidth = 1200;
+	protected $tnPixWidth = 130;
+	protected $lgPixWidth = 2400;
 	protected $jpgCompression= 60;
-	protected $createTnImg;
-	protected $createLgImg;
+	protected $createWebImg = 1;
+	protected $createTnImg = 1;
+	protected $createLgImg = 1;
 	
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
-	protected $dbMetadata = 1;
+	protected $dbMetadata = 1;			//Only used when run as a standalone script
 	
 	protected $logPath;
 	protected $logFH;
 	protected $logErrFH;
+	protected $mdOutputFH;
 	
 	function __construct($logPath) {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -134,22 +136,20 @@ class SpecProcessorManager {
 		return $occId;
 	}
 	
-	protected function recordImageMetadata($specPk,$webUrl,$tnUrl,$oUrl){
+	protected function recordImageMetadata($specID,$webUrl,$tnUrl,$oUrl){
 		$status = false;
 		if($this->dbMetadata){
-			$status = $this->databaseImage($specPk,$webUrl,$tnUrl,$oUrl);
+			$status = $this->databaseImage($specID,$webUrl,$tnUrl,$oUrl);
 		}
 		else{
-			$status = $this->writeToFile($specPk,$webUrl,$tnUrl,$oUrl);
+			$status = $this->writeMetadataToFile($specID,$webUrl,$tnUrl,$oUrl);
 		}
 		return $status;
 	}
 	
-	private function databaseImage($specPk,$webUrl,$tnUrl,$oUrl){
+	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
 		$status = true;
-		if($specPk){
-			$occId = $this->getOccId($specPk);
-			
+		if($occId){
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
 			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
@@ -199,11 +199,15 @@ class SpecProcessorManager {
 		return $status;
 	}
 
-	private function writeToFile($specPk,$webUrl,$tnUrl,$oUrl){
-		
-		
+	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
+		$status = true;
+		if($this->mdOutputFH){
+			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$webUrl.'","'.$tnUrl.'","'.$oUrl.'"'."\n");
+		}
+		return $status;
 	}
 	
+	//Project Functions (create, edit, delete, etc)
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
@@ -304,6 +308,7 @@ class SpecProcessorManager {
 		return $returnArr;
 	}
 
+	//Set and Get functions
 	public function getLogPath(){
 		return $this->logPath;
 	}
@@ -445,6 +450,14 @@ class SpecProcessorManager {
 		return $this->jpgCompression;
 	}
 
+	public function setCreateWebImg($c){
+		$this->createWebImg = $c;
+	}
+
+	public function getCreateWebImg(){
+		return $this->createWebImg;
+	}
+
 	public function setCreateTnImg($c){
 		$this->createTnImg = $c;
 	}
@@ -481,6 +494,7 @@ class SpecProcessorManager {
 		$this->dbMetadata = $v;
 	}
 
+	//Misc functions
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
