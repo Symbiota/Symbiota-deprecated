@@ -1,58 +1,70 @@
 <?php
-date_default_timezone_set('America/Phoenix');
-
 //Pattern matching tern used to locate primary key (PK) of specimen record
-$specKeyPattern = '/ASU\d{7}/';
+$specKeyPattern = '/UTC\d{8}/';
+
 //filename = grab PK from file name; ocr = attempt to retrieve PK from image using OCR
 $specKeyRetrieval = 'filename';
+
 //Folder containing unprecessed images; read access needed
 $sourcePath = 'C:/htdocs/symbiota/trunk/temp/images/toprocess/';
+//$sourcePath = '/herbshare/inetpub/wwwroot/USUherbarium/toprocess/';
+
 //Folder where images are to be placed; write access needed
 $targetPath = 'C:/htdocs/symbiota/trunk/temp/images/';
+//$targetPath = '/herbshare/inetpub/wwwroot/USUherbarium/';
+
 //Url base needed to build image URL that will be save in DB
 $imgUrlBase = '/seinet/temp/images/';
+//$imgUrlBase = 'http://129.123.92.247/USUherbarium/specimen_images/';
+
 $webPixWidth = 1200;
 $tnPixWidth = 130;
 $lgPixWidth = 3000;
+
 //Value between 0 and 100
 $jpgCompression = 60;	  
 
 //Create thumbnail versions of image
 $createTnImg = 1;		
+
 //Create large version of image, given source image is large enough
 $createLgImg = 1;		
-//Weather to copyover images with matching names (includes path) or rename new image and keep both$copyOverImg = 1;		
 
 //Path to where log files will be placed
 $logPath = '';
 
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
-$dbMetadata = 0;		
+$dbMetadata = 0;
 
 //Variables below needed only if connecting directly with database
-//If record matching PK is not found, should a new blank record be created?
+//Symbiota PK for collection; needed if run as a standalone script
 $collId = 1;
+
+//If record matching PK is not found, should a new blank record be created?
 $createNewRec = 1;
+
+//Weather to copyover images with matching names (includes path) or rename new image and keep both$copyOverImg = 1;		
 $copyOverImg = 1;
 
 //-------------------------------------------------------------------------------------------//
 //End of variable assignment. Don't modify code below.
-//Create processor and procede with processing images  
+//Create processor and procede with processing images
+date_default_timezone_set('America/Phoenix');
 $specManager = new SpecProcessorImage($logPath);
 
 //Set variables
-$specManager->setSpecKeyPattern($specKeyPattern);	
-$specManager->setSpecKeyRetrieval($specKeyRetrieval);		 
-$specManager->setSourcePath($sourcePath);		
-$specManager->setTargetPath($targetPath);		
-$specManager->setImgUrlBase($imgUrlBase);		
+$specManager->setSpecKeyPattern($specKeyPattern);
+$specManager->setSpecKeyRetrieval($specKeyRetrieval);
+$specManager->setSourcePath($sourcePath);
+$specManager->setTargetPath($targetPath);
+$specManager->setImgUrlBase($imgUrlBase);
 $specManager->setWebPixWidth($webPixWidth);
 $specManager->setTnPixWidth($tnPixWidth);
 $specManager->setLgPixWidth($lgPixWidth);
-$specManager->setJpgCompression($jpgCompression);	  
+$specManager->setJpgCompression($jpgCompression);
 
-$specManager->setCreateTnImg($createTnImg);		
-$specManager->setCreateLgImg($createLgImg);		
+$specManager->setCreateTnImg($createTnImg);
+$specManager->setCreateLgImg($createLgImg);
 $specManager->setCreateNewRec($createNewRec);
 $specManager->setCopyOverImg($copyOverImg);
 
@@ -91,11 +103,12 @@ class SpecProcessorManager {
 	
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
-	protected $dbMetadata = 1;
+	protected $dbMetadata = 1;			//Only used when run as a standalone script
 	
 	protected $logPath;
 	protected $logFH;
 	protected $logErrFH;
+	protected $mdOutputFH;
 	
 	function __construct($logPath) {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -207,8 +220,8 @@ class SpecProcessorManager {
 		$status = true;
 		if($specPk){
 			$occId = $this->getOccId($specPk);
-		
-	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>";
+			
+	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
 			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
@@ -258,8 +271,11 @@ class SpecProcessorManager {
 	}
 
 	private function writeToFile($specPk,$webUrl,$tnUrl,$oUrl){
-		
-		
+		$status = false;
+		if($this->mdOutputFH){
+			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$webUrl.'","'.$tnUrl.'","'.$oUrl.'"'."\n");
+		}
+		return $status;
 	}
 	
 	public function editProject($editArr){
@@ -548,23 +564,46 @@ class SpecProcessorManager {
 class SpecProcessorImage extends SpecProcessorManager{
 
 	function __construct($logPath){
- 		parent::__construct($logPath);
+		parent::__construct($logPath);
 	}
 
 	public function batchLoadImages(){
 		//Create log Files
-		if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
-		if(file_exists($this->logPath.'specprocessor/')){
-			$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
-			$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
-			$this->logFH = fopen($logFile, 'a');
-			$this->logErrFH = fopen($errFile, 'a');
-			if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
-			if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+		if(file_exists($this->logPath)){
+			if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
+			if(file_exists($this->logPath.'specprocessor/')){
+				$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
+				$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
+				$this->logFH = fopen($logFile, 'a');
+				$this->logErrFH = fopen($errFile, 'a');
+				if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+				if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			}
+		}
+		//If output is to go out to file, create file for output
+		if(!$this->dbMetadata){
+			$this->mdOutputFH = fopen("output_".time().'.csv', 'w');
+			fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
+			//If unable to create output file, abort upload procedure
+			if(!$this->mdOutputFH){
+				if($this->logFH){
+					fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
+					fclose($this->logFH);
+				}
+				if($this->logErrFH){
+					fwrite($this->logErrFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
+					fclose($this->logErrFH);
+				}
+				echo "<li>Image upload aborted: Unable to establish connection to output file to where image metadata is to be written</li>\n";
+				return;
+			}
 		}
 		echo "<li>Starting Image Processing</li>\n";
 		$this->processFolder();
 		echo "<li>Image upload complete</li>\n";
+		if(!$this->dbMetadata){
+			fclose($this->mdOutputFH);
+		}
 		if($this->logFH){
 			fwrite($this->logFH, "Image upload complete\n");
 			fwrite($this->logFH, "----------------------------\n\n");
@@ -579,16 +618,17 @@ class SpecProcessorImage extends SpecProcessorManager{
 	private function processFolder($pathFrag = ''){
 		set_time_limit(800);
 		$sourcePath = $this->sourcePath;
+		if(!$sourcePath) $sourcePath = './';
 		$webPixWidth = $this->webPixWidth?$this->webPixWidth:1200;
 		$tnPixWidth = $this->tnPixWidth?$this->tnPixWidth:130;
 		$lgPixWidth = $this->lgPixWidth?$this->lgPixWidth:2400;
 		if($imgFH = opendir($sourcePath.$pathFrag)){
 			while($file = readdir($imgFH)){
-        		if($file != "." && $file != ".." && $file != ".svn"){
-        			if(is_file($sourcePath.$pathFrag.$file)){
+				if($file != "." && $file != ".." && $file != ".svn"){
+					if(is_file($sourcePath.$pathFrag.$file)){
 						$fileExt = strtolower(substr($file,strrpos($file,'.')));
-        				if($fileExt == ".tif"){
-							//Do something, like convert to jpg 
+						if($fileExt == ".tif"){
+							//Do something, like convert to jpg
 						}
 						if($fileExt == ".jpg"){
 							//Grab Primary Key
@@ -596,7 +636,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 							if($this->specKeyRetrieval == 'filename'){
 								//Grab Primary Key from filename
 								$specPk = $this->getPrimaryKey($file);
-	        					if($specPk){
+								if($specPk){
 									//Get occid (Symbiota occurrence record primary key)
 	        					}
 							}
@@ -715,7 +755,8 @@ class SpecProcessorImage extends SpecProcessorManager{
 		$sourceImg = imagecreatefromjpeg($sourcePath);
 		ini_set('memory_limit','512M');
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-		imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
+		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
+		imagecopyresized($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
 		if(imagejpeg($tmpImg, $targetPath, $this->jpgCompression)){
 			$status = true;
 		}

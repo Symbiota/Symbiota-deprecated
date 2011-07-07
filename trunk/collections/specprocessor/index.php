@@ -176,29 +176,8 @@ if($spprId){
 			}
 			?>
 			<h1>Specimen Processor Control Panel</h1>
-			<div style="clear:both;">
+			<div style="clear:both;padding:15px;">
 				<?php 
-				if($action == 'Upload ABBYY File'){
-					$statusArr = $specManager->loadLabelFile();
-					if($statusArr){
-						$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
-					}
-				}
-				elseif($action == 'Process Images'){
-					echo '<h3>Batch Processing Images</h3>'."\n";
-					echo '<ul>'."\n";
-					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
-					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
-					$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:0);
-					$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maptn']:0);
-					$specManager->batchLoadImages();
-					echo '</ul>'."\n";
-				}
-				?>
-				&nbsp;
-			</div>
-			<?php 
-			if($symbUid){
 				if($status){ 
 					?>
 					<div style='margin:20px 0px 20px 0px;'>
@@ -208,6 +187,72 @@ if($spprId){
 					</div>
 					<?php 
 				}
+				if($action == 'Upload ABBYY File'){
+					$statusArr = $specManager->loadLabelFile();
+					if($statusArr){
+						$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
+					}
+				}
+				elseif($action == 'Process Images'){
+					echo '<h3>Batch Processing Images</h3>'."\n";
+					echo '<ul>'."\n";
+					$specManager->setCreateWebImg(array_key_exists('mapweb',$_REQUEST)?$_REQUEST['mapweb']:1);
+					$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:1);
+					$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maplarge']:1);
+					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
+					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
+					$specManager->batchLoadImages();
+					echo '</ul>'."\n";
+				}
+				?>
+				This tool is designed to aid collection manager in processing specimen images and integrating them into the biodiversity portal. 
+				Typical processing steps involve the following steps. 
+				Display <a href="#" onclick="toggle('fulldetails')">full details</a> for image processing.
+				<ol id="fulldetails" style="display:none;">
+					<li>
+						<b>Create web quality copies of the original image</b> - 
+						The standard image used for the web is a compressed JPG. Three copies typically 
+						created are: basic web, thumbnail, and a large version for optional download by users. 
+						This application is capable of creating the web versions 
+						of the image using the PHP GD image library. If managers wish to use other image resizing and compression 
+						algorythms, they can preprocess the images before hand and then use this application for the file  
+						transfer and linking steps. 
+						Maximun image file size is dictated by the PHP configuration settings (e.g. memory_limit) of the web server.
+					</li>
+					<li>
+						<b>Obtain the unique identifier for the specimen record</b> - 
+						This is the identification value that uniquely identifies each specimen. 
+						Ideally, the accession number or barcode serves this purpose, however, this is only possible if these values 
+						are entered for each specimen and are truly unique within that particular collection. 
+						There are two methods available for retrieving the identification value. The first is to retrieve 
+						the value from the file name of the image. The second is to 
+						attempt to use OCR to obtain the value directly from the image. In both cases, 
+						pattern matching is used to locate the value.  
+					</li>
+					<li>
+						<b>Transfer images to storage</b> - 
+						Given that the images are to be displaed within the user's web browser, 
+						the storage location must be accessable to the web. In general, it is a good practive to store only a 
+						couple thousand images per folder. For this reason, the transfer process will atempt to 
+						make use of the specimen identification value (Primary Key) to to establish a practical storage system 
+						(UTC00413000 to UTC00413999 goes into folder called UTC00413). Another option is to place the unprocessed 
+						images within folders using the preferred naming schema. This will trigger the transfer scripts to 
+						place the processed images within folders of the same name. 
+					</li>
+					<li>
+						<b>Integrate images into portal</b> - 
+						This is done by loading image metadata into the portal's database along with links to the prospective 
+						specimen record. The specimmen identifier obtained in step 2 is used to locate existing specimen records. 
+						If the specimen record does not yet exists, there is an option of creating a blank record 
+						to which the image will be linked so that the specimen label can then be processed online using the image.  
+						Note that it is important that the image URLs are stable. If an image is moved or renamed, 
+						the image URL stored within the database will also have to be modified.  
+					</li>
+				
+				</ol>
+			</div>
+			<?php 
+			if($symbUid){
 				if($collId){
 					?>
 					<div id="adddiv" style="display:<?php echo ($spprId||$specProjects?'none':'block'); ?>;">
@@ -463,7 +508,29 @@ if($spprId){
 										the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
 										and link them to their prespective specimen record. 
 									</div>
-									<div style="margin:15px;">
+									<fieldset style="margin:15px;">
+										<legend><b>Image Versions</b></legend>
+										<div style="margin:0px 0px 10px 10px;">
+											Web Versions:<br/>
+											<input type="radio" name="mapweb" value="1" CHECKED /> 
+											Create basic web images<br/>
+											<input type="radio" name="mapweb" value="0" /> 
+											Use existing images without resizing or compressing
+											<br/><br/> 
+											Thumbnails:<br/>
+											<input type="radio" name="maptn" value="1" <?php echo ($specManager->getCreateTnImg()?'CHECKED':'') ?> /> 
+											Create Thumbnails<br/>
+											<input type="radio" name="maptn" value="0" <?php echo ($specManager->getCreateTnImg()?'':'CHECKED') ?> /> 
+											Use existing thumbnail (files must end in _tn.jpg), or skip altogether
+											<br/><br/> 
+											Large Images:<br/>
+											<input type="radio" name="maplarge" value="1" <?php echo ($specManager->getCreateLgImg()?'CHECKED':'') ?> />
+											Create Large Versions<br/>
+											<input type="radio" name="maplarge" value="0" <?php echo ($specManager->getCreateLgImg()?'':'CHECKED') ?> /> 
+											Use existing large images (files must end in _lg.jpg), or skip altogether
+										</div>
+									</fieldset>
+									<div style="margin:25px;">
 										<b>Action if specimen record is not found:</b> 
 										<div style="margin:0px 0px 10px 10px;">
 											<input type="radio" name="createnewrec" value="0" /> 
@@ -478,15 +545,9 @@ if($spprId){
 											<input type="radio" name="copyoverimg" value="1" CHECKED /> 
 											Copy over existing image
 										</div>
-										<b>Image versions:</b> 
-										<div style="margin:0px 0px 10px 10px;">
-											<input type="checkbox" name="maptn" value="1" <?php echo ($specManager->getCreateTnImg()?'CHECKED':'') ?> /> 
-											Create Thumbnails<br/>
-											<input type="checkbox" name="maplarge" value="1" <?php echo ($specManager->getCreateLgImg()?'CHECKED':'') ?> /> 
-											Create Large Versions
-										</div>
 									</div>
-									<div style="margin:15px;">
+									<fieldset style="margin:15px;">
+										<legend><b>Project Variables</b></legend>
 										<table>
 											<tr>
 												<td>
@@ -561,7 +622,7 @@ if($spprId){
 												</td>
 											</tr>
 										</table>
-									</div>
+									</fieldset>
 									<div style="margin:15px 0px 0px 15px;">
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
