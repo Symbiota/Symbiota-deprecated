@@ -64,19 +64,21 @@ class SpecProcessorImage extends SpecProcessorManager{
 			while($fileName = readdir($imgFH)){
 				if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
 					if(is_file($this->sourcePath.$pathFrag.$fileName)){
-						$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
-						if($fileExt == ".tif"){
-							//Do something, like convert to jpg
-						}
-						if($fileExt == ".jpg"){
-							
-							$this->processImageFile($fileName,$pathFrag);
-							
-        				}
-						else{
-							//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
-							if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
-							//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
+						if(stripos($fileName,'_tn.jpg') === false && stripos($fileName,'_lg.jpg') === false){
+							$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
+							if($fileExt == ".tif"){
+								//Do something, like convert to jpg
+							}
+							if($fileExt == ".jpg"){
+								
+								$this->processImageFile($fileName,$pathFrag);
+								
+	        				}
+							else{
+								//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
+								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
+								//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
+							}
 						}
 					}
 					elseif(is_dir($this->sourcePath.$pathFrag.$fileName)){
@@ -88,7 +90,7 @@ class SpecProcessorImage extends SpecProcessorManager{
    		closedir($imgFH);
 	}
 
-	private function processImageFile($fileName,$pathFrag = ''){
+	public function processImageFile($fileName,$pathFrag = ''){
 		//Grab Primary Key
 		$specPk = '';
         if($this->specKeyRetrieval == 'ocr'){
@@ -181,7 +183,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 					else{
 						$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
 						if(file_exists($this->sourcePath.$pathFrag.$lgSourceFileName)){
-							copy($this->sourcePath.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
+							rename($this->sourcePath.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
 						}
 					}
 					//Create Thumbnail Image
@@ -194,7 +196,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 					else{
 						$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
 						if(file_exists($this->sourcePath.$pathFrag.$tnFileName)){
-							copy($this->sourcePath.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
+							rename($this->sourcePath.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
 						}
 					}
 					if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
