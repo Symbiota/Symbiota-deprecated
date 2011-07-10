@@ -94,12 +94,13 @@ class SpecProcessorManager {
 	protected $sourcePath;
 	protected $targetPath;
 	protected $imgUrlBase;
-	protected $webPixWidth;
-	protected $tnPixWidth;
-	protected $lgPixWidth;
+	protected $webPixWidth = 1200;
+	protected $tnPixWidth = 130;
+	protected $lgPixWidth = 2400;
 	protected $jpgCompression= 60;
-	protected $createTnImg;
-	protected $createLgImg;
+	protected $createWebImg = 1;
+	protected $createTnImg = 1;
+	protected $createLgImg = 1;
 	
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
@@ -205,22 +206,20 @@ class SpecProcessorManager {
 		return $occId;
 	}
 	
-	protected function recordImageMetadata($specPk,$webUrl,$tnUrl,$oUrl){
+	protected function recordImageMetadata($specID,$webUrl,$tnUrl,$oUrl){
 		$status = false;
 		if($this->dbMetadata){
-			$status = $this->databaseImage($specPk,$webUrl,$tnUrl,$oUrl);
+			$status = $this->databaseImage($specID,$webUrl,$tnUrl,$oUrl);
 		}
 		else{
-			$status = $this->writeToFile($specPk,$webUrl,$tnUrl,$oUrl);
+			$status = $this->writeMetadataToFile($specID,$webUrl,$tnUrl,$oUrl);
 		}
 		return $status;
 	}
 	
-	private function databaseImage($specPk,$webUrl,$tnUrl,$oUrl){
+	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
 		$status = true;
-		if($specPk){
-			$occId = $this->getOccId($specPk);
-			
+		if($occId){
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
 			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
@@ -270,14 +269,15 @@ class SpecProcessorManager {
 		return $status;
 	}
 
-	private function writeToFile($specPk,$webUrl,$tnUrl,$oUrl){
-		$status = false;
+	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
+		$status = true;
 		if($this->mdOutputFH){
 			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$webUrl.'","'.$tnUrl.'","'.$oUrl.'"'."\n");
 		}
 		return $status;
 	}
 	
+	//Project Functions (create, edit, delete, etc)
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
@@ -378,6 +378,7 @@ class SpecProcessorManager {
 		return $returnArr;
 	}
 
+	//Set and Get functions
 	public function getLogPath(){
 		return $this->logPath;
 	}
@@ -519,6 +520,14 @@ class SpecProcessorManager {
 		return $this->jpgCompression;
 	}
 
+	public function setCreateWebImg($c){
+		$this->createWebImg = $c;
+	}
+
+	public function getCreateWebImg(){
+		return $this->createWebImg;
+	}
+
 	public function setCreateTnImg($c){
 		$this->createTnImg = $c;
 	}
@@ -555,6 +564,7 @@ class SpecProcessorManager {
 		$this->dbMetadata = $v;
 	}
 
+	//Misc functions
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
@@ -598,9 +608,11 @@ class SpecProcessorImage extends SpecProcessorManager{
 				return;
 			}
 		}
+		//Lets start processing folder
 		echo "<li>Starting Image Processing</li>\n";
 		$this->processFolder();
 		echo "<li>Image upload complete</li>\n";
+		//Now lets start closing things up
 		if(!$this->dbMetadata){
 			fclose($this->mdOutputFH);
 		}
@@ -617,137 +629,167 @@ class SpecProcessorImage extends SpecProcessorManager{
 
 	private function processFolder($pathFrag = ''){
 		set_time_limit(800);
-		$sourcePath = $this->sourcePath;
-		if(!$sourcePath) $sourcePath = './';
-		$webPixWidth = $this->webPixWidth?$this->webPixWidth:1200;
-		$tnPixWidth = $this->tnPixWidth?$this->tnPixWidth:130;
-		$lgPixWidth = $this->lgPixWidth?$this->lgPixWidth:2400;
-		if($imgFH = opendir($sourcePath.$pathFrag)){
-			while($file = readdir($imgFH)){
-				if($file != "." && $file != ".." && $file != ".svn"){
-					if(is_file($sourcePath.$pathFrag.$file)){
-						$fileExt = strtolower(substr($file,strrpos($file,'.')));
-						if($fileExt == ".tif"){
-							//Do something, like convert to jpg
-						}
-						if($fileExt == ".jpg"){
-							//Grab Primary Key
-							$specPk = '';
-							if($this->specKeyRetrieval == 'filename'){
-								//Grab Primary Key from filename
-								$specPk = $this->getPrimaryKey($file);
-								if($specPk){
-									//Get occid (Symbiota occurrence record primary key)
-	        					}
+		if(!$this->sourcePath) $this->sourcePath = './';
+		//Read file and loop through images
+		if($imgFH = opendir($this->sourcePath.$pathFrag)){
+			while($fileName = readdir($imgFH)){
+				if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
+					if(is_file($this->sourcePath.$pathFrag.$fileName)){
+						if(stripos($fileName,'_tn.jpg') === false && stripos($fileName,'_lg.jpg') === false){
+							$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
+							if($fileExt == ".tif"){
+								//Do something, like convert to jpg
 							}
-	        				elseif($this->specKeyRetrieval == 'ocr'){
-	        					//OCR process image and grab primary key from OCR return
-	        					$labelBlock = $this->ocrImage();
-	        					$specPk = $this->getPrimaryKey($file);
-	        					if($specPk){
-		        					//Get occid (Symbiota occurrence record primary key)
-	        					}
+							if($fileExt == ".jpg"){
+								
+								$this->processImageFile($fileName,$pathFrag);
+								
 	        				}
-	        				//If Primary Key is found, continue with processing image
-	        				if($specPk){
-	        					//Setup path and file name in prep for loading image
-		        				$targetPath = $this->targetPath;
-								$targetFolder = '';
-		        				if($pathFrag){
-									$targetFolder = $pathFrag;
-								}
-								else{
-									$targetFolder = substr($specPk,0,strlen($specPk)-3).'/';
-								}
-								$targetPath .= $targetFolder;
-								if(!file_exists($targetPath)){
-									mkdir($targetPath);
-								}
-	        					$targetFileName = $file;
-								if(file_exists($targetPath.$targetFileName)){
-									//Image already exists at target
-									if($this->copyOverImg){
-			        					unlink($targetPath.$targetFileName);
-			        					if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
-				        					unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
-			        					}
-			        					if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg")){
-			        						unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg");
-			        					}
-									}
-									else{
-										//Rename image before saving
-										$cnt = 1;
-								 		while(file_exists($targetPath.$targetFileName)){
-								 			$targetFileName = str_ireplace(".jpg","_".$cnt.".jpg",$file);
-								 			$cnt++;
-								 		}
-									}
-								}
-								list($width, $height) = getimagesize($sourcePath.$pathFrag.$file);
-								echo "<li>Starting to load: ".$file."</li>\n";
-								if($this->logFH) fwrite($this->logFH, "Starting to load: ".$file."\n");
-								//Create web image
-								$webImgCreated = false;
-								if($width > $webPixWidth){
-									$webImgCreated = $this->createNewImage($sourcePath.$pathFrag.$file,$targetPath.$targetFileName,$webPixWidth,round($webPixWidth*$height/$width),$width,$height);
-								}
-								else{
-									$webImgCreated = copy($sourcePath.$pathFrag.$file,$targetPath.$targetFileName);
-								}
-								if($webImgCreated){
-		        					//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
-									if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
-									$tnUrl = "";$lgUrl = "";
-									//Create Large Image
-									if($this->createLgImg && $width > ($webPixWidth*1.2)){
-										$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg";
-										if($width < $lgPixWidth){
-											if(copy($sourcePath.$pathFrag.$file,$targetPath.$lgTargetFileName)){
-												$lgUrl = $lgTargetFileName;
-											}
-										}
-										else{
-											if($this->createNewImage($sourcePath.$pathFrag.$file,$targetPath.$lgTargetFileName,$lgPixWidth,round($lgPixWidth*$height/$width),$width,$height)){
-												$lgUrl = $lgTargetFileName;
-											}
-										}
-									}
-									//Create Thumbnail Image
-									if($this->createTnImg){
-										$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg";
-										if($this->createNewImage($sourcePath.$pathFrag.$file,$targetPath.$tnTargetFileName,$tnPixWidth,round($tnPixWidth*$height/$width),$width,$height)){
-											$tnUrl = $tnTargetFileName;
-										}
-									}
-									if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
-									if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
-									if($this->recordImageMetadata($specPk,$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
-										if(file_exists($sourcePath.$pathFrag.$file)) unlink($sourcePath.$pathFrag.$file);
-										echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
-										if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
-									}
-								}
-							}
 							else{
-								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
-								if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to locate specimen record \n");
-								echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
+								//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
+								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
+								//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
 							}
-        				}
-						else{
-							//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
-							if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
-							//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
 						}
 					}
-					elseif(is_dir($sourcePath.$pathFrag.$file)){
-						$this->processFolder($pathFrag.$file."/");
+					elseif(is_dir($this->sourcePath.$pathFrag.$fileName)){
+						$this->processFolder($pathFrag.$fileName."/");
 					}
         		}
 			}
 		}
    		closedir($imgFH);
+	}
+
+	private function processImageFile($fileName,$pathFrag = ''){
+		//Grab Primary Key
+		$specPk = '';
+        if($this->specKeyRetrieval == 'ocr'){
+        	//OCR process image and grab primary key from OCR return
+        	$labelBlock = $this->ocrImage();
+        	$specPk = $this->getPrimaryKey($fileName);
+        	if($specPk){
+        		//Get occid (Symbiota occurrence record primary key)
+        	}
+        }
+		else{
+			//Grab Primary Key from filename
+			$specPk = $this->getPrimaryKey($fileName);
+			if($specPk){
+				//Get occid (Symbiota occurrence record primary key)
+        	}
+		}
+		$occId = 0;
+		if($this->dbMetadata){
+			$occId = $this->getOccId($specPk);
+		}
+        //If Primary Key is found, continue with processing image
+        if($specPk){
+        	if(!$this->dbMetadata || $this->createNewRec || $occId){
+	        	//Setup path and file name in prep for loading image
+				$targetFolder = '';
+	        	if($pathFrag){
+					$targetFolder = $pathFrag;
+				}
+				else{
+					$targetFolder = substr($specPk,0,strlen($specPk)-3).'/';
+				}
+				$targetPath = $this->targetPath.$targetFolder;
+				if(!file_exists($targetPath)){
+					mkdir($targetPath);
+				}
+	        	$targetFileName = $fileName;
+				//Check to see if image already exists at target, if so, delete or rename
+	        	if(file_exists($targetPath.$targetFileName)){
+					if($this->copyOverImg){
+	        			unlink($targetPath.$targetFileName);
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
+	        			}
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg");
+	        			}
+					}
+					else{
+						//Rename image before saving
+						$cnt = 1;
+				 		while(file_exists($targetPath.$targetFileName)){
+				 			$targetFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
+				 			$cnt++;
+				 		}
+					}
+				}
+				//Start the processing procedure
+				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
+				echo "<li>Starting to load: ".$fileName."</li>\n";
+				if($this->logFH) fwrite($this->logFH, "Starting to load: ".$fileName."\n");
+				//Create web image
+				$webImgCreated = false;
+				if($this->createWebImg && $width > $this->webPixWidth){
+					$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+				}
+				else{
+					$webImgCreated = copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName);
+				}
+				if($webImgCreated){
+	        		//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
+					if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
+					$tnUrl = "";$lgUrl = "";
+					//Create Large Image
+					$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
+					if($this->createLgImg){
+						if($width > ($this->webPixWidth*1.3)){
+							if($width < $this->lgPixWidth){
+								if(copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
+									$lgUrl = $lgTargetFileName;
+								}
+							}
+							else{
+								if($this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
+									$lgUrl = $lgTargetFileName;
+								}
+							}
+						}
+					}
+					else{
+						$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
+						if(file_exists($this->sourcePath.$pathFrag.$lgSourceFileName)){
+							rename($this->sourcePath.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
+						}
+					}
+					//Create Thumbnail Image
+					$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
+					if($this->createTnImg){
+						if($this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
+							$tnUrl = $tnTargetFileName;
+						}
+					}
+					else{
+						$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
+						if(file_exists($this->sourcePath.$pathFrag.$tnFileName)){
+							rename($this->sourcePath.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
+						}
+					}
+					if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
+					if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
+					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
+						if(file_exists($this->sourcePath.$pathFrag.$fileName)) unlink($this->sourcePath.$pathFrag.$fileName);
+						echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
+						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
+					}
+				}
+        	}
+			else{
+				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
+				if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record \n");
+				echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
+			}
+		}
+		else{
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier \n");
+			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier \n");
+			echo "<li style='margin-left:10px;'>File skipped, unable to extract specimen identifier</li>\n";
+		}
 	}
 
 	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
