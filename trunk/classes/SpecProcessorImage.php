@@ -57,7 +57,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	}
 
 	private function processFolder($pathFrag = ''){
-		set_time_limit(800);
+		set_time_limit(2000);
 		if(!$this->sourcePath) $this->sourcePath = './';
 		//Read file and loop through images
 		if($imgFH = opendir($this->sourcePath.$pathFrag)){
