@@ -124,7 +124,7 @@ class OccurrenceEditorManager {
 			$recCnt = $r->reccnt;
 		}
 		if($recCnt){
-			adsfds
+			//adsfds
 		}
 		return $recCnt;
 	}
