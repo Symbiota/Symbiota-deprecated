@@ -172,7 +172,7 @@ class OccurrenceIndividualManager {
 			$sqlWhere .= "OR clid IN(".implode(",",$uRights["ClAdmin"]).") ";
 		}
 		$sql = 'SELECT name, clid '.
-			'FROM fmchecklists '.substr($sqlWhere,2).' ORDER BY c.Name';
+			'FROM fmchecklists '.substr($sqlWhere,2).' ORDER BY Name';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArr[$row->clid] = $row->name;
