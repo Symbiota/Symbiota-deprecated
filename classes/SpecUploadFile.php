@@ -74,85 +74,81 @@ class SpecUploadFile extends SpecUploadManager{
 			$this->transferCount = 0;
 			$reqFieldsNullCnt = 0;
 			while($recordArr = $this->getRecordArr($fh)){
-				if(count($recordArr) == count($headerArr)){
-					//If there is no sciname, see if you can populate by family
-					if(!$recordArr[array_search($sourceArr["sciname"],$headerArr)]){
-						if(array_key_exists("family",$sourceArr) && $recordArr[array_search($sourceArr["family"],$headerArr)]){
-							$recordArr[array_search($sourceArr["sciname"],$headerArr)] = $recordArr[array_search($sourceArr["family"],$headerArr)];
-						}
+				//If there is no sciname, see if you can populate by family
+				if(!$recordArr[array_search($sourceArr["sciname"],$headerArr)]){
+					if(array_key_exists("family",$sourceArr) && $recordArr[array_search($sourceArr["family"],$headerArr)]){
+						$recordArr[array_search($sourceArr["sciname"],$headerArr)] = $recordArr[array_search($sourceArr["family"],$headerArr)];
 					}
-					
-					//Load only if there is a scientific name in the record
-					if($recordArr[array_search($this->fieldMap["sciname"]["field"],$headerArr)]){
-						$sqlValues = "";
-						$headCnt = count($headerArr);
-						for($x=0;$x<$headCnt;$x++){
-							//Iterate through record values and use to build SQL statement
-							if($spKeys = array_keys($sourceArr,$headerArr[$x])){
-								//A header field may be linked to multiple Symbiota fields
-								foreach($spKeys as $specName){
-									$valueStr = trim($recordArr[$x]);
-									//If value is encloded by quotes, remove the quotes
-									if(substr($valueStr,0,1) == "\"" && substr($valueStr,-1) == "\""){
-										$valueStr = substr($valueStr,1,strlen($valueStr)-2);
-									}
-									$valueStr = $this->cleanString($valueStr);
-									$valueStr = $this->encodeString($valueStr);
-									//Load data
-									$type = $this->fieldMap[$specName]["type"];
-									$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);
-									switch($type){
-										case "numeric":
-											if(!$valueStr) $valueStr = "NULL";
-											$sqlValues .= ",".$valueStr;
-											break;
-										case "date":
-											if(($dateStr = strtotime($valueStr))){
-												$sqlValues .= ",\"".date('Y-m-d H:i:s', $dateStr)."\"";
-											} 
-											else{
-												$sqlValues .= ",NULL";
-											}
-											break;
-										default:	//string
-											if($size && strlen($valueStr) > $size){
-												$valueStr = substr($valueStr,0,$size);
-											}
-											if($valueStr){
-												$sqlValues .= ",\"".$valueStr."\"";
-											}
-											else{
-												$sqlValues .= ",NULL";
-											}
-									}
+				}
+				
+				//Load only if there is a scientific name in the record
+				if($recordArr[array_search($this->fieldMap["sciname"]["field"],$headerArr)]){
+					$sqlValues = "";
+					$headCnt = count($headerArr);
+					for($x=0;$x<$headCnt;$x++){
+						//Iterate through record values and use to build SQL statement
+						if($spKeys = array_keys($sourceArr,$headerArr[$x])){
+							//A header field may be linked to multiple Symbiota fields
+							foreach($spKeys as $specName){
+								$valueStr = trim($recordArr[$x]);
+								//If value is encloded by quotes, remove the quotes
+								if(substr($valueStr,0,1) == "\"" && substr($valueStr,-1) == "\""){
+									$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+								}
+								$valueStr = $this->cleanString($valueStr);
+								$valueStr = $this->encodeString($valueStr);
+								//Load data
+								$type = (array_key_exists('type',$this->fieldMap[$specName])?$this->fieldMap[$specName]["type"]:'');
+								$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);
+								switch($type){
+									case "numeric":
+										if(!$valueStr) $valueStr = "NULL";
+										$sqlValues .= ",".$valueStr;
+										break;
+									case "date":
+										if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $valueStr)){
+											$sqlValues .= ',"'.$valueStr.'"';
+										} 
+										elseif(($dateStr = strtotime($valueStr))){
+											$sqlValues .= ",\"".date('Y-m-d H:i:s', $dateStr)."\"";
+										} 
+										else{
+											$sqlValues .= ",NULL";
+										}
+										break;
+									default:	//string
+										if($size && strlen($valueStr) > $size){
+											$valueStr = substr($valueStr,0,$size);
+										}
+										if($valueStr){
+											$sqlValues .= ",\"".$valueStr."\"";
+										}
+										else{
+											$sqlValues .= ",NULL";
+										}
 								}
 							}
 						}
-						
-						$sql = $sqlBase."VALUES(".$this->collId.",".substr($sqlValues,1).")";
-						//echo "<div>".$recordCnt.": ".$sql."</div>";
-						
-						$status = $this->conn->query($sql);
-						if($status){
-							//echo "<li>";
-							//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
-							//echo "</li>";
-						}
-						else{
-							echo "<li>FAILED adding record #".$this->transferCount."</li>";
-							echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
-							echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
-						}
-						$this->transferCount++;
+					}
+					
+					$sql = $sqlBase."VALUES(".$this->collId.",".substr($sqlValues,1).")";
+					//echo "<div>SQL: ".$sql."</div>";
+					
+					$status = $this->conn->query($sql);
+					if($status){
+						//echo "<li>";
+						//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
+						//echo "</li>";
 					}
 					else{
-						echo "<li>Record skipped due to lack of scientific name</li>";
+						echo "<li>FAILED adding record #".$this->transferCount."</li>";
+						echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
+						echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
 					}
+					$this->transferCount++;
 				}
 				else{
-					echo "<li>Record skipped: ".count($recordArr)." columns of data exist, but ".count($headerArr)." columns were excepted; may be due to tab, return, or new line characters enbedded in data record.";
-					//print_r($recordArr);
-					echo "</li>";
+					echo "<li>Record skipped due to lack of scientific name</li>";
 				}
 			}
 			fclose($fh);
@@ -188,16 +184,17 @@ class SpecUploadFile extends SpecUploadManager{
 		else{
 			$headerArr = explode($this->delimiter,$headerData);
 		}
-		foreach($headerArr as $k => $field){
+		$retArr = array();
+		foreach($headerArr as $field){
 			$fieldStr = strtolower(trim($field));
 			if($fieldStr){
-				$headerArr[$k] = $fieldStr;
+				$retArr[] = $fieldStr;
 			}
 			else{
 				break;
 			}
 		}
-		return $headerArr;
+		return $retArr;
     }
 
     private function getRecordArr($fHandler){

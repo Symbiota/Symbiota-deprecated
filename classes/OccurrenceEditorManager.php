@@ -8,7 +8,8 @@ class OccurrenceEditorManager {
 	private $collId;
 	private $collMap = Array();
 	private $occurrenceMap = Array();
-
+	private $occSql;
+	
 	private $photographerArr = Array();
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
@@ -20,6 +21,20 @@ class OccurrenceEditorManager {
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		$this->occSql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+		'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
+		'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
+		'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
+		'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+		'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
+		'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
+		'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
+		'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
+		'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+		'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
+		'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
+		'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, o.dateLastModified '.
+		'FROM omoccurrences o ';
 	}
 
 	public function __destruct(){
@@ -65,30 +80,67 @@ class OccurrenceEditorManager {
 		return $this->collMap;
 	}
 	
+	public function queryOccurrences($postArr,$occIndex=0){
+		$recCnt = 0;
+		$qIdentifier = $postArr['q_identifier'];
+		$qRecordedBy = $postArr['q_recordedby'];
+		$qRecordNumber1 = $postArr['q_recordnumber1'];
+		$qRecordNumber2 = $postArr['q_recordnumber2'];
+		$qEnteredBy = $postArr['q_enteredby'];
+		$qProcessingStatus = $postArr['q_processingstatus'];
+		$qDateLastModified1 = $postArr['q_datelastmodified1'];
+		$qDateLastModified2 = $postArr['q_datelastmodified2'];
+		
+		$sqlWhere = '';
+		if($qIdentifier){
+			$sqlWhere .= 'AND (o.catalogNumber = "'.$qIdentifier.'" OR o.occurrenceId = "'.$qIdentifier.'" OR o.occid = "'.$qIdentifier.'") ';
+		}
+		if($qRecordedBy){
+			$sqlWhere .= 'AND o.recordedby LIKE "%'.$qRecordedBy.'%" ';
+		}
+		if($qRecordNumber1){
+			if($qRecordNumber2){
+				$sqlWhere .= 'AND cast(o.recordnumber as unsigned) BETWEEN '.$qRecordNumber1.' AND '.$qRecordNumber2.' ';
+			}
+			else{
+				$sqlWhere .= 'AND o.recordnumber = "'.$qRecordNumber2.'" ';
+			}
+		}
+		if($qProcessingStatus){
+			$sqlWhere .= 'AND o.processingstatus LIKE "'.$qProcessingStatus.'%" ';
+		}
+		if($qDateLastModified1){
+			if($qDateLastModified2){
+				$sqlWhere .= 'AND CAST(o.datelastmodified AS DATE) BETWEEN "'.$qDateLastModified1.'" AND "'.$qDateLastModified2.'" ';
+			}
+			else{
+				$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qDateLastModified2.'" ';
+			}
+		}
+				
+		$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences WHERE collid = '.$this->collId.' ';
+		$rs = $this->query($sql);
+		if($r = $rs->fetch_object()){
+			$recCnt = $r->reccnt;
+		}
+		if($recCnt){
+			adsfds
+		}
+		return $recCnt;
+	}
+	
 	public function getOccurMap(){
-		$this->occurrenceMap = $this->getOccurArr();
-		$this->setImages();
-		$this->setDeterminations();
+		if(!$this->occurrenceMap && $this->occId){
+			$this->setOccurArr();
+			$this->setImages();
+			$this->setDeterminations();
+		}
 		return $this->occurrenceMap;
 	}
 	
-	private function getOccurArr($oid = 0){
+	private function setOccurArr(){
 		$retArr = Array();
-		$sql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
-			'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
-			'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
-			'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
-			'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-			'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-			'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
-			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
-			'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
-			'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
-			'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, o.dateLastModified '.
-			'FROM omoccurrences o '.
-			'WHERE o.occid = '.($oid?$oid:$this->occId);
+		$sql = $this->occSql.'WHERE o.occid = '.$this->occId;
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -97,7 +149,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		$rs->close();
-		return $retArr;
+		$this->occurrenceMap = $retArr;
 	}
 
 	private function setImages(){

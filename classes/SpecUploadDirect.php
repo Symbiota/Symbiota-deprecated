@@ -79,8 +79,14 @@ class SpecUploadDirect extends SpecUploadManager {
 							$value = $row[$sourceField["field"]];
 							$value = $this->cleanString($value);
 							$value = $this->encodeString($value);
-							if($sourceField["type"] == "date"){
-								if($datetime = strtotime($value)){
+							$type = (array_key_exists('type',$sourceField)?$sourceField['type']:'');
+							$size = (array_key_exists("size",$sourceField)?$sourceField['size']:0);
+							
+							if($type == "date"){
+								if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)){
+									$sqlInsertValues .= ',"'.$value.'"';
+								} 
+								elseif($datetime = strtotime($value)){
 									$value = date('Y-m-d H:i:s',$datetime);
 									$sqlInsertValues .= ",\"".$value."\"";
 								}
@@ -88,7 +94,7 @@ class SpecUploadDirect extends SpecUploadManager {
 									$sqlInsertValues .= ",null";
 								}
 							}
-							elseif($sourceField["type"] == "numeric"){
+							elseif($type == "numeric"){
 								if(is_numeric($value)){
 									$sqlInsertValues .= ",".$value;
 								}
@@ -97,7 +103,7 @@ class SpecUploadDirect extends SpecUploadManager {
 								}
 							}
 							else{
-								if(array_key_exists("size",$sourceField) && strlen($value) > $sourceField["size"]){
+								if($size && strlen($value) > $size){
 									$value = substr($value,0,$size);
 								}
 								if($value){

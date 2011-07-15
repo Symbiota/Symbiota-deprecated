@@ -86,6 +86,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 					}
         		}
 			}
+			$this->conn->query('CALL UpdateCollectionStats('.$this->collId.')');
 		}
    		closedir($imgFH);
 	}
