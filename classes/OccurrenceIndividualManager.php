@@ -164,14 +164,15 @@ class OccurrenceIndividualManager {
 	public function getChecklists($uRights){
 		$returnArr = Array();
 		//Get all public checklist names
-		$sql = "SELECT DISTINCT c.name, c.clid ".
-			"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
-			"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-			"WHERE c.Access = 'public' ";
-		if(array_key_exists("ClAdmin",$uRights)){
-			$sql .= "AND c.clid IN(".implode(",",$uRights["ClAdmin"]).") ";
+		$sqlWhere = '';
+		if(array_key_exists('SuperAdmin',$uRights)){
+			$sqlWhere .= "OR Access = 'public' ";
 		}
-		$sql .= "ORDER BY c.Name";
+		if(array_key_exists("ClAdmin",$uRights)){
+			$sqlWhere .= "OR clid IN(".implode(",",$uRights["ClAdmin"]).") ";
+		}
+		$sql = 'SELECT name, clid '.
+			'FROM fmchecklists '.substr($sqlWhere,2).' ORDER BY c.Name';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArr[$row->clid] = $row->name;

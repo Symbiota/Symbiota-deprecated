@@ -240,18 +240,24 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			                    </div>
 							</td>
 							<td colspan='3'>
-								<?php if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ ?>
-								<div style="float:right;" title="Edit Occurrence Record">
-									<a href="editor/occurrenceeditor.php?occid=<?php echo $occId; ?>" target="_blank">
-										<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
-									</a>
-								</div>
-								<?php if($collManager->getClName() && $_REQUEST["targettid"]){ ?>
-								<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
-									<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
-								</div>
-								<?php } ?>
-								<?php } ?>
+								<?php 
+								if($isEditor || ($symbUid && $symbUid == $fieldArr['observeruid'])){ 
+									?>
+									<div style="float:right;" title="Edit Occurrence Record">
+										<a href="editor/occurrenceeditor.php?occid=<?php echo $occId; ?>" target="_blank">
+											<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" />
+										</a>
+									</div>
+									<?php 
+								} 
+								if($collManager->getClName() && $_REQUEST["targettid"]){ 
+									?>
+									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+										<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
+									</div>
+									<?php 
+								}
+								?>
 								<div style="float:left;">
 									<a target='_blank' href='../taxa/index.php?taxon=<?php echo $fieldArr["sciname"];?>'>
 										<span style='font-style:italic;' title='General Species Information'>
