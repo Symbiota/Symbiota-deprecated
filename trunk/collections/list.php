@@ -86,6 +86,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			}
 			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
+			return false;
 		}
 	</script>
 </head>
@@ -288,7 +289,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			            <tr>
 			            	<td colspan='3'>
 					            <b>
-					            	<a href="#" onclick="openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>)">
+					            	<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>);">
 				            			Full Record Details
 				            		</a>
 				            	</b>

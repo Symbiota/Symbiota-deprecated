@@ -128,7 +128,7 @@ class SpecProcessorManager {
 		if(!$occId && $this->createNewRec){
 			//Records does not exist, create a new one to which image will be linked
 			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
-				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unparsed")';
+				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
 			} 

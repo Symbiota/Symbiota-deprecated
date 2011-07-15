@@ -393,11 +393,11 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					</div>
 					<?php 
 				}
-				if($occArr['dynamicproperties']){ 
+				if($occArr['verbatimattributes']){ 
 					?>
 					<div style="clear:both;">
 						<b>Description:</b> 
-						<?php echo $occArr['dynamicproperties']; ?>
+						<?php echo $occArr['verbatimattributes']; ?>
 					</div>
 					<?php 
 				}

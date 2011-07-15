@@ -56,7 +56,7 @@ class OccurrenceIndividualManager {
     		'o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality, '.
     		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
 			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
-			'o.georeferenceremarks, IFNULL(o.dynamicproperties,o.attributes) AS dynamicproperties, '.
+			'o.georeferenceremarks, verbatimattributes, '.
 			'o.typestatus, o.dbpk, o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
 			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, observeruid '.
 			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';

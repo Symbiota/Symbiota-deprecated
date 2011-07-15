@@ -369,11 +369,15 @@ class DataLoader{
 									$sqlValues .= ",".$valueStr;
 									break;
 								case "date":
-									if(($dateStr = strtotime($valueStr))){
-										$sqlValues .= ",\"".date('Y-m-d H:i:s', $dateStr)."\"";
-									} 
+									if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $valueStr)){
+										$sqlValues .= ',"'.$valueStr.'"';
+										echo 'Date: '.$valueStr;
+									}
+									elseif(($dateStr = strtotime($valueStr))){
+										$sqlValues .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
+									}
 									else{
-										$sqlValues .= ",\"\"";
+										$sqlValues .= ',NULL';
 									}
 									break;
 								default:	//string
