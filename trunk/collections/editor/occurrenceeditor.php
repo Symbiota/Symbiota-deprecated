@@ -134,7 +134,7 @@ if($symbUid){
 			<?php 
 		}
 		else{
-			echo '<div style="float:right;cursor:pointer;" onclick="toggle(\'querydiv\')">Record Search</div>';
+			//echo '<div style="float:right;cursor:pointer;" onclick="toggle(\'querydiv\')">Record Search</div>';
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			if($statusStr){
 				?>
