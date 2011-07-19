@@ -95,6 +95,14 @@ function verifyFullformSciName(){
 	snXmlHttp.send(null);
 } 
 
+function submitQueryForm(qryLimit,qryCnt){
+	var f = document.queryform;
+	f.occindex.value = qryLimit;
+	f.qrycnt.value = qryCnt;
+	f.submit();
+	return false;
+}
+
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){

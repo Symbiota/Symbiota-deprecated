@@ -80,51 +80,91 @@ class OccurrenceEditorManager {
 		return $this->collMap;
 	}
 	
-	public function queryOccurrences($postArr,$occIndex=0){
+	public function queryOccurrences($postArr,$occIndex=0,$qryCnt=0){
 		$recCnt = 0;
+		if($qryCnt) $recCnt = $qryCnt;
 		$qIdentifier = $postArr['q_identifier'];
 		$qRecordedBy = $postArr['q_recordedby'];
-		$qRecordNumber1 = $postArr['q_recordnumber1'];
-		$qRecordNumber2 = $postArr['q_recordnumber2'];
+		$qRecordNumber = $postArr['q_recordnumber'];
 		$qEnteredBy = $postArr['q_enteredby'];
 		$qProcessingStatus = $postArr['q_processingstatus'];
-		$qDateLastModified1 = $postArr['q_datelastmodified1'];
-		$qDateLastModified2 = $postArr['q_datelastmodified2'];
+		$qDateLastModified = $postArr['q_datelastmodified'];
 		
 		$sqlWhere = '';
+		$sqlOrderBy = '';
 		if($qIdentifier){
-			$sqlWhere .= 'AND (o.catalogNumber = "'.$qIdentifier.'" OR o.occurrenceId = "'.$qIdentifier.'" OR o.occid = "'.$qIdentifier.'") ';
+			$iArr = explode(',',$qIdentifier);
+			$iBetweenFrag = array();
+			$iInFrag = array();
+			foreach($iArr as $v){
+				if($p = strpos($v,' - ')){
+					$iBetweenFrag[] = 'o.catalogNumber BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3);
+					$iBetweenFrag[] = 'o.occurrenceId BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3);
+				}
+				else{
+					$iInFrag[] = $v;
+				}
+			}
+			$iWhere = '';
+			if($iBetweenFrag){
+				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
+			}
+			if($iInFrag){
+				$iWhere .= 'OR o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") ';
+			}
+			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
+			$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId';
 		}
 		if($qRecordedBy){
 			$sqlWhere .= 'AND o.recordedby LIKE "%'.$qRecordedBy.'%" ';
+			$sqlOrderBy .= ',o.recordnumber';
 		}
-		if($qRecordNumber1){
-			if($qRecordNumber2){
-				$sqlWhere .= 'AND cast(o.recordnumber as unsigned) BETWEEN '.$qRecordNumber1.' AND '.$qRecordNumber2.' ';
+		if($qRecordNumber){
+			$rnArr = explode(',',$qRecordNumber);
+			$rnBetweenFrag = array();
+			$rnInFrag = array();
+			foreach($rnArr as $v){
+				if($p = strpos($v,' - ')){
+					$rnBetweenFrag[] = 'o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'"';
+					$rnBetweenFrag[] = 'o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'"';
+				}
+				else{
+					$rnInFrag[] = $v;
+				}
 			}
-			else{
-				$sqlWhere .= 'AND o.recordnumber = "'.$qRecordNumber2.'" ';
+			$rnWhere = '';
+			if($rnBetweenFrag){
+				$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
 			}
+			if($rnInFrag){
+				$rnWhere .= 'OR o.recordnumber IN("'.implode('","',$rnInFrag).'") ';
+			}
+			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 		}
 		if($qProcessingStatus){
 			$sqlWhere .= 'AND o.processingstatus LIKE "'.$qProcessingStatus.'%" ';
 		}
-		if($qDateLastModified1){
-			if($qDateLastModified2){
-				$sqlWhere .= 'AND CAST(o.datelastmodified AS DATE) BETWEEN "'.$qDateLastModified1.'" AND "'.$qDateLastModified2.'" ';
-			}
-			else{
-				$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qDateLastModified2.'" ';
-			}
+		if($qDateLastModified){
+			$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qDateLastModified.'" ';
+			$sqlOrderBy .= ',o.datelastmodified';
 		}
-				
-		$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences WHERE collid = '.$this->collId.' ';
-		$rs = $this->query($sql);
-		if($r = $rs->fetch_object()){
-			$recCnt = $r->reccnt;
-		}
-		if($recCnt){
-			//adsfds
+		if($sqlWhere){
+			$sqlWhere = 'WHERE o.collid = '.$this->collId.' '.$sqlWhere;
+			if(!$recCnt){
+				$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
+				//echo '<div>'.$sql.'</div>';
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_object()){
+					$recCnt = $r->reccnt;
+				}
+			}
+			if($recCnt){
+				if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
+				$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
+				$this->setOccurArr($sqlWhere);
+				$this->setImages();
+				$this->setDeterminations();
+			}
 		}
 		return $recCnt;
 	}
@@ -138,9 +178,15 @@ class OccurrenceEditorManager {
 		return $this->occurrenceMap;
 	}
 	
-	private function setOccurArr(){
+	private function setOccurArr($sqlWhere = ''){
 		$retArr = Array();
-		$sql = $this->occSql.'WHERE o.occid = '.$this->occId;
+		$sql = '';
+		if($sqlWhere){
+			$sql = $this->occSql.$sqlWhere;
+		}
+		else{
+			$sql = $this->occSql.'WHERE o.occid = '.$this->occId;
+		}
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -149,6 +195,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		$rs->close();
+		if(!$this->occId) $this->occId = $retArr['occid']; 
 		$this->occurrenceMap = $retArr;
 	}
 

@@ -8,13 +8,12 @@ $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $gotoMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:1;
-$carryLoc = array_key_exists('carryloc',$_REQUEST)?$_REQUEST['carryloc']:0;
-$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
+$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:false;
+$qryCnt = array_key_exists('qrycnt',$_REQUEST)&&$_REQUEST['qrycnt']?$_REQUEST['qrycnt']:false;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action){
-	$action = array_key_exists("gotonew",$_REQUEST)?$_REQUEST["gotonew"]:"";
+	$action = array_key_exists('gotonew',$_REQUEST)?'gotonew':'';
 }
-
 $occManager = new OccurrenceEditorManager();
 if($occId) $occManager->setOccId($occId); 
 if($collId) $occManager->setCollId($collId);
@@ -27,6 +26,12 @@ if($symbUid){
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 		$isEditor = 1;
 	}
+	if($occIndex !== false && $isEditor){
+		//Query form has been submitted
+		$qryCnt = $occManager->queryOccurrences($_REQUEST,$occIndex,$qryCnt);
+		$occId = $occManager->getOccId();
+		$occArr = $occManager->getOccurMap();
+	}
 	if($action){
 		if(!$isEditor && $occManager->getObserverUid() == $symbUid){
 			//User is the one who created record, thus they are an editor
@@ -36,10 +41,7 @@ if($symbUid){
 			$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		}
 		if($isEditor){
-			if($action == 'Query Records'){
-				$occArr = $occManager->queryOccurrences($_POST,$occIndex);
-			}
-			elseif($action == 'Delete Occurrence'){
+			if($action == 'Delete Occurrence'){
 				$statusStr = $occManager->deleteOccurrence($occId);
 				if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
 			}
@@ -56,8 +58,8 @@ if($symbUid){
 					header('Location: ../individual/index.php?occid='.$occId);
 				}
 			}
-			elseif($action == "Go to New Occurrence Record"){
-				if($carryLoc){
+			elseif($action == "gotonew"){
+				if(array_key_exists('carryloc',$_REQUEST)){
 					$occArr = $occManager->carryOverValues($_REQUEST);
 				}
 				$occId = 0;
@@ -93,6 +95,32 @@ if($symbUid){
 	if($occId && !$occArr){
 		$occArr = $occManager->getOccurMap();
 	}
+
+	$navStr = '';
+	if($qryCnt !== false){
+		$navStr = '<b>';
+		if($qryCnt === 0){
+			$navStr .= 'Search returned 0 records';
+		}
+		else{
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(0,'.$qryCnt.');">';
+			$navStr .= '|&lt;';
+			if($occIndex > 0) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-1).','.$qryCnt.');">';
+			$navStr .= '&lt;&lt;';
+			if($occIndex > 0) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;| '.($occIndex + 1).' of '.$qryCnt.' |&nbsp;&nbsp;';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+1).','.$qryCnt.');">';
+			$navStr .= '&gt;&gt;';
+			if($occIndex<$qryCnt-1) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($qryCnt-1).','.$qryCnt.');">';
+			$navStr .= '&gt;|';
+			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
+		}
+		$navStr .= '</b>';
+	}
 }
 ?>
 <html>
@@ -113,7 +141,6 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
 </head>
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($collections_editor_occurrenceeditorMenu)?$collections_individual_occurrenceeditorMenu:false);
 	include($serverRoot.'/header.php');
@@ -134,7 +161,15 @@ if($symbUid){
 			<?php 
 		}
 		else{
-			//echo '<div style="float:right;cursor:pointer;" onclick="toggle(\'querydiv\')">Record Search</div>';
+			/*
+			?>
+			<div style="float:right;">
+				<div style="cursor:pointer;" onclick="toggle('querydiv')">
+					Search / Filter
+				</div>
+			</div>
+			<?php
+			*/ 
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			if($statusStr){
 				?>
@@ -158,7 +193,7 @@ if($symbUid){
 								Go to <a href="../individual/index.php?occid=<?php echo $occManager->getOccId(); ?>">Occurrence Display Page</a>
 							</div>
 							<?php 
-						} 
+						}
 						?>
 					</fieldset>
 				</div>
@@ -195,58 +230,69 @@ if($symbUid){
 					<?php 
 				}
 				else{
+					$qIdentifier = (array_key_exists('q_identifier',$_POST)?$_POST['q_identifier']:'');
+					$qRecordedBy = (array_key_exists('q_recordedby',$_POST)?$_POST['q_recordedby']:'');
+					$qRecordNumber = (array_key_exists('q_recordnumber',$_POST)?$_POST['q_recordnumber']:'');
+					$qEnteredBy = (array_key_exists('q_enteredby',$_POST)?$_POST['q_enteredby']:'');
+					$qProcessingStatus = (array_key_exists('q_processingstatus',$_POST)?$_POST['q_processingstatus']:'');
+					$qDateLastModified = (array_key_exists('q_datelastmodified',$_POST)?$_POST['q_datelastmodified']:'');
 					?>
-					<div id="querydiv" style="display:none;">
-						<form name="queryform" action="occurrenceeditor.php" method="post">
+					<div id="querydiv" style="display:<?php echo (!$occId&&$action!='gotonew'?'block':'none'); ?>;">
+						<form name="queryform" action="occurrenceeditor.php" method="get">
 							<fieldset style="padding:5px;">
 								<legend><b>Record Search Form</b></legend>
 								<div style="float:right;">
-									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-									<input type="submit" name="submitaction" value="Query Records" />
+									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+									<input type="hidden" name="occindex" value="0" />
+									<input type="hidden" name="qrycnt" value="" />
+									<input type="submit" name="submitaction" value="Query Records" /><br/>
+									<input type="reset" name="reset" value="Reset Form" />
 								</div>
 								<div style="float:left;margin:5px;">
 									Identifier: 
-									<input type="text" name="q_identifier" value="<?php echo (array_key_exists('q_identifier',$_POST)?$q_identifier:''); ?>" />
+									<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+										<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
+									</span>
 									<span style="margin-left:10px;">Collector:</span> 
-									<input type="text" name="q_recordedby" value="<?php echo (array_key_exists('q_recordedby',$_POST)?$q_recordedBy:''); ?>" />
+									<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
 									<span style="margin-left:10px;">Number:</span>
-									<input type="text" name="q_recordnumber1" value="<?php echo (array_key_exists('q_recordnumber1',$_POST)?$q_recordNumber1:''); ?>" style="width:60px;" /> -
-									<input type="text" name="q_recordnumber2" value="<?php echo (array_key_exists('q_recordnumber2',$_POST)?$q_recordNumber2:''); ?>" style="width:60px" />
+									<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+										<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
+									</span>
 								</div>
 								<div style="clear:both;margin:5px;">
 									Entered by: 
-									<input type="text" name="q_enteredby" value="<?php echo (array_key_exists('q_enteredby',$_POST)?$q_enteredBy:''); ?>" />
+									<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
 									<span style="margin-left:10px;">Status:</span> 
 									<select name="q_processingstatus">
-										<?php 
-										$pStatus = (array_key_exists('q_processingstatus',$_POST)?$_POST['q_processingstatus']:'');
-										?>
 										<option value=''>All Records</option>
 										<option>-------------------</option>
-										<option <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>
+										<option <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
 											unprocessed
 										</option>
-										<option <?php echo ($pStatus=='preparsed'?'SELECTED':''); ?>>
+										<option <?php echo ($qProcessingStatus=='preparsed'?'SELECTED':''); ?>>
 											preparsed
 										</option>
-										<option <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
+										<option <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
 											reviewed
 										</option>
-										<option <?php echo ($pStatus=='closed'?'SELECTED':''); ?>>
+										<option <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
 											closed
 										</option>
 									</select>
 									<span style="margin-left:10px;">Date entered:</span> 
-									<input type="text" name="q_datelastmodified1" value="<?php echo (array_key_exists('q_datelastmodified1',$_POST)?$q_datelastModified1:''); ?>" style="width:60px" /> -
-									<input type="text" name="q_datelastmodified2" value="<?php echo (array_key_exists('q_datelastmodified2',$_POST)?$q_q_datelastModified2:''); ?>" style="width:60px" />
+									<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:120px" />
 								</div>
 							</fieldset>
 						</form>
 					</div>
 					<?php 
-					if($occId || $action == 'newrecord'){
+					if($occId || $action == 'gotonew'){
+						if($navStr){
+							echo '<div style="float:right;">'.$navStr.'</div>'."\n";
+						}
 						?>
-						<div id="occedittabs" style="">
+						<div id="occedittabs" style="clear:both;">
 							<ul>
 								<li>
 									<a href="#occdiv" <?php echo (!$tabTarget||$tabTarget=='occdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
@@ -844,7 +890,21 @@ if($symbUid){
 										<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 										<?php if($occId){ ?>
 											<div style="margin:15px 0px 20px 30px;">
-												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" /><br/>
+												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" />
+												<?php 
+												if($occIndex !== false){
+													?>
+													<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+													<input type="hidden" name="qrycnt" value="<?php echo $qryCnt; ?>" />
+													<input type="hidden" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
+													<input type="hidden" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
+													<input type="hidden" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" />
+													<input type="hidden" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
+													<input type="hidden" name="q_processingstatus" value="<?php echo $qProcessingStatus; ?>" />
+													<input type="hidden" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" />
+													<?php 
+												}
+												?>
 											</div>
 											<div style="width:250px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
 												<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
@@ -1436,7 +1496,10 @@ if($symbUid){
 							?>
 						</div>
 						<?php
-					} 
+						if($navStr){
+							echo '<div style="float:right;">'.$navStr.'</div>';
+						}
+					}
 				}
 			}
 			else{
