@@ -12,7 +12,8 @@ $(document).ready(function() {
 				statusObj.style.display = "none";
 			}
 			return true;
-		}
+		},
+		selected: tabTarget
 	});
 
 	$("#ffsciname").autocomplete({ 
@@ -25,26 +26,6 @@ $(document).ready(function() {
 	},
 	{ minLength: 3, autoFocus: true });
 
-	//Determination add form
-	$("#dafsciname").autocomplete({ 
-		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) { 
-			pauseSubmit = true;
-			verifyDetSciName(document.detaddform);
-		}
-	},
-	{ minLength: 3, autoFocus: true });
-	
-	//Determination edit form
-	$("#defsciname").autocomplete({ 
-		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) { 
-			pauseSubmit = true;
-			verifyDetSciName(document.deteditform);
-		}
-	},
-	{ minLength: 3, autoFocus: true });
-	
 	//Misc pulldown fields
 	$("#ffcountry").autocomplete( { source: countryArr },{ minLength: 1, autoFocus: true, matchContains: false } );
 
@@ -62,6 +43,28 @@ $(document).ready(function() {
 	},{ minLength: 1, autoFocus: true, matchContains: false }
 	);
 });
+
+function initDetAddAutocomplete(){
+	$("#dafsciname").autocomplete({ 
+		source: "rpc/getspeciessuggest.php",
+		change: function(event, ui) { 
+			pauseSubmit = true;
+			verifyDetSciName(document.detaddform);
+		}
+	},
+	{ minLength: 3, autoFocus: true });
+}
+
+function initDetEditAutocomplete(inputName){
+	$("#"+inputName).autocomplete({ 
+		source: "rpc/getspeciessuggest.php",
+		change: function(event, ui) { 
+			pauseSubmit = true;
+			verifyDetSciName(document.deteditform);
+		}
+	},
+	{ minLength: 3, autoFocus: true });
+}
 
 function verifyFullformSciName(){
 	var f = document.fullform;
@@ -404,25 +407,25 @@ function lookForDups(f){
 	document.getElementById("dupspan").style.display = "block";
 
 	//Parse last name of collector
-	var lastName = "";
-	var lastNameArr = collName.split(",");
-	lastNameArr = lastNameArr[0].split(";");
-	lastNameArr = lastNameArr[0].split("&");
-	lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
-	if(lastNameArr.length == 1){
-		lastName = lastNameArr[0];
-	}
-	else if(lastNameArr.length > 1){
-		lastName = lastNameArr[1];
-	}
+	//var lastName = "";
+	//var lastNameArr = collName.split(",");
+	//lastNameArr = lastNameArr[0].split(";");
+	//lastNameArr = lastNameArr[0].split("&");
+	//lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
+	//if(lastNameArr.length == 1){
+		//lastName = lastNameArr[0];
+	//}
+	//else if(lastNameArr.length > 1){
+		//lastName = lastNameArr[1];
+	//}
 	
 	//Check for matching records
 	dupXmlHttp = GetXmlHttpObject();
 	if(dupXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
+		alert ("Your browser does not support AJAX!");
   		return;
-  	}
-	var url = "rpc/querydups.php?cname=" + lastName + "&cnum=" + collNum;
+	}
+	var url = "rpc/querydups.php?cname=" + collName + "&cnum=" + collNum;
 	if(collDate) url = url + "&cdate=" + collDate;
 	dupXmlHttp.onreadystatechange=function(){
 		if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
@@ -460,9 +463,10 @@ function verifyFullForm(f){
 		alert("Collector field must have a value. Enter 'unknown' if needed.");
 		return false;
 	}
-	if(!verifyDate(f.eventdate)){
-		return false;
-	}
+	//if(!verifyDate(f.eventdate)){
+		//alert("Event date is invalid");
+		//return false;
+	//}
 	if(f.country.value == ""){
 		alert("Country field must have a value");
 		return false;

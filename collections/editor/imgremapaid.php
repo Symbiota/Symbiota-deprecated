@@ -10,7 +10,7 @@ $identifier = array_key_exists("identifier",$_REQUEST)?$_REQUEST["identifier"]:"
 $collector = array_key_exists("collector",$_REQUEST)?$_REQUEST["collector"]:""; 
 $collNumber = array_key_exists("collnum",$_REQUEST)?$_REQUEST["collnum"]:""; 
  
-$occManager = new OccurrenceEditorManager();
+$occManager = new OccurrenceEditorImages();
  
 ?>
 <html>

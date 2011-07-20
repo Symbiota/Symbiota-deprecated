@@ -5,7 +5,7 @@ include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
-$tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:'';
+$tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $gotoMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:1;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:false;
@@ -14,7 +14,16 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 if(!$action){
 	$action = array_key_exists('gotonew',$_REQUEST)?'gotonew':'';
 }
-$occManager = new OccurrenceEditorManager();
+$occManager;
+if(strpos($action,'Determination')){
+	$occManager = new OccurrenceEditorDeterminations();
+}
+elseif(strpos($action,'Image')){
+	$occManager = new OccurrenceEditorImages();
+}
+else{
+	$occManager = new OccurrenceEditorManager();
+}
 if($occId) $occManager->setOccId($occId); 
 if($collId) $occManager->setCollId($collId);
 $occArr = Array();
@@ -28,7 +37,7 @@ if($symbUid){
 	}
 	if($occIndex !== false && $isEditor){
 		//Query form has been submitted
-		$qryCnt = $occManager->queryOccurrences($_REQUEST,$occIndex,$qryCnt);
+		$qryCnt = $occManager->queryOccurrences($_POST,$occIndex,$qryCnt);
 		$occId = $occManager->getOccId();
 		$occArr = $occManager->getOccurMap();
 	}
@@ -86,7 +95,7 @@ if($symbUid){
 			elseif($action == "Delete Determination"){
 				$statusStr = $occManager->deleteDetermination($_REQUEST['detid']);
 			}
-			elseif($action == "Make Current"){
+			elseif($action == "Make Determination Current"){
 				$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
 				$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
 			}
@@ -137,6 +146,7 @@ if($symbUid){
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
+		var tabTarget = <?php echo $tabTarget; ?>;
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
 </head>
@@ -161,7 +171,6 @@ if($symbUid){
 			<?php 
 		}
 		else{
-			/*
 			?>
 			<div style="float:right;">
 				<div style="cursor:pointer;" onclick="toggle('querydiv')">
@@ -169,7 +178,6 @@ if($symbUid){
 				</div>
 			</div>
 			<?php
-			*/ 
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			if($statusStr){
 				?>
@@ -238,7 +246,7 @@ if($symbUid){
 					$qDateLastModified = (array_key_exists('q_datelastmodified',$_POST)?$_POST['q_datelastmodified']:'');
 					?>
 					<div id="querydiv" style="display:<?php echo (!$occId&&$action!='gotonew'?'block':'none'); ?>;">
-						<form name="queryform" action="occurrenceeditor.php" method="get">
+						<form name="queryform" action="occurrenceeditor.php" method="post">
 							<fieldset style="padding:5px;">
 								<legend><b>Record Search Form</b></legend>
 								<div style="float:right;">
@@ -295,7 +303,7 @@ if($symbUid){
 						<div id="occedittabs" style="clear:both;">
 							<ul>
 								<li>
-									<a href="#occdiv" <?php echo (!$tabTarget||$tabTarget=='occdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+									<a href="#occdiv"  style="margin:0px 20px 0px 20px;">
 										<?php
 										if($occId){
 											echo 'Occurrence Data';
@@ -308,19 +316,21 @@ if($symbUid){
 								</li>
 								<?php
 								if($occId && $isEditor){
+									$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'];
+									$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
 									?>
 									<li>
-										<a href="#determdiv" <?php echo ($tabTarget=='determdiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
-										Determination History
+										<a href="occurrenceeditordets.php?occid=<?php echo $occId.$detVars; ?>" style="margin:0px 20px 0px 20px;">
+											Determination History
 										</a>
 									</li>
 									<li>
-										<a href="#imagediv" <?php echo ($tabTarget=='imagediv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+										<a href="occurrenceeditorimages.php?occid=<?php echo $occId.$imgVars; ?>" style="margin:0px 20px 0px 20px;">
 											Images
 										</a>
 									</li>
 									<li>
-										<a href="#admindiv" <?php echo ($tabTarget=='admindiv'?'class="selected"':''); ?> style="margin:0px 20px 0px 20px;">
+										<a href="#admindiv" style="margin:0px 20px 0px 20px;">
 											Admin
 										</a>
 									</li>
@@ -883,6 +893,11 @@ if($symbUid){
 											</span>
 										</div>
 									</fieldset>
+									<?php 
+									if($navStr){
+										echo '<div style="float:right;">'.$navStr.'</div>';
+									}
+									?>
 									<div style="padding:10px;">
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="editedfields" value="" />
@@ -932,497 +947,6 @@ if($symbUid){
 							<?php
 							if($occId && $isEditor){
 								?>
-								<div id="determdiv" style="">
-									<div style="text-align:right;width:100%;">
-										<img style="border:0px;width:12px;cursor:pointer;" src="../../images/add.png" onclick="toggle('newdetdiv');" title="Add New Determination" />
-									</div>
-									<div id="newdetdiv" style="display:none;">
-										<form name="detaddform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetAddForm(this)">
-											<fieldset>
-												<legend><b>Add a New Determination</b></legend>
-												<div style='margin:3px;'>
-													<b>Identification Qualifier:</b>
-													<input type="text" name="identificationqualifier" title="e.g. cf, aff, etc" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Scientific Name:</b> 
-													<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" />
-													<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
-													<input type="hidden" name="family" value="" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Author:</b> 
-													<input type="text" name="scientificnameauthorship" style="width:200px;" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Determiner:</b> 
-													<input type="text" name="identifiedby" style="background-color:lightyellow;width:200px;" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Date:</b> 
-													<input type="text" name="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Reference:</b> 
-													<input type="text" name="identificationreferences" style="width:350px;" />
-												</div>
-												<div style='margin:3px;'>
-													<b>Notes:</b> 
-													<input type="text" name="identificationremarks" style="width:350px;" />
-												</div>
-												<div style='margin:15px;'>
-													<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-													<div style="float:left;">
-														<input type="submit" name="submitaction" value="Add New Determination" />
-													</div>
-													<div style="float:left;margin-left:30px;">
-														<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination <br/>
-														<input type="checkbox" name="remapimages" value="1" /> Remap images to new taxonomic name
-													</div>
-												</div>
-											</fieldset>
-										</form>
-									</div>
-									<div class="fieldset">
-										<div class="legend"><b>Determination History</b></div>
-										<?php
-										if(array_key_exists('dets',$occArr)){
-											$detArr = $occArr['dets'];
-											foreach($detArr as $detId => $detRec){
-												if(!array_key_exists('iscurrent',$detRec)){
-													?>
-													<div style="float:right;cursor:pointer;margin:10px;" onclick="toggle('editdetdiv-<?php echo $detId;?>');" title="Edit Determination">
-														<img style="border:0px;width:12px;" src="../../images/edit.png" />
-													</div>
-													<?php 
-												} 
-												?>
-												<div id="detdiv-<?php echo $detId;?>">
-													<div>
-														<?php 
-														if($detRec['identificationqualifier']) echo $detRec['identificationqualifier'].' ';
-														echo '<b><i>'.$detRec['sciname'].'</i></b> '.$detRec['scientificnameauthorship'];
-														if(array_key_exists('iscurrent',$detRec)){
-															echo '<span style="margin-left:10px;color:red;">CURRENT DETERMINATION</span>';	
-														}
-														?>
-													</div>
-													<div style='margin:3px 0px 0px 15px;'>
-														<b>Determiner:</b> <?php echo $detRec['identifiedby']; ?>
-														<span style="margin-left:40px;">
-															<b>Date:</b> <?php echo $detRec['dateidentified']; ?>
-														</span>
-													</div>
-													<?php 
-													if($detRec['identificationreferences']){
-														?>
-														<div style='margin:3px 0px 0px 15px;'>
-															<b>Reference:</b> <?php echo $detRec['identificationreferences']; ?>
-														</div>
-														<?php 
-													}
-													if($detRec['identificationremarks']){
-														?>
-														<div style='margin:3px 0px 0px 15px;'>
-															<b>Notes:</b> <?php echo $detRec['identificationremarks']; ?>
-														</div>
-														<?php 
-													}
-													?>
-												</div>
-												<?php if(!array_key_exists('iscurrent',$detRec)){ ?>
-												<div id="editdetdiv-<?php echo $detId;?>" style="display:none;">
-													<fieldset>
-														<legend><b>Edit Determination</b></legend>
-														<form name="deteditform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetEditForm(this);">
-															<div style='margin:3px;'>
-																<b>Identification Qualifier:</b>
-																<input type="text" name="identificationqualifier" value="<?php echo $detRec['identificationqualifier']; ?>" title="e.g. cf, aff, etc" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Scientific Name:</b> 
-																<input type="text" id="defsciname" name="sciname" value="<?php echo $detRec['sciname']; ?>" style="background-color:lightyellow;width:350;" />
-																<input type="hidden" id="deftidtoadd" name="tidtoadd" value="" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Author:</b> 
-																<input type="text" name="scientificnameauthorship" value="<?php echo $detRec['scientificnameauthorship']; ?>" style="width:200;" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Determiner:</b> 
-																<input type="text" name="identifiedby" value="<?php echo $detRec['identifiedby']; ?>" style="background-color:lightyellow;width:200;" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Date:</b> 
-																<input type="text" name="dateidentified" value="<?php echo $detRec['dateidentified']; ?>" style="background-color:lightyellow;" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Reference:</b> 
-																<input type="text" name="identificationreferences" value="<?php echo $detRec['identificationreferences']; ?>" style="width:350;" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Notes:</b> 
-																<input type="text" name="identificationremarks" value="<?php echo $detRec['identificationremarks']; ?>" style="width:350;" />
-															</div>
-															<div style='margin:3px;'>
-																<b>Sort Sequence:</b> 
-																<input type="text" name="sortsequence" value="<?php echo $detRec['sortsequence']; ?>" style="width:40px;" />
-															</div>
-															<div style='margin:3px;margin:15px;'>
-																<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-																<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
-																<input type="submit" name="submitaction" value="Submit Determination Edits" />
-															</div>
-														</form>
-														<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete this specimen determination?');">
-															<div style="padding:15px;background-color:lightblue;width:155px;margin:15px;">
-																<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-																<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
-																<input type="submit" name="submitaction" value="Delete Determination" />
-															</div>
-														</form>
-														<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to make this the most current determination?');">
-															<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
-																<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-																<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
-																<input type="submit" name="submitaction" value="Make Current" /><br/>
-																<input type="checkbox" name="remapimages" value="1" CHECKED /> Remap images to this taxonomic name
-															</div>
-														</form>
-													</fieldset>
-												</div>
-												<?php } ?>
-												<hr style='margin:10px 0px 10px 0px;' />
-												<?php 
-											}
-										}
-										else{
-											?>
-											<div style="font-weight:bold;margin:10px 0px 20px 20px;font-size:120%;">There are no historic annotations for this specimen</div>
-											<?php 
-										}
-										?>
-									</div>
-								</div>
-								<div id="imagediv" style="">
-									<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
-										<img style="border:0px;width:12px;" src="../../images/add.png" />
-									</div>
-									<div id="addimgdiv" style="display:none;">
-										<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
-											<fieldset>
-												<legend><b>Add a New Image</b></legend>
-												<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
-													<div class="targetdiv" style="display:block;">
-														<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
-															Select an image file located on your computer that you want to upload:
-														</div>
-												    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-														<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
-														<div>
-															<input name='imgfile' type='file' size='70'/>
-														</div>
-														<div style="margin-left:10px;">
-															<input type="checkbox" name="createlargeimg" value="1" /> Create a large version of image, when applicable
-														</div>
-														<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
-														<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-															Link to External Image
-														</div>
-													</div>
-													<div class="targetdiv" style="display:none;">
-														<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
-															Enter a URL to an image already located on a web server:
-														</div>
-														<div>
-															<b>URL:</b> 
-															<input type='text' name='imgurl' size='70'/>
-														</div>
-														<div>
-															<b>Thumbnail URL:</b> 
-															<input type='text' name='tnurl' size='70'/>
-														</div>
-														<div>
-															<b>Large URL:</b> 
-															<input type='text' name='lgurl' size='70'/>
-														</div>
-														<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-															Upload Local Image
-														</div>
-													</div>
-												</div>
-												<div style="clear:both;margin:20px 0px 5px 10px;">
-													<b>Caption:</b> 
-													<input name="caption" type="text" size="40" value="" />
-												</div>
-												<div style='margin:0px 0px 5px 10px;'>
-													<b>Photographer:</b> 
-													<select name='photographeruid' name='photographeruid'>
-														<option value="">Select Photographer</option>
-														<option value="">---------------------------------------</option>
-														<?php
-															$pArr = $occManager->getPhotographerArr();
-															foreach($pArr as $id => $uname){
-																echo "<option value='".$id."' ".($id == $paramsArr["uid"]?"SELECTED":"").">";
-																echo $uname;
-																echo "</option>\n";
-															}
-														?>
-													</select>
-													<a href="#" onclick="toggle('imgaddoverride');return false;" title="Display photographer override field">
-														<img src="../../images/showedit.png" style="border:0px;width:13px;" />
-													</a>
-												</div>
-												<div id="imgaddoverride" style="margin:0px 0px 5px 10px;display:none;">
-													<b>Photographer (override):</b> 
-													<input name='photographer' type='text' style="width:300px;" maxlength='100'>
-													* Will override above selection
-												</div>
-												<div style="margin:0px 0px 5px 10px;">
-													<b>Notes:</b> 
-													<input name="notes" type="text" size="40" value="" />
-												</div>
-												<div style="margin:0px 0px 5px 10px;">
-													<b>Copyright:</b>
-													<input name="copyright" type="text" size="40" value="" />
-												</div>
-												<div style="margin:0px 0px 5px 10px;">
-													<b>Source Webpage:</b>
-													<input name="sourceurl" type="text" size="40" value="" />
-												</div>
-												<div style="margin:10px 0px 10px 20px;">
-													<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-													<input type="hidden" name="tid" value="<?php echo $occArr["tidinterpreted"]; ?>" />
-													<input type="hidden" name="institutioncode" value="<?php echo $collMap['institutioncode']; ?>" />
-													<input type="submit" name="submitaction" value="Submit New Image" />
-												</div>
-											</fieldset>
-										</form>
-									</div>
-									<div style="clear:both;">
-										<?php
-										if(array_key_exists("images",$occArr)){
-											?>
-											<table>
-											<?php 
-											$imagesArr = $occArr["images"];
-											foreach($imagesArr as $imgId => $imgArr){
-												?>
-												<tr>
-													<td style="width:45%;text-align:center;padding:20px;">
-														<?php
-														$imgUrl = $imgArr["url"];
-														$origUrl = $imgArr["origurl"];
-														$tnUrl = $imgArr["tnurl"];
-														if(array_key_exists("imageDomain",$GLOBALS)){
-															if(substr($imgUrl,0,1)=="/"){
-																$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-															}
-															if($origUrl && substr($origUrl,0,1)=="/"){
-																$origUrl = $GLOBALS["imageDomain"].$origUrl;
-															}
-															if($tnUrl && substr($tnUrl,0,1)=="/"){
-																$tnUrl = $GLOBALS["imageDomain"].$tnUrl;
-															}
-														}
-														?>
-														<a href="<?php echo $imgUrl;?>">
-															<img src="<?php echo $imgUrl;?>" style="width:90%;" title="<?php echo $imgArr["caption"]; ?>" />
-														</a>
-														<?php 
-														if($origUrl){
-															echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
-														}
-														?>
-													</td>
-													<td style="text-align:left;padding:10px;">
-														<div style="float:right;cursor:pointer;" onclick="toggle('img<?php echo $imgId; ?>editdiv');" title="Edit Image MetaData">
-															<img style="border:0px;width:12px;" src="../../images/edit.png" />
-														</div>
-														<div style="margin-top:30px;">
-															<div>
-																<b>Caption:</b> 
-																<?php echo $imgArr["caption"]; ?>
-															</div>
-															<div>
-																<b>Photographer:</b> 
-																<?php
-																if($imgArr["photographer"]){
-																	echo $imgArr["photographer"];
-																}
-																else if($imgArr["photographeruid"]){
-																	$pArr = $occManager->getPhotographerArr();
-																	echo $pArr[$imgArr["photographeruid"]];
-																} 
-																?>
-															</div>
-															<div>
-																<b>Notes:</b> 
-																<?php echo $imgArr["notes"]; ?>
-															</div>
-															<div>
-																<b>Copyright:</b>
-																<?php echo $imgArr["copyright"]; ?>
-															</div>
-															<div>
-																<b>Source Webpage:</b>
-																<a href="<?php echo $imgArr["sourceurl"]; ?>">
-																	<?php echo $imgArr["sourceurl"]; ?>
-																</a>
-															</div>
-															<div>
-																<b>Web URL: </b>
-																<a href="<?php echo $imgArr["url"]; ?>">
-																	<?php echo $imgArr["url"]; ?>
-																</a>
-															</div>
-															<div>
-																<b>Large Image URL: </b>
-																<a href="<?php echo $imgArr["origurl"]; ?>">
-																	<?php echo $imgArr["origurl"]; ?>
-																</a>
-															</div>
-															<div>
-																<b>Thumbnail URL: </b>
-																<a href="<?php echo $imgArr["tnurl"]; ?>">
-																	<?php echo $imgArr["tnurl"]; ?>
-																</a>
-															</div>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td colspan="2">
-														<div id="img<?php echo $imgId; ?>editdiv" style="display:none;clear:both;">
-															<form name="img<?php echo $imgId; ?>editform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgEditForm(this);">
-																<fieldset>
-																	<legend><b>Edit Image Data</b></legend>
-																	<div>
-																		<b>Caption:</b><br/> 
-																		<input name="caption" type="text" value="<?php echo $imgArr["caption"]; ?>" style="width:300px;" />
-																	</div>
-																	<div>
-																		<b>Photographer:</b><br/> 
-																		<select name='photographeruid' name='photographeruid'>
-																			<option value="">Select Photographer</option>
-																			<option value="">---------------------------------------</option>
-																			<?php
-																			$pArr = $occManager->getPhotographerArr();
-																			foreach($pArr as $id => $uname){
-																				echo "<option value='".$id."' ".($id == $imgArr["photographeruid"]?"SELECTED":"").">";
-																				echo $uname;
-																				echo "</option>\n";
-																			}
-																			?>
-																		</select>
-																		<a href="#" onclick="toggle('imgeditoverride<?php echo $imgId; ?>');return false;" title="Display photographer override field">
-																			<img src="../../images/showedit.png" style="border:0px;width:13px;" />
-																		</a>
-																	</div>
-																	<div id="imgeditoverride<?php echo $imgId; ?>" style="display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
-																		<b>Photographer (override):</b><br/> 
-																		<input name='photographer' type='text' value="<?php echo $imgArr["photographer"]; ?>" style="width:300px;" maxlength='100'>
-																		* Warning: value will override above selection
-																	</div>
-																	<div>
-																		<b>Notes:</b><br/>
-																		<input name="notes" type="text" value="<?php echo $imgArr["notes"]; ?>" style="width:90%;" />
-																	</div>
-																	<div>
-																		<b>Copyright:</b><br/>
-																		<input name="copyright" type="text" value="<?php echo $imgArr["copyright"]; ?>" style="width:90%;" />
-																	</div>
-																	<div>
-																		<b>Source Webpage:</b><br/>
-																		<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"]; ?>" style="width:90%;" />
-																	</div>
-																	<div>
-																		<b>Web URL: </b><br/>
-																		<input name="url" type="text" value="<?php echo $imgArr["url"]; ?>" style="width:90%;" />
-																		<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
-																			<div style="margin-left:10px;">
-																				<input type="checkbox" name="renameweburl" value="1" />
-																				Rename web image file on server to match above edit
-																			</div>
-																			<input name='oldurl' type='hidden' value='<?php echo $imgArr["url"];?>' />
-																		<?php } ?>
-																	</div>
-																	<div>
-																		<b>Large Image URL: </b><br/>
-																		<input name="origurl" type="text" value="<?php echo $imgArr["origurl"]; ?>" style="width:90%;" />
-																		<?php if(stripos($imgArr["origurl"],$imageRootUrl) === 0){ ?>
-																			<div style="margin-left:10px;">
-																				<input type="checkbox" name="renameorigurl" value="1" />
-																				Rename large image file on server to match above edit
-																			</div>
-																			<input name='oldorigurl' type='hidden' value='<?php echo $imgArr["origurl"];?>' />
-																		<?php } ?>
-																	</div>
-																	<div>
-																		<b>Thumbnail URL: </b><br/>
-																		<input name="tnurl" type="text" value="<?php echo $imgArr["tnurl"]; ?>" style="width:90%;" />
-																		<?php if(stripos($imgArr["tnurl"],$imageRootUrl) === 0){ ?>
-																			<div style="margin-left:10px;">
-																				<input type="checkbox" name="renametnurl" value="1" />
-																				Rename thumbnail file on server to match above edit
-																			</div>
-																			<input name='oldtnurl' type='hidden' value='<?php echo $imgArr["tnurl"];?>' />
-																		<?php } ?>
-																	</div>
-																	<div style="margin-top:10px;">
-																		<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-																		<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-																		<input type="submit" name="submitaction" value="Submit Image Edits" />
-																	</div>
-																</fieldset>
-															</form>
-															<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
-																<fieldset>
-																	<legend><b>Delete Image</b></legend>
-																	<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-																	<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-																	<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server 
-																	<div style="margin-left:20px;">
-																		(Note: leaving unchecked removes image from database w/o removing from server)
-																	</div>
-																	<input type="submit" name="submitaction" value="Delete Image" />
-																</fieldset>
-															</form>
-															<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
-																<fieldset>
-																	<legend><b>Remap to Another Specimen</b></legend>
-																	<div>
-																		<b>Occurrence Record #:</b> 
-																		<input id="imgoccid" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
-																		<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid')">
-																			Open Occurrence Linking Aid
-																		</span>
-																	</div>
-																	<div style="margin-left:20px;">
-																		* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
-																		<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-																		<input type="submit" name="submitaction" value="Remap Image" />
-																	</div>
-																</fieldset>
-															</form>
-														</div>
-														<hr/>
-													</td>
-												</tr>
-												<?php 
-											}
-											?>
-											</table>
-											<?php 
-										}
-										else{
-											?>
-											<h2>No images linked to this collection record.<br/>Click symbol to right to add an image.</h2>
-											<?php 
-										}
-										?>
-									</div>
-								</div>
 								<div id="admindiv" style="">
 									<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
 										<fieldset>
@@ -1444,7 +968,7 @@ if($symbUid){
 														One or more images are linked to this occurrence. 
 														Before this specimen can be deleted, images have to be deleted or disassociated 
 														with this occurrence record. Continuing will remove associations to 
-														the occurrence record being deleted but leave image in system linked to the scientific name.  
+														the occurrence record being deleted but leave image in system linked only to the scientific name.  
 													</div>
 													<div id="delimgappdiv" style="display:none;">
 														<span style="color:green;">Approved for deletion.</span>
@@ -1496,9 +1020,6 @@ if($symbUid){
 							?>
 						</div>
 						<?php
-						if($navStr){
-							echo '<div style="float:right;">'.$navStr.'</div>';
-						}
 					}
 				}
 			}

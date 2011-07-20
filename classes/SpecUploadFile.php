@@ -12,6 +12,10 @@ class SpecUploadFile extends SpecUploadManager{
  		set_time_limit(600);
 	}
 
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+	
 	public function analyzeFile(){
 	 	$this->readUploadParameters();
 		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
