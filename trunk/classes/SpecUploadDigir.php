@@ -23,7 +23,11 @@ class SpecUploadDigir extends SpecUploadManager {
  		set_time_limit(10000);
  	}
 
- 	public function uploadData($finalTransfer){
+	public function __destruct(){
+ 		parent::__destruct();
+	}
+ 	
+	public function uploadData($finalTransfer){
 	 	$this->readUploadParameters();
  		if($this->schemaName){
 			if(substr($this->schemaName,0,4) != "http"){
