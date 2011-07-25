@@ -442,7 +442,7 @@ class DataLoader{
 		$obserArr = Array();
 		while($row = $result->fetch_object()){
 			$collId = $row->collid;
-			echo "<option value='".$collId."' ".($collId==1?"SELECTED":"").">".$row->CollectionName."</option>";
+			echo "<option value='".$collId."' ".($collId==100||$collId==1000?"SELECTED":"").">".$row->CollectionName."</option>";
 		}
 		$this->conn->close();
 	}
