@@ -62,6 +62,7 @@ class OccurrenceEditorManager {
 				$rs = $this->conn->query($sql);
 				if($row = $rs->fetch_object()){
 					$this->collMap['collid'] = $row->collid;
+					!$this->collId = $row->collid;
 					$this->collMap['collectionname'] = $row->collectionname;
 					$this->collMap['institutioncode'] = $row->institutioncode;
 					$this->collMap['collectioncode'] = $row->collectioncode;
@@ -73,20 +74,28 @@ class OccurrenceEditorManager {
 		return $this->collMap;
 	}
 	
-	public function queryOccurrences($postArr,$occIndex=0,$qryCnt=0){
+	public function queryOccurrences($occIndex=0){
+		global $clientRoot;
 		$recCnt = 0;
-		if($qryCnt) $recCnt = $qryCnt;
-		$qIdentifier = $postArr['q_identifier'];
-		$qRecordedBy = $postArr['q_recordedby'];
-		$qRecordNumber = $postArr['q_recordnumber'];
-		$qEnteredBy = $postArr['q_enteredby'];
-		$qProcessingStatus = $postArr['q_processingstatus'];
-		$qDateLastModified = $postArr['q_datelastmodified'];
-		
+		$qryArr = array();
+		if(array_key_exists('q_identifier',$_POST)){
+			if($_POST['q_identifier']) $qryArr['id'] = $_POST['q_identifier'];
+			if($_POST['q_recordedby']) $qryArr['rb'] = $_POST['q_recordedby'];
+			if($_POST['q_recordnumber']) $qryArr['rn'] = $_POST['q_recordnumber'];
+			if($_POST['q_enteredby']) $qryArr['eb'] = $_POST['q_enteredby'];
+			if($_POST['q_processingstatus']) $qryArr['ps'] = $_POST['q_processingstatus'];
+			if($_POST['q_datelastmodified']) $qryArr['dm'] = $_POST['q_datelastmodified'];
+			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+		}
+		elseif(isset($_COOKIE["editorquery"])){
+			$qryArr = json_decode($_COOKIE["editorquery"],true);
+			$recCnt = $qryArr['rc'];
+		}
+
 		$sqlWhere = '';
 		$sqlOrderBy = '';
-		if($qIdentifier){
-			$iArr = explode(',',$qIdentifier);
+		if(array_key_exists('id',$qryArr)){
+			$iArr = explode(',',$qryArr['id']);
 			$iBetweenFrag = array();
 			$iInFrag = array();
 			foreach($iArr as $v){
@@ -108,17 +117,16 @@ class OccurrenceEditorManager {
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 			$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId';
 		}
-		if($qRecordedBy){
-			$sqlWhere .= 'AND o.recordedby LIKE "%'.$qRecordedBy.'%" ';
+		if(array_key_exists('rb',$qryArr)){
+			$sqlWhere .= 'AND o.recordedby LIKE "%'.$qryArr['rb'].'%" ';
 			$sqlOrderBy .= ',o.recordnumber';
 		}
-		if($qRecordNumber){
-			$rnArr = explode(',',$qRecordNumber);
+		if(array_key_exists('rn',$qryArr)){
+			$rnArr = explode(',',$qryArr['rn']);
 			$rnBetweenFrag = array();
 			$rnInFrag = array();
 			foreach($rnArr as $v){
 				if($p = strpos($v,' - ')){
-					$rnBetweenFrag[] = 'o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'"';
 					$rnBetweenFrag[] = 'o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'"';
 				}
 				else{
@@ -134,15 +142,21 @@ class OccurrenceEditorManager {
 			}
 			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 		}
-		if($qEnteredBy){
-			$sqlWhere .= 'AND o.recordEnteredBy = "'.$qEnteredBy.'" ';
+		if(array_key_exists('eb',$qryArr)){
+			$sqlWhere .= 'AND o.recordEnteredBy LIKE "'.$qryArr['eb'].'%" ';
 		}
-		if($qProcessingStatus){
-			$sqlWhere .= 'AND o.processingstatus LIKE "'.$qProcessingStatus.'%" ';
-		}
-		if($qDateLastModified){
-			$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qDateLastModified.'" ';
+		if(array_key_exists('dm',$qryArr)){
+			if($p = strpos($qryArr['dm'],' - ')){
+				$sqlWhere .= 'AND DATE(o.datelastmodified) BETWEEN "'.substr($qryArr['dm'],0,$p).'" AND "'.substr($qryArr['dm'],$p+3).'" ';
+			}
+			else{
+				$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qryArr['dm'].'" ';
+			}
+			
 			$sqlOrderBy .= ',o.datelastmodified';
+		}
+		if(array_key_exists('ps',$qryArr)){
+			$sqlWhere .= 'AND o.processingstatus LIKE "'.$qryArr['ps'].'%" ';
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE o.collid = '.$this->collId.' '.$sqlWhere;
@@ -153,6 +167,9 @@ class OccurrenceEditorManager {
 				if($r = $rs->fetch_object()){
 					$recCnt = $r->reccnt;
 				}
+				$rs->close();
+				$qryArr['rc'] = (int)$recCnt;
+				setCookie('editorquery',json_encode($qryArr),0,($clientRoot?$clientRoot:'/'));
 			}
 			if($recCnt){
 				if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
@@ -160,7 +177,8 @@ class OccurrenceEditorManager {
 				$this->setOccurArr($sqlWhere);
 			}
 		}
-		return $recCnt;
+
+		return $qryArr;
 	}
 	
 	public function getOccurMap(){

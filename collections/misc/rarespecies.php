@@ -28,8 +28,8 @@ if($editable){
 	<title>Rare, Threatened, Sensitive Species</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../../js/jquery-1.4.4.min.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../../js/jquery.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script language=javascript>
 		$(document).ready(function() {
 			$("#speciestoadd").autocomplete({ source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true });

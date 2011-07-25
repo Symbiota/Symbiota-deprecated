@@ -3,6 +3,7 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:''; 
 $clManager = new ChecklistManager();
 $clManager->setClValue($clid);
@@ -121,14 +122,10 @@ $clManager->getNonVoucheredCnt();
 	<li>
 		<?php 
 		if($dynSql){
-			?>
-			<a href="checklist.php?cl=<?php echo $clid; ?>&submitaction=ListMissingTaxa&tabindex=1&emode=2">
-			<?php 
+			echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListMissingTaxa&tabindex=1&emode=2">';
 		}
 		else{
-			?>
-			<a href="#" onclick="alert('SQL Fragment needs to be established before this function can be used');toggle('sqlfragdiv');">
-			<?php 
+			echo '<a href="#" onclick="alert(\'SQL Fragment needs to be established before this function can be used\');toggle(\'sqlfragdiv\');">';
 		}
 		?>
 		<b>Search for Missing Taxa</b>
@@ -197,7 +194,6 @@ if($action == 'VoucherConflicts'){
 	}
 }
 elseif($action == 'ListNonVouchered'){
-	$startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 	$nonVoucherArr = $clManager->getNonVoucheredTaxa($startPos);
 	?>
 	<hr/>
@@ -241,7 +237,6 @@ elseif($action == 'ListNonVouchered'){
 	<?php 
 }
 elseif($action == 'ListMissingTaxa'){
-	$startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 	$missingArr = $clManager->getMissingTaxa($startPos);
 	?>
 	<hr/>

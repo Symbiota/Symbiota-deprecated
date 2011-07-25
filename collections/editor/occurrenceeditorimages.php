@@ -4,9 +4,10 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = $_REQUEST['occid'];
-$tid = $_REQUEST['tid'];
-$instCode = $_REQUEST['instcode'];
+$occId = $_GET['occid'];
+$occIndex = $_GET['occindex'];
+$tid = $_GET['tid'];
+$instCode = $_GET['instcode'];
 
 $occManager = new OccurrenceEditorImages();
 
@@ -104,6 +105,7 @@ $imageArr = $occManager->getImageMap();
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 					<input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 					<input type="hidden" name="institutioncode" value="<?php echo $instCode; ?>" />
+					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<input type="submit" name="submitaction" value="Submit New Image" />
 				</div>
 			</fieldset>
@@ -282,6 +284,7 @@ $imageArr = $occManager->getImageMap();
 									<div style="margin-top:10px;">
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="submit" name="submitaction" value="Submit Image Edits" />
 									</div>
 								</fieldset>
@@ -291,6 +294,7 @@ $imageArr = $occManager->getImageMap();
 									<legend><b>Delete Image</b></legend>
 									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 									<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+									<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server 
 									<div style="margin-left:20px;">
 										(Note: leaving unchecked removes image from database w/o removing from server)
@@ -311,6 +315,7 @@ $imageArr = $occManager->getImageMap();
 									<div style="margin-left:20px;">
 										* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="submit" name="submitaction" value="Remap Image" />
 									</div>
 								</fieldset>

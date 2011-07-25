@@ -468,6 +468,7 @@ class ChecklistManager {
 			'WHERE v.clid IS NULL AND ctl.clid = '.$this->clid.' AND ts.taxauthid = 1 '.
 			'ORDER BY ts.family, t.sciname '.
 			'LIMIT '.($startLimit?$startLimit.',':'').'100';
+		//echo '<div>'.$sql.'</div>';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
 			$retArr[$row->family][$row->tid] = $row->sciname;
