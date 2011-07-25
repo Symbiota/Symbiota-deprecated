@@ -24,6 +24,7 @@
 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
 	$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
+	$startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 	
 	//Search Synonyms is default
 	if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
@@ -120,8 +121,8 @@
 		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
 	?>
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
-	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
@@ -278,7 +279,7 @@
 				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
-				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().'&submitaction='.$action; ?>"><span>Voucher Admin</span></a></li>
+				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
 					<div id="mdtab">

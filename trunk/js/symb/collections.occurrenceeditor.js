@@ -98,12 +98,28 @@ function verifyFullformSciName(){
 	snXmlHttp.send(null);
 } 
 
-function submitQueryForm(qryLimit,qryCnt){
+function submitQueryForm(qryLimit){
 	var f = document.queryform;
 	f.occindex.value = qryLimit;
-	f.qrycnt.value = qryCnt;
 	f.submit();
 	return false;
+}
+
+function verifyQueryForm(f){
+	var dateStr = f.q_datelastmodified.value;
+	if(dateStr == "") return true;
+	try{
+		var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+		var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+		if(!validformat1.test(dateStr) && !validformat2.test(dateStr)){
+			alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+			return false;
+		}
+	}
+	catch(ex){
+		
+	}
+	return true;
 }
 
 function toggle(target){
@@ -406,19 +422,6 @@ function lookForDups(f){
 	document.getElementById("dupsearchspan").style.display = "block";
 	document.getElementById("dupspan").style.display = "block";
 
-	//Parse last name of collector
-	//var lastName = "";
-	//var lastNameArr = collName.split(",");
-	//lastNameArr = lastNameArr[0].split(";");
-	//lastNameArr = lastNameArr[0].split("&");
-	//lastNameArr = lastNameArr[0].match(/[A-Z]{1}[A-Za-z]{2,}/g);
-	//if(lastNameArr.length == 1){
-		//lastName = lastNameArr[0];
-	//}
-	//else if(lastNameArr.length > 1){
-		//lastName = lastNameArr[1];
-	//}
-	
 	//Check for matching records
 	dupXmlHttp = GetXmlHttpObject();
 	if(dupXmlHttp==null){

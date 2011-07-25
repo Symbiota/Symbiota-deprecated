@@ -64,8 +64,8 @@ $clArray = $vManager->getChecklistData();
 		<title>Species Details: <?php echo $vManager->getTaxonName()." of ".$vManager->getClName(); ?></title>
 		<link rel="stylesheet" href="../css/main.css" type="text/css" />
 		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
-		<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
-		<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.js"></script>
+		<script type="text/javascript" src="../js/jquery-ui.js"></script>
 		<script language="JavaScript">
 		
 			function validateRenameForm(){ 

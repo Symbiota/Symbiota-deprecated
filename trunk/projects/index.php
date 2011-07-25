@@ -49,8 +49,8 @@ if($isEditable && $projSubmit){
 	<title><?php echo $defaultTitle; ?> Species Lists</title>
 	<link type="text/css" href="../css/main.css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
-	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
@@ -368,14 +368,15 @@ if($isEditable && $projSubmit){
 	            $researchList = $projManager->getResearchChecklists();
 				if($researchList){
 				?>
-					<h3>Research Checklists
+					<div style="font-weight:bold;font-size:130%;">
+						Research Checklists
 						<span onclick="toggleResearchInfoBox(this);" title="What is a Research Species List?" style="cursor:pointer;">
 							<img src="../images/qmark.jpg" style="height:15px;"/>
 						</span> 
 						<a href="../checklists/clgmap.php?cltype=research&proj=<?php echo $projManager->getProjectId();?>" title="Map Checklists">
 							<img src='../images/world40.gif' style='width:14px;border:0' />
 						</a>
-					</h3>
+					</div>
 					<div id="researchlistpopup" class="genericpopup" style="display:none;">
 						<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />
 			            Research checklists are pre-compiled by floristic scientists.
@@ -383,6 +384,10 @@ if($isEditable && $projSubmit){
 			            specific specimens to be linked to the species names within the checklist and thus serve as vouchers. 
 			            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
 			            can inspect these specimens for verification or annotate the identification when necessary.
+					</div>
+					<div style="margin-left:15px;font-size:90%">
+						The <img src="../images/key.jpg" style="width: 12px;" alt="Golden Key Symbol" /> 
+						symbol opens the species list as an interactive key.
 					</div>
 					<?php 
 					$gMapUrl = $projManager->getGoogleStaticMap("research");
@@ -425,14 +430,15 @@ if($isEditable && $projSubmit){
 				if($surveyList){
 				?>
 					<div style="clear:both;">
-						<h3>Survey Species Lists 
+						<div style="font-weight:bold;font-size:130%;">
+							Survey Species Lists 
 							<span onclick="toggleSurveyInfoBox(this);" title="What is a Dynamic Survey Species List?" style="cursor:pointer;">
 								<img src="../images/qmark.jpg" style="height:15px;"/>
 							</span> 
 							<a href="../checklists/clgmap.php?cltype=survey&proj=<?php echo $projManager->getProjectId();?>" title="Map checklists">
 								<img src="../images/world40.gif" style="width:14px;border:0" />
 							</a>
-						</h3>
+						</div>
 					</div>
 					<div id="surveylistpopup" class="genericpopup" style="display:none;">
 						<img src="../images/uptriangle.png" style="position: relative; top: -22px; left: 30px;" />

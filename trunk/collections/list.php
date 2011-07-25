@@ -23,8 +23,8 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
 	</style>
 	
-	<script type="text/javascript" src="../js/jquery-1.4.4.min.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui-1.8.11.custom.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
@@ -124,7 +124,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 	        </li>
 	        <li>
 	        	<a href="#speclist">
-	        		<span>Specimen List</span>
+	        		<span>Specimens</span>
 	        	</a>
 	        </li>
 	        <li>

@@ -159,8 +159,13 @@ if($collId){
 					<legend><b><?php echo ($collId?$collData['collectionname']:'');?> Management Control Panel</b></legend>
 					<ul>
 						<li>
-							<a href="../editor/occurrenceeditor.php?submitaction=gotonew&collid=<?php echo $collId; ?>">
+							<a href="../editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
 								Add a New Specimen Record
+							</a>
+						</li>
+						<li>
+							<a href="../editor/occurrenceeditor.php?collid=<?php echo $collId; ?>">
+								Edit a Specimen Record
 							</a>
 						</li>
 						<?php if($editCode > 1){ ?>

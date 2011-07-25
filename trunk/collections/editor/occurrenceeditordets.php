@@ -4,10 +4,11 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = $_REQUEST['occid'];
-$identBy = $_REQUEST['identby'];
-$dateIdent = $_REQUEST['dateident'];
-$sciName = $_REQUEST['sciname'];
+$occId = $_GET['occid'];
+$occIndex = $_GET['occindex'];
+$identBy = $_GET['identby'];
+$dateIdent = $_GET['dateident'];
+$sciName = $_GET['sciname'];
 
 $occManager = new OccurrenceEditorDeterminations();
 
@@ -19,7 +20,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 		<img style="border:0px;width:12px;cursor:pointer;" src="../../images/add.png" onclick="toggle('newdetdiv');" title="Add New Determination" />
 	</div>
 	<div id="newdetdiv" style="display:none;">
-		<form name="detaddform" action="occurrenceeditor.php" method="post" onsubmit="return verifyDetAddForm(this)">
+		<form name="detaddform" action="occurrenceeditor.php" method="get" onsubmit="return verifyDetAddForm(this)">
 			<fieldset>
 				<legend><b>Add a New Determination</b></legend>
 				<div style='margin:3px;'>
@@ -54,6 +55,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 				</div>
 				<div style='margin:15px;'>
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<div style="float:left;">
 						<input type="submit" name="submitaction" value="Add New Determination" />
 					</div>
@@ -152,6 +154,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 							<div style='margin:3px;margin:15px;'>
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
+								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 								<input type="submit" name="submitaction" value="Submit Determination Edits" />
 							</div>
 						</form>
@@ -159,6 +162,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 							<div style="padding:15px;background-color:lightblue;width:155px;margin:15px;">
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
+								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 								<input type="submit" name="submitaction" value="Delete Determination" />
 							</div>
 						</form>
@@ -166,6 +170,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 							<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
+								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 								<input type="submit" name="submitaction" value="Make Determination Current" /><br/>
 								<input type="checkbox" name="remapimages" value="1" CHECKED /> Remap images to this taxonomic name
 							</div>

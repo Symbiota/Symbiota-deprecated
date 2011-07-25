@@ -37,9 +37,8 @@ $gMapCon = MySQLiConnectionFactory::getCon("readonly");
 
 	$clList = Array();
 	$sql = "SELECT c.CLID, c.Name, c.LongCentroid, c.LatCentroid ".
-		"FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ".
-		"INNER JOIN fmprojects p ON cpl.pid = p.pid ".
-		"WHERE c.LongCentroid IS NOT NULL AND p.projname = '".$projValue."'";
+		"FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid ".
+		"WHERE c.LongCentroid IS NOT NULL AND cpl.pid = '".$projValue."'";
 	$result = $gMapCon->query($sql);
 	while($row = $result->fetch_object()){
 		$idStr = $row->CLID;
