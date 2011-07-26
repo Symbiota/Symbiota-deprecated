@@ -33,8 +33,10 @@ class SurveyManager {
 	private $genusCount = 0;
 	
 	function __construct($sId) {
-		$this->surveyId = $sId;
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		if(is_numeric($sId)){
+			$this->surveyId = $this->conn->real_escape_string($sId);
+		}
 	}
 
 	function __destruct(){
@@ -46,7 +48,7 @@ class SurveyManager {
 			"FROM ((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) ".
 			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid ".
-			"WHERE sol.surveyid = ".$this->conn->real_escape_string($this->surveyId).
+			"WHERE sol.surveyid = ".$this->surveyId.
 			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
 		//echo $sql;
 		$uArr = Array(); $fArr = Array(); $gArr = Array(); 
@@ -63,9 +65,9 @@ class SurveyManager {
 	}
 	
 	public function getMetaData(){
-		if(!$this->metaData){
+		if(!$this->metaData && $this->surveyId){
 			$sql = "SELECT s.projectname, s.locality, s.managers, s.latcentroid, s.longcentroid, s.notes, s.ispublic ".
-				"FROM omsurveys s WHERE s.surveyid = ".$this->conn->real_escape_string($this->surveyId);
+				"FROM omsurveys s WHERE s.surveyid = ".$this->surveyId;
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->surveyName = $row->projectname;
@@ -81,18 +83,18 @@ class SurveyManager {
 		return $this->metaData;
 	}
 	
-	public function editMetaData($editArr){
+	public function editMetaData(){
 		$setSql = "";
 		$con = MySQLiConnectionFactory::getCon("write");
-		foreach($editArr as $key =>$value){
-			if($value){
-				$setSql .= ", ".$con->real_escape_string($key)." = '".$con->real_escape_string($value)."'";
-			}
-			else{
-				$setSql .= ", ".$con->real_escape_string($key)." = NULL";
-			}
-		}
-		$sql = "UPDATE omsurveys SET ".substr($setSql,2)." WHERE surveyid = ".$this->surveyId;
+		$sql = 'UPDATE omsurveys SET '.
+			'projectname = '.($_POST['projectname']?'"'.$con->real_escape_string(trim($_POST['projectname'])).'"':'NULL').', '.
+			'managers = '.($_POST['managers']?'"'.$con->real_escape_string(trim($_POST['managers'])).'"':'NULL').', '.
+			'locality = '.($_POST['locality']?'"'.$con->real_escape_string(trim($_POST['locality'])).'"':'NULL').', '.
+			'notes = '.($_POST['notes']?'"'.$con->real_escape_string(trim($_POST['notes'])).'"':'NULL').', '.
+			'latcentroid = '.($_POST['latcentroid']?$con->real_escape_string($_POST['latcentroid']):'NULL').', '.
+			'longcentroid = '.($_POST['longcentroid']?$con->real_escape_string($_POST['longcentroid']):'NULL').', '.
+			'ispublic = '.($_POST['ispublic']?1:0).' '.
+			'WHERE surveyid = '.$this->surveyId;
 		//echo $sql;
 		$con->query($sql);
 		$con->close();
@@ -115,72 +117,74 @@ class SurveyManager {
 
 	//return an array: [family][sciname][occid] => collector
 	public function getTaxaList($pageNumber = 0){
-		$sql = $this->getClSql();
-		//echo $sql;
-		$result = $this->conn->query($sql);
-		$itemLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
 		$taxaArr = Array();
-		$activeTids = Array();
-		$genusPrev="";$speciesPrev="";$taxonPrev="";$tidPrev=0;
-		while($row = $result->fetch_object()){
-			$family = strtoupper($row->family);
-			$tid = $row->tid;
-			if($tid != $tidPrev){
-				$sciName = $row->sciname;
-				$taxonTokens = explode(" ",$sciName);
-				if(strtolower($taxonTokens[0]) == "x") array_shift($taxonTokens);
-				if(count($taxonTokens) > 1 && strtolower($taxonTokens[1]) == "x") array_splice($taxonTokens,1,1);
-
-				if($this->taxaCount >= ($pageNumber*$itemLimit) && $this->taxaCount <= ($pageNumber+1)*$itemLimit){
-					//taxaCount is within range for being displayed
-					if(count($taxonTokens) == 1) $sciName .= " sp.";
-					$taxaArr[$family][$tid]["sciname"] = $sciName;
-					if($this->showAuthors) $taxaArr[$family][$tid]["author"] = $row->author; 
-					if($this->showCommon && $row->vernacularname) $taxaArr[$family][$tid]["vern"] = $row->vernacularname;
-					$activeTids[] = $tid;
+		if($this->surveyId){
+			$sql = $this->getClSql();
+			//echo $sql;
+			$result = $this->conn->query($sql);
+			$itemLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
+			$activeTids = Array();
+			$genusPrev="";$speciesPrev="";$taxonPrev="";$tidPrev=0;
+			while($row = $result->fetch_object()){
+				$family = strtoupper($row->family);
+				$tid = $row->tid;
+				if($tid != $tidPrev){
+					$sciName = $row->sciname;
+					$taxonTokens = explode(" ",$sciName);
+					if(strtolower($taxonTokens[0]) == "x") array_shift($taxonTokens);
+					if(count($taxonTokens) > 1 && strtolower($taxonTokens[1]) == "x") array_splice($taxonTokens,1,1);
+	
+					if($this->taxaCount >= ($pageNumber*$itemLimit) && $this->taxaCount <= ($pageNumber+1)*$itemLimit){
+						//taxaCount is within range for being displayed
+						if(count($taxonTokens) == 1) $sciName .= " sp.";
+						$taxaArr[$family][$tid]["sciname"] = $sciName;
+						if($this->showAuthors) $taxaArr[$family][$tid]["author"] = $row->author; 
+						if($this->showCommon && $row->vernacularname) $taxaArr[$family][$tid]["vern"] = $row->vernacularname;
+						$activeTids[] = $tid;
+					}
+					
+		    		if($taxonTokens[0] != $genusPrev) $this->genusCount++;
+		    		$genusPrev = $taxonTokens[0];
+					if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
+		    			$this->speciesCount++;
+		    			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
+		    		}
+		    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
+		    			$this->taxaCount++;
+		    		}
+	    			$taxonPrev = implode(" ",$taxonTokens);
 				}
-				
-	    		if($taxonTokens[0] != $genusPrev) $this->genusCount++;
-	    		$genusPrev = $taxonTokens[0];
-				if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
-	    			$this->speciesCount++;
-	    			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
-	    		}
-	    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
-	    			$this->taxaCount++;
-	    		}
-    			$taxonPrev = implode(" ",$taxonTokens);
+				$tidPrev = $tid;
+		    	if(array_key_exists($family,$taxaArr) && array_key_exists($tid,$taxaArr[$family])){
+					$taxaArr[$family][$tid]["vs"][$row->occid] = $row->collstr;
+		    	}
+		    }
+			$result->close();
+			$this->familyCount = count($taxaArr);
+			
+			//User is asking for too high of a page number, thus return first page only
+			if(($pageNumber*$itemLimit) > $this->taxaCount){
+				$this->taxaCount = 0;
+				return $this->getTaxaList(0);
 			}
-			$tidPrev = $tid;
-	    	if(array_key_exists($family,$taxaArr) && array_key_exists($tid,$taxaArr[$family])){
-				$taxaArr[$family][$tid]["vs"][$row->occid] = $row->collstr;
-	    	}
-	    }
-		$result->close();
-		$this->familyCount = count($taxaArr);
-		
-		//User is asking for too high of a page number, thus return first page only
-		if(($pageNumber*$itemLimit) > $this->taxaCount){
-			$this->taxaCount = 0;
-			return $this->getTaxaList(0);
-		}
-		//Grab images, if requested
-		if($this->showImages && $activeTids){
-			$imgArr = Array();
-			$sql = "SELECT DISTINCT ts2.tid, i.url, i.thumbnailurl ".
-				"FROM (images i INNER JOIN taxstatus ts1 ON i.tid = ts1.tid) ".
-				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
-				"WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND i.sortsequence = 1 AND ts1.tid IN (".implode(",",$activeTids).")";
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$imgArr[$row->tid]["url"] = ($row->thumbnailurl?$row->thumbnailurl:$row->url); 
-			}
-			$rs->close();
-			foreach($taxaArr as $family => $tidArr){
-				foreach($tidArr as $t => $v){
-					if(array_key_exists($t,$imgArr)){
-						$taxaArr[$family][$t]["url"] = $imgArr[$t]["url"];
-					} 
+			//Grab images, if requested
+			if($this->showImages && $activeTids){
+				$imgArr = Array();
+				$sql = "SELECT DISTINCT ts2.tid, i.url, i.thumbnailurl ".
+					"FROM (images i INNER JOIN taxstatus ts1 ON i.tid = ts1.tid) ".
+					"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
+					"WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND i.sortsequence = 1 AND ts1.tid IN (".implode(",",$activeTids).")";
+				$rs = $this->conn->query($sql);
+				while($row = $rs->fetch_object()){
+					$imgArr[$row->tid]["url"] = ($row->thumbnailurl?$row->thumbnailurl:$row->url); 
+				}
+				$rs->close();
+				foreach($taxaArr as $family => $tidArr){
+					foreach($tidArr as $t => $v){
+						if(array_key_exists($t,$imgArr)){
+							$taxaArr[$family][$t]["url"] = $imgArr[$t]["url"];
+						} 
+					}
 				}
 			}
 		}
@@ -224,7 +228,7 @@ class SurveyManager {
 			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".
 				$this->conn->real_escape_string($this->language)."' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
 		}
-		$sql .= "WHERE sol.surveyid = ".$this->conn->real_escape_string($this->surveyId).
+		$sql .= "WHERE sol.surveyid = ".$this->surveyId.
 			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
 		if($this->taxonFilter){
 			if($this->searchCommon){

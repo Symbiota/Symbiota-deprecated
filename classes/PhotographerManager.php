@@ -28,7 +28,7 @@ class PhotographerManager{
 	public function echoPhotographerInfo($uid){
 		$sql = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, u.address, ".
 			"u.city, u.state, u.zip, u.country, u.email, u.url, u.biography, u.notes, u.ispublic ".
-			"FROM users u WHERE u.uid = ".$uid;
+			"FROM users u WHERE u.uid = ".$this->conn->real_escape_string($uid);
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -59,8 +59,9 @@ class PhotographerManager{
 		$sql = "SELECT i.imgid, i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname ".
 			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
 			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 AND i.photographeruid = $uid ".
-			"ORDER BY t.sciname, ts.family LIMIT $limitStart, ".($limitNum+1);
+			"WHERE ts.taxauthid = 1 AND i.photographeruid = ".$this->conn->real_escape_string($uid)." ".
+			"ORDER BY t.sciname, ts.family ".
+			"LIMIT ".$this->conn->real_escape_string($limitStart).", ".($this->conn->real_escape_string($limitNum)+1);
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$rowCnt = $result->num_rows;
