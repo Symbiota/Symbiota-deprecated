@@ -248,7 +248,7 @@ class DataLoader{
 		$this->setConnection();
 		$this->setFieldMap();
 
-		set_time_limit(240);
+		set_time_limit(500);
 		ini_set("max_input_time",240);
 		$fh = fopen($_FILES['uploadfile']['tmp_name'],'r') or die("Can't open file");
 		$headerData = fgets($fh);
@@ -413,9 +413,9 @@ class DataLoader{
 		}
 		fclose($fh);
 		//Update taxa links and families values
-		$sql1 = 'UPDATE uploadspectemp s INNER JOIN taxa t ON s.sciname = t.sciname SET s.TidInterpreted = t.tid '.
-			'WHERE s.TidInterpreted IS NULL';
-		$this->conn->query($sql1);
+		//$sql1 = 'UPDATE omoccurrences s INNER JOIN taxa t ON s.sciname = t.sciname SET s.TidInterpreted = t.tid '.
+		//	'WHERE s.TidInterpreted IS NULL';
+		//$this->conn->query($sql1);
 		$sql2 = 'UPDATE omoccurrences u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
 			'SET u.family = ts.family '.
 			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
@@ -425,10 +425,10 @@ class DataLoader{
 			'SET u.family = ts.family '.
 			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
 		$this->conn->query($sql3);
-		$sql4 = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+		/*$sql4 = 'UPDATE taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
 			'SET o.scientificnameauthorship = t.author '.
 			'WHERE t.author is not null and (o.scientificnameauthorship IS NULL or o.scientificnameauthorship = "")';
-		$this->conn->query($sql4);
+		$this->conn->query($sql4); */
 		
 		$this->conn->query("Call UpdateCollectionStats(".$collId.");");
 		$this->conn->close();
