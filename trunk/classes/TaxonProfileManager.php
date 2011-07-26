@@ -5,18 +5,18 @@
  * Global Institute of Sustainability - GIOS 
  * on 31 Aug. 2006
  * 
- */
+*/
  
- include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
- class TaxonProfileManager {
+class TaxonProfileManager {
 
- 	private $submittedTid;
- 	private $submittedSciName;
+	private $submittedTid;
+	private $submittedSciName;
 	private $submittedAuthor;
- 	private $tid;
+	private $tid;
 	private $sciName;
- 	private $taxAuthId;
+	private $taxAuthId;
 	private $author;
 	private $parentTid;
 	private $family;
@@ -39,10 +39,10 @@
 	private $synonyms;					// An array of synonyms. Array(synonymName) --Display order is controlled by SQL
 	private $acceptedTaxa;				// Array(tid -> SciName) Used if target is not accepted
 	private $imageArr; 
-	
+
 	//used if taxa rank is at genus or family level
 	private $sppArray;
-	
+
 	private $con; 
 
  	public function __construct(){
@@ -189,12 +189,12 @@
  	}
  	
  	public function setTaxAuthId($id){
- 		$this->taxAuthId = $id;
+ 		$this->taxAuthId = $this->con->real_escape_string($id);
  	}
 
 	public function setSppData(){
 		$this->sppArray = Array();
-		$sql = "";
+		$sql = '';
 		if($this->clid){
 			/*$sql = "(SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.Tid) ".
@@ -340,8 +340,7 @@
 		$this->vernaculars = Array();
 		$sql = "SELECT DISTINCT v.VernacularName ".
 			"FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted ".
-			"WHERE (ts.TID = $this->tid) AND (v.SortSequence < 90) AND (v.Language = '".
-			$this->con->real_escape_string($this->language)."') ".
+			"WHERE (ts.TID = $this->tid) AND (v.SortSequence < 90) AND (v.Language = '".$this->language."') ".
 			"ORDER BY v.SortSequence";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -633,7 +632,7 @@
 			"tds.tdsid, tds.heading, tds.statement, tds.displayheader ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
 			"INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->con->real_escape_string($this->language)."') ".
+			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->language."') ".
 			"ORDER BY tdb.displaylevel,tds.sortsequence";
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -675,8 +674,8 @@
 	public function getSecurityStatus(){
 		return $this->securityStatus;
 	}
- 	
- 	public function setClName($clv){
+
+	public function setClName($clv){
 		$sql = "SELECT c.CLID, c.Name, c.parentclid, cp.name AS parentname ".
 			"FROM fmchecklists c LEFT JOIN fmchecklists cp ON cp.clid = c.parentclid ";
 		if(intval($clv)){
@@ -708,18 +707,18 @@
 	public function getParentClid(){
 		return $this->parentClid;
 	}
-	
+
 	public function getParentName(){
 		return $this->parentName;
 	}
-	
+
 	public function getClInfo(){
 		return $this->clInfo;
 	}
-	
+
 	public function setProj($p){
 		if(is_numeric($p)){
-			$this->pid = $p;
+			$this->pid = $this->con->real_escape_string($p);
 			$sql = "SELECT p.projname FROM fmprojects p WHERE p.pid = ".$this->con->real_escape_string($p);
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
@@ -743,7 +742,7 @@
 	}
 	
 	public function setLanguage($lang){
-		$this->language = $lang;
+		$this->language = $this->con->real_escape_string($lang);
 	}
 	
 	public function getLanguage(){

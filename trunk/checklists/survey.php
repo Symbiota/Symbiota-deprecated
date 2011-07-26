@@ -45,21 +45,8 @@ if($isAdmin || (array_key_exists("SurveyAdmin",$userRights) && in_array($surveyI
 if($editable){
 	//Submit checklist MetaData edits
  	if($action == "Submit Changes"){
- 		$editArr = Array();
-		foreach($_REQUEST as $k => $v){
-			if(substr($k,0,3) == "ecl"){
-				$editArr[substr($k,3)] = $_REQUEST[$k];
-			}
-		}
- 		$clManager->editMetaData($editArr);
+ 		$clManager->editMetaData();
  	}
-	 	
- 	//Add species to checklist
-	if(array_key_exists("tidtoadd",$_REQUEST)){
-		$dataArr["tid"] = $_REQUEST["tidtoadd"];
-		$dataArr["notes"] = $_REQUEST["notes"];
-		$clManager->addNewSpecies($dataArr);
-	}
 }
 $mdArray = $clManager->getMetaData();
 $taxaArray = $clManager->getTaxaList($pageNumber);
@@ -332,30 +319,30 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 							<legend>Edit Survey Details:</legend>
 							<div>
 								<span>Survey Name: </span>
-								<input type='text' name='esprojectname' size='80' value='<?php echo $clManager->getSurveyName();?>' />
+								<input type='text' name='projectname' size='80' value='<?php echo $clManager->getSurveyName();?>' />
 							</div>
 							<div>
 								<span>Managers: </span>
-								<input type='text' name='eclmanagers' value='<?php echo $mdArray["managers"]; ?>' />
+								<input type='text' name='managers' value='<?php echo $mdArray["managers"]; ?>' />
 							</div>
 							<div>
 								<span>Locality: </span>
-								<input type='text' name='ecllocality' size='80' value='<?php echo $mdArray["locality"]; ?>' />
+								<input type='text' name='locality' size='80' value='<?php echo $mdArray["locality"]; ?>' />
 							</div> 
 							<div>
 								<span>Notes: </span>
-								<input type='text' name='eclnotes' size='80' value='<?php echo $mdArray["notes"]; ?>' />
+								<input type='text' name='notes' size='80' value='<?php echo $mdArray["notes"]; ?>' />
 							</div>
 							<div>
 								<span>Latitude Centroid: </span>
-								<input id="latdec" type='text' name='ecllatcentroid' value='<?php echo $mdArray["latcentroid"]; ?>' />
-								<span style="cursor:pointer;" onclick="openMappingAid('editmetadata','ecllatcentroid','ecllongcentroid');">
+								<input id="latdec" type='text' name='latcentroid' value='<?php echo $mdArray["latcentroid"]; ?>' />
+								<span style="cursor:pointer;" onclick="openMappingAid('editmetadata','latcentroid','longcentroid');">
 									<img src="../images/world40.gif" style="width:12px;" />
 								</span>
 							</div>
 							<div>
 								<span>Longitude Centroid: </span>
-								<input id="lngdec" type='text' name='ecllongcentroid' value='<?php echo $mdArray["longcentroid"]; ?>' />
+								<input id="lngdec" type='text' name='longcentroid' value='<?php echo $mdArray["longcentroid"]; ?>' />
 							</div>
 							<div>
 								<span>Public Access: </span>

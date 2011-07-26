@@ -37,12 +37,12 @@ if($newCollRec && $editCode < 3){
 }
 if($editCode > 1){
 	if($action == 'Submit Edits'){
-		$collManager->submitCollEdits($_REQUEST);
+		$collManager->submitCollEdits();
 	}
 }
 if($editCode == 3){
 	if($action == "Add New Profile"){
-		$collId = $collManager->submitCollAdd($_REQUEST);
+		$collId = $collManager->submitCollAdd();
 		$collManager->setCollectionId($collId);
 	}
 }
