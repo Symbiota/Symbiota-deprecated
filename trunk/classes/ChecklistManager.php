@@ -512,7 +512,7 @@ class ChecklistManager {
 				'WHERE t.rankid >= 220 AND intab.tid IS NULL AND '.
 				'('.$this->sqlFrag.') '.
 				'ORDER BY o.sciname '.
-				'LIMIT '.($startLimit?$startLimit.',':'').'100';
+				'LIMIT '.($startLimit?$startLimit.',':'').'105';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->clCon->query($sql);
 			while($row = $rs->fetch_object()){

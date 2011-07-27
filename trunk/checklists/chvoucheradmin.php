@@ -249,6 +249,19 @@ elseif($action == 'ListMissingTaxa'){
 	<div style="margin:20px;">
 		<?php 
 		if($missingArr){
+			$paginationStr = '';
+			if(count($missingArr) > 100){
+				$paginationStr = '<div style="margin:15px;text-weight:bold;width:100%;text-align:right;">';
+				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
+				$paginationStr .= '&lt;&lt; Previous';
+				if($startPos > 100) $paginationStr .= '</a>';
+				$paginationStr .= ' || '.$startPos.'-'.($startPos+100).' Records || ';
+				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
+				$paginationStr .= 'Next &gt;&gt;';
+				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '</a>';
+				$paginationStr .= '</div>';
+				echo $paginationStr;
+			}
 			foreach($missingArr as $tid => $sn){
 				echo '<div>';
 				echo '<a href="#" onclick="openPopup(\'../collections/list.php?db=all&thes=1&reset=1&taxa='.$sn.'&clid='.$clid.'&targettid='.$tid.'\',\'editorwindow\');return false;">';
@@ -257,15 +270,7 @@ elseif($action == 'ListMissingTaxa'){
 				echo '</div>';
 			}
 			if(count($missingArr) > 100){
-				echo '<div style="text-weight:bold;">';
-				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
-				echo '&lt;&lt; Previous';
-				if($startPos > 100) echo '</a>';
-				echo ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
-				echo 'Next &gt;&gt;';
-				if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
-				echo '</div>';
+				echo $paginationStr;
 			}
 		}
 		else{

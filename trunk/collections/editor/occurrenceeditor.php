@@ -846,6 +846,16 @@ if($symbUid){
 										<div style="padding:3px;">
 											Notes:
 											<input type="text" name="occurrenceremarks" tabindex="88" style="width:600px;" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
+											<span style="margin-left:5px;cursor:pointer;" onclick="toggle('miscextradiv');">
+												<img src="../../images/showedit.png" style="width:15px;" />
+											</span>
+										</div>
+										<div id="miscextradiv" style="padding:3px;display:none;">
+											Dynamic Properties:
+											<a href="#" onclick="return dwcDoc('dynamicProperties')">
+												<img class="dwcimg" src="../../images/qmark.png" />
+											</a>
+											<input type="text" name="dynamicproperties" tabindex="90" style="width:550px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
 										</div>
 									</fieldset>
 									<fieldset>
@@ -888,12 +898,23 @@ if($symbUid){
 											</span>
 										</div>
 										<div style="padding:3px;">
-											<span>
-												Owner Institution Code:
+											<span title="If different than institution code">
+												Owner Code:
 												<a href="#" onclick="return dwcDoc('ownerInstitutionCode')">
 													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 												<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
+											</span>
+											<span style="margin-left:10px;">
+												Basis of Record:
+												<a href="#" onclick="return dwcDoc('basisOfRecord')">
+													<img class="dwcimg" src="../../images/qmark.png" />
+												</a>
+												<input type="text" name="basisofrecord" tabindex="106" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
+											</span>
+											<span style="margin-left:10px;">
+												Language:
+												<input type="text" name="language" tabindex="108" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 											</span>
 										</div>
 									</fieldset>
@@ -901,32 +922,47 @@ if($symbUid){
 										<legend><b>Other</b></legend>
 										<div style="padding:3px;">
 											<span>
-												Basis of Record:
-												<a href="#" onclick="return dwcDoc('basisOfRecord')">
-													<img class="dwcimg" src="../../images/qmark.png" />
-												</a>
-												<input type="text" name="basisofrecord" tabindex="108" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
-											</span>
-											<span style="margin-left:20px;">
-												Language:
-												<input type="text" name="language" tabindex="110" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+												Processing Status:
+												<?php 
+													$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:''; 
+												?>
+												<select name="processingstatus" tabindex="110" onchange="fieldChanged('processingstatus');">
+													<option value=''>No Set Status</option>
+													<option value=''>-------------------</option>
+													<option <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>
+														unprocessed
+													</option>
+													<option <?php echo ($pStatus=='preparsed'?'SELECTED':''); ?>>
+														preparsed
+													</option>
+													<option <?php echo (!$occId || $pStatus=='reviewed'?'SELECTED':''); ?>>
+														reviewed
+													</option>
+													<option <?php echo ($pStatus=='closed'?'SELECTED':''); ?>>
+														closed
+													</option>
+												</select>
 											</span>
 											<span style="margin-left:20px;">
 												Label Project:
-												<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" />
-											</span>
-										</div>
-										<div style="padding:3px;">
-											<span>
-												Dynamic Properties:
-												<a href="#" onclick="return dwcDoc('dynamicProperties')">
-													<img class="dwcimg" src="../../images/qmark.png" />
-												</a>
-												<input type="text" name="dynamicproperties" tabindex="114" style="width:350px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
+												<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" onchange="fieldChanged('labelproject');" />
 											</span>
 											<span style="margin-left:20px;" title="aka label quantity">
 												Duplicate Quantity:
-												<input type="text" name="duplicatequantity" tabindex="116" style="width:35px;" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" />
+												<input type="text" name="duplicatequantity" tabindex="116" style="width:35px;" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
+											</span>
+										</div>
+										<div style="padding:3px;">
+											<span style="" title="Internal occurrence record Primary Key">
+												Portal ID: <?php echo $occId; ?>
+											</span>
+											<span style="margin-left:80px;" title="">
+												Date Last Modified:
+												<?php echo array_key_exists('datelastmodified',$occArr)?$occArr['datelastmodified']:''; ?>
+											</span>
+											<span style="margin-left:80px;" title="">
+												Entered By:
+												<?php echo array_key_exists('recordenteredby',$occArr)?$occArr['recordenteredby']:''; ?>
 											</span>
 										</div>
 									</fieldset>
@@ -937,7 +973,13 @@ if($symbUid){
 									?>
 									<div style="padding:10px;">
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-										<input type="hidden" name="editedfields" value="" />
+										<?php 
+										if($occId){
+											?>
+											<input type="hidden" name="editedfields" value="" />
+											<?php 
+										}
+										?>
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 										<?php if($occId){ ?>
