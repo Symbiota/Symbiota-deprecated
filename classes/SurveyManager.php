@@ -49,7 +49,7 @@ class SurveyManager {
 			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid ".
 			"WHERE sol.surveyid = ".$this->surveyId.
-			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
+			" AND ts.taxauthid = ".$this->thesFilter." ";
 		//echo $sql;
 		$uArr = Array(); $fArr = Array(); $gArr = Array(); 
 		$rs = $this->conn->query($sql);
@@ -226,22 +226,22 @@ class SurveyManager {
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid) ";
 		if($this->showCommon){
 			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".
-				$this->conn->real_escape_string($this->language)."' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
+				$this->language."' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
 		}
 		$sql .= "WHERE sol.surveyid = ".$this->surveyId.
-			" AND ts.taxauthid = ".$this->conn->real_escape_string($this->thesFilter)." ";
+			" AND ts.taxauthid = ".$this->thesFilter." ";
 		if($this->taxonFilter){
 			if($this->searchCommon){
 				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".
-					$this->conn->real_escape_string($this->taxonFilter)."%')) ";
+					$this->taxonFilter."%')) ";
 			}
 			else{
-				$sql .= "AND (ts.UpperTaxonomy = '".$this->conn->real_escape_string($this->taxonFilter).
-					"' OR t.SciName Like '".$this->conn->real_escape_string($this->taxonFilter)."%' ".
-					"OR ts.Family = '".$this->conn->real_escape_string($this->taxonFilter)."' ";
+				$sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter.
+					"' OR t.SciName Like '".$this->taxonFilter."%' ".
+					"OR ts.Family = '".$this->taxonFilter."' ";
 				if($this->searchSynonyms){
 					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
-						"WHERE ta.SciName Like '".$this->conn->real_escape_string($this->taxonFilter)."%'))";
+						"WHERE ta.SciName Like '".$this->taxonFilter."%'))";
 				}
 				$sql .= ")";
 			}
@@ -252,7 +252,7 @@ class SurveyManager {
 	}
 
 	public function setThesFilter($filt){
-		$this->thesFilter = $filt;
+		$this->thesFilter = $this->conn->real_escape_string($filt);
 	}
 
 	public function getThesFilter(){
@@ -260,7 +260,7 @@ class SurveyManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$this->taxonFilter = $tFilter;
+		$this->taxonFilter = $this->conn->real_escape_string($tFilter);
 	}
 	
 	public function setShowAuthors($value = 1){
@@ -293,7 +293,7 @@ class SurveyManager {
 	}
 	
 	public function setLanguage($l){
-		$this->language = $l;
+		$this->language = $this->conn->real_escape_string($l);
 	}
 	
 	public function setImageLimit($cnt){

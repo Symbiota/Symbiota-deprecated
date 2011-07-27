@@ -200,7 +200,9 @@
 			}
 			?>
 			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
-				<?php echo $clManager->getClName(); ?>
+				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid; ?>">
+					<?php echo $clManager->getClName(); ?>
+				</a>
 			</div>
 			<?php 
 			if($keyModIsActive){

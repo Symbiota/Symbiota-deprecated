@@ -19,9 +19,8 @@ $(document).ready(function() {
 	$("#ffsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php", 
 		change: function(event, ui) {
-			pauseSubmit = true;
-			fieldChanged('sciname');
 			verifyFullformSciName();
+			fieldChanged('sciname');
 		}
 	},
 	{ minLength: 3, autoFocus: true });
@@ -482,13 +481,15 @@ function verifyFullForm(f){
 		alert("Locality field must have a value");
 		return false;
 	}
-	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
-	if(pauseSubmit){
-		var date = new Date();
-		var curDate = null;
-		do{ 
-			curDate = new Date(); 
-		}while(curDate - date < 5000 && pauseSubmit);
+	if(!isNumeric(f.duplicatequantity.value)){
+		alert("Duplicate Quantity field must be numeric only");
+		return false;
+	}
+	if(f.editedfields){
+		if(f.editedfields.value == ""){
+			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+			return false;
+		}
 	}
 	return true;
 }

@@ -26,7 +26,8 @@ class OccurrenceEditorManager {
 		'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
 		'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
 		'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
-		'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, o.dateLastModified '.
+		'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, '.
+		'o.dateLastModified, o.processingstatus, o.recordEnteredBy '.
 		'FROM omoccurrences o ';
 	}
 
@@ -35,7 +36,7 @@ class OccurrenceEditorManager {
 	}
 	
 	public function setOccId($id){
-		$this->occId = $id;
+		$this->occId = $this->conn->real_escape_string($id);
 	}
 	
 	public function getOccId(){
@@ -43,7 +44,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function setCollId($id){
-		$this->collId = $id;
+		$this->collId = $this->conn->real_escape_string($id);
 	}
 
 	public function getCollMap(){
@@ -280,7 +281,7 @@ class OccurrenceEditorManager {
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
-			"verbatimElevation, disposition, language, recordEnteredBy, duplicateQuantity, labelProject) ".
+			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy) ".
 			"VALUES (".$occArr["collid"].",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
 			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
@@ -337,7 +338,8 @@ class OccurrenceEditorManager {
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
 			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",".
 			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
-			($occArr["labelproject"]?"\"".$occArr["labelproject"]."\"":"NULL").",\"".
+			($occArr["labelproject"]?"\"".$occArr["labelproject"]."\"":"NULL").",".
+			($occArr["processingstatus"]?"\"".$occArr["processingstatus"]."\"":"NULL").",\"".
 			$occArr["userid"]."\") ";
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
