@@ -8,20 +8,25 @@ include_once($serverRoot.'/config/dbconnection.php');
 
 class TaxonomyDisplayManager{
 
+	private $conn;
 	private $indentValue = 0;
 	private $taxaArr = Array();
 	private $targetStr = "";
 	
 	function __construct($target){
-		$this->targetStr = $conn->real_escape_string(trim(ucfirst($target)));
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->targetStr = $this->conn->real_escape_string(trim(ucfirst($target)));
 	}
 
+ 	public function __destruct(){
+		if(!($this->conn === null)) $this->conn->close();
+	}
+ 	
 	public function getTaxa(){
 		//Get target taxa (we don't want children and parents of not accepted taxa, so we'll get those later) 
 		$hArray = Array();
 		$hierarchyArr = Array();
 		$taxaParentIndex = Array();
-		$conn = MySQLiConnectionFactory::getCon("readonly");
 		if($this->targetStr){
 			$sql = "SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr ".
 				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
@@ -35,7 +40,7 @@ class TaxonomyDisplayManager{
 				$sql .= "AND ((t.sciname LIKE '".$this->targetStr."%') OR (t1.sciname LIKE '".$this->targetStr."%'))";
 			}
 			//echo "<div>".$sql."</div>";
-			$rs = $conn->query($sql);
+			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$tid = $row->tid;
 				$parentTid = $row->parenttid;
@@ -67,7 +72,7 @@ class TaxonomyDisplayManager{
 			if($hArray) $innerSql .= "OR (t.tid IN(".implode(",",array_unique($hArray)).")) ";
 			$sql .= substr($innerSql,3).")";
 			//echo $sql."<br>";
-			$result = $conn->query($sql);
+			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$tid = $row->tid;
 				$parentTid = $row->parenttid;
@@ -84,7 +89,7 @@ class TaxonomyDisplayManager{
 			$sqlSyns = "SELECT ts.tidaccepted, t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 				"WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = 1) AND (ts.tidaccepted IN(".$synTidStr."))";
 			//echo $sqlSyns;
-			$rsSyns = $conn->query($sqlSyns);
+			$rsSyns = $this->conn->query($sqlSyns);
 			while($row = $rsSyns->fetch_object()){
 				$this->taxaArr[$row->tidaccepted]["synonyms"][$row->tid] = $row->sciname;
 			}
@@ -97,7 +102,7 @@ class TaxonomyDisplayManager{
 					"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 					"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (t.tid IN (".implode(",",$orphanTaxa)."))";
 				//echo $sqlOrphan;
-				$rsOrphan = $conn->query($sqlOrphan);
+				$rsOrphan = $this->conn->query($sqlOrphan);
 				while($row = $rsOrphan->fetch_object()){
 					$tid = $row->tid;
 					$taxaParentIndex[$tid] = $row->parenttid;
@@ -124,7 +129,6 @@ class TaxonomyDisplayManager{
 				}
 			}
 		}
-		if($conn) $conn->close();
 		$this->echoTaxonArray($hierarchyArr);
 	}
 	
