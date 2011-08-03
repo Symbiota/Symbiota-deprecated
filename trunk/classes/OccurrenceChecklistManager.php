@@ -38,7 +38,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) ".
 				"ORDER BY IFNULL(ts.family,o.family), o.sciname ";
         }
-        //echo "<div>".$sql."</div>";
+		//echo "<div>".$sql."</div>";
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
