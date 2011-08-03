@@ -634,7 +634,7 @@
 								<?php
 								$prevfam = $family;
 							}
-							$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
 							echo "<div id='tid-$tid' style='margin-left:10px;'>";
 							echo "<div>";
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
