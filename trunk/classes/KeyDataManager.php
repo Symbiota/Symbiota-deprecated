@@ -40,7 +40,7 @@ class KeyDataManager {
 			$this->pid = $projValue;
 		}
 		else{
-			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$projValue."'";
+			$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$projValue."')";
 			$result = $this->keyCon->query($sql);
 			if($row = $result->fetch_object()){
 				$this->pid = $row->pid;
@@ -64,7 +64,7 @@ class KeyDataManager {
 		if($userid){
 			$this->uid = $userid;
 			$sql = "SELECT DISTINCT c.Name, c.CLID ".
-				"FROM fmchecklists c WHERE c.uid = ".$userid." ORDER BY c.Name";
+				"FROM fmchecklists c WHERE (c.uid = ".$userid.") ORDER BY c.Name";
 			$result = $this->keyCon->query($sql);
 			while($row = $result->fetch_object()){
 				$returnList[$row->CLID] = $row->Name;
@@ -77,7 +77,7 @@ class KeyDataManager {
 		$sql = "SELECT DISTINCT c.CLID, c.Name ".
 			"FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid ".
 			"WHERE c.Access = 'public' AND c.Type = 'static' ";
-		if($this->pid) $sql .= "AND cpl.pid = ".$this->pid." ";
+		if($this->pid) $sql .= "AND (cpl.pid = ".$this->pid.") ";
 		$sql .= "ORDER BY c.Name";
 		//echo $sql;
 		$result = $this->keyCon->query($sql);
@@ -136,7 +136,7 @@ class KeyDataManager {
 		$sql = "";
 		if($this->dynClid){
 			$sql = 'SELECT d.name, d.details, d.type '.
-				'FROM fmdynamicchecklists d WHERE dynclid = '.$this->dynClid;
+				'FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
 			$result = $this->keyCon->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
@@ -146,11 +146,11 @@ class KeyDataManager {
 		else{
 			if(is_numeric($clv)){
 				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
-					"FROM fmchecklists cl WHERE cl.CLID = $clv";
+					"FROM fmchecklists cl WHERE (cl.CLID = ".$clv.")";
 			}
 			else{
 				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
-					"FROM fmchecklists cl WHERE cl.Name = '".$clv."' OR cl.Title = '".$clv."'";
+					"FROM fmchecklists cl WHERE (cl.Name = '".$clv."') OR (cl.Title = '".$clv."')";
 			}
 			$result = $this->keyCon->query($sql);
 			if($row = $result->fetch_object()){
@@ -402,14 +402,14 @@ class KeyDataManager {
 	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
 	                "INNER JOIN taxstatus ts ON ts.tidaccepted = t1.tid) ".
 	                "INNER JOIN fmdyncltaxalink clk ON ts.tid = clk.tid ";
-				$sqlWhere = "WHERE clk.dynclid = ".$this->dynClid." AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
+				$sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
 			}
 			else{
 				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
 	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
 	                "INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid) ".
 	                "INNER JOIN fmchklsttaxalink clk ON ts1.tid = clk.tid ";
-				$sqlWhere = "WHERE clk.clid = ".$this->clid." AND ts1.taxauthid = 1 AND ts.taxauthid = 1 AND t.RankId = 220 ";
+				$sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts1.taxauthid = 1 AND ts.taxauthid = 1 AND t.RankId = 220 ";
 				if($this->clType == "dynamic"){
 					$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
 	    				"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
@@ -424,7 +424,7 @@ class KeyDataManager {
 					//Do nothing
 				}
 				else{
-					$sqlWhere .= "AND (ts.UpperTaxonomy = \"".$this->taxonFilter."\" OR ts.Family = \"".$this->taxonFilter."\" OR t.UnitName1 = \"".$this->taxonFilter."\") ";
+					$sqlWhere .= "AND ((ts.UpperTaxonomy = \"".$this->taxonFilter."\") OR (ts.Family = \"".$this->taxonFilter."\") OR (t.UnitName1 = \"".$this->taxonFilter."\")) ";
 				}
 			}
 	
@@ -460,6 +460,5 @@ class KeyDataManager {
 		"morphological data compiled for that subset of species. If you would like to help, please email me at the above address. ";
 		return $returnStr;
 	}
- }
- 
+}
 ?>

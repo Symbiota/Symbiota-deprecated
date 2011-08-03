@@ -9,6 +9,7 @@ $limitNum = array_key_exists("lnum",$_REQUEST)?$_REQUEST["lnum"]:50;
 $imgCnt = array_key_exists("imgcnt",$_REQUEST)?$_REQUEST["imgcnt"]:0;
 
 $pManager = new PhotographerManager();
+if($phUid) $pManager->setUid($phUid);  
 ?>
 <html>
 <head>
@@ -35,29 +36,99 @@ $pManager = new PhotographerManager();
 	<div id="innertext">
 		<h1><?php echo $defaultTitle; ?> Photographers</h1>
 		<?php
-			if($phUid){
-				echo "<div style='margin:0px 0px 5px 20px;'>"; 
-				$pManager->echoPhotographerInfo($phUid);
-				echo "</div>";
-				echo "<div style='float:right;'><a href='photographers.php'>Return to Photographer List</a></div>";
-				if($imgCnt < 51){
-					echo "<div>Total Image: $imgCnt</div>";
+		if($phUid){
+			$pArr = $pManager->getPhotographerInfo()
+			?>
+			<div style="margin:20px;font-size:14px;">
+				<div style="font-weight:bold;"><?php echo $pArr['name']; ?> </div>
+				<?php 
+				if($pArr['ispublic']){
+					if($pArr['title']) echo '<div>'.$pArr['title'].'</div>';
+					if($pArr['institution']) echo '<div>'.$pArr['institution'].'</div>';
+					if($pArr['department']) echo '<div>'.$pArr['department'].'</div>';
+					if($pArr['city'] || $pArr['state']){
+						echo '<div>'.$pArr['city'].($pArr['city']?', ':'').$pArr['state'].'&nbsp;&nbsp;'.$pArr['zip'].'</div>';
+					}
+					if($pArr['country']) echo '<div>'.$pArr['country'].'</div>';
+					if($pArr['email']) echo '<div>'.$pArr['email'].'</div>';
+					if($pArr['notes']) echo '<div>'.$pArr['notes'].'</div>';
+					if($pArr['biography']) echo '<div>'.$pArr['biography'].'</div>';
+					if($pArr['url']) echo '<div><a href="'.$pArr['url'].'">'.$pArr['url'].'</a></div>';
 				}
 				else{
-					echo "<div style='font-weight:bold;'>Images: $limitStart - ".($limitStart+$limitNum)." of $imgCnt</div>";
+					echo '<div style="margin:10px;font-size:12px;">Photographers details not public</div>';
 				}
-				echo "<hr />";
-				$pManager->echoPhotographerImages($phUid,$limitStart,$limitNum,$imgCnt);
+				?>
+			</div>
+			<div style="float:right;">
+				<a href="photographers.php">Return to Photographer List</a>
+			</div>
+			<?php 
+			if($imgCnt < 51){
+				echo "<div>Total Image: $imgCnt</div>";
 			}
 			else{
-				$pManager->echoPhotographerList(); 
+				echo "<div style='font-weight:bold;'>Images: $limitStart - ".($limitStart+$limitNum)." of $imgCnt</div>";
 			}
+			echo "<hr />";
+			
+			$imgArr = $pManager->getPhotographerImages($limitStart,$limitNum,$imgCnt);
+			if($imgArr){
+				$paginationStr = '<div>';
+				if($limitStart){
+					$paginationStr .= '<div style="float:left;">';
+					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart - $limitNum).'&lnum='.$limitNum.'">&lt;&lt; Previous Images</a>';
+					$paginationStr .= '</div>';
+				}
+				if($imgCnt >= $limitNum){
+					$paginationStr .= '<div style="float:right;">';
+					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart + $limitNum).'&lnum='.$limitNum.'">Next Images &gt;&gt;</a>';
+					$paginationStr .= '</div>';
+				}
+				$paginationStr .= "</div>\n";
+				echo $paginationStr;
+				
+				echo '<div style="clear:both;">';
+				foreach($imgArr as $imgId => $imgArr){
+					$imgUrl = $imgArr['url'];
+					$imgTn = $imgArr['tnurl'];
+					if($imgTn){
+						$imgUrl = $imgTn;
+						if($imageDomain && substr($imgTn,0,1)=='/'){
+							$imgUrl = $imageDomain.$imgTn;
+						}
+					}
+					elseif($imageDomain && substr($imgUrl,0,1)=='/'){
+						$imgUrl = $imageDomain.$imgUrl;
+					}
+					?>
+					<div style="float:left;height:160px;" class="imgthumb">
+						<a href="imgdetails.php?imgid=<?php echo $imgId; ?>">
+							<img src="<?php echo $imgUrl; ?>" style="height:130px;" />
+						</a><br />
+						<a href="../taxa/index.php?taxon=<?php echo $imgArr['tid']; ?>">
+							<i><?php echo $imgArr['sciname']; ?></i>
+						</a>
+					</div>
+					<?php 
+				}
+				echo "</div>";
+				echo $paginationStr;
+			}			
+		}
+		else{
+			$pList = $pManager->getPhotographerList();
+			foreach($pList as $uid => $pArr){
+				echo '<div>';
+				echo '<a href="photographers.php?phuid='.$uid.'&imgcnt='.$pArr['imgcnt'].'">';
+				echo $pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
+			}
+		}
 		?>
 	</div>
 	<?php 
 	include($serverRoot.'/footer.php');
 	?>
-	
 </body>
 </html>
 

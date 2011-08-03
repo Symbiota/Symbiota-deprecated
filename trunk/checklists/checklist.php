@@ -36,6 +36,7 @@
 	elseif($dynClid){
 		$clManager->setDynClid($dynClid);
 	}
+	if($proj) $clManager->setProj($proj);
 	if($thesFilter) $clManager->setThesFilter($thesFilter);
 	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 	if($searchCommon){
@@ -117,7 +118,6 @@
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
 		if(array_key_exists("authors",$clArray) && $clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
-		if($proj) $keywordStr .= ",".$proj;
 		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
 	?>
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
@@ -150,36 +150,47 @@
 <?php
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:true);
 	include($serverRoot.'/header.php');
-	if(isset($checklists_checklistCrumbs)){
-		if($checklists_checklistCrumbs){
-			echo "<div class='navpath'>";
-			echo "<a href='../index.php'>Home</a> &gt; ";
-			if($dynClid){
-				if($clArray["type"] == "Specimen Checklist"){
-					echo "<a href='".$clientRoot."/collections/list.php?tabindex=0'>";
-					echo "Occurrence Checklist";
-					echo "</a> &gt; ";
-				}
-			}
-			else{
-				echo $checklists_checklistCrumbs;
-			}
-			echo " <b>".$clManager->getClName()."</b>";
-			echo "</div>";
-		}
-	}
-	else{
+	if($proj){
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt; ';
-		if($dynClid){
-			if($clArray['type'] == 'Specimen Checklist'){
-				echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
-				echo 'Occurrence Checklist';
-				echo '</a> &gt; ';
+		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$clManager->getPid().'">';
+		echo $clManager->getProjName();
+		echo '</a> &gt; ';
+		echo '<b>'.$clManager->getClName().'</b>';
+		echo '</div>';
+	}
+	else{
+		if(isset($checklists_checklistCrumbs)){
+			if($checklists_checklistCrumbs){
+				echo "<div class='navpath'>";
+				echo "<a href='../index.php'>Home</a> &gt; ";
+				if($dynClid){
+					if($clArray["type"] == "Specimen Checklist"){
+						echo "<a href='".$clientRoot."/collections/list.php?tabindex=0'>";
+						echo "Occurrence Checklist";
+						echo "</a> &gt; ";
+					}
+				}
+				else{
+					echo $checklists_checklistCrumbs;
+				}
+				echo " <b>".$clManager->getClName()."</b>";
+				echo "</div>";
 			}
 		}
-		echo ' <b>'.$clManager->getClName().'</b>';
-		echo '</div>';
+		else{
+			echo '<div class="navpath">';
+			echo '<a href="../index.php">Home</a> &gt; ';
+			if($dynClid){
+				if($clArray['type'] == 'Specimen Checklist'){
+					echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+					echo 'Occurrence Checklist';
+					echo '</a> &gt; ';
+				}
+			}
+			echo ' <b>'.$clManager->getClName().'</b>';
+			echo '</div>';
+		}
 	}
 	?>
 	<!-- This is inner text! -->
@@ -200,7 +211,7 @@
 			}
 			?>
 			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
-				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid; ?>">
+				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$clManager->getPid()."&dynclid=".$dynClid; ?>">
 					<?php echo $clManager->getClName(); ?>
 				</a>
 			</div>
@@ -208,7 +219,7 @@
 			if($keyModIsActive){
 				?>
 				<div style="float:left;padding-top:5px;">
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$proj."&dynclid=".$dynClid;?>&taxon=All+Species">
+					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$clManager->getPid()."&dynclid=".$dynClid;?>&taxon=All+Species">
 						<img src='../images/key.jpg' style="width:15px;border:0px;" title='Open Symbiota Key' />
 					</a>&nbsp;&nbsp;&nbsp;
 				</div>
@@ -281,7 +292,7 @@
 				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
-				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
+				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($proj?'&proj='.$clManager->getPid():'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
 					<div id="mdtab">
@@ -349,7 +360,7 @@
 									<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 								</div>
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
+								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
 							</fieldset>
 						</form>
 					</div>
@@ -431,6 +442,7 @@
 							<div style="margin:5px 0px 0px 5px;">
 								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
 								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
+								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 								<input type="submit" name="submitaction" value="Rebuild List" />
 								<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
@@ -504,7 +516,7 @@
 									</div>
 								</div>
 								<input type="hidden" name="cl" value="<?php echo $clManager->getClid(); ?>" />
-								<input type="hidden" name="proj" value="<?php echo $proj; ?>" />
+								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
 								<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 								<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
 								<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
@@ -552,7 +564,7 @@
 						if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
 						$argStr .= "&cl=".$clValue."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-						$argStr .= ($proj?"&proj=".$proj:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+						$argStr .= ($proj?"&proj=".$clManager->getPid():"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
 						echo "<hr /><div>Page <b>".($pageNumber+1)."</b> of <b>$pageCount</b>: ";
 						for($x=0;$x<$pageCount;$x++){
@@ -591,7 +603,7 @@
 								echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
 								$imgSrc = ($sppArr["tnurl"]?$sppArr["tnurl"]:$sppArr["url"]);
 								echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
-								$spUrl = "../taxa/index.php?taxauthid=0&taxon=$tid&cl=".$clManager->getClid();
+								$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
 								if($imgSrc){
 									$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 									echo "<a href='".$spUrl."'>";
@@ -636,7 +648,7 @@
 									<img src='../images/edit.png' style='width:13px;' title='edit details' />
 								</span>
 								<?php if($showVouchers && $dynSqlExists){ ?>
-								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $sppArr["sciname"]."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
+								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
 									<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
 								</span>
 								<?php
@@ -651,7 +663,7 @@
 								if(array_key_exists('vouchers',$sppArr)){
 									$vArr = $sppArr['vouchers'];
 									foreach($vArr as $occid => $collName){
-										$voucStr .= ", <a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
+										$voucStr .= ", <a style='cursor:pointer' onclick=\"return openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
 									}
 									$voucStr = substr($voucStr,2);
 								}

@@ -38,7 +38,7 @@
 			"FROM (fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid) ".
 			"INNER JOIN fmchecklists c ON cpl.clid = c.CLID ".
 			"WHERE (c.access = 'public' AND p.ispublic = 1) ";
-		if($this->projectId) $sql .= "AND p.pid = ".$this->con->real_escape_string($this->projectId)." ";
+		if($this->projectId) $sql .= "AND (p.pid = ".$this->projectId.") ";
 		$sql .= "ORDER BY p.SortSequence, p.projname, c.SortSequence, c.Name";
 		//echo $sql;
 		$rs = $this->con->query($sql);
@@ -54,7 +54,7 @@
 			"FROM (fmprojects p INNER JOIN omsurveyprojlink spl ON p.pid = spl.pid) ".
 			"INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
 			"WHERE (p.ispublic = 1 AND s.ispublic = 1) ";
-		if($this->projectId) $sql .= "AND p.pid = ".$this->con->real_escape_string($this->projectId)." ";
+		if($this->projectId) $sql .= "AND (p.pid = ".$this->projectId.") ";
 		$sql .= "ORDER BY p.SortSequence, p.projname, s.SortSequence, s.projectname";
 		//echo $sql;
 		$rs = $this->con->query($sql);
@@ -64,5 +64,4 @@
 		return $returnArr;
 	}
 }
-
- ?>
+?>

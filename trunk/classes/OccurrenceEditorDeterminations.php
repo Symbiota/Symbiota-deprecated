@@ -22,7 +22,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
 			"identificationQualifier, identificationReferences, identificationRemarks, sortsequence ".
 			"FROM omoccurdeterminations ".
-			"WHERE occid = ".$this->occId." ORDER BY sortsequence";
+			"WHERE (occid = ".$this->occId.") ORDER BY sortsequence";
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -67,7 +67,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 					'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, IFNULL(dateidentified,"assumed to be collection date") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-					'FROM omoccurrences WHERE occid = '.$detArr['occid'];
+					'FROM omoccurrences WHERE (occid = '.$detArr['occid'].')';
 				$this->conn->query($sqlInsert);
 				//echo "<div>".$sqlInsert."</div>";
 				//Load new determination into omoccurrences table
@@ -80,7 +80,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
 					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').', '.
 					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' '.
-					'WHERE occid = '.$detArr['occid'];
+					'WHERE (occid = '.$detArr['occid'].')';
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
 			}
@@ -88,7 +88,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			if(array_key_exists('remapimages',$detArr) && $detArr['remapimages'] == "1") $remapImages = true;
 			if($remapImages){
 				if($detArr['tidtoadd']){
-					$sql = 'UPDATE images SET tid = '.$detArr['tidtoadd'].' WHERE occid = '.$detArr['occid'];
+					$sql = 'UPDATE images SET tid = '.$detArr['tidtoadd'].' WHERE (occid = '.$detArr['occid'].')';
 					//echo $sql;
 					$this->conn->query($sql);
 				}
@@ -112,7 +112,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
 			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.
 			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').' '.
-			'WHERE detid = '.$detArr['detid'];
+			'WHERE (detid = '.$detArr['detid'].')';
 		if(!$this->conn->query($sql)){
 			$status = "ERROR - failed to edit determination: ".$this->conn->error;
 		}
@@ -121,7 +121,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 	public function deleteDetermination($detId){
 		$status = 'Determination deleted successfully!';
-		$sql = 'DELETE FROM omoccurdeterminations WHERE detid = '.$detId;
+		$sql = 'DELETE FROM omoccurdeterminations WHERE (detid = '.$detId.')';
 		if(!$this->conn->query($sql)){
 			$status = "ERROR - failed to delete determination: ".$this->conn->error;
 		}
@@ -135,12 +135,12 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 			'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-			'FROM omoccurrences WHERE occid = '.$this->occId;
+			'FROM omoccurrences WHERE (occid = '.$this->occId.')';
 		$this->conn->query($sqlInsert);
 		//echo "<div>".$sqlInsert."</div>";
 		//Update omoccurrences to reflect this determination
 		$tid = 0;
-		$sqlTid = 'SELECT t.tid FROM omoccurdeterminations d INNER JOIN taxa t ON d.sciname = t.sciname WHERE d.detid = '.$detId;
+		$sqlTid = 'SELECT t.tid FROM omoccurdeterminations d INNER JOIN taxa t ON d.sciname = t.sciname WHERE (d.detid = '.$detId.')';
 		$rs = $this->conn->query($sqlTid);
 		if($r = $rs->fetch_object()){
 			$tid = $r->tid;
@@ -148,7 +148,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$rs->close();
 		$family = '';
 		if($tid){
-			$sqlFam = 'SELECT family FROM taxstatus WHERE taxauthid = 1 AND tid = '.$tid;
+			$sqlFam = 'SELECT family FROM taxstatus WHERE taxauthid = 1 AND (tid = '.$tid.')';
 			$rs = $this->conn->query($sqlFam);
 			if($r = $rs->fetch_object()){
 				$family = $r->family;
@@ -159,13 +159,13 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'o.sciname = d.sciname,o.genus = NULL,o.specificEpithet = NULL,o.taxonRank = NULL,o.infraspecificepithet = NULL,o.scientificname = NULL,'.
 			'o.scientificNameAuthorship = d.scientificnameauthorship,o.identificationQualifier = d.identificationqualifier,'.
 			'o.identificationReferences = d.identificationreferences,o.identificationRemarks = d.identificationremarks,'.
-			'o.tidinterpreted = '.($tid?$tid:'NULL').' WHERE detid = '.$detId;
+			'o.tidinterpreted = '.($tid?$tid:'NULL').' WHERE (detid = '.$detId.')';
 		//echo "<div>".$sqlNewDet."</div>";
 		$this->conn->query($sqlNewDet);
 		
 		if($remapImages){
 			if($tid){
-				$sql = 'UPDATE images SET tid = '.$tid.' WHERE occid = '.$this->occId;
+				$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occId.')';
 				//echo $sql;
 				$this->conn->query($sql);
 			}

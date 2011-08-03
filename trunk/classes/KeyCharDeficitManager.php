@@ -35,7 +35,7 @@ class KeyCharDeficitManager{
 		$sql = "SELECT DISTINCT cl.Name, cl.CLID ".
 			"FROM (fmchecklists cl INNER JOIN fmchklstprojlink cpl ON cl.CLID = cpl.clid) ".
 			"INNER JOIN fmprojects p ON cpl.pid = p.pid ";
-		if($this->project) $sql .= "WHERE ".(intval($this->project)?"p.pid = $this->project ":"p.projname = '".$this->project."' ");
+		if($this->project) $sql .= "WHERE ".(intval($this->project)?"(p.pid = ".$this->project.") ":"(p.projname = '".$this->project."') ");
 		$sql .= "ORDER BY cl.Name";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -75,7 +75,7 @@ class KeyCharDeficitManager{
 				"FROM (kmchartaxalink ctl INNER JOIN kmcharacters c ON ctl.CID = c.CID) INNER JOIN kmcharheading ch ON c.hid = ch.hid ".
 				"WHERE (((c.CID) Not In (SELECT DISTINCT CID FROM kmchartaxalink WHERE ((TID In ($strFrag)) ".
 				"AND (Relation='exclude')))) AND ((c.chartype)='UM' Or (c.chartype)='OM') AND (c.defaultlang='".
-				$this->language."') AND ch.language='".$this->language."' AND ((ctl.TID) In ($strFrag))) ".
+				$this->language."') AND (ch.language='".$this->language."') AND (ctl.TID In ($strFrag))) ".
 				"ORDER BY c.hid, c.CID";
 			//echo $sql;
 			$headingArray = Array();		//Heading => Array(CID => CharName)
@@ -104,7 +104,7 @@ class KeyCharDeficitManager{
 		$targetTid = $t;
 		$parentList[] = $targetTid;
 		while($targetTid){
-			$sql = "SELECT ts.ParentTID FROM taxstatus ts WHERE ts.TID = $targetTid AND ts.taxauthid = 1";
+			$sql = "SELECT ts.ParentTID FROM taxstatus ts WHERE (ts.TID = ".$targetTid.") AND ts.taxauthid = 1";
 			//echo $sql;
 			$result = $this->con->query($sql);
 		    if ($row = $result->fetch_object()){
@@ -125,7 +125,7 @@ class KeyCharDeficitManager{
 		$sppStr = $this->getChildren($cidVal, $cfVal, $clVal);
 		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName ".
 			"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ". 
-			"LEFT JOIN (SELECT DISTINCT d1.TID FROM kmdescr d1 WHERE d1.CID = ".$cidVal.") AS d ON t.TID = d.TID ".
+			"LEFT JOIN (SELECT DISTINCT d1.TID FROM kmdescr d1 WHERE (d1.CID = ".$cidVal.")) AS d ON t.TID = d.TID ".
 			"WHERE (ts.taxauthid = 1) AND (t.TID IN (".$sppStr.") AND (d.TID) Is Null) ".
 			"ORDER BY ts.Family, t.SciName";
 		//echo $sql;
@@ -143,7 +143,7 @@ class KeyCharDeficitManager{
 		//Returns a list of children TIDs that are members of selected checklist and only of the 220 rank
  		//Get taxa to exclude
  		$excludeArray = Array();
- 		$sqlEx = "SELECT c.TID FROM kmchartaxalink c WHERE c.CID = ".$cidVal." AND c.Relation = 'exclude'";
+ 		$sqlEx = "SELECT c.TID FROM kmchartaxalink c WHERE (c.CID = ".$cidVal.") AND c.Relation = 'exclude'";
 		$resultEx = $this->con->query($sqlEx);
 		while($row = $resultEx->fetch_object()){
  			$excludeArray[] = $row->TID;
@@ -159,10 +159,10 @@ class KeyCharDeficitManager{
 			$targetList = Array();
 			$sql = "SELECT DISTINCT t.TID, t.rankid, cl.clid ".
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-				"LEFT JOIN (SELECT ctl.tid, ctl.clid From fmchklsttaxalink ctl WHERE ctl.clid = ".$clVal.") AS cl ".
+				"LEFT JOIN (SELECT ctl.tid, ctl.clid From fmchklsttaxalink ctl WHERE (ctl.clid = ".$clVal.")) AS cl ".
 				"ON ts.TID = cl.tid ".
 				"WHERE ts.taxauthid = 1 AND (ts.ParentTID IN(".$targetStr.")) ";
-			if($excludeStr) $sql .= "AND t.TID NOT IN(".$excludeStr.")";
+			if($excludeStr) $sql .= "AND (t.TID NOT IN(".$excludeStr."))";
 			//echo $sql."<br/><br/>";
 			$rankId = 0;
 			$result = $this->con->query($sql);

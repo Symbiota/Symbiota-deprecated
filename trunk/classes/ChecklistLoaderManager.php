@@ -17,7 +17,8 @@ class ChecklistLoaderManager {
 	}
 	
 	public function setClid($c){
-		if($c){
+		$c = $this->conn->real_escape_string($c);
+		if($c && is_numeric($c)){
 			$this->clid = $c;
 			$sql = "SELECT c.name, c.authors FROM fmchecklists c WHERE c.clid = ".$c;
 			$rs = $this->conn->query($sql);
@@ -85,12 +86,12 @@ class ChecklistLoaderManager {
 						$sql = "SELECT t2.tid, ts.family, t2.rankid ".
 							"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
 							"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
-							"WHERE ts.taxauthid = ".$thesId." AND t.sciname = \"".$sciNameStr."\"";
+							"WHERE (ts.taxauthid = ".$thesId.") AND (t.sciname = \"".$sciNameStr."\")";
 					}
 					else{
 						$sql = "SELECT t.tid, ts.family, t.rankid ".
 							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-							"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciNameStr."\"";
+							"WHERE ts.taxauthid = 1 AND (t.sciname = \"".$sciNameStr."\")";
 					}
 					$rs = $this->conn->query($sql);
 					if($rs){
@@ -139,12 +140,12 @@ class ChecklistLoaderManager {
 							$sql = "SELECT t2.tid, ts.family, t2.rankid ".
 								"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
 								"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
-								"WHERE ts.taxauthid = ".$thesId." AND t.sciname = \"".$sciName."\"";
+								"WHERE (ts.taxauthid = ".$thesId.") AND (t.sciname = \"".$sciName."\")";
 						}
 						else{
 							$sql = "SELECT t.tid, ts.family, t.rankid ".
 								"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-								"WHERE ts.taxauthid = 1 AND t.sciname = \"".$sciName."\"";
+								"WHERE ts.taxauthid = 1 AND (t.sciname = \"".$sciName."\")";
 						}
 						//echo $sql;
 						$rs = $this->conn->query($sql);
@@ -211,6 +212,5 @@ class ChecklistLoaderManager {
 			echo "<div style='color:red;'>ERROR: unable to located sciname field</div>";
 		}
 	}
- }
-
- ?>
+}
+?>

@@ -53,7 +53,7 @@ class CollectionProfileManager {
 				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 				"LEFT JOIN institutions i ON c.iid = i.iid ".
-				"WHERE c.collid = ".$this->collId." ORDER BY c.SortSeq";
+				"WHERE (c.collid = ".$this->collId.") ORDER BY c.SortSeq";
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -135,7 +135,7 @@ class CollectionProfileManager {
 					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').' '.
 					($_POST['sortseq']?',sortseq = '.$_POST['sortseq']:'').' ';
 			}
-			$sql .= 'WHERE collid = '.$this->collId;
+			$sql .= 'WHERE (collid = '.$this->collId.')';
 			//echo $sql;
 			$conn->query($sql);
 			$conn->close();

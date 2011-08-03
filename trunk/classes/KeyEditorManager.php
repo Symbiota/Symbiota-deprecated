@@ -39,7 +39,7 @@ class KeyEditorManager{
 		}
 		if($this->taxonName){
 			$sql = "SELECT t.TID, ts.Family, ts.ParentTID, ts.hierarchystr, t.RankId FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE ts.taxauthid = 1 AND t.SciName = '".$this->taxonName."'";
+				"WHERE ts.taxauthid = 1 AND (t.SciName = '".$this->taxonName."')";
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$this->tid = $row->TID;
@@ -50,7 +50,7 @@ class KeyEditorManager{
 		    }
 		}elseif($this->tid){
 			$sql = "SELECT t.SciName, ts.Family, ts.ParentTID, ts.hierarchystr, t.RankId ".
-				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE ts.taxauthid = 1 AND t.TID = ".$this->tid;
+				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE ts.taxauthid = 1 AND (t.TID = ".$this->tid.')';
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$this->taxonName = $row->SciName;
@@ -125,7 +125,7 @@ class KeyEditorManager{
 		$sql = "SELECT c.CharName, c.CID, ch.headingname, dep.CIDDependance, dep.CSDependance ".
 		"FROM ((kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID) ".
 		"INNER JOIN kmcharheading ch ON c.hid = ch.hid) LEFT JOIN kmchardependance dep ON c.CID = dep.CID ".
-		"WHERE (ch.language = '".$this->language."' AND (c.CID Not In (SELECT DISTINCT chartl.CID FROM kmchartaxalink chartl ".
+		"WHERE ((ch.language = '".$this->language."') AND (c.CID Not In (SELECT DISTINCT chartl.CID FROM kmchartaxalink chartl ".
 		"WHERE (chartl.TID In ($this->hierarchy)) AND (chartl.Relation='exclude'))) ".
 		"AND (c.chartype = 'UM' Or c.chartype='OM') AND (ctl.TID In ($this->hierarchy)) AND ".
 		"(c.defaultlang='".$this->language."') AND (ctl.Relation='include')) ".
@@ -158,7 +158,7 @@ class KeyEditorManager{
 	private function setCharStates($cidStr){
 		//cs Array: cid => (cs => charStateName)
 		$sql = "SELECT CID, CS, CharStateName FROM kmcs ".
-			"WHERE CID In ($cidStr) AND Language = '".$this->language."' ".
+			"WHERE (CID In ($cidStr)) AND (Language = '".$this->language."') ".
 		"ORDER BY SortSequence";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -173,7 +173,7 @@ class KeyEditorManager{
 
 	private function setSelectedStates(){
 		//selectedStates Array: cid_cs (ex: 1_3=>" (i)")
-		$sql = "SELECT d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (((d.TID) = $this->tid))";
+		$sql = "SELECT d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (d.TID = $this->tid)";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$cid = $row->CID;
@@ -342,7 +342,7 @@ class KeyEditorManager{
 		$targetTid = $this->tid;
 		$parentList[] = $targetTid;
 		while($targetTid){
-			$sql = "SELECT ts.ParentTID FROM taxstatus ts WHERE ts.taxauthid = 1 AND ts.TID = $targetTid";
+			$sql = "SELECT ts.ParentTID FROM taxstatus ts WHERE ts.taxauthid = 1 AND (ts.TID = ".$targetTid.")";
 			//echo $sql;
 			$result=$this->con->query($sql);
 		    if ($row = $result->fetch_object()){
@@ -354,6 +354,4 @@ class KeyEditorManager{
 		return $parentList;
 	}
 }
-?>
-
-	
+?>	

@@ -24,11 +24,15 @@ class OccurrenceIndividualManager {
 	}
    
  	public function setOccId($o){
-		$this->occId = $o;
+ 		if(is_numeric($o)){
+			$this->occId = $o;
+ 		}
 	}
 	
 	public function setCollId($id){
-		$this->collId = $id;
+ 		if(is_numeric($o)){
+			$this->collId = $id;
+ 		}
 	}
 	
 	public function setDbpk($pk){
@@ -61,10 +65,10 @@ class OccurrenceIndividualManager {
 			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, observeruid '.
 			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';
 		if($this->occId){
-			$sql .= 'WHERE o.occid = '.$this->occId;
+			$sql .= 'WHERE (o.occid = '.$this->occId.')';
 		}
 		elseif($this->collId && $this->dbpk){
-			$sql .= 'WHERE o.collid = '.$this->collId.' AND o.dbpk = "'.$this->dbpk.'"';
+			$sql .= 'WHERE (o.collid = '.$this->collId.') AND (o.dbpk = "'.$this->dbpk.'")';
 		}
 		else{
 			return 'ERROR: Collection acronym was null or empty';
@@ -78,7 +82,7 @@ class OccurrenceIndividualManager {
 		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] == $this->occArr['institutioncode']){
 			$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 			'FROM omcollsecondary '.
-			'WHERE collid = '.$this->occArr['collid'];
+			'WHERE (collid = '.$this->occArr['collid'].')';
 			$rsSec = $this->conn->query($sqlSec);
 			if($r = $rsSec->fetch_object()){
 				$this->occArr['collectionname'] = $r->collectionname;
@@ -140,7 +144,7 @@ class OccurrenceIndividualManager {
 	private function setComments(){
         $sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
 			'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
-			'WHERE c.occid = '.$this->occId.' AND c.reviewstatus = 1 '.
+			'WHERE (c.occid = '.$this->occId.') AND c.reviewstatus = 1 '.
 			'ORDER BY  c.initialtimestamp, u.lastlogin';
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -192,5 +196,4 @@ class OccurrenceIndividualManager {
 		return $retStr;
 	}
 }
-
 ?>

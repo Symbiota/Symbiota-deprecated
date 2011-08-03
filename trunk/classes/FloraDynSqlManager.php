@@ -13,7 +13,9 @@ class FloraDynSqlManager {
 	
 	function __construct($id) {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->clid = $id;
+		if(is_numeric($id)){
+			$this->clid = $id;
+		}
 	}
 
 	function __destruct(){
@@ -22,13 +24,15 @@ class FloraDynSqlManager {
 	
 	public function getDynamicSql(){
 		$sqlStr = "";
-		$sql = "SELECT c.dynamicsql FROM fmchecklists c WHERE c.clid = ".$this->clid;
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$sqlStr = $row->dynamicsql;
+		if($this->clid){
+			$sql = "SELECT c.dynamicsql FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$sqlStr = $row->dynamicsql;
+			}
+			$rs->close();
 		}
-		$rs->close();
 		return $sqlStr;
 	}
 	
@@ -41,7 +45,7 @@ class FloraDynSqlManager {
 	}
 	
 	public function saveSql($sqlFrag){
-		$sql = "UPDATE fmchecklists c SET c.dynamicsql = \"".trim($sqlFrag)."\" WHERE c.clid = ".$this->clid;
+		$sql = "UPDATE fmchecklists c SET c.dynamicsql = \"".trim($sqlFrag)."\" WHERE (c.clid = ".$this->clid.')';
 		$this->conn->query($sql);
 	}
 

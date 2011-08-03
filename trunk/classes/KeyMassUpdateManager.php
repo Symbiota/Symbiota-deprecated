@@ -43,7 +43,7 @@ class KeyMassUpdateManager{
 	}
 	
 	public function setProj($p){
-		$sql = 'SELECT pid, projname FROM fmprojects WHERE pid = "'.$p.'" OR projname = "'.$p.'"';
+		$sql = 'SELECT pid, projname FROM fmprojects WHERE (pid = "'.$p.'") OR (projname = "'.$p.'")';
 		$rs = $this->con->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->pid = $r->pid;
@@ -73,7 +73,7 @@ class KeyMassUpdateManager{
 		$sql = "SELECT cl.CLID, cl.Name FROM fmchecklists cl ";
 		if($this->pid) {
 			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.CLID = cpl.clid ".
-				"WHERE cpl.pid = ".$this->pid." ";
+				"WHERE (cpl.pid = ".$this->pid.") ";
 		}
 		$sql .= "ORDER BY cl.Name";
 		$result = $this->con->query($sql);
@@ -91,7 +91,7 @@ class KeyMassUpdateManager{
 			"INNER JOIN taxstatus ts ON ctl.tid = ts.tid) 
 			INNER JOIN taxa t ON ts.tidaccepted = t.TID ";
 		$sqlWhere = "";
-		if($this->clidFilter && $this->clidFilter != "all") $sqlWhere .= "ctl.CLID = ".$this->clidFilter." ";
+		if($this->clidFilter && $this->clidFilter != "all") $sqlWhere .= "(ctl.CLID = ".$this->clidFilter.") ";
 		if($this->pid) $sqlWhere .= ($sqlWhere?"AND ":"")."(cpl.pid = '".$this->pid."') ";
 		if($sqlWhere) $sql = $sql."WHERE ".$sqlWhere;
 		//echo $sql;
@@ -144,7 +144,7 @@ class KeyMassUpdateManager{
 		$targetTaxon = $t;
 		while($targetTaxon){
 			$sql = "SELECT t.TID, ts.ParentTID FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE ts.taxauthid = 1 AND ".(intval($targetTaxon)?"t.TID = $targetTaxon":"t.SciName = '".$t."'");
+				"WHERE ts.taxauthid = 1 AND ".(intval($targetTaxon)?"(t.TID = ".$targetTaxon.")":"(t.SciName = '".$t."')");
 			$result = $this->con->query($sql);
 		    if ($row = $result->fetch_object()){
 					$targetTaxon = $row->ParentTID;
@@ -163,7 +163,7 @@ class KeyMassUpdateManager{
 	public function getStates(){
 		$stateArr = Array();
 		$sql = "SELECT kmcs.CharStateName, kmcs.CS FROM kmcs ".
-			"WHERE kmcs.Language = '".$this->lang."' AND kmcs.CID = $this->cid ORDER BY kmcs.SortSequence";
+			"WHERE (kmcs.Language = '".$this->lang."') AND (kmcs.CID = ".$this->cid.") ORDER BY kmcs.SortSequence";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$stateArr[$row->CS] = $row->CharStateName;
@@ -175,7 +175,7 @@ class KeyMassUpdateManager{
 	public function getTaxaList(){
 		//Get list of Char States
  		$stateList = Array();
-		$sql = "SELECT kmcs.CS, kmcs.CharStateName FROM kmcs WHERE kmcs.CID = $this->cid";
+		$sql = "SELECT kmcs.CS, kmcs.CharStateName FROM kmcs WHERE (kmcs.CID = ".$this->cid.")";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$stateList[$row->CS] = $row->CharStateName; 
@@ -194,7 +194,7 @@ class KeyMassUpdateManager{
 		}
 		$sql .= "WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.Family='".$this->taxonNameFilter."' OR t.SciName Like '".$this->taxonNameFilter." %') ";
 		if($this->clidFilter && $this->clidFilter != "all"){
-			$sql .= "AND (ctl.CLID = $this->clidFilter)" ;
+			$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
 		}
 		//echo $sql;
 		$rs = $this->con->query($sql);
@@ -219,7 +219,7 @@ class KeyMassUpdateManager{
 		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
 		"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
 		"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
-		"WHERE (di.CID=$this->cid)) AS d ON t.TID = d.TID ".
+		"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
 		"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
@@ -328,7 +328,7 @@ class KeyMassUpdateManager{
 			//unset($targetList);
 			$targetList = Array();
 			$sql = "SELECT DISTINCT t.TID FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND t.RankId > 140 AND t.RankId <= 220 AND ts.ParentTID In ($targetStr)";
+				"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND t.RankId > 140 AND t.RankId <= 220 AND (ts.ParentTID In ($targetStr))";
 			//echo $sql."<br/>";
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
@@ -343,6 +343,4 @@ class KeyMassUpdateManager{
 		$this->childrenStr = implode(",",array_unique($childrenArr));
 	}
 }
-?>
-
-	
+?>	

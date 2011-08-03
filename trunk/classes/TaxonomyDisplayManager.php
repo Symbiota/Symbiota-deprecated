@@ -13,7 +13,7 @@ class TaxonomyDisplayManager{
 	private $targetStr = "";
 	
 	function __construct($target){
-		$this->targetStr = trim(ucfirst($target));
+		$this->targetStr = $conn->real_escape_string(trim(ucfirst($target)));
 	}
 
 	public function getTaxa(){
@@ -29,11 +29,10 @@ class TaxonomyDisplayManager{
 				"INNER JOIN taxa t1 ON ts1.tid = t1.tid ".
 				"WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) ";
 			if(is_numeric($this->targetStr)){
-				$sql .= "AND (t.tid IN(".implode(",",$this->targetTids).") OR ts1.tid = ".$conn->real_escape_string($this->targetTid).")";
+				$sql .= "AND (t.tid IN(".implode(",",$this->targetStr).") OR (ts1.tid = ".$this->targetStr."))";
 			}
 			else{
-				$sql .= "AND (t.sciname LIKE '".$conn->real_escape_string($this->targetStr).
-					"%' OR t1.sciname LIKE '".$conn->real_escape_string($this->targetStr)."%')";
+				$sql .= "AND ((t.sciname LIKE '".$this->targetStr."%') OR (t1.sciname LIKE '".$this->targetStr."%'))";
 			}
 			//echo "<div>".$sql."</div>";
 			$rs = $conn->query($sql);
@@ -63,9 +62,9 @@ class TaxonomyDisplayManager{
 			//Add sql fragments that will grab the children taxa
 			$innerSql = "";
 			foreach($this->taxaArr as $t => $tArr){
-				$innerSql .= "OR ts.hierarchystr LIKE '%,".$t.",%' ";	
+				$innerSql .= "OR (ts.hierarchystr LIKE '%,".$t.",%') ";
 			}
-			if($hArray) $innerSql .= "OR t.tid IN(".implode(",",array_unique($hArray)).") ";
+			if($hArray) $innerSql .= "OR (t.tid IN(".implode(",",array_unique($hArray)).")) ";
 			$sql .= substr($innerSql,3).")";
 			//echo $sql."<br>";
 			$result = $conn->query($sql);
@@ -96,7 +95,7 @@ class TaxonomyDisplayManager{
 			if($orphanTaxa){
 				$sqlOrphan = "SELECT t.tid, t.sciname, t.author, ts.parenttid, t.rankid ".
 					"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-					"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND t.tid IN (".implode(",",$orphanTaxa).")";
+					"WHERE (ts.taxauthid = 1) AND (ts.tid = ts.tidaccepted) AND (t.tid IN (".implode(",",$orphanTaxa)."))";
 				//echo $sqlOrphan;
 				$rsOrphan = $conn->query($sqlOrphan);
 				while($row = $rsOrphan->fetch_object()){

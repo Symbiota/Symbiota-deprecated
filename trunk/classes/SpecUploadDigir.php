@@ -38,7 +38,7 @@ class SpecUploadDigir extends SpecUploadManager {
 			$this->schemaName = $this->defaultSchema;
 		}
  		//Delete all records in uploadspectemp table
-		$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
+		$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 		$this->conn->query($sqlDel);
  		
 		echo "<li style='font-weight:bold;'>Starting record harvest</li>\n";

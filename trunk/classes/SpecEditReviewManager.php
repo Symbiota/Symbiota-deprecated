@@ -20,9 +20,9 @@ class SpecEditReviewManager {
 	}
 	
 	public function setCollId($id){
-		if($id){
+		if($id && is_numeric($id)){
 			$this->collId = $id;
-			$sql = 'SELECT collectionname, institutioncode, collectioncode FROM omcollections WHERE collid = '.$id;
+			$sql = 'SELECT collectionname, institutioncode, collectioncode FROM omcollections WHERE (collid = '.$id.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$collName = $r->collectionname.' (';
@@ -46,14 +46,14 @@ class SpecEditReviewManager {
 			'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE o.collid = '.$this->collId;
+			'WHERE (o.collid = '.$this->collId.')';
 		if($aStatus === '0' || $aStatus == 1) $sql .= ' AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
 			if($rStatus == '1-2'){
-				$sql .= ' AND e.reviewstatus IN(1,2) ';
+				$sql .= ' AND (e.reviewstatus IN(1,2)) ';
 			}
 			else{
-				$sql .= ' AND e.reviewstatus = '.$rStatus.' ';
+				$sql .= ' AND (e.reviewstatus = '.$rStatus.') ';
 			}
 		}
 		$sql .= ' ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
@@ -83,11 +83,11 @@ class SpecEditReviewManager {
 			if($applyTask == 'apply'){
 				//Apply edits with applied status = 0
 				$sql = 'SELECT occid, fieldname, fieldvaluenew '.
-					'FROM omoccuredits WHERE appliedstatus = 0 AND ocedid IN('.implode(',',$ocedidArr).')';
+					'FROM omoccuredits WHERE appliedstatus = 0 AND (ocedid IN('.implode(',',$ocedidArr).'))';
 				$rs = $this->conn->query($sql);
 				$eCnt=0;$oCnt=0;$lastOccid = 0;
 				while($r = $rs->fetch_object()){
-					$uSql = 'UPDATE omoccurrences SET '.$r->fieldname.' = "'.$r->fieldvaluenew.'" WHERE occid = '.$r->occid;
+					$uSql = 'UPDATE omoccurrences SET '.$r->fieldname.' = "'.$r->fieldvaluenew.'" WHERE (occid = '.$r->occid.')';
 					//echo '<div>'.$uSql.'</div>';
 					$this->conn->query($uSql);
 					$eCnt++;
@@ -99,11 +99,11 @@ class SpecEditReviewManager {
 			else{
 				//Revert edits with applied status = 1
 				$sql = 'SELECT occid, fieldname, fieldvalueold '.
-					'FROM omoccuredits WHERE appliedstatus = 1 AND ocedid IN('.implode(',',$ocedidArr).')';
+					'FROM omoccuredits WHERE appliedstatus = 1 AND (ocedid IN('.implode(',',$ocedidArr).'))';
 				$rs = $this->conn->query($sql);
 				$oCnt=0;$lastOccid = 0;
 				while($r = $rs->fetch_object()){
-					$uSql = 'UPDATE omoccurrences SET '.$r->fieldname.' = "'.$r->fieldvalueold.'" WHERE occid = '.$r->occid;
+					$uSql = 'UPDATE omoccurrences SET '.$r->fieldname.' = "'.$r->fieldvalueold.'" WHERE (occid = '.$r->occid.')';
 					//echo '<div>'.$uSql.'</div>';
 					$this->conn->query($uSql);
 					if($r->occid != $lastOccid) $oCnt++;
@@ -113,7 +113,7 @@ class SpecEditReviewManager {
 			}
 			//Change status
 			$sql = 'UPDATE omoccuredits SET reviewstatus = '.$reqArr['rstatus'].',appliedstatus = '.($applyTask=='apply'?1:0).' '.
-				'WHERE ocedid IN('.implode(',',$ocedidArr).')';
+				'WHERE (ocedid IN('.implode(',',$ocedidArr).'))';
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -133,7 +133,7 @@ class SpecEditReviewManager {
 			'CONCAT_WS(" ",u.firstname,u.lastname) AS username '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE o.collid = '.$this->collId.' AND ocedid IN('.implode(',',$ocedidArr).') '.
+			'WHERE (o.collid = '.$this->collId.') AND (ocedid IN('.implode(',',$ocedidArr).')) '.
 			'ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
@@ -168,7 +168,7 @@ class SpecEditReviewManager {
 				'FROM omcollections c '.
 				'WHERE colltype LIKE "%specimens%" ';
 			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'AND c.collid IN('.implode(',',$userRights['CollAdmin']).') '; 
+				$sql .= 'AND (c.collid IN('.implode(',',$userRights['CollAdmin']).')) ';
 			}
 			$sql .= 'ORDER BY c.collectionname';
 			//echo $sql;

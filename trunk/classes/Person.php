@@ -36,7 +36,9 @@ class Person{
     } 
     
     public function setUid($id){
-        $this->uid = $id;
+    	if(is_numeric($id)){
+	        $this->uid = $id;
+    	}
     } 
     
     public function getUserName(){

@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/ChecklistManager.php');
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
 $startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
+$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:''; 
 $clManager = new ChecklistManager();
 $clManager->setClValue($clid);
@@ -91,7 +92,7 @@ $clManager->getNonVoucheredCnt();
 		</fieldset>
 	</li>
 	<li>
-		<a href="checklist.php?cl=<?php echo $clid; ?>&submitaction=ListNonVouchered&tabindex=1&emode=2">
+		<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListNonVouchered&tabindex=1&emode=2">
 			<b>List Non-vouchered Taxa</b>
 		</a> 
 		<div style="margin-left:5px;">
@@ -105,7 +106,7 @@ $clManager->getNonVoucheredCnt();
 	<li>
 		<?php
 		if($clManager->getVoucherCnt()){
-			echo '<a href="checklist.php?cl='.$clid.'&submitaction=VoucherConflicts&tabindex=1&emode=2">';
+			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=VoucherConflicts&tabindex=1&emode=2">';
 		}
 		else{
 			echo '<a href="#" onclick="alert(\'There are no conflicts because no vouchers have yet been linked to this checklist\')">';
@@ -122,7 +123,7 @@ $clManager->getNonVoucheredCnt();
 	<li>
 		<?php 
 		if($dynSql){
-			echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListMissingTaxa&tabindex=1&emode=2">';
+			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListMissingTaxa&tabindex=1&emode=2">';
 		}
 		else{
 			echo '<a href="#" onclick="alert(\'SQL Fragment needs to be established before this function can be used\');toggle(\'sqlfragdiv\');">';
@@ -131,14 +132,15 @@ $clManager->getNonVoucheredCnt();
 		<b>Search for Missing Taxa</b>
 		</a>
 		<div style="margin-left:5px;">
-			Look for specimens collected within the research area that represent taxa not yet added to list
+			Look for specimens collected within the research area that represent taxa not yet added to list. 
+			Be patient, this list may take a minute or so to render even though it might not seem like anything is happening.
 		</div>
 	</li>
 	<?php 
 	if($clManager->hasChildrenChecklists()){
 		?>
 		<li>
-			<a href="checklist.php?cl=<?php echo $clid; ?>&submitaction=ListChildTaxa&tabindex=1&emode=2">
+			<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListChildTaxa&tabindex=1&emode=2">
 				<b>List New Taxa from Children Lists</b>
 			</a> 
 			<div style="margin-left:5px;">
@@ -169,7 +171,7 @@ if($action == 'VoucherConflicts'){
 				?>
 				<tr>
 					<td>
-						<a href="#" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');return false;">
+						<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
 							<?php echo $vArr['listid'] ?>
 						</a>
 					</td>
@@ -210,20 +212,23 @@ elseif($action == 'ListNonVouchered'){
 				echo '<div style="margin:10px;text-decoration:italic;">';
 				foreach($tArr as $tid => $sciname){
 					echo '<div>';
-					if($dynSql) echo '<a href="#" onclick="openPopup(\'../collections/list.php?db=all&thes=1&reset=1&taxa='.$sciname.'&clid='.$clid.'&targettid='.$tid.'\',\'editorwindow\');return false;">';
-					echo $sciname;
-					if($dynSql) echo '</a>';
+					echo '<a href="#" onclick="return openPopup(\'../taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid.'\',\'taxawindow\');">'.$sciname.'</a> ';
+					if($dynSql){
+						echo '<a href="#" onclick="return openPopup(\'../collections/list.php?db=all&thes=1&reset=1&taxa='.$tid.'&clid='.$clid.'&targettid='.$tid.'\',\'editorwindow\');">';
+						echo '<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />';
+						echo '</a>';
+					}
 					echo '</div>';
 				}
 				echo '</div>';
 			}
 			if($nonVoucherCnt > 100){
 				echo '<div style="text-weight:bold;">';
-				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
 				echo '&lt;&lt; Previous';
 				if($startPos > 100) echo '</a>';
 				echo ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
 				echo 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
 				echo '</div>';
@@ -252,11 +257,11 @@ elseif($action == 'ListMissingTaxa'){
 			$paginationStr = '';
 			if(count($missingArr) > 100){
 				$paginationStr = '<div style="margin:15px;text-weight:bold;width:100%;text-align:right;">';
-				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
 				$paginationStr .= '&lt;&lt; Previous';
 				if($startPos > 100) $paginationStr .= '</a>';
 				$paginationStr .= ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
 				$paginationStr .= 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '</a>';
 				$paginationStr .= '</div>';
@@ -264,7 +269,7 @@ elseif($action == 'ListMissingTaxa'){
 			}
 			foreach($missingArr as $tid => $sn){
 				echo '<div>';
-				echo '<a href="#" onclick="openPopup(\'../collections/list.php?db=all&thes=1&reset=1&taxa='.$sn.'&clid='.$clid.'&targettid='.$tid.'\',\'editorwindow\');return false;">';
+				echo '<a href="#" onclick="return openPopup(\'../collections/list.php?db=all&thes=1&reset=1&taxa='.$sn.'&clid='.$clid.'&targettid='.$tid.'\',\'editorwindow\');">';
 				echo $sn;
 				echo '</a>';
 				echo '</div>';

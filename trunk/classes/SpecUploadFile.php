@@ -45,7 +45,7 @@ class SpecUploadFile extends SpecUploadManager{
 			ini_set("upload_max_filesize",10);
 	
 			//First, delete all records in uploadspectemp table associated with this collection
-			$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
+			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$this->conn->query($sqlDel);
 			
 			$fullPath = $this->getUploadTargetPath()."/".$this->ulFileName;

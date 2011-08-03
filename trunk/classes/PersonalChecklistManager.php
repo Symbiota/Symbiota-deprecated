@@ -20,7 +20,7 @@ class PersonalChecklistManager{
 	
 	public function getChecklists($uid){
 		$returnArr = Array();
-		$sql = "SELECT c.clid, c.name FROM fmchecklists c WHERE uid = ".$uid;
+		$sql = "SELECT c.clid, c.name FROM fmchecklists c WHERE (uid = ".$uid.')';
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->clid] = $row->name;
@@ -54,9 +54,9 @@ class PersonalChecklistManager{
 	}
 
 	public function deleteChecklist($clidDel){
-		$sql = "DELETE FROM fmchklsttaxalink WHERE clid = ".$clidDel;
+		$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$clidDel.')';
 		$this->conn->query($sql);
-		$sql = "DELETE FROM fmchecklists WHERE clid = ".$clidDel;
+		$sql = "DELETE FROM fmchecklists WHERE (clid = ".$clidDel.')';
 		//echo $sql;
 		return $this->conn->query($sql);
 	}
@@ -70,6 +70,4 @@ class PersonalChecklistManager{
 		$rs->close();
 	}
 }
-
-
 ?>

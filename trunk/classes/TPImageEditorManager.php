@@ -34,7 +34,7 @@ class TPImageEditorManager extends TPEditorManager{
 		$imageArr = Array();
 		$tidArr = Array($this->tid);
 		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
-			'WHERE taxauthid = 1 AND tid = tidaccepted AND (hierarchystr LIKE "%,'.$this->tid.',%" OR hierarchystr LIKE "%,'.$this->tid.'")';
+			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
 		$rs1 = $this->taxonCon->query($sql1);
 		while($r1 = $rs1->fetch_object()){
 			$tidArr[] = $r1->tid;
@@ -48,7 +48,7 @@ class TPImageEditorManager extends TPEditorManager{
 			'ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
-			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
+			'WHERE ts.taxauthid = 1 AND (ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
 			'ORDER BY ti.sortsequence'; 
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
@@ -88,11 +88,12 @@ class TPImageEditorManager extends TPEditorManager{
 	public function editImageSort($imgSortEdits){
 		$status = "";
 		foreach($imgSortEdits as $editKey => $editValue){
-			$sql = "UPDATE images SET sortsequence = ".$this->taxonCon->real_escape_string($editValue)." WHERE imgid = ".
-				$this->taxonCon->real_escape_string($editKey);
-			//echo $sql;
-			if(!$this->taxonCon->query($sql)){
-				$status .= $this->taxonCon->error."\nSQL: ".$sql."; ";
+			if(is_numeric($editKey) && is_numeric($editValue)){
+				$sql = "UPDATE images SET sortsequence = ".$editValue." WHERE imgid = ".$editKey;
+				//echo $sql;
+				if(!$this->taxonCon->query($sql)){
+					$status .= $this->taxonCon->error."\nSQL: ".$sql."; ";
+				}
 			}
 		}
 		if($status) $status = "with editImageSort method: ".$status;

@@ -64,10 +64,10 @@ class TaxonProfileManager {
 			"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
 			"WHERE (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") ";
 		if(intval($t)){
-			$sql .= "AND t.TID = ".$this->con->real_escape_string($t)." ";
+			$sql .= "AND (t.TID = ".$this->con->real_escape_string($t).") ";
 		}
 		else{
-			$sql .= "AND t.SciName = '".$this->con->real_escape_string($t)."' ";
+			$sql .= "AND (t.SciName = '".$this->con->real_escape_string($t)."') ";
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -189,7 +189,9 @@ class TaxonProfileManager {
  	}
  	
  	public function setTaxAuthId($id){
- 		$this->taxAuthId = $this->con->real_escape_string($id);
+ 		if(is_numeric($id)){
+	 		$this->taxAuthId = $this->con->real_escape_string($id);
+ 		}
  	}
 
 	public function setSppData(){
@@ -213,7 +215,7 @@ class TaxonProfileManager {
 				"FROM (taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tid) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ctl.TID = ts.tid ".
 				"WHERE (ctl.clid = ".$this->clid.") AND (ts.taxauthid = 1) AND ".
-				"(ts.hierarchystr LIKE '%,".$this->tid.",%' OR ts.hierarchystr LIKE '%,".$this->tid."')";
+				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";
 		}
 		elseif($this->pid){
 			/*$sql = "(SELECT DISTINCT t.tid, t.SciName, t.Author, t.securitystatus ".
@@ -237,8 +239,8 @@ class TaxonProfileManager {
 				"INNER JOIN taxstatus ts2 ON t.Tid = ts2.tidaccepted) ".
 				"INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID) ".
 				"INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid ".
-				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = ".$this->con->real_escape_string($this->pid).") AND ".
-				"(ts.hierarchystr LIKE '%,".$this->tid.",%' OR ts.hierarchystr LIKE '%,".$this->tid."')";
+				"WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (cpl.pid = ".$this->pid.") AND ".
+				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";
 		}
 		else{
 			/*$sql = "SELECT DISTINCT t.tid, t.sciname, t.Author, t.securitystatus ".
@@ -249,7 +251,7 @@ class TaxonProfileManager {
 				"CONCAT_WS(' ',t.unitname1, t.unitname2) AS sciname, t.securitystatus ".
 				"FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.Tid ".
 				"WHERE (ts.taxauthid = 1) AND (ts.Tid = ts.TidAccepted) AND ".
-				"(ts.hierarchystr LIKE '%,".$this->tid.",%' OR ts.hierarchystr LIKE '%,".$this->tid."')";
+				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";
 		}
 		//echo $sql;
 		
@@ -271,7 +273,7 @@ class TaxonProfileManager {
 			$sql = "SELECT DISTINCT t.tid, t.sciname, t.securitystatus ".
 				"FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.TidAccepted ".
 				"WHERE (ts.taxauthid = 1) AND (t.rankid = 220) AND ".
-				"(ts.hierarchystr LIKE '%,".$this->tid.",%' OR ts.hierarchystr LIKE '%,".$this->tid."')";
+				"((ts.hierarchystr LIKE '%,".$this->tid.",%') OR (ts.hierarchystr LIKE '%,".$this->tid."'))";
 			//echo $sql;
 			
 			$result = $this->con->query($sql);
@@ -299,7 +301,7 @@ class TaxonProfileManager {
 				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
-				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tid IN('.implode(',',$tids).') '.
+				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tids).')) '.
 				'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid '.
 				'INNER JOIN taxa t ON i2.tid = t.tid '.
 				'LEFT JOIN users u ON i.photographeruid = u.uid ';
@@ -338,10 +340,11 @@ class TaxonProfileManager {
 	
 	public function setVernaculars(){
 		$this->vernaculars = Array();
-		$sql = "SELECT DISTINCT v.VernacularName ".
-			"FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted ".
-			"WHERE (ts.TID = $this->tid) AND (v.SortSequence < 90) AND (v.Language = '".$this->language."') ".
-			"ORDER BY v.SortSequence";
+		$sql = 'SELECT DISTINCT v.VernacularName '.
+			'FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
+			'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) AND (v.Language = "'.$this->language.'") '.
+			'ORDER BY v.SortSequence';
+		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$this->vernaculars[] = $row->VernacularName;
@@ -369,15 +372,15 @@ class TaxonProfileManager {
  	
  	public function setSynonyms(){
 		$this->synonyms = Array();
-		$sql = "SELECT t.tid, t.SciName, t.Author ".
-			"FROM taxstatus ts INNER JOIN taxa t ON ts.Tid = t.TID ".
-			"WHERE (ts.TidAccepted = ".$this->tid.") AND (ts.taxauthid = ".
-			($this->taxAuthId?$this->taxAuthId:"1").") AND ts.SortSequence < 90 ".
-			"ORDER BY ts.SortSequence, t.SciName";
+		$sql = 'SELECT t.tid, t.SciName, t.Author '.
+			'FROM taxstatus ts INNER JOIN taxa t ON ts.Tid = t.TID '.
+			'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = '.
+			($this->taxAuthId?$this->taxAuthId:'1').') AND ts.SortSequence < 90 '.
+			'ORDER BY ts.SortSequence, t.SciName';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
-			$this->synonyms[$row->tid] = "<i>".$row->SciName."</i> ".$row->Author;
+			$this->synonyms[$row->tid] = '<i>'.$row->SciName.'</i> '.$row->Author;
 		}
 		$result->close();
 		if(!$this->taxAuthId && ($this->tid != $this->submittedTid)){
@@ -418,7 +421,7 @@ class TaxonProfileManager {
 	private function setTaxaImages(){
 		$tidArr = Array($this->tid);
 		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
-			'WHERE taxauthid = 1 AND tid = tidaccepted AND (hierarchystr LIKE "%,'.$this->tid.',%" OR hierarchystr LIKE "%,'.$this->tid.'")';
+			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
 		$rs1 = $this->con->query($sql1);
 		while($r1 = $rs1->fetch_object()){
 			$tidArr[] = $r1->tid;
@@ -427,12 +430,12 @@ class TaxonProfileManager {
 		
 		$tidStr = implode(",",$tidArr);
 		$this->imageArr = Array();
-		$sql = "SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ".
-			"IFNULL(ti.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographer ".
-			"FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) ".
-			"INNER JOIN taxstatus ts ON ti.tid = ts.tid ".
-			"WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ($tidStr)) AND ti.SortSequence < 500 ".
-			"ORDER BY ti.sortsequence";
+		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, '.
+			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
+			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
+			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
+			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 '.
+			'ORDER BY ti.sortsequence';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -507,10 +510,9 @@ class TaxonProfileManager {
 	public function getTaxaLinks(){
 		$links = Array();
 		//Get hierarchy string
-		$hierStr = "";
-		$sqlHier = "SELECT ts.hierarchystr ".
-			"FROM taxstatus ts ".
-			"WHERE ts.taxauthid = 1 AND ts.tid = ".$this->tid;
+		$hierStr = '';
+		$sqlHier = 'SELECT ts.hierarchystr FROM taxstatus ts '.
+			'WHERE ts.taxauthid = 1 AND (ts.tid = '.$this->tid.')';
 		//echo $sqlHier;
 		$resultHier = $this->con->query($sqlHier);
 		while($rowHier = $resultHier->fetch_object()){
@@ -520,9 +522,8 @@ class TaxonProfileManager {
 
 		//Get links
 		if($hierStr){
-			$sql = "SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes ".
-				"FROM taxalinks tl ".
-				"WHERE tl.tid IN($hierStr) ORDER BY tl.sortsequence";
+			$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes FROM taxalinks tl '.
+				'WHERE (tl.tid IN('.$hierStr.')) ORDER BY tl.sortsequence';
 			//echo $sql;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
@@ -540,12 +541,12 @@ class TaxonProfileManager {
 	public function getMapUrl($tidObj = 0){
 		global $occurrenceModIsActive,$isAdmin,$userRights;
 		$urlArr = Array();
- 		$tidStr = "";
+ 		$tidStr = '';
  		if($tidObj){
 	 		if(is_array($tidObj)){
 	 			$tidStr = implode(",",$tidObj);
 	 		}
-	 		else{
+	 		elseif(is_numeric($tidObj)){
 	 			$tidStr = $tidObj;
 	 		}
  		}
@@ -564,19 +565,21 @@ class TaxonProfileManager {
 	
  	private function getTaxaMap($tidStr){
 		$maps = Array();
-		$sql = "SELECT tm.url, t.sciname ".
-			"FROM taxamaps tm INNER JOIN taxa t ON tm.tid = t.tid ".
-			"WHERE t.tid IN(".$tidStr.")";
-		//echo $sql;
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+		if($tidStr){
+			$sql = 'SELECT tm.url, t.sciname '.
+				'FROM taxamaps tm INNER JOIN taxa t ON tm.tid = t.tid '.
+				'WHERE (t.tid IN('.$tidStr.'))';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			if($row = $result->fetch_object()){
+				$imgUrl = $row->url;
+				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				}
+				$maps[$row->sciname] = $imgUrl;
 			}
-			$maps[$row->sciname] = $imgUrl;
+			$result->close();
 		}
-		$result->close();
 		return $maps;
  	}
  	
@@ -628,12 +631,12 @@ class TaxonProfileManager {
 	public function getDescriptions(){
 		$descriptionsStr = "There is no description set for this taxon.";
 		$descriptions = Array();
-		$sql = "SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, ".
-			"tds.tdsid, tds.heading, tds.statement, tds.displayheader ".
-			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
-			"INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) AND (tdb.Language = '".$this->language."') ".
-			"ORDER BY tdb.displaylevel,tds.sortsequence";
+		$sql = 'SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
+			'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
+			'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) '.
+			'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
+			'WHERE (tdb.tid = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
+			'ORDER BY tdb.displaylevel,tds.sortsequence';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -678,12 +681,13 @@ class TaxonProfileManager {
 	public function setClName($clv){
 		$sql = "SELECT c.CLID, c.Name, c.parentclid, cp.name AS parentname ".
 			"FROM fmchecklists c LEFT JOIN fmchecklists cp ON cp.clid = c.parentclid ";
-		if(intval($clv)){
-			$sql .= "WHERE c.CLID = '".$this->con->real_escape_string($clv)."'";
+		$inValue = $this->con->real_escape_string($clv);
+		if($intVal = intval($inValue)){
+			$sql .= "WHERE (c.CLID = '".$intVal."')";
 		}
 		else{
-			$sql .= "WHERE c.Name = '".$this->con->real_escape_string($clv).
-				"' OR c.Title = '".$this->con->real_escape_string($clv)."'";
+			$sql .= "WHERE (c.Name = '".$inValue.
+				"') OR (c.Title = '".$inValue."')";
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -719,7 +723,7 @@ class TaxonProfileManager {
 	public function setProj($p){
 		if(is_numeric($p)){
 			$this->pid = $this->con->real_escape_string($p);
-			$sql = "SELECT p.projname FROM fmprojects p WHERE p.pid = ".$this->con->real_escape_string($p);
+			$sql = "SELECT p.projname FROM fmprojects p WHERE (p.pid = ".$this->con->real_escape_string($p).')';
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->projName = $row->projname;
@@ -728,7 +732,7 @@ class TaxonProfileManager {
 		}
 		else{
 			$this->projName = $p;
-			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$this->con->real_escape_string($p)."'";
+			$sql = 'SELECT p.pid FROM fmprojects p WHERE (p.projname = "'.$this->con->real_escape_string($p).'")';
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->pid = $row->pid;

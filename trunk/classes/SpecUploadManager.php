@@ -44,7 +44,7 @@ class SpecUploadManager{
 	public static function getUploadType($uspid){
 		$retStr = "";
 		$con = MySQLiConnectionFactory::getCon("readonly");
-		$sql = "SELECT uploadtype FROM uploadspecparameters WHERE uspid = ".$uspid;
+		$sql = "SELECT uploadtype FROM uploadspecparameters WHERE (uspid = ".$uspid.')';
 		$rs = $con->query($sql);
 		if($row = $rs->fetch_object()){
 			$retStr = $row->uploadtype;
@@ -54,8 +54,10 @@ class SpecUploadManager{
 	}
 	
 	public function setCollId($id){
-		$this->collId = $id;
-		$this->setCollInfo();
+		if(is_numeric($id)){
+			$this->collId = $id;
+			$this->setCollInfo();
+		}
 	}
 	
 	public function setUploadType($t){
@@ -74,10 +76,9 @@ class SpecUploadManager{
 		global $isAdmin, $userRights;
 		$returnArr = Array();
 		if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon '.
-				'FROM omcollections c ';
+			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon FROM omcollections c ';
 			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'WHERE c.collid IN('.implode(',',$userRights['CollAdmin']).') '; 
+				$sql .= 'WHERE (c.collid IN('.implode(',',$userRights['CollAdmin']).')) '; 
 			}
 			$sql .= 'ORDER BY c.CollectionName';
 			//echo $sql;
@@ -92,9 +93,9 @@ class SpecUploadManager{
 	}
 
 	private function setCollInfo(){
-		$sql = "SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate ".
-			"FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid ".
-			"WHERE c.collid = $this->collId ";
+		$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate '.
+			'FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid '.
+			'WHERE (c.collid = '.$this->collId.')';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -122,11 +123,11 @@ class SpecUploadManager{
 	
 	public function getUploadList($uspid = 0){
 		$returnArr = Array();
-		$sql = "SELECT usp.uspid, usp.uploadtype, usp.title ".
-			"FROM uploadspecparameters usp ".
-			"WHERE (usp.collid = $this->collId) ";
+		$sql = 'SELECT usp.uspid, usp.uploadtype, usp.title '.
+			'FROM uploadspecparameters usp '.
+			'WHERE (usp.collid = '.$this->collId.') ';
 		if($uspid){
-			$sql .= "AND usp.uspid = ".$uspid;
+			$sql .= 'AND (usp.uspid = '.$uspid.') ';
 		}
 		else{
 			$sql .= "ORDER BY usp.uploadtype";
@@ -156,10 +157,10 @@ class SpecUploadManager{
 	}
 
     public function readUploadParameters(){
-		$sql = "SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, ".
-    		"usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, cs.uploaddate ".
-			"FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid ".
-    		"WHERE usp.uspid = ".$this->uspid;
+		$sql = 'SELECT usp.title, usp.Platform, usp.server, usp.port, usp.Username, usp.Password, usp.SchemaName, '.
+    		'usp.digircode, usp.digirpath, usp.digirpkfield, usp.querystr, usp.cleanupsp, cs.uploaddate '.
+			'FROM uploadspecparameters usp LEFT JOIN omcollectionstats cs ON usp.collid = cs.collid '.
+    		'WHERE (usp.uspid = '.$this->uspid.')';
 		//echo $sql;
 		$result = $this->conn->query($sql);
     	if($row = $result->fetch_object()){
@@ -182,9 +183,8 @@ class SpecUploadManager{
 
 		//Get Field Map for $fieldMap
 		if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
-			$sql = "SELECT usm.sourcefield, usm.symbspecfield ".
-				"FROM uploadspecmap usm ".
-				"WHERE usm.uspid = ".$this->uspid;
+			$sql = 'SELECT usm.sourcefield, usm.symbspecfield FROM uploadspecmap usm '.
+				'WHERE (usm.uspid = '.$this->uspid.')';
 	    	//echo $sql;
 			$rs = $this->conn->query($sql);
 	    	while($row = $rs->fetch_object()){
@@ -239,7 +239,7 @@ class SpecUploadManager{
 		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
 		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanString($_REQUEST["eupquerystr"])."\"";
 		if(array_key_exists("eupcleanupsp",$_REQUEST)) $sql .= ", cleanupsp = \"".$_REQUEST["eupcleanupsp"]."\"";
-		$sql .= " WHERE uspid = ".$this->uspid;
+		$sql .= ' WHERE (uspid = '.$this->uspid.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Editing Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -263,7 +263,7 @@ class SpecUploadManager{
 	}
 	
     public function deleteUploadProfile($uspid){
-		$sql = "DELETE FROM uploadspecparameters WHERE uspid = ".$uspid;
+		$sql = 'DELETE FROM uploadspecparameters WHERE (uspid = '.$uspid.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -341,7 +341,7 @@ class SpecUploadManager{
 				"VALUES (".$this->uspid.",'dbpk','".$dbpk."')";
 		}
 		else{
-			$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid." AND symbspecfield = 'dbpk'";
+			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield = 'dbpk'";
 		}
 		$this->conn->query($sql);
 	}
@@ -361,7 +361,7 @@ class SpecUploadManager{
 	}
 
 	public function deleteFieldMap(){
-		$sql = "DELETE FROM uploadspecmap WHERE uspid = ".$this->uspid." AND symbspecfield <> 'dbpk' ";
+		$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield <> 'dbpk' ";
 		//echo "<div>$sql</div>";
 		$this->conn->query($sql);
 	}
@@ -399,7 +399,7 @@ class SpecUploadManager{
 			}
 		}
 		if(!$this->transferCount){
-			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE collid = ".$this->collId ;
+			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->transferCount = $row->cnt;
@@ -418,13 +418,13 @@ class SpecUploadManager{
 	}
 
 	public function performFinalTransfer(){
-/*		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
+/*		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$recCnt = $r->reccnt;
 			if($recCnt > 0){
 				$newPk = 1;
-				$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE collid = '.$this->collId;
+				$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE (collid = '.$this->collId.')';
 				$rsMax = $this->conn->query($sqlMax);
 				if($rMax = $rsMax->fetch_object()){
 					$newPk = $rMax->maxpk;
@@ -444,7 +444,7 @@ class SpecUploadManager{
 			//Verify that dbpk is unique; should be but let's make sure 
 			$sql = 'SELECT count(u.dbpk) AS mcnt '.
 				'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
-				'WHERE o.collid = '.$this->collId.' AND u.collid = '.$this->collId;
+				'WHERE (o.collid = '.$this->collId.') AND (u.collid = '.$this->collId.')';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				if($r->mcnt > 0){

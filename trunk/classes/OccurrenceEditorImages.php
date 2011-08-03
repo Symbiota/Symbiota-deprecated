@@ -31,7 +31,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
 			'sourceurl, copyright, notes, occid, sortsequence '.
 			'FROM images '.
-			'WHERE occid = '.$this->occId.' ORDER BY sortsequence';
+			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
@@ -110,7 +110,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			",notes = ".($notes?"\"".$notes."\"":"NULL").
 			",copyright = ".($copyRight?"\"".$copyRight."\"":"NULL").",imagetype = \"specimen\",sourceurl = ".
 			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
-			" WHERE imgid = ".$imgId;
+			" WHERE (imgid = ".$imgId.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			$status .= "ERROR: image not changed, ".$this->conn->error."SQL: ".$sql;
@@ -316,8 +316,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
 		$status = "Image deleted successfully";
 		$occid = 0;
-		$sqlQuery = "SELECT url, thumbnailurl, originalurl, occid ".
-			"FROM images WHERE imgid = ".$imgIdDel;
+		$sqlQuery = 'SELECT url, thumbnailurl, originalurl, occid FROM images WHERE (imgid = '.$imgIdDel.')';
 		$result = $this->conn->query($sqlQuery);
 		if($row = $result->fetch_object()){
 			$imgUrl = $row->url;
@@ -326,12 +325,12 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 		$result->close();
 				
-		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
+		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			if($removeImg){
 				//Remove images only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE url = '".$imgUrl."'";
+				$sql = "SELECT imgid FROM images WHERE (url = '".$imgUrl."')";
 				$rs = $this->conn->query($sql);
 				if(!$rs->num_rows){
 					$imageRootUrl = $GLOBALS["imageRootUrl"];
@@ -364,10 +363,10 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 
 	public function remapImage($imgId, $occId){
 		$statusStr = '';
-		$sql = 'UPDATE images SET occid = '.$occId.' WHERE imgid = '.$imgId;
+		$sql = 'UPDATE images SET occid = '.$occId.' WHERE (imgid = '.$imgId.')';
 		if($this->conn->query($sql)){
 			$imgSql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'SET i.tid = o.tidinterpreted WHERE i.imgid = '.$imgId;
+				'SET i.tid = o.tidinterpreted WHERE (i.imgid = '.$imgId.')';
 			//echo $imgSql;
 			$this->conn->query($imgSql);
 		}
@@ -396,21 +395,21 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
  		if(!$identifier && !$collector && !$collNumber) return $returnArr;
  		$sql = '';
  		if($collId){
- 			$sql .= 'AND o.collid = '.$collId.' ';
+ 			$sql .= 'AND (o.collid = '.$collId.') ';
  		}
  		if($identifier){
  			if(strpos($identifier,'%') !== false){
-	 			$sql .= 'AND (o.occurrenceId LIKE "'.$identifier.'" OR o.catalognumber LIKE "'.$identifier.'" OR o.othercatalognumber LIKE "'.$identifier.'")';
+	 			$sql .= 'AND ((o.occurrenceId LIKE "'.$identifier.'") OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumber LIKE "'.$identifier.'"))';
  			}
  			else{
-	 			$sql .= 'AND (o.occurrenceId = "'.$identifier.'" OR o.catalognumber = "'.$identifier.'" OR o.othercatalognumber = "'.$identifier.'")';
+	 			$sql .= 'AND ((o.occurrenceId = "'.$identifier.'") OR (o.catalognumber = "'.$identifier.'") OR (o.othercatalognumber = "'.$identifier.'"))';
  			}
  		}
  		if($collector){
- 			$sql .= 'AND o.recordedby LIKE "%'.$collector.'%" ';
+ 			$sql .= 'AND (o.recordedby LIKE "%'.$collector.'%") ';
  		}
  		if($collNumber){
- 			$sql .= 'AND o.recordnumber LIKE "%'.$collNumber.'%" ';
+ 			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
  		}
  		$sql = 'SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, o.sciname, '.
  			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.

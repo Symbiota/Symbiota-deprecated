@@ -26,12 +26,12 @@ class TPEditorManager {
 		if(is_numeric($t)){
 			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
 				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND t.TID = ".$this->taxonCon->real_escape_string($t);
+				"WHERE (ts.taxauthid = 1) AND (t.TID = ".$this->taxonCon->real_escape_string($t).')';
 		}
 		else{
 			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
 				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND t.sciname = \"".$this->taxonCon->real_escape_string($t)."\"";
+				"WHERE (ts.taxauthid = 1) AND (t.sciname = \"".$this->taxonCon->real_escape_string($t)."\")";
 		}
 		$result = $this->taxonCon->query($sql);
 		if($row = $result->fetch_object()){
@@ -87,7 +87,7 @@ class TPEditorManager {
 		$childrenArr = Array();
 		$sql = "SELECT t.Tid, t.SciName, t.Author ".
 			"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 AND ts.ParentTid = ".$this->tid." ORDER BY t.SciName";
+			"WHERE ts.taxauthid = 1 AND (ts.ParentTid = ".$this->tid.") ORDER BY t.SciName";
 		$result = $this->taxonCon->query($sql);
 		while($row = $result->fetch_object()){
 			$childrenArr[$row->Tid]["sciname"] = $row->SciName;
@@ -117,11 +117,12 @@ class TPEditorManager {
 	public function editSynonymSort($synSort){
 		$status = "";
 		foreach($synSort as $editKey => $editValue){
-			$sql = "UPDATE taxstatus SET SortSequence = ".$this->taxonCon->real_escape_string($editValue).
-				" WHERE tid = ".$this->taxonCon->real_escape_string($editKey)." AND TidAccepted = ".$this->tid;
-			//echo $sql."<br>";
-			if(!$this->taxonCon->query($sql)){
-				$status .= $this->taxonCon->error."\nSQL: ".$sql.";<br/> ";
+			if(is_numeric($editKey) && is_numeric($editValue)){
+				$sql = "UPDATE taxstatus SET SortSequence = ".$editValue." WHERE (tid = ".$editKey.") AND (TidAccepted = ".$this->tid.')';
+				//echo $sql."<br>";
+				if(!$this->taxonCon->query($sql)){
+					$status .= $this->taxonCon->error."\nSQL: ".$sql.";<br/> ";
+				}
 			}
 		}
 		if($status) $status = "Errors with editVernacularSort method:<br/> ".$status;
@@ -133,7 +134,7 @@ class TPEditorManager {
 		$sql = "SELECT v.VID, v.VernacularName, v.Language, v.Source, v.username, v.notes, v.SortSequence ".
 			"FROM taxavernaculars v ".
 			"WHERE (v.tid = ".$this->tid.") ";
-		if($this->language) $sql .= "AND v.Language = '".$this->taxonCon->real_escape_string($this->language)."' ";
+		if($this->language) $sql .= "AND (v.Language = '".$this->language."') ";
 		$sql .= "ORDER BY v.Language, v.SortSequence";
 		$result = $this->taxonCon->query($sql);
 		$vernCnt = 0;
@@ -160,7 +161,7 @@ class TPEditorManager {
 		foreach($editArr as $keyField => $value){
 			$setFrag .= ",".$keyField." = \"".$value."\" ";
 		}
-		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE VID = ".$this->taxonCon->real_escape_string($vid);
+		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE (vid = ".$this->taxonCon->real_escape_string($vid).')';
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
@@ -181,14 +182,16 @@ class TPEditorManager {
 	}
 	
 	public function deleteVernacular($delVid){
-		$sql = "DELETE FROM taxavernaculars WHERE VID = ".$this->taxonCon->real_escape_string($delVid);
-		//echo $sql;
-		$status = "";
-		if(!$this->taxonCon->query($sql)){
-			$status = "Error:deleteVernacular: ".$this->taxonCon->error."\nSQL: ".$sql;
-		}
-		else{
-			$status = "";
+		$status = '';
+		if(is_numeric($delVid)){
+			$sql = "DELETE FROM taxavernaculars WHERE (VID = ".$delVid.')';
+			//echo $sql;
+			if(!$this->taxonCon->query($sql)){
+				$status = "Error:deleteVernacular: ".$this->taxonCon->error."\nSQL: ".$sql;
+			}
+			else{
+				$status = "";
+			}
 		}
 		return $status;
 	}
@@ -196,7 +199,7 @@ class TPEditorManager {
 	public function getChildrenArr(){
 		$returnArr = Array();
 		$sql = 'SELECT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE ts.taxauthid = 1 AND ts.parenttid = '.$this->tid;
+			'WHERE ts.taxauthid = 1 AND (ts.parenttid = '.$this->tid.')';
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
 		while($row = $result->fetch_object()){
@@ -224,9 +227,9 @@ class TPEditorManager {
 	
 	public function getLinks(){
 		$linkArr = Array();
-		$sql = "SELECT tl.url, tl.title ".
-			"FROM taxalinks tl INNER JOIN taxa ON tl.tid = taxa.TID ".
-			"WHERE ((taxa.TID = $tid)) ";
+		$sql = 'SELECT tl.url, tl.title '.
+			'FROM taxalinks tl INNER JOIN taxa ON tl.tid = taxa.TID '.
+			'WHERE (taxa.TID = '.$this->tid.') ';
 		$result = $this->taxonCon->query($sql);
 		$linkCnt = 0;
 		while($row = $result->fetch_object()){
@@ -255,7 +258,7 @@ class TPEditorManager {
  	}
 
  	public function setLanguage($lang){
- 		return $this->language = $lang;
+ 		return $this->language = $this->taxonCon->real_escape_string($lang);
  	}
  	
  	protected function cleanArray($arr){

@@ -157,22 +157,23 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			$lastPage = (int) ($collManager->getRecordCnt() / $collManager->getCntPerPage()) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
+			$hrefPrefix = 'list.php?'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
 			$pageBar = "<tr><td>";
 			if($startPage > 1){
-			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='list.php?page=1'>First</a></span>";
-			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='list.php?page=".(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."'>&lt;&lt;</a></span>";
+			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix."1'>First</a></span>";
+			    $pageBar .= "<span class='pagination' style='margin-right:5px;'><a href='".$hrefPrefix.(($pageNumber - 10) < 1 ?1:$pageNumber - 10)."'>&lt;&lt;</a></span>";
 			}
 			for($x = $startPage; $x <= $endPage; $x++){
 			    if($pageNumber != $x){
-			        $pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;'><a href='list.php?page=".$x."'>".$x."</a></span>";
+			        $pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.$x."'>".$x."</a></span>";
 			    }
 			    else{
 			        $pageBar .= "<span class='pagination' style='margin-right:3px;margin-right:3px;font-weight:bold;'>".$x."</span>";
 			    }
 			}
 			if(($lastPage - $startPage) >= 10){
-			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='list.php?page=".(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."'>&gt;&gt;</a></span>";
-			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='list.php?page=".$lastPage."'>Last</a></span>";
+			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.(($pageNumber + 10) > $lastPage?$lastPage:($pageNumber + 10))."'>&gt;&gt;</a></span>";
+			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.$lastPage."'>Last</a></span>";
 			}
 			$pageBar .= "</td><td align='right'>";
 			$beginNum = ($pageNumber - 1)*$collManager->getCntPerPage() + 1;

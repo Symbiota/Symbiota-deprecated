@@ -26,7 +26,7 @@ class OccurrenceManager{
  			$this->reset();
  			$this->reset = true;
  		}
- 		if($this->useCookies){
+ 		if($this->useCookies && !$this->reset){
  			$this->readCollCookies();
  		}
 		$this->readRequestVariables();
@@ -115,7 +115,7 @@ class OccurrenceManager{
 			}
 			elseif(preg_match('/;catid:(\d+)/',$this->searchTermsArr["db"],$matches)){
 				$catId = $matches[1];
-				if($catId) $sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE ccpk = ".$catId.")) ";
+				if($catId) $sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk = ".$catId."))) ";
 			}
 		}
 		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
@@ -145,13 +145,13 @@ class OccurrenceManager{
 			//Build sql
 			foreach($this->taxaArr as $key => $valueArray){
 				if($this->taxaSearchType == 4){
-					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE sciname = '".$key."'");
+					$rs1 = $this->conn->query("SELECT tid FROM taxa WHERE (sciname = '".$key."')");
 					if($r1 = $rs1->fetch_object()){
 						//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(SELECT tid FROM taxstatus WHERE taxauthid = 1 AND hierarchystr LIKE '%,".$r1->tid.",%')) ";
 						
 						$fStr = "";
 						$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
-							"WHERE ts.taxauthid = 1 AND ts.hierarchystr LIKE '%,".$r1->tid.",%' AND ts.family IS NOT NULL AND ts.family <> '' ";
+							"WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE '%,".$r1->tid.",%') AND ts.family IS NOT NULL AND ts.family <> '' ";
 						$rs2 = $this->conn->query($sql2);
 						while($r2 = $rs2->fetch_object()){
 							$fStr .= "','".$r2->family;
@@ -282,8 +282,7 @@ class OccurrenceManager{
 			$clid = $this->searchTermsArr["clid"];
 			$clSql = ""; 
 			if($clid){
-				$sql = "SELECT dynamicsql, name ".
-					"FROM fmchecklists WHERE clid = ".$clid;
+				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
 				$result = $this->conn->query($sql);
 				if($row = $result->fetch_object()){
 					$clSql = $row->dynamicsql;
@@ -365,7 +364,7 @@ class OccurrenceManager{
 				"c.IndividualUrl, c.icon, c.colltype, c.Contact, c.email, c.SortSeq ".
 				"FROM omcollections c ";
 			if($catId){
-				$sql .= "INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid WHERE ccl.ccpk = ".$catId." ";
+				$sql .= "INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid WHERE (ccl.ccpk = ".$catId.") ";
 			}
 			$sql .= "ORDER BY c.SortSeq, c.CollectionName ";
 			//echo "<div>SQL: ".$sql."</div>";
@@ -426,7 +425,7 @@ class OccurrenceManager{
 	
 	private function getSurveyStr(){
 		$returnStr = "";
-		$sql = "SELECT projectname FROM omsurveys WHERE surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).") ";
+		$sql = "SELECT projectname FROM omsurveys WHERE (surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).")) ";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnStr .= " ;".$row->projectname; 
@@ -497,7 +496,7 @@ class OccurrenceManager{
 				if(is_numeric($taxa)){
 					$sql = "SELECT t.sciname ". 
 						"FROM taxa t ".
-						"WHERE t.tid = ".$taxa;
+						"WHERE (t.tid = ".$taxa.')';
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
 						$taxaStr = $row->sciname;

@@ -4,6 +4,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 class PhotographerManager{
 
 	private $conn;
+	private $uid;
 	
  	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -12,102 +13,86 @@ class PhotographerManager{
  	public function __destruct() {
  		$this->conn->close();
 	}
+	
+	public function setUid($u){
+		if(is_numeric($u)){
+			$this->uid = $this->conn->real_escape_string($u);
+		}
+	}
 
- 	public function echoPhotographerList(){
-		$sql = "SELECT u.uid, u.firstname, u.lastname, u.email, Count(ti.imgid) AS imgcnt ".
-			"FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid ".
-			"GROUP BY u.firstname, u.lastname, u.email ".
-			"ORDER BY u.lastname, u.firstname";
+ 	public function getPhotographerList(){
+		$retArr = array();
+ 		$sql = 'SELECT u.uid, CONCAT_WS(" ,", u.lastname, u.firstname) as pname, u.email, Count(ti.imgid) AS imgcnt '.
+			'FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid '.
+			'GROUP BY u.firstname, u.lastname, u.email '.
+			'ORDER BY u.lastname, u.firstname';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			echo "<div><a href='photographers.php?phuid=".$row->uid."&imgcnt=".$row->imgcnt."'>".$row->lastname.($row->firstname?", ".$row->firstname:"")."</a> ($row->imgcnt)</div>";
+			$retArr[$row->uid]['name'] = $row->pname; 
+			$retArr[$row->uid]['imgcnt'] = $row->imgcnt; 
 		}
     	$result->close();
+    	return $retArr;
 	}
-	
-	public function echoPhotographerInfo($uid){
-		$sql = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, u.address, ".
-			"u.city, u.state, u.zip, u.country, u.email, u.url, u.biography, u.notes, u.ispublic ".
-			"FROM users u WHERE u.uid = ".$this->conn->real_escape_string($uid);
+
+	public function getPhotographerInfo(){
+		$retArr = array();
+		$sql = 'SELECT u.uid, CONCAT_WS(" ",u.firstname, u.lastname) as pname, u.title, u.institution, u.department, u.address, '.
+			'u.city, u.state, u.zip, u.country, u.email, u.url, u.biography, u.notes, IFNULL(u.ispublic,0) AS ispublic '.
+			'FROM users u WHERE (u.uid = '.$this->uid.')';
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			echo "<div style='margin:20px;font-size:14px;'>";
-			echo "<div style='font-weight:bold;'>$row->firstname $row->lastname</div>";
-			$isPublic = $row->ispublic;
-			if($isPublic){
-				if($row->title) echo "<div>$row->title</div>";
-				if($row->institution) echo "<div>$row->institution</div>";
-				if($row->department) echo "<div>$row->department</div>";
-				if($row->city || $row->state){
-					echo "<div>".$row->city.($row->city?", ":"").$row->state."&nbsp;&nbsp;$row->zip</div>";
-				}
-				if($row->country) echo "<div>$row->country</div>";
-				if($row->email) echo "<div>$row->email</div>";
-				if($row->notes) echo "<div>$row->biography</div>";
-				if($row->url) echo "<div><a href='".$row->url."'>$row->url</a></div>";
-			}
-			else{
-				echo "<div style='margin:10px;font-size:12px;'>Photographers details not public</div>";
-			}
-			echo "</div>";
+		if($row = $result->fetch_object()){
+			$retArr['name'] = $row->pname;
+			$retArr['ispublic'] = $row->ispublic;
+			$retArr['title'] = $row->title;
+			$retArr['institution'] = $row->institution;
+			$retArr['department'] = $row->department;
+			$retArr['city'] = $row->city;
+			$retArr['state'] = $row->state;
+			$retArr['zip'] = $row->zip;
+			$retArr['country'] = $row->country;
+			$retArr['email'] = $row->email;
+			$retArr['notes'] = $row->notes;
+			$retArr['biography'] = $row->biography;
+			$retArr['url'] = $row->url;
 		}
     	$result->close();
+    	return $retArr;
 	}
-	
-	public function echoPhotographerImages($uid,$limitStart = 0, $limitNum = 50, $imgCnt = 0){
-		$sql = "SELECT i.imgid, i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname ".
-			"FROM (images i INNER JOIN taxa t ON i.tid = t.tid) ".
-			"INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 AND i.photographeruid = ".$this->conn->real_escape_string($uid)." ".
-			"ORDER BY t.sciname, ts.family ".
-			"LIMIT ".$this->conn->real_escape_string($limitStart).", ".($this->conn->real_escape_string($limitNum)+1);
+
+	public function getPhotographerImages($lStart, $lNum, $iCnt){
+		$retArr = array();
+		$limitStart = 0;
+		$limitNum = 50;
+		$imgCnt = 0;
+		if($lStart && is_numeric($lStart)){
+			$lStart = $this->conn->real_escape_string($lStart);
+		}
+		if($lNum && is_numeric($lNum)){
+			$limitNum = $this->conn->real_escape_string($lNum);
+		}
+		if($iCnt && is_numeric($iCnt)){
+			$imgCnt = $this->conn->real_escape_string($iCnt);
+		}
+		$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname, t.tid '.
+			'FROM (images i INNER JOIN taxa t ON i.tid = t.tid) '.
+			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = 1) AND (i.photographeruid = '.$this->uid.') '.
+			'ORDER BY t.sciname, ts.family '.
+			'LIMIT '.$limitStart.', '.($imgCnt+1);
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$rowCnt = $result->num_rows;
-		echo "<div>";
-		if($limitStart){
-			echo "<div style='float:left;'>";
-			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
-			echo "</div>";
-		}
-		if($rowCnt >= $limitNum){
-			echo "<div style='float:right;'>";
-			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
-			echo "</div>";
-		}
-		echo "</div><div style='clear:both;'>";
 		while($row = $result->fetch_object()){
-			echo "<div style='float:left;height:160px;' class='imgthumb'>";
-			$imgUrl = $row->url;
-			$imgTn = $row->thumbnailurl;
-			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-			}
-			echo "<a href='imgdetails.php?imgid=".$row->imgid."'>";
-			if($imgTn){
-				$imgUrl = $imgTn;
-				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgTn,0,1)=="/"){
-					$imgUrl = $GLOBALS["imageDomain"].$imgTn;
-				}
-			}
-			echo "<img src='".$imgUrl."' style='height:130px;' />";
-			echo "</a><br />";
-			echo "<a href='../taxa/index.php?taxon=".$row->sciname."'><i>".$row->sciname."</i></a>";
-			echo "</div>";
+			$imgId = $row->imgid;
+			$retArr[$imgId]['url'] = $row->url;
+			$retArr[$imgId]['tnurl'] = $row->thumbnailurl;
+			$retArr[$imgId]['tid'] = $row->tid;
+			$retArr[$imgId]['sciname'] = $row->sciname;
 		}
     	$result->close();
-		echo "</div><div style='clear:both;'>";
-		if($limitStart){
-			echo "<div style='float:left;'>";
-			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart - $limitNum)."&lnum=$limitNum'>&lt;&lt; Previous Images</a>";
-			echo "</div>";
-		}
-		if($rowCnt >= $limitNum){
-			echo "<div style='float:right;'>";
-			echo "<a href='photographers.php?phuid=$uid&imgcnt=$imgCnt&lstart=".($limitStart + $limitNum)."&lnum=$limitNum'>Next Images &gt;&gt;</a>";
-			echo "</div>";
-		}
+    	return $retArr;
 	}
 }
 ?>

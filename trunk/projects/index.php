@@ -472,7 +472,7 @@ if($isEditable && $projSubmit){
 			            ?>
 		            
 							<li>
-								<a href='../checklists/survey.php?surveyid=<?php echo $key;?>'><?php echo $value;?></a> 
+								<a href='../checklists/survey.php?surveyid=<?php echo $key.'&proj='.$projManager->getProjectId();?>'><?php echo $value;?></a> 
 							</li>
 							<?php } ?>
 						</ul>

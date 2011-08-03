@@ -6,12 +6,10 @@ class ObservationSubmitManager {
 	private $conn;
 	private $occId;
 	private $uid;
-	private $username = "";
 	private $institutionCode;
 
 	private $occurrenceMap = Array();
 
-	private $photographerArr = Array();
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
 
@@ -23,11 +21,6 @@ class ObservationSubmitManager {
 	public function __construct($uid){
 		$this->uid = $uid;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$rs = $this->conn->query("SELECT CONCAT_WS(', ',lastname,firstname) as name FROM users WHERE uid = ".$uid);
-		if($row = $rs->fetch_object()){
-			$this->username = $row->name;
-		}
-		$rs->close();
 	}
 
 	public function __destruct(){
@@ -40,7 +33,7 @@ class ObservationSubmitManager {
 			$collId = $occArr['collid'];
 			//Get Institutional code for storage
 			$owner = '';
-			$ownerSql = 'SELECT institutioncode, collectionname FROM omcollections c WHERE collid = '.$collId;
+			$ownerSql = 'SELECT institutioncode, collectionname FROM omcollections c WHERE (collid = '.$collId.')';
 			$rs = $this->conn->query($ownerSql);
 			if($row = $rs->fetch_object()){
 				$this->institutionCode = $row->institutioncode;
@@ -59,7 +52,7 @@ class ObservationSubmitManager {
 				}
 				//Get tid for scinetific name
 				$tid = 0;
-				$result = $this->conn->query('SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"');
+				$result = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")');
 				if($row = $result->fetch_object()){
 					$tid = $row->tid;
 				}
@@ -110,6 +103,7 @@ class ObservationSubmitManager {
 				$obsUid.') ';
 				//echo $sql;
 				if($this->conn->query($sql)){
+					if(!$occArr['phuid']) $occArr['phuid'] = $obsUid;
 					$statusStr = $this->conn->insert_id;
 					$imgStatus = $this->dbImages($nameArr,$occArr,$this->conn->insert_id,$tid);
 					if($imgStatus){
@@ -197,7 +191,7 @@ class ObservationSubmitManager {
 				$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
 				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
-					','.$GLOBALS['symbUid'].',"Observation",'.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
+					','.$occArr['phuid'].',"Observation",'.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR loadImageData: '.$this->conn->error;
@@ -311,17 +305,16 @@ class ObservationSubmitManager {
 	    return $successStatus;
 	}
 	
-	public function getPhotographerArr(){
-		if(!$this->photographerArr){
-			$sql = "SELECT u.uid, CONCAT_WS(', ',u.lastname,u.firstname) AS fullname ".
-				"FROM users u ORDER BY u.lastname, u.firstname ";
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$this->photographerArr[$row->uid] = $row->fullname;
-			}
-			$result->close();
+	public function getUserArr(){
+		$retArr = array();
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS fullname '.
+			'FROM users u ORDER BY u.lastname, u.firstname ';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$retArr[$row->uid] = $row->fullname;
 		}
-		return $this->photographerArr;
+		$result->close();
+		return $retArr;
 	}
 
 	private function cleanStr($str){
@@ -331,10 +324,6 @@ class ObservationSubmitManager {
 		return $newStr;
 	}
 
-	public function getUsername(){
-		return $this->username;
-	}
-	
 	public function getCollArr($collArr){
 		$retArr = Array();
 		$sql = "SELECT collid,collectionname,colltype FROM omcollections WHERE colltype LIKE '%observation%' ";
@@ -356,4 +345,3 @@ class ObservationSubmitManager {
 }
 
 ?>
-

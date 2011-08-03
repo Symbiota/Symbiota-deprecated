@@ -51,38 +51,45 @@ class TaxonomyLoaderManager{
 			$tid = $this->conn->insert_id;
 		 	//Load accepteance status into taxstatus table
 			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			if($dataArr["parenttid"]) $hierarchy = $this->getHierarchy($dataArr["parenttid"]);
-			//Get family from hierarchy
-			$family = '';
-			$sqlFam = 'SELECT sciname FROM taxa WHERE tid IN('.$this->conn->real_escape_string($hierarchy).') AND rankid = 140 ';
-			$rsFam = $this->conn->query($sqlFam);
-			if($rsFam){
-				if($r = $rsFam->fetch_object()){
-					$family = $r->sciname;
+			if($dataArr["parenttid"]){ 
+				$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
+				//Get family from hierarchy
+				$family = '';
+				$sqlFam = 'SELECT sciname FROM taxa WHERE (tid IN('.$hierarchy.')) AND rankid = 140 ';
+				$rsFam = $this->conn->query($sqlFam);
+				if($rsFam){
+					if($r = $rsFam->fetch_object()){
+						$family = $r->sciname;
+					}
 				}
-			}
-			
-			//Load new record into taxstatus table
-			$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-				"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
-				($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
-				",".($dataArr["parenttid"]?$this->conn->real_escape_string($dataArr["parenttid"]):"NULL").",\"".
-				$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$this->conn->real_escape_string($hierarchy)."\") ";
-			//echo "sqlTaxStatus: ".$sqlTaxStatus;
-			if(!$this->conn->query($sqlTaxStatus)){
-				return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+				
+				//Load new record into taxstatus table
+				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
+					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
+					($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
+					",".($dataArr["parenttid"]?$this->conn->real_escape_string($dataArr["parenttid"]):"NULL").",\"".
+					$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
+				//echo "sqlTaxStatus: ".$sqlTaxStatus;
+				if(!$this->conn->query($sqlTaxStatus)){
+					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+				}
 			}
 		 	
 			//Link new name to existing specimens and set locality secirity if needed
 			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
 			if($dataArr['securitystatus']) $sql1 .= ',o.localitysecurity = 1 '; 
-			$sql1 .= 'WHERE o.sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'"';
+			$sql1 .= 'WHERE (o.sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'") ';
 			$this->conn->query($sql1);
+			//Link occurrence images to the new name
+			$sql2 = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'SET i.tid = o.tidinterpreted '.
+				'WHERE i.tid is null AND o.tidinterpreted IS NOT NULL';
+			$this->conn->query($sql2);
 			//Add their geopoints to omoccurgeoindex 
 			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
 				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
 				"FROM omoccurrences o ".
-				"WHERE o.tidinterpreted = ".$tid." AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+				"WHERE (o.tidinterpreted = ".$tid.") AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
 			$this->conn->query($sql3);
 			
 		}
@@ -95,9 +102,9 @@ class TaxonomyLoaderManager{
 	private function getHierarchy($tid){
 		$parentArr = Array($tid);
 		$parCnt = 0;
-		$targetTid = $tid;
+		$targetTid = $this->conn->real_escape_string($tid);
 		do{
-			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE ts.tid = ".$this->conn->real_escape_string($targetTid);
+			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE (ts.tid = ".$targetTid.')';
 			//echo "<div>".$sqlParents."</div>";
 			$resultParent = $this->conn->query($sqlParents);
 			if($rowParent = $resultParent->fetch_object()){

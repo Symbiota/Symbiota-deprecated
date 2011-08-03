@@ -82,7 +82,7 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 	private function loadSynonyms($synArr){
 		if(count($synArr) == 5){
 			$sql = "UPDATE uploadtaxa SET SourceAcceptedId = ".$this->conn->real_escape_string($synArr[3]).
-			", acceptance = 0 WHERE SourceId = ".$this->conn->real_escape_string($synArr[2]);
+			", acceptance = 0 WHERE (SourceId = ".$this->conn->real_escape_string($synArr[2]).')';
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -91,7 +91,7 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 	private function loadAuthors($aArr){
 		if(count($aArr) == 5 && $aArr[2]){
 			$sql = "UPDATE uploadtaxa SET author = \"".$this->conn->real_escape_string($aArr[2]).
-				"\" WHERE author = '".$this->conn->real_escape_string($aArr[1])."'";
+				"\" WHERE (author = '".$this->conn->real_escape_string($aArr[1])."')";
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
@@ -100,7 +100,7 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 	private function loadVernaculars($vArr){
 		if(count($vArr) == 8 && $vArr[3]){
 			$sql = "UPDATE uploadtaxa SET vernacular = \"".$this->conn->real_escape_string($vArr[3]).
-				"\", vernlang = \"".$this->conn->real_escape_string($vArr[5])."\" WHERE SourceId = ".$this->conn->real_escape_string($vArr[4]);
+				"\", vernlang = \"".$this->conn->real_escape_string($vArr[5])."\" WHERE (SourceId = ".$this->conn->real_escape_string($vArr[4]).')';
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}

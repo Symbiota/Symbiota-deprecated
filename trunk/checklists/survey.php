@@ -24,6 +24,7 @@ $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["search
 $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:""; 
  	 	
 $clManager = new SurveyManager($surveyId);
+if($proj) $clManager->setProj($proj);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
 if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 if($searchCommon) $clManager->setSearchCommon();
@@ -63,7 +64,6 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getSurveyName();
-		if($proj) $keywordStr .= ",".$proj;
 		echo"<meta name='keywords' content='".$keywordStr."' />";
 	?>
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
@@ -242,12 +242,31 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 <?php
 	$displayLeftMenu = (isset($checklists_surveyMenu)?$checklists_surveyMenu:"true");
 	include($serverRoot."/header.php");
-	if(isset($checklists_surveyCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $checklists_surveyCrumbs;
-		echo " <b>".$clManager->getSurveyName()."</b>"; 
-		echo "</div>";
+	if($proj){
+		echo '<div class="navpath">';
+		echo '<a href="../index.php">Home</a> &gt; ';
+		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$clManager->getPid().'">';
+		echo $clManager->getProjName();
+		echo '</a> &gt; ';
+		echo '<b>'.$clManager->getSurveyName().'</b>';
+		echo '</div>';
+	}
+	else{
+		if(isset($checklists_surveyCrumbs)){
+			if($checklists_surveyCrumbs){
+				echo "<div class='navpath'>";
+				echo "<a href='../index.php'>Home</a> &gt; ";
+				echo $checklists_surveyCrumbs;
+				echo " <b>".$clManager->getSurveyName()."</b>";
+				echo "</div>";
+			}
+		}
+		else{
+			echo '<div class="navpath">';
+			echo '<a href="../index.php">Home</a> &gt; ';
+			echo ' <b>'.$clManager->getSurveyName().'</b>';
+			echo '</div>';
+		}
 	}
 	?>
 	<!-- This is inner text! -->
@@ -267,7 +286,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			if(1 == 2){
 				if($keyModIsActive){
 					?>
-					<a href="../ident/key.php?surveyid=<?php echo $surveyId."&proj=".$proj;?>&taxon=All+Species">
+					<a href="../ident/key.php?surveyid=<?php echo $surveyId."&proj=".$clManager->getPid();?>&taxon=All+Species">
 						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
 					</a>&nbsp;&nbsp;&nbsp;
 					<?php 
@@ -353,7 +372,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 								<input type='submit' name='action' id='editsubmit' value='Submit Changes' />
 							</div>
 							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
-							<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
+							<input type='hidden' name='proj' value='<?php echo $clManager->getPid(); ?>' />
 							<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 							<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
 							<input type='hidden' name='thesfilter' value='<?php echo $thesFilter; ?>' />
@@ -428,6 +447,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 						</div>
 						<div style="float:right;">
 							<input type='hidden' name='surveyid' value='<?php echo $surveyId; ?>' />
+							<input type='hidden' name='proj' value='<?php echo $clManager->getPid(); ?>' />
 							<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 							<input type="submit" name="action" value="Rebuild List" />
 						</div>
@@ -467,7 +487,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 					if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
 					$argStr .= "&surveyid=".$surveyId.($showCommon?"&showcommon=".$showCommon:"");
 					$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-					$argStr .= ($proj?"&proj=".$proj:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+					$argStr .= ($proj?"&proj=".$clManager->getPid():"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 					$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
 					echo "<hr /><div>Page <b>".($pageNumber+1)."</b> of <b>$pageCount</b>: ";
 					for($x=0;$x<$pageCount;$x++){

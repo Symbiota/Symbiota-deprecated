@@ -24,7 +24,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 
  	public function setTid($t){
-		$this->tid = $t;
+		if(is_numeric($t)){
+			$this->tid = $this->conn->real_escape_string($t);
+		}
  	}
 	
 	public function getTid(){
@@ -36,7 +38,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 	
 	public function setClid($id){
-		$this->clid = $id;
+		if(is_numeric($id)){
+			$this->clid = $this->conn->real_escape_string($id);
+		}
 	}
 	
 	public function getClid(){
@@ -53,7 +57,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 		$sql = "SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, cl.Name ".
 			"FROM (fmchecklists cl INNER JOIN fmchklsttaxalink cllink ON cl.CLID = cllink.CLID) ".
 			"INNER JOIN taxa t ON cllink.TID = t.TID ".
-			"WHERE ((cllink.TID = ".$this->conn->real_escape_string($this->tid).") AND (cllink.CLID = ".$this->conn->real_escape_string($this->clid)."))";
+			"WHERE ((cllink.TID = ".$this->tid.") AND (cllink.CLID = ".$this->clid."))";
  		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
 			if($row->Habitat) $checklistData["habitat"] = $row->Habitat;
@@ -75,8 +79,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 			$valStr = trim($v);
 			$innerSql .= ",".$k."=".($valStr?"\"".$valStr."\" ":"NULL ");
 		}
-		$sqlClUpdate = "UPDATE fmchklsttaxalink SET ".substr($innerSql,1).
-			"WHERE tid = ".$this->conn->real_escape_string($this->tid)." AND clid = ".$this->conn->real_escape_string($this->clid);
+		$sqlClUpdate = 'UPDATE fmchklsttaxalink SET '.substr($innerSql,1).
+			'WHERE (tid = '.$this->tid.') AND (clid = '.$this->clid.')';
 		if(!$this->conn->query($sqlClUpdate)){
 			return "ERROR: ".$conn->error."<br/>SQL: ".$sqlClUpdate.";<br/> ";
 		}
@@ -84,16 +88,16 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 
 	public function renameTaxon($newTaxon){
-		$sql = "UPDATE fmchklsttaxalink SET TID = ".$newTaxon." ".
-			"WHERE TID = ".$this->conn->real_escape_string($this->tid)." AND CLID = ".$this->conn->real_escape_string($this->clid);
+		$nTaxon = $this->conn->real_escape_string($newTaxon);
+		$sql = 'UPDATE fmchklsttaxalink SET TID = '.$nTaxon.' '.
+			"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
 		if($this->conn->query($sql)){
-			$this->tid = $newTaxon;
+			$this->tid = $nTaxon;
 			$this->taxonName = "";
 		}
 		else{
 			$sqlTarget = "SELECT cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.Nativity ".
-				"FROM fmchklsttaxalink cllink WHERE TID = ".$this->conn->real_escape_string($newTaxon)." AND CLID = ".
-				$this->conn->real_escape_string($this->clid);
+				"FROM fmchklsttaxalink cllink WHERE (TID = ".$nTaxon.") AND (CLID = ".$this->clid.')';
 			$rsTarget = $this->conn->query($sqlTarget);
 			if($row = $rsTarget->fetch_object()){
 				$habitatTarget = $this->cleanStr($row->Habitat);
@@ -104,17 +108,18 @@ include_once($serverRoot.'/config/dbconnection.php');
 				$nativeTarget = $this->cleanStr($row->Nativity);
 			
 				//Move all vouchers to new name
-				$sqlVouch = "UPDATE fmvouchers SET TID = ".$newTaxon." ".
-					"WHERE TID = ".$this->conn->real_escape_string($this->tid)." AND CLID = ".$this->conn->real_escape_string($this->clid);
+				$sqlVouch = "UPDATE fmvouchers SET TID = ".$nTaxon." ".
+					"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
 				$this->conn->query($sqlVouch);
 				//Delete all Vouchers that didn't transfer because they were already linked to target name
-				$sqlVouchDel = "DELETE FROM fmvouchers v WHERE v.CLID = ".$this->conn->real_escape_string($this->clid)." AND v.TID = ".$this->conn->real_escape_string($this->tid);
+				$sqlVouchDel = 'DELETE FROM fmvouchers v '.
+					'WHERE (v.CLID = '.$this->clid.") AND (v.TID = ".$this->tid.')';
 				$this->conn->query($sqlVouchDel);
 				
 				//Merge chklsttaxalink data
 				//Harvest source (unwanted) chklsttaxalink data
 				$sqlSourceCl = "SELECT ctl.Habitat, ctl.Abundance, ctl.Notes, ctl.internalnotes, ctl.source, ctl.Nativity ".
-					"FROM fmchklsttaxalink ctl WHERE ctl.TID = ".$this->conn->real_escape_string($this->tid)." AND ctl.CLID = ".$this->conn->real_escape_string($this->clid);
+					"FROM fmchklsttaxalink ctl WHERE (ctl.TID = ".$this->tid.") AND (ctl.CLID = ".$this->clid.')';
 				$rsSourceCl =  $this->conn->query($sqlSourceCl);
 				if($row = $rsSourceCl->fetch_object()){
 					$habitatSource = $this->cleanStr($row->Habitat);
@@ -136,13 +141,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 					'Abundance = "'.$this->conn->real_escape_string($abundStr).'", Notes = "'.$this->conn->real_escape_string($notesStr).
 					'", internalnotes = "'.$this->conn->real_escape_string($internalNotesStr).'", source = "'.
 					$this->conn->real_escape_string($sourceStr).'", Nativity = "'.$this->conn->real_escape_string($nativeStr).'" '.
-					'WHERE TID = '.$this->conn->real_escape_string($newTaxon).' AND CLID = '.$this->conn->real_escape_string($this->clid);
+					'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
 				$this->conn->query($sqlCl);
 				//Delete unwanted taxon
-				$sqlDel = 'DELETE FROM fmchklsttaxalink ctl WHERE ctl.CLID = '.$this->conn->real_escape_string($this->clid).
-					' AND ctl.TID = '.$this->conn->real_escape_string($this->tid);
+				$sqlDel = 'DELETE FROM fmchklsttaxalink ctl WHERE (ctl.CLID = '.$this->clid.') AND (ctl.TID = '.$this->tid.')';
 				if($this->conn->query($sqlDel)){
-					$this->tid = $newTaxon;
+					$this->tid = $nTaxon;
 					$this->taxonName = '';
 				}
 			}
@@ -152,12 +156,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 	
 	public function deleteTaxon(){
 		//Delete vouchers
-		$vSql = "DELETE v.* FROM fmvouchers v WHERE v.tid = ".$this->conn->real_escape_string($this->tid).
-			" AND v.clid = ".$this->conn->real_escape_string($this->clid);
+		$vSql = "DELETE v.* FROM fmvouchers v WHERE (v.tid = ".$this->tid.") AND (v.clid = ".$this->clid.')';
 		$this->conn->query($vSql);
 		//Delete checklist record 
-		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE ctl.tid = '.$this->conn->real_escape_string($this->tid).
-			' AND ctl.clid = '.$this->conn->real_escape_string($this->clid);
+		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE (ctl.tid = '.$this->tid.') AND (ctl.clid = '.$this->clid.')';
 		if(!$this->conn->query($sql)){
 			return "ERROR - Unable to delete taxon from checklist: ".$this->conn->error;
 		}
@@ -166,10 +168,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 	public function getVoucherData(){
 		$voucherData = Array();
  		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = "SELECT v.occid, v.Collector, v.Notes, v.editornotes ".
-			"FROM fmvouchers v ".
-			"WHERE (v.TID = ".$this->conn->real_escape_string($this->tid).") AND (v.CLID = ".
-			$this->conn->real_escape_string($this->clid).")";
+		$sql = "SELECT v.occid, v.Collector, v.Notes, v.editornotes FROM fmvouchers v ".
+			"WHERE (v.TID = ".$this->tid.") AND (v.CLID = ".$this->clid.")";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$occId = $row->occid;
@@ -191,9 +191,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = 'UPDATE fmvouchers v '.
-				'SET '.$this->conn->real_escape_string($setStr).' WHERE v.occid = "'.
-				$this->conn->real_escape_string($occId).'" AND v.TID = '.$this->conn->real_escape_string($this->tid).
-				' AND v.CLID = '.$this->conn->real_escape_string($this->clid);
+				'SET '.$this->conn->real_escape_string($setStr).' WHERE (v.occid = "'.
+				$this->conn->real_escape_string($occId).'") AND (v.TID = '.$this->tid.
+				') AND (v.CLID = '.$this->clid.')';
 			$this->conn->query($sqlVoucUpdate);
 		}
 	}
@@ -201,15 +201,17 @@ include_once($serverRoot.'/config/dbconnection.php');
 	public function addVoucher($vOccId, $vNotes, $vEditNotes){
 		$vNotes = $this->cleanStr($vNotes);
 		$vEditNotes = $this->cleanStr($vEditNotes);
-		if($vOccId && $this->clid){
-			$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
-			if($status){
-				$sqlInsertCl = 'INSERT INTO fmchklsttaxalink ( clid, TID ) '.
-					'SELECT '.$this->conn->real_escape_string($this->clid).' AS clid, o.TidInterpreted '.
-					'FROM omoccurrences o WHERE o.occid = '.$this->conn->real_escape_string($vOccId);
-				//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
-				if($this->conn->query($sqlInsertCl)){
-					return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
+		if(is_numeric($vOccId)){
+			if($vOccId && $this->clid){
+				$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
+				if($status){
+					$sqlInsertCl = 'INSERT INTO fmchklsttaxalink ( clid, TID ) '.
+						'SELECT '.$this->clid.' AS clid, o.TidInterpreted '.
+						'FROM omoccurrences o WHERE (o.occid = '.$vOccId.')';
+					//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
+					if($this->conn->query($sqlInsertCl)){
+						return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
+					}
 				}
 			}
 		}
@@ -223,8 +225,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 			'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) '.
 			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-			'WHERE ctl.clid = '.$this->clid.' AND o.occid = '.
-			$vOccId.' AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+			'WHERE (ctl.clid = '.$this->clid.') AND (o.occid = '.
+			$vOccId.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
 			'LIMIT 1';
 		//echo "addVoucherSql: ".$sql."<br/>";
 		$rs = $this->conn->query($sql);
@@ -253,11 +255,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 
 	public function removeVoucher($delOid){
-		$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$this->conn->real_escape_string($delOid).
-			' AND TID = '.$this->tid.' AND CLID = '.$this->clid;
-		$this->conn->query($sqlDel);
+		if(is_numeric($delOid)){
+			$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$delOid.' AND (TID = '.$this->tid.') AND (CLID = '.$this->clid.')';
+			$this->conn->query($sqlDel);
+		}
 	}
-	
+
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
 		$outStr = str_replace(chr('34'),"&quot;",$outStr);
