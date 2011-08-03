@@ -11,17 +11,13 @@ class TaxonomyLoaderManager{
 	private $conn;
 	
 	public function __construct(){
-		$this->setConnection();
+ 		$this->conn = MySQLiConnectionFactory::getCon('write');
 	}
 	
 	function __destruct(){
-		$this->conn->close();
+		if(!($this->conn === null)) $this->conn->close();
 	}
 	
-	private function setConnection($conType = "write"){
- 		$this->conn = MySQLiConnectionFactory::getCon($conType);
- 	}
- 	
 	public function echoTaxonRanks(){
 		$sql = "SELECT tu.rankid, tu.rankname FROM taxonunits tu ORDER BY tu.rankid";
 		$result = $this->conn->query($sql);
