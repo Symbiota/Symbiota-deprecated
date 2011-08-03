@@ -16,10 +16,11 @@ if(array_key_exists("CollAdmin",$userRights)) $okCollArr = array_merge($okCollAr
 if(array_key_exists("CollEditor",$userRights)) $okCollArr = array_merge($okCollArr,$userRights["CollEditor"]);
 if($isAdmin || ($collId && in_array($collId,$okCollArr))){
 	if($action == "Submit Observation"){
-		$status = $obsManager->addObservation($_REQUEST,$symbUid);
+		$status = $obsManager->addObservation($_POST,$symbUid);
 	}
 }
 $okCollArr = $obsManager->getCollArr($okCollArr);
+$userArr = $obsManager->getUserArr();
 
 ?>
 
@@ -90,7 +91,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 						</div>
 						<div style="clear:both;" class="p1">
 							<span>
-								<input type="text" id="sciname" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" value="" onchange="scinameChanged()" />
+								<input type="text" id="sciname" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 							</span>
 							<span style="margin-left:10px;">
@@ -115,7 +116,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 							</div>
 							<div style="clear:both;">
 								<span>
-									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $obsManager->getUsername(); ?>" />
+									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userArr[$symbUid]; ?>" />
 								</span>
 								<span style="margin-left:10px;">
 									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
@@ -300,7 +301,18 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 					</fieldset>
 					<fieldset>
 						<legend><b>Images</b></legend>
-						<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
+						<div style="margin:5px;">
+							Photographer: 
+							<select name="phuid">
+								<option value=''>Select Photographer</option>
+								<option value=''>-----------------------------</option>
+								<?php 
+								foreach($userArr as $uid => $nameStr){
+									echo '<option value="'.$uid.'" '.($symbUid==$uid?'SELECTED':'').'>'.$nameStr.'</option>'."\n";
+								}
+								?>
+							</select>
+						</div>
 						<div style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
@@ -355,6 +367,7 @@ $okCollArr = $obsManager->getCollArr($okCollArr);
 								</span>
 							</div>
 						</div>
+						<div style="margin-left:10px;">* Upload image size can not be greater than 1MB</div>
 					</fieldset>
 					<div style="margin:5px;">
 						<b>Management:</b> 

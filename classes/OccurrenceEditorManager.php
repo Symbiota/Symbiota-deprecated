@@ -36,7 +36,9 @@ class OccurrenceEditorManager {
 	}
 	
 	public function setOccId($id){
-		$this->occId = $this->conn->real_escape_string($id);
+		if(is_numeric($id)){
+			$this->occId = $this->conn->real_escape_string($id);
+		}
 	}
 	
 	public function getOccId(){
@@ -44,7 +46,9 @@ class OccurrenceEditorManager {
 	}
 
 	public function setCollId($id){
-		$this->collId = $this->conn->real_escape_string($id);
+		if(is_numeric($id)){
+			$this->collId = $this->conn->real_escape_string($id);
+		}
 	}
 
 	public function getCollMap(){
@@ -52,12 +56,12 @@ class OccurrenceEditorManager {
 			$sql = '';
 			if($this->collId){
 				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
-					'FROM omcollections c WHERE c.collid = '.$this->collId;
+					'FROM omcollections c WHERE (c.collid = '.$this->collId.')';
 			}
 			elseif($this->occId){
 				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
 					'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-					'WHERE o.occid = '.$this->occId;
+					'WHERE (o.occid = '.$this->occId.')';
 			}
 			if($sql){
 				$rs = $this->conn->query($sql);
@@ -113,13 +117,13 @@ class OccurrenceEditorManager {
 				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
 			}
 			if($iInFrag){
-				$iWhere .= 'OR o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") ';
+				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 			$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId';
 		}
 		if(array_key_exists('rb',$qryArr)){
-			$sqlWhere .= 'AND o.recordedby LIKE "%'.$qryArr['rb'].'%" ';
+			$sqlWhere .= 'AND (o.recordedby LIKE "%'.$qryArr['rb'].'%") ';
 			$sqlOrderBy .= ',o.recordnumber';
 		}
 		if(array_key_exists('rn',$qryArr)){
@@ -128,7 +132,7 @@ class OccurrenceEditorManager {
 			$rnInFrag = array();
 			foreach($rnArr as $v){
 				if($p = strpos($v,' - ')){
-					$rnBetweenFrag[] = 'o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'"';
+					$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'")';
 				}
 				else{
 					$rnInFrag[] = $v;
@@ -139,28 +143,28 @@ class OccurrenceEditorManager {
 				$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
 			}
 			if($rnInFrag){
-				$rnWhere .= 'OR o.recordnumber IN("'.implode('","',$rnInFrag).'") ';
+				$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 		}
 		if(array_key_exists('eb',$qryArr)){
-			$sqlWhere .= 'AND o.recordEnteredBy LIKE "'.$qryArr['eb'].'%" ';
+			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$qryArr['eb'].'%") ';
 		}
 		if(array_key_exists('dm',$qryArr)){
 			if($p = strpos($qryArr['dm'],' - ')){
-				$sqlWhere .= 'AND DATE(o.datelastmodified) BETWEEN "'.substr($qryArr['dm'],0,$p).'" AND "'.substr($qryArr['dm'],$p+3).'" ';
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.substr($qryArr['dm'],0,$p).'" AND "'.substr($qryArr['dm'],$p+3).'") ';
 			}
 			else{
-				$sqlWhere .= 'AND DATE(o.datelastmodified) = "'.$qryArr['dm'].'" ';
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$qryArr['dm'].'") ';
 			}
 			
 			$sqlOrderBy .= ',o.datelastmodified';
 		}
 		if(array_key_exists('ps',$qryArr)){
-			$sqlWhere .= 'AND o.processingstatus LIKE "'.$qryArr['ps'].'%" ';
+			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$qryArr['ps'].'%") ';
 		}
 		if($sqlWhere){
-			$sqlWhere = 'WHERE o.collid = '.$this->collId.' '.$sqlWhere;
+			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
 			if(!$recCnt){
 				$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
 				//echo '<div>'.$sql.'</div>';
@@ -196,7 +200,7 @@ class OccurrenceEditorManager {
 			$sql = $this->occSql.$sqlWhere;
 		}
 		else{
-			$sql = $this->occSql.'WHERE o.occid = '.$this->occId;
+			$sql = $this->occSql.'WHERE (o.occid = '.$this->occId.')';
 		}
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
@@ -225,7 +229,7 @@ class OccurrenceEditorManager {
 						$occArr[$v] = 0;
 					}
 					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$occArr[$v].'" AS fvn,'.$v.' FROM omoccurrences '.
-						'WHERE occid = '.$occArr['occid'].' AND trim('.$v.') <> "'.trim($occArr[$v]).'"';
+						'WHERE (occid = '.$occArr['occid'].') AND (trim('.$v.') <> "'.trim($occArr[$v]).'")';
 					//echo '<div>'.$sqlEdit.'</div>';
 					$this->conn->query($sqlEdit);
 				}
@@ -240,7 +244,7 @@ class OccurrenceEditorManager {
 					}
 				}
 				if(in_array('sciname',$editArr)){
-					$sqlTid = 'SELECT tid FROM taxa WHERE sciname = "'.$occArr['sciname'].'"';
+					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
 					$rsTid = $this->conn->query($sqlTid);
 					if($r = $rsTid->fetch_object()){
 						$sql .= ',tidinterpreted = '.$r->tid;
@@ -249,7 +253,7 @@ class OccurrenceEditorManager {
 						$sql .= ',tidinterpreted = NULL';
 					}
 				}
-				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE occid = '.$occArr['occid'];
+				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR: failed to edit occurrence record (#'.$occArr['occid'].'): '.$this->conn->error;
@@ -354,12 +358,14 @@ class OccurrenceEditorManager {
 	
 	public function deleteOccurrence($occId){
 		$status = '';
-		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$occId;
-		if($this->conn->query($sql)){
-			$status = 'SUCCESS: Occurrence Record Deleted!';
-		}
-		else{
-			$status = 'FAILED: unable to delete occurrence record';
+		if(is_numeric($occId)){
+			$sql = 'DELETE FROM omoccurrences WHERE (occid = '.$occId.')';
+			if($this->conn->query($sql)){
+				$status = 'SUCCESS: Occurrence Record Deleted!';
+			}
+			else{
+				$status = 'FAILED: unable to delete occurrence record';
+			}
 		}
 		return $status;
 	}
@@ -373,7 +379,7 @@ class OccurrenceEditorManager {
 	
 	public function getObserverUid(){
 		$obsId = 0;
-		$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE occid = '.$this->occId);
+		$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE (occid = '.$this->occId.')');
 		if($row = $rs->fetch_object()){
 			$obsId = $row->observeruid;
 		}
@@ -385,7 +391,7 @@ class OccurrenceEditorManager {
 		$collList = Array();
 		$sql = 'SELECT collid, collectionname, institutioncode, collectioncode FROM omcollections ';
 		if($collArr){
-			$sql .= 'WHERE collid IN ('.implode(',',$collArr).') ';
+			$sql .= 'WHERE (collid IN ('.implode(',',$collArr).')) ';
 		}
 		$sql .= 'ORDER BY collectionname';
 		$rs = $this->conn->query($sql);
@@ -434,7 +440,7 @@ class OccurrenceEditorManager {
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
 			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'WHERE occid IN('.$occidStr.')';
+			'WHERE (occid IN('.$occidStr.'))';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){

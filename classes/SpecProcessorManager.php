@@ -62,8 +62,8 @@ class SpecProcessorManager {
 
 	public function setCollId($id) {
 		$this->collId = $id;
-		if($this->collId && !$this->collectionName){
-			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE collid = '.$this->collId; 
+		if($this->collId && is_numeric($this->collId) && !$this->collectionName){
+			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collId.')';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->collectionName = $row->collectionname;
@@ -74,7 +74,9 @@ class SpecProcessorManager {
 	}
 
 	public function setSpprId($id) {
-		if($id) $this->spprid = $id;
+		if($id && is_numeric($id)){
+			$this->spprid = $id;
+		}
 	}
 	
 	protected function getPrimaryKey($str){
@@ -119,7 +121,7 @@ class SpecProcessorManager {
 	protected function getOccId($specPk){
 		$occId = 0;
 		//Check to see if record with pk already exists
-		$sql = 'SELECT occid FROM omoccurrences WHERE catalognumber = "'.$specPk.'" AND collid = '.$this->collId;
+		$sql = 'SELECT occid FROM omoccurrences WHERE (catalognumber = "'.$specPk.'") AND (collid = '.$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
 			$occId = $row->occid;
@@ -149,14 +151,14 @@ class SpecProcessorManager {
 	
 	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
 		$status = true;
-		if($occId){
+		if($occId && is_numeric($occId)){
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
 			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
 			$recCnt = 0;
-			$sql = 'SELECT imgid FROM images WHERE occid = '.$occId.' AND url = "'.$imgUrl.$webUrl.'"';
+			$sql = 'SELECT imgid FROM images WHERE (occid = '.$occId.') AND (url = "'.$imgUrl.$webUrl.'")';
 			$rs = $this->conn->query($sql);
 			if($rs){
 				$recCnt = $rs->num_rows;
@@ -218,7 +220,7 @@ class SpecProcessorManager {
 				', jpgcompression = '.$editArr['jpgcompression'].
 				', createtnimg = '.(array_key_exists('createtnimg',$editArr)?'1':'0').
 				', createlgimg = '.(array_key_exists('createlgimg',$editArr)?'1':'0').' '.
-				'WHERE spprid = '.$editArr['spprid'];
+				'WHERE (spprid = '.$editArr['spprid'].')';
 			//echo 'SQL: '.$sql;
 			$this->conn->query($sql);
 		}
@@ -235,7 +237,7 @@ class SpecProcessorManager {
 	}
 
 	public function deleteProject($spprId){
-		$sql = 'DELETE FROM specprocessorprojects WHERE spprid = '.$spprId;
+		$sql = 'DELETE FROM specprocessorprojects WHERE (spprid = '.$spprId.')';
 		$this->conn->query($sql);
 	}
 
@@ -244,7 +246,7 @@ class SpecProcessorManager {
 			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
 				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
 				'FROM specprocessorprojects p '.
-				'WHERE p.spprid = '.$this->spprid; 
+				'WHERE (p.spprid = '.$this->spprid.')'; 
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				if(!$this->collId) $this->setCollId($row->collid); 
@@ -277,7 +279,7 @@ class SpecProcessorManager {
 		if($this->collId){
 			$sql = 'SELECT spprid, title '.
 				'FROM specprocessorprojects '.
-				'WHERE collid = '.$this->collId;
+				'WHERE (collid = '.$this->collId.')';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$projArr[$row->spprid] = $row->title;
@@ -294,7 +296,7 @@ class SpecProcessorManager {
 			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon '.
 				'FROM omcollections c ';
 			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'WHERE c.collid IN('.implode(',',$userRights['CollAdmin']).') '; 
+				$sql .= 'WHERE (c.collid IN('.implode(',',$userRights['CollAdmin']).')) '; 
 			}
 			$sql .= 'ORDER BY c.CollectionName';
 			//echo $sql;
@@ -320,7 +322,6 @@ class SpecProcessorManager {
 	public function getLogErrFH(){
 		return $this->logErrFH;
 	}
-
 
 	public function setTitle($t){
 		$this->title = $t;

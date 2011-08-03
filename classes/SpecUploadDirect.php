@@ -52,7 +52,7 @@ class SpecUploadDirect extends SpecUploadManager {
 		if($sourceConn){
 			if($sourceDbpkFieldName){
 				//Delete all records in uploadspectemp table
-				$sqlDel = "DELETE FROM uploadspectemp WHERE collid = ".$this->collId;
+				$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 				$this->conn->query($sqlDel);
 				
 				echo "<li style='font-weight:bold;'>Connected to Source Database</li>";

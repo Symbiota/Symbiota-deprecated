@@ -28,7 +28,7 @@ class SpecTaxCleanerManager{
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE o.tidinterpreted IS NULL ';
-		if($collId) $sql .= 'AND o.collid = '.$this->conn->real_escape_string($collId);
+		if($collId && is_numeric($collId)) $sql .= 'AND (o.collid = '.$collId.')';
 		$this->conn->query($sql);
 	}
 
@@ -38,7 +38,7 @@ class SpecTaxCleanerManager{
 		$numBad = 0;
 		$sql = 'SELECT DISTINCT o.sciname FROM omoccurrences o '.
 			'WHERE o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
-		if($collId) $sql .= 'AND o.collid = '.$this->conn->real_escape_string($collId).' '; 
+		if($collId && is_numeric($collId)) $sql .= 'AND (o.collid = '.$collId.') '; 
 		$sql .= 'ORDER BY o.sciname LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
@@ -72,7 +72,7 @@ class SpecTaxCleanerManager{
 				else{
 					//Name is not good, mark as so
 					$numBad++;
-					$sql = 'UPDATE omoccurrences SET taxonstatus = 1 WHERE sciname = "'.$r->sciname.'" AND tidinterpreted IS NULL ';
+					$sql = 'UPDATE omoccurrences SET taxonstatus = 1 WHERE (sciname = "'.$r->sciname.'") AND tidinterpreted IS NULL ';
 					$this->conn->query($sql);
 				}
 			}
@@ -86,7 +86,7 @@ class SpecTaxCleanerManager{
 	public function verifyExistingNames(){
 		//Check accepted taxa first
 		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND ts.tid = ts.tidaccepted '; 
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid = ts.tidaccepted '; 
 		if($this->testValidity){
 			$sql .= 'AND t.validitystatus IS NULL ';
 		}
@@ -102,7 +102,7 @@ class SpecTaxCleanerManager{
 		
 		//Check remaining taxa 
 		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId.' '; 
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') '; 
 		if($this->testValidity){
 			$sql .= 'AND t.validitystatus IS NULL ';
 		}
@@ -167,13 +167,13 @@ class SpecTaxCleanerManager{
 		if($externalTaxonObj){
 			$source = $externalTaxonObj['source_database'];
 			if($this->testValidity){
-				$sql = 'UPDATE taxa SET validitystatus = 1, validitysource = "'.$source.'" WHERE tid = '.$internalTaxonObj['tid'];
+				$sql = 'UPDATE taxa SET validitystatus = 1, validitysource = "'.$source.'" WHERE (tid = '.$internalTaxonObj['tid'].')';
 				$this->conn->query($sql);
 			}
 			//Check author
 			if($this->checkAuthor){
 				if($externalTaxonObj['author'] && $internalTaxonObj['author'] != $externalTaxonObj['author']){
-					$sql = 'UPDATE taxa SET author = '.$externalTaxonObj['author'].' WHERE tid = '.$internalTaxonObj['tid'];
+					$sql = 'UPDATE taxa SET author = '.$externalTaxonObj['author'].' WHERE (tid = '.$internalTaxonObj['tid'].')';
 					$this->conn->query($sql);
 				}
 			}
@@ -204,8 +204,8 @@ class SpecTaxCleanerManager{
 							$accObj = $externalTaxonObj['accepted_name'];
 							$accTid = $this->evaluateTaxonomy($accObj,0);
 							//Change to not accepted and link to accepted 
-							$sql = 'UPDATE taxstatus SET tidaccetped = '.$accTid.' WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.
-								$taxonArr['tid'].' AND tidaccepted = '.$tidCurrentAccepted;
+							$sql = 'UPDATE taxstatus SET tidaccetped = '.$accTid.' WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.
+								$taxonArr['tid'].') AND (tidaccepted = '.$tidCurrentAccepted.')';
 							$this->conn->query($sql);
 							$this->updateDependentData($taxonArr['tid'],$accTid);
 							//Go through synonyms and evaluate
@@ -222,7 +222,7 @@ class SpecTaxCleanerManager{
 						}
 						elseif($nameStatus == 'synonym'){			//Not Accepted in both
 							//Get accepted name; compare with system's accepted name; if different, remap
-							$sql = 'SELECT sciname FROM taxa WHERE tid = '.$taxonArr['tidaccepted'];
+							$sql = 'SELECT sciname FROM taxa WHERE (tid = '.$taxonArr['tidaccepted'].')';
 							$rs = $this->conn->query($sql);
 							$systemAccName = '';
 							if($r = $rs->fetch_object()){
@@ -233,8 +233,8 @@ class SpecTaxCleanerManager{
 							if($accObj['name'] != $systemAccName){
 								//Remap to external name
 								$tidToBeAcc = $this->evaluateTaxonomy($accObj,0);
-								$sql = 'UPDATE taxstatus SET tidaccetped = '.$tidToBeAcc.' WHERE taxauthid = '.$this->taxAuthId.' AND tid = '.
-									$taxonArr['tid'].' AND tidaccepted = '.$taxonArr['tidaccepted'];
+								$sql = 'UPDATE taxstatus SET tidaccetped = '.$tidToBeAcc.' WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.
+									$taxonArr['tid'].') AND (tidaccepted = '.$taxonArr['tidaccepted'].')';
 								$this->conn->query($sql);
 							}
 						}
@@ -245,7 +245,7 @@ class SpecTaxCleanerManager{
 		else{
 			//Name not found
 			if($this->testValidity){
-				$sql = 'UPDATE taxa SET validitystatus = 0, validitysource = "Species 2000" WHERE tid = '.$taxonArr['tid'];
+				$sql = 'UPDATE taxa SET validitystatus = 0, validitysource = "Species 2000" WHERE (tid = '.$taxonArr['tid'].')';
 				$this->conn->query($sql);
 			}
 		}
@@ -255,17 +255,17 @@ class SpecTaxCleanerManager{
 		$retTid = 0;
 		$sql = 'SELECT t.tid, ts.tidaccepted, t.sciname, t.author '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE ts.taxauthid = '.$this->taxAuthId;
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.')';
 		if(array_key_exists('name',$testObj)){
-			$sql .= ' AND t.sciname = "'.$testObj['name'].'"';
+			$sql .= ' AND (t.sciname = "'.$testObj['name'].'")';
 		}
 		else{
-			$sql .= ' AND t.tid = "'.$testObj['tid'].'"';
+			$sql .= ' AND (t.tid = "'.$testObj['tid'].'")';
 		}
 		$rs = $this->conn->query($sql);
 		if($rs){
 			if($this->testValidity){
-				$sql = 'UPDATE taxa SET validitystatus = 1, validitysource = "Species 2000" WHERE t.sciname = "'.$testObj['name'].'"';
+				$sql = 'UPDATE taxa SET validitystatus = 1, validitysource = "Species 2000" WHERE (t.sciname = "'.$testObj['name'].'")';
 				$this->conn->query($sql);
 			}
 			while($r = $rs->fetch_object()){
@@ -278,12 +278,12 @@ class SpecTaxCleanerManager{
 				}
 				else{
 					//Adjust taxonomy: point to anchor
-					$sql = 'UPDATE taxstatus SET tidaccepted = '.$anchorTid.' WHERE taxauthid = '.$this->taxAuthId.
-						' AND tid = '.$retTid.' AND tidaccepted = '.$tidAcc;
+					$sql = 'UPDATE taxstatus SET tidaccepted = '.$anchorTid.' WHERE (taxauthid = '.$this->taxAuthId.
+						') AND (tid = '.$retTid.') AND (tidaccepted = '.$tidAcc.')';
 					$this->conn->query($sql);
 					//Point synonyms to anchor tid
-					$sql = 'UPDATE taxstatus SET tidaccepted = '.$anchorTid.' WHERE taxauthid = '.$this->taxAuthId.
-						' AND tidaccepted = '.$retTid;
+					$sql = 'UPDATE taxstatus SET tidaccepted = '.$anchorTid.' WHERE (taxauthid = '.$this->taxAuthId.
+						') AND (tidaccepted = '.$retTid.')';
 					$this->conn->query($sql);
 					if($retTid == $tidAcc){
 						//Move descriptions, key morphology, and vernacular over to new accepted
@@ -301,22 +301,22 @@ class SpecTaxCleanerManager{
 
 	private function updateDependentData($tid, $tidNew){
 		//method to update descr, vernaculars,
-
-		$this->conn->query("DELETE FROM kmdescr WHERE inherited IS NOT NULL AND tid = ".$tid);
-		$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$tidNew." WHERE tid = ".$tid);
-		$this->conn->query("DELETE FROM kmdescr WHERE tid = ".$tid);
-		$this->resetCharStateInheritance($tidNew);
-		
-		$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE tid = ".$tid;
-		$this->conn->query($sqlVerns);
-		
-		$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE tid = '.$tidNew.') lj ON tb.caption = lj.caption '.
-			'SET tid = '.$tidNew.' WHERE tid = '.$tid.' AND lj.caption IS NULL';
-		$this->conn->query($sqltd);
-
-		$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE tid = ".$tid;
-		$this->conn->query($sqltl);
-
+		if(is_numeric($tid) && is_numeric($tidNew)){
+			$this->conn->query("DELETE FROM kmdescr WHERE inherited IS NOT NULL AND (tid = ".$tid.')');
+			$this->conn->query("UPDATE IGNORE kmdescr SET tid = ".$tidNew." WHERE (tid = ".$tid.')');
+			$this->conn->query("DELETE FROM kmdescr WHERE (tid = ".$tid.')');
+			$this->resetCharStateInheritance($tidNew);
+			
+			$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
+			$this->conn->query($sqlVerns);
+			
+			$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.$tidNew.')) lj ON tb.caption = lj.caption '.
+				'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
+			$this->conn->query($sqltd);
+	
+			$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
+			$this->conn->query($sqltl);
+		}
 	}
 	
 	private function resetCharStateInheritance($tid){
@@ -417,7 +417,7 @@ class SpecTaxCleanerManager{
 					}
 				}
 				if($parentName){
-					$sqlParent = 'SELECT tid FROM taxa WHERE sciname = "'.$parentName.'"';
+					$sqlParent = 'SELECT tid FROM taxa WHERE (sciname = "'.$parentName.'")';
 					$rs = $this->conn->query($sqlParent);
 					$parTid = $rs->tid;
 					if(!$parTid){
@@ -458,7 +458,7 @@ class SpecTaxCleanerManager{
 		$parCnt = 0;
 		$targetTid = $tid;
 		do{
-			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE ts.tid = ".$targetTid;
+			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE (ts.tid = ".$targetTid.')';
 			//echo "<div>".$sqlParents."</div>";
 			$resultParent = $this->conn->query($sqlParents);
 			if($rowParent = $resultParent->fetch_object()){
@@ -496,10 +496,10 @@ class SpecTaxCleanerManager{
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname '.
 			'FROM omcollections c ';
 		if($collId && $collId <> 'all'){
-			$sql .= 'WHERE collid = '.$collId.' ';
+			$sql .= 'WHERE (collid = '.$collId.') ';
 		}
 		elseif($targetIds){
-			$sql .= 'WHERE collid IN('.implode(',',$targetIds).') ';
+			$sql .= 'WHERE (collid IN('.implode(',',$targetIds).')) ';
 		}
 		$sql .= 'ORDER BY c.SortSeq,c.CollectionName';
 		$rs = $this->conn->query($sql);

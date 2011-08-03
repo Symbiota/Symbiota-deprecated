@@ -12,7 +12,9 @@ class ImageDetailManager{
 
 	public function __construct($id,$conType){
  		$this->conn = MySQLiConnectionFactory::getCon($conType);
- 		$this->imgId = $id;
+ 		if(is_numeric($id)){
+	 		$this->imgId = $id;
+ 		}
 	}
 
  	public function __destruct(){
@@ -21,34 +23,37 @@ class ImageDetailManager{
  	
 	public function getImageMetadata(){
 		$retArr = Array();
-		$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.photographer, ".
-			"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ".
-			"i.caption, i.owner, i.sourceurl, i.copyright, i.locality, i.notes, i.occid, i.sortsequence, ".
-			"t.sciname, t.author, t.rankid ".
-			"FROM images i INNER JOIN taxa t ON i.tid = t.tid ".
-			"LEFT JOIN users u ON i.photographeruid = u.uid ".
-			"WHERE i.imgid = ".$this->imgId;
-		//echo "<div>$sql</div>";
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$retArr["tid"] = $row->tid;
-			$retArr["sciname"] = $row->sciname;
-			$retArr["author"] = $row->author;
-			$retArr["rankid"] = $row->rankid;
-			$retArr["url"] = $row->url;
-			$retArr["thumbnailurl"] = $row->thumbnailurl;
-			$retArr["originalurl"] = $row->originalurl;
-			$retArr["photographer"] = $row->photographer;
-			$retArr["photographerdisplay"] = $row->photographerdisplay;
-			$retArr["photographeruid"] = $row->photographeruid;
-			$retArr["caption"] = $row->caption;
-			$retArr["owner"] = $row->owner;
-			$retArr["sourceurl"] = $row->sourceurl;
-			$retArr["copyright"] = $row->copyright;
-			$retArr["locality"] = $row->locality;
-			$retArr["notes"] = $row->notes;
-			$retArr["sortsequence"] = $row->sortsequence;
-			$retArr["occid"] = $row->occid;
+		if($this->imgId){
+			$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.photographer, ".
+				"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ".
+				"i.caption, i.owner, i.sourceurl, i.copyright, i.locality, i.notes, i.occid, i.sortsequence, ".
+				"t.sciname, t.author, t.rankid ".
+				"FROM images i INNER JOIN taxa t ON i.tid = t.tid ".
+				"LEFT JOIN users u ON i.photographeruid = u.uid ".
+				"WHERE (i.imgid = ".$this->imgId.')';
+			//echo "<div>$sql</div>";
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$retArr["tid"] = $row->tid;
+				$retArr["sciname"] = $row->sciname;
+				$retArr["author"] = $row->author;
+				$retArr["rankid"] = $row->rankid;
+				$retArr["url"] = $row->url;
+				$retArr["thumbnailurl"] = $row->thumbnailurl;
+				$retArr["originalurl"] = $row->originalurl;
+				$retArr["photographer"] = $row->photographer;
+				$retArr["photographerdisplay"] = $row->photographerdisplay;
+				$retArr["photographeruid"] = $row->photographeruid;
+				$retArr["caption"] = $row->caption;
+				$retArr["owner"] = $row->owner;
+				$retArr["sourceurl"] = $row->sourceurl;
+				$retArr["copyright"] = $row->copyright;
+				$retArr["locality"] = $row->locality;
+				$retArr["notes"] = $row->notes;
+				$retArr["sortsequence"] = $row->sortsequence;
+				$retArr["occid"] = $row->occid;
+			}
+			$rs->close();
 		}
 		return $retArr;
 	}
@@ -115,7 +120,7 @@ class ImageDetailManager{
 			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
 			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", ".
 			"notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
-			" WHERE imgid = ".$this->imgId;
+			" WHERE (imgid = ".$this->imgId.')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			if($addToTid){
@@ -143,11 +148,11 @@ class ImageDetailManager{
 		if(!$this->conn->query($sql)){
 			$sql = 'SELECT i.imgid '.
 				'FROM images i INNER JOIN images i2 ON i.url = i2.url '.
-				'WHERE i.tid = '.$targetTid.' AND i2.imgid = '.$this->imgId;
+				'WHERE (i.tid = '.$targetTid.') AND (i2.imgid = '.$this->imgId.')';
 			$rs = $this->conn->query($sql);  
 			if($rs->num_rows){
 				//Transfer is not happening because image is already mapped to that taxon
-				$sql2 = 'DELETE FROM images WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
+				$sql2 = 'DELETE FROM images WHERE (imgid = '.$this->imgId.') AND (tid = '.$sourceTid.')';
 				$this->conn->query($sql2);
 			}
 			$rs->close();
@@ -163,7 +168,7 @@ class ImageDetailManager{
 		if(substr($imageRootUrl,-1) != "/") $imageRootUrl .= "/";
 		
 		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = ""; $tid = 0;
-		$sqlQuery = "SELECT ti.url, ti.thumbnailurl, ti.originalurl, ti.tid FROM images ti WHERE ti.imgid = ".$imgIdDel;
+		$sqlQuery = "SELECT ti.url, ti.thumbnailurl, ti.originalurl, ti.tid FROM images ti WHERE (ti.imgid = ".$imgIdDel.')';
 		$result = $this->conn->Query($sqlQuery);
 		if($row = $result->fetch_object()){
 			$imgUrl = $row->url;
@@ -173,12 +178,12 @@ class ImageDetailManager{
 		}
 		$result->close();
 				
-		$sql = "DELETE FROM images WHERE imgid = ".$imgIdDel;
+		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			if($removeImg){
 				//Remove images only if there are no other references to the image
-				$sql = "SELECT imgid FROM images WHERE url = '".$imgUrl."'";
+				$sql = "SELECT imgid FROM images WHERE (url = '".$imgUrl."')";
 				$rs = $this->conn->query($sql);
 				if(!$rs->num_rows){
 					//Delete image from server
@@ -213,7 +218,7 @@ class ImageDetailManager{
 	public function parentImageEmpty($url,$tid){
 		$sql = 'SELECT i.imgid '.
 			'FROM taxa t INNER JOIN images i ON t.parenttid = i.tid '.
-			'WHERE t.tid = '.$tid.' AND i.url = "'.$url.'"';
+			'WHERE (t.tid = '.$tid.') AND (i.url = "'.$url.'")';
 		$result = $this->conn->query($sql);
 		if($result && $result->num_rows > 0) return false;
 		return true;
@@ -223,7 +228,7 @@ class ImageDetailManager{
 		$childrenArr = Array();
 		$sql = "SELECT t.Tid, t.SciName, t.Author ".
 			"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-			"WHERE ts.taxauthid = 1 AND ts.ParentTid = ".$tid." ORDER BY t.SciName";
+			"WHERE ts.taxauthid = 1 AND (ts.ParentTid = ".$tid.") ORDER BY t.SciName";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$childrenArr[$row->Tid]["sciname"] = $row->SciName;

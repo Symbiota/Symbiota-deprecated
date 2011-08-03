@@ -21,10 +21,10 @@ class GamesManager {
 		$sql = "SELECT c.clid, c.name ".
 			"FROM fmchecklists c ";
 		if(is_numeric($clValue)){
-			$sql .= 'WHERE clid = '.$clValue;
+			$sql .= 'WHERE (clid = '.$clValue.')';
 		}
 		else{
-			$sql .= 'WHERE clname = "'.$clValue.'"';
+			$sql .= 'WHERE (clname = "'.$clValue.'")';
 		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -39,7 +39,7 @@ class GamesManager {
 		if(!$dynClid) return;
 		$sql = 'SELECT c.dynclid, c.name '.
 			'FROM fmdynamicchecklists c '.
-			'WHERE c.dynclid = '.$dynClid;
+			'WHERE (c.dynclid = '.$dynClid.')';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
@@ -66,7 +66,7 @@ class GamesManager {
 		$sql = 'SELECT DISTINCT c.clid, c.name '.
 			'FROM fmchecklists c INNER JOIN fmchklstprojlink plink ON c.clid = plink.clid ';
 		if($projId){
-			$sql .= 'WHERE c.type = "static" AND plink.pid = '.$projId.' ';
+			$sql .= 'WHERE c.type = "static" AND (plink.pid = '.$projId.') ';
 		}
 		else{
 			$sql .= 'INNER JOIN fmprojects p ON plink.pid = p.pid WHERE c.type = "static" AND p.ispublic = 1 ';

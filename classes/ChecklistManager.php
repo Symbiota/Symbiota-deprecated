@@ -11,6 +11,8 @@ class ChecklistManager {
 	private $clid;
 	private $dynClid;
 	private $clName;
+	private $pid = '';
+	private $projName = '';
 	private $taxaList = Array();
 	private $clMetaData = Array();
 	private $language = "English";
@@ -43,12 +45,12 @@ class ChecklistManager {
 	public function echoFilterList(){
 		echo "'".implode("','",$this->filterArr)."'";
 	}
-	
+
 	public function echoSpeciesAddList(){
 		$sql = "SELECT DISTINCT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
 			"WHERE ts.taxauthid = 1 ";
 		if($this->taxonFilter){
-			$sql .= "AND t.rankid > 140 AND (ts.family = '".$this->taxonFilter."' OR t.sciname LIKE '".$this->taxonFilter."%') ";
+			$sql .= "AND t.rankid > 140 AND ((ts.family = '".$this->taxonFilter."') OR (t.sciname LIKE '".$this->taxonFilter."%')) ";
 		}
 		else{
 			$sql .= "AND (t.rankid = 140 OR t.rankid = 180) ";
@@ -65,7 +67,7 @@ class ChecklistManager {
         	}
        	}
 	}
-	
+
 	public function addNewSpecies($dataArr){
 		$insertStatus = false;
 		$colSql = '';
@@ -91,6 +93,7 @@ class ChecklistManager {
 	}
 	
 	public function setClValue($clValue){
+		$clValue = $this->clCon->real_escape_string($clValue);
 		if(is_numeric($clValue)){
 			$this->clid = $clValue;
 		}
@@ -104,7 +107,9 @@ class ChecklistManager {
 	}
 
 	public function setDynClid($did){
-		$this->dynClid = $did;
+		if(is_numeric($did)){
+			$this->dynClid = $did;
+		}
 	}
 	
 	public function getClMetaData($fieldName = ''){
@@ -124,33 +129,35 @@ class ChecklistManager {
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
 				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
-				"FROM fmchecklists c WHERE c.clid = ".$this->clid;
+				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 		}
 		elseif($this->dynClid){
 			$sql = "SELECT c.dynclid AS clid, c.name, c.details AS locality, c.notes, c.uid, c.type, c.initialtimestamp ".
-				"FROM fmdynamicchecklists c WHERE c.dynclid = ".$this->dynClid;
+				"FROM fmdynamicchecklists c WHERE (c.dynclid = ".$this->dynClid.')';
 		}
- 		$result = $this->clCon->query($sql);
-		if($row = $result->fetch_object()){
-			$this->clName = $row->name;
-			$this->clMetaData["locality"] = $row->locality; 
-			$this->clMetaData["notes"] = $row->notes;
-			$this->clMetaData["type"] = $row->type;
-			if($this->clid){
-				$this->clMetaData["publication"] = $row->publication;
-				$this->clMetaData["abstract"] = $row->abstract;
-				$this->clMetaData["authors"] = $row->authors;
-				$this->clMetaData["parentclid"] = $row->parentclid;
-				$this->clMetaData["uid"] = $row->uid;
-				$this->clMetaData["latcentroid"] = $row->latcentroid;
-				$this->clMetaData["longcentroid"] = $row->longcentroid;
-				$this->clMetaData["pointradiusmeters"] = $row->pointradiusmeters;
-				$this->clMetaData["access"] = $row->access;
-				$this->clMetaData["dynamicsql"] = $row->dynamicsql;
-				$this->clMetaData["datelastmodified"] = $row->datelastmodified;
-			}
-    	}
-    	$result->close();
+		if($sql){
+	 		$result = $this->clCon->query($sql);
+			if($row = $result->fetch_object()){
+				$this->clName = $row->name;
+				$this->clMetaData["locality"] = $row->locality; 
+				$this->clMetaData["notes"] = $row->notes;
+				$this->clMetaData["type"] = $row->type;
+				if($this->clid){
+					$this->clMetaData["publication"] = $row->publication;
+					$this->clMetaData["abstract"] = $row->abstract;
+					$this->clMetaData["authors"] = $row->authors;
+					$this->clMetaData["parentclid"] = $row->parentclid;
+					$this->clMetaData["uid"] = $row->uid;
+					$this->clMetaData["latcentroid"] = $row->latcentroid;
+					$this->clMetaData["longcentroid"] = $row->longcentroid;
+					$this->clMetaData["pointradiusmeters"] = $row->pointradiusmeters;
+					$this->clMetaData["access"] = $row->access;
+					$this->clMetaData["dynamicsql"] = $row->dynamicsql;
+					$this->clMetaData["datelastmodified"] = $row->datelastmodified;
+				}
+	    	}
+	    	$result->close();
+		}
 	}
 	
 	public function editMetaData($editArr){
@@ -163,7 +170,7 @@ class ChecklistManager {
 				$setSql .= ', '.$key.' = NULL';
 			}
 		}
-		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE clid = '.$this->clid;
+		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE (clid = '.$this->clid.')';
 		//echo $sql;
 		$con = MySQLiConnectionFactory::getCon("write");
 		$con->query($sql);
@@ -190,7 +197,7 @@ class ChecklistManager {
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		$voucherArr = Array();
 		if($this->showVouchers){
-			$vSql = 'SELECT DISTINCT v.tid, v.occid, v.collector, v.notes FROM fmvouchers v WHERE v.clid = '.$this->clid;
+			$vSql = 'SELECT DISTINCT v.tid, v.occid, v.collector, v.notes FROM fmvouchers v WHERE (v.clid = '.$this->clid.')';
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
 				$voucherArr[$row->tid][$row->occid] = $row->collector;
@@ -275,7 +282,7 @@ class ChecklistManager {
 			'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
 			'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 			'INNER JOIN images i ON ts2.tid = i.tid '.
-			'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tid IN('.implode(',',$tidReturn).') '.
+			'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) '.
 			'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
 		//echo $sql;
 		$rs = $this->clCon->query($sql);
@@ -315,37 +322,37 @@ class ChecklistManager {
 		$sql = "";
 		if($this->clid){
 			if($this->thesFilter){
-				$sql = "SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ". 
-					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid ".
-	    	  		"WHERE ctl.clid = ".$this->clid." AND ts.taxauthid = ".$this->thesFilter;
+				$sql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
+					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid '.
+	    	  		'WHERE (ctl.clid = '.$this->clid.') AND (ts.taxauthid = '.$this->thesFilter.')';
 			} 
 			else{
-				$sql = "SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, ".
-					"t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-					"INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ".
-	    	  		"WHERE (ts.taxauthid = 1) AND ctl.clid = ".$this->clid;
+				$sql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '.
+					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
+					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
+	    	  		'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.')';
 			}
 		}
 		else{
 			if($this->thesFilter > 1){
-				$sql = "SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = ts.tid ".
-	    	  		"WHERE ctl.dynclid = ".$this->dynClid." AND ts.taxauthid = ".$this->thesFilter;
+				$sql = 'SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author '.
+					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
+					'INNER JOIN fmdyncltaxalink ctl ON ctl.tid = ts.tid '.
+	    	  		'WHERE (ctl.dynclid = '.$this->dynClid.') AND (ts.taxauthid = '.$this->thesFilter.')';
 			}
 			else{
-				$sql = "SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author ".
-					"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-					"INNER JOIN fmdyncltaxalink ctl ON ctl.tid = t.tid ".
-	    	  		"WHERE (ts.taxauthid = 1) AND ctl.dynclid = ".$this->dynClid;
+				$sql = 'SELECT t.tid, ts.uppertaxonomy, ts.family, t.sciname, t.author '.
+					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
+					'INNER JOIN fmdyncltaxalink ctl ON ctl.tid = t.tid '.
+	    	  		'WHERE (ts.taxauthid = 1) AND (ctl.dynclid = '.$this->dynClid.')';
 			}
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
-				$sql .= " AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.vernacularname LIKE '%".$this->taxonFilter."%')) ";
+				$sql .= ' AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE (v.vernacularname LIKE "%'.$this->taxonFilter.'%"))) ';
 			}
 			else{
 				$sql .= " AND ((ts.uppertaxonomy = '".$this->taxonFilter."') ";
@@ -370,14 +377,14 @@ class ChecklistManager {
 				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, v.vernacularname, it.sciname, it.author, ".
 					"it.habitat, it.abundance, it.notes, it.source ".
 					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
-					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
+					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE (vern.language = '".$this->language."') ".
+					"AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
 			}
 			else{
 				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, it.sciname, it.author, v.vernacularname ".
 					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.language = '".$this->language.
-					"' AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
+					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE (vern.language = '".$this->language.
+					"') AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
 			}
 		}
 		$sql .= " ORDER BY family, sciname";
@@ -388,7 +395,7 @@ class ChecklistManager {
 	//Voucher Maintenance functions
 	public function getDynamicSql(){
 		if(!$this->sqlFrag){
-			$sql = "SELECT c.dynamicsql FROM fmchecklists c WHERE c.clid = ".$this->clid;
+			$sql = 'SELECT c.dynamicsql FROM fmchecklists c WHERE (c.clid = '.$this->clid.')';
 			//echo $sql;
 			$rs = $this->clCon->query($sql);
 			while($row = $rs->fetch_object()){
@@ -426,7 +433,7 @@ class ChecklistManager {
 		if($sqlFragArr['latlngor']) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
 		if($sqlFrag){
-			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".trim(substr($sqlFrag,3))."' WHERE c.clid = ".$conn->real_escape_string($this->clid);
+			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".trim(substr($sqlFrag,3))."' WHERE (c.clid = ".$this->clid.')';
 			//echo $sql;
 			$conn->query($sql);
 		}
@@ -435,7 +442,7 @@ class ChecklistManager {
 
 	public function getVoucherCnt(){
 		$vCnt = 0;
-		$sql = 'SELECT count(*) AS vcnt FROM fmvouchers WHERE clid = '.$this->clid;
+		$sql = 'SELECT count(*) AS vcnt FROM fmvouchers WHERE (clid = '.$this->clid.')';
 		$rs = $this->clCon->query($sql);
 		while($r = $rs->fetch_object()){
 			$vCnt = $r->vcnt;
@@ -450,7 +457,7 @@ class ChecklistManager {
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 			'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
-			'WHERE v.clid IS NULL AND ctl.clid = '.$this->clid.' AND ts.taxauthid = 1 ';
+			'WHERE v.clid IS NULL AND (ctl.clid = '.$this->clid.') AND ts.taxauthid = 1 ';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
 			$uvCnt = $row->uvcnt;
@@ -465,7 +472,7 @@ class ChecklistManager {
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 			'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
-			'WHERE v.clid IS NULL AND ctl.clid = '.$this->clid.' AND ts.taxauthid = 1 '.
+			'WHERE v.clid IS NULL AND (ctl.clid = '.$this->clid.') AND ts.taxauthid = 1 '.
 			'ORDER BY ts.family, t.sciname '.
 			'LIMIT '.($startLimit?$startLimit.',':'').'100';
 		//echo '<div>'.$sql.'</div>';
@@ -484,7 +491,7 @@ class ChecklistManager {
 			'INNER JOIN fmvouchers v ON o.occid = v.occid '.
 			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '.
 			'INNER JOIN taxa t ON v.tid = t.tid '.
-			'WHERE v.clid = '.$this->clid.' AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
+			'WHERE (v.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
 			'ORDER BY t.sciname ';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
@@ -507,7 +514,7 @@ class ChecklistManager {
 			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname FROM omoccurrences o LEFT JOIN '.
 				'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-				'WHERE ctl.clid = '.$this->clid.' AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
+				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
 				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'WHERE t.rankid >= 220 AND intab.tid IS NULL AND '.
 				'('.$this->sqlFrag.') '.
@@ -525,7 +532,7 @@ class ChecklistManager {
 	
 	public function hasChildrenChecklists(){
 		$hasChildren = false;
-		$sql = 'SELECT count(*) AS clcnt FROM fmchecklists WHERE parentclid = '.$this->clid;
+		$sql = 'SELECT count(*) AS clcnt FROM fmchecklists WHERE (parentclid = '.$this->clid.')';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
 			if($row->clcnt > 0) $hasChildren = true;
@@ -540,8 +547,8 @@ class ChecklistManager {
 			'FROM taxa t INNER JOIN fmchklsttaxalink ctl1 ON t.tid = ctl1.tid '.
 			'INNER JOIN fmchecklists c ON ctl1.clid = c.clid '.
 			'LEFT JOIN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid WHERE ctl.clid = '.$this->clid.') intab ON ctl1.tid = intab.tid '.
-			'WHERE c.parentclid = '.$this->clid.' AND intab.tid IS NULL '.
+			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid WHERE (ctl.clid = '.$this->clid.')) intab ON ctl1.tid = intab.tid '.
+			'WHERE (c.parentclid = '.$this->clid.') AND intab.tid IS NULL '.
 			'ORDER BY t.sciname';
 		$rs = $this->clCon->query($sql);
 		while($r = $rs->fetch_object()){
@@ -595,6 +602,27 @@ class ChecklistManager {
 
 	public function getClName(){
 		return $this->clName;
+	}
+	
+	public function setProj($pValue){
+		$sql = 'SELECT pid, projname FROM fmprojects '.
+			'WHERE (pid = "'.$pValue.'") OR (projname = "'.$pValue.'")';
+		$rs = $this->clCon->query($sql);
+		if($rs){
+			if($r = $rs->fetch_object()){
+				$this->pid = $r->pid;
+				$this->projName = $r->projname;
+			}
+			$rs->close();
+		}
+	}
+
+	public function getProjName(){
+		return $this->projName;
+	}
+	
+	public function getPid(){
+		return $this->pid;
 	}
 	
 	public function setLanguage($l){
@@ -658,5 +686,4 @@ class ChecklistManager {
  		return $newStr;
  	}
 }
-?>
- 
+?> 

@@ -22,8 +22,8 @@ class TPDescEditorManager extends TPEditorManager{
 			"tds.tdsid, tds.heading, tds.statement, tds.notes as stmtnotes, tds.displayheader, tds.sortsequence ".
 			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
 			"LEFT JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = $this->tid) AND (ts.taxauthid = 1) ";
-		if($this->language) $sql .=	"AND (tdb.Language = '".$this->taxonCon->real_escape_string($this->language)."') ";
+			"WHERE (tdb.tid = ".$this->tid.") AND (ts.taxauthid = 1) ";
+		if($this->language) $sql .=	"AND (tdb.Language = '".$this->language."') ";
 		$sql .=	"ORDER BY tdb.Language, tdb.DisplayLevel, tds.SortSequence";
 		//echo $sql;
 		$result = $this->taxonCon->query($sql);
@@ -58,7 +58,7 @@ class TPDescEditorManager extends TPEditorManager{
 			",caption = ".($_REQUEST["caption"]?"\"".$this->cleanStr($this->taxonCon->real_escape_string($_REQUEST["caption"]))."\"":"NULL").
 			",source = ".($_REQUEST["source"]?"\"".$this->cleanStr($this->taxonCon->real_escape_string($_REQUEST["source"]))."\"":"NULL").
 			",sourceurl = ".($_REQUEST["sourceurl"]?"\"".$this->taxonCon->real_escape_string($_REQUEST["sourceurl"])."\"":"NULL").
-			" WHERE tdbid = ".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]);
+			" WHERE (tdbid = ".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]).')';
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
@@ -69,7 +69,7 @@ class TPDescEditorManager extends TPEditorManager{
 	}
 
 	public function deleteDescriptionBlock(){
-		$sql = "DELETE FROM taxadescrblock WHERE tdbid = ".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]);
+		$sql = "DELETE FROM taxadescrblock WHERE (tdbid = ".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]).')';
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
@@ -105,7 +105,7 @@ class TPDescEditorManager extends TPEditorManager{
 			"statement = \"".$this->cleanStr($this->taxonCon->real_escape_string($_REQUEST["statement"]))."\"".
 			(array_key_exists("displayheader",$_REQUEST)?",displayheader = 1":",displayheader = 0").
 			($_REQUEST["sortsequence"]?",sortsequence = ".$this->taxonCon->real_escape_string($_REQUEST["sortsequence"]):"").
-			" WHERE tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]);
+			" WHERE (tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]).')';
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){
@@ -116,7 +116,7 @@ class TPDescEditorManager extends TPEditorManager{
 	}
 
 	public function deleteStatement(){
-		$sql = "DELETE FROM taxadescrstmts WHERE tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]);
+		$sql = "DELETE FROM taxadescrstmts WHERE (tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]).')';
 		//echo $sql;
 		$status = "";
 		if(!$this->taxonCon->query($sql)){

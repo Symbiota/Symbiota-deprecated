@@ -10,9 +10,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-if(!$projValue) $projValue = "Arizona";
-
-$gMapCon = MySQLiConnectionFactory::getCon("readonly");
+if(!$projValue) $projValue = 1;
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -34,23 +32,25 @@ $gMapCon = MySQLiConnectionFactory::getCon("readonly");
 
                 map.setCenter(new GLatLng( 41.0, -95.0 ), 3);
 <?php
-
-	$clList = Array();
-	$sql = "SELECT c.CLID, c.Name, c.LongCentroid, c.LatCentroid ".
-		"FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid ".
-		"WHERE c.LongCentroid IS NOT NULL AND cpl.pid = '".$gMapCon->real_escape_string($projValue)."'";
-	$result = $gMapCon->query($sql);
-	while($row = $result->fetch_object()){
-		$idStr = $row->CLID;
-		$nameStr = $row->Name;
-		echo "var point = new GLatLng(".$row->LatCentroid.", ".$row->LongCentroid.");\n";
-	  	echo "points.push( point );\n";
-	  	echo "var marker$idStr = new GMarker(point);\n";
-		echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'loadingcl.php?cl=".$row->CLID."&proj=".$projValue."&taxon=All+Species&submit=Show+Species+List';});\n";	
-		echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml('<b>".$nameStr."</b><br>Double Click to open key.<br>Be patient, some keys take 20-30 seconds to open.');});\n";
-	  	echo "map.addOverlay(marker$idStr);\n";
+	$gMapCon = MySQLiConnectionFactory::getCon("readonly");
+	$pValue = $gMapCon->real_escape_string($projValue);
+	if(is_numeric($pValue)){
+		$sql = 'SELECT c.CLID, c.Name, c.LongCentroid, c.LatCentroid '.
+			'FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid '.
+			'WHERE c.LongCentroid IS NOT NULL AND (cpl.pid = '.$pValue.')';
+		$result = $gMapCon->query($sql);
+		while($row = $result->fetch_object()){
+			$idStr = $row->CLID;
+			$nameStr = $row->Name;
+			echo "var point = new GLatLng(".$row->LatCentroid.", ".$row->LongCentroid.");\n";
+		  	echo "points.push( point );\n";
+		  	echo "var marker$idStr = new GMarker(point);\n";
+			echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'loadingcl.php?cl=".$row->CLID."&proj=".$projValue."&taxon=All+Species&submit=Show+Species+List';});\n";	
+			echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml('<b>".$nameStr."</b><br>Double Click to open key.<br>Be patient, some keys take 20-30 seconds to open.');});\n";
+		  	echo "map.addOverlay(marker$idStr);\n";
+		}
+		$result->free();
 	}
-	$result->free();
 	if(!($gMapCon === null)) $gMapCon->close();
 	echo "resizeMap(map, points);\n";
 	

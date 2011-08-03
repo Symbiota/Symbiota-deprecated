@@ -176,8 +176,8 @@ header("Content-Type: text/html; charset=".$charset);
 						</tr>
 						<tr>
 							<td colspan="2">
-								<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);">
-									<table id="edittable" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
+								<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);" >
+									<table class="styledtable" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
 										<tr>
 											<?php if($mode != 'printmode'){ ?>
 												<th></th>

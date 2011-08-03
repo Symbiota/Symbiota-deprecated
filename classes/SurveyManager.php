@@ -13,6 +13,8 @@ class SurveyManager {
 	private $conn;
 	private $surveyId;
 	private $surveyName;
+	private $pid = '';
+	private $projName = '';
 	private $metaData = Array();
 	private $language = "English";
 	private $thesFilter = 1;
@@ -44,12 +46,12 @@ class SurveyManager {
 	}
 
 	public function echoFilterList(){
-		$sql = "SELECT DISTINCT ts.uppertaxonomy, ts.family, t.unitname1 ".
-			"FROM ((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) ".
-			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
-			"INNER JOIN taxa t ON ts.tidaccepted = t.tid ".
-			"WHERE sol.surveyid = ".$this->surveyId.
-			" AND ts.taxauthid = ".$this->thesFilter." ";
+		$sql = 'SELECT DISTINCT ts.uppertaxonomy, ts.family, t.unitname1 '.
+			'FROM ((omsurveyoccurlink sol INNER JOIN omoccurrences o ON sol.occid = o.occid) '.
+			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) '.
+			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+			'WHERE (sol.surveyid = '.$this->surveyId.') '.
+			'AND (ts.taxauthid = '.$this->thesFilter.') ';
 		//echo $sql;
 		$uArr = Array(); $fArr = Array(); $gArr = Array(); 
 		$rs = $this->conn->query($sql);
@@ -67,7 +69,7 @@ class SurveyManager {
 	public function getMetaData(){
 		if(!$this->metaData && $this->surveyId){
 			$sql = "SELECT s.projectname, s.locality, s.managers, s.latcentroid, s.longcentroid, s.notes, s.ispublic ".
-				"FROM omsurveys s WHERE s.surveyid = ".$this->surveyId;
+				"FROM omsurveys s WHERE (s.surveyid = ".$this->surveyId.')';
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->surveyName = $row->projectname;
@@ -94,7 +96,7 @@ class SurveyManager {
 			'latcentroid = '.($_POST['latcentroid']?$con->real_escape_string($_POST['latcentroid']):'NULL').', '.
 			'longcentroid = '.($_POST['longcentroid']?$con->real_escape_string($_POST['longcentroid']):'NULL').', '.
 			'ispublic = '.($_POST['ispublic']?1:0).' '.
-			'WHERE surveyid = '.$this->surveyId;
+			'WHERE (surveyid = '.$this->surveyId.')';
 		//echo $sql;
 		$con->query($sql);
 		$con->close();
@@ -173,7 +175,8 @@ class SurveyManager {
 				$sql = "SELECT DISTINCT ts2.tid, i.url, i.thumbnailurl ".
 					"FROM (images i INNER JOIN taxstatus ts1 ON i.tid = ts1.tid) ".
 					"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted ".
-					"WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND i.sortsequence = 1 AND ts1.tid IN (".implode(",",$activeTids).")";
+					"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (i.sortsequence = 1) ".
+					"AND (ts1.tid IN (".implode(",",$activeTids)."))";
 				$rs = $this->conn->query($sql);
 				while($row = $rs->fetch_object()){
 					$imgArr[$row->tid]["url"] = ($row->thumbnailurl?$row->thumbnailurl:$row->url); 
@@ -225,23 +228,23 @@ class SurveyManager {
 			"INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid) ".
 			"INNER JOIN taxa t ON ts.tidaccepted = t.tid) ";
 		if($this->showCommon){
-			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE vern.Language = '".
-				$this->language."' AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
+			$sql .= "LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE (vern.Language = '".
+				$this->language."') AND vern.SortSequence = 1) v ON t.Tid = v.tid ";
 		}
-		$sql .= "WHERE sol.surveyid = ".$this->surveyId.
-			" AND ts.taxauthid = ".$this->thesFilter." ";
+		$sql .= "WHERE (sol.surveyid = ".$this->surveyId.') '.
+			"AND (ts.taxauthid = ".$this->thesFilter.") ";
 		if($this->taxonFilter){
 			if($this->searchCommon){
-				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE v.VernacularName LIKE '%".
-					$this->taxonFilter."%')) ";
+				$sql .= "AND (t.tid IN(SELECT v.tid FROM taxavernaculars v WHERE (v.VernacularName LIKE '%".
+					$this->taxonFilter."%'))) ";
 			}
 			else{
-				$sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter.
-					"' OR t.SciName Like '".$this->taxonFilter."%' ".
-					"OR ts.Family = '".$this->taxonFilter."' ";
+				$sql .= "AND ((ts.UpperTaxonomy = '".$this->taxonFilter.') '.
+					"'OR (t.SciName Like '".$this->taxonFilter."%') ".
+					"OR (ts.Family = '".$this->taxonFilter."') ";
 				if($this->searchSynonyms){
 					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
-						"WHERE ta.SciName Like '".$this->taxonFilter."%'))";
+						"WHERE (ta.SciName Like '".$this->taxonFilter."%')))";
 				}
 				$sql .= ")";
 			}
@@ -252,7 +255,9 @@ class SurveyManager {
 	}
 
 	public function setThesFilter($filt){
-		$this->thesFilter = $this->conn->real_escape_string($filt);
+		if(is_numeric($filt)){
+			$this->thesFilter = $this->conn->real_escape_string($filt);
+		}
 	}
 
 	public function getThesFilter(){
@@ -260,7 +265,9 @@ class SurveyManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$this->taxonFilter = $this->conn->real_escape_string($tFilter);
+		if(is_numeric($tFilter)){
+			$this->taxonFilter = $this->conn->real_escape_string($tFilter);
+		}
 	}
 	
 	public function setShowAuthors($value = 1){
@@ -290,6 +297,27 @@ class SurveyManager {
 
 	public function getSurveyName(){
 		return $this->surveyName;
+	}
+	
+	public function setProj($pValue){
+		$sql = 'SELECT pid, projname FROM fmprojects '.
+			'WHERE (pid = "'.$pValue.'") OR (projname = "'.$pValue.'")';
+		$rs = $this->conn->query($sql);
+		if($rs){
+			if($r = $rs->fetch_object()){
+				$this->pid = $r->pid;
+				$this->projName = $r->projname;
+			}
+			$rs->close();
+		}
+	}
+
+	public function getProjName(){
+		return $this->projName;
+	}
+	
+	public function getPid(){
+		return $this->pid;
 	}
 	
 	public function setLanguage($l){

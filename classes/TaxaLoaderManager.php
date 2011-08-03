@@ -91,11 +91,11 @@ class TaxaLoaderManager{
 		$rs->close();
 		if($sspStr == 'subsp.') $inSspStr = 'ssp.';
 		
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," '.$inSspStr.' "," '.$sspStr.' ") WHERE AcceptedStr LIKE "% '.$inSspStr.' %"';
+		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," '.$inSspStr.' "," '.$sspStr.' ") WHERE (AcceptedStr LIKE "% '.$inSspStr.' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," var "," var. ") WHERE AcceptedStr LIKE "% var %"';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") WHERE AcceptedStr LIKE "% '.substr($sspStr,0,strlen($sspStr)-1).' %"';
+		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") WHERE (AcceptedStr LIKE "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr," sp.") WHERE AcceptedStr LIKE "% sp."';
 		$this->conn->query($sql);
@@ -118,11 +118,11 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		
 		//Clean sciname field (sciname input gets cleaned later) 
-		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.$inSspStr.' "," '.$sspStr.' ") WHERE sciname like "% '.$inSspStr.' %"';
+		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.$inSspStr.' "," '.$sspStr.' ") WHERE (sciname like "% '.$inSspStr.' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %"';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") WHERE sciname like "% '.substr($sspStr,0,strlen($sspStr)-1).' %"';
+		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") WHERE (sciname like "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET sciname = replace(sciname," cf. "," ") WHERE sciname like "% cf. %"';
 		$this->conn->query($sql);
@@ -143,12 +143,12 @@ class TaxaLoaderManager{
 		
 		//Clean scinameinput field
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," '.$inSspStr.' "," '.$sspStr.' ") '.
-			'WHERE scinameinput like "% '.$inSspStr.' %"';
+			'WHERE (scinameinput like "% '.$inSspStr.' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," var "," var. ") WHERE scinameinput like "% var %"';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," '.substr($sspStr,0,strlen($sspStr)-1).' "," '.$sspStr.' ") '.
-			'WHERE scinameinput like "% '.substr($sspStr,0,strlen($sspStr)-1).' %"';
+			'WHERE (scinameinput like "% '.substr($sspStr,0,strlen($sspStr)-1).' %")';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET scinameinput = replace(scinameinput," cf. "," ") WHERE scinameinput like "% cf. %"';
 		$this->conn->query($sql);
@@ -192,7 +192,7 @@ class TaxaLoaderManager{
 			'WHERE unitind3 IS NULL AND scinameinput LIKE "% var. %" AND (rankid IS NULL OR rankid = 240)';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET unitind3 = "'.$sspStr.'", rankid = 230 '.
-			'WHERE unitind3 IS NULL AND scinameinput LIKE "% '.$sspStr.' %" AND (rankid IS NULL OR rankid = 230)';
+			'WHERE unitind3 IS NULL AND (scinameinput LIKE "% '.$sspStr.' %") AND (rankid IS NULL OR rankid = 230)';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa '.
 			'SET unitname3 = TRIM(SUBSTRING(scinameinput,LOCATE(unitind3,scinameinput)+LENGTH(unitind3)+1, '.
@@ -424,7 +424,7 @@ class TaxaLoaderManager{
 			unset($hArr);
 			$hArr = Array();
 			$tempArr = Array();
-			$sql = "SELECT ts.tid FROM taxstatus ts WHERE taxauthid = $taxAuthId AND ts.hierarchystr IS NULL LIMIT 100";
+			$sql = 'SELECT ts.tid FROM taxstatus ts WHERE (taxauthid = '.$taxAuthId.') AND ts.hierarchystr IS NULL LIMIT 100';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($rs->num_rows){
@@ -435,7 +435,7 @@ class TaxaLoaderManager{
 					unset($tempArr);
 					$tempArr = Array();
 					$sql2 = "SELECT IFNULL(ts.parenttid,0) AS parenttid, ts.tid ".
-						"FROM taxstatus ts WHERE taxauthid = ".$taxAuthId." AND ts.tid IN(".implode(",",array_keys($hArr)).")";
+						"FROM taxstatus ts WHERE (taxauthid = ".$taxAuthId.") AND (ts.tid IN(".implode(",",array_keys($hArr))."))";
 					//echo $sql2."<br />";
 					$rs2 = $this->conn->query($sql2);
 					while($row2 = $rs2->fetch_object()){
@@ -459,7 +459,7 @@ class TaxaLoaderManager{
 				foreach($finalArr as $hStr => $taxaArr){
 					$sqlInsert = "UPDATE taxstatus ts ".
 						"SET ts.hierarchystr = '".$hStr."' ".
-						"WHERE ts.taxauthid = ".$taxAuthId." AND ts.tid IN(".implode(",",$taxaArr).") AND (ts.hierarchystr IS NULL)";
+						"WHERE (ts.taxauthid = ".$taxAuthId.") AND (ts.tid IN(".implode(",",$taxaArr).")) AND (ts.hierarchystr IS NULL)";
 					//echo "<div>".$sqlInsert."</div>";
 					$this->conn->query($sqlInsert);
 				}

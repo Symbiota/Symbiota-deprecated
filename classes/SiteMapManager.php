@@ -24,7 +24,7 @@ class SiteMapManager{
 			$collArr = array_merge($collArr,$userRights['CollEditor']);
 		}
 		if($collArr){
-			$sql .= "WHERE c.collid IN(".implode(",",$collArr).") ";
+			$sql .= "WHERE (c.collid IN(".implode(",",$collArr).")) ";
 		}
 		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
@@ -43,7 +43,7 @@ class SiteMapManager{
 		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
 			"WHERE cl.access = 'public' ";
 		if(!$isAdmin && $clArr){
-			$sql .= "AND cl.clid IN(".implode(",",$clArr).") ";
+			$sql .= "AND (cl.clid IN(".implode(",",$clArr).")) ";
 		}
 		$sql .= "ORDER BY cl.name";
 		//echo "<div>".$sql."</div>";
@@ -62,7 +62,7 @@ class SiteMapManager{
 		$sql = 'SELECT p.pid, p.projname, p.managers FROM fmprojects p '.
 			'WHERE p.ispublic = 1 ';
 		if($projArr){
-			$sql .= 'AND p.pid IN('.implode(',',$projArr).') ';
+			$sql .= 'AND (p.pid IN('.implode(',',$projArr).')) ';
 		}
 		$sql .= 'ORDER BY p.projname';
 		//echo '<div>'.$sql.'</div>';
@@ -88,7 +88,7 @@ class SiteMapManager{
 				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
 				($fieldImagesOnly?'AND imagetype NOT LIKE "%specimen%" ':'').
 				') i ON t.tid = i.tid '.
-				'WHERE ctl.clid = '.$clid.' AND i.tid IS NULL '.
+				'WHERE (ctl.clid = '.$clid.') AND i.tid IS NULL '.
 				'ORDER BY t.sciname';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);

@@ -42,17 +42,19 @@
 	        <?php
 	        $staticList = $klManager->getStaticChecklists();
 			foreach($staticList as $projStr => $clArr){
-				$projId = str_replace(" ","",$projStr);
+				$pidPos = strpos($projStr,':');
+				$pid = substr($projStr,0,$pidPos); 
+				$projName = substr($projStr,$pidPos+1);
 				echo "<div style='margin:3px 0px 0px 15px;'><a name='".$projStr."'></a>";
-				echo "<h3><span style='cursor:pointer;color:#990000;' onclick='javascript:toggle(\"stcl-".$projId."\")'>";
-				echo "<span class='stcl-".$projId."' style='display:none;'><img src='../images/plus.gif'/></span>";
-				echo "<span class='stcl-".$projId."' style='display:inline;'><img src='../images/minus.gif'/></span>";
-				echo "&nbsp;&nbsp;".$projStr."</span>&nbsp;&nbsp;";
-				echo "<a href='clgmap.php?proj=".$projStr."' title='Show checklists on map'><img src='../images/world40.gif' style='width:10px;border:0' /></a>";
+				echo "<h3><span style='cursor:pointer;color:#990000;' onclick='javascript:toggle(\"stcl-".$pid."\")'>";
+				echo "<span class='stcl-".$pid."' style='display:none;'><img src='../images/plus.gif'/></span>";
+				echo "<span class='stcl-".$pid."' style='display:inline;'><img src='../images/minus.gif'/></span>";
+				echo "&nbsp;&nbsp;".$projName."</span>&nbsp;&nbsp;";
+				echo "<a href='clgmap.php?proj=".$pid."' title='Show checklists on map'><img src='../images/world40.gif' style='width:10px;border:0' /></a>";
 				echo "</h3>";
-				echo "<div class='stcl-".$projId."' style='display:block;'><ul>";
+				echo "<div class='stcl-".$pid."' style='display:block;'><ul>";
 				foreach($clArr as $clid => $clName){
-					echo "<li><a href='key.php?cl=$clid&proj=$projStr&taxon=All+Species'>".$clName."</a></li>";
+					echo "<li><a href='key.php?cl=$clid&proj=$pid&taxon=All+Species'>".$clName."</a></li>";
 				}
 				echo "</ul></div>";
 				echo "</div>";
@@ -110,28 +112,28 @@
 
 	public function getStaticChecklists(){
 		$returnArr = Array();
-		$sql = "SELECT p.projname, c.CLID, c.Name ".
+		$sql = "SELECT p.pid, p.projname, c.CLID, c.Name ".
 			"FROM (fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid) ".
 			"INNER JOIN fmchecklists c ON cpl.clid = c.CLID ".
 			"WHERE (c.Type = 'static') ".
 			"ORDER BY p.projname, c.Name";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->projname][$row->CLID] = $row->Name;
+			$returnArr[$row->pid.':'.$row->projname][$row->CLID] = $row->Name;
 		}
 		return $returnArr;
 	}
 	
 	public function getDynamicChecklists(){
 		$returnArr = Array();
-		$sql = "SELECT p.projname, c.CLID, c.Name ".
+		$sql = "SELECT p.pid, p.projname, c.CLID, c.Name ".
 			"FROM (fmprojects p INNER JOIN fmchklstprojlink cpl ON p.pid = cpl.pid) ".
 			"INNER JOIN fmchecklists c ON cpl.clid = c.CLID ".
 			"WHERE (c.Type = 'dynamic') ".
 			"ORDER BY p.projname, c.Name";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->projname][$row->CLID] = $row->Name;
+			$returnArr[$row->pid.':'.$row->projname][$row->CLID] = $row->Name;
 		}
 		return $returnArr;
 	}

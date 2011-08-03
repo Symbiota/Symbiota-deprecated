@@ -83,7 +83,7 @@ class FloraProjectManager {
 			$v = $this->cleanString($value);
 			$sql .= ','.$field.' = "'.$v.'"';
 		}
-		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE pid = '.$this->projId;
+		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE (pid = '.$this->projId.')';
 		//echo $sql;
 		$conn->query($sql);
 		$conn->close();
@@ -161,7 +161,7 @@ class FloraProjectManager {
 	public function getClAddArr(){
 		$returnArr = Array();
 		$sql = 'SELECT c.clid, c.name '.
-			'FROM fmchecklists c LEFT JOIN (SELECT clid FROM fmchklstprojlink WHERE pid = '.$this->projId.') pl ON c.clid = pl.clid '.
+			'FROM fmchecklists c LEFT JOIN (SELECT clid FROM fmchklstprojlink WHERE (pid = '.$this->projId.')) pl ON c.clid = pl.clid '.
 			'WHERE pl.clid IS NULL AND c.access = "public" '.
 			'ORDER BY name';
 		$rs = $this->con->query($sql);
@@ -176,7 +176,7 @@ class FloraProjectManager {
 		$returnArr = Array();
 		$sql = 'SELECT c.clid, c.name '.
 			'FROM fmchecklists c INNER JOIN fmchklstprojlink pl ON c.clid = pl.clid '.
-			'WHERE pl.pid = '.$this->projId.' '.
+			'WHERE (pl.pid = '.$this->projId.') '.
 			'ORDER BY name';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
@@ -200,7 +200,7 @@ class FloraProjectManager {
 
 	public function deleteChecklist($clid){
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'DELETE FROM fmchklstprojlink WHERE pid = '.$this->projId.' AND clid = '.$clid;
+		$sql = 'DELETE FROM fmchklstprojlink WHERE (pid = '.$this->projId.') AND (clid = '.$clid.')';
 		if($conn->query($sql)){
 			return 'SUCCESS: Checklist has been deleted from project';
 		}
