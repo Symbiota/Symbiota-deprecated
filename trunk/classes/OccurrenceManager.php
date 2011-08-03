@@ -24,9 +24,8 @@ class OccurrenceManager{
  		$this->useCookies = array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?false:true; 
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
- 			$this->reset = true;
  		}
- 		if($this->useCookies && !$this->reset){
+ 		if($this->useCookies){
  			$this->readCollCookies();
  		}
 		$this->readRequestVariables();
@@ -45,6 +44,7 @@ class OccurrenceManager{
 		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
 		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
 		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
+ 		$this->reset = true;
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
 			//reset all other search terms except maintain the db terms 
 			$dbsTemp = "";
