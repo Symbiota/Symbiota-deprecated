@@ -14,21 +14,28 @@ class OccurrenceManager{
 	protected $searchTermsArr = Array();
 	protected $localSearchArr = Array();
 	protected $collectionArr = Array();
-	protected $useCookies = true;
-	protected $reset = false;
+	protected $useCookies = 1;
+	protected $reset = 0;
 	protected $dynamicClid;
 	private $clName;
 	
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
- 		$this->useCookies = array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?false:true; 
+		$this->useCookies = (array_key_exists("usecookies",$_REQUEST)&&$_REQUEST["usecookies"]=="false"?0:1); 
  		if(array_key_exists("reset",$_REQUEST) && $_REQUEST["reset"]){
  			$this->reset();
  		}
- 		if($this->useCookies){
+ 		if($this->useCookies && !$this->reset){
  			$this->readCollCookies();
  		}
-		$this->readRequestVariables();
+ 		//Read DB cookies no matter what
+		if(array_key_exists("colldbs",$_COOKIE)){
+			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
+		}
+		elseif(array_key_exists("collsurveyid",$_COOKIE)){
+			$this->searchTermsArr["surveyid"] = $_COOKIE["collsurveyid"];
+		}
+ 		$this->readRequestVariables();
  	}
 
 	public function __destruct(){
@@ -44,7 +51,7 @@ class OccurrenceManager{
 		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
 		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
 		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
- 		$this->reset = true;
+ 		$this->reset = 1;
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
 			//reset all other search terms except maintain the db terms 
 			$dbsTemp = "";
@@ -58,12 +65,6 @@ class OccurrenceManager{
 	}
 
 	private function readCollCookies(){
-		if(array_key_exists("colldbs",$_COOKIE)){
-			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
-		}
-		elseif(array_key_exists("collsurveyid",$_COOKIE)){
-			$this->searchTermsArr["surveyid"] = $_COOKIE["collsurveyid"];
-		}
 		if(array_key_exists("colltaxa",$_COOKIE)){
 			$collTaxa = $_COOKIE["colltaxa"]; 
 			$taxaArr = explode("&",$collTaxa);

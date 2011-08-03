@@ -251,7 +251,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 									</div>
 									<?php 
 								} 
-								if($collManager->getClName() && $_REQUEST["targettid"]){ 
+								if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){ 
 									?>
 									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
 										<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
