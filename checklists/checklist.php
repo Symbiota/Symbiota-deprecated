@@ -351,9 +351,7 @@
 									<select name="eclaccess">
 										<option value="private">Private</option>
 										<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
-									<?php if($isAdmin || $clArray["access"]=="public"){ ?>
 										<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public Research Grade</option>
-									<?php } ?>
 									</select>
 								</div>
 								<div>

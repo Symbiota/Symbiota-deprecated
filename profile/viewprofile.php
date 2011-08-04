@@ -690,9 +690,7 @@ if(isset($profile_viewprofileCrumbs)){
 								<select name="nclaccess">
 									<option value="private">Private</option>
 									<option value="public limited">Public Limited</option>
-								<?php if($isAdmin){ ?>
 									<option value="public">Public Research Grade</option>
-								<?php } ?>
 								</select>
 							</div>
 						</div>
