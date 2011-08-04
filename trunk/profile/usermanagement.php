@@ -253,6 +253,25 @@ if($isAdmin){
 										</li>
 										<?php 
 									}
+									//Floristic Projects
+									if(array_key_exists("ProjAdmin",$userPermissions)){
+										?>
+										<li>
+											<b>Floristic Project Administrator for following projects</b>
+											<ul>
+												<?php 
+												$projList = $userPermissions["ProjAdmin"];
+												foreach($projList as $k => $v){
+													echo "<li>$v";
+													echo "<a href='usermanagement.php?del=ProjAdmin-$k&userid=$userId'>";
+													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
+													echo "</a></li>";
+												}
+												?>
+											</ul>
+										</li>
+										<?php 
+									}
 									//Checklists
 									if(array_key_exists("ClAdmin",$userPermissions)){
 										?>
@@ -417,6 +436,28 @@ if($isAdmin){
 												?>
 											</table>
 											<?php 
+										}
+										?>
+										<div><hr/></div>
+										<div style="float:right;">
+											<input type='submit' name='apsubmit' value='Add Permission' />
+										</div>
+										<?php 
+										//Get checklists
+										$pidArr = Array();
+										if(array_key_exists("ProjAdmin",$userPermissions)){
+											$pidArr = array_keys($userPermissions["ProjAdmin"]);
+										}
+										$projectArr = $userManager->getProjectArr($pidArr);
+										if($projectArr){
+											echo "<h2>Floristic Project Management</h2>";
+											foreach($projectArr as $k=>$v){
+												?>
+												<div style='margin-left:15px;'>
+													<?php echo '<input type="checkbox" name="p[]" value="ProjAdmin-'.$k.'" />'.$v; ?>
+												</div>
+												<?php 
+											}
 										}
 										?>
 										<div><hr/></div>

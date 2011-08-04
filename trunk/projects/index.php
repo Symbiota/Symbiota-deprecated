@@ -13,7 +13,7 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 $projManager = new FloraProjectManager($proj);
 
 $isEditable = 0;
-if($isAdmin){
+if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($projManager->getProjectId(),$userRights["ProjAdmin"]))){
 	$isEditable = 1;
 }
 

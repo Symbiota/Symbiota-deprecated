@@ -11,6 +11,7 @@ CollAdmin-#			Upload records; modify metadata
 CollEditor-#		Edit collection records
 
 ClAdmin-#			Checklist write access
+ProjAdmin-#			Project admin access
 KeyEditor			Edit identification key data
 TaxonProfile		Modify decriptions; add images; 
 Taxonomy			Add names; edit name; change taxonomy
@@ -101,6 +102,10 @@ class PermissionsManager{
 					$clid = substr($pName,8);
 					$perArr["ClAdmin"][$clid] = $clid;
 				}
+				elseif(strpos($pName,"ProjAdmin-") !== false){
+					$pid = substr($pName,10);
+					$perArr["ProjAdmin"][$pid] = $pid;
+				}
 				else{
 					//RareSppAdmin, RareSppReader, KeyEditor, TaxonProfile, Taxonomy
 					$perArr[$pName] = $pName;
@@ -144,6 +149,17 @@ class PermissionsManager{
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
 					$perArr["ClAdmin"][$row->clid] = $row->name;
+				}
+				$result->close();
+			}
+
+			//If there are project admins, fetch project names
+			if(array_key_exists("ProjAdmin",$perArr)){
+				$sql = "SELECT pid, projname FROM fmprojects ".
+					"WHERE (pid IN(".implode(",",$perArr["ProjAdmin"])."))";
+				$result = $this->conn->query($sql);
+				while($row = $result->fetch_object()){
+					$perArr["ProjAdmin"][$row->pid] = $row->projname;
 				}
 				$result->close();
 			}
@@ -196,6 +212,19 @@ class PermissionsManager{
 		return $returnArr;
 	} 
 
+	public function getProjectArr($pidKeys){
+		$returnArr = Array();
+		$sql = 'SELECT pid, projname FROM fmprojects ';
+		if($pidKeys) $sql .= 'WHERE (pid NOT IN('.implode(',',$pidKeys).')) ';
+		$sql .= 'ORDER BY projname';
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$returnArr[$row->pid] = $row->projname;
+		}
+		return $returnArr;
+	} 
+	
 	public function getChecklistArr($clKeys){
 		$returnArr = Array();
 		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl ';
