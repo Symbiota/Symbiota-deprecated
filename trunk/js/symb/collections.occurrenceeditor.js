@@ -3,7 +3,6 @@ var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
 
-
 $(document).ready(function() {
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
@@ -368,15 +367,18 @@ function catalogNumberChanged(cnValue){
 	if(cnValue){
 		cnXmlHttp = GetXmlHttpObject();
 		if(cnXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
+			alert ("Your browser does not support AJAX!");
+			return;
+		}
 		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId;
 		cnXmlHttp.onreadystatechange=function(){
 			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
 				if(resObj.length > 0){
-					alert("Record(s) of same catalog number already exists: " + resObj);
+					if(confirm("Record(s) of same catalog number already exists. Do you want to go to this record?")){
+						occWindow=open("occurrenceeditor.php?occid="+resObj+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
 				}
 			}
 		};
@@ -435,8 +437,7 @@ function lookForDups(f){
 			if(resObj.length > 0){
 				document.getElementById("dupsearchspan").style.display = "none";
 				document.getElementById("dupdisplayspan").style.display = "block";
-				//alert("Duplicate records have been found: " + resObj);
-				dupWindow=open("dupsearch.php?occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=700,height=700,left=20,top=20");
+				dupWindow=open("dupsearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
 				if(dupWindow.opener == null) dupWindow.opener = self;
 				if(window.focus) {dupWindow.focus()}
 				document.getElementById("dupspan").style.display = "none";
@@ -452,7 +453,11 @@ function lookForDups(f){
 }
 
 function fieldChanged(fieldName){
-	document.fullform.editedfields.value = document.fullform.editedfields.value + fieldName + ";"; 
+	try{
+		document.fullform.editedfields.value = document.fullform.editedfields.value + fieldName + ";";
+	}
+	catch(ex){
+	}
 }
 
 //Form verification code

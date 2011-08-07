@@ -22,7 +22,7 @@ class PhotographerManager{
 
  	public function getPhotographerList(){
 		$retArr = array();
- 		$sql = 'SELECT u.uid, CONCAT_WS(" ,", u.lastname, u.firstname) as pname, u.email, Count(ti.imgid) AS imgcnt '.
+ 		$sql = 'SELECT u.uid, CONCAT_WS(", ", u.lastname, u.firstname) as pname, u.email, Count(ti.imgid) AS imgcnt '.
 			'FROM users u INNER JOIN images ti ON u.uid = ti.photographeruid '.
 			'GROUP BY u.firstname, u.lastname, u.email '.
 			'ORDER BY u.lastname, u.firstname';

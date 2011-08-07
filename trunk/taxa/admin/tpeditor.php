@@ -148,24 +148,25 @@ if($tEditor->getTid()){
 		?>
 		<table style="width:100%;">
 			<tr><td>
-				<div style='float:right;'>
-					<ul style="margin-top:15px;width:200px;border:dotted 1px;">
-						<li><a href="../index.php?taxon=<?php echo $tEditor->getTid(); ?>">Taxon Profile Page</a></li>
-						<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=images">Edit Images</a></li>
-						<ul>
+				<fieldset style="float:right;">
+					<legend>
+						<b>Menu</b>
+					</legend>
+					<div>
+						<ul style="margin:0px">
+							<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=images">Edit Images</a></li>
 							<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
 							<li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
+							<li><a href="tpdesceditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
+							<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){ ?>
+								<li><a href="taxonomydisplay.php?target=<?php echo $tEditor->getSciName(); ?>">View Taxonomic Tree</a></li>
+								<li><a href="taxonomyeditor.php?target=<?php echo $tEditor->getTid(); ?>">Edit Taxonomic Placement</a></li>
+								<li><a href="taxonomyloader.php">Add New Taxonomic Name</a></li>
+							<?php } ?>
+							<li><a href="../index.php?taxon=<?php echo $tEditor->getTid(); ?>">Return to Taxon Profile Page</a></li>
 						</ul>
-						<li><a href="tpdesceditor.php?tid=<?php echo $tEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
-						<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){ ?>
-						<li><a href="taxonomydisplay.php?target=<?php echo $tEditor->getSciName(); ?>">View Taxonomic Tree</a></li>
-						<ul>
-							<li><a href="taxonomyeditor.php?target=<?php echo $tEditor->getTid(); ?>">Edit Taxonomic Placement</a></li>
-							<li><a href="taxonomyloader.php">Add New Taxonomic Name</a></li>
-						</ul>
-						<?php } ?>
-					</ul>
-				</div>
+					</div>
+				</fieldset>
 			<?php 
 	 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 	 	if($tEditor->getSubmittedTid()){

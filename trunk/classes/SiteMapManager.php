@@ -40,12 +40,11 @@ class SiteMapManager{
 	
 	public function getChecklistList($isAdmin, $clArr){
 		$returnArr = Array();
-		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
-			"WHERE cl.access = 'public' ";
+		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl WHERE cl.access LIKE "public%"';
 		if(!$isAdmin && $clArr){
-			$sql .= "AND (cl.clid IN(".implode(",",$clArr).")) ";
+			$sql .= 'AND (cl.clid IN('.implode(',',$clArr).')) ';
 		}
-		$sql .= "ORDER BY cl.name";
+		$sql .= 'ORDER BY cl.name';
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($rs){

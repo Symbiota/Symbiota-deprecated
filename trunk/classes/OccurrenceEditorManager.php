@@ -428,7 +428,7 @@ class OccurrenceEditorManager {
 	}
 
 	//Used in dupsearch.php
-	public function getDupOccurrences($occidStr){
+	public function getDupOccurrences($oid,$occidStr){
 		$occurrenceMap = Array();
 		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
 			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
@@ -440,7 +440,8 @@ class OccurrenceEditorManager {
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
 			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'WHERE (occid IN('.$occidStr.'))';
+			'WHERE (o.occid IN('.$occidStr.')) ';
+		if($oid) $sql .= 'AND (o.occid != '.$oid.')';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -453,6 +454,88 @@ class OccurrenceEditorManager {
 		}
 		$rs->close();
 		return $occurrenceMap;
+	}
+	
+	public function mergeRecords($o1,$o2){
+		$status = '';
+		$targetOccid = '';
+		$sourceOccid = '';
+		if($o1 < $o2){
+			$targetOccid = $o1;
+			$sourceOccid = $o2;
+		}
+		else{
+			$targetOccid = $o2;
+			$sourceOccid = $o1;
+		}
+		
+		$oArr = array();
+		//Merge records
+		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$o1.' OR occid = '.$o2;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_assoc()){
+			$tempArr = array();
+			foreach($r as $k => $v){
+				$tempArr[strtolower($k)] = $v;
+			}
+			$id = $tempArr['occid'];
+			unset($tempArr['occid']);
+			unset($tempArr['collid']);
+			unset($tempArr['dbpk']);
+			unset($tempArr['datelastmodified']);
+			$oArr[$id] = $tempArr;
+		}
+		$rs->close();
+
+		$tArr = $oArr[$targetOccid];
+		$sArr = $oArr[$sourceOccid];
+		$sqlFrag = '';
+		foreach($sArr as $k => $v){
+			if(($v != '') && $tArr[$k] == ''){
+				$sqlFrag .= ','.$k.'="'.$v.'"';
+			} 
+		}
+		if($sqlFrag){
+			//Remap source to target
+			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
+			//echo $sqlIns;
+			$this->conn->query($sqlIns);
+		}
+
+		//Remap determinations
+		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap occurrence edits
+		$sql = 'UPDATE omoccuredits SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap images
+		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap comments
+		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap OCR raw text blocks
+		$sql = 'UPDATE specprocessorrawlabels SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap checklists voucher links
+		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap survey lists
+		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Delete source
+		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$status .= 'ERROR: unable to delete source occurrence: '.$this->conn->error;
+		}
+		return $status;
 	}
 }
 ?>
