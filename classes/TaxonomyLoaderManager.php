@@ -19,7 +19,7 @@ class TaxonomyLoaderManager{
 	}
 	
 	public function echoTaxonRanks(){
-		$sql = "SELECT tu.rankid, tu.rankname FROM taxonunits tu ORDER BY tu.rankid";
+		$sql = 'SELECT DISTINCT tu.rankid, tu.rankname FROM taxonunits tu ORDER BY tu.rankid';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$rankId = $row->rankid;
@@ -73,7 +73,7 @@ class TaxonomyLoaderManager{
 		 	
 			//Link new name to existing specimens and set locality secirity if needed
 			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
-			if($dataArr['securitystatus']) $sql1 .= ',o.localitysecurity = 1 '; 
+			if($dataArr['securitystatus'] == 1) $sql1 .= ',o.localitysecurity = 1 '; 
 			$sql1 .= 'WHERE (o.sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'") ';
 			$this->conn->query($sql1);
 			//Link occurrence images to the new name

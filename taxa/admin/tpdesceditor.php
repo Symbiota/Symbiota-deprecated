@@ -85,11 +85,14 @@ if($editable && $tid){
 	?>
 	<table style="width:100%;">
 		<tr><td>
-			<div style='float:right;margin:15px;'>
+			<fieldset style="float:right;">
+				<legend>
+					<b>Menu</b>
+				</legend>
 				<a href="tpeditor.php?tid=<?php echo $descEditor->getTid(); ?>">
-					Main Menu
+					Continue to Main Menu
 				</a>
-			</div>
+			</fieldset>
 		<?php 
 
  	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted

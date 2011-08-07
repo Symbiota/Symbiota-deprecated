@@ -319,11 +319,14 @@ if($symbUid){
 											<option <?php echo ($qProcessingStatus=='preparsed'?'SELECTED':''); ?>>
 												preparsed
 											</option>
+											<option <?php echo ($qProcessingStatus=='dups'?'SELECTED':''); ?>>
+												probable dups
+											</option>
+											<option <?php echo ($qProcessingStatus=='parsed'?'SELECTED':''); ?>>
+												parsed
+											</option>
 											<option <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
 												reviewed
-											</option>
-											<option <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
-												closed
 											</option>
 										</select>
 									</div>
@@ -418,15 +421,9 @@ if($symbUid){
 											<span style="margin-left:10px;" title="Earliest Date Collected">
 												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateModified(this);" />
 											</span>
-											<?php 
-											if(!$occId){ 
-												?>
-												<span style="margin-left:5px;cursor:pointer;" onclick="">
-													<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
-												</span>
-												<?php 
-											} 
-											?>
+											<span style="margin-left:5px;cursor:pointer;" onclick="">
+												<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
+											</span>
 										</div>
 										<div style="margin-top:5px;">
 											<span>
@@ -487,7 +484,7 @@ if($symbUid){
 												<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 											</span>
 											<span style="margin-left:10px;">
-												<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
+												<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="width:200px;" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 											</span>
 											<?php if(!$isEditor) echo '<div style="color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>' ?>
 											<div></div>
@@ -588,7 +585,7 @@ if($symbUid){
 													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
-											<span style="margin-left:58px;">
+											<span style="margin-left:62px;">
 												Datum
 												<a href="#" onclick="return dwcDoc('geodeticDatum')">
 													<img class="dwcimg" src="../../images/qmark.png" />
@@ -764,10 +761,10 @@ if($symbUid){
 												<span style="">
 													Verbatim Coordinates
 												</span>
-												<span style="margin-left:135px;">
+												<span style="margin-left:185px;">
 													Georeferenced By
 												</span>
-												<span style="margin-left:52px;">
+												<span style="margin-left:54px;">
 													Georeference Protocol
 													<a href="#" onclick="return dwcDoc('georeferenceProtocol')">
 														<img class="dwcimg" src="../../images/qmark.png" />
@@ -954,15 +951,13 @@ if($symbUid){
 										</div>
 										<div style="padding:3px;">
 											<span style="" title="Internal occurrence record Primary Key">
-												Portal ID: <?php echo $occId; ?>
+												<?php if($occId) echo 'Portal ID: '.$occId; ?>
 											</span>
-											<span style="margin-left:80px;" title="">
-												Date Last Modified:
-												<?php echo array_key_exists('datelastmodified',$occArr)?$occArr['datelastmodified']:''; ?>
+											<span style="margin-left:90px;">
+												<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Date Last Modified: '.$occArr['datelastmodified']; ?>
 											</span>
-											<span style="margin-left:80px;" title="">
-												Entered By:
-												<?php echo array_key_exists('recordenteredby',$occArr)?$occArr['recordenteredby']:''; ?>
+											<span style="margin-left:90px;">
+												<?php if(array_key_exists('recordenteredby',$occArr)) echo 'Entered By: '.$occArr['recordenteredby']; ?>
 											</span>
 										</div>
 									</fieldset>

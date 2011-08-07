@@ -224,7 +224,13 @@ if($taxonManager->getSciName() != "unknown"){
 		 	}
 			echo "</div>";
 			if($editable){
-				echo "<div style='float:right;'><a href='admin/tpeditor.php?tid=".$taxonManager->getTid()."' title='Edit Taxon Data'><img style='border:0px;' src='../images/edit.png'/></a></div>";
+				?>
+				<div style="float:right;">
+					<a href='admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>' title='Edit Taxon Data'>
+						<img style='border:0px;' src='../images/edit.png'/>
+					</a>
+				</div>
+				<?php 
 			}
 			?>
 			</td>
@@ -369,9 +375,12 @@ if($taxonManager->getSciName() != "unknown"){
 			<td style="width:250px;vertical-align:top;">
 				<?php 
 				$displayName = $spDisplay;
+				if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> spp. ';
 				if($taxonRank > 140){
 					$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
-					$displayName = "<i>".$displayName."</i> spp.&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+					$displayName .= ' <a href="'.$parentLink.'">';
+					$displayName .= '<img border="0" height="10px" src="../images/toparent.jpg" title="Go to Parent" />';
+					$displayName .= '</a>';
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
 				if($taxonRank > 140) echo "<div id='family' style='margin-top:3px;margin-left:20px;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
@@ -380,10 +389,19 @@ if($taxonManager->getSciName() != "unknown"){
 			</td>
 			<td>
 				<?php 
+				if($editable){
+					?>
+					<div style='float:right;'>
+						<a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="Edit Taxon Data">
+							<img style='border:0px;' src='../images/edit.png'/>
+						</a>
+					</div>
+					<?php 
+				}
 				//Display description
 				if($descriptions = $taxonManager->getDescriptions()){
 					?>
-					<div id="desctabs" style="margin:10px;">
+					<div id="desctabs" style="margin:10px;clear:both;">
 						<ul>
 							<?php 
 							$capCnt = 1;
@@ -398,7 +416,7 @@ if($taxonManager->getSciName() != "unknown"){
 						<?php 
 						foreach($descriptions as $k => $vArr){
 							?>
-							<div id='tab<?php echo $k; ?>' class='genustab'>
+							<div id='tab<?php echo $k; ?>' class='spptab'>
 								<?php 
 								if($vArr["source"]){
 									echo "<div id='descsource' style='float:right;'>";
@@ -432,15 +450,6 @@ if($taxonManager->getSciName() != "unknown"){
 				}
 				else{
 					echo "<div style='margin:70px 0px 20px 50px '>Description Not Yet Available</div>";
-				}
-				if($editable){
-					?>
-					<div style='position:absolute;top:0px;right:0px;'>
-						<a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="Edit Taxon Data">
-							<img style='border:0px;' src='../images/edit.png'/>
-						</a>
-					</div>
-					<?php 
 				}
 				?>
 			</td>

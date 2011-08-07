@@ -51,12 +51,14 @@ class SpecUploadDigir extends SpecUploadManager {
 		$digirEof = false;
 		$recordCount = 0;
 		$recordReturn = 0;
+		$prevReturn = 0;
 		$qStr = "<like><darwin:collectioncode>%%%</darwin:collectioncode></like>";
 		if($this->queryStr){
 			$qStr = trim($this->queryStr);
 		}
 		
 		do{
+			$prevReturn = $recordReturn;
 			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->digirPath."?doc=".urlencode("<request ".
 				"xmlns='http://digir.net/schema/protocol/2003/1.0' ".
 				"xmlns:xsd='http://www.w3.org/2001/XMLSchema' ".
@@ -136,7 +138,7 @@ class SpecUploadDigir extends SpecUploadManager {
 			$this->searchStart += $this->searchLimit;
 			flush();
 			//sleep(3);
-		} while ($recordCount > $recordReturn && !$digirEof);
+		} while ($recordCount > $recordReturn && $prevReturn < $recordReturn && !$digirEof);
 	}
 	
 	private function startElement($parser, $name, $attrs){

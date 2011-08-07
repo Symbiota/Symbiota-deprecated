@@ -547,7 +547,7 @@ class SpecUploadManager{
 				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 			}
 		}
-		elseif(strtolower($charset) == "ISO-8859-1"){
+		elseif(strtolower($charset) == "iso-8859-1"){
 			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "UTF-8"){
 				//$value = utf8_decode($value);
 				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

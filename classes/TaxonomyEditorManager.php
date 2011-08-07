@@ -213,8 +213,11 @@ class TaxonomyEditorManager{
 		
 		//If SecurityStatus was changed, set security status within omoccurrence table 
 		if($taxonEditArr['securitystatus'] != $_REQUEST['securitystatusstart']){
-			$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$this->conn->real_escape_string($taxonEditArr['securitystatus']).' WHERE (tidinterpreted = '.$tid.')';
-			$this->conn->query($sql2);
+			if(is_numeric($taxonEditArr['securitystatus'])){
+				$sql2 = 'UPDATE omoccurrences SET localitysecurity = '.$taxonEditArr['securitystatus'].
+					' WHERE (tidinterpreted = '.$tid.')';
+				$this->conn->query($sql2);
+			}
 		}
 		return $status;
 	}

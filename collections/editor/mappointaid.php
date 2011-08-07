@@ -75,7 +75,6 @@ if(!$latDef && !$lngDef){
 	            opener.document.fullform.decimallongitude.onchange();
 			}
 			catch(myErr){
-				alert("Unable to transfer data. Please let an administrator know.");
 			}
 			finally{
 	            self.close();

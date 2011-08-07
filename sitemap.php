@@ -29,9 +29,9 @@ $smManager = new SiteMapManager();
 	    	if (newWindow.opener == null) newWindow.opener = self;
 	    }
 
-	    function verifyTaxaNoImgForm(f){
+	    function submitTaxaNoImgForm(f){
 			if(f.clid.value != ""){
-				return true;
+				f.submit();
 			}
 			return false;
 	    }
@@ -151,7 +151,7 @@ $smManager = new SiteMapManager();
 							See the Symbiota documentation on 
 							<a href="http://symbiota.org/tiki/tiki-index.php?page=Image+Submission">Image Submission</a> 
 							for an overview of how images are managed within a Symbiota data portal. Field images without 
-							detailed locality information can be uploaded using the Taxon Species Profile page (details below).
+							detailed locality information can be uploaded using the Taxon Species Profile page.
 							Specimen images are loaded through the Specimen Editing page or through a batch upload process 
 							established by a portal manager. Image Observations (Image Vouchers) with detailed locality information can be 
 							uploaded using the link below. Note that you will need the necessary permission assignments to use this 
@@ -159,19 +159,25 @@ $smManager = new SiteMapManager();
 						</div>
 						<ul>
 							<li>
+								<a href="taxa/admin/tpimageeditor.php?category=images" target="_blank">
+									Basic Field Image Submission 
+								</a>
+							</li>
+							<li>
 								<a href="collections/editor/observationsubmit.php">
 									Image Observation Submission Module
 								</a>
 							</li>
 		            		<?php if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ ?>
 								<li>
-									<b>Taxa without images:</b>
-									<form name="taxanoimg"> 
-										<select name="clid" onchange="return verifyTaxaNoImgForm(this.form);">
+									<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
+									<b>Taxa without images:</b> 
+									<form name="taxanoimg" action="sitemap.php#taxanoimages" method="post" style="display:inline;"> 
+										<select name="clid" onchange="submitTaxaNoImgForm(this.form);">
 											<option value="">Select a Checklist</option>
 											<option value="">-------------------------------</option>
 											<?php 
-	            								$clArr = $smManager->getChecklistList(true);
+	            								$clArr = $smManager->getChecklistList($isAdmin,true);
 												foreach($clArr as $clid => $clname){
 													echo '<option value="'.$clid.'">'.$clname."</option>\n";
 												}
@@ -181,19 +187,23 @@ $smManager = new SiteMapManager();
 									</form>
 									<?php 
 									if($submitAction == 'taxanoimages'){
-										echo "<ul>\n";
 										$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid']);
+										echo '<fieldset style="margin:10px;width:400px;">';
+										echo '<div style="margin:10px;"><b>'.$clArr[$_REQUEST['clid']].':</b> '.count($tArr).' taxa without images</div>';
+										echo "<ul style='margin:10px'>\n";
 										foreach($tArr as $tid => $sn){
-											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd'>".$sn."</a></li>\n";
+											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd' target='_blank'>".$sn."</a></li>\n";
 										}
 										echo "</ul>\n";
+										echo '</fieldset>';
 									}
 									?>
 								</li>
 								<li>
+									<?php if($submitAction == 'taxanofieldimages') echo '<a name="taxanofieldimages"><a/>'; ?>
 									<b>Taxa without field images:</b> 
-									<form name="taxanofieldimg"> 
-										<select name="clid" onchange="return verifyTaxaNoImgForm(this.form);">
+									<form name="taxanofieldimg" action="sitemap.php#taxanofieldimages" method="post" style="display:inline;"> 
+										<select name="clid" onchange="submitTaxaNoImgForm(this.form);">
 											<option value="">Select a Checklist</option>
 											<option value="">--------------------------------</option>
 											<?php 
@@ -206,12 +216,17 @@ $smManager = new SiteMapManager();
 									</form>
 									<?php 
 									if($submitAction == 'taxanofieldimages'){
-										echo "<ul>\n";
 										$tArr = $smManager->getTaxaWithoutImages($_REQUEST['clid'],true);
+										echo '<fieldset style="margin:10px;width:400px;">';
+										echo '<div style="margin:10px;"><b>'.$clArr[$_REQUEST['clid']].':</b> '.count($tArr).' taxa without field images</div>';
+										echo "<ul>";
 										foreach($tArr as $tid => $sn){
-											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd'>".$sn."</a></li>\n";
+											echo '<li>';
+											echo '<a href="taxa/admin/tpimageeditor.php?tid='.$tid.'&category=imageadd" target="_blank">'.$sn.'</a>';
+											echo "</li>";
 										}
-										echo "</ul>\n";
+										echo "</ul>";
+										echo '</fieldset>';
 									}
 									?>
 								</li>
