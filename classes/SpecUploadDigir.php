@@ -5,8 +5,9 @@ class SpecUploadDigir extends SpecUploadManager {
 	private $searchStart = 0;
 	private $searchLimit = 1000;
 	private $defaultSchema = "";	//http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd
-	private $returnCount = true;
-
+	private $recCount = 0;
+	private $successCount = 0;
+	
 	//XML parser stuff
 	private $withinRecordElement = false;
 	private $activeFieldName = "";
@@ -50,15 +51,13 @@ class SpecUploadDigir extends SpecUploadManager {
 
 		$digirEof = false;
 		$recordCount = 0;
-		$recordReturn = 0;
-		$prevReturn = 0;
+		$zeroReturnCnt = 0;
 		$qStr = "<like><darwin:collectioncode>%%%</darwin:collectioncode></like>";
 		if($this->queryStr){
 			$qStr = trim($this->queryStr);
 		}
 		
 		do{
-			$prevReturn = $recordReturn;
 			$url = (stripos($this->server,"http://")!==false?"":"http://").$this->server.$this->digirPath."?doc=".urlencode("<request ".
 				"xmlns='http://digir.net/schema/protocol/2003/1.0' ".
 				"xmlns:xsd='http://www.w3.org/2001/XMLSchema' ".
@@ -77,7 +76,7 @@ class SpecUploadDigir extends SpecUploadManager {
 				"<records limit='".$this->searchLimit."' start='".$this->searchStart."'>".
 				"<structure schemaLocation='".$this->schemaName."'/>".
 				"</records>".
-				"<count>".($this->returnCount?"true":"false")."</count>".
+				"<count>true</count>".
 				"</search></request>");
 			//echo "\n".$url."\n";
 			$fp = fopen($url, 'rb');
@@ -121,28 +120,41 @@ class SpecUploadDigir extends SpecUploadManager {
 					foreach ($xml->diagnostic as $diag) {
 						switch((string) $diag['code']) { 
 							case 'MATCH_COUNT':
-								$recordCount = (int)$diag;
+								$matchCount = (int)$diag;
 								break;
 							case 'END_OF_RECORDS':
 								$digirEof = ($diag == "true"?true:false);
 								break;
 							case 'RECORD_COUNT':
-								$recordReturn += (int)$diag;
+								$currentReturn = (int)$diag;
 								break;
 						}
 					}
 				}
 			    fclose($fp);
 			}
-			echo "<li style='font-weight:bold;'>Records Returned: ".$recordReturn." of ".$recordCount."</li>";
+			echo "<li style='font-weight:bold;'>Records Returned: ".$this->successCount." of ".$matchCount." (".($this->recCount-$this->successCount)."failed)</li>";
 			$this->searchStart += $this->searchLimit;
 			flush();
+			if($currentReturn){
+				$zeroReturnCnt = 0;
+			}
+			else{
+				$zeroReturnCnt++;
+			}
+			if($zeroReturnCnt > 10){
+				echo '<li>Download stopped prematurely due to stall in record return</li>';
+				break;
+			}
 			//sleep(3);
-		} while ($recordCount > $recordReturn && $prevReturn < $recordReturn && !$digirEof);
+		} while (!$digirEof && $matchCount > $this->successCount);
 	}
 	
 	private function startElement($parser, $name, $attrs){
-		if($name == "RECORD") $this->withinRecordElement = true;
+		if($name == "RECORD"){
+			$this->withinRecordElement = true;
+			$this->recCount++;
+		}
 		if($this->withinRecordElement){
 			if($p = strpos($name,":")){
 				$name = substr($name,$p+1);
@@ -341,7 +353,10 @@ class SpecUploadDigir extends SpecUploadManager {
 			}
 			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",".($dbpk?'"'.$dbpk.'"':'NULL').",\"".substr($sqlValuesFrag,3)."\")";
 			//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
-			if(!$this->conn->query($sql)){
+			if($this->conn->query($sql)){
+				$this->successCount++;
+			}
+			else{
 				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>\n";
 				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
 			}
