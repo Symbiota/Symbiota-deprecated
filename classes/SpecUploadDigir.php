@@ -50,7 +50,7 @@ class SpecUploadDigir extends SpecUploadManager {
 	private function submitReq(){
 
 		$digirEof = false;
-		$recordCount = 0;
+		$matchCount = 0;
 		$zeroReturnCnt = 0;
 		$qStr = "<like><darwin:collectioncode>%%%</darwin:collectioncode></like>";
 		if($this->queryStr){
@@ -133,7 +133,7 @@ class SpecUploadDigir extends SpecUploadManager {
 				}
 			    fclose($fp);
 			}
-			echo "<li style='font-weight:bold;'>Records Returned: ".$this->successCount." of ".$matchCount." (".($this->recCount-$this->successCount)."failed)</li>";
+			echo "<li style='font-weight:bold;'>Records Returned: ".$this->successCount." of ".$matchCount." (".($this->recCount-$this->successCount)." failed)</li>";
 			$this->searchStart += $this->searchLimit;
 			flush();
 			if($currentReturn){
@@ -142,12 +142,12 @@ class SpecUploadDigir extends SpecUploadManager {
 			else{
 				$zeroReturnCnt++;
 			}
-			if($zeroReturnCnt > 10){
+			if($zeroReturnCnt > 5){
 				echo '<li>Download stopped prematurely due to stall in record return</li>';
 				break;
 			}
 			//sleep(3);
-		} while (!$digirEof && $matchCount > $this->successCount);
+		} while (!$digirEof);
 	}
 	
 	private function startElement($parser, $name, $attrs){
