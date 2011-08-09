@@ -322,7 +322,7 @@ class ChecklistManager {
 		$sql = "";
 		if($this->clid){
 			if($this->thesFilter){
-				$sql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
+				$sql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, ts.family, '. 
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
 					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid '.
@@ -356,7 +356,7 @@ class ChecklistManager {
 			}
 			else{
 				$sql .= " AND ((ts.uppertaxonomy = '".$this->taxonFilter."') ";
-				if($this->clid){
+				if($this->clid && $this->thesFilter){
 					$sql .= "OR (IFNULL(ctl.familyoverride,ts.family) = '".$this->taxonFilter."') ";
 				}
 				else{
