@@ -470,68 +470,69 @@ if($taxonManager->getSciName() != "unknown"){
 					</div>
 					<div>
 					<?php 
-					$sppArr = $taxonManager->getSppArray();
-					$cnt = 0;
-					ksort($sppArr);
-					foreach($sppArr as $sciNameKey => $subArr){
-						if($cnt%5 == 0 && $cnt > 0){
-							echo "<div style='clear:both;'><hr></div>";
-						}
-						echo "<div class='spptaxon'>";
-						echo "<div style='margin-top:10px;'><a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'><i>".$sciNameKey."</i></a></div>\n";
-						echo "<div class='sppimg' style='overflow:hidden;'>";
-	
-						if(array_key_exists("url",$subArr)){
-							$imgUrl = $subArr["url"];
-							if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-								$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+					if($sppArr = $taxonManager->getSppArray()){
+						$cnt = 0;
+						ksort($sppArr);
+						foreach($sppArr as $sciNameKey => $subArr){
+							if($cnt%5 == 0 && $cnt > 0){
+								echo "<div style='clear:both;'><hr></div>";
 							}
-							echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
-	
-							if($subArr["thumbnailurl"]){
-								$imgUrl = $subArr["thumbnailurl"];
-								if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
-									$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+							echo "<div class='spptaxon'>";
+							echo "<div style='margin-top:10px;'><a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'><i>".$sciNameKey."</i></a></div>\n";
+							echo "<div class='sppimg' style='overflow:hidden;'>";
+		
+							if(array_key_exists("url",$subArr)){
+								$imgUrl = $subArr["url"];
+								if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+									$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 								}
+								echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+		
+								if($subArr["thumbnailurl"]){
+									$imgUrl = $subArr["thumbnailurl"];
+									if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
+										$imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+									}
+								}
+								echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."' style='z-index:-1' />";
+								echo "</a>\n";
+								echo "<div style='text-align:right;position:relative;top:-26px;left:5px;' title='Photographer: ".$subArr["photographer"]."'>";
+								echo "</div>";
 							}
-							echo "<img src='".$imgUrl."' title='".$subArr["caption"]."' alt='Image of ".$sciNameKey."' style='z-index:-1' />";
-							echo "</a>\n";
-							echo "<div style='text-align:right;position:relative;top:-26px;left:5px;' title='Photographer: ".$subArr["photographer"]."'>";
-							echo "</div>";
-						}
-						elseif($editable){
-							echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&tid=".$subArr["tid"]."'>Add an Image!</a></div>";
-						}
-						else{
-							echo "<div class='spptext'>Image<br/>Not Available</div>";
-						}
-						echo "</div>\n";
-						
-						if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
-							$gUrl = ""; $iUrl = "";
-							if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
-								$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/googlemap.php?usecookies=0&type=3&db=all&thes=on&taxa=".$subArr["tid"]."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
-							}
-							$aUrl = "";
-							if(strpos($mapUrl,"maps.google.com")){
-								if($gUrl) $aUrl = $gUrl;
+							elseif($editable){
+								echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&tid=".$subArr["tid"]."'>Add an Image!</a></div>";
 							}
 							else{
-								$aUrl = $mapUrl;
-								if($gUrl) $iUrl = $gUrl;
+								echo "<div class='spptext'>Image<br/>Not Available</div>";
 							}
-							echo "<div class='sppmap'>";
-							if($aUrl) echo "<a href=\"".$aUrl."\">";
-							echo "<img src='".$mapUrl."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
-							if($aUrl) echo "</a>";
-							if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
+							echo "</div>\n";
+							
+							if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
+								$gUrl = ""; $iUrl = "";
+								if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
+									$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/googlemap.php?usecookies=0&type=3&db=all&thes=on&taxa=".$subArr["tid"]."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
+								}
+								$aUrl = "";
+								if(strpos($mapUrl,"maps.google.com")){
+									if($gUrl) $aUrl = $gUrl;
+								}
+								else{
+									$aUrl = $mapUrl;
+									if($gUrl) $iUrl = $gUrl;
+								}
+								echo "<div class='sppmap'>";
+								if($aUrl) echo "<a href=\"".$aUrl."\">";
+								echo "<img src='".$mapUrl."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
+								if($aUrl) echo "</a>";
+								if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
+								echo "</div>";
+							}
+							elseif($taxonManager->getRankId()>140){
+								echo "<div class='sppmap'><div class='spptext'>Map<br />not<br />Available</div></div>\n";
+							}
 							echo "</div>";
+							$cnt++;
 						}
-						elseif($taxonManager->getRankId()>140){
-							echo "<div class='sppmap'><div class='spptext'>Map<br />not<br />Available</div></div>\n";
-						}
-						echo "</div>";
-						$cnt++;
 					}
 					?>
 						<div style='clear:both;'><hr></div>
