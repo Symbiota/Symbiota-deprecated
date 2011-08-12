@@ -60,14 +60,14 @@ class TaxonProfileManager {
 	}
  	
  	public function setTaxon($t){
-		$sql = "SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
-			"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-			"WHERE (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") ";
-		if(intval($t)){
-			$sql .= "AND (t.TID = ".$this->con->real_escape_string($t).") ";
+		$sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted '. 
+			'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID '.
+			'WHERE (ts.taxauthid = '.($this->taxAuthId?$this->taxAuthId:'1').') ';
+		if(is_numeric($t)){
+			$sql .= 'AND (t.TID = '.$this->con->real_escape_string($t).') ';
 		}
 		else{
-			$sql .= "AND (t.SciName = '".$this->con->real_escape_string($t)."') ";
+			$sql .= 'AND (t.SciName = "'.$this->con->real_escape_string($t).'") ';
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -607,28 +607,31 @@ class TaxonProfileManager {
  	}
 
 	public function getDescriptions(){
-		$descriptionsStr = "There is no description set for this taxon.";
-		$descriptions = Array();
-		$sql = 'SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
-			'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
-			'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) '.
-			'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
-			'WHERE (tdb.tid = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
-			'ORDER BY tdb.displaylevel,tds.sortsequence';
-		//echo $sql;
-		$result = $this->con->query($sql);
-		while($row = $result->fetch_object()){
-			$tdbId = $row->tdbid;
-			if(!array_key_exists($tdbId,$descriptions)){
-				$descriptions[$tdbId]["caption"] = $row->caption;
-				$descriptions[$tdbId]["source"] = $row->source;
-				$descriptions[$tdbId]["url"] = $row->sourceurl;
+		$descriptionsStr = '';
+		if($this->tid){
+			$descriptionsStr = "There is no description set for this taxon.";
+			$descriptions = Array();
+			$sql = 'SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
+				'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
+				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) '.
+				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
+				'WHERE (tdb.tid = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
+				'ORDER BY tdb.displaylevel,tds.sortsequence';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			while($row = $result->fetch_object()){
+				$tdbId = $row->tdbid;
+				if(!array_key_exists($tdbId,$descriptions)){
+					$descriptions[$tdbId]["caption"] = $row->caption;
+					$descriptions[$tdbId]["source"] = $row->source;
+					$descriptions[$tdbId]["url"] = $row->sourceurl;
+				}
+				$header = $row->displayheader?"<b>".$row->heading."</b>: ":"";
+				$descriptions[$tdbId]["desc"][$row->tdsid] = $header.$row->statement;
 			}
-			$header = $row->displayheader?"<b>".$row->heading."</b>: ":"";
-			$descriptions[$tdbId]["desc"][$row->tdsid] = $header.$row->statement;
+			$result->close();
+			return $descriptions;
 		}
-		$result->close();
-		return $descriptions;
 	}
 
 	public function getFamily(){
@@ -661,7 +664,7 @@ class TaxonProfileManager {
 			"FROM fmchecklists c LEFT JOIN fmchecklists cp ON cp.clid = c.parentclid ";
 		$inValue = $this->con->real_escape_string($clv);
 		if($intVal = intval($inValue)){
-			$sql .= "WHERE (c.CLID = '".$intVal."')";
+			$sql .= 'WHERE (c.CLID = '.$intVal.')';
 		}
 		else{
 			$sql .= "WHERE (c.Name = '".$inValue.
