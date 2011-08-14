@@ -70,7 +70,7 @@ if($editable){
 	}
 	elseif($submitAction == 'changetonotaccepted'){
 		$tidAccepted = $_REQUEST["tidaccepted"];
-		$taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted);
+		$taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted,$_POST['unacceptabilityreason'],$_POST['notes']);
 	}
 	elseif(array_key_exists("updatehierarchy",$_REQUEST)){
 		$taxonEditorObj->rebuildHierarchy($target);
@@ -275,8 +275,8 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					</div>
 				</form>
 			</div>
-			<div class="fieldset" style="width:90%;">
-				<div class="legend"><b>Taxonomic Placement</b></div>
+			<fieldset style="width:95%;">
+				<legend><b>Taxonomic Placement</b></legend>
 				<div style="padding:7px 7px 0px 7px;background-color:silver;margin:-15px -10px 5px 0px;float:right;">
 					<form id="taxauthidform" name="taxauthidform" action="taxonomyeditor.php" method="GET">
 						<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
@@ -386,9 +386,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						}
 						?>
 						<div class="acceptedits" style="display:none;">
-							<div class="fieldset" style="width:380px;margin:20px;">
-								<div class="legend"><b>Link to Another Accepted Name</b></div>
-								<form id="accepteditsform" name="accepteditsform" action="taxonomyeditor.php" method="get">
+							<form id="accepteditsform" name="accepteditsform" action="taxonomyeditor.php" method="post" onsubmit="return verifyAcceptEditsForm(this);" >
+								<fieldset style="width:380px;margin:20px;">
+									<legend><b>Link to Another Accepted Name</b></legend>
 									<div>
 										Accepted Taxon: 
 										<input id="aefacceptedstr" name="acceptedstr" type="text" style="width:300px;" />
@@ -401,14 +401,14 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 										<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
 										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
 										<input type="hidden" name="submitaction" value="linktoaccepted" /> 
-										<input type='button' name='addacceptedlink' value='Add Link' onclick="submitLinkToAccepted(this.form);" />
+										<input type='submit' name='addacceptedlink' value='Add Link' />
 									</div>
-								</form>
-							</div>
+								</fieldset>
+							</form>
 							<?php if($acceptedArr && count($acceptedArr)==1){ ?>
-							<div class="fieldset" style="width:350px;margin:20px;">
-								<div class="legend"><b>Change to Accepted</b></div>
-								<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
+							<form id="changetoacceptedform" name="changetoacceptedform" action="taxonomyeditor.php" method="get">
+								<fieldset style="width:350px;margin:20px;">
+									<legend><b>Change to Accepted</b></legend>
 									<div>
 										<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
 									</div>
@@ -418,8 +418,8 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 										<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
 										<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
 									</div>
-								</form>
-							</div>
+								</fieldset>
+							</form>
 							<?php } ?>
 						</div>
 					<?php
@@ -445,20 +445,22 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								echo "<img style='border:0px;width:10px;' src='../../images/edit.png'/>";
 								echo "</span>";
 								if($synArr["notes"] || $synArr["unacceptabilityreason"]){
-									echo "<div style='margin-left:10px;'>";
 									if($synArr["unacceptabilityreason"]){
-										echo "<u>Unacceptability Reason:</u> ".$synArr["unacceptabilityreason"];
+										echo "<div style='margin-left:10px;'>";
+										echo "<u>Reason:</u> ".$synArr["unacceptabilityreason"];
+										echo "</div>";
 									}
 									if($synArr["notes"]){
+										echo "<div style='margin-left:10px;'>";
 										echo "<u>Notes:</u> ".$synArr["notes"];
+										echo "</div>";
 									}
-									echo "</div>";
 								}
 								echo "</li>";
 								?>
-								<div id="syn-<?php echo $tidSyn;?>" class="fieldset" style="display:none;">
+								<fieldset id="syn-<?php echo $tidSyn;?>" style="display:none;">
+									<legend>Synonym Link Editor</legend>
 									<form id="synform-<?php echo $tidSyn;?>" name="synform-<?php echo $tidSyn;?>" action="taxonomyeditor.php" method="get">
-										<div class="legend">Synonym Link Editor</div>
 										<div style="clear:both;">
 											<div style="float:left;width:150px;font-weight:bold;">Unacceptability Reason:</div>
 											<div>
@@ -486,8 +488,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 											</div>
 										</div>
 									</form>
-								</div>
-								
+								</fieldset>
 					<?php 	} ?>
 						</ul>
 					<?php
@@ -496,7 +497,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							echo "<div style='margin:20px;'>No Synonyms Linked to this Taxon</div>";
 						}
 						?>
-						<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="get">
+						<form id="changetonotacceptedform" name="changetonotacceptedform" action="taxonomyeditor.php" method="post" onsubmit="return verifyChangeToNotAcceptedForm(this);">
 							<fieldset id="tonotaccepted" style="width:90%px;display:none;">
 								<legend><b>Change to Not Accepted</b></legend>
 								<div style="margin:5px;">
@@ -505,10 +506,18 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									<input name="tidaccepted" type="hidden" value="" />
 								</div>
 								<div style="margin:5px;">
+									<b>Reason:</b> 
+									<input name="unacceptabilityreason" type="text" style="width:400px;" />
+								</div>
+								<div style="margin:5px;">
+									<b>Notes:</b> 
+									<input name="notes" type="text" style="width:400px;" />
+								</div>
+								<div style="margin:5px;">
 									<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
 									<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
 									<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
-									<input type='button' name='changetonotacceptedbutton' value='Change Status to Not Accepted' onclick="submitLinkToAccepted(this.form);" />
+									<input type='submit' name='changetonotacceptedbutton' value='Change Status to Not Accepted' />
 								</div>
 								<div style="margin:5px;">
 									* Synonyms will be transferred to Accepted Taxon
@@ -519,9 +528,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					}
 					?>
 				</div>
-			</div>
-			<div class="fieldset" style="width:420px;">
-				<div class="legend">Quick Query Taxonomic Hierarchy</div>
+			</fieldset>
+			<fieldset style="width:420px;">
+				<legend>Quick Query Taxonomic Hierarchy</legend>
 				<div style="float:right;" title="Rebuild Hierarchy">
 					<form name="updatehierarchyform" action="taxonomyeditor.php" method="get">
 						<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>"/>
@@ -532,7 +541,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				<?php 
 					$taxonEditorObj->echoHierarchy();
 				?>
-			</div>
+			</fieldset>
 			
 		</div>
 

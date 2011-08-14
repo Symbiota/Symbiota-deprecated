@@ -68,58 +68,55 @@ class KeyMassUpdateManager{
     	$this->username = $uname;
   	}
 
-  	public function getClQueryList(){
+	public function getClQueryList(){
 		$returnList = Array();
-		$sql = "SELECT cl.CLID, cl.Name FROM fmchecklists cl ";
+		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ";
 		if($this->pid) {
-			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.CLID = cpl.clid ".
+			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.clid = cpl.clid ".
 				"WHERE (cpl.pid = ".$this->pid.") ";
 		}
-		$sql .= "ORDER BY cl.Name";
+		$sql .= "ORDER BY cl.name";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
-			$returnList[$row->CLID] = $row->Name;
+			if($row->name) $returnList[$row->clid] = $row->name;
 		}
 		$result->close();
 		return $returnList;
 	}
-	
+
 	public function getTaxaQueryList(){
-		$returnList = Array();
-		$sql = "SELECT DISTINCT ts.UpperTaxonomy, ts.Family, t.UnitName1 
-			FROM ((fmchklstprojlink cpl INNER JOIN fmchklsttaxalink ctl ON cpl.clid = ctl.CLID) ".
-			"INNER JOIN taxstatus ts ON ctl.tid = ts.tid) 
-			INNER JOIN taxa t ON ts.tidaccepted = t.TID ";
-		$sqlWhere = "";
-		if($this->clidFilter && $this->clidFilter != "all") $sqlWhere .= "(ctl.CLID = ".$this->clidFilter.") ";
-		if($this->pid) $sqlWhere .= ($sqlWhere?"AND ":"")."(cpl.pid = '".$this->pid."') ";
-		if($sqlWhere) $sql = $sql."WHERE ".$sqlWhere;
+		// = Array();
+		$familyArr = Array();
+		$genusArr = Array();
+		$sql = 'SELECT DISTINCT ts.UpperTaxonomy, ts.Family, t.UnitName1 '. 
+			'FROM ((fmchklstprojlink cpl INNER JOIN fmchklsttaxalink ctl ON cpl.clid = ctl.CLID) '.
+			'INNER JOIN taxstatus ts ON ctl.tid = ts.tid) '. 
+			'INNER JOIN taxa t ON ts.tidaccepted = t.TID ';
+		$sqlWhere = '';
+		if($this->clidFilter && $this->clidFilter != 'all') $sqlWhere .= '(ctl.CLID = '.$this->clidFilter.') ';
+		if($this->pid) $sqlWhere .= ($sqlWhere?'AND ':'').'(cpl.pid = '.$this->pid.') ';
+		if($sqlWhere) $sql .= 'WHERE '.$sqlWhere;
+		$sql .= ' ORDER BY t.unitname1';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
-			$upper = $row->UpperTaxonomy;
+			//$upper = $row->UpperTaxonomy;
 			$fam = $row->Family;
 			$genus = $row->UnitName1;
-			if(!in_array($upper,$returnList)) $returnList[] = $upper;
-			if(!in_array($fam,$returnList)) $returnList[] = $fam;
-			if(!in_array($genus,$returnList)) $returnList[] = $genus;
+			//if($upper && !in_array($upper,$upperArr)) $upperArr[] = $upper;
+			if($fam && !in_array($fam,$familyArr)) $familyArr[] = $fam;
+			if($genus && !in_array($genus,$genusArr)) $genusArr[] = $genus;
 		}
 		$result->close();
-		sort($returnList);
-		return $returnList;
+		//sort($upperArr);
+		sort($familyArr);
+		return array_merge($familyArr,$genusArr);
 	}
 
 	public function getCharList(){
 		$headingArray = Array();		//Heading => Array(CID => CharName)
 		if($this->taxonNameFilter){
 			$strFrag = implode(",",$this->getParents($this->taxonNameFilter));
-			/*$sql = "SELECT DISTINCT charnames.Heading, charnames.CID, charnames.CharName ".
-				"FROM ((chartaxalink INNER JOIN characters ON chartaxalink.CID = characters.CID) INNER JOIN charnames ON characters.CID = charnames.CID) ".
-				"LEFT JOIN chardependance ON characters.CID = chardependance.CID ".
-				"WHERE (chartaxalink.Relation = 'include') ".
-				"AND (characters.Type='UM' Or characters.Type='OM') AND (charnames.Language='".$this->lang."') ".
-				"AND (chartaxalink.TID In ($strFrag)) ".
-				"ORDER BY charnames.Heading, characters.SortSequence";*/
 			$sql = "SELECT DISTINCT ch.headingname, c.CID, c.CharName ".
 				"FROM ((kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID) ".
 				"INNER JOIN kmcharheading ch ON c.hid = ch.hid) ".
@@ -127,7 +124,7 @@ class KeyMassUpdateManager{
 				"WHERE ch.language = 'English' AND (ctl.Relation = 'include') ".
 				"AND (c.chartype='UM' Or c.chartype='OM') AND (c.defaultlang='".$this->lang."') ".
 				"AND (ctl.TID In ($strFrag)) ".
-				"ORDER BY c.hid, c.SortSequence";
+				"ORDER BY c.hid, c.SortSequence, c.CharName";
 			//echo $sql;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
@@ -162,8 +159,9 @@ class KeyMassUpdateManager{
 
 	public function getStates(){
 		$stateArr = Array();
-		$sql = "SELECT kmcs.CharStateName, kmcs.CS FROM kmcs ".
-			"WHERE (kmcs.Language = '".$this->lang."') AND (kmcs.CID = ".$this->cid.") ORDER BY kmcs.SortSequence";
+		$sql = 'SELECT kmcs.CharStateName, kmcs.CS FROM kmcs '.
+			'WHERE (kmcs.Language = "'.$this->lang.'") AND (kmcs.CID = '.$this->cid.') '.
+			'ORDER BY kmcs.SortSequence, (kmcs.CS + 1)';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$stateArr[$row->CS] = $row->CharStateName;
@@ -217,10 +215,10 @@ class KeyMassUpdateManager{
 		$taxaStr = implode(",",$parArr);
 		$famStr = implode("','",$famArr);
 		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
-		"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-		"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
-		"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
-		"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
+			"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+			"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
+			"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
+			"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$sciName = $row->SciName;

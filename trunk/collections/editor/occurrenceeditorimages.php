@@ -295,7 +295,7 @@ $imageArr = $occManager->getImageMap();
 									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 									<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 									<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-									<input name="removeimg" type="checkbox" value="1" CHECKED /> Remove image from server 
+									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 									<div style="margin-left:20px;">
 										(Note: leaving unchecked removes image from database w/o removing from server)
 									</div>

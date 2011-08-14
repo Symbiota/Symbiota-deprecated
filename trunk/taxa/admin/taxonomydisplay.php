@@ -66,7 +66,13 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 			}
 		}
 		else{
-			echo "<div>You must be <a href='../../profile/index.php'>logged in</a> and authorized to view internal taxonomy. Please login.</div>";
+			?>
+			<div>
+				You must be 
+				<a href="../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/taxonomydisplay.php">logged in</a> 
+				and authorized to view internal taxonomy. Please login.
+			</div>
+			<?php 
 		}
 		?>
 	</div>
