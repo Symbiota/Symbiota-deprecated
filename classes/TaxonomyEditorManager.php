@@ -378,12 +378,15 @@ class TaxonomyEditorManager{
 		return $status;
 	}
 	
-	public function submitChangeToNotAccepted($tid,$tidAccepted){
+	public function submitChangeToNotAccepted($tid,$tidAccepted,$reason,$notes){
 		$status = '';
 		$tid = $this->conn->real_escape_string($tid);
 		if(is_numeric($tid)){
 			//Change subject taxon to Not Accepted
-			$sql = 'UPDATE taxstatus SET tidaccepted = '.$tidAccepted.' WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
+			$sql = 'UPDATE taxstatus '.
+				'SET tidaccepted = '.$tidAccepted.', unacceptabilityreason = '.($reason?'"'.$reason.'"':'NULL').
+				', notes = '.($notes?'"'.$notes.'"':'NULL').' '.
+				'WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
 			$status = $this->conn->query($sql);
 	
 			//Switch synonyms of subject to Accepted Taxon 

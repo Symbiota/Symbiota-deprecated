@@ -104,36 +104,50 @@ function GetXmlHttpObject(){
 	return xmlHttp;
 }
 
+function verifyAcceptEditsForm(f){
+	if(f.acceptedstr.value == ""){
+		alert("Please enter an accepted name to link this name to!");
+		return false;
+	}
+	submitLinkToAccepted(f);
+	return false;
+	//Form submission will take place within the submitLinkToAccepted method
+}
+
+function verifyChangeToNotAcceptedForm(f){
+	if(f.acceptedstr.value == ""){
+		alert("Please enter an accepted name to link this name to!");
+		return false;
+	}
+	submitLinkToAccepted(f);
+	return false;
+	//Form submission will take place within the submitLinkToAccepted method
+}
+
 function submitLinkToAccepted(f){
 	//Used by more than one form
 	var testStr = f.acceptedstr.value;
-	if(testStr == null){
-  		alert("You must enter an accepted name");
+	var snXmlHttp=GetXmlHttpObject();
+	if(snXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
   		return;
   	}
-	else{
-		var snXmlHttp=GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url="rpc/gettid.php";
-		url=url+"?sciname="+testStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				var accTid = snXmlHttp.responseText;
-				if(accTid){
-					f.tidaccepted.value = accTid;
-					f.submit();
-				}
-				else{
-					alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
-				}
+	var url="rpc/gettid.php";
+	url=url+"?sciname="+testStr;
+	snXmlHttp.onreadystatechange=function(){
+		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+			var accTid = snXmlHttp.responseText;
+			if(accTid){
+				f.tidaccepted.value = accTid;
+				f.submit();
 			}
-		};
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
+			else{
+				alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
+			}
+		}
+	};
+	snXmlHttp.open("POST",url,true);
+	snXmlHttp.send(null);
 }
 
 function submitTaxStatusForm(f){
