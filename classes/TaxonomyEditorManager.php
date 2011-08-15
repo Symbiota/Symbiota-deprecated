@@ -387,7 +387,7 @@ class TaxonomyEditorManager{
 				'SET tidaccepted = '.$tidAccepted.', unacceptabilityreason = '.($reason?'"'.$reason.'"':'NULL').
 				', notes = '.($notes?'"'.$notes.'"':'NULL').' '.
 				'WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
-			echo $sql;
+			//echo $sql;
 			if(!$this->conn->query($sql)){
 				$status = 'ERROR: unable to switch acceptance; '.$this->conn->error;
 				$status .= '<br/>SQL: '.$sql;
