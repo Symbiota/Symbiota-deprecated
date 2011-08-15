@@ -409,9 +409,9 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 									</div>
 									<div>
 										<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
-										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
+										<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>" />
 										<input type="hidden" name="submitaction" value="linktoaccepted" /> 
-										<input type='submit' name='addacceptedlink' value='Add Link' />
+										<input type="submit" name="pseudosubmit" value="Add Link" />
 									</div>
 								</fieldset>
 							</form>
