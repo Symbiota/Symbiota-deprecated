@@ -139,8 +139,6 @@ function submitLinkToAccepted(f){
 			var accTid = snXmlHttp.responseText;
 			if(accTid){
 				f.tidaccepted.value = accTid;
-				alert('accTid from form: '+f.tidaccepted.value);
-				alert('accTid: '+accTid);
 				f.submit();
 			}
 			else{
