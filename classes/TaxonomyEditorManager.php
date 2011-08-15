@@ -387,13 +387,20 @@ class TaxonomyEditorManager{
 				'SET tidaccepted = '.$tidAccepted.', unacceptabilityreason = '.($reason?'"'.$reason.'"':'NULL').
 				', notes = '.($notes?'"'.$notes.'"':'NULL').' '.
 				'WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
-			$status = $this->conn->query($sql);
-	
-			//Switch synonyms of subject to Accepted Taxon 
-			$sqlSyns = 'UPDATE taxstatus SET tidaccepted = '.$tidAccepted.' WHERE (tidaccepted = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
-			$status = $this->conn->query($sqlSyns);
-			
-			$this->updateDependentData($tid,$tidAccepted);
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR: unable to switch acceptance; '.$this->conn->error;
+				$status .= '<br/>SQL: '.$sql;
+			}
+			else{
+				//Switch synonyms of subject to Accepted Taxon
+				$sqlSyns = 'UPDATE taxstatus SET tidaccepted = '.$tidAccepted.' WHERE (tidaccepted = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
+				if(!$this->conn->query($sqlSyns)){
+					$status = 'ERROR: unable to transfer linked synonyms to accepted taxon; '.$this->conn->error;
+				}
+				
+				$this->updateDependentData($tid,$tidAccepted);
+			}
 		}
 		return $status;
 	}

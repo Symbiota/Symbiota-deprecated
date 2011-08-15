@@ -20,6 +20,7 @@ if($isAdmin || in_array("Taxonomy",$userRights)){
 	$editable = true;
 }
 
+$statusStr = '';
 if($editable){
 	if(array_key_exists("taxonedits",$_REQUEST)){
 		$taxonEditArray = Array();
@@ -36,7 +37,7 @@ if($editable){
 		$taxonEditArray["source"] = $_REQUEST["source"];
 		$taxonEditArray["notes"] = $_REQUEST["notes"];
 		$taxonEditArray["securitystatus"] = $_REQUEST["securitystatus"];
-		$taxonEditorObj->submitTaxonEdits($taxonEditArray);
+		$statusStr = $taxonEditorObj->submitTaxonEdits($taxonEditArray);
 	}
 	elseif($submitAction == 'updatetaxstatus'){
 		$tsArr = Array();
@@ -45,7 +46,7 @@ if($editable){
 		$tsArr["uppertaxonomy"] = $_REQUEST["uppertaxonomy"];
 		$tsArr["family"] = $_REQUEST["family"];
 		$tsArr["parenttid"] = $_REQUEST["parenttid"];
-		$taxonEditorObj->submitTaxstatusEdits($tsArr);
+		$statusStr = $taxonEditorObj->submitTaxstatusEdits($tsArr);
 	}
 	elseif(array_key_exists("synonymedits",$_REQUEST)){
 		$synEditArr = Array();
@@ -54,11 +55,11 @@ if($editable){
 		$synEditArr["unacceptabilityreason"] = $_REQUEST["unacceptabilityreason"];
 		$synEditArr["notes"] = $_REQUEST["notes"];
 		$synEditArr["sortsequence"] = $_REQUEST["sortsequence"];
-		$taxonEditorObj->submitSynEdits($synEditArr);
+		$statusStr = $taxonEditorObj->submitSynEdits($synEditArr);
 	}
 	elseif($submitAction == 'linktoaccepted'){
 		$deleteOther = array_key_exists("deleteother",$_REQUEST)?true:false;
-		$taxonEditorObj->submitAddAcceptedLink($target,$_REQUEST["tidaccepted"],$deleteOther);
+		$statusStr = $taxonEditorObj->submitAddAcceptedLink($target,$_REQUEST["tidaccepted"],$deleteOther);
 	}
 	elseif(array_key_exists("changetoaccepted",$_REQUEST)){
 		$tidAccepted = $_REQUEST["tidaccepted"];
@@ -66,16 +67,16 @@ if($editable){
 		if(array_key_exists("switchacceptance",$_REQUEST)){
 			$switchAcceptance = true;
 		}
-		$taxonEditorObj->submitChangeToAccepted($target,$tidAccepted,$switchAcceptance);
+		$statusStr = $taxonEditorObj->submitChangeToAccepted($target,$tidAccepted,$switchAcceptance);
 	}
 	elseif($submitAction == 'changetonotaccepted'){
 		$tidAccepted = $_REQUEST["tidaccepted"];
-		$taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted,$_POST['unacceptabilityreason'],$_POST['notes']);
+		$statusStr = $taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted,$_POST['unacceptabilityreason'],$_POST['notes']);
 	}
 	elseif(array_key_exists("updatehierarchy",$_REQUEST)){
-		$taxonEditorObj->rebuildHierarchy($target);
+		$statusStr = $taxonEditorObj->rebuildHierarchy($target);
 	}
-	
+
 	$taxonEditorObj->setTaxon();
 }
  
@@ -108,7 +109,16 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 ?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
+		if($statusStr){
+			?>
+			<hr/>
+			<div style="color:red;margin:15px;">
+				<?php echo $statusStr; ?>
+			</div>
+			<hr/>
+			<?php 
+		}
 		if($editable && $target){
 		?>
 		<div class="taxondisplaydiv">
