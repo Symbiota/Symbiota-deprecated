@@ -69,7 +69,7 @@ if($editable){
 		}
 		$statusStr = $taxonEditorObj->submitChangeToAccepted($target,$tidAccepted,$switchAcceptance);
 	}
-	elseif($submitAction == 'changetonotaccepted'){
+	elseif($submitAction == 'Change Status to Not Accepted'){
 		$tidAccepted = $_REQUEST["tidaccepted"];
 		$statusStr = $taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted,$_POST['unacceptabilityreason'],$_POST['notes']);
 	}
@@ -526,8 +526,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 								<div style="margin:5px;">
 									<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid();?>" />
 									<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-									<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
-									<input type='submit' name='changetonotacceptedbutton' value='Change Status to Not Accepted' />
+									<input type='submit' name='submitaction' value='Change Status to Not Accepted' />
 								</div>
 								<div style="margin:5px;">
 									* Synonyms will be transferred to Accepted Taxon

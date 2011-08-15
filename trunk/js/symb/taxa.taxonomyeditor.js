@@ -138,8 +138,9 @@ function submitLinkToAccepted(f){
 		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
 			var accTid = snXmlHttp.responseText;
 			if(accTid){
+				alert('accTid: '+accTid);
 				f.tidaccepted.value = accTid;
-				f.submit();
+				//f.submit();
 			}
 			else{
 				alert("ERROR: Accepted taxon not found in thesaurus. It is either misspelled or needs to be added to the thesaurus.");
