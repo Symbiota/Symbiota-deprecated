@@ -338,7 +338,7 @@ else{
 					<div>
 						<b>Upload File:</b>
 						<div style="margin:10px;">
-							<input id="uploadfile" name="uploadfile" type="file" size="40" />
+							<input id="uploadfile" name="uploadfile" type="file" size="50" />
 						</div>
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="View Parameters" />

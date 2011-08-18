@@ -326,7 +326,11 @@ function insertTRS(f) {
 	var secdetails = document.getElementById("secdetails").value.replace(/^\s+|\s+$/g,"");
 	var meridian = document.getElementById("meridian").value.replace(/^\s+|\s+$/g,"");
 	
-	if(!isNumeric(township)){
+	if(!township || !range){
+		alert("Township and Range fields must have values");
+		return false;
+	}
+	else if(!isNumeric(township)){
 		alert("Numeric value expected for Township field. If non-standardize format is used, enter directly into the Verbatim Coordinate Field");
 		return false;
 	}
@@ -353,12 +357,26 @@ function insertTRS(f) {
 function insertElevFt(f){
 	var elevMin = document.getElementById("elevminft").value;
 	var elevMax = document.getElementById("elevmaxft").value;
-	f.minimumelevationinmeters.value = Math.round(elevMin*.03048)*10;
-	f.maximumelevationinmeters.value = Math.round(elevMax*.03048)*10;
-	verbStr = elevMin;
-	if(elevMax) verbStr += " - " + elevMax;
-	verbStr += "ft";
-	f.verbatimelevation.value = verbStr;
+	if(elevMin){
+		if(isNumeric(elevMin)){
+			f.minimumelevationinmeters.value = Math.round(elevMin*.03048)*10;
+			verbStr = elevMin;
+			if(elevMax){
+				if(isNumeric(elevMax)){
+					f.maximumelevationinmeters.value = Math.round(elevMax*.03048)*10;
+					if(elevMax) verbStr += " - " + elevMax;
+				}
+				else{
+					alert("Elevation fields must be numeric values only (no text)!");
+				}
+			}
+			verbStr += "ft";
+			f.verbatimelevation.value = verbStr;
+		}
+		else{
+			alert("Elevation fields must be numeric values only (no text)!");
+		}
+	}
 }
 
 function catalogNumberChanged(cnValue){

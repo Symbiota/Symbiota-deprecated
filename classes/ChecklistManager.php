@@ -394,6 +394,11 @@ class ChecklistManager {
 
 	//Voucher Maintenance functions
 	public function getDynamicSql(){
+		$this->setDynamicSql();
+		return $this->sqlFrag;
+	}
+	
+	private function setDynamicSql(){
 		if(!$this->sqlFrag){
 			$sql = 'SELECT c.dynamicsql FROM fmchecklists c WHERE (c.clid = '.$this->clid.')';
 			//echo $sql;
@@ -403,34 +408,33 @@ class ChecklistManager {
 			}
 			$rs->close();
 		}
-		return $this->sqlFrag;
 	}
 	
 	public function saveSql($sqlFragArr){
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sqlFrag = "";
-		if(array_key_exists('country',$sqlFragArr)){
+		if($sqlFragArr['country']){
 			$sqlFrag = 'AND (o.country = "'.$this->cleanStr($sqlFragArr['country']).'") ';
 		}
-		if(array_key_exists('state',$sqlFragArr)){
+		if($sqlFragArr['state']){
 			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanStr($sqlFragArr['state']).'") ';
 		}
-		if(array_key_exists('county',$sqlFragArr)){
+		if($sqlFragArr['county']){
 			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanStr($sqlFragArr['county']).'%") ';
 		}
-		if(array_key_exists('locality',$sqlFragArr)){
+		if($sqlFragArr['locality']){
 			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanStr($sqlFragArr['locality']).'%") ';
 		}
 		$llStr = '';
-		if(array_key_exists('latnorth',$sqlFragArr) && array_key_exists('latsouth',$sqlFragArr)){
+		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth']){
 			$llStr .= 'AND (o.decimallatitude BETWEEN '.$conn->real_escape_string($sqlFragArr['latsouth']).
 			' AND '.$conn->real_escape_string($sqlFragArr['latnorth']).') ';
 		}
-		if(array_key_exists('lngwest',$sqlFragArr) && array_key_exists('lngeast',$sqlFragArr)){
+		if($sqlFragArr['lngwest'] && $sqlFragArr['lngeast']){
 			$llStr .= 'AND (o.decimallongitude BETWEEN '.$conn->real_escape_string($sqlFragArr['lngwest']).
 			' AND '.$conn->real_escape_string($sqlFragArr['lngeast']).') ';
 		}
-		if($sqlFragArr['latlngor']) $llStr = 'OR ('.trim(substr($llStr,3)).')';
+		if(array_key_exists('latlngor',$sqlFragArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
 		if($sqlFrag){
 			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".trim(substr($sqlFrag,3))."' WHERE (c.clid = ".$this->clid.')';
@@ -438,6 +442,16 @@ class ChecklistManager {
 			$conn->query($sql);
 		}
 		$conn->close();
+	}
+
+	public function deleteSql(){
+		$statusStr = '';
+		$conn = MySQLiConnectionFactory::getCon("write");
+		if(!$conn->query('UPDATE fmchecklists c SET c.dynamicsql = NULL WHERE (c.clid = '.$this->clid.')')){
+			$statusStr = 'ERROR: '.$conn->query->error;
+		}
+		$conn->close();
+		return $statusStr;
 	}
 
 	public function getVoucherCnt(){
@@ -529,7 +543,69 @@ class ChecklistManager {
 		}
 		return $retArr;
 	}
-	
+
+	public function exportMissingOccurCsv(){
+    	global $defaultTitle, $userRights, $isAdmin;
+		$canReadRareSpp = false;
+		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$canReadRareSpp = true;
+		}
+    	$fileName = $defaultTitle;
+		if($fileName){
+			if(strlen($fileName) > 10){
+				$nameArr = explode(" ",$fileName);
+				$fileName = $nameArr[0];
+			}
+			$fileName = str_replace(Array("."," ",":"),"",$fileName);
+		}
+		else{
+			$fileName = "symbiota";
+		}
+		$fileName .= "_voucher_".time().".csv";
+		header ('Content-Type: text/csv');
+		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+
+		$this->setDynamicSql();
+		$sql = 'SELECT o.family, o.sciname, c.institutioncode, o.occurrenceid, o.catalognumber, o.identifiedby, o.dateidentified, '.
+			'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
+			'o.decimallatitude, o.decimallongitude, o.minimumelevationinmeters, o.habitat, o.occurrenceremarks, o.occid, '.
+			'o.localitysecurity, o.collid '.
+			'FROM omoccurrences o LEFT JOIN '.
+			'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
+			'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE intab.tid IS NULL AND ('.$this->sqlFrag.') '.
+			'ORDER BY o.family, o.sciname, c.institutioncode ';
+		//echo '<div>'.$sql.'</div>';
+		if($rs = $this->clCon->query($sql)){
+			echo '"family","scientificName","institutionCode","occurrenceId","catalogNumber","identifiedBy","dateIdentified",'.
+ 			'"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",'.
+ 			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
+			
+			while($row = $rs->fetch_assoc()){
+				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.$row["occurrenceid"].'","'.
+					$row["catalognumber"].'","'.$row["identifiedby"].'","'.$row["dateidentified"].'","'.$row["recordedby"].'","'.
+					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
+					$row["county"].'","'.$row["municipality"].'",';
+				
+				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
+				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
+					echo '"'.$this->cleanStr($row["locality"]).'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
+					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
+				}
+				else{
+					echo '"Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden",';
+				}
+				echo '"'.$row["occid"]."\"\n";
+			}
+        	$rs->close();
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+	} 
+
 	public function hasChildrenChecklists(){
 		$hasChildren = false;
 		$sql = 'SELECT count(*) AS clcnt FROM fmchecklists WHERE (parentclid = '.$this->clid.')';

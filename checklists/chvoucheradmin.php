@@ -16,7 +16,7 @@ $clManager->getNonVoucheredCnt();
 
 <ul>
 	<li>
-		<a href="#" onclick="document.sqlbuilder.style.display = 'block';return false;"><b>Modify SQL Fragment</b></a>
+		<a href="#" onclick="return toggle('sqlbuilderdiv');"><b>Modify SQL Fragment</b></a>
 		<div style="margin-left:5px;"> 
 			The SQL fragment defines geographically boundaries of the research area in order to  
 			aid researchers in locating specimen vouchers that will serve as proof that a species occurs within the area.  
@@ -24,71 +24,90 @@ $clManager->getNonVoucheredCnt();
 		</div>
 		<fieldset style="margin:10px;padding:10px;">
 			<legend><b>Current Dynamic SQL Fragment</b></legend>
-			<?php
-			$dynSql = $clManager->getDynamicSql();
-			echo $dynSql?$dynSql:"<b>SQL not set</b>"
-			?>
-			<form name="sqlbuilder" action="checklist.php" method="post" onsubmit="return validateSqlFragForm(this);" style="display:none;">
+			<div style="margin:15px;font-weight:bold;">
+				<?php
+				$dynSql = $clManager->getDynamicSql();
+				echo ($dynSql?$dynSql:'SQL not set');
+				?>
+			</div>
+			<div id="sqlbuilderdiv" style="display:none;margin-top:15px;">
 				<hr/>
-				<div style="margin:10px;">
-					Use this form to aid in building the SQL fragment. 
-					Click the 'Create SQL Fragment' button to build and save the SQL using the terms 
-					supplied in the form. 
-					Your data administrator can aid you in establishing more complex SQL fragments than can be created within this form.  
-				</div>
-				<table style="margin:15px;">
-					<tr>
-						<td>
-							<div style="margin:3px;">
-								<b>Country:</b>
-								<input type="text" name="country" onchange="" />
-							</div>
-							<div style="margin:3px;">
-								<b>State:</b>
-								<input type="text" name="state" onchange="" />
-							</div>
-							<div style="margin:3px;">
-								<b>County:</b>
-								<input type="text" name="county" onchange="" />
-							</div>
-							<div style="margin:3px;">
-								<b>Locality:</b>
-								<input type="text" name="locality" onchange="" />
-							</div>
-						</td>
-						<td>
-							<div style="margin-left:30px;">
-								<b>Lat/Long:</b>
-								<span style="margin-left:100px;">
-									<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
-								</span>
-							</div>
-							<div style="margin-left:112px;">
-								<span style="">
-									<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
-								</span>
-								<span style="margin-left:70px;">
-									<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
-								</span>
-							</div>
-							<div style="margin-left:187px;">
-								<input type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
-							</div>
-							<div style="margin-left:50px;">
-								<input type="checkbox" name="latlngor" value="1" />
-								Include Lat/Long as OR statement
-							</div>
-							<div style="float:right;margin:20px 20px 0px 0px;">
-								<input type="submit" name="submitaction" value="Create SQL Fragment" />
-								<input type="hidden" name="tabindex" value="1" />
-								<input type="hidden" name="emode" value="2" />
-								<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
-								<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
-							</div>
-						</td>
-					</tr>
-				</table>
-			</form>
+				<form name="sqlbuilderform" action="checklist.php" method="post" onsubmit="return validateSqlFragForm(this);">
+					<div style="margin:10px;">
+						Use this form to aid in building the SQL fragment. 
+						Click the 'Create SQL Fragment' button to build and save the SQL using the terms 
+						supplied in the form. 
+						Your data administrator can aid you in establishing more complex SQL fragments than can be created within this form.  
+					</div>
+					<table style="margin:15px;">
+						<tr>
+							<td>
+								<div style="margin:3px;">
+									<b>Country:</b>
+									<input type="text" name="country" onchange="" />
+								</div>
+								<div style="margin:3px;">
+									<b>State:</b>
+									<input type="text" name="state" onchange="" />
+								</div>
+								<div style="margin:3px;">
+									<b>County:</b>
+									<input type="text" name="county" onchange="" />
+								</div>
+								<div style="margin:3px;">
+									<b>Locality:</b>
+									<input type="text" name="locality" onchange="" />
+								</div>
+							</td>
+							<td>
+								<div style="margin-left:30px;">
+									<b>Lat/Long:</b>
+									<span style="margin-left:70px;">
+										<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
+									</span>
+								</div>
+								<div style="margin-left:82px;">
+									<span style="">
+										<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
+									</span>
+									<span style="margin-left:70px;">
+										<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
+									</span>
+								</div>
+								<div style="margin-left:157px;">
+									<input type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
+								</div>
+								<div style="margin-left:50px;">
+									<input type="checkbox" name="latlngor" value="1" />
+									Include Lat/Long as OR statement
+								</div>
+								<div style="float:right;margin:20px 20px 0px 0px;">
+									<input type="submit" name="submitaction" value="Create SQL Fragment" />
+									<input type="hidden" name="tabindex" value="1" />
+									<input type="hidden" name="emode" value="2" />
+									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
+									<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</form>
+				<?php 
+				if($dynSql){
+					?>
+					<form name="sqldeleteform" action="checklist.php" method="post" onsubmit="return confirm('Are you sure you want to delete current SQL statement?');">
+						<div style="float:right;margin:10px 120px 20px 0px;">
+							<input type="submit" name="submitaction" value="Delete SQL Fragment" />
+						</div>
+						<input type="hidden" name="tabindex" value="1" />
+						<input type="hidden" name="emode" value="2" />
+						<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
+						<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
+					</form>
+					<?php
+				}
+				?>
+			</div>
 		</fieldset>
 	</li>
 	<li>
@@ -150,6 +169,17 @@ $clManager->getNonVoucheredCnt();
 		<?php
 	} 
 	?>
+	<!-- 
+	<li>
+		<b>Reports</b>
+		<div style="margin-left:5px;">
+			<b>Print Voucher Pick List</b>
+			<a href="voucherreports.php?cl=<?php echo $clid; ?>" target="_blank">
+			</a> 
+			Display in print mode a pick list of species with full voucher citations.  
+		</div> 
+	</li>
+	-->
 </ul>
 
 <?php 
@@ -251,7 +281,12 @@ elseif($action == 'ListMissingTaxa'){
 		Taxa are listed 100 at a time. Use navigation controls located at the bottom of the list to advance to the next group of taxa. 
 		If the SQL fragment has been set, clicking on taxon name will dynamically query the system for possible voucher specimens.  
 	</div>
-	<div style="margin:20px;">
+	<div style="float:right;">
+		<a href="voucherreports.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>" target="_blank" title="Download list of possible vouchers">
+			<img src="<?php echo $clientRoot; ?>/images/dl.png" style="border:0px;" />
+		</a>
+	</div>
+	<div style="margin:20px;clear:both;">
 		<?php 
 		if($missingArr){
 			$paginationStr = '';
