@@ -1,21 +1,17 @@
 <?php
-/*
- * Created on 24 Aug 2009
- * E.E. Gilbert
- */
-
- //error_reporting(E_ALL);
- //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once('../../config/symbini.php');
- include_once($serverRoot.'/classes/TaxonomyDisplayManager.php');
+//error_reporting(E_ALL);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/classes/TaxonomyDisplayManager.php');
   
- $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
- $taxonDisplayObj = new TaxonomyDisplayManager($target);
+$target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
+$taxonDisplayObj = new TaxonomyDisplayManager($target);
  
- $editable = false;
- if($isAdmin || in_array("Taxonomy",$userRights)){
+$editable = false;
+if($isAdmin || in_array("Taxonomy",$userRights)){
 	$editable = true;
- }
+}
  
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">

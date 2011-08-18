@@ -1,8 +1,4 @@
 <?php
-/*
- * Rebuilt 29 Jan 2010
- * By E.E. Gilbert
- */
 	include_once('../config/symbini.php');
 	include_once($serverRoot.'/classes/ChecklistManager.php');
 	header("Content-Type: text/html; charset=".$charset);
@@ -70,19 +66,11 @@
 	 		$clManager->editMetaData($editArr);
 	 	}
 		elseif($action == "Create SQL Fragment"){
-			$sqlFragArr = Array();
-			if($_POST['country']) $sqlFragArr['country'] = $_POST['country'];
-			if($_POST['state']) $sqlFragArr['state'] = $_POST['state'];
-			if($_POST['county']) $sqlFragArr['county'] = $_POST['county'];
-			if($_POST['locality']) $sqlFragArr['locality'] = $_POST['locality'];
-			if($_POST['latsouth']) $sqlFragArr['latsouth'] = $_POST['latsouth'];
-			if($_POST['latnorth']) $sqlFragArr['latnorth'] = $_POST['latnorth'];
-			if($_POST['lngeast']) $sqlFragArr['lngeast'] = $_POST['lngeast'];
-			if($_POST['lngwest']) $sqlFragArr['lngwest'] = $_POST['lngwest'];
-			$sqlFragArr['latlngor'] = (array_key_exists('latlngor',$_POST)?$_POST['latlngor']:0);
-			$statusStr = $clManager->saveSql($sqlFragArr);
+			$statusStr = $clManager->saveSql($_POST);
 	 	}
-	 	
+		elseif($action == 'Delete SQL Fragment'){
+			$statusStr = $clManager->deleteSql();
+		}
 	 	//Add species to checklist
 		if(array_key_exists("tidtoadd",$_REQUEST)){
 			$dataArr["tid"] = $_REQUEST["tidtoadd"];

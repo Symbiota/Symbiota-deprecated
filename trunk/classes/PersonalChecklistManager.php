@@ -57,7 +57,6 @@ class PersonalChecklistManager{
 		$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$clidDel.')';
 		$this->conn->query($sql);
 		$sql = "DELETE FROM fmchecklists WHERE (clid = ".$clidDel.')';
-		//echo $sql;
 		return $this->conn->query($sql);
 	}
 	
