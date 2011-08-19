@@ -128,11 +128,12 @@ if($symbUid){
 
 	$navStr = '';
 	if($qryCnt !== false){
-		$navStr = '<b>';
-		if($qryCnt === 0){
-			$navStr .= 'Search returned 0 records';
+		if($qryCnt == 0){
+			$navStr .= '<div style="margin:20px;font-size:150%;font-weight:bold;">';
+			$navStr .= 'Search returned 0 records</div>'."\n";
 		}
 		else{
+			$navStr = '<b>';
 			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(0);">';
 			$navStr .= '|&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
@@ -148,8 +149,9 @@ if($symbUid){
 			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($qryCnt-1).');">';
 			$navStr .= '&gt;|';
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
+			$navStr .= '</b>';
+			$navStr = '<div style="float:right;">'.$navStr.'</div>'."\n";
 		}
-		$navStr .= '</b>';
 	}
 }
 ?>
@@ -290,7 +292,7 @@ if($symbUid){
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="hidden" name="occindex" value="0" />
 										<input type="submit" name="submitaction" value="Query Records" /><br/>
-										<input type="reset" name="reset" value="Reset Form" />
+										<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" />
 									</div>
 									<div style="float:left;margin:5px;">
 										Identifier: 
@@ -318,18 +320,22 @@ if($symbUid){
 											<option <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
 												unprocessed
 											</option>
-											<option <?php echo ($qProcessingStatus=='preparsed'?'SELECTED':''); ?>>
-												preparsed
+											<option <?php echo ($qProcessingStatus=='OCR processed'?'SELECTED':''); ?>>
+												OCR processed
 											</option>
-											<option <?php echo ($qProcessingStatus=='dups'?'SELECTED':''); ?>>
-												probable dups
+											<option <?php echo ($qProcessingStatus=='OCR parsed'?'SELECTED':''); ?>>
+												OCR parsed
 											</option>
-											<option <?php echo ($qProcessingStatus=='parsed'?'SELECTED':''); ?>>
-												parsed
+											<option <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
+												pending duplicate
+											</option>
+											<option <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
+												pending review
 											</option>
 											<option <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
 												reviewed
 											</option>
+
 										</select>
 									</div>
 								</fieldset>
@@ -337,10 +343,10 @@ if($symbUid){
 						</div>
 						<?php
 					} 
+					if($navStr){
+						echo $navStr;
+					}
 					if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
-						if($navStr){
-							echo '<div style="float:right;">'.$navStr.'</div>'."\n";
-						}
 						?>
 						<div id="occedittabs" style="clear:both;">
 							<ul>
@@ -836,7 +842,10 @@ if($symbUid){
 										</div>
 										<div style="padding:3px;">
 											Associated Taxa:
-											<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" />
+											<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" /> 
+											<a href="#" onclick="openAssocSppAid();return false;">
+												<img src="../../images/list.png" style="width:15px;border:0px;" />
+											</a>
 										</div>
 										<div style="padding:3px;">
 											Description:
@@ -928,17 +937,23 @@ if($symbUid){
 												<select name="processingstatus" tabindex="110" onchange="fieldChanged('processingstatus');">
 													<option value=''>No Set Status</option>
 													<option value=''>-------------------</option>
-													<option <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>
+													<option value='unprocessed' <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>
 														unprocessed
 													</option>
-													<option <?php echo ($pStatus=='preparsed'?'SELECTED':''); ?>>
-														preparsed
+													<option value='OCR processed' <?php echo ($pStatus=='OCR processed'?'SELECTED':''); ?>>
+														OCR processed
 													</option>
-													<option <?php echo (!$occId || $pStatus=='reviewed'?'SELECTED':''); ?>>
+													<option value='OCR parsed' <?php echo ($pStatus=='OCR parsed'?'SELECTED':''); ?>>
+														OCR parsed
+													</option>
+													<option value='pending duplicate' <?php echo ($pStatus=='pending duplicate'?'SELECTED':''); ?>>
+														pending duplicate
+													</option>
+													<option value='pending review' <?php echo (!$occId || $pStatus=='pending review'?'SELECTED':''); ?>>
+														pending review
+													</option>
+													<option value='reviewed' <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
 														reviewed
-													</option>
-													<option <?php echo ($pStatus=='closed'?'SELECTED':''); ?>>
-														closed
 													</option>
 												</select>
 											</span>
@@ -965,7 +980,7 @@ if($symbUid){
 									</fieldset>
 									<?php 
 									if($navStr){
-										echo '<div style="float:right;">'.$navStr.'</div>';
+										echo $navStr;
 									}
 									?>
 									<div style="padding:10px;">

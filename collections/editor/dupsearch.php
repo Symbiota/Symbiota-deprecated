@@ -63,11 +63,13 @@ if($submitAction){
 						var elem = openerForm.elements[k];
 						if(appendMode == false || elem.value == ""){
 							elem.value = tArr[k];
+							if(k != "tidtoadd") opener.fieldChanged(k);
 						}
 					}
 					catch(err){
 					}
 				}
+				openerForm.processingstatus.value = "reviewed";
 				window.close();
 			}
 

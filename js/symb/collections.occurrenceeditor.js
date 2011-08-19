@@ -104,6 +104,12 @@ function submitQueryForm(qryLimit){
 }
 
 function verifyQueryForm(f){
+	if(f.q_identifier.value == "" && f.q_recordedby.value == "" && f.q_recordnumber.value == "" 
+		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == ""){
+		alert("Query form is empty! Please enter a value to query by.");
+		return false;
+	}
+
 	var dateStr = f.q_datelastmodified.value;
 	if(dateStr == "") return true;
 	try{
@@ -118,6 +124,15 @@ function verifyQueryForm(f){
 		
 	}
 	return true;
+}
+
+function resetQueryForm(f){
+	f.q_identifier.value = "";
+	f.q_recordedby.value = "";
+	f.q_recordnumber.value = "";
+	f.q_enteredby.value = "";
+	f.q_datelastmodified.value = "";
+	f.q_processingstatus.value = "";
 }
 
 function toggle(target){
@@ -185,14 +200,19 @@ function toggleIdDetails(){
 	toggle("idremdiv");
 }
 
+function openAssocSppAid(){
+	assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=200,left=20,top=20");
+	if (assocWindow.opener == null) assocWindow.opener = self;
+}
+
 function openMappingAid() {
 	var f = document.fullform;
 	var latDef = f.decimallatitude.value;
 	var lngDef = f.decimallongitude.value;
 	var zoom = 5;
 	if(latDef && lngDef) zoom = 9;
-    mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-    if (mapWindow.opener == null) mapWindow.opener = self;
+	mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+	if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function dwcDoc(dcTag){
@@ -633,10 +653,11 @@ function displayDeleteSubmit(){
 
 //Occurrence field checks
 function eventDateModified(eventDateInput){
+	fieldChanged('eventdate');
 	var dateStr = eventDateInput.value;
 	if(dateStr == "") return true;
-	var dateArr = parseDate(dateStr);
 
+	var dateArr = parseDate(dateStr);
 	if(dateArr['y'] == 0){
 		alert("Unable to interpret Date. Please following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
 		return false;
@@ -651,7 +672,6 @@ function eventDateModified(eventDateInput){
 			dStr = "0" + dStr;
 		}
 		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
-		fieldChanged('eventdate');
 		if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
 	}
 	return true;

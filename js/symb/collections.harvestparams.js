@@ -6,7 +6,9 @@
 
 $(document).ready(function() {
 
-	var cache = {}, lastXhr;
+	$("#taxa").autocomplete({ source: "rpc/taxalist.php" },{ minLength: 3, autoFocus: true, delay: 400 });
+	
+	/*	var cache = {}, lastXhr;
 	$( "#taxa" ).autocomplete({
 		minLength: 2,
 		source: function( request, response ) {
@@ -23,7 +25,7 @@ $(document).ready(function() {
 				}
 			});
 		}
-	},{ autoFocus: true });
+	},{ autoFocus: true }); */
 });
 
 //$(document).ready(function() {

@@ -70,7 +70,7 @@ if($editable){
 		$tidAccepted = $_REQUEST["tidaccepted"];
 		$statusStr = $taxonEditorObj->submitChangeToNotAccepted($target,$tidAccepted,$_POST['unacceptabilityreason'],$_POST['notes']);
 	}
-	elseif(array_key_exists("updatehierarchy",$_REQUEST)){
+	elseif($submitAction == 'updatehierarchy'){
 		$statusStr = $taxonEditorObj->rebuildHierarchy($target);
 	}
 
@@ -539,10 +539,11 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 			<fieldset style="width:420px;">
 				<legend>Quick Query Taxonomic Hierarchy</legend>
 				<div style="float:right;" title="Rebuild Hierarchy">
-					<form name="updatehierarchyform" action="taxonomyeditor.php" method="get">
+					<form name="updatehierarchyform" action="taxonomyeditor.php" method="post">
 						<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>"/>
 						<input type="hidden" name="taxauthid" value="<?php echo $taxonEditorObj->getTaxAuthId();?>">
-						<input type="image" name="updatehierarchy" value="1" src="../../images/undo.jpg" style="width:20px;"/>
+						<input type="hidden" name="submitaction" value="updatehierarchy" />
+						<input type="image" name="imagesubmit" src="../../images/undo.jpg" style="width:20px;"/>
 					</form>
 				</div>
 				<?php 
