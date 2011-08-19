@@ -34,8 +34,8 @@
 			else{
 				$sql .= "AND rankid >= 140 ";
 			}
-			//$sql .= "ORDER BY o.sciname";
 		}
+		$sql .= 'LIMIT 10';
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {
 			$returnArr[] = $row->sciname;
