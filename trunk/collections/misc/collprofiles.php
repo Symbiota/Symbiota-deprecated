@@ -168,6 +168,11 @@ if($collId){
 								Edit a Specimen Record
 							</a>
 						</li>
+						<li>
+							<a href="../datasets/index.php?collid=<?php echo $collId; ?>">
+								Print Labels
+							</a>
+						</li>
 						<?php if($editCode > 1){ ?>
 							<li>
 								<a href="#" onclick="toggleById('colledit');" >
@@ -184,11 +189,13 @@ if($collId){
 									Review/Verify Specimen Edits 
 								</a>
 							</li>
+							<!-- 
 							<li>
 								<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
 									Manage/Clean Scientific Names 
 								</a>
 							</li>
+							 -->
 						<?php } ?>
 					</ul>
 				</fieldset>

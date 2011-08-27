@@ -31,9 +31,12 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 	<script type="text/javascript">
 
 		$(document).ready(function() {
-			$('#tabs').tabs(
-				{ selected: <?php echo $tabIndex; ?> }
-			);
+			$('#tabs').tabs({
+				selected: <?php echo $tabIndex; ?>,
+				//spinner: 'Loading...',
+				cache: false,
+				ajaxOptions: {cache: false}
+			});
 		});
 
 		function addVoucherToCl(occid,clid,tid){
