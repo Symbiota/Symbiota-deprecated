@@ -17,17 +17,42 @@ class PersonalChecklistManager{
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
-	public function getChecklists($uid){
+
+	public function getManagementLists($uid){
 		$returnArr = Array();
-		$sql = "SELECT c.clid, c.name FROM fmchecklists c WHERE (uid = ".$uid.')';
+		//Get project and checklist IDs from userpermissions
+		$clStr = '';
+		$projStr = '';
+		$sql = 'SELECT pname FROM userpermissions WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%")';
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+		while($r = $rs->fetch_object()){
+			$pArr = explode('-',$r->pname);
+			if(count($pArr) == 2){
+				if($pArr[0] == 'ClAdmin') $clStr .= ','.$pArr[1];
+				if($pArr[0] == 'ProjAdmin') $projStr .= ','.$pArr[1];
+			}
+		}
+		if($clStr){
+			//Get checklists
+			$sql = "SELECT clid, name FROM fmchecklists WHERE (clid IN(".substr($clStr,1).'))';
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$returnArr['cl'][$row->clid] = $row->name;
+			}
+			$rs->close();
+		}
+		if($projStr){
+			//Get projects
+			$sql = "SELECT pid, projname FROM fmprojects WHERE (pid IN(".substr($projStr,1).'))';
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$returnArr['proj'][$row->pid] = $row->projname;
+			}
+			$rs->close();
 		}
 		return $returnArr;
 	}
-	
+
 	public function createChecklist($newClArr){
 		$sqlInsert = "";
 		$sqlValues = "";
@@ -54,10 +79,18 @@ class PersonalChecklistManager{
 	}
 
 	public function deleteChecklist($clidDel){
+		$status = '';
 		$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$clidDel.')';
 		$this->conn->query($sql);
 		$sql = "DELETE FROM fmchecklists WHERE (clid = ".$clidDel.')';
-		return $this->conn->query($sql);
+		if($this->conn->query($sql)){
+			$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$clidDel.'")';
+			$this->conn->query($sql);
+		}
+		else{
+			$status = 'Checklist Deletion falsed. Please contact data administrator.';
+		}
+		return $status;
 	}
 	
 	public function echoParentSelect(){

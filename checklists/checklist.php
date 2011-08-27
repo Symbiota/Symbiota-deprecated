@@ -440,7 +440,7 @@
 					<?php 
 					if($clValue && $clManager->getEditable()){
 					?>
-					<div class="editspp" style="display:<?php echo ($editMode==1?"block":"none");?>;width:250px;margin-top:10px;">
+					<div class="editspp" style="display:<?php echo ($editMode==1?'block':'none');?>;width:250px;margin-top:10px;">
 						<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 							<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 								<legend><b>Add New Species to Checklist</b></legend>
@@ -630,7 +630,7 @@
 							if($clManager->getEditable()){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
-								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
+								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
 									<img src='../images/edit.png' style='width:13px;' title='edit details' />
 								</span>
 								<?php if($showVouchers && $dynSqlExists){ ?>
