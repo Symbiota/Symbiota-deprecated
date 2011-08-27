@@ -278,19 +278,21 @@ class ChecklistManager {
 	}
 	
 	private function setImages($tidReturn){
-		$sql = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
-			'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
-			'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN images i ON ts2.tid = i.tid '.
-			'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) '.
-			'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
-		//echo $sql;
-		$rs = $this->clCon->query($sql);
-		while($row = $rs->fetch_object()){
-			$this->taxaList[$row->tid]["url"] = $row->url;
-			$this->taxaList[$row->tid]["tnurl"] = $row->thumbnailurl;
+		if($tidReturn){
+			$sql = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
+				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN images i ON ts2.tid = i.tid '.
+				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) '.
+				'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
+			//echo $sql;
+			$rs = $this->clCon->query($sql);
+			while($row = $rs->fetch_object()){
+				$this->taxaList[$row->tid]["url"] = $row->url;
+				$this->taxaList[$row->tid]["tnurl"] = $row->thumbnailurl;
+			}
+			$rs->close();
 		}
-		$rs->close();
 	}
 
     public function downloadChecklistCsv(){
