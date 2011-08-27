@@ -583,7 +583,8 @@ else{
 				<fieldset>
 					<legend>Delete this Profile</legend>
 					<div>
-						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+						<input type="hidden" name="uspid" value="<?php echo $uspid; ?>" />
+						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 						<input type="submit" name="action" value="Delete Profile" />
 					</div>
 				</fieldset>

@@ -194,7 +194,7 @@ if($action == 'VoucherConflicts'){
 	<?php 
 	if($conflictArr){
 		?>
-		<table id="edittable">
+		<table class="styledtable">
 			<tr><th><b>Checklist ID</b></th><th><b>Collector</b></th><th><b>Specimen ID</b></th><th><b>Identified By</b></th></tr>
 			<?php
 			foreach($conflictArr as $tid => $vArr){
@@ -331,7 +331,7 @@ elseif($action == 'ListChildTaxa'){
 		<?php 
 		if($childArr){
 			?>
-			<table id="edittable">
+			<table class="styledtable">
 				<tr><th><b>Taxon</b></th><th><b>Source Checklist</b></th></tr>
 				<?php
 				foreach($childArr as $tid => $sArr){
