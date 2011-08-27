@@ -131,13 +131,13 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 							<input type="radio" id="isaccepted" name="acceptstatus" value="1" onchange="acceptanceChanged(this.form)" checked> Accepted
 							<input type="radio" id="isnotaccepted" name="acceptstatus" value="0" onchange="acceptanceChanged(this.form)"> Not Accepted
 						</div>
-						<div id="accdiv" style="display:none;">
+						<div id="accdiv" style="display:none;margin-top:3px;">
 							Accepted Taxon:
-							<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;" />
+							<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;border:inset;" />
 							<input type="hidden" name="tidaccepted" /> 
-							<div>
-								<div style="float:left;width:150px;">UnacceptabilityReason:</div>
-								<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;border:inset;' title=''/>
+							<div style="margin-top:3px;">
+								UnacceptabilityReason: 
+								<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;' title=''/>
 							</div>
 						</div>
 					</fieldset>

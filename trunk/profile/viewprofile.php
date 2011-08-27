@@ -561,37 +561,68 @@ if(isset($profile_viewprofileCrumbs)){
 				</form>
 			</div>
 			<div id="checklistdiv">
-				<div style="margin:10px;" class="fieldset">
-					<div class="legend"><b>Available Checklists</b></div>
-					<ul>
+				<fieldset style="margin:10px;padding:20px;">
+					<legend><b>Management</b></legend>
 					<?php 
-						$clArr = $pClManager->getChecklists($userId);
-						if($clArr){
-							foreach($clArr as $kClid => $vName){
-								?>
-								<li>
-									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
-										<?php echo $vName; ?>
-									</a>
-									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
-										<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
-									</a>
-									<form action="viewprofile.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
-										<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
-										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-										<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
-									</form> 
-								</li>
-								
-								<?php 
-							}
+					$listArr = $pClManager->getManagementLists($userId);
+					echo '<div style="font-weight:bold;font:bold 14pt;">Checklists</div>'."\n";
+					if(array_key_exists('cl',$listArr)){
+						$clArr = $listArr['cl'];
+						?>
+						<ul>
+						<?php 
+						foreach($clArr as $kClid => $vName){
+							?>
+							<li>
+								<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
+									<?php echo $vName; ?>
+								</a>
+								<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
+									<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
+								</a>
+								<form action="viewprofile.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
+									<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
+									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+									<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
+								</form> 
+							</li>
+							<?php 
 						}
-						else{
-							echo "<h3>You have no personal checklists</h3>";
+						?>
+						</ul>
+						<?php 
+					}
+					else{
+						echo '<div style="margin:10px;">You have no personal checklists</div>';
+					}
+
+					echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Project Administration</div>'."\n";
+					if(array_key_exists('proj',$listArr)){
+						$projArr = $listArr['proj'];
+						?>
+						<ul>
+						<?php 
+						foreach($projArr as $pid => $projName){
+							?>
+							<li>
+								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=0">
+									<?php echo $projName; ?>
+								</a>
+								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=1">
+									<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Project" />
+								</a>
+							</li>
+							<?php 
 						}
+						?>
+						</ul>
+						<?php 
+					}
+					else{
+						echo '<div style="margin:10px;">There are no Projects for which you have administrative permissions</div>';
+					}
 					?>
-					</ul>
-				</div>
+				</fieldset>
 				<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
 					<fieldset>
 						<legend style="font-weight:bold;">Create a New Checklist</legend>
