@@ -126,9 +126,9 @@ if($symbUid){
 							</span>
 							<span style="margin-left:20px;">
 								Entered by: 
-								<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_POST)?$_POST['recordenteredby']:''); ?>" />
+								<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_POST)?$_POST['recordenteredby']:''); ?>" title="login name of data entry person" />
 							</span>
-							<span style="margin-left:20px;" title="Enter a range separated by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
 								Date Modified: 
 								<input type="text" name="datelastmodified" value="<?php echo (array_key_exists('datelastmodified',$_POST)?$_POST['datelastmodified']:''); ?>" />
 							</span>
@@ -136,9 +136,9 @@ if($symbUid){
 						<div style="margin:3px;">
 							<span>
 								Collector: 
-								<input type="text" name="recordedby" value="<?php echo (array_key_exists('recordedby',$_POST)?$_POST['recordedby']:''); ?>" />
+								<input type="text" name="recordedby" value="<?php echo (array_key_exists('recordedby',$_POST)?$_POST['recordedby']:''); ?>" title="Must match exactly as entered" />
 							</span>
-							<span style="margin-left:20px;" title="Enter a range separated by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
 								Number(s): 
 								<input type="text" name="recordnumber" value="<?php echo (array_key_exists('recordnumber',$_POST)?$_POST['recordnumber']:''); ?>" />
 							</span>
@@ -155,6 +155,13 @@ if($symbUid){
 							<span style="margin-left:20px;">
 								* Specimen return is limited to 100 records
 							</span>
+							<!-- 
+							<span style="margin-left:150px;">
+								<a href="#" onclick="toogle('');return false;">
+									Hints
+								</a>
+							</span>
+							-->
 						</div>
 					</fieldset>
 				</form>
