@@ -139,13 +139,13 @@ class SpecDatasetManager {
 	}
 	
 	public function exportCsvFile(){
-		if($occidArr = $_POST['occid']){
+		$sql = $this->getLabelSql();
+		//echo 'SQL: '.$sql;
+		if($sql){
 	    	$fileName = 'labeloutput_'.time().".csv";
 			header ('Content-Type: text/csv');
 			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 			
-			$sql = $this->getLabelSql();
-			//echo 'SQL: '.$sql;
 			$rs = $this->conn->query($sql);
 			if($rs){
 				echo "\"occid\",\"occurrenceId\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
@@ -159,19 +159,22 @@ class SpecDatasetManager {
 	 			"\"minimumElevationInMeters\",\"maximumElevationInMeters\",\"verbatimElevation\",\"disposition\"\n";
 				
 				while($row = $rs->fetch_assoc()){
-					echo $row['occid'].",\"".$row["occurrenceid"]."\",\"".$row["catalognumber"]."\",\"".
-						$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
-						$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
-						$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
-						$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
-						$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
-						$row["verbatimeventdate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["verbatimattributes"])."\",\"".
-						$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
-						$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
-						$row["county"]."\",\"".$row["municipality"]."\",\"".$this->cleanStr($row["locality"])."\",".$row["decimallatitude"].",".
-						$row["decimallongitude"].",\"".$row["geodeticdatum"]."\",".$row["coordinateuncertaintyinmeters"].",\"".
-						$this->cleanStr($row["verbatimcoordinates"])."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
-						$row["verbatimelevation"]."\",\"".$row["disposition"]."\"\n";
+					$dupCnt = $_POST['q-'.$row['occid']];
+					for($i = 0;$i < $dupCnt;$i++){
+						echo $row['occid'].",\"".$row["occurrenceid"]."\",\"".$row["catalognumber"]."\",\"".
+							$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
+							$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
+							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
+							$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
+							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
+							$row["verbatimeventdate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["verbatimattributes"])."\",\"".
+							$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
+							$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
+							$row["county"]."\",\"".$row["municipality"]."\",\"".$this->cleanStr($row["locality"])."\",".$row["decimallatitude"].",".
+							$row["decimallongitude"].",\"".$row["geodeticdatum"]."\",".$row["coordinateuncertaintyinmeters"].",\"".
+							$this->cleanStr($row["verbatimcoordinates"])."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
+							$row["verbatimelevation"]."\",\"".$row["disposition"]."\"\n";
+					}
 				}
 			}
 			else{

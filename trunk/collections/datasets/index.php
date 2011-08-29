@@ -136,7 +136,7 @@ if($symbUid){
 						<div style="margin:3px;">
 							<span>
 								Collector: 
-								<input type="text" name="recordedby" value="<?php echo (array_key_exists('recordedby',$_POST)?$_POST['recordedby']:''); ?>" title="Must match exactly as entered" />
+								<input type="text" name="recordedby" value="<?php echo (array_key_exists('recordedby',$_POST)?$_POST['recordedby']:''); ?>" title="Collector Name must match exactly as entered in database" />
 							</span>
 							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
 								Number(s): 
