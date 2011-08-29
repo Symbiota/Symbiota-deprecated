@@ -322,7 +322,7 @@
 								<div>
 									<span>Latitude Centroid: </span>
 									<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
-									<span style="cursor:pointer;" onclick="openMappingAid('editclmatadata','ecllatcentroid','ecllongcentroid');">
+									<span style="cursor:pointer;" onclick="openMappingAid();">
 										<img src="../images/world40.gif" style="width:12px;" />
 									</span>
 								</div>

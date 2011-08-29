@@ -128,8 +128,8 @@ if($isEditable){
 			$('#tabs').tabs();
 		});
 
-		function openMappingAid(targetForm,targetLat,targetLong) {
-		    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		function openMappingAid() {
+		    mapWindow=open("../tools/mappointaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -692,7 +692,7 @@ if(isset($profile_viewprofileCrumbs)){
 							</div>
 							<div style="float:left;">
 								<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
-								<span style="cursor:pointer;" onclick="openMappingAid('checklistaddform','ncllatcentroid','ncllongcentroid');">
+								<span style="cursor:pointer;" onclick="openMappingAid();">
 									<img src="../images/world40.gif" style="width:12px;" />
 								</span>
 							</div>

@@ -50,7 +50,7 @@
 				echo "<span class='stcl-".$pid."' style='display:none;'><img src='../images/plus.gif'/></span>";
 				echo "<span class='stcl-".$pid."' style='display:inline;'><img src='../images/minus.gif'/></span>";
 				echo "&nbsp;&nbsp;".$projName."</span>&nbsp;&nbsp;";
-				echo "<a href='clgmap.php?proj=".$pid."' title='Show checklists on map'><img src='../images/world40.gif' style='width:10px;border:0' /></a>";
+				echo "<a href='../checklists/clgmap.php?proj=".$pid."&target=keys' title='Show checklists on map'><img src='../images/world40.gif' style='width:10px;border:0' /></a>";
 				echo "</h3>";
 				echo "<div class='stcl-".$pid."' style='display:block;'><ul>";
 				foreach($clArr as $clid => $clName){

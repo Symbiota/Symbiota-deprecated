@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <?php
 include_once('../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -8,84 +8,102 @@ $longName = array_key_exists("longname",$_REQUEST)?$_REQUEST["longname"]:"";
 $latDef = array_key_exists("latdef",$_REQUEST)?$_REQUEST["latdef"]:0; 
 $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:0; 
 $zoom = array_key_exists("zoom",$_REQUEST)&&$_REQUEST["zoom"]?$_REQUEST["zoom"]:5;
-if(!$latDef && !$lngDef){
+if($latDef == 0 && $lngDef == 0){
 	$latDef = '';
 	$lngDef = '';
 } 
+
+$lat = 0; $lng = 0; 
+if(is_numeric($latDef) && is_numeric($lngDef)){
+	$lat = $latDef; 
+	$lng = $lngDef; 
+}
+else{
+	$boundaryArr = explode(";",$mappingBoundaries);
+	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
+	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
+}
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
-  </head> 
-  <body onload="initialize()"  onunload="GUnload()">
-  	<?php
-  	$lat = 0; $lng = 0; 
-	if(is_numeric($latDef) && is_numeric($lngDef)){
-		$lat = $latDef; 
-		$lng = $lngDef; 
-	}
-  	else{
-  		$boundaryArr = explode(";",$mappingBoundaries);
-  		$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
-  		$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
-  	}
-  	?>
-    <script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
-    <script type="text/javascript">
-      //<![CDATA[
-      
-		var zoomLevel = <?php echo $zoom; ?>;
-      	
-		function initialize(){
-
-			var map = new GMap2(document.getElementById("map"));
-
-				<?php
-				if(is_numeric($latDef) && is_numeric($lngDef)){
-					echo "map.addOverlay(new GMarker(new GLatLng(".$lat.",".$lng.")));\n";
+<html>
+	<head>
+		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false">
+		</script>
+	    <script type="text/javascript">
+		    var map;
+		    var currentMarker;
+	      	
+			function initialize(){
+				var latCenter = <?php echo $lat; ?>;
+				var lngCenter = <?php echo $lng; ?>;
+				var latValue = opener.document.<?php echo $formName.'.'.$latName; ?>.value;
+				var lngValue = opener.document.<?php echo $formName.'.'.$longName; ?>.value;
+				if(latValue){
+					latCenter = latValue;
+					lngCenter = lngValue;
+					document.getElementById("latbox").value = latValue;
+					document.getElementById("lngbox").value = lngValue;
 				}
-				?>
-            map.setCenter(new GLatLng(<?php echo $lat.",".$lng;?>), zoomLevel);
-            map.setUIToDefault();
-            
-            GEvent.addListener(map, 'dblclick', function(overlay, point) {
-				map.clearOverlays();
-				map.zoomIn(point,true);
-            });
+		    	var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
+		    	var dmOptions = {
+					zoom: <?php echo $zoom; ?>,
+					center: dmLatLng,
+					mapTypeId: google.maps.MapTypeId.TERRAIN
+				};
+		    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
+				if(latValue && lngValue){
+					var mLatLng = new google.maps.LatLng(latValue,lngValue);
+					var marker = new google.maps.Marker({
+						position: mLatLng,
+						map: map
+					});
+					currentMarker = marker;
+				}
 
-            GEvent.addListener(map, 'click', function(overlay, point) {
-				if(point) {
-					map.clearOverlays();
-					var marker = new GMarker(point);
-					map.addOverlay(marker);
-					// Add Coords by clicking the map
-					var latValue = point.y;
-					var lonValue = point.x;
+				google.maps.event.addListener(map, 'click', function(event) {
+		            mapZoom = map.getZoom();
+		            startLocation = event.latLng;
+		            setTimeout("placeMarker()", 500);
+		        });
+	        }
+	
+	        function placeMarker() {
+	    		if(currentMarker) currentMarker.setMap();
+	            if(mapZoom == map.getZoom()){
+	                var marker = new google.maps.Marker({
+	                    position: startLocation,
+	                    map: map
+	                });
+	    			currentMarker = marker;
+	
+	    	        var latValue = startLocation.lat();
+	    	        var lonValue = startLocation.lng();
 					latValue = latValue.toFixed(5);;
 					lonValue = lonValue.toFixed(5);
-    				document.getElementById("latbox").value = latValue;
-                    document.getElementById("lngbox").value = lonValue;
-             	}
-            });
-        }
+					document.getElementById("latbox").value = latValue;
+					document.getElementById("lngbox").value = lonValue;
+	    		}
+	        }
 
-        function updateParentForm() {
-			try{
-	            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
-	            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
-			}
-			catch(myErr){
-				alert("Unable to transfer data. Please let an administrator know.");
-			}
-            self.close();
-            return false;
-        }
+	        function updateParentForm() {
+				try{
+		            opener.document.<?php echo $formName.'.'.$latName; ?>.value = document.getElementById("latbox").value;
+		            opener.document.<?php echo $formName.'.'.$longName; ?>.value = document.getElementById("lngbox").value;
+				}
+				catch(myErr){
+					alert("Unable to transfer data. Please let an administrator know.");
+				}
+	            self.close();
+	            return false;
+	        }
+	    </script>
 
-        //]]>
-    </script>
-		<div style="width:770px;">
+	</head> 
+	<body onload="initialize()">
+		<div style="width:770px;height:650px;">
 			<div>
-				Use navigation controls to pan and zoom. Click once to capture coordinates.  
+				Click once to capture coordinates.  
 				Submit Coordinate button will transfer to form. 
 			</div>
 			<div style="margin-right:30px;">
@@ -93,9 +111,7 @@ if(!$latDef && !$lngDef){
 				<b>Longitude:</b> <input type="text" id="lngbox" size="13" name="lon" value="<?php echo $lngDef; ?>" /> 
 				<input type="submit" name="addcoords" value="Submit Coordinates" onclick="updateParentForm();" />&nbsp;&nbsp;&nbsp;
 			</div>
-			<div style="clear:both;">
-				<div id='map' style='width:750px;height:650px;'></div>
-			</div>
+			<div id='map_canvas' style='width:95%; height:90%; clear:both;'></div>
 		</div>
 	</body>
 </html>
