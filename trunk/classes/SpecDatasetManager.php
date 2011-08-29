@@ -109,7 +109,7 @@ class SpecDatasetManager {
 			if($sqlWhere){
 				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT(recordedby," (",IFNULL(recordnumber,"s.n."),")") AS collector, '.
 					'family, sciname, CONCAT_WS("; ",country, stateProvince, county, locality) AS locality '.
-					'FROM omoccurrences WHERE '.substr($sqlWhere,4);
+					'FROM omoccurrences WHERE collid = '.$this->collId.' '.$sqlWhere;
 				if($sqlOrderBy) $sql .= 'ORDER BY '.substr($sqlOrderBy,1);
 				$sql .= ' LIMIT 100';
 				//echo '<div>'.$sql.'</div>';
