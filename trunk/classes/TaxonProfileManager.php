@@ -1,12 +1,4 @@
 <?php
-/*
- * Created by Edward Gilbert 
- * egbot@asu.edu
- * Global Institute of Sustainability - GIOS 
- * on 31 Aug. 2006
- * 
-*/
- 
 include_once($serverRoot.'/config/dbconnection.php');
 
 class TaxonProfileManager {

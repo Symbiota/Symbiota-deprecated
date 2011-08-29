@@ -120,8 +120,8 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 	
-		function openMappingAid(targetForm,targetLat,targetLong) {
-		    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		function openMappingAid() {
+		    mapWindow=open("../tools/mappointaid.php?formname=editmetadata&latname=latcentroid&longname=longcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -355,7 +355,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 							<div>
 								<span>Latitude Centroid: </span>
 								<input id="latdec" type='text' name='latcentroid' value='<?php echo $mdArray["latcentroid"]; ?>' />
-								<span style="cursor:pointer;" onclick="openMappingAid('editmetadata','latcentroid','longcentroid');">
+								<span style="cursor:pointer;" onclick="openMappingAid();">
 									<img src="../images/world40.gif" style="width:12px;" />
 								</span>
 							</div>

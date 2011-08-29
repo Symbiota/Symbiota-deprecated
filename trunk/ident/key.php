@@ -143,7 +143,7 @@ if($keyModIsActive){
 			echo "<input Type='hidden' Id='dynclid' Name='dynclid' Value='".$dynClid."' />";
 			echo "<input Type='hidden' Id='proj' Name='proj' Value='".$projValue."' />";
 			echo "<input Type='hidden' Id='rv' Name='rv' Value='".$dataManager->getRelevanceValue()."' />";
-			if($projValue) echo "<div><a href='clgmap.php?proj=".$projValue."'>map view</a></div>";
+			if($projValue) echo "<div><a href='../checklists/clgmap.php?proj=".$projValue."&target=keys'>map view</a></div>";
 			?>
 			<div style='font-weight:bold; margin-top:0.5em;'>Taxon:</div>
 			<select name="taxon">

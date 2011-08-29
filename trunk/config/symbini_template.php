@@ -60,7 +60,6 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 	//ident/
 		$ident_keyMenu = false;
 		$ident_keyCrumbs = "<a href='../ident/index.php'>Identification Keys</a> &gt; ";
-		$ident_loadingclMenu = false;
 		$ident_tools_chardeficitMenu = false;
 		$ident_tools_chardeficitCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
 		$ident_tools_massupdateMenu = false;

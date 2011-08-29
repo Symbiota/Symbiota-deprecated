@@ -56,9 +56,9 @@ function toggle(target){
 	return false;
 }
 
-function openMappingAid(targetForm,targetLat,targetLong) {
-    mapWindow=open("../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-    if (mapWindow.opener == null) mapWindow.opener = self;
+function openMappingAid() {
+	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=ecllatcentroid&longname=ecllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    if(mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function openPopup(urlStr,windowName){

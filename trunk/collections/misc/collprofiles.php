@@ -71,8 +71,8 @@ if($collId){
 			return false;
 		}
 
-		function openMappingAid(targetForm,targetLat,targetLong) {
-		    mapWindow=open("../../tools/mappointaid.php?formname="+targetForm+"&latname="+targetLat+"&longname="+targetLong,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+		function openMappingAid() {
+		    mapWindow=open("../../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 		    if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -293,7 +293,7 @@ if($collId){
 									</td>
 									<td>
 										<input id="latdec" type="text" name="latitudedecimal" value="<?php echo ($collId?$collData["latitudedecimal"]:'');?>" />
-										<span style="cursor:pointer;" onclick="openMappingAid('colleditform','latitudedecimal','longitudedecimal');">
+										<span style="cursor:pointer;" onclick="openMappingAid();">
 											<img src="../../images/world40.gif" style="width:12px;" />
 										</span>
 									</td>

@@ -1,86 +1,83 @@
+<!DOCTYPE html>
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
+$projValue = $_REQUEST['proj'];
 if(!$projValue && isset($defaultProjId)) $projValue = $defaultProjId;
-$clType = array_key_exists("cltype",$_REQUEST)?$_REQUEST["cltype"]:""; 
+$clType = array_key_exists('cltype',$_REQUEST)?$_REQUEST['cltype']:'research';
+$target = array_key_exists('target',$_REQUEST)?$_REQUEST['target']:'checklists';
 
 $mapperObj = new ChecklistMapper($projValue);
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title><?php echo $defaultTitle?> - Species Checklists</title>
-    <meta name='keywords' content='<?php echo"species distribution,".$mapperObj->getProjName(); ?>' />
-    <script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
-    <script type="text/javascript">
-      //<![CDATA[
+<html>
+	<head>
+		<title><?php echo $defaultTitle?> - Species Checklists</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false">
+		</script>
+		<script type="text/javascript">
+		    var map;
+		    var points = new Array();
+		    var infoWins = new Array();
+		  	
+		    function initialize(){
+		    	var dmLatLng = new google.maps.LatLng(41.0, -95.0);
+		    	var dmOptions = {
+					zoom: 3,
+					center: dmLatLng,
+					mapTypeId: google.maps.MapTypeId.TERRAIN
+				};
 
-        function load() 
-        {
-            if (GBrowserIsCompatible()) 
-            {
-                var map = new GMap2(document.getElementById("map"));
-                var points = new Array();
-                map.addControl(new GLargeMapControl()); // pan, zoom
-                map.addControl(new GMapTypeControl()); // map, satellite, hybrid
-                map.addControl(new GOverviewMapControl()); // small overview in corner
-
-                map.setCenter(new GLatLng( 41.0, -95.0 ), 3);
+				map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
                 <?php $mapperObj->echoChecklistPoints($clType); ?>
-                resizeMap(map, points);
-            }
-        }
+                resizeMap();
+	        }
 
-        function resizeMap( map, points ) {
-            var minLng = 180;       //Pixels
-              var minLat = 180;
-              var maxLng = -180;
-              var maxLat = -180;
-            var averLat = 0;
-            var averLng = 0;
-            var panBounds;
-            
-            var neBounds;
-            var swBounds;
-            var optimalBounds;
-            var zoomLevel = 3;
+			function resizeMap() {
+				var minLng = 180;       //Pixels
+				var minLat = 180;
+				var maxLng = -180;
+				var maxLat = -180;
+				var averLat = 0;
+				var averLng = 0;
+				var panBounds;
+	            
+				var neBounds;
+				var swBounds;
+				var optimalBounds;
+				var zoomLevel = 3;
+	
+				// Find the max/min points
+				for( var i = 0; i < points.length; i++ ) {
+					var p = points[i];
+					if ( p.lat() < minLat ) minLat = p.lat();
+					if ( p.lat() > maxLat ) maxLat = p.lat();
+					if ( p.lng() < minLng ) minLng = p.lng();
+					if ( p.lng() > maxLng ) maxLng = p.lng();
+				}
+				var swLatLng = new google.maps.LatLng(minLat, minLng);
+				var neLatLng = new google.maps.LatLng(maxLat, maxLng);
+				var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
+				map.fitBounds(llBounds);
+	    	}
 
-            // Find the max/min points
-            for ( var i = 0; i < points.length; i++ ) {
-                var p = points[i];
-                if ( p.lat() < minLat ) minLat = p.lat();
-                if ( p.lat() > maxLat ) maxLat = p.lat();
-                if ( p.lng() < minLng ) minLng = p.lng();
-                if ( p.lng() > maxLng ) maxLng = p.lng();
-              }
-
-            averLat =  (minLat + maxLat) / 2;
-            averLng = (minLng + maxLng) / 2;
-            panBounds = new GLatLng(averLat,averLng);
-
-              // Find the optimal Width Zoom
-              swBounds = new GLatLng(minLat,minLng);
-              neBounds = new GLatLng(maxLat,maxLng);
-              optimalBounds = new GLatLngBounds(swBounds,neBounds);
-            zoomLevel = map.getBoundsZoomLevel(optimalBounds);
-
-              // Reposition
-            window.setTimeout(function() {
-                map.setCenter(panBounds, zoomLevel);
-              }, 500);
-                    
-        }
-      //]]>
-    </script>
-  </head>
-  <body onload="load()" onunload="GUnload()">
-    <div id="map" style="width:800px;height:600px;"></div>
-  </body>
+	    	function closeAllInfoWins(){
+				for( var w = 0; w < infoWins.length; w++ ) {
+					var win = infoWins[w];
+					win.close();
+				}
+	    	}
+		</script>
+	</head>
+	<body onload="initialize()">
+		<div style="width:800px;height:600px;">
+	    	<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
+		</div>
+	</body>
 </html>
 
 <?php 
@@ -95,7 +92,7 @@ class ChecklistMapper{
         $this->conn = MySQLiConnectionFactory::getCon("readonly");
         $sql = "SELECT p.pid, p.projname FROM fmprojects p ";
         if(is_numeric($projValue)){
-            $sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
+			$sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
         }
         else{
             $sql .= " WHERE p.projname = '".$this->conn->real_escape_string($projValue)."'";
@@ -119,30 +116,39 @@ class ChecklistMapper{
         return $this->pid;
     }
 
-    public function echoChecklistPoints($type){
+    public function echoChecklistPoints($type,$target="checklists"){
         if($type == "research"){
-        	$this->echoResearchPoints();
+        	$this->echoResearchPoints($target);
         }
         elseif($type == "survey"){
         	$this->echoSurveyPoints();
         }
     }
 
-    private function echoResearchPoints(){
-    	$sql = "SELECT c.clid, c.Name, c.LongCentroid, c.LatCentroid ".
+    private function echoResearchPoints($target){
+    	$sql = "SELECT c.clid, c.name, c.longcentroid, c.latcentroid ".
             "FROM (fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid) ". 
             "INNER JOIN fmprojects p ON cpl.pid = p.pid ".
             "WHERE c.access = 'public' AND p.ispublic = 1 AND c.LongCentroid IS NOT NULL AND p.pid = ".$this->conn->real_escape_string($this->pid);
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $idStr = $row->clid;
-            $nameStr = $row->Name;
-            echo "var point = new GLatLng(".$row->LatCentroid.", ".$row->LongCentroid.");\n";
-              echo "points.push( point );\n";
-              echo "var marker$idStr = new GMarker(point);\n";
-            echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'checklist.php?cl=".$idStr."&proj=".$this->getPid()."';});\n";
-            echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml(\"<b>".$nameStr."</b><br>Double Click to open checklist.\");});\n";
-              echo "map.addOverlay(marker$idStr);\n";
+            $nameStr = $row->name;
+			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
+			echo "points.push( point".$idStr." );\n";
+			echo "var marker".$idStr." = new google.maps.Marker({ position: point".$idStr.", map: map, title: '".$nameStr."' });\n";
+			//Single click event
+			echo "var infoWin".$idStr." = new google.maps.InfoWindow({ content: '<div style=\"width:300px;\"><b>".$nameStr."</b><br/>Double Click to open</div>' });\n";
+			echo "infoWins.push( infoWin".$idStr." );\n";
+			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
+			//Double click event
+			if($target == 'keys'){
+				echo "var lStr".$idStr." = '../keys.php?cl=".$idStr."&proj=".$this->getPid()."';\n";
+			}
+			else{
+				echo "var lStr".$idStr." = 'checklist.php?cl=".$idStr."&proj=".$this->getPid()."';\n";
+			}
+			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
         }
         $result->close();
     }
@@ -155,15 +161,18 @@ class ChecklistMapper{
         while($row = $result->fetch_object()){
             $idStr = $row->surveyid;
             $nameStr = $row->projectname;
-            echo "var point = new GLatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
-            echo "points.push( point );\n";
-            echo "var marker$idStr = new GMarker(point);\n";
-			echo "GEvent.addListener(marker$idStr, 'dblclick', function() {window.location.href = 'survey.php?surveyid=".$idStr."&proj=".$this->pid."';});\n";
-            echo "GEvent.addListener(marker$idStr, 'click', function() {marker$idStr.openInfoWindowHtml(\"<b>".$nameStr."</b><br>Double Click to open survey checklist.\");});\n";
-            echo "map.addOverlay(marker$idStr);\n";
-        }
-        $result->close();
-    }
+			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
+			echo "points.push( point".$idStr." );\n";
+			echo "var marker".$idStr." = new google.maps.Marker({ position: point".$idStr.", map: map, title: '".$nameStr."' });\n";
+			//Single click event
+			echo "var infoWin".$idStr." = new google.maps.InfoWindow({ content: '<div style=\"width:300px;\"><b>".$nameStr."</b><br/>Double Click to open</div>' });\n";
+			echo "infoWins.push( infoWin".$idStr." );\n";
+			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
+			//Double click event
+			echo "var lStr".$idStr." = 'survey.php?surveyid=".$idStr."&proj=".$this->getPid()."';\n";
+			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
+		}
+		$result->close();
+	}
 }
-
 ?>
