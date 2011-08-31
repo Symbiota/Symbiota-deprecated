@@ -54,10 +54,10 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 			'VALUES ('.$detArr['occid'].',"'.$detArr['identifiedby'].'","'.$detArr['dateidentified'].'","'.
-			$detArr['sciname'].'",'.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
+			$this->cleanStr($detArr['sciname']).'",'.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
 			($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
-			($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
-			($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.$sortSeq.')';
+			($detArr['identificationreferences']?'"'.$this->cleanStr($detArr['identificationreferences']).'"':'NULL').','.
+			($detArr['identificationremarks']?'"'.$this->cleanStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
 		//echo "<div>".$sql."</div>";
 		if($this->conn->query($sql)){
 			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
@@ -106,11 +106,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	public function editDetermination($detArr){
 		$status = "Determination editted successfully!";
 		$sql = 'UPDATE omoccurdeterminations '.
-			'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'", sciname = "'.$detArr['sciname'].
+			'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'", sciname = "'.$this->cleanStr($detArr['sciname']).
 			'", scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
 			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
-			'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
-			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').','.
+			'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanStr($detArr['identificationreferences']).'"':'NULL').','.
+			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanStr($detArr['identificationremarks']).'"':'NULL').','.
 			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').' '.
 			'WHERE (detid = '.$detArr['detid'].')';
 		if(!$this->conn->query($sql)){
