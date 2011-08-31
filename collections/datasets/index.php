@@ -233,6 +233,10 @@ if($symbUid){
 									<input type="checkbox" name="bc" value="1" />
 									<b>Include barcode of Catalog Number</b> 
 								</div>
+								<div style="margin:4px;">
+									<input type="checkbox" name="bconly" value="1" />
+									<b>Print only Barcode</b> 
+								</div>
 								<!-- 
 								<div style="margin:4px;">
 									<input type="checkbox" name="symbbc" value="1" />
