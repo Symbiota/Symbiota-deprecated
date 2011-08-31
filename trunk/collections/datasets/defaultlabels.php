@@ -3,6 +3,14 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecDatasetManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
+$useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
+$useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
+$bcObj = null;
+if($useBarcode || $useSymbBarcode){
+	include_once("Image/Barcode.php");
+	if(class_exists('Image_Barcode')) $bcObj = new Image_Barcode;
+}
+
 $collId = $_POST["collid"];
 $hPrefix = $_POST['lhprefix'];
 $hMid = $_POST['lhmid'];
@@ -10,7 +18,7 @@ $hSuffix = $_POST['lhsuffix'];
 $lFooter = $_POST['lfooter'];
 $occIdArr = $_POST['occid'];
 $rowsPerPage = $_POST['rpp'];
-$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
+$action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $labelManager = new SpecDatasetManager();
 $labelManager->setCollId($collId);
@@ -52,8 +60,9 @@ else{
 				.collectordiv {margin-top:10px;}
 				.recordnumber {margin-left:10px;}
 				.associatedcollectors {margin:0px 0px 10px 15px;clear:both;}
-				.disposition {width:100%;text-alignment:center;font-size:90%;}
+				.cnbarcode {width:100%; text-align:center;}
 				.lfooter {width:100%; text-align:center; font:bold 14px arial,sans-serif; margin-bottom:10px;}
+				.symbbarcode {width:100%; text-align:center;margin-top:10px}
 			</style>
 		</head>
 		<body>
@@ -142,8 +151,8 @@ else{
 												<?php
 											}
 											else{
-												echo '<span id="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
-												echo '<span id="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallatitude>0?'E':'W').' ';
+												echo '<span class="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
+												echo '<span class="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallatitude>0?'E':'W').' ';
 											}
 											if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.'</span>';
 											if($r->geodeticdatum) echo '<span style="margin-left:10px;">['.$r->geodeticdatum.']</span>'; 
@@ -153,7 +162,7 @@ else{
 									}
 									if($r->minimumelevationinmeters){ 
 										?>
-										<div id="elevdiv">
+										<div class="elevdiv">
 											Elev: 
 											<?php 
 											echo '<span class="minimumelevationinmeters">'.$r->minimumelevationinmeters.'</span>'.
@@ -211,9 +220,27 @@ else{
 										}
 										?>
 									</div>
+									<?php 
+									if($useBarcode && $bcObj){
+										?>
+										<div class="cnbarcode">
+											<img src="<?php echo $bcObj->draw($r->catalognumber, "Code39", "png"); ?>" />
+										</div>
+										<?php 
+									}
+									?>
 									<div class="lfooter" style="clear:both;">
 										<?php echo $lFooter; ?>
 									</div>
+									<?php 
+									if($useSymbBarcode && $bcObj){
+										?>
+										<div class="symbbarcode">
+											<img src="<?php echo $bcObj->draw($r->occid, "Code39", "png"); ?>" />
+										</div>
+										<?php 
+									}
+									?>
 								</td> 
 								<?php
 								if($labelCnt%2 == 0){
