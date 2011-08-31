@@ -223,20 +223,21 @@ function dwcDoc(dcTag){
 
 function insertUtm(f) {
 	var zValue = document.getElementById("utmzone").value.replace(/^\s+|\s+$/g,"");
+	var hValue = document.getElementById("zonens").value;
 	var eValue = document.getElementById("utmeast").value.replace(/^\s+|\s+$/g,"");
 	var nValue = document.getElementById("utmnorth").value.replace(/^\s+|\s+$/g,"");
 	if(zValue && eValue && nValue){
 		if(isNumeric(zValue) && isNumeric(eValue) && isNumeric(nValue)){
 			//Remove prior UTM references from verbatimCoordinates field
 			var vcStr = f.verbatimcoordinates.value;
-			vcStr = vcStr.replace(/\(UTM: \d+ \d+E \d+N\)[;\s]*/g, "");
+			vcStr = vcStr.replace(/\d{2}[NS]{1}\s{1}\d+E\s+\d+N[;\s]*/g, "");
 			vcStr = vcStr.replace(/^\s+|\s+$/g, "");
 			vcStr = vcStr.replace(/^;|;$/g, "");
 			//put UTM into verbatimCoordinate field
 			if(vcStr != ""){
 				vcStr = vcStr + "; ";
 			}
-			var utmStr = "UTM: " + zValue + " " + eValue + "E " + nValue + "N";
+			var utmStr = zValue + hValue + " " + eValue + "E " + nValue + "N";
 			f.verbatimcoordinates.value = vcStr + utmStr;
 			//Convert to Lat/Lng values
 			var latLngStr = utm2LatLng(zValue,eValue,nValue);
@@ -308,16 +309,16 @@ function insertLatLng(f) {
 			}
 			else{
 				var vcStr = f.verbatimcoordinates.value;
-				vcStr = vcStr.replace(/\(Lat: [-dmsNSLong:;EW\d\.\s]+\)/g, "");
+				vcStr = vcStr.replace(/-*\d{2}°+[NS\d\.\s\'\"]+°+[-\d\.\s\'\"]+[EW;]+/g, "");
 				vcStr = vcStr.replace(/^\s+|\s+$/g, "");
 				vcStr = vcStr.replace(/^;|;$/g, "");
 				if(vcStr != ""){
 					vcStr = vcStr + "; ";
 				}
-				var dmsStr = "Lat: " + latDeg + "d " + latMin + "m ";
-				if(latSec > 0) dmsStr += latSec + "s ";
-				dmsStr += latNS + "; Long: " + lngDeg + "d " + lngMin + "m ";
-				if(lngSec) dmsStr += lngSec + "s ";
+				var dmsStr = latDeg + "° " + latMin + "' ";
+				if(latSec > 0) dmsStr += latSec + '" ';
+				dmsStr += latNS + "  " + lngDeg + "° " + lngMin + "' ";
+				if(lngSec) dmsStr += lngSec + '" ';
 				dmsStr += lngEW;
 				f.verbatimcoordinates.value = vcStr + dmsStr;
 				var latDec = parseInt(latDeg) + (parseFloat(latMin)/60) + (parseFloat(latSec)/3600);

@@ -842,7 +842,7 @@ if($symbUid){
 										</div>
 										<div style="padding:3px;">
 											Associated Taxa:
-											<input type="text" name="associatedtaxa" tabindex="84" style="width:600px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" /> 
+											<input type="text" name="associatedtaxa" tabindex="84" style="width:575px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" /> 
 											<a href="#" onclick="openAssocSppAid();return false;">
 												<img src="../../images/list.png" style="width:15px;border:0px;" />
 											</a>

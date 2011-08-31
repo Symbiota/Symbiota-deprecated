@@ -130,21 +130,24 @@ else{
 										<span class="locality"><?php echo $r->locality; ?></span> 
 									</div>
 									<?php
-									if($r->decimallatitude){ 
+									if($r->decimallatitude || $r->verbatimcoordinates){ 
 										?>
 										<div class="loc2div">
 											<?php 
-											echo $r->decimallatitude.' '.$r->decimallongitude.' ';
-											if($r->coordinateuncertaintyinmeters) echo '+-'.$r->coordinateuncertaintyinmeters;
-											if($r->geodeticdatum) echo ' ['.$r->geodeticdatum.']'; 
+											if($r->verbatimcoordinates){ 
+												?>
+												<span class="verbatimcoordinates">
+													<?php echo $r->verbatimcoordinates; ?>
+												</span>
+												<?php
+											}
+											else{
+												echo '<span id="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
+												echo '<span id="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallatitude>0?'E':'W').' ';
+											}
+											if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.'</span>';
+											if($r->geodeticdatum) echo '<span style="margin-left:10px;">['.$r->geodeticdatum.']</span>'; 
 											?>
-										</div>
-										<?php
-									}
-									if($r->verbatimcoordinates){ 
-										?>
-										<div class="verbatimcoordinates">
-											<?php echo $r->verbatimcoordinates; ?>
 										</div>
 										<?php
 									}
@@ -198,20 +201,17 @@ else{
 										<div class="collectordiv2" style="float:right;">
 											<span class="eventdate"><?php echo $r->eventdate; ?></span>
 										</div>
-										<div class="associatedcollectors">
-											<?php echo $r->associatedcollectors; ?>
-										</div>
-									</div>
-									<?php
-									if($r->disposition){ 
+										<?php 
+										if($r->associatedcollectors){
+											?>
+											<div class="associatedcollectors" style="clear:both;margin-left:10px;">
+												With: <?php echo $r->associatedcollectors; ?>
+											</div>
+											<?php 
+										}
 										?>
-										<div class="disposition">
-											<?php echo 'Duplicates to: '.$r->disposition; ?>
-										</div>
-										<?php
-									} 
-									?>
-									<div class="lfooter">
+									</div>
+									<div class="lfooter" style="clear:both;">
 										<?php echo $lFooter; ?>
 									</div>
 								</td> 

@@ -228,7 +228,8 @@ class OccurrenceEditorManager {
 						//Field is a checkbox that is unchecked
 						$occArr[$v] = 0;
 					}
-					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$occArr[$v].'" AS fvn,'.$v.' FROM omoccurrences '.
+					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$this->cleanStr($occArr[$v]).
+						'" AS fvn,'.$this->cleanStr($v).' AS fvo FROM omoccurrences '.
 						'WHERE (occid = '.$occArr['occid'].') AND (trim('.$v.') <> "'.trim($occArr[$v]).'")';
 					//echo '<div>'.$sqlEdit.'</div>';
 					$this->conn->query($sqlEdit);
@@ -240,7 +241,7 @@ class OccurrenceEditorManager {
 				$sql = '';
 				foreach($editArr as $v){
 					if($v){
-						$sql .= ','.$v.' = '.($occArr[$v]!==''?'"'.$occArr[$v].'"':'NULL');
+						$sql .= ','.$v.' = '.($occArr[$v]!==''?'"'.$this->cleanStr($occArr[$v]).'"':'NULL');
 					}
 				}
 				if(in_array('sciname',$editArr)){
@@ -295,7 +296,7 @@ class OccurrenceEditorManager {
 			($occArr["family"]?"\"".$occArr["family"]."\"":"NULL").",".
 			"\"".$occArr["sciname"]."\",".
 			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").",".
-			($occArr["scientificnameauthorship"]?"\"".$occArr["scientificnameauthorship"]."\"":"NULL").",".
+			($occArr["scientificnameauthorship"]?"\"".$this->conn->real_escape_string($occArr["scientificnameauthorship"])."\"":"NULL").",".
 			($occArr["identifiedby"]?"\"".$occArr["identifiedby"]."\"":"NULL").",".
 			($occArr["dateidentified"]?"\"".$occArr["dateidentified"]."\"":"NULL").",".
 			($occArr["identificationreferences"]?"\"".$occArr["identificationreferences"]."\"":"NULL").",".
@@ -304,41 +305,41 @@ class OccurrenceEditorManager {
 			($occArr["typestatus"]?"\"".$occArr["typestatus"]."\"":"NULL").",".
 			($occArr["recordedby"]?"\"".$occArr["recordedby"]."\"":"NULL").",".
 			($occArr["recordnumber"]?"\"".$occArr["recordnumber"]."\"":"NULL").",".
-			($occArr["associatedcollectors"]?"\"".$occArr["associatedcollectors"]."\"":"NULL").",".
+			($occArr["associatedcollectors"]?"\"".$this->conn->real_escape_string($occArr["associatedcollectors"])."\"":"NULL").",".
 			($occArr["eventdate"]?"'".$occArr["eventdate"]."'":"NULL").",".
 			($occArr["year"]?$occArr["year"]:"NULL").",".
 			($occArr["month"]?$occArr["month"]:"NULL").",".
 			($occArr["day"]?$occArr["day"]:"NULL").",".
 			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
 			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			($occArr["verbatimeventdate"]?"\"".$occArr["verbatimeventdate"]."\"":"NULL").",".
-			($occArr["habitat"]?"\"".$occArr["habitat"]."\"":"NULL").",".
-			($occArr["occurrenceremarks"]?"\"".$occArr["occurrenceremarks"]."\"":"NULL").",".
-			($occArr["associatedtaxa"]?"\"".$occArr["associatedtaxa"]."\"":"NULL").",".
-			($occArr["verbatimattributes"]?"\"".$occArr["verbatimattributes"]."\"":"NULL").",".
-			($occArr["dynamicproperties"]?"\"".$occArr["dynamicproperties"]."\"":"NULL").",".
+			($occArr["verbatimeventdate"]?"\"".$this->conn->real_escape_string($occArr["verbatimeventdate"])."\"":"NULL").",".
+			($occArr["habitat"]?"\"".$this->conn->real_escape_string($occArr["habitat"])."\"":"NULL").",".
+			($occArr["occurrenceremarks"]?"\"".$this->conn->real_escape_string($occArr["occurrenceremarks"])."\"":"NULL").",".
+			($occArr["associatedtaxa"]?"\"".$this->conn->real_escape_string($occArr["associatedtaxa"])."\"":"NULL").",".
+			($occArr["verbatimattributes"]?"\"".$this->conn->real_escape_string($occArr["verbatimattributes"])."\"":"NULL").",".
+			($occArr["dynamicproperties"]?"\"".$this->conn->real_escape_string($occArr["dynamicproperties"])."\"":"NULL").",".
 			($occArr["reproductivecondition"]?"\"".$occArr["reproductivecondition"]."\"":"NULL").",".
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			($occArr["establishmentmeans"]?"\"".$occArr["establishmentmeans"]."\"":"NULL").",".
+			($occArr["establishmentmeans"]?"\"".$this->conn->real_escape_string($occArr["establishmentmeans"])."\"":"NULL").",".
 			($occArr["country"]?"\"".$occArr["country"]."\"":"NULL").",".
 			($occArr["stateprovince"]?"\"".$occArr["stateprovince"]."\"":"NULL").",".
 			($occArr["county"]?"\"".$occArr["county"]."\"":"NULL").",".
-			($occArr["locality"]?"\"".$occArr["locality"]."\"":"NULL").",".
+			($occArr["locality"]?"\"".$this->conn->real_escape_string($occArr["locality"])."\"":"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
 			($occArr["localitysecurityreason"]?$occArr["localitysecurityreason"]:"NULL").",".
 			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
 			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			($occArr["geodeticdatum"]?"\"".$occArr["geodeticdatum"]."\"":"NULL").",".
+			($occArr["geodeticdatum"]?"\"".$this->conn->real_escape_string($occArr["geodeticdatum"])."\"":"NULL").",".
 			($occArr["coordinateuncertaintyinmeters"]?"\"".$occArr["coordinateuncertaintyinmeters"]."\"":"NULL").",".
-			($occArr["verbatimcoordinates"]?"\"".$occArr["verbatimcoordinates"]."\"":"NULL").",".
+			($occArr["verbatimcoordinates"]?"\"".$this->cleanStr($occArr["verbatimcoordinates"])."\"":"NULL").",".
 			($occArr["georeferencedby"]?"\"".$occArr["georeferencedby"]."\"":"NULL").",".
-			($occArr["georeferenceprotocol"]?"\"".$occArr["georeferenceprotocol"]."\"":"NULL").",".
-			($occArr["georeferencesources"]?"\"".$occArr["georeferencesources"]."\"":"NULL").",".
+			($occArr["georeferenceprotocol"]?"\"".$this->conn->real_escape_string($occArr["georeferenceprotocol"])."\"":"NULL").",".
+			($occArr["georeferencesources"]?"\"".$this->conn->real_escape_string($occArr["georeferencesources"])."\"":"NULL").",".
 			($occArr["georeferenceverificationstatus"]?"\"".$occArr["georeferenceverificationstatus"]."\"":"NULL").",".
-			($occArr["georeferenceremarks"]?"\"".$occArr["georeferenceremarks"]."\"":"NULL").",".
+			($occArr["georeferenceremarks"]?"\"".$this->conn->real_escape_string($occArr["georeferenceremarks"])."\"":"NULL").",".
 			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			($occArr["verbatimelevation"]?"\"".$occArr["verbatimelevation"]."\"":"NULL").",".
+			($occArr["verbatimelevation"]?"\"".$this->conn->real_escape_string($occArr["verbatimelevation"])."\"":"NULL").",".
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
 			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",".
 			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
@@ -373,7 +374,8 @@ class OccurrenceEditorManager {
 	protected function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","'",$newStr);
+		$newStr = str_replace('"',"''",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 	
