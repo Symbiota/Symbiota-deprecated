@@ -5,11 +5,6 @@ header("Content-Type: text/html; charset=".$charset);
 
 $useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
 $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
-$bcObj = null;
-if($useBarcode || $useSymbBarcode){
-	include_once("Image/Barcode.php");
-	if(class_exists('Image_Barcode')) $bcObj = new Image_Barcode;
-}
 
 $collId = $_POST["collid"];
 $hPrefix = $_POST['lhprefix'];
@@ -202,7 +197,7 @@ else{
 										<?php 
 									}
 									?>
-									<div class=collectordiv>
+									<div class="collectordiv">
 										<div class="collectordiv1" style="float:left;">
 											<span class="recordedby"><?php echo $r->recordedby; ?></span> 
 											<span class="recordnumber"><?php echo $r->recordnumber; ?></span> 
@@ -221,10 +216,11 @@ else{
 										?>
 									</div>
 									<?php 
-									if($useBarcode && $bcObj){
+									if($useBarcode && $r->catalognumber){
 										?>
-										<div class="cnbarcode">
-											<img src="<?php echo $bcObj->draw($r->catalognumber, "Code39", "png"); ?>" />
+										<div class="cnbarcode" style="clear:both;padding-top:15px;">
+											<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->catalognumber; ?>" /><br/>
+											<?php echo strtoupper($r->catalognumber); ?>
 										</div>
 										<?php 
 									}
@@ -233,10 +229,12 @@ else{
 										<?php echo $lFooter; ?>
 									</div>
 									<?php 
-									if($useSymbBarcode && $bcObj){
+									if($useSymbBarcode){
 										?>
-										<div class="symbbarcode">
-											<img src="<?php echo $bcObj->draw($r->occid, "Code39", "png"); ?>" />
+										<hr style="border:dashed;" />
+										<div class="symbbarcode" style="padding:10px;">
+											<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->occid; ?>" /><br/>
+											<?php echo strtoupper($r->occid); ?>
 										</div>
 										<?php 
 									}
