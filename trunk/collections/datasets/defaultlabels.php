@@ -40,14 +40,16 @@ else{
 			<style type="text/css">
 				body {font-family:arial,sans-serif}
 				table {page-break-before:auto;page-break-inside:avoid;}
-				table td {padding:15px;}
+				table td {padding:15px; font-size:10pt;}
 				p.printbreak {page-break-after:always;}
-				.lheader {width:100%; text-align:center; font:bold 16px arial,sans-serif; margin-bottom:10px;}
+				.lheader {width:100%; text-align:center; font:bold 16pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
 				.sciname {font-weight:bold;}
+				.scientificnamediv {font-size:12pt;}
 				.identifiedbydiv {margin-left:15px;}
 				.identificationreferences {margin-left:15px;}
 				.identificationremarks {margin-left:15px;}
+				.loc1div {font-size:11pt;}
 				.country {font-weight:bold;}
 				.stateprovince {font-weight:bold;}
 				.county {font-weight:bold;}
@@ -100,12 +102,12 @@ else{
 									$labelCnt++;
 									if($labelCnt%2) echo '<table><tr>'."\n";
 									?>
-									<td style="width:250pt;">
+									<td style="width:250pt;" valign="top">
 										<div class="lheader">
 											<?php echo $headerStr; ?>
 										</div>
 										<?php if($hMid != 4) echo '<div class="family">'.$r->family.'</div>'; ?>
-										<div>
+										<div class="scientificnamediv">
 											<?php 
 											if($r->identificationqualifier) echo '<span class="identificationqualifier">'.$r->identificationqualifier.'</span> ';
 											$scinameStr = $r->sciname;
@@ -122,6 +124,7 @@ else{
 										if($r->identifiedby){
 											?>
 											<div class="identifiedbydiv">
+												Det by: 
 												<span class="identifiedby"><?php echo $r->identifiedby; ?></span> 
 												<span class="dateidentified"><?php echo $r->dateidentified; ?></span>
 											</div>
@@ -143,7 +146,15 @@ else{
 											<span class="stateprovince"><?php echo $r->stateprovince.($r->stateprovince?', ':''); ?></span> 
 											<span class="county"><?php echo $r->county.($r->county?', ':''); ?></span> 
 											<span class="municipality"><?php echo $r->municipality.($r->municipality?', ':''); ?></span>
-											<span class="locality"><?php echo $r->locality; ?></span> 
+											<span class="locality">
+												<?php
+												$locStr = trim($r->locality);
+												if(substr($locStr,-1) != '.'){
+													$locStr .= '.';
+												}
+												echo $locStr;
+												?>
+											</span>
 										</div>
 										<?php
 										if($r->decimallatitude || $r->verbatimcoordinates){ 
@@ -181,7 +192,15 @@ else{
 										}
 										if($r->habitat){
 											?>
-											<div class="habitat"><?php echo $r->habitat; ?></div>
+											<div class="habitat">
+												<?php
+												$habStr = trim($r->habitat);
+												if(substr($habStr,-1) != '.'){
+													$habStr .= '.';
+												} 
+												echo $habStr; 
+												?> 
+											</div>
 											<?php 
 										}
 										if($r->verbatimattributes || $r->establishmentmeans){
@@ -261,10 +280,10 @@ else{
 									}
 								}
 							}
-							if($labelCnt%2){
-								echo '<td></td></tr></table>'; //If label count is odd, close final labelrowdiv
-							} 
 						}
+						if($labelCnt%2){
+							echo '<td></td></tr></table>'; //If label count is odd, close final labelrowdiv
+						} 
 						$rs->close();
 					}
 				}
