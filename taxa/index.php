@@ -194,7 +194,7 @@
 		
 	</script>
 </head>
-<body onload="initTabs('desctabs');">
+<body>
 <?php
 $displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
 include($serverRoot.'/header.php');
@@ -337,7 +337,7 @@ if($taxonManager->getSciName() != "unknown"){
 		if($mapSrc){
 			$gUrl = ""; $iUrl = "";
 			if($taxonManager->getSecurityStatus() == 0 || $isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-				$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/googlemap.php?usecookies=0&type=3&db=all&thes=on&taxa=".$taxonManager->getSciName()."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
+				$gUrl = "javascript:var popupReference=window.open('googlemap.php?taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
 			}
 			$url = array_shift($mapSrc);
 			if(strpos($url,"maps.google.com")){
@@ -510,7 +510,7 @@ if($taxonManager->getSciName() != "unknown"){
 							if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
 								$gUrl = ""; $iUrl = "";
 								if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
-									$gUrl = "javascript:var popupReference=window.open('".$clientRoot."/collections/googlemap.php?usecookies=0&type=3&db=all&thes=on&taxa=".$subArr["tid"]."','gmap','toolbar=0,resizable=1,width=950,height=700,left=20,top=20');";
+									$gUrl = "javascript:var popupReference=window.open('googlemap.php?taxon=".$subArr["tid"]."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
 								}
 								$aUrl = "";
 								if(strpos($mapUrl,"maps.google.com")){

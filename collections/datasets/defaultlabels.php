@@ -188,7 +188,7 @@ else{
 											?>
 											<div>
 												<span class="verbatimattributes"><?php echo $r->verbatimattributes; ?></span>
-												<?php echo ($r->verbatimattributes?'. ':''); ?>
+												<?php echo ($r->verbatimattributes && $r->establishmentmeans?'; ':''); ?>
 												<span class="establishmentmeans">
 													<?php echo $r->establishmentmeans; ?>
 												</span>
