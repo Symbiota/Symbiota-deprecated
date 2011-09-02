@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceMapManager.php');
@@ -6,49 +5,47 @@ header("Content-Type: text/html; charset=".$charset);
 
 $mapManager = new OccurrenceMapManager(); 
  
-$latCen = 41.0;
-$lngCen = -95.0;
-$coorArr;
-if(isset($mappingBoundaries)){
-	$coorArr = explode(";",$mappingBoundaries);
-	if($coorArr && count($coorArr) == 4){
-		$latCen = ($coorArr[0] + $coorArr[2])/2;
-		$longCen = ($coorArr[1] + $coorArr[3])/2;
-	}
-}
 ?>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title><?php echo $defaultTitle; ?> - Google Map</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false">
+</head> 
+<body onload="load()" onunload="GUnload()">
+	<script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
+	<script type="text/javascript">
+		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
+      //<![CDATA[
 		var map;
 		var points;
 		var useLLDecimal = true;
 
-	    function initialize(){
-	    	var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$lngCen; ?>);
-	    	var dmOptions = {
-				zoom: 3,
-				center: dmLatLng,
-				mapTypeId: google.maps.MapTypeId.TERRAIN
-			};
+		function load(){
+			if(GBrowserIsCompatible()) {
+				map = new GMap2(document.getElementById("map"));
+                points = new Array();
+                map.addControl(new GLargeMapControl()); // pan, zoom
+                map.addControl(new GMapTypeControl()); // map, satellite, hybrid
+                map.addControl(new GOverviewMapControl()); // small overview in corner
+                <?php
+                	$latCen = 41.0;
+                	$longCen = -95.0;
+                	$coorArr = explode(";",$mappingBoundaries);
+                	if($coorArr && count($coorArr) == 4){
+                		$latCen = ($coorArr[0] + $coorArr[2])/2;
+                		$longCen = ($coorArr[1] + $coorArr[3])/2;
+                	}
+                ?>
+                map.setCenter(new GLatLng( <?php echo $latCen.",".$longCen; ?> ), 3);
 
-	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-            points = new Array();
-
-            var mImg = new google.maps.MarkerImage();
-
-            
-			var tinyIcon = new GIcon(G_DEFAULT_ICON);
-			tinyIcon.shadow = "../images/google/shadow.png";
-			tinyIcon.iconSize = new GSize(25, 25);
-			tinyIcon.infoWindowAnchor = new GPoint(12,0);
-			tinyIcon.shadowSize = new GSize(45, 25);
-			tinyIcon.iconAnchor = new GPoint(12, 25);
+                var tinyIcon = new GIcon(G_DEFAULT_ICON);
+                tinyIcon.shadow = "../images/google/shadow.png";
+                tinyIcon.iconSize = new GSize(25, 25);
+                tinyIcon.infoWindowAnchor = new GPoint(12,0);
+                tinyIcon.shadowSize = new GSize(45, 25);
+                tinyIcon.iconAnchor = new GPoint(12, 25);
            <?php 
                 $coordExist = false;
                 $iconKeys = Array(); 
@@ -86,6 +83,7 @@ if(isset($mappingBoundaries)){
                 }
                 echo "resizeMap(map, points);";
             ?>
+            }
         }
 
         function resizeMap( map, points ) {
@@ -192,106 +190,79 @@ if(isset($mappingBoundaries)){
             }
         }
         
-		function toggleLatLongDivs(){
-			var divs = document.getElementsByTagName("div");
-			for (i = 0; i < divs.length; i++) {
-				var obj = divs[i];
-				if(obj.getAttribute("class") == "latlongdiv" || obj.getAttribute("className") == "latlongdiv"){
-					if(obj.style.display=="none"){
-						obj.style.display="block";
-					}
-					else{
-						obj.style.display="none";
-					}
+	function toggleLatLongDivs(){
+		var divs = document.getElementsByTagName("div");
+		for (i = 0; i < divs.length; i++) {
+			var obj = divs[i];
+			if(obj.getAttribute("class") == "latlongdiv" || obj.getAttribute("className") == "latlongdiv"){
+				if(obj.style.display=="none"){
+					obj.style.display="block";
 				}
-			}
-			if(useLLDecimal){
-				useLLDecimal = false;
-			}
-			else{
-				useLLDecimal = true;
+				else{
+					obj.style.display="none";
+				}
 			}
 		}
-	
-		function openIndPU(occId,clid){
-			var wWidth = 900;
-			try{
-				if(opener.document.getElementById('maintable').offsetWidth){
-					wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
-				}
-				else if(opener.document.body.offsetWidth){
-					wWidth = opener.document.body.offsetWidth*0.9;
-				}
-			}
-			catch(err){
-			}
-			newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
-			if (newWindow.opener == null) newWindow.opener = self;
+		if(useLLDecimal){
+			useLLDecimal = false;
 		}
+		else{
+			useLLDecimal = true;
+		}
+	}
+
+	function openIndPU(occId,clid){
+		var wWidth = 900;
+		try{
+			if(opener.document.getElementById('maintable').offsetWidth){
+				wWidth = opener.document.getElementById('maintable').offsetWidth*1.05;
+			}
+			else if(opener.document.body.offsetWidth){
+				wWidth = opener.document.body.offsetWidth*0.9;
+			}
+		}
+		catch(err){
+		}
+		newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+		if (newWindow.opener == null) newWindow.opener = self;
+	}
+      //]]>
     </script>
-</head> 
-<body onload="initialize();">
 <?php
+
     if(!$coordExist){ //no results
-    	?>
-		<div style='font-size:120%;font-weight:bold;'>
-			Your query apparently does not contain any records with coordinates that can be mapped.
-		</div>
-		<div style="margin:15px;">
-			Either the records in the query are not georeferenced (no lat/long) or
-		 	Rare/threatened status requires the locality coordinates be hidden.
-		</div>
-        <?php 
+        echo "<div style='font-size:120%;font-weight:bold;'>Your query apparently does not contain any records with coordinates that can be mapped.</div>";
+        echo "&nbsp;&nbsp;&nbsp;Either the records in the query are not georeferenced (no lat/long)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-or-<br>";
+        echo "&nbsp;&nbsp;&nbsp;Rare/threatened status requires the locality coordinates be hidden.";
     }
-    ?>
-	<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
-    <table title='Add Point of Reference'>
-    	<tr>
-    		<td width='200px' valign='top'>
-			    <?php 
-			    foreach($iconKeys as $iconValue){
-			        echo $iconValue;
-			    }
-			    ?>
-			</td>
-			<td width='340' valign='top'>
-				<div class='latlongdiv' style='display:block'>
-					Latitude decimal:
-					<input name='lat' id='lat' size='10' type='text'> eg: 34.57<br/>
-					Longitude decimal: 
-					<input name='lng' id='lng' size='10' type='text'> eg: -112.38
-					<div style='font-size:80%;margin-left:10px;'>
-						<a href='#' onclick='toggleLatLongDivs();return false;'>Enter in D:M:S format</a>
-					</div>
-				</div>
-				<div class='latlongdiv' style='display:none'>
-					Latitude:
-					<input name='latdeg' id='latdeg' size='2' type='text'>&deg;
-					<input name='latmin' id='latmin' size='5' type='text'>&prime;
-					<input name='latsec' id='latsec' size='5' type='text'>&Prime;
-					<select name='latns' id='latns'>
-						<option value='N' selected>N</option>
-						<option value='S'>S</option>
-					</select>
-					Longitude: 
-					<input name='longdeg' id='longdeg' size='2' type='text'>&deg;
-					<input name='longmin' id='longmin' size='5' type='text'>&prime;
-					<input name='longsec' id='longsec' size='5' type='text'>&Prime;
-					<select name='longew' id='longew'>
-						<option value='E'>E</option>
-						<option value='W' selected>W</option>
-					</select>
-					<div style='font-size:80%;margin-left:10px;'>
-						<a href='#' onclick='toggleLatLongDivs();return false;'>Enter in Decimal format</a>
-					</div>
-				</div>
-			</td>
-			<td valign='top'>
-				Marker Name: 
-				<input name='title' id='title' size='20' type='text'><br>
-				<input type='submit' value='Add Marker' onclick='addRefPoint();'>
-			</td>
-		</tr>
-	</table>
+    echo "<div id='map' style='width: 800px; height: 600px'></div>";
+    echo "<table title='Add Point of Reference'><tr><td width='200px' valign='top'>";
+    foreach($iconKeys as $iconValue){
+        echo $iconValue;
+    }
+    echo "</td><td width='340' valign='top'>";
+    echo "<div class='latlongdiv' style='display:block'>";
+    echo "Latitude decimal:&nbsp;&nbsp;&nbsp;<input name='lat' id='lat' size='10' type='text'> eg: 34.57<br/>";
+    echo "Longitude decimal: <input name='lng' id='lng' size='10' type='text'> eg: -112.38";
+    echo "<div style='font-size:80%;margin-left:10px;'><a href='#' onclick='javascript: toggleLatLongDivs();'>Enter in D:M:S format</a></div>";
+    echo "</div>";
+
+    echo "<div class='latlongdiv' style='display:none'>";
+    echo "Latitude:&nbsp;&nbsp;&nbsp;<input name='latdeg' id='latdeg' size='2' type='text'>&deg;&nbsp;";
+    echo "<input name='latmin' id='latmin' size='5' type='text'>&prime;&nbsp;";
+    echo "<input name='latsec' id='latsec' size='5' type='text'>&Prime;&nbsp;";
+    echo "<select name='latns' id='latns'><option value='N' selected>N</option><option value='S'>S</option></select>";
+    echo "Longitude: <input name='longdeg' id='longdeg' size='2' type='text'>&deg;&nbsp;";
+    echo "<input name='longmin' id='longmin' size='5' type='text'>&prime;&nbsp;";
+    echo "<input name='longsec' id='longsec' size='5' type='text'>&Prime;&nbsp;";
+    echo "<select name='longew' id='longew'><option value='E'>E</option><option value='W' selected>W</option></select>";
+    echo "<div style='font-size:80%;margin-left:10px;'><a href='#' onclick='javascript: toggleLatLongDivs();'>Enter in Decimal format</a></div>";
+    echo "</div>";
+
+    echo "</td><td valign='top'>";
+    echo "Marker Name: <input name='title' id='title' size='20' type='text'><br>";
+    echo "<input type='submit' value='Add Marker' onclick='javascript: addRefPoint();'>";
+    echo "</td></tr></table>";
+?>
 </body>
 </html>
