@@ -432,7 +432,7 @@ if($collId){
 					<?php } ?>
 					<div style="clear:both;">
 						<ul style='margin-top:10px;'>
-							<li><?php echo $collData["recordcnt"];?> total records</li>
+							<li><?php echo $collData["recordcnt"];?> specimens in database</li>
 							<li><?php echo $collData["georefcnt"]." (".(round(100*$collData["georefcnt"]/($collData["recordcnt"]?$collData["recordcnt"]:1)));?>%) georeferenced</li>
 							<li><?php echo $collData["familycnt"];?> families</li>
 							<li><?php echo $collData["genuscnt"];?> genera</li>

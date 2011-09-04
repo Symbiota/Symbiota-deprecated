@@ -132,7 +132,7 @@ class OccurrenceEditorManager {
 			$rnInFrag = array();
 			foreach($rnArr as $v){
 				if($p = strpos($v,' - ')){
-					$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'")';
+					$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'")';
 				}
 				else{
 					$rnInFrag[] = $v;
@@ -425,7 +425,8 @@ class OccurrenceEditorManager {
 			'startdayofyear','enddayofyear','country','stateprovince','county','locality','decimallatitude','decimallongitude',
 			'verbatimcoordinates','coordinateuncertaintyinmeters','geodeticdatum','minimumelevationinmeters',
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
-			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord','language');
+			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord',
+			'language','labelproject');
 		return array_intersect_key($fArr,array_flip($locArr)); 
 	}
 

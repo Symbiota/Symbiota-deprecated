@@ -72,6 +72,27 @@ if($symbUid){
 		      	return false;
 			}
 
+			function openIndPopup(occid){
+				openPopup('../individual/index.php?occid=' + occid);
+			}
+
+			function openEditorPopup(occid){
+				openPopup('../editor/occurrenceeditor.php?occid=' + occid);
+			}
+
+			function openPopup(urlStr){
+				var wWidth = 900;
+				if(document.getElementById('maintable').offsetWidth){
+					wWidth = document.getElementById('maintable').offsetWidth*1.05;
+				}
+				else if(document.body.offsetWidth){
+					wWidth = document.body.offsetWidth*0.9;
+				}
+				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+				if (newWindow.opener == null) newWindow.opener = self;
+				return false;
+			}
+
 		</script>
 	</head>
 	<body>
@@ -110,41 +131,41 @@ if($symbUid){
 						<legend><b>Define Specimen Recordset</b></legend>
 						<div style="margin:3px;">
 							<span>
+								Collector: 
+								<input type="text" name="recordedby" style="width:100px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
+							</span>
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+								Number(s): 
+								<input type="text" name="recordnumber" style="width:100px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
+							</span>
+							<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+								Identifier: 
+								<input type="text" name="identifier" style="width:100px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
+							</span>
+						</div>
+						<div style="margin:3px;">
+							<span>
+								Entered by: 
+								<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_REQUEST)?$_REQUEST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
+							</span>
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+								Date Modified: 
+								<input type="text" name="datelastmodified" style="width:100px;" value="<?php echo (array_key_exists('datelastmodified',$_REQUEST)?$_REQUEST['datelastmodified']:''); ?>" />
+							</span>
+							<span style="margin-left:20px;">
 								Label Projects: 
 								<select name="labelproject" >
 									<option value=""></option>
 									<option value="">-------------------------</option>
 									<?php 
 									$lProj = '';
-									if(array_key_exists('labelproject',$_POST)) $lProj = $_POST['labelproject'];
+									if(array_key_exists('labelproject',$_REQUEST)) $lProj = $_REQUEST['labelproject'];
 									$lProjArr = $datasetManager->getLabelProjects();
 									foreach($lProjArr as $projStr){
 										echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
 									} 
 									?>
 								</select> 
-							</span>
-							<span style="margin-left:20px;">
-								Entered by: 
-								<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_POST)?$_POST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
-							</span>
-							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
-								Date Modified: 
-								<input type="text" name="datelastmodified" style="width:100px;" value="<?php echo (array_key_exists('datelastmodified',$_POST)?$_POST['datelastmodified']:''); ?>" />
-							</span>
-						</div>
-						<div style="margin:3px;">
-							<span>
-								Collector: 
-								<input type="text" name="recordedby" style="width:100px;" value="<?php echo (array_key_exists('recordedby',$_POST)?$_POST['recordedby']:''); ?>" />
-							</span>
-							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
-								Number(s): 
-								<input type="text" name="recordnumber" style="width:100px;" value="<?php echo (array_key_exists('recordnumber',$_POST)?$_POST['recordnumber']:''); ?>" />
-							</span>
-							<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
-								Identifier: 
-								<input type="text" name="identifier" style="width:100px;" value="<?php echo (array_key_exists('identifier',$_POST)?$_POST['identifier']:''); ?>" />
 							</span>
 						</div>
 						<div>
@@ -196,7 +217,12 @@ if($symbUid){
 											<input type="text" name="q-<?php echo $occId; ?>" value="<?php echo $recArr["q"]; ?>" style="width:20px;border:inset;" />
 										</td>
 										<td>
-											<?php echo $recArr["c"]; ?>
+											<a href="#" onclick="openIndPopup(<?php echo $occId; ?>); return false;">
+												<?php echo $recArr["c"]; ?>
+											</a>
+											<a href="#" onclick="openEditorPopup(<?php echo $occId; ?>); return false;">
+												<img src="../../images/edit.png" />
+											</a>
 										</td>
 										<td>
 											<?php echo $recArr["s"]; ?>

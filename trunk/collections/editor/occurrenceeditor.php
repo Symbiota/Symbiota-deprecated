@@ -197,7 +197,7 @@ if($symbUid){
 			if($isEditor){
 				?>
 				<div style="float:right;">
-					<div style="cursor:pointer;" onclick="toggle('querydiv')">
+					<div style="cursor:pointer;" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';">
 						Search / Filter
 					</div>
 				</div>
@@ -288,32 +288,26 @@ if($symbUid){
 							<form name="queryform" action="occurrenceeditor.php" method="post" onsubmit="return verifyQueryForm(this)">
 								<fieldset style="padding:5px;">
 									<legend><b>Record Search Form</b></legend>
-									<div style="float:right;">
-										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-										<input type="hidden" name="occindex" value="0" />
-										<input type="submit" name="submitaction" value="Query Records" /><br/>
-										<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" />
-									</div>
-									<div style="float:left;margin:5px;">
-										Identifier: 
-										<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
-											<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
-										</span>
-										<span style="margin-left:10px;">Collector:</span> 
+									<div style="margin:2px;">
+										<span style="">Collector:</span> 
 										<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
-										<span style="margin-left:10px;">Number:</span>
+										<span style="margin-left:25px;">Number:</span>
 										<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
 											<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
 										</span>
+										<span style="margin-left:30px;">Identifier:</span> 
+										<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+											<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
+										</span>
 									</div>
-									<div style="clear:both;margin:5px;">
+									<div style="margin:2px;">
 										Entered by: 
 										<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
-										<span style="margin-left:10px;" title="Enter ranges separated by ' - ' (space before and after dash requiered), e.g.: 2002-01-01 - 2003-01-01">
+										<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash requiered), e.g.: 2002-01-01 - 2003-01-01">
 											Date entered: 
 											<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
 										</span>
-										<span style="margin-left:10px;">Status:</span> 
+										<span style="margin-left:15px;">Status:</span> 
 										<select name="q_processingstatus">
 											<option value=''>All Records</option>
 											<option>-------------------</option>
@@ -337,6 +331,31 @@ if($symbUid){
 											</option>
 
 										</select>
+									</div>
+									<?php 
+									$qryStr = '';
+									if($qRecordedBy) $qryStr .= '&recordedby='.$qRecordedBy;
+									if($qRecordNumber) $qryStr .= '&recordnumber='.$qRecordNumber;
+									if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
+									if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
+									if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
+									if($qryStr){
+										?>
+										<div style="float:right;margin-top:10px;" title="Go to Label Printing Module">
+											<a href="../datasets/index.php?collid=<?php echo $collId.$qryStr; ?>">
+												<img src="../../images/list.png" style="width:15px;" />
+											</a>
+										</div>
+										<?php 
+									}
+									?>
+									<div style="margin:5px;">
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+										<input type="hidden" name="occindex" value="0" />
+										<input type="submit" name="submitaction" value="Query Records" />
+										<span style="margin-left:10px;">
+											<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" /> 
+										</span>
 									</div>
 								</fieldset>
 							</form>
@@ -387,7 +406,7 @@ if($symbUid){
 								?>
 							</ul>
 							<div id="occdiv" style="width:745px">
-								<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this)">
+								<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" >
 									<fieldset>
 										<legend><b>Collector Info</b></legend>
 										<div>
@@ -667,7 +686,7 @@ if($symbUid){
 										?>
 										<div>
 											<div id="coordaiddiv" style="display:none;">
-												<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:270px;">
+												<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:260px;">
 													<div>
 														Latitude: 
 														<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
@@ -692,15 +711,14 @@ if($symbUid){
 														<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
 													</div>
 												</div>
-												<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:150px;margin-bottom:10px;">
-													Zone: <input id="utmzone" style="width:40px;" />
-													<select id="zonens" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-														<option>N</option>
-														<option>S</option>
-													</select><br/>
+												<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:155px;margin-bottom:10px;">
+													Zone: <input id="utmzone" style="width:40px;" /><br/>
 													East: <input id="utmeast" type="text" style="width:100px;" /><br/>
 													North: <input id="utmnorth" type="text" style="width:100px;" /><br/>
-													<div style="margin:5px;">
+													Hemisphere: <select id="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
+														<option>Northern</option>
+														<option>Southern</option>
+													</select><br/>													<div style="margin:5px;">
 														<input type="button" value="Insert UTM Values" onclick="insertUtm(this.form)" />
 													</div>
 												</div>
@@ -996,7 +1014,7 @@ if($symbUid){
 										<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 										<?php if($occId){ ?>
 											<div style="margin:15px 0px 20px 30px;">
-												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" />
+												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullForm(this.form)" />
 												<?php 
 												if($occIndex !== false){
 													?>
