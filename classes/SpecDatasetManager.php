@@ -67,7 +67,7 @@ class SpecDatasetManager {
 				foreach($rnArr as $v){
 					$v = trim($v);
 					if($p = strpos($v,' - ')){
-						$rnBetweenFrag[] = '(recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
+						$rnBetweenFrag[] = '(CAST(recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
 					}
 					else{
 						$rnInFrag[] = $v;

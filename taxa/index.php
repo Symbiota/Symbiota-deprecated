@@ -478,7 +478,10 @@ if($taxonManager->getSciName() != "unknown"){
 								echo "<div style='clear:both;'><hr></div>";
 							}
 							echo "<div class='spptaxon'>";
-							echo "<div style='margin-top:10px;'><a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'><i>".$sciNameKey."</i></a></div>\n";
+							echo "<div style='margin-top:10px;'>";
+							echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+							echo "<i>".$sciNameKey."</i>";
+							echo "</a></div>\n";
 							echo "<div class='sppimg' style='overflow:hidden;'>";
 		
 							if(array_key_exists("url",$subArr)){

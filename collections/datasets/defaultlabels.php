@@ -185,7 +185,7 @@ else{
 												<?php 
 												echo '<span class="minimumelevationinmeters">'.$r->minimumelevationinmeters.'</span>'.
 												($r->maximumelevationinmeters?' - <span class="maximumelevationinmeters">'.$r->maximumelevationinmeters.'<span>':''),'m. ';
-												if($r->verbatimelevation) '('.$r->verbatimelevation.')'; 
+												if($r->verbatimelevation) echo ' ('.$r->verbatimelevation.')'; 
 												?>
 											</div>
 											<?php

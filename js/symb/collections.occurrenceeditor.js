@@ -223,32 +223,35 @@ function dwcDoc(dcTag){
 
 function insertUtm(f) {
 	var zValue = document.getElementById("utmzone").value.replace(/^\s+|\s+$/g,"");
-	var hValue = document.getElementById("zonens").value;
+	var hValue = document.getElementById("hemisphere").value;
 	var eValue = document.getElementById("utmeast").value.replace(/^\s+|\s+$/g,"");
 	var nValue = document.getElementById("utmnorth").value.replace(/^\s+|\s+$/g,"");
 	if(zValue && eValue && nValue){
-		if(isNumeric(zValue) && isNumeric(eValue) && isNumeric(nValue)){
+		if(isNumeric(eValue) && isNumeric(nValue)){
 			//Remove prior UTM references from verbatimCoordinates field
 			var vcStr = f.verbatimcoordinates.value;
-			vcStr = vcStr.replace(/\d{2}[NS]{1}\s{1}\d+E\s+\d+N[;\s]*/g, "");
+			vcStr = vcStr.replace(/\d{2}.*\d+E\s+\d+N\s{1}(Northern)|(Southern){1}[;\s]*/g, "");
 			vcStr = vcStr.replace(/^\s+|\s+$/g, "");
 			vcStr = vcStr.replace(/^;|;$/g, "");
 			//put UTM into verbatimCoordinate field
 			if(vcStr != ""){
 				vcStr = vcStr + "; ";
 			}
-			var utmStr = zValue + hValue + " " + eValue + "E " + nValue + "N";
+			var utmStr = zValue + " " + eValue + "E " + nValue + "N " + hValue;
 			f.verbatimcoordinates.value = vcStr + utmStr;
 			//Convert to Lat/Lng values
-			var latLngStr = utm2LatLng(zValue,eValue,nValue);
-			var llArr = latLngStr.split(',');
-			if(llArr){
-				f.decimallatitude.value = Math.round(llArr[0]*1000000)/1000000;
-				f.decimallongitude.value = Math.round(llArr[1]*1000000)/1000000;
+			var zNum = parseInt(zValue);
+			if(isNumeric(zNum)){
+				var latLngStr = utm2LatLng(zNum,eValue,nValue);
+				var llArr = latLngStr.split(',');
+				if(llArr){
+					f.decimallatitude.value = Math.round(llArr[0]*1000000)/1000000;
+					f.decimallongitude.value = Math.round(llArr[1]*1000000)/1000000;
+				}
 			}
 		}
 		else{
-			alert("UTM fields must contain numeric values only");
+			alert("Easting and northing fields must contain numeric values only");
 		}
 	}
 	else{
