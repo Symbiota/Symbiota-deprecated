@@ -61,29 +61,25 @@ class PhotographerManager{
     	return $retArr;
 	}
 
-	public function getPhotographerImages($lStart, $lNum, $iCnt){
+	public function getPhotographerImages($lStart, $lNum){
 		$retArr = array();
 		$limitStart = 0;
 		$limitNum = 50;
 		$imgCnt = 0;
 		if($lStart && is_numeric($lStart)){
-			$lStart = $this->conn->real_escape_string($lStart);
+			$limitStart = $this->conn->real_escape_string($lStart);
 		}
 		if($lNum && is_numeric($lNum)){
 			$limitNum = $this->conn->real_escape_string($lNum);
-		}
-		if($iCnt && is_numeric($iCnt)){
-			$imgCnt = $this->conn->real_escape_string($iCnt);
 		}
 		$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, i.originalurl, ts.family, t.sciname, t.tid '.
 			'FROM (images i INNER JOIN taxa t ON i.tid = t.tid) '.
 			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'WHERE (ts.taxauthid = 1) AND (i.photographeruid = '.$this->uid.') '.
 			'ORDER BY t.sciname, ts.family '.
-			'LIMIT '.$limitStart.', '.($imgCnt+1);
+			'LIMIT '.$limitStart.', '.$lNum;
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
-		$rowCnt = $result->num_rows;
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
 			$retArr[$imgId]['url'] = $row->url;

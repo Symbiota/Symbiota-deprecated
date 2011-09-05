@@ -72,9 +72,9 @@ if($phUid) $pManager->setUid($phUid);
 			}
 			echo "<hr />";
 			
-			$imgArr = $pManager->getPhotographerImages($limitStart,$limitNum,$imgCnt);
+			$imgArr = $pManager->getPhotographerImages($limitStart,$limitNum);
 			if($imgArr){
-				$paginationStr = '<div>';
+				$paginationStr = '<div style="clear:both;">';
 				if($limitStart){
 					$paginationStr .= '<div style="float:left;">';
 					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart - $limitNum).'&lnum='.$limitNum.'">&lt;&lt; Previous Images</a>';
