@@ -436,13 +436,13 @@ class DataLoader{
 	
 	public function echoCollectionIdSelect(){
 		$this->setConnection();
-		$sql = "SELECT c.collid, c.CollectionName FROM omcollections c ".
-			"WHERE c.colltype = 'Observations' ORDER BY c.CollectionName";
+		$sql = "SELECT c.collid, c.CollectionName, c.institutioncode FROM omcollections c ".
+			"WHERE c.colltype LIKE '%observations' ORDER BY c.CollectionName";
 		$result = $this->conn->query($sql);
 		$obserArr = Array();
 		while($row = $result->fetch_object()){
 			$collId = $row->collid;
-			echo "<option value='".$collId."' ".($collId==100||$collId==1000?"SELECTED":"").">".$row->CollectionName."</option>";
+			echo "<option value='".$collId."' ".($row->institutioncode=='MABA'?"SELECTED":"").">".$row->CollectionName."</option>";
 		}
 		$this->conn->close();
 	}
