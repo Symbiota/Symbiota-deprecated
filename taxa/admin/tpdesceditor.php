@@ -205,7 +205,8 @@ if($editable && $tid){
 										<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
 										<input type='hidden' name='tid' value='<?php echo $tid;?>' />
 										<input type='hidden' name='category' value='<?php echo $category;?>'>
-										<input name='action' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+										<input type='hidden' name='action' value='Delete Description Block'>
+										<input name='submitaction' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
 										Delete Description Block (Including all statements below) 
 									</form>
 								</div>
@@ -276,11 +277,12 @@ if($editable && $tid){
 												</form>
 											</div>
 											<div style='margin:5px 0px 5px 20px;border:2px solid red;padding:2px;'>
-												<form name='delstmt' action='tpdesceditor.php' method='post' onsubmit="javascript: return window.confirm('Are you sure you want to delete this Description?');">
+												<form name='delstmt' action='tpdesceditor.php' method='post' onsubmit="return window.confirm('Are you sure you want to delete this Description?');">
 													<input type='hidden' name='tdsid' value='<?php echo $tdsid;?>' />
 													<input type='hidden' name='tid' value='<?php echo $tid;?>' />
 													<input type='hidden' name='category' value='<?php echo $category;?>'>
-													<input name='action' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
+													<input type='hidden' name='action' value='Delete Statement'>
+													<input name='submitaction' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.gif'/> 
 													Delete Statement 
 												</form>
 											</div>
