@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $phUid = array_key_exists("phuid",$_REQUEST)?$_REQUEST["phuid"]:0;
 $limitStart = array_key_exists("lstart",$_REQUEST)?$_REQUEST["lstart"]:0;
-$limitNum = array_key_exists("lnum",$_REQUEST)?$_REQUEST["lnum"]:50;
+$limitNum = array_key_exists("lnum",$_REQUEST)?$_REQUEST["lnum"]:100;
 $imgCnt = array_key_exists("imgcnt",$_REQUEST)?$_REQUEST["imgcnt"]:0;
 
 $pManager = new PhotographerManager();

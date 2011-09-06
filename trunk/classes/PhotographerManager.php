@@ -64,7 +64,7 @@ class PhotographerManager{
 	public function getPhotographerImages($lStart, $lNum){
 		$retArr = array();
 		$limitStart = 0;
-		$limitNum = 50;
+		$limitNum = 100;
 		$imgCnt = 0;
 		if($lStart && is_numeric($lStart)){
 			$limitStart = $this->conn->real_escape_string($lStart);
