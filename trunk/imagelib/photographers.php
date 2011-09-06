@@ -68,7 +68,7 @@ if($phUid) $pManager->setUid($phUid);
 				echo "<div>Total Image: $imgCnt</div>";
 			}
 			else{
-				echo "<div style='font-weight:bold;'>Images: $limitStart - ".($limitStart+$limitNum)." of $imgCnt</div>";
+				echo "<div style='font-weight:bold;'>Images: $limitStart - ".(($limitStart+$limitNum)<$imgCnt?($limitStart+$limitNum):$imgCnt)." of $imgCnt</div>";
 			}
 			echo "<hr />";
 			
@@ -80,9 +80,11 @@ if($phUid) $pManager->setUid($phUid);
 					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart - $limitNum).'&lnum='.$limitNum.'">&lt;&lt; Previous Images</a>';
 					$paginationStr .= '</div>';
 				}
-				if($imgCnt >= $limitNum){
+				if($imgCnt >= ($limitStart+$limitNum)){
 					$paginationStr .= '<div style="float:right;">';
-					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart + $limitNum).'&lnum='.$limitNum.'">Next Images &gt;&gt;</a>';
+					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart + $limitNum).'&lnum='.$limitNum.'">';
+					$paginationStr .= 'Next Images &gt;&gt;';
+					$paginationStr .= '</a>';
 					$paginationStr .= '</div>';
 				}
 				$paginationStr .= "</div>\n";
