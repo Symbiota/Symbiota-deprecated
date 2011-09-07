@@ -87,13 +87,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$remapImages = false;
 			if(array_key_exists('remapimages',$detArr) && $detArr['remapimages'] == "1") $remapImages = true;
 			if($remapImages){
-				if($detArr['tidtoadd']){
-					$sql = 'UPDATE images SET tid = '.$detArr['tidtoadd'].' WHERE (occid = '.$detArr['occid'].')';
-					//echo $sql;
-					$this->conn->query($sql);
-				}
-				else{
-					$status = 'ERROR: Annotation added but failed to remap image because taxon name not in taxonomic thesaurus.';
+				$sql = 'UPDATE images SET tid = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' WHERE (occid = '.$detArr['occid'].')';
+				//echo $sql;
+				if(!$this->conn->query($sql)){
+					$status = 'ERROR: Annotation added but failed to remap images to new name';
+					$status .= ': '.$this->conn->error;
 				}
 			}
 		}
@@ -133,7 +131,8 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//Make sure current is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
 		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'SELECT occid, identifiedby, dateidentified, sciname, scientificnameauthorship, '.
+			'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, '.
+			'IFNULL(dateidentified,"assumed to be collection date") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 			'FROM omoccurrences WHERE (occid = '.$this->occId.')';
 		$this->conn->query($sqlInsert);
