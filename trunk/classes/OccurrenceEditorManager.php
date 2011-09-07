@@ -79,9 +79,8 @@ class OccurrenceEditorManager {
 		return $this->collMap;
 	}
 	
-	public function queryOccurrences($occIndex=0){
+	public function getQueryVariables(){
 		global $clientRoot;
-		$recCnt = 0;
 		$qryArr = array();
 		if(array_key_exists('q_identifier',$_POST)){
 			if($_POST['q_identifier']) $qryArr['id'] = $_POST['q_identifier'];
@@ -94,9 +93,11 @@ class OccurrenceEditorManager {
 		}
 		elseif(isset($_COOKIE["editorquery"])){
 			$qryArr = json_decode($_COOKIE["editorquery"],true);
-			$recCnt = $qryArr['rc'];
 		}
-
+		return $qryArr;
+	}
+	
+	public function getQueryWhere($qryArr,$occIndex=0){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
 		if(array_key_exists('id',$qryArr)){
@@ -165,35 +166,38 @@ class OccurrenceEditorManager {
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
-			if(!$recCnt){
-				$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
-				//echo '<div>'.$sql.'</div>';
-				$rs = $this->conn->query($sql);
-				if($r = $rs->fetch_object()){
-					$recCnt = $r->reccnt;
-				}
-				$rs->close();
-				$qryArr['rc'] = (int)$recCnt;
-				setCookie('editorquery',json_encode($qryArr),0,($clientRoot?$clientRoot:'/'));
-			}
-			if($recCnt){
-				if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
-				$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
-				$this->setOccurArr($sqlWhere);
-			}
+			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
+			$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
 		}
-
-		return $qryArr;
+		return $sqlWhere;
 	}
 	
+	public function getQueryRecordCount($qryArr,$sqlWhere){
+		global $clientRoot;
+		$recCnt = 0;
+		if($obPos = strpos($sqlWhere,' ORDER BY')){
+			$sqlWhere = substr($sqlWhere,0,$obPos);
+		}
+		$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
+		//echo '<div>'.$sql.'</div>';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$recCnt = $r->reccnt;
+		}
+		$rs->close();
+		$qryArr['rc'] = (int)$recCnt;
+		setCookie('editorquery',json_encode($qryArr),0,($clientRoot?$clientRoot:'/'));
+		return $recCnt;
+	}
+
 	public function getOccurMap(){
 		if(!$this->occurrenceMap && $this->occId){
 			$this->setOccurArr();
 		}
 		return $this->occurrenceMap;
 	}
-	
-	private function setOccurArr($sqlWhere = ''){
+
+	public function setOccurArr($sqlWhere = ''){
 		$retArr = Array();
 		$sql = '';
 		if($sqlWhere){
@@ -210,7 +214,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		$rs->close();
-		if(!$this->occId) $this->occId = $retArr['occid']; 
+		if($retArr && !$this->occId) $this->occId = $retArr['occid']; 
 		$this->occurrenceMap = $retArr;
 	}
 

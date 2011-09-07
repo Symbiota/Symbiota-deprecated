@@ -50,24 +50,43 @@ if($symbUid){
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
-		//Reset query form
-		//setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-		$occIndex = false;
+		//Reset query if it was used
+		$qryArr = $occManager->getQueryVariables();
+		if($qryArr){
+			$qryCnt = $qryArr['rc'];
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+			if($newQryCnt == 0){
+				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+				$occIndex = false;
+			}
+			elseif($qryCnt != $newQryCnt){
+				$qryCnt = $newQryCnt;
+				$occIndex--;
+			}
+		}
 	}
 	if($isEditor){
+		$qryArr = $occManager->getQueryVariables();
+		if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
 		if($action == 'Delete Occurrence'){
 			$statusStr = $occManager->deleteOccurrence($occId);
 			if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
-			//Reset query form
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-			$occIndex = false;
+			//Reset query form index to one less, unless it's already 1, then just reset
+			if($qryCnt > 1){
+				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
+			}
+			else{
+				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+				$occIndex = false;
+			}
 		}
 		elseif($goToMode){
 			if($action == 'Add Record'){
 				$statusStr = $occManager->addOccurrence($_REQUEST);
 				$occId = $occManager->getOccId();
 			}
-			//Reset query form
+			//When a new record is added, reset query form if it already exists
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 			$occIndex = false;
 
@@ -82,7 +101,8 @@ if($symbUid){
 				header('Location: ../individual/index.php?occid='.$occId);
 			}
 		}
-		elseif($action == "Submit Image Edits"){
+
+		if($action == "Submit Image Edits"){
 			$statusStr = $occManager->editImage($_REQUEST);
 		}
 		elseif($action == "Submit New Image"){
@@ -110,10 +130,13 @@ if($symbUid){
 		}
 	}
 	//Check to see if Query Form has been activated
-	if($occIndex !== false){
-		if($isEditor){
-			$qryArr = $occManager->queryOccurrences($occIndex);
-			$qryCnt = $qryArr['rc'];
+	if($occIndex !== false){ 
+		if($isEditor && !$occId){
+			$qryArr = $occManager->getQueryVariables();
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+			
+			$occManager->setOccurArr($qryWhere);
 			$occId = $occManager->getOccId();
 			$occArr = $occManager->getOccurMap();
 		}
@@ -234,7 +257,7 @@ if($symbUid){
 				</div>
 				<?php 
 			}
-			if(($occId || $isEditor) && $action != 'Delete Occurrence'){
+			if($occId || $isEditor){
 				if(!$occId && !$collId){
 					?>
 					<div style="margin:10px;">
@@ -1006,6 +1029,7 @@ if($symbUid){
 										<?php 
 										if($occId){
 											?>
+											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="editedfields" value="" />
 											<?php 
 										}
@@ -1111,6 +1135,8 @@ if($symbUid){
 												</div>
 												<div id="delapprovediv" style="margin:15px;display:none;">
 													<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+													<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
+													<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 													<input name="submitaction" type="submit" value="Delete Occurrence" />
 												</div>
 											</div>

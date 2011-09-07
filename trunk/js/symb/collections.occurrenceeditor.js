@@ -84,7 +84,7 @@ function verifyFullformSciName(){
 			else{
 				f.scientificnameauthorship.value = "";
 				f.family.value = "";
-				alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus.");
+				alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
 				f.sciname.focus();
 			}
 			fieldChanged('scientificnameauthorship');
@@ -832,7 +832,7 @@ function verifyDetSciName(f){
 			}
 			else{
 				f.scientificnameauthorship.value = "";
-				alert("WARNING: Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name.");
+				alert("WARNING: Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
 				f.sciname.focus();
 			}
 			pauseSubmit = false;
