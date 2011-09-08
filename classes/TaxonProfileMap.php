@@ -48,61 +48,83 @@ class TaxonProfileMap {
 			}
 			$result->close();
 			//Add subject
-			$this->taxaArr[$this->tid] = $this->sciName;
-			//Get accepted children 
-			$this->taxaArr = $this->taxaArr + $this->getChildren(array($this->tid));
-			//Seed $synMap with accepted names
-			$taxaKeys = array_keys($this->taxaArr);
-			$this->synMap = array_combine($taxaKeys,$taxaKeys);
-			//Add synonyms to $synMap
-			$this->setSynonyms($taxaKeys);
+			if($this->tid){
+				$this->taxaArr[$this->tid] = $this->sciName;
+				//Get accepted children 
+				$this->taxaArr = $this->taxaArr + $this->getChildren(array($this->tid));
+				//Seed $synMap with accepted names
+				$taxaKeys = array_keys($this->taxaArr);
+				$this->synMap = array_combine($taxaKeys,$taxaKeys);
+				//Add synonyms to $synMap
+				$this->setSynonyms($taxaKeys);
+			}
 		}
 	}
 	
     public function getGeoCoords($limit = 1000){
-		global $userRights;
-        $querySql = '';
-        $sql = 'SELECT o.occid, o.tidinterpreted, o.decimallatitude, o.decimallongitude, o.collid, ';
-       	$sql .= 'CONCAT_WS(" ", o.recordedBy, o.recordNumber, CONCAT(" [",c.institutioncode,"]")) AS descr ';
-        $sql .= 'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-        $sql .= 'WHERE (o.tidinterpreted IN('.implode(',',$this->synMap).')) '.
-        	'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-			//Is global rare species reader, thus do nothing to sql and grab all records
-		}
-		elseif(array_key_exists("RareSppReader",$userRights)){
-			$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
-		}
-		else{
-			$sql .= 'AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ';
-		}
-		if($limit && is_numeric($limit)){
-			$sql .= 'LIMIT '.$limit;
-		}
-		else{
-			$sql .= 'LIMIT 1000';
-		}
-		//echo "<div>SQL: ".$sql."</div>";
-		$latMin = 90; $latMax = -90; $lngMin = 180; $lngMax = -180; 
+		global $userRights, $mappingBoundaries;
+		
 		$coordArr = Array();
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-        	$lat = round($row->decimallatitude,5);
-        	$lng = round($row->decimallongitude,5);
-			if($lat < $latMin) $latMin = $lat;
-			if($lat > $latMax) $latMax = $lat;  
-			if($lng < $lngMin) $lngMin = $lng;
-			if($lng > $lngMax) $lngMax = $lng;
-        	$llStr = $lat.','.$lng; 
-			$coordArr[$llStr][$row->occid]['d'] = $row->descr;
-			$coordArr[$llStr][$row->occid]['tid'] = $row->tidinterpreted;
-			$this->taxaMap[$row->tidinterpreted] = '';
+		if($this->synMap){
+			$useBoundingBox = false;
+			$boundArr = array();
+			if(isset($mappingBoundaries)){
+				$boundArr = explode(";",$mappingBoundaries);
+			}
+			
+	        $querySql = '';
+	        $sql = 'SELECT o.occid, o.tidinterpreted, o.decimallatitude, o.decimallongitude, o.collid, ';
+	       	$sql .= 'CONCAT_WS(" ", o.recordedBy, o.recordNumber, CONCAT(" [",c.institutioncode,"]")) AS descr ';
+	        $sql .= 'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
+	        $sql .= 'WHERE (o.tidinterpreted IN('.implode(',',array_keys($this->synMap)).')) '.
+	        	'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
+			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+				//Is global rare species reader, thus do nothing to sql and grab all records
+			}
+			elseif(array_key_exists("RareSppReader",$userRights)){
+				$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
+			}
+			else{
+				$sql .= 'AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ';
+			}
+			if($limit && is_numeric($limit)){
+				$sql .= 'LIMIT '.$limit;
+			}
+			else{
+				$sql .= 'LIMIT 1000';
+			}
+			//echo "<div>SQL: ".$sql."</div>";
+			$latMin = 90; $latMax = -90; $lngMin = 180; $lngMax = -180; 
+	        $result = $this->conn->query($sql);
+	        while($row = $result->fetch_object()){
+	        	$lat = round($row->decimallatitude,5);
+	        	$lng = round($row->decimallongitude,5);
+	        	if(!$useBoundingBox && $boundArr && $lat < $boundArr[0] && $lat > $boundArr[2] && $lng < $boundArr[1] && $lng > $boundArr[3]){
+					$useBoundingBox = true;
+	        	}
+				if($lat < $latMin) $latMin = $lat;
+				if($lat > $latMax) $latMax = $lat;  
+				if($lng < $lngMin) $lngMin = $lng;
+				if($lng > $lngMax) $lngMax = $lng;
+	        	$llStr = $lat.','.$lng; 
+				$coordArr[$llStr][$row->occid]['d'] = $row->descr;
+				$coordArr[$llStr][$row->occid]['tid'] = $row->tidinterpreted;
+				$this->taxaMap[$row->tidinterpreted] = '';
+			}
+			$result->close();
+	
+			//Add map boundaries
+			if(!$boundArr 
+				|| ($latMax < $boundArr[0] && $lngMax < $boundArr[1] && $latMin > $boundArr[2] && $lngMin > $boundArr[3])
+				|| ($latMin > $boundArr[0] || $latMax < $boundArr[2] || $lngMin > $boundArr[1] || $lngMax < $boundArr[3])){
+				$useBoundingBox = false;
+			}
+			
+			$coordArr['latmax'] = ($useBoundingBox?$boundArr[0]:$latMax);
+			$coordArr['lngmax'] = ($useBoundingBox?$boundArr[1]:$lngMax);
+			$coordArr['latmin'] = ($useBoundingBox?$boundArr[2]:$latMin);
+			$coordArr['lngmin'] = ($useBoundingBox?$boundArr[3]:$lngMin);
 		}
-		$result->close();
-		$coordArr['latmin'] = $latMin;
-		$coordArr['latmax'] = $latMax;
-		$coordArr['lngmin'] = $lngMin;
-		$coordArr['lngmax'] = $lngMax;
 		return $coordArr;
 	}
 

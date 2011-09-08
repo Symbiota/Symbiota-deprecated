@@ -11,16 +11,6 @@ $mapManager = new TaxonProfileMap();
 $mapManager->setTaxon($taxonValue);
 $synMap = $mapManager->getSynMap(); 
 
-$latCen = 41.0;
-$lngCen = -95.0;
-$boundArr;
-if(isset($mappingBoundaries)){
-	$boundArr = explode(";",$mappingBoundaries);
-	if($boundArr && count($boundArr) == 4){
-		$latCen = ($boundArr[0] + $boundArr[2])/2;
-		$longCen = ($boundArr[1] + $boundArr[3])/2;
-	}
-}
 $coordArr = $mapManager->getGeoCoords();
 $taxaMap = $mapManager->getTaxaMap(); 
 ?>
@@ -38,17 +28,15 @@ $taxaMap = $mapManager->getTaxaMap();
 	    var puWin;
 
 	    function initialize(){
-	    	var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$lngCen; ?>);
 	    	var dmOptions = {
 				zoom: 3,
-				center: dmLatLng,
+				center: new google.maps.LatLng(41,-95),
 				mapTypeId: google.maps.MapTypeId.TERRAIN
 			};
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 
             <?php
-			$latMin; $latMax; $lngMin; $lngMax; 
 			if($coordArr){
 				$latMin = $coordArr['latmin'];
 				unset($coordArr['latmin']);
@@ -105,13 +93,9 @@ $taxaMap = $mapManager->getTaxaMap();
 						<?php
 					}
 				}
-	            $minLatBound = ($latMin<$boundArr[2]?$boundArr[2]:$latMin);
-	            $maxLatBound = ($latMax<$boundArr[0]?$latMax:$boundArr[0]);
-	            $minLngBound = ($lngMin<$boundArr[3]?$boundArr[3]:$lngMin);
-	            $maxLngBound = ($lngMax<$boundArr[1]?$lngMax:$boundArr[1]);
 				?>
-				var swLatLng = new google.maps.LatLng(<?php echo $minLatBound.','.$minLngBound; ?>);
-				var neLatLng = new google.maps.LatLng(<?php echo $maxLatBound.','.$maxLngBound; ?>);
+				var swLatLng = new google.maps.LatLng(<?php echo $latMin.','.$lngMin; ?>);
+				var neLatLng = new google.maps.LatLng(<?php echo $latMax.','.$lngMax; ?>);
 				var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
 				map.fitBounds(llBounds);
 	            <?php
