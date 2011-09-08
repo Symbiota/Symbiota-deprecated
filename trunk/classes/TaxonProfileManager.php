@@ -563,9 +563,10 @@ class TaxonProfileManager {
  		$maxLong = -180;
  		$latlonArr = explode(";",$mappingBoundaries);
 
- 		$sql = "SELECT DISTINCT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
+ 		$sqlBase = "SELECT DISTINCT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
 			"WHERE (gi.tid IN ($tidStr)) ";
+ 		$sql = $sqlBase;
 		if($latlonArr){
 			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
 				"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
@@ -585,6 +586,20 @@ class TaxonProfileManager {
  			$mapArr[] = $lat.",".$long;
 		}
 		$result->close();
+		if(!$mapArr && $latlonArr){
+			$result = $this->con->query($sqlBase."LIMIT 50");
+			while($row = $result->fetch_object()){
+				$sciName = ucfirst(strtolower(trim($row->sciname)));
+				$lat = round($row->DecimalLatitude,2);
+				if($lat < $minLat) $minLat = $lat;
+				if($lat > $maxLat) $maxLat = $lat;
+	 			$long = round($row->DecimalLongitude,2);
+				if($long < $minLong) $minLong = $long;
+				if($long > $maxLong) $maxLong = $long;
+	 			$mapArr[] = $lat.",".$long;
+			}
+			$result->close();
+		}
 		if(!$mapArr) return 0;
 		$latDist = $maxLat - $minLat;
 		$longDist = $maxLong - $minLong;

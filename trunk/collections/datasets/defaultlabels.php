@@ -56,9 +56,9 @@ else{
 				.associatedtaxa {font-style:italic;}
 				.collectordiv {margin-top:10px;}
 				.recordnumber {margin-left:10px;}
-				.associatedcollectors {margin:0px 0px 10px 15px;clear:both;}
+				.associatedcollectors {margin-left:15px;clear:both;}
 				.cnbarcode {width:100%; text-align:center;}
-				.lfooter {width:100%; text-align:center; font:bold 14px arial,sans-serif; margin-bottom:10px;}
+				.lfooter {width:100%; text-align:center; font:bold 14px arial,sans-serif; padding-top:10px;}
 				.barcodeonly {width:220px; height:50px; float:left;padding:10px; text-align:center; }
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
 			</style>
@@ -143,8 +143,15 @@ else{
 										?>
 										<div class="loc1div" style="margin-top:10px;">
 											<span class="country"><?php echo $r->country.($r->country?', ':''); ?></span> 
-											<span class="stateprovince"><?php echo $r->stateprovince.($r->stateprovince?', ':''); ?></span> 
-											<span class="county"><?php echo $r->county.($r->county?', ':''); ?></span> 
+											<span class="stateprovince"><?php echo $r->stateprovince.($r->stateprovince?', ':''); ?></span>
+											<?php 
+											$countyStr = trim($r->county);
+											if($countyStr){
+												if(!stripos($r->county,' County') && !stripos($r->county,' Parish')) $countyStr .= ' County';
+												$countyStr .= ', ';
+											}
+											?> 
+											<span class="county"><?php echo $countyStr; ?></span> 
 											<span class="municipality"><?php echo $r->municipality.($r->municipality?', ':''); ?></span>
 											<span class="locality">
 												<?php
