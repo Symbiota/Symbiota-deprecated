@@ -310,14 +310,25 @@ class TaxonProfileManager {
 	
 	public function setVernaculars(){
 		$this->vernaculars = Array();
-		$sql = 'SELECT DISTINCT v.VernacularName '.
+		$sql = 'SELECT DISTINCT v.VernacularName, v.language '.
 			'FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
-			'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) AND (v.Language = "'.$this->language.'") '.
-			'ORDER BY v.SortSequence';
+			'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) '.
+			'ORDER BY v.SortSequence,v.VernacularName';
 		//echo $sql;
 		$result = $this->con->query($sql);
+		$tempVernArr = array();
 		while($row = $result->fetch_object()){
-			$this->vernaculars[] = $row->VernacularName;
+			$langStr = ucwords($row->language);
+			if($this->language != $langStr){
+				$tempVernArr[$langStr][] = $row->VernacularName;
+			}
+			else{
+				$this->vernaculars[] = $row->VernacularName;
+			}
+		}
+		ksort($tempVernArr);
+		foreach($tempVernArr as $lang => $vArr){
+			$this->vernaculars[] = '('.$lang.': '.implode(', ',$vArr).')';
 		}
 		$result->close();
 	}
@@ -734,7 +745,7 @@ class TaxonProfileManager {
 	}
 	
 	public function setLanguage($lang){
-		$this->language = $this->con->real_escape_string($lang);
+		$this->language = ucwords($this->con->real_escape_string($lang));
 	}
 	
 	public function getLanguage(){
