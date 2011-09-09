@@ -49,7 +49,8 @@ else{
 		    	var dmOptions = {
 					zoom: <?php echo $zoom; ?>,
 					center: dmLatLng,
-					mapTypeId: google.maps.MapTypeId.TERRAIN
+					mapTypeId: google.maps.MapTypeId.TERRAIN,
+					scaleControl: true
 				};
 		    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 				if(latValue && lngValue){
