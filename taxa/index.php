@@ -243,9 +243,11 @@ if($taxonManager->getSciName() != "unknown"){
 	
 		$vernStr = $taxonManager->getVernacularStr();
 		if($vernStr){
-			echo "\t<div id='vernaculars' style='margin-left:10px;margin-top:0.5em;font-size:130%;' title='Common Names'>";
-			echo $vernStr;
-			echo"</div>\n";
+			?>
+			<div id='vernaculars' style='margin-left:10px;margin-top:0.5em;font-size:130%;' title='Common Names'>
+				<?php echo $vernStr; ?>
+			</div>
+			<?php 
 		}
 		
 		$synStr = $taxonManager->getSynonymStr();
