@@ -225,35 +225,64 @@ if($tEditor->getTid()){
 		echo "</div>";
 		if($vernList){
 			foreach($vernList as $lang => $vernsList){
-				echo "<div style='width:250px;margin:5px 0px 0px 15px;'><fieldset>";
-		    	echo "<legend>".$lang."</legend>";
-				foreach($vernsList as $vernArr){
-					echo "<div style='margin-left:10px;'><b>".$vernArr["vernacularname"]."</b>&nbsp;&nbsp;&nbsp;\n";
-					echo "<span onclick='javascript:toggle(\"vid-".$vernArr["vid"]."\");' title='Edit Common Name'><img style='border:0px;width:12px;' src='../../images/edit.png'/></span>&nbsp;&nbsp;&nbsp;\n";
-					echo "</div>\n";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><div style='background-color:yellow;'>\n";
-					echo "<form id='delvern' name='delvern' action='".$_SERVER["PHP_SELF"]."' method='post' onsubmit=\"javascript: return window.confirm('Are you sure you want to delete this Common Name?');\">\n";
-					echo "<input type='hidden' name='delvern' value='".$vernArr["vid"]."'>\n";
-					echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
-					echo "<input id='vernsubmitimg' name='action' type='image' value='Delete Common Name' style='margin:10px 0px 0px 20px;height:12px;' src='../../images/del.gif'/> Delete Common Name ";
-					echo "</form></div></div>\n";
-					echo "<form id='updatevern' name='updatevern' style='margin-left:20px;'>";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='vernacularname' name='vernacularname' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='".$vernArr["vernacularname"]."' /></div>\n";
-					echo "<div style='display:none;'>Language: ".$vernArr["language"]."</div>";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='language' name='language' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='".$vernArr["language"]."' /></div>\n";
-					echo "<div style=''>Notes: ".$vernArr["notes"]."</div>";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='notes' name='notes' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='".$vernArr["notes"]."' /></div>\n";
-					echo "<div style=''>Source: ".$vernArr["source"]."</div>";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='source' name='source' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='".$vernArr["source"]."' /></div>\n";
-					echo "<div style=''>Sort Sequence: ".$vernArr["sortsequence"]."</div>";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='".$vernArr["sortsequence"]."' /></div>\n";
-					echo "<input type='hidden' name='vid' value='".$vernArr["vid"]."'>\n";
-					echo "<input type='hidden' name='tid' value='".$tEditor->getTid()."' />";
-					echo "<div class='vid-".$vernArr["vid"]."' style='display:none;'><input id='vernssubmit' name='action' style='margin:2px 0px 20px 15px;' type='submit' value='Submit Common Name Edits' /></div>\n";
-					echo "</form>\n";
-					
-				}
-				echo "</fieldset></div>";
+				?>
+				<div style='width:250px;margin:5px 0px 0px 15px;'>
+					<fieldset>
+		    			<legend><?php echo $lang; ?></legend>
+		    			<?php 
+						foreach($vernsList as $vernArr){
+							?>
+							<div style='margin-left:10px;'>
+								<b><?php echo $vernArr["vernacularname"]; ?></b>
+								<span onclick="toggle('vid-<?php echo $vernArr["vid"]; ?>');" title="Edit Common Name">
+									<img style='border:0px;width:12px;' src='../../images/edit.png' />
+								</span>
+							</div>
+							<form id='updatevern' name='updatevern' style='margin-left:20px;'>
+								<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+									<input id='vernacularname' name='vernacularname' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["vernacularname"]; ?>' />
+								</div>
+								<div>
+									Language: <?php echo $vernArr["language"]; ?>
+								</div>
+								<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+									<input id='language' name='language' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["language"]; ?>' />
+								</div>
+								<div>
+									Notes: <?php echo $vernArr["notes"]; ?>
+								</div>
+								<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+									<input id='notes' name='notes' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["notes"];?>' />
+								</div>
+								<div style=''>Source: <?php echo $vernArr["source"]; ?></div>
+								<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+									<input id='source' name='source' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["source"]; ?>' />
+								</div>
+								<div style=''>Sort Sequence: <?php echo $vernArr["sortsequence"];?></div>
+								<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
+									<input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='<?php echo $vernArr["sortsequence"]; ?>' />
+								</div>
+								<input type='hidden' name='vid' value='<?php echo $vernArr["vid"]; ?>' />
+								<input type='hidden' name='tid' value='<?php echo $tEditor->getTid();?>' />
+								<div class='vid-<?php echo $vernArr["vid"];?>' style='display:none;'>
+									<input id='vernssubmit' name='action' type='submit' value='Submit Common Name Edits' />
+								</div>
+							</form>
+							<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;margin:15px;'>
+								<form id='delvern' name='delvern' action='tpeditor.php' method='post' onsubmit="return window.confirm('Are you sure you want to delete this Common Name?')">
+									<input type='hidden' name='delvern' value='<?php echo $vernArr["vid"]; ?>' />
+									<input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
+									<input name='action' type='hidden' value='Delete Common Name' /> 
+									<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.gif' /> 
+									Delete Common Name
+								</form>
+							</div>
+							<?php 
+						}
+						?>
+					</fieldset>
+				</div>
+				<?php 
 			}
 			echo "</div>";
 		}

@@ -31,7 +31,8 @@ $taxaMap = $mapManager->getTaxaMap();
 	    	var dmOptions = {
 				zoom: 3,
 				center: new google.maps.LatLng(41,-95),
-				mapTypeId: google.maps.MapTypeId.TERRAIN
+				mapTypeId: google.maps.MapTypeId.TERRAIN,
+				scaleControl: true
 			};
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
