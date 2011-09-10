@@ -57,7 +57,7 @@ class SpecDatasetManager {
 				$sqlOrderBy .= ',datelastmodified';
 			}
 			if($_POST['recordedby']){
-				$sqlWhere .= 'AND (recordedby LIKE "%'.trim($_POST['recordedby']).'%") ';
+				$sqlWhere .= 'AND (recordedby LIKE "'.trim($_POST['recordedby']).'%") ';
 				$sqlOrderBy .= ',recordnumber';
 			}
 			if($_POST['recordnumber']){

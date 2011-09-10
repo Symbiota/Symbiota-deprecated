@@ -50,25 +50,29 @@ if($symbUid){
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
-		//Reset query if it was used
-		$qryArr = $occManager->getQueryVariables();
-		if($qryArr){
-			$qryCnt = $qryArr['rc'];
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
-			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
-			if($newQryCnt == 0){
-				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-				$occIndex = false;
-			}
-			elseif($qryCnt != $newQryCnt){
-				$qryCnt = $newQryCnt;
-				$occIndex--;
+		//Reset query counts if it is activated
+		if($occIndex !== false){
+			$qryArr = $occManager->getQueryVariables();
+			if($qryArr){
+				$qryCnt = $qryArr['rc'];
+				$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+				$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+				if($newQryCnt == 0){
+					setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+					$occIndex = false;
+				}
+				elseif($qryCnt != $newQryCnt){
+					$qryCnt = $newQryCnt;
+					$occIndex--;
+				}
 			}
 		}
 	}
 	if($isEditor){
-		$qryArr = $occManager->getQueryVariables();
-		if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
+		if($occIndex !== false){ 
+			$qryArr = $occManager->getQueryVariables();
+			if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
+		}
 		if($action == 'Delete Occurrence'){
 			$statusStr = $occManager->deleteOccurrence($occId);
 			if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
@@ -298,22 +302,16 @@ if($symbUid){
 							$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 							$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
 						}
-						elseif(array_key_exists('q_identifier',$_POST)){
-							$qIdentifier = $_POST['q_identifier'];
-							$qRecordedBy = $_POST['q_recordedby'];
-							$qRecordNumber = $_POST['q_recordnumber'];
-							$qEnteredBy = $_POST['q_enteredby'];
-							$qProcessingStatus = $_POST['q_processingstatus'];
-							$qDateLastModified = $_POST['q_datelastmodified'];
-						}
 						?>
 						<div id="querydiv" style="display:<?php echo (!$occArr&&!$goToMode?'block':'none'); ?>;">
 							<form name="queryform" action="occurrenceeditor.php" method="post" onsubmit="return verifyQueryForm(this)">
 								<fieldset style="padding:5px;">
 									<legend><b>Record Search Form</b></legend>
 									<div style="margin:2px;">
-										<span style="">Collector:</span> 
-										<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
+										<span title="Full name of collector as entered in database. To search just on last name, place the wildcard character (%) before name (%Gentry).">
+											Collector: 
+											<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
+										</span>
 										<span style="margin-left:25px;">Number:</span>
 										<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
 											<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
@@ -597,13 +595,13 @@ if($symbUid){
 										</div>
 										<div>
 											<span>
-												<input type="text" id="ffcountry" name="country" tabindex="40" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('country',$occArr)?$occArr['country']:''; ?>" onchange="fieldChanged('country');" />
+												<input type="text" id="ffcountry" name="country" tabindex="40" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('country',$occArr)?$occArr['country']:''; ?>" onchange="countryChanged(this.form);" />
 											</span>
 											<span>
-												<input type="text" id="ffstate" name="stateprovince" tabindex="42" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="fieldChanged('stateprovince');" />
+												<input type="text" id="ffstate" name="stateprovince" tabindex="42" style="width:150px;background-color:lightyellow;" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="stateProvinceChanged(this.form);" />
 											</span>
 											<span>
-												<input type="text" id="ffcounty" name="county" tabindex="44" style="width:150px;" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="fieldChanged('county');" />
+												<input type="text" id="ffcounty" name="county" tabindex="44" style="width:150px;" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="countyChanged(this.form);" />
 											</span>
 											<span>
 												<input type="text" id="ffmunicipality" name="municipality" tabindex="45" style="width:150px;" value="<?php echo array_key_exists('municipality',$occArr)?$occArr['municipality']:''; ?>" onchange="fieldChanged('municipality');" />

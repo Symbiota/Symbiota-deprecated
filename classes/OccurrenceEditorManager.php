@@ -106,8 +106,8 @@ class OccurrenceEditorManager {
 			$iInFrag = array();
 			foreach($iArr as $v){
 				if($p = strpos($v,' - ')){
-					$iBetweenFrag[] = 'o.catalogNumber BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3);
-					$iBetweenFrag[] = 'o.occurrenceId BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3);
+					$iBetweenFrag[] = 'o.catalogNumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
+					$iBetweenFrag[] = 'o.occurrenceId BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
 				}
 				else{
 					$iInFrag[] = $v;
@@ -124,7 +124,7 @@ class OccurrenceEditorManager {
 			$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId';
 		}
 		if(array_key_exists('rb',$qryArr)){
-			$sqlWhere .= 'AND (o.recordedby LIKE "%'.$qryArr['rb'].'%") ';
+			$sqlWhere .= 'AND (o.recordedby LIKE "'.$qryArr['rb'].'%") ';
 			$sqlOrderBy .= ',o.recordnumber';
 		}
 		if(array_key_exists('rn',$qryArr)){
@@ -169,6 +169,7 @@ class OccurrenceEditorManager {
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
 		}
+		//echo $sqlWhere;
 		return $sqlWhere;
 	}
 	
@@ -412,7 +413,7 @@ class OccurrenceEditorManager {
 		}
 		return $collList;
 	}
-	
+
 	public function echoCountryList(){
 		$retArr = Array();
 		$sql = 'SELECT countryname FROM lkupcountry ORDER BY countryname';

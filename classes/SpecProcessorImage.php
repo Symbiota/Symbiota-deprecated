@@ -152,7 +152,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
 				echo "<li>Starting to load: ".$fileName."</li>\n";
-				if($this->logFH) fwrite($this->logFH, "Starting to load: ".$fileName."\n");
+				if($this->logFH) fwrite($this->logFH, "Starting to load (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
 				//Create web image
 				$webImgCreated = false;
 				if($this->createWebImg && $width > $this->webPixWidth){
@@ -163,7 +163,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				if($webImgCreated){
 	        		//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
-					if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
+					if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") \n");
 					$tnUrl = "";$lgUrl = "";
 					//Create Large Image
 					$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
@@ -205,19 +205,19 @@ class SpecProcessorImage extends SpecProcessorManager{
 					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
 						if(file_exists($this->sourcePath.$pathFrag.$fileName)) unlink($this->sourcePath.$pathFrag.$fileName);
 						echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
-						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
+						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully (".date('Y-m-d h:i:s A').")!\n");
 					}
 				}
         	}
 			else{
-				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
-				if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record \n");
+				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record (".date('Y-m-d h:i:s A').") \n");
+				if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record (".date('Y-m-d h:i:s A').") \n");
 				echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
 			}
 		}
 		else{
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier \n");
-			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier \n");
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
 			echo "<li style='margin-left:10px;'>File skipped, unable to extract specimen identifier</li>\n";
 		}
 	}
