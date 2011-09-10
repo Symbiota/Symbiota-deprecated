@@ -4,7 +4,7 @@
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
 	$queryString = $con->real_escape_string($_REQUEST['term']);
-	$stateStr = array_key_exists('state',$_REQUEST)?$con->real_escape_string($_REQUEST['state']):0;
+	$stateStr = array_key_exists('state',$_REQUEST)?$con->real_escape_string($_REQUEST['state']):'';
 
 	$sql = 'SELECT DISTINCT c.countyname FROM lkupcounty c ';
 	$sqlWhere = 'WHERE c.countyname LIKE "'.$queryString.'%" ';
@@ -20,5 +20,10 @@
 	}
 	$result->close();
 	$con->close();
-	echo json_encode($retArr);
+	if($retArr){
+		echo json_encode($retArr);
+	}
+	else{
+		echo '';
+	}
 ?>

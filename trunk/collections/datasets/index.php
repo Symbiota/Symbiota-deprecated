@@ -130,7 +130,7 @@ if($symbUid){
 					<fieldset>
 						<legend><b>Define Specimen Recordset</b></legend>
 						<div style="margin:3px;">
-							<span>
+							<span title="Full name of collector as entered in database. To search just on last name, place the wildcard character (%) before name (%Gentry).">
 								Collector: 
 								<input type="text" name="recordedby" style="width:100px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
 							</span>

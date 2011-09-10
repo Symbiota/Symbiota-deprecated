@@ -634,6 +634,7 @@ if($spprId){
 								</fieldset>
 							</form>
 						</div>
+						<!-- 
 						<div style="">
 							<form name="abbyyloaderform" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateAbbyyForm(this);">
 								<fieldset>
@@ -651,6 +652,7 @@ if($spprId){
 								</fieldset>
 							</form>
 						</div>
+						 -->
 						<?php
 					}
 					elseif($specProjects){

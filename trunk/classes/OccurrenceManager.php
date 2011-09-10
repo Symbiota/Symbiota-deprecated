@@ -317,7 +317,7 @@ class OccurrenceManager{
 		$result = $this->conn->query($sql);
 		if($result->num_rows){
 			while($row = $result->fetch_object()){
-				$vernName = $row->VernacularName;
+				$vernName = strtolower($row->VernacularName);
 				if($row->rankid == 140){
 					$this->taxaArr[$vernName]["families"][] = $row->sciname;
 				}
@@ -492,6 +492,7 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
+			$searchType = array_key_exists("type",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["type"]):1;
 			if($taxa){
 				$taxaStr = "";
 				if(is_numeric($taxa)){
@@ -508,7 +509,9 @@ class OccurrenceManager{
 					$taxaStr = str_replace(",",";",$taxa);
 					$taxaArr = explode(";",$taxaStr);
 					foreach($taxaArr as $key => $sciName){
-						$taxaArr[$key] = ucfirst(trim($sciName));
+						$snStr = trim($sciName);
+						if($searchType != 5) $snStr = ucfirst($snStr);
+						$taxaArr[$key] = $snStr;
 					}
 					$taxaStr = implode(";",$taxaArr);
 				}
@@ -522,7 +525,6 @@ class OccurrenceManager{
 				else{
 					$this->searchTermsArr["usethes"] = false;
 				}
-				$searchType = array_key_exists("type",$_REQUEST)?$this->conn->real_escape_string($_REQUEST["type"]):1;
 				if($searchType){
 					$collTaxa .= "&taxontype:".$searchType;
 					$this->searchTermsArr["taxontype"] = $searchType;

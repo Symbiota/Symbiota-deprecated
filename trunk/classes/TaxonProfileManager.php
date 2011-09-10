@@ -343,7 +343,7 @@ class TaxonProfileManager {
  			$str = array_shift($this->vernaculars);
  		}
  		if($this->vernaculars){
- 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;vertical-align:sub' title='Click here to show more common names'>,&nbsp;&nbsp;more</span>";
+ 			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='cursor:pointer;display:inline;font-size:70%;' title='Click here to show more common names'>,&nbsp;&nbsp;more...</span>";
  			$str .= "<span class='verns' onclick=\"javascript: toggle('verns');\" style='display:none;'>, ";
  			$str .= implode(", ",$this->vernaculars);
  			$str .= "</span>";
