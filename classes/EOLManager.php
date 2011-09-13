@@ -12,12 +12,13 @@ class EOLManager {
 	function __destruct(){
 		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
 	public function getEmptyIdentifierCount(){
 		$tidCnt = 0;
 		$sql = 'SELECT COUNT(t.tid) as tidcnt '.
-			'FROM taxa t LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND tl.TID IS NULL  ';
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$tidCnt = $r->tidcnt;
@@ -26,12 +27,13 @@ class EOLManager {
 		return $tidCnt;
 	}
 	
-	public function mapTaxa(){
+	public function mapTaxa($makePrimaryLink = 1){
 		$successCnt = 0;
-		set_time_limit(600);
+		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname '.
-			'FROM taxa t LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND tl.TID IS NULL ';
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping EOL identifiers for '.$recCnt.' taxa</div>'."\n";
@@ -39,7 +41,7 @@ class EOLManager {
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
 			$sciName = $r->sciname;
-			if($this->queryEolIdentifier($tid, $sciName)){
+			if($this->queryEolIdentifier($tid, $sciName, $makePrimaryLink)){
 				$successCnt++;
 			}
 		}
@@ -48,7 +50,7 @@ class EOLManager {
 		$rs->close();
 	}
 	
-	private function queryEolIdentifier($tid, $sciName){
+	private function queryEolIdentifier($tid, $sciName, $makePrimaryLink){
 		$retStatus = 0;
 		$url = 'http://eol.org/api/search/1.0/'.urlencode($sciName).'.json';
 		if($fh = fopen($url, 'r')){
@@ -64,8 +66,8 @@ class EOLManager {
 				$link = $retArr['results'][0]['link'];
 				//Load link
 				if($identifier){
-					$sql = 'INSERT INTO taxalinks(tid, url, sourceIdentifier, owner, title) '.
-						'VALUES('.$tid.',"'.$link.'","'.$identifier.'","EOL","Encyclopedia of Life") ';
+					$sql = 'INSERT INTO taxalinks(tid, url, sourceIdentifier, owner, title, sortsequence) '.
+						'VALUES('.$tid.',"'.$link.'","'.$identifier.'","EOL","Encyclopedia of Life", '.($makePrimaryLink?1:50).') ';
 					if($this->conn->query($sql)){
 						echo '<li>Identifier mapped successfully</li>'."\n";
 						$retStatus = 1;
