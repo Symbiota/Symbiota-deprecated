@@ -31,7 +31,7 @@ class EOLManager {
 		set_time_limit(600);
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND tl.TID IS NULL LIMIT 10 ';
+			'WHERE t.rankid >= 220 AND tl.TID IS NULL ';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping EOL identifiers for '.$recCnt.' taxa</div>'."\n";
