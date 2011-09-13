@@ -135,6 +135,7 @@ class SpecUploadDigir extends SpecUploadManager {
 			}
 			echo "<li style='font-weight:bold;'>Records Returned: ".$this->successCount." of ".$matchCount." (".($this->recCount-$this->successCount)." failed)</li>";
 			$this->searchStart += $this->searchLimit;
+			ob_flush();
 			flush();
 			if($currentReturn){
 				$zeroReturnCnt = 0;

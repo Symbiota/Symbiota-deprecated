@@ -1,40 +1,37 @@
 <?php
-/*
- * Created on Jun 11, 2006
- * By E.E. Gilbert
- */
- //error_reporting(0);
- include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/TaxonProfileManager.php');
- Header("Content-Type: text/html; charset=".$charset);
+//error_reporting(0);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/TaxonProfileManager.php');
+Header("Content-Type: text/html; charset=".$charset);
 
- $descrDisplayLevel;
- $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
- $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
- $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
- $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
- $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
- $descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
- 
- if(!$projValue && !$clValue) $projValue = $defaultProjId;
- 
- $taxonManager = new TaxonProfileManager();
- if($taxAuthId || $taxAuthId === "0") {
- 	$taxonManager->setTaxAuthId($taxAuthId);
- }
- if($clValue) $taxonManager->setClName($clValue);
- if($projValue) $taxonManager->setProj($projValue);
- if($lang) $taxonManager->setLanguage($lang);
- if($taxonValue) $taxonManager->setTaxon($taxonValue);
- $spDisplay = $taxonManager->getDisplayName();
- $taxonRank = $taxonManager->getRankId();
- 
- $editable = false;
- if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
- 	$editable = true;
- }
- $descr = Array();
- 
+$descrDisplayLevel;
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
+$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
+$descrDisplayLevel = array_key_exists("displaylevel",$_REQUEST)?$_REQUEST["displaylevel"]:"";
+
+if(!$projValue && !$clValue) $projValue = $defaultProjId;
+
+$taxonManager = new TaxonProfileManager();
+if($taxAuthId || $taxAuthId === "0") {
+	$taxonManager->setTaxAuthId($taxAuthId);
+}
+if($clValue) $taxonManager->setClName($clValue);
+if($projValue) $taxonManager->setProj($projValue);
+if($lang) $taxonManager->setLanguage($lang);
+if($taxonValue) $taxonManager->setTaxon($taxonValue);
+$spDisplay = $taxonManager->getDisplayName();
+$taxonRank = $taxonManager->getRankId();
+$links = $taxonManager->getTaxaLinks();
+
+$editable = false;
+if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+	$editable = true;
+}
+$descr = Array();
+
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
@@ -100,15 +97,23 @@ if($taxonManager->getSciName() != "unknown"){
 				</div>
 				<?php 
 			}
+			if($links && $links[0]['sortseq'] == 1){
+				?>
+				<div style="margin-left:25px;clear:both;">
+					Go to <a href="<?php echo $links[0]['url']; ?>"><?php echo $links[0]['title']; ?></a>...
+				</div>
+				<?php 
+			}
 			?>
 			</td>
 		</tr>
 		<tr>
 			<td width='300' valign='top'>
+				<div id='family' style='margin-left:25px;'>
+					<b>Family:</b> 
+					<?php echo $taxonManager->getFamily(); ?>
+				</div>
 		<?php 
-		//Left Middle Section
-		echo "\t<div id='family' style='margin-left:20px;margin-top:0.25em;'><b>Family:</b> ".$taxonManager->getFamily()."</div>\n";
-	
 		$vernStr = $taxonManager->getVernacularStr();
 		if($vernStr){
 			?>
@@ -437,17 +442,12 @@ if($taxonManager->getSciName() != "unknown"){
 	echo "</div>";
 	
 	//List Web Links as a list
-	if($taxonRank > 180){
+	if($taxonRank > 180 && $links){
 		echo "<div class='links' style='display:none;'>\n<h1 style='margin-left:20px;'>Web Links</h1>\n<ul style='margin-left:30px;'>\n";
-		$links = $taxonManager->getTaxaLinks();
-		if($links){
-			foreach($links as $l){
-				$urlStr = str_replace("--SCINAME--",str_replace(" ","%20",$taxonManager->getSciName()),$l["url"]);
-				$title = $l["title"];
-				if(!$title) $title = $urlStr;
-				echo "<li><a href='".$urlStr."' target='_blank'>".$title."</a></li>";
-				if($l["notes"]) echo " ".$l["notes"];
-			}
+		foreach($links as $l){
+			$urlStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$l['url']);
+			echo '<li><a href="'.$urlStr.'" target="_blank">'.$l['title'].'</a></li>';
+			if($l['notes']) echo ' '.$l['notes'];
 		}
 		echo "</ul>\n</div>";
 	}

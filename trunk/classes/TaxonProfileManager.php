@@ -503,16 +503,14 @@ class TaxonProfileManager {
 
 		//Get links
 		if($hierStr){
-			$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes FROM taxalinks tl '.
-				'WHERE (tl.tid IN('.$hierStr.')) ORDER BY tl.sortsequence';
+			$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes, tl.sortsequence '.
+				'FROM taxalinks tl '.
+				'WHERE (tl.tid IN('.$this->tid.','.$hierStr.')) '.
+				'ORDER BY tl.sortsequence, tl.title';
 			//echo $sql;
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
-				$tlid = $row->tlid;
-				$links[$tlid]["url"] = $row->url;
-				$links[$tlid]["title"] = $row->title;
-				$links[$tlid]["owner"] = $row->owner;
-				$links[$tlid]["notes"] = $row->notes;
+				$links[] = array('title'=>$row->title,'url'=>$row->url,'notes'=>$row->notes,'sortseq'=>$row->sortsequence);
 			}
 			$result->close();
 		}

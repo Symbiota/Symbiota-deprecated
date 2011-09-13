@@ -57,6 +57,10 @@ if(isset($taxa_admin_eoladminCrumbs)){
 			<div style="margin:15px;">
 				<?php
 				if($submitAction == 'Map Taxa'){
+					$makePrimary = 0;
+					if(array_key_exists('makeprimary',$_POST) && $_POST['makeprimary']){
+						$makePrimary = 1;
+					}
 					$eolManager->mapTaxa();
 				}
 				?>
@@ -76,6 +80,9 @@ if(isset($taxa_admin_eoladminCrumbs)){
 					<div style="margin:10px;">
 						<form name="taxamappingform" action="eolmapper.php" method="post">
 							<input type="submit" name="submitaction" value="Map Taxa" />
+							<div style="margin:15px;">
+								<input type="checkbox" name="makeprimary" value="1" CHECKED /> Make EOL primary link (sort order = 1)
+							</div>
 						</form>
 					</div>
 				</fieldset>

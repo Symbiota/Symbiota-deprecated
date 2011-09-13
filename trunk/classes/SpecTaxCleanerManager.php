@@ -158,6 +158,7 @@ class SpecTaxCleanerManager{
 			
 			}
 		}
+		ob_flush();
 		flush();
 		sleep(5);
 	}
