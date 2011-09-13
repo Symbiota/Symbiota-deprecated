@@ -42,7 +42,7 @@
 <head>
 	<title><?php echo $defaultTitle." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<meta name='keywords' content='virtual flora,<?php echo $spDisplay; ?>' />
+	<meta name='keywords' content='<?php echo $spDisplay; ?>' />
 	<link type="text/css" href="../css/main.css" rel="stylesheet" />
 	<link type="text/css" href="../css/speciesprofile.css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
@@ -52,147 +52,10 @@
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-
-		var imageArr = new Array();
-		var imgCnt = 0;
 		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
-
-		$(document).ready(function() {
-			$('#desctabs').tabs();
-		});
-
-		function toggle(target){
-			var spanObjs = document.getElementsByTagName("span");
-			for (i = 0; i < spanObjs.length; i++) {
-				var obj = spanObjs[i];
-				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-					if(obj.style.display=="none"){
-						obj.style.display="inline";
-					}
-					else {
-						obj.style.display="none";
-					}
-				}
-			}
-	
-			var divObjs = document.getElementsByTagName("div");
-			for (i = 0; i < divObjs.length; i++) {
-				var obj = divObjs[i];
-				if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-					if(obj.style.display=="none"){
-						obj.style.display="inline";
-					}
-					else {
-						obj.style.display="none";
-					}
-				}
-			}
-		}
-	
-		function toggleMap(mapObj){
-			var roi = mapObj.value;
-			var mapObjs = getElementByTagName("div");
-			for(x=0;x<mapObjs.length;x++){
-				var mObj = mapObjs[x];
-				if(mObj.classname == "mapdiv"){
-					if(mObj == mapObj){
-						mObj.style.display = "block";
-					}
-					else{
-						mObj.style.display = "none";
-					}
-				}
-			}
-		}
-		
-		function toggleImgInfo(target, anchorObj){
-			//close all imgpopup divs
-			var divs = document.getElementsByTagName("div");
-			for(x=0;x<divs.length;x++){
-				var d = divs[x];
-				if(d.getAttribute("class") == "imgpopup" || d.getAttribute("className") == "imgpopup"){
-					d.style.display = "none";
-				}
-			}
-
-			//Open and place target imgpopup
-			var obj = document.getElementById(target);
-			var pos = findPos(anchorObj);
-			var posLeft = pos[0];
-			if(posLeft > 550){
-				posLeft = 550;
-			}
-			obj.style.left = posLeft;
-			obj.style.top = pos[1];
-			if(obj.style.display=="block"){
-				obj.style.display="none";
-			}
-			else {
-				obj.style.display="block";
-			}
-			var targetStr = "document.getElementById('" + target + "').style.display='none'";
-			var t=setTimeout(targetStr,10000);
-		}
-		
-		function findPos(obj){
-			var curleft = 0; 
-			var curtop = 0;
-			curleft = obj.offsetLeft;
-			curtop = obj.offsetTop;
-			return [curleft,curtop];
-		}	
-		
-		function setImgPopupHtml(puTarget,imgId){
-			siphXmlHttp=GetXmlHttpObject();
-			if (siphXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url="<?php echo $clientRoot; ?>/imagelib/rpc/getimgmetadata.php";
-			url=url+"?imgid="+imgId;
-			siphXmlHttp.onreadystatechange=function(){
-				alert(siphXmlHttp.readyState);
-				alert(siphXmlHttp.responseText);
-				if(siphXmlHttp.readyState==4){
-					if(siphXmlHttp.status==200){
-						puTarget.innerHTML=siphXmlHttp.responseText;
-					}
-					else{
-						puTarget.innerHTML = "Unable to retrieve image details";
-					}
-				}
-			}
-			siphXmlHttp.open("POST",url,true);
-			siphXmlHttp.send(null);
-		} 
-		
-		function expandImages(){
-			eiObj = document.getElementById("imgextra");
-			eiObj.style.display = "block";
-			mpObj = document.getElementById("morephotos");
-			mpObj.style.display = "none";
-		}
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
-		}
-		
 	</script>
+	<script type="text/javascript" src="../js/symb/taxa.index.js"></script>
 </head>
 <body>
 <?php
@@ -213,16 +76,21 @@ if($taxonManager->getSciName() != "unknown"){
 		?>
 		<tr>
 			<td colspan="2" valign="bottom" height="35px">
+			<div style='float:left;font-size:16px;margin-left:10px;'>
+				<span style='font-weight:bold;color:#990000;'>
+					<i><?php echo $spDisplay; ?></i>
+				</span> 
+				<?php echo $taxonManager->getAuthor(); ?>
+				<?php 
+				$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
+				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
+			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
+			 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
+			 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
+			 	}
+			 	?>
+			</div>
 			<?php 
-			//Top Middle Section, scientific name
-			echo "<div style='float:left;font-size:16px;margin-left:10px;'><span style='font-weight:bold;color:#990000;'><i>$spDisplay</i></span> ".$taxonManager->getAuthor();
-			$parentLink = "index.php?taxon=".$taxonManager->getParentTid()."&cl=".$taxonManager->getClName()."&proj=".$projValue."&taxauthid=".$taxAuthId;
-			echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.jpg' title='Go to Parent' /></a>";
-		 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
-		 	if(($taxonManager->getTid() != $taxonManager->getSubmittedTid()) && $taxAuthId){
-		 		echo "<span style='font-size:90%;margin-left:25px;'> (redirected from: <i>".$taxonManager->getSubmittedSciName()."</i>)</span>"; 
-		 	}
-			echo "</div>";
 			if($editable){
 				?>
 				<div style="float:right;">

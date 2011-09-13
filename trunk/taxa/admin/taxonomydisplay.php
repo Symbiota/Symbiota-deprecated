@@ -75,10 +75,6 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	<?php 
 	include($serverRoot.'/footer.php');
 	?>
-	<script type="text/javascript">
-
-		
-	</script>
 
 </body>
 </html>
