@@ -6,7 +6,7 @@ class EOLManager {
 	private $conn;
 
 	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	function __destruct(){
