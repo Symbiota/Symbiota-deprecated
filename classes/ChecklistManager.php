@@ -1,13 +1,9 @@
 <?php
-/*
- * Rebuilt 29 Jan 2010
- * By E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
  
 class ChecklistManager {
 
-	private $clCnn;
+	private $clCon;
 	private $clid;
 	private $dynClid;
 	private $clName;

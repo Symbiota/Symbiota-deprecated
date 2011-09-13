@@ -563,8 +563,10 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				echo "<div>You must be logged in and authorized to view internal taxonomy. Please login.</div>";
 			}
 		}
-		include($serverRoot.'/footer.php');
 		?>
 	</div>
+	<?php 
+	include($serverRoot.'/footer.php');
+	?>
 </body>
 </html>
