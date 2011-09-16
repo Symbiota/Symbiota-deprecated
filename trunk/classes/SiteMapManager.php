@@ -15,7 +15,8 @@ class SiteMapManager{
 
 	public function getCollectionList($userRights){
 		$returnArr = Array();
-		$sql = "SELECT c.collid, c.collectioncode, c.collectionname FROM omcollections c ";
+		$sql = 'SELECT c.collid, c.collectioncode, c.collectionname, c.colltype '.
+			'FROM omcollections c ';
 		$collArr = Array();
 		if(array_key_exists("CollAdmin",$userRights)){
 			$collArr = $userRights['CollAdmin'];
@@ -24,20 +25,28 @@ class SiteMapManager{
 			$collArr = array_merge($collArr,$userRights['CollEditor']);
 		}
 		if($collArr){
-			$sql .= "WHERE (c.collid IN(".implode(",",$collArr).")) ";
+			$sql .= 'WHERE (c.collid IN('.implode(',',$collArr).')) ';
 		}
 		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($rs){
 			while($row = $rs->fetch_object()){
-				$returnArr[$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+				if($row->colltype == 'Observations'){
+					$returnArr['obs'][$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+				}
+				elseif($row->colltype == 'General Observations'){
+					$returnArr['genobs'][$row->collid] = $row->collectionname;
+				}
+				else{
+					$returnArr['spec'][$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+				}
 			}
 			$rs->close();
 		}
 		return $returnArr;
 	}
-	
+
 	public function getChecklistList($isAdmin, $clArr){
 		$returnArr = Array();
 		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl WHERE cl.access LIKE "public%"';

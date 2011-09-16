@@ -30,62 +30,80 @@ elseif(strpos($action,'Image')){
 else{
 	$occManager = new OccurrenceEditorManager();
 }
+
+$occManager->setSymbUid($symbUid); 
 if($occId) $occManager->setOccId($occId); 
 if($collId) $occManager->setCollId($collId);
-$occArr = Array();
 $collMap = Array();
 $collMap = $occManager->getCollMap();
 if($occId && !$collId) $collId = $collMap['collid'];
-$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
-$statusStr = '';
+
+$occArr = Array();
 $qryArr = array();
 $qryCnt = false;
+//Check to see if Query Form has been activated
+if($occIndex !== false){ 
+	$qryArr = $occManager->getQueryVariables();
+	if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
+	if($action != "Save Edits" && $action != 'Delete Occurrence'){
+		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+		if(!$qryCnt) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+		$occManager->setOccurArr($qryWhere);
+		$occId = $occManager->getOccId();
+		$occArr = $occManager->getOccurMap();
+	}
+}
+elseif(isset($_COOKIE["editorquery"])){
+	//Make sure query is null
+	setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+}
+
+$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+$isGenObs = ($collMap['colltype']=='General Observations'?1:0);
+$statusStr = '';
 if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
-	if(!$isEditor && $occManager->getObserverUid() == $symbUid){
-		//User is the one who created record, thus they are an editor
+	elseif($isGenObs){ 
+		if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+			//Approved General Observation editors can add records
+			$isEditor = 1;
+		}
+		elseif($occManager->getObserverUid() == $symbUid){
+			//User can only edit their own records
+			$isEditor = 1;
+		}
+	}
+	elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 		$isEditor = 1;
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		//Reset query counts if it is activated
 		if($occIndex !== false){
-			$qryArr = $occManager->getQueryVariables();
-			if($qryArr){
-				$qryCnt = $qryArr['rc'];
-				$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
-				$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
-				if($newQryCnt == 0){
-					setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-					$occIndex = false;
-				}
-				elseif($qryCnt != $newQryCnt){
-					$qryCnt = $newQryCnt;
-					$occIndex--;
-				}
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+			if($newQryCnt == 0){
+				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+				$occIndex = false;
+			}
+			elseif($qryCnt != $newQryCnt){
+				$qryCnt = $newQryCnt;
+				$occIndex--;
+			}
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$occManager->setOccurArr($qryWhere);
+			$occId = $occManager->getOccId();
+			$occArr = $occManager->getOccurMap();
+			if($isGenObs && $occManager->getObserverUid() != $symbUid){
+				//User can only edit their own records
+				$isEditor = 0;
 			}
 		}
 	}
 	if($isEditor){
-		if($occIndex !== false){ 
-			$qryArr = $occManager->getQueryVariables();
-			if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
-		}
-		if($action == 'Delete Occurrence'){
-			$statusStr = $occManager->deleteOccurrence($occId);
-			if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
-			//Reset query form index to one less, unless it's already 1, then just reset
-			if($qryCnt > 1){
-				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
-			}
-			else{
-				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-				$occIndex = false;
-			}
-		}
-		elseif($goToMode){
+		if($goToMode){
 			if($action == 'Add Record'){
 				$statusStr = $occManager->addOccurrence($_REQUEST);
 				$occId = $occManager->getOccId();
@@ -106,48 +124,57 @@ if($symbUid){
 			}
 		}
 
-		if($action == "Submit Image Edits"){
-			$statusStr = $occManager->editImage($_REQUEST);
+		if($isEditor){
+			if($action == 'Delete Occurrence'){
+				$statusStr = $occManager->deleteOccurrence($occId);
+				if(strpos($statusStr,'SUCCESS') !== false) $occId = 0;
+				//Reset query form index to one less, unless it's already 1, then just reset
+				if($occIndex !== false){
+					if($qryCnt > 1){
+						if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
+						$qryCnt--;
+						$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+						$occManager->setOccurArr($qryWhere);
+						$occId = $occManager->getOccId();
+						$occArr = $occManager->getOccurMap();
+						if($isGenObs && $occManager->getObserverUid() != $symbUid){
+							//User can only edit their own records
+							$isEditor = 0;
+						}
+					}
+					else{
+						setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+						$occIndex = false;
+					}
+				}
+			}
+			elseif($action == "Submit Image Edits"){
+				$statusStr = $occManager->editImage($_REQUEST);
+			}
+			elseif($action == "Submit New Image"){
+				$statusStr = $occManager->addImage($_REQUEST);
+			}
+			elseif($action == "Delete Image"){
+				$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
+				$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
+			}
+			elseif($action == "Remap Image"){
+				$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
+			}
+			elseif($action == "Add New Determination"){
+				$statusStr = $occManager->addDetermination($_REQUEST);
+			}
+			elseif($action == "Submit Determination Edits"){
+				$statusStr = $occManager->editDetermination($_REQUEST);
+			}
+			elseif($action == "Delete Determination"){
+				$statusStr = $occManager->deleteDetermination($_REQUEST['detid']);
+			}
+			elseif($action == "Make Determination Current"){
+				$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
+				$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
+			}
 		}
-		elseif($action == "Submit New Image"){
-			$statusStr = $occManager->addImage($_REQUEST);
-		}
-		elseif($action == "Delete Image"){
-			$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
-			$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
-		}
-		elseif($action == "Remap Image"){
-			$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
-		}
-		elseif($action == "Add New Determination"){
-			$statusStr = $occManager->addDetermination($_REQUEST);
-		}
-		elseif($action == "Submit Determination Edits"){
-			$statusStr = $occManager->editDetermination($_REQUEST);
-		}
-		elseif($action == "Delete Determination"){
-			$statusStr = $occManager->deleteDetermination($_REQUEST['detid']);
-		}
-		elseif($action == "Make Determination Current"){
-			$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
-			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
-		}
-	}
-	//Check to see if Query Form has been activated
-	if($occIndex !== false){ 
-		if($isEditor && !$occId){
-			$qryArr = $occManager->getQueryVariables();
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
-			$qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
-			
-			$occManager->setOccurArr($qryWhere);
-			$occId = $occManager->getOccId();
-			$occArr = $occManager->getOccurMap();
-		}
-	}
-	elseif(isset($_COOKIE["editorquery"])){
-		//Reset Query settings
-		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 	}
 	if($occId && !$occArr){
 		$occArr = $occManager->getOccurMap();
@@ -534,7 +561,11 @@ if($symbUid){
 											<span style="margin-left:10px;">
 												<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="width:200px;" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 											</span>
-											<?php if(!$isEditor) echo '<div style="color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>' ?>
+											<?php 
+											if(!$isEditor && $occArr){
+												echo '<div style="color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
+											} 
+											?>
 											<div></div>
 										</div>
 										<div style="clear:both;padding:3px 0px 0px 10px;">

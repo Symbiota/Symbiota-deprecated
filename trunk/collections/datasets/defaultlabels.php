@@ -179,7 +179,7 @@ else{
 													echo '<span class="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
 													echo '<span class="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallatitude>0?'E':'W').' ';
 												}
-												if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.'</span>';
+												if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.' meters</span>';
 												if($r->geodeticdatum) echo '<span style="margin-left:10px;">['.$r->geodeticdatum.']</span>'; 
 												?>
 											</div>

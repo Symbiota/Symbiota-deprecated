@@ -61,7 +61,10 @@ if(isset($taxa_admin_eoladminCrumbs)){
 					if(array_key_exists('makeprimary',$_POST) && $_POST['makeprimary']){
 						$makePrimary = 1;
 					}
-					$eolManager->mapTaxa();
+					$eolManager->mapTaxa($makePrimary);
+				}
+				elseif($submitAction == 'Map Images'){
+					$eolManager->mapImagesForTaxa();
 				}
 				?>
 			</div>
@@ -75,15 +78,38 @@ if(isset($taxa_admin_eoladminCrumbs)){
 				?>
 				<fieldset style="padding:15px;">
 					<legend><b>Taxa Mapping</b></legend>
-					Number of taxa not mapped to EOL: 
-					<b><?php echo $eolManager->getEmptyIdentifierCount(); ?></b> 
+					<div>
+						This module will query EOL for all accepted taxa that do not currently have an EOL link nor identifier assignment. 
+						If an EOL taxon object is found, a link to EOL will be created for that taxon. 
+					</div>
 					<div style="margin:10px;">
-						<form name="taxamappingform" action="eolmapper.php" method="post">
-							<input type="submit" name="submitaction" value="Map Taxa" />
-							<div style="margin:15px;">
-								<input type="checkbox" name="makeprimary" value="1" CHECKED /> Make EOL primary link (sort order = 1)
-							</div>
-						</form>
+						Number of taxa not mapped to EOL: 
+						<b><?php echo $eolManager->getEmptyIdentifierCount(); ?></b> 
+						<div style="margin:10px;">
+							<form name="taxamappingform" action="eolmapper.php" method="post">
+								<input type="submit" name="submitaction" value="Map Taxa" />
+								<div style="margin:15px;">
+									<input type="checkbox" name="makeprimary" value="1" CHECKED /> Make EOL primary link (sort order = 1)
+								</div>
+							</form>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset style="margin-top:15px;padding:15px;">
+					<legend><b>Image Mapping</b></legend>
+					<div>
+						This module will query the EOL image library for all accepted taxa currently linked to EOL  
+						that do not have any field images. 
+						Up to 5 images will be automatically linked in the mapping procedure. 
+					</div>
+					<div style="margin:10px;">
+						Number of accpeted taxa without images: 
+						<b><?php echo $eolManager->getImageDeficiencyCount(); ?></b> 
+						<div style="margin:10px;">
+							<form name="imagemappingform" action="eolmapper.php" method="post">
+								<input type="submit" name="submitaction" value="Map Images" />
+							</form>
+						</div>
 					</div>
 				</fieldset>
 				<?php 

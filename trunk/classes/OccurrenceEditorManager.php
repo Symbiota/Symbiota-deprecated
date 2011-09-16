@@ -11,6 +11,7 @@ class OccurrenceEditorManager {
 	private $collMap = Array();
 	private $occurrenceMap = Array();
 	private $occSql;
+	private $symbUid;
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -53,17 +54,16 @@ class OccurrenceEditorManager {
 
 	public function getCollMap(){
 		if(!$this->collMap){
-			$sql = '';
-			if($this->collId){
-				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
-					'FROM omcollections c WHERE (c.collid = '.$this->collId.')';
-			}
-			elseif($this->occId){
-				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.managementtype '.
-					'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-					'WHERE (o.occid = '.$this->occId.')';
-			}
-			if($sql){
+			if($this->collId || $this->occId){
+				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.colltype, c.managementtype '.
+					'FROM omcollections c ';
+				if($this->collId){
+					$sql .= 'WHERE (c.collid = '.$this->collId.')';
+				}
+				elseif($this->occId){
+					$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
+						'WHERE (o.occid = '.$this->occId.')';
+				}
 				$rs = $this->conn->query($sql);
 				if($row = $rs->fetch_object()){
 					$this->collMap['collid'] = $row->collid;
@@ -71,6 +71,7 @@ class OccurrenceEditorManager {
 					$this->collMap['collectionname'] = $row->collectionname;
 					$this->collMap['institutioncode'] = $row->institutioncode;
 					$this->collMap['collectioncode'] = $row->collectioncode;
+					$this->collMap['colltype'] = $row->colltype;
 					$this->collMap['managementtype'] = $row->managementtype;
 				}
 				$rs->close();
@@ -79,16 +80,20 @@ class OccurrenceEditorManager {
 		return $this->collMap;
 	}
 	
+	public function setSymbUid($id){
+		$this->symbUid = $id;
+	}
+	
 	public function getQueryVariables(){
 		global $clientRoot;
 		$qryArr = array();
 		if(array_key_exists('q_identifier',$_POST)){
-			if($_POST['q_identifier']) $qryArr['id'] = $_POST['q_identifier'];
-			if($_POST['q_recordedby']) $qryArr['rb'] = $_POST['q_recordedby'];
-			if($_POST['q_recordnumber']) $qryArr['rn'] = $_POST['q_recordnumber'];
-			if($_POST['q_enteredby']) $qryArr['eb'] = $_POST['q_enteredby'];
-			if($_POST['q_processingstatus']) $qryArr['ps'] = $_POST['q_processingstatus'];
-			if($_POST['q_datelastmodified']) $qryArr['dm'] = $_POST['q_datelastmodified'];
+			if($_POST['q_identifier']) $qryArr['id'] = trim($_POST['q_identifier']);
+			if($_POST['q_recordedby']) $qryArr['rb'] = trim($_POST['q_recordedby']);
+			if($_POST['q_recordnumber']) $qryArr['rn'] = trim($_POST['q_recordnumber']);
+			if($_POST['q_enteredby']) $qryArr['eb'] = trim($_POST['q_enteredby']);
+			if($_POST['q_processingstatus']) $qryArr['ps'] = trim($_POST['q_processingstatus']);
+			if($_POST['q_datelastmodified']) $qryArr['dm'] = trim($_POST['q_datelastmodified']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
@@ -166,6 +171,7 @@ class OccurrenceEditorManager {
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
+			if($this->collMap['colltype'] == 'General Observations') $sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
 		}
@@ -386,11 +392,16 @@ class OccurrenceEditorManager {
 	
 	public function getObserverUid(){
 		$obsId = 0;
-		$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE (occid = '.$this->occId.')');
-		if($row = $rs->fetch_object()){
-			$obsId = $row->observeruid;
+		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap)){
+			return $this->occurrenceMap['observeruid'];
 		}
-		$rs->close();
+		if($this->occId){
+			$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE (occid = '.$this->occId.')');
+			if($row = $rs->fetch_object()){
+				$obsId = $row->observeruid;
+			}
+			$rs->close();
+		}
 		return $obsId;
 	}
 	

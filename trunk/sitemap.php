@@ -110,7 +110,7 @@ $smManager = new SiteMapManager();
 				</ul>
 
 		        <fieldset style="margin:30px 0px 10px 10px;padding:15px;">
-		            <legend><b>Data Editing Tools</b></legend>
+		            <legend><b>Data Management Tools</b></legend>
 	            	<?php if($symbUid){ ?>
 	            		<h3>Identification Keys</h3>
 						<ul>
@@ -340,11 +340,11 @@ $smManager = new SiteMapManager();
 
 						<h3>Collections</h3>
 						<div style="margin:10px;">
-							Tools for managing collection data are available through each Collection Profile page, 
-							which is generally accessed by clicking on the collection name within the specimen search engine.
-							Clicking on the editing symbol located in the upper right of Collection Profile page will open 
+							Tools for managing data specific to a particular collection are available through the collection's profile page. 
+							Clicking on a collection name in the list below will take you to this page for that given collection. 
+							An additional method to reach this page is by clicking on the collection name within the specimen search engine.
+							The editing symbol located in the upper right of Collection Profile page will open 
 							the editing pane and display a list of editing options.  
-							Click on a collecion in the list below to go directly to this page. 
 						</div>
 						<?php 
 						if($isAdmin){
@@ -352,7 +352,7 @@ $smManager = new SiteMapManager();
 							<ul>
 								<li>
 									<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?newcoll=1">
-										Create a New Collection Profile
+										Create a New Collection or Observation Profile
 									</a>
 								</li>
 								<li>
@@ -370,8 +370,9 @@ $smManager = new SiteMapManager();
 							</div>
 	            			<ul>
 	            			<?php 
-							if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("CollEditor",$userRights)){
-	            				$collList = $smManager->getCollectionList($userRights);
+	            			$collectionList = $smManager->getCollectionList($userRights);
+	            			if(array_key_exists('spec',$collectionList)){
+	            				$collList = $collectionList['spec'];
 		            			foreach($collList as $k => $v){
 		            				echo '<li>';
 		            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
@@ -381,16 +382,69 @@ $smManager = new SiteMapManager();
 		            			}
 	            			}
 	            			else{
-	            				echo "<li>You are not authorized to edit any of the Collections</li>";
+	            				echo "<li>You have no explicit editing permissions for a particular collections</li>";
 	            			}
 	            			?>
 							</ul>
 						</div>
 
+						<h3>Observations</h3>
+						<div style="margin:10px;">
+							Data management for observation projects is handled in a similar manner to what is described in the Collections paragraph above.
+							One difference is the General Observation project. This project servers two central purposes: 
+							1) Allows registered users to submit a image voucherd field observation. 
+							2) Allows collectors to enter their own collection data for label printing and to make it available for transfer 
+							to collections obtaining the physical specimens through donations or exchange.
+							Visit the <a href="http://symbiota.org/tiki/tiki-index.php?page=Specimen+Label+Printing" target="_blank">Symbiota Documentation</a> for more information on specimen processing capabilites.  
+							Note that the General Observation project is not allows activated for all data portals. 
+							Click on an observation project below to go directly to this page. 
+						</div>
+						<div style="margin:10px;">
+							<div style="font-weight:bold;">
+								List of observation projects to which you have access
+							</div>
+	            			<ul>
+	            			<?php 
+	            			if(array_key_exists('genobs',$collectionList) || array_key_exists('obs',$collectionList)){
+		            			if(array_key_exists('genobs',$collectionList)){
+		            				foreach($collectionList['genobs'] as $k => $v){
+		            					?>
+										<li>
+											<a href="collections/editor/observationsubmit.php">
+												Image Vouchered Observation Submission
+											</a>
+										</li>
+		            					<li>
+											<a href="collections/misc/collprofiles.php?collid=<?php echo $k; ?>&emode=1">
+					            				<?php echo $v; ?> (Personal Specimen Management / Label Printing)
+				            				</a>
+			            				</li>
+			            				<?php 
+		            				}
+		            			}
+		            			if(array_key_exists('obs',$collectionList)){
+		            				echo '<div style="margin-top:10px;">';
+			            			foreach($collectionList['obs'] as $k => $v){
+			            				echo '<li>';
+			            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
+			            				echo $v;
+			            				echo '</a>';
+			            				echo '</li>';
+			            			}
+		            				echo '</div>';
+		            			}
+	            			}
+	            			else{
+	            				echo "<li>You have no observation project permissions</li>";
+	            			}
+	            			?>
+							</ul>
+						</div>
 	            		<?php 
 					}
 					else{
-						echo '<a href="'.$clientRoot.'/profile/index.php">Login</a> to view editing tools that you have permission to access. Please see you data administrator for editing permissions assignment procedures.';
+						echo 'Please <a href="'.$clientRoot.'/profile/index.php?refurl=../sitemap.php">login</a> to access editing tools.<br/>'.
+						'Contact a portal administrator for obtaining editing permissions.';
 					}
 	            ?>
 	            </fieldset>

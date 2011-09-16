@@ -17,7 +17,7 @@ class CollectionProfileManager {
 
 	public function setCollectionId($collId){
 		if(is_numeric($collId)){
-			$this->collId = $this->conn->real_escape_string($collId);
+			$this->collId = $collId;
 		}
 	}
 
@@ -185,6 +185,98 @@ class CollectionProfileManager {
 		$conn->query($sql);
 		$conn->close();
 		return $cid;
+	}
+	
+	public function updateStatistics(){
+		set_time_limit(200);
+		echo '<li>Updating records with null families... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'SET o.family = ts.family '.
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "")';
+		$this->conn->query($sql);
+		echo $this->conn->affected_rows.' records updated</li>';
+
+		echo '<li>Updating records with null author... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+			'SET o.scientificNameAuthorship = t.author '.
+			'WHERE o.scientificNameAuthorship IS NULL and t.author is not null';
+		$this->conn->query($sql);
+		echo $this->conn->affected_rows.' records updated</li>';
+		
+		echo '<li>Updating total record count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li>Updating family count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
+			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li>Updating genus count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
+			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+		
+		echo '<li>Updating species count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
+			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done</li>';
+		
+		echo '<li>Updating georeference count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
+			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+
+		echo '<li>Updating georeference indexing... ';
+		ob_flush();
+		flush();
+		$sql = 'REPLACE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
+			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
+			'FROM omoccurrences o '.
+			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
+			'AND o.decimallongitude IS NOT NULL';
+		$this->conn->query($sql);
+		
+		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+		echo '<li>Finished updating collection statistics</li>';
+		
 	}
 
 	public function getFamilyRecordCounts(){

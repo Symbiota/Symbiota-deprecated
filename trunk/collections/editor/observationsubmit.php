@@ -7,21 +7,26 @@ header("Content-Type: text/html; charset=".$charset);
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId  = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
-$obsManager = new ObservationSubmitManager($symbUid);
+$obsManager = new ObservationSubmitManager($collId);
+$collMap = $obsManager->getCollMap(); 
+if(!$collId && $collMap) $collId = $collMap['collid']; 
 $status = "";
 
-$okCollArr = Array();
-if($isAdmin) $okCollArr[] = "all";
-if(array_key_exists("CollAdmin",$userRights)) $okCollArr = array_merge($okCollArr,$userRights["CollAdmin"]);
-if(array_key_exists("CollEditor",$userRights)) $okCollArr = array_merge($okCollArr,$userRights["CollEditor"]);
-if($isAdmin || ($collId && in_array($collId,$okCollArr))){
-	if($action == "Submit Observation"){
+$isEditor = 0;
+if($collMap){
+	if($isAdmin){
+		$isEditor = 1;
+	}
+	elseif(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights['CollAdmin'])){
+		$isEditor = 1;
+	}
+	elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights['CollEditor'])){
+		$isEditor = 1;
+	}
+	if($isEditor && $action == "Submit Observation"){
 		$status = $obsManager->addObservation($_POST,$symbUid);
 	}
 }
-$okCollArr = $obsManager->getCollArr($okCollArr);
-$userArr = $obsManager->getUserArr();
-
 ?>
 
 <html>
@@ -49,6 +54,7 @@ $userArr = $obsManager->getUserArr();
 ?>
 	<!-- inner text -->
 	<div id="innertext">
+		<h1><?php echo $collMap['collectionname']; ?></h1>
 		<?php
 		if($status){
 			?>
@@ -76,7 +82,7 @@ $userArr = $obsManager->getUserArr();
 			<?php
 		} 
 		if($symbUid){
-			if($okCollArr){
+			if($isEditor){
 				?>
 				<form id='obsform' name='obsform' action='observationsubmit.php' method='post' enctype='multipart/form-data' onsubmit="return submitObsForm(this)">
 					<fieldset>
@@ -116,7 +122,7 @@ $userArr = $obsManager->getUserArr();
 							</div>
 							<div style="clear:both;">
 								<span>
-									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userArr[$symbUid]; ?>" />
+									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userDisplayName; ?>" />
 								</span>
 								<span style="margin-left:10px;">
 									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
@@ -301,18 +307,6 @@ $userArr = $obsManager->getUserArr();
 					</fieldset>
 					<fieldset>
 						<legend><b>Images</b></legend>
-						<div style="margin:5px;">
-							Photographer: 
-							<select name="phuid">
-								<option value=''>Select Photographer</option>
-								<option value=''>-----------------------------</option>
-								<?php 
-								foreach($userArr as $uid => $nameStr){
-									echo '<option value="'.$uid.'" '.($symbUid==$uid?'SELECTED':'').'>'.$nameStr.'</option>'."\n";
-								}
-								?>
-							</select>
-						</div>
 						<div style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
@@ -369,24 +363,6 @@ $userArr = $obsManager->getUserArr();
 						</div>
 						<div style="margin-left:10px;">* Upload image size can not be greater than 1MB</div>
 					</fieldset>
-					<div style="margin:5px;">
-						<b>Management:</b> 
-						<select name="collid" style="background-color:FFFF99;">
-							<option value="">Select an Observation Project</option>
-							<option value="">-----------------------------------</option>
-							<?php 
-							foreach($okCollArr as $collId => $collName){
-								$selectStr = "";
-								if(strpos($collName,"[default]")){
-									$collName = str_replace("[default]","",$collName);
-									$selectStr = "SELECTED";
-								}
-								echo "<option value='".$collId."' ".$selectStr.">".$collName."</option>\n";
-							}
-							//Voucher Project: stuff
-							?>
-						</select>
-					</div>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Submit Observation" />
 						* Fields with background color are required  
@@ -395,8 +371,8 @@ $userArr = $obsManager->getUserArr();
 			<?php 
 			}
 			else{
-				echo 'There are no observation projects that you are authorized to submit to. ';
-				echo '<br/><b>Please contact an administrator to obtain access.</b> ';
+				echo 'You are authorized to submit to an observation. ';
+				echo '<br/><b>Please contact an administrator to obtain the necessary permissions.</b> ';
 			}
 		}
 		else{

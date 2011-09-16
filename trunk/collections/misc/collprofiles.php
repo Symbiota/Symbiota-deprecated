@@ -13,9 +13,6 @@ $newCollRec = array_key_exists("newcoll",$_REQUEST)?1:0;
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
 $collManager = new CollectionProfileManager();
-if($collId){
-	$collManager->setCollectionId($collId);
-}
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin 
 if($symbUid){
@@ -26,7 +23,7 @@ if($symbUid){
 		if(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
 			$editCode = 2;
 		}
-		else if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 			$editCode = 1;
 		}
 	}
@@ -48,6 +45,7 @@ if($editCode == 3){
 }
 $collData = Array();
 if($collId){
+	$collManager->setCollectionId($collId);
 	$collData = $collManager->getCollectionData();
 }
 
@@ -142,6 +140,15 @@ if($collId){
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
+		if($editCode > 1){
+			if($action == 'Update Statistics'){
+				echo '<h2>Updating statisitcs related to this collection...</h2>';
+				echo '<ul>';
+				$collManager->updateStatistics();
+				echo '</ul><hr/>';
+				$collData = $collManager->getCollectionData();
+			}
+		}
 		if($editCode > 0 && $collId){
 			?>
 			<div style="float:right;margin:3px;cursor:pointer;" onclick="toggleById('controlpanel');" title="Toggle Manager's Control Panel">
@@ -177,6 +184,11 @@ if($collId){
 							<li>
 								<a href="#" onclick="toggleById('colledit');" >
 									Edit Metadata and Contact Information
+								</a>
+							</li>
+							<li>
+								<a href="collprofiles.php?action=Update Statistics" >
+									Update Statistics
 								</a>
 							</li>
 							<li>
