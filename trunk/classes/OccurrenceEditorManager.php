@@ -102,7 +102,7 @@ class OccurrenceEditorManager {
 		return $qryArr;
 	}
 	
-	public function getQueryWhere($qryArr,$occIndex=0){
+	public function getQueryWhere($qryArr, $occIndex=0, $isAdmin=0){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
 		if(array_key_exists('id',$qryArr)){
@@ -171,7 +171,7 @@ class OccurrenceEditorManager {
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
-			if($this->collMap['colltype'] == 'General Observations') $sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
+			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations') $sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
 		}

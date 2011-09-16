@@ -38,6 +38,12 @@ $collMap = Array();
 $collMap = $occManager->getCollMap();
 if($occId && !$collId) $collId = $collMap['collid'];
 
+$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+if($symbUid){
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+		$isEditor = 1;
+	}
+}
 $occArr = Array();
 $qryArr = array();
 $qryCnt = false;
@@ -46,7 +52,7 @@ if($occIndex !== false){
 	$qryArr = $occManager->getQueryVariables();
 	if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
 	if($action != "Save Edits" && $action != 'Delete Occurrence'){
-		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
 		if(!$qryCnt) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
 		$occManager->setOccurArr($qryWhere);
 		$occId = $occManager->getOccId();
@@ -58,31 +64,27 @@ elseif(isset($_COOKIE["editorquery"])){
 	setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 }
 
-$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
 $isGenObs = ($collMap['colltype']=='General Observations'?1:0);
 $statusStr = '';
 if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
-		$isEditor = 1;
-	}
-	elseif($isGenObs){ 
+	if($isGenObs){ 
 		if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 			//Approved General Observation editors can add records
-			$isEditor = 1;
+			$isEditor = 2;
 		}
 		elseif($occManager->getObserverUid() == $symbUid){
 			//User can only edit their own records
-			$isEditor = 1;
+			$isEditor = 2;
 		}
 	}
 	elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
-		$isEditor = 1;
+		$isEditor = 2;
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		//Reset query counts if it is activated
 		if($occIndex !== false){
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
 			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
 			if($newQryCnt == 0){
 				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
@@ -92,7 +94,7 @@ if($symbUid){
 				$qryCnt = $newQryCnt;
 				$occIndex--;
 			}
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
 			$occManager->setOccurArr($qryWhere);
 			$occId = $occManager->getOccId();
 			$occArr = $occManager->getOccurMap();
@@ -133,7 +135,7 @@ if($symbUid){
 					if($qryCnt > 1){
 						if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
 						$qryCnt--;
-						$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex);
+						$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
 						$occManager->setOccurArr($qryWhere);
 						$occId = $occManager->getOccId();
 						$occArr = $occManager->getOccurMap();
