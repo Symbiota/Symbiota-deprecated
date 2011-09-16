@@ -488,6 +488,9 @@ function insertUtm(f) {
 					f.decimallongitude.value = Math.round(llArr[1]*1000000)/1000000;
 				}
 			}
+			fieldChanged("decimallatitude");
+			fieldChanged("decimallongitude");
+			fieldChanged("verbatimcoordinates");
 		}
 		else{
 			alert("Easting and northing fields must contain numeric values only");
@@ -569,6 +572,10 @@ function insertLatLng(f) {
 				if(lngEW == "W") lngDec = lngDec * -1; 
 				f.decimallatitude.value = Math.round(latDec*1000000)/1000000;
 				f.decimallongitude.value = Math.round(lngDec*1000000)/1000000;
+
+				fieldChanged("decimallatitude");
+				fieldChanged("decimallongitude");
+				fieldChanged("verbatimcoordinates");
 			}
 		}
 		else{
@@ -611,9 +618,10 @@ function insertTRS(f) {
 	}
 	else{
 		//Insert into verbatimCoordinate field
-		vCoord = document.fullform.verbatimcoordinates;
+		vCoord = f.verbatimcoordinates;
 		if(vCoord.value) vCoord.value = vCoord.value + "; "; 
 		vCoord.value = vCoord.value + "TRS: T"+township+townshipNS+" R"+range+rangeEW+" sec "+section+" "+secdetails+" "+meridian;
+		fieldChanged("verbatimcoordinates");
 	}
 }
 
@@ -623,10 +631,12 @@ function insertElevFt(f){
 	if(elevMin){
 		if(isNumeric(elevMin)){
 			f.minimumelevationinmeters.value = Math.round(elevMin*.03048)*10;
+			fieldChanged("minimumelevationinmeters");
 			verbStr = elevMin;
 			if(elevMax){
 				if(isNumeric(elevMax)){
 					f.maximumelevationinmeters.value = Math.round(elevMax*.03048)*10;
+					fieldChanged("maximumelevationinmeters");
 					if(elevMax) verbStr += " - " + elevMax;
 				}
 				else{
@@ -635,6 +645,7 @@ function insertElevFt(f){
 			}
 			verbStr += "ft";
 			f.verbatimelevation.value = verbStr;
+			fieldChanged("verbatimelevation");
 		}
 		else{
 			alert("Elevation fields must be numeric values only (no text)!");

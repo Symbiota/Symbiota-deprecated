@@ -85,6 +85,7 @@ else{
 		            opener.document.fullform.geodeticdatum.value = "WGS84";
 		            opener.document.fullform.decimallatitude.onchange();
 		            opener.document.fullform.decimallongitude.onchange();
+		            opener.document.fullform.geodeticdatum.onchange();
 				}
 				catch(myErr){
 				}
