@@ -52,7 +52,7 @@ if($occIndex !== false){
 	$qryArr = $occManager->getQueryVariables();
 	if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
 	if($action != "Save Edits" && $action != 'Delete Occurrence'){
-		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
+		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
 		if(!$qryCnt) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
 		$occManager->setOccurArr($qryWhere);
 		$occId = $occManager->getOccId();
@@ -84,7 +84,7 @@ if($symbUid){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
 		//Reset query counts if it is activated
 		if($occIndex !== false){
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
 			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
 			if($newQryCnt == 0){
 				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
@@ -94,7 +94,7 @@ if($symbUid){
 				$qryCnt = $newQryCnt;
 				$occIndex--;
 			}
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==2?1:0));
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
 			$occManager->setOccurArr($qryWhere);
 			$occId = $occManager->getOccId();
 			$occArr = $occManager->getOccurMap();
