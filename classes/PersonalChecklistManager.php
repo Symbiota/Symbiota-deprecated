@@ -57,12 +57,12 @@ class PersonalChecklistManager{
 		$sqlInsert = "";
 		$sqlValues = "";
 		foreach($newClArr as $k => $v){
-			$sqlInsert .= ",".$k;
+			$sqlInsert .= ','.$k;
 			if($v){
-				$sqlValues .= ",\"".$v."\"";
+				$sqlValues .= ',"'.$this->cleanStr($v).'"';
 			}
 			else{
-				$sqlValues .= ",NULL";
+				$sqlValues .= ',NULL';
 			}
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
@@ -100,6 +100,12 @@ class PersonalChecklistManager{
 			echo "<option value='".$row->clid."'>".$row->name."</option>";
 		}
 		$rs->close();
+	}
+
+	private function cleanStr($inStr){
+		$outStr = trim($inStr);
+		$outStr = str_replace('"',"''",$outStr);
+		return $outStr;
 	}
 }
 ?>
