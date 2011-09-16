@@ -67,18 +67,20 @@ elseif(isset($_COOKIE["editorquery"])){
 $isGenObs = ($collMap['colltype']=='General Observations'?1:0);
 $statusStr = '';
 if($symbUid){
-	if($isGenObs){ 
-		if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
-			//Approved General Observation editors can add records
+	if(!$isEditor){
+		if($isGenObs){ 
+			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+				//Approved General Observation editors can add records
+				$isEditor = 2;
+			}
+			elseif($occManager->getObserverUid() == $symbUid){
+				//User can only edit their own records
+				$isEditor = 2;
+			}
+		}
+		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 			$isEditor = 2;
 		}
-		elseif($occManager->getObserverUid() == $symbUid){
-			//User can only edit their own records
-			$isEditor = 2;
-		}
-	}
-	elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
-		$isEditor = 2;
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
@@ -98,7 +100,7 @@ if($symbUid){
 			$occManager->setOccurArr($qryWhere);
 			$occId = $occManager->getOccId();
 			$occArr = $occManager->getOccurMap();
-			if($isGenObs && $occManager->getObserverUid() != $symbUid){
+			if($isEditor == 2 && $isGenObs && $occManager->getObserverUid() != $symbUid){
 				//User can only edit their own records
 				$isEditor = 0;
 			}
@@ -139,7 +141,7 @@ if($symbUid){
 						$occManager->setOccurArr($qryWhere);
 						$occId = $occManager->getOccId();
 						$occArr = $occManager->getOccurMap();
-						if($isGenObs && $occManager->getObserverUid() != $symbUid){
+						if($isEditor == 2 && $isGenObs && $occManager->getObserverUid() != $symbUid){
 							//User can only edit their own records
 							$isEditor = 0;
 						}
