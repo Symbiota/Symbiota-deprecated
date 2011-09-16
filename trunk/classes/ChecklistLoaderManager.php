@@ -127,25 +127,42 @@ class ChecklistLoaderManager {
 							}
 						}
 						while(isset($sciNameArr) && $sciStr = array_shift($sciNameArr)){
-							if($sciStr == "ssp." || $sciStr == "ssp" || $sciStr == "subsp." || $sciStr == "subsp" || $sciStr == "var." || $sciStr == "var" || $sciStr == "f." || $sciStr == "forma"){
+							if($sciStr == "f." || $sciStr == "fo." || $sciStr == "fo" || $sciStr == "forma"){
 								if($sciNameArr){
-									$unitInd3 = $sciStr;
+									$unitInd3 = 'f.';
+									$unitName3 = array_shift($sciNameArr);
+								}
+							}
+							elseif($sciStr == "var." || $sciStr == "var"){
+								if($sciNameArr){
+									$unitInd3 = 'var.';
+									$unitName3 = array_shift($sciNameArr);
+								}
+							}
+							elseif($sciStr == "ssp." || $sciStr == "ssp" || $sciStr == "subsp." || $sciStr == "subsp"){
+								if($sciNameArr){
+									$unitInd3 = 'ssp.';
 									$unitName3 = array_shift($sciNameArr);
 								}
 							}
 						}
 						$sciName = trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3));
-						$sql = "";
+						$sql = '';
 						if($thesId){
 							$sql = "SELECT t2.tid, ts.family, t2.rankid ".
 								"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-								"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
-								"WHERE (ts.taxauthid = ".$thesId.") AND (t.sciname = \"".$sciName."\")";
+								"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid WHERE (ts.taxauthid = ".$thesId.") AND ";
 						}
 						else{
 							$sql = "SELECT t.tid, ts.family, t.rankid ".
 								"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-								"WHERE ts.taxauthid = 1 AND (t.sciname = \"".$sciName."\")";
+								"WHERE ts.taxauthid = 1 AND ";
+						}
+						if($unitInd3 == 'ssp.'){
+							$sql .= '((t.sciname = "'.$sciName.'") OR (t.sciname = "'.str_replace('ssp.','subsp.',$sciName).'"))';
+						}
+						else{
+							$sql .= '(t.sciname = "'.$sciName.'")';
 						}
 						//echo $sql;
 						$rs = $this->conn->query($sql);
@@ -160,25 +177,25 @@ class ChecklistLoaderManager {
 					//Load taxon into checklist
 					if($tid){
 						if($rankId > 180){
-							$sqlInsert = "";
-							$sqlValues = "";
-							if(array_key_exists("family",$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr["family"]])){
-								$sqlInsert .= ",familyoverride";
-								$sqlValues .= ",'".$valueArr[$headerArr["family"]]."'";
+							$sqlInsert = '';
+							$sqlValues = '';
+							if(array_key_exists('family',$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr['family']])){
+								$sqlInsert .= ',familyoverride';
+								$sqlValues .= ',"'.$valueArr[$headerArr['family']].'"';
 							}
-							if(array_key_exists("habitat",$headerArr) && $valueArr[$headerArr["habitat"]]){
-								$sqlInsert .= ",habitat";
-								$sqlValues .= ",'".$valueArr[$headerArr["habitat"]]."'";
+							if(array_key_exists('habitat',$headerArr) && $valueArr[$headerArr['habitat']]){
+								$sqlInsert .= ',habitat';
+								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['habitat']]).'"';
 							}
-							if(array_key_exists("abundance",$headerArr) && $valueArr[$headerArr["abundance"]]){
-								$sqlInsert .= ",abundance";
-								$sqlValues .= ",'".$valueArr[$headerArr["abundance"]]."'";
+							if(array_key_exists('abundance',$headerArr) && $valueArr[$headerArr['abundance']]){
+								$sqlInsert .= ',abundance';
+								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['abundance']]).'"';
 							}
-							if(array_key_exists("notes",$headerArr) && $valueArr[$headerArr["notes"]]){
-								$sqlInsert .= ",notes";
-								$sqlValues .= ",'".$valueArr[$headerArr["notes"]]."'";
+							if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
+								$sqlInsert .= ',notes';
+								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['notes']]).'"';
 							}
-							$sql = "INSERT INTO fmchklsttaxalink (tid,clid".$sqlInsert.") VALUES (".$tid.", ".$this->clid.$sqlValues.")";
+							$sql = 'INSERT INTO fmchklsttaxalink (tid,clid'.$sqlInsert.') VALUES ('.$tid.', '.$this->clid.$sqlValues.')';
 							//echo $sql;
 							if($this->conn->query($sql)){
 								$successCnt++;
@@ -211,6 +228,12 @@ class ChecklistLoaderManager {
 		else{
 			echo "<div style='color:red;'>ERROR: unable to located sciname field</div>";
 		}
+	}
+
+	private function cleanStr($inStr){
+		$outStr = trim($inStr);
+		$outStr = str_replace('"',"''",$outStr);
+		return $outStr;
 	}
 }
 ?>
