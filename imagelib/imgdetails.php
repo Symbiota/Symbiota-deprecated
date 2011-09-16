@@ -297,6 +297,7 @@ if($isEditor){
 								echo "</div>";
 							}
 							if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
+							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>View Image Source</a></div>";
 							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
 							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
 							echo "<div>";
@@ -312,7 +313,6 @@ if($isEditor){
 								echo "<a href='../misc/usagepolicy.php#images'>Copyright Details</a>";
 							}
 							echo "</div>";
-							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>Source Webpage</a></div>";
 							if($imgArr["occid"]) echo "<div><a href='../collections/individual/index.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
 							echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
 							if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";

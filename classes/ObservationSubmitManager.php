@@ -4,11 +4,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 class ObservationSubmitManager {
 
 	private $conn;
-	private $occId;
-	private $uid;
-	private $institutionCode;
-
-	private $occurrenceMap = Array();
+	private $collId;
+	private $collMap = Array();
 
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
@@ -18,9 +15,28 @@ class ObservationSubmitManager {
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 250000;
 	
-	public function __construct($uid){
-		$this->uid = $uid;
+	public function __construct($collId = 0){
+		$this->collId = $collId;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		$sql = 'SELECT collid, institutioncode, collectioncode, collectionname, colltype FROM omcollections ';
+		if($collId && is_numeric($collId)){
+			$sql .= 'WHERE (collid = '.$collId.')';
+		}
+		else{
+			$sql .= 'WHERE (colltype = "General Observations")';
+		}
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->collMap['collid'] = $r->collid;
+			$this->collMap['institutioncode'] = $r->institutioncode;
+			$this->collMap['collectioncode'] = $r->collectioncode;
+			$this->collMap['collectionname'] = $r->collectionname;
+			$this->collMap['colltype'] = $r->colltype;
+			if(!$this->collId){
+				$this->collId = $r->collid;
+			}
+		}
+		$rs->close();
 	}
 
 	public function __destruct(){
@@ -30,15 +46,6 @@ class ObservationSubmitManager {
 	public function addObservation($occArr, $obsUid){
 		$statusStr = '';
 		if($occArr){
-			$collId = $occArr['collid'];
-			//Get Institutional code for storage
-			$owner = '';
-			$ownerSql = 'SELECT institutioncode, collectionname FROM omcollections c WHERE (collid = '.$collId.')';
-			$rs = $this->conn->query($ownerSql);
-			if($row = $rs->fetch_object()){
-				$this->institutionCode = $row->institutioncode;
-				$owner = "";//$row->collectionname;
-			}
 			//Load Image, abort if unsuccessful
 			$nameArr = $this->loadImages();
 			if($nameArr){
@@ -75,7 +82,7 @@ class ObservationSubmitManager {
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
 	
-				'VALUES ('.$collId.',"Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
+				'VALUES ('.$this->collId.',"Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
 				'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
 				($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
 				$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
@@ -103,7 +110,7 @@ class ObservationSubmitManager {
 				$obsUid.') ';
 				//echo $sql;
 				if($this->conn->query($sql)){
-					if(!$occArr['phuid']) $occArr['phuid'] = $obsUid;
+					$occArr['phuid'] = $obsUid;
 					$statusStr = $this->conn->insert_id;
 					$imgStatus = $this->dbImages($nameArr,$occArr,$this->conn->insert_id,$tid);
 					if($imgStatus){
@@ -218,10 +225,10 @@ class ObservationSubmitManager {
  	}
  	
 	private function getDownloadPath($fileName){
- 		if(!file_exists($this->imageRootPath.$this->institutionCode)){
- 			mkdir($this->imageRootPath.$this->institutionCode, 0775);
+ 		if(!file_exists($this->imageRootPath.$this->collMap['institutioncode'])){
+ 			mkdir($this->imageRootPath.$this->collMap['institutioncode'], 0775);
  		}
-		$path = $this->imageRootPath.$this->institutionCode."/";
+		$path = $this->imageRootPath.$this->collMap['institutioncode']."/";
 		$yearMonthStr = date('Ym');
  		if(!file_exists($path.$yearMonthStr)){
  			mkdir($path.$yearMonthStr, 0775);
@@ -305,26 +312,7 @@ class ObservationSubmitManager {
 	    return $successStatus;
 	}
 	
-	public function getUserArr(){
-		$retArr = array();
-		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS fullname '.
-			'FROM users u ORDER BY u.lastname, u.firstname ';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$retArr[$row->uid] = $row->fullname;
-		}
-		$result->close();
-		return $retArr;
-	}
-
-	private function cleanStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","'",$newStr);
-		return $newStr;
-	}
-
-	public function getCollArr($collArr){
+	public function getChecklists($userRights){
 		$retArr = Array();
 		$sql = "SELECT collid,collectionname,colltype FROM omcollections WHERE colltype LIKE '%observation%' ";
 		if(!in_array("all",$collArr)){
@@ -341,6 +329,17 @@ class ObservationSubmitManager {
 			$retArr[$row->collid] = $cName;
 		}
 		return $retArr;
+	}
+	
+	public function getCollMap(){
+		return $this->collMap;
+	}
+
+	private function cleanStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = str_replace("\"","'",$newStr);
+		return $newStr;
 	}
 }
 
