@@ -197,11 +197,11 @@ function updateRadius(){
 }
 
 function openPointRadiusMap() {
-     mapWindow=open("mappointradius.php","pointradius","resizable=0,width=650,height=600,left=20,top=20");
+     mapWindow=open("mappointradius.php","pointradius","resizable=0,width=700,height=630,left=20,top=20");
      if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
 function openBoundingBoxMap() {
-     mapWindow=open("mapboundingbox.php","boundingbox","resizable=0,width=530,height=500,left=20,top=20");
+     mapWindow=open("mapboundingbox.php","boundingbox","resizable=0,width=700,height=630,left=20,top=20");
      if (mapWindow.opener == null) mapWindow.opener = self;
 }

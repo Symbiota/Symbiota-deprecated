@@ -1069,9 +1069,10 @@ if($symbUid){
 										?>
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
+										<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 										<?php if($occId){ ?>
 											<div style="margin:15px 0px 20px 30px;">
-												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullForm(this.form)" />
+												<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" />
 												<?php 
 												if($occIndex !== false){
 													?>
@@ -1087,7 +1088,7 @@ if($symbUid){
 											</div>
 										<?php }else{ ?>
 											<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
-												<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" />
+												<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" onclick="return verifyFullForm(this.form)" />
 												<div style="margin-left:15px;font-weight:bold;">
 													Follow-up Action:
 												</div>
