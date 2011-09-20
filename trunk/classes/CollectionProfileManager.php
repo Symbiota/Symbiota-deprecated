@@ -203,6 +203,7 @@ class CollectionProfileManager {
 		$writeConn->query($sql);
 		echo $writeConn->affected_rows.' records updated</li>';
 
+		/*
 		echo '<li>Updating records with null author... ';
 		ob_flush();
 		flush();
@@ -211,6 +212,7 @@ class CollectionProfileManager {
 			'WHERE o.scientificNameAuthorship IS NULL and t.author is not null';
 		$writeConn->query($sql);
 		echo $writeConn->affected_rows.' records updated</li>';
+		*/
 		
 		echo '<li>Updating total record count... ';
 		ob_flush();
@@ -262,7 +264,8 @@ class CollectionProfileManager {
 			'WHERE cs.collid = '.$this->collId;
 		$writeConn->query($sql);
 		echo 'Done!</li>';
-
+		
+		/*
 		echo '<li>Updating georeference indexing... ';
 		ob_flush();
 		flush();
@@ -276,8 +279,9 @@ class CollectionProfileManager {
 		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
 		$writeConn->query($sql);
 		echo 'Done!</li>';
-		echo '<li>Finished updating collection statistics</li>';
+		*/
 		
+		echo '<li>Finished updating collection statistics</li>';
 	}
 
 	public function getFamilyRecordCounts(){

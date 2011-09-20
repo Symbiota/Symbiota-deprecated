@@ -93,9 +93,10 @@ class EOLManager {
 	public function getImageDeficiencyCount(){
 		$tidCnt = 0;
 		$sql = 'SELECT COUNT(t.tid) AS tidcnt '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
+			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
+			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
+			'WHERE ts1.taxauthid = 1 AND ii.imagetype NOT LIKE "%specimen%") i ON t.tid = i.tidaccepted '. 
+			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$tidCnt = $r->tidcnt;
@@ -119,7 +120,7 @@ class EOLManager {
 		echo "<ul>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
-			echo '<li>Mapping images for '.$r->sciname.' (tid: '.$tid.")</li>\n";
+			echo '<li>Mapping images for '.$r->sciname.' (tid: '.$tid.'; EOL:'.$r->sourceidentifier.")</li>\n";
 			if($this->mapEolImages($tid, $r->sourceidentifier)){
 				$successCnt++;
 			}
@@ -133,8 +134,8 @@ class EOLManager {
 	private function mapEolImages($tid, $identifier){
 		global $eolKey;
 		$retStatus = 0;
-		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=5&vetted=2&details=1 ';
-		echo $url;
+		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=10&vetted=2&details=1 ';
+		//echo $url;
 		if(isset($eolKey) && $eolKey) $url .= '&key='.$eolKey;
 		if($fh = fopen($url, 'r')){
 			$content = '';
