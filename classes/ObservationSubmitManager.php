@@ -112,7 +112,44 @@ class ObservationSubmitManager {
 				if($this->conn->query($sql)){
 					$occArr['phuid'] = $obsUid;
 					$statusStr = $this->conn->insert_id;
-					$imgStatus = $this->dbImages($nameArr,$occArr,$this->conn->insert_id,$tid);
+					//Link observation to checklist
+					if(array_key_exists('clid',$occArr)){
+						if($clid = $occArr['clid']){
+							$sql = '';
+							$targetClid = substr($clid,2);
+							if(substr($clid,0,2) == 'cl'){
+								$sql = 'SELECT cltl.tid '.
+									'FROM fmchklsttaxalink cltl INNER JOIN taxstatus ts1 ON cltl.tid = ts1.tid '.
+									'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+									'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND cltl.clid = '.$targetClid.' AND ts2.tid = '.$tid;
+								$rs = $this->conn->query($sql);
+								$clTid = 0;
+								while($r = $rs->fetch_object()){
+									$clTid = $r->tid;
+									if($clTid == $tid) break; 
+								}
+								$rs->close();
+								if(!$clTid){
+									$sql = 'INSERT INTO fmchklsttaxalink(tid,clid) '.
+										'VALUES('.$tid.','.$targetClid.')';
+									$this->conn->query($sql);
+									$clTid = $tid;
+								}
+								$collectorStr = $occArr['recordedby'].' ('.($occArr['recordnumber']?$occArr['recordnumber']:$eventDate).')';
+								$sql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) '.
+									'VALUES('.$clTid.','.$targetClid.','.$statusStr.',"'.$collectorStr.'") ';
+								$this->conn->query($sql);
+								
+							}
+							else{
+								$sql = 'INSERT INTO omsurveyoccurlink(occid,surveyid) '.
+									'VALUES('.$statusStr.','.$targetClid.')';
+								$this->conn->query($sql);
+							}
+						}
+					}
+					//Load images 
+					$imgStatus = $this->dbImages($nameArr,$occArr,$statusStr,$tid);
 					if($imgStatus){
 						$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
 					}
@@ -314,20 +351,24 @@ class ObservationSubmitManager {
 	
 	public function getChecklists($userRights){
 		$retArr = Array();
-		$sql = "SELECT collid,collectionname,colltype FROM omcollections WHERE colltype LIKE '%observation%' ";
-		if(!in_array("all",$collArr)){
-			if($collArr){
-				$sql .= "AND collid IN(".implode(",",$collArr).") ";
-			}
+		$sql = 'SELECT clid,name FROM fmchecklists WHERE access != "private" ';
+		if(!array_key_exists("SuperAdmin",$userRights) && array_key_exists('ClAdmin',$userRights)){
+			$sql .= 'AND clid IN('.implode(',',$collArr).') ';
 		}
+		$sql .= 'ORDER BY name';
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$cName = $row->collectionname;
-			if($row->colltype == "General Observations"){
-				$cName .= " [default]";
-			}
-			$retArr[$row->collid] = $cName;
+			$retArr['cl'.$row->clid] = $row->name;
 		}
+
+		//Add biodiversity survey projects
+		$sql = 'SELECT surveyid, projectname FROM omsurveys WHERE ispublic = 1 ';
+		$sql .= 'ORDER BY projectname';
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr['sv'.$row->surveyid] = $row->projectname;
+		}
+		asort($retArr);
 		return $retArr;
 	}
 	

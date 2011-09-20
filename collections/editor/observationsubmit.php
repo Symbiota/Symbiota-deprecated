@@ -305,6 +305,26 @@ if($collMap){
 							</span>
 						</div>
 					</fieldset>
+					<?php 
+					$clArr = $obsManager->getChecklists($userRights); 
+					if($clArr){
+						?>
+						<fieldset>
+							<legend><b>Voucher Linkage</b></legend>
+							Flora: 
+							<select name='clid'>
+								<option value="0">Link to a Checklist</option>
+								<option value="0">------------------------------</option>
+								<?php 
+								foreach($clArr as $id => $clName){
+									echo '<option value="'.$id.'">'.$clName.'</option>';
+								}
+								?>
+							</select>
+						</fieldset>
+						<?php
+					} 
+					?>
 					<fieldset>
 						<legend><b>Images</b></legend>
 						<div style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;'>
