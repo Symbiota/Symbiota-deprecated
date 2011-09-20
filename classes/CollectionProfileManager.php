@@ -189,18 +189,19 @@ class CollectionProfileManager {
 	
 	public function updateStatistics(){
 		set_time_limit(200);
+		$writeConn = MySQLiConnectionFactory::getCon("write");
 		echo '<li>Updating records with null families... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'SET o.family = ts.family '.
 			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "")';
-		$this->conn->query($sql);
-		echo $this->conn->affected_rows.' records updated</li>';
+		$writeConn->query($sql);
+		echo $writeConn->affected_rows.' records updated</li>';
 
 		echo '<li>Updating records with null author... ';
 		ob_flush();
@@ -208,8 +209,8 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
 			'SET o.scientificNameAuthorship = t.author '.
 			'WHERE o.scientificNameAuthorship IS NULL and t.author is not null';
-		$this->conn->query($sql);
-		echo $this->conn->affected_rows.' records updated</li>';
+		$writeConn->query($sql);
+		echo $writeConn->affected_rows.' records updated</li>';
 		
 		echo '<li>Updating total record count... ';
 		ob_flush();
@@ -217,7 +218,7 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done!</li> ';
 		
 		echo '<li>Updating family count... ';
@@ -227,7 +228,7 @@ class CollectionProfileManager {
 			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
 			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done!</li> ';
 		
 		echo '<li>Updating genus count... ';
@@ -238,7 +239,7 @@ class CollectionProfileManager {
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
 			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
 			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done!</li>';
 		
 		echo '<li>Updating species count... ';
@@ -249,7 +250,7 @@ class CollectionProfileManager {
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
 			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
 			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done</li>';
 		
 		echo '<li>Updating georeference count... ';
@@ -259,7 +260,7 @@ class CollectionProfileManager {
 			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
 			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done!</li>';
 
 		echo '<li>Updating georeference indexing... ';
@@ -270,10 +271,10 @@ class CollectionProfileManager {
 			'FROM omoccurrences o '.
 			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
 			'AND o.decimallongitude IS NOT NULL';
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		
 		$sql = 'DELETE FROM omoccurgeoindex WHERE InitialTimestamp < DATE_SUB(CURDATE(), INTERVAL 1 DAY)';
-		$this->conn->query($sql);
+		$writeConn->query($sql);
 		echo 'Done!</li>';
 		echo '<li>Finished updating collection statistics</li>';
 		
