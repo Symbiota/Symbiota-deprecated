@@ -33,7 +33,8 @@ class EOLManager {
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL '.
+			'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping EOL identifiers for '.$recCnt.' taxa</div>'."\n";
@@ -110,7 +111,8 @@ class EOLManager {
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
 			'WHERE ts1.taxauthid = 1 AND ii.imagetype NOT LIKE "%specimen%") i ON t.tid = i.tidaccepted '. 
-			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" LIMIT 5';
+			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" '.
+			'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping images for '.$recCnt.' taxa</div>'."\n";
@@ -143,8 +145,10 @@ class EOLManager {
 			$retArr = json_decode($content, true);
 			if(is_array($retArr) && array_key_exists('dataObjects',$retArr)){
 				$dataObjArr = $retArr['dataObjects'];
+				$imageFound = 0;
 				foreach($dataObjArr as $objArr){
 					if(array_key_exists('mimeType',$objArr) && $objArr['mimeType'] == 'image/jpeg'){
+						$imageFound = 1;
 						$resourceArr = array(); 
 						$locStr = '';
 						if(array_key_exists('mediaURL',$objArr)) $resourceArr['url'] = $objArr['mediaURL'];
@@ -153,19 +157,19 @@ class EOLManager {
 
 						if(array_key_exists('agents',$objArr)){
 							foreach($objArr['agents'] as $agentObj){
-								if($agentObj['full_name']) $resourceArr['photographer'] = $agentObj['full_name'];
+								if($agentObj['full_name']) $resourceArr['photographer'] = $this->cleanStr($agentObj['full_name']);
 								if($agentObj['role'] == 'photographer') break; 
 							}
 						}
-						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $objArr['description'];
-						if(array_key_exists('rights',$objArr)) $resourceArr['notes'] = $objArr['rights'];
-						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $objArr['title'];
-						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $objArr['rightsHolder'];
-						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $objArr['source'];
-						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $objArr['license'];
-						if(array_key_exists('location',$objArr)) $locStr = $objArr['location'];
+						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanStr($objArr['description']);
+						if(array_key_exists('rights',$objArr)) $resourceArr['notes'] = $this->cleanStr($objArr['rights']);
+						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanStr($objArr['title']);
+						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanStr($objArr['rightsHolder']);
+						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanStr($objArr['source']);
+						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $this->cleanStr($objArr['license']);
+						if(array_key_exists('location',$objArr)) $locStr = $this->cleanStr($objArr['location']);
 						if(array_key_exists('latitude',$objArr) && array_key_exists('longitude',$objArr)){
-							$locStr .= ' ('.$objArr['latitude'].', '.$objArr['longitude'].')';
+							$locStr .= ' ('.$this->cleanStr($objArr['latitude']).', '.$this->cleanStr($objArr['longitude']).')';
 						}
 						if($resourceArr){
 							$sql = 'INSERT INTO images(tid,url,thumbnailurl,photographer,caption,owner,sourceurl,copyright,locality,notes,sortsequence) '.
@@ -184,14 +188,15 @@ class EOLManager {
 								$retStatus = 1;
 							}
 							else{
-								echo '<li style="color:red;">ERROR: unable to map image: '.$sql.")</li>\n";
+								echo '<li style="color:red;">ERROR: unable to map image: '.$sql."</li>\n";
 							}
 						}
 					}
 				}
+				echo '<li>No images found</li>';
 			}
 			else{
-				echo '<li>No results returned</li>'."\n";
+				echo '<li>Scientific name not registered with EOL</li>'."\n";
 			}
 		}
 		ob_flush();
@@ -200,10 +205,33 @@ class EOLManager {
 		return $retStatus;
 	}
 
+	protected function encodeString($inStr){
+ 		global $charset;
+ 		$retStr = $inStr;
+		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				//$value = utf8_encode($value);
+				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+			}
+		}
+		elseif(strtolower($charset) == "iso-8859-1"){
+			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+				//$value = utf8_decode($value);
+				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+			}
+		}
+		return $retStr;
+	}
+	
 	private function cleanStr($str){
 		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = str_replace('"',"'",$newStr);
+		$newStr = str_replace(chr(9)," ",$newStr);
+		$newStr = str_replace(chr(10)," ",$newStr);
+		$newStr = str_replace(chr(13)," ",$newStr);
+
+		$newStr = $this->encodeString($newStr);
+		
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}

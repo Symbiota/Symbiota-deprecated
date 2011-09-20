@@ -239,12 +239,12 @@ class SurveyManager {
 					$this->taxonFilter."%'))) ";
 			}
 			else{
-				$sql .= "AND ((ts.UpperTaxonomy = '".$this->taxonFilter.') '.
-					"'OR (t.SciName Like '".$this->taxonFilter."%') ".
-					"OR (ts.Family = '".$this->taxonFilter."') ";
+				$sql .= 'AND ((ts.UpperTaxonomy = "'.$this->taxonFilter.'") '.
+					'OR (t.SciName Like "'.$this->taxonFilter.'%") '.
+					'OR (ts.Family = "'.$this->taxonFilter.'") ';
 				if($this->searchSynonyms){
-					$sql .= "OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid ".
-						"WHERE (ta.SciName Like '".$this->taxonFilter."%')))";
+					$sql .= 'OR (t.tid IN(SELECT tsa.tidaccepted FROM taxstatus tsa INNER JOIN taxa ta ON tsa.tid = ta.tid '.
+						'WHERE (ta.SciName Like "'.$this->taxonFilter.'%")))';
 				}
 				$sql .= ")";
 			}
@@ -265,9 +265,7 @@ class SurveyManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		if(is_numeric($tFilter)){
-			$this->taxonFilter = $this->conn->real_escape_string($tFilter);
-		}
+		$this->taxonFilter = $this->conn->real_escape_string($tFilter);
 	}
 	
 	public function setShowAuthors($value = 1){

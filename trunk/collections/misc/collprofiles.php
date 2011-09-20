@@ -187,7 +187,7 @@ if($collId){
 								</a>
 							</li>
 							<li>
-								<a href="collprofiles.php?action=Update Statistics" >
+								<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=Update Statistics" >
 									Update Statistics
 								</a>
 							</li>
