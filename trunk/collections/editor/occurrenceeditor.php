@@ -823,7 +823,7 @@ if($symbUid){
 														<option value="WRWY">Wyoming, Wind River</option>
 													</select>
 													<div style="margin:5px;">
-														<input type="button" value="Insert TRS Values" onclick="insertTRS()" />
+														<input type="button" value="Insert TRS Values" onclick="insertTRS(this.form)" />
 													</div>
 												</div>
 											</div>
