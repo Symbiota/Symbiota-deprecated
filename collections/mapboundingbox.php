@@ -100,7 +100,7 @@
     </script>
     <div style="width:500px;">Double click to pan and zoom, click once to start drawing and again to finish rectangle, and 
     click on the Submit button to transfer Coordinates.</div>
-    <div id='map' style='width: 500px; height: 400px'></div>
+    <div id='map' style='width:100%; height: 520px'></div>
 	<form id="mapForm" onsubmit="return updateParentForm();">
 		<table>
 			<tr><td>

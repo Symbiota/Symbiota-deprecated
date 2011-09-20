@@ -297,7 +297,7 @@ class OccurrenceEditorManager {
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
-			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy) ".
+			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy, observeruid) ".
 			"VALUES (".$occArr["collid"].",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
 			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
@@ -356,7 +356,7 @@ class OccurrenceEditorManager {
 			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
 			($occArr["labelproject"]?"\"".$occArr["labelproject"]."\"":"NULL").",".
 			($occArr["processingstatus"]?"\"".$occArr["processingstatus"]."\"":"NULL").",\"".
-			$occArr["userid"]."\") ";
+			$occArr["userid"]."\",".$occArr["observeruid"].") ";
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
 				$this->occId = $this->conn->insert_id;

@@ -57,13 +57,11 @@
     </script>
     <div>Pan and zoom by double clicking on map. Click once to capture coordinates.  
     Click on the Submit Coordinate button to transfer Coordinates. </div>
-    <div id='map' style='width: 620px; height: 500px'></div>
+    <div id='map' style='width: 100%; height: 520px'></div>
 	<form id="mapForm" onsubmit="return updateParentForm();">
 		<div>
-			Latitude: <input type="text" id="latbox" size="13" name="lat" value="" /> 
-		</div>
-		<div>
-			Longitude: <input type="text" id="lonbox" size="13" name="lon" value="" /> 
+			Latitude: <input type="text" id="latbox" size="13" name="lat" value="" />&nbsp;&nbsp;&nbsp; 
+			Longitude: <input type="text" id="lonbox" size="13" name="lon" value="" /> &nbsp;&nbsp;&nbsp;
 			<input type="submit" name="addcoords" value="Submit Coordinates" onclick="addCoordinates()" />	
 		</div>
 	</form>

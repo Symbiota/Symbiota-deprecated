@@ -696,6 +696,16 @@ function lookForDups(f){
 }
 
 //Form verification code
+function verifyFullFormEdits(f){
+	if(f.editedfields){
+		if(f.editedfields.value == ""){
+			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+			return false;
+		}
+	}
+	return verifyFullForm(f);
+}
+
 function verifyFullForm(f){
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
@@ -724,12 +734,6 @@ function verifyFullForm(f){
 	if(!isNumeric(f.duplicatequantity.value)){
 		alert("Duplicate Quantity field must be numeric only");
 		return false;
-	}
-	if(f.editedfields){
-		if(f.editedfields.value == ""){
-			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
-			return false;
-		}
 	}
 	return true;
 }
