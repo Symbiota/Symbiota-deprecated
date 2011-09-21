@@ -160,12 +160,10 @@ class SpecProcessorManager {
 			$imgId = 0;
 			$sql = 'SELECT imgid '.
 				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$imgUrl.$webUrl.'")';
-			echo $sql.'<br/>'; 
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$imgId = $r->imgid;
 			}
-			echo 'imgid: '.$imgId.'<br/>';
 			$rs->close();
 			$sql1 = 'INSERT images(occid,url';
 			$sql2 = 'VALUES ('.$occId.',"'.$imgUrl.$webUrl.'"';
@@ -183,7 +181,6 @@ class SpecProcessorManager {
 			}
 			$sql1 .= ',imagetype,owner) ';
 			$sql2 .= ',"specimen","'.$this->collectionName.'")';
-			echo $sql1.$sql2.'<br/>'; 
 			if(!$this->conn->query($sql1.$sql2)){
 				$status = false;
 				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
