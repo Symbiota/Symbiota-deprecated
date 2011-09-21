@@ -653,7 +653,7 @@ function insertElevFt(f){
 	}
 }
 
-function lookForDups(f){
+function lookForDupes(f){
 	var collName = f.recordedby.value;
 	var collNum = f.recordnumber.value;
 	var collDate = f.eventdate.value;
@@ -661,10 +661,10 @@ function lookForDups(f){
 		alert("Collector name and number must have a value to search for duplicates");
 		return;
 	}
-	document.getElementById("dupdisplayspan").style.display = "none";
-	document.getElementById("dupnonespan").style.display = "none";
-	document.getElementById("dupsearchspan").style.display = "block";
-	document.getElementById("dupspan").style.display = "block";
+	document.getElementById("dupedisplayspan").style.display = "none";
+	document.getElementById("dupenonespan").style.display = "none";
+	document.getElementById("dupesearchspan").style.display = "block";
+	document.getElementById("dupespan").style.display = "block";
 
 	//Check for matching records
 	dupXmlHttp = GetXmlHttpObject();
@@ -672,22 +672,22 @@ function lookForDups(f){
 		alert ("Your browser does not support AJAX!");
   		return;
 	}
-	var url = "rpc/querydups.php?cname=" + collName + "&cnum=" + collNum;
+	var url = "rpc/querydupes.php?cname=" + collName + "&cnum=" + collNum;
 	if(collDate) url = url + "&cdate=" + collDate;
 	dupXmlHttp.onreadystatechange=function(){
 		if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
 			var resObj = eval('(' + dupXmlHttp.responseText + ')')
 			if(resObj.length > 0){
-				document.getElementById("dupsearchspan").style.display = "none";
-				document.getElementById("dupdisplayspan").style.display = "block";
-				dupWindow=open("dupsearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
+				document.getElementById("dupesearchspan").style.display = "none";
+				document.getElementById("dupedisplayspan").style.display = "block";
+				dupWindow=open("dupesearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
 				if(dupWindow.opener == null) dupWindow.opener = self;
 				if(window.focus) {dupWindow.focus()}
-				document.getElementById("dupspan").style.display = "none";
+				document.getElementById("dupespan").style.display = "none";
 			}
 			else{
-				document.getElementById("dupsearchspan").style.display = "none";
-				document.getElementById("dupnonespan").style.display = "block";
+				document.getElementById("dupesearchspan").style.display = "none";
+				document.getElementById("dupenonespan").style.display = "block";
 			}
 		}
 	};

@@ -95,7 +95,7 @@ class EOLManager {
 		$sql = 'SELECT COUNT(t.tid) AS tidcnt '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND ii.imagetype NOT LIKE "%specimen%") i ON t.tid = i.tidaccepted '. 
+			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) i ON t.tid = i.tidaccepted '. 
 			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -111,7 +111,7 @@ class EOLManager {
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND ii.imagetype NOT LIKE "%specimen%") i ON t.tid = i.tidaccepted '. 
+			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) i ON t.tid = i.tidaccepted '. 
 			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" '.
 			'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
@@ -173,7 +173,7 @@ class EOLManager {
 							$locStr .= ' ('.$this->cleanStr($objArr['latitude']).', '.$this->cleanStr($objArr['longitude']).')';
 						}
 						if($resourceArr){
-							$sql = 'INSERT INTO images(tid,url,thumbnailurl,photographer,caption,owner,sourceurl,copyright,locality,notes,sortsequence) '.
+							$sql = 'INSERT INTO images(tid,url,thumbnailurl,photographer,caption,owner,sourceurl,copyright,locality,notes,imagetype,sortsequence) '.
 							'VALUES('.$tid.',"'.$resourceArr['url'].'",'.
 							(array_key_exists('urltn',$resourceArr)?'"'.$resourceArr['urltn'].'"':'NULL').','.
 							(array_key_exists('photographer',$resourceArr)?'"'.$resourceArr['photographer'].'"':'NULL').','.
@@ -183,7 +183,7 @@ class EOLManager {
 							(array_key_exists('license',$resourceArr)?'"'.$resourceArr['license'].'"':'NULL').','.
 							($locStr?'"'.$locStr.'"':'NULL').','.
 							(array_key_exists('notes',$resourceArr)?'"'.$resourceArr['notes'].'"':'NULL').
-							',40)';
+							',"field image",40)';
 							if($this->conn->query($sql)){
 								echo '<li>Image mapped successfully</li>'."\n";
 								$retStatus = 1;

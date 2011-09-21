@@ -501,7 +501,7 @@ if($symbUid){
 												<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateModified(this);" />
 											</span>
 											<span style="margin-left:5px;cursor:pointer;" onclick="">
-												<input type="button" value="Dups" tabindex="12" onclick="lookForDups(this.form);" />
+												<input type="button" value="Dupes" tabindex="12" onclick="lookForDupes(this.form);" />
 											</span>
 										</div>
 										<div style="margin-top:5px;">
@@ -514,10 +514,10 @@ if($symbUid){
 													<img class="dwcimg" src="../../images/qmark.png" />
 												</a>
 											</span>
-											<div id="dupspan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
-												<span id="dupsearchspan">Looking for Dups...</span>
-												<span id="dupnonespan" style="display:none;color:red;">No Dups Found</span>
-												<span id="dupdisplayspan" style="display:none;color:red;">Displaying Dups</span>
+											<div id="dupespan" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
+												<span id="dupesearchspan">Looking for Dupes...</span>
+												<span id="dupenonespan" style="display:none;color:red;">No Dupes Found</span>
+												<span id="dupedisplayspan" style="display:none;color:red;">Displaying Dupes</span>
 											</div>
 										</div>
 										<div>
@@ -1017,8 +1017,8 @@ if($symbUid){
 													<option value='OCR processed' <?php echo ($pStatus=='OCR processed'?'SELECTED':''); ?>>
 														OCR processed
 													</option>
-													<option value='OCR parsed' <?php echo ($pStatus=='OCR parsed'?'SELECTED':''); ?>>
-														OCR parsed
+													<option value='OCR parsed' <?php echo ($pStatus=='NLP parsed'?'SELECTED':''); ?>>
+														NLP parsed
 													</option>
 													<option value='pending duplicate' <?php echo ($pStatus=='pending duplicate'?'SELECTED':''); ?>>
 														pending duplicate

@@ -198,6 +198,8 @@ class SpecProcessorManager {
 			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
 	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>\n";
 		}
+		ob_flush();
+		flush();
 		return $status;
 	}
 
