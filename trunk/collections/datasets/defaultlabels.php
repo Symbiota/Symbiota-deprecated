@@ -117,7 +117,7 @@ else{
 											?>
 											<span class="sciname">
 												<i><?php echo $scinameStr; ?></i>
-											</span> 
+											</span>&nbsp;&nbsp;
 											<span class="scientificnameauthorship"><?php echo $r->scientificnameauthorship; ?></span>
 										</div>
 										<?php 
