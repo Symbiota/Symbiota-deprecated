@@ -88,7 +88,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 					}
         		}
 			}
-			//$this->conn->query('CALL UpdateCollectionStats('.$this->collId.')');
+			$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'SET i.tid = o.tidinterpreted '.
+				'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+			$this->conn->query($sql);
 		}
    		closedir($imgFH);
 	}
@@ -138,8 +141,14 @@ class SpecProcessorImage extends SpecProcessorManager{
 	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
 	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
 	        			}
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg");
+	        			}
 	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg")){
 	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg");
+	        			}
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg");
 	        			}
 					}
 					else{
