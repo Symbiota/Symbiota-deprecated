@@ -157,46 +157,47 @@ class SpecProcessorManager {
 			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
-			$recCnt = 0;
-			$sql = 'SELECT imgid FROM images WHERE (occid = '.$occId.') AND (url = "'.$imgUrl.$webUrl.'")';
+			$imgId = 0;
+			$sql = 'SELECT imgid '.
+				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$imgUrl.$webUrl.'")';
 			$rs = $this->conn->query($sql);
-			if($rs){
-				$recCnt = $rs->num_rows;
-				$rs->close();
+			if($r = $rs->fetch_object()){
+				$imgId = $rs->imgid;
 			}
-			if($recCnt){
-				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
+			$rs->close();
+			$sql1 = 'INSERT images(occid,url';
+			$sql2 = 'VALUES ('.$occId.',"'.$imgUrl.$webUrl.'"';
+			if($imgId){
+				$sql1 = 'REPLACE images(imgid,occid,url';
+				$sql2 = 'VALUES ('.$imgId.','.$occId.',"'.$imgUrl.$webUrl.'"';
+			}
+			if($tnUrl){
+				$sql1 .= ',thumbnailurl';
+				$sql2 .= ',"'.$imgUrl.$tnUrl.'"';
+			}
+			if($oUrl){
+				$sql1 .= ',originalurl';
+				$sql2 .= ',"'.$imgUrl.$oUrl.'"'; 
+			}
+			$sql1 .= ',imagetype,owner) ';
+			$sql2 .= ',"specimen","'.$this->collectionName.'")';
+			if(!$this->conn->query($sql1.$sql2)){
+				$status = false;
+				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
+			}
+			if($imgId){
+				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced \n");
+				echo "<li style='margin-left:20px;'>Existing image database record replaced</li>\n";
 			}
 			else{
-				$sql1 = 'INSERT images(occid,url';
-				$sql2 = 'VALUES ('.$occId.',"'.$imgUrl.$webUrl.'"';
-				if($tnUrl){
-					$sql1 .= ',thumbnailurl';
-					$sql2 .= ',"'.$imgUrl.$tnUrl.'"';
-				}
-				if($oUrl){
-					$sql1 .= ',originalurl';
-					$sql2 .= ',"'.$imgUrl.$oUrl.'"'; 
-				}
-				$sql1 .= ',imagetype,owner) ';
-				$sql2 .= ',"specimen","'.$this->collectionName.'")';
-				if(!$this->conn->query($sql1.$sql2)){
-					$status = false;
-					if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
-				}
+				echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
+				if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
 			}
 		}
 		else{
 			$status = false;
 			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
-		}
-		if($status){
-			echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
-			if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
-		}
-		else{
-			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
-	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>\n";
+	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image into database. See error log for details</li>\n";
 		}
 		ob_flush();
 		flush();
