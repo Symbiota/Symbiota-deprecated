@@ -446,7 +446,7 @@ class OccurrenceEditorManager {
 		return array_intersect_key($fArr,array_flip($locArr)); 
 	}
 
-	//Used in dupsearch.php
+	//Used in dupesearch.php
 	public function getDupOccurrences($oid,$occidStr){
 		$occurrenceMap = Array();
 		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.

@@ -10,7 +10,7 @@ $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
 $occId = (array_key_exists('occid',$_GET)?$_GET['occid']:'');
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
-$dupManager = new OccurrenceEditorManager();
+$dupeManager = new OccurrenceEditorManager();
 $occArr = array();
 if($occidStr) $occArr = $dupManager->getDupOccurrences($oid,$occidStr);
 
@@ -29,7 +29,7 @@ if($submitAction){
 	if($isEditor){
 		if($submitAction == 'mergerecs'){
 			$onLoadStr = 'window.close()';
-			$statusStr = $dupManager->mergeRecords($oid,$occId);
+			$statusStr = $dupeManager->mergeRecords($oid,$occId);
 			if($statusStr){
 				$onLoadStr = '';
 			}
@@ -196,7 +196,7 @@ if($submitAction){
 						if($oid){ 
 							?>
 							<span style="margin-left:30px;">
-								<a href="dupsearch.php?submitaction=mergerecs&oid=<?php echo $oid.'&occid='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
+								<a href="dupesearch.php?submitaction=mergerecs&oid=<?php echo $oid.'&occid='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 									Merge Records
 								</a>
 							</span>

@@ -2,6 +2,8 @@
 
 class SpecProcessorImage extends SpecProcessorManager{
 
+	private $sourceImg;
+	
 	function __construct($logPath){
 		parent::__construct($logPath);
 	}
@@ -86,7 +88,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 					}
         		}
 			}
-			$this->conn->query('CALL UpdateCollectionStats('.$this->collId.')');
+			//$this->conn->query('CALL UpdateCollectionStats('.$this->collId.')');
 		}
    		closedir($imgFH);
 	}
@@ -94,7 +96,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	public function processImageFile($fileName,$pathFrag = ''){
 		//Grab Primary Key
 		$specPk = '';
-        if($this->specKeyRetrieval == 'ocr'){
+		if($this->specKeyRetrieval == 'ocr'){
         	//OCR process image and grab primary key from OCR return
         	$labelBlock = $this->ocrImage();
         	$specPk = $this->getPrimaryKey($fileName);
@@ -153,6 +155,9 @@ class SpecProcessorImage extends SpecProcessorManager{
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
 				echo "<li>Starting to load: ".$fileName."</li>\n";
 				if($this->logFH) fwrite($this->logFH, "Starting to load (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
+				ob_flush();
+				flush();
+				
 				//Create web image
 				$webImgCreated = false;
 				if($this->createWebImg && $width > $this->webPixWidth){
@@ -208,6 +213,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully (".date('Y-m-d h:i:s A').")!\n");
 					}
 				}
+				if($this->sourceImg){
+					imagedestroy($this->sourceImg);
+					$this->sourceImg = null;
+				}
         	}
 			else{
 				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record (".date('Y-m-d h:i:s A').") \n");
@@ -220,15 +229,17 @@ class SpecProcessorImage extends SpecProcessorManager{
 			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
 			echo "<li style='margin-left:10px;'>File skipped, unable to extract specimen identifier</li>\n";
 		}
+		ob_flush();
+		flush();
 	}
 
 	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
 		$status = false;
-		$sourceImg = imagecreatefromjpeg($sourcePath);
-		ini_set('memory_limit','512M');
+		if(!$this->sourceImg) $this->sourceImg = imagecreatefromjpeg($sourcePath);
+		//ini_set('memory_limit','512M');
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
-		imagecopyresized($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
+		imagecopyresized($tmpImg,$this->sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
 		if(imagejpeg($tmpImg, $targetPath, $this->jpgCompression)){
 			$status = true;
 		}
@@ -236,7 +247,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
 			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
 		}
-		imagedestroy($sourceImg);
+		//if($this->sourceImg) imagedestroy($this->sourceImg);
 		imagedestroy($tmpImg);
 		return $status;
 	}
