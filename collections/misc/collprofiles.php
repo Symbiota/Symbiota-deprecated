@@ -193,12 +193,17 @@ if($collId){
 							</li>
 							<li>
 								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
-									Upload Data
+									Import/Update Specimen Records
+								</a>
+							</li>
+							<li>
+								<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
+									Batch Load Specimen Images
 								</a>
 							</li>
 							<li>
 								<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
-									Review/Verify Specimen Edits 
+									Review/Verify General Specimen Edits 
 								</a>
 							</li>
 							<!-- 

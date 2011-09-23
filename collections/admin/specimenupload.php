@@ -596,7 +596,7 @@ else{
 		//Upload records
  		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
  		echo "<ol style='margin:10px;font-weight:bold;'>";
- 		echo "<listyle='font-weight:bold;'>Starting Data Upload</li>";
+ 		echo "<li style='font-weight:bold;'>Starting Data Upload</li>";
  		$duManager->uploadData($finalTransfer);
 		echo "</ol>";
  		if($duManager->getTransferCount() && !$finalTransfer){
@@ -622,7 +622,10 @@ else{
 		}
  	}
 	elseif(stripos($action,"transfer") !== false || $finalTransfer){
+		echo '<ol>';
 		$duManager->performFinalTransfer();
+		echo '<li style="font-weight:bold;">Upload Procedure Complete';
+		echo '</ol>';
 	}
 	elseif($action == "addprofile"){
 		?>
