@@ -372,30 +372,37 @@ class SpecUploadManager{
  	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 	 	$this->readUploadParameters();
- 		if($this->uploadType == $this->STOREDPROCEDURE){
+
+	 	//First, delete all records in uploadspectemp table associated with this collection
+		$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
+		$this->conn->query($sqlDel);
+
+	 	if($this->uploadType == $this->STOREDPROCEDURE){
 			$this->finalUploadSteps($finalTransfer);
  		}
  		elseif($this->uploadType == $this->SCRIPTUPLOAD){
  			if(system($this->queryStr)){
-				echo "<li style='font-weight:bold;'>Script Upload successful.</li>";
-				echo "<li style='font-weight:bold;'>Initializing final transfer steps...</li>";
+				echo '<li style="font-weight:bold;">Script Upload successful.</li>';
+				echo '<li style="font-weight:bold;">Initializing final transfer steps...</li>';
  				$this->finalUploadSteps($finalTransfer);
  			}
  		}
-	}
+		ob_flush();
+		flush();
+ 	}
 
 	public function finalUploadSteps($finalTransfer){
 		//Run cleanup Stored Procedure, if one exists 
 		if($this->storedProcedure){
 			try{
-				if($this->conn->query("CALL ".$this->storedProcedure.";")){
-					echo "<li>";
-					echo "Stored procedure executed: ".$this->storedProcedure;
-					echo "</li>";
+				if($this->conn->query('CALL '.$this->storedProcedure)){
+					echo '<li style="font-weight:bold;">';
+					echo 'Stored procedure executed: '.$this->storedProcedure;
+					echo '</li>';
 				}
 			}
 			catch(Exception $e){
-				echo '<li>ERROR: Record cleaning failed ('.$this->storedProcedure.')</li>';
+				echo '<li style="color:red;">ERROR: Record cleaning failed ('.$this->storedProcedure.')</li>';
 			}
 		}
 		if(!$this->transferCount){
@@ -406,64 +413,317 @@ class SpecUploadManager{
 			}
 			$rs->close();
 		}
+		ob_flush();
+		flush();
 		if($finalTransfer){
 			$this->performFinalTransfer();
+			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
 		}
 		else{
-			echo '<li>Upload Procedure Complete';
+			echo '<li style="font-weight:bold;">Upload Procedure Complete';
 			if($this->transferCount) echo ': '.$this->transferCount.' records';
 			echo '</li>';
-			if($this->transferCount) echo '<li>Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
+			if($this->transferCount) echo '<li style="font-weight:bold;">Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
 		}
 	}
 
 	public function performFinalTransfer(){
-/*		$sql = 'SELECT count(*) AS reccnt FROM uploadspectemp WHERE dbpk IS NULL AND (collid = '.$this->collId.')';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$recCnt = $r->reccnt;
-			if($recCnt > 0){
-				$newPk = 1;
-				$sqlMax = 'SELECT IFNULL(MAX(dbpk+1),1) AS maxpk FROM omoccurrences WHERE (collid = '.$this->collId.')';
-				$rsMax = $this->conn->query($sqlMax);
-				if($rMax = $rsMax->fetch_object()){
-					$newPk = $rMax->maxpk;
-				}
-				$rsMax->close();
-				$this->conn->query('ALTER TABLE uploadspectemp DISABLE KEYS');
-				for($x = 0;$x < $recCnt; $x++){
-					$sqlI = 'UPDATE uploadspectemp SET dbpk = '.$newPk.' WHERE dbpk IS NULL LIMIT 1';
-					$this->conn->query($sqlI);
-					$newPk++;
-				}
-				$this->conn->query('ALTER TABLE uploadspectemp ENABLE KEYS');
-			}
-		}
-		$rs->close();
-		if(strpos($this->collMetadataArr["managementtype"],'Live') !== false){
-			//Verify that dbpk is unique; should be but let's make sure 
-			$sql = 'SELECT count(u.dbpk) AS mcnt '.
-				'FROM omoccurrences o INNER JOIN uploadspectemp u ON o.dbpk = u.dbpk '.
-				'WHERE (o.collid = '.$this->collId.') AND (u.collid = '.$this->collId.')';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				if($r->mcnt > 0){
-					echo 'ERROR: DBPKs are not unique; necessary for importing into a Live Dataset ';
-					return;
-				}
-			}
-			$rs->close();
-		}
-*/		
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(800);
-		$spCallStr = "CALL TransferUploads(".$this->collId.")";
-		if($this->conn->query($spCallStr)){
-			echo "<li>Upload Procedure Complete! </li>";
+
+		echo '<li style="font-weight:bold;">Update event date fields...';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadspectemp u '.
+			'SET u.year = YEAR(u.eventDate) '.
+			'WHERE u.collid = '.$this->collId.' AND u.eventDate IS NOT NULL AND (u.year IS NULL OR u.year = 0)';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u '.
+			'SET u.month = MONTH(u.eventDate) '.
+			'WHERE u.collid = '.$this->collId.' AND (u.month IS NULL OR u.month = 0) AND u.eventDate IS NOT NULL';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u '.
+			'SET u.day = DAY(u.eventDate) '.
+			'WHERE u.collid = '.$this->collId.' AND (u.day IS NULL OR u.day = 0) AND u.eventDate IS NOT NULL';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u '.
+			'SET u.startDayOfYear = DAYOFYEAR(u.eventDate) '.
+			'WHERE u.collid = '.$this->collId.' AND u.startDayOfYear IS NULL AND u.eventDate IS NOT NULL';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u '.
+			'SET u.endDayOfYear = DAYOFYEAR(u.LatestDateCollected) '.
+			'WHERE u.collid = '.$this->collId.' AND u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+
+		echo '<li style="font-weight:bold;">Cleaning taxonomy and link to taxonomic thesaurus...';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE taxa t INNER JOIN uploadspectemp u ON t.SciName = u.SciName '.
+			'SET u.LocalitySecurity = t.SecurityStatus '.
+			'WHERE u.collid = '.$this->collId.' AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL)';
+		$this->conn->query($sql);
+		
+		$taxonRank = 'ssp.';
+		$sql = 'SELECT distinct unitind3 FROM taxa '.
+			'WHERE unitind3 = "ssp." OR unitind3 = "subsp."';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$taxonRank = $r->unitind3;
 		}
-		else{
-			echo "<li>Unable to complete transfer. Please contact system administrator</li>";
-		}
+		$rs->close();
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname," '.($taxonRank=='subsp.'?'ssp.':'subsp.').' "," '.$taxonRank.' ") '.
+			'WHERE s.sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," var "," var. ") WHERE s.sciname like "% var %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname," cf. "," "), s.identificationQualifier = CONCAT_WS("; ","cf.",s.identificationQualifier), tidinterpreted = null '.
+			'WHERE s.sciname like "% cf. %"';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname," cf "," "), s.identificationQualifier = CONCAT_WS("; ","cf.",s.identificationQualifier), tidinterpreted = null '.
+			'WHERE s.sciname like "% cf %"';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = REPLACE(s.sciname," aff. "," "), s.identificationQualifier = CONCAT_WS("; ","aff.",s.identificationQualifier), tidinterpreted = null '.
+			'WHERE sciname like "% aff. %"';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = REPLACE(s.sciname," aff "," "), s.identificationQualifier = CONCAT_WS("; ","aff.",s.identificationQualifier), tidinterpreted = null '.
+			'WHERE sciname like "% aff %"';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = trim(s.sciname), tidinterpreted = null '.
+			'WHERE sciname like "% " OR sciname like " %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname,"   "," ") '.
+			'WHERE sciname like "%   %"';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname,"  "," ") '.
+			'WHERE sciname like "%  %"';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname," sp.","") '.
+			'WHERE sciname like "% sp."';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp s '.
+			'SET s.sciname = replace(s.sciname," sp","") '.
+			'WHERE sciname like "% sp"';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET specificepithet = NULL '.
+			'WHERE specificepithet = "sp." OR specificepithet = "sp"';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp s INNER JOIN taxa t ON s.sciname = t.sciname '.
+			'SET s.TidInterpreted = t.tid WHERE s.TidInterpreted IS NULL';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
+			'SET u.family = ts.family '.
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.genus = t.unitname1 '.
+			'INNER JOIN taxstatus ts on t.tid = ts.tid '.
+			'SET u.family = ts.family '.
+			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.tidinterpreted = t.tid '.
+			'SET u.scientificNameAuthorship = t.author '.
+			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+
+		echo '<li style="font-weight:bold;">Cleaning illegal and errored coordinates...';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude '.
+			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico")';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
+			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
+			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
+			'WHERE DecimalLongitude < -180 OR DecimalLongitude > 180';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET verbatimCoordinates = CONCAT_WS("; ",verbatimCoordinates,CONCAT("UTM: ",UtmZoning," ",UtmNorthing,"N ",UtmEasting,"E")) '.
+			'WHERE UtmNorthing IS NOT NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+
+		echo '<li style="font-weight:bold;">Linking existing record in preparation for updating... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
+			'SET u.occid = o.occid '.
+			'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+
+		echo '<li style="font-weight:bold;">Updating existing occurrence records... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+			'SET o.basisOfRecord = u.basisOfRecord, o.occurrenceID = u.occurrenceID, o.catalogNumber = u.catalogNumber, '.
+			'o.otherCatalogNumbers = u.otherCatalogNumbers, o.ownerInstitutionCode = u.ownerInstitutionCode, o.family = u.family, '.
+			'o.scientificName = u.scientificName, o.sciname = u.sciname, o.genus = u.genus, o.institutionID = u.institutionID, '.
+			'o.collectionID = u.collectionID, o.specificEpithet = u.specificEpithet, o.datasetID = u.datasetID, o.taxonRank = u.taxonRank, '.
+			'o.infraspecificEpithet = u.infraspecificEpithet, o.institutionCode = u.institutionCode, o.collectionCode = u.collectionCode, '.
+			'o.scientificNameAuthorship = u.scientificNameAuthorship, o.taxonRemarks = u.taxonRemarks, o.identifiedBy = u.identifiedBy, '.
+			'o.dateIdentified = u.dateIdentified, o.identificationReferences = u.identificationReferences, '.
+			'o.identificationRemarks = u.identificationRemarks, o.identificationQualifier = u.identificationQualifier, o.typeStatus = u.typeStatus, '.
+			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, '.
+			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
+			'o.year = u.year, o.month = u.month, o.day = u.day, o.startDayOfYear = u.startDayOfYear, o.endDayOfYear = u.endDayOfYear, '.
+			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.fieldNotes = u.fieldNotes, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
+			'o.associatedOccurrences = u.associatedOccurrences, o.associatedTaxa = u.associatedTaxa, '.
+			'o.dynamicProperties = u.dynamicProperties, o.verbatimAttributes = u.verbatimAttributes, '.
+			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, o.establishmentMeans = u.establishmentMeans, '.
+			'o.country = u.country, o.stateProvince = u.stateProvince, o.county = u.county, o.municipality = u.municipality, o.locality = u.locality, '.
+			'o.localitySecurity = u.localitySecurity, o.localitySecurityReason = u.localitySecurityReason, o.decimalLatitude = u.decimalLatitude, o.decimalLongitude = u.decimalLongitude, '.
+			'o.geodeticDatum = u.geodeticDatum, o.coordinateUncertaintyInMeters = u.coordinateUncertaintyInMeters, '.
+			'o.coordinatePrecision = u.coordinatePrecision, o.locationRemarks = u.locationRemarks, o.verbatimCoordinates = u.verbatimCoordinates, '.
+			'o.verbatimCoordinateSystem = u.verbatimCoordinateSystem, o.georeferencedBy = u.georeferencedBy, o.georeferenceProtocol = u.georeferenceProtocol, '.
+			'o.georeferenceSources = u.georeferenceSources, o.georeferenceVerificationStatus = u.georeferenceVerificationStatus, '.
+			'o.georeferenceRemarks = u.georeferenceRemarks, o.minimumElevationInMeters = u.minimumElevationInMeters, '.
+			'o.maximumElevationInMeters = u.maximumElevationInMeters, o.verbatimElevation = u.verbatimElevation, '.
+			'o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, '.
+			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.duplicateQuantity = u.duplicateQuantity '.
+			'WHERE u.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+
+		echo '<li style="font-weight:bold;">Inserting new records into active occurrence table... ';
+		ob_flush();
+		flush();
+		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, family, scientificName, '.
+			'sciname, genus, institutionID, collectionID, specificEpithet, datasetID, taxonRank, infraspecificEpithet, institutionCode, collectionCode, '.
+			'scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
+			'identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
+			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, fieldNotes, occurrenceRemarks, informationWithheld, '.
+			'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, stateProvince, '.
+			'county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, '.
+			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
+			'georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, '.
+			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, duplicateQuantity ) '.
+			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.occurrenceID, u.catalogNumber, u.otherCatalogNumbers, u.ownerInstitutionCode, '.
+			'u.family, u.scientificName, '.
+			'u.sciname, u.genus, u.institutionID, u.collectionID, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
+			'u.institutionCode, u.collectionCode, u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, '.
+			'u.identificationReferences, u.identificationRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, '.
+			'u.associatedCollectors, u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, '.
+			'u.endDayOfYear, u.verbatimEventDate, u.habitat, u.fieldNotes, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, u.associatedTaxa, '.
+			'u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, u.country, u.stateProvince, u.county, '.
+			'u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, '.
+			'u.coordinatePrecision, u.locationRemarks, u.verbatimCoordinates, u.verbatimCoordinateSystem, u.georeferencedBy, u.georeferenceProtocol, '.
+			'u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters, '.
+			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.duplicateQuantity '.
+			'FROM uploadspectemp u '.
+			'WHERE u.occid IS NULL AND u.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li style="font-weight:bold;">Updating georeference indexing... ';
+		ob_flush();
+		flush();
+		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
+			'SELECT DISTINCT u.tidinterpreted, round(u.decimallatitude,3), round(u.decimallongitude,3) '.
+			'FROM uploadspectemp u '.
+			'WHERE u.tidinterpreted IS NOT NULL AND u.decimallatitude IS NOT NULL '.
+			'AND u.decimallongitude IS NOT NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+		
+		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo '<li style="font-weight:bold;">Collection transfer process finished</li>';
+		
+		//Update collection stats
+		echo '<li style="font-weight:bold;">Updating Collection Statistics</li>';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		echo '<li style="margin-left:10px;">Updating total record count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li style="margin-left:10px;">Updating family count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
+			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li style="margin-left:10px;">Updating genus count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
+			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+
+		echo '<li style="margin-left:10px;">Updating species count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
+			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done</li>';
+		
+		echo '<li style="margin-left:10px;">Updating georeference count... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omcollectionstats cs '.
+			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
+			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
+			'WHERE cs.collid = '.$this->collId;
+		$this->conn->query($sql);
+		echo 'Done!</li>';
 	}
 
 	public function getFieldMap(){
