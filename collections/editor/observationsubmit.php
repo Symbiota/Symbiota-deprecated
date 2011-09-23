@@ -310,10 +310,10 @@ if($collMap){
 					if($clArr){
 						?>
 						<fieldset>
-							<legend><b>Voucher Linkage</b></legend>
-							Flora: 
+							<legend><b>Link to Checklist as Voucher</b></legend>
+							Species List: 
 							<select name='clid'>
-								<option value="0">Link to a Checklist</option>
+								<option value="0">Select Checklist</option>
 								<option value="0">------------------------------</option>
 								<?php 
 								foreach($clArr as $id => $clName){

@@ -351,24 +351,34 @@ class ObservationSubmitManager {
 	
 	public function getChecklists($userRights){
 		$retArr = Array();
-		$sql = 'SELECT clid,name FROM fmchecklists WHERE access != "private" ';
-		if(!array_key_exists("SuperAdmin",$userRights) && array_key_exists('ClAdmin',$userRights)){
-			$sql .= 'AND clid IN('.implode(',',$collArr).') ';
+		$clStr = '';
+		if(array_key_exists('ClAdmin',$userRights)){
+			$clStr = implode(',',$userRights['ClAdmin']);
 		}
-		$sql .= 'ORDER BY name';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr['cl'.$row->clid] = $row->name;
+		if(array_key_exists("SuperAdmin",$userRights) || $clStr){
+			$sql = 'SELECT clid,name FROM fmchecklists WHERE access != "private" ';
+			if(!array_key_exists("SuperAdmin",$userRights) && $clStr){
+				$sql .= 'AND clid IN('.$clStr.') ';
+			}
+			$sql .= 'ORDER BY name';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$retArr['cl'.$row->clid] = $row->name;
+			}
+	
+			//Add biodiversity survey projects
+			$sql = 'SELECT surveyid, projectname FROM omsurveys WHERE ispublic = 1 ';
+			if(!array_key_exists("SuperAdmin",$userRights) && $clStr){
+				$sql .= 'AND surveyid IN('.$clStr.') ';
+			}
+			$sql .= 'ORDER BY projectname';
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$retArr['sv'.$row->surveyid] = $row->projectname;
+			}
+			asort($retArr);
 		}
-
-		//Add biodiversity survey projects
-		$sql = 'SELECT surveyid, projectname FROM omsurveys WHERE ispublic = 1 ';
-		$sql .= 'ORDER BY projectname';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr['sv'.$row->surveyid] = $row->projectname;
-		}
-		asort($retArr);
 		return $retArr;
 	}
 	
