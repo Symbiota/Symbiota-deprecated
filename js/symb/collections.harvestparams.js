@@ -6,7 +6,7 @@
 
 $(document).ready(function() {
 
-	$("#taxa").autocomplete({ source: "rpc/taxalist.php" },{ minLength: 3, autoFocus: true, delay: 400 });
+	$("#taxa").autocomplete({ source: "rpc/taxalist.php" },{ minLength: 3, delay: 400 });
 	
 	/*	var cache = {}, lastXhr;
 	$( "#taxa" ).autocomplete({
