@@ -77,8 +77,8 @@ class SpecUploadDirect extends SpecUploadManager {
 						}
 						foreach($this->fieldMap as $symbField => $sourceField){
 							$value = $row[$sourceField["field"]];
-							$value = $this->cleanString($value);
 							$value = $this->encodeString($value);
+							$value = $this->cleanString($value);
 							$type = (array_key_exists('type',$sourceField)?$sourceField['type']:'');
 							$size = (array_key_exists("size",$sourceField)?$sourceField['size']:0);
 							

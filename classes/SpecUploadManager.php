@@ -788,8 +788,7 @@ class SpecUploadManager{
 
 	protected function cleanString($inStr){
 		$retStr = trim($inStr);
-
-		$retStr = str_replace("\"","'",$retStr);
+		$retStr = str_replace('"',"'",$retStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
 		$retStr = str_replace(chr(11),' ',$retStr);
 		$retStr = str_replace(chr(13),' ',$retStr);
