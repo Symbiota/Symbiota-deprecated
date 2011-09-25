@@ -96,7 +96,7 @@ class SpecUploadFile extends SpecUploadManager{
 							foreach($spKeys as $specName){
 								$valueStr = trim($recordArr[$x]);
 								//If value is encloded by quotes, remove the quotes
-								if(substr($valueStr,0,1) == "\"" && substr($valueStr,-1) == "\""){
+								if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
 									$valueStr = substr($valueStr,1,strlen($valueStr)-2);
 								}
 								$valueStr = $this->cleanString($valueStr);
@@ -114,7 +114,7 @@ class SpecUploadFile extends SpecUploadManager{
 											$sqlValues .= ',"'.$valueStr.'"';
 										} 
 										elseif(($dateStr = strtotime($valueStr))){
-											$sqlValues .= ",\"".date('Y-m-d H:i:s', $dateStr)."\"";
+											$sqlValues .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
 										} 
 										else{
 											$sqlValues .= ",NULL";
@@ -125,7 +125,7 @@ class SpecUploadFile extends SpecUploadManager{
 											$valueStr = substr($valueStr,0,$size);
 										}
 										if($valueStr){
-											$sqlValues .= ",\"".$valueStr."\"";
+											$sqlValues .= ',"'.$valueStr.'"';
 										}
 										else{
 											$sqlValues .= ",NULL";

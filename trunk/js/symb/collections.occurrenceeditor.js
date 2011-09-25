@@ -26,7 +26,10 @@ $(document).ready(function() {
 	{ minLength: 3, autoFocus: true });
 
 	//Misc fields with lookups
-	$("#ffcountry").autocomplete( { source: countryArr },{ minLength: 1, autoFocus: true, matchContains: false } );
+	$("#ffcountry").autocomplete( 
+		{ source: countryArr },
+		{ minLength: 1, autoFocus: true } 
+	);
 
 	$("#ffstate").autocomplete(
 		{source: function( request, response ) {

@@ -88,7 +88,7 @@ class SpecUploadDirect extends SpecUploadManager {
 								} 
 								elseif($datetime = strtotime($value)){
 									$value = date('Y-m-d H:i:s',$datetime);
-									$sqlInsertValues .= ",\"".$value."\"";
+									$sqlInsertValues .= ',"'.$value.'"';
 								}
 								else{
 									$sqlInsertValues .= ",null";
@@ -107,7 +107,7 @@ class SpecUploadDirect extends SpecUploadManager {
 									$value = substr($value,0,$size);
 								}
 								if($value){
-									$sqlInsertValues .= ",\"".$value."\"";
+									$sqlInsertValues .= ',"'.$value.'"';
 								}
 								else{
 									$sqlInsertValues .= ",NULL";
