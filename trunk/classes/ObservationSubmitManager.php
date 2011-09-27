@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once('PelJpeg.php');
 
 class ObservationSubmitManager {
 
@@ -14,7 +15,13 @@ class ObservationSubmitManager {
 	private $webPixWidth = 1400;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 250000;
-	
+	private $processUsingImageMagick = 0;
+
+	private $sourceGdImg;
+	//private $sourceImagickImg;
+	private $exif;
+	private $errArr = array();
+
 	public function __construct($collId = 0){
 		$this->collId = $collId;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -41,6 +48,8 @@ class ObservationSubmitManager {
 
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
+		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
+		//if($this->sourceImagickImg) $this->sourceImagickImg->clear();
 	}
 
 	public function addObservation($occArr, $obsUid){
@@ -323,32 +332,82 @@ class ObservationSubmitManager {
 	}
 	
 	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 0){
-        $successStatus = false;
+		$successStatus = 0;
 		list($sourceWidth, $sourceHeight) = getimagesize($sourceImg);
-        $newWidth = $targetWidth;
-        $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
-        if($newHeight > $targetWidth*1.2){
-        	$newHeight = $targetWidth;
-        	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
-        }
+		$newWidth = $targetWidth;
+		$newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
+		if($newHeight > $targetWidth*1.2){
+			$newHeight = $targetWidth;
+			$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
+		}
+		/*
+		if($this->processUsingImageMagick) {
+			// Usa ImageMagick to resize images 
+			$this->createNewImageMagick($sourceImg,$targetPath,$newWidth,$qualityRating);
+		} 
+		else
+		*/ 
+		if(extension_loaded('gd') && function_exists('gd_info')) {
+			// GD is installed and working 
+			$this->createNewImageGD($sourceImg,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating);
+		}
+		else{
+			// Neither ImageMagick nor GD are installed 
+			$this->errArr[] = 'No appropriate image handler to remove EXIF data';
+		}
+		return $successStatus;
+	}
 
-       	$newImg = imagecreatefromjpeg($sourceImg);  
+	private function createNewImageGD($sourceImg,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating){
+		$successStatus = 0;
 
-    	$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+	   	if(!$this->sourceGdImg){
+	   		$this->sourceGdImg = imagecreatefromjpeg($sourceImg);
+			if(class_exists('PelJpeg')){
+				$inputJpg = new PelJpeg($this->sourceGdImg);
+				$this->exif = $inputJpg->getExif();
+			}
 
-		imagecopyresampled($tmpImg,$newImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
+	   	}
 
-        if($qualityRating){
-        	$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
-        }
-        else{
-        	$successStatus = imagejpeg($tmpImg, $targetPath);
-        }
+		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		imagecopyresampled($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
+		
+		if($qualityRating){
+			$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($targetPath);
+				$outputJpg->setExif($exif);
+				$outputJpg->saveFile($targetPath);
+			}
+		}
+		else{
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($tmpImg);
+				$outputJpg->setExif($exif);
+				$successStatus = $outputJpg->saveFile($targetPath);
+			}
+			else{
+				$successStatus = imagejpeg($tmpImg, $targetPath);
+			}
+		}
 
-        imagedestroy($tmpImg);
-	    return $successStatus;
+		imagedestroy($tmpImg);
+		return $successStatus;
 	}
 	
+	private function createNewImageMagick($sourceImg,$targetPath,$newWidth,$qualityRating){
+		$ct;
+		$retval;
+		if($newWidth < 300){
+			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
+		}
+		else{
+			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($qualityRating?' -quality '.$qualityRating:'').' '.$targetPath, $retval);
+		}
+		return $ct;
+	}
+
 	public function getChecklists($userRights){
 		$retArr = Array();
 		$clStr = '';
@@ -381,6 +440,10 @@ class ObservationSubmitManager {
 		}
 		return $retArr;
 	}
+ 	
+	public function setUseImageMagick($useIM){
+ 		$this->processUsingImageMagick = $useIM;
+ 	}
 	
 	public function getCollMap(){
 		return $this->collMap;

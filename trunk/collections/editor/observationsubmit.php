@@ -1,5 +1,5 @@
 <?php
-//error_reporting(E_ALL);
+error_reporting(0);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/ObservationSubmitManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -24,6 +24,7 @@ if($collMap){
 		$isEditor = 1;
 	}
 	if($isEditor && $action == "Submit Observation"){
+		if(isset($useImageMagick) && $useImageMagick) $obsManager->setUseImageMagick(1);
 		$status = $obsManager->addObservation($_POST,$symbUid);
 	}
 }
@@ -381,7 +382,7 @@ if($collMap){
 								</span>
 							</div>
 						</div>
-						<div style="margin-left:10px;">* Upload image size can not be greater than 1MB</div>
+						<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than 1MB</div>
 					</fieldset>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Submit Observation" />
