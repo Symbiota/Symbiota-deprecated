@@ -12,7 +12,7 @@ $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:''
 
 $dupeManager = new OccurrenceEditorManager();
 $occArr = array();
-if($occidStr) $occArr = $dupManager->getDupOccurrences($oid,$occidStr);
+if($occidStr) $occArr = $dupeManager->getDupOccurrences($oid,$occidStr);
 
 $onLoadStr = '';
 $statusStr = '';
