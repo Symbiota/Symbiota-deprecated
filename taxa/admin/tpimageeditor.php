@@ -1,10 +1,5 @@
 <?php
-/*
-* Rebuilt on Sept 2010
-* Author: E.E. Gilbert
-*/
-
-//error_reporting(E_ALL);
+error_reporting(0);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
 

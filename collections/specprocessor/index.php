@@ -201,6 +201,7 @@ if($spprId){
 					$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maplarge']:1);
 					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
 					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
+					if(isset($useImageMagick) && $useImageMagick) $specManager->setUseImageMagick(1);
 					$specManager->batchLoadImages();
 					echo '</ul>'."\n";
 				}

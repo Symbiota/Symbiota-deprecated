@@ -6,6 +6,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcessorAbbyy.php');
 include_once($serverRoot.'/classes/SpecProcessorImage.php');
+include_once('PelJpeg.php');
 
 class SpecProcessorManager {
 
@@ -35,6 +36,7 @@ class SpecProcessorManager {
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
 	protected $dbMetadata = 1;			//Only used when run as a standalone script
+	protected $processUsingImageMagick = 0;
 	
 	protected $logPath;
 	protected $logFH;
@@ -497,6 +499,10 @@ class SpecProcessorManager {
 	public function setDbMetadata($v){
 		$this->dbMetadata = $v;
 	}
+
+ 	public function setUseImageMagick($useIM){
+ 		$this->processUsingImageMagick = $useIM;
+ 	}
 
 	//Misc functions
 	protected function cleanStr($str){

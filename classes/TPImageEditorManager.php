@@ -1,10 +1,6 @@
 <?php
-/* 
- * Rebuilt 7 Sept 2010
- * @author  E. Gilbert: egbot@asu.edu
-*/
-
 include_once("TPEditorManager.php");
+include_once('PelJpeg.php');
 
 class TPImageEditorManager extends TPEditorManager{
 
@@ -15,7 +11,10 @@ class TPImageEditorManager extends TPEditorManager{
 	private $webPixWidth = 2000;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
-	
+
+	private $sourceGdImg;
+	private $exif;
+		
  	public function __construct(){
  		parent::__construct();
 		set_time_limit(120);
@@ -28,6 +27,7 @@ class TPImageEditorManager extends TPEditorManager{
  	
  	public function __destruct(){
  		parent::__destruct();
+		if($this->sourceGdImg) imagedestroy($this->sourceGdImg);
  	}
  	
 	public function getImages(){
@@ -74,7 +74,7 @@ class TPImageEditorManager extends TPEditorManager{
 		$result->close();
 		return $imageArr;
 	}
-	
+
 	public function echoPhotographerSelect($userId = 0){
 		$sql = "SELECT u.uid, CONCAT_WS(', ',u.lastname,u.firstname) AS fullname ".
 			"FROM users u ORDER BY u.lastname, u.firstname ";
@@ -279,52 +279,48 @@ class TPImageEditorManager extends TPEditorManager{
 		}
 		return $newThumbnailUrl;
 	}
-	
-	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 60){
+
+	private function createNewImage($sourceImg,$targetPath,$targetWidth,$qualityRating = 0){
         $successStatus = false;
-		list($sourceWidth, $sourceHeight, $imageType) = getimagesize($sourceImg);
+		list($sourceWidth, $sourceHeight) = getimagesize($sourceImg);
         $newWidth = $targetWidth;
         $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
         if($newHeight > $targetWidth*1.2){
         	$newHeight = $targetWidth;
         	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
         }
-        
-	    switch ($imageType){
-	        case 1: 
-	        	$newImg = imagecreatefromgif($sourceImg);
-	        	break;
-	        case 3: 
-	        	$newImg = imagecreatefrompng($sourceImg);
-	        	break;
-	        default: 
-	        	$newImg = imagecreatefromjpeg($sourceImg);  
-	        	break;
-	    }
-        
+
+		if(!$this->sourceGdImg){
+			$this->sourceGdImg = imagecreatefromjpeg($sourceImg);
+			if(class_exists('PelJpeg')){
+				$inputJpg = new PelJpeg($this->sourceGdImg);
+				$this->exif = $inputJpg->getExif();
+			}
+		}
+
     	$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		imagecopyresampled($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
 
-	    /* Check if this image is PNG or GIF to preserve its transparency */
-	    if(($imageType == 1) || ($imageType==3)){
-	        imagealphablending($tmpImg, false);
-	        imagesavealpha($tmpImg,true);
-	        $transparent = imagecolorallocatealpha($tmpImg, 255, 255, 255, 127);
-	        imagefilledrectangle($tmpImg, 0, 0, $newWidth, $newHeight, $transparent);
-	    }
-		imagecopyresampled($tmpImg,$newImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
-
-		switch ($imageType){
-	        case 1: 
-	        	$successStatus = imagegif($tmpImg,$targetPath);
-	        	break;
-	        case 2: 
-	        	$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
-	        	break; // best quality
-	        case 3: 
-	        	$successStatus = imagepng($tmpImg, $targetPath, 0);
-	        	break; // no compression
-	    }
-	    imagedestroy($tmpImg);
+		if($qualityRating){
+			$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($targetPath);
+				$outputJpg->setExif($exif);
+				$outputJpg->saveFile($targetPath);
+			}
+		}
+		else{
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($tmpImg);
+				$outputJpg->setExif($exif);
+				$successStatus = $outputJpg->saveFile($targetPath);
+			}
+			else{
+				$successStatus = imagejpeg($tmpImg, $targetPath);
+			}
+		}
+		
+       	imagedestroy($tmpImg);
 	    return $successStatus;
 	}
 
