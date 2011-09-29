@@ -104,6 +104,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 	}
 
 	private function processImageFile($fileName,$pathFrag = ''){
+		echo "<li>Processing image ".$fileName."</li>\n";
+		if($this->logFH) fwrite($this->logFH, "Processing image (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
+		ob_flush();
+		flush();
 		//Grab Primary Key
 		$specPk = '';
 		if($this->specKeyRetrieval == 'ocr'){
@@ -127,7 +131,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 		}
         //If Primary Key is found, continue with processing image
         if($specPk){
-        	if(!$this->dbMetadata || $this->createNewRec || $occId){
+        	if($occId || !$this->dbMetadata){
 	        	//Setup path and file name in prep for loading image
 				$targetFolder = '';
 	        	if($pathFrag){
@@ -169,8 +173,8 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
-				echo "<li>Starting to load: ".$fileName."</li>\n";
-				if($this->logFH) fwrite($this->logFH, "Starting to load (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
+				echo "<li style='margin-left:10px;'>Loadimg image</li>\n";
+				if($this->logFH) fwrite($this->logFH, "Loadimg image (".date('Y-m-d h:i:s A').")\n");
 				ob_flush();
 				flush();
 				
@@ -240,11 +244,6 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				
         	}
-			else{
-				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record (".date('Y-m-d h:i:s A').") \n");
-				if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record (".date('Y-m-d h:i:s A').") \n");
-				echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
-			}
 		}
 		else{
 			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
@@ -257,24 +256,25 @@ class SpecProcessorImage extends SpecProcessorManager{
 
 	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
 		global $useImageMagick;
-		$successStatus = 0;
+		$status = false;
 		
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
-			$this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		} 
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 
-			$this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		}
 		else{
 			// Neither ImageMagick nor GD are installed 
 			$this->errArr[] = 'No appropriate image handler for image conversions';
 		}
-		return $successStatus;
+		return $status;
 	}
 	
 	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
+		$status = false;
 		$ct;
 		if($newWidth < 300){
 			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
@@ -282,7 +282,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 		else{
 			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgCompression?' -quality '.$this->jpgCompression:'').' '.$targetPath, $retval);
 		}
-		return $ct;
+		if(file_exists($targetPath)){
+			$status = true;
+		}
+		return $status;
 	}
 	
 	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
@@ -290,7 +293,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
 			if(class_exists('PelJpeg')){
-				$inputJpg = new PelJpeg($this->sourceGdImg);
+				$inputJpg = new PelJpeg($sourcePath);
 				$this->exif = $inputJpg->getExif();
 			}
 
@@ -305,14 +308,14 @@ class SpecProcessorImage extends SpecProcessorManager{
 			$status = imagejpeg($tmpImg, $targetPath, $this->jpgCompression);
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($targetPath);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$outputJpg->saveFile($targetPath);
 			}
 		}
 		else{
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($tmpImg);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$status = $outputJpg->saveFile($targetPath);
 			}
 			else{
