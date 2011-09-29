@@ -359,12 +359,12 @@ class ObservationSubmitManager {
 	}
 
 	private function createNewImageGD($sourceImg,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating){
-		$successStatus = 0;
+		$successStatus = false;
 
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourceImg);
 			if(class_exists('PelJpeg')){
-				$inputJpg = new PelJpeg($this->sourceGdImg);
+				$inputJpg = new PelJpeg($sourceImg);
 				$this->exif = $inputJpg->getExif();
 			}
 
@@ -377,14 +377,14 @@ class ObservationSubmitManager {
 			$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($targetPath);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$outputJpg->saveFile($targetPath);
 			}
 		}
 		else{
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($tmpImg);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$successStatus = $outputJpg->saveFile($targetPath);
 			}
 			else{
@@ -397,6 +397,7 @@ class ObservationSubmitManager {
 	}
 	
 	private function createNewImageMagick($sourceImg,$targetPath,$newWidth,$qualityRating){
+		$status = false;
 		$ct;
 		$retval;
 		if($newWidth < 300){
@@ -405,7 +406,10 @@ class ObservationSubmitManager {
 		else{
 			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($qualityRating?' -quality '.$qualityRating:'').' '.$targetPath, $retval);
 		}
-		return $ct;
+		if(file_exists($targetPath)){
+			$status = true;
+		}
+		return $status;
 	}
 
 	public function getChecklists($userRights){

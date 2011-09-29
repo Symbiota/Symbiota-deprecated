@@ -305,14 +305,14 @@ class TPImageEditorManager extends TPEditorManager{
 			$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($targetPath);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$outputJpg->saveFile($targetPath);
 			}
 		}
 		else{
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($tmpImg);
-				$outputJpg->setExif($exif);
+				$outputJpg->setExif($this->exif);
 				$successStatus = $outputJpg->saveFile($targetPath);
 			}
 			else{
