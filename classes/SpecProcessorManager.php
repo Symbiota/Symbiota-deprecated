@@ -137,6 +137,11 @@ class SpecProcessorManager {
 				$occId = $this->conn->insert_id;
 			} 
 		}
+		if(!$occId){
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
+			echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record ".$specPk."</li>\n";
+		}
 		return $occId;
 	}
 	
