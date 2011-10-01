@@ -13,6 +13,7 @@ $newCollRec = array_key_exists("newcoll",$_REQUEST)?1:0;
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
 $collManager = new CollectionProfileManager();
+if($collId) $collManager->setCollectionId($collId);
 
 $editCode = 0;		//0 = no permissions; 1 = CollEditor; 2 = CollAdmin; 3 = SuperAdmin 
 if($symbUid){
@@ -44,10 +45,7 @@ if($editCode == 3){
 	}
 }
 $collData = Array();
-if($collId){
-	$collManager->setCollectionId($collId);
-	$collData = $collManager->getCollectionData();
-}
+if($collId) $collData = $collManager->getCollectionData();
 
 ?>
 <html>

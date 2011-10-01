@@ -22,7 +22,8 @@ $imgLoaderTargetPath = "";		//If null, $imageRootPath will be used
 $imgLoaderUrl = "";				//If null, $imageRootUrl will be used
 $tnPixWidth = 130;				//Preferred pixel width of thumbnail 
 $webPixWidth = 1300;			//Preferred pixel width of basic web image. If source image is < 120% this width, it is not resized
-$lgPixWidth = 3168;			//Preferred pixel width of large image 
+$lgPixWidth = 3168;				//Preferred pixel width of large image 
+//$useImageMagick = 0;			//Set to 1 to have ImageMagick resize images, given that it's installed (faster, less memory intensive)
 
 //Module activations
 $occurrenceModIsActive = 1;
