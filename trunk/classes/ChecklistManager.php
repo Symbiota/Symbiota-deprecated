@@ -189,7 +189,7 @@ class ChecklistManager {
 	}
 
 	//return an array: family => array(TID => sciName)
-	public function getTaxaList($pageNumber = 0){
+	public function getTaxaList($pageNumber = 0,$retLimit = 0){
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		$voucherArr = Array();
 		if($this->showVouchers){
@@ -205,7 +205,7 @@ class ChecklistManager {
 		//Get species list
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
 		$tidReturn = Array();
-		$retLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
+		if(!$retLimit) $retLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
 		$sql = $this->getClSql();
 		$result = $this->clCon->query($sql);
 		while($row = $result->fetch_object()){

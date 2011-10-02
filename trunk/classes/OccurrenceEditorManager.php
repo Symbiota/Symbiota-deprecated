@@ -92,7 +92,7 @@ class OccurrenceEditorManager {
 			if($_POST['q_recordedby']) $qryArr['rb'] = trim($_POST['q_recordedby']);
 			if($_POST['q_recordnumber']) $qryArr['rn'] = trim($_POST['q_recordnumber']);
 			if($_POST['q_enteredby']) $qryArr['eb'] = trim($_POST['q_enteredby']);
-			if($_POST['q_processingstatus']) $qryArr['ps'] = trim($_POST['q_processingstatus']);
+			if($_POST['q_processingstatus']) $qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if($_POST['q_datelastmodified']) $qryArr['dm'] = trim($_POST['q_datelastmodified']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
@@ -113,6 +113,7 @@ class OccurrenceEditorManager {
 				if($p = strpos($v,' - ')){
 					$iBetweenFrag[] = 'o.catalogNumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
 					$iBetweenFrag[] = 'o.occurrenceId BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
+					$iBetweenFrag[] = 'o.othercatalognumbers BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
 				}
 				else{
 					$iInFrag[] = $v;
@@ -123,10 +124,10 @@ class OccurrenceEditorManager {
 				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
 			}
 			if($iInFrag){
-				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'")) ';
+				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.othercatalognumbers IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
-			$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId';
+			//$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId,othercatalognumbers';
 		}
 		if(array_key_exists('rb',$qryArr)){
 			$sqlWhere .= 'AND (o.recordedby LIKE "'.$qryArr['rb'].'%") ';
@@ -173,9 +174,8 @@ class OccurrenceEditorManager {
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
 			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations') $sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
-			$sqlWhere .= 'LIMIT '.($occIndex?$occIndex.',':'').'1';
+			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').'1';
 		}
-		//echo $sqlWhere;
 		return $sqlWhere;
 	}
 	
@@ -183,6 +183,9 @@ class OccurrenceEditorManager {
 		global $clientRoot;
 		$recCnt = 0;
 		if($obPos = strpos($sqlWhere,' ORDER BY')){
+			$sqlWhere = substr($sqlWhere,0,$obPos);
+		}
+		if($obPos = strpos($sqlWhere,' LIMIT ')){
 			$sqlWhere = substr($sqlWhere,0,$obPos);
 		}
 		$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
@@ -555,6 +558,18 @@ class OccurrenceEditorManager {
 			$status .= 'ERROR: unable to delete source occurrence: '.$this->conn->error;
 		}
 		return $status;
+	}
+	
+	//Label processing methods
+	public function getRawTextFragments(){
+		$retArr = array();
+		$sql = 'SELECT prlid, rawstr, notes FROM specprocessorrawlabels WHERE occid = '.$this->occId;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->prlid] = $r->rawstr;
+		}
+		$rs->close();
+		return $retArr;
 	}
 }
 ?>
