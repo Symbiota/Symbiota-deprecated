@@ -458,7 +458,7 @@ if($symbUid){
 								?>
 							</ul>
 							<div id="occdiv" style="position:relative;">
-								<table>
+								<table width="100%">
 									<tr><td>
 										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" >
 											<fieldset>
@@ -744,7 +744,7 @@ if($symbUid){
 												?>
 												<div>
 													<div id="coordaiddiv" style="display:none;">
-														<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:260px;">
+														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:260px;">
 															<div>
 																Latitude: 
 																<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
@@ -769,18 +769,19 @@ if($symbUid){
 																<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
 															</div>
 														</div>
-														<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:155px;margin-bottom:10px;">
+														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:140px;margin-bottom:10px;">
 															Zone: <input id="utmzone" style="width:40px;" /><br/>
 															East: <input id="utmeast" type="text" style="width:100px;" /><br/>
 															North: <input id="utmnorth" type="text" style="width:100px;" /><br/>
 															Hemisphere: <select id="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-																<option>Northern</option>
-																<option>Southern</option>
-															</select><br/>													<div style="margin:5px;">
+																<option value="Northern">North</option>
+																<option value="Southern">South</option>
+															</select><br/>
+															<div style="margin-top:5px;">
 																<input type="button" value="Insert UTM Values" onclick="insertUtm(this.form)" />
 															</div>
 														</div>
-														<div style="float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;">
+														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;">
 															T<input id="township" style="width:30px;" title="Township" />
 															<select id="townshipNS">
 																<option>N</option>

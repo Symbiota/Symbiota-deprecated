@@ -484,7 +484,7 @@ function insertUtm(f) {
 			//Convert to Lat/Lng values
 			var zNum = parseInt(zValue);
 			if(isNumeric(zNum)){
-				var latLngStr = utm2LatLng(zNum,eValue,nValue);
+				var latLngStr = utm2LatLng(zNum,eValue,nValue,f.geodeticdatum.value);
 				var llArr = latLngStr.split(',');
 				if(llArr){
 					f.decimallatitude.value = Math.round(llArr[0]*1000000)/1000000;
@@ -504,10 +504,15 @@ function insertUtm(f) {
 	}
 }
 
-function utm2LatLng(zValue, eValue, nValue){
+function utm2LatLng(zValue, eValue, nValue, datum){
 	var d = 0.99960000000000004; // scale along long0
 	var d1 = 6378137; // Polar Radius
-	var d2 = 0.0066943799999999998;
+	var d2 = 0.00669438;
+	if(datum.match(/nad\s?27/i)){
+		//datum is NAD27, else assumed to be NAD83 or WGS84
+		d1 = 6378206; 
+		d2 = 0.006768658;
+	}
 
 	var d4 = (1 - Math.sqrt(1 - d2)) / (1 + Math.sqrt(1 - d2));
 	var d15 = eValue - 500000;
