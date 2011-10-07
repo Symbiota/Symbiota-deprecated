@@ -415,23 +415,9 @@ class SpecUploadManager{
 		}
 		ob_flush();
 		flush();
-		if($finalTransfer){
-			$this->performFinalTransfer();
-			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
-		}
-		else{
-			echo '<li style="font-weight:bold;">Upload Procedure Complete';
-			if($this->transferCount) echo ': '.$this->transferCount.' records';
-			echo '</li>';
-			if($this->transferCount) echo '<li style="font-weight:bold;">Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
-		}
-	}
 
-	public function performFinalTransfer(){
-		//Clean and Transfer records from uploadspectemp to specimens
-		set_time_limit(800);
-
-		echo '<li style="font-weight:bold;">Update event date fields...';
+		echo '<li style="font-weight:bold;">Records Upload Complete!</li>';
+		echo '<li style="font-weight:bold;">Updating event date fields...';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
@@ -460,14 +446,10 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 
-		echo '<li style="font-weight:bold;">Cleaning taxonomy and link to taxonomic thesaurus...';
+		echo '<li style="font-weight:bold;">Cleaning taxonomy...';
 		ob_flush();
 		flush();
-		$sql = 'UPDATE taxa t INNER JOIN uploadspectemp u ON t.SciName = u.SciName '.
-			'SET u.LocalitySecurity = t.SecurityStatus '.
-			'WHERE u.collid = '.$this->collId.' AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL)';
-		$this->conn->query($sql);
-		
+
 		$taxonRank = 'ssp.';
 		$sql = 'SELECT distinct unitind3 FROM taxa '.
 			'WHERE unitind3 = "ssp." OR unitind3 = "subsp."';
@@ -476,53 +458,54 @@ class SpecUploadManager{
 			$taxonRank = $r->unitind3;
 		}
 		$rs->close();
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname," '.($taxonRank=='subsp.'?'ssp.':'subsp.').' "," '.$taxonRank.' ") '.
-			'WHERE s.sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %"';
+		
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname," '.($taxonRank=='subsp.'?'ssp.':'subsp.').' "," '.$taxonRank.' ") '.
+			'WHERE sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %"';
 		$this->conn->query($sql);
 		
-		$sql = 'UPDATE uploadspectemp s SET s.sciname = replace(s.sciname," var "," var. ") WHERE s.sciname like "% var %"';
+		$sql = 'UPDATE uploadspectemp SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %"';
 		$this->conn->query($sql);
 		
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname," cf. "," "), s.identificationQualifier = CONCAT_WS("; ","cf.",s.identificationQualifier), tidinterpreted = null '.
-			'WHERE s.sciname like "% cf. %"';
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname," cf. "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
+			'WHERE sciname like "% cf. %"';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname," cf "," "), s.identificationQualifier = CONCAT_WS("; ","cf.",s.identificationQualifier), tidinterpreted = null '.
-			'WHERE s.sciname like "% cf %"';
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname," cf "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
+			'WHERE sciname like "% cf %"';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = REPLACE(s.sciname," aff. "," "), s.identificationQualifier = CONCAT_WS("; ","aff.",s.identificationQualifier), tidinterpreted = null '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = REPLACE(sciname," aff. "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
 			'WHERE sciname like "% aff. %"';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = REPLACE(s.sciname," aff "," "), s.identificationQualifier = CONCAT_WS("; ","aff.",s.identificationQualifier), tidinterpreted = null '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = REPLACE(sciname," aff "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
 			'WHERE sciname like "% aff %"';
 		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = trim(s.sciname), tidinterpreted = null '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = trim(sciname), tidinterpreted = null '.
 			'WHERE sciname like "% " OR sciname like " %"';
 		$this->conn->query($sql);
 		
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname,"   "," ") '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname,"   "," ") '.
 			'WHERE sciname like "%   %"';
 		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname,"  "," ") '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname,"  "," ") '.
 			'WHERE sciname like "%  %"';
 		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname," sp.","") '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname," sp.","") '.
 			'WHERE sciname like "% sp."';
 		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadspectemp s '.
-			'SET s.sciname = replace(s.sciname," sp","") '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET sciname = replace(sciname," sp","") '.
 			'WHERE sciname like "% sp"';
 		$this->conn->query($sql);
 
@@ -530,11 +513,53 @@ class SpecUploadManager{
 			'SET specificepithet = NULL '.
 			'WHERE specificepithet = "sp." OR specificepithet = "sp"';
 		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% f. %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% forma %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "var." '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% var. %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp. %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp. %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp %"';
+		$this->conn->query($sql);
+		
+		$sql = 'UPDATE uploadspectemp SET sciname = CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet) '.
+			'WHERE sciname IS NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li style="font-weight:bold;">Linking to taxonomic thesaurus...';
+		ob_flush();
+		flush();
 
-		$sql = 'UPDATE uploadspectemp s INNER JOIN taxa t ON s.sciname = t.sciname '.
-			'SET s.TidInterpreted = t.tid WHERE s.TidInterpreted IS NULL';
+		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '.
+			'SET u.TidInterpreted = t.tid WHERE u.TidInterpreted IS NULL';
 		$this->conn->query($sql);
 
+		$sql = 'UPDATE taxa t INNER JOIN uploadspectemp u ON t.tid = u.tidinterpreted '.
+			'SET u.LocalitySecurity = t.SecurityStatus '.
+			'WHERE u.collid = '.$this->collId.' AND (t.SecurityStatus > 0) AND (u.LocalitySecurity = 0 OR u.LocalitySecurity IS NULL)';
+		$this->conn->query($sql);
+		
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
 			'SET u.family = ts.family '.
 			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
@@ -560,7 +585,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
-			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
+			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
 			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0';
 		$this->conn->query($sql);
 
@@ -588,6 +613,22 @@ class SpecUploadManager{
 			'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
+		
+		if($finalTransfer){
+			$this->performFinalTransfer();
+			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
+		}
+		else{
+			echo '<li style="font-weight:bold;">Upload Procedure Complete';
+			if($this->transferCount) echo ': '.$this->transferCount.' records';
+			echo '</li>';
+			if($this->transferCount) echo '<li style="font-weight:bold;">Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
+		}
+	}
+
+	public function performFinalTransfer(){
+		//Clean and Transfer records from uploadspectemp to specimens
+		set_time_limit(800);
 
 		echo '<li style="font-weight:bold;">Updating existing occurrence records... ';
 		ob_flush();
@@ -619,9 +660,13 @@ class SpecUploadManager{
 			'o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, '.
 			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.duplicateQuantity = u.duplicateQuantity '.
 			'WHERE u.collid = '.$this->collId;
-		$this->conn->query($sql);
-		echo 'Done!</li> ';
-
+		if($this->conn->query($sql)){
+			echo 'Done!</li> ';
+		}
+		else{
+			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+		}
+		
 		echo '<li style="font-weight:bold;">Inserting new records into active occurrence table... ';
 		ob_flush();
 		flush();
@@ -649,8 +694,12 @@ class SpecUploadManager{
 			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.duplicateQuantity '.
 			'FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId;
-		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		if($this->conn->query($sql)){
+			echo 'Done!</li> ';
+		}
+		else{
+			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+		}
 		
 		echo '<li style="font-weight:bold;">Updating georeference indexing... ';
 		ob_flush();
@@ -660,8 +709,12 @@ class SpecUploadManager{
 			'FROM uploadspectemp u '.
 			'WHERE u.tidinterpreted IS NOT NULL AND u.decimallatitude IS NOT NULL '.
 			'AND u.decimallongitude IS NOT NULL';
-		$this->conn->query($sql);
-		echo 'Done!</li>';
+		if($this->conn->query($sql)){
+			echo 'Done!</li> ';
+		}
+		else{
+			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+		}
 		
 		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
@@ -724,6 +777,86 @@ class SpecUploadManager{
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		echo 'Done!</li>';
+	}
+	
+	protected function loadRecord($recMap){
+		//Date cleaning
+		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
+			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
+				if($eDateStr = strtotime($recMap['verbatimeventdate'])){
+					$recMap['eventdate'] = date('Y-m-d', $eDateStr);
+				}
+			}
+			//day, month, year values used to create eventdate in SQL statement section 
+		}
+		
+		$sqlFields = '';
+		$sqlValues = '';
+		foreach($recMap as $symbField => $valueStr){
+			$sqlFields .= ','.$symbField;
+			$valueStr = $this->encodeString($valueStr);
+			$valueStr = $this->cleanString($valueStr);
+			//Load data
+			$type = '';
+			$size = 0;
+			if(array_key_exists($symbField,$this->fieldMap)){ 
+				if(array_key_exists('type',$this->fieldMap[$symbField])){
+					$type = $this->fieldMap[$symbField]["type"];
+				}
+				if(array_key_exists('size',$this->fieldMap[$symbField])){
+					$type = $this->fieldMap[$symbField]["size"];
+				}
+			}
+			switch($type){
+				case "numeric":
+					if(is_numeric($valueStr)){
+						$sqlValues .= ",".$valueStr;
+					}
+					else{
+						$sqlValues .= ",NULL";
+					}
+					break;
+				case "date":
+					if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $valueStr)){
+						$sqlValues .= ',"'.$valueStr.'"';
+					} 
+					elseif(($dateStr = strtotime($valueStr))){
+						$sqlValues .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
+					} 
+					else{
+						$sqlValues .= ",NULL";
+					}
+					break;
+				default:	//string
+					if($size && strlen($valueStr) > $size){
+						$valueStr = substr($valueStr,0,$size);
+					}
+					if($valueStr){
+						$sqlValues .= ',"'.$valueStr.'"';
+					}
+					else{
+						$sqlValues .= ",NULL";
+					}
+			}
+		}
+		$sql = "INSERT INTO uploadspectemp(collid".$sqlFields.") ".
+			"VALUES(".$this->collId.$sqlValues.")";
+		//echo "<div>SQL: ".$sql."</div>";
+		
+		if($this->conn->query($sql)){
+			$this->transferCount++;
+			if($this->transferCount%1000 == 0) echo '<li style="font-weight:bold;">Upload count: '.$this->transferCount.'</li>';
+			ob_flush();
+			flush();
+			//echo "<li>";
+			//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
+			//echo "</li>";
+		}
+		else{
+			echo "<li>FAILED adding record #".$this->transferCount."</li>";
+			echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
+			echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
+		}
 	}
 
 	public function getFieldMap(){
