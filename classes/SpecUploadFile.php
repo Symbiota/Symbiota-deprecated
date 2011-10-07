@@ -53,109 +53,24 @@ class SpecUploadFile extends SpecUploadManager{
 			
 			$headerArr = $this->getHeaderArr($fh);
 			
-			$colCnt = 0;
-			$sourceArr = Array();
-			$targetArr = Array();
-			$tempSourceArr = Array();
-			//Load sourceArr with mapped fields (map should contain all matching and unmatcing fields)
-			foreach($this->fieldMap as $symbField => $detailArr){
-				$sourceField = $detailArr["field"];
-				if(in_array($sourceField,$headerArr)){
-					$sourceArr[$symbField] = $sourceField;
-				}
-			}
-			
-			//Set $sqlBase values (all specimen field names that are mapped to headerArr) 
-			foreach($headerArr as $k => $fieldStr){
-				$kArr = array_keys($sourceArr,$fieldStr);
-				foreach($kArr as $v){
-					$targetArr[] = $v;
-				}
-				$colCnt++;
-			}
 			//Grab data 
-			$sqlBase = "INSERT INTO uploadspectemp(collid,".implode(",",$targetArr).") ";
 			$this->transferCount = 0;
-			$reqFieldsNullCnt = 0;
 			while($recordArr = $this->getRecordArr($fh)){
-				//If there is no sciname, see if you can populate by family
-				if(!$recordArr[array_search($sourceArr["sciname"],$headerArr)]){
-					if(array_key_exists("family",$sourceArr) && $recordArr[array_search($sourceArr["family"],$headerArr)]){
-						$recordArr[array_search($sourceArr["sciname"],$headerArr)] = $recordArr[array_search($sourceArr["family"],$headerArr)];
+				$recMap = Array();
+				foreach($this->fieldMap as $symbField => $sMap){
+					$indexArr = array_keys($headerArr,$sMap['field']);
+					$valueStr = $recordArr[array_shift($indexArr)];
+					//If value is enclosed by quotes, remove quotes
+					if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
+						$valueStr = substr($valueStr,1,strlen($valueStr)-2);
 					}
+					$recMap[$symbField] = $valueStr;
 				}
-				
-				//Load only if there is a scientific name in the record
-				if($recordArr[array_search($this->fieldMap["sciname"]["field"],$headerArr)]){
-					$sqlValues = "";
-					$headCnt = count($headerArr);
-					for($x=0;$x<$headCnt;$x++){
-						//Iterate through record values and use to build SQL statement
-						if($spKeys = array_keys($sourceArr,$headerArr[$x])){
-							//A header field may be linked to multiple Symbiota fields
-							foreach($spKeys as $specName){
-								$valueStr = trim($recordArr[$x]);
-								//If value is encloded by quotes, remove the quotes
-								if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
-									$valueStr = substr($valueStr,1,strlen($valueStr)-2);
-								}
-								$valueStr = $this->encodeString($valueStr);
-								$valueStr = $this->cleanString($valueStr);
-								//Load data
-								$type = (array_key_exists('type',$this->fieldMap[$specName])?$this->fieldMap[$specName]["type"]:'');
-								$size = (array_key_exists("size",$this->fieldMap[$specName])?$this->fieldMap[$specName]["size"]:0);
-								switch($type){
-									case "numeric":
-										if(!$valueStr) $valueStr = "NULL";
-										$sqlValues .= ",".$valueStr;
-										break;
-									case "date":
-										if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $valueStr)){
-											$sqlValues .= ',"'.$valueStr.'"';
-										} 
-										elseif(($dateStr = strtotime($valueStr))){
-											$sqlValues .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
-										} 
-										else{
-											$sqlValues .= ",NULL";
-										}
-										break;
-									default:	//string
-										if($size && strlen($valueStr) > $size){
-											$valueStr = substr($valueStr,0,$size);
-										}
-										if($valueStr){
-											$sqlValues .= ',"'.$valueStr.'"';
-										}
-										else{
-											$sqlValues .= ",NULL";
-										}
-								}
-							}
-						}
-					}
-					
-					$sql = $sqlBase."VALUES(".$this->collId.",".substr($sqlValues,1).")";
-					//echo "<div>SQL: ".$sql."</div>";
-					
-					$status = $this->conn->query($sql);
-					if($status){
-						//echo "<li>";
-						//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
-						//echo "</li>";
-					}
-					else{
-						echo "<li>FAILED adding record #".$this->transferCount."</li>";
-						echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
-						echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
-					}
-					$this->transferCount++;
-				}
-				else{
-					echo "<li>Record skipped due to lack of scientific name</li>";
-				}
+				$this->loadRecord($recMap);
+				unset($recMap);
 			}
 			fclose($fh);
+
 			//Delete upload file 
 			if(file_exists($fullPath)) unlink($fullPath);
 			if($this->zipFileName) unlink($this->getUploadTargetPath()."/".$this->zipFileName);

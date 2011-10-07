@@ -61,71 +61,19 @@ class SpecUploadDirect extends SpecUploadManager {
 				//echo "<div>".$this->queryStr."</div><br/>";
 				if($result = $sourceConn->query($this->queryStr)){
 					echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
-					$recCnt = 1;
+					$this->transferCount = 0;
 					while($row = $result->fetch_assoc()){
+						$recMap = Array();
 						$row = array_change_key_case($row);
-						//Set DBPK value
-						$dbpk = 0;
-						$sqlInsertValues = $sqlInsertValuesBase;
-						$sqlInsertValues .= ",\"".$row[$sourceDbpkFieldName]."\"";
-						//Set Lat/Long values that are both 0 to null
-						if(array_key_exists("decimallatitude",$this->fieldMap) && array_key_exists("decimallongitude",$this->fieldMap)){
-							if($row[$this->fieldMap["decimallatitude"]["field"]] === 0 && $row[$this->fieldMap["decimallongitude"]["field"]] === 0){
-								$row[$this->fieldMap["decimallatitude"]["field"]] = "";
-								$row[$this->fieldMap["decimallongitude"]["field"]] = "";
-							}
+						foreach($this->fieldMap as $symbField => $sMap){
+							$valueStr = $row[$sMap['field']];
+							$recMap[$symbField] = $valueStr;
 						}
-						foreach($this->fieldMap as $symbField => $sourceField){
-							$value = $row[$sourceField["field"]];
-							$value = $this->encodeString($value);
-							$value = $this->cleanString($value);
-							$type = (array_key_exists('type',$sourceField)?$sourceField['type']:'');
-							$size = (array_key_exists("size",$sourceField)?$sourceField['size']:0);
-							
-							if($type == "date"){
-								if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)){
-									$sqlInsertValues .= ',"'.$value.'"';
-								} 
-								elseif($datetime = strtotime($value)){
-									$value = date('Y-m-d H:i:s',$datetime);
-									$sqlInsertValues .= ',"'.$value.'"';
-								}
-								else{
-									$sqlInsertValues .= ",null";
-								}
-							}
-							elseif($type == "numeric"){
-								if(is_numeric($value)){
-									$sqlInsertValues .= ",".$value;
-								}
-								else{
-									$sqlInsertValues .= ",null";
-								}
-							}
-							else{
-								if($size && strlen($value) > $size){
-									$value = substr($value,0,$size);
-								}
-								if($value){
-									$sqlInsertValues .= ',"'.$value.'"';
-								}
-								else{
-									$sqlInsertValues .= ",NULL";
-								}
-							}
-						}
-						$sqlInsert = $sqlInsertInto.$sqlInsertValues.")";
-						//echo "<div>sqlInsert: ".$sqlInsert."</div>";
-						if(!$this->conn->query($sqlInsert)){
-							echo "<hr /><div style='color:red;'>ERROR inserting new record: ".$this->conn->error."</div>";
-							echo "<div style='font-weight:bold;'>SQL: ".$sqlInsert."</div><hr />";
-						}
-						$recCnt++;
-						if($recCnt%1000 == 0) echo "<li style='font-weight:bold;'>Record Count: $recCnt</li>";
+						$this->loadRecord($recMap);
+						unset($recMap);
 					}
 					
 					$this->finalUploadSteps($finalTransfer);
-					$this->transferCount = $recCnt-1;
 					$result->close();
 				}
 				else{
