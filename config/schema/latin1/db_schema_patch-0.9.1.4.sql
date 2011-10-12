@@ -35,7 +35,7 @@ CREATE TABLE `omcollsecondary` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 )
-ENGINE = InnoDB;
+ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `omcollections` 
  MODIFY COLUMN `InstitutionCode` VARCHAR(45) NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE `populusrawlabels` (
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (`prlid`)
 )
-ENGINE = InnoDB;
+ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `populusrawlabels` 
   ADD CONSTRAINT `FK_populusrawlabels_occid` FOREIGN KEY `FK_populusrawlabels_occid` (`occid`)
@@ -77,7 +77,7 @@ CREATE TABLE `omoccurdeterminations` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 )
-ENGINE = InnoDB;
+ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `omoccurdeterminations` 
    ADD UNIQUE INDEX `Index_unique`(`occid`, `dateIdentified`, `identifiedBy`);

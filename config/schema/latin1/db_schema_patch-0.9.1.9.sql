@@ -31,7 +31,7 @@ CREATE  TABLE `omcollectors` (
   `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp ,
   PRIMARY KEY (`recordedById`) ,
   INDEX `fullname` (`familyname` ASC, `firstname` ASC) 
-) ENGINE = InnoDB;
+) ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `omoccurrences` 
   ADD CONSTRAINT `FK_omoccurrences_recbyid`
@@ -54,7 +54,7 @@ CREATE  TABLE `omoccurduplicates` (
   `notes` VARCHAR(255) NULL ,   
   `initialTimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`duplicateid`) 
-) ENGINE = InnoDB; 
+) ENGINE = InnoDB DEFAULT CHARSET=latin1; 
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `duplicateid` INT NULL  AFTER `language` ; 
@@ -76,7 +76,7 @@ CREATE  TABLE `omoccurdatasets` (
   `uid` INT NOT NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`datasetid`) 
-) ENGINE = InnoDB;
+) ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 CREATE  TABLE `omoccurdatasetlink` (   
   `occid` INT NOT NULL ,   
@@ -84,7 +84,7 @@ CREATE  TABLE `omoccurdatasetlink` (
   `notes` VARCHAR(250) NULL ,   
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`occid`, `datasetid`) 
-) ENGINE = InnoDB; 
+) ENGINE = InnoDB DEFAULT CHARSET=latin1; 
 
 
 ALTER TABLE `images` 
@@ -108,7 +108,7 @@ CREATE  TABLE `omoccurloansout` (
   `notes` VARCHAR(255) NULL ,   
   `initialTimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`loanoutid`) 
-) ENGINE = InnoDB; 
+) ENGINE = InnoDB DEFAULT CHARSET=latin1; 
 
 CREATE TABLE `omoccurloansoutlink`(
   `loanoutid` INT UNSIGNED NOT NULL, 
@@ -117,7 +117,7 @@ CREATE TABLE `omoccurloansoutlink`(
   `notes` VARCHAR(255) NULL ,   
   `initialTimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`loanoutid`,`occid`) 
-) ENGINE = InnoDB;
+) ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `omoccurloansoutlink`    
   ADD CONSTRAINT `FK_loanoutlink_occid`   FOREIGN KEY (`occid` )   

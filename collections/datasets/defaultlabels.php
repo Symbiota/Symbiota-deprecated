@@ -40,7 +40,9 @@ else{
 			<style type="text/css">
 				body {font-family:arial,sans-serif}
 				table {page-break-before:auto;page-break-inside:avoid;}
-				table td {padding:15px; font-size:10pt;}
+				td {width:280pt; font-size:10pt;}
+				td.lefttd {padding:10px 15px 10px 0px;}
+				td.righttd {padding:10px 0px 10px 15px;}
 				p.printbreak {page-break-after:always;}
 				.lheader {width:100%; text-align:center; font:bold 16pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
@@ -64,7 +66,7 @@ else{
 			</style>
 		</head>
 		<body>
-			<div style="width:550pt;">
+			<div>
 				<?php 
 				if($isEditor){
 					if($action){
@@ -102,7 +104,7 @@ else{
 									$labelCnt++;
 									if($labelCnt%2) echo '<table><tr>'."\n";
 									?>
-									<td style="width:250pt;" valign="top">
+									<td class="<?php echo (($labelCnt%2)?"lefttd":"righttd"); ?>" valign="top">
 										<div class="lheader">
 											<?php echo $headerStr; ?>
 										</div>
