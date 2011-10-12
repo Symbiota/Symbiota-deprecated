@@ -12,7 +12,7 @@ CREATE TABLE `lkupcountry` (
   `initialtimestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`countryId`),
   UNIQUE KEY `country_unique` (`countryName`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `lkupstateprovince` (
   `stateId` int(11) NOT NULL AUTO_INCREMENT,
@@ -25,7 +25,7 @@ CREATE TABLE `lkupstateprovince` (
   KEY `fk_country` (`countryId`),
   KEY `index_statename` (`stateName`),
   CONSTRAINT `fk_country` FOREIGN KEY (`countryId`) REFERENCES `lkupcountry` (`countryId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `lkupcounty` (
   `countyId` int(11) NOT NULL AUTO_INCREMENT,
@@ -37,4 +37,4 @@ CREATE TABLE `lkupcounty` (
   KEY `fk_stateprovince` (`stateId`),
   KEY `index_countyname` (`countyName`),
   CONSTRAINT `fk_stateprovince` FOREIGN KEY (`stateId`) REFERENCES `lkupstateprovince` (`stateId`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

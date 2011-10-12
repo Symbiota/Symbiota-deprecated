@@ -29,7 +29,7 @@ CREATE TABLE `specprocessorprojects` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 )
-ENGINE = InnoDB;
+ENGINE = InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `omcollections` 
   CHANGE COLUMN `CollType` `CollType` VARCHAR(45) NOT NULL DEFAULT 'Preserved Specimens' COMMENT 'Live Data, Snapshot, Observations ',
@@ -48,7 +48,7 @@ CREATE  TABLE `omoccuredits` (
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`ocedid`) 
 )
-ENGINE = InnoDB ; 
+ENGINE = InnoDB DEFAULT CHARSET=latin1; 
 
 ALTER TABLE `omoccuredits`    
   ADD CONSTRAINT `fk_omoccuredits_uid`   FOREIGN KEY (`uid` )   
@@ -70,7 +70,7 @@ CREATE  TABLE `omoccurcomments` (
   `initialtimestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp ,   
   PRIMARY KEY (`comid`) 
 )
-ENGINE = InnoDB ; 
+ENGINE = InnoDB DEFAULT CHARSET=latin1; 
 
 ALTER TABLE `omoccurcomments`    
   ADD CONSTRAINT `fk_omoccurcomments_occid`   
