@@ -812,6 +812,9 @@ class SpecUploadManager{
 					if(is_numeric($valueStr)){
 						$sqlValues .= ",".$valueStr;
 					}
+					elseif(is_numeric(str_replace(',',"",$valueStr))){
+						$sqlValues .= ",".str_replace(',',"",$valueStr);
+					}
 					else{
 						$sqlValues .= ",NULL";
 					}
