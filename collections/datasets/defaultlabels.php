@@ -41,8 +41,8 @@ else{
 				body {font-family:arial,sans-serif}
 				table {page-break-before:auto;page-break-inside:avoid;}
 				td {width:280pt; font-size:10pt;}
-				td.lefttd {padding:10px 15px 10px 0px;}
-				td.righttd {padding:10px 0px 10px 15px;}
+				td.lefttd {padding:10px 23px 10px 0px;}
+				td.righttd {padding:10px 0px 10px 23px;}
 				p.printbreak {page-break-after:always;}
 				.lheader {width:100%; text-align:center; font:bold 16pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
