@@ -272,12 +272,42 @@ class OccurrenceManager{
 		}
 		if(array_key_exists("collnum",$this->searchTermsArr)){
 			$collNumArr = explode(";",$this->searchTermsArr["collnum"]);
-			$tempArr = Array();
-			foreach($collNumArr as $value){
-				$tempArr[] = "(o.recordNumber LIKE '".trim($value)."%')";
+			$rnWhere = '';
+			foreach($collNumArr as $v){
+				$v = trim($v);
+				if($p = strpos($v,' - ')){
+					$rnWhere .= 'OR (CAST(o.recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
+				}
+				elseif(preg_match('/^(\d+).*/',$v,$m)){
+					$rnWhere .= 'OR (CAST(o.recordNumber AS SIGNED) = '.$m[0].') ';
+				}
 			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(", ",$collNumArr);
+			if($rnWhere){
+				$sqlWhere .= "AND (".substr($rnWhere,3).") ";
+				$this->localSearchArr[] = implode(", ",$collNumArr);
+			}
+		}
+		if(array_key_exists('eventdate',$this->searchTermsArr)){
+			$dateArr = array();
+			if(strpos($this->searchTermsArr['eventdate'],' to ')){
+				$dateArr = explode(' to ',$this->searchTermsArr['eventdate']);
+			}
+			elseif(strpos($this->searchTermsArr['eventdate'],' - ')){
+				$dateArr = explode(' - ',$this->searchTermsArr['eventdate']);
+			}
+			else{
+				$dateArr[] = $this->searchTermsArr['eventdate'];
+			}
+			if($eDate1 = $this->formatDate($dateArr[0])){
+				$eDate2 = (count($dateArr)>1?$this->formatDate($dateArr[1]):'');
+				if($eDate2){
+					$sqlWhere .= 'AND (DATE(o.eventdate) BETWEEN "'.$eDate1.'" AND "'.$eDate2.'") ';
+				}
+				else{
+					$sqlWhere .= 'AND (DATE(o.eventdate) = "'.$eDate1.'") ';
+				}
+			}
+			$this->localSearchArr[] = $this->searchTermsArr['eventdate'];
 		}
 		if(array_key_exists("clid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["clid"];
@@ -290,20 +320,89 @@ class OccurrenceManager{
 					$this->clName = $row->name;
 				}
 				if($clSql){
-					$sqlWhere .= "AND (".$clSql.")";
+					$sqlWhere .= "AND (".$clSql.") ";
 					$this->localSearchArr[] = "SQL: ".$clSql;
 				}
 			}
 		}
 		if(array_key_exists("sql",$this->searchTermsArr)){
 			$sqlTerm = $this->searchTermsArr["sql"];
-			$sqlWhere .= "AND (".$clSql.")";
+			$sqlWhere .= "AND (".$clSql.") ";
 			$this->localSearchArr[] = "SQL: ".$clSql;
 		}
-		//echo "WHERE ".substr($sqlWhere,4);
-		return "WHERE ".substr($sqlWhere,4);
+		$retStr = '';
+		if($sqlWhere){
+			$retStr = 'WHERE '.substr($sqlWhere,4);
+		}
+		else{
+			$retStr = 'WHERE o.collid = -1 ';
+		}
+		//echo $retStr;
+		return $retStr; 
 	}
-	
+
+	private function formatDate($inDate){
+		$inDate = trim($inDate);
+		$retDate = '';
+		$y=''; $m=''; $d='';
+		if(preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/',$inDate)){
+			$dateTokens = explode('-',$inDate);
+			$y = $dateTokens[0];
+			$m = $dateTokens[1];
+			$d = $dateTokens[2];
+		}
+		elseif(preg_match('/^\d{1,2}\/*\d{0,2}\/\d{2,4}$/',$inDate)){
+			//dd/mm/yyyy
+			$dateTokens = explode('/',$inDate);
+			$m = $dateTokens[0];
+			if(count($dateTokens) == 3){
+				$d = $dateTokens[1];
+				$y = $dateTokens[2];
+			}
+			else{
+				$d = '00';
+				$y = $dateTokens[1];
+			}
+		}
+		elseif(preg_match('/^\d{0,2}\s*\D+ \d{2,4}$/',$inDate)){
+			$dateTokens = explode(' ',$inDate);
+			if(count($dateTokens) == 3){
+				$y = $dateTokens[2];
+				$mText = substr($dateTokens[1],0,3);
+				$d = $dateTokens[0];
+			}
+			else{
+				$y = $dateTokens[1];
+				$mText = substr($dateTokens[0],0,3);
+				$d = '00';
+			}
+			$mText = strtolower($mText);
+			$mNames = Array("jan"=>1,"feb"=>2,"mar"=>3,"apr"=>4,"may"=>5,"jun"=>6,"jul"=>7,"aug"=>8,"sep"=>9,"oct"=>10,"nov"=>11,"dec"=>12);
+			$m = $mNames[$mText];
+		}
+		elseif($dateObj = strtotime($inDate)){
+			$retDate = date('Y-m-d',$dateObj);
+		}
+		if(!$retDate && $y){
+			if(strlen($y) == 2){
+				if($y < 20){
+					$y = "20".$y;
+				}
+				else{
+					$y = "19".$y;
+				}
+			}
+			if(strlen($m) == 1){
+				$m = '0'.$m;
+			}
+			if(strlen($d) == 1){
+				$d = '0'.$d;
+			}
+			$retDate = $y.'-'.$m.'-'.$d;
+		}
+		return $retDate;
+	}
+
     protected function setSciNamesByVerns(){
         $sql = "SELECT DISTINCT v.VernacularName, t.sciname, ts.family, t.rankid ".
             "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
@@ -615,6 +714,18 @@ class OccurrenceManager{
 			}
 			else{
 				unset($this->searchTermsArr["collnum"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("eventdate",$_REQUEST)){
+			$eventDate = $this->conn->real_escape_string($_REQUEST["eventdate"]);
+			if($eventDate){
+				$str = str_replace(",",";",$eventDate);
+				$searchArr[] = "eventdate:".$str;
+				$this->searchTermsArr["eventdate"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["eventdate"]);
 			}
 			$searchFieldsActivated = true;
 		}
