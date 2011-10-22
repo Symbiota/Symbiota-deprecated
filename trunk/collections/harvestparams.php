@@ -69,7 +69,7 @@ $collManager->reset();
 						<option id='classorder' value='4' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "4") echo "SELECTED"; ?> >Class / Order</option>
 						<option id='commonname' value='5' <?php if(array_key_exists("taxontype",$collArray) && $collArray["taxontype"] == "5") echo "SELECTED"; ?> >Common Name</option>
 					</select>: 
-					<input id="taxa" type="text" size="60" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Seperate multiple taxa w/ commas" />
+					<input id="taxa" type="text" size="60" name="taxa" value="<?php if(array_key_exists("taxa",$collArray)) echo $collArray["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
 				</div>
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>
@@ -77,13 +77,13 @@ $collManager->reset();
 				<h1>Locality Criteria:</h1>
 			</div>
 			<div>
-				Country: <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>" title="Seperate multiple terms w/ commas" />
+				Country: <input type="text" id="country" size="43" name="country" value="<?php if(array_key_exists("country",$collArray)) echo $collArray["country"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
-				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="Seperate multiple terms w/ commas" />
+				State/Province: <input type="text" id="state" size="37" name="state" value="<?php if(array_key_exists("state",$collArray)) echo $collArray["state"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
-				County: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Seperate multiple terms w/ commas" />
+				County: <input type="text" id="county" size="37"  name="county" value="<?php if(array_key_exists("county",$collArray)) echo $collArray["county"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
 				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />
@@ -184,10 +184,15 @@ $collManager->reset();
 				<h1>Collector Criteria:</h1>
 			</div>
 			<div>
-				Collector's Last Name: <input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Seperate multiple terms w/ commas" />
+				Collector's Last Name: <input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
-				Collector's Number: <input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Seperate multiple terms w/ commas" />
+				Collector's Number: 
+				<input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750" />
+			</div>
+			<div>
+				Collection Date: 
+				<input type="text" id="eventdate" size="32" name="eventdate" value="<?php if(array_key_exists("eventdate",$collArray)) echo $collArray["eventdate"]; ?>" title="Enter ranges separated by ' to ' or ' - ', e.g.: 5 May 1984 to 1 June 1984" />
 			</div>
 			<div><hr></div>
 			<div>

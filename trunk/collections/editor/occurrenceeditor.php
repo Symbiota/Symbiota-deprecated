@@ -344,7 +344,7 @@ if($symbUid){
 											<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
 										</span>
 										<span style="margin-left:25px;">Number:</span>
-										<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+										<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
 											<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
 										</span>
 										<span style="margin-left:30px;">Identifier:</span> 
@@ -1107,39 +1107,67 @@ if($symbUid){
 											<div style="clear:both;">&nbsp;</div>
 										</form>
 									</td>
-									<td>
-										<div style="display:none;float:right;width:300px;">
-											<fieldset>
-												<legend>Label Processing</legend>
-												<div id="labelimagediv" style="">
-													
-												</div>
-												<div id="labeltndiv" style="">
-													
-												</div>
-												<div id="rawtextdiv">
-													<?php 
-													$fragArr = $occManager->getRawTextFragments();
-													$fragCnt = 1;
-													$totalFragCnt = count($fragArr);
-													foreach($fragArr as $prlid => $rawStr){
-														echo '<div style="display:'.($fragCnt?'none':'block').'">';
-														if(count($fragArr) > 1){
+									<td style="display:none;">
+										<?php 
+										$fragArr = $occManager->getRawTextFragments();
+										$specImgArr = $occManager->getImageMap();
+										if($fragArr || $specImgArr ){
+											?>
+											<div style="display:none;float:right;width:300px;">
+												<fieldset>
+													<legend>Label Processing</legend>
+													<div id="labelimagediv" style="">
+														<?php
+														if($specImgArr){
+															$i1 = array_pop($specImgArr); 
 															?>
-															<a href="#" onclick="nextRawText(<?php echo ($fragCnt<$totalFragCnt?$fragCnt+1:1); ?>);">
-																<img src="../../images/rightarrow.jpg" title="Show Next Text Fragment" /><br/>
-															</a>
-															<?php 
-															echo $fragCnt.' of '.$totalFragCnt;
+															<img src="<?php echo $i1['origurl']; ?>" />
+															<?php
 														}
-														echo '<textarea name="rawtext" value="" id="textfrag'.$fragCnt.'" />';
-														echo '</div>';
-														$fragCnt++;
-													}
+														?>
+													</div>
+													<?php
+													if($specImgArr){ 
+														?>
+														<div id="labeltndiv" style="width:280px;height:100px;position:relative;">
+															<?php 
+															foreach($specImgArr as $imgId => $iArr){
+																?>
+																<div style="float:left">
+																	<img src="<?php echo $iArr['tnurl']; ?>" />
+																</div>
+																<?php
+															} 
+															?>
+														</div>
+														<?php
+													} 
 													?>
-												</div>
-											</fieldset>
-										</div>
+													<div id="rawtextdiv">
+														<?php 
+														$fragCnt = 1;
+														$totalFragCnt = count($fragArr);
+														foreach($fragArr as $prlid => $rawStr){
+															echo '<div style="display:'.($fragCnt?'none':'block').'">';
+															if(count($fragArr) > 1){
+																?>
+																<a href="#" onclick="nextRawText(<?php echo ($fragCnt<$totalFragCnt?$fragCnt+1:1); ?>);">
+																	<img src="../../images/rightarrow.jpg" title="Show Next Text Fragment" /><br/>
+																</a>
+																<?php 
+																echo $fragCnt.' of '.$totalFragCnt;
+															}
+															echo '<textarea name="rawtext" value="" id="textfrag'.$fragCnt.'" />';
+															echo '</div>';
+															$fragCnt++;
+														}
+														?>
+													</div>
+												</fieldset>
+											</div>
+											<?php
+										} 
+										?>
 									</td></tr>
 								</table>
 							</div>

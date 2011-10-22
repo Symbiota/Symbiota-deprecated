@@ -135,6 +135,8 @@ class SpecProcessorManager {
 				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
+				if($this->logFH) fwrite($this->logFH, "\tSpecimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") \n");
+				echo "<li style='margin-left:10px;'>Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.")</li>\n";
 			} 
 		}
 		if(!$occId){
@@ -160,7 +162,7 @@ class SpecProcessorManager {
 		$status = true;
 		if($occId && is_numeric($occId)){
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
-			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
+			if($this->logFH) fwrite($this->logFH, "\tPreparing to load record into database\n");
 			$imgUrl = $this->imgUrlBase;
 			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
@@ -193,7 +195,7 @@ class SpecProcessorManager {
 				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
 			}
 			if($imgId){
-				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced \n");
+				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced; occid: $occId \n");
 				echo "<li style='margin-left:20px;'>Existing image database record replaced</li>\n";
 			}
 			else{

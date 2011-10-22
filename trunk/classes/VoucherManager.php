@@ -60,12 +60,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 			"WHERE ((cllink.TID = ".$this->tid.") AND (cllink.CLID = ".$this->clid."))";
  		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
-			if($row->Habitat) $checklistData["habitat"] = $row->Habitat;
-			if($row->Abundance) $checklistData["abundance"] = $row->Abundance;
-			if($row->Notes) $checklistData["notes"] = $row->Notes;
-			if($row->internalnotes) $checklistData["internalnotes"] = $row->internalnotes;
-			if($row->source) $checklistData["source"] = $row->source;
-			if($row->familyoverride) $checklistData["familyoverride"] = $row->familyoverride;
+			$checklistData["habitat"] = $row->Habitat;
+			$checklistData["abundance"] = $row->Abundance;
+			$checklistData["notes"] = $row->Notes;
+			$checklistData["internalnotes"] = $row->internalnotes;
+			$checklistData["source"] = $row->source;
+			$checklistData["familyoverride"] = $row->familyoverride;
 			if(!$this->clName) $this->clName = $row->Name;
 			if(!$this->taxonName) $this->taxonName = $row->SciName;
 		}

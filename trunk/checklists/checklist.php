@@ -94,11 +94,8 @@
 
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
-
+<!DOCTYPE html >
+<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
@@ -351,12 +348,23 @@
 						</form>
 					</div>
 					<div id="editortab">
-						Editors
-						<div style="margin:10px;">
-							<b>To be added</b>
+						<div style="margin:30px 0px 30px 15px;">
 							<?php 
-								$clManager->echoEditorList();
-							
+								$editorArr = $clManager->getEditors();
+								if($editorArr){
+									echo "<ul>\n";
+									foreach($editorArr as $uid => $eArr){
+										echo '<li>';
+										echo $eArr['name'];
+										if($eArr['email']) echo ' ('.$eArr['email'].')';
+										if($eArr['assignedby']) echo ' - assigned by: '.$eArr['assignedby'];
+										echo "</li>\n";
+									}
+									echo "</ul>\n";
+								}
+								else{
+									echo "<div>No one has been explicitly assigned as an editor</div>\n";
+								}
 							?>
 						</div>
 					</div>
@@ -439,87 +447,96 @@
 					</form>
 					<?php 
 					if($clValue && $clManager->getEditable()){
-					?>
-					<div class="editspp" style="display:<?php echo ($editMode==1?'block':'none');?>;width:250px;margin-top:10px;">
-						<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
-							<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
-								<legend><b>Add New Species to Checklist</b></legend>
-								<div style="clear:left">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Taxon:
+						?>
+						<div class="editspp" style="display:<?php echo ($editMode==1?'block':'none');?>;width:250px;margin-top:10px;">
+							<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
+								<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
+									<legend><b>Add New Species to Checklist</b></legend>
+									<div style="clear:left">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Taxon:
+										</div>
+										<div style="float:left;">
+											<input type="text" id="speciestoadd" name="speciestoadd" />
+											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
+										</div>
 									</div>
-									<div style="float:left;">
-										<input type="text" id="speciestoadd" name="speciestoadd" />
-										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:100px;">
+											Family Override: 
+										</div>
+										<div style="float:left;">
+											<input type="text" name="familyoverride" size="15" title="Only enter if you want to override current family" />
+										</div>
 									</div>
-								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:100px;">
-										Family Override: 
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Habitat:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="habitat" />
+										</div>
 									</div>
-									<div style="float:left;">
-										<input type="text" name="familyoverride" size="15" title="Only enter if you want to override current family" />
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Abundance:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="abundance" />
+										</div>
 									</div>
-								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Habitat:
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Notes:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="notes" />
+										</div>
 									</div>
-									<div style="float:left;">
-										<input type="text" name="habitat" />
+									<div style="clear:left;padding-top:2px;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Internal Notes:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="internalnotes" title="Displayed to administrators only"/>
+										</div>
 									</div>
-								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Abundance:
+									<div style="clear:left;">
+										<div style="font-weight:bold;float:left;width:70px;">
+											Source:
+										</div>
+										<div style="float:left;">
+											<input type="text" name="source" />
+										</div>
 									</div>
-									<div style="float:left;">
-										<input type="text" name="abundance" />
+									<input type="hidden" name="cl" value="<?php echo $clManager->getClid(); ?>" />
+									<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
+									<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
+									<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
+									<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
+									<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
+									<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
+									<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
+									<input type="hidden" name="emode" value="1" />
+									<input type="submit" name="submitadd" value="Add Species to List"/>
+									<hr />
+									<div style="text-align:center;">
+										<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload</a>
 									</div>
-								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Notes:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="notes" />
-									</div>
-								</div>
-								<div style="clear:left;padding-top:2px;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Internal Notes:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="internalnotes" title="Displayed to administrators only"/>
-									</div>
-								</div>
-								<div style="clear:left;">
-									<div style="font-weight:bold;float:left;width:70px;">
-										Source:
-									</div>
-									<div style="float:left;">
-										<input type="text" name="source" />
-									</div>
-								</div>
-								<input type="hidden" name="cl" value="<?php echo $clManager->getClid(); ?>" />
-								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
-								<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
-								<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
-								<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
-								<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
-								<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
-								<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
-								<input type="hidden" name="emode" value="1" />
-								<input type="submit" name="submitadd" value="Add Species to List"/>
-								<hr />
-								<div style="text-align:center;">
-									<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload</a>
-								</div>
-							</fieldset>
-						</form>
-					</div>
-					<?php 
+								</fieldset>
+							</form>
+						</div>
+						<?php 
 					}
+					if($coordArr = $clManager->getCoordinates(0,true)){
+						?>
+						<div style="text-align:center;padding:10px">
+							<a href="checklistmap.php?clid=<?php echo $clManager->getClid().'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" >
+								<img src="http://maps.google.com/maps/api/staticmap?size=170x170&maptype=terrain&sensor=false&markers=size:tiny|<?php echo implode('|',$coordArr); ?>" style="border:0px;" />
+							</a>
+						</div>
+						<?php
+					} 
 					?>
 				</div>
 				<div>

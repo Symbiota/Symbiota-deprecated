@@ -1,8 +1,6 @@
 <?php
 class OccurrenceEditorImages extends OccurrenceEditorManager {
 
-	private $imageMap = Array();
-	
 	private $photographerArr = Array();
 	private $imageRootPath = "";
 	private $imageRootUrl = "";
@@ -18,36 +16,6 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 
 	public function __destruct(){
  		parent::__destruct();
-	}
-
-	public function getImageMap(){
-		if(!$this->imageMap && $this->occId){
-			$this->setImages();
-		}
-		return $this->imageMap;
-	}
-
-	private function setImages(){
-		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-			'sourceurl, copyright, notes, occid, sortsequence '.
-			'FROM images '.
-			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$imgId = $row->imgid;
-			$this->imageMap[$imgId]["url"] = $row->url;
-			$this->imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
-			$this->imageMap[$imgId]["origurl"] = $row->originalurl;
-			$this->imageMap[$imgId]["caption"] = $row->caption;
-			$this->imageMap[$imgId]["photographer"] = $row->photographer;
-			$this->imageMap[$imgId]["photographeruid"] = $row->photographeruid;
-			$this->imageMap[$imgId]["sourceurl"] = $row->sourceurl;
-			$this->imageMap[$imgId]["copyright"] = $row->copyright;
-			$this->imageMap[$imgId]["notes"] = $row->notes;
-			$this->imageMap[$imgId]["occid"] = $row->occid;
-			$this->imageMap[$imgId]["sortseq"] = $row->sortsequence;
-		}
-		$result->close();
 	}
 
 	public function editImage(){
