@@ -1,23 +1,23 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/GamesFlashcard.php');
 header("Content-Type: text/html; charset=".$charset);
 
-	$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
-	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0; 
-	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:1; 
-	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-	$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0; 
+$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
+$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
 
-	$fcManager = new FlashcardManager();
-	$fcManager->setClid($clid);
-	$fcManager->setDynClid($dynClid);
-	$fcManager->setTaxonFilter($taxonFilter);
-	$fcManager->setThesFilter($thesFilter);
-	$fcManager->setShowCommon($showCommon);
-	$fcManager->setLang($lang);
+$fcManager = new GamesFlashcard();
+$fcManager->setClid($clid);
+$fcManager->setDynClid($dynClid);
+$fcManager->setTaxonFilter($taxonFilter);
+$fcManager->setShowCommon($showCommon);
+$fcManager->setLang($lang);
+
+$sciArr = array();
 ?>
 <html>
 <head>
@@ -28,23 +28,8 @@ header("Content-Type: text/html; charset=".$charset);
 	</script>
 	<script type="text/javascript">
 		var imageArr = new Array();
-		<?php 
-			$urlArr = $fcManager->getImages();
-			if($urlArr){
-	 			$sciNameStr = "\"".implode("\",\"",array_keys($urlArr))."\""; 
-				echo "var sciNameArr = Array(".$sciNameStr.");\n";
-				$arrCnt = 0;
-				foreach($urlArr as $imgUrls){
-					echo "imageArr[".$arrCnt."] = new Array('".implode("','",$imgUrls)."');\n";
-					$arrCnt++;
-				}
-			}
-			else{
-				echo "var sciNameArr = Array();\n";
-			}
-		?>
+		var sciNameArr = new Array();
 		var toBeIdentified = new Array();
-		var randomIndex = 0;
 		var activeIndex = 0;
 		var activeImageArr = new Array();
 		var activeImageIndex = 0;
@@ -52,23 +37,42 @@ header("Content-Type: text/html; charset=".$charset);
 		var totalTried = 0;
 		var firstTry = true;
 
+		function init(){
+			<?php 
+				$imagesArr = $fcManager->getImages();
+				if($imagesArr){
+					foreach($imagesArr as $imgArr){
+						if(array_key_exists('url',$imgArr)){
+							$scinameStr = $imgArr['sciname'];
+							if($showCommon){
+								$scinameStr .= ' ('.$imgArr['vern'].')';
+							}
+							$sciArr[$imgArr['tid']] = $scinameStr;
+							echo 'sciNameArr.push('.$imgArr['tid'].');'."\n";
+							echo 'imageArr['.$imgArr['tid'].'] = new Array("'.implode('","',$imgArr['url']).'");'."\n";
+						}
+					}
+				}
+			?>
+			reset();
+		}
+
 		function reset(){
 			toBeIdentified = new Array();
 			if(sciNameArr.length == 0){
 				alert("Sorry, there are no images for the species list you have defined");
 			}
 			else{
-				for(x=0;x<sciNameArr.length;x++){
-					toBeIdentified[x] = x;
-				}
+				toBeIdentified = sciNameArr.slice();
 				document.getElementById("numtotal").innerHTML = sciNameArr.length;
+				document.getElementById("numcomplete").innerHTML = 0;
+				document.getElementById("numcorrect").innerHTML = 0;
 				insertNewImage();
 			}
 		}
 
 		function insertNewImage(){
-			randomIndex = Math.floor(Math.random()*toBeIdentified.length);
-			activeIndex = toBeIdentified[randomIndex];
+			activeIndex = toBeIdentified.shift();
 			activeImageArr = imageArr[activeIndex];
 			document.getElementById("activeimage").src = activeImageArr[0];
 			document.getElementById("imageanchor").href = activeImageArr[0];
@@ -86,31 +90,33 @@ header("Content-Type: text/html; charset=".$charset);
 			document.getElementById("imageanchor").href = activeImageArr[activeImageIndex];
 			document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
 			document.getElementById("imagecount").innerHTML = activeImageArr.length;
+			document.getElementById("scinameselect").options[0].selected = "1";
 		}
 
-		function checkId($idSelect){
-			var idIndexSelected = $idSelect.value;
-			totalTried++;
-			if(idIndexSelected == activeIndex){
-				alert("Correct! Try another");
-				toBeIdentified.splice(randomIndex,1);
-				document.getElementById("numcomplete").innerHTML = sciNameArr.length - toBeIdentified.length;
-				if(firstTry){
-					totalCorrect++;
-					document.getElementById("numcorrect").innerHTML = totalCorrect;
-				}
-				firstTry = true;
-				if(toBeIdentified.length > 0){
-					insertNewImage();
-					document.getElementById("scinameselect").value = "-1";
+		function checkId(idSelect){
+			var idIndexSelected = idSelect.value;
+			if(idIndexSelected > 0){
+				totalTried++;
+				if(idIndexSelected == activeIndex){
+					alert("Correct! Try another");
+					document.getElementById("numcomplete").innerHTML = sciNameArr.length - toBeIdentified.length;
+					if(firstTry){
+						totalCorrect++;
+						document.getElementById("numcorrect").innerHTML = totalCorrect;
+					}
+					firstTry = true;
+					if(toBeIdentified.length > 0){
+						insertNewImage();
+						document.getElementById("scinameselect").value = "-1";
+					}
+					else{
+						alert("Nothing left to identify. Hit reset to start again.");
+					}
 				}
 				else{
-					alert("Nothing left to identify. Hit reset to start again.");
+					alert("Sorry, incorrect. Try Again.");
+					firstTry = false;
 				}
-			}
-			else{
-				alert("Sorry, incorrect. Try Again.");
-				firstTry = false;
 			}
 		}
 
@@ -122,14 +128,14 @@ header("Content-Type: text/html; charset=".$charset);
 			else if(document.body.offsetWidth){
 				wWidth = document.body.offsetWidth*0.9;
 			}
-			newWindow = window.open("../taxa/index.php?taxon="+sciNameArr[activeIndex],"activetaxon",'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			newWindow = window.open("../taxa/index.php?taxon="+activeIndex,"activetaxon",'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			firstTry = false;
 		}
 	</script>
 </head>
 
-<body onload="reset()">
+<body onload="init()">
 <?php
 	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
 	include($serverRoot.'/header.php');
@@ -146,7 +152,7 @@ header("Content-Type: text/html; charset=".$charset);
 		<div style="width:420px;height:420px;text-align:center;">
 			<div>
 				<a id="imageanchor" href="">
-					<img id="activeimage" src=""/ style="height:97%;max-width:450px">
+					<img id="activeimage" src="" style="height:97%;max-width:450px" />
 				</a>
 			</div>
 		</div>
@@ -162,13 +168,12 @@ header("Content-Type: text/html; charset=".$charset);
 			</div>
 			<div style="clear:both;">
 				<select id="scinameselect" onchange="checkId(this)">
-					<option value="-1">Name of Above Organism</option>
-					<option value="-2">-------------------------</option>
+					<option value="0">Name of Above Organism</option>
+					<option value="0">-------------------------</option>
 					<?php 
-					$cnt = 0;
-					foreach($urlArr as $sciName => $url){
-						echo "<option value='".$cnt."'>".$sciName."</option>";
-						$cnt++;
+					asort($sciArr);
+					foreach($sciArr as $t => $s){
+						echo "<option value='".$t."'>".$s."</option>";
 					}
 				
 					?>
@@ -182,7 +187,6 @@ header("Content-Type: text/html; charset=".$charset);
 					<fieldset>
 					    <legend>Options</legend>
 						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
-						<input type="hidden" name="thesfilter" value="<?php echo $thesFilter; ?>" />
 						<input type="hidden" name="lang" value="<?php echo $lang; ?>" />
 						<div>
 							<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
@@ -196,7 +200,7 @@ header("Content-Type: text/html; charset=".$charset);
 							<?php 
 								//Display Common Names: 0 = false, 1 = true 
 							    if($displayCommonNames){
-							    	echo "<input id=\"showcommon\" name=\"showcommon\" type=\"checkbox\" value=\"1\" ".($showCommon?"checked":"")." onchange=\"document.getElementById('taxonfilterform').submit();\"/> Display Common Names\n";
+							    	echo '<input id="showcommon" name="showcommon" type="checkbox" value="1" '.($showCommon?"checked":"").' onchange="document.getElementById(\'taxonfilterform\').submit();"/> Display Common Names'."\n";
 							    }
 							?>
 						</div>
@@ -211,119 +215,3 @@ header("Content-Type: text/html; charset=".$charset);
 	?>
 </body>
 </html>
-<?php
- 
- class FlashcardManager {
- 	
-	private $conn;
-	private $clid;
-	private $dynClid;
-	private $taxonFilter;
-	private $thesFilter = 1;
-	private $showCommon = 0;
-	private $lang;
-
-	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-	}
-
-	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
-	}
-	
-	public function getImages(){
-		//Get species list
-		$sql1 = "SELECT DISTINCT t.sciname, ti.url ";
-		$sql2 = "FROM ((((".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid) ".
-			"INNER JOIN taxa t ON ts.".($this->thesFilter?"tidaccepted":"tid")." = t.tid) ".
-			"INNER JOIN taxstatus ts1 ON ts.tidaccepted = ts1.tidaccepted) ".
-			"INNER JOIN images ti ON ts1.tid = ti.tid) ";
-		if($this->showCommon){
-			$sql1 .= ",v.vernacularname "; 
-			$sql2 .= "LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = '".$this->lang."' AND vern.SortSequence = 1) v ON ts.TidAccepted = v.tid ";
-		}
-		$sql = $sql1.$sql2."WHERE ".($this->clid?"ctl.clid = ".$this->clid:"ctl.dynclid = ".$this->dynClid)." AND ts.taxauthid = ".($this->thesFilter?$this->thesFilter:"1")." AND ts1.taxauthid = 1 AND ti.SortSequence < 90 ";
-		if($this->taxonFilter) $sql .= "AND (ts.UpperTaxonomy = '".$this->taxonFilter."' OR ts.Family = '".$this->taxonFilter."' OR t.sciname Like '".$this->taxonFilter."%') ";
-		$sql .= "ORDER BY t.sciname,ti.sortsequence";
-		//echo $sql;
-		$result = $this->conn->query($sql);
-		$returnArr = Array();
-		while ($row = $result->fetch_object()){
-			$url = $row->url;
-			if(array_key_exists("imageDomain",$GLOBALS) && substr($url,0,1)=="/"){
-				$url = $GLOBALS["imageDomain"].$url;
-			}
-			$sciName = $row->sciname;
-			if($this->showCommon && $row->vernacularname) $sciName .= " (".$row->vernacularname.")";
-			if(!array_key_exists($sciName,$returnArr) || count($returnArr[$sciName]) < 10){
-				$returnArr[$sciName][] = $url;
-			}
-		}
-		$result->close();
-		return $returnArr;
-	}
-
-	public function echoTaxonFilterList(){
-		$returnArr = Array();
-		$upperList = Array();
-		$sqlFamily = "SELECT DISTINCT ts.uppertaxonomy, ".($this->clid?"IFNULL(ctl.familyoverride,ts.Family)":"ts.Family")." AS family ".
-			"FROM (taxa t INNER JOIN taxstatus ts ON t.TID = ts.TID) ".
-			"INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.TID = ctl.TID ".
-			"WHERE (ts.taxauthid = ".($this->thesFilter?$this->thesFilter:1)." AND ctl.".
-			($this->clid?"clid = ".$this->clid:"dynclid = ".$this->dynClid).") ";
-		//echo $sqlFamily."<br>";
-		$rsFamily = $this->conn->query($sqlFamily);
-		while ($row = $rsFamily->fetch_object()){
-			$returnArr[] = $row->family;
-			$upperList[$row->uppertaxonomy] = "";
-		}
-		$rsFamily->close();
-		$sqlGenus = "SELECT DISTINCT t.unitname1 ".
-			"FROM taxa t INNER JOIN ".($this->clid?"fmchklsttaxalink":"fmdyncltaxalink")." ctl ON t.tid = ctl.tid ".
-			"WHERE (ctl.clid = ".$this->clid.") ";
-		//echo $sqlGenus."<br>";
- 		$rsGenus = $this->conn->query($sqlGenus);
-		while ($row = $rsGenus->fetch_object()){
-			$returnArr[] = $row->unitname1;
-		}
-		$rsGenus->close();
-		natcasesort($returnArr);
-		ksort($upperList);
-		$upperList["-----------------------------------------------"] = "";
-		$returnArr["-----------------------------------------------"] = "";
-		$returnArr = array_merge(array_keys($upperList),$returnArr);
-		foreach($returnArr as $value){
-			echo "<option ";
-			if($this->taxonFilter && $this->taxonFilter == $value){
-				echo " SELECTED";
-			}
-			echo ">".$value."</option>\n";
-		}
-	}
-
-	public function setClid($id){
-		$this->clid = $id;
-	}
-
-	public function setDynClid($id){
-		$this->dynClid = $id;
-	}
-
-	public function setTaxonFilter($tValue){
-		$this->taxonFilter = $tValue;
-	}
-
-	public function setThesFilter($tValue){
-		$this->thesFilter = $tValue;
-	}
-
-	public function setShowCommon($sc){
-		$this->showCommon = $sc;
-	}
-
-	public function setLang($l){
-		$this->lang = $l;
-	}
-}
-
- ?>
