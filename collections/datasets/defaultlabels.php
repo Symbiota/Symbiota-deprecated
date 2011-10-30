@@ -10,6 +10,7 @@ $hSuffix = $_POST['lhsuffix'];
 $lFooter = $_POST['lfooter'];
 $occIdArr = $_POST['occid'];
 $rowsPerPage = $_POST['rpp'];
+$floatingWidth = array_key_exists('fw',$_POST)?$_POST['fw']:0;
 $useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
 $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
 $barcodeOnly = array_key_exists('bconly',$_POST)?$_POST['bconly']:0;
@@ -38,16 +39,16 @@ else{
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
 		    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 			<style type="text/css">
-				body {font-family:arial,sans-serif}
+				body {font-family:arial,sans-serif;<?php echo ($floatingWidth?'':'width:560pt;') ?>}
 				table {page-break-before:auto;page-break-inside:avoid;}
-				td {width:280pt; font-size:10pt;}
+				td {font-size:10pt;}
 				td.lefttd {padding:10px 23px 10px 0px;}
 				td.righttd {padding:10px 0px 10px 23px;}
 				p.printbreak {page-break-after:always;}
-				.lheader {width:100%; text-align:center; font:bold 16pt arial,sans-serif; margin-bottom:10px;}
+				.lheader {width:100%; text-align:center; font:bold 14pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
 				.sciname {font-weight:bold;}
-				.scientificnamediv {font-size:12pt;}
+				.scientificnamediv {font-size:11pt;}
 				.identifiedbydiv {margin-left:15px;}
 				.identificationreferences {margin-left:15px;}
 				.identificationremarks {margin-left:15px;}
@@ -60,7 +61,7 @@ else{
 				.recordnumber {margin-left:10px;}
 				.associatedcollectors {margin-left:15px;clear:both;}
 				.cnbarcode {width:100%; text-align:center;}
-				.lfooter {width:100%; text-align:center; font:bold 14px arial,sans-serif; padding-top:10px;}
+				.lfooter {width:100%; text-align:center; font:bold 12pt arial,sans-serif; padding-top:10px;clear:both;}
 				.barcodeonly {width:220px; height:50px; float:left;padding:10px; text-align:center; }
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
 			</style>
@@ -179,7 +180,7 @@ else{
 												}
 												else{
 													echo '<span class="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
-													echo '<span class="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallatitude>0?'E':'W').' ';
+													echo '<span class="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallongitude>0?'E':'W').' ';
 												}
 												if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.' meters</span>';
 												if($r->geodeticdatum) echo '<span style="margin-left:10px;">['.$r->geodeticdatum.']</span>'; 
@@ -265,9 +266,7 @@ else{
 											<?php 
 										}
 										?>
-										<div class="lfooter" style="clear:both;">
-											<?php echo $lFooter; ?>
-										</div>
+										<div class="lfooter"><?php echo $lFooter; ?></div>
 										<?php 
 										if($useSymbBarcode){
 											?>

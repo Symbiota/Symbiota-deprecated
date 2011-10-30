@@ -256,6 +256,10 @@ if($symbUid){
 									<input type="text" name="lfooter" value="" style="width:450px" />
 								</div>
 								<div style="margin:4px;">
+									<input type="checkbox" name="fw" value="1" />
+									<b>Floating label width (allows one to adjust overall font in print preview)</b> 
+								</div>
+								<div style="margin:4px;">
 									<input type="checkbox" name="bc" value="1" />
 									<b>Include barcode of Catalog Number</b> 
 								</div>
