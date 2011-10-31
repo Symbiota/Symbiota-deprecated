@@ -128,7 +128,6 @@ class EOLManager {
 		echo "<li>EOL mapping successfully completed for $successCnt taxa</li>\n";
 		echo "</ul>\n";
 		$rs->close();
-		
 	}
 
 	private function mapEolImages($tid, $identifier){

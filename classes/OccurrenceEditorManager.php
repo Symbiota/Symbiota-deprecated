@@ -139,7 +139,14 @@ class OccurrenceEditorManager {
 			$rnInFrag = array();
 			foreach($rnArr as $v){
 				if($p = strpos($v,' - ')){
-					$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'")';
+					$term1 = substr($v,0,$p);
+					$term2 = substr($v,$p+3);
+					if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
+						$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					}
+					else{
+						$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					}
 				}
 				else{
 					$rnInFrag[] = $v;
@@ -563,12 +570,14 @@ class OccurrenceEditorManager {
 	//Label processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
-		$sql = 'SELECT prlid, rawstr, notes FROM specprocessorrawlabels WHERE occid = '.$this->occId;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->prlid] = $r->rawstr;
-		}
-		$rs->close(); 
+		if($this->occId){
+			$sql = 'SELECT prlid, rawstr, notes FROM specprocessorrawlabels WHERE occid = '.$this->occId;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->prlid] = $r->rawstr;
+			}
+			$rs->close();
+		} 
 		return $retArr;
 	}
 	
