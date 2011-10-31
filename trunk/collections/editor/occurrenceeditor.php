@@ -208,7 +208,7 @@ if($symbUid){
 			$navStr .= '&gt;|';
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
 			$navStr .= '</b>';
-			$navStr = '<div style="float:right;">'.$navStr.'</div>'."\n";
+			$navStr = $navStr;
 		}
 	}
 }
@@ -222,8 +222,9 @@ if($symbUid){
 	<style type="text/css">
 		img.dwcimg {border:0px;width:9px;margin-bottom:2px;}
 	</style>
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
@@ -232,19 +233,8 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
 </head>
 <body>
-	<?php
-	$displayLeftMenu = (isset($collections_editor_occurrenceeditorMenu)?$collections_individual_occurrenceeditorMenu:false);
-	include($serverRoot.'/header.php');
-	if(isset($collections_editor_occurrenceeditorCrumbs)){
-		echo "<div class='navpath'>";
-		echo "<a href='../../index.php'>Home</a> &gt; ";
-		echo $collections_editor_occurrenceeditorCrumbs;
-		echo "<b>Occurrence Editor</b>";
-		echo "</div>";
-	}
-	?>
 	<!-- inner text -->
-	<div id="innertext">
+	<div id="innertext" style="width:790px">
 		<?php 
 		if(!$symbUid){
 			?>
@@ -415,7 +405,18 @@ if($symbUid){
 						<?php
 					} 
 					if($navStr){
-						echo $navStr;
+						?>
+						<div>
+							<span class='navpath'>
+								<a href="../../index.php">Home</a> &gt;&gt;
+								<a href="..//misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
+								<b>Editor</b>
+							</span>
+							<span style="margin-left:400px;">
+								<?php echo $navStr; ?>
+							</span>
+						</div>
+						<?php 
 					}
 					if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 						?>
@@ -458,11 +459,27 @@ if($symbUid){
 								?>
 							</ul>
 							<div id="occdiv" style="position:relative;">
-								<table width="100%">
-									<tr><td>
+								<table id="edittable">
+									<tr><td style="width:745px;">
 										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" >
 											<fieldset>
 												<legend><b>Collector Info</b></legend>
+												<?php
+												if($occId){ 
+													$fragArr = $occManager->getRawTextFragments();
+													$specImgArr = $occManager->getImageMap();
+													if($fragArr || $specImgArr){
+														?>
+														<div id="imgprocondiv" style="float:right;margin:-7px -4px 0px 0px;font-weight:bold;">
+															<a href="#" onclick="toggleImageTd();return false;">&gt;&gt;</a>
+														</div>
+														<div id="imgprocoffdiv" style="float:right;margin:-7px -4px 0px 0px;font-weight:bold;display:none;">
+															<a href="#" onclick="toggleImageTd();return false;">&lt;&lt;</a>
+														</div>
+														<?php
+													}
+												} 
+												?>
 												<div>
 													<span style="margin-left:2px;">
 														Catalog Number
@@ -808,6 +825,7 @@ if($symbUid){
 																<option value="UTCO">Colorado, Ute</option>
 																<option value="B-ID">Idaho, Boise</option>
 																<option value="SPKS">Kansas, Sixth Principal</option>
+																<option value="F-MO">Missouri, Fifth Principal</option>
 																<option value="P-MT">Montana, Principal</option>
 																<option value="SPNE">Nebraska, Sixth Principal</option>
 																<option value="M-NV">Nevada, Mt. Diablo</option>
@@ -1057,7 +1075,7 @@ if($symbUid){
 											</fieldset>
 											<?php 
 											if($navStr){
-												echo $navStr;
+												echo '<div style="margin-left:580px;">'.$navStr.'</div>'."\n";
 											}
 											?>
 											<div style="padding:10px;">
@@ -1107,62 +1125,97 @@ if($symbUid){
 											<div style="clear:both;">&nbsp;</div>
 										</form>
 									</td>
-									<td style="display:none;">
+									<td id="imgproctd" style="display:none;">
 										<?php 
-										$fragArr = $occManager->getRawTextFragments();
-										$specImgArr = $occManager->getImageMap();
-										if($fragArr || $specImgArr ){
+										if($occId && ($fragArr || $specImgArr )){
 											?>
-											<div style="display:none;float:right;width:300px;">
-												<fieldset>
-													<legend>Label Processing</legend>
-													<div id="labelimagediv" style="">
-														<?php
-														if($specImgArr){
-															$i1 = array_pop($specImgArr); 
-															?>
-															<img src="<?php echo $i1['origurl']; ?>" />
-															<?php
+											<div style="width:100%;height:800px;">
+												<fieldset style="height:95%">
+													<legend><b>Label Processing</b></legend>
+													<?php
+													if($specImgArr){
+														$imgArr = array();
+														foreach($specImgArr as $i2){
+															$imgArr[] = ($i2['origurl']?$i2['origurl']:$i2['url']);
 														}
 														?>
-													</div>
-													<?php
-													if($specImgArr){ 
-														?>
-														<div id="labeltndiv" style="width:280px;height:100px;position:relative;">
-															<?php 
-															foreach($specImgArr as $imgId => $iArr){
-																?>
-																<div style="float:left">
-																	<img src="<?php echo $iArr['tnurl']; ?>" />
-																</div>
-																<?php
-															} 
-															?>
+														<div id="labelimagediv">
+															<img id="activeimage" src="<?php echo $imgArr[0]; ?>" />
+															<div style="width:100%;">
+																<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
+																<span>
+																	Image 
+																	<span id="imageindex">1</span> 
+																	of <?php echo count($imgArr); ?> 
+																	<?php 
+																	if(count($imgArr)>1){
+																		?>
+																		<script type="text/javascript"> 
+																			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
+																			var activeImageIndex = 1; 
+																			function nextLabelProcessingImage(){
+																				activeImageIndex++;
+																				if(activeImageIndex >= activeImageArr.length){
+																					activeImageIndex = 0;
+																				}
+																				document.getElementById("activeimage").src = activeImageArr[activeImageIndex];
+																				document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
+																			}
+																		</script>
+																		<a href="#" onclick="nextLabelProcessingImage(); return false;">
+																			<img src="../../images/rightarrow.jpg" title="Show Next Image" />
+																		</a>
+																		<?php 
+																	}
+																	?>
+																</span>
+															</div>
 														</div>
 														<?php
-													} 
-													?>
-													<div id="rawtextdiv">
-														<?php 
-														$fragCnt = 1;
-														$totalFragCnt = count($fragArr);
-														foreach($fragArr as $prlid => $rawStr){
-															echo '<div style="display:'.($fragCnt?'none':'block').'">';
-															if(count($fragArr) > 1){
-																?>
-																<a href="#" onclick="nextRawText(<?php echo ($fragCnt<$totalFragCnt?$fragCnt+1:1); ?>);">
-																	<img src="../../images/rightarrow.jpg" title="Show Next Text Fragment" /><br/>
-																</a>
-																<?php 
-																echo $fragCnt.' of '.$totalFragCnt;
-															}
-															echo '<textarea name="rawtext" value="" id="textfrag'.$fragCnt.'" />';
-															echo '</div>';
-															$fragCnt++;
-														}
+													}
+													if($fragArr){
 														?>
-													</div>
+														<div id="rawtextdiv">
+															<?php 
+															$fragCnt = 0;
+															foreach($fragArr as $prlid => $rawStr){
+																echo '<div id="txtfrag'.$fragCnt.'" '.($fragCnt?'style="display:none"':'').'>'."\n";
+																echo '<textarea name="rawtext-'.$prlid.'" >';
+																echo $rawStr;
+																echo '</textarea>'."\n";
+																echo '</div>'."\n";
+																$fragCnt++;
+															}
+															?>
+															<div style="width:100%;text-align:right;">
+																<span id="textfragindex">1</span> of <?php echo $fragCnt; ?>
+																<?php 
+																if($fragCnt > 1){
+																	?>
+																	<script type="text/javascript"> 
+																		var textFragIndex = 0;
+																		var totalFragCnt = <?php echo $fragCnt; ?>; 
+																		function nextRawText(){
+																			textFragIndex++;
+																			document.getElementById("txtfrag"+(textFragIndex-1)).style.display = "none";
+																			if(textFragIndex == totalFragCnt){
+																				textFragIndex = 0;
+																			}
+																			document.getElementById("txtfrag"+textFragIndex).style.display = "block";
+																			document.getElementById("textfragindex").innerHTML = activeImageIndex + 1;
+																		}
+																	</script>
+																	<a href="#" onclick="nextRawText();return false;">
+																		<img src="../../images/rightarrow.jpg" title="Show Next Text Fragment" />
+																	</a>
+																	<?php 
+																}
+																?>
+															</div>
+														</div>
+														<?php
+													}
+													?>
 												</fieldset>
 											</div>
 											<?php
@@ -1261,7 +1314,7 @@ if($symbUid){
 		?>
 	</div>
 <?php 	
-include($serverRoot.'/footer.php');
+//include($serverRoot.'/footer.php');
 ?>
 
 </body>

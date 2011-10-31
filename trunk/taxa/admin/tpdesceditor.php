@@ -122,22 +122,22 @@ if($editable && $tid){
 		</div>
 		<div id='adddescrblock' style='display:none;'>
 			<form name='adddescrblockform' action="tpdesceditor.php" method="get">
-				<fieldset style='width:475px;margin:20px;'>
+				<fieldset style='width:550px;margin:20px;'>
 	    			<legend><b>New Description Block</b></legend>
 					<div style=''>
 						Language: <input id="language" name="language" style="margin-top:5px;" type="text" value="<?php echo $defaultLang; ?>" />
 					</div>
 					<div style=''>
-						Caption: <input id='caption' name='caption' style='margin:2px;' type='text' />
+						Caption: <input id='caption' name='caption' style='margin:2px;width:300px;' type='text' />
 					</div>
 					<div style=''>
-						Source: <input id='source' name='source' style='margin:2px;width:300px;' type='text' />
+						Source: <input id='source' name='source' style='margin:2px;width:450px;' type='text' />
 					</div>
 					<div style=''>
-						Source Url: <input id='sourceurl' name='sourceurl' style='margin:2px;width:300px;' type='text' />
+						Source Url: <input id='sourceurl' name='sourceurl' style='margin:2px;width:450px;' type='text' />
 					</div>
 					<div style=''>
-						Notes: <input id='notes' name='notes' style='margin:2px;width:300px;' type='text' />
+						Notes: <input id='notes' name='notes' style='margin:2px;width:450px;' type='text' />
 					</div>
 					<div style="float:right;">
 						<input name='action' style='margin-top:5px;' type='submit' value='Add Description Block' />
@@ -156,7 +156,7 @@ if($editable && $tid){
 			foreach($descList as $lang => $dlArr){
 		    	foreach($dlArr as $displayLevel => $bArr){
 		    		?>
-    				<fieldset style='width:500px;margin:10px 5px 5px 5px;'>
+    				<fieldset style='width:90%;margin:10px 5px 5px 5px;'>
 						<legend><b><?php echo $lang.": ".($bArr["caption"]?$bArr["caption"]:"Description ".$displayLevel); ?></b></legend>
 						<div style="float:right;" onclick="javascript:toggleById('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
 							<img style='border:0px;width:12px;' src='../../images/edit.png'/>
@@ -175,19 +175,19 @@ if($editable && $tid){
 									</div>
 									<div>
 										Caption: 
-										<input id='caption' name='caption' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["caption"];?>' />
+										<input id='caption' name='caption' style='margin-top:5px;border:inset;width:450px;' type='text' value='<?php echo $bArr["caption"];?>' />
 									</div>
 									<div>
 										Source: 
-										<input id='source' name='source' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["source"];?>' />
+										<input id='source' name='source' style='margin-top:5px;border:inset;width:450px;' type='text' value='<?php echo $bArr["source"];?>' />
 									</div>
 									<div>
 										Source URL: 
-										<input id='sourceurl' name='sourceurl' style='margin-top:5px;border:inset;width:330px;' type='text' value='<?php echo $bArr["sourceurl"];?>' />
+										<input id='sourceurl' name='sourceurl' style='margin-top:5px;border:inset;width:500px;' type='text' value='<?php echo $bArr["sourceurl"];?>' />
 									</div>
 									<div>
 										Notes: 
-										<input name='notes' style='margin-top:5px;border:inset;width:400px;' type='text' value='<?php echo $bArr["notes"];?>' />
+										<input name='notes' style='margin-top:5px;border:inset;width:450px;' type='text' value='<?php echo $bArr["notes"];?>' />
 									</div>
 									<div style="float:right;margin:10px;">
 										<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
@@ -218,30 +218,8 @@ if($editable && $tid){
 								<div onclick="javascript:toggleById('addstmt-<?php echo $bArr["tdbid"];?>');" style="float:right;" title="Add a New Statement">
 									<img style='border:0px;width:15px;' src='../../images/add.png'/>
 								</div>
-								<div id='addstmt-<?php echo $bArr["tdbid"];?>' style='display:none;'>
-									<form name='adddescrstmtform' action="tpdesceditor.php" method="post">
-										<fieldset style='margin:5px 0px 0px 15px;'>
-							    			<legend><b>New Description Statement</b></legend>
-											<div style='margin:3px;'>
-												Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
-												<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Header
-											</div>
-											<div style='margin:3px;'>
-												<textarea name='statement' cols='50' rows='3'></textarea>
-											</div>
-											<div style="float:right;">
-												<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
-												<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
-												<input type='hidden' name='category' value='<?php echo $category; ?>' />
-												<input name='action' style='margin:3px;' type='submit' value='Add Statement' />
-											</div>
-											<div style='margin:3px;'>
-												Sort Sequence: <input name='sortsequence' style='margin-top:5px;width:40px;' type='text' />
-											</div>
-										</fieldset>
-									</form>
-								</div>
 								<?php
+								$defaultSort = 5;
 								if(array_key_exists("stmts",$bArr)){
 									$sArr = $bArr["stmts"];
 									foreach($sArr as $tdsid => $stmtArr){
@@ -262,7 +240,7 @@ if($editable && $tid){
 														<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> Display Header
 													</div>
 													<div>
-														<textarea name='statement' cols='50' rows='3' style='margin:3px;'><?php echo $stmtArr["statement"];?></textarea>
+														<textarea name='statement'  style="width:95%;height:200px;margin:3px;"><?php echo $stmtArr["statement"];?></textarea>
 													</div>
 													<div style="float:right;margin:10px;">
 														<input name='action' type='submit' value='Edit Statement' />
@@ -287,10 +265,37 @@ if($editable && $tid){
 												</form>
 											</div>
 										</div>
-									<?php 
+										<?php
+										if($stmtArr["sortsequence"] && $stmtArr["sortsequence"] > $defaultSort){
+											$defaultSort = $stmtArr["sortsequence"] + 5;
+										}
 									}
 								}
-							?>
+								?>
+								<div id='addstmt-<?php echo $bArr["tdbid"];?>' style='display:none;'>
+									<form name='adddescrstmtform' action="tpdesceditor.php" method="post">
+										<fieldset style='margin:5px 0px 0px 15px;'>
+							    			<legend><b>New Description Statement</b></legend>
+											<div style='margin:3px;'>
+												Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
+												<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Heading
+											</div>
+											<div style='margin:3px;'>
+												<textarea name='statement' style="width:95%;height:200px;"></textarea>
+											</div>
+											<div style="float:right;margin-right:30px;">
+												<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
+												<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
+												<input type='hidden' name='category' value='<?php echo $category; ?>' />
+												<input name='action' style='margin:3px;' type='submit' value='Add Statement' />
+											</div>
+											<div style='margin:3px;'>
+												Sort Sequence: 
+												<input name='sortsequence' style='margin-top:5px;width:40px;' type='text' value='<?php echo $defaultSort; ?>' />
+											</div>
+										</fieldset>
+									</form>
+								</div>
 							</fieldset>
 						</div>
 					</fieldset>

@@ -44,6 +44,17 @@ $(document).ready(function() {
 		}},
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
+
+});
+
+$(function() {
+	$("#labelimagediv img").imagetool({
+		maxWidth: 6000
+		,viewportWidth: 400
+        ,viewportHeight: 400
+        ,imageWidth: 3500
+        ,imageHeight: 5200
+	});
 });
 
 function initDetAddAutocomplete(){
@@ -403,6 +414,26 @@ function toggle(target){
 	}
 }
 
+function toggleIdDetails(){
+	toggle("idrefdiv");
+	toggle("idremdiv");
+}
+
+function toggleImageTd(){
+	toggle("imgprocondiv");
+	toggle("imgprocoffdiv");
+	if(document.getElementById("imgproctd").style.display == "none"){
+		document.getElementById("imgproctd").style.display = "block";
+		document.getElementById("innertext").style.width = "1200px";
+		document.getElementById("edittable").style.width = "1175px";
+	}
+	else{
+		document.getElementById("imgproctd").style.display = "none";
+		document.getElementById("innertext").style.width = "790px";
+		document.getElementById("edittable").style.width = "745px";
+	}
+}
+
 function toogleLocSecReason(f){
 	var lsrObj = document.getElementById("locsecreason");
 	if(f.localitysecurity.checked){
@@ -435,11 +466,6 @@ function toggleElevDiv(){
 	else{
 		elevObj.style.display = "none";
 	}
-}
-
-function toggleIdDetails(){
-	toggle("idrefdiv");
-	toggle("idremdiv");
 }
 
 function openAssocSppAid(){
@@ -860,7 +886,7 @@ function displayDeleteSubmit(){
 	}
 }
 
-//Occurrence field checks
+//Occurrence field verifications
 function eventDateModified(eventDateInput){
 	var dateStr = eventDateInput.value;
 	if(dateStr == "") return true;
