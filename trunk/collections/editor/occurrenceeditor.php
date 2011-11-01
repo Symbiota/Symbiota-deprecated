@@ -412,7 +412,7 @@ if($symbUid){
 								<a href="..//misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
 								<b>Editor</b>
 							</span>
-							<span style="margin-left:400px;">
+							<span style="margin-left:370px;">
 								<?php echo $navStr; ?>
 							</span>
 						</div>
@@ -1129,7 +1129,7 @@ if($symbUid){
 										<?php 
 										if($occId && ($fragArr || $specImgArr )){
 											?>
-											<div style="width:100%;height:800px;">
+											<div style="width:100%;height:825px;">
 												<fieldset style="height:95%">
 													<legend><b>Label Processing</b></legend>
 													<?php
@@ -1138,38 +1138,36 @@ if($symbUid){
 														foreach($specImgArr as $i2){
 															$imgArr[] = ($i2['origurl']?$i2['origurl']:$i2['url']);
 														}
+														$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
 														?>
 														<div id="labelimagediv">
-															<img id="activeimage" src="<?php echo $imgArr[0]; ?>" />
-															<div style="width:100%;">
-																<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
-																<span>
-																	Image 
-																	<span id="imageindex">1</span> 
-																	of <?php echo count($imgArr); ?> 
-																	<?php 
-																	if(count($imgArr)>1){
-																		?>
-																		<script type="text/javascript"> 
-																			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
-																			var activeImageIndex = 1; 
-																			function nextLabelProcessingImage(){
-																				activeImageIndex++;
-																				if(activeImageIndex >= activeImageArr.length){
-																					activeImageIndex = 0;
-																				}
-																				document.getElementById("activeimage").src = activeImageArr[activeImageIndex];
-																				document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
-																			}
-																		</script>
-																		<a href="#" onclick="nextLabelProcessingImage(); return false;">
-																			<img src="../../images/rightarrow.jpg" title="Show Next Image" />
-																		</a>
-																		<?php 
+															<img id="activeimage" src="<?php echo $imgUrlPrefix.$imgArr[0]; ?>" />
+														</div>
+														<div style="width:100%;">
+															<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
+															<?php 
+															if(count($imgArr)>1){
+																?>
+																<script type="text/javascript"> 
+																	var activeImageArr = new Array("<?php echo $imgUrlPrefix.implode('","'.$imgUrlPrefix,$imgArr); ?>");
+																	var activeImageIndex = 0; 
+																	function nextLabelProcessingImage(){
+																		activeImageIndex++;
+																		if(activeImageIndex >= activeImageArr.length){
+																			activeImageIndex = 0;
+																		}
+																		document.getElementById("activeimage").src = activeImageArr[activeImageIndex];
+																		document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
 																	}
-																	?>
-																</span>
-															</div>
+																</script>
+																<?php 
+															}
+															?>
+															<span style="margin-left:200px;font-weight:bold;">
+																Image <span id="imageindex">1</span> 
+																of <?php echo count($imgArr); ?> 
+																<a href="#" onclick="nextLabelProcessingImage(); return false;">=&gt;&gt;</a>
+															</span>
 														</div>
 														<?php
 													}
@@ -1180,14 +1178,14 @@ if($symbUid){
 															$fragCnt = 0;
 															foreach($fragArr as $prlid => $rawStr){
 																echo '<div id="txtfrag'.$fragCnt.'" '.($fragCnt?'style="display:none"':'').'>'."\n";
-																echo '<textarea name="rawtext-'.$prlid.'" >';
+																echo '<textarea name="rawtext-'.$prlid.'" style="width:400px;height:325px;">';
 																echo $rawStr;
 																echo '</textarea>'."\n";
 																echo '</div>'."\n";
 																$fragCnt++;
 															}
 															?>
-															<div style="width:100%;text-align:right;">
+															<div style="width:100%;text-align:right;font-weight:bold;">
 																<span id="textfragindex">1</span> of <?php echo $fragCnt; ?>
 																<?php 
 																if($fragCnt > 1){
@@ -1202,12 +1200,10 @@ if($symbUid){
 																				textFragIndex = 0;
 																			}
 																			document.getElementById("txtfrag"+textFragIndex).style.display = "block";
-																			document.getElementById("textfragindex").innerHTML = activeImageIndex + 1;
+																			document.getElementById("textfragindex").innerHTML = textFragIndex + 1;
 																		}
 																	</script>
-																	<a href="#" onclick="nextRawText();return false;">
-																		<img src="../../images/rightarrow.jpg" title="Show Next Text Fragment" />
-																	</a>
+																	<a href="#" onclick="nextRawText();return false;">=>></a>
 																	<?php 
 																}
 																?>
