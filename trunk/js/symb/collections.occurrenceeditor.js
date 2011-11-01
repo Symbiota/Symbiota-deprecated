@@ -691,8 +691,8 @@ function lookForDupes(f){
 	var collName = f.recordedby.value;
 	var collNum = f.recordnumber.value;
 	var collDate = f.eventdate.value;
-	if(!collName || !collNum){
-		alert("Collector name and number must have a value to search for duplicates");
+	if(!collName || (!collNum && !collDate)){
+		alert("Collector name and number or date must have a value to search for duplicates");
 		return;
 	}
 	document.getElementById("dupedisplayspan").style.display = "none";

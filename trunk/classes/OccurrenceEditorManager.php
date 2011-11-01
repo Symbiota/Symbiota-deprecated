@@ -566,7 +566,7 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
-	
+
 	//Label processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
