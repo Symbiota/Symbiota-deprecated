@@ -1,18 +1,18 @@
 <?php
 //Pattern matching term used to locate primary key (PK) of specimen record
-$specKeyPattern = '/ASU\d{7}/';		//ex: '/ASU\d{7}/'; '/UTC\d{8}/'
+$specKeyPattern = '';		//ex: '/ASU\d{7}/'; '/UTC\d{8}/'
 
 //filename = grab PK from file name; ocr = attempt to retrieve PK from image using OCR (tesseract must be installed on server)
 $specKeyRetrieval = 'filename';		//OCR PK retrival not yet implimented, only filename works
 
 //Folder containing unprecessed images; read access needed
-$sourcePath = 'C:/htdocs/symbiota/trunk/temp/images/toprocess/';
+$sourcePath = '';
 
 //Folder where images are to be placed; write access needed
-$targetPath = 'C:/htdocs/symbiota/trunk/temp/images/';
+$targetPath = '';
 
 //Url base needed to build image URL that will be save in DB
-$imgUrlBase = '/seinet/temp/images/';
+$imgUrlBase = '';
 
 $webPixWidth = 1200;
 $tnPixWidth = 130;
@@ -32,7 +32,7 @@ $createTnImg = 1;
 $createLgImg = 1;		
 
 //Path to where log files will be placed
-$logPath = 'C:/htdocs/symbiota/trunk/temp/logs/';
+$logPath = '';
 
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
 $dbMetadata = 0;
