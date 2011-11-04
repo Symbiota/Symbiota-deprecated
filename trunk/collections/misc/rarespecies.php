@@ -189,7 +189,11 @@ if($editable){
 		}
 	}
 	else{
-		echo "<div>No species have been marked as sensitive within the system.</div>";
+		?>
+		<div sytle="margin:30px;font-weight:bold;font-size:120px;">
+			No species have been marked as sensitive within the system.
+		</div>
+		<?php 
 	}
 ?>
 </div>

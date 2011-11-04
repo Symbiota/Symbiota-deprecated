@@ -62,25 +62,26 @@ class SpecProcessorManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function setCollId($id) {
+	public function setCollId($id){
 		$this->collId = $id;
 		if($this->collId && is_numeric($this->collId) && !$this->collectionName){
 			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collId.')';
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->collectionName = $row->collectionname;
-				$this->managementType = $row->managementtype;
+			if($rs = $this->conn->query($sql)){
+				if($row = $rs->fetch_object()){
+					$this->collectionName = $row->collectionname;
+					$this->managementType = $row->managementtype;
+				}
+				else{
+					exit('ABORTED: unable to locate collection in data');
+				}
+				$rs->close();
 			}
-			$rs->close();
+			else{
+				exit('ABORTED: unable run SQL to obtain collectionName');
+			}
 		}
 	}
 
-	public function setSpprId($id) {
-		if($id && is_numeric($id)){
-			$this->spprid = $id;
-		}
-	}
-	
 	protected function getPrimaryKey($str){
 		$specPk = '';
 		$pkPattern = $this->specKeyPattern;
@@ -90,36 +91,6 @@ class SpecProcessorManager {
 		return $specPk;
 	}
 	
-	protected function ocrImage(){
-		$labelBlock = '';
-		//Process image to aid OCR
-			//Convert to TIF
-			//contrast, brightness, B/W ???
-		
-		$output = array();
-		exec('tesseract', $output);
-		
-		//Obtain text from tesseract output file
-
-		
-		return $labelBlock;
-	}
-
-	protected function loadRawFragment($occId,$labelBlock){
-		//load raw label record
-		$status = true; 
-		$sql = 'INSERT INTO specprocessorrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
-		if(!$this->conn->query($sql)){
-			if($this->logErrFH){
-				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
-				fwrite($this->logErrFH, $this->conn->error." \n");
-				fwrite($this->logErrFH, "\tSQL: $sql \n");
-			}
-			$status = false;
-		}
-		return $status;
-	}
-
 	protected function getOccId($specPk){
 		$occId = 0;
 		//Check to see if record with pk already exists
@@ -163,30 +134,28 @@ class SpecProcessorManager {
 		if($occId && is_numeric($occId)){
 	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
 			if($this->logFH) fwrite($this->logFH, "\tPreparing to load record into database\n");
-			$imgUrl = $this->imgUrlBase;
-			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
 			//Check to see if image url already exists for that occid
 			$imgId = 0;
 			$sql = 'SELECT imgid '.
-				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$imgUrl.$webUrl.'")';
+				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$this->imgUrlBase.$webUrl.'")';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$imgId = $r->imgid;
 			}
 			$rs->close();
 			$sql1 = 'INSERT images(occid,url';
-			$sql2 = 'VALUES ('.$occId.',"'.$imgUrl.$webUrl.'"';
+			$sql2 = 'VALUES ('.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
 			if($imgId){
 				$sql1 = 'REPLACE images(imgid,occid,url';
-				$sql2 = 'VALUES ('.$imgId.','.$occId.',"'.$imgUrl.$webUrl.'"';
+				$sql2 = 'VALUES ('.$imgId.','.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
 			}
 			if($tnUrl){
 				$sql1 .= ',thumbnailurl';
-				$sql2 .= ',"'.$imgUrl.$tnUrl.'"';
+				$sql2 .= ',"'.$this->imgUrlBase.$tnUrl.'"';
 			}
 			if($oUrl){
 				$sql1 .= ',originalurl';
-				$sql2 .= ',"'.$imgUrl.$oUrl.'"'; 
+				$sql2 .= ',"'.$this->imgUrlBase.$oUrl.'"'; 
 			}
 			$sql1 .= ',imagetype,owner) ';
 			$sql2 .= ',"specimen","'.$this->collectionName.'")';
@@ -216,12 +185,46 @@ class SpecProcessorManager {
 	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($this->mdOutputFH){
-			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$webUrl.'","'.$tnUrl.'","'.$oUrl.'"'."\n");
+			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$this->imgUrlBase.$webUrl.'","'.$this->imgUrlBase.$tnUrl.'","'.$this->imgUrlBase.$oUrl.'"'."\n");
 		}
 		return $status;
 	}
-	
+
+	//OCR and NLP scripts
+	//Not yet implimented and may not be. OCR is not a great method for obtaining primary identifier for specimen record.
+	//Functions not needed for standalone scripts
+	protected function ocrImage(){
+		$labelBlock = '';
+		//Process image to aid OCR
+			//Convert to TIF
+			//contrast, brightness, B/W ???
+		
+		$output = array();
+		exec('tesseract', $output);
+		
+		//Obtain text from tesseract output file
+
+		
+		return $labelBlock;
+	}
+
+	protected function loadRawFragment($occId,$labelBlock){
+		//load raw label record
+		$status = true; 
+		$sql = 'INSERT INTO specprocessorrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
+		if(!$this->conn->query($sql)){
+			if($this->logErrFH){
+				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
+				fwrite($this->logErrFH, $this->conn->error." \n");
+				fwrite($this->logErrFH, "\tSQL: $sql \n");
+			}
+			$status = false;
+		}
+		return $status;
+	}
+
 	//Project Functions (create, edit, delete, etc)
+	//Functions not needed for standalone scripts
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
@@ -323,16 +326,10 @@ class SpecProcessorManager {
 	}
 
 	//Set and Get functions
-	public function getLogPath(){
-		return $this->logPath;
-	}
-
-	public function getLogFH(){
-		return $this->logFH;
-	}
-
-	public function getLogErrFH(){
-		return $this->logErrFH;
+	public function setSpprId($id) {
+		if($id && is_numeric($id)){
+			$this->spprid = $id;
+		}
 	}
 
 	public function setTitle($t){
@@ -424,6 +421,7 @@ class SpecProcessorManager {
 	}
 
 	public function setImgUrlBase($u){
+		if(substr($u,-1) != '/') $u = '/';
 		$this->imgUrlBase = $u;
 	}
 

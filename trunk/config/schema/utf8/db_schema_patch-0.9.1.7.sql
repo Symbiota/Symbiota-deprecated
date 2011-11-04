@@ -1,5 +1,6 @@
 ALTER TABLE `uploadspectemp`  
-   ADD INDEX `FK_uploadspectemp_occid` (`occid` ASC)  , ADD INDEX `FK_uploadspectemp_dbpk` (`dbpk` ASC) ; 
+   ADD INDEX `Index_uploadspectemp_occid` (`occid` ASC)  , 
+   ADD INDEX `Index_uploadspectemp_dbpk` (`dbpk` ASC) ; 
 
 ALTER TABLE `omoccurrences`  ADD INDEX `Index_collnum` (`recordNumber` ASC) ;
 
