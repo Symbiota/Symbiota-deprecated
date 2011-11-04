@@ -1,28 +1,29 @@
 <?php
-//Pattern matching tern used to locate primary key (PK) of specimen record
-$specKeyPattern = '/UTC\d{8}/';
+//Pattern matching term used to locate primary key (PK) of specimen record
+$specKeyPattern = '/ASU\d{7}/';		//ex: '/ASU\d{7}/'; '/UTC\d{8}/'
 
-//filename = grab PK from file name; ocr = attempt to retrieve PK from image using OCR
-$specKeyRetrieval = 'filename';
+//filename = grab PK from file name; ocr = attempt to retrieve PK from image using OCR (tesseract must be installed on server)
+$specKeyRetrieval = 'filename';		//OCR PK retrival not yet implimented, only filename works
 
 //Folder containing unprecessed images; read access needed
 $sourcePath = 'C:/htdocs/symbiota/trunk/temp/images/toprocess/';
-//$sourcePath = '/herbshare/inetpub/wwwroot/USUherbarium/toprocess/';
 
 //Folder where images are to be placed; write access needed
 $targetPath = 'C:/htdocs/symbiota/trunk/temp/images/';
-//$targetPath = '/herbshare/inetpub/wwwroot/USUherbarium/';
 
 //Url base needed to build image URL that will be save in DB
 $imgUrlBase = '/seinet/temp/images/';
-//$imgUrlBase = 'http://129.123.92.247/USUherbarium/specimen_images/';
 
 $webPixWidth = 1200;
 $tnPixWidth = 130;
 $lgPixWidth = 3000;
 
+//Whether to use ImageMagick for creating thumbnails and web images. ImageMagick must be installed on server.
+// 0 = use GD library (default), 1 = use ImageMagick  
+$useImageMagick = 0;
+
 //Value between 0 and 100
-$jpgCompression = 60;	  
+$jpgCompression = 80;	  
 
 //Create thumbnail versions of image
 $createTnImg = 1;		
@@ -31,7 +32,7 @@ $createTnImg = 1;
 $createLgImg = 1;		
 
 //Path to where log files will be placed
-$logPath = '';
+$logPath = 'C:/htdocs/symbiota/trunk/temp/logs/';
 
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
 $dbMetadata = 0;
@@ -43,14 +44,14 @@ $collId = 1;
 //If record matching PK is not found, should a new blank record be created?
 $createNewRec = 1;
 
-//Weather to copyover images with matching names (includes path) or rename new image and keep both$copyOverImg = 1;		
+//Weather to copyover images with matching names (includes path) or rename new image and keep both		
 $copyOverImg = 1;
 
 //-------------------------------------------------------------------------------------------//
 //End of variable assignment. Don't modify code below.
 //Create processor and procede with processing images
 date_default_timezone_set('America/Phoenix');
-$specManager = new SpecProcessorImage($logPath);
+$specManager = new SpecProcessorImage($logPath,$dbMetadata);
 
 //Set variables
 $specManager->setSpecKeyPattern($specKeyPattern);
@@ -62,15 +63,15 @@ $specManager->setWebPixWidth($webPixWidth);
 $specManager->setTnPixWidth($tnPixWidth);
 $specManager->setLgPixWidth($lgPixWidth);
 $specManager->setJpgCompression($jpgCompression);
+$specManager->setUseImageMagick($useImageMagick);
 
 $specManager->setCreateTnImg($createTnImg);
 $specManager->setCreateLgImg($createLgImg);
 $specManager->setCreateNewRec($createNewRec);
 $specManager->setCopyOverImg($copyOverImg);
 
-
-$specManager->setDbMetadata($dbMetadata);
 if($dbMetadata){
+	if(!$collId) exit("ABORTED: variable set to write to database but 'collid' variable has not been set"); 
 	$specManager->setCollId($collId);
 }
 
@@ -104,49 +105,52 @@ class SpecProcessorManager {
 	
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
-	protected $dbMetadata = 1;			//Only used when run as a standalone script
-	
+	protected $dbMetadata = 0;			//Only used when run as a standalone script
+	protected $processUsingImageMagick = 0;
+
 	protected $logPath;
 	protected $logFH;
 	protected $logErrFH;
 	protected $mdOutputFH;
 	
-	function __construct($logPath) {
-		$this->conn = MySQLiConnectionFactory::getCon("write");
+	function __construct($logPath, $dbMetadata){
+		$this->dbMetadata = $dbMetadata;
+		if($this->dbMetadata){
+			$this->conn = MySQLiConnectionFactory::getCon("write");
+		}
 		$this->logPath = $logPath;
-		if(!$this->logPath && array_key_exists('tempDirRoot',$GLOBALS)){
-			$this->logPath = $GLOBALS['tempDirRoot'];
-		}
-		if(!$this->logPath && array_key_exists('serverRoot',$GLOBALS)){
-			$this->logPath = $GLOBALS['serverRoot'].'/temp/';
-		}
 		if($this->logPath){
 			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
-			$this->logPath .= 'logs/';
+			//$this->logPath .= 'logs/';
 		}
 	}
 
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
-	}
-
-	public function setCollId($id) {
-		$this->collId = $id;
-		if($this->collId && !$this->collectionName){
-			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE collid = '.$this->collId; 
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->collectionName = $row->collectionname;
-				$this->managementType = $row->managementtype;
-			}
-			$rs->close();
+		if($this->dbMetadata){
+	 		if(!($this->conn === false)) $this->conn->close();
 		}
 	}
 
-	public function setSpprId($id) {
-		if($id) $this->spprid = $id;
+	public function setCollId($id){
+		$this->collId = $id;
+		if($this->collId && is_numeric($this->collId) && !$this->collectionName){
+			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collId.')';
+			if($rs = $this->conn->query($sql)){
+				if($row = $rs->fetch_object()){
+					$this->collectionName = $row->collectionname;
+					$this->managementType = $row->managementtype;
+				}
+				else{
+					exit('ABORTED: unable to locate collection in data');
+				}
+				$rs->close();
+			}
+			else{
+				exit('ABORTED: unable run SQL to obtain collectionName');
+			}
+		}
 	}
-	
+
 	protected function getPrimaryKey($str){
 		$specPk = '';
 		$pkPattern = $this->specKeyPattern;
@@ -156,6 +160,107 @@ class SpecProcessorManager {
 		return $specPk;
 	}
 	
+	protected function getOccId($specPk){
+		$occId = 0;
+		//Check to see if record with pk already exists
+		$sql = 'SELECT occid FROM omoccurrences WHERE (catalognumber = "'.$specPk.'") AND (collid = '.$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$occId = $row->occid;
+		}
+		$rs->close();
+		if(!$occId && $this->createNewRec){
+			//Records does not exist, create a new one to which image will be linked
+			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
+				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
+			if($this->conn->query($sql2)){
+				$occId = $this->conn->insert_id;
+				if($this->logFH) fwrite($this->logFH, "\tSpecimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") \n");
+				echo "Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.")\n";
+			} 
+		}
+		if(!$occId){
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
+			echo "File skipped, unable to locate specimen record ".$specPk."\n";
+		}
+		return $occId;
+	}
+	
+	protected function recordImageMetadata($specID,$webUrl,$tnUrl,$oUrl){
+		$status = false;
+		if($this->dbMetadata){
+			$status = $this->databaseImage($specID,$webUrl,$tnUrl,$oUrl);
+		}
+		else{
+			$status = $this->writeMetadataToFile($specID,$webUrl,$tnUrl,$oUrl);
+		}
+		return $status;
+	}
+	
+	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
+		$status = true;
+		if($occId && is_numeric($occId)){
+	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
+			if($this->logFH) fwrite($this->logFH, "\tPreparing to load record into database\n");
+			//Check to see if image url already exists for that occid
+			$imgId = 0;
+			$sql = 'SELECT imgid '.
+				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$this->imgUrlBase.$webUrl.'")';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$imgId = $r->imgid;
+			}
+			$rs->close();
+			$sql1 = 'INSERT images(occid,url';
+			$sql2 = 'VALUES ('.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
+			if($imgId){
+				$sql1 = 'REPLACE images(imgid,occid,url';
+				$sql2 = 'VALUES ('.$imgId.','.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
+			}
+			if($tnUrl){
+				$sql1 .= ',thumbnailurl';
+				$sql2 .= ',"'.$this->imgUrlBase.$tnUrl.'"';
+			}
+			if($oUrl){
+				$sql1 .= ',originalurl';
+				$sql2 .= ',"'.$this->imgUrlBase.$oUrl.'"';
+			}
+			$sql1 .= ',imagetype,owner) ';
+			$sql2 .= ',"specimen","'.$this->collectionName.'")';
+			if(!$this->conn->query($sql1.$sql2)){
+				$status = false;
+				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
+			}
+			if($imgId){
+				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced; occid: $occId \n");
+				echo "Existing image database record replaced\n";
+			}
+			else{
+				echo "Image record loaded into database\n";
+				if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
+			}
+		}
+		else{
+			$status = false;
+			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
+	        echo "ERROR: Unable to load image into database. See error log for details\n";
+		}
+		//ob_flush();
+		flush();
+		return $status;
+	}
+
+	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
+		$status = true;
+		if($this->mdOutputFH){
+			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$this->imgUrlBase.$webUrl.'","'.$this->imgUrlBase.$tnUrl.'","'.$this->imgUrlBase.$oUrl.'"'."\n");
+		}
+		return $status;
+	}
+
+	//OCR and NLP scripts
+	//Not yet implimented and may not be. OCR is not a great method for obtaining primary identifier for specimen record.
 	protected function ocrImage(){
 		$labelBlock = '';
 		//Process image to aid OCR
@@ -186,212 +291,13 @@ class SpecProcessorManager {
 		return $status;
 	}
 
-	protected function getOccId($specPk){
-		$occId = 0;
-		//Check to see if record with pk already exists
-		$sql = 'SELECT occid FROM omoccurrences WHERE catalognumber = "'.$specPk.'" AND collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$occId = $row->occid;
-		}
-		$rs->close();
-		if(!$occId && $this->createNewRec){
-			//Records does not exist, create a new one to which image will be linked
-			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
-				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unparsed")';
-			if($this->conn->query($sql2)){
-				$occId = $this->conn->insert_id;
-			} 
-		}
-		return $occId;
-	}
-	
-	protected function recordImageMetadata($specID,$webUrl,$tnUrl,$oUrl){
-		$status = false;
-		if($this->dbMetadata){
-			$status = $this->databaseImage($specID,$webUrl,$tnUrl,$oUrl);
-		}
-		else{
-			$status = $this->writeMetadataToFile($specID,$webUrl,$tnUrl,$oUrl);
-		}
-		return $status;
-	}
-	
-	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
-		$status = true;
-		if($occId){
-	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
-			if($this->logFH) fwrite($this->logFH, "Preparing to load record into database\n");
-			$imgUrl = $this->imgUrlBase;
-			if(substr($imgUrl,-1) != '/') $imgUrl = '/';
-			//Check to see if image url already exists for that occid
-			$recCnt = 0;
-			$sql = 'SELECT imgid FROM images WHERE occid = '.$occId.' AND url = "'.$imgUrl.$webUrl.'"';
-			$rs = $this->conn->query($sql);
-			if($rs){
-				$recCnt = $rs->num_rows;
-				$rs->close();
-			}
-			if($recCnt){
-				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Image record already exists with matching url and occid (".$occId."). Data loading skipped\n");
-			}
-			else{
-				$sql1 = 'INSERT images(occid,url';
-				$sql2 = 'VALUES ('.$occId.',"'.$imgUrl.$webUrl.'"';
-				if($tnUrl){
-					$sql1 .= ',thumbnailurl';
-					$sql2 .= ',"'.$imgUrl.$tnUrl.'"';
-				}
-				if($oUrl){
-					$sql1 .= ',originalurl';
-					$sql2 .= ',"'.$imgUrl.$oUrl.'"'; 
-				}
-				$sql1 .= ',imagetype,owner) ';
-				$sql2 .= ',"specimen","'.$this->collectionName.'")';
-				if(!$this->conn->query($sql1.$sql2)){
-					$status = false;
-					if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
-				}
-			}
-		}
-		else{
-			$status = false;
-			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
-		}
-		if($status){
-			echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
-			if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
-		}
-		else{
-			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database. See error log for details. \n");
-	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image record into database. See error log for details</li>\n";
-		}
-		return $status;
-	}
-
-	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
-		$status = true;
-		if($this->mdOutputFH){
-			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$webUrl.'","'.$tnUrl.'","'.$oUrl.'"'."\n");
-		}
-		return $status;
-	}
-	
-	//Project Functions (create, edit, delete, etc)
-	public function editProject($editArr){
-		if($editArr['spprid']){
-			$sql = 'UPDATE specprocessorprojects '.
-				'SET title = "'.$editArr['title'].'", speckeypattern = "'.str_replace('\\','\\\\',$editArr['speckeypattern']).
-				'", speckeyretrieval = "'.(array_key_exists('speckeyretrieval',$editArr)?$editArr['speckeyretrieval']:'filename').
-				'", sourcepath = "'.$editArr['sourcepath'].'", targetpath = "'.$editArr['targetpath'].'", imgurl = "'.$editArr['imgurl'].
-				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
-				', jpgcompression = '.$editArr['jpgcompression'].
-				', createtnimg = '.(array_key_exists('createtnimg',$editArr)?'1':'0').
-				', createlgimg = '.(array_key_exists('createlgimg',$editArr)?'1':'0').' '.
-				'WHERE spprid = '.$editArr['spprid'];
-			//echo 'SQL: '.$sql;
-			$this->conn->query($sql);
-		}
-	}
-
-	public function addProject($addArr){
-		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
-			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
-			'VALUES('.$this->collId.',"'.$addArr['title'].'","'.$addArr['speckeypattern'].'","'.$addArr['speckeyretrieval'].'","'.
-			$addArr['sourcepath'].'","'.$addArr['targetpath'].'","'.$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
-			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgcompression'].','.
-			(array_key_exists('createtnimg',$addArr)?'1':'0').','.(array_key_exists('createlgimg',$addArr)?'1':'0').')';
-		$this->conn->query($sql);
-	}
-
-	public function deleteProject($spprId){
-		$sql = 'DELETE FROM specprocessorprojects WHERE spprid = '.$spprId;
-		$this->conn->query($sql);
-	}
-
-	public function setProjVariables(){
-		if($this->spprid){
-			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
-				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
-				'FROM specprocessorprojects p '.
-				'WHERE p.spprid = '.$this->spprid; 
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				if(!$this->collId) $this->setCollId($row->collid); 
-				$this->title = $row->title;
-				$this->specKeyPattern = $row->speckeypattern;
-				$this->specKeyRetrieval = $row->speckeyretrieval;
-				$this->coordX1 = $row->coordx1;
-				$this->coordX2 = $row->coordx2;
-				$this->coordY1 = $row->coordy1;
-				$this->coordY2 = $row->coordy2;
-				$this->sourcePath = $row->sourcepath;
-				if(substr($this->sourcePath,-1) != '/') $this->sourcePath .= '/'; 
-				$this->targetPath = $row->targetpath;
-				if(substr($this->targetPath,-1) != '/') $this->targetPath .= '/'; 
-				$this->imgUrlBase = $row->imgurl;
-				if(substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
-				$this->webPixWidth = $row->webpixwidth;
-				$this->tnPixWidth = $row->tnpixwidth;
-				$this->lgPixWidth = $row->lgpixwidth;
-				$this->jpgCompression = $row->jpgcompression;
-				$this->createTnImg = $row->createtnimg;
-				$this->createLgImg = $row->createlgimg;
-			}
-			$rs->close();
-		}
-	}
-	
-	public function getProjects(){
-		$projArr = array();
-		if($this->collId){
-			$sql = 'SELECT spprid, title '.
-				'FROM specprocessorprojects '.
-				'WHERE collid = '.$this->collId;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$projArr[$row->spprid] = $row->title;
-			}
-			$rs->close();
-		}
-		return $projArr;
-	}
-
-	public function getCollectionList(){
-		global $isAdmin, $userRights;
-		$returnArr = Array();
-		if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon '.
-				'FROM omcollections c ';
-			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'WHERE c.collid IN('.implode(',',$userRights['CollAdmin']).') '; 
-			}
-			$sql .= 'ORDER BY c.CollectionName';
-			//echo $sql;
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$collId = $row->CollID;
-				$returnArr[$collId] = $row->CollectionName;
-			}
-			$result->close();
-		}
-		return $returnArr;
-	}
-
 	//Set and Get functions
-	public function getLogPath(){
-		return $this->logPath;
+	public function setSpprId($id) {
+		if($id && is_numeric($id)){
+			$this->spprid = $id;
+		}
 	}
-
-	public function getLogFH(){
-		return $this->logFH;
-	}
-
-	public function getLogErrFH(){
-		return $this->logErrFH;
-	}
-
-
+	
 	public function setTitle($t){
 		$this->title = $t;
 	}
@@ -481,6 +387,7 @@ class SpecProcessorManager {
 	}
 
 	public function setImgUrlBase($u){
+		if(substr($u,-1) != '/') $u = '/';
 		$this->imgUrlBase = $u;
 	}
 
@@ -564,6 +471,10 @@ class SpecProcessorManager {
 		$this->dbMetadata = $v;
 	}
 
+ 	public function setUseImageMagick($useIM){
+ 		$this->processUsingImageMagick = $useIM;
+ 	}
+
 	//Misc functions
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
@@ -573,29 +484,45 @@ class SpecProcessorManager {
 
 class SpecProcessorImage extends SpecProcessorManager{
 
-	function __construct($logPath){
-		parent::__construct($logPath);
+	private $sourceGdImg;
+	private $sourceImagickImg;
+	private $exif;
+	private $errArr = array();
+
+	function __construct($logPath, $dbMetadata = 0){
+		parent::__construct($logPath, $dbMetadata);
 	}
 
+ 	public function __destruct(){
+ 		parent::__destruct();
+ 	}
+ 	
 	public function batchLoadImages(){
 		//Create log Files
 		if(file_exists($this->logPath)){
-			if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
-			if(file_exists($this->logPath.'specprocessor/')){
-				$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
-				$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
-				$this->logFH = fopen($logFile, 'a');
-				$this->logErrFH = fopen($errFile, 'a');
-				if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
-				if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			$lPath = $this->logPath;
+			if(!file_exists($lPath.'specprocessor/')){
+				if(mkdir($lPath.'specprocessor/')){
+					$lPath .= 'specprocessor/';
+				}
 			}
+			$logFile = $lPath."log_".date('Ymd').".log";
+			$errFile = $lPath."logErr_".date('Ymd').".log";
+			$this->logFH = fopen($logFile, 'a');
+			$this->logErrFH = fopen($errFile, 'a');
+			if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
 		}
 		//If output is to go out to file, create file for output
 		if(!$this->dbMetadata){
-			$this->mdOutputFH = fopen("output_".time().'.csv', 'w');
+			$mdFileName = "output_".time().'.csv';
+			$this->mdOutputFH = fopen($mdFileName, 'w');
 			fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
-			//If unable to create output file, abort upload procedure
-			if(!$this->mdOutputFH){
+			if($this->mdOutputFH){
+				echo "Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)\n";
+			}
+			else{
+				//If unable to create output file, abort upload procedure
 				if($this->logFH){
 					fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
 					fclose($this->logFH);
@@ -604,14 +531,14 @@ class SpecProcessorImage extends SpecProcessorManager{
 					fwrite($this->logErrFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
 					fclose($this->logErrFH);
 				}
-				echo "<li>Image upload aborted: Unable to establish connection to output file to where image metadata is to be written</li>\n";
+				echo "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n";
 				return;
 			}
 		}
 		//Lets start processing folder
-		echo "<li>Starting Image Processing</li>\n";
+		echo "Starting Image Processing\n";
 		$this->processFolder();
-		echo "<li>Image upload complete</li>\n";
+		echo "Image upload complete\n";
 		//Now lets start closing things up
 		if(!$this->dbMetadata){
 			fclose($this->mdOutputFH);
@@ -628,7 +555,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 	}
 
 	private function processFolder($pathFrag = ''){
-		set_time_limit(800);
+		set_time_limit(2000);
 		if(!$this->sourcePath) $this->sourcePath = './';
 		//Read file and loop through images
 		if($imgFH = opendir($this->sourcePath.$pathFrag)){
@@ -657,14 +584,24 @@ class SpecProcessorImage extends SpecProcessorManager{
 					}
         		}
 			}
+			if($this->dbMetadata && $this->conn){
+				$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'SET i.tid = o.tidinterpreted '.
+					'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+				$this->conn->query($sql);
+			}
 		}
    		closedir($imgFH);
 	}
 
 	private function processImageFile($fileName,$pathFrag = ''){
+		echo "Processing image ".$fileName."\n";
+		if($this->logFH) fwrite($this->logFH, "Processing image (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
+		//ob_flush();
+		flush();
 		//Grab Primary Key
 		$specPk = '';
-        if($this->specKeyRetrieval == 'ocr'){
+		if($this->specKeyRetrieval == 'ocr'){
         	//OCR process image and grab primary key from OCR return
         	$labelBlock = $this->ocrImage();
         	$specPk = $this->getPrimaryKey($fileName);
@@ -685,7 +622,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 		}
         //If Primary Key is found, continue with processing image
         if($specPk){
-        	if(!$this->dbMetadata || $this->createNewRec || $occId){
+        	if($occId || !$this->dbMetadata){
 	        	//Setup path and file name in prep for loading image
 				$targetFolder = '';
 	        	if($pathFrag){
@@ -706,8 +643,14 @@ class SpecProcessorImage extends SpecProcessorManager{
 	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg")){
 	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."tn.jpg");
 	        			}
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg");
+	        			}
 	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg")){
 	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."lg.jpg");
+	        			}
+	        			if(file_exists($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg")){
+	        				unlink($targetPath.substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg");
 	        			}
 					}
 					else{
@@ -721,8 +664,11 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
-				echo "<li>Starting to load: ".$fileName."</li>\n";
-				if($this->logFH) fwrite($this->logFH, "Starting to load: ".$fileName."\n");
+				echo "Loading image\n";
+				if($this->logFH) fwrite($this->logFH, "\tLoading image (".date('Y-m-d h:i:s A').")\n");
+				//ob_flush();
+				flush();
+				
 				//Create web image
 				$webImgCreated = false;
 				if($this->createWebImg && $width > $this->webPixWidth){
@@ -733,7 +679,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				if($webImgCreated){
 	        		//echo "<li style='margin-left:10px;'>Web image copied to target folder</li>";
-					if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder\n");
+					if($this->logFH) fwrite($this->logFH, "\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") \n");
 					$tnUrl = "";$lgUrl = "";
 					//Create Large Image
 					$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
@@ -774,39 +720,105 @@ class SpecProcessorImage extends SpecProcessorManager{
 					if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
 					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
 						if(file_exists($this->sourcePath.$pathFrag.$fileName)) unlink($this->sourcePath.$pathFrag.$fileName);
-						echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
-						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully!\n");
+						echo "Image processed successfully!\n";
+						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully (".date('Y-m-d h:i:s A').")!\n");
 					}
 				}
+
+				if($this->sourceGdImg){
+					imagedestroy($this->sourceGdImg);
+					$this->sourceGdImg = null;
+				}
+				if($this->sourceImagickImg){
+					$this->sourceImagickImg->clear();
+					$this->sourceImagickImg = null;
+				}
+				
         	}
-			else{
-				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record \n");
-				if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record \n");
-				echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record</li>\n";
+		}
+		else{
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
+			echo "File skipped, unable to extract specimen identifier\n";
+		}
+		//ob_flush();
+		flush();
+	}
+
+	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+		global $useImageMagick;
+		$status = false;
+		
+		if($this->processUsingImageMagick) {
+			// Use ImageMagick to resize images 
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+		} 
+		elseif(extension_loaded('gd') && function_exists('gd_info')) {
+			// GD is installed and working 
+			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+		}
+		else{
+			// Neither ImageMagick nor GD are installed 
+			$this->errArr[] = 'No appropriate image handler for image conversions';
+		}
+		return $status;
+	}
+	
+	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
+		$status = false;
+		$ct;
+		if($newWidth < 300){
+			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
+		}
+		else{
+			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgCompression?' -quality '.$this->jpgCompression:'').' '.$targetPath, $retval);
+		}
+		if(file_exists($targetPath)){
+			$status = true;
+		}
+		return $status;
+	}
+	
+	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+		$status = false;
+	   	if(!$this->sourceGdImg){
+	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
+			if(class_exists('PelJpeg')){
+				$inputJpg = new PelJpeg($sourcePath);
+				$this->exif = $inputJpg->getExif();
+			}
+
+	   	}
+
+		ini_set('memory_limit','512M');
+		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+
+		if($this->jpgCompression){
+			$status = imagejpeg($tmpImg, $targetPath, $this->jpgCompression);
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($targetPath);
+				$outputJpg->setExif($this->exif);
+				$outputJpg->saveFile($targetPath);
 			}
 		}
 		else{
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier \n");
-			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier \n");
-			echo "<li style='margin-left:10px;'>File skipped, unable to extract specimen identifier</li>\n";
+			if($this->exif && class_exists('PelJpeg')){
+				$outputJpg = new PelJpeg($tmpImg);
+				$outputJpg->setExif($this->exif);
+				$status = $outputJpg->saveFile($targetPath);
+			}
+			else{
+				$status = imagejpeg($tmpImg, $targetPath);
+			}
 		}
-	}
-
-	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $oldWidth, $oldHeight){
-		$status = false;
-		$sourceImg = imagecreatefromjpeg($sourcePath);
-		ini_set('memory_limit','512M');
-		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
-		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
-		imagecopyresized($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$oldWidth,$oldHeight);
-		if(imagejpeg($tmpImg, $targetPath, $this->jpgCompression)){
-			$status = true;
-		}
-		else{
+		
+		if(!$status){
 			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
+			echo "Error: Unable to resize and write file: ".$targetPath."\n";
 		}
-		imagedestroy($sourceImg);
+		
 		imagedestroy($tmpImg);
 		return $status;
 	}
@@ -818,31 +830,32 @@ class MySQLiConnectionFactory {
 			'type' => 'readonly',
 			'host' => 'localhost',
 			'username' => 'root',
-			'password' => 'bolivia15',
-			'database' => 'symbiotaseinet'
+			'password' => '',
+			'database' => ''
 		),
 		array(
 			'type' => 'write',
 			'host' => 'localhost',
 			'username' => 'root',
-			'password' => 'bolivia15',
-			'database' => 'symbiotaseinet'
+			'password' => '',
+			'database' => ''
 		)
 	);
 
 	public static function getCon($type) {
-        // Figure out which connections are open, automatically opening any connections
-        // which are failed or not yet opened but can be (re)established.
-        for ($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
-            $server = MySQLiConnectionFactory::$SERVERS[$i];
-            if($server['type'] == $type){
+		// Figure out which connections are open, automatically opening any connections
+		// which are failed or not yet opened but can be (re)established.
+		for($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
+			$server = MySQLiConnectionFactory::$SERVERS[$i];
+			if($server['type'] == $type){
 				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database']);
-                if(mysqli_connect_errno()){
-        			//throw new Exception('Could not connect to any databases! Please try again later.');
-                }
-                return $connection;
-            }
-        }
-    }
+				if(mysqli_connect_errno()){
+					//throw new Exception('Could not connect to any databases! Please try again later.');
+					exit('ABORTED: could not connect to database');
+				}
+				return $connection;
+			}
+		}
+	}
 }
 ?>

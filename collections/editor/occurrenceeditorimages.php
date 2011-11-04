@@ -307,8 +307,8 @@ $imageArr = $occManager->getImageMap();
 									<legend><b>Remap to Another Specimen</b></legend>
 									<div>
 										<b>Occurrence Record #:</b> 
-										<input id="imgoccid" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
-										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid')">
+										<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
+										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
 											Open Occurrence Linking Aid
 										</span>
 									</div>

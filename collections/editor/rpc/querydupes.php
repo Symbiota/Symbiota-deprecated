@@ -22,7 +22,7 @@ if($collName && ($collNum || $collDate)){
 			$lastName = $match[0][1];
 		}
 	}
-	
+
 	if($collNum){
 		$sql = 'SELECT occid FROM omoccurrences WHERE (recordedby LIKE "%'.$lastName.'%") ';
 		if(is_numeric(substr($collNum,0,1))){
@@ -39,12 +39,12 @@ if($collName && ($collNum || $collDate)){
 		}
 		$result->close();
 		//If nothing returned, try get close neighbors
-		if(!$retArr && is_numeric($collNum)){
+		if(!$retArr] &&is_numeric($collNum)){
 			$nStart = $collNum - 5;
 			$nEnd = $collNum + 5;
 			$sql = 'SELECT occid FROM omoccurrences WHERE (recordedby LIKE "%'.$lastName.'%") '.
 				'AND (CAST(recordnumber AS UNSIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
-			if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
+		/if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
 			//echo $sql;
 			$result = $con->query($sql);
 			while ($row = $result->fetch_object()) {

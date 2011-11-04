@@ -691,11 +691,20 @@ function lookForDupes(f){
 	var collName = f.recordedby.value;
 	var collNum = f.recordnumber.value;
 	var collDate = f.eventdate.value;
+	var occId = f.occid.value;
+	var collId = f.collid.value;
+		
 	if(!collName || (!collNum && !collDate)){
 		alert("Collector name and number or date must have a value to search for duplicates");
 		return;
 	}
-	document.getElementById("dupedisplayspan").style.display = "none";
+
+	//dupWindow=open("dupesearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
+	dupWindow=open("dupesearch.php?cname="+collName+"&cnum="+collNum+"&cdate="+collDate+"&oid="+occId+"&collid="+collId,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
+	if(dupWindow.opener == null) dupWindow.opener = self;
+	if(window.focus) {dupWindow.focus()}
+
+	/*document.getElementById("dupedisplayspan").style.display = "none";
 	document.getElementById("dupenonespan").style.display = "none";
 	document.getElementById("dupesearchspan").style.display = "block";
 	document.getElementById("dupespan").style.display = "block";
@@ -727,6 +736,7 @@ function lookForDupes(f){
 	};
 	dupXmlHttp.open("POST",url,true);
 	dupXmlHttp.send(null);
+	*/
 }
 
 //Form verification code

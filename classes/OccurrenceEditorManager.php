@@ -457,32 +457,89 @@ class OccurrenceEditorManager {
 	}
 
 	//Used in dupesearch.php
-	public function getDupOccurrences($oid,$occidStr){
-		$occurrenceMap = Array();
-		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
-			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
-			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
-			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-			'WHERE (o.occid IN('.$occidStr.')) ';
-		if($oid) $sql .= 'AND (o.occid != '.$oid.')';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$occId = $row->occid;
-			foreach($row as $k => $v){
-				if($k != 'occid'){
-					$occurrenceMap[$occId][strtolower($k)] = $v;
+	public function getDupOccurrences($collName, $collNum, $collDate, $oid, $runCnt = 0){
+		$collNum = $this->conn->real_escape_string($collNum);
+		$collDate = $this->conn->real_escape_string($collDate);
+		$retArr = array();
+		if($collName && ($collNum || $collDate)){
+			//Parse last name from collector's name 
+			$lastName = "";
+			$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
+			$lastNameArr = explode(';',$lastNameArr[0]);
+			$lastNameArr = explode('&',$lastNameArr[0]);
+			$lastNameArr = explode(' and ',$lastNameArr[0]);
+			$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
+			if($match){
+				if(count($match[0]) == 1){
+					$lastName = $match[0][0];
+				}
+				elseif(count($match[0]) > 1){
+					$lastName = $match[0][1];
 				}
 			}
+
+			if($lastName){
+				$sqlBase = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
+					'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+					'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
+					'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+					'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+					'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
+					'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
+				$sql = $sqlBase;
+				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
+				if($runCnt == 0){
+					if($collNum){
+						if(is_numeric(substr($collNum,0,1))){
+							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) = "'.$collNum.'") ';
+						}
+						else{
+							$sql .= 'AND (o.recordnumber = "'.$collNum.'") ';
+						}
+						//if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
+					}
+					else{
+						$sql .= 'AND (o.eventdate = "'.$collDate.'") '.
+							'ORDER BY o.recordnumber ';
+					}
+		
+					//echo $sql;
+					$rs = $this->conn->query($sql);
+					while($row = $rs->fetch_assoc()){
+						$retArr[$row['occid']] = array_change_key_case($row);
+					}
+					$rs->close();
+				}
+				else{
+					//If nothing returned, try get close neighbors
+					$runQry = true;
+					if($collNum && is_numeric($collNum)){
+						$nStart = $collNum - 5;
+						$nEnd = $collNum + 5;
+						$sql .= 'AND (CAST(o.recordnumber AS UNSIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+						if($collDate) $sql .= 'AND (o.eventdate = "'.$collDate.'") ';
+						//echo $sql;
+					}
+					elseif($collDate){
+						$sql .= 'AND (o.eventdate = "'.$collDate.'") LIMIT 10';
+					}
+					else{
+						$runQry = false;
+					}
+					if($runQry){
+						$result = $this->conn->query($sql);
+						while ($row = $result->fetch_assoc()) {
+							$retArr[$row['occid']] = array_change_key_case($row);
+						}
+						$result->close();
+					}
+				}
+			}			
 		}
-		$rs->close();
-		return $occurrenceMap;
+		return $retArr;
 	}
 	
 	public function mergeRecords($o1,$o2){

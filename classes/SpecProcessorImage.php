@@ -18,22 +18,29 @@ class SpecProcessorImage extends SpecProcessorManager{
 	public function batchLoadImages(){
 		//Create log Files
 		if(file_exists($this->logPath)){
-			if(!file_exists($this->logPath.'specprocessor/')) mkdir($this->logPath.'specprocessor/');
-			if(file_exists($this->logPath.'specprocessor/')){
-				$logFile = $this->logPath."specprocessor/log_".date('Ymd').".log";
-				$errFile = $this->logPath."specprocessor/logErr_".date('Ymd').".log";
-				$this->logFH = fopen($logFile, 'a');
-				$this->logErrFH = fopen($errFile, 'a');
-				if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
-				if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			$lPath = $this->logPath;
+			if(!file_exists($lPath.'specprocessor/')){
+				if(mkdir($lPath.'specprocessor/')){
+					$lPath .= 'specprocessor/';
+				}
 			}
+			$logFile = $lPath."log_".date('Ymd').".log";
+			$errFile = $lPath."logErr_".date('Ymd').".log";
+			$this->logFH = fopen($logFile, 'a');
+			$this->logErrFH = fopen($errFile, 'a');
+			if($this->logFH) fwrite($this->logFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
+			if($this->logErrFH) fwrite($this->logErrFH, "DateTime: ".date('Y-m-d h:i:s A')."\n");
 		}
 		//If output is to go out to file, create file for output
 		if(!$this->dbMetadata){
-			$this->mdOutputFH = fopen("output_".time().'.csv', 'w');
+			$mdFileName = "output_".time().'.csv';
+			$this->mdOutputFH = fopen($mdFileName, 'w');
 			fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
-			//If unable to create output file, abort upload procedure
-			if(!$this->mdOutputFH){
+			if($this->mdOutputFH){
+				echo "Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script) \n";
+			}
+			else{
+				//If unable to create output file, abort upload procedure
 				if($this->logFH){
 					fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
 					fclose($this->logFH);
@@ -95,10 +102,12 @@ class SpecProcessorImage extends SpecProcessorManager{
 					}
         		}
 			}
-			$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'SET i.tid = o.tidinterpreted '.
-				'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
-			$this->conn->query($sql);
+			if($this->dbMetadata && $this->conn){
+				$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'SET i.tid = o.tidinterpreted '.
+					'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+				$this->conn->query($sql);
+			}
 		}
    		closedir($imgFH);
 	}
@@ -173,8 +182,8 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
-				echo "<li style='margin-left:10px;'>Loadimg image</li>\n";
-				if($this->logFH) fwrite($this->logFH, "Loadimg image (".date('Y-m-d h:i:s A').")\n");
+				echo "<li style='margin-left:10px;'>Loading image</li>\n";
+				if($this->logFH) fwrite($this->logFH, "\nLoading image (".date('Y-m-d h:i:s A').")\n");
 				ob_flush();
 				flush();
 				
