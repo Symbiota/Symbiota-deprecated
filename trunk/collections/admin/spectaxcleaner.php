@@ -4,11 +4,14 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecTaxCleanerManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
-$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+$collId = $_REQUEST["collid"];
+$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
+$displayIndex = array_key_exists('displayindex',$_REQUEST)?$_REQUEST['displayindex']:0;
+$analyzeIndex = array_key_exists('analyzeindex',$_REQUEST)?$_REQUEST['analyzeindex']:0;
 
 $cleanManager = new SpecTaxCleanerManager();
-$collArr = $cleanManager->getCollectionList($collId, $userRights);
+$cleanManager->setCollId($collId);
+$collName = $cleanManager->getCollectionName();
 
 $isEditor = false;
 if($symbUid && ($isAdmin || ($collId && (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))))){
@@ -16,14 +19,6 @@ if($symbUid && ($isAdmin || ($collId && (array_key_exists("CollAdmin",$userRight
 }
 
 $status = "";
-if($isEditor){
-	if($action == 'verifyscinames'){
-		$cleanManager->verifySciNames($collId);
-	}
-	elseif($action == 'showscinames'){
-		
-	}
-}
 
 ?>
 <html>
@@ -88,51 +83,108 @@ if($isEditor){
 					<?php 
 				}
 				if($collId){
-					$cName = array_shift($collArr);
-					echo '<h1>'.$cName.'</h1>';
-					?>
-					<form name="mainmenu" action="spectaxcleaner.php" method="get">
-						<fieldset>
-							<legend>Main Menu</legend>
-							<div>
-								<input type="radio" name="action" value="verifyscinames" /> 
-								Verify New Specimen Scientific Names
-							</div>
-							<div>
-								<input type="radio" name="action" value="showscinames" /> 
-								Display specimen scientific names not in taxonomic thesaurus 
-							</div>
-							<div>
-								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-								<input type="submit" name="submitbut" value="Perform Action" />
-								
-							</div>								
-						</fieldset>
-					</form>
-					<?php 
-				}
-				else{
-					$collList = $cleanManager;
-					?>
-					<h1><?php echo $defaultTitle; ?> Collections </h1>
-					<div style='margin:10px;'>Select a collection to see full details. </div>
-					<ul>
-					<?php 
-					foreach($collList as $collId => $collName){
+					if($isEditor){
 						?>
-						<li>
-							<a href="spectaxcleaner.php?collid=<?php echo $collId; ?>">
-								<?php echo $collName; ?>
-							</a>
-						</li>
+						<h1><?php echo $collName; ?></h1>
+						<div>
+							This module is designed to aid in cleaning scientific names that are not mapping  
+							to the taxonomic thesaurus. Unmapped names are likely due to misspelllings, illegidimate names, 
+							or simply because they just have not been added to the thesaurus.   
+						</div>
+						<div>
+							Number of mismapped names: <?php echo $cleanManager->getTaxaCount(); ?>
+						</div>
+						<?php 
+						if(!$action){
+							?>
+							<form name="mainmenu" action="spectaxcleaner.php" method="get">
+								<fieldset>
+									<legend><b>Main Menu</b></legend>
+									<div>
+										<input type="radio" name="submitaction" value="displaynames" /> 
+										Display unverified names 
+										<div style="margin-left:15px;">Start index: 
+											<input name="displayindex" type="text" value="0" style="width:25px;" />
+											(500 names at a time)
+										</div> 
+									</div>
+									<div>
+										<input type="radio" name="submitaction" value="analyzenames" /> 
+										analyze names 
+										<div style="margin-left:15px;">Start index: 
+											<input name="analyzeindex" type="text" value="0" style="width:25px;" />
+											(10 names at a time)
+										</div> 
+									</div>
+									<div>
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+										<input type="submit" name="submitbut" value="Perform Action" />
+									</div>								
+								</fieldset>
+							</form>
+							<?php
+						}
+						elseif($action == 'displaynames'){
+							$nameArr = $cleanManager->getTaxaList($displayIndex);
+							echo '<ul>';
+							foreach($nameArr as $k => $sciName){
+								echo '<li>';
+								echo '<a href="spectaxcleaner.php?submitaction=analyzenames&analyzeindex='.$k.'">';
+								echo '<b><i>'.$sciName.'</i></b>';
+								echo '</a>';
+								echo '</li>';
+							}
+							echo '</ul>';
+						}
+						elseif($action == 'analyzenames'){
+							$nameArr = $cleanManager->analyzeTaxa($analyzeIndex);
+							echo '<ul>';
+							foreach($nameArr as $sn => $snArr){
+								echo '<li>'.$sn.'</li>';
+								if(array_key_exists('col',$snArr)){
+									
+								}
+								else{
+									echo '<div style="margin-left:15px;font-weight:bold;">';
+									echo '<form name="taxaremapform" method="get" action="" >';
+									echo 'Remap to: ';
+									echo '<input type="input" name="remaptaxon" value="'.$sn.'" />';
+									echo '<input type="submit" name="submitaction" value="Remap" />';
+									echo '</form>';
+									echo '</div>';
+									if(array_key_exists('soundex',$snArr)){
+										foreach($snArr['soundex'] as $t => $s){
+											echo '<div style="margin-left:15px;font-weight:bold;">';
+											echo $s;
+											echo ' <a href="" title="Remap to this name...">==>></a>';
+											echo '</div>';
+										}
+									}
+								}
+							}
+							echo '</ul>';
+						}
+					}
+					else{
+						?>
+						<div style="margin:20px;font-weight:bold;font-size:120%;">
+							ERROR: You don't have the necessary permissions to access the editing tools for this collection.
+						</div>
 						<?php 
 					}
+				}
+				else{
+					?>
+					<div style="margin:20px;font-weight:bold;font-size:120%;">
+						ERROR: No collection selected.
+					</div>
+					<?php 
 				}
 			}
 			else{
 				?>
-				<div style='font-weight:bold;'>
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/editor/editreviewer.php?collid=<?php echo $collId; ?>'>login</a>!
+				<div style="font-weight:bold;">
+					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/admin/spectaxcleaner.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
 				<?php 
 			}

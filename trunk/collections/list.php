@@ -320,7 +320,33 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 				echo "<hr/>";
 			}
 			else{
-				echo "<div><h3>Your query produced no results. Please modify your query parameters.</h3></div>";
+				?>
+				<div>
+					<h3>Your query produced no results. Please modify your query parameters.</h3>
+					<?php
+					$tn = $collManager->getTaxaSearchStr();
+					if($p = strpos($tn,';')){
+						$tn = substr($tn,0,$p);
+					}
+					if($p = strpos($tn,'=>')){
+						$tn = substr($tn,$p+2);
+					}
+					if($p = strpos($tn,'(')){
+						$tn = substr($tn,0,$p);
+					}
+					if($sn = $collManager->getCloseTaxaMatch(trim($tn))){
+						?>
+						<div style="margin-left: 15px;font-weight:bold;;">
+							Did you mean:
+							<?php
+							echo '<a href="list.php?taxa='.$sn.'">'.$sn.'</a><br/>';
+							?>
+						</div>
+						<?php 
+					}
+					?>
+				</div>
+				<?php 
 			}
 			?>
 		</div>

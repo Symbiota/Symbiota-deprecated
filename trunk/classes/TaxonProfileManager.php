@@ -491,28 +491,30 @@ class TaxonProfileManager {
 	public function getTaxaLinks(){
 		$links = Array();
 		//Get hierarchy string
-		$hierStr = '';
-		$sqlHier = 'SELECT ts.hierarchystr FROM taxstatus ts '.
-			'WHERE ts.taxauthid = 1 AND (ts.tid = '.$this->tid.')';
-		//echo $sqlHier;
-		$resultHier = $this->con->query($sqlHier);
-		while($rowHier = $resultHier->fetch_object()){
-			$hierStr = $rowHier->hierarchystr;
-		}
-		$resultHier->close();
-
-		//Get links
-		if($hierStr){
-			$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes, tl.sortsequence '.
-				'FROM taxalinks tl '.
-				'WHERE (tl.tid IN('.$this->tid.','.$hierStr.')) '.
-				'ORDER BY tl.sortsequence, tl.title';
-			//echo $sql;
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$links[] = array('title'=>$row->title,'url'=>$row->url,'notes'=>$row->notes,'sortseq'=>$row->sortsequence);
+		if($this->tid){
+			$hierStr = '';
+			$sqlHier = 'SELECT ts.hierarchystr FROM taxstatus ts '.
+				'WHERE ts.taxauthid = 1 AND (ts.tid = '.$this->tid.')';
+			//echo $sqlHier;
+			$resultHier = $this->con->query($sqlHier);
+			while($rowHier = $resultHier->fetch_object()){
+				$hierStr = $rowHier->hierarchystr;
 			}
-			$result->close();
+			$resultHier->close();
+	
+			//Get links
+			if($hierStr){
+				$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes, tl.sortsequence '.
+					'FROM taxalinks tl '.
+					'WHERE (tl.tid IN('.$this->tid.','.$hierStr.')) '.
+					'ORDER BY tl.sortsequence, tl.title';
+				//echo $sql;
+				$result = $this->con->query($sql);
+				while($row = $result->fetch_object()){
+					$links[] = array('title'=>$row->title,'url'=>$row->url,'notes'=>$row->notes,'sortseq'=>$row->sortsequence);
+				}
+				$result->close();
+			}
 		}
 		return $links;
 	}
@@ -749,5 +751,16 @@ class TaxonProfileManager {
 	public function getLanguage(){
 		return $this->language;
 	}
- }
+
+	public function getCloseTaxaMatches($testValue){
+		$retArr = array();
+		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
+		if($rs = $this->con->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->tid] = $r->sciname;
+			}
+		}
+		return $retArr;
+	}
+}
 ?>
