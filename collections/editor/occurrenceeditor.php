@@ -814,6 +814,8 @@ if($symbUid){
 															Details: 
 															<input id="secdetails" style="width:90px;" title="Section Details" /><br/>
 															<select id="meridian" title="Meridian">
+																<option value="">Meridian Selection</option>
+																<option value="">----------------------------------</option>
 																<option value="G-AZ">Arizona, Gila &amp; Salt River</option>
 																<option value="NAAZ">Arizona, Navajo</option>
 																<option value="F-AR">Arkansas, Fifth Principal</option> 

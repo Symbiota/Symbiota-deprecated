@@ -1,14 +1,10 @@
 <?php
-/*
- * Created on 24 Feb 2011
- * E.E. Gilbert
- */
-
 include_once($serverRoot.'/config/dbconnection.php');
   
 class SpecTaxCleanerManager{
 
 	private $conn;
+	private $collId;
 	private $taxAuthId = 1;
 	private $testValidity = 1;
 	private $testTaxonomy = 1;
@@ -480,37 +476,93 @@ class SpecTaxCleanerManager{
 		return implode(",",array_reverse($parentArr));
 	}
 
-	public function getCollectionList($collId,$userRights){
-		$returnArr = Array();
-		$isAdmin = array_key_exists("SuperAdmin",$userRights);
-		$targetIds = Array();
-		if(!$isAdmin){
-			if(array_key_exists("CollAdmin",$userRights)){
-				$targetIds = $userRights["CollAdmin"];
+	public function getCollectionName(){
+		$retStr;
+		$sql = 'SELECT institutioncode, collectioncode, collectionname '.
+			'FROM omcollections WHERE (collid = '.$this->collId.') ';
+		if($rs = $this->conn->query($sql)){
+			if($row = $rs->fetch_object()){
+				$retStr = $row->collectionname;
+				if($row->institutioncode) $retStr .= ' ('.$row->institutioncode.($row->collectioncode?':'.$row->collectioncode:'').')';
 			}
-			if(array_key_exists("CollEditor",$userRights)){
-				$targetIds = array_merge($targetIds,$userRights["CollEditor"]);
+			$rs->close();
+		}
+		return $retStr;
+	}
+	
+	public function getTaxaList($index = 0){
+		$retArr = array();
+		$sql = 'SELECT sciname '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collId.') AND tidinterpreted IS NULL '.
+			'ORDER BY sciname '.
+			'LIMIT '.$index.',500 ';
+		if($rs = $this->conn->query($sql)){
+			if($row = $rs->fetch_object()){
+				$retArr[] = $row->sciname;
 			}
-			if(!$targetIds) return;
-			if($collId && !in_array($collId,$targetIds)) return; 
+			$rs->close();
 		}
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname '.
-			'FROM omcollections c ';
-		if($collId && $collId <> 'all'){
-			$sql .= 'WHERE (collid = '.$collId.') ';
+		return $retArr;
+	}
+	
+	public function analyzeTaxa($startIndex = 0, $limit = 10){
+		$retArr = array();
+		$sql = 'SELECT sciname '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collId.') AND tidinterpreted IS NULL '.
+			'ORDER BY sciname '.
+			'LIMIT '.$index.','.$limit;
+		if($rs = $this->conn->query($sql)){
+			if($row = $rs->fetch_object()){
+				$sn = $row->sciname;
+				$sxArr[$sn] = $sn;
+				//Check name through Catalog of Life
+				
+				//Check for near match using SoundEx
+				$sxArr = $this->getSoundexMatch($sn);
+				if($sxArr) $retArr[$sn]['soundex'] = $sxArr;
+				
+			}
+			$rs->close();
 		}
-		elseif($targetIds){
-			$sql .= 'WHERE (collid IN('.implode(',',$targetIds).')) ';
+
+		return $retArr;
+	}
+
+	public function getSoundexMatch($taxonStr){
+		$retArr = array();
+		if($taxonStr){
+			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'")';
+			if($rs = $this->conn->query($sql)){
+				while($row = $rs->fetch_object()){
+					$retArr[$row->tid] = $row->sciname;
+				}
+				$rs->close();
+			}
 		}
-		$sql .= 'ORDER BY c.SortSeq,c.CollectionName';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$cName = $row->collectionname;
-			if($row->institutioncode) $cName .= ' ('.$row->institutioncode.($row->collectioncode?':'.$row->collectioncode:'').')'; 
-			$returnArr[$row->collid] = $cName;
+		return $retArr;
+	}
+
+	public function getTaxaCount(){
+		$retStr = '';
+		$sql = 'SELECT count(DISTINCT sciname) AS taxacnt '.
+			'FROM omoccurrences '.
+			'WHERE (collid = '.$this->collId.') AND tidinterpreted IS NULL ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			if($row = $rs->fetch_object()){
+				$retStr = $row->taxacnt;
+			}
+			$rs->close();
 		}
-		$rs->close();
-		return $returnArr;
+		return $retStr;
+	}
+	
+	public function setCollId($id){
+		if(is_numeric($id)){
+			$this->collId = $id;
+		}
 	}
 }
 ?>

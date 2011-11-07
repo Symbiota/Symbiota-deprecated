@@ -454,13 +454,45 @@ if($taxonManager->getSciName() != "unknown"){
 	echo "</td></tr>\n";
 }
 elseif($taxonValue){
-	echo "<tr><td>";
-	echo "<div style='margin-top:45px;margin-left:20px'><h1>Sorry, we do not have <i>$taxonValue</i> in our system.</h1>\n";
-	echo "<h3>Links below may provide some useful information:</h3>\n";
-	echo "<ul><li><a target='_blank' href='http://www.google.com/search?hl=en&btnG=Google+Search&q=\"".$taxonValue."\"'>Google</a></li>\n";
-	echo "<li><a target='_blank' href='http://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=all&search_value=".$taxonValue."&search_kingdom=every&search_span=exactly_for&categories=All&source=html&search_credRating=All'>ITIS: Integrated Taxonomic Information System</a></li>\n";
-	echo "<li><a target='_blank' href='http://images.google.com/images?q=\"".$taxonValue."\"'>Google Images</a></li>\n</ul></div>\n";
-	echo "</td></tr>";
+	?>
+	<tr><td>
+		<div style="margin-top:45px;margin-left:20px">
+			<h1>Sorry, we do not have <i><?php echo $taxonValue; ?></i> in our system.</h1>
+			<?php 
+			if($matchArr = $taxonManager->getCloseTaxaMatches($taxonValue)){
+				?>
+				<div style="margin-left: 15px;font-weight:bold;font-size:120%;">
+					Did you mean?
+					<div style=margin-left:25px;>
+						<?php
+						foreach($matchArr as $t => $n){ 
+							echo '<a href="index.php?taxon='.$t.'">'.$n.'</a><br/>';
+						} 
+						?>
+					</div>
+				</div>
+				<?php 
+			}
+			?>
+			<h3>Links below may provide some useful information:</h3>
+			<ul>
+				<li>
+					<a target="_blank" href="http://www.google.com/search?hl=en&btnG=Google+Search&q=<?php echo $taxonValue; ?>">Google</a>
+				</li>
+				<li>
+					<a target="_blank" href="http://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=all&search_value=<?php echo $taxonValue; ?>&search_kingdom=every&search_span=exactly_for&categories=All&source=html&search_credRating=All">
+						ITIS: Integrated Taxonomic Information System
+					</a>
+				</li>
+				<li>
+					<a target="_blank" href="http://images.google.com/images?q="<?php echo $taxonValue; ?>"'>
+						Google Images
+					</a>
+				</li>
+			</ul>
+		</div>
+	</td></tr>
+	<?php 
 }
 else{
 	echo "<tr><td>";

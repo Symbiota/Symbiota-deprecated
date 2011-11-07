@@ -108,5 +108,16 @@ class OccurrenceListManager extends OccurrenceManager{
 	public function getCntPerPage(){
 		return $this->cntPerPage;
 	}
+	
+	public function getCloseTaxaMatch($name){
+		$retStr = '';
+		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$name.'")';
+		if($rs = $this->conn->query($sql)){
+			if($r = $rs->fetch_object()){
+				$retStr = $r->sciname;
+			}
+		}
+		return $retStr;
+	}
 }
 ?>
