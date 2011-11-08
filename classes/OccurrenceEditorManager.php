@@ -492,13 +492,9 @@ class OccurrenceEditorManager {
 				$sql = $sqlBase;
 				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
 				if($runCnt == 0){
+					//First run
 					if($collNum){
-						if(is_numeric(substr($collNum,0,1))){
-							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) = "'.$collNum.'") ';
-						}
-						else{
-							$sql .= 'AND (o.recordnumber = "'.$collNum.'") ';
-						}
+						$sql .= 'AND (o.recordnumber LIKE "'.$collNum.'") ';
 						//if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
 					}
 					else{
@@ -514,27 +510,67 @@ class OccurrenceEditorManager {
 					$rs->close();
 				}
 				else{
-					//If nothing returned, try get close neighbors
 					$runQry = true;
-					if($collNum && is_numeric($collNum)){
-						$nStart = $collNum - 5;
-						$nEnd = $collNum + 5;
-						$sql .= 'AND (CAST(o.recordnumber AS UNSIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+					if($collNum){
+						if(is_numeric($collNum)){
+							$nStart = $collNum - 4;
+							if($nStart < 1) $nStart = 1;
+							$nEnd = $collNum + 4;
+							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+						}
+						elseif(preg_match('/^(\d+)-{0,1}[a-zA-Z]{1,2}$/',$collNum,$m)){
+							//ex: 123a, 123b, 123-a
+							$cNum = $m[1];
+							$nStart = $cNum - 4;
+							if($nStart < 1) $nStart = 1;
+							$nEnd = $cNum + 4;
+							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+						}
+						elseif(preg_match('/^(\D+-?)(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
+							//RM-123, RM123
+							$prefix = $m[1];
+							$num = $m[2];
+							$nStart = $num - 5;
+							if($nStart < 1) $nStart = 1;
+							$rangeArr = array();
+							for($x=1;$x<11;$x++){
+								$rangeArr[] = $prefix.($nStart+$x);
+							}
+							$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
+						}
+						elseif(preg_match('/^(\d{2,4}-{1})(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
+							//95-123, 1995-123
+							$prefix = $m[1];
+							$num = $m[2];
+							$nStart = $num - 5;
+							if($nStart < 1) $nStart = 1;
+							$rangeArr = array();
+							for($x=1;$x<11;$x++){
+								$rangeArr[] = $prefix.($nStart+$x);
+							}
+							$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
+						}
+						else{
+							$runQry = false;
+						}
 						if($collDate) $sql .= 'AND (o.eventdate = "'.$collDate.'") ';
-						//echo $sql;
+						//$sql .= 'ORDER BY o.recordnumber'; 
 					}
 					elseif($collDate){
-						$sql .= 'AND (o.eventdate = "'.$collDate.'") LIMIT 10';
+						$sql .= 'AND (o.eventdate = "'.$collDate.'") ';
+						$sql .= 'LIMIT 10';
 					}
 					else{
 						$runQry = false;
 					}
+					//echo $sql;
 					if($runQry){
 						$result = $this->conn->query($sql);
 						while ($row = $result->fetch_assoc()) {
 							$retArr[$row['occid']] = array_change_key_case($row);
 						}
 						$result->close();
+						
 					}
 				}
 			}			
