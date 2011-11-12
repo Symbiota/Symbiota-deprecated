@@ -1146,7 +1146,7 @@ if($symbUid){
 															<img id="activeimage" src="<?php echo $imgUrlPrefix.$imgArr[0]; ?>" />
 														</div>
 														<div style="width:100%;">
-															<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
+														<!-- 	<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />  -->
 															<?php 
 															if(count($imgArr)>1){
 																?>

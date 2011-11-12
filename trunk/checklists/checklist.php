@@ -452,62 +452,34 @@
 							<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
 								<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 									<legend><b>Add New Species to Checklist</b></legend>
-									<div style="clear:left">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Taxon:
-										</div>
-										<div style="float:left;">
-											<input type="text" id="speciestoadd" name="speciestoadd" />
-											<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
-										</div>
+									<div>
+										<b>Taxon:</b> 
+										<input type="text" id="speciestoadd" name="speciestoadd" style="width:174px;" />
+										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 									</div>
-									<div style="clear:left;">
-										<div style="font-weight:bold;float:left;width:100px;">
-											Family Override: 
-										</div>
-										<div style="float:left;">
-											<input type="text" name="familyoverride" size="15" title="Only enter if you want to override current family" />
-										</div>
+									<div>
+										<b>Family Override:</b> 
+										<input type="text" name="familyoverride" style="width:122px;" title="Only enter if you want to override current family" />
 									</div>
-									<div style="clear:left;">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Habitat:
-										</div>
-										<div style="float:left;">
-											<input type="text" name="habitat" />
-										</div>
+									<div>
+										<b>Habitat:</b> 
+										<input type="text" name="habitat" style="width:170px;" />
 									</div>
-									<div style="clear:left;">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Abundance:
-										</div>
-										<div style="float:left;">
-											<input type="text" name="abundance" />
-										</div>
+									<div>
+										<b>Abundance:</b> 
+										<input type="text" name="abundance" style="width:145px;" />
 									</div>
-									<div style="clear:left;">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Notes:
-										</div>
-										<div style="float:left;">
-											<input type="text" name="notes" />
-										</div>
+									<div>
+										<b>Notes:</b> 
+										<input type="text" name="notes" style="width:175px;" />
 									</div>
-									<div style="clear:left;padding-top:2px;">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Internal Notes:
-										</div>
-										<div style="float:left;">
-											<input type="text" name="internalnotes" title="Displayed to administrators only"/>
-										</div>
+									<div style="padding:2px;">
+										<b>Internal Notes:</b> 
+										<input type="text" name="internalnotes" style="width:126px;" title="Displayed to administrators only" />
 									</div>
-									<div style="clear:left;">
-										<div style="font-weight:bold;float:left;width:70px;">
-											Source:
-										</div>
-										<div style="float:left;">
-											<input type="text" name="source" />
-										</div>
+									<div>
+										<b>Source:</b> 
+										<input type="text" name="source" style="width:167px;" />
 									</div>
 									<input type="hidden" name="cl" value="<?php echo $clManager->getClid(); ?>" />
 									<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />

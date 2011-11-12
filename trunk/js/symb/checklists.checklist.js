@@ -7,7 +7,7 @@ $(document).ready(function() {
 		source: function( request, response ) {
 			$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: clid }, response );
 		}
-	},{ minLength: 4, delay: 400, autoFocus: true }
+	},{ minLength: 4, }
 	);
 
 	$('#tabs').tabs(

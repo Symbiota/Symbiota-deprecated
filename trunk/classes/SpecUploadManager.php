@@ -804,7 +804,7 @@ class SpecUploadManager{
 					$type = $this->fieldMap[$symbField]["type"];
 				}
 				if(array_key_exists('size',$this->fieldMap[$symbField])){
-					$type = $this->fieldMap[$symbField]["size"];
+					$size = $this->fieldMap[$symbField]["size"];
 				}
 			}
 			switch($type){
