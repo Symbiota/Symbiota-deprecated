@@ -20,6 +20,7 @@ $vManager->setClid($clid);
 
 if($action == "Rename Taxon"){
 	$vManager->renameTaxon($_REQUEST["renametid"]);
+	$action = "close";
 }
 elseif($action == "Submit Checklist Edits"){
 	$eArr = Array();
@@ -30,6 +31,7 @@ elseif($action == "Submit Checklist Edits"){
 	$eArr["source"] = $_REQUEST["source"];
 	$eArr["familyoverride"] = $_REQUEST["familyoverride"];
 	$status = $vManager->editClData($eArr);
+	$action = "close";
 }
 elseif($action == "Delete Taxon From Checklist"){
 	$status = $vManager->deleteTaxon();
@@ -68,7 +70,7 @@ $clArray = $vManager->getChecklistData();
 					source: function( request, response ) {
 						$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: <?php echo $clid;?> }, response );
 					}
-					},{ minLength: 3, autoFocus: true }
+					},{ minLength: 3 }
 				);
 	
 				$('#tabs').tabs();
@@ -150,7 +152,11 @@ $clArray = $vManager->getChecklistData();
 			}
 
 			function closeEditor(){
-				if(parent.opener.name != "gmap") parent.opener.location.reload();
+				changetaxonomy
+				if(parent.opener.name != "gmap"){
+					//parent.opener.document.changetaxonomy.submit();
+					//parent.opener.location.reload();
+				}
 				//var URL = unescape(window.opener.location.pathname);
 				//window.opener.location.href = URL
 				self.close();
