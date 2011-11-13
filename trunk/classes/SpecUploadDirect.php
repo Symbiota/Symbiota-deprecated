@@ -38,54 +38,40 @@ class SpecUploadDirect extends SpecUploadManager {
  	public function uploadData($finalTransfer){
  		global $charset;
 	 	$this->readUploadParameters();
- 		$sourceDbpkFieldName = "";
-		if(array_key_exists("dbpk",$this->fieldMap)){
-			$sourceDbpkFieldName = $this->fieldMap["dbpk"]["field"];
-			unset($this->fieldMap["dbpk"]);
-		}
-		$sqlInsertInto = "INSERT INTO uploadspectemp (collid,dbpk,";
-		$sqlInsertInto .= implode(",",array_keys($this->fieldMap));
-		$sqlInsertInto .= ") ";
-		$sqlInsertValuesBase = "VALUES (".$this->collId;
 		
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
-			if($sourceDbpkFieldName){
-				//Delete all records in uploadspectemp table
-				$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-				$this->conn->query($sqlDel);
-				
-				echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
-				set_time_limit(800);
-				$sourceConn->query("SET NAMES ".str_replace('-','',strtolower($charset)).";");
-				//echo "<div>".$this->queryStr."</div><br/>";
-				if($result = $sourceConn->query($this->queryStr)){
-					echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
-					$this->transferCount = 0;
-					while($row = $result->fetch_assoc()){
-						$recMap = Array();
-						$row = array_change_key_case($row);
-						foreach($this->fieldMap as $symbField => $sMap){
-							$valueStr = $row[$sMap['field']];
-							$recMap[$symbField] = $valueStr;
-						}
-						$this->loadRecord($recMap);
-						unset($recMap);
+			//Delete all records in uploadspectemp table
+			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
+			$this->conn->query($sqlDel);
+			
+			echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
+			set_time_limit(800);
+			$sourceConn->query("SET NAMES ".str_replace('-','',strtolower($charset)).";");
+			//echo "<div>".$this->queryStr."</div><br/>";
+			if($result = $sourceConn->query($this->queryStr)){
+				echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
+				$this->transferCount = 0;
+				while($row = $result->fetch_assoc()){
+					$recMap = Array();
+					$row = array_change_key_case($row);
+					foreach($this->fieldMap as $symbField => $sMap){
+						$valueStr = $row[$sMap['field']];
+						$recMap[$symbField] = $valueStr;
 					}
-					
-					$this->finalUploadSteps($finalTransfer);
-					$result->close();
+					$this->loadRecord($recMap);
+					unset($recMap);
 				}
-				else{
-					echo "<hr /><div style='color:red;'>Unable to create a Resultset with the Source Connection. Check connection parameters, source sql statement, and firewall restriction</div>";
-					echo "<div style='color:red;'>ERROR: ".$sourceConn->error."</div><hr />";
-					//echo "<div>SQL: $this->sourceSql</div>";
-				}
-				$sourceConn->close();
+				
+				$this->finalUploadSteps($finalTransfer);
+				$result->close();
 			}
 			else{
-				echo "<div style='color:red;'>Source Primary Key has not yet been mapped to a system field</div>";
+				echo "<hr /><div style='color:red;'>Unable to create a Resultset with the Source Connection. Check connection parameters, source sql statement, and firewall restriction</div>";
+				echo "<div style='color:red;'>ERROR: ".$sourceConn->error."</div><hr />";
+				//echo "<div>SQL: $this->sourceSql</div>";
 			}
+			$sourceConn->close();
 		}
 	}
 	
