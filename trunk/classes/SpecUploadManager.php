@@ -781,11 +781,40 @@ class SpecUploadManager{
 	
 	protected function loadRecord($recMap){
 		//Date cleaning
+		if(array_key_exists('month',$recMap) && !is_numeric($recMap['month'])){
+			if(strlen($recMap['month']) > 2){
+				$monAbbr = strtolower(substr($recMap['month'],3));
+				if($monAbbr == 'jan') $monAbbr = 1;
+				elseif($monAbbr == 'feb') $monAbbr = 2;
+				elseif($monAbbr == 'mar') $monAbbr = 3;
+				elseif($monAbbr == 'apr') $monAbbr = 4;
+				elseif($monAbbr == 'may') $monAbbr = 5;
+				elseif($monAbbr == 'jun') $monAbbr = 6;
+				elseif($monAbbr == 'jul') $monAbbr = 7;
+				elseif($monAbbr == 'aug') $monAbbr = 8;
+				elseif($monAbbr == 'sep') $monAbbr = 9;
+				elseif($monAbbr == 'oct') $monAbbr = 10;
+				elseif($monAbbr == 'nov') $monAbbr = 11;
+				elseif($monAbbr == 'dec') $monAbbr = 12;
+			}
+		}
 		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
 			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
 				if($eDateStr = strtotime($recMap['verbatimeventdate'])){
 					$recMap['eventdate'] = date('Y-m-d', $eDateStr);
 				}
+			}
+			elseif(array_key_exists('year',$recMap) && $recMap['year']){
+				$y = $recMap['year'];
+				$m = 0;
+				$d = 0;
+				if(array_key_exists('month',$recMap) && $recMap['month'] && is_numeric($recMap['month'])){
+					$m = $recMap['month'];
+				}
+				if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
+					$m = $recMap['day'];
+				}
+				$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
 			}
 			//day, month, year values used to create eventdate in SQL statement section 
 		}
