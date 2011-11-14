@@ -110,18 +110,19 @@ class ImageDetailManager{
 		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
-		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
-		if(array_key_exists("addtotid",$_REQUEST)){
-			$addToTid = $_REQUEST["addtotid"];
-		}
+		//$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
+		//if(array_key_exists("addtotid",$_REQUEST)){
+		//	$addToTid = $_REQUEST["addtotid"];
+		//}
 		
-		$sql = "UPDATE images SET caption = \"".$caption."\", url = \"".$url."\", thumbnailurl = \"".$tnUrl."\", ".
-			"originalurl = \"".$origUrl."\", photographer = ".($photographer?"\"".$photographer."\"":"NULL").", ".
-			"photographeruid = ".($photographerUid?$photographerUid:"NULL").", owner = \"".$owner."\", sourceurl = \"".$sourceUrl."\", ".
-			"copyright = \"".$copyRight."\", locality = \"".$locality."\", occid = ".($occId?$occId:"NULL").", ".
-			"notes = \"".$notes."\", sortsequence = ".$sortSequence." ".
-			" WHERE (imgid = ".$this->imgId.')';
+		$sql = 'UPDATE images SET caption = "'.$caption.'", url = "'.$url.'", thumbnailurl = "'.$tnUrl.'", '.
+			'originalurl = "'.$origUrl.'", photographer = '.($photographer?'"'.$photographer.'"':"NULL").', '.
+			'photographeruid = '.($photographerUid?$photographerUid:'NULL').', owner = "'.$owner.'", sourceurl = "'.$sourceUrl.'", '.
+			'copyright = "'.$copyRight.'", locality = "'.$locality.'", occid = '.($occId?$occId:'NULL').', '.
+			'notes = "'.$notes.'", sortsequence = '.$sortSequence.' '.
+			'WHERE (imgid = '.$this->imgId.')';
 		//echo $sql;
+		/*
 		if($this->conn->query($sql)){
 			if($addToTid){
 				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
@@ -139,6 +140,7 @@ class ImageDetailManager{
 		else{
 			$status = "Error:editImage: ".$this->conn->error."\nSQL: ".$sql;
 		}
+		*/
 		return $status;
 	}
 	
@@ -251,7 +253,7 @@ class ImageDetailManager{
  	protected function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","&quot;",$newStr);
+		$newStr = str_replace('"',"'",$newStr);
  		return $newStr;
  	}
 }

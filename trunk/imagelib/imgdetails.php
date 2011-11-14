@@ -84,17 +84,17 @@ if($isEditor){
 					?>
 					<tr>
 					<td colspan='2'>
-						<div id="imageedit" style='display:<?php echo ($eMode?'block':'none'); ?>;'>
-							<form name="editform" action='imgdetails.php' method='post' target='_self' onsubmit='return verifyEditForm(this);'>
-								<fieldset style='margin:5px 0px 5px 5px;'>
+						<div id="imageedit" style="display:<?php echo ($eMode?'block':'none'); ?>;">
+							<form name="editform" action="imgdetails.php" method="post" target="_self" onsubmit="return verifyEditForm(this);">
+								<fieldset style="margin:5px 0px 5px 5px;">
 							    	<legend><b>Edit Image Details</b></legend>
-							    	<div style='margin-top:2px;'>
+							    	<div style="margin-top:2px;">
 							    		<b>Caption:</b>
-										<input name='caption' type='text' value='<?php echo $imgArr["caption"];?>' style="width:250px;" maxlength='100'>
+										<input name="caption" type="text" value="<?php echo $imgArr["caption"];?>" style="width:250px;" maxlength="100">
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Photographer User ID:</b> 
-										<select name='photographeruid' name='photographeruid'>
+										<select name="photographeruid" name="photographeruid">
 											<option value="">Select Photographer</option>
 											<option value="">---------------------------------------</option>
 											<?php $imgManager->echoPhotographerSelect($imgArr["photographeruid"]); ?>
@@ -106,101 +106,110 @@ if($isEditor){
 									</div>
 									<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
 										<b>Photographer (override):</b> 
-										<input name='photographer' type='text' value='<?php echo $imgArr["photographer"];?>' style="width:250px;" maxlength='100'>
+										<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" maxlength="100">
 										* Will override above selection
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Manager:</b> 
 										<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" maxlength="100">
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Source URL:</b> 
 										<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" maxlength="250">
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Copyright:</b> 
 										<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" maxlength="250">
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Locality:</b> 
 										<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" maxlength="250">
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Occurrence Record #:</b> 
 										<input id="occid" name="occid" type="text" value="<?php  echo $imgArr["occid"];?>" />
 										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occid')">Link to Occurrence Record</span>
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Notes:</b> 
-										<input name='notes' type='text' value='<?php echo $imgArr["notes"];?>' style="width:550px;" maxlength='250' />
+										<input name="notes" type="text" value="<?php echo $imgArr["notes"];?>" style="width:550px;" maxlength="250" />
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Sort sequence:</b> 
-										<input name='sortsequence' type='text' value='<?php echo $imgArr["sortsequence"];?>' size='5' maxlength='5' />
+										<input name="sortsequence" type="text" value="<?php echo $imgArr["sortsequence"];?>" size="5" maxlength="5" />
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Web Image:</b><br/> 
-										<input name='url' type='text' value='<?php echo $imgArr["url"];?>' style="width:90%;" maxlength='150' />
+										<input name="url" type="text" value="<?php echo $imgArr["url"];?>" style="width:90%;" maxlength="150" />
 										<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
 											<input type="checkbox" name="renameweburl" value="1" />
 											Rename web image file on server to match above edit (web server editing privileges requiered)
 										</div>
-										<input name='oldurl' type='hidden' value='<?php echo $imgArr["url"];?>' />
+										<input name="oldurl" type="hidden" value="<?php echo $imgArr["url"];?>" />
 										<?php } ?>
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Thumbnail:</b><br/> 
-										<input name='thumbnailurl' type='text' value='<?php echo $imgArr["thumbnailurl"];?>' style="width:90%;" maxlength='150'>
+										<input name="thumbnailurl" type="text" value="<?php echo $imgArr["thumbnailurl"];?>" style="width:90%;" maxlength="150">
 										<?php if(stripos($imgArr["thumbnailurl"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
 											<input type="checkbox" name="renametnurl" value="1" />
 											Rename thumbnail image file on server to match above edit (web server editing privileges requiered)
 										</div>
-										<input name='oldthumbnailurl' type='hidden' value='<?php echo $imgArr["thumbnailurl"];?>' />
+										<input name="oldthumbnailurl" type="hidden" value="<?php echo $imgArr["thumbnailurl"];?>" />
 										<?php } ?>
 									</div>
-									<div style='margin-top:2px;'>
+									<div style="margin-top:2px;">
 										<b>Large Image:</b><br/>
-										<input name='originalurl' type='text' value='<?php echo $imgArr["originalurl"];?>' style="width:90%;" maxlength='150'>
+										<input name="originalurl" type="text" value="<?php echo $imgArr["originalurl"];?>" style="width:90%;" maxlength="150">
 										<?php if(stripos($imgArr["originalurl"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:80px;">
 											<input type="checkbox" name="renameorigurl" value="1" />
 											Rename large image file on server to match above edit (web server editing privileges requiered)
 										</div>
-										<input name='oldoriginalurl' type='hidden' value='<?php echo $imgArr["originalurl"];?>' />
+										<input name="oldoriginalurl" type="hidden" value="<?php echo $imgArr["originalurl"];?>" />
 										<?php } ?>
 									</div>
-									<?php if($imgArr["rankid"] > 220 && $imgManager->parentImageEmpty($imgArr["url"],$imgArr["tid"])){ ?>
-									<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-										<input type='checkbox' name='addtoparent' value='1' /> 
-										Add Image to Species Rank 
-										<div style='margin-left:10px;'>
-											* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
-										</div>
-									</div>
-									<?php }elseif($imgArr["rankid"] == 220 && $cArr = $imgManager->getChildrenArr($imgArr["tid"])){ ?>
-									<div style='padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;'>
-										Add Image to a Child Taxon 
-										<select name='addtotid'>
-											<option value='0'>Child Taxon</option>
-											<option value='0'>-----------------------</option>
-											<?php 
-												foreach($cArr as $t => $sn){
-													?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
-												}
+									<!-- 
+										<?php 
+										if($imgArr["rankid"] > 220 && $imgManager->parentImageEmpty($imgArr["url"],$imgArr["tid"])){ 
 											?>
-										</select> 
-									</div>
-									<?php } ?>
+											<div style="padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;">
+												<input type="checkbox" name="addtoparent" value="1" /> 
+												Add Image to Species Rank 
+												<div style="margin-left:10px;">
+													* If scientific name is a subspecies or variety, click this option if you also want image to be displays at the species level
+												</div>
+											</div>
+											<?php 
+										}
+										elseif($imgArr["rankid"] == 220 && $cArr = $imgManager->getChildrenArr($imgArr["tid"])){ 
+											?>
+											<div style="padding:10px;margin:5px;width:475px;border:1px solid yellow;background-color:FFFF99;">
+												Add Image to a Child Taxon 
+												<select name="addtotid">
+													<option value="0">Child Taxon</option>
+													<option value="0">-----------------------</option>
+													<?php 
+														foreach($cArr as $t => $sn){
+															?><option value="<?php echo $t;?>"><?php echo $sn;?></option><?php 
+														}
+													?>
+												</select> 
+											</div>
+											<?php 
+										} 
+										?>
+									 -->
 									<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
-									<div style='margin-top:2px;'>
-										<input type='submit' name='submitaction' id='editsubmit' value='Submit Image Edits' />
+									<div style="margin-top:2px;">
+										<input type="submit" name="submitaction" id="editsubmit" value="Submit Image Edits" />
 									</div>
 								</fieldset>
 							</form>
-							<form name="changetaxonform" action='imgdetails.php' method='post' target='_self' onsubmit='return verifyChangeTaxonForm(this);' >
-								<fieldset style='margin:5px 0px 5px 5px;'>
+							<form name="changetaxonform" action="imgdetails.php" method="post" target="_self" onsubmit="return verifyChangeTaxonForm(this);" >
+								<fieldset style="margin:5px 0px 5px 5px;">
 							    	<legend><b>Transfer Image to a Different Scientific Name</b></legend>
 									<div style="font-weight:bold;">
 										Transfer to Taxon: 
@@ -222,8 +231,8 @@ if($isEditor){
 									<fieldset style="margin:5px 0px 5px 5px;">
 								    	<legend><b>Authorized to Remove this Image</b></legend>
 										<input name="imgid" type="hidden" value="<?php echo $imgId; ?>" />
-										<div style='margin-top:2px;'>
-											<input type='submit' name='submitaction' id='submit' value='Delete Image'/>
+										<div style="margin-top:2px;">
+											<input type="submit" name="submitaction" id="submit" value="Delete Image"/>
 										</div>
 										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 										<div style="margin-left:20px;color:red;">
@@ -259,7 +268,7 @@ if($isEditor){
 						</a>
 						<?php 
 						if($origUrl){
-							echo "<div><a href='".$origUrl."'>Click on Image to Enlarge</a></div>";
+							echo '<div><a href="'.$origUrl.'">Click on Image to Enlarge</a></div>';
 						}
 						?>
 					</td>
@@ -277,7 +286,7 @@ if($isEditor){
 						else{
 							if($isEditor){ 
 								?>
-								<div style='float:right;margin-right:10px;cursor:pointer;'>
+								<div style="float:right;margin-right:10px;cursor:pointer;">
 									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
 								</div>
 								<?php 
@@ -297,25 +306,25 @@ if($isEditor){
 								echo "</div>";
 							}
 							if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
-							if($imgArr["sourceurl"]) echo "<div><a href='".$imgArr["sourceurl"]."'>View Image Source</a></div>";
+							if($imgArr["sourceurl"]) echo '<div><a href="'.$imgArr["sourceurl"].'">View Image Source</a></div>';
 							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
 							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
 							echo "<div>";
 							if($imgArr["copyright"]){
 								if(stripos($imgArr["copyright"],"http") === 0){
-									echo "<a href='".$imgArr["copyright"]."'>Copyright Details</a>";
+									echo '<a href="'.$imgArr["copyright"].'">Copyright Details</a>';
 								}
 								else{
 									echo $imgArr["copyright"];
 								}
 							}
 							else{
-								echo "<a href='../misc/usagepolicy.php#images'>Copyright Details</a>";
+								echo '<a href="../misc/usagepolicy.php#images">Copyright Details</a>';
 							}
 							echo "</div>";
-							if($imgArr["occid"]) echo "<div><a href='../collections/individual/index.php?occid=".$imgArr["occid"]."'>Display Specimen Details</a></div>";
-							echo "<div><a href='".$imgUrl."'>Open Medium Sized Image</a></div>";
-							if($origUrl) echo "<div><a href='".$origUrl."'>Open Large Image</a></div>";
+							if($imgArr["occid"]) echo '<div><a href="../collections/individual/index.php?occid='.$imgArr['occid'].'">Display Specimen Details</a></div>';
+							echo '<div><a href="'.$imgUrl.'">Open Medium Sized Image</a></div>';
+							if($origUrl) echo '<div><a href="'.$origUrl.'">Open Large Image</a></div>';
 						?>
 						<div style="margin-top:20px;">
 							Do you see an error or have a comment about this image? <br/>If so, send email to: 

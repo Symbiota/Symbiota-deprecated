@@ -810,13 +810,12 @@ class SpecUploadManager{
 				$d = 0;
 				if(array_key_exists('month',$recMap) && $recMap['month'] && is_numeric($recMap['month'])){
 					$m = $recMap['month'];
-				}
-				if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
-					$m = $recMap['day'];
+					if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
+						$m = $recMap['day'];
+					}
 				}
 				$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
 			}
-			//day, month, year values used to create eventdate in SQL statement section 
 		}
 		
 		$sqlFields = '';
