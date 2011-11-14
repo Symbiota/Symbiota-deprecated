@@ -36,20 +36,20 @@ class ImageDetailManager{
 			if($row = $rs->fetch_object()){
 				$retArr["tid"] = $row->tid;
 				$retArr["sciname"] = $row->sciname;
-				$retArr["author"] = $row->author;
+				$retArr["author"] = $this->cleanStr($row->author);
 				$retArr["rankid"] = $row->rankid;
 				$retArr["url"] = $row->url;
 				$retArr["thumbnailurl"] = $row->thumbnailurl;
 				$retArr["originalurl"] = $row->originalurl;
-				$retArr["photographer"] = $row->photographer;
+				$retArr["photographer"] = $this->cleanStr($row->photographer);
 				$retArr["photographerdisplay"] = $row->photographerdisplay;
 				$retArr["photographeruid"] = $row->photographeruid;
-				$retArr["caption"] = $row->caption;
-				$retArr["owner"] = $row->owner;
-				$retArr["sourceurl"] = $row->sourceurl;
-				$retArr["copyright"] = $row->copyright;
-				$retArr["locality"] = $row->locality;
-				$retArr["notes"] = $row->notes;
+				$retArr["caption"] = $this->cleanStr($row->caption);
+				$retArr["owner"] = $this->cleanStr($row->owner);
+				$retArr["sourceurl"] = $this->cleanStr($row->sourceurl);
+				$retArr["copyright"] = $this->cleanStr($row->copyright);
+				$retArr["locality"] = $this->cleanStr($row->locality);
+				$retArr["notes"] = $this->cleanStr($row->notes);
 				$retArr["sortsequence"] = $row->sortsequence;
 				$retArr["occid"] = $row->occid;
 			}
@@ -122,8 +122,8 @@ class ImageDetailManager{
 			'notes = "'.$notes.'", sortsequence = '.$sortSequence.' '.
 			'WHERE (imgid = '.$this->imgId.')';
 		//echo $sql;
-		/*
 		if($this->conn->query($sql)){
+			/*
 			if($addToTid){
 				$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 					"owner, sourceurl, copyright, locality, occid, notes) ".
@@ -136,11 +136,11 @@ class ImageDetailManager{
 					//$status = "Error:editImage:loading the parent data: ".$this->conn->error."<br/>SQL: ".$sql;
 				}
 			}
+			*/
 		}
 		else{
 			$status = "Error:editImage: ".$this->conn->error."\nSQL: ".$sql;
 		}
-		*/
 		return $status;
 	}
 	
