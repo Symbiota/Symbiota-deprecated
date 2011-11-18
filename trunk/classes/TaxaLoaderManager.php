@@ -253,11 +253,13 @@ class TaxaLoaderManager{
 		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
 			'INNER JOIN uploadtaxa u3 ON u2.sourceParentId = u3.sourceId '.
 			'SET u1.family = u3.sciname '.
-			'WHERE u1.family is null AND u1.rankid > 140 AND u2.rankid = 180 AND u3.rankid = 140';
+			'WHERE u2.sourceParentId IS NOT NULL AND u3.sourceId IS NOT NULL '.
+			'AND u1.family is null AND u1.rankid > 140 AND u2.rankid = 180 AND u3.rankid = 140';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.sourceAcceptedId = u1.sourceid '.
 			'SET u0.family = u1.family '.
-			'WHERE u0.family IS NULL AND u0.rankid > 140 AND u1.family IS NOT NULL';
+			'WHERE u0.sourceParentId IS NOT NULL AND u1.sourceId IS NOT NULL AND '.
+			'u0.family IS NULL AND u0.rankid > 140 AND u1.family IS NOT NULL';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.scinameinput = u1.acceptedstr '.
 			'SET u0.family = u1.family '.
