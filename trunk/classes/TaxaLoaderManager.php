@@ -408,6 +408,12 @@ class TaxaLoaderManager{
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
 			'WHERE ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid = 180 AND ut2.sciname IS NULL';
 		$this->conn->query($sql);
+
+		//Set acceptance to 0 where sciname <> acceptedstr
+		$sql = 'UPDATE uploadtaxa '.
+			'SET acceptance = 0 '.
+			'WHERE acceptedstr IS NOT NULL AND sicname IS NOT NULL AND sciname <> acceptedstr';
+		$this->conn->query($sql);
 		echo 'Done!</li>';
 		echo '<li>Done data cleaning</li>';
 		ob_flush();
@@ -442,11 +448,6 @@ class TaxaLoaderManager{
 			
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
 				'SET ut.tid = t.tid WHERE ut.tid IS NULL';
-			$this->conn->query($sql);
-			
-			$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.acceptedstr = u2.scinameinput '.
-				'SET u1.tidaccepted = u2.tid '. 
-				'WHERE u1.tidaccepted IS NULL AND u2.tid IS NOT NULL';
 			$this->conn->query($sql);
 			
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname '.
