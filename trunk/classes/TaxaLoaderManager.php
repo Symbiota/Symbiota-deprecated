@@ -326,6 +326,21 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		echo 'Done!</li>';
 		
+		echo '<li style="margin-left:10px;">Populating and mapping parent taxon... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE uploadtaxa SET parentstr = CONCAT_WS(" ", unitname1, unitname2) WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 220';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa SET parentstr = family WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
+		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
+			'SET parenttid = t.tid WHERE parenttid IS NULL';
+		$this->conn->query($sql);
+		echo 'Done!</li>';
+		
 		echo '<li style="margin-left:10px;">Populating null upper taxonomy and kingdom values (part 2)... ';
 		ob_flush();
 		flush();
@@ -347,25 +362,12 @@ class TaxaLoaderManager{
 			'SET ut.kingdomid = t.kingdomid '.
 			'WHERE t.rankid = 140 AND t.kingdomid is not null AND ut.kingdomid IS NULL';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa ut SET ut.kingdomid = 3 WHERE ut.kingdomid IS NULL';
+		$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid'. 
+			'SET ut.kingdomid = t.kingdomid '.
+			'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
 		$this->conn->query($sql);
 		echo 'Done!</li>';
-		
-		echo '<li style="margin-left:10px;">Populating parentStr field... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE uploadtaxa SET parentstr = CONCAT_WS(" ", unitname1, unitname2) WHERE (parentstr IS NULL OR parentstr = "") AND rankid > 220';
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa SET parentstr = unitname1 WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 220';
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa SET parentstr = family WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
-		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
-			'SET parenttid = t.tid WHERE parenttid IS NULL';
-		$this->conn->query($sql);
-		echo 'Done!</li>';
-		
 		//Load into uploadtaxa parents of infrasp not yet in taxa table 
 		echo '<li style="margin-left:10px;">Add parents that are not yet in uploadtaxa table... ';
 		ob_flush();
@@ -387,8 +389,8 @@ class TaxaLoaderManager{
 			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.family IS NOT NULL AND ut.rankid = 220 AND ut2.sciname IS NULL';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
-			'SET parenttid = t.tid '.
-			'WHERE parenttid IS NULL';
+			'SET up.parenttid = t.tid '.
+			'WHERE up.parenttid IS NULL';
 		$this->conn->query($sql);
 
 		//Load into uploadtaxa parents of genera not yet in taxa table 
@@ -435,7 +437,7 @@ class TaxaLoaderManager{
 				'SELECT DISTINCT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
 				'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 				'FROM uploadtaxa AS ut '.
-				'WHERE (ut.TID Is Null AND ut.parenttid IS NOT NULL )';
+				'WHERE (ut.TID Is Null AND ut.parenttid IS NOT NULL AND kingdomid IS NOT NULL )';
 			$this->conn->query($sql);
 			
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
@@ -481,6 +483,11 @@ class TaxaLoaderManager{
 			$sql = 'DELETE FROM uploadtaxa WHERE tid IS NOT NULL AND tidaccepted IS NOT NULL';
 			$this->conn->query($sql);
 
+			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid'. 
+				'SET ut.kingdomid = t.kingdomid '.
+				'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
+			$this->conn->query($sql);
+			
 			$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 				'SET up.parenttid = t.tid '.
 				'WHERE up.parenttid IS NULL';
