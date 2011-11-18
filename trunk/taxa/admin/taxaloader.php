@@ -19,28 +19,11 @@ $status = "";
 if($editable){
 	if($action == "Upload ITIS File"){
 		$loaderManager = new TaxaLoaderItisManager();
-		$status = $loaderManager->uploadFile();
 	}
 	else{
-		$loaderManager = new TaxaLoaderManager();
-		if($ulFileName) $loaderManager->setUploadFile($ulFileName);
+		$loaderManager->setUploadFile($ulFileName);
 	}
-	if($action == "Analyze Input File"){
-		$loaderManager->setUploadFile();
-	}
-	elseif($action == "Verify Mapping"){
-		
-	}
-	elseif($action == "Activate Taxa"){
-		$loaderManager->transferUpload();
-		$status .= "<li>Taxa upload appears to have been successful.</li>";
-		$status .= "<li>Go to <a href='taxonomydisplay.php'>Taxonomic Tree Search</a> page to query for a loaded name.</li>";
-	}
-	elseif($action == "Clean and Transfer Taxa"){
-		$loaderManager->cleanUpload();
-		$loaderManager->transferUpload();
-		$status = "Taxa apparently cleaned and loaded into the taxonomic hierarchy";
-	}
+	
 	if(array_key_exists("sf",$_REQUEST)){
 		//Grab field mapping, if mapping form was submitted
  		$targetFields = $_REQUEST["tf"];
@@ -50,10 +33,6 @@ if($editable){
 			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
 		}
 		$loaderManager->setFieldMap($fieldMap);
-
-		if($action == "Upload Taxa"){
-			$status = $loaderManager->uploadFile();
-		}
 	}
 }
 ?>
@@ -115,11 +94,28 @@ if($editable){
 		See <a href="">Symbiota Documentation</a> pages for more details on the Taxonomic Thesaurus layout.
 	</div> 
 	<?php 
-	if($status){
-		echo '<hr /><div><ul>';
-		echo $status;
-		echo '</ul></div><hr />';
+	if($editable){
+		if($action == "Upload ITIS File" || $action == 'Upload Taxa'){
+			echo '<hr /><ul>';
+			$loaderManager->uploadFile();
+			echo '</ul><hr />';
+		}
+		elseif($action == "Activate Taxa"){
+			echo '<hr /><ul>';
+			$loaderManager->transferUpload();
+			echo "<li>Taxa upload appears to have been successful.</li>";
+			echo "<li>Go to <a href='taxonomydisplay.php'>Taxonomic Tree Search</a> page to query for a loaded name.</li>";
+			echo '</ul><hr />';
+		}
+		elseif($action == "Clean and Transfer Taxa"){
+			echo '<hr /><ul>';
+			$loaderManager->cleanUpload();
+			$loaderManager->transferUpload();
+			echo "Taxa apparently cleaned and loaded into the taxonomic hierarchy";
+			echo '</ul><hr />';
+		}
 	}
+		
 	if(strpos($action,"Upload") !== false){
 		?>
 		<div>

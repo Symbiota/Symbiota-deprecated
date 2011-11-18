@@ -122,12 +122,12 @@ class OccurrenceEditorManager {
 			$iWhere = '';
 			if($iBetweenFrag){
 				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
+				$sqlOrderBy .= ',o.catalogNumber';
 			}
 			if($iInFrag){
 				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.othercatalognumbers IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
-			//$sqlOrderBy .= ',o.catalogNumber,o.occurrenceId,othercatalognumbers';
 		}
 		if(array_key_exists('rb',$qryArr)){
 			$sqlWhere .= 'AND (o.recordedby LIKE "'.$qryArr['rb'].'%") ';

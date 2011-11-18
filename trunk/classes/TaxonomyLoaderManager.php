@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 10 Aug 2009
- * E.E. Gilbert
- */
 
 include_once($serverRoot.'/config/dbconnection.php');
   

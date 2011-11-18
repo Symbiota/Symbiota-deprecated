@@ -409,7 +409,7 @@ if($symbUid){
 						<div>
 							<span class='navpath'>
 								<a href="../../index.php">Home</a> &gt;&gt;
-								<a href="..//misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
+								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
 								<b>Editor</b>
 							</span>
 							<span style="margin-left:370px;">
