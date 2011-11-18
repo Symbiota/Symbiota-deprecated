@@ -1,8 +1,4 @@
 <?php
-/*
- * Built 26 Jan 2011
- * By E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcessorAbbyy.php');
 include_once($serverRoot.'/classes/SpecProcessorImage.php');
@@ -86,7 +82,12 @@ class SpecProcessorManager {
 		$specPk = '';
 		$pkPattern = $this->specKeyPattern;
 		if(preg_match($pkPattern,$str,$matchArr)){
-			$specPk = $matchArr[0];
+			if(array_key_exists(1,$matchArr) && $matchArr[1]){
+				$specPk = $matchArr[1];
+			}
+			else{
+				$specPk = $matchArr[0];
+			}
 		}
 		return $specPk;
 	}

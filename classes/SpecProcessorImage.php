@@ -1,5 +1,4 @@
 <?php
-
 class SpecProcessorImage extends SpecProcessorManager{
 
 	private $sourceGdImg;
