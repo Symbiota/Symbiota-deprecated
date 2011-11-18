@@ -362,7 +362,7 @@ class TaxaLoaderManager{
 			'SET ut.kingdomid = t.kingdomid '.
 			'WHERE t.rankid = 140 AND t.kingdomid is not null AND ut.kingdomid IS NULL';
 		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid'. 
+		$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid '. 
 			'SET ut.kingdomid = t.kingdomid '.
 			'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
 		$this->conn->query($sql);
@@ -483,7 +483,7 @@ class TaxaLoaderManager{
 			$sql = 'DELETE FROM uploadtaxa WHERE tid IS NOT NULL AND tidaccepted IS NOT NULL';
 			$this->conn->query($sql);
 
-			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid'. 
+			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.parenttid = t.tid '. 
 				'SET ut.kingdomid = t.kingdomid '.
 				'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
 			$this->conn->query($sql);
