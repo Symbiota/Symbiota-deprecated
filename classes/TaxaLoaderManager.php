@@ -375,7 +375,7 @@ class TaxaLoaderManager{
 		$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput, SciName, KingdomID, uppertaxonomy, family, RankId, UnitName1, UnitName2, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.kingdomid, ut.uppertaxonomy, ut.family, 220 as r, ut.unitname1, ut.unitname2, ut.unitname1, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
-			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid > 220 AND ut2.sciname IS NULL';
+			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.rankid > 220 AND ut2.sciname IS NULL ';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET up.parenttid = t.tid '.
@@ -439,11 +439,11 @@ class TaxaLoaderManager{
 			echo '<li>Transferring taxa to taxon table... ';
 			ob_flush();
 			flush();
-			$sql = 'INSERT INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
+			$sql = 'INSERT IGNORE INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
 				'SELECT DISTINCT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
 				'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 				'FROM uploadtaxa AS ut '.
-				'WHERE (ut.TID Is Null AND ut.parenttid IS NOT NULL AND kingdomid IS NOT NULL )';
+				'WHERE (ut.TID Is Null AND ut.parenttid IS NOT NULL AND kingdomid IS NOT NULL AND rankid IS NOT NULL )';
 			$this->conn->query($sql);
 			
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
@@ -506,7 +506,8 @@ class TaxaLoaderManager{
 		echo '<li>Finishing up with some house cleaning... ';
 		ob_flush();
 		flush();
-		$this->buildHierarchy();
+		//Something is wrong with the buildHierarchy method. Needs to be fixed. 
+		//$this->buildHierarchy();
 		
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
 		$this->conn->query($sql);
