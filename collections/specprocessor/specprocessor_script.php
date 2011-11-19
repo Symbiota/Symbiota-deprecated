@@ -99,6 +99,8 @@ class SpecProcessorManager {
 	protected $tnPixWidth = 130;
 	protected $lgPixWidth = 2400;
 	protected $jpgCompression= 60;
+	protected $webMaxFileSize = 400000;
+	protected $lgMaxFileSize = 3000000;
 	protected $createWebImg = 1;
 	protected $createTnImg = 1;
 	protected $createLgImg = 1;
@@ -432,6 +434,14 @@ class SpecProcessorManager {
 		return $this->jpgCompression;
 	}
 
+	public function setWebMaxFileSize($s){
+		$this->webMaxFileSize = $s;
+	}
+
+	public function setLgMaxFileSize($s){
+		$this->lgMaxFileSize = $s;
+	}
+	
 	public function setCreateWebImg($c){
 		$this->createWebImg = $c;
 	}
@@ -600,9 +610,9 @@ class SpecProcessorImage extends SpecProcessorManager{
 	}
 
 	private function processImageFile($fileName,$pathFrag = ''){
-		echo "Processing image ".$fileName."\n";
+		echo "<li>Processing image ".$fileName."</li>\n";
 		if($this->logFH) fwrite($this->logFH, "Processing image (".date('Y-m-d h:i:s A')."): ".$fileName."\n");
-		//ob_flush();
+		ob_flush();
 		flush();
 		//Grab Primary Key
 		$specPk = '';
@@ -669,15 +679,27 @@ class SpecProcessorImage extends SpecProcessorManager{
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePath.$pathFrag.$fileName);
-				echo "Loading image\n";
-				if($this->logFH) fwrite($this->logFH, "\tLoading image (".date('Y-m-d h:i:s A').")\n");
-				//ob_flush();
+				echo "<li style='margin-left:10px;'>Loading image</li>\n";
+				if($this->logFH) fwrite($this->logFH, "\nLoading image (".date('Y-m-d h:i:s A').")\n");
+				ob_flush();
 				flush();
 				
 				//Create web image
 				$webImgCreated = false;
-				if($this->createWebImg && $width > $this->webPixWidth){
-					$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+				$fileSize = 0;
+				if($this->createWebImg){
+					if($width > $this->webPixWidth){
+						$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+					}
+					else{
+						$fileSize = filesize($this->sourcePath.$pathFrag.$fileName);
+						if($fileSize && $fileSize > $this->webMaxFileSize){
+							$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$width,$height,$width,$height,80);
+						}
+						else{
+							$webImgCreated = copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName);
+						}
+					}
 				}
 				else{
 					$webImgCreated = copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName);
@@ -691,8 +713,16 @@ class SpecProcessorImage extends SpecProcessorManager{
 					if($this->createLgImg){
 						if($width > ($this->webPixWidth*1.3)){
 							if($width < $this->lgPixWidth){
-								if(copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
-									$lgUrl = $lgTargetFileName;
+								if(!$fileSize) $fileSize = filesize($this->sourcePath.$pathFrag.$fileName);
+								if($fileSize && $fileSize > $this->lgMaxFileSize){
+									if($this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$width,$height,$width,$height,80)){
+										$lgUrl = $lgTargetFileName;
+									}
+								}
+								else{
+									if(copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
+										$lgUrl = $lgTargetFileName;
+									}
 								}
 							}
 							else{
@@ -725,7 +755,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 					if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
 					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
 						if(file_exists($this->sourcePath.$pathFrag.$fileName)) unlink($this->sourcePath.$pathFrag.$fileName);
-						echo "Image processed successfully!\n";
+						echo "<li style='margin-left:20px;'>Image processed successfully!</li>\n";
 						if($this->logFH) fwrite($this->logFH, "\tImage processed successfully (".date('Y-m-d h:i:s A').")!\n");
 					}
 				}
@@ -744,23 +774,23 @@ class SpecProcessorImage extends SpecProcessorManager{
 		else{
 			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
 			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
-			echo "File skipped, unable to extract specimen identifier\n";
+			echo "<li style='margin-left:10px;'>File skipped, unable to extract specimen identifier</li>\n";
 		}
-		//ob_flush();
+		ob_flush();
 		flush();
 	}
 
-	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $c = 0){
 		global $useImageMagick;
 		$status = false;
 		
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
-			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$c);
 		} 
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 
-			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$c);
 		}
 		else{
 			// Neither ImageMagick nor GD are installed 
@@ -769,14 +799,15 @@ class SpecProcessorImage extends SpecProcessorManager{
 		return $status;
 	}
 	
-	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
+	private function createNewImageImagick($sourceImg,$targetPath,$newWidth, $c = 0){
 		$status = false;
+		if(!$c) $c = $this->jpgCompression;
 		$ct;
 		if($newWidth < 300){
 			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
 		}
 		else{
-			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgCompression?' -quality '.$this->jpgCompression:'').' '.$targetPath, $retval);
+			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($c?' -quality '.$c:'').' '.$targetPath, $retval);
 		}
 		if(file_exists($targetPath)){
 			$status = true;
@@ -784,8 +815,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 		return $status;
 	}
 	
-	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $c = 0){
 		$status = false;
+		if(!$c) $c = $this->jpgCompression;
+		
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
 			if(class_exists('PelJpeg')){
@@ -794,14 +827,14 @@ class SpecProcessorImage extends SpecProcessorManager{
 			}
 
 	   	}
-
-		ini_set('memory_limit','512M');
+		
+		//ini_set('memory_limit','512M');
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 
-		if($this->jpgCompression){
-			$status = imagejpeg($tmpImg, $targetPath, $this->jpgCompression);
+		if($c){
+			$status = imagejpeg($tmpImg, $targetPath, $c);
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($targetPath);
 				$outputJpg->setExif($this->exif);
@@ -821,7 +854,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 		
 		if(!$status){
 			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-			echo "Error: Unable to resize and write file: ".$targetPath."\n";
+			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
 		}
 		
 		imagedestroy($tmpImg);

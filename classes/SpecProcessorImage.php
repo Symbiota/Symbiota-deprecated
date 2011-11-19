@@ -52,10 +52,13 @@ class SpecProcessorImage extends SpecProcessorManager{
 				return;
 			}
 		}
-		//Lets start processing folder
-		echo "<li>Starting Image Processing</li>\n";
-		$this->processFolder();
-		echo "<li>Image upload complete</li>\n";
+		if($this->targetPath){
+			
+			//Lets start processing folder
+			echo "<li>Starting Image Processing</li>\n";
+			$this->processFolder();
+			echo "<li>Image upload complete</li>\n";
+		}
 		//Now lets start closing things up
 		if(!$this->dbMetadata){
 			fclose($this->mdOutputFH);
@@ -188,8 +191,20 @@ class SpecProcessorImage extends SpecProcessorManager{
 				
 				//Create web image
 				$webImgCreated = false;
-				if($this->createWebImg && $width > $this->webPixWidth){
-					$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+				$fileSize = 0;
+				if($this->createWebImg){
+					if($width > $this->webPixWidth){
+						$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+					}
+					else{
+						$fileSize = filesize($this->sourcePath.$pathFrag.$fileName);
+						if($fileSize && $fileSize > $this->webMaxFileSize){
+							$webImgCreated = $this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName,$width,$height,$width,$height,80);
+						}
+						else{
+							$webImgCreated = copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName);
+						}
+					}
 				}
 				else{
 					$webImgCreated = copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$targetFileName);
@@ -203,8 +218,16 @@ class SpecProcessorImage extends SpecProcessorManager{
 					if($this->createLgImg){
 						if($width > ($this->webPixWidth*1.3)){
 							if($width < $this->lgPixWidth){
-								if(copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
-									$lgUrl = $lgTargetFileName;
+								if(!$fileSize) $fileSize = filesize($this->sourcePath.$pathFrag.$fileName);
+								if($fileSize && $fileSize > $this->lgMaxFileSize){
+									if($this->createNewImage($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$width,$height,$width,$height,80)){
+										$lgUrl = $lgTargetFileName;
+									}
+								}
+								else{
+									if(copy($this->sourcePath.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
+										$lgUrl = $lgTargetFileName;
+									}
 								}
 							}
 							else{
@@ -262,17 +285,17 @@ class SpecProcessorImage extends SpecProcessorManager{
 		flush();
 	}
 
-	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+	private function createNewImage($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $c = 0){
 		global $useImageMagick;
 		$status = false;
 		
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
-			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$c);
 		} 
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 
-			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
+			$status = $this->createNewImageGD($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$c);
 		}
 		else{
 			// Neither ImageMagick nor GD are installed 
@@ -281,14 +304,15 @@ class SpecProcessorImage extends SpecProcessorManager{
 		return $status;
 	}
 	
-	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
+	private function createNewImageImagick($sourceImg,$targetPath,$newWidth, $c = 0){
 		$status = false;
+		if(!$c) $c = $this->jpgCompression;
 		$ct;
 		if($newWidth < 300){
 			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
 		}
 		else{
-			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgCompression?' -quality '.$this->jpgCompression:'').' '.$targetPath, $retval);
+			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($c?' -quality '.$c:'').' '.$targetPath, $retval);
 		}
 		if(file_exists($targetPath)){
 			$status = true;
@@ -296,8 +320,10 @@ class SpecProcessorImage extends SpecProcessorManager{
 		return $status;
 	}
 	
-	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
+	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $c = 0){
 		$status = false;
+		if(!$c) $c = $this->jpgCompression;
+		
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
 			if(class_exists('PelJpeg')){
@@ -312,8 +338,8 @@ class SpecProcessorImage extends SpecProcessorManager{
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 
-		if($this->jpgCompression){
-			$status = imagejpeg($tmpImg, $targetPath, $this->jpgCompression);
+		if($c){
+			$status = imagejpeg($tmpImg, $targetPath, $c);
 			if($this->exif && class_exists('PelJpeg')){
 				$outputJpg = new PelJpeg($targetPath);
 				$outputJpg->setExif($this->exif);

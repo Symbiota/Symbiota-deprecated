@@ -25,6 +25,8 @@ class SpecProcessorManager {
 	protected $tnPixWidth = 130;
 	protected $lgPixWidth = 2400;
 	protected $jpgCompression= 60;
+	protected $webMaxFileSize = 400000;
+	protected $lgMaxFileSize = 3000000;
 	protected $createWebImg = 1;
 	protected $createTnImg = 1;
 	protected $createLgImg = 1;
@@ -462,6 +464,14 @@ class SpecProcessorManager {
 		return $this->jpgCompression;
 	}
 
+	public function setWebMaxFileSize($s){
+		$this->webMaxFileSize = $s;
+	}
+
+	public function setLgMaxFileSize($s){
+		$this->lgMaxFileSize = $s;
+	}
+	
 	public function setCreateWebImg($c){
 		$this->createWebImg = $c;
 	}
