@@ -267,17 +267,6 @@ if($isEditable && $projSubmit){
 								</tr>	
 								<tr>
 									<td>
-										Occurrence Search: 
-									</td>
-									<td>
-										<select name="occurrencesearch">
-											<option value="0">Exclude in Occurrence Search Engine</option>
-											<option value="1" <?php echo ($projArr&&$projArr['occurrencesearch']?'SELECTED':''); ?>>Include in Occurrence Search Engine</option>
-										</select>
-									</td>
-								</tr>	
-								<tr>
-									<td>
 										Public: 
 									</td>
 									<td>
@@ -385,11 +374,15 @@ if($isEditable && $projSubmit){
 			            Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one
 			            can inspect these specimens for verification or annotate the identification when necessary.
 					</div>
-					<div style="margin-left:15px;font-size:90%">
-						The <img src="../images/key.jpg" style="width: 12px;" alt="Golden Key Symbol" /> 
-						symbol opens the species list as an interactive key.
-					</div>
 					<?php 
+					if($keyModIsActive){
+						?>
+						<div style="margin-left:15px;font-size:90%">
+							The <img src="../images/key.jpg" style="width: 12px;" alt="Golden Key Symbol" /> 
+							symbol opens the species list as an interactive key.
+						</div>
+						<?php
+					}
 					$gMapUrl = $projManager->getGoogleStaticMap("research");
 					if($gMapUrl){
 						?>

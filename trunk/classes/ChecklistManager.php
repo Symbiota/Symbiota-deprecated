@@ -211,7 +211,8 @@ class ChecklistManager {
 		while($row = $result->fetch_object()){
 			$this->filterArr[$row->uppertaxonomy] = "";
 			$family = strtoupper($row->family);
-			$this->filterArr[$family] = "";
+			if(!$family) $family = 'Family Incertae Sedis';
+			$this->filterArr[$family] = '';
 			$tid = $row->tid;
 			$sciName = $row->sciname;
 			$taxonTokens = explode(" ",$sciName);

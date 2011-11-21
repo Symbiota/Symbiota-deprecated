@@ -433,7 +433,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 			</div>
 			<div style="clear:both;padding:10px;">
 				<?php 
-				if(array_key_exists('imgs',$occArr)){
+				if($displayLocality && array_key_exists('imgs',$occArr)){
 					$iArr = $occArr['imgs'];
 					?>
 					<fieldset style="padding:10px;">

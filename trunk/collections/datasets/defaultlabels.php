@@ -42,8 +42,8 @@ else{
 				body {font-family:arial,sans-serif;<?php echo ($floatingWidth?'':'width:560pt;') ?>}
 				table {page-break-before:auto;page-break-inside:avoid;}
 				td {font-size:10pt;}
-				td.lefttd {padding:10px 23px 10px 0px;}
-				td.righttd {padding:10px 0px 10px 23px;}
+				td.lefttd {width:50%;padding:10px 23px 10px 0px;}
+				td.righttd {width:50%;padding:10px 0px 10px 23px;}
 				p.printbreak {page-break-after:always;}
 				.lheader {width:100%; text-align:center; font:bold 14pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
@@ -290,7 +290,7 @@ else{
 							}
 						}
 						if($labelCnt%2){
-							echo '<td></td></tr></table>'; //If label count is odd, close final labelrowdiv
+							echo '<td class="righttd"></td></tr></table>'; //If label count is odd, close final labelrowdiv
 						} 
 						$rs->close();
 					}
