@@ -579,7 +579,9 @@
 							<div>
 								<?php 
 								echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
-								$imgSrc = (array_key_exists('tnurl',$sppArr)&&$sppArr["tnurl"]?$sppArr["tnurl"]:$sppArr["url"]);
+								$tu = (array_key_exists('tnurl',$sppArr)?$sppArr['tnurl']:'');
+								$u = (array_key_exists('url',$sppArr)?$sppArr['url']:'');
+								$imgSrc = ($tu?$tu:$u);
 								echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
 								$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
 								if($imgSrc){

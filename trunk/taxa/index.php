@@ -26,16 +26,20 @@ $spDisplay = $taxonManager->getDisplayName();
 $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
 
-$displayLocality = false;
+$displayLocality = 0;
 $isEditor = false;
 if($symbUid){
 	if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 		$isEditor = true;
 	}
-	if($isAdmin || $taxonManager->getSecurityStatus() == 0 || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-		$displayLocality = true;
+	if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		$displayLocality = 1;
 	}
 }
+if($taxonManager->getSecurityStatus() == 0){
+	$displayLocality = 1;
+}
+$taxonManager->setDisplayLocality($displayLocality);
 $descr = Array();
 
 ?>
@@ -214,7 +218,7 @@ if($taxonManager->getSciName() != "unknown"){
 		$taxonManager->echoImages(1,4);
 		
 		//Map
-		$mapSrc = $taxonManager->getMapUrl($displayLocality);
+		$mapSrc = $taxonManager->getMapUrl();
 		if($mapSrc){
 			$gUrl = ""; $iUrl = ""; 
 			if($displayLocality){
