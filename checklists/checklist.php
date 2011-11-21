@@ -84,6 +84,7 @@
 		}
 	}
 	$clArray = Array();
+	$taxaArray = Array();
 	if($clValue || $dynClid){
 		$clArray = $clManager->getClMetaData();
 		$taxaArray = $clManager->getTaxaList($pageNumber);

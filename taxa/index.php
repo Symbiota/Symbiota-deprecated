@@ -26,9 +26,15 @@ $spDisplay = $taxonManager->getDisplayName();
 $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
 
-$editable = false;
-if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
-	$editable = true;
+$displayLocality = false;
+$isEditor = false;
+if($symbUid){
+	if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
+		$isEditor = true;
+	}
+	if($isAdmin || $taxonManager->getSecurityStatus() == 0 || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		$displayLocality = true;
+	}
 }
 $descr = Array();
 
@@ -88,7 +94,7 @@ if($taxonManager->getSciName() != "unknown"){
 			 	?>
 			</div>
 			<?php 
-			if($editable){
+			if($isEditor){
 				?>
 				<div style="float:right;">
 					<a href='admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>' title='Edit Taxon Data'>
@@ -132,7 +138,7 @@ if($taxonManager->getSciName() != "unknown"){
 		
 		if(!$taxonManager->echoImages(0,1,0)){
 			echo "<div class='image' style='width:260px;height:260px;border-style:solid;margin-top:5px;margin-left:20px;text-align:center;'>";
-			if($editable){
+			if($isEditor){
 				echo "<a href='admin/tpeditor.php?category=imageadd&tid=".$taxonManager->getTid()."'><b>Add an Image</b></a>";
 			}
 			else{
@@ -208,10 +214,10 @@ if($taxonManager->getSciName() != "unknown"){
 		$taxonManager->echoImages(1,4);
 		
 		//Map
-		$mapSrc = $taxonManager->getMapUrl();
+		$mapSrc = $taxonManager->getMapUrl($displayLocality);
 		if($mapSrc){
-			$gUrl = ""; $iUrl = "";
-			if($taxonManager->getSecurityStatus() == 0 || $isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			$gUrl = ""; $iUrl = ""; 
+			if($displayLocality){
 				$gUrl = "javascript:var popupReference=window.open('googlemap.php?taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
 			}
 			$url = array_shift($mapSrc);
@@ -264,7 +270,7 @@ if($taxonManager->getSciName() != "unknown"){
 			</td>
 			<td>
 				<?php 
-				if($editable){
+				if($isEditor){
 					?>
 					<div style='float:right;'>
 						<a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="Edit Taxon Data">
@@ -377,7 +383,7 @@ if($taxonManager->getSciName() != "unknown"){
 								echo "<div style='text-align:right;position:relative;top:-26px;left:5px;' title='Photographer: ".$subArr["photographer"]."'>";
 								echo "</div>";
 							}
-							elseif($editable){
+							elseif($isEditor){
 								echo "<div class='spptext'><a href='admin/tpeditor.php?category=imageadd&tid=".$subArr["tid"]."'>Add an Image!</a></div>";
 							}
 							else{

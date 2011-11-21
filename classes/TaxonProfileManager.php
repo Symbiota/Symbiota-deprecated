@@ -399,7 +399,7 @@ class TaxonProfileManager {
  		return $str;
  	}
  	
-	private function setTaxaImages(){
+	private function setTaxaImages($displayLocality){
 		$tidArr = Array($this->tid);
 		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
 			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
@@ -415,8 +415,9 @@ class TaxonProfileManager {
 			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
-			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 '.
-			'ORDER BY ti.sortsequence';
+			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
+		if(!$displayLocality) $sql .= 'AND ti.occid IS NULL ';
+		$sql .= 'ORDER BY ti.sortsequence';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -429,9 +430,9 @@ class TaxonProfileManager {
 		if(!$this->imageArr) $this->imageArr = "No images";
  	}
  	
- 	public function getTaxaImageCnt(){
+ 	public function getTaxaImageCnt($displayLocality = 1){
  		if(!$this->imageArr){
-			$this->setTaxaImages();
+			$this->setTaxaImages($displayLocality);
 		}
  		if(is_array($this->imageArr)){
  			return count($this->imageArr);
@@ -441,9 +442,9 @@ class TaxonProfileManager {
  		}
  	}
  	
- 	public function echoImages($start, $length, $useThumbnail = 1){		//A length of 0 means show all images
+ 	public function echoImages($start, $length, $useThumbnail = 1, $displayLocality = 1){		//A length of 0 means show all images
  		if(!$this->imageArr){
-			$this->setTaxaImages();
+			$this->setTaxaImages($displayLocality);
 		}
 		if(is_array($this->imageArr) && count($this->imageArr) >= $start){
 			$length = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
@@ -519,7 +520,7 @@ class TaxonProfileManager {
 		return $links;
 	}
 
-	public function getMapUrl($tidObj = 0){
+	public function getMapUrl($displayLocality = 1, $tidObj = 0){
 		global $occurrenceModIsActive,$isAdmin,$userRights;
 		$urlArr = Array();
  		$tidStr = '';
@@ -538,7 +539,7 @@ class TaxonProfileManager {
  		}
 		
  		$urlArr = $this->getTaxaMap($tidStr);
- 		if(!$urlArr && $occurrenceModIsActive && ($this->securityStatus == 0 || $isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights))){
+ 		if(!$urlArr && $occurrenceModIsActive && $displayLocality){
 			return $this->getGoogleStaticMap($tidStr);
 		}
 		return $urlArr;
