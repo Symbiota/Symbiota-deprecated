@@ -24,9 +24,9 @@ class SpecProcessorManager {
 	protected $webPixWidth = 1200;
 	protected $tnPixWidth = 130;
 	protected $lgPixWidth = 2400;
-	protected $jpgCompression= 60;
+	protected $jpgCompression= 80;
 	protected $webMaxFileSize = 400000;
-	protected $lgMaxFileSize = 3000000;
+	protected $lgMaxFileSize = 4500000;
 	protected $createWebImg = 1;
 	protected $createTnImg = 1;
 	protected $createLgImg = 1;

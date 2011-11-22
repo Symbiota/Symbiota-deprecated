@@ -52,14 +52,23 @@ class SpecProcessorImage extends SpecProcessorManager{
 				return;
 			}
 		}
+
 		if($this->targetPath){
-			
 			//Lets start processing folder
 			echo "<li>Starting Image Processing</li>\n";
 			$this->processFolder();
 			echo "<li>Image upload complete</li>\n";
 		}
+
 		//Now lets start closing things up
+		//First some data cleaning
+		if($this->dbMetadata && $this->conn){
+			$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'SET i.tid = o.tidinterpreted '.
+				'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+			$this->conn->query($sql);
+		}
+		//Close database or MD output file
 		if(!$this->dbMetadata){
 			fclose($this->mdOutputFH);
 		}
@@ -103,12 +112,6 @@ class SpecProcessorImage extends SpecProcessorManager{
 						$this->processFolder($pathFrag.$fileName."/");
 					}
         		}
-			}
-			if($this->dbMetadata && $this->conn){
-				$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-					'SET i.tid = o.tidinterpreted '.
-					'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
-				$this->conn->query($sql);
 			}
 		}
    		closedir($imgFH);

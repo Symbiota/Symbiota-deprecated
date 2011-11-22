@@ -11,9 +11,9 @@ $logPath = '';
 //pmterm = Pattern matching terms used to locate primary key (PK) of specimen record
 //ex: '/(ASU\d{7})/'; '/(UTC\d{8})/'
 $collArr = array(
-	'duke' => array('pmterm' => '/(^\d{7})/'),
-	'mich' => array('pmterm' => '/(^\d{6})/'),
-	'ny' => array('pmterm' => '/(NY\d{8})/'),
+	'duke' => array('pmterm' => '/(^\d{7})/', 'collid' => 1),
+	'mich' => array('pmterm' => '/(^\d{6})/', 'collid' => 1),
+	'ny' => array('pmterm' => '/(NY\d{8})/', 'collid' => 1),
 );
 
 //If record matching PK is not found, should a new blank record be created?
@@ -39,9 +39,6 @@ $createLgImg = 1;
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
 $dbMetadata = 0;
 
-//Variables below needed only if connecting directly with database
-//Symbiota PK for collection; needed if run as a standalone script
-$collId = 1;
 
 //-------------------------------------------------------------------------------------------//
 //End of variable assignment. Don't modify code below.
@@ -50,6 +47,7 @@ $specManager = new SpecProcessorManager($dbMetadata);
 
 //Set variables
 $specManager->setCollArr($collArr);
+$specManager->setDbMetadata($dbMetadata);
 $specManager->setSourcePathBase($sourcePathBase);
 $specManager->setTargetPathBase($targetPathBase);
 $specManager->setImgUrlBase($imgUrlBase);
@@ -65,11 +63,6 @@ $specManager->setCreateNewRec($createNewRec);
 $specManager->setCopyOverImg($copyOverImg);
 
 $specManager->setLogPath($logPath);
-
-if($dbMetadata){
-	if(!$collId) exit("ABORTED: variable set to write to database but 'collid' variable has not been set"); 
-	$specManager->setCollId($collId);
-}
 
 //Run process
 $specManager->batchLoadImages();
@@ -109,76 +102,100 @@ class SpecProcessorManager {
 	private $exif;
 	private $errArr = array();
 
-	function __construct($dbMetadata){
-		$this->dbMetadata = $dbMetadata;
-		if($this->dbMetadata){
-			$this->conn = MySQLiConnectionFactory::getCon("write");
-		}
+	function __construct(){
 	}
 
 	function __destruct(){
-		if($this->dbMetadata){
-	 		if(!($this->conn === false)) $this->conn->close();
-		}
 	}
 
 	public function batchLoadImages(){
-
+		$cycleArr = array('bryophytes','lichens');
 		foreach($collArr as $acro => $termArr){
-			
-			//Create log Files
-			if($this->logPath && file_exists($this->logPath)){
-				if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
+			foreach($cycleArr as $collName){
 
-				$logFile = $this->logPath.$acro."_log_".date('Ymd').".log";
-				$errFile = $this->logPath.$acro."_logErr_".date('Ymd').".log";
-				$this->logFH = fopen($logFile, 'a');
-				$this->logErrFH = fopen($errFile, 'a');
-				if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
-				if($this->logErrFH) fwrite($this->logErrFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
+				//Create log Files
+				if($this->logPath && file_exists($this->logPath)){
+					if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
+	
+					$logFile = $this->logPath.$acro.'-'.$collName."_log_".date('Ymd').".log";
+					$errFile = $this->logPath.$acro.'-'.$collName."_logErr_".date('Ymd').".log";
+					$this->logFH = fopen($logFile, 'a');
+					$this->logErrFH = fopen($errFile, 'a');
+					if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
+					if($this->logErrFH) fwrite($this->logErrFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
 				}
-			}
 
-			//If output is to go out to file, create file for output
-			if(!$this->dbMetadata){
-				$mdFileName = $this->logPath.$acro."_urldata_".time().'.csv';
-				$this->mdOutputFH = fopen($mdFileName, 'w');
-				fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
-				if($this->mdOutputFH){
-					echo "Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)\n";
+				//Connect to database or create output file
+				if($this->dbMetadata){
+					if($collName == 'bryophytes'){
+						$this->conn = MySQLiConnectionFactory::getCon("symbiotabryophyte");
+					}
+					else{
+						$this->conn = MySQLiConnectionFactory::getCon("symbiotalichen");
+					}
 				}
 				else{
-					//If unable to create output file, abort upload procedure
-					if($this->logFH){
-						fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
-						fclose($this->logFH);
+					$mdFileName = $this->logPath.$acro.'-'.$collName."_urldata_".time().'.csv';
+					$this->mdOutputFH = fopen($mdFileName, 'w');
+					fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
+					if($this->mdOutputFH){
+						echo "Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)\n";
 					}
-					if($this->logErrFH){
-						fwrite($this->logErrFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
-						fclose($this->logErrFH);
+					else{
+						//If unable to create output file, abort upload procedure
+						if($this->logFH){
+							fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
+							fclose($this->logFH);
+						}
+						if($this->logErrFH){
+							fwrite($this->logErrFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
+							fclose($this->logErrFH);
+						}
+						echo "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n";
+						return;
 					}
-					echo "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n";
-					return;
 				}
-			}
-adfgadf	
-			//Lets start processing folder
-			echo "Starting Image Processing\n";
-			$this->processFolder();
-			echo "Image upload complete\n";
-	
-			//Now lets start closing things up
-			if(!$this->dbMetadata){
-				fclose($this->mdOutputFH);
-			}
-			if($this->logFH){
-				fwrite($this->logFH, "Image upload complete\n");
-				fwrite($this->logFH, "----------------------------\n\n");
-				fclose($this->logFH);
-			}
-			if($this->logErrFH){
-				fwrite($this->logErrFH, "----------------------------\n\n");
-				fclose($this->logErrFH);
+				
+				//Set variables
+				if($this->dbMetadata){
+					if(!array_key_exists('collid',$termArr)){
+						$this->setCollId($termArr['collid']);
+					}
+					else{
+						exit("ABORTED: variable set to write to database but 'collid' variable has not been set");
+					}
+				}
+				$this->patternMatchingTerm = $termArr['pmterm'];
+				
+				//Lets start processing folder
+				echo 'Starting image processing: '.$acro.'/'.$collName."\n";
+				$this->processFolder($acro.'/'.$collName.'/');
+				echo 'Image upload complete for '.$acro.'/'.$collName."\n";
+
+				//Now lets start closing things up
+				//First some data maintenance
+				if($this->dbMetadata && $this->conn){
+					$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+						'SET i.tid = o.tidinterpreted '.
+						'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+					$this->conn->query($sql);
+				}
+				//Close connection or MD output file
+				if($this->dbMetadata){
+			 		if(!($this->conn === false)) $this->conn->close();
+				}
+				else{
+					fclose($this->mdOutputFH);
+				}
+				if($this->logFH){
+					fwrite($this->logFH, 'Image upload complete for '.$acro.'/'.$collName."\n");
+					fwrite($this->logFH, "----------------------------\n\n");
+					fclose($this->logFH);
+				}
+				if($this->logErrFH){
+					fwrite($this->logErrFH, "----------------------------\n\n");
+					fclose($this->logErrFH);
+				}
 			}
 		}
 	}
@@ -193,15 +210,18 @@ adfgadf
 					if(is_file($this->sourcePathBase.$pathFrag.$fileName)){
 						if(stripos($fileName,'_tn.jpg') === false && stripos($fileName,'_lg.jpg') === false){
 							$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
-							if($fileExt == ".tif"){
-								//Do something, like convert to jpg
-							}
 							if($fileExt == ".jpg"){
-								
 								$this->processImageFile($fileName,$pathFrag);
-								
 	        				}
-							else{
+							elseif($fileExt == ".tif"){
+								//Do something, like convert to jpg???
+								//but for now do nothing
+							}
+							elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat") && stripos($fileName,'metadata') !== false ){
+								//Is metadata file. Append data to database records
+								$this->processMetadataFile($this->sourcePathBase.$pathFrag.$fileName);
+							}
+	        				else{
 								//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
 								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
 								//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
@@ -213,12 +233,9 @@ adfgadf
 					}
         		}
 			}
-			if($this->dbMetadata && $this->conn){
-				$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-					'SET i.tid = o.tidinterpreted '.
-					'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
-				$this->conn->query($sql);
-			}
+		}
+		else{
+			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag." \n");
 		}
    		closedir($imgFH);
 	}
@@ -461,7 +478,7 @@ adfgadf
 
 	private function getPrimaryKey($str){
 		$specPk = '';
-		if(preg_match($patternMatchingTerm,$str,$matchArr)){
+		if(preg_match($this->patternMatchingTerm,$str,$matchArr)){
 			if(array_key_exists(1,$matchArr) && $matchArr[1]){
 				$specPk = $matchArr[1];
 			}
@@ -570,6 +587,229 @@ adfgadf
 		}
 		return $status;
 	}
+	
+	private function processMetadataFile($filePath){
+		if($this->logFH) fwrite($this->logFH, "\tPreparing to load Metadata file into database\n");
+
+		if($fh = fopen($filePath,'r') or die("Can't open metadata file")){
+			$hArr = array();
+			$fileExt = substr($filePath,-4);
+			$delimiter = '';
+			if($fileExt == '.csv'){
+				//Comma delimited
+				$hArr = fgetcsv($fh);
+				$delimiter = 'csv';
+			}
+			elseif($fileExt == '.tab'){
+				//Tab delimited assumed
+				$headerStr = fgets($fh);
+				$delimiter = "\t";
+				$hArr = explode($delimiter,$headerStr);
+			}
+			elseif($fileExt == '.dat' || $fileExt == '.txt'){
+				//Test to see if comma, tab delimited, or pipe delimited
+				$headerStr = fgets($fh);
+				if(strpos($headerStr,"\t") === false){
+					$delimiter = "\t";
+				}
+				elseif(strpos($headerStr,"|") === false){
+					$delimiter = "|";
+				}
+				elseif(strpos($headerStr,",") === false){
+					$delimiter = ",";
+				}
+				else{
+					if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Unable to identify delimiter for metadata file \n");
+				}
+				if($delimiter) $hArr = explode($delimiter,$headerStr);
+			}
+			if($hArr){
+				//Clean and finalize header array
+				$headerArr = array();
+				foreach($hArr as $field){
+					$fieldStr = strtolower(trim($field));
+					if($fieldStr){
+						if($fieldStr == 'scientificname'){
+							$headerArr[] = 'sciname';
+						}
+						else{
+							$headerArr[] = $fieldStr;
+						}
+					}
+					else{
+						break;
+					}
+				}
+	
+				//Read and database each record, only if the catalognumber was supplied
+				$symbMap = array();
+				if(array_key_exists('catalognumber',$headerArr)){
+					//Get map of value Symbiota occurrence fields
+					$sqlMap = "SHOW COLUMNS FROM omoccurrences";
+					$rsMap = $this->conn->query($sqlMap);
+			    	while($rMap = $rsMap->fetch_object()){
+			    		$field = strtolower($rMap->Field);
+			    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && in_array($field,$headerArr)){
+				    		$type = $row->Type;
+							if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+								$symbMap[$field]["type"] = "numeric";
+							}
+							elseif(strpos($type,"date") !== false){
+								$symbMap[$field]["type"] = "date";
+							}
+							else{
+								$symbMap[$field]["type"] = "string";
+								if(preg_match('/\(\d+\)$/', $type, $matches)){
+									$symbMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+								}
+							}
+			    		}
+			    	}
+					
+			    	//Fetch each record with file and process accordingly  
+					while($recordArr = $this->getRecordArr($fh,$delimiter)){
+						//Clean and map record
+						$recMap = Array();
+						foreach($headerArr as $k => $hStr){
+							if(array_key_exists($hStr,$symbMap)){
+								$valueStr = $recordArr[$k];
+								//If value is enclosed by quotes, remove quotes
+								if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
+									$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+								}
+								$valueStr = trim($valueStr);
+								if($valueStr) $recMap[$hStr] = $valueStr;
+							}
+						}
+
+						//Load record
+						$catNum = $recMap['catlognumber'];
+						unset($recMap['catlognumber']);
+						$sql = 'SELECT occid,'.implode(',',array_keys($symbMap)).' '.
+							'FROM omoccurrences WHERE collid = '.$this->collId.' AND (catlognumber = "'.$catNum.'" OR dbpk = "'.$catNum.'") ';
+						$rs = $this->conn->query($sql);
+						if($r = $rs->fetch_assoc()){
+							//Record already exists, thus just append values to record
+							$occId = $r->occid;
+							$sqlUpdateFrag = '';  
+							foreach($recMap as $k => $v){
+								$uValue = '';
+								if(!$r[$k]){
+									$uValue = $v;
+								}
+								elseif($v != $r[$k]){
+									$uValue = $v.'; '.$r[$k];
+asdfaf
+									$type = (array_key_exists('type',$symbMap[$k])?$symbMap[$k]['type']:'string');
+									$size = (array_key_exists('size',$symbMap[$k])?$symbMap[$k]['size']:0);
+									if($type == 'numeric' && $type == 'date'){
+										if(is_numeric($value)){
+											$sqlIns2 .= ",".$value;
+										}
+										else{
+											$sqlIns2 .= ",NULL";
+										}
+										
+									}
+									else{
+										if($size && strlen($value) > $size){
+											$value = substr($value,0,$size);
+										}
+										if($value){
+											$sqlIns2 .= ',"'.$this->encodeString($value).'"';
+										}
+										else{
+											$sqlIns2 .= ',NULL';
+										}
+									}
+									
+								
+								
+								}
+								if($uValue){
+									$sqlUpdateFrag .= ','.$k.'="'.$uValue.'"';
+								}
+							}
+							if($sqlUpdateFrag){
+								$sqlUpdate = 'UPDATE omoccurrences SET '.substr($sqlUpdateFrag,1).' WHERE occid = '.$occId;
+							}  
+						}
+						else{
+							//Insert new record
+							$sqlIns1 = 'INSERT INTO omoccurrences(collid,catalogNumber';
+							$sqlIns2 = 'VALUES ('.$this->collId.',"'.$catNum.'"';
+							foreach($symbMap as $symbKey => $fMap){
+								$sqlIns1 .= ','.$symbKey;
+								$value = $recMap[$symbKey];
+								$type = (array_key_exists('type',$fMap)?$fMap['type']:'string');
+								$size = (array_key_exists('size',$fMap)?$fMap['size']:0);
+								if($type == 'numeric'){
+									if(is_numeric($value)){
+										$sqlIns2 .= ",".$value;
+									}
+									else{
+										$sqlIns2 .= ",NULL";
+									}
+									
+								}
+								elseif($type == 'date'){
+									if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)){
+										$sqlIns2 .= ',"'.$value.'"';
+									} 
+									elseif(($dateStr = strtotime($value))){
+										$sqlIns2 .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
+									} 
+									else{
+										$sqlIns2 .= ",NULL";
+									}
+									
+								}
+								else{
+									if($size && strlen($value) > $size){
+										$value = substr($value,0,$size);
+									}
+									if($value){
+										$sqlIns2 .= ',"'.$this->encodeString($value).'"';
+									}
+									else{
+										$sqlIns2 .= ',NULL';
+									}
+								}
+							}
+							if(!$this->conn->query($sqlIns1.') '.$sqlIns1.')')){
+								if($this->logErrFH){
+									fwrite($this->logErrFH, "ERROR: Unable to load new metadata record \n");
+									fwrite($this->logErrFH, "\tSQL : $sqlIns \n");
+								}
+							}
+						}
+						$rs->close();
+						
+						$this->loadRecord($recMap);
+						unset($recMap);
+						
+					}
+				}
+			}
+		}
+		
+
+		
+		if($this->logFH) fwrite($this->logFH, "\tMetadata file loaded \n");
+	}
+
+    private function getRecordArr($fh, $delimiter){
+    	if(!$delimiter) return;
+    	$recordArr = Array();
+    	if($delimiter == 'csv'){
+			$recordArr = fgetcsv($fh);
+    	}
+    	else{
+	    	$record = fgets($fh);
+    		$recordArr = explode($delimiter,$record);
+    	}
+    	return $recordArr;
+    }
 
 	//Set and Get functions
 	public function setCollArr($cArr){
@@ -711,35 +951,44 @@ adfgadf
 
 	//Misc functions
 	private function cleanStr($str){
-		$str = str_replace('"','',$str);
+		$str = trim(str_replace('"','',$str));
 		return $str;
+	}
+
+	private function encodeString($inStr){
+ 		$retStr = $inStr;
+		if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+			//$value = utf8_decode($value);
+			$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+		}
+		return $retStr;
 	}
 }
 
 class MySQLiConnectionFactory {
 	static $SERVERS = array(
 		array(
-			'type' => 'readonly',
+			'type' => 'write',
 			'host' => 'localhost',
 			'username' => 'root',
-			'password' => '',
-			'database' => ''
+			'password' => 'bolivia15',
+			'database' => 'symbiotalichens'
 		),
 		array(
 			'type' => 'write',
 			'host' => 'localhost',
 			'username' => 'root',
-			'password' => '',
-			'database' => ''
+			'password' => 'bolivia15',
+			'database' => 'symbiotabryophytes'
 		)
 	);
 
-	public static function getCon($type) {
+	public static function getCon($db) {
 		// Figure out which connections are open, automatically opening any connections
 		// which are failed or not yet opened but can be (re)established.
 		for($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
 			$server = MySQLiConnectionFactory::$SERVERS[$i];
-			if($server['type'] == $type){
+			if($server['database'] == $db){
 				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database']);
 				if(mysqli_connect_errno()){
 					//throw new Exception('Could not connect to any databases! Please try again later.');
