@@ -8,7 +8,7 @@
 	$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:0;
+	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:1;
 	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
 	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
 	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
@@ -539,21 +539,21 @@
 					$pageCount = ceil($clManager->getTaxaCount()/$taxaLimit);
 					$argStr = "";
 					if($pageCount > 1){
-						if(($pageNumber+1)>$pageCount) $pageNumber = 0;  
+						if(($pageNumber)>$pageCount) $pageNumber = 1;  
 						$argStr .= "&cl=".$clValue."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 						$argStr .= ($proj?"&proj=".$clManager->getPid():"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
-						echo "<hr /><div>Page <b>".($pageNumber+1)."</b> of <b>$pageCount</b>: ";
-						for($x=0;$x<$pageCount;$x++){
-							if($x) echo " | ";
+						echo "<hr /><div>Page <b>".($pageNumber)."</b> of <b>$pageCount</b>: ";
+						for($x=1;$x<=$pageCount;$x++){
+							if($x>1) echo " | ";
 							if(($pageNumber) == $x){
 								echo "<b>";
 							}
 							else{
 								echo "<a href='checklist.php?pagenumber=".$x.$argStr."'>";
 							}
-							echo ($x+1);
+							echo ($x);
 							if(($pageNumber) == $x){
 								echo "</b>";
 							}
@@ -659,8 +659,9 @@
 						}
 					}
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
-					if($clManager->getTaxaCount() > (($pageNumber+1)*$taxaLimit)){
-						echo "<div style='margin:20px;clear:both;'><a href='checklist.php?pagenumber=".($pageNumber+1).$argStr."'>Display next ".$taxaLimit." taxa...</a></div>";
+					if($clManager->getTaxaCount() > (($pageNumber)*$taxaLimit)){
+						echo '<div style="margin:20px;clear:both;">';
+						echo '<a href="checklist.php?pagenumber='.($pageNumber+1).$argStr.'">Display next '.$taxaLimit.' taxa...</a></div>';
 					}
 					if(!$taxaArray) echo "<h1 style='margin:40px;'>No Taxa Found</h1>";
 					?>

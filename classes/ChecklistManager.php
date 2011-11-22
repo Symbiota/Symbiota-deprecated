@@ -189,7 +189,7 @@ class ChecklistManager {
 	}
 
 	//return an array: family => array(TID => sciName)
-	public function getTaxaList($pageNumber = 0,$retLimit = 0){
+	public function getTaxaList($pageNumber = 1,$retLimit = 500){
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		$voucherArr = Array();
 		if($this->showVouchers){
@@ -205,7 +205,7 @@ class ChecklistManager {
 		//Get species list
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
 		$tidReturn = Array();
-		if(!$retLimit) $retLimit = ($this->showImages?$this->imageLimit:$this->taxaLimit);
+		if($this->showImages) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->clCon->query($this->basicSql);
 		while($row = $result->fetch_object()){
@@ -225,7 +225,7 @@ class ChecklistManager {
 				}
 				$taxonTokens = $newArr;
 			}
-			if($this->taxaCount >= ($pageNumber*$retLimit) && $this->taxaCount <= ($pageNumber+1)*$retLimit){
+			if(!$retLimit || ($this->taxaCount >= (($pageNumber-1)*$retLimit) && $this->taxaCount <= ($pageNumber)*$retLimit)){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
 				if($this->showVouchers){
 					$clStr = "";
@@ -262,10 +262,10 @@ class ChecklistManager {
 		$this->filterArr = array_keys($this->filterArr);
 		sort($this->filterArr);
 		$result->close();
-		if($this->taxaCount < ($pageNumber*$retLimit)){
+		if($this->taxaCount < (($pageNumber-1)*$retLimit)){
 			$this->taxaCount = 0; $this->genusCount = 0; $this->familyCount = 0;
 			unset($this->filterArr);
-			return $this->getTaxaList(0);
+			return $this->getTaxaList(1,$retLimit);
 		}
 		if($this->showImages) $this->setImages($tidReturn);
 		if($this->showCommon) $this->setVernaculars($tidReturn);
@@ -415,22 +415,27 @@ class ChecklistManager {
     	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
-		//echo $sql;
-		$result = $this->clCon->query($sql);
-		//Write column names out to file
-		if($result){
-			$hasVernacular = (stripos($sql,"vernacularname")?true:false);
+		$this->showAuthors = 1;
+		if($taxaArr = $this->getTaxaList(1,0)){
 			echo "Family,ScientificName,ScientificNameAuthorship,";
-			echo ($hasVernacular?"CommonName,":"")."TaxonId\n";
-			while($row = $result->fetch_object()){
-				echo "\"".$row->family."\",\"".$row->sciname."\",\"".$row->author."\",";
-				echo ($hasVernacular?"\"".$row->vernacularname."\",":"")."\"".$row->tid."\"\n";
+			if($this->showCommon) echo "CommonName,";
+			echo "TaxonId\n";
+			foreach($taxaArr as $tid => $tArr){
+				echo '"'.$tArr['family'].'","'.$tArr['sciname'].'","'.$tArr['author'].'"';
+				if($this->showCommon){
+					if(array_key_exists('vern',$tArr)){
+						echo ',"'.$tArr['vern'].'"';
+					}
+					else{
+						echo ',""';
+					}
+				}
+				echo ',"'.$tid.'"'."\n";
 			}
 		}
 		else{
 			echo "Recordset is empty.\n";
 		}
-        $result->close();
     }
 
 	private function setClSql(){
@@ -486,21 +491,6 @@ class ChecklistManager {
 				}
 			}
 		}
-/*		if($this->showCommon){
-			if($this->clid){
-				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, v.vernacularname, it.sciname, it.author, ".
-					"it.habitat, it.abundance, it.notes, it.source ".
-					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE (vern.language = '".$this->language."') ".
-					"AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
-			}
-			else{
-				$sql = "SELECT DISTINCT it.tid, it.uppertaxonomy, it.family, it.sciname, it.author, v.vernacularname ".
-					"FROM ((".$sql.") it INNER JOIN taxstatus ts ON it.tid = ts.tid) ".
-					"LEFT JOIN (SELECT vern.tid, vern.vernacularname FROM taxavernaculars vern WHERE (vern.language = '".$this->language.
-					"') AND vern.sortsequence = 1) v ON ts.tidaccepted = v.tid WHERE ts.taxauthid = 1";
-			}
-		}*/
 		$this->basicSql .= " ORDER BY family, sciname";
 		//echo $this->basicSql;
 	}
