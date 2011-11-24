@@ -54,7 +54,9 @@ if($submitAction){
 				foreach($occArr as $occId => $oArr){
 					echo 'var oArr = new Array();'."\n";
 					foreach($oArr as $k => $v){
-						if($v) echo 'oArr["'.$k.'"] = "'.str_replace('"',"''",$v).'";'."\n";
+						if($v && $k != 'occid'){
+							echo 'oArr["'.$k.'"] = "'.str_replace('"',"''",$v).'";'."\n";
+						}
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
