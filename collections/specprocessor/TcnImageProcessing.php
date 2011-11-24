@@ -12,8 +12,8 @@ $logPath = '';
 //ex: '/(ASU\d{7})/'; '/(UTC\d{8})/'
 $collArr = array(
 	'duke' => array('pmterm' => '/(^\d{7})/', 'collid' => 1),
-	'mich' => array('pmterm' => '/(^\d{6})/', 'collid' => 1),
-	'ny' => array('pmterm' => '/(NY\d{8})/', 'collid' => 1),
+	'mich' => array('pmterm' => '/(^\d{6})/', 'collid' => 2),
+	'ny' => array('pmterm' => '/(NY\d{8})/', 'collid' => 3),
 );
 
 //If record matching PK is not found, should a new blank record be created?
@@ -37,7 +37,7 @@ $createTnImg = 1;
 $createLgImg = 1;		
 
 //0 = write image metadata to file; 1 = write metadata to Symbiota database
-$dbMetadata = 0;
+$dbMetadata = 1;
 
 
 //-------------------------------------------------------------------------------------------//
@@ -89,18 +89,16 @@ class SpecProcessorManager {
 	
 	private $createNewRec = true;
 	private $copyOverImg = true;
-	private $dbMetadata = 0;			//Only used when run as a standalone script
+	private $dbMetadata = 1;
 	private $processUsingImageMagick = 0;
 
 	private $logPath;
 	private $logFH;
-	private $logErrFH;
 	private $mdOutputFH;
 	
 	private $sourceGdImg;
 	private $sourceImagickImg;
 	private $exif;
-	private $errArr = array();
 
 	function __construct(){
 	}
@@ -109,29 +107,26 @@ class SpecProcessorManager {
 	}
 
 	public function batchLoadImages(){
-		$cycleArr = array('bryophytes','lichens');
-		foreach($collArr as $acro => $termArr){
-			foreach($cycleArr as $collName){
+		//Create log File
+		if($this->logPath && file_exists($this->logPath)){
+			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
 
-				//Create log Files
-				if($this->logPath && file_exists($this->logPath)){
-					if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
-	
-					$logFile = $this->logPath.$acro.'-'.$collName."_log_".date('Ymd').".log";
-					$errFile = $this->logPath.$acro.'-'.$collName."_logErr_".date('Ymd').".log";
-					$this->logFH = fopen($logFile, 'a');
-					$this->logErrFH = fopen($errFile, 'a');
-					if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
-					if($this->logErrFH) fwrite($this->logErrFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
-				}
+			$logFile = $this->logPath."log_".date('Ymd').".log";
+			$this->logFH = fopen($logFile, 'a');
+			if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
+		}
+
+		$cycleArr = array('bryophytes','lichens');
+		foreach($this->collArr as $acro => $termArr){
+			foreach($cycleArr as $collName){
 
 				//Connect to database or create output file
 				if($this->dbMetadata){
 					if($collName == 'bryophytes'){
-						$this->conn = MySQLiConnectionFactory::getCon("symbiotabryophyte");
+						$this->conn = MySQLiConnectionFactory::getCon("symbiotabryophytes");
 					}
 					else{
-						$this->conn = MySQLiConnectionFactory::getCon("symbiotalichen");
+						$this->conn = MySQLiConnectionFactory::getCon("symbiotalichens");
 					}
 				}
 				else{
@@ -139,39 +134,57 @@ class SpecProcessorManager {
 					$this->mdOutputFH = fopen($mdFileName, 'w');
 					fwrite($this->mdOutputFH, '"collid","dbpk","url","thumbnailurl","originalurl"'."\n");
 					if($this->mdOutputFH){
+						if($this->logFH) fwrite($this->logFH, "\tImage Metadata written out to CSV file: '".$mdFileName."' (same folder as script)\n");
 						echo "Image Metadata written out to CSV file: '".$mdFileName."' (same folder as script)\n";
 					}
 					else{
 						//If unable to create output file, abort upload procedure
 						if($this->logFH){
-							fwrite($this->logFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
+							fwrite($this->logFH, "ABORTED: Unable to establish connection to output file to where image metadata is to be written\n\n");
 							fclose($this->logFH);
 						}
-						if($this->logErrFH){
-							fwrite($this->logErrFH, "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n\n");
-							fclose($this->logErrFH);
-						}
 						echo "Image upload aborted: Unable to establish connection to output file to where image metadata is to be written\n";
-						return;
+						exit;
 					}
 				}
 				
 				//Set variables
 				if($this->dbMetadata){
-					if(!array_key_exists('collid',$termArr)){
+					if(array_key_exists('collid',$termArr)){
 						$this->setCollId($termArr['collid']);
 					}
 					else{
-						exit("ABORTED: variable set to write to database but 'collid' variable has not been set");
+						exit("ABORTED: 'collid' variable has not been set");
 					}
 				}
 				$this->patternMatchingTerm = $termArr['pmterm'];
 				
 				//Lets start processing folder
 				echo 'Starting image processing: '.$acro.'/'.$collName."\n";
-				$this->processFolder($acro.'/'.$collName.'/');
+				if($this->logFH) fwrite($this->logFH, 'Starting image processing: '.$acro.'/'.$collName."\n");
+				
+				if(substr($this->targetPathBase,-1) != "/"){
+					$this->targetPathBase .= "/";
+				}
+				if(!file_exists($this->targetPathBase)){
+					if($this->logFH) fwrite($this->logFH, "ABORT: targetPathBase does not exist \n");
+					exit;
+				}
+				if(!file_exists($this->targetPathBase.$acro)){
+					if(!mkdir($this->targetPathBase.$acro)){
+						if($this->logFH) fwrite($this->logFH, "ERROR: unable to create new folder (".$this->targetPathBase.$acro.") \n");
+					}
+				}
+				if(!file_exists($this->targetPathBase.$acro.'/'.$collName)){
+					if(!mkdir($this->targetPathBase.$acro.'/'.$collName)){
+						if($this->logFH) fwrite($this->logFH, "ERROR: unable to create new folder (".$this->targetPathBase.$acro.'/'.$collName.") \n");
+					}
+				}
+				if(file_exists($this->targetPathBase.$acro.'/'.$collName)) $this->processFolder($acro.'/'.$collName.'/');
 				echo 'Image upload complete for '.$acro.'/'.$collName."\n";
-
+				if($this->logFH) fwrite($this->logFH, "\tImage upload complete for ".$acro."/".$collName."\n");
+				if($this->logFH) fwrite($this->logFH, "-----------------------------------------------------\n\n");
+				
 				//Now lets start closing things up
 				//First some data maintenance
 				if($this->dbMetadata && $this->conn){
@@ -187,16 +200,13 @@ class SpecProcessorManager {
 				else{
 					fclose($this->mdOutputFH);
 				}
-				if($this->logFH){
-					fwrite($this->logFH, 'Image upload complete for '.$acro.'/'.$collName."\n");
-					fwrite($this->logFH, "----------------------------\n\n");
-					fclose($this->logFH);
-				}
-				if($this->logErrFH){
-					fwrite($this->logErrFH, "----------------------------\n\n");
-					fclose($this->logErrFH);
-				}
 			}
+		}
+		//Close log file
+		if($this->logFH){
+			fwrite($this->logFH, 'Image upload complete for '.$acro.'/'.$collName."\n");
+			fwrite($this->logFH, "----------------------------\n\n");
+			fclose($this->logFH);
 		}
 	}
 
@@ -223,8 +233,7 @@ class SpecProcessorManager {
 							}
 	        				else{
 								//echo "<li style='margin-left:10px;'><b>Error:</b> File skipped, not a supported image file: ".$file."</li>";
-								if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
-								//fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$file." \n");
+								if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, not a supported image file: ".$fileName." \n");
 							}
 						}
 					}
@@ -235,7 +244,7 @@ class SpecProcessorManager {
 			}
 		}
 		else{
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag." \n");
+			if($this->logFH) fwrite($this->logFH, "\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag." \n");
 		}
    		closedir($imgFH);
 	}
@@ -267,7 +276,9 @@ class SpecProcessorManager {
 				}
 				$targetPath = $this->targetPathBase.$targetFolder;
 				if(!file_exists($targetPath)){
-					mkdir($targetPath);
+					if(!mkdir($targetPath)){
+						if($this->logFH) fwrite($this->logFH, "ERROR: unable to create new folder (".$targetPath.") \n");
+					}
 				}
 	        	$targetFileName = $fileName;
 				//Check to see if image already exists at target, if so, delete or rename
@@ -370,8 +381,7 @@ class SpecProcessorManager {
         	}
 		}
 		else{
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
-			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
 			echo "File skipped, unable to extract specimen identifier\n";
 		}
 		//ob_flush();
@@ -391,8 +401,9 @@ class SpecProcessorManager {
 			$status = $this->createNewImageGD($sourcePathBase,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		}
 		else{
-			// Neither ImageMagick nor GD are installed 
-			$this->errArr[] = 'No appropriate image handler for image conversions';
+			// Neither ImageMagick nor GD are installed
+			if($this->logFH) fwrite($this->logFH, "\tFATAL ERROR: No appropriate image handler for image conversions\n");
+			exit;
 		}
 		return $status;
 	}
@@ -448,8 +459,8 @@ class SpecProcessorManager {
 		}
 		
 		if(!$status){
-			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-			echo "Error: Unable to resize and write file: ".$targetPath."\n";
+			if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to resize and write file: ".$targetPath."\n");
+			echo "ERROR: Unable to resize and write file: ".$targetPath."\n";
 		}
 		
 		imagedestroy($tmpImg);
@@ -509,8 +520,7 @@ class SpecProcessorManager {
 			} 
 		}
 		if(!$occId){
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
-			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
+			if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
 			echo "File skipped, unable to locate specimen record ".$specPk."\n";
 		}
 		return $occId;
@@ -559,10 +569,10 @@ class SpecProcessorManager {
 			$sql2 .= ',"specimen","'.$this->collectionName.'")';
 			if(!$this->conn->query($sql1.$sql2)){
 				$status = false;
-				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
+				if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
 			}
 			if($imgId){
-				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced; occid: $occId \n");
+				if($this->logFH) fwrite($this->logFH, "\tWARNING: Existing image record replaced; occid: $occId \n");
 				echo "Existing image database record replaced\n";
 			}
 			else{
@@ -572,7 +582,7 @@ class SpecProcessorManager {
 		}
 		else{
 			$status = false;
-			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
+			if($this->logFH) fwrite($this->logFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
 	        echo "ERROR: Unable to load image into database. See error log for details\n";
 		}
 		//ob_flush();
@@ -590,9 +600,9 @@ class SpecProcessorManager {
 	
 	private function processMetadataFile($filePath){
 		if($this->logFH) fwrite($this->logFH, "\tPreparing to load Metadata file into database\n");
-
-		if($fh = fopen($filePath,'r') or die("Can't open metadata file")){
-			$hArr = array();
+		$fh = fopen($filePath,'r');
+		$hArr = array();
+		if($fh){
 			$fileExt = substr($filePath,-4);
 			$delimiter = '';
 			if($fileExt == '.csv'){
@@ -603,25 +613,31 @@ class SpecProcessorManager {
 			elseif($fileExt == '.tab'){
 				//Tab delimited assumed
 				$headerStr = fgets($fh);
+				$hArr = explode("\t",$headerStr);
 				$delimiter = "\t";
-				$hArr = explode($delimiter,$headerStr);
 			}
 			elseif($fileExt == '.dat' || $fileExt == '.txt'){
 				//Test to see if comma, tab delimited, or pipe delimited
 				$headerStr = fgets($fh);
-				if(strpos($headerStr,"\t") === false){
+				if(strpos($headerStr,"\t") !== false){
+					$hArr = explode("\t",$headerStr);
 					$delimiter = "\t";
 				}
-				elseif(strpos($headerStr,"|") === false){
+				elseif(strpos($headerStr,"|") !== false){
+					$hArr = explode("|",$headerStr);
 					$delimiter = "|";
 				}
-				elseif(strpos($headerStr,",") === false){
-					$delimiter = ",";
+				elseif(strpos($headerStr,",") !== false){
+					rewind($fh);
+					$hArr = fgetcsv($fh);
+					$delimiter = "csv";
 				}
 				else{
-					if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Unable to identify delimiter for metadata file \n");
+					if($this->logFH) fwrite($this->logFH, "\tERROR: Unable to identify delimiter for metadata file \n");
 				}
-				if($delimiter) $hArr = explode($delimiter,$headerStr);
+			}
+			else{
+				if($this->logFH) fwrite($this->logFH, "\tERROR: Metadata file skipped: unable to determine file type \n");
 			}
 			if($hArr){
 				//Clean and finalize header array
@@ -640,37 +656,41 @@ class SpecProcessorManager {
 						break;
 					}
 				}
-	
+
 				//Read and database each record, only if the catalognumber was supplied
 				$symbMap = array();
-				if(array_key_exists('catalognumber',$headerArr)){
+				if(in_array('catalognumber',$headerArr)){
 					//Get map of value Symbiota occurrence fields
 					$sqlMap = "SHOW COLUMNS FROM omoccurrences";
 					$rsMap = $this->conn->query($sqlMap);
 			    	while($rMap = $rsMap->fetch_object()){
 			    		$field = strtolower($rMap->Field);
-			    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && in_array($field,$headerArr)){
-				    		$type = $row->Type;
-							if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
-								$symbMap[$field]["type"] = "numeric";
-							}
-							elseif(strpos($type,"date") !== false){
-								$symbMap[$field]["type"] = "date";
-							}
-							else{
-								$symbMap[$field]["type"] = "string";
-								if(preg_match('/\(\d+\)$/', $type, $matches)){
-									$symbMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+			    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && $field != 'catalognumber'){
+							if(in_array($field,$headerArr)){
+				    			$type = $rMap->Type;
+								if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+									$symbMap[$field]["type"] = "numeric";
+								}
+								elseif(strpos($type,"date") !== false){
+									$symbMap[$field]["type"] = "date";
+								}
+								else{
+									$symbMap[$field]["type"] = "string";
+									if(preg_match('/\(\d+\)$/', $type, $matches)){
+										$symbMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+									}
 								}
 							}
 			    		}
 			    	}
 					
-			    	//Fetch each record with file and process accordingly  
+			    	//Fetch each record within file and process accordingly  
 					while($recordArr = $this->getRecordArr($fh,$delimiter)){
-						//Clean and map record
+						//Clean record and map fields
+						$catNum = 0;
 						$recMap = Array();
 						foreach($headerArr as $k => $hStr){
+							if($hStr == 'catalognumber') $catNum = $recordArr[$k];
 							if(array_key_exists($hStr,$symbMap)){
 								$valueStr = $recordArr[$k];
 								//If value is enclosed by quotes, remove quotes
@@ -683,119 +703,152 @@ class SpecProcessorManager {
 						}
 
 						//Load record
-						$catNum = $recMap['catlognumber'];
-						unset($recMap['catlognumber']);
-						$sql = 'SELECT occid,'.implode(',',array_keys($symbMap)).' '.
-							'FROM omoccurrences WHERE collid = '.$this->collId.' AND (catlognumber = "'.$catNum.'" OR dbpk = "'.$catNum.'") ';
-						$rs = $this->conn->query($sql);
-						if($r = $rs->fetch_assoc()){
-							//Record already exists, thus just append values to record
-							$occId = $r->occid;
-							$sqlUpdateFrag = '';  
-							foreach($recMap as $k => $v){
-								$uValue = '';
-								if(!$r[$k]){
-									$uValue = $v;
-								}
-								elseif($v != $r[$k]){
-									$uValue = $v.'; '.$r[$k];
-asdfaf
-									$type = (array_key_exists('type',$symbMap[$k])?$symbMap[$k]['type']:'string');
-									$size = (array_key_exists('size',$symbMap[$k])?$symbMap[$k]['size']:0);
-									if($type == 'numeric' && $type == 'date'){
-										if(is_numeric($value)){
-											$sqlIns2 .= ",".$value;
+						if($catNum){
+							$sql = 'SELECT occid,'.(!array_key_exists('occurrenceremarks',$symbMap)?'occurrenceremarks,':'').implode(',',array_keys($symbMap)).' '.
+								'FROM omoccurrences WHERE collid = '.$this->collId.' AND (catalognumber = "'.$catNum.'" OR dbpk = "'.$catNum.'") ';
+							$rs = $this->conn->query($sql);
+							if($r = $rs->fetch_assoc()){
+								//Record already exists, thus just append values to record
+								$occId = $r['occid'];
+								$updateValueArr = array();
+								$occRemarkArr = array();  
+								foreach($recMap as $k => $v){
+									if(!trim($r[$k])){
+										//Field is empty for existing record, thus load new data 
+										$type = (array_key_exists('type',$symbMap[$k])?$symbMap[$k]['type']:'string');
+										$size = (array_key_exists('size',$symbMap[$k])?$symbMap[$k]['size']:0);
+										if($type == 'numeric'){
+											if(is_numeric($v)){
+												$updateValueArr[$k] = $v;
+											}
+											else{
+												//Not numeric, thus load into occRemarks 
+												$occRemarkArr[$k] = $v;
+											}
+										}
+										elseif($type == 'date'){
+											if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)){
+												$updateValueArr[$k] = $v;
+											} 
+											elseif(($dateStr = strtotime($v))){
+												$updateValueArr[$k] = date('Y-m-d H:i:s', $dateStr);
+											} 
+											else{
+												//Not valid date, thus load into verbatiumEventDate or occRemarks
+												if($k == 'eventdate' && !array_key_exists('verbatimeventdate',$updateValueArr)){
+													$updateValueArr['verbatimeventdate'] = $v;
+												}
+												else{
+													$occRemarkArr[$k] = $v;
+												}
+											}
 										}
 										else{
-											$sqlIns2 .= ",NULL";
+											//Type assumed to be a string
+											if($size && strlen($v) > $size){
+												$v = substr($v,0,$size);
+											}
+											$updateValueArr[$k] = $v;
 										}
-										
 									}
-									else{
-										if($size && strlen($value) > $size){
-											$value = substr($value,0,$size);
+									elseif($v != $r[$k]){
+										//Target field is not empty and values not equal, thus add value into occurrenceRemarks
+										$occRemarkArr[$k] = $v;
+									}
+								}
+								$updateFrag = '';
+								foreach($updateValueArr as $k => $uv){
+									$updateFrag .= ','.$k.'="'.$this->encodeString($uv).'"';
+								}
+								if($occRemarkArr){
+									$occStr = '';
+									foreach($occRemarkArr as $k => $orv){
+										$occStr .= ','.$k.': '.$this->encodeString($orv);
+									} 
+									$updateFrag .= ',occurrenceremarks="'.($r['occurrenceremarks']?$r['occurrenceremarks'].'; ':'').substr($occStr,1).'"';
+								}
+								if($updateFrag){
+									$sqlUpdate = 'UPDATE omoccurrences SET '.substr($updateFrag,1).' WHERE occid = '.$occId;
+									if(!$this->conn->query($sqlUpdate)){
+										if($this->logFH){
+											fwrite($this->logFH, "ERROR: Unable to update existing record with new metadata \n");
+											fwrite($this->logFH, "\tSQL : $sqlUpdate \n");
 										}
-										if($value){
-											$sqlIns2 .= ',"'.$this->encodeString($value).'"';
+									}
+								}
+							}
+							else{
+								//Insert new record
+								$sqlIns1 = 'INSERT INTO omoccurrences(collid,dbpk,catalogNumber';
+								$sqlIns2 = 'VALUES ('.$this->collId.',"'.$catNum.'","'.$catNum.'"';
+								foreach($symbMap as $symbKey => $fMap){
+									if(array_key_exists($symbKey,$recMap)){
+										$sqlIns1 .= ','.$symbKey;
+										$value = $recMap[$symbKey];
+										$type = (array_key_exists('type',$fMap)?$fMap['type']:'string');
+										$size = (array_key_exists('size',$fMap)?$fMap['size']:0);
+										if($type == 'numeric'){
+											if(is_numeric($value)){
+												$sqlIns2 .= ",".$value;
+											}
+											else{
+												$sqlIns2 .= ",NULL";
+											}
+										}
+										elseif($type == 'date'){
+											if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)){
+												$sqlIns2 .= ',"'.$value.'"';
+											}
+											elseif(($dateStr = strtotime($value))){
+												$sqlIns2 .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
+											}
+											else{
+												$sqlIns2 .= ",NULL";
+												//Not valid date, thus load into verbatiumEventDate 
+												if($symbKey == 'eventdate' && !array_key_exists('verbatimeventdate',$symbMap)){
+													$sqlIns1 .= ',verbatimeventdate';
+													$sqlIns2 .= ',"'.$value.'"';
+												}
+											}
 										}
 										else{
-											$sqlIns2 .= ',NULL';
+											if($size && strlen($value) > $size){
+												$value = substr($value,0,$size);
+											}
+											if($value){
+												$sqlIns2 .= ',"'.$this->encodeString($value).'"';
+											}
+											else{
+												$sqlIns2 .= ',NULL';
+											}
 										}
 									}
-									
-								
-								
 								}
-								if($uValue){
-									$sqlUpdateFrag .= ','.$k.'="'.$uValue.'"';
+								$sqlIns = $sqlIns1.') '.$sqlIns2.')';
+								if(!$this->conn->query($sqlIns)){
+									if($this->logFH){
+										fwrite($this->logFH, "ERROR: Unable to load new metadata record \n");
+										fwrite($this->logFH, "\tSQL : $sqlIns \n");
+									}
 								}
 							}
-							if($sqlUpdateFrag){
-								$sqlUpdate = 'UPDATE omoccurrences SET '.substr($sqlUpdateFrag,1).' WHERE occid = '.$occId;
-							}  
+							$rs->close();
 						}
-						else{
-							//Insert new record
-							$sqlIns1 = 'INSERT INTO omoccurrences(collid,catalogNumber';
-							$sqlIns2 = 'VALUES ('.$this->collId.',"'.$catNum.'"';
-							foreach($symbMap as $symbKey => $fMap){
-								$sqlIns1 .= ','.$symbKey;
-								$value = $recMap[$symbKey];
-								$type = (array_key_exists('type',$fMap)?$fMap['type']:'string');
-								$size = (array_key_exists('size',$fMap)?$fMap['size']:0);
-								if($type == 'numeric'){
-									if(is_numeric($value)){
-										$sqlIns2 .= ",".$value;
-									}
-									else{
-										$sqlIns2 .= ",NULL";
-									}
-									
-								}
-								elseif($type == 'date'){
-									if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)){
-										$sqlIns2 .= ',"'.$value.'"';
-									} 
-									elseif(($dateStr = strtotime($value))){
-										$sqlIns2 .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
-									} 
-									else{
-										$sqlIns2 .= ",NULL";
-									}
-									
-								}
-								else{
-									if($size && strlen($value) > $size){
-										$value = substr($value,0,$size);
-									}
-									if($value){
-										$sqlIns2 .= ',"'.$this->encodeString($value).'"';
-									}
-									else{
-										$sqlIns2 .= ',NULL';
-									}
-								}
-							}
-							if(!$this->conn->query($sqlIns1.') '.$sqlIns1.')')){
-								if($this->logErrFH){
-									fwrite($this->logErrFH, "ERROR: Unable to load new metadata record \n");
-									fwrite($this->logErrFH, "\tSQL : $sqlIns \n");
-								}
-							}
-						}
-						$rs->close();
-						
-						$this->loadRecord($recMap);
 						unset($recMap);
-						
 					}
 				}
+				else{
+					fwrite($this->logFH, "\tERROR: Failed to locate catalognumber MD within file (".$filePath."),  \n");
+				}
+			}
+			if($this->logFH) fwrite($this->logFH, "\tMetadata file loaded \n");
+			if(!unlink($filePath)){
+				if($this->logFH) fwrite($this->logFH, "\tERROR: unable to delete file (".$filePath.") \n");
 			}
 		}
-		
-
-		
-		if($this->logFH) fwrite($this->logFH, "\tMetadata file loaded \n");
+		else{
+			fwrite($this->logFH, "ERROR: Can't open metadata file ".$filePath." \n");
+		}
 	}
 
     private function getRecordArr($fh, $delimiter){
@@ -805,8 +858,8 @@ asdfaf
 			$recordArr = fgetcsv($fh);
     	}
     	else{
-	    	$record = fgets($fh);
-    		$recordArr = explode($delimiter,$record);
+	    	$recordStr = fgets($fh);
+			if($recordStr) $recordArr = explode($delimiter,$recordStr);
     	}
     	return $recordArr;
     }
@@ -815,7 +868,7 @@ asdfaf
 	public function setCollArr($cArr){
 		$this->collArr = $cArr;
 	}
-	
+
 	public function setTitle($t){
 		$this->title = $t;
 	}
@@ -950,14 +1003,9 @@ asdfaf
  	}
 
 	//Misc functions
-	private function cleanStr($str){
-		$str = trim(str_replace('"','',$str));
-		return $str;
-	}
-
 	private function encodeString($inStr){
- 		$retStr = $inStr;
-		if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+ 		$retStr = trim(str_replace('"',"",$inStr));
+ 		if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 			//$value = utf8_decode($value);
 			$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 		}
@@ -969,16 +1017,16 @@ class MySQLiConnectionFactory {
 	static $SERVERS = array(
 		array(
 			'type' => 'write',
-			'host' => 'localhost',
-			'username' => 'root',
-			'password' => 'bolivia15',
+			'host' => 'sod84.asu.edu',
+			'username' => 'lbtcnwriter',
+			'password' => '',
 			'database' => 'symbiotalichens'
 		),
 		array(
 			'type' => 'write',
-			'host' => 'localhost',
-			'username' => 'root',
-			'password' => 'bolivia15',
+			'host' => 'sod84.asu.edu',
+			'username' => 'lbtcnwriter',
+			'password' => '',
 			'database' => 'symbiotabryophytes'
 		)
 	);
