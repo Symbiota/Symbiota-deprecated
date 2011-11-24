@@ -32,6 +32,17 @@ if($symbUid){
 		<title><?php echo $defaultTitle; ?> Specimen Dataset Definer</title>
 	    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 		<script language="javascript" type="text/javascript">
+			function init(){
+				if(navigator.appName == "Microsoft Internet Explorer"){
+					alert("You are using Internet Explorer as your web browser. We recommend that you use Firefox or Google Chrome since these browsers are generally more reliable when using these tools.");
+				}
+				else{
+					if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){
+						var ffversion=new Number(RegExp.$1);
+						if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
+					}
+				}
+			}
 		
 			function selectAll(cb){
 				boxesChecked = true;
@@ -95,7 +106,7 @@ if($symbUid){
 
 		</script>
 	</head>
-	<body>
+	<body onload="init()">
 	
 	<?php
 	$displayLeftMenu = (isset($collections_datasets_indexMenu)?$collections_datasets_indexMenu:false);
