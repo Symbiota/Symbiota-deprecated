@@ -84,6 +84,12 @@ else{
 	<title><?php echo $defaultTitle; ?> Login</title>
 	<link href="../css/main.css" rel="stylesheet" type="text/css"/>
 	<script type="text/javascript">
+		function init(){
+			if(!navigator.cookieEnabled){
+				alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
+			}
+		}
+	
 		function resetPassword(){
 			if(document.getElementById("login").value == ""){
 				alert("Enter your login name in the User Id field and leave the password blank");
@@ -94,7 +100,7 @@ else{
 		}
 	</script>
 </head>
-<body>
+<body onload="init()">
 
 <?php
 $displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:"true");

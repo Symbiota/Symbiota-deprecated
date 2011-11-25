@@ -105,15 +105,16 @@ class EOLManager {
 		return $tidCnt;
 	}
 	
-	public function mapImagesForTaxa(){
+	public function mapImagesForTaxa($startIndex = 0){
 		$successCnt = 0;
 		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
 			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
 			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) i ON t.tid = i.tidaccepted '. 
-			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" '.
-			'ORDER BY t.tid';
+			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" ';
+		if($startIndex && is_numeric($startIndex)) $sql .= 'AND t.tid >= '.$startIndex.' '; 
+		$sql .= 'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">Mapping images for '.$recCnt.' taxa</div>'."\n";
@@ -171,14 +172,15 @@ class EOLManager {
 						if(array_key_exists('latitude',$objArr) && array_key_exists('longitude',$objArr)){
 							$locStr .= ' ('.$this->cleanStr($objArr['latitude']).', '.$this->cleanStr($objArr['longitude']).')';
 						}
-						if($resourceArr){
+						$sourceStr = (array_key_exists('source',$resourceArr)?trim($resourceArr['source']):'');
+						if($resourceArr && !in_array('MBG',$resourceArr) && !stripos($sourceStr,'tropicos')){
 							$sql = 'INSERT INTO images(tid,url,thumbnailurl,photographer,caption,owner,sourceurl,copyright,locality,notes,imagetype,sortsequence) '.
 							'VALUES('.$tid.',"'.$resourceArr['url'].'",'.
 							(array_key_exists('urltn',$resourceArr)?'"'.$resourceArr['urltn'].'"':'NULL').','.
 							(array_key_exists('photographer',$resourceArr)?'"'.$resourceArr['photographer'].'"':'NULL').','.
 							(array_key_exists('title',$resourceArr)?'"'.$resourceArr['title'].'"':'NULL').','.
 							(array_key_exists('owner',$resourceArr)?'"'.$resourceArr['owner'].'"':'NULL').','.
-							(array_key_exists('source',$resourceArr)?'"'.$resourceArr['source'].'"':'NULL').','.
+							($sourceStr?'"'.$sourceStr.'"':'NULL').','.
 							(array_key_exists('license',$resourceArr)?'"'.$resourceArr['license'].'"':'NULL').','.
 							($locStr?'"'.$locStr.'"':'NULL').','.
 							(array_key_exists('notes',$resourceArr)?'"'.$resourceArr['notes'].'"':'NULL').
