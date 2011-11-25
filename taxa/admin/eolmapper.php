@@ -64,7 +64,11 @@ if(isset($taxa_admin_eoladminCrumbs)){
 					$eolManager->mapTaxa($makePrimary);
 				}
 				elseif($submitAction == 'Map Images'){
-					$eolManager->mapImagesForTaxa();
+					$startIndex = 0;
+					if(array_key_exists('startindex',$_POST) && $_POST['startindex']){
+						$startIndex = $_POST['startindex'];
+					}
+					$eolManager->mapImagesForTaxa($startIndex);
 				}
 				?>
 			</div>
@@ -107,6 +111,7 @@ if(isset($taxa_admin_eoladminCrumbs)){
 						<b><?php echo $eolManager->getImageDeficiencyCount(); ?></b> 
 						<div style="margin:10px;">
 							<form name="imagemappingform" action="eolmapper.php" method="post">
+								TID Start Index: <input type="text" name="startindex" value="" /><br/>
 								<input type="submit" name="submitaction" value="Map Images" />
 							</form>
 						</div>
