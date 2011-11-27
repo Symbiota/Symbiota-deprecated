@@ -50,7 +50,7 @@ header("Cache-control: private; Content-Type: text/html; charset=".$charset);
 	
 	function toggle(target){
 		var divObjs = document.getElementsByTagName("div");
-  	for (i = 0; i < divObjs.length; i++) {
+	  	for (i = 0; i < divObjs.length; i++) {
 	  		var obj = divObjs[i];
 	  		if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
 					if(obj.style.display=="none"){

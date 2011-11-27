@@ -2,6 +2,8 @@ var pauseSubmit = false;
 var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
+var pendingDataEdits = false;
+var abortFormVerification = false;
 
 $(document).ready(function() {
 
@@ -67,6 +69,14 @@ $(function() {
 	});
 });
 
+window.onbeforeunload = verifyClose;
+
+function verifyClose() { 
+	if(pendingDataEdits && document.fullform.editedfields.value != ""){
+		return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
+	}
+}
+
 function initDetAddAutocomplete(){
 	$("#dafsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php",
@@ -95,6 +105,7 @@ function fieldChanged(fieldName){
 	}
 	catch(ex){
 	}
+	pendingDataEdits = true;
 }
 
 function catalogNumberChanged(cnValue){
@@ -149,6 +160,7 @@ function occurrenceIdChanged(oiValue){
 function countryChanged(f){
 	fieldChanged("country");
 
+	/*
 	var countryValue = f.country.value;
 	if(countryValue){
 		var isNew = true;
@@ -181,6 +193,7 @@ function countryChanged(f){
 			});
 		}
 	}
+	*/
 }
 
 function addLookupCountry(countryValue){
@@ -207,6 +220,7 @@ function addLookupCountry(countryValue){
 
 function stateProvinceChanged(f){
 	fieldChanged('stateprovince');
+	/*
 	var stateValue = f.stateprovince.value;
 	var countryValue = f.country.value;
 	if(stateValue && countryValue){
@@ -243,6 +257,7 @@ function stateProvinceChanged(f){
 		scXmlHttp.open("POST",url,true);
 		scXmlHttp.send(null);
 	}
+	*/
 }
 
 function addLookupState(stateStr,countryStr){
@@ -268,6 +283,7 @@ function addLookupState(stateStr,countryStr){
 
 function countyChanged(f){
 	fieldChanged('county');
+	/*
 	var countyValue = f.county.value;
 	var stateValue = f.stateprovince.value;
 	if(countyValue && stateValue){
@@ -304,6 +320,7 @@ function countyChanged(f){
 		countyXmlHttp.open("POST",url,true);
 		countyXmlHttp.send(null);
 	}
+	*/
 }
 
 function addLookupCounty(countyStr,stateStr){
@@ -757,10 +774,10 @@ function verifyFullFormEdits(f){
 			return false;
 		}
 	}
-	return verifyFullForm(f);
 }
 
 function verifyFullForm(f){
+	if(abortFormVerification) return true;
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
 		return false;
@@ -789,14 +806,12 @@ function verifyFullForm(f){
 		alert("Duplicate Quantity field must be numeric only");
 		return false;
 	}
+	pendingDataEdits = false;
 	return true;
 }
 
 function verifyGotoNew(f){
-	if(f.editedfields.value){
-		return confirm("Edits not saved. If you go to a new record you will loss your edits. Are you sure you want to continue?");
-	}
-	return true;
+	abortFormVerification = true;
 }
 
 function verifyDeletion(f){

@@ -32,29 +32,31 @@ if($action == "Submit Profile"){
 	$biography = $_REQUEST["biography"];
 	$isPublic = array_key_exists('ispublic',$_REQUEST);
 	
-	$pHandler = new ProfileManager();
-	$newPerson = new Person();
-    $newPerson->setPassword($pwd);
-	$newPerson->setUserName($username);
-	$newPerson->setFirstName($firstname);
-    $newPerson->setLastName($lastname);
-    $newPerson->setTitle($title);
-    $newPerson->setInstitution($institution);
-    $newPerson->setCity($city);
-    $newPerson->setState($state);
-    $newPerson->setZip($zip);
-    $newPerson->setCountry($country);
-    $newPerson->setEmail($email);
-    $newPerson->setUrl($url);
-    $newPerson->setBiography($biography);
-    $newPerson->setIsPublic($isPublic);
-    $displayMsg = $pHandler->checkLogin($username, $email);
-	if(!$displayMsg){
-		$displayMsg = $pHandler->register($newPerson);
-	}
-	if(substr($displayMsg,0,7) == "SUCCESS"){
-		$pHandler->authenticate($username, $pwd);
-    	header("Location: viewprofile.php");
+	if($firstname != $lastname || !strpos($biography,'http:')){
+		$pHandler = new ProfileManager();
+		$newPerson = new Person();
+	    $newPerson->setPassword($pwd);
+		$newPerson->setUserName($username);
+		$newPerson->setFirstName($firstname);
+	    $newPerson->setLastName($lastname);
+	    $newPerson->setTitle($title);
+	    $newPerson->setInstitution($institution);
+	    $newPerson->setCity($city);
+	    $newPerson->setState($state);
+	    $newPerson->setZip($zip);
+	    $newPerson->setCountry($country);
+	    $newPerson->setEmail($email);
+	    $newPerson->setUrl($url);
+	    $newPerson->setBiography($biography);
+	    $newPerson->setIsPublic($isPublic);
+	    $displayMsg = $pHandler->checkLogin($username, $email);
+		if(!$displayMsg){
+			$displayMsg = $pHandler->register($newPerson);
+		}
+		if(substr($displayMsg,0,7) == "SUCCESS"){
+			$pHandler->authenticate($username, $pwd);
+	    	header("Location: viewprofile.php");
+		}
 	}
 }
 
