@@ -451,13 +451,13 @@ function toggleImageTd(){
 	toggle("imgprocoffdiv");
 	if(document.getElementById("imgproctd").style.display == "none"){
 		document.getElementById("imgproctd").style.display = "block";
-		document.getElementById("innertext").style.width = "1200px";
-		document.getElementById("edittable").style.width = "1175px";
+		document.getElementById("innertext").style.width = "1245px";
+		document.getElementById("edittable").style.width = "1220px";
 	}
 	else{
 		document.getElementById("imgproctd").style.display = "none";
 		document.getElementById("innertext").style.width = "790px";
-		document.getElementById("edittable").style.width = "745px";
+		document.getElementById("edittable").style.width = "790px";
 	}
 }
 

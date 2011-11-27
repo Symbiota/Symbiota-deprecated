@@ -405,7 +405,7 @@ if($symbUid){
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
 								<b>Editor</b>
 							</span>
-							<span style="margin-left:330px;">
+							<span style="margin-left:340px;">
 								<?php echo $navStr; ?>
 							</span>
 						</div>
@@ -414,7 +414,7 @@ if($symbUid){
 					if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 						?>
 						<table id="edittable">
-							<tr><td style="width:745px;" valign="top">
+							<tr><td style="width:785px;" valign="top">
 								<div id="occedittabs" style="clear:both;">
 									<ul>
 										<li>
@@ -969,10 +969,10 @@ if($symbUid){
 											</fieldset>
 											<?php 
 											if($navStr){
-												echo '<div style="margin-left:530px;">'.$navStr.'</div>'."\n";
+												echo '<div style="float:right;margin-right:20px;">'.$navStr.'</div>'."\n";
 											}
 											?>
-											<div style="padding:10px;">
+											<div style="padding:10px;clear:both;">
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 												<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 												<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
