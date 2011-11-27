@@ -11,7 +11,6 @@ $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
 $autoPStatus = array_key_exists('autoprocessingstatus',$_POST)?$_POST['autoprocessingstatus']:'';
-$refreshQuery = array_key_exists('refreshquery',$_POST)?$_POST['refreshquery']:0;
 $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action && array_key_exists('gotonew',$_REQUEST)){
@@ -58,9 +57,9 @@ if($symbUid){
 		//Query Form has been activated
 		$qryArr = $occManager->getQueryVariables();
 		if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
-		if(($refreshQuery || $action != "Save Edits") && $action != 'Delete Occurrence'){
+		if($action != "Save Edits" && $action != 'Delete Occurrence'){
 			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
-			if(!$qryCnt || $refreshQuery) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+			if(!$qryCnt) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
 			$occManager->setOccurArr($qryWhere);
 			$occId = $occManager->getOccId();
 			$occArr = $occManager->getOccurMap();
@@ -389,7 +388,6 @@ if($symbUid){
 										<input type="hidden" name="occindex" value="0" />
 										<input type="submit" name="submitaction" value="Query Records" />
 										<input type="hidden" name="autoprocessingstatus" value="<?php echo $autoPStatus; ?>" />
-										<input type="hidden" name="refreshquery" value="<?php echo $refreshQuery; ?>" />
 										<span style="margin-left:10px;">
 											<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" /> 
 										</span>
@@ -407,7 +405,7 @@ if($symbUid){
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
 								<b>Editor</b>
 							</span>
-							<span style="margin-left:370px;">
+							<span style="margin-left:330px;">
 								<?php echo $navStr; ?>
 							</span>
 						</div>
@@ -415,47 +413,47 @@ if($symbUid){
 					}
 					if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 						?>
-						<div id="occedittabs" style="clear:both;">
-							<ul>
-								<li>
-									<a href="#occdiv"  style="margin:0px 20px 0px 20px;">
+						<table id="edittable">
+							<tr><td style="width:745px;" valign="top">
+								<div id="occedittabs" style="clear:both;">
+									<ul>
+										<li>
+											<a href="#occdiv"  style="margin:0px 20px 0px 20px;">
+												<?php
+												if($occId){
+													echo 'Occurrence Data';
+												}
+												else{
+													echo '<span style="color:red;">New Occurrence Record</span>';
+												}
+												?>
+											</a>
+										</li>
 										<?php
-										if($occId){
-											echo 'Occurrence Data';
-										}
-										else{
-											echo '<span style="color:red;">New Occurrence Record</span>';
+										if($occId && $isEditor){
+											$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'];
+											$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
+											?>
+											<li>
+												<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$detVars; ?>" style="margin:0px 20px 0px 20px;">
+													Determination History
+												</a>
+											</li>
+											<li>
+												<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$imgVars; ?>" style="margin:0px 20px 0px 20px;">
+													Images
+												</a>
+											</li>
+											<li>
+												<a href="#admindiv" style="margin:0px 20px 0px 20px;">
+													Admin
+												</a>
+											</li>
+											<?php
 										}
 										?>
-									</a>
-								</li>
-								<?php
-								if($occId && $isEditor){
-									$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'];
-									$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
-									?>
-									<li>
-										<a href="occurrenceeditordets.php?occid=<?php echo $occId.'&occindex='.$occIndex.$detVars; ?>" style="margin:0px 20px 0px 20px;">
-											Determination History
-										</a>
-									</li>
-									<li>
-										<a href="occurrenceeditorimages.php?occid=<?php echo $occId.'&occindex='.$occIndex.$imgVars; ?>" style="margin:0px 20px 0px 20px;">
-											Images
-										</a>
-									</li>
-									<li>
-										<a href="#admindiv" style="margin:0px 20px 0px 20px;">
-											Admin
-										</a>
-									</li>
-									<?php
-								}
-								?>
-							</ul>
-							<div id="occdiv" style="position:relative;">
-								<table id="edittable">
-									<tr><td style="width:745px;">
+									</ul>
+									<div id="occdiv" style="position:relative;">
 										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this);">
 											<fieldset>
 												<legend><b>Collector Info</b></legend>
@@ -753,109 +751,8 @@ if($symbUid){
 													elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
 														$locExtraDiv1 = "block";
 													}
+													include_once('includes/geotools.php');
 												?>
-												<div>
-													<div id="coordaiddiv" style="display:none;">
-														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:260px;">
-															<div>
-																Latitude: 
-																<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
-																<input id="latmin" style="width:50px;" title="Latitude Minutes" />' 
-																<input id="latsec" style="width:50px;" title="Latitude Seconds" />&quot; 
-																<select id="latns">
-																	<option>N</option>
-																	<option>S</option>
-																</select>
-															</div>
-															<div>
-																Longitude: 
-																<input id="lngdeg" style="width:35px;" title="Longitude Degree" />&deg; 
-																<input id="lngmin" style="width:50px;" title="Longitude Minutes" />' 
-																<input id="lngsec" style="width:50px;" title="Longitude Seconds" />&quot; 
-																<select id="lngew">
-																	<option>E</option>
-																	<option SELECTED>W</option>
-																</select>
-															</div>
-															<div style="margin:5px;">
-																<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
-															</div>
-														</div>
-														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:140px;margin-bottom:10px;">
-															Zone: <input id="utmzone" style="width:40px;" /><br/>
-															East: <input id="utmeast" type="text" style="width:100px;" /><br/>
-															North: <input id="utmnorth" type="text" style="width:100px;" /><br/>
-															Hemisphere: <select id="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-																<option value="Northern">North</option>
-																<option value="Southern">South</option>
-															</select><br/>
-															<div style="margin-top:5px;">
-																<input type="button" value="Insert UTM Values" onclick="insertUtm(this.form)" />
-															</div>
-														</div>
-														<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;">
-															T<input id="township" style="width:30px;" title="Township" />
-															<select id="townshipNS">
-																<option>N</option>
-																<option>S</option>
-															</select>&nbsp;&nbsp;&nbsp;&nbsp;
-															R<input id="range" style="width:30px;" title="Range" />
-															<select id="rangeEW">
-																<option>E</option>
-																<option>W</option>
-															</select><br/>
-															Sec: 
-															<input id="section" style="width:30px;" title="Section" />&nbsp;&nbsp;&nbsp; 
-															Details: 
-															<input id="secdetails" style="width:90px;" title="Section Details" /><br/>
-															<select id="meridian" title="Meridian">
-																<option value="">Meridian Selection</option>
-																<option value="">----------------------------------</option>
-																<option value="G-AZ">Arizona, Gila &amp; Salt River</option>
-																<option value="NAAZ">Arizona, Navajo</option>
-																<option value="F-AR">Arkansas, Fifth Principal</option> 
-																<option value="H-CA">California, Humboldt</option>
-																<option value="M-CA">California, Mt. Diablo</option>
-																<option value="S-CA">California, San Bernardino</option>
-																<option value="NMCO">Colorado, New Mexico</option>
-																<option value="SPCO">Colorado, Sixth Principal</option>
-																<option value="UTCO">Colorado, Ute</option>
-																<option value="B-ID">Idaho, Boise</option>
-																<option value="SPKS">Kansas, Sixth Principal</option>
-																<option value="F-MO">Missouri, Fifth Principal</option>
-																<option value="P-MT">Montana, Principal</option>
-																<option value="SPNE">Nebraska, Sixth Principal</option>
-																<option value="M-NV">Nevada, Mt. Diablo</option>
-																<option value="NMNM">New Mexico, New Mexico</option>
-																<option value="F-ND">North Dakota, Fifth Principal</option>
-																<option value="C-OK">Oklahoma, Cimarron</option>
-																<option value="I-OK">Oklahoma, Indian</option>
-																<option value="W-OR">Oregon, Willamette</option>
-																<option value="BHSD">South Dakota, Black Hills</option>
-																<option value="F-SD">South Dakota, Fifth Principal</option>
-																<option value="SPSD">South Dakota, Sixth Principal</option>
-																<option value="SLUT">Utah, Salt Lake</option>
-																<option value="U-UT">Utah, Uinta</option>
-																<option value="W-WA">Washington, Willamette</option>
-																<option value="SPWY">Wyoming, Sixth Principal</option>
-																<option value="WRWY">Wyoming, Wind River</option>
-															</select>
-															<div style="margin:5px;">
-																<input type="button" value="Insert TRS Values" onclick="insertTRS(this.form)" />
-															</div>
-														</div>
-													</div>
-													<div id="elevaiddiv" style="display:none;">
-														<div style="float:right;padding:15px;background-color:lightyellow;border:1px solid yellow;width:180px;margin-bottom:10px;">
-															Elevation: 
-															<input id="elevminft" style="width:45px;" /> - 
-															<input id="elevmaxft" style="width:45px;" /> feet
-															<div style="margin:5px;">
-																<input type="button" value="Insert Elevation" onclick="insertElevFt(this.form)" />
-															</div>
-														</div>
-													</div>
-												</div>
 												<div id="locextradiv1" style="position:relative;clear:both;display:<?php echo $locExtraDiv1; ?>;">
 													<div>
 														<span style="">
@@ -1072,7 +969,7 @@ if($symbUid){
 											</fieldset>
 											<?php 
 											if($navStr){
-												echo '<div style="margin-left:580px;">'.$navStr.'</div>'."\n";
+												echo '<div style="margin-left:530px;">'.$navStr.'</div>'."\n";
 											}
 											?>
 											<div style="padding:10px;">
@@ -1083,6 +980,11 @@ if($symbUid){
 												<?php if($occId){ ?>
 													<fieldset style="float:right;margin:15px 20px 20px 0px;padding:15px;background-color:lightyellow">
 														<legend><b>Options</b></legend>
+														<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+														<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
+													</fieldset>
+													<div style="margin:15px 0px 20px 30px;">
+														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" /><br/>
 														Processing Status Auto-Select:
 														<select name="autoprocessingstatus">
 															<option value=''>Not Activated</option>
@@ -1106,14 +1008,6 @@ if($symbUid){
 																reviewed
 															</option>
 														</select><br/>
-														<input name="refreshquery" type="checkbox" value="1" <?php echo ($refreshQuery?'CHECKED':''); ?> /> 
-														Refresh Query (advance record)<br/>
-														<hr/ style="margin:10px 0px 10px 0px;">
-														<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
-														<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
-													</fieldset>
-													<div style="margin:15px 0px 20px 30px;">
-														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" />
 														<input type="hidden" name="editedfields" value="" />
 														<?php 
 														if($occIndex !== false){
@@ -1140,179 +1034,93 @@ if($symbUid){
 											</div>
 											<div style="clear:both;">&nbsp;</div>
 										</form>
-									</td>
-									<td id="imgproctd" style="display:none;">
-										<?php 
-										if($occId && ($fragArr || $specImgArr )){
-											?>
-											<div style="width:100%;height:825px;">
-												<fieldset style="height:95%">
-													<legend><b>Label Processing</b></legend>
-													<?php
-													if($specImgArr){
-														$imgArr = array();
-														foreach($specImgArr as $i2){
-															$imgArr[] = ($i2['origurl']?$i2['origurl']:$i2['url']);
-														}
-														$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
-														?>
-														<div id="labelimagediv">
-															<img id="activeimage" src="<?php echo $imgUrlPrefix.$imgArr[0]; ?>" />
+									</div>
+									<?php
+									if($occId && $isEditor){
+										?>
+										<div id="admindiv" style="">
+											<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
+												<fieldset>
+													<legend>Delete Occurrence Record</legend>
+													<div style="margin:15px">
+														Record first needs to be evaluated before it can be deleted from the system. 
+														The evaluation ensures that the deletion of this record will not interfer with 
+														the integrity of other data linked to this record. Note that all determination and 
+														comments for this occurrence will be automatically deleted. Links to images, checklist vouchers, 
+														and surveys will have to be individually addressed before can be deleted.      
+														<div style="margin:15px;display:block;">
+															<input name="verifydelete" type="button" value="Evaluate record for deletion" onclick="verifyDeletion(this.form);" />
 														</div>
-														<div style="width:100%;">
-														<!-- 	<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />  -->
-															<?php 
-															if(count($imgArr)>1){
-																?>
-																<script type="text/javascript"> 
-																	var activeImageArr = new Array("<?php echo $imgUrlPrefix.implode('","'.$imgUrlPrefix,$imgArr); ?>");
-																	var activeImageIndex = 0; 
-																	function nextLabelProcessingImage(){
-																		activeImageIndex++;
-																		if(activeImageIndex >= activeImageArr.length){
-																			activeImageIndex = 0;
-																		}
-																		document.getElementById("activeimage").src = activeImageArr[activeImageIndex];
-																		document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
-																	}
-																</script>
-																<?php 
-															}
-															?>
-															<span style="margin-left:200px;font-weight:bold;">
-																Image <span id="imageindex">1</span> 
-																of <?php echo count($imgArr); ?> 
-																<a href="#" onclick="nextLabelProcessingImage(); return false;">=&gt;&gt;</a>
-															</span>
-														</div>
-														<?php
-													}
-													if($fragArr){
-														?>
-														<div id="rawtextdiv">
-															<?php 
-															$fragCnt = 0;
-															foreach($fragArr as $prlid => $rawStr){
-																echo '<div id="txtfrag'.$fragCnt.'" '.($fragCnt?'style="display:none"':'').'>'."\n";
-																echo '<textarea name="rawtext-'.$prlid.'" style="width:400px;height:325px;">';
-																echo $rawStr;
-																echo '</textarea>'."\n";
-																echo '</div>'."\n";
-																$fragCnt++;
-															}
-															?>
-															<div style="width:100%;text-align:right;font-weight:bold;">
-																<span id="textfragindex">1</span> of <?php echo $fragCnt; ?>
-																<?php 
-																if($fragCnt > 1){
-																	?>
-																	<script type="text/javascript"> 
-																		var textFragIndex = 0;
-																		var totalFragCnt = <?php echo $fragCnt; ?>; 
-																		function nextRawText(){
-																			textFragIndex++;
-																			document.getElementById("txtfrag"+(textFragIndex-1)).style.display = "none";
-																			if(textFragIndex == totalFragCnt){
-																				textFragIndex = 0;
-																			}
-																			document.getElementById("txtfrag"+textFragIndex).style.display = "block";
-																			document.getElementById("textfragindex").innerHTML = textFragIndex + 1;
-																		}
-																	</script>
-																	<a href="#" onclick="nextRawText();return false;">=&gt;$gt;</a>
-																	<?php 
-																}
-																?>
+														<div id="delverimgdiv" style="margin:15px;">
+															<b>Image Links: </b>
+															<span id="delverimgspan" style="color:orange;display:none;">checking image links...</span>
+															<div id="delimgfailspan" style="display:none;style:0px 10px 10px 10px;">
+																<span style="color:red;">Warning:</span> 
+																One or more images are linked to this occurrence. 
+																Before this specimen can be deleted, images have to be deleted or disassociated 
+																with this occurrence record. Continuing will remove associations to 
+																the occurrence record being deleted but leave image in system linked only to the scientific name.  
+															</div>
+															<div id="delimgappdiv" style="display:none;">
+																<span style="color:green;">Approved for deletion.</span>
+																No images are directly associated with this occurrence record.  
 															</div>
 														</div>
-														<?php
-													}
-													?>
+														<div id="delvervoucherdiv" style="margin:15px;">
+															<b>Checklist Voucher Links: </b>
+															<span id="delvervouspan" style="color:orange;display:none;">checking checklist links...</span>
+															<div id="delvouappdiv" style="display:none;">
+																<span style="color:green;">Approved for deletion.</span>
+																No checklists have been linked to this occurrence record. 
+															</div>
+															<div id="delvoulistdiv" style="display:none;style:0px 10px 10px 10px;">
+																<span style="color:red;">Warning:</span> 
+																This occurrence serves as an occurrence voucher for the following species checklists.
+																Deleting this occurrence will remove these association. 
+																You may want to first verify this action with the checklist administrators.
+																<ul id="voucherlist">
+																</ul> 
+															</div>
+														</div>
+														<div id="delversurveydiv" style="margin:15px;">
+															<b>Survey Voucher Links: </b>
+															<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
+															<div id="delsurappdiv" style="display:none;">
+																<span style="color:green;">Approved for deletion.</span>
+																No survey projects have been linked to this occurrence record. 
+															</div>
+															<div id="delsurlistdiv" style="display:none;style:0px 10px 10px 10px;">
+																<span style="color:red;">Warning:</span> 
+																This occurrence serves as an occurrence voucher for the following survey projects.
+																Deleting this occurrence will remove these association. 
+																You may want to first verify this action with the project administrators.
+																<ul id="surveylist">
+																</ul> 
+															</div>
+														</div>
+														<div id="delapprovediv" style="margin:15px;display:none;">
+															<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+															<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
+															<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+															<input name="submitaction" type="submit" value="Delete Occurrence" />
+														</div>
+													</div>
 												</fieldset>
-											</div>
-											<?php
-										} 
-										?>
-									</td></tr>
-								</table>
-							</div>
-							<?php
-							if($occId && $isEditor){
-								?>
-								<div id="admindiv" style="">
-									<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
-										<fieldset>
-											<legend>Delete Occurrence Record</legend>
-											<div style="margin:15px">
-												Record first needs to be evaluated before it can be deleted from the system. 
-												The evaluation ensures that the deletion of this record will not interfer with 
-												the integrity of other data linked to this record. Note that all determination and 
-												comments for this occurrence will be automatically deleted. Links to images, checklist vouchers, 
-												and surveys will have to be individually addressed before can be deleted.      
-												<div style="margin:15px;display:block;">
-													<input name="verifydelete" type="button" value="Evaluate record for deletion" onclick="verifyDeletion(this.form);" />
-												</div>
-												<div id="delverimgdiv" style="margin:15px;">
-													<b>Image Links: </b>
-													<span id="delverimgspan" style="color:orange;display:none;">checking image links...</span>
-													<div id="delimgfailspan" style="display:none;style:0px 10px 10px 10px;">
-														<span style="color:red;">Warning:</span> 
-														One or more images are linked to this occurrence. 
-														Before this specimen can be deleted, images have to be deleted or disassociated 
-														with this occurrence record. Continuing will remove associations to 
-														the occurrence record being deleted but leave image in system linked only to the scientific name.  
-													</div>
-													<div id="delimgappdiv" style="display:none;">
-														<span style="color:green;">Approved for deletion.</span>
-														No images are directly associated with this occurrence record.  
-													</div>
-												</div>
-												<div id="delvervoucherdiv" style="margin:15px;">
-													<b>Checklist Voucher Links: </b>
-													<span id="delvervouspan" style="color:orange;display:none;">checking checklist links...</span>
-													<div id="delvouappdiv" style="display:none;">
-														<span style="color:green;">Approved for deletion.</span>
-														No checklists have been linked to this occurrence record. 
-													</div>
-													<div id="delvoulistdiv" style="display:none;style:0px 10px 10px 10px;">
-														<span style="color:red;">Warning:</span> 
-														This occurrence serves as an occurrence voucher for the following species checklists.
-														Deleting this occurrence will remove these association. 
-														You may want to first verify this action with the checklist administrators.
-														<ul id="voucherlist">
-														</ul> 
-													</div>
-												</div>
-												<div id="delversurveydiv" style="margin:15px;">
-													<b>Survey Voucher Links: </b>
-													<span id="delversurspan" style="color:orange;display:none;">checking survey links...</span>
-													<div id="delsurappdiv" style="display:none;">
-														<span style="color:green;">Approved for deletion.</span>
-														No survey projects have been linked to this occurrence record. 
-													</div>
-													<div id="delsurlistdiv" style="display:none;style:0px 10px 10px 10px;">
-														<span style="color:red;">Warning:</span> 
-														This occurrence serves as an occurrence voucher for the following survey projects.
-														Deleting this occurrence will remove these association. 
-														You may want to first verify this action with the project administrators.
-														<ul id="surveylist">
-														</ul> 
-													</div>
-												</div>
-												<div id="delapprovediv" style="margin:15px;display:none;">
-													<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
-													<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
-													<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-													<input name="submitaction" type="submit" value="Delete Occurrence" />
-												</div>
-											</div>
-										</fieldset>
-									</form>
+											</form>
+										</div>
+										<?php
+									}
+									?>
 								</div>
-								<?php
-							}
-							?>
-						</div>
+							</td>
+							<td id="imgproctd" style="display:none;">
+								<?php 
+								if($occId && ($fragArr || $specImgArr )){
+									include_once('includes/imgprocessor.php');
+								}
+								?>
+							</td></tr>
+						</table>
 						<?php
 					}
 				}

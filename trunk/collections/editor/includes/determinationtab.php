@@ -1,6 +1,6 @@
 <?php
 //error_reporting(E_ALL);
-include_once('../../config/symbini.php'); 
+include_once('../../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
