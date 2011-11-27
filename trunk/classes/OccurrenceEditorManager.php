@@ -260,8 +260,13 @@ class OccurrenceEditorManager {
 			if($autoCommit){
 				$status = 'SUCCESS: edits submitted and activated';
 				$sql = '';
+				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
+					$sql .= ',processingstatus = "'.$occArr['autoprocessingstatus'].'"';
+					$k2d = array_search('processingstatus',$editArr);
+					if($k2d) unset($editArr[$k2d]);
+				}
 				foreach($editArr as $v){
-					if($v){
+					if($v && array_key_exists($v,$occArr)){
 						$sql .= ','.$v.' = '.($occArr[$v]!==''?'"'.$this->cleanStr($occArr[$v]).'"':'NULL');
 					}
 				}

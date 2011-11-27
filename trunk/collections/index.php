@@ -44,6 +44,10 @@
 		<script type="text/javascript" src="../js/jquery-ui.js"></script>
 		<script language="javascript" type="text/javascript">
 			$(document).ready(function() {
+				if(!navigator.cookieEnabled){
+					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
+				}
+
 				$('#tabs').tabs();
 
 				c = document.cookie;

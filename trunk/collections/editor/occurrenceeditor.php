@@ -10,6 +10,8 @@ $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
+$autoPStatus = array_key_exists('autoprocessingstatus',$_POST)?$_POST['autoprocessingstatus']:'';
+$refreshQuery = array_key_exists('refreshquery',$_POST)?$_POST['refreshquery']:0;
 $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action && array_key_exists('gotonew',$_REQUEST)){
@@ -31,37 +33,43 @@ else{
 	$occManager = new OccurrenceEditorManager();
 }
 
-$occManager->setSymbUid($symbUid); 
-if($occId) $occManager->setOccId($occId); 
-if($collId) $occManager->setCollId($collId);
-$collMap = Array();
-$collMap = $occManager->getCollMap();
-if($occId && !$collId) $collId = $collMap['collid'];
-
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+$collMap = Array();
 if($symbUid){
+	$occManager->setSymbUid($symbUid); 
+	if($occId) $occManager->setOccId($occId); 
+	if($collId) $occManager->setCollId($collId);
+	$collMap = $occManager->getCollMap();
+	if($occId && !$collId) $collId = $collMap['collid'];
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
 }
-$occArr = Array();
+$occArr = array();
 $qryArr = array();
 $qryCnt = false;
-//Check to see if Query Form has been activated
-if($occIndex !== false){ 
-	$qryArr = $occManager->getQueryVariables();
-	if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
-	if($action != "Save Edits" && $action != 'Delete Occurrence'){
-		$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
-		if(!$qryCnt) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
-		$occManager->setOccurArr($qryWhere);
-		$occId = $occManager->getOccId();
-		$occArr = $occManager->getOccurMap();
+
+if($symbUid){
+	if($action == "Save Edits"){
+		$statusStr = $occManager->editOccurrence($_POST,$symbUid,$isEditor);
 	}
-}
-elseif(isset($_COOKIE["editorquery"])){
-	//Make sure query is null
-	setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+
+	if($occIndex !== false && !$goToMode){ 
+		//Query Form has been activated
+		$qryArr = $occManager->getQueryVariables();
+		if(array_key_exists('rc',$qryArr)) $qryCnt = $qryArr['rc'];
+		if(($refreshQuery || $action != "Save Edits") && $action != 'Delete Occurrence'){
+			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
+			if(!$qryCnt || $refreshQuery) $qryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
+			$occManager->setOccurArr($qryWhere);
+			$occId = $occManager->getOccId();
+			$occArr = $occManager->getOccurMap();
+		}
+	}
+	elseif(isset($_COOKIE["editorquery"])){
+		//Make sure query is null
+		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+	}
 }
 
 $isGenObs = ($collMap['colltype']=='General Observations'?1:0);
@@ -82,39 +90,23 @@ if($symbUid){
 			$isEditor = 2;
 		}
 	}
-	if($action == "Save Edits"){
-		$statusStr = $occManager->editOccurrence($_REQUEST,$symbUid,$isEditor);
-		//Reset query counts if it is activated
-		if($occIndex !== false){
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
-			$newQryCnt = $occManager->getQueryRecordCount($qryArr,$qryWhere);
-			if($newQryCnt == 0){
-				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-				$occIndex = false;
-			}
-			elseif($qryCnt != $newQryCnt){
-				$qryCnt = $newQryCnt;
-				$occIndex--;
-			}
-			$qryWhere = $occManager->getQueryWhere($qryArr,$occIndex,($isEditor==1?1:0));
-			$occManager->setOccurArr($qryWhere);
-			$occId = $occManager->getOccId();
-			$occArr = $occManager->getOccurMap();
-			if($isEditor == 2 && $isGenObs && $occManager->getObserverUid() != $symbUid){
-				//User can only edit their own records
-				$isEditor = 0;
-			}
-		}
-	}
 	if($isEditor){
 		if($goToMode){
+			//New record mode
 			if($action == 'Add Record'){
 				$statusStr = $occManager->addOccurrence($_REQUEST);
 				$occId = $occManager->getOccId();
 			}
-			//When a new record is added, reset query form if it already exists
-			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
-			$occIndex = false;
+			//Set query form primed for current user
+			if(array_key_exists('rc',$_POST)) $qryCnt = $_POST['qrycnt'];
+			if(!$qryCnt){
+				$today = date('Y-m-d');
+				$wStr = 'WHERE (o.collid = '.$collId.') AND (DATE(o.datelastmodified) = "'.$today.'") '.
+					'AND (o.recordEnteredBy = "'.$paramsArr['un'].'") ';
+				$qryArr = array('eb'=>$paramsArr['un'],'dm'=>$today);
+				$qryCnt = $occManager->getQueryRecordCount($qryArr,$wStr);
+				$occIndex = $qryCnt;
+			}
 
 			if($goToMode == 1){
 				$occId = 0;
@@ -122,9 +114,6 @@ if($symbUid){
 			elseif($goToMode == 2){
 				$occArr = $occManager->carryOverValues($_REQUEST);
 				$occId = 0;
-			}
-			elseif($goToMode == 4){
-				header('Location: ../individual/index.php?occid='.$occId);
 			}
 		}
 
@@ -187,28 +176,32 @@ if($symbUid){
 	$navStr = '';
 	if($qryCnt !== false){
 		if($qryCnt == 0){
-			$navStr .= '<div style="margin:20px;font-size:150%;font-weight:bold;">';
-			$navStr .= 'Search returned 0 records</div>'."\n";
+			if(!$goToMode){
+				$navStr .= '<div style="margin:20px;font-size:150%;font-weight:bold;">';
+				$navStr .= 'Search returned 0 records</div>'."\n";
+			}
 		}
 		else{
 			$navStr = '<b>';
-			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(0);">';
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(0);" title="First Record">';
 			$navStr .= '|&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
-			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-1).');">';
+			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-1).');" title="Previous Record">';
 			$navStr .= '&lt;&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
-			$navStr .= '&nbsp;&nbsp;| '.($occIndex + 1).' of '.$qryCnt.' |&nbsp;&nbsp;';
-			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+1).');">';
+			$recIndex = ($occIndex<$qryCnt?($occIndex + 1):'*');
+			$navStr .= '&nbsp;&nbsp;| '.$recIndex.' of '.$qryCnt.' |&nbsp;&nbsp;';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+($action=="Save Edits"?0:1)).');"  title="Next Record">';
 			$navStr .= '&gt;&gt;';
 			if($occIndex<$qryCnt-1) $navStr .= '</a>';
-			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($qryCnt-1).');">';
+			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($qryCnt-1).');" title="Last Record">';
 			$navStr .= '&gt;|';
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
+			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+			$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" title="New Record">&gt;*</a>';
 			$navStr .= '</b>';
-			$navStr = $navStr;
 		}
 	}
 }
@@ -395,6 +388,8 @@ if($symbUid){
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 										<input type="hidden" name="occindex" value="0" />
 										<input type="submit" name="submitaction" value="Query Records" />
+										<input type="hidden" name="autoprocessingstatus" value="<?php echo $autoPStatus; ?>" />
+										<input type="hidden" name="refreshquery" value="<?php echo $refreshQuery; ?>" />
 										<span style="margin-left:10px;">
 											<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" /> 
 										</span>
@@ -461,7 +456,7 @@ if($symbUid){
 							<div id="occdiv" style="position:relative;">
 								<table id="edittable">
 									<tr><td style="width:745px;">
-										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" >
+										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this);">
 											<fieldset>
 												<legend><b>Collector Info</b></legend>
 												<?php
@@ -1029,7 +1024,7 @@ if($symbUid){
 													<span>
 														Processing Status:
 														<?php 
-															$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:''; 
+															$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:'';
 														?>
 														<select name="processingstatus" tabindex="110" onchange="fieldChanged('processingstatus');">
 															<option value=''>No Set Status</option>
@@ -1082,20 +1077,44 @@ if($symbUid){
 											?>
 											<div style="padding:10px;">
 												<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-												<?php 
-												if($occId){
-													?>
-													<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-													<input type="hidden" name="editedfields" value="" />
-													<?php 
-												}
-												?>
 												<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 												<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 												<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 												<?php if($occId){ ?>
+													<fieldset style="float:right;margin:15px 20px 20px 0px;padding:15px;background-color:lightyellow">
+														<legend><b>Options</b></legend>
+														Processing Status Auto-Select:
+														<select name="autoprocessingstatus">
+															<option value=''>Not Activated</option>
+															<option value=''>-------------------</option>
+															<option value='unprocessed' <?php echo ($autoPStatus=='unprocessed'?'SELECTED':''); ?>>
+																unprocessed
+															</option>
+															<option value='OCR processed' <?php echo ($autoPStatus=='OCR processed'?'SELECTED':''); ?>>
+																OCR processed
+															</option>
+															<option value='OCR parsed' <?php echo ($autoPStatus=='NLP parsed'?'SELECTED':''); ?>>
+																NLP parsed
+															</option>
+															<option value='pending duplicate' <?php echo ($autoPStatus=='pending duplicate'?'SELECTED':''); ?>>
+																pending duplicate
+															</option>
+															<option value='pending review' <?php echo ($autoPStatus=='pending review'?'SELECTED':''); ?>>
+																pending review
+															</option>
+															<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
+																reviewed
+															</option>
+														</select><br/>
+														<input name="refreshquery" type="checkbox" value="1" <?php echo ($refreshQuery?'CHECKED':''); ?> /> 
+														Refresh Query (advance record)<br/>
+														<hr/ style="margin:10px 0px 10px 0px;">
+														<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+														<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
+													</fieldset>
 													<div style="margin:15px 0px 20px 30px;">
 														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" />
+														<input type="hidden" name="editedfields" value="" />
 														<?php 
 														if($occIndex !== false){
 															?>
@@ -1104,22 +1123,17 @@ if($symbUid){
 														}
 														?>
 													</div>
-													<div style="width:250px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
-														<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
-														<input type="checkbox" name="carryloc" value="1" /> Carry over locality values<br/>
-														* For data entry purposes only 
-													</div>
 												<?php }else{ ?>
 													<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
-														<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" onclick="return verifyFullForm(this.form)" />
+														<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" />
+														<input type="hidden" name="qrycnt" value="<?php echo $qryCnt?$qryCnt:''; ?>" />
 														<div style="margin-left:15px;font-weight:bold;">
 															Follow-up Action:
 														</div>
 														<div style="margin-left:20px;">
 															<input type="radio" name="gotomode" value="1" <?php echo ($goToMode>1?'':'CHECKED'); ?> /> Go to New Record<br/>
 															<input type="radio" name="gotomode" value="2" <?php echo ($goToMode==2?'CHECKED':''); ?> /> Go to New Record and Carryover Locality Information<br/> 
-															<input type="radio" name="gotomode" value="3" <?php echo ($goToMode==3?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)<br/>
-															<input type="radio" name="gotomode" value="4" <?php echo ($goToMode==4?'CHECKED':''); ?> /> Go to Specimen Display Page 
+															<input type="radio" name="gotomode" value="3" <?php echo ($goToMode==3?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)
 														</div>
 													</div>
 												<?php } ?>
@@ -1205,7 +1219,7 @@ if($symbUid){
 																			document.getElementById("textfragindex").innerHTML = textFragIndex + 1;
 																		}
 																	</script>
-																	<a href="#" onclick="nextRawText();return false;">=>></a>
+																	<a href="#" onclick="nextRawText();return false;">=&gt;$gt;</a>
 																	<?php 
 																}
 																?>
