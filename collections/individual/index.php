@@ -323,7 +323,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						<div style="margin-left:10px;">
 							<?php 
 							echo $occArr['decimallatitude'].'&nbsp;&nbsp;'.$occArr['decimallongitude'];
-							if($occArr['coordinateuncertaintyinmeters']) echo ' +-'.$occArr['coordinateuncertaintyinmeters']; 
+							if($occArr['coordinateuncertaintyinmeters']) echo ' +-'.$occArr['coordinateuncertaintyinmeters'].'m.'; 
 							if($occArr['geodeticdatum']) echo '&nbsp;&nbsp;'.$occArr['geodeticdatum'];
 							?>
 						</div>
