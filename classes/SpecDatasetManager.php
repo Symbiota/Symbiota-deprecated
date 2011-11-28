@@ -58,7 +58,7 @@ class SpecDatasetManager {
 			}
 			if($_POST['recordedby']){
 				$sqlWhere .= 'AND (recordedby LIKE "'.trim($_POST['recordedby']).'%") ';
-				$sqlOrderBy .= ',recordnumber';
+				$sqlOrderBy .= ',(recordnumber+1)';
 			}
 			if($_POST['recordnumber']){
 				$rnArr = explode(',',$_POST['recordnumber']);
@@ -67,8 +67,7 @@ class SpecDatasetManager {
 				foreach($rnArr as $v){
 					$v = trim($v);
 					if($p = strpos($v,' - ')){
-						//$rnBetweenFrag[] = '(CAST(recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
-						$rnBetweenFrag[] = '(recordnumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
+						$rnBetweenFrag[] = '(CAST(recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
 					}
 					else{
 						$rnInFrag[] = $v;
@@ -110,7 +109,8 @@ class SpecDatasetManager {
 			if($sqlWhere){
 				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT(recordedby," (",IFNULL(recordnumber,"s.n."),")") AS collector, '.
 					'family, sciname, CONCAT_WS("; ",country, stateProvince, county, locality) AS locality '.
-					'FROM omoccurrences WHERE collid = '.$this->collId.' '.$sqlWhere;
+					'FROM omoccurrences '.($_POST['recordedby']?'use index(Index_collector) ':'').
+					'WHERE collid = '.$this->collId.' '.$sqlWhere;
 				if($sqlOrderBy) $sql .= 'ORDER BY '.substr($sqlOrderBy,1);
 				$sql .= ' LIMIT 100';
 				//echo '<div>'.$sql.'</div>';
