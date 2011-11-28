@@ -131,7 +131,7 @@ class OccurrenceEditorManager {
 		}
 		if(array_key_exists('rb',$qryArr)){
 			$sqlWhere .= 'AND (o.recordedby LIKE "'.$qryArr['rb'].'%") ';
-			$sqlOrderBy .= ',o.recordnumber';
+			$sqlOrderBy .= ',(o.recordnumber+1)';
 		}
 		if(array_key_exists('rn',$qryArr)){
 			$rnArr = explode(',',$qryArr['rn']);
@@ -141,12 +141,12 @@ class OccurrenceEditorManager {
 				if($p = strpos($v,' - ')){
 					$term1 = substr($v,0,$p);
 					$term2 = substr($v,$p+3);
-					//if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
-						//$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
-					//}
-					//else{
+					if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
+						$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					}
+					else{
 						$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'")';
-					//}
+					}
 				}
 				else{
 					$rnInFrag[] = $v;
@@ -219,7 +219,7 @@ class OccurrenceEditorManager {
 		$retArr = Array();
 		$sql = '';
 		if($sqlWhere){
-			$sql = $this->occSql.$sqlWhere;
+			$sql = $this->occSql.(strpos($sqlWhere,'recordedby')?'use index(Index_collector) ':'').$sqlWhere;
 		}
 		else{
 			$sql = $this->occSql.'WHERE (o.occid = '.$this->occId.')';
