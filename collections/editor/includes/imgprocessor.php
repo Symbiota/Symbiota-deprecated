@@ -32,10 +32,12 @@
 					<?php 
 				}
 				?>
-				<span style="margin-left:200px;font-weight:bold;">
-					Image <span id="imageindex">1</span> 
-					of <?php echo count($imgArr); ?> 
-					<a href="#" onclick="nextLabelProcessingImage(); return false;">=&gt;&gt;</a>
+				<span style="float:right;margin-right:20px;font-weight:bold;">
+					Image <span id="imageindex">1</span> of  
+					<?php 
+					echo count($imgArr);  
+					if(count($imgArr) > 1) echo '<a href="#" onclick="nextLabelProcessingImage(); return false;">=&gt;&gt;</a>';
+					?>
 				</span>
 			</div>
 			<?php

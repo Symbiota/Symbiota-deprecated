@@ -141,12 +141,12 @@ class OccurrenceEditorManager {
 				if($p = strpos($v,' - ')){
 					$term1 = substr($v,0,$p);
 					$term2 = substr($v,$p+3);
-					if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
-						$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
-					}
-					else{
+					//if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
+						//$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					//}
+					//else{
 						$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'")';
-					}
+					//}
 				}
 				else{
 					$rnInFrag[] = $v;
@@ -183,6 +183,7 @@ class OccurrenceEditorManager {
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').'1';
 		}
+		//echo $sqlWhere;
 		return $sqlWhere;
 	}
 	

@@ -226,7 +226,7 @@ if($symbUid){
 </head>
 <body>
 	<!-- inner text -->
-	<div id="innertext" style="width:790px">
+	<div id="innertext">
 		<?php 
 		if(!$symbUid){
 			?>
@@ -234,6 +234,7 @@ if($symbUid){
 			<?php 
 		}
 		else{
+			echo '<div style="width:790px;">';
 			if($isEditor){
 				?>
 				<div style="float:right;">
@@ -246,6 +247,7 @@ if($symbUid){
 			if($collMap){
 				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 			}
+			echo '</div>';
 			if($statusStr){
 				?>
 				<div id="statusdiv">
@@ -316,7 +318,7 @@ if($symbUid){
 							$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
 						}
 						?>
-						<div id="querydiv" style="display:<?php echo (!$occArr&&!$goToMode?'block':'none'); ?>;">
+						<div id="querydiv" style="width:790px;display:<?php echo (!$occArr&&!$goToMode?'block':'none'); ?>;">
 							<form name="queryform" action="occurrenceeditor.php" method="post" onsubmit="return verifyQueryForm(this)">
 								<fieldset style="padding:5px;">
 									<legend><b>Record Search Form</b></legend>
@@ -399,13 +401,13 @@ if($symbUid){
 					} 
 					if($navStr){
 						?>
-						<div>
+						<div style="width:790px;">
 							<span class='navpath'>
 								<a href="../../index.php">Home</a> &gt;&gt;
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
 								<b>Editor</b>
 							</span>
-							<span style="margin-left:340px;">
+							<span style="float:right;margin-right:30px;">
 								<?php echo $navStr; ?>
 							</span>
 						</div>
@@ -413,8 +415,8 @@ if($symbUid){
 					}
 					if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 						?>
-						<table id="edittable">
-							<tr><td style="width:785px;" valign="top">
+						<table id="edittable" style="100%">
+							<tr><td id="editortd" style="width:785px;" valign="top">
 								<div id="occedittabs" style="clear:both;">
 									<ul>
 										<li>
@@ -985,7 +987,7 @@ if($symbUid){
 													</fieldset>
 													<div style="margin:15px 0px 20px 30px;">
 														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" /><br/>
-														Processing Status Auto-Select:
+														Status Auto-Set:
 														<select name="autoprocessingstatus">
 															<option value=''>Not Activated</option>
 															<option value=''>-------------------</option>
@@ -1113,7 +1115,7 @@ if($symbUid){
 									?>
 								</div>
 							</td>
-							<td id="imgproctd" style="display:none;">
+							<td id="imgtd" style="display:none;width:430px;" valign="top";>
 								<?php 
 								if($occId && ($fragArr || $specImgArr )){
 									include_once('includes/imgprocessor.php');
