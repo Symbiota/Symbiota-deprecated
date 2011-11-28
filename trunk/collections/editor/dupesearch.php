@@ -77,7 +77,6 @@ if($submitAction){
 					catch(err){
 					}
 				}
-				openerForm.processingstatus.value = "reviewed";
 				window.close();
 			}
 
