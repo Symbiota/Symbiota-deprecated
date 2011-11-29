@@ -11,9 +11,9 @@ $logPath = '';
 //pmterm = Pattern matching terms used to locate primary key (PK) of specimen record
 //ex: '/(ASU\d{7})/'; '/(UTC\d{8})/'
 $collArr = array(
-	'duke' => array('pmterm' => '/(^\d{7})/', 'collid' => 1),
-	'mich' => array('pmterm' => '/(^\d{6})/', 'collid' => 2),
-	'ny' => array('pmterm' => '/(NY\d{8})/', 'collid' => 3),
+	'duke:lichens' => array('pmterm' => '/^(\d{7})/', 'collid' => 28),
+	'mich:bryophytes' => array('pmterm' => '/(5\d{5})/', 'collid' => 7),
+	'ny:lichens' => array('pmterm' => '/^(NY\d{8})/', 'collid' => 2),
 );
 
 //If record matching PK is not found, should a new blank record be created?
@@ -109,17 +109,18 @@ class SpecProcessorManager {
 	public function batchLoadImages(){
 		//Create log File
 		if($this->logPath && file_exists($this->logPath)){
-			if(substr($this->logPath,-1) != '/') $this->logPath .= '/'; 
 
 			$logFile = $this->logPath."log_".date('Ymd').".log";
 			$this->logFH = fopen($logFile, 'a');
 			if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
 		}
 
-		$cycleArr = array('bryophytes','lichens');
-		foreach($this->collArr as $acro => $termArr){
-			foreach($cycleArr as $collName){
-
+		foreach($this->collArr as $acroColl => $termArr){
+			$aArr = explode(':',$acroColl);
+			if(count($aArr) == 2){
+				$acro = $aArr[0];
+				$collName = $aArr[1];
+	
 				//Connect to database or create output file
 				if($this->dbMetadata){
 					if($collName == 'bryophytes'){
@@ -159,13 +160,7 @@ class SpecProcessorManager {
 				}
 				$this->patternMatchingTerm = $termArr['pmterm'];
 				
-				//Lets start processing folder
-				echo 'Starting image processing: '.$acro.'/'.$collName."\n";
-				if($this->logFH) fwrite($this->logFH, 'Starting image processing: '.$acro.'/'.$collName."\n");
-				
-				if(substr($this->targetPathBase,-1) != "/"){
-					$this->targetPathBase .= "/";
-				}
+				//Target path maintenance and verification
 				if(!file_exists($this->targetPathBase)){
 					if($this->logFH) fwrite($this->logFH, "ABORT: targetPathBase does not exist \n");
 					exit;
@@ -180,19 +175,17 @@ class SpecProcessorManager {
 						if($this->logFH) fwrite($this->logFH, "ERROR: unable to create new folder (".$this->targetPathBase.$acro.'/'.$collName.") \n");
 					}
 				}
-				if(file_exists($this->targetPathBase.$acro.'/'.$collName)) $this->processFolder($acro.'/'.$collName.'/');
+				
+				//Lets start processing folder
+				echo 'Starting image processing: '.$acro.'/'.$collName."\n";
+				if($this->logFH) fwrite($this->logFH, 'Starting image processing: '.$acro.'/'.$collName."\n");
+				if(file_exists($this->targetPathBase.$acro.'/'.$collName)){
+					$this->processFolder($acro.'/'.$collName.'/');
+				}
 				echo 'Image upload complete for '.$acro.'/'.$collName."\n";
 				if($this->logFH) fwrite($this->logFH, "\tImage upload complete for ".$acro."/".$collName."\n");
 				if($this->logFH) fwrite($this->logFH, "-----------------------------------------------------\n\n");
 				
-				//Now lets start closing things up
-				//First some data maintenance
-				if($this->dbMetadata && $this->conn){
-					$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-						'SET i.tid = o.tidinterpreted '.
-						'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
-					$this->conn->query($sql);
-				}
 				//Close connection or MD output file
 				if($this->dbMetadata){
 			 		if(!($this->conn === false)) $this->conn->close();
@@ -201,6 +194,22 @@ class SpecProcessorManager {
 					fclose($this->mdOutputFH);
 				}
 			}
+			else{
+				if($this->logFH) fwrite($this->logFH, "ERROR: processing ".$acroColl." aborted since unable to determine collection type \n");
+			}
+		}
+		//Now lets start closing things up
+		//First some data maintenance
+		if($this->dbMetadata){
+			$sql = 'UPDATE images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'SET i.tid = o.tidinterpreted '.
+				'WHERE i.tid IS NULL and o.tidinterpreted IS NOT NULL';
+			$connBryo = MySQLiConnectionFactory::getCon("symbiotabryophytes");
+			$connBryo->query($sql);
+			$connBryo->close();
+			$connlichen = MySQLiConnectionFactory::getCon("symbiotalichens");
+			$connlichen->query($sql);
+			$connlichen->close();
 		}
 		//Close log file
 		if($this->logFH){
@@ -255,17 +264,12 @@ class SpecProcessorManager {
 		//ob_flush();
 		flush();
 		//Grab Primary Key from filename
-		$specPk = $this->getPrimaryKey($fileName);
-		if($specPk){
-			//Get occid (Symbiota occurrence record primary key)
-        }
-		$occId = 0;
-		if($this->dbMetadata){
-			$occId = $this->getOccId($specPk);
-		}
-        //If Primary Key is found, continue with processing image
-        if($specPk){
-        	if($occId || !$this->dbMetadata){
+		if($specPk = $this->getPrimaryKey($fileName)){
+			$occId = 0;
+			if($this->dbMetadata){
+				$occId = $this->getOccId($specPk);
+			}
+			if($occId || !$this->dbMetadata){
 	        	//Setup path and file name in prep for loading image
 				$targetFolder = '';
 	        	if($pathFrag){
@@ -381,8 +385,8 @@ class SpecProcessorManager {
         	}
 		}
 		else{
-			if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped, unable to extract specimen identifier (".date('Y-m-d h:i:s A').") \n");
-			echo "File skipped, unable to extract specimen identifier\n";
+			if($this->logFH) fwrite($this->logFH, "\tERROR: File skipped (".$fileName."), unable to extract specimen identifier \n");
+			echo "File skipped (".$fileName."), unable to extract specimen identifier\n";
 		}
 		//ob_flush();
 		flush();
@@ -894,6 +898,7 @@ class SpecProcessorManager {
 	}
 
 	public function setSourcePathBase($p){
+		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
 		$this->sourcePathBase = $p;
 	}
 
@@ -902,6 +907,7 @@ class SpecProcessorManager {
 	}
 
 	public function setTargetPathBase($p){
+		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/';
 		$this->targetPathBase = $p;
 	}
 
@@ -999,6 +1005,7 @@ class SpecProcessorManager {
  	}
  	
  	public function setLogPath($p){
+		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/'; 
  		$this->logPath = $p;
  	}
 
@@ -1017,15 +1024,15 @@ class MySQLiConnectionFactory {
 	static $SERVERS = array(
 		array(
 			'type' => 'write',
-			'host' => 'sod84.asu.edu',
-			'username' => 'lbtcnwriter',
+			'host' => '',
+			'username' => '',
 			'password' => '',
 			'database' => 'symbiotalichens'
 		),
 		array(
 			'type' => 'write',
-			'host' => 'sod84.asu.edu',
-			'username' => 'lbtcnwriter',
+			'host' => '',
+			'username' => '',
 			'password' => '',
 			'database' => 'symbiotabryophytes'
 		)
