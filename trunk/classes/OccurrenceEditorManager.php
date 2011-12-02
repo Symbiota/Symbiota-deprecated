@@ -269,7 +269,9 @@ class OccurrenceEditorManager {
 				}
 				foreach($editArr as $v){
 					if($v && array_key_exists($v,$occArr)){
-						$sql .= ','.$v.' = '.($occArr[$v]!==''?'"'.$this->cleanStr($occArr[$v]).'"':'NULL');
+						$vStr = $this->cleanStr($occArr[$v]);
+						$sql .= ','.$v.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
+						if(array_key_exists($v,$this->occurrenceMap)) $this->occurrenceMap[$v] = $vStr;
 					}
 				}
 				if(in_array('sciname',$editArr)){
