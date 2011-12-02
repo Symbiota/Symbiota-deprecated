@@ -238,6 +238,7 @@ class OccurrenceEditorManager {
 
 	public function editOccurrence($occArr,$uid,$autoCommit){
 		$status = '';
+		if(!$autoCommit && $this->getObserverUid() == $uid) $autoCommit = 1;
 		$editedFields = trim($occArr['editedfields']);
 		if($editedFields){
 			//Add edits to omoccuredits
@@ -412,11 +413,8 @@ class OccurrenceEditorManager {
 			return $this->occurrenceMap['observeruid'];
 		}
 		if($this->occId){
-			$rs = $this->conn->query('SELECT observeruid FROM omoccurrences WHERE (occid = '.$this->occId.')');
-			if($row = $rs->fetch_object()){
-				$obsId = $row->observeruid;
-			}
-			$rs->close();
+			$this->setOccurArr();
+			$obsId = $this->occurrenceMap['observeruid'];
 		}
 		return $obsId;
 	}

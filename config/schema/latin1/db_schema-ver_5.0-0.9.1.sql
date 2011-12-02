@@ -1430,7 +1430,7 @@ CREATE TABLE `uploadtaxa` (
   `Hybrid` varchar(50) DEFAULT NULL,
   `InitialTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`scinameinput`),
-  UNIQUE KEY `sciname_index` (`SciName`) USING BTREE
+  UNIQUE KEY `sciname_index` (`SciName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

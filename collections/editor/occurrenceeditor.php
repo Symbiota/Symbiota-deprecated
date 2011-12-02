@@ -47,6 +47,7 @@ if($symbUid){
 $occArr = array();
 $qryArr = array();
 $qryCnt = false;
+$statusStr = '';
 
 if($symbUid){
 	if($action == "Save Edits"){
@@ -69,11 +70,8 @@ if($symbUid){
 		//Make sure query is null
 		setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 	}
-}
 
-$isGenObs = ($collMap['colltype']=='General Observations'?1:0);
-$statusStr = '';
-if($symbUid){
+	$isGenObs = ($collMap['colltype']=='General Observations'?1:0);
 	if(!$isEditor){
 		if($isGenObs){ 
 			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
@@ -222,7 +220,9 @@ if($symbUid){
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occurrenceeditor.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js"></script>
 </head>
 <body>
 	<!-- inner text -->

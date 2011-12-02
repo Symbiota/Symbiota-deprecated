@@ -241,9 +241,12 @@ class SpecProcessorImage extends SpecProcessorManager{
 						}
 					}
 					else{
+						//If large image was supplied, transfer to storage
 						$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
 						if(file_exists($this->sourcePath.$pathFrag.$lgSourceFileName)){
-							rename($this->sourcePath.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
+							if(rename($this->sourcePath.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName)){
+								$lgUrl = $lgTargetFileName;
+							}
 						}
 					}
 					//Create Thumbnail Image
@@ -254,9 +257,12 @@ class SpecProcessorImage extends SpecProcessorManager{
 						}
 					}
 					else{
+						//If thumbnail image was supplied, transfer to storage
 						$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
 						if(file_exists($this->sourcePath.$pathFrag.$tnFileName)){
-							rename($this->sourcePath.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
+							if(rename($this->sourcePath.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName)){
+								$tnUrl = $tnTargetFileName;
+							}
 						}
 					}
 					if($tnUrl) $tnUrl = $targetFolder.$tnUrl;

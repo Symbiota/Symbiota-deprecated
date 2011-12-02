@@ -13,7 +13,7 @@
 				<img id="activeimage" src="<?php echo $imgUrlPrefix.$imgArr[0]; ?>" style="width:400px;height:400px;" />
 			</div>
 			<div style="width:100%;">
-			<!-- 	<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />  -->
+				<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
 				<?php 
 				if(count($imgArr)>1){
 					?>
