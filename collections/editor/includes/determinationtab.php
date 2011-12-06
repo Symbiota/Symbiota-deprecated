@@ -184,7 +184,12 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 		}
 		else{
 			?>
-			<div style="font-weight:bold;margin:10px 0px 20px 20px;font-size:120%;">There are no historic annotations for this specimen</div>
+			<div style="font-weight:bold;margin:10px;font-size:120%;">
+				There are no historic annotations for this specimen
+			</div>
+			<div style="margin:20px;">
+				Click plus sign to the right to add a new annotation
+			</div>
 			<?php 
 		}
 		?>

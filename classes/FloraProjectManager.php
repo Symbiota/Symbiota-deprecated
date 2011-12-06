@@ -9,21 +9,10 @@ class FloraProjectManager {
 	private $researchCoord = Array();
 	private $surveyCoord = Array();
 
-	public function __construct($proj){
+	public function __construct(){
 		global $googleMapKey;
 		$this->con = MySQLiConnectionFactory::getCon("readonly");
 		$this->googleUrl = "http://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain&sensor=false";
-		if(is_numeric($proj)){
-			$this->projId = $proj;
-		}
-		else{
-			$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$proj."')";
-			$rs = $this->con->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->projId = $row->pid;
-			}
-			$rs->close();
-		}
 	}
 
 	public function __destruct(){
@@ -32,6 +21,22 @@ class FloraProjectManager {
 
 	public function getProjectId(){
 		return $this->projId;
+	}
+	
+	public function setProj($proj){
+		if($proj){
+			if(is_numeric($proj)){
+				$this->projId = $proj;
+			}
+			else{
+				$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$proj."')";
+				$rs = $this->con->query($sql);
+				if($row = $rs->fetch_object()){
+					$this->projId = $row->pid;
+				}
+				$rs->close();
+			}
+		}
 	}
 
 	public function getProjectList(){
@@ -92,10 +97,10 @@ class FloraProjectManager {
 	public function addNewProject($projArr){
 		$pid = 0;
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO fmprojects(projname,managers,briefdescription,fulldescription,notes,occurrencesearch,ispublic,sortsequence) '.
+		$sql = 'INSERT INTO fmprojects(projname,managers,briefdescription,fulldescription,notes,ispublic,sortsequence) '.
 			'VALUES("'.$this->cleanString($projArr['projname']).'","'.$this->cleanString($projArr['managers']).'","'.
 			$this->cleanString($projArr['briefdescription']).'","'.$this->cleanString($projArr['fulldescription']).'","'.
-			$this->cleanString($projArr['notes']).'",'.$projArr['occurrencesearch'].','.$projArr['ispublic'].','.
+			$this->cleanString($projArr['notes']).'",'.$projArr['ispublic'].','.
 			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
 		//echo $sql;
 		if($conn->query($sql)){

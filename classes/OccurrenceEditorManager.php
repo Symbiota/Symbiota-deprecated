@@ -11,6 +11,8 @@ class OccurrenceEditorManager {
 	private $collMap = Array();
 	private $occurrenceMap = Array();
 	private $occSql;
+	private $sqlWhere;
+	private $qryArr = Array();
 	private $symbUid;
 	
 	public function __construct(){
@@ -84,29 +86,35 @@ class OccurrenceEditorManager {
 		$this->symbUid = $id;
 	}
 	
-	public function getQueryVariables(){
+	public function setQueryVariables($overrideQry = ''){
 		global $clientRoot;
-		$qryArr = array();
-		if(array_key_exists('q_identifier',$_POST)){
-			if($_POST['q_identifier']) $qryArr['id'] = trim($_POST['q_identifier']);
-			if($_POST['q_recordedby']) $qryArr['rb'] = trim($_POST['q_recordedby']);
-			if($_POST['q_recordnumber']) $qryArr['rn'] = trim($_POST['q_recordnumber']);
-			if($_POST['q_enteredby']) $qryArr['eb'] = trim($_POST['q_enteredby']);
-			if($_POST['q_processingstatus']) $qryArr['ps'] = trim($_POST['q_processingstatus']); 
-			if($_POST['q_datelastmodified']) $qryArr['dm'] = trim($_POST['q_datelastmodified']);
+		if($overrideQry){
+			$this->qryArr = $overrideQry;
+			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
+		}
+		elseif(array_key_exists('q_identifier',$_POST)){
+			if($_POST['q_identifier']) $this->qryArr['id'] = trim($_POST['q_identifier']);
+			if($_POST['q_recordedby']) $this->qryArr['rb'] = trim($_POST['q_recordedby']);
+			if($_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
+			if($_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
+			if($_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
+			if($_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
-			$qryArr = json_decode($_COOKIE["editorquery"],true);
+			$this->qryArr = json_decode($_COOKIE["editorquery"],true);
 		}
-		return $qryArr;
 	}
 	
-	public function getQueryWhere($qryArr, $occIndex=0, $isAdmin=0){
+	public function getQueryVariables(){
+		return $this->qryArr;
+	}
+	
+	public function setSqlWhere($occIndex=0, $isAdmin=0){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
-		if(array_key_exists('id',$qryArr)){
-			$iArr = explode(',',$qryArr['id']);
+		if(array_key_exists('id',$this->qryArr)){
+			$iArr = explode(',',$this->qryArr['id']);
 			$iBetweenFrag = array();
 			$iInFrag = array();
 			foreach($iArr as $v){
@@ -129,12 +137,12 @@ class OccurrenceEditorManager {
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}
-		if(array_key_exists('rb',$qryArr)){
-			$sqlWhere .= 'AND (o.recordedby LIKE "'.$qryArr['rb'].'%") ';
+		if(array_key_exists('rb',$this->qryArr)){
+			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
 			$sqlOrderBy .= ',(o.recordnumber+1)';
 		}
-		if(array_key_exists('rn',$qryArr)){
-			$rnArr = explode(',',$qryArr['rn']);
+		if(array_key_exists('rn',$this->qryArr)){
+			$rnArr = explode(',',$this->qryArr['rn']);
 			$rnBetweenFrag = array();
 			$rnInFrag = array();
 			foreach($rnArr as $v){
@@ -161,21 +169,21 @@ class OccurrenceEditorManager {
 			}
 			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 		}
-		if(array_key_exists('eb',$qryArr)){
-			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$qryArr['eb'].'%") ';
+		if(array_key_exists('eb',$this->qryArr)){
+			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
 		}
-		if(array_key_exists('dm',$qryArr)){
-			if($p = strpos($qryArr['dm'],' - ')){
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.substr($qryArr['dm'],0,$p).'" AND "'.substr($qryArr['dm'],$p+3).'") ';
+		if(array_key_exists('dm',$this->qryArr)){
+			if($p = strpos($this->qryArr['dm'],' - ')){
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.substr($this->qryArr['dm'],0,$p).'" AND "'.substr($this->qryArr['dm'],$p+3).'") ';
 			}
 			else{
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$qryArr['dm'].'") ';
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$this->qryArr['dm'].'") ';
 			}
 			
 			$sqlOrderBy .= ',o.datelastmodified';
 		}
-		if(array_key_exists('ps',$qryArr)){
-			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$qryArr['ps'].'%") ';
+		if(array_key_exists('ps',$this->qryArr)){
+			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
@@ -184,56 +192,62 @@ class OccurrenceEditorManager {
 			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').'1';
 		}
 		//echo $sqlWhere;
-		return $sqlWhere;
+		$this->sqlWhere = $sqlWhere;
 	}
 	
-	public function getQueryRecordCount($qryArr,$sqlWhere){
+	public function getQueryRecordCount($reset = 0){
 		global $clientRoot;
-		$recCnt = 0;
-		if($obPos = strpos($sqlWhere,' ORDER BY')){
-			$sqlWhere = substr($sqlWhere,0,$obPos);
+		if(!$reset && array_key_exists('rc',$this->qryArr)) return $this->qryArr['rc'];
+		$sqlWhere = $this->sqlWhere;
+		$recCnt = false;
+		if($sqlWhere){
+			if($obPos = strpos($sqlWhere,' ORDER BY')){
+				$sqlWhere = substr($sqlWhere,0,$obPos);
+			}
+			if($obPos = strpos($sqlWhere,' LIMIT ')){
+				$sqlWhere = substr($sqlWhere,0,$obPos);
+			}
+			$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
+			//echo '<div>'.$sql.'</div>';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$recCnt = $r->reccnt;
+			}
+			$rs->close();
+			$this->qryArr['rc'] = (int)$recCnt;
+			setCookie('editorquery',json_encode($this->qryArr),0,($clientRoot?$clientRoot:'/'));
 		}
-		if($obPos = strpos($sqlWhere,' LIMIT ')){
-			$sqlWhere = substr($sqlWhere,0,$obPos);
-		}
-		$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
-		//echo '<div>'.$sql.'</div>';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$recCnt = $r->reccnt;
-		}
-		$rs->close();
-		$qryArr['rc'] = (int)$recCnt;
-		setCookie('editorquery',json_encode($qryArr),0,($clientRoot?$clientRoot:'/'));
 		return $recCnt;
 	}
 
 	public function getOccurMap(){
-		if(!$this->occurrenceMap && $this->occId){
+		if(!$this->occurrenceMap && ($this->occId || $this->sqlWhere)){
 			$this->setOccurArr();
 		}
 		return $this->occurrenceMap;
 	}
 
-	public function setOccurArr($sqlWhere = ''){
+	private function setOccurArr(){
 		$retArr = Array();
 		$sql = '';
-		if($sqlWhere){
-			$sql = $this->occSql.(strpos($sqlWhere,'recordedby')?'use index(Index_collector) ':'').$sqlWhere;
-		}
-		else{
+		if($this->occId){
 			$sql = $this->occSql.'WHERE (o.occid = '.$this->occId.')';
 		}
-		//echo "<div>".$sql."</div>";
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			foreach($row as $k => $v){
-				$retArr[strtolower($k)] = $v;
-			}
+		elseif($this->sqlWhere){
+			$sql = $this->occSql.(strpos($this->sqlWhere,'recordedby')?'use index(Index_collector) ':'').$this->sqlWhere;
 		}
-		$rs->close();
-		if($retArr && !$this->occId) $this->occId = $retArr['occid']; 
-		$this->occurrenceMap = $retArr;
+		if($sql){
+			//echo "<div>".$sql."</div>";
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				foreach($row as $k => $v){
+					$retArr[strtolower($k)] = $v;
+				}
+			}
+			$rs->close();
+			if($retArr && !$this->occId) $this->occId = $retArr['occid']; 
+			$this->occurrenceMap = $retArr;
+		}
 	}
 
 	public function editOccurrence($occArr,$uid,$autoCommit){
@@ -412,35 +426,15 @@ class OccurrenceEditorManager {
 	public function getObserverUid(){
 		$obsId = 0;
 		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap)){
-			return $this->occurrenceMap['observeruid'];
+			$obsId = $this->occurrenceMap['observeruid'];
 		}
-		if($this->occId){
+		elseif($this->occId){
 			$this->setOccurArr();
 			$obsId = $this->occurrenceMap['observeruid'];
 		}
 		return $obsId;
 	}
 	
-	public function getCollectionList($collArr){
-		$collList = Array();
-		$sql = 'SELECT collid, collectionname, institutioncode, collectioncode FROM omcollections ';
-		if($collArr){
-			$sql .= 'WHERE (collid IN ('.implode(',',$collArr).')) ';
-		}
-		$sql .= 'ORDER BY collectionname';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$collName = $r->collectionname;
-			if($r->institutioncode){
-				$collName .= ' ('.$r->institutioncode;
-				if($r->collectioncode) $collName .= ':'.$r->collectioncode;
-				$collName .= ')';
-			}
-			$collList[$r->collid] = $collName;
-		}
-		return $collList;
-	}
-
 	public function echoCountryList(){
 		$retArr = Array();
 		$sql = 'SELECT countryname FROM lkupcountry ORDER BY countryname';

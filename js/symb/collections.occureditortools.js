@@ -47,14 +47,15 @@ function insertUtm(f) {
 		if(isNumeric(eValue) && isNumeric(nValue)){
 			//Remove prior UTM references from verbatimCoordinates field
 			var vcStr = f.verbatimcoordinates.value;
-			vcStr = vcStr.replace(/\d{2}.*\d+E\s+\d+N\s{1}(Northern)|(Southern){1}[;\s]*/g, "");
+			vcStr = vcStr.replace(/\d{2}.*\d+E\s+\d+N[;\s]*/g, "");
+			vcStr = vcStr.replace(/(Northern)|(Southern)/g, "");
 			vcStr = vcStr.replace(/^\s+|\s+$/g, "");
 			vcStr = vcStr.replace(/^;|;$/g, "");
 			//put UTM into verbatimCoordinate field
 			if(vcStr != ""){
 				vcStr = vcStr + "; ";
 			}
-			var utmStr = zValue + " " + eValue + "E " + nValue + "N " + hValue;
+			var utmStr = zValue + " " + eValue + "E " + nValue + "N ";
 			f.verbatimcoordinates.value = vcStr + utmStr;
 			//Convert to Lat/Lng values
 			var zNum = parseInt(zValue);
@@ -62,7 +63,9 @@ function insertUtm(f) {
 				var latLngStr = utm2LatLng(zNum,eValue,nValue,f.geodeticdatum.value);
 				var llArr = latLngStr.split(',');
 				if(llArr){
-					f.decimallatitude.value = Math.round(llArr[0]*1000000)/1000000;
+					var latFact = 1;
+					if(hValue == "Southern") latFact = -1;
+					f.decimallatitude.value = latFact*Math.round(llArr[0]*1000000)/1000000;
 					f.decimallongitude.value = Math.round(llArr[1]*1000000)/1000000;
 				}
 			}
