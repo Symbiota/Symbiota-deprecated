@@ -112,7 +112,7 @@ function catalogNumberChanged(cnValue){
 			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
 				if(resObj.length > 0){
-					if(confirm("Record(s) of same catalog number already exists. Do you want to go to this record?")){
+					if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
 						occWindow=open("occurrenceeditor.php?occid="+resObj+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
@@ -825,6 +825,7 @@ function detDateChanged(f){
 	var newDateStr = f.dateidentified.value;
 	if(newDateStr){
 		dateIdentified = document.fullform.dateidentified.value;
+		if(dateIdentified == "") dateIdentified = document.fullform.eventdate.value;
 		if(dateIdentified){
 			var yearPattern = /[1,2]{1}\d{3}/;
 			var newYear = newDateStr.match(yearPattern);
@@ -852,10 +853,6 @@ function verifyDetAddForm(f){
 	}
 	if(f.dateidentified.value == ""){
 		alert("Determination Date field must have a value");
-		return false;
-	}
-	if(!isNumeric(f.sortsequence.value)){
-		alert("Sort Sequence field must be a numeric value only");
 		return false;
 	}
 	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 

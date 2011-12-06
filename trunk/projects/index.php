@@ -9,8 +9,10 @@ $editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:"";
 $newProj = array_key_exists("newproj",$_REQUEST)?1:0;
 $projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:""; 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
+$statusStr = '';
 
-$projManager = new FloraProjectManager($proj);
+$projManager = new FloraProjectManager();
+$projManager->setProj($proj);
 
 $isEditable = 0;
 if($isAdmin || (array_key_exists("ProjAdmin",$userRights) && in_array($projManager->getProjectId(),$userRights["ProjAdmin"]))){
@@ -31,14 +33,18 @@ if($isEditable && $projSubmit){
 		$projEditArr["briefdescription"] = $_REQUEST["briefdescription"];
 		$projEditArr["fulldescription"] = $_REQUEST["fulldescription"];
 		$projEditArr["notes"] = $_REQUEST["notes"];
-		$projEditArr["occurrencesearch"] = $_REQUEST["occurrencesearch"];
 		$projEditArr["ispublic"] = $_REQUEST["ispublic"];
 		$projEditArr["sortsequence"] = $_REQUEST["sortsequence"];
 		if($projSubmit == 'Submit Edits'){
 			$projManager->submitProjEdits($projEditArr);
 		}
 		else if($projSubmit == 'Add New Project'){
-			$projManager->addNewProject($projEditArr);
+			$proj = $projManager->addNewProject($projEditArr);
+			if($proj){
+				$projManager->setProj($proj);
+				$statusStr = 'Flora/Fauna Project created! To add checklists, open the editing pane by '.
+					'clicking on editing symbol to the far right of project name and select the Checklist Management tab.';
+			}
 		}
 	}
 }
@@ -188,6 +194,15 @@ if($isEditable && $projSubmit){
 	<div id="innertext">
 
 	<?php
+	if($statusStr){
+		?>
+		<hr/>
+		<div style="margin:20px;font-weight:bold;color:red;">
+			<?php echo $statusStr; ?>
+		</div>
+		<hr/>
+		<?php 
+	}
 	if($proj || $newProj){
 		if($isEditable && !$newProj){
 			?>

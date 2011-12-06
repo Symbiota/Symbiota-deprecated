@@ -332,7 +332,8 @@ $imageArr = $occManager->getImageMap();
 		}
 		else{
 			?>
-			<h2>No images linked to this collection record.<br/>Click symbol to right to add an image.</h2>
+			<h2>No images linked to this collection record.</h2>
+			<div style="margin-left:15px;">Click symbol to right to add an image</div>
 			<?php 
 		}
 		?>
