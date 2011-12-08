@@ -137,7 +137,7 @@ if($isEditable){
 			return formCheck;
 		}
 
-		function pkChanged(){
+		function pkChanged(selObj){
 			document.getElementById('pkdiv').style.display='block';
 			document.getElementById('mdiv').style.display='none';
 			document.getElementById('uldiv').style.display='none';
@@ -350,13 +350,13 @@ else{
 				if($isSnapshot && ($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES))){ 
 					?>
 					<div style="margin:20px;">
-						<b>Source Primary Key (required): </b>
+						<b>Source Unique Identifier / Primary Key (required): </b>
 						<?php
 						$fm = $duManager->getFieldMap();
 						$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
 						$sFields = $duManager->getSourceArr();
 						?>
-						<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged();">
+						<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
 							<option value=''>Select Source Primary Key</option>
 							<option value=''>Delete Primary Key</option>
 							<option value=''>----------------------------------</option>
@@ -367,14 +367,13 @@ else{
 							}
 							?>
 						</select>
-						<div id="pkdiv" style="margin:5px 0px 0px 200px;display:<?php echo ($dbpk?"none":"block");?>";>
+						<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
 							<input type="submit" name="action" value="Save Primary Key" />
 						</div>
 					</div>
 					<?php 
 				} 
-				
-				if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName)){ 
+				if($dbpk && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))){ 
 					?>
 					<div id="mdiv">
 						<table border="1" cellpadding="2" style="border:1px solid black">
@@ -402,8 +401,8 @@ else{
 						<hr />
 					</div>
 				<?php } ?>
-				<?php if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName) || ($uploadType == $DIGIRUPLOAD) 
-					|| ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
+				<?php if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName && $dbpk) 
+					|| ($uploadType == $DIGIRUPLOAD) || ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
 					<div id="uldiv">
 						<?php 
 						if($uploadType == $DIGIRUPLOAD){
