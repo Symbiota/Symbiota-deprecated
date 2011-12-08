@@ -373,7 +373,7 @@ else{
 					</div>
 					<?php 
 				} 
-				if($dbpk && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))){ 
+				if((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))){ 
 					?>
 					<div id="mdiv">
 						<table border="1" cellpadding="2" style="border:1px solid black">
@@ -401,7 +401,7 @@ else{
 						<hr />
 					</div>
 				<?php } ?>
-				<?php if(($uploadType == $DIRECTUPLOAD && $dbpk) || ($uploadType == $FILEUPLOAD && $ulFileName && $dbpk) 
+				<?php if(((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))) 
 					|| ($uploadType == $DIGIRUPLOAD) || ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
 					<div id="uldiv">
 						<?php 
