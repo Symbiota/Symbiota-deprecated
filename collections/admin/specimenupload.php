@@ -5,6 +5,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
+$ulfnOverride = array_key_exists("ulfnoverride",$_REQUEST)?$_REQUEST["ulfnoverride"]:"";
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
@@ -25,6 +26,7 @@ elseif($uploadType == $DIGIRUPLOAD){
 }
 elseif($uploadType == $FILEUPLOAD){
 	$duManager = new SpecUploadFile();
+	if($ulfnOverride) $ulFileName = $ulfnOverride;
 	if($ulFileName) $duManager->setUploadFileName($ulFileName);
 }
 else{
@@ -104,11 +106,12 @@ if($isEditable){
 			return false;
 		}
 
-		function checkInitForm(){
-			var ufObj = document.getElementById("uploadfile");
-			if(ufObj){
-				if(ufObj.value == ""){
-					alert("Upload file path is empty. Please select the file that is to be uploaded.");
+		function verifyInitForm(f){
+			var ufObj = f.uploadfile;
+			var ufOverrideObj = f.ulfnoverride;
+			if(ufObj && ufOverrideObj){
+				if(ufObj.value == "" && ufOverrideObj == ""){
+					alert("File path is empty. Please select the file that is to be loaded.");
 					return false;
 				}
 			}
@@ -323,11 +326,11 @@ else{
 	 	$ulArr = array_pop($ulList);
 	 	if($ulFileName || array_key_exists("uploadfile",$_FILES) || $uploadType == $DIRECTUPLOAD){
 			$duManager->analyzeFile();
-			if(array_key_exists("uploadfile",$_FILES)) $ulFileName = $duManager->getUploadFileName();
+			if(array_key_exists("uploadfile",$_FILES) || $ulfnOverride) $ulFileName = $duManager->getUploadFileName();
 	 	} 
 	 	?>
-		<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return checkInitForm()">
-			<fieldset style="width:450px;">
+		<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return verifyInitForm(this)">
+			<fieldset style="width:95%;">
 				<legend style="font-weight:bold;font-size:120%;"><?php echo $ulArr["title"];?></legend>
 				<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 				<input type="hidden" name="collid" value="<?php echo $collId;?>" />
@@ -336,14 +339,23 @@ else{
 				<?php if($uploadType == $FILEUPLOAD && stripos($action,"initialize") !== false){ ?>
 					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 					<div>
-						<b>Upload File:</b>
 						<div style="margin:10px;">
-							<input id="uploadfile" name="uploadfile" type="file" size="50" accept="text/csv" />
+							<div class="ulfnoptions">
+								<b>Upload File:</b> 
+								<input name="uploadfile" type="file" size="50" />
+							</div>
+							<div class="ulfnoptions" style="display:none;">
+								Full File Path: 
+								<input name="ulfnoverride" type="text" size="50" /><br/>
+								* This option is for manual upload of a data file. 
+								Enter full path to data file located on working server.   
+							</div>
 						</div>
+						
 						<div style="margin:10px;">
-							<input type="submit" name="action" value="View Parameters" />
 							<input type="submit" name="action" value="Analyze Upload File" />
 						</div>
+						<a style="float:right;" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
 					</div>
 				<?php 
 				}
