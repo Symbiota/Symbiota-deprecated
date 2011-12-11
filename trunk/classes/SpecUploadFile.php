@@ -2,7 +2,6 @@
 class SpecUploadFile extends SpecUploadManager{
 	
 	private $ulFileName;
-	private $zipFileName;
 	private $uploadTargetPath;
 	private $delimiter = ",";
 	private $isCsv = false;
@@ -20,21 +19,52 @@ class SpecUploadFile extends SpecUploadManager{
 	 	$this->readUploadParameters();
 		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
 	 	$targetPath = $this->getUploadTargetPath();
+	 	$fullPath = '';
 		if(!$this->ulFileName){
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
-	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath."/".$this->ulFileName);
-	        if(substr($this->ulFileName,-4) == ".zip"){
-	        	$this->zipFileName = $this->ulFileName;
+			$fullPath = $targetPath."/".$this->ulFileName;
+		 	move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath);
+		}
+		elseif(strpos($this->ulFileName,'/') !== false || strpos($this->ulFileName,'\\') !== false){
+			if(file_exists($this->ulFileName)){
+				$extStr = substr($this->ulFileName,-4);
+				$fullPath = $targetPath.'/collTransferCollId'.$this->collId.$extStr;
+				if(copy($this->ulFileName,$fullPath)){
+					unlink($this->ulFileName);
+					if(strpos($this->ulFileName,'/') !== false){
+						$this->ulFileName = substr($fullPath,strrpos($fullPath,'/'));
+					}
+					elseif(strpos($this->ulFileName,'\\') !== false){
+						$this->ulFileName = substr($fullPath,strrpos($fullPath,'\\'));
+					}
+				}
+				else{
+					echo '<li>ERROR: Unable to copy file to temp locality</li>';
+					echo '<li style="margin-left:10px;">Source File: '.$this->ulFileName.'</li>';
+					echo '<li style="margin-left:10px;">Target Path: '.$fullPath.'</li>';
+				}
+			}
+			else{
+				echo '<li>ERROR: File not found ('.$this->ulFileName.')</li>';
+			}
+		}
+		else{
+			$fullPath = $targetPath."/".$this->ulFileName;
+		}
+		if($fullPath){
+	        if(substr($fullPath,-4) == ".zip"){
+	        	$zipFilePath = $fullPath;
 				$zip = new ZipArchive;
-				$zip->open($targetPath."/".$this->ulFileName);
+				$zip->open($fullPath);
 				$this->ulFileName = $zip->getNameIndex(0);
+				$fullPath = $targetPath."/".$this->ulFileName; 
 				$zip->extractTo($targetPath);
 				$zip->close();
+				unlink($zipFilePath);
 	        }
+			$fh = fopen($fullPath,'rb') or die("Can't open file");
+			$this->sourceArr = $this->getHeaderArr($fh);
 		}
-		$fullPath = $targetPath."/".$this->ulFileName;
-		$fh = fopen($fullPath,'rb') or die("Can't open file");
-		$this->sourceArr = $this->getHeaderArr($fh);
 	}
  	
 	public function uploadData($finalTransfer,$delimiter="\t"){
@@ -73,7 +103,6 @@ class SpecUploadFile extends SpecUploadManager{
 
 			//Delete upload file 
 			if(file_exists($fullPath)) unlink($fullPath);
-			if($this->zipFileName) unlink($this->getUploadTargetPath()."/".$this->zipFileName);
 			
 			$this->finalUploadSteps($finalTransfer);
 		}
