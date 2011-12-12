@@ -8,7 +8,6 @@ class SpecUploadFile extends SpecUploadManager{
 
 	function __construct() {
  		parent::__construct();
- 		set_time_limit(3000);
 	}
 
 	public function __destruct(){
@@ -70,9 +69,9 @@ class SpecUploadFile extends SpecUploadManager{
 	public function uploadData($finalTransfer,$delimiter="\t"){
 		if($this->ulFileName){
 		 	$this->readUploadParameters();
-			set_time_limit(200);
-			ini_set("max_input_time",120);
-			ini_set("upload_max_filesize",10);
+			set_time_limit(1800);
+			ini_set("max_input_time",240);
+			ini_set("upload_max_filesize",30);
 	
 			//First, delete all records in uploadspectemp table associated with this collection
 			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
