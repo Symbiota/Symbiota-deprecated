@@ -464,7 +464,12 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				elseif(strpos($occArr['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
 					$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$occArr['individualurl']);
 				}
-				if($indUrl) echo '<div style="margin-top:10px;clear:both;">'.$occArr['collectionname'].' <a href="'.$indUrl.'"> display page</a></div>';
+				if($indUrl){
+					echo '<div style="margin-top:10px;clear:both;">';
+					echo 'Source Display: <a href="'.$indUrl.'">';
+					echo $occArr['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
+					echo '</a></div>';
+				}
 			}
 			?>
 			<div style="margin:10px 0px 15px 0px;clear:both;">
