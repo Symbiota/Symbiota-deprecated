@@ -457,8 +457,14 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 			</div>
 			<?php 
 			if($occArr['individualurl']){
-				$indUrl = str_replace('--PK--',$occArr['dbpk'],$occArr['individualurl']);
-				echo '<div style="margin-top:10px;clear:both;">'.$occArr['collectionname'].' <a href="'.$indUrl.'"> display page</a></div>';
+				$indUrl = '';
+				if(strpos($occArr['individualurl'],'--DBPK--')){
+					$indUrl = str_replace('--DBPK--',$occArr['dbpk'],$occArr['individualurl']);
+				}
+				elseif(strpos($occArr['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
+					$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$occArr['individualurl']);
+				}
+				if($indUrl) echo '<div style="margin-top:10px;clear:both;">'.$occArr['collectionname'].' <a href="'.$indUrl.'"> display page</a></div>';
 			}
 			?>
 			<div style="margin:10px 0px 15px 0px;clear:both;">
