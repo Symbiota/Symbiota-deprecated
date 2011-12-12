@@ -628,7 +628,7 @@ class SpecUploadManager{
 
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		set_time_limit(800);
+		set_time_limit(1000);
 
 		echo '<li style="font-weight:bold;">Updating existing occurrence records... ';
 		ob_flush();
