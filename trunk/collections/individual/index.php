@@ -466,7 +466,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				}
 				if($indUrl){
 					echo '<div style="margin-top:10px;clear:both;">';
-					echo 'Source Display: <a href="'.$indUrl.'">';
+					echo '<b>Source Display:</b> <a href="'.$indUrl.'">';
 					echo $occArr['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
 					echo '</a></div>';
 				}
