@@ -428,6 +428,15 @@ class TaxaLoaderManager{
 		echo '<li>Starting data transfer</li>';
 		ob_flush();
 		flush();
+
+		//Prime table with kingdoms that are not yet in table
+		$sql = 'INSERT IGNORE INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
+			'SELECT DISTINCT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
+			'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
+			'FROM uploadtaxa AS ut '.
+			'WHERE (ut.TID Is Null AND rankid = 10)';
+		$this->conn->query($sql);
+		
 		
 		WHILE(($endLoadCnt > 0 || $startLoadCnt <> $endLoadCnt) && $loopCnt < 30){
 			$sql = 'SELECT COUNT(*) AS cnt FROM uploadtaxa';
@@ -612,7 +621,7 @@ class TaxaLoaderManager{
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
-    		if(stripos($field,"tid")===false && stripos($field,"tidaccepted")===false && stripos($field,"parenttid")===false){
+    		if(strtolower($field) != 'tid' && strtolower($field) != 'tidaccepted' && strtolower($field) != 'parenttid'){
 				$this->targetArr[] = $field;
     		}
     	}

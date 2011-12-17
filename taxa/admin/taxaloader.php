@@ -175,6 +175,7 @@ if($editable){
 								<?php
 								$sArr = $loaderManager->getSourceArr();
 								$tArr = $loaderManager->getTargetArr();
+								sort($tArr);
 								$fMap = $loaderManager->getFieldMap();
 								foreach($sArr as $sField){
 									?>

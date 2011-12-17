@@ -13,7 +13,7 @@ $logPath = '';
 $collArr = array(
 	'duke:lichens' => array('pmterm' => '/^(\d{7})/', 'collid' => 28),
 	'mich:bryophytes' => array('pmterm' => '/(5\d{5})/', 'collid' => 7),
-	'ny:lichens' => array('pmterm' => '/^(NY\d{8})/', 'collid' => 2),
+	'ny:lichens' => array('pmterm' => '/^NY0*([1-9]{1}\d*)/', 'collid' => 2),
 );
 
 //If record matching PK is not found, should a new blank record be created?
@@ -109,7 +109,6 @@ class SpecProcessorManager {
 	public function batchLoadImages(){
 		//Create log File
 		if($this->logPath && file_exists($this->logPath)){
-
 			$logFile = $this->logPath."log_".date('Ymd').".log";
 			$this->logFH = fopen($logFile, 'a');
 			if($this->logFH) fwrite($this->logFH, "\nDateTime: ".date('Y-m-d h:i:s A')."\n");
@@ -129,6 +128,7 @@ class SpecProcessorManager {
 					else{
 						$this->conn = MySQLiConnectionFactory::getCon("symbiotalichens");
 					}
+					if($this->logFH && $this->conn) fwrite($this->logFH, "\tSuccessfully connected to database");
 				}
 				else{
 					$mdFileName = $this->logPath.$acro.'-'.$collName."_urldata_".time().'.csv';
