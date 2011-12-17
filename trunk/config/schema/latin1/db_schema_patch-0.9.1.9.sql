@@ -126,4 +126,3 @@ ALTER TABLE `omoccurloansoutlink`
    REFERENCES `omoccurloansout` (`loanoutid` )   ON DELETE CASCADE   ON UPDATE CASCADE , 
   ADD INDEX `FK_loanoutlink_occid` (`occid` ASC), 
   ADD INDEX `FK_loanoutlink_loid` (`loanoutid` ASC) ; 
-
