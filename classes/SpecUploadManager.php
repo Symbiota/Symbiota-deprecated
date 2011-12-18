@@ -32,6 +32,8 @@ class SpecUploadManager{
 	protected $symbFields = Array();
 
 	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5;
+	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
+		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12');
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -799,12 +801,7 @@ class SpecUploadManager{
 			}
 		}
 		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
-			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
-				if($eDateStr = strtotime($recMap['verbatimeventdate'])){
-					$recMap['eventdate'] = date('Y-m-d', $eDateStr);
-				}
-			}
-			elseif(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4){
+			if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4){
 				$y = $recMap['year'];
 				$m = "00";
 				$d = "00";
@@ -817,6 +814,10 @@ class SpecUploadManager{
 					}
 				}
 				$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
+			}
+			elseif(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
+				$dateStr = $this->formatDate($recMap['verbatimeventdate']);
+				if($dateStr) $recMap['eventdate'] = $dateStr;
 			}
 		}
 		
@@ -850,12 +851,10 @@ class SpecUploadManager{
 					}
 					break;
 				case "date":
-					if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $valueStr)){
-						$sqlValues .= ',"'.$valueStr.'"';
-					} 
-					elseif(($dateStr = strtotime($valueStr))){
-						$sqlValues .= ',"'.date('Y-m-d H:i:s', $dateStr).'"';
-					} 
+					$dateStr = $this->formatDate($valueStr);
+					if($dateStr){
+						$sqlValues .= ',"'.$dateStr.'"';
+					}
 					else{
 						$sqlValues .= ",NULL";
 					}
@@ -950,6 +949,81 @@ class SpecUploadManager{
 	
 	public function getTransferCount(){
 		return $this->transferCount;
+	}
+	
+	public function formatDate($dateStr){
+		$t = '';
+		$y = '';
+		$m = '00';
+		$d = '00';
+		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
+			$t = $match[0];
+		}
+		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
+			//Format: yyyy-mm-dd, yyyy-m-d
+			$y = $match[1];
+			$m = $match[2];
+			$d = $match[3];
+		}
+		elseif(preg_match('/^(\d{1,2})\s{1}(\D{3,})\.*\s{1}(\d{2,4})/',$dateStr,$match)){
+			//Format: dd mmm yyyy, d mmm yy
+			$d = $match[1];
+			$mStr = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			$m = $this->monthNames[$mStr];
+		}
+		elseif(preg_match('/^(\d{1,2})-(\D{3,})-(\d{2,4})/',$dateStr,$match)){
+			//Format: dd-mmm-yyyy
+			$d = $match[1];
+			$mStr = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			$m = $this->monthNames[$mStr];
+		}
+		elseif(preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/',$dateStr,$match)){
+			//Format: mm/dd/yyyy, m/d/yy
+			$m = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+		}
+		elseif(preg_match('/^(\D{3,})\.*\s{1}(\d{1,2}),{0,1}\s{1}(\d{2,4})/',$dateStr,$match)){
+			//Format: mmm dd, yyyy
+			$mStr = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			$m = $this->monthNames[$mStr];
+		}
+		elseif(preg_match('/^(\d{1,2})-(\d{1,2})-(\d{2,4})/',$dateStr,$match)){
+			//Format: mm-dd-yyyy, mm-dd-yy
+			$m = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+		}
+		elseif(preg_match('/^(\D{3,})\.*\s([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
+			//Format: mmm yyyy
+			$mStr = strtolower(substr($match[1],0,3));
+			$m = $this->monthNames[$mStr];
+			$y = $match[2];
+		}
+		elseif(preg_match('/([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
+			//Format: yyyy
+			$y = $match[1];
+		}
+		if($y){
+			if(strlen($y) == 2){ 
+				if($y < 20) $y = '20'.$y;
+				else $y = '19'.$y;
+			}
+			if(strlen($m) == 1) $m = '0'.$m;
+			if(strlen($d) == 1) $d = '0'.$d;
+			$dateStr = $y.'-'.$m.'-'.$d;
+		}
+		if($t){
+			$dateStr .= ' '.$t;
+		}
+		return $dateStr;
 	}
 
 	protected function cleanString($inStr){
