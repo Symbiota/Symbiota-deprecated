@@ -292,12 +292,11 @@ class TPImageEditorManager extends TPEditorManager{
 
 		if(!$this->sourceGdImg){
 			$this->sourceGdImg = imagecreatefromjpeg($sourceImg);
-			if(class_exists('PelJpeg')){
+			if($newWidth > 300 && class_exists('PelJpeg')){
 				$inputJpg = new PelJpeg($this->sourceGdImg);
 				$this->exif = $inputJpg->getExif();
 			}
 		}
-
     	$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
 
