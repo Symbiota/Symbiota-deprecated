@@ -763,7 +763,7 @@ class TaxonProfileManager {
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
 		if($rs = $this->con->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->tid] = $r->sciname;
+				if($r->tid && $testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
 			}
 		}
 		return $retArr;
