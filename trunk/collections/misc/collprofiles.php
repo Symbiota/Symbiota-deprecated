@@ -139,7 +139,7 @@ if($collId) $collData = $collManager->getCollectionData();
 	<div id="innertext">
 		<?php
 		if($editCode > 1){
-			if($action == 'Update Statistics'){
+			if($action == 'UpdateStatistics'){
 				echo '<h2>Updating statisitcs related to this collection...</h2>';
 				echo '<ul>';
 				$collManager->updateStatistics();
@@ -185,10 +185,17 @@ if($collId) $collData = $collManager->getCollectionData();
 								</a>
 							</li>
 							<li>
-								<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=Update Statistics" >
+								<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=UpdateStatistics" >
 									Update Statistics
 								</a>
 							</li>
+							<!-- 
+							<li>
+								<a href="collpermissions.php?collid=<?php echo $collId; ?>" >
+									Manage Permissions
+								</a>
+							</li>
+							 -->
 							<li>
 								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
 									Import/Update Specimen Records
