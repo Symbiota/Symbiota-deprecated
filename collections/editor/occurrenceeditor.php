@@ -366,21 +366,23 @@ if($symbUid){
 						</fieldset>
 					</form>
 				</div>
-				<?php
-				if($navStr){
-					?>
-					<div style="width:790px;">
-						<span class='navpath'>
-							<a href="../../index.php">Home</a> &gt;&gt;
-							<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
-							<b>Editor</b>
-						</span>
+				<div style="width:790px;">
+					<span class='navpath'>
+						<a href="../../index.php">Home</a> &gt;&gt;
+						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
+						<b>Editor</b>
+					</span>
+					<?php
+					if($navStr){
+						?>
 						<span style="float:right;margin-right:30px;">
 							<?php echo $navStr; ?>
 						</span>
-					</div>
-					<?php 
-				}
+						<?php 
+					}
+					?>
+				</div>
+				<?php 
 				if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 					?>
 					<table id="edittable" style="100%">

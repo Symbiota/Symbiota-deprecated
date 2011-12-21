@@ -951,8 +951,10 @@ class SpecUploadManager{
 		return $this->transferCount;
 	}
 	
-	public function formatDate($dateStr){
-		$t = '';
+	private function formatDate($inStr){
+		$dateStr = trim($inStr);
+    	if(!$dateStr) return;
+    	$t = '';
 		$y = '';
 		$m = '00';
 		$d = '00';
@@ -1019,6 +1021,9 @@ class SpecUploadManager{
 			if(strlen($m) == 1) $m = '0'.$m;
 			if(strlen($d) == 1) $d = '0'.$d;
 			$dateStr = $y.'-'.$m.'-'.$d;
+		}
+		else{
+			
 		}
 		if($t){
 			$dateStr .= ' '.$t;

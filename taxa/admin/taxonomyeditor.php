@@ -13,7 +13,7 @@ if(array_key_exists("taxauthid",$_REQUEST)){
 }
 
 $editable = false;
-if($isAdmin || in_array("Taxonomy",$userRights)){
+if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
 
