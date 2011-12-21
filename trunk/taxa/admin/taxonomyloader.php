@@ -18,7 +18,7 @@ $status = "";
 $loaderObj = new TaxonomyLoaderManager();
  
 $editable = false;
-if($isAdmin || array_key_exists("",$userRights)){
+if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
  

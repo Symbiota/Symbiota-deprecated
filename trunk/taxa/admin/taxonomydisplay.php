@@ -9,7 +9,7 @@ $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $taxonDisplayObj = new TaxonomyDisplayManager($target);
  
 $editable = false;
-if($isAdmin || in_array("Taxonomy",$userRights)){
+if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
  
