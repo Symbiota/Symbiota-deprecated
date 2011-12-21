@@ -268,7 +268,9 @@ header("Content-Type: text/html; charset=".$charset);
 									//State is false for this taxon or it is inherited
 									$jsStr = "javascript: addAttr('".$t."-".$cs."');";	
 								}
-								echo "<td align='center' width='15'><input type=\"checkbox\" name=\"csDisplay\" onclick=\"".$jsStr."\" ".($isSelected && !$isInherited?"CHECKED":"")." title=\"".$csName."\"/>".($isInherited?"(I)":"")."</td>\n";
+								echo "<td align='center' width='15'>";
+								echo "<input type=\"checkbox\" name=\"csDisplay\" onclick=\"".$jsStr."\" ".($isSelected && !$isInherited?"CHECKED":"")." title=\"".$csName."\"/>".($isInherited?"(I)":"");
+								echo "</td>\n";
 							}
 							?>
 						</tr>
@@ -308,7 +310,7 @@ header("Content-Type: text/html; charset=".$charset);
 								?>
 								<td width='10' align='center'>
 									<div <?php echo ($isSelected?"style='text-weight:bold;'":"")?>>
-										<input type="checkbox" name="csDisplay" onclick="<?php echo $jsStr." ".($isSelected && !$isInherited?"CHECKED":""); ?>" title="<?php echo $csName; ?>" />
+										<input type="checkbox" name="csDisplay" onclick="<?php echo $jsStr.'" '.($isSelected && !$isInherited?'CHECKED':''); ?> title="<?php echo $csName; ?>" />
 										<?php echo ($isInherited?$inheritStr:""); ?>
 									</div>
 								</td>

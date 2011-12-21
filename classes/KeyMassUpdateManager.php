@@ -171,14 +171,6 @@ class KeyMassUpdateManager{
 	}
 	
 	public function getTaxaList(){
-		//Get list of Char States
- 		$stateList = Array();
-		$sql = "SELECT kmcs.CS, kmcs.CharStateName FROM kmcs WHERE (kmcs.CID = ".$this->cid.")";
-		$result = $this->con->query($sql);
-		while($row = $result->fetch_object()){
-			$stateList[$row->CS] = $row->CharStateName; 
-	    }
-		$result->free();
 		
 		//Get all Taxa found in checklist 
 		$taxaList = Array();
