@@ -355,11 +355,6 @@ $smManager = new SiteMapManager();
 										Create a New Collection or Observation Profile
 									</a>
 								</li>
-								<li>
-									<a href="<?php echo $clientRoot; ?>/collections/admin/specimenupload.php">
-										Specimen Upload Management
-									</a>
-								</li>
 	            			</ul>
 	            			<?php
 						}
@@ -370,13 +365,12 @@ $smManager = new SiteMapManager();
 							</div>
 	            			<ul>
 	            			<?php 
-	            			$collectionList = $smManager->getCollectionList($userRights);
-	            			if(array_key_exists('spec',$collectionList)){
-	            				$collList = $collectionList['spec'];
-		            			foreach($collList as $k => $v){
+	            			$smManager->setCollectionList();
+	            			if($collList = $smManager->getCollArr()){
+		            			foreach($collList as $k => $cArr){
 		            				echo '<li>';
 		            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
-		            				echo $v;
+		            				echo $cArr['name'];
 		            				echo '</a>';
 		            				echo '</li>';
 		            			}
@@ -396,49 +390,78 @@ $smManager = new SiteMapManager();
 							2) Allows collectors to enter their own collection data for label printing and to make it available for transfer 
 							to collections obtaining the physical specimens through donations or exchange.
 							Visit the <a href="http://symbiota.org/tiki/tiki-index.php?page=Specimen+Label+Printing" target="_blank">Symbiota Documentation</a> for more information on specimen processing capabilites.  
-							Note that the General Observation project is not allows activated for all data portals. 
-							Click on an observation project below to go directly to this page. 
+							Note that observation projects are not activated on all Symbiota data portals. 
 						</div>
 						<div style="margin:10px;">
+							<?php 
+							$obsList = $smManager->getObsArr();
+							$genObsList = $smManager->getGenObsArr();
+							$obsManagementStr = '';
+							?>
 							<div style="font-weight:bold;">
-								List of observation projects to which you have access
+								Observation Image Voucher Submission
 							</div>
 	            			<ul>
-	            			<?php 
-	            			if(array_key_exists('genobs',$collectionList) || array_key_exists('obs',$collectionList)){
-		            			if(array_key_exists('genobs',$collectionList)){
-		            				foreach($collectionList['genobs'] as $k => $v){
+	            				<?php 
+	            				if($obsList){
+	            					foreach($genObsList as $k => $oArr){
 		            					?>
 										<li>
-											<a href="collections/editor/observationsubmit.php">
-												Image Vouchered Observation Submission
+											<a href="collections/editor/observationsubmit.php?collid=<?php echo $k; ?>">
+												<?php echo $oArr['name']; ?>
 											</a>
 										</li>
-		            					<li>
+	            						<?php
+	            						if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
+	            					}
+	            					foreach($obsList as $k => $oArr){
+		            					?>
+										<li>
+											<a href="collections/editor/observationsubmit.php?collid=<?php echo $k; ?>">
+												<?php echo $oArr['name']; ?>
+											</a>
+										</li>
+	            						<?php
+	            						if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
+	            					}
+	            				}
+	            				else{
+	            					echo "<li>You have no observation project permissions</li>";
+	            				}
+	            				?>
+	            			</ul>
+							<?php
+							if($genObsList){ 
+								?>
+								<div style="font-weight:bold;">
+									Personal Specimen Management and Label Printing Features
+								</div>
+		            			<ul>
+		            				<?php 
+		            				foreach($genObsList as $k => $oArr){
+		            					?>
+										<li>
 											<a href="collections/misc/collprofiles.php?collid=<?php echo $k; ?>&emode=1">
-					            				<?php echo $v; ?> (Personal Specimen Management / Label Printing)
-				            				</a>
-			            				</li>
-			            				<?php 
+												<?php echo $oArr['name']; ?>
+											</a>
+										</li>
+										<?php 
 		            				}
-		            			}
-		            			if(array_key_exists('obs',$collectionList)){
-		            				echo '<div style="margin-top:10px;">';
-			            			foreach($collectionList['obs'] as $k => $v){
-			            				echo '<li>';
-			            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
-			            				echo $v;
-			            				echo '</a>';
-			            				echo '</li>';
-			            			}
-		            				echo '</div>';
-		            			}
-	            			}
-	            			else{
-	            				echo "<li>You have no observation project permissions</li>";
-	            			}
-	            			?>
-							</ul>
+		            				?>
+		            			</ul>
+								<?php
+							}
+							if($obsManagementStr){
+								?>
+								<div style="font-weight:bold;">
+									Observation project Management
+								</div>
+		            			<ul>
+		            				<?php echo $obsManagementStr; ?>
+		            			</ul>
+	            			<?php 
+							}
+						?>
 						</div>
 	            		<?php 
 					}

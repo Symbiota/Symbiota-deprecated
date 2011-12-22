@@ -607,14 +607,27 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 
-		echo '<li style="font-weight:bold;">Linking existing record in preparation for updating... ';
-		ob_flush();
-		flush();
-		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
-			'SET u.occid = o.occid '.
-			'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
-		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
+			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
+				'SET u.occid = o.occid '.
+				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+			
+			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
+			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+				'SET u.occid = o.occid '.
+				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+		}
 		
 		if($finalTransfer){
 			$this->performFinalTransfer();
@@ -667,6 +680,22 @@ class SpecUploadManager{
 		}
 		else{
 			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+		}
+		
+		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+			//Update DBPKs for records that were processed via the portal, walked back to collection's central database, and now come back to portal with assigned DBPKs 
+			echo '<li style="font-weight:bold;">Updating DBPKs for records originally processed in portal, walked back to central database, and now return to portal with assigned DBPKs... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
+				'SET o.dbpk = u.dbpk '.
+				'WHERE u.collid = '.$this->collId.' AND o.dbpk IS NULL AND u.dbpk IS NOT NULL';
+			if($this->conn->query($sql)){
+				echo 'Done!</li> ';
+			}
+			else{
+				echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+			}
 		}
 		
 		echo '<li style="font-weight:bold;">Inserting new records into active occurrence table... ';
