@@ -369,7 +369,7 @@ if($symbUid){
 				<div style="width:790px;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
-						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>">Collection Editor Panel</a> &gt;&gt;
+						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Editor Panel</a> &gt;&gt;
 						<b>Editor</b>
 					</span>
 					<?php

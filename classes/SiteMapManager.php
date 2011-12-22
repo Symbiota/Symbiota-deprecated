@@ -4,7 +4,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 class SiteMapManager{
 	
 	private $conn;
-
+	private $collArr = array();
+	private $obsArr = array();
+	private $genObsArr = array();
+	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
@@ -13,38 +16,55 @@ class SiteMapManager{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getCollectionList($userRights){
-		$returnArr = Array();
-		$sql = 'SELECT c.collid, c.collectioncode, c.collectionname, c.colltype '.
-			'FROM omcollections c ';
-		$collArr = Array();
+	public function setCollectionList(){
+		global $userRights, $isAdmin;
+		$adminArr = array();
+		$editorArr = array();
 		if(array_key_exists("CollAdmin",$userRights)){
-			$collArr = $userRights['CollAdmin'];
+			$adminArr = $userRights['CollAdmin'];
 		}
 		if(array_key_exists("CollEditor",$userRights)){
-			$collArr = array_merge($collArr,$userRights['CollEditor']);
+			$editorArr = $userRights['CollEditor'];
 		}
-		if($collArr){
-			$sql .= 'WHERE (c.collid IN('.implode(',',$collArr).')) ';
+		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS ccode, c.collectionname, c.colltype '.
+			'FROM omcollections c ';
+		if($adminArr || $editorArr){
+			$sql .= 'WHERE (c.collid IN('.implode(',',array_merge($adminArr,$editorArr)).')) ';
 		}
 		$sql .= "ORDER BY c.collectionname";
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		if($rs){
 			while($row = $rs->fetch_object()){
+				$name = $row->collectionname.($row->ccode?" (".$row->ccode.")":"");
+				$isCollAdmin = ($isAdmin||in_array($row->collid,$adminArr)?1:0);
 				if($row->colltype == 'Observations'){
-					$returnArr['obs'][$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+					$this->obsArr[$row->collid]['name'] = $name;
+					$this->obsArr[$row->collid]['isadmin'] = $isCollAdmin; 
 				}
 				elseif($row->colltype == 'General Observations'){
-					$returnArr['genobs'][$row->collid] = $row->collectionname;
+					$this->genObsArr[$row->collid]['name'] = $name;
+					$this->genObsArr[$row->collid]['isadmin'] = $isCollAdmin; 
 				}
 				else{
-					$returnArr['spec'][$row->collid] = $row->collectionname.($row->collectioncode?" (".$row->collectioncode.")":"");
+					$this->collArr[$row->collid]['name'] = $name;
+					$this->collArr[$row->collid]['isadmin'] = $isCollAdmin; 
 				}
 			}
 			$rs->close();
 		}
-		return $returnArr;
+	}
+	
+	public function getCollArr(){
+		return $this->collArr;
+	}
+
+	public function getObsArr(){
+		return $this->obsArr;
+	}
+
+	public function getGenObsArr(){
+		return $this->genObsArr;
 	}
 
 	public function getChecklistList($isAdmin, $clArr){

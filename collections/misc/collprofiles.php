@@ -163,14 +163,25 @@ if($collId) $collData = $collManager->getCollectionData();
 				<fieldset style="padding:15px;">
 					<legend><b><?php echo ($collId?$collData['collectionname']:'');?> Management Control Panel</b></legend>
 					<ul>
+						<?php
+						if(stripos($collData['colltype'],'observation') !== false){ 
+							?>
+							<li>
+								<a href="../editor/observationsubmit.php?collid=<?php echo $collId; ?>">
+									Submit an Image Voucher (observation supported by a photo)
+								</a>
+							</li>
+							<?php
+						}
+						?>
 						<li>
 							<a href="../editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
-								Add a New Specimen Record
+								Add a New Occurrence Record
 							</a>
 						</li>
 						<li>
 							<a href="../editor/occurrenceeditor.php?collid=<?php echo $collId; ?>">
-								Edit a Specimen Record
+								Edit an Existing Occurrence Record
 							</a>
 						</li>
 						<li>
@@ -179,45 +190,48 @@ if($collId) $collData = $collManager->getCollectionData();
 							</a>
 						</li>
 						<?php if($editCode > 1){ ?>
-							<li>
-								<a href="#" onclick="toggleById('colledit');" >
-									Edit Metadata and Contact Information
-								</a>
-							</li>
-							<li>
-								<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=UpdateStatistics" >
-									Update Statistics
-								</a>
-							</li>
-							<!-- 
-							<li>
-								<a href="collpermissions.php?collid=<?php echo $collId; ?>" >
-									Manage Permissions
-								</a>
-							</li>
-							 -->
-							<li>
-								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
-									Import/Update Specimen Records
-								</a>
-							</li>
-							<li>
-								<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
-									Batch Load Specimen Images
-								</a>
-							</li>
-							<li>
-								<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
-									Review/Verify General Specimen Edits 
-								</a>
-							</li>
-							<!-- 
-							<li>
-								<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
-									Manage/Clean Scientific Names 
-								</a>
-							</li>
-							 -->
+							<li><b>Administrative Functions</b></li>
+							<ul>
+								<li>
+									<a href="#" onclick="toggleById('colledit');" >
+										Edit Metadata and Contact Information
+									</a>
+								</li>
+								<li>
+									<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=UpdateStatistics" >
+										Update Statistics
+									</a>
+								</li>
+								<!-- 
+								<li>
+									<a href="collpermissions.php?collid=<?php echo $collId; ?>" >
+										Manage Permissions
+									</a>
+								</li>
+								 -->
+								<li>
+									<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
+										Import/Update Specimen Records
+									</a>
+								</li>
+								<li>
+									<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
+										Batch Load Specimen Images
+									</a>
+								</li>
+								<li>
+									<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
+										Review/Verify General Specimen Edits 
+									</a>
+								</li>
+								<!-- 
+								<li>
+									<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
+										Manage/Clean Scientific Names 
+									</a>
+								</li>
+								 -->
+							</ul>
 						<?php } ?>
 					</ul>
 				</fieldset>
