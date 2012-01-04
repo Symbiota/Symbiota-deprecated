@@ -756,6 +756,38 @@ class ChecklistManager {
 		return $editorArr;
 	}
 	
+	public function getVoucherProjects(){
+		global $userRights;
+		$retArr = array();
+		$runQuery = true;
+		$sql = 'SELECT collid, collectionname '.
+			'FROM omcollections WHERE colltype = "Observations" OR colltype = "General Observations" ';
+		if(!array_key_exists('SuperAdmin',$userRights)){
+			$collInStr = '';
+			foreach($userRights as $k => $v){
+				if($k == 'CollAdmin' || $k == 'CollEditor'){
+					$collInStr .= ','.implode($v);
+				}
+			}
+			if($collInStr){
+				$sql .= 'AND collid IN ('.substr($collInStr,1).') ';
+			}
+			else{
+				$runQuery = false;
+			}
+		}
+		$sql .= 'ORDER BY colltype,collectionname';
+		if($runQuery){
+			if($rs = $this->clCon->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr[$r->collid] = $r->collectionname;
+				}
+				$rs->close();
+			}
+		}
+		return $retArr;
+	}
+	
 	//Misc set/get functions
     public function setThesFilter($filt){
 		$this->thesFilter = $filt;

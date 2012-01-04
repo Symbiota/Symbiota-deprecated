@@ -278,13 +278,14 @@
 				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
+				        <li><a href="#imgvouchertab">Add Image Voucher</a></li>
 				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($proj?'&proj='.$clManager->getPid():'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
 					<div id="mdtab">
 						<form id="checklisteditform" action="checklist.php" method="post" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
-							<fieldset style="margin:5px 0px 5px 5px;">
-								<legend>Edit Checklist Details:</legend>
+							<fieldset style="margin:15px;padding:10px;">
+								<legend><b>Edit Checklist Details</b></legend>
 								<div>
 									<span>Checklist Name: </span>
 									<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
@@ -347,6 +348,36 @@
 								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
 							</fieldset>
 						</form>
+					</div>
+					<div id="imgvouchertab">
+						<?php
+						$voucherProjects = $clManager->getVoucherProjects(); 
+						if($voucherProjects){
+							?>
+							<form name="addimagevoucher" action="../collections/editor/observationsubmit.php" method="get">
+								<fieldset style="margin:15px;padding:25px;">
+									<legend><b>Add Image Voucher and Link to Checklist</b></legend>
+									This form will allow you to add an image voucher linked to this checklist.<br/>
+									Scientific name will be added if not yet on list.<br/>
+									Select the voucher project to which you wish to add the voucher. 
+									<div style="margin:5px;">
+										<select name="collid">
+											<?php 
+											foreach($voucherProjects as $k => $v){
+												echo '<option value="'.$k.'">'.$v.'</option>';
+											}
+											?>
+										</select><br/>
+										<input type="hidden" name="clid" value="<?php echo $clManager->getClid(); ?>" />
+									</div>
+									<div style="margin:5px;">
+										<input type="submit" name="submitvoucher" value="Add Image Voucher" /><br/>
+									</div> 
+								</fieldset>
+							</form>
+							<?php
+						} 
+						?>
 					</div>
 					<div id="editortab">
 						<div style="margin:30px 0px 30px 15px;">
@@ -494,7 +525,7 @@
 									<input type="submit" name="submitadd" value="Add Species to List"/>
 									<hr />
 									<div style="text-align:center;">
-										<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload</a>
+										<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload Spreadsheet</a>
 									</div>
 								</fieldset>
 							</form>
