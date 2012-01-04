@@ -8,7 +8,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
 $permManager = new CollectionPermissions();
-$collManager->setCollectionId($collId);
+$permManager->setCollectionId($collId);
 
 $isEditor = 0;		 
 if($symbUid){
@@ -21,8 +21,7 @@ if($isEditor){
 
 }
 
-$collData = Array();
-$collData = $collManager->getCollectionData();
+$collData = $permManager->getCollectionData();
 
 ?>
 <html>
@@ -30,33 +29,6 @@ $collData = $collManager->getCollectionData();
 	<title><?php echo $defaultTitle." ".($collId?$collData["collectionname"]:"") ; ?> Collection Permissions</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language=javascript>
-		function toggleById(target){
-			if(target != null){
-			  	var obj = document.getElementById(target);
-				if(obj.style.display=="none" || obj.style.display==""){
-					obj.style.display="block";
-				}
-			 	else {
-			 		obj.style.display="none";
-			 	}
-			}
-			return false;
-		}
-
-		function isNumeric(sText){
-		   	var ValidChars = "0123456789-.";
-		   	var IsNumber = true;
-		   	var Char;
-		 
-		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
-				if(ValidChars.indexOf(Char) == -1){
-					IsNumber = false;
-					break;
-		      	}
-		   	}
-			return IsNumber;
-		}
 	</script>
 </head>
 <body>
@@ -77,7 +49,8 @@ $collData = $collManager->getCollectionData();
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt; 
 			<a href='../index.php'>Collections</a> &gt; 
-			<b><?php echo ($collData?$collData['collectionname']:'Collection Permissions'); ?></b>
+			<a href='collprofiles.php'>Collect Management</a> &gt; 
+			<b><?php echo $collData['collectionname'].' Permissions'; ?></b>
 		</div>
 		<?php 
 	}
@@ -86,8 +59,64 @@ $collData = $collManager->getCollectionData();
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
-		
+		$collPerms = $permManager->getEditors();
 		?>
+		<fieldset>
+			<legend>Administrators</legend>
+			<?php 
+			if(array_key_exists('admin',$collPerms)){
+				?>
+				<ul>
+				<?php 
+				$adminArr = $collPerms['admin'];
+				foreach($adminArr as $uid => $uName){
+					?>
+					<li>
+						<?php echo $uName; ?> 
+						<form name="deluser" action="collpermissions" method="post" onclick="">
+							<input type="hidden" name="deluser" value="<?php echo $uid; ?>" />
+							<input type="image" src="../../images/del.png" name="deluser" />
+						</form>
+					</li>
+					<?php 
+				}
+				?>
+				</ul>
+				<?php 
+			}
+			else{
+				echo "<h2>No one has explicitly assigned Administrative Permissions (excluding Super Admins)</h2>";
+			}
+			?>
+		</fieldset>
+		<fieldset>
+			<legend>Editors</legend>
+			<?php 
+			if(array_key_exists('editor',$collPerms)){
+				echo '<li>';
+				$editorArr = $collPerms['editor'];
+				
+			}
+			else{
+				echo "<h2>No one has explicitly assigned Editor Permissions</h2>";
+			}
+			?>
+			*Administrators automatically inherit editing rights
+		</fieldset>
+		<fieldset>
+			<legend>Rare Species Readers</legend>
+			<?php 
+			if(array_key_exists('rarespp',$collPerms)){
+				echo '<li>';
+				$rareSppArr = $collPerms['rarespp'];
+				
+			}
+			else{
+				echo "<h2>No one has explicitly assigned permissions to view locality data for species with a Rare/Threatened/Protected Species status</h2>";
+			}
+			?>
+			*Administrators and Editors automatically inherit protected species viewing rights for that collection
+		</fieldset>
 	</div>
 	<?php
 		include($serverRoot.'/footer.php');

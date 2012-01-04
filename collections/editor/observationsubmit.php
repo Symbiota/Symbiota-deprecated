@@ -6,6 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId  = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
+$clid  = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 
 $obsManager = new ObservationSubmitManager($collId);
 $collMap = $obsManager->getCollMap(); 
@@ -318,7 +319,7 @@ if($collMap){
 								<option value="0">------------------------------</option>
 								<?php 
 								foreach($clArr as $id => $clName){
-									echo '<option value="'.$id.'">'.$clName.'</option>';
+									echo '<option value="'.$id.'" '.($id=='cl'.$clid?'SELECTED':'').'>'.$clName.'</option>';
 								}
 								?>
 							</select>

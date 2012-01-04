@@ -25,8 +25,7 @@ class CollectionPermissions {
 		if($this->collId){
 			$sql = "SELECT c.CollectionCode, c.CollectionName ".
 				"FROM omcollections ".
-				"LEFT JOIN institutions i ON c.iid = i.iid ".
-				"WHERE (c.collid = ".$this->collId.") ORDER BY c.SortSeq";
+				"WHERE (c.collid = ".$this->collId.") ";
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -43,11 +42,15 @@ class CollectionPermissions {
 		if($this->collId){
 			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
 				'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
-				'WHERE up.pname = "CollAdmin-'.$this->collId.'" OR up.pname = "CollEditor-'.$this->collId.'" ';
+				'WHERE up.pname = "CollAdmin-'.$this->collId.'" OR up.pname = "CollEditor-'.$this->collId.'" '. 
+				'OR up.pname = "RareSppReader-'.$this->collId.'" ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$returnArr[$r->pname][$r->uid] = $r->uname;
+				$pGroup = 'rarespp';
+				if(substr($r->pname,0,9) == 'CollAdmin') $pGroup = 'admin';
+				elseif(substr($r->pname,0,10) == 'CollEditor') $pGroup = 'editor'; 
+				$returnArr[$pGroup][$r->uid] = $r->uname;
 			}
 			$rs->close();
 		}
