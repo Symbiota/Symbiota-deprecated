@@ -354,7 +354,7 @@
 						$voucherProjects = $clManager->getVoucherProjects(); 
 						if($voucherProjects){
 							?>
-							<form name="addimagevoucher" action="../collections/editor/observationsubmit.php" method="get">
+							<form name="addimagevoucher" action="../collections/editor/observationsubmit.php" method="get" target="_blank">
 								<fieldset style="margin:15px;padding:25px;">
 									<legend><b>Add Image Voucher and Link to Checklist</b></legend>
 									This form will allow you to add an image voucher linked to this checklist.<br/>
