@@ -420,7 +420,7 @@ class TaxaLoaderManager{
 		flush();
 	}
 
-	public function transferUpload(){
+	public function transferUpload($taxAuthId = 1){
 		set_time_limit(600);
 		$startLoadCnt = -1;
 		$endLoadCnt = 0;
@@ -459,6 +459,12 @@ class TaxaLoaderManager{
 				'SET ut.tid = t.tid WHERE ut.tid IS NULL';
 			$this->conn->query($sql);
 			
+			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceacceptedid = ut2.sourceid '.
+				'INNER JOIN taxa t ON ut2.scinameinput = t.sciname '.
+				'SET ut1.tidaccepted = t.tid '.
+				'WHERE ut1.acceptance = 0 AND ut1.tidaccepted IS NULL AND ut1.sourceacceptedid IS NOT NULL';
+			$this->conn->query($sql);
+
 			$sql = 'UPDATE uploadtaxa ut INNER JOIN taxa t ON ut.acceptedstr = t.sciname '.
 				'SET ut.tidaccepted = t.tid '.
 				'WHERE ut.acceptance = 0 AND ut.tidaccepted IS NULL AND ut.acceptedstr IS NOT NULL';
@@ -473,7 +479,7 @@ class TaxaLoaderManager{
 			ob_flush();
 			flush();
 			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
-				'SELECT DISTINCT ut.TID, ut.TidAccepted, 1 AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason '.
+				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$taxAuthId.' AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason '.
 				'FROM uploadtaxa AS ut '.
 				'WHERE (ut.TID IS NOT NULL AND ut.TidAccepted IS NOT NULL AND ut.parenttid IS NOT NULL)';
 			$this->conn->query($sql);
@@ -498,6 +504,12 @@ class TaxaLoaderManager{
 				'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
 			$this->conn->query($sql);
 			
+			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceparentid = ut2.sourceid '.
+				'INNER JOIN taxa t ON ut2.scinameinput = t.sciname '.
+				'SET ut1.parenttid = t.tid '.
+				'WHERE ut1.parenttid IS NULL AND ut1.sourceparentid IS NOT NULL';
+			$this->conn->query($sql);
+			
 			$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 				'SET up.parenttid = t.tid '.
 				'WHERE up.parenttid IS NULL';
@@ -516,7 +528,7 @@ class TaxaLoaderManager{
 		ob_flush();
 		flush();
 		//Something is wrong with the buildHierarchy method. Needs to be fixed. 
-		//$this->buildHierarchy();
+		$this->buildHierarchy($taxAuthId);
 		
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
 		$this->conn->query($sql);
@@ -531,6 +543,45 @@ class TaxaLoaderManager{
 	}
 
 	protected function buildHierarchy($taxAuthId = 1){
+		$sqlHier = 'SELECT ts.tid FROM taxstatus ts WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.hierarchystr IS NULL)';
+		//echo $sqlHier;
+		$resultHier = $this->conn->query($sqlHier);
+		while($rowHier = $resultHier->fetch_object()){
+			$tid = $rowHier->tid;
+			$parentArr = Array();
+			$targetTid = $tid;
+			$parCnt = 0;
+			do{
+				$sqlParents = 'SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts '.
+					'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid = '. $targetTid;
+				$targetTid = 0;
+				//echo "<div>".$sqlParents."</div>";
+				$resultParent = $this->conn->query($sqlParents);
+				if($rowParent = $resultParent->fetch_object()){
+					$parentTid = $rowParent->parenttid;
+					if($parentTid) {
+						$parentArr[$parentTid] = $parentTid;
+					}
+					$targetTid = $parentTid;
+				}
+				$resultParent->close();
+				$parCnt++;
+				if($parCnt > 35) break;
+			}while($targetTid);
+			
+			//Add hierarchy string to taxstatus table
+			if($parentArr){
+				$sqlInsert = 'UPDATE taxstatus ts SET ts.hierarchystr = "'.implode(',',array_reverse($parentArr)).'" '.
+					'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid = '.$tid;
+				echo "<div>".$sqlInsert."</div>";
+				$this->conn->query($sqlInsert);
+			}
+			unset($parentArr);
+		}
+		$resultHier->close();
+	}
+	
+	protected function buildHierarchy_old($taxAuthId = 1){
 		do{
 			unset($hArr);
 			$hArr = Array();

@@ -11,7 +11,7 @@ class SpecDatasetManager {
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		$this->occSql = 'SELECT o.occid, o.collid, o.occurrenceid, o.catalognumber, '.
+		$this->occSql = 'SELECT o.occid, o.collid, o.occurrenceid, o.catalognumber, o.othercatalognumbers, '.
 			'o.family, o.sciname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
 			'o.scientificnameauthorship, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
 			'o.identificationremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
