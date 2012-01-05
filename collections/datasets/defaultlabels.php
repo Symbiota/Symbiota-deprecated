@@ -257,6 +257,13 @@ else{
 											?>
 										</div>
 										<?php 
+										if($r->othercatalognumbers){
+											?>
+											<div class="othercatalognumbers" style="clear:both;">
+												<?php echo $r->othercatalognumbers; ?>
+											</div>
+											<?php 
+										}
 										if($useBarcode && $r->catalognumber){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">

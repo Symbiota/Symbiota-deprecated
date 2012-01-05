@@ -35,7 +35,7 @@ class BuildHierarchy{
 				}
 				$resultParent->close();
 				$parCnt++;
-				if($parCnt > 15) break;
+				if($parCnt > 35) break;
 			}while($targetTid);
 			
 			//Add hierarchy string to taxa table
