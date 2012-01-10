@@ -202,13 +202,11 @@ if($collId) $collData = $collManager->getCollectionData();
 										Update Statistics
 									</a>
 								</li>
-								<!-- 
 								<li>
 									<a href="collpermissions.php?collid=<?php echo $collId; ?>" >
 										Manage Permissions
 									</a>
 								</li>
-								 -->
 								<li>
 									<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
 										Import/Update Specimen Records

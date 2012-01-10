@@ -23,9 +23,9 @@ class CollectionPermissions {
 	public function getCollectionData(){
 		$returnArr = Array();
 		if($this->collId){
-			$sql = "SELECT c.CollectionCode, c.CollectionName ".
+			$sql = "SELECT CollectionCode, CollectionName ".
 				"FROM omcollections ".
-				"WHERE (c.collid = ".$this->collId.") ";
+				"WHERE (collid = ".$this->collId.") ";
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -37,7 +37,7 @@ class CollectionPermissions {
 		return $returnArr;
 	}
 
-	private function getEditors(){
+	public function getEditors(){
 		$returnArr = Array();
 		if($this->collId){
 			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
@@ -57,6 +57,56 @@ class CollectionPermissions {
 		return $returnArr;
 	}
 
+	public function getUsers(){
+		$returnArr = Array();
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
+			'FROM users u '.
+			'ORDER BY u.lastname,u.firstname';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$returnArr[$r->uid] = $r->uname;
+		}
+		$rs->close();
+		return $returnArr;
+	}
+
+	public function deletePermission($uid,$ur){
+		$userRight = '';
+		if($ur == 'admin'){
+			$userRight = 'CollAdmin-'.$this->collId;
+		}
+		elseif($ur == 'editor'){
+			$userRight = 'CollEditor-'.$this->collId;
+		}
+		elseif($ur == 'rare'){
+			$userRight = 'RareSppReader-'.$this->collId;
+		}
+		if($userRight){
+			$sql = 'DELETE FROM userpermissions WHERE uid = '.$uid.' AND pname = "'.$userRight.'"';
+			//echo $sql;
+			$this->conn->query($sql);
+		}
+	}
+	
+	public function addUser($uid,$ur){
+		$userRight = '';
+		if($ur == 'admin'){
+			$userRight = 'CollAdmin-'.$this->collId;
+		}
+		elseif($ur == 'editor'){
+			$userRight = 'CollEditor-'.$this->collId;
+		}
+		elseif($ur == 'rare'){
+			$userRight = 'RareSppReader-'.$this->collId;
+		}
+		if($userRight){
+			$sql = 'INSERT INTO userpermissions(uid,pname) VALUES('.$uid.',"'.$userRight.'") ';
+			//echo $sql;
+			$this->conn->query($sql);
+		}
+	}
+	
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
 		$outStr = str_replace('"',"'",$inStr);

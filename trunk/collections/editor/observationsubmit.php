@@ -386,6 +386,8 @@ if($collMap){
 						<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than 1MB</div>
 					</fieldset>
 					<div style="margin:10px;">
+						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
+						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 						<input type="submit" name="action" value="Submit Observation" />
 						* Fields with background color are required  
 					</div>
