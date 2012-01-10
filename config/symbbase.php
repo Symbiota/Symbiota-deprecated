@@ -2,6 +2,10 @@
 set_include_path(get_include_path() . PATH_SEPARATOR . $serverRoot . PATH_SEPARATOR . $serverRoot."/config/" . PATH_SEPARATOR . $serverRoot."/classes/");
 date_default_timezone_set('America/Phoenix');
 
+if(substr($clientRoot,-1) == '/'){
+	$clientRoot = substr($clientRoot,0,strlen($clientRoot)-1);
+}
+
 //Check cookie to see if signed in
 $paramsArr = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
 $userRights = Array();
