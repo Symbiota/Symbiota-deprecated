@@ -13,12 +13,28 @@ $permManager->setCollectionId($collId);
 $isEditor = 0;		 
 if($symbUid){
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
-		$editCode = 1;
+		$isEditor = 1;
 	}
 }
 
 if($isEditor){
-
+	if(array_key_exists('deladmin',$_GET)){
+		$uid = $_GET['deladmin'];
+		$permManager->deletePermission($uid,'admin');
+	}
+	elseif(array_key_exists('deleditor',$_GET)){
+		$uid = $_GET['deleditor'];
+		$permManager->deletePermission($uid,'editor');
+	}
+	elseif(array_key_exists('delrare',$_GET)){
+		$uid = $_GET['delrare'];
+		$permManager->deletePermission($uid,'rare');
+	}
+	elseif($action == 'Add Permissions for User'){
+		$uid = $_POST['uid'];
+		$right = $_POST['righttype'];
+		$permManager->addUser($uid,$right);
+	}
 }
 
 $collData = $permManager->getCollectionData();
@@ -29,6 +45,17 @@ $collData = $permManager->getCollectionData();
 	<title><?php echo $defaultTitle." ".($collId?$collData["collectionname"]:"") ; ?> Collection Permissions</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language=javascript>
+		function verifyAddRights(f){
+			if(f.uid.value == ""){
+				alert("Please select a user from list");
+				return false;
+			}
+			else if(f.righttype.value == ""){
+				alert("Please select the permissions you wish to assign this user");
+				return false;
+			}
+			return true;
+		}
 	</script>
 </head>
 <body>
@@ -49,7 +76,7 @@ $collData = $permManager->getCollectionData();
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt; 
 			<a href='../index.php'>Collections</a> &gt; 
-			<a href='collprofiles.php'>Collect Management</a> &gt; 
+			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt; 
 			<b><?php echo $collData['collectionname'].' Permissions'; ?></b>
 		</div>
 		<?php 
@@ -59,64 +86,136 @@ $collData = $permManager->getCollectionData();
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
-		$collPerms = $permManager->getEditors();
-		?>
-		<fieldset>
-			<legend>Administrators</legend>
-			<?php 
-			if(array_key_exists('admin',$collPerms)){
-				?>
-				<ul>
+		if($isEditor){
+			$collPerms = $permManager->getEditors();
+			?>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend><b>Administrators</b></legend>
 				<?php 
-				$adminArr = $collPerms['admin'];
-				foreach($adminArr as $uid => $uName){
+				if(array_key_exists('admin',$collPerms)){
 					?>
-					<li>
-						<?php echo $uName; ?> 
-						<form name="deluser" action="collpermissions" method="post" onclick="">
-							<input type="hidden" name="deluser" value="<?php echo $uid; ?>" />
-							<input type="image" src="../../images/del.png" name="deluser" />
-						</form>
-					</li>
+					<ul>
+					<?php 
+					$adminArr = $collPerms['admin'];
+					foreach($adminArr as $uid => $uName){
+						?>
+						<li>
+							<?php echo $uName; ?> 
+							<a href="collpermissions.php?collid=<?php echo $collId.'&deladmin='.$uid; ?>" onclick="return confirm('Are you sure you want to remove administrative rights for this user?');" title="Delete permissions for this user">
+								<img src="../../images/drop.png" style="width:12px;" />
+							</a>
+						</li>
+						<?php 
+					}
+					?>
+					</ul>
 					<?php 
 				}
+				else{
+					echo '<div style="font-weight:bold;font-size:120%;">';
+					echo 'No one has explicitly assigned Administrative Permissions (excluding Super Admins)';
+					echo '</div>';
+				}
 				?>
-				</ul>
+			</fieldset>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend><b>Editors</b></legend>
 				<?php 
-			}
-			else{
-				echo "<h2>No one has explicitly assigned Administrative Permissions (excluding Super Admins)</h2>";
-			}
-			?>
-		</fieldset>
-		<fieldset>
-			<legend>Editors</legend>
-			<?php 
-			if(array_key_exists('editor',$collPerms)){
-				echo '<li>';
-				$editorArr = $collPerms['editor'];
-				
-			}
-			else{
-				echo "<h2>No one has explicitly assigned Editor Permissions</h2>";
-			}
-			?>
-			*Administrators automatically inherit editing rights
-		</fieldset>
-		<fieldset>
-			<legend>Rare Species Readers</legend>
-			<?php 
-			if(array_key_exists('rarespp',$collPerms)){
-				echo '<li>';
-				$rareSppArr = $collPerms['rarespp'];
-				
-			}
-			else{
-				echo "<h2>No one has explicitly assigned permissions to view locality data for species with a Rare/Threatened/Protected Species status</h2>";
-			}
-			?>
-			*Administrators and Editors automatically inherit protected species viewing rights for that collection
-		</fieldset>
+				if(array_key_exists('editor',$collPerms)){
+					?>
+					<ul>
+					<?php 
+					$editorArr = $collPerms['editor'];
+					foreach($editorArr as $uid => $uName){
+						?>
+						<li>
+							<?php echo $uName; ?> 
+							<a href="collpermissions.php?collid=<?php echo $collId.'&deleditor='.$uid; ?>" onclick="return confirm('Are you sure you want to remove editing rights for this user?');" title="Delete permissions for this user">
+								<img src="../../images/drop.png" style="width:12px;" />
+							</a>
+						</li>
+						<?php 
+					}
+					?>
+					</ul>
+					<?php 
+				}
+				else{
+					echo '<div style="font-weight:bold;font-size:120%;">';
+					echo 'No one has explicitly assigned Editor Permissions';
+					echo '</div>';
+				}
+				?>
+				<div style="margin:10px">
+					*Administrators automatically inherit editing rights
+				</div>
+			</fieldset>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend><b>Rare Species Readers</b></legend>
+				<?php 
+				if(array_key_exists('rarespp',$collPerms)){
+					?>
+					<ul>
+					<?php 
+					$rareArr = $collPerms['rarespp'];
+					foreach($rareArr as $uid => $uName){
+						?>
+						<li>
+							<?php echo $uName; ?> 
+							<a href="collpermissions.php?collid=<?php echo $collId.'&delrare='.$uid; ?>" onclick="return confirm('Are you sure you want to remove user rights to view locality details for rare species?');" title="Delete permissions for this user">
+								<img src="../../images/drop.png" style="width:12px;" />
+							</a>
+						</li>
+						<?php 
+					}
+					?>
+					</ul>
+					<?php 
+				}
+				else{
+					echo '<div style="font-weight:bold;font-size:110%;">';
+					echo 'No one has explicitly assigned permissions to view locality data for species with a Rare/Threatened/Protected Species status';
+					echo '</div>';
+				}
+				?>
+				<div style="margin:10px">
+					*Administrators and Editors automatically inherit protected species viewing rights
+				</div>
+			</fieldset>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend><b>Add a User</b></legend>
+				<form name="addrights" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
+					<div>
+						User: 
+						<select name="uid">
+							<option value="">Select User</option>
+							<?php 
+							$userArr = $permManager->getUsers();
+							foreach($userArr as $uid => $uName){
+								echo '<option value="'.$uid.'">'.$uName.'</option>';
+							}
+							?>
+						</select> 
+					</div>
+					<div style="margin:5px 0px 5px 0px;">
+						<input name="righttype" type="radio" value="admin" /> Administrator <br/> 
+						<input name="righttype" type="radio" value="editor" /> Editor <br/>
+						<input name="righttype" type="radio" value="rare" /> Rare Species Reader<br/>
+					</div>
+					<div>
+						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+						<input name="action" type="submit" value="Add Permissions for User" />
+					</div> 
+				</form>
+			</fieldset>
+			<?php
+		}
+		else{
+			echo '<div style="font-weight:bold;font-size:120%;">';
+			echo 'Unauthorized to view this page. You must have administrative right for this collection.';
+			echo '</div>';
+		} 
+		?>
 	</div>
 	<?php
 		include($serverRoot.'/footer.php');
