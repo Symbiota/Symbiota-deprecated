@@ -16,6 +16,8 @@ $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
 $barcodeOnly = array_key_exists('bconly',$_POST)?$_POST['bconly']:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
+$exportDoc = ($action == 'Export to DOC'?1:0);
+
 $labelManager = new SpecDatasetManager();
 $labelManager->setCollId($collId);
 
@@ -26,19 +28,35 @@ if($symbUid){
 		$isEditor = 1;
 	}
 }
-if($action == 'Export Label Data'){
+if($action == 'Export to CSV'){
 	$labelManager->exportCsvFile();
 }
 else{
 	?>
 
-	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-	<html>
+	<!DOCTYPE HTML>
+	<html <?php echo ($exportDoc?'xmlns:w="urn:schemas-microsoft-com:office:word"':'') ?>>
 		<head>
-		    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+			<?php 
+			if($exportDoc){
+				header('Content-Type: application/msword');
+				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
+				?>
+				<meta http-equiv="Content-Type" content="application/msword; charset="<?php echo $charset; ?>">
+				<xml>
+					<w:WordDocument>
+					<w:View>Print</w:View>
+					<w:Pages>1</w:Pages>
+					</w:WordDocument>
+				</xml>
+				<?php 
+			}
+			?>
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
-		    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 			<style type="text/css">
+				<?php 
+				include_once($serverRoot.'/css/main.css');
+				?>
 				body {font-family:arial,sans-serif;<?php echo ($floatingWidth?'':'width:560pt;') ?>}
 				table {page-break-before:auto;page-break-inside:avoid;}
 				td {font-size:10pt;}
@@ -290,7 +308,12 @@ else{
 									if($labelCnt%2 == 0){
 										echo '</tr></table>'."\n";
 										if($rowsPerPage && ($labelCnt/2)%$rowsPerPage == 0){
-											echo '<p class="printbreak"></p>'."\n";
+											if($exportDoc){
+												echo '<br clear=all style=\'mso-special-character:line-break;page-break-before:always\'>';
+											}
+											else{
+												echo '<p class="printbreak"></p>'."\n";
+											}
 										}
 									}
 								}

@@ -163,21 +163,21 @@ if($symbUid){
 								Date Modified: 
 								<input type="text" name="datelastmodified" style="width:100px;" value="<?php echo (array_key_exists('datelastmodified',$_REQUEST)?$_REQUEST['datelastmodified']:''); ?>" />
 							</span>
-							<span style="margin-left:20px;">
-								Label Projects: 
-								<select name="labelproject" >
-									<option value=""></option>
-									<option value="">-------------------------</option>
-									<?php 
-									$lProj = '';
-									if(array_key_exists('labelproject',$_REQUEST)) $lProj = $_REQUEST['labelproject'];
-									$lProjArr = $datasetManager->getLabelProjects();
-									foreach($lProjArr as $projStr){
-										echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
-									} 
-									?>
-								</select> 
-							</span>
+						</div>
+						<div style="margin:3px;">
+							Label Projects: 
+							<select name="labelproject" >
+								<option value=""></option>
+								<option value="">-------------------------</option>
+								<?php 
+								$lProj = '';
+								if(array_key_exists('labelproject',$_REQUEST)) $lProj = $_REQUEST['labelproject'];
+								$lProjArr = $datasetManager->getLabelProjects();
+								foreach($lProjArr as $projStr){
+									echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
+								} 
+								?>
+							</select> 
 						</div>
 						<div>
 							<span style="margin-left:20px;">
@@ -291,12 +291,13 @@ if($symbUid){
 									<input type="radio" name="rpp" value="3" checked /> 3<br/>
 									<input type="radio" name="rpp" value="0" /> Auto (unreliable)
 								</fieldset>
-								<div style="float:left;margin:50px;">
+								<div style="float:left;margin: 15px 50px;">
 									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-									<input type="submit" name="submitaction" value="Print Labels" /> 
-									<span style="margin-left:30px;">
-										<input type="submit" name="submitaction" value="Export Label Data" />
-									</span> 
+									<input type="submit" name="submitaction" value="Print in Browser" />
+									<br/><br/> 
+									<input type="submit" name="submitaction" value="Export to CSV" />
+									<br/><br/>
+									<input type="submit" name="submitaction" value="Export to DOC" />
 								</div>
 							</fieldset>					
 						</form>

@@ -95,6 +95,7 @@ if($editable){
 	</div> 
 	<?php 
 	if($editable){
+		$taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 		if($action == "Upload ITIS File" || $action == 'Upload Taxa'){
 			echo '<hr /><ul>';
 			$loaderManager->uploadFile();
@@ -102,7 +103,7 @@ if($editable){
 		}
 		elseif($action == "Activate Taxa"){
 			echo '<hr /><ul>';
-			$loaderManager->transferUpload();
+			$loaderManager->transferUpload($taxAuthId);
 			echo "<li>Taxa upload appears to have been successful.</li>";
 			echo "<li>Go to <a href='taxonomydisplay.php'>Taxonomic Tree Search</a> page to query for a loaded name.</li>";
 			echo '</ul><hr />';
@@ -110,7 +111,7 @@ if($editable){
 		elseif($action == "Clean and Transfer Taxa"){
 			echo '<hr /><ul>';
 			$loaderManager->cleanUpload();
-			$loaderManager->transferUpload();
+			$loaderManager->transferUpload($taxAuthId);
 			echo "Taxa apparently cleaned and loaded into the taxonomic hierarchy";
 			echo '</ul><hr />';
 		}
@@ -129,6 +130,17 @@ if($editable){
 						transferring to the central taxonomic tables  
 						(&quot;taxa&quot;,&quot;taxstatus&quot;) and building the hierarchy. 
 						If you feel confident of the data integrity, click the transfer button below.  
+					</div>
+					<div style="margin:10px;">
+						Target Thesaurus: 
+						<select name="taxauthid">
+							<?php 
+							$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+							foreach($taxonAuthArr as $k => $v){
+								echo '<option value="'.$k.'">'.$v.'</option>'."\n";
+							}
+							?>
+						</select>
 					</div>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Activate Taxa" />
@@ -260,6 +272,17 @@ if($editable){
 					<div style="margin:10px;">
 						If taxa information was loaded into the UploadTaxa table using other means, 
 						one can use this form to clean and transfer the taxa names into the taxonomic tables (taxa, tastatus).  
+					</div>
+					<div style="margin:10px;">
+						Target Thesaurus: 
+						<select name="taxauthid">
+							<?php 
+							$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+							foreach($taxonAuthArr as $k => $v){
+								echo '<option value="'.$k.'">'.$v.'</option>'."\n";
+							}
+							?>
+						</select>
 					</div>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Clean and Transfer Taxa" />

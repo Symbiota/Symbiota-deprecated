@@ -542,7 +542,7 @@ class TaxaLoaderManager{
 		
 	}
 
-	protected function buildHierarchy($taxAuthId = 1){
+	protected function buildHierarchy($taxAuthId){
 		$sqlHier = 'SELECT ts.tid FROM taxstatus ts WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.hierarchystr IS NULL)';
 		//echo $sqlHier;
 		$resultHier = $this->conn->query($sqlHier);
@@ -581,7 +581,7 @@ class TaxaLoaderManager{
 		$resultHier->close();
 	}
 	
-	protected function buildHierarchy_old($taxAuthId = 1){
+	protected function buildHierarchy_old($taxAuthId){
 		do{
 			unset($hArr);
 			$hArr = Array();
@@ -707,6 +707,18 @@ class TaxaLoaderManager{
 			$this->setSourceArr();
 		}
 		return $this->sourceArr;
+	}
+	
+	public function getTaxAuthorityArr(){
+		$retArr = array();
+		$sql = 'SELECT taxauthid, name FROM taxauthority ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->taxauthid] = $r->name;
+			}
+			$rs->close();
+		} 
+		return $retArr;
 	}
 	
  	protected function cleanField($fieldValue){
