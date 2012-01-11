@@ -5,8 +5,8 @@ $defaultTitle = '';
 $adminEmail = '';
 $charset = 'ISO-8859-1';			//ISO-8859-1 or UTF-8
 
-$clientRoot = '';					//URL path to project root folder 
-$serverRoot = '';					//Root path to Symbiota project root folder
+$clientRoot = '';					//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
+$serverRoot = '';					//Full path to Symbiota project root folder
 $tempDirRoot = '';
 $logPath = '';						//If left NULL, <$tempDirRoot>/logs will be used
 
