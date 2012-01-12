@@ -87,8 +87,8 @@ else{
 				echo ('@page WordSection1
 					{size:8.5in 11.0in;
 					margin:.25in .25in .25in .25in;
-					mso-header-margin:.5in;
-					mso-footer-margin:.5in;
+					mso-header-margin:0;
+					mso-footer-margin:0;
 					mso-paper-source:0;}
 				div.WordSection1
 					{page:WordSection1;}');
