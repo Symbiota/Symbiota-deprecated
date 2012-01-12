@@ -44,12 +44,16 @@ else{
 			}
 			?>
 				<meta http-equiv="Content-Type" content="application/msword; charset="<?php echo $charset; ?>">
-				<xml>
+				<?php
+				if($exportDoc) {
+				echo ('<xml>
 					<w:WordDocument>
 					<w:View>Print</w:View>
 					<w:Pages>1</w:Pages>
 					</w:WordDocument>
-				</xml>
+				</xml>');
+				}
+				?>
 				<?php 
 			}
 			?>
