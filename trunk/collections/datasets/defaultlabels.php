@@ -41,7 +41,8 @@ else{
 			if($exportDoc){
 				header('Content-Type: application/msword');
 				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
-				?>
+			}
+			?>
 				<meta http-equiv="Content-Type" content="application/msword; charset="<?php echo $charset; ?>">
 				<xml>
 					<w:WordDocument>
@@ -82,10 +83,21 @@ else{
 				.lfooter {width:100%; text-align:center; font:bold 12pt arial,sans-serif; padding-top:10px;clear:both;}
 				.barcodeonly {width:220px; height:50px; float:left;padding:10px; text-align:center; }
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
+				<?php 
+				if($exportDoc) {
+				echo ('@page WordSection1
+					{size:8.5in 11.0in;
+					margin:.25in .25in .25in .25in;
+					mso-header-margin:.5in;
+					mso-footer-margin:.5in;
+					mso-paper-source:0;}
+				div.WordSection1
+					{page:WordSection1;}');
+				?>
 			</style>
 		</head>
 		<body>
-			<div>
+			<div <?php echo ($exportDoc?'class=WordSection1':'') ?>>
 				<?php 
 				if($isEditor){
 					if($action){
