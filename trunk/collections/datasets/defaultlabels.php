@@ -41,20 +41,15 @@ else{
 			if($exportDoc){
 				header('Content-Type: application/msword');
 				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
-			}
 			?>
 				<meta http-equiv="Content-Type" content="application/msword; charset="<?php echo $charset; ?>">
-				<?php
-				if($exportDoc) {
-				echo ('<xml>
+				<xml>
 					<w:WordDocument>
 					<w:View>Print</w:View>
 					<w:Pages>1</w:Pages>
 					</w:WordDocument>
-				</xml>');
-				}
-				?>
-				<?php 
+				</xml>
+				<?php
 			}
 			?>
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
@@ -97,6 +92,7 @@ else{
 					mso-paper-source:0;}
 				div.WordSection1
 					{page:WordSection1;}');
+				}
 				?>
 			</style>
 		</head>
