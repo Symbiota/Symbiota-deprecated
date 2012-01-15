@@ -160,10 +160,10 @@ class SpecUploadFile extends SpecUploadManager{
     	if($this->uploadTargetPath) return $this->uploadTargetPath;
 		$tPath = $GLOBALS["tempDirRoot"];
 		if(!$tPath){
-			$tPath = $GLOBALS["serverRoot"]."/temp";
+			$tPath = ini_get('upload_tmp_dir');
 		}
-		if(!file_exists($tPath."/downloads")){
-			mkdir($tPath."/downloads");
+		if(!$tPath){
+			$tPath = $GLOBALS["serverRoot"]."/temp";
 		}
 		if(file_exists($tPath."/downloads")){
 			$tPath .= "/downloads";

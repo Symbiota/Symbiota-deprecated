@@ -1,8 +1,8 @@
 <?php
 
-class SpecProcessorLabelManager{
+class SpecProcessorOcrManager{
 
-	public static function ocrImage($imgId){
+	public function ocrImage($imgId){
 		$retStr = '';
 		if(is_numeric($imgId)){
 			$imgURrl = '';
@@ -23,8 +23,14 @@ class SpecProcessorLabelManager{
 					$tempPath = $GLOBALS['tempDirRoot']; 
 				}
 				else{
-					$tempPath = $GLOBALS['serverRoot'];
+					$tempPath = ini_get('upload_tmp_dir');
 				}
+				if(!$tempPath){
+					$tempPath = $GLOBALS['serverRoot'];
+					if(substr($tempPath,-1) != '/') $tempPath .= '/';
+					$tempPath .= 'temp/';
+				}
+				
 				if(substr($tempPath,-1) != '/') $tempPath .= '/';
 				if(file_exists($tempPath.'images/') || mkdir($tempPath.'images/')){
 					$tempPath .= 'images/';
@@ -73,7 +79,7 @@ class SpecProcessorLabelManager{
 		return $retStr;
 	}
 	
-	public static function parseRawTextSymbiota($prlid){
+	public function parseRawTextSymbiota($prlid){
 		$textBlock = '';
 		if(is_numeric($prlid)){
 			$conn = MySQLiConnectionFactory::getCon("readonly");
@@ -90,13 +96,13 @@ class SpecProcessorLabelManager{
 		return $this->parseTextBlockSymbiota($textBlock);
 	}
 	
-	public static function parseTextBlockSymbiota($textBlock){
+	public function parseTextBlockSymbiota($textBlock){
 		$dataMap = array();
 		
 		return $dataMap;
 	}
 	
-	public static function parseTextBlockSalix($textBlock){
+	public function parseTextBlockSalix($textBlock){
 		$dataMap = array();
 		
 		return $dataMap;

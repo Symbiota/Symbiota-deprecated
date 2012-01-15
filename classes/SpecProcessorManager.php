@@ -44,8 +44,16 @@ class SpecProcessorManager {
 	function __construct($logPath) {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->logPath = $logPath;
-		if(!$this->logPath && array_key_exists('tempDirRoot',$GLOBALS)){
-			$this->logPath = $GLOBALS['tempDirRoot'];
+		if(!$this->logPath){
+			if(array_key_exists('logPath',$GLOBALS)){
+				$this->logPath = $GLOBALS['logPath'];
+			}
+			elseif(array_key_exists('tempDirRoot',$GLOBALS)){
+				$this->logPath = $GLOBALS['tempDirRoot'];
+			}
+			else{
+				$this->logPath = ini_get('upload_tmp_dir');
+			}
 		}
 		if(!$this->logPath && array_key_exists('serverRoot',$GLOBALS)){
 			$this->logPath = $GLOBALS['serverRoot'].'/temp/';

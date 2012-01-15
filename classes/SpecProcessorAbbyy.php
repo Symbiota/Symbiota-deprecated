@@ -17,8 +17,8 @@ class SpecProcessorAbbyy extends SpecProcessorManager{
 		$statusArr = Array();
 	 	$fileName = basename($_FILES['abbyyfile']['name']);
 	 	$filePath = $GLOBALS['tempDirRoot'];
+	 	if(!$filePath) $filePath = ini_get('upload_tmp_dir');
 	 	if(substr($filePath,-1) != '/') $filePath .= '/';
-	 	$filePath .= 'downloads/';
 	 	if(move_uploaded_file($_FILES['abbyyfile']['tmp_name'], $filePath.$fileName)){
 	 		$fh = fopen($filePath.$fileName,'rb') or die("Can't open file");
 			if($fh){

@@ -5,6 +5,9 @@ date_default_timezone_set('America/Phoenix');
 if(substr($clientRoot,-1) == '/'){
 	$clientRoot = substr($clientRoot,0,strlen($clientRoot)-1);
 }
+if(substr($serverRoot,-1) == '/'){
+	$serverRoot = substr($serverRoot,0,strlen($serverRoot)-1);
+}
 
 //Check cookie to see if signed in
 $paramsArr = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
