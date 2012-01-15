@@ -185,8 +185,12 @@ if($editable){
 					<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 					<div style="margin:10px;">
 						Flat structured, CSV (comma delimited) text files can be uploaded here. 
-						To upload an Excel file, save as a CSV file. 
-						Scientific name is the only required field. 
+						Scientific name is the only required field below genus rank. 
+						However, family, author, and rankid (as defined in taxonunits table) are always advised. 
+						For upper level taxa, parents and rankids need to be included in order to build the taxonomic hierarchy.
+						Large data files can be compressed as a ZIP file before import. 
+						If the file upload step fails without displaying an error message, it is possible that the 
+						file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
 					</div>
 					<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getUploadFileName();?>" />
 					<?php if(!$loaderManager->getUploadFileName()){ ?>
@@ -288,9 +292,14 @@ if($editable){
 				<fieldset style="width:90%;">
 					<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
 					<div style="margin:10px;">
-						ITIS data files downloaded from the <a href="http://www.itis.gov/access.html">ITIS Download Page</a> ca be uploaded
-						using this function. If the ITIS download file includes synonyms 
-						and vernaculars, this data will also be incorporated into the upload process.
+						ITIS data extract from the <a href="http://www.itis.gov/access.html" target="_blank">ITIS Download Page</a> can be uploaded
+						using this function. Note that the file needs to be in their single file format (.bin).
+						If you are looking for a full kingdom extraction, follow the "Download a specific taxonomic group" link and
+						a link to a data extract will be emailed to you.   
+						Large data files can be compressed as a ZIP file before import. 
+						If the file upload step fails without displaying an error message, it is possible that the 
+						file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
+						Note that if synonyms and vernaculars are included, these data will also be incorporated into the upload process.
 					</div>
 					<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 					<div class="itisoverrideopt">
