@@ -72,7 +72,10 @@ class ImageDetailManager{
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$url);
 	 		if($url != $oldUrl){
-	 			if(!rename($oldName,$newName)){
+	 			if(copy($oldName,$newName)){
+	 				unlink($oldName);
+	 			}
+	 			else{
 	 				$url = $oldUrl;
 		 			$status .= "Web URL rename FAILED; url address unchanged";
 	 			}
@@ -83,7 +86,10 @@ class ImageDetailManager{
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldTnUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$tnUrl);
 	 		if($tnUrl != $oldTnUrl){
-	 			if(!rename($oldName,$newName)){
+	 			if(copy($oldName,$newName)){
+	 				unlink($oldName);
+	 			}
+	 			else{
 	 				$tnUrl = $oldTnUrl;
 		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
 	 			}
@@ -94,7 +100,10 @@ class ImageDetailManager{
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldOrigUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$origUrl);
 	 		if($origUrl != $oldOrigUrl){
-	 			if(!rename($oldName,$newName)){
+	 			if(copy($oldName,$newName)){
+	 				unlink($oldName);
+	 			}
+	 			else{
 	 				$origUrl = $oldOrigUrl;
 		 			$status .= "Large image URL rename FAILED; url address unchanged";
 	 			}
