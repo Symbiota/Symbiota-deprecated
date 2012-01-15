@@ -1,6 +1,9 @@
 <?php
 class TaxaLoaderItisManager extends TaxaLoaderManager{
 	
+	private $extraArr = array();
+	private $authArr = array();
+	
 	function __construct() {
  		parent::__construct();
 	}
@@ -10,14 +13,22 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 	}
 
 	public function uploadFile(){
-		$statusStr = "<li>Starting Upload</li>";
-		$synLoaded = false;
-		$authLoaded = false;
-		$vernLoaded = false;
+		echo "<li>Starting Upload</li>";
+		ob_flush();
+		flush();
+		//Initiate upload process
 		$this->conn->query("DELETE FROM uploadtaxa");
-		$fh = fopen($_FILES['uploadfile']['tmp_name'],'rb') or die("Can't open file");
-		$recordCnt = 0;
+		$this->setUploadFile();
+		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
+		echo "<li>Taxa file uploaded and successfully opened</li>";
+		ob_flush();
+		flush();
+		
+		//First run through file and grab and store Authors, Synonyms, and Vernaculars
 		$delimtStr = "";
+		echo "<li>Harvesting authors, synonyms, and vernaculars</li>";
+		ob_flush();
+		flush();
 		while($record = fgets($fh)){
 			if(!$delimtStr){
 				$delimtStr = "|";
@@ -25,86 +36,99 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 					$delimtStr = ",";
 				}
 			}
+			if(substr($record,4) != '[TU]'){
+				$recordArr = explode($delimtStr,$record);
+				if($recordArr[0] == "[SY]"){
+					$this->extraArr[$recordArr[2]]['s'] = $this->conn->real_escape_string($recordArr[3]);
+				}
+				elseif($recordArr[0] == "[TA]"){
+					$this->authArr[$recordArr[1]] = $this->conn->real_escape_string($recordArr[2]);
+				}
+				elseif($recordArr[0] == "[VR]"){
+					$this->extraArr[$recordArr[4]]['v'] = $this->conn->real_escape_string($recordArr[3]);
+					$this->extraArr[$recordArr[4]]['l'] = $this->conn->real_escape_string($recordArr[5]);
+				}
+			}
+		}
+		if($this->authArr){
+			echo '<ul><li>Authors mapped</li></ul>';
+		}
+		if($this->extraArr){
+			echo '<ul><li>Synonyms and Vernaculars mapped</li></ul>';
+		}
+		ob_flush();
+		flush();
+		
+		
+		//Load taxa records
+		echo "<li>Harvest and loading Taxa... ";
+		ob_flush();
+		flush();
+		$recordCnt = 0;
+		rewind($fh);
+		
+		while($record = fgets($fh)){
 			$recordArr = explode($delimtStr,$record);
 			if($recordArr[0] == "[TU]"){
 				$this->loadTaxonUnit($recordArr);
 				$recordCnt++;
 			}
-			elseif($recordArr[0] == "[SY]"){
-				$this->loadSynonyms($recordArr);
-				$synLoaded = true;
-			}
-			elseif($recordArr[0] == "[TA]"){
-				$this->loadAuthors($recordArr);
-				$authLoaded = true;
-			}
-			elseif($recordArr[0] == "[VR]"){
-				$this->loadVernaculars($recordArr);
-				$vernLoaded = true;
-			}
 		}
-		$statusStr .= '<li>'.$recordCnt.' taxon records uploaded</li>';
-		if($synLoaded){
-			$statusStr .= '<ul><li>Synonym links added</li></ul>';
-		}
-		if($authLoaded){
-			$statusStr .= '<ul><li>Authors added</li></ul>';
-		}
-		if($vernLoaded){
-			$statusStr .= '<ul><li>Vernaculars added</li></ul>';
-		}
+
+		echo " Done!</li>";
+		echo '<li>'.$recordCnt.' records loaded</li>';
+		ob_flush();
+		flush();
 		fclose($fh);
 		$this->cleanUpload();
-		return $statusStr;
 	}
 
 	private function loadTaxonUnit($tuArr){
 		if(count($tuArr) > 24){
+			
 			$unitInd3 = $this->conn->real_escape_string($tuArr[8]?$tuArr[8]:$tuArr[6]);
 			$unitName3 = $this->conn->real_escape_string($tuArr[9]?$tuArr[9]:$tuArr[7]);
 			$sciName = $this->conn->real_escape_string(trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3));
-			$sql = "INSERT INTO uploadtaxa(SourceId,scinameinput,sciname,unitind1,unitname1,unitind2,unitname2,unitind3,unitname3,SourceParentId,author,kingdomid,rankid) ".
-				"VALUES (".$this->conn->real_escape_string($tuArr[1]).",\"".$sciName."\",\"".$sciName."\",".
-				($tuArr[2]?"\"".$this->conn->real_escape_string($tuArr[2])."\"":"NULL").",".
-				($tuArr[3]?"\"".$this->conn->real_escape_string($tuArr[3])."\"":"NULL").",".
-				($tuArr[4]?"\"".$this->conn->real_escape_string($tuArr[4])."\"":"NULL").",".
-				($tuArr[5]?"\"".$this->conn->real_escape_string($tuArr[5])."\"":"NULL").",".
-				($unitInd3?"\"".$unitInd3."\"":"NULL").",".($unitName3?"\"".$unitName3."\"":"NULL").",".
+			$author = '';
+			if($tuArr[20] && array_key_exists($tuArr[20],$this->authArr)){
+				$author = $this->authArr[$tuArr[20]];
+				unset($this->authArr[$tuArr[20]]);
+			}
+			$sourceId = $this->conn->real_escape_string($tuArr[1]);
+			$sourceAcceptedId = '';
+			$acceptance = '1';
+			$vernacular = '';
+			$vernlang = '';
+			if(array_key_exists($sourceId,$this->extraArr)){
+				$eArr = $this->extraArr[$sourceId];
+				if(array_key_exists('s',$eArr)){
+					$sourceAcceptedId = $eArr['s'];
+					$acceptance = '0';
+				}
+				if(array_key_exists('v',$eArr)){
+					$vernacular = $eArr['v'];
+					$vernlang = $eArr['l'];
+				}
+				unset($this->extraArr[$sourceId]);
+			}
+			$sql = "INSERT INTO uploadtaxa(SourceId,scinameinput,sciname,unitind1,unitname1,unitind2,unitname2,unitind3,".
+				"unitname3,SourceParentId,author,kingdomid,rankid,SourceAcceptedId,acceptance,vernacular,vernlang) ".
+				"VALUES (".$sourceId.',"'.$sciName.'","'.$sciName.'",'.
+				($tuArr[2]?'"'.$this->conn->real_escape_string($tuArr[2]).'"':"NULL").",".
+				($tuArr[3]?'"'.$this->conn->real_escape_string($tuArr[3]).'"':"NULL").",".
+				($tuArr[4]?'"'.$this->conn->real_escape_string($tuArr[4]).'"':"NULL").",".
+				($tuArr[5]?'"'.$this->conn->real_escape_string($tuArr[5]).'"':"NULL").",".
+				($unitInd3?'"'.$unitInd3.'"':"NULL").",".($unitName3?'"'.$unitName3.'"':"NULL").",".
 				($tuArr[18]?$this->conn->real_escape_string($tuArr[18]):"NULL").",".
-				($tuArr[20]?$this->conn->real_escape_string($tuArr[20]):"NULL").",".
+				($author?'"'.$author.'"':"NULL").",".
 				($tuArr[23]?$this->conn->real_escape_string($tuArr[23]):"NULL").",".
-				($tuArr[24]?$this->conn->real_escape_string($tuArr[24]):"NULL").")";
-			//echo '<div>'.$sql.'</div>';
-			$this->conn->query($sql);
-		}
-	}
-
-	private function loadSynonyms($synArr){
-		if(count($synArr) == 5){
-			$sql = "UPDATE uploadtaxa SET SourceAcceptedId = ".$this->conn->real_escape_string($synArr[3]).
-			", acceptance = 0 WHERE (SourceId = ".$this->conn->real_escape_string($synArr[2]).')';
-			//echo '<div>'.$sql.'</div>';
-			$this->conn->query($sql);
-		}
-	}
-
-	private function loadAuthors($aArr){
-		if(count($aArr) == 5 && $aArr[2]){
-			$sql = "UPDATE uploadtaxa SET author = \"".$this->conn->real_escape_string($aArr[2]).
-				"\" WHERE (author = '".$this->conn->real_escape_string($aArr[1])."')";
-			//echo '<div>'.$sql.'</div>';
-			$this->conn->query($sql);
-		}
-	}
-
-	private function loadVernaculars($vArr){
-		if(count($vArr) == 8 && $vArr[3]){
-			$sql = "UPDATE uploadtaxa SET vernacular = \"".$this->conn->real_escape_string($vArr[3]).
-				"\", vernlang = \"".$this->conn->real_escape_string($vArr[5])."\" WHERE (SourceId = ".$this->conn->real_escape_string($vArr[4]).')';
+				($tuArr[24]?$this->conn->real_escape_string($tuArr[24]):"NULL").",".
+				($sourceAcceptedId?$sourceAcceptedId:'NULL').','.$acceptance.','.
+				($vernacular?'"'.$vernacular.'"':'NULL').','.
+				($vernlang?'"'.$vernlang.'"':'NULL').')';
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
 	}
 }
-
 ?>

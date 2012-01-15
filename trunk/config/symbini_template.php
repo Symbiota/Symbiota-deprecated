@@ -1,28 +1,21 @@
 <?php
-$defaultLang = 'English';			//Default language
+$defaultLang = 'English';		//Default language
 $defaultProjId = 1;
 $defaultTitle = '';
 $adminEmail = '';
-$charset = 'ISO-8859-1';			//ISO-8859-1 or UTF-8
+$charset = 'ISO-8859-1';		//ISO-8859-1 or UTF-8
 
-$clientRoot = '';					//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
-$serverRoot = '';					//Full path to Symbiota project root folder
-$tempDirRoot = '';
-$logPath = '';						//If left NULL, <$tempDirRoot>/logs will be used
+$clientRoot = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
+$serverRoot = '';				//Full path to Symbiota project root folder
+$tempDirRoot = '';				//Must be writable by Apache; will use system default if not specified  
+$logPath = '';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified 
 
 //the root for the image directory
-$imageDomain = '';					//Domain path to images, if different from Virtual Flora portal 
-$imageRootUrl = '';					//URL path to images
-$imageRootPath = '';				//Writable path to images, especially needed for downloading images
+$imageDomain = '';				//Domain path to images, if different from Virtual Flora portal 
+$imageRootUrl = '';				//URL path to images
+$imageRootPath = '';			//Writable path to images, especially needed for downloading images
 
 //Specimen Label and Batch Image Processor variables
-//Pixel variable also used in observation image, specimen image, and taxon image uploaders  
-$imgLoaderSourcePath = "";
-$imgLoaderTargetPath = "";		//If null, $imageRootPath will be used
-$imgLoaderUrl = "";				//If null, $imageRootUrl will be used
-$tnPixWidth = 130;				//Preferred pixel width of thumbnail 
-$webPixWidth = 1300;			//Preferred pixel width of basic web image. If source image is < 120% this width, it is not resized
-$lgPixWidth = 3168;				//Preferred pixel width of large image 
 //$useImageMagick = 0;			//Set to 1 to have ImageMagick resize images, given that it's installed (faster, less memory intensive)
 
 //Module activations

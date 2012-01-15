@@ -8,11 +8,13 @@ class TaxaLoaderManager{
 	protected $sourceArr = Array();
 	protected $targetArr = Array();
 	protected $fieldMap = Array();	//target field => source field
-	private $uploadFileName;
+	protected $uploadFileName;
+	protected $uploadTargetPath;
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
- 		set_time_limit(600);
+ 		$this->setUploadTargetPath();
+ 		set_time_limit(3000);
 		ini_set("max_input_time",120);
 		ini_set("upload_max_filesize",10);
 	}
@@ -24,15 +26,14 @@ class TaxaLoaderManager{
 	public function setUploadFile($ulFileName = ""){
 		//Just read first line of file in order to map fields to uploadtaxa table
 		if(!$ulFileName && array_key_exists('uploadfile',$_FILES)){
-	 		$targetPath = $this->getUploadTargetPath();
 			$ulFileName = $_FILES['uploadfile']['name'];
-	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath.$ulFileName);
+	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$ulFileName);
 	        if(substr($ulFileName,-4) == ".zip"){
 	        	$zipFileName = $ulFileName;
 				$zip = new ZipArchive;
-				$zip->open($targetPath.$ulFileName);
+				$zip->open($this->uploadTargetPath.$ulFileName);
 				$ulFileName = $zip->getNameIndex(0);
-				$zip->extractTo($targetPath);
+				$zip->extractTo($this->uploadTargetPath);
 				$zip->close();
 	        }
 		}
@@ -48,7 +49,7 @@ class TaxaLoaderManager{
 		ob_flush();
 		flush();
 		$this->conn->query("DELETE FROM uploadtaxa");
-		$fh = fopen($this->getUploadTargetPath().$this->uploadFileName,'rb') or die("Can't open file");
+		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
 		//convert all values to lowercase
 		foreach($headerArr as $k => $v){
@@ -81,11 +82,10 @@ class TaxaLoaderManager{
 		}
 		fclose($fh);
 		$this->cleanUpload();
-		if(file_exists($this->getUploadTargetPath().$this->uploadFileName)) unlink($this->getUploadTargetPath().$this->uploadFileName);
+		if(file_exists($this->uploadTargetPath.$this->uploadFileName)) unlink($this->uploadTargetPath.$this->uploadFileName);
 	}
 
 	public function cleanUpload(){
-		set_time_limit(600);
 		
 		$sspStr = 'ssp.';$inSspStr = 'subsp.';
 		$sql = 'SELECT unitind3 FROM taxa WHERE rankid = 230 AND unitind3 LIKE "s%" LIMIT 1';
@@ -228,6 +228,14 @@ class TaxaLoaderManager{
 			'SET sciname = CONCAT_WS(" ",unitind1, unitname1, unitind2, unitname2, unitind3, unitname3) '.
 			'WHERE sciname IS NULL';
 		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
+			'SET u.parentstr = u2.sciname '.
+			'WHERE u.parentstr IS NULL';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
+			'SET u.acceptedstr = u2.sciname '.
+			'WHERE u.acceptedstr IS NULL';
+		$this->conn->query($sql);
 		echo 'Done!</li>';
 
 		//Delete taxa where sciname can't be inserted. These are taxa where sciname already exists
@@ -250,6 +258,18 @@ class TaxaLoaderManager{
 		echo '<li style="margin-left:10px;">Populating null family values... ';
 		ob_flush();
 		flush();
+		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceParentId = u2.sourceId '.
+			'SET u1.family = u2.sciname '.
+			'WHERE u2.rankid = 140 AND u1.family is null ';
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname '.
+			'SET u1.family = u2.family '.
+			'WHERE u1.family IS NULL AND u2.family IS NOT NULL ';
+		$this->conn->query($sql);
+		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceAcceptedId = u2.sourceId) '.
+			'SET u1.family = u2.family '.
+			'WHERE u1.family IS NULL AND u2.family IS NOT NULL ';
+		$this->conn->query($sql);
 		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
 			'INNER JOIN uploadtaxa u3 ON u2.sourceParentId = u3.sourceId '.
 			'SET u1.family = u3.sciname '.
@@ -264,10 +284,6 @@ class TaxaLoaderManager{
 		$sql = 'UPDATE uploadtaxa u0 INNER JOIN uploadtaxa u1 ON u0.scinameinput = u1.acceptedstr '.
 			'SET u0.family = u1.family '.
 			'WHERE u0.family IS NULL AND u0.rankid > 140 AND u1.family IS NOT NULL';
-		$this->conn->query($sql);
-		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
-			'SET u.parentstr = u2.sciname '.
-			'WHERE u.parentstr IS NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li>';
 
@@ -335,7 +351,11 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET parentstr = family WHERE (parentstr IS NULL OR parentstr = "") AND rankid = 180';
 		$this->conn->query($sql);
-
+		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceAcceptedID = u2.sourceId '.
+			'SET u1.sourceParentId = u2.sourceParentId, u1.parentStr = u2.parentStr '.
+			'WHERE u1.sourceParentId IS NULL AND u1.sourceAcceptedID IS NOT NULL AND u2.sourceParentId IS NOT NULL AND u1.rankid < 220 ';
+		$this->conn->query($sql);
+		
 		$sql = 'UPDATE uploadtaxa up INNER JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET parenttid = t.tid WHERE parenttid IS NULL';
 		$this->conn->query($sql);
@@ -421,7 +441,6 @@ class TaxaLoaderManager{
 	}
 
 	public function transferUpload($taxAuthId = 1){
-		set_time_limit(600);
 		$startLoadCnt = -1;
 		$endLoadCnt = 0;
 		$loopCnt = 0;
@@ -429,6 +448,7 @@ class TaxaLoaderManager{
 		ob_flush();
 		flush();
 
+		
 		//Prime table with kingdoms that are not yet in table
 		$sql = 'INSERT IGNORE INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
 			'SELECT DISTINCT ut.SciName, ut.KingdomID, ut.RankId, ut.UnitInd1, ut.UnitName1, ut.UnitInd2, ut.UnitName2, ut.UnitInd3, '.
@@ -504,6 +524,7 @@ class TaxaLoaderManager{
 				'WHERE ut.kingdomid IS NULL AND t.kingdomid IS NOT NULL AND ut.parenttid IS NOT NULL ';
 			$this->conn->query($sql);
 			
+			//Update parentTids
 			$sql = 'UPDATE uploadtaxa ut1 INNER JOIN uploadtaxa ut2 ON ut1.sourceparentid = ut2.sourceid '.
 				'INNER JOIN taxa t ON ut2.scinameinput = t.sciname '.
 				'SET ut1.parenttid = t.tid '.
@@ -515,6 +536,7 @@ class TaxaLoaderManager{
 				'WHERE up.parenttid IS NULL';
 			$this->conn->query($sql);
 
+			
 			$sql = 'SELECT COUNT(*) as cnt FROM uploadtaxa';
 			$rs = $this->conn->query($sql);
 			$r = $rs->fetch_object();
@@ -524,6 +546,7 @@ class TaxaLoaderManager{
 			$loopCnt++;
 		}
 
+		
 		echo '<li>Finishing up with some house cleaning... ';
 		ob_flush();
 		flush();
@@ -546,6 +569,8 @@ class TaxaLoaderManager{
 		$sqlHier = 'SELECT ts.tid FROM taxstatus ts WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.hierarchystr IS NULL)';
 		//echo $sqlHier;
 		$resultHier = $this->conn->query($sqlHier);
+		
+		
 		while($rowHier = $resultHier->fetch_object()){
 			$tid = $rowHier->tid;
 			$parentArr = Array();
@@ -573,11 +598,13 @@ class TaxaLoaderManager{
 			if($parentArr){
 				$sqlInsert = 'UPDATE taxstatus ts SET ts.hierarchystr = "'.implode(',',array_reverse($parentArr)).'" '.
 					'WHERE (ts.taxauthid = '.$taxAuthId.') AND ts.tid = '.$tid;
-				echo "<div>".$sqlInsert."</div>";
+				//echo "<div>".$sqlInsert."</div>";
 				$this->conn->query($sqlInsert);
 			}
 			unset($parentArr);
 		}
+		
+		
 		$resultHier->close();
 	}
 	
@@ -644,18 +671,21 @@ class TaxaLoaderManager{
 		return $retArr;
 	}
 
-	protected function getUploadTargetPath(){
+	protected function setUploadTargetPath(){
 		$tPath = $GLOBALS["tempDirRoot"];
+		if(!$tPath){
+			$tPath = ini_get('upload_tmp_dir');
+		}
 		if(!$tPath){
 			$tPath = $GLOBALS["serverRoot"]."/temp";
 		}
-		if(!file_exists($tPath."/downloads")){
-			mkdir($tPath."/downloads");
+		if(!file_exists($tPath."/symb_dl")){
+			mkdir($tPath."/symb_dl");
 		}
-		if(file_exists($tPath."/downloads")){
-			$tPath .= "/downloads";
+		if(file_exists($tPath."/symb_dl")){
+			$tPath .= "/symb_dl";
 		}
-    	return $tPath."/";
+		$this->uploadTargetPath = $tPath."/"; 
     }
 
 	public function setFieldMap($fm){
@@ -680,7 +710,7 @@ class TaxaLoaderManager{
 	}
 	
 	private function setSourceArr(){
-		$fh = fopen($this->getUploadTargetPath().$this->uploadFileName,'rb') or die("Can't open file");
+		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
 		$sourceArr = Array();
 		foreach($headerArr as $field){

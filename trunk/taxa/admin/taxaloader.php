@@ -7,6 +7,7 @@ include_once($serverRoot.'/classes/TaxaLoaderManager.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
+$ulOverride = array_key_exists("uloverride",$_REQUEST)?$_REQUEST["uloverride"]:"";
 
 $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
@@ -21,6 +22,7 @@ if($editable){
 		$loaderManager = new TaxaLoaderItisManager();
 	}
 	else{
+		if($ulOverride) $ulFileName = $ulOverride;
 		$loaderManager->setUploadFile($ulFileName);
 	}
 	
@@ -43,34 +45,59 @@ if($editable){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script type="text/javascript">
-	function checkItisUploadForm(f){
-		if(f.uploadfile.value == ""){
-			alert("Please enter a path value of the file you wish to upload");
-			return false;
+		function toggle(target){
+			var tDiv = document.getElementById(target);
+			if(tDiv != null){
+				if(tDiv.style.display=="none"){
+					tDiv.style.display="block";
+				}
+			 	else {
+			 		tDiv.style.display="none";
+			 	}
+			}
+			else{
+			  	var divs = document.getElementsByTagName("div");
+			  	for (var i = 0; i < divs.length; i++) {
+			  	var divObj = divs[i];
+					if(divObj.className == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="block";
+						}
+					 	else {
+					 		divObj.style.display="none";
+					 	}
+					}
+				}
+			}
 		}
-		return true;
-	}
-
-	function checkUploadForm(f){
-		var ulObj = document.getElementById("genuploadfile");
-		if(ulObj != null){
-			valueStr = ulObj.value;
-			if(valueStr == ""){
+	
+		function verifyItisUploadForm(f){
+			if(f.uploadfile.value == "" && f.uloverride.value == ""){
 				alert("Please enter a path value of the file you wish to upload");
 				return false;
 			}
-			if(valueStr.indexOf(".csv") == -1 && valueStr.indexOf(".CSV") == -1 && valueStr.indexOf(".zip") == -1){
-				alert("Upload file must be a CSV or ZIP file");
-				return false;
-			}			
+			return true;
 		}
-		return true;
-	}
-
-	function checkTransferForm(f){
-		return true;
-	}
 	
+		function verifyUploadForm(f){
+			var inputValue = f.uploadfile.value;
+			if(inputValue == "") inputValue = f.uloverride.value;
+			if(inputValue == ""){
+				alert("Please enter a path value of the file you wish to upload");
+				return false;
+			}
+			else{
+				if(inputValue.indexOf(".csv") == -1 && inputValue.indexOf(".CSV") == -1 && inputValue.indexOf(".zip") == -1){
+					alert("Upload file must be a CSV or ZIP file");
+					return false;
+				}			
+			}
+			return true;
+		}
+	
+		function checkTransferForm(f){
+			return true;
+		}
 	</script>
 </head>
 <body>
@@ -153,8 +180,8 @@ if($editable){
 	else{
 		?>
 		<div>
-			<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm()">
-				<fieldset style="width:450px;">
+			<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyUploadForm(this)">
+				<fieldset style="width:90%;">
 					<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 					<div style="margin:10px;">
 						Flat structured, CSV (comma delimited) text files can be uploaded here. 
@@ -165,12 +192,25 @@ if($editable){
 					<?php if(!$loaderManager->getUploadFileName()){ ?>
 						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 						<div>
-							<b>Upload File:</b>
-							<div style="margin:10px;">
-								<input id="genuploadfile" name="uploadfile" type="file" size="40" />
+							<div class="overrideopt">
+								<b>Upload File:</b>
+								<div style="margin:10px;">
+									<input id="genuploadfile" name="uploadfile" type="file" size="40" />
+								</div>
+							</div>
+							<div class="overrideopt" style="display:none;">
+								<b>Full File Path:</b> 
+								<div style="margin:10px;">
+									<input name="uloverride" type="text" size="50" /><br/>
+									* This option is for manual upload of a data file. 
+									Enter full path to data file located on working server.
+								</div>   
 							</div>
 							<div style="margin:10px;">
 								<input type="submit" name="action" value="Analyze Input File" />
+							</div>
+							<div style="float:right;" >
+								<a href="#" onclick="toggle('overrideopt');return false;">Toggle Manual Upload Option</a>
 							</div>
 						</div>
 					<?php }else{ ?>
@@ -215,7 +255,7 @@ if($editable){
 													elseif($selStr !== 0 && $mappedTarget && $mappedTarget == $tField){
 														$selStr = "SELECTED";
 													}
-													elseif($selStr !== 0 && $tField==$sField){
+													elseif($selStr !== 0 && $tField==$sField && $tField != "sciname"){
 														$selStr = "SELECTED";
 													}
 													echo '<option '.($selStr?$selStr:'').'>'.$tField."</option>\n";
@@ -244,8 +284,8 @@ if($editable){
 			</form>
 		</div>
 		<div>
-			<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return checkItisUploadForm()">
-				<fieldset style="width:450px;">
+			<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyItisUploadForm(this)">
+				<fieldset style="width:90%;">
 					<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
 					<div style="margin:10px;">
 						ITIS data files downloaded from the <a href="http://www.itis.gov/access.html">ITIS Download Page</a> ca be uploaded
@@ -253,21 +293,32 @@ if($editable){
 						and vernaculars, this data will also be incorporated into the upload process.
 					</div>
 					<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
-					<div>
+					<div class="itisoverrideopt">
 						<b>Upload File:</b>
 						<div style="margin:10px;">
 							<input id="itisuploadfile" name="uploadfile" type="file" size="40" />
 						</div>
 					</div>
+					<div class="itisoverrideopt" style="display:none;">
+						<b>Full File Path:</b> 
+						<div style="margin:10px;">
+							<input name="uloverride" type="text" size="50" /><br/>
+							* This option is for manual upload of a data file. 
+							Enter full path to data file located on working server.
+						</div>
+					</div>
 					<div style="margin:10px;">
 						<input type="submit" name="action" value="Upload ITIS File" />
+					</div>
+					<div style="float:right;">
+						<a href="#" onclick="toggle('itisoverrideopt');return false;">Toggle Manual Upload Option</a>
 					</div>
 				</fieldset>
 			</form>
 		</div>
 		<div>
 			<form name="cleantransferform" action="taxaloader.php" method="post">
-				<fieldset style="width:450px;">
+				<fieldset style="width:90%;">
 					<legend style="font-weight:bold;font-size:120%;">Clean and Transfer Taxa To Central Table</legend>
 					<div style="margin:10px;">
 						If taxa information was loaded into the UploadTaxa table using other means, 

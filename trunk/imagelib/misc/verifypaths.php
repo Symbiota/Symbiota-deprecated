@@ -81,6 +81,9 @@ class VerifyPaths{
 		$this->urlPath = $GLOBALS["imageRootUrl"];
 		if(substr($this->urlPath,-1) != "/") $this->urlPath .= "/";  
 		$this->tempRoot = $GLOBALS["tempDirRoot"];
+		if(!$this->tempRoot){
+			$this->tempRoot = ini_get('upload_tmp_dir');
+		}
 		if(substr($this->tempRoot,-1) != "/") $this->tempRoot .= "/";  
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
