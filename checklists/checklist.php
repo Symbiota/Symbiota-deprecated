@@ -93,6 +93,7 @@
 		$dynSqlExists = true;
 	}
 
+	$voucherProjects = $clManager->getVoucherProjects(); 
 ?>
 
 <!DOCTYPE html >
@@ -278,7 +279,13 @@
 				<div id="tabs" style="margin:10px;">
 				    <ul>
 				        <li><a href="#mdtab"><span>Metadata</span></a></li>
-				        <li><a href="#imgvouchertab">Add Image Voucher</a></li>
+						<?php
+						if($voucherProjects){
+							?>
+					        <li><a href="#imgvouchertab">Add Image Voucher</a></li>
+					        <?php
+						}
+					    ?>
 				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($proj?'&proj='.$clManager->getPid():'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
@@ -349,16 +356,15 @@
 							</fieldset>
 						</form>
 					</div>
-					<div id="imgvouchertab">
-						<?php
-						$voucherProjects = $clManager->getVoucherProjects(); 
-						if($voucherProjects){
-							?>
+					<?php
+					if($voucherProjects){
+						?>
+						<div id="imgvouchertab">
 							<form name="addimagevoucher" action="../collections/editor/observationsubmit.php" method="get" target="_blank">
 								<fieldset style="margin:15px;padding:25px;">
 									<legend><b>Add Image Voucher and Link to Checklist</b></legend>
 									This form will allow you to add an image voucher linked to this checklist.<br/>
-									Scientific name will be added if not yet on list.<br/>
+									If not already present, Scientific name will be added to checklist.<br/>
 									Select the voucher project to which you wish to add the voucher. 
 									<div style="margin:5px;">
 										<select name="collid">
@@ -375,10 +381,10 @@
 									</div> 
 								</fieldset>
 							</form>
-							<?php
-						} 
-						?>
-					</div>
+						</div>
+						<?php
+					} 
+					?>
 					<div id="editortab">
 						<div style="margin:30px 0px 30px 15px;">
 							<?php 

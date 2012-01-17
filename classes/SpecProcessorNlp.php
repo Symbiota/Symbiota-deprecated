@@ -1,6 +1,6 @@
 <?php
 
-class SpecProcessorOcrManager{
+class SpecProcessorNlp{
 
 	protected $conn;
 	

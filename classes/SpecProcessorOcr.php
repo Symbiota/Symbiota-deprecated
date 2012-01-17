@@ -4,7 +4,7 @@
  * Authors: egbot 2012
  */
 
-class SpecProcessorOcrManager{
+class SpecProcessorOcr{
 
 	private $conn;
 	private $tempPath;
