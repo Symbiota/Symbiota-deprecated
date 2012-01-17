@@ -70,14 +70,20 @@ class ImageDetailManager{
 	 	if(array_key_exists("renameweburl",$_REQUEST)){
 	 		$oldUrl = $_REQUEST["oldurl"];
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldUrl);
-	 		$newName = str_replace($searchStr,$replaceStr,$url);
+ 			$newWebName = str_replace($searchStr,$replaceStr,$url);
 	 		if($url != $oldUrl){
-	 			if(copy($oldName,$newName)){
-	 				unlink($oldName);
+	 			if(file_exists($newWebName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name';
+		 			$url = $oldUrl;
 	 			}
 	 			else{
-	 				$url = $oldUrl;
-		 			$status .= "Web URL rename FAILED; url address unchanged";
+		 			if(copy($oldName,$newWebName)){
+		 				unlink($oldName);
+		 			}
+		 			else{
+		 				$url = $oldUrl;
+			 			$status = "Web URL rename FAILED; url address unchanged";
+		 			}
 	 			}
 	 		}
 		}
@@ -86,12 +92,18 @@ class ImageDetailManager{
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldTnUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$tnUrl);
 	 		if($tnUrl != $oldTnUrl){
-	 			if(copy($oldName,$newName)){
-	 				unlink($oldName);
+	 			if(file_exists($newName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name';
+		 			$tnUrl = $oldTnUrl;
 	 			}
 	 			else{
-	 				$tnUrl = $oldTnUrl;
-		 			$status .= "Thumbnail URL rename FAILED; url address unchanged";
+		 			if(copy($oldName,$newName)){
+		 				unlink($oldName);
+		 			}
+		 			else{
+		 				$tnUrl = $oldTnUrl;
+			 			$status = "Thumbnail URL rename FAILED; url address unchanged";
+		 			}
 	 			}
 	 		}
 		}
@@ -100,12 +112,18 @@ class ImageDetailManager{
 	 		$oldName = str_replace($searchStr,$replaceStr,$oldOrigUrl);
 	 		$newName = str_replace($searchStr,$replaceStr,$origUrl);
 	 		if($origUrl != $oldOrigUrl){
-	 			if(copy($oldName,$newName)){
-	 				unlink($oldName);
-	 			}
-	 			else{
+	 			if(file_exists($newName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name';
 	 				$origUrl = $oldOrigUrl;
-		 			$status .= "Large image URL rename FAILED; url address unchanged";
+ 	 			}
+	 			else{
+		 			if(copy($oldName,$newName)){
+		 				unlink($oldName);
+		 			}
+		 			else{
+		 				$origUrl = $oldOrigUrl;
+			 			$status = "Large image URL rename FAILED; url address unchanged";
+		 			}
 	 			}
 	 		}
 		}

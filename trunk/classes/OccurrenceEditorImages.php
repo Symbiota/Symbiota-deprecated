@@ -31,11 +31,17 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	 	if(array_key_exists("renameweburl",$_REQUEST)){
 	 		$oldUrl = $_REQUEST["oldurl"];
 	 		$oldName = str_replace($rootUrl,$rootPath,$oldUrl);
-	 		$newName = str_replace($rootUrl,$rootPath,$url);
+	 		$newWebName = str_replace($rootUrl,$rootPath,$url);
 	 		if($url != $oldUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$url = $oldUrl;
-		 			$status .= "Web URL rename FAILED; ";
+	 			if(file_exists($newWebName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name; ';
+		 			$url = $oldUrl;
+	 			}
+	 			else{
+		 			if(!rename($oldName,$newWebName)){
+		 				$url = $oldUrl;
+			 			$status .= "Web URL rename FAILED (possible write permissions issue); ";
+		 			}
 	 			}
 	 		}
 		}
@@ -44,9 +50,15 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	 		$oldName = str_replace($rootUrl,$rootPath,$oldTnUrl);
 	 		$newName = str_replace($rootUrl,$rootPath,$tnUrl);
 	 		if($tnUrl != $oldTnUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$tnUrl = $oldTnUrl;
-		 			$status .= "Thumbnail URL rename FAILED; ";
+	 			if(file_exists($newName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name; ';
+		 			$tnUrl = $oldTnUrl;
+	 			}
+	 			else{
+		 			if(!rename($oldName,$newName)){
+		 				$tnUrl = $oldTnUrl;
+			 			$status = "Thumbnail URL rename FAILED (possible write permissions issue); ";
+		 			}
 	 			}
 	 		}
 		}
@@ -55,9 +67,15 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	 		$oldName = str_replace($rootUrl,$rootPath,$oldOrigUrl);
 	 		$newName = str_replace($rootUrl,$rootPath,$origUrl);
 	 		if($origUrl != $oldOrigUrl){
-	 			if(!rename($oldName,$newName)){
-	 				$origUrl = $oldOrigUrl;
-		 			$status .= "Thumbnail URL rename FAILED; ";
+	 			if(file_exists($newName)){
+ 					$status = 'ERROR: unable to modify image URL because a file already exists with that name; ';
+		 			$tnUrl = $oldTnUrl;
+	 			}
+	 			else{
+		 			if(!rename($oldName,$newName)){
+		 				$origUrl = $oldOrigUrl;
+			 			$status .= "ERROR: Thumbnail URL rename FAILED (possible write permissions issue); ";
+		 			}
 	 			}
 	 		}
 		}

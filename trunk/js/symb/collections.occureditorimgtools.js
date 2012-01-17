@@ -29,5 +29,39 @@ function initImageTool(img){
 }
 
 function ocrImage(){
-	activeimage
+	var imgUrl = document.getElementById("activeimage").src;
+	var ocrXmlHttp = GetXmlHttpObject();
+	if(ocrXmlHttp == null){
+		alert ("Your browser does not support AJAX!");
+		return false;
+	}
+	var url="rpc/ocrimage.php?url="+imgUrl;
+	ocrXmlHttp.onreadystatechange=function(){
+		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
+			var rawTxtObj = document.getElementById("txtfrag");
+			var rawStr = ocrXmlHttp.responseText;
+			rawTxtObj.innerText = rawStr;
+			rawTxtObj.textContent = rawStr;
+		}
+	};
+	ocrXmlHttp.open("POST",url,true);
+	ocrXmlHttp.send(null);
+}
+
+function GetXmlHttpObject(){
+	var xmlHttp=null;
+	try{
+		// Firefox, Opera 8.0+, Safari, IE 7.x
+  		xmlHttp=new XMLHttpRequest();
+  	}
+	catch (e){
+  		// Internet Explorer
+  		try{
+    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+  		catch(e){
+    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+    	}
+  	}
+	return xmlHttp;
 }

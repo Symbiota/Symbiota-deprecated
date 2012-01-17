@@ -48,11 +48,13 @@
 				<?php 
 				$fragCnt = 0;
 				foreach($fragArr as $prlid => $rawStr){
-					echo '<div id="txtfrag'.$fragCnt.'" '.($fragCnt?'style="display:none"':'').'>'."\n";
-					echo '<textarea name="rawtext-'.$prlid.'" style="width:400px;height:325px;">';
-					echo $rawStr;
-					echo '</textarea>'."\n";
-					echo '</div>'."\n";
+					?>
+					<div id="txtfrag<?php echo $fragCnt; ?>" style="<?php echo ($fragCnt?'display:none':''); ?>">
+						<textarea id="txtfrag" name="rawtext-<?php echo $prlid; ?>" style="width:400px;height:325px;">
+							<?php echo $rawStr; ?>
+						</textarea>
+					</div>
+					<?php 
 					$fragCnt++;
 				}
 				?>
