@@ -761,12 +761,12 @@ class ChecklistManager {
 		$retArr = array();
 		$runQuery = true;
 		$sql = 'SELECT collid, collectionname '.
-			'FROM omcollections WHERE colltype = "Observations" OR colltype = "General Observations" ';
+			'FROM omcollections WHERE (colltype = "Observations" OR colltype = "General Observations") ';
 		if(!array_key_exists('SuperAdmin',$userRights)){
 			$collInStr = '';
 			foreach($userRights as $k => $v){
 				if($k == 'CollAdmin' || $k == 'CollEditor'){
-					$collInStr .= ','.implode($v);
+					$collInStr .= ','.implode(',',$v);
 				}
 			}
 			if($collInStr){
@@ -777,6 +777,7 @@ class ChecklistManager {
 			}
 		}
 		$sql .= 'ORDER BY colltype,collectionname';
+		//echo $sql;
 		if($runQuery){
 			if($rs = $this->clCon->query($sql)){
 				while($r = $rs->fetch_object()){
