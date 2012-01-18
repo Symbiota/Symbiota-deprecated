@@ -3,6 +3,7 @@
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php) 
  * Authors: egbot 2012
  */
+include_once($serverRoot.'/config/dbconnection.php');
 
 class SpecProcessorOcr{
 
@@ -13,21 +14,24 @@ class SpecProcessorOcr{
 	}
 	
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
 	}
 	
 	public function batchOcrUnprocessed($collArr = 0){
 		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
 		//Triggered automaticly (crontab) on a nightly basis
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'SELECT imgid, IFNULL(i.originalurl, i.url) AS url '.
+		$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
 			'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
-		if($collArr) $sql .= 'AND o.collid IN('.implode(',',$collArr).')';
+		if($collArr) $sql .= 'AND o.collid IN('.implode(',',$collArr).') ';
+		//Limit for debugging purposes only
+		$sql .= 'LIMIT 2 ';
+		//echo 'SQL: '.$sql."\n";
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$rawStr = $this->imgUrl($r->url);
+				$rawStr = $this->ocrImage($r->url);
+				//echo 'rawStr: '.$rawStr."\n";
 				if($rawStr){
 					$this->databaseRawStr($r->imgid,$rawStr);
 				}
@@ -49,7 +53,8 @@ class SpecProcessorOcr{
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
 			}
 			$rs->close();
-			$rawStr = ocrImage($imgUrl);
+			$rawStr = $this->ocrImage($imgUrl);
+			//echo 'rawStr: '.$rawStr."\n";
 	 		if(!($this->conn === false)) $this->conn->close();
 	 		return $rawStr;
 		}
@@ -58,11 +63,20 @@ class SpecProcessorOcr{
 	public function ocrImage($imgUrl,$grayscale = 0,$brightness = 0,$contrast = 0){
 		$retStr = '';
 		if($imgUrl){
+			//If there is an image domain name is set in symbini.php and url is relative, 
+			//then it's assumed that image is located on another server, thus add domain to url
+			if(array_key_exists("imageDomain",$GLOBALS)){
+				if(substr($imgUrl,0,1)=="/"){
+					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				}
+			}
+			//echo 'URL: '.$imgUrl."\n";
+			
 			//Set temp folder path and file names  
 			$this->setTempPath();
-			$ts = '_'.time();
+			$ts = time();
 			$imgFile = $this->tempPath.$ts.'_img.jpg';
-			$outputFile = $this->tempPath.$ts.'_output.txt';
+			$outputFile = $this->tempPath.$ts.'_output';
 			
    			if($img = imagecreatefromjpeg($imgUrl)){
 				//Optional adjustments
@@ -86,11 +100,12 @@ class SpecProcessorOcr{
 				}
 				
 				//Obtain text from tesseract output file
-				$fh = fopen($outputFile, 'r');
-				while (!feof($fh)) {
-				  $retStr .= fread($fh, 8192);
+				if($fh = fopen($outputFile.'.txt', 'r')){
+					while (!feof($fh)) {
+					  $retStr .= fread($fh, 8192);
+					}
+					fclose($fh);
 				}
-				fclose($fh);
 				//unlink($imgFile);
 				//unlink($outputFile);
    			}
@@ -100,16 +115,18 @@ class SpecProcessorOcr{
    			}
    		}
 		else{
-			//Unable to locate URL
+			//URL is empty
 			//Add some error reporting
 		}
 		return trim($retStr);
 	}
 	
 	private function databaseRawStr($imgId,$rawStr){
-		$sql = 'INSERT INTO (imgid,rawstr) '.
-			'VALUE ('.$imgId.',"'.$rawStr.'")';
-		$status = $this->query($sql);
+		$rawStr = $this->cleanRawStr($rawStr);
+		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) '.
+			'VALUE ('.$imgId.',trim(" '.$rawStr.' "))';
+		//echo 'SQL: '.$sql."\n";
+		$status = $this->conn->query($sql);
 		return $status;
 	}
 	
