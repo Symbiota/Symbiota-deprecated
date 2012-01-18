@@ -20,7 +20,7 @@ class SpecProcessorOcr{
 		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
 		//Triggered automaticly (crontab) on a nightly basis
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'SELECT $imgId, IFNULL(i.origianlurl, i.url) AS url '.
+		$sql = 'SELECT imgid, IFNULL(i.originalurl, i.url) AS url '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
 			'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
@@ -41,7 +41,7 @@ class SpecProcessorOcr{
 		if(is_numeric($imgId)){
 			$this->conn = MySQLiConnectionFactory::getCon("write");
 			$imgUrl = '';
-			$sql = 'SELECT origianlurl, url '.
+			$sql = 'SELECT originalurl, url '.
 				'FROM images '.
 				'WHERE (imgid = '.$imgId.')';
 			$rs = $this->conn->query($sql);
