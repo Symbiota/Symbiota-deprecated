@@ -42,7 +42,7 @@ else{
 				header('Content-Type: application/msword');
 				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
 			?>
-				<meta http-equiv="Content-Type" content="application/msword; charset="<?php echo $charset; ?>">
+				<meta charset="<?php echo $charset; ?>">
 				<xml>
 					<w:WordDocument>
 					<w:View>Print</w:View>
