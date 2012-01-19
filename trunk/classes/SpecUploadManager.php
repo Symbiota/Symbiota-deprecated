@@ -33,7 +33,7 @@ class SpecUploadManager{
 
 	private $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5;
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
-		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12');
+		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -812,21 +812,21 @@ class SpecUploadManager{
 	
 	protected function loadRecord($recMap){
 		//Date cleaning
-		if(array_key_exists('month',$recMap) && !is_numeric($recMap['month'])){
-			if(strlen($recMap['month']) > 2){
-				$monAbbr = strtolower(substr($recMap['month'],3));
-				if($monAbbr == 'jan') $recMap['month'] = '01';
-				elseif($monAbbr == 'feb') $recMap['month'] = '02';
-				elseif($monAbbr == 'mar') $recMap['month'] = '03';
-				elseif($monAbbr == 'apr') $recMap['month'] = '04';
-				elseif($monAbbr == 'may') $recMap['month'] = '05';
-				elseif($monAbbr == 'jun') $recMap['month'] = '06';
-				elseif($monAbbr == 'jul') $recMap['month'] = '07';
-				elseif($monAbbr == 'aug') $recMap['month'] = '08';
-				elseif($monAbbr == 'sep') $recMap['month'] = '09';
-				elseif($monAbbr == 'oct') $recMap['month'] = '10';
-				elseif($monAbbr == 'nov') $recMap['month'] = '11';
-				elseif($monAbbr == 'dec') $recMap['month'] = '12';
+		if(array_key_exists('month',$recMap)){
+			if(!is_numeric($recMap['month']) && strlen($recMap['month']) > 2){
+				$monAbbr = strtolower(substr($recMap['month'],0,3));
+				if(array_key_exists('month',$recMap)){
+					$recMap['month'] = $this->monthNames[$monAbbr];
+				}
+				else{
+					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+						$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
+					}
+					$recMap['month'] = '';
+				}
+			}
+			else{
+				$recMap['month'] = '';
 			}
 		}
 		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
