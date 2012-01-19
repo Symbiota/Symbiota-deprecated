@@ -22,7 +22,7 @@ class SpecProcessorOcr{
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-			'LEFT JOIN specprocessorrawlabels rl ON i.occid = rl.occid '.
+			'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
 			'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
 		if($collArr) $sql .= 'AND o.collid IN('.implode(',',$collArr).') ';
 		//Limit for debugging purposes only
