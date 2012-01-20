@@ -24,19 +24,22 @@ $clManager->getNonVoucheredCnt();
 		</div>
 		<fieldset style="margin:10px;padding:10px;">
 			<legend><b>Current Dynamic SQL Fragment</b></legend>
-			<div style="margin:15px;font-weight:bold;">
+			<div style="margin:10px;font-weight:bold;font-size:120%;color:red;">
 				<?php
 				$dynSql = $clManager->getDynamicSql();
-				echo ($dynSql?$dynSql:'SQL not set');
+				echo ($dynSql?$dynSql:'SQL fragment needs to be set');
 				?>
+			</div>
+			<div style="margin:10px;">
+				<a href="#" onclick="return toggle('sqlbuilderdiv');"><b>Click here to create SQL fragment</b></a>
 			</div>
 			<div id="sqlbuilderdiv" style="display:none;margin-top:15px;">
 				<hr/>
 				<form name="sqlbuilderform" action="checklist.php" method="post" onsubmit="return validateSqlFragForm(this);">
 					<div style="margin:10px;">
-						Use this form to aid in building the SQL fragment. 
-						Click the 'Create SQL Fragment' button to build and save the SQL using the terms 
-						supplied in the form. 
+						Use this form to build an SQL fragment that will be used by the tools below to filter occurrence records 
+						to those collected within the vacinity of the research area.  
+						Click the 'Create SQL Fragment' button to build and save the SQL using the terms supplied in the form. 
 						Your data administrator can aid you in establishing more complex SQL fragments than can be created within this form.  
 					</div>
 					<table style="margin:15px;">
@@ -59,31 +62,30 @@ $clManager->getNonVoucheredCnt();
 									<input type="text" name="locality" onchange="" />
 								</div>
 							</td>
-							<td>
-								<div style="margin-left:30px;">
-									<b>Lat/Long:</b>
-									<span style="margin-left:70px;">
-										<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
-									</span>
+							<td style="padding-left:20px;">
+								<div>
+									<b>Lat North:</b>
+									<input type="text" name="latnorth" style="width:70px;" onchange="" title="Latitude North" />
 								</div>
-								<div style="margin-left:82px;">
-									<span style="">
-										<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
-									</span>
-									<span style="margin-left:70px;">
-										<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
-									</span>
-								</div>
-								<div style="margin-left:157px;">
+								<div>
+									<b>Lat South:</b>
 									<input type="text" name="latsouth" style="width:70px;" onchange="" title="Latitude South" />
 								</div>
-								<div style="margin-left:50px;">
+								<div>
+									<b>Long East:</b>
+									<input type="text" name="lngeast" style="width:70px;" onchange="" title="Longitude East" />
+								</div>
+								<div>
+									<b>Long West:</b>
+									<input type="text" name="lngwest" style="width:70px;" onchange="" title="Longitude West" />
+								</div>
+								<div>
 									<input type="checkbox" name="latlngor" value="1" />
-									Include Lat/Long as OR statement
+									Include Lat/Long as an "OR" condition
 								</div>
 								<div style="float:right;margin:20px 20px 0px 0px;">
 									<input type="submit" name="submitaction" value="Create SQL Fragment" />
-									<input type="hidden" name="tabindex" value="1" />
+									<input type="hidden" name="tabindex" value="2" />
 									<input type="hidden" name="emode" value="2" />
 									<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
 									<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
@@ -99,7 +101,7 @@ $clManager->getNonVoucheredCnt();
 						<div style="float:right;margin:10px 120px 20px 0px;">
 							<input type="submit" name="submitaction" value="Delete SQL Fragment" />
 						</div>
-						<input type="hidden" name="tabindex" value="1" />
+						<input type="hidden" name="tabindex" value="2" />
 						<input type="hidden" name="emode" value="2" />
 						<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
 						<input type='hidden' name='proj' value='<?php echo $proj; ?>' />
@@ -111,7 +113,7 @@ $clManager->getNonVoucheredCnt();
 		</fieldset>
 	</li>
 	<li>
-		<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListNonVouchered&tabindex=1&emode=2">
+		<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListNonVouchered&tabindex=2&emode=2">
 			<b>List Non-vouchered Taxa</b>
 		</a> 
 		<div style="margin-left:5px;">
@@ -125,7 +127,7 @@ $clManager->getNonVoucheredCnt();
 	<li>
 		<?php
 		if($clManager->getVoucherCnt()){
-			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=VoucherConflicts&tabindex=1&emode=2">';
+			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=VoucherConflicts&tabindex=2&emode=2">';
 		}
 		else{
 			echo '<a href="#" onclick="alert(\'There are no conflicts because no vouchers have yet been linked to this checklist\')">';
@@ -142,7 +144,7 @@ $clManager->getNonVoucheredCnt();
 	<li>
 		<?php 
 		if($dynSql){
-			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListMissingTaxa&tabindex=1&emode=2">';
+			echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListMissingTaxa&tabindex=2&emode=2">';
 		}
 		else{
 			echo '<a href="#" onclick="alert(\'SQL Fragment needs to be established before this function can be used\');toggle(\'sqlfragdiv\');">';
@@ -159,7 +161,7 @@ $clManager->getNonVoucheredCnt();
 	if($clManager->hasChildrenChecklists()){
 		?>
 		<li>
-			<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListChildTaxa&tabindex=1&emode=2">
+			<a href="checklist.php?cl=<?php echo $clid.'&proj='.$proj; ?>&submitaction=ListChildTaxa&tabindex=2&emode=2">
 				<b>List New Taxa from Children Lists</b>
 			</a> 
 			<div style="margin-left:5px;">
@@ -254,11 +256,11 @@ elseif($action == 'ListNonVouchered'){
 			}
 			if($nonVoucherCnt > 100){
 				echo '<div style="text-weight:bold;">';
-				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
 				echo '&lt;&lt; Previous';
 				if($startPos > 100) echo '</a>';
 				echo ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
 				echo 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
 				echo '</div>';
@@ -292,11 +294,11 @@ elseif($action == 'ListMissingTaxa'){
 			$paginationStr = '';
 			if(count($missingArr) > 100){
 				$paginationStr = '<div style="margin:15px;text-weight:bold;width:100%;text-align:right;">';
-				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
 				$paginationStr .= '&lt;&lt; Previous';
 				if($startPos > 100) $paginationStr .= '</a>';
 				$paginationStr .= ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=1&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
 				$paginationStr .= 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '</a>';
 				$paginationStr .= '</div>';

@@ -456,6 +456,11 @@ class TaxaLoaderManager{
 			'FROM uploadtaxa AS ut '.
 			'WHERE (ut.TID Is Null AND rankid = 10)';
 		$this->conn->query($sql);
+		$sql = 'INSERT IGNORE INTO taxstatus (tid, tidaccepted, taxauthid, parenttid) '.
+			'SELECT DISTINCT t.tid, t.tid, 1 AS taxauthid, t.tid '.
+			'FROM uploadtaxa AS ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
+			'WHERE (ut.TID Is Null AND ut.rankid = 10)';
+		$this->conn->query($sql);
 		
 		
 		WHILE(($endLoadCnt > 0 || $startLoadCnt <> $endLoadCnt) && $loopCnt < 30){

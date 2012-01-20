@@ -663,6 +663,8 @@ class OccurrenceEditorManager {
 	//Label processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
+		return $retArr;
+		
 		if($this->occId){
 			$sql = 'SELECT prlid, rawstr, notes FROM specprocessorrawlabels WHERE occid = '.$this->occId;
 			$rs = $this->conn->query($sql);
