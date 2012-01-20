@@ -316,25 +316,36 @@ if($symbUid){
 								<select name="q_processingstatus">
 									<option value=''>All Records</option>
 									<option>-------------------</option>
-									<option <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
-										unprocessed
+									<option value="unprocessed" <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
+										Unprocessed
 									</option>
-									<option <?php echo ($qProcessingStatus=='OCR processed'?'SELECTED':''); ?>>
-										OCR processed
+									<option value="unprocessed/OCR" <?php echo ($qProcessingStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
+										Unprocessed/OCR 
 									</option>
-									<option <?php echo ($qProcessingStatus=='OCR parsed'?'SELECTED':''); ?>>
-										OCR parsed
+									<option  value="unprocessed/NLP" <?php echo ($qProcessingStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
+										Unprocessed/NLP
 									</option>
-									<option <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
-										pending duplicate
+									<option value="stage 1" <?php echo ($qProcessingStatus=='stage 1'?'SELECTED':''); ?>>
+										Stage 1
 									</option>
-									<option <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
-										pending review
+									<option value="stage 2" <?php echo ($qProcessingStatus=='stage 2'?'SELECTED':''); ?>>
+										Stage 2
 									</option>
-									<option <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
-										reviewed
+									<option value="stage 3" <?php echo ($qProcessingStatus=='stage 3'?'SELECTED':''); ?>>
+										Stage 3
 									</option>
-
+									<option value="pending duplicate" <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
+										Pending Duplicate
+									</option>
+									<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
+										Pending Review
+									</option>
+									<option value="expert requiered" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
+										Expert Requiered
+									</option>
+									<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
+										Reviewed
+									</option>
 								</select>
 							</div>
 							<?php 
@@ -899,22 +910,34 @@ if($symbUid){
 														<option value=''>No Set Status</option>
 														<option value=''>-------------------</option>
 														<option value='unprocessed' <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>
-															unprocessed
+															Unprocessed
 														</option>
-														<option value='OCR processed' <?php echo ($pStatus=='OCR processed'?'SELECTED':''); ?>>
-															OCR processed
+														<option value='unprocessed/OCR' <?php echo ($pStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
+															Unprocessed/OCR
 														</option>
-														<option value='OCR parsed' <?php echo ($pStatus=='NLP parsed'?'SELECTED':''); ?>>
-															NLP parsed
+														<option value='unprocessed/NLP' <?php echo ($pStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
+															Unprocessed/NLP
+														</option>
+														<option value='stage 1' <?php echo ($pStatus=='stage 1'?'SELECTED':''); ?>>
+															Stage 1
+														</option>
+														<option value='stage 2' <?php echo ($pStatus=='stage 2'?'SELECTED':''); ?>>
+															Stage 2
+														</option>
+														<option value='stage 3' <?php echo ($pStatus=='stage 3'?'SELECTED':''); ?>>
+															Stage 3
 														</option>
 														<option value='pending duplicate' <?php echo ($pStatus=='pending duplicate'?'SELECTED':''); ?>>
-															pending duplicate
+															Pending Duplicate
 														</option>
 														<option value='pending review' <?php echo (!$occId || $pStatus=='pending review'?'SELECTED':''); ?>>
-															pending review
+															Pending Review
+														</option>
+														<option value='expert requiered' <?php echo ($pStatus=='expert requiered'?'SELECTED':''); ?>>
+															Expert Requiered
 														</option>
 														<option value='reviewed' <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
-															reviewed
+															Reviewed
 														</option>
 													</select>
 												</span>
@@ -962,22 +985,34 @@ if($symbUid){
 														<option value=''>Not Activated</option>
 														<option value=''>-------------------</option>
 														<option value='unprocessed' <?php echo ($autoPStatus=='unprocessed'?'SELECTED':''); ?>>
-															unprocessed
+															Unprocessed
 														</option>
-														<option value='OCR processed' <?php echo ($autoPStatus=='OCR processed'?'SELECTED':''); ?>>
-															OCR processed
+														<option value='unprocessed/OCR' <?php echo ($autoPStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
+															Unprocessed/OCR
 														</option>
-														<option value='OCR parsed' <?php echo ($autoPStatus=='NLP parsed'?'SELECTED':''); ?>>
-															NLP parsed
+														<option value='unprocessed/NLP' <?php echo ($autoPStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
+															Unprocessed/NLP
+														</option>
+														<option value='stage 1' <?php echo ($autoPStatus=='stage 1'?'SELECTED':''); ?>>
+															Stage 1
+														</option>
+														<option value='stage 2' <?php echo ($autoPStatus=='stage 2'?'SELECTED':''); ?>>
+															Stage 2
+														</option>
+														<option value='stage 3' <?php echo ($autoPStatus=='stage 3'?'SELECTED':''); ?>>
+															Stage 3
 														</option>
 														<option value='pending duplicate' <?php echo ($autoPStatus=='pending duplicate'?'SELECTED':''); ?>>
-															pending duplicate
+															Pending Duplicate
 														</option>
 														<option value='pending review' <?php echo ($autoPStatus=='pending review'?'SELECTED':''); ?>>
-															pending review
+															Pending Review
+														</option>
+														<option value='expert requiered' <?php echo ($autoPStatus=='expert requiered'?'SELECTED':''); ?>>
+															Expert Requiered
 														</option>
 														<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
-															reviewed
+															Reviewed
 														</option>
 													</select><br/>
 													<input type="hidden" name="editedfields" value="" />
