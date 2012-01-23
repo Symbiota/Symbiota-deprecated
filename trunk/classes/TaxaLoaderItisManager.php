@@ -12,13 +12,12 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
  		parent::__destruct();
 	}
 
-	public function uploadFile(){
+	public function loadFile(){
 		echo "<li>Starting Upload</li>";
 		ob_flush();
 		flush();
 		//Initiate upload process
 		$this->conn->query("DELETE FROM uploadtaxa");
-		$this->setUploadFile();
 		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
 		echo "<li>Taxa file uploaded and successfully opened</li>";
 		ob_flush();
@@ -127,7 +126,13 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 				($vernacular?'"'.$vernacular.'"':'NULL').','.
 				($vernlang?'"'.$vernlang.'"':'NULL').')';
 			//echo '<div>'.$sql.'</div>';
-			$this->conn->query($sql);
+			if(!$this->conn->query($sql)){
+				//Failed because name is already in table, thus replace if this one is accepted
+				if($acceptance){
+					$sql = 'REPLACE'.substr($sql,6);
+					$this->conn->query($sql);
+				}
+			}
 		}
 	}
 }

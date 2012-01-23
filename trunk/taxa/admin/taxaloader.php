@@ -13,17 +13,22 @@ $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 	$editable = true;
 }
-	 
-$loaderManager = new TaxaLoaderManager();
+
+$loaderManager;
+if($action == "Upload ITIS File"){
+	$loaderManager = new TaxaLoaderItisManager();
+}
+else{
+	$loaderManager = new TaxaLoaderManager();
+}
 
 $status = "";
 if($editable){
-	if($action == "Upload ITIS File"){
-		$loaderManager = new TaxaLoaderItisManager();
+	if($ulFileName){
+		$loaderManager->setFileName($ulFileName);
 	}
 	else{
-		if($ulOverride) $ulFileName = $ulOverride;
-		$loaderManager->setUploadFile($ulFileName);
+		$loaderManager->setUploadFile($ulOverride);
 	}
 	
 	if(array_key_exists("sf",$_REQUEST)){
@@ -125,7 +130,7 @@ if($editable){
 		$taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 		if($action == "Upload ITIS File" || $action == 'Upload Taxa'){
 			echo '<hr /><ul>';
-			$loaderManager->uploadFile();
+			$loaderManager->loadFile();
 			echo '</ul><hr />';
 		}
 		elseif($action == "Activate Taxa"){
@@ -192,8 +197,8 @@ if($editable){
 						If the file upload step fails without displaying an error message, it is possible that the 
 						file size excedes the file upload limits set within your PHP installation (see your php configuraton file).
 					</div>
-					<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getUploadFileName();?>" />
-					<?php if(!$loaderManager->getUploadFileName()){ ?>
+					<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getFileName();?>" />
+					<?php if(!$loaderManager->getFileName()){ ?>
 						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 						<div>
 							<div class="overrideopt">
