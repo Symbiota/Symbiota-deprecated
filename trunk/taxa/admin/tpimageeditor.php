@@ -69,7 +69,7 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 				<b>Menu</b>
 			</legend>
 			<div class="mdiv" style="float:right;cursor:pointer;color:blue;" onclick="toggle('mdiv')">
-				Diplay Full Menu
+				Display Full Menu
 			</div>
 			<div class="mdiv" style="display:none;">
 				<ul style="margin:0px">
