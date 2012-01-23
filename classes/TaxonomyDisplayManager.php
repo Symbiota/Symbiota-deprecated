@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 24 Aug 2009
- * E.E. Gilbert
- */
 
 include_once($serverRoot.'/config/dbconnection.php');
 
@@ -28,16 +24,19 @@ class TaxonomyDisplayManager{
 		$hierarchyArr = Array();
 		$taxaParentIndex = Array();
 		if($this->targetStr){
-			$sql = "SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr ".
-				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-				"INNER JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted) ".
-				"INNER JOIN taxa t1 ON ts1.tid = t1.tid ".
-				"WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) ";
+			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr '.
+				'FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
+				'INNER JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted) '.
+				'INNER JOIN taxa t1 ON ts1.tid = t1.tid '.
+				'WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) ';
 			if(is_numeric($this->targetStr)){
-				$sql .= "AND (t.tid IN(".implode(",",$this->targetStr).") OR (ts1.tid = ".$this->targetStr."))";
+				$sql .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
+			}
+			elseif(strpos($this->targetStr," ")){
+				$sql .= 'AND ((t.sciname LIKE "'.$this->targetStr.'%") OR (t1.sciname LIKE "'.$this->targetStr.'%"))';
 			}
 			else{
-				$sql .= "AND ((t.sciname LIKE '".$this->targetStr."%') OR (t1.sciname LIKE '".$this->targetStr."%'))";
+				$sql .= 'AND ((t.sciname = "'.$this->targetStr.'") OR (t1.sciname = "'.$this->targetStr.'"))';
 			}
 			//echo "<div>".$sql."</div>";
 			$rs = $this->conn->query($sql);
@@ -67,7 +66,7 @@ class TaxonomyDisplayManager{
 			//Add sql fragments that will grab the children taxa
 			$innerSql = "";
 			foreach($this->taxaArr as $t => $tArr){
-				$innerSql .= "OR (ts.hierarchystr LIKE '%,".$t.",%') ";
+				$innerSql .= "OR (ts.hierarchystr LIKE '%,".$t.",%') OR (ts.hierarchystr LIKE '%,".$t."') ";
 			}
 			if($hArray) $innerSql .= "OR (t.tid IN(".implode(",",array_unique($hArray)).")) ";
 			$sql .= substr($innerSql,3).")";

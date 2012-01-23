@@ -10,7 +10,7 @@ class TaxaLoaderManager{
 	protected $fieldMap = Array();	//target field => source field
 	protected $uploadFileName;
 	protected $uploadTargetPath;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
  		$this->setUploadTargetPath();
@@ -22,29 +22,42 @@ class TaxaLoaderManager{
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-
-	public function setUploadFile($ulFileName = ""){
-		//Just read first line of file in order to map fields to uploadtaxa table
-		if(!$ulFileName && array_key_exists('uploadfile',$_FILES)){
-			$ulFileName = $_FILES['uploadfile']['name'];
-	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$ulFileName);
-	        if(substr($ulFileName,-4) == ".zip"){
-	        	$zipFileName = $ulFileName;
-				$zip = new ZipArchive;
-				$zip->open($this->uploadTargetPath.$ulFileName);
-				$ulFileName = $zip->getNameIndex(0);
-				$zip->extractTo($this->uploadTargetPath);
-				$zip->close();
-	        }
-		}
-		$this->uploadFileName = $ulFileName;
-	}
 	
-	public function getUploadFileName(){
+	public function setFileName($fName){
+		$this->uploadFileName = $fName;
+	}
+
+	public function getFileName(){
 		return $this->uploadFileName;
 	}
 
-	public function uploadFile(){
+	public function setUploadFile($ulFileName = ""){
+		if($ulFileName){
+			//URL to existing file  
+			if(file_exists($ulFileName)){
+				$pos = strrpos($ulFileName,"/");
+				if(!$pos) $pos = strrpos($ulFileName,"\\");
+				$this->uploadFileName = substr($ulFileName,$pos+1);
+				echo $this->uploadFileName;
+				copy($ulFileName,$this->uploadTargetPath.$this->uploadFileName);
+			}
+		}
+		elseif(array_key_exists('uploadfile',$_FILES)){
+			$this->uploadFileName = $_FILES['uploadfile']['name'];
+	        move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$this->uploadFileName);
+		}
+        if(file_exists($this->uploadTargetPath.$this->uploadFileName) && substr($this->uploadFileName,-4) == ".zip"){
+			$zip = new ZipArchive;
+			$zip->open($this->uploadTargetPath.$this->uploadFileName);
+			$zipFile = $this->uploadTargetPath.$this->uploadFileName;
+			$this->uploadFileName = $zip->getNameIndex(0);
+			$zip->extractTo($this->uploadTargetPath);
+			$zip->close();
+			unlink($zipFile);
+        }
+	}
+
+	public function loadFile(){
 		echo "<li>Starting Upload</li>";
 		ob_flush();
 		flush();
@@ -68,7 +81,12 @@ class TaxaLoaderManager{
 				$valueSql = str_replace('""','NULL',$valueSql);
 				$sql .= "VALUES (".substr($valueSql,2)."\")";
 				//echo "<div>".$sql."</div>";
-				$this->conn->query($sql);
+				if(!$this->conn->query($sql)){
+					//if($this->fieldMap['']){
+						//$sql = 'REPLACE'.substr($sql,6);
+						//$this->conn->query($sql);
+					//}
+				}
 				$recordCnt++;
 			}
 			echo '<li>'.$recordCnt.' taxon records uploaded</li>';
@@ -82,7 +100,9 @@ class TaxaLoaderManager{
 		}
 		fclose($fh);
 		$this->cleanUpload();
-		if(file_exists($this->uploadTargetPath.$this->uploadFileName)) unlink($this->uploadTargetPath.$this->uploadFileName);
+		if(file_exists($this->uploadTargetPath.$this->uploadFileName)){
+			unlink($this->uploadTargetPath.$this->uploadFileName);
+		}
 	}
 
 	public function cleanUpload(){
