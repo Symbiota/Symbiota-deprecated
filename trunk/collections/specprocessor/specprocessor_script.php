@@ -283,10 +283,10 @@ class SpecProcessorManager {
 		return $labelBlock;
 	}
 
-	protected function loadRawFragment($occId,$labelBlock){
+	protected function loadRawFragment($imgId,$labelBlock){
 		//load raw label record
 		$status = true; 
-		$sql = 'INSERT INTO specprocessorrawlabels(occid,rawstr) VALUES('.$occId.',"'.$this->cleanStr($labelBlock).'")';
+		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) VALUES('.$imgId.',"'.$this->cleanStr($labelBlock).'")';
 		if(!$this->conn->query($sql)){
 			if($this->logErrFH){
 				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");

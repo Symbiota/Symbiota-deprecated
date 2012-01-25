@@ -53,7 +53,7 @@ define ("nm2meter", 1852);
 ** earth in three different coordinate systema. Lat/Long, UTM and Lambert Conic
 ** Conformal.
 */
-class gPoint
+class GPoint
 {
 /* Reference ellipsoids derived from Peter H. Dana's website- 
 ** http://www.colorado.edu/geography/gcraft/notes/datum/datum_f.html
@@ -69,13 +69,13 @@ class gPoint
 	"Australian National"	=>array	(6378160, 0.006694542),
 	"Bessel 1841"			=>array	(6377397, 0.006674372),
 	"Bessel 1841 Nambia"	=>array	(6377484, 0.006674372),
-	"Clarke 1866"			=>array	(6378206, 0.006768658),
+	"Clarke 1866"			=>array	(6378206, 0.006768658),		//NAD 27
 	"Clarke 1880"			=>array	(6378249, 0.006803511),
 	"Everest"				=>array	(6377276, 0.006637847),
 	"Fischer 1960 Mercury"	=>array (6378166, 0.006693422),
 	"Fischer 1968"			=>array (6378150, 0.006693422),
 	"GRS 1967"				=>array	(6378160, 0.006694605),
-	"GRS 1980"				=>array	(6378137, 0.00669438),
+	"GRS 1980"				=>array	(6378137, 0.00669438),		//NAD 83
 	"Helmert 1906"			=>array	(6378200, 0.006693422),
 	"Hough"					=>array	(6378270, 0.00672267),
 	"International"			=>array	(6378388, 0.00672267),
@@ -106,6 +106,19 @@ class gPoint
 	// constructor
 	function gPoint($datum='WGS 84')			// Default datum is WGS 84
 	{
+		$this->setDatum($datum);
+	}
+	function setDatum($datum){
+		if(preg_match('/nad\s*83/i',$datum)){
+			//NAD 83
+			$datum = "GRS 1980";
+		}elseif(preg_match('/nad\s*27/i',$datum)){
+			//NAD 27
+			$datum = "Clarke 1866";
+		}
+		else{
+			$datum = 'WGS 84';
+		}
 		$this->a = $this->ellipsoid[$datum][0];		// Set datum Equatorial Radius
 		$this->e2 = $this->ellipsoid[$datum][1];	// Set datum Square of eccentricity
 		$this->datum = $datum;						// Save the datum
@@ -317,12 +330,10 @@ class gPoint
 		if (!$LongOrigin)
 		{ // It is a UTM coordinate we want to convert
 			sscanf($this->utmZone,"%d%s",$ZoneNumber,$ZoneLetter);
-			if($ZoneLetter >= 'N')
-				$NorthernHemisphere = 1;//point is in northern hemisphere
-			else
-			{
+			$NorthernHemisphere = 1;	//point is in northern hemisphere
+			if($ZoneLetter && (strtoupper($ZoneLetter) == 'S' || strtoupper($ZoneLetter) < 'N')){
 				$NorthernHemisphere = 0;//point is in southern hemisphere
-				$y -= 10000000.0;//remove 10,000,000 meter offset used for southern hemisphere
+				$y -= 10000000.0;	//remove 10,000,000 meter offset used for southern hemisphere
 			}
 			$LongOrigin = ($ZoneNumber - 1)*6 - 180 + 3;  //+3 puts origin in middle of zone
 			$falseEasting = 500000.0;

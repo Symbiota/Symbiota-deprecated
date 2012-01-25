@@ -47,8 +47,9 @@ class CollectionProfileManager {
 			$sql = "SELECT IFNULL(i.InstitutionCode,c.InstitutionCode) AS institutioncode, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 				"c.collid, c.CollectionCode, c.CollectionName, ".
-				"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, c.latitudedecimal, ".
-				"c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, c.sortseq, cs.uploaddate, ".
+				"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
+				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
+				"c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
@@ -80,6 +81,9 @@ class CollectionProfileManager {
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
 				$returnArr['publicedits'] = $row->publicedits;
+				$returnArr['rights'] = $row->rights;
+				$returnArr['rightsholder'] = $row->rightsholder;
+				$returnArr['accessrights'] = $row->accessrights;
 				$returnArr['sortseq'] = $row->sortseq;
 				$uDate = "";
 				if($row->uploaddate){
@@ -111,6 +115,9 @@ class CollectionProfileManager {
 			$homepage = $this->cleanStr($_POST['homepage']);
 			$contact = $this->cleanStr($_POST['contact']);
 			$email = $this->cleanStr($_POST['email']);
+			$rights = $this->cleanStr($_POST['rights']);
+			$rightsHolder = $this->cleanStr($_POST['rightsholder']);
+			$accessRights = $this->cleanStr($_POST['accessrights']);
 			$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
@@ -125,7 +132,10 @@ class CollectionProfileManager {
 				'email = '.($email?'"'.$email.'"':'NULL').','.
 				'latitudedecimal = '.($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
 				'longitudedecimal = '.($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
-				'publicedits = '.$publicEdits.' ';
+				'publicedits = '.$publicEdits.','.
+				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
+				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
+				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
 			if(array_key_exists('icon',$_POST)){
 				$icon = $this->cleanStr($_POST['icon']);
 				$indUrl = $this->cleanStr($_POST['individualurl']);
@@ -152,6 +162,9 @@ class CollectionProfileManager {
 		$homepage = $this->cleanStr($_POST['homepage']);
 		$contact = $this->cleanStr($_POST['contact']);
 		$email = $this->cleanStr($_POST['email']);
+		$rights = $this->cleanStr($_POST['rights']);
+		$rightsHolder = $this->cleanStr($_POST['rightsholder']);
+		$accessRights = $this->cleanStr($_POST['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
 		$icon = array_key_exists('icon',$_POST)?$this->cleanStr($_POST['icon']):'';
 		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanStr($_POST['managementtype']):'';
@@ -161,7 +174,8 @@ class CollectionProfileManager {
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,'.
-			'contact,email,latitudedecimal,longitudedecimal,publicedits,icon,managementtype,colltype,individualurl,sortseq) '.
+			'contact,email,latitudedecimal,longitudedecimal,publicedits,rights,rightsholder,accessrights,icon,'.
+			'managementtype,colltype,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.$coleName.'",'.
 			($briefDesc?'"'.$briefDesc.'"':'NULL').','.
@@ -172,6 +186,9 @@ class CollectionProfileManager {
 			($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
 			($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
 			$publicEdits.','.
+			($rights?'"'.$rights.'"':'NULL').','.
+			($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
+			($accessRights?'"'.$accessRights.'"':'NULL').','.
 			($icon?'"'.$icon.'"':'NULL').','.
 			($managementType?'"'.$managementType.'"':'snapshot').','.
 			($collType?'"'.$collType.'"':'Preserved Specimens').','.

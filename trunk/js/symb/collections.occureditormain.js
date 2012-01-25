@@ -447,7 +447,7 @@ function toogleLocSecReason(f){
 }
 
 function dwcDoc(dcTag){
-    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=900,height=300,left=20,top=20,scrollbars=1");
+    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
     if(dwcWindow.opener == null) dwcWindow.opener = self;
     return false;
 }

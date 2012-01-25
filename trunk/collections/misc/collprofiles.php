@@ -109,6 +109,13 @@ if($collId) $collData = $collManager->getCollectionData();
 		   	}
 			return IsNumber;
 		}
+
+		function dwcDoc(dcTag){
+		    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
+		    if(dwcWindow.opener == null) dwcWindow.opener = self;
+		    return false;
+		}
+
 	</script>
 </head>
 <body>
@@ -261,6 +268,9 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="institutioncode" value="<?php echo ($collId?$collData["institutioncode"]:'');?>" style="width:75px;" />
+										<a href="#" onclick="return dwcDoc('institutionCode')">
+											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										</a>
 									</td>
 								</tr>
 								<tr>
@@ -269,6 +279,9 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="collectioncode" value="<?php echo ($collId?$collData["collectioncode"]:'');?>" style="width:75px;" />
+										<a href="#" onclick="return dwcDoc('collectionCode')">
+											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										</a>
 									</td>
 								</tr>
 								<tr>
@@ -346,6 +359,39 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="checkbox" name="publicedits" value="1" <?php echo ($collData && $collData['publicedits']?'CHECKED':''); ?> />
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Rights:
+									</td>
+									<td>
+										<input type="text" name="rights" value="<?php echo ($collId?$collData["rights"]:'');?>" style="width:350px;" />
+										<a href="#" onclick="return dwcDoc('dcterms:rights')">
+											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Rights Holder:
+									</td>
+									<td>
+										<input type="text" name="rightsholder" value="<?php echo ($collId?$collData["rightsholder"]:'');?>" style="width:350px;" />
+										<a href="#" onclick="return dwcDoc('dcterms:rightsHolder')">
+											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Access Rights:
+									</td>
+									<td>
+										<input type="text" name="accessrights" value="<?php echo ($collId?$collData["accessrights"]:'');?>" style="width:350px;" />
+										<a href="#" onclick="return dwcDoc('dcterms:accessRights')">
+											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										</a>
 									</td>
 								</tr>
 								<?php 
