@@ -10,7 +10,7 @@
 			$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
 			?>
 			<div id="labelimagediv">
-				<img id="activeimage" src="<?php echo $imgUrlPrefix.$imgArr[0]; ?>" style="width:400px;height:400px;" />
+				<img id="activeimage" src="<?php echo (substr($imgArr[0],0,4)=='http'?'':$imgUrlPrefix).$imgArr[0]; ?>" style="width:400px;height:400px;" />
 			</div>
 			<div style="width:100%;">
 				<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
@@ -18,14 +18,17 @@
 				if(count($imgArr)>1){
 					?>
 					<script type="text/javascript"> 
-						var activeImageArr = new Array("<?php echo $imgUrlPrefix.implode('","'.$imgUrlPrefix,$imgArr); ?>");
+						var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
 						var activeImageIndex = 0; 
+						var imagePrefix = "<?php echo $imgUrlPrefix; ?>";
 						function nextLabelProcessingImage(){
 							activeImageIndex++;
 							if(activeImageIndex >= activeImageArr.length){
 								activeImageIndex = 0;
 							}
-							document.getElementById("activeimage").src = activeImageArr[activeImageIndex];
+							var activeImageSrc = activeImageArr[activeImageIndex];
+							if(activeImageSrc.substring(0,4)!="http") activeImageSrc = imagePrefix + activeImageSrc;
+							document.getElementById("activeimage").src = activeImageSrc;
 							document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
 						}
 					</script>
@@ -76,7 +79,7 @@
 								document.getElementById("textfragindex").innerHTML = textFragIndex + 1;
 							}
 						</script>
-						<a href="#" onclick="nextRawText();return false;">=&gt;$gt;</a>
+						<a href="#" onclick="nextRawText();return false;">=&gt;&gt;</a>
 						<?php 
 					}
 					?>

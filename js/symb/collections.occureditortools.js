@@ -83,13 +83,19 @@ function insertUtm(f) {
 }
 
 function utm2LatLng(zValue, eValue, nValue, datum){
+	//Datum assumed to be  or WGS84
 	var d = 0.99960000000000004; // scale along long0
 	var d1 = 6378137; // Polar Radius
 	var d2 = 0.00669438;
 	if(datum.match(/nad\s?27/i)){
-		//datum is NAD27, else assumed to be NAD83 or WGS84
+		//datum is NAD27
 		d1 = 6378206; 
 		d2 = 0.006768658;
+	}
+	else if(datum.match(/nad\s?83/i)){
+		//datum is NAD83
+		d1 = 6378137;
+		d2 = 0.00669438;
 	}
 
 	var d4 = (1 - Math.sqrt(1 - d2)) / (1 + Math.sqrt(1 - d2));

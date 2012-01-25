@@ -3,6 +3,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecUploadDirect.php');
 include_once($serverRoot.'/classes/SpecUploadDigir.php');
 include_once($serverRoot.'/classes/SpecUploadFile.php');
+include_once($serverRoot.'/classes/GPoint.php');
 
 class SpecUploadManager{
 
@@ -424,17 +425,17 @@ class SpecUploadManager{
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.year = YEAR(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND u.eventDate IS NOT NULL AND (u.year IS NULL OR u.year = 0)';
+			'WHERE u.collid = '.$this->collId.' AND u.eventDate IS NOT NULL AND u.year IS NULL';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.month = MONTH(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND (u.month IS NULL OR u.month = 0) AND u.eventDate IS NOT NULL';
+			'WHERE u.collid = '.$this->collId.' AND u.month IS NULL AND u.eventDate IS NOT NULL';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.day = DAY(u.eventDate) '.
-			'WHERE u.collid = '.$this->collId.' AND (u.day IS NULL OR u.day = 0) AND u.eventDate IS NOT NULL';
+			'WHERE u.collid = '.$this->collId.' AND u.day IS NULL AND u.eventDate IS NOT NULL';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u '.
@@ -813,20 +814,22 @@ class SpecUploadManager{
 	protected function loadRecord($recMap){
 		//Date cleaning
 		if(array_key_exists('month',$recMap)){
-			if(!is_numeric($recMap['month']) && strlen($recMap['month']) > 2){
-				$monAbbr = strtolower(substr($recMap['month'],0,3));
-				if(array_key_exists('month',$recMap)){
-					$recMap['month'] = $this->monthNames[$monAbbr];
+			if(!is_numeric($recMap['month'])){
+				if(strlen($recMap['month']) > 2){
+					$monAbbr = strtolower(substr($recMap['month'],0,3));
+					if(array_key_exists('month',$recMap)){
+						$recMap['month'] = $this->monthNames[$monAbbr];
+					}
+					else{
+						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+							$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
+						}
+						$recMap['month'] = '';
+					}
 				}
 				else{
-					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-						$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
-					}
 					$recMap['month'] = '';
 				}
-			}
-			else{
-				$recMap['month'] = '';
 			}
 		}
 		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
@@ -849,7 +852,28 @@ class SpecUploadManager{
 				if($dateStr) $recMap['eventdate'] = $dateStr;
 			}
 		}
+		//Convert UTM to Lat/Long
+		if(array_key_exists('utmnorthing',$recMap) && array_key_exists('utmeasting',$recMap) && array_key_exists('utmzoning',$recMap) 
+			&& (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']) 
+			&& (!array_key_exists('decimallongitude',$recMap) || !$recMap['decimallongitude'])){
+			$n = $recMap['utmnorthing'];
+			$e = $recMap['utmeasting'];
+			$z = $recMap['utmzoning'];
+			$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
+			if($n && $e && $z){
+				$gPoint = new GPoint($d);
+				$gPoint->setUTM($e,$n,$z);
+				$gPoint->convertTMtoLL();
+				$lat = $gPoint->Lat();
+				$lng = $gPoint->Long();
+				if($lat && $lng){
+					$recMap['decimallatitude'] = round($lat,6);
+					$recMap['decimallongitude'] = round($lng,6);
+				}
+			}
+		}
 		
+		//Create update str 
 		$sqlFields = '';
 		$sqlValues = '';
 		foreach($recMap as $symbField => $valueStr){

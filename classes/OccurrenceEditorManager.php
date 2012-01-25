@@ -640,10 +640,6 @@ class OccurrenceEditorManager {
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$this->conn->query($sql);
 
-		//Remap OCR raw text blocks
-		$sql = 'UPDATE specprocessorrawlabels SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
 		//Remap checklists voucher links
 		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$this->conn->query($sql);
@@ -663,10 +659,10 @@ class OccurrenceEditorManager {
 	//Label processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
-		return $retArr;
-		
 		if($this->occId){
-			$sql = 'SELECT prlid, rawstr, notes FROM specprocessorrawlabels WHERE occid = '.$this->occId;
+			$sql = 'SELECT r.prlid, r.rawstr, r.notes '.
+				'FROM specprocessorrawlabels r INNER JOIN images i ON r.imgid = i.imgid '.
+				'WHERE i.occid = '.$this->occId;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->prlid] = $r->rawstr;
