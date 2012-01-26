@@ -29,6 +29,10 @@ if($editable){
 	}
 }
 
+if($mode == 'export'){
+	$reviewManager->exportCsvFile();
+}
+
 header("Content-Type: text/html; charset=".$charset);
 ?>
 <html>
@@ -36,43 +40,6 @@ header("Content-Type: text/html; charset=".$charset);
 		<title>Specimen Edit Reviewer</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 		<script language="javascript">
-			function toggle(divName){
-				divObj = document.getElementById(divName);
-				if(divObj != null){
-					if(divObj.style.display == "block"){
-						divObj.style.display = "none";
-					}
-					else{
-						divObj.style.display = "block";
-					}
-				}
-				else{
-					divObjs = document.getElementsByTagName("div");
-					divObjLen = divObjs.length;
-					for(i = 0; i < divObjLen; i++) {
-						var obj = divObjs[i];
-						if(obj.getAttribute("class") == target || obj.getAttribute("className") == target){
-							if(obj.style.display=="none"){
-								obj.style.display="inline";
-							}
-							else {
-								obj.style.display="none";
-							}
-						}
-					}
-				}
-			}
-
-			function validateEditForm(){
-				var eElements = document.getElementsByName("ocedid[]");
-				for(i = 0; i < eElements.length; i++){
-					var elem = eElements[i];
-					if(elem.checked) return true;
-				}
-			   	alert("You need to select at least one editted record!");
-		      	return false;
-			}
-
 			function selectAllOcedid(cbObj){
 				var eElements = document.getElementsByName("ocedid[]");
 				for(i = 0; i < eElements.length; i++){
@@ -85,16 +52,6 @@ header("Content-Type: text/html; charset=".$charset);
 					}
 				}
 			}
-
-			function submitDownload(){
-				if(validateEditForm()){
-					var f = document.editform;
-					f.target = "_blank";
-					f.download.value = 1;
-					f.submit();
-				}
-			}
-			
 		</script>
 	</head>
 	<body>
@@ -183,6 +140,7 @@ header("Content-Type: text/html; charset=".$charset);
 												<th></th>
 											<?php } ?>
 											<th>Record #</th>
+											<th>Catalog Number</th>
 											<th>Field Name</th>
 											<th>Old Value</th>
 											<th>New Value</th>
@@ -217,6 +175,11 @@ header("Content-Type: text/html; charset=".$charset);
 																echo $occid;
 															} 
 															?>
+														</td>
+														<td>
+															<div title="Catalog Number">
+																<?php echo $edObj['catnum']; ?>
+															</div>
 														</td>
 														<td>
 															<div title="Field Name">
@@ -282,7 +245,7 @@ header("Content-Type: text/html; charset=".$charset);
 											}
 											if($mode != 'printmode'){ 
 												?>
-												<tr><td colspan="9" valign="bottom">
+												<tr><td colspan="10" valign="bottom">
 													<div style="margin:10px;">
 														<span>
 															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits
@@ -310,7 +273,7 @@ header("Content-Type: text/html; charset=".$charset);
 														<b>Additional Actions:</b>
 													</div>
 													<div style="margin:5px 0px 10px 15px;">
-														<a href="javascript: var f = submitDownload();">
+														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=export'; ?>">
 															Download Selected Records
 														</a>
 													</div>
