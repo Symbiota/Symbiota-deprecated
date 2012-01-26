@@ -274,7 +274,7 @@ header("Content-Type: text/html; charset=".$charset);
 													</div>
 													<div style="margin:5px 0px 10px 15px;">
 														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=export'; ?>">
-															Download Selected Records
+															Download Records
 														</a>
 													</div>
 													<div style="margin:10px 0px 5px 15px;">
