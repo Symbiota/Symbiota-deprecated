@@ -4,8 +4,12 @@
  * By E.E. Gilbert
  */
 include_once($serverRoot.'/config/dbconnection.php');
+include_once('../../config/symbini.php');
 
 class SpecEditReviewManager {
+
+	//public $faStatus = $_POST['fastatus'];
+	//public $frStatus = $_POST['frstatus'];
 
 	private $conn;
 	private $collId;
@@ -42,7 +46,7 @@ class SpecEditReviewManager {
 	public function getEditArr($aStatus, $rStatus){
 		if(!$this->collId) return;
 		$retArr = Array();
-		$sql = 'SELECT e.ocedid,e.occid,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
+		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
 			'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
@@ -62,6 +66,7 @@ class SpecEditReviewManager {
 		while($r = $rs->fetch_object()){
 			$ocedid = $r->ocedid;
 			$occId = $r->occid;
+			$retArr[$occId][$ocedid]['catnum'] = $r->catalognumber;
 			$retArr[$occId][$ocedid]['fname'] = $r->fieldname;
 			$retArr[$occId][$ocedid]['fvalueold'] = $r->fieldvalueold;
 			$retArr[$occId][$ocedid]['fvaluenew'] = $r->fieldvaluenew;
@@ -119,7 +124,7 @@ class SpecEditReviewManager {
 		}
 		return $statusStr;
 	}
-
+	
 	public function downloadRecords($reqArr){
 		if(!array_key_exists('ocedid',$reqArr)) return;
 		$ocedidArr = $reqArr['ocedid'];
@@ -184,6 +189,40 @@ class SpecEditReviewManager {
 	protected function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
+	}
+	
+	public function exportCsvFile(){
+		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,'.
+					'CASE e.reviewstatus WHEN 1 THEN "OPEN" WHEN 2 THEN "PENDING" WHEN 3 THEN "CLOSED" ELSE "UNKNOWN" END AS reviewstatus,'.
+					'CASE e.appliedstatus WHEN 1 THEN "APPLIED" ELSE "NOT APPLIED" END AS appliedstatus,'.
+					'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
+					'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
+					'INNER JOIN users u ON e.uid = u.uid '.
+					'WHERE (o.collid = '.$this->collId.')';
+		
+		if($sql){
+	    	$fileName = 'edited_recordset_'.date('Ymd').".csv";
+			header ('Content-Type: text/csv');
+			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+			
+			$rs = $this->conn->query($sql);
+			if($rs){
+				echo "SEINetID,\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
+					"\"AppliedStatus\",\"EditorName\",\"DateEdited\"\n";
+				
+				while($row = $rs->fetch_assoc()){
+					echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
+							$row["fieldname"]."\","."\"".$row["fieldvalueold"]."\",\"".$row["fieldvaluenew"]."\",\"".
+							$row['reviewstatus']."\",\"".$row["appliedstatus"]."\",\"".$row["username"]."\",\"".
+							$row["initialtimestamp"]."\"\n";
+					
+				}
+			}
+			else{
+				echo "Recordset is empty.\n";
+			}
+	        exit();
+		}
 	}
 }
 ?>
