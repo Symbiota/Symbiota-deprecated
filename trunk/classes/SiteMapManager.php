@@ -20,11 +20,13 @@ class SiteMapManager{
 		global $userRights, $isAdmin;
 		$adminArr = array();
 		$editorArr = array();
-		if(array_key_exists("CollAdmin",$userRights)){
-			$adminArr = $userRights['CollAdmin'];
-		}
-		if(array_key_exists("CollEditor",$userRights)){
-			$editorArr = $userRights['CollEditor'];
+		if(!$isAdmin){
+			if(array_key_exists("CollAdmin",$userRights)){
+				$adminArr = $userRights['CollAdmin'];
+			}
+			if(array_key_exists("CollEditor",$userRights)){
+				$editorArr = $userRights['CollEditor'];
+			}
 		}
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS ccode, c.collectionname, c.colltype '.
 			'FROM omcollections c ';

@@ -426,7 +426,7 @@ $smManager = new SiteMapManager();
 	            					}
 	            				}
 	            				else{
-	            					echo "<li>You have no observation project permissions</li>";
+	            					echo "<li>There are no Observation Projects to which you have permissions</li>";
 	            				}
 	            				?>
 	            			</ul>
