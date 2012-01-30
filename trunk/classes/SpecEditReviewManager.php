@@ -8,9 +8,6 @@ include_once('../../config/symbini.php');
 
 class SpecEditReviewManager {
 
-	//public $faStatus = $_POST['fastatus'];
-	//public $frStatus = $_POST['frstatus'];
-
 	private $conn;
 	private $collId;
 	private $collAcronym;
@@ -53,8 +50,11 @@ class SpecEditReviewManager {
 			'WHERE (o.collid = '.$this->collId.')';
 		if($aStatus === '0' || $aStatus == 1) $sql .= ' AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
-			if($rStatus == '1-2'){
-				$sql .= ' AND (e.reviewstatus IN(1,2)) ';
+			if($rStatus == '0-2'){
+				$sql .= ' AND (e.reviewstatus IN(0,1,2)) ';
+			}
+			elseif($rStatus == '0-1'){
+				$sql .= ' AND (e.reviewstatus IN(0,1)) ';
 			}
 			else{
 				$sql .= ' AND (e.reviewstatus = '.$rStatus.') ';
@@ -192,13 +192,13 @@ class SpecEditReviewManager {
 	}
 	
 	public function exportCsvFile(){
-		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,'.
+		$sql = 'SELECT e.ocedid,e.occid,o.dbpk,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,'.
 					'CASE e.reviewstatus WHEN 1 THEN "OPEN" WHEN 2 THEN "PENDING" WHEN 3 THEN "CLOSED" ELSE "UNKNOWN" END AS reviewstatus,'.
 					'CASE e.appliedstatus WHEN 1 THEN "APPLIED" ELSE "NOT APPLIED" END AS appliedstatus,'.
 					'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
 					'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 					'INNER JOIN users u ON e.uid = u.uid '.
-					'WHERE (o.collid = '.$this->collId.')';
+					'WHERE (o.collid = '.$this->collId.') AND e.reviewstatus <> 3';
 		
 		if($sql){
 	    	$fileName = 'edited_recordset_'.date('Ymd').".csv";
@@ -207,11 +207,11 @@ class SpecEditReviewManager {
 			
 			$rs = $this->conn->query($sql);
 			if($rs){
-				echo "SEINetID,\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
+				echo "SEINetID,\"SourcePK\",\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
 					"\"AppliedStatus\",\"EditorName\",\"DateEdited\"\n";
 				
 				while($row = $rs->fetch_assoc()){
-					echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
+					echo $row['occid'].",\"".$row["dbpk"]."\",\"".$row["catalognumber"]."\",\"".
 							$row["fieldname"]."\","."\"".$row["fieldvalueold"]."\",\"".$row["fieldvaluenew"]."\",\"".
 							$row['reviewstatus']."\",\"".$row["appliedstatus"]."\",\"".$row["username"]."\",\"".
 							$row["initialtimestamp"]."\"\n";
