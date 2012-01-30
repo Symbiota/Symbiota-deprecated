@@ -114,8 +114,8 @@ header("Content-Type: text/html; charset=".$charset);
 											Review Status: 
 											<select name="frstatus">
 												<option value="0">All Records</option>
-												<option value="1-2" <?php echo (!$frStatus||$frStatus=='1-2'?'SELECTED':''); ?>>Open/Pending</option>
-												<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
+												<option value="0-2" <?php echo (!$frStatus||$frStatus=='0-2'?'SELECTED':''); ?>>Open/Pending</option>
+												<option value="0-1" <?php echo ($frStatus=='0-1'?'SELECTED':''); ?>>Open Only</option>
 												<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
 												<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
 											</select>
@@ -289,8 +289,8 @@ header("Content-Type: text/html; charset=".$charset);
 										else{
 											?>
 											<tr>
-												<td colspan="9">
-													<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria</div>
+												<td colspan="10">
+													<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria.</div>
 												</td>
 											</tr>
 											<?php 
