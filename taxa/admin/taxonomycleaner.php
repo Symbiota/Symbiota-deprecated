@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecTaxCleanerManager.php');
+include_once($serverRoot.'/classes/TaxonomyCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST["collid"];
@@ -9,7 +9,7 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 $displayIndex = array_key_exists('displayindex',$_REQUEST)?$_REQUEST['displayindex']:0;
 $analyzeIndex = array_key_exists('analyzeindex',$_REQUEST)?$_REQUEST['analyzeindex']:0;
 
-$cleanManager = new SpecTaxCleanerManager();
+$cleanManager = new TaxonomyCleaner();
 $cleanManager->setCollId($collId);
 $collName = $cleanManager->getCollectionName();
 
