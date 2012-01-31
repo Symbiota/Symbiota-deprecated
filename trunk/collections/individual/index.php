@@ -471,7 +471,30 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					echo '</a></div>';
 				}
 			}
+			$rightsStr = '';
+			if($occArr['rights']){
+				$rightsStr = $occArr['rights'];
+				if(substr($occArr['rights'],0,4) == 'http') $rightsStr = '<a href="'.$rightsStr.'">'.$rightsStr.'</a>';
+				$rightsStr = '<div style="margin-top:2px;"><b>Usage Rights:</b> '.$rightsStr.'</div>';
+			}
+			if($occArr['rightsholder']){
+				$rightsStr .= '<div style="margin-top:2px;"><b>Rights Holder:</b> '.$occArr['rightsholder'].'</div>';
+			}
+			if($occArr['accessrights']){
+				$rightsStr .= '<div style="margin-top:2px;"><b>Access Rights:</b> '.$occArr['accessrights'].'</div>';
+			}
 			?>
+			<div>
+				<?php 
+				if($rightsStr){
+					echo $rightsStr;
+				}
+				else{
+					echo '<a href="../../misc/usagepolicy.php">General Data Usage Policy</a>';
+				}
+				?>
+			</div>
+			
 			<div style="margin:10px 0px 15px 0px;clear:both;">
 				For additional information on this specimen, please contact: 
 				<?php 

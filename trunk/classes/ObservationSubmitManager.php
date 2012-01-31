@@ -53,14 +53,14 @@ class ObservationSubmitManager {
 	}
 
 	public function addObservation($occArr, $obsUid){
-		$statusStr = '';
+		$newOccId = '';
 		if($occArr){
 			//Load Image, abort if unsuccessful
 			$nameArr = $this->loadImages();
 			if($nameArr){
 				//Setup Event Date fields
+				$eventYear = 'NULL'; $eventMonth = 'NULL'; $eventDay = 'NULL'; $startDay = 'NULL';
 				if($dateObj = strtotime($occArr['eventdate'])){
-					$eventDate = date('Y-m-d',$dateObj);
 					$eventYear = date('Y',$dateObj);
 					$eventMonth = date('m',$dateObj);
 					$eventDay = date('d',$dateObj);
@@ -74,7 +74,8 @@ class ObservationSubmitManager {
 				}
 				if(!$tid){
 					//Abort process
-					return 'ERROR: scientific name failed, contact admin to add name to thesaurus';
+					$this->errArr[] = 'ERROR: scientific name failed, contact admin to add name to thesaurus';
+					return;
 				}
 				//Get PK for that collection
 				//$dbpk = 1;
@@ -100,7 +101,7 @@ class ObservationSubmitManager {
 				($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
 				'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
 				($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
-				'"'.$eventDate.'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
+				'"'.$occArr['eventdate'].'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
 				($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
 				($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
 				($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
@@ -120,7 +121,7 @@ class ObservationSubmitManager {
 				//echo $sql;
 				if($this->conn->query($sql)){
 					$occArr['phuid'] = $obsUid;
-					$statusStr = $this->conn->insert_id;
+					$newOccId = $this->conn->insert_id;
 					//Link observation to checklist
 					if(array_key_exists('clid',$occArr)){
 						if($clid = $occArr['clid']){
@@ -146,21 +147,21 @@ class ObservationSubmitManager {
 								}
 								$collectorStr = $occArr['recordedby'].' ('.($occArr['recordnumber']?$occArr['recordnumber']:$eventDate).')';
 								$sql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) '.
-									'VALUES('.$clTid.','.$targetClid.','.$statusStr.',"'.$collectorStr.'") ';
+									'VALUES('.$clTid.','.$targetClid.','.$newOccId.',"'.$collectorStr.'") ';
 								$this->conn->query($sql);
 								
 							}
 							else{
 								$sql = 'INSERT INTO omsurveyoccurlink(occid,surveyid) '.
-									'VALUES('.$statusStr.','.$targetClid.')';
+									'VALUES('.$newOccId.','.$targetClid.')';
 								$this->conn->query($sql);
 							}
 						}
 					}
-					//Load images 
-					$imgStatus = $this->dbImages($nameArr,$occArr,$statusStr,$tid);
+					//Load images
+					$imgStatus = $this->dbImages($nameArr,$occArr,$newOccId,$tid);
 					if($imgStatus){
-						$statusStr = 'Observation added successfully, but images did not upload successful.<br/>'.$imgStatus;
+						$this->errArr[] = 'Observation added successfully, but images did not upload successful';
 					}
 					else{
 						$sql = 'INSERT INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
@@ -169,18 +170,20 @@ class ObservationSubmitManager {
 					}
 				}
 				else{
-					$statusStr = 'ERROR: Failed to load observation record.<br/> Err Descr: '.$this->conn->error;
+					$this->errArr[] = 'ERROR: Failed to load observation record.<br/> Err Descr: '.$this->conn->error;
 				}
 			}
+			else{
+				$this->errArr[] = 'ERROR: Failed to load images ';
+			}
 		}
-		return $statusStr;
+		return $newOccId;
 	}
 
 	private function loadImages(){
-		$status = '';
+		$statusStr = '';
 		//Set download paths and variables
-		set_time_limit(120);
-		ini_set('max_input_time',120);
+		set_time_limit(240);
  		$this->imageRootPath = $GLOBALS['imageRootPath'];
 		if(substr($this->imageRootPath,-1) != '/') $this->imageRootPath .= '/';  
 		$this->imageRootUrl = $GLOBALS['imageRootUrl'];
@@ -201,7 +204,7 @@ class ObservationSubmitManager {
 	
 	private function dbImages($imgNamesArr,$occArr,$occId,$tid){
 		$status = '';
-		//Get owner
+		$imgCnt = 1;
 		foreach($imgNamesArr as $imgPath){
 			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
 			
@@ -210,11 +213,12 @@ class ObservationSubmitManager {
 			$imgWebUrl = $imgUrl;
 			list($width, $height) = getimagesize($imgPath);
 			$fileSize = filesize($imgPath);
+ 			$extStr = substr($imgUrl,strrpos($imgUrl,'.'));
 			//Create Large Image
 			$imgLgUrl = '';
 			/* Deactivate, at least for now
 			if($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
-				$lgWebUrlTemp = str_ireplace('_temp.jpg','lg.jpg',$imgPath); 
+				$lgWebUrlTemp = str_ireplace('_temp'.$extStr,'lg'.$extStr,$imgPath); 
 				if($width < ($this->lgPixWidth*1.2)){
 					if(copy($imgPath,$lgWebUrlTemp)){
 						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
@@ -228,7 +232,7 @@ class ObservationSubmitManager {
 			}*/
 
 			//Create web url
-			$imgTargetPath = str_ireplace('_temp.jpg','.jpg',$imgPath);
+			$imgTargetPath = str_ireplace('_temp'.$extStr,$extStr,$imgPath);
 			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
 				rename($imgPath,$imgTargetPath);
 			}
@@ -240,8 +244,8 @@ class ObservationSubmitManager {
 			if(file_exists($imgPath)) unlink($imgPath);
 				
 			if($imgWebUrl){
-				$caption = $this->cleanStr($occArr['caption']);
-				$notes = (array_key_exists("notes",$occArr)?$this->cleanStr($occArr["notes"]):"");
+				$caption = $this->cleanStr($occArr['caption'.$imgCnt]);
+				$notes = $this->cleanStr($occArr["notes"].$imgCnt);
 				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
 					','.$occArr['phuid'].',"Observation",'.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
@@ -251,6 +255,7 @@ class ObservationSubmitManager {
 					//$status .= '<br/>SQL: '.$sql;
 				}
 			}
+			$imgCnt++;
 		}
 		return $status;
 	}
@@ -283,11 +288,13 @@ class ObservationSubmitManager {
  		//Check and see if file already exists, if so, rename filename until it has a unique name
  		$tempFileName = $fileName;
  		$cnt = 0;
+ 		$extStr = substr($fileName,strrpos($fileName,'.'));
+ 		//Check to see if file with exact name already exists, if so than rename
  		while(file_exists($path.$tempFileName)){
- 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
+ 			$tempFileName = str_ireplace($extStr,"_".$cnt.$extStr,$fileName);
  			$cnt++;
  		}
- 		$fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
+ 		$fileName = str_ireplace($extStr,"_temp".$extStr,$tempFileName);
  		return $path.$fileName;
  	}
 
@@ -302,17 +309,18 @@ class ObservationSubmitManager {
 					if(!mkdir($this->imageRootPath."misc_thumbnails/", 0775)) return "";
 				}
 				$fileName = "";
-				if(stripos($imgUrl,"_temp.jpg")){
-					$fileName = str_ireplace("_temp.jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+ 				$extStr = substr($imgUrl,strrpos($imgUrl,'.'));
+				if(stripos($imgUrl,"_temp".$extStr)){
+					$fileName = str_ireplace("_temp".$extStr,"_tn".$extStr,substr($imgUrl,strrpos($imgUrl,"/")));
 				}
 				else{
-					$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+					$fileName = str_ireplace($extStr,"_tn".$extStr,substr($imgUrl,strrpos($imgUrl,"/")));
 				}
 				$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
 				$cnt = 1;
-				$fileNameBase = str_ireplace("tn.jpg","",$fileName);
+				$fileNameBase = str_ireplace("_tn".$extStr,"",$fileName);
 				while(file_exists($newThumbnailPath)){
-					$fileName = $fileNameBase."tn".$cnt.".jpg";
+					$fileName = $fileNameBase."_tn".$cnt.$extStr;
 					$newThumbnailPath = $this->imageRootPath."misc_thumbnails/".$fileName;
 					$cnt++; 
 				}
@@ -320,7 +328,7 @@ class ObservationSubmitManager {
 			}
 			elseif(strpos($imgUrl,$this->imageRootUrl) === 0){
 				$imgPath = str_replace($this->imageRootUrl,$this->imageRootPath,$imgUrl);
-				$newThumbnailUrl = str_ireplace("_temp.jpg","tn.jpg",$imgUrl);
+				$newThumbnailUrl = str_ireplace("_temp".$extStr,"_tn".$extStr,$imgUrl);
 				$newThumbnailPath = str_replace($this->imageRootUrl,$this->imageRootPath,$newThumbnailUrl);
 			}
 			if(!$newThumbnailUrl) return "";
@@ -349,7 +357,7 @@ class ObservationSubmitManager {
 		*/ 
 		if(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 
-			$this->createNewImageGD($sourceImg,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating);
+			$successStatus = $this->createNewImageGD($sourceImg,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating);
 		}
 		else{
 			// Neither ImageMagick nor GD are installed 
@@ -369,27 +377,19 @@ class ObservationSubmitManager {
 			}
 
 	   	}
-
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
 		
 		if($qualityRating){
 			$successStatus = imagejpeg($tmpImg, $targetPath, $qualityRating);
-			if($this->exif && class_exists('PelJpeg')){
-				$outputJpg = new PelJpeg($targetPath);
-				$outputJpg->setExif($this->exif);
-				$outputJpg->saveFile($targetPath);
-			}
 		}
 		else{
-			if($this->exif && class_exists('PelJpeg')){
-				$outputJpg = new PelJpeg($tmpImg);
-				$outputJpg->setExif($this->exif);
-				$successStatus = $outputJpg->saveFile($targetPath);
-			}
-			else{
-				$successStatus = imagejpeg($tmpImg, $targetPath);
-			}
+			$successStatus = imagejpeg($tmpImg, $targetPath);
+		}
+		if($successStatus && $this->exif && class_exists('PelJpeg')){
+			$outputJpg = new PelJpeg($targetPath);
+			$outputJpg->setExif($this->exif);
+			$outputJpg->saveFile($targetPath);
 		}
 
 		imagedestroy($tmpImg);
