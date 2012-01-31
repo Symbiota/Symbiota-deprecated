@@ -306,7 +306,7 @@ if($isEditor){
 								echo "</div>";
 							}
 							if($imgArr["owner"]) echo "<div><b>Manager:</b> ".$imgArr["owner"]."</div>";
-							if($imgArr["sourceurl"]) echo '<div><a href="'.$imgArr["sourceurl"].'">View Image Source</a></div>';
+							if($imgArr["sourceurl"]) echo '<div><b>Image Source:</b> <a href="'.$imgArr["sourceurl"].'">'.$imgArr["sourceurl"].'</a></div>';
 							if($imgArr["locality"]) echo "<div><b>Locality:</b> ".$imgArr["locality"]."</div>";
 							if($imgArr["notes"]) echo "<div><b>Notes:</b> ".$imgArr["notes"]."</div>";
 							echo "<div>";

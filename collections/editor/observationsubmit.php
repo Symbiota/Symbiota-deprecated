@@ -86,7 +86,7 @@ if($collMap){
 		if($symbUid){
 			if($isEditor){
 				?>
-				<form id='obsform' name='obsform' action='observationsubmit.php' method='post' enctype='multipart/form-data' onsubmit="return submitObsForm(this)">
+				<form id='obsform' name='obsform' action='observationsubmit.php' method='post' enctype='multipart/form-data' onsubmit="return verifyObsForm(this)">
 					<fieldset>
 						<legend><b>Observation</b></legend>
 						<div style="clear:both;" class="p1">
@@ -130,7 +130,7 @@ if($collMap){
 									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
 								</span>
 								<span style="margin-left:10px;">
-									<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" />
+									<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 								</span>
 								<span style="margin-left:5px;cursor:pointer;" onclick="toggle('obsextradiv')">
 									<img src="../../images/showedit.png" style="width:15px;" />
@@ -331,17 +331,17 @@ if($collMap){
 						<legend><b>Images</b></legend>
 						<div style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+							<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 							<div>
 								Image 1: <input name='imgfile1' type='file' size='70' style="background-color:lightyellow;"/>
 								<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
 							</div>
 							<div style="margin:5px;">
 								Caption: 
-								<input name="caption" type="text" style="width:200px;" />
+								<input name="caption1" type="text" style="width:200px;" />
 								<span style="margin-left:20px;">
 									Image Remarks: 
-									<input name="notes" type="text" style="width:275px;" />
+									<input name="notes1" type="text" style="width:275px;" />
 								</span>
 							</div>
 							<div style="width:100%;cursor:pointer;text-align:right;margin-top:-15;" onclick="toggle('img2div')" title="Add a Second Image">
@@ -350,17 +350,17 @@ if($collMap){
 						</div>
 						<div id="img2div" style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;display:none;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+							<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 							<div>
 								Image 2: <input name='imgfile2' type='file' size='70'/>
-								<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
+								<input type="button" value="Reset" onclick="document.obsform.imgfile2.value = ''">
 							</div>
 							<div style="margin:5px;">
 								Caption: 
-								<input name="caption" type="text" style="width:200px;" />
+								<input name="caption2" type="text" style="width:200px;" />
 								<span style="margin-left:20px;">
 									Image Remarks: 
-									<input name="notes" type="text" style="width:275px;" />
+									<input name="notes2" type="text" style="width:275px;" />
 								</span>
 							</div>
 							<div style="width:100%;cursor:pointer;text-align:right;margin-top:-15;" onclick="toggle('img3div')" title="Add a third Image">
@@ -369,24 +369,23 @@ if($collMap){
 						</div>
 						<div id="img3div" style='padding:10px;width:675px;border:1px solid yellow;background-color:FFFF99;display:none;'>
 					    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-							<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+							<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
 							<div>
 								Image 3: <input name='imgfile3' type='file' size='70'/>
-								<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
+								<input type="button" value="Reset" onclick="document.obsform.imgfile3.value = ''">
 							</div>
 							<div style="margin:5px;">
 								Caption: 
-								<input name="caption" type="text" style="width:200px;" />
+								<input name="caption3" type="text" style="width:200px;" />
 								<span style="margin-left:20px;">
 									Image Remarks: 
-									<input name="notes" type="text" style="width:275px;" />
+									<input name="notes3" type="text" style="width:275px;" />
 								</span>
 							</div>
 						</div>
 						<div style="margin-left:10px;">* Uploading web-ready images recommended. Upload image size can not be greater than 1MB</div>
 					</fieldset>
 					<div style="margin:10px;">
-						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
 						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 						<input type="submit" name="action" value="Submit Observation" />
 						* Fields with background color are required  

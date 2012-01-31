@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 5 May 2009
- * @author  E. Gilbert: egbot@asu.edu
- */
 include_once("OccurrenceManager.php");
 
 class OccurrenceDownloadManager extends OccurrenceManager{
@@ -28,7 +24,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
  			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
  			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-	 		"o.disposition, o.modified, o.language, o.collid, o.localitySecurity ".
+	 		"o.disposition, o.modified, o.language, o.collid, o.localitySecurity, c.rights, c.rightsholder, c.accessrights ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
  		$this->dwcSql .= $this->getSqlWhere();
@@ -74,7 +70,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
 			'o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-			'o.disposition, o.modified, o.language, o.localitysecurity '.
+			'o.disposition, o.modified, o.language, o.localitysecurity, c.rights, c.rightsholder, c.accessrights '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ';
 		$sql .= $this->sqlFrag;
 		//echo $sql;
@@ -91,7 +87,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
 				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-		 		"disposition","modified","language");
+		 		"disposition","modified","language","rights","rightsholder","accessrights");
 			fputcsv($outstream, $headArr);
    		
 			while($row = $result->fetch_assoc()){
@@ -163,7 +159,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-			"o.disposition, o.duplicatequantity, o.modified, o.language, o.collid, o.localitySecurity ".
+			"o.disposition, o.duplicatequantity, o.modified, o.language, o.collid, o.localitySecurity, c.rights, c.rightsholder, c.accessrights ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 		$sql .= $this->sqlFrag;
@@ -183,7 +179,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
  			"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
  			"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-	 		"disposition","duplicatequantity","modified","language","collid","localitySecurity");
+	 		"disposition","duplicatequantity","modified","language","collid","localitySecurity","rights","rightsholder","accessrights");
 			fputcsv($outstream, $headArr);
 			
 			while($row = $result->fetch_assoc()){
