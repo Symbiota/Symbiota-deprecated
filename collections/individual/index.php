@@ -140,8 +140,13 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						<b>Family:</b> <?php echo $occArr['family']; ?>
 					</div>
 					<div style='float:right;'>
-						<b>Catalog Number:</b> <?php echo $occArr['catalognumber']; ?>
-						<?php 
+						<?php
+						if($occArr['catalognumber']){ 
+							?>
+							<b>Catalog Number:</b> 
+							<?php 
+							echo $occArr['catalognumber'];
+						}
 						if($occArr['occurrenceid']){
 							?> 
 							<div title="Global Unique Identifier">
@@ -153,7 +158,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						if($occArr['othercatalognumbers']){
 							?>
 							<div title="Other Catalog Numbers">
-								<b><?php echo $occArr['ownerinstitutioncode']; ?></b>
+								<b>Additional Catalog #:</b>
 								<?php echo $occArr['othercatalognumbers']; ?>
 							</div>
 							<?php 
