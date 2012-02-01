@@ -286,7 +286,7 @@ if($collMap){
 						</div>
 						<div style="padding:3px;">
 							Description of Organism:
-							<input type="text" name="dynamicproperties" tabindex="86" style="width:600px;" value="" />
+							<input type="text" name="verbatimattributes" tabindex="86" style="width:600px;" value="" />
 						</div>
 						<div style="padding:3px;">
 							General Notes:

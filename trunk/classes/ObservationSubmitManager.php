@@ -88,34 +88,37 @@ class ObservationSubmitManager {
 					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 					'identificationReferences, recordedBy, recordNumber, '.
 					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
-					'dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
+					'verbatimattributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
 	
 				'VALUES ('.$this->collId.',"Observation",'.($occArr['family']?'"'.$occArr['family'].'"':'NULL').','.
-				'"'.$occArr['sciname'].'","'.$occArr['sciname'].' '.$occArr['scientificnameauthorship'].'",'.
-				($occArr['scientificnameauthorship']?'"'.$occArr['scientificnameauthorship'].'"':'NULL').','.
-				$tid.",".($occArr['taxonremarks']?'"'.$occArr['taxonremarks'].'"':'NULL').','.
-				($occArr['identifiedby']?'"'.$occArr['identifiedby'].'"':'NULL').','.
-				($occArr['dateidentified']?'"'.$occArr['dateidentified'].'"':'NULL').','.
-				($occArr['identificationreferences']?'"'.$occArr['identificationreferences'].'"':'NULL').','.
-				'"'.$occArr['recordedby'].'",'.($occArr['recordnumber']?'"'.$occArr['recordnumber'].'"':'NULL').','.
-				($occArr['associatedcollectors']?'"'.$occArr['associatedcollectors'].'"':'NULL').','.
+				'"'.$this->cleanStr($occArr['sciname']).'","'.
+				$this->cleanStr($occArr['sciname'].' '.$occArr['scientificnameauthorship']).'",'.
+				($occArr['scientificnameauthorship']?'"'.$this->cleanStr($occArr['scientificnameauthorship']).'"':'NULL').','.
+				$tid.",".($occArr['taxonremarks']?'"'.$this->cleanStr($occArr['taxonremarks']).'"':'NULL').','.
+				($occArr['identifiedby']?'"'.$this->cleanStr($occArr['identifiedby']).'"':'NULL').','.
+				($occArr['dateidentified']?'"'.$this->cleanStr($occArr['dateidentified']).'"':'NULL').','.
+				($occArr['identificationreferences']?'"'.$this->cleanStr($occArr['identificationreferences']).'"':'NULL').','.
+				'"'.$this->cleanStr($occArr['recordedby']).'",'.
+				($occArr['recordnumber']?'"'.$this->cleanStr($occArr['recordnumber']).'"':'NULL').','.
+				($occArr['associatedcollectors']?'"'.$this->cleanStr($occArr['associatedcollectors']).'"':'NULL').','.
 				'"'.$occArr['eventdate'].'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
-				($occArr['habitat']?'"'.$occArr['habitat'].'"':'NULL').','.
-				($occArr['occurrenceremarks']?'"'.$occArr['occurrenceremarks'].'"':'NULL').','.
-				($occArr['associatedtaxa']?'"'.$occArr['associatedtaxa'].'"':'NULL').','.
-				($occArr['dynamicproperties']?'"'.$occArr['dynamicproperties'].'"':'NULL').','.
-				($occArr['reproductivecondition']?'"'.$occArr['reproductivecondition'].'"':'NULL').','.
+				($occArr['habitat']?'"'.$this->cleanStr($occArr['habitat']).'"':'NULL').','.
+				($occArr['occurrenceremarks']?'"'.$this->cleanStr($occArr['occurrenceremarks']).'"':'NULL').','.
+				($occArr['associatedtaxa']?'"'.$this->cleanStr($occArr['associatedtaxa']).'"':'NULL').','.
+				($occArr['verbatimattributes']?'"'.$this->cleanStr($occArr['verbatimattributes']).'"':'NULL').','.
+				($occArr['reproductivecondition']?'"'.$this->cleanStr($occArr['reproductivecondition']).'"':'NULL').','.
 				(array_key_exists('cultivationstatus',$occArr)?'1':'0').','.
-				($occArr['establishmentmeans']?'"'.$occArr['establishmentmeans'].'"':'NULL').','.
-				'"'.$occArr['country'].'",'.($occArr['stateprovince']?'"'.$occArr['stateprovince'].'"':'NULL').','.
-				($occArr['county']?'"'.$occArr['county'].'"':'NULL').','.
-				'"'.$occArr['locality'].'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
+				($occArr['establishmentmeans']?'"'.$this->cleanStr($occArr['establishmentmeans']).'"':'NULL').','.
+				'"'.$this->cleanStr($occArr['country']).'",'.
+				($occArr['stateprovince']?'"'.$this->cleanStr($occArr['stateprovince']).'"':'NULL').','.
+				($occArr['county']?'"'.$this->cleanStr($occArr['county']).'"':'NULL').','.
+				'"'.$this->cleanStr($occArr['locality']).'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
 				$occArr['decimallatitude'].','.$occArr['decimallongitude'].','.
-				($occArr['geodeticdatum']?'"'.$occArr['geodeticdatum'].'"':'NULL').','.
+				($occArr['geodeticdatum']?'"'.$this->cleanStr($occArr['geodeticdatum']).'"':'NULL').','.
 				($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
-				($occArr['georeferenceremarks']?'"'.$occArr['georeferenceremarks'].'"':'NULL').','.
+				($occArr['georeferenceremarks']?'"'.$this->cleanStr($occArr['georeferenceremarks']).'"':'NULL').','.
 				($occArr['minimumelevationinmeters']?$occArr['minimumelevationinmeters']:'NULL').','.
 				$obsUid.') ';
 				//echo $sql;
@@ -147,9 +150,8 @@ class ObservationSubmitManager {
 								}
 								$collectorStr = $occArr['recordedby'].' ('.($occArr['recordnumber']?$occArr['recordnumber']:$eventDate).')';
 								$sql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) '.
-									'VALUES('.$clTid.','.$targetClid.','.$newOccId.',"'.$collectorStr.'") ';
+									'VALUES('.$clTid.','.$targetClid.','.$newOccId.',"'.$this->cleanStr($collectorStr).'") ';
 								$this->conn->query($sql);
-								
 							}
 							else{
 								$sql = 'INSERT INTO omsurveyoccurlink(occid,surveyid) '.
@@ -248,7 +250,8 @@ class ObservationSubmitManager {
 				$notes = $this->cleanStr($occArr["notes"].$imgCnt);
 				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.
 					'VALUES ('.$tid.',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').
-					','.$occArr['phuid'].',"Observation",'.($caption?'"'.$caption.'"':'NULL').','.$occId.','.($notes?'"'.$notes.'"':'NULL').',50)';
+					','.$occArr['phuid'].',"Observation",'.($caption?'"'.$this->cleanStr($caption).'"':'NULL').','.$occId.','.
+					($notes?'"'.$this->cleanStr($notes).'"':'NULL').',50)';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR loadImageData: '.$this->conn->error;
@@ -463,7 +466,7 @@ class ObservationSubmitManager {
 	private function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","'",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }
