@@ -250,32 +250,51 @@ class OccurrenceEditorManager {
 		}
 	}
 
-	public function editOccurrence($occArr,$uid,$autoCommit){
+	public function editOccurrence($occArr,$autoCommit){
+		global $paramsArr;
 		$status = '';
-		if(!$autoCommit && $this->getObserverUid() == $uid) $autoCommit = 1;
+		if(!$autoCommit && $this->getObserverUid() == $paramsArr['uid']) $autoCommit = 1;
 		$editedFields = trim($occArr['editedfields']);
-		if($editedFields){
+		$editArr = array_unique(explode(';',$editedFields));
+		foreach($editArr as $k => $v){
+			if(!trim($v)) unset($editArr[$k]);
+		}
+		if($editArr){
 			//Add edits to omoccuredits
-			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
-				'SELECT '.$occArr['occid'].' AS occid, 1 AS rs,'.($autoCommit?'1':'0').' AS astat,'.$uid.' AS uid,';
-			$editArr = array_unique(explode(';',$editedFields));
-			foreach($editArr as $k => $v){
-				if($v){
+			//Get old values before they are changed
+			$sql = 'SELECT '.implode(',',$editArr).(in_array('processingstatus',$editArr)?'':',processingstatus').
+				',recordenteredby FROM omoccurrences WHERE occid = '.$occArr['occid'];
+			$rs = $this->conn->query($sql);
+			$oldValues = $rs->fetch_assoc();
+			$rs->close();
+			//Version edits only if old processing status does not equal "unprocessed"
+			if($oldValues['processingstatus'] != 'unprocessed'){ 
+				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
+					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
+				foreach($editArr as $v){
+					$v = trim($v);
 					if(!array_key_exists($v,$occArr)){
 						//Field is a checkbox that is unchecked
 						$occArr[$v] = 0;
 					}
-					$sqlEdit = $sqlEditsBase.'"'.$v.'" AS fn,"'.$this->cleanStr($occArr[$v]).
-						'" AS fvn,'.$this->cleanStr($v).' AS fvo FROM omoccurrences '.
-						'WHERE (occid = '.$occArr['occid'].') AND (trim('.$v.') <> "'.trim($occArr[$v]).'")';
-					//echo '<div>'.$sqlEdit.'</div>';
-					$this->conn->query($sqlEdit);
+					$newValue = $this->cleanStr($occArr[$v]);
+					$oldValue = $this->cleanStr($oldValues[$v]);
+					//Version edits only if value has changed and old value was not null 
+					if($v && $oldValue && $oldValue != $newValue){
+						$sqlEdit = $sqlEditsBase.'"'.$v.'","'.$newValue.'","'.$oldValue.'")';
+						//echo '<div>'.$sqlEdit.'</div>';
+						$this->conn->query($sqlEdit);
+					}
 				}
 			}
 			//Edit record only if user is authorized to autoCommit 
 			if($autoCommit){
 				$status = 'SUCCESS: edits submitted and activated';
+				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
+				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
+					$sql = ',recordenteredby = "'.$paramsArr['un'].'"';
+				}
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$sql .= ',processingstatus = "'.$occArr['autoprocessingstatus'].'"';
 					$k2d = array_search('processingstatus',$editArr);
