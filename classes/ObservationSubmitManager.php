@@ -256,6 +256,13 @@ class ObservationSubmitManager {
 				}
 			}
 			$imgCnt++;
+			//Reset image
+			imagedestroy($this->sourceGdImg);
+			unset($this->sourceGdImg);
+			//if($this->processUsingImageMagick) {
+				//imagedestroy($this->sourceImagickImg);
+				//unset($this->sourceImagickImg);
+			//}
 		}
 		return $status;
 	}
