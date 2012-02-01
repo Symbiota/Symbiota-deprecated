@@ -90,7 +90,7 @@ if($symbUid){
 			}
 		}
 		elseif($action == "Save Edits"){
-			$statusStr = $occManager->editOccurrence($_POST,$symbUid,$isEditor);
+			$statusStr = $occManager->editOccurrence($_POST,$isEditor);
 		}
 		elseif($action == 'Delete Occurrence'){
 			$statusStr = $occManager->deleteOccurrence($occId);
