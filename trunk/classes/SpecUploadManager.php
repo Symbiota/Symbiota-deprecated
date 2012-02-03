@@ -812,135 +812,143 @@ class SpecUploadManager{
 	}
 	
 	protected function loadRecord($recMap){
-		//Date cleaning
-		if(array_key_exists('month',$recMap)){
-			if(!is_numeric($recMap['month'])){
-				if(strlen($recMap['month']) > 2){
-					$monAbbr = strtolower(substr($recMap['month'],0,3));
-					if(array_key_exists('month',$recMap)){
-						$recMap['month'] = $this->monthNames[$monAbbr];
+		//Only import record if at least one of the minimal fields have data 
+		if((array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
+			|| (array_key_exists('recordedby',$recMap) && $recMap['recordedby'])
+			|| (array_key_exists('eventdate',$recMap) && $recMap['eventdate'])
+			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
+			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
+			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
+			//Date cleaning
+			if(array_key_exists('month',$recMap)){
+				if(!is_numeric($recMap['month'])){
+					if(strlen($recMap['month']) > 2){
+						$monAbbr = strtolower(substr($recMap['month'],0,3));
+						if(array_key_exists('month',$recMap)){
+							$recMap['month'] = $this->monthNames[$monAbbr];
+						}
+						else{
+							if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+								$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
+							}
+							$recMap['month'] = '';
+						}
 					}
 					else{
-						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-							$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
-						}
 						$recMap['month'] = '';
 					}
 				}
-				else{
-					$recMap['month'] = '';
+			}
+			if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
+				if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4){
+					$y = $recMap['year'];
+					$m = "00";
+					$d = "00";
+					if(array_key_exists('month',$recMap) && $recMap['month'] && is_numeric($recMap['month'])){
+						$m = $recMap['month'];
+						if(strlen($m) == 1) $m = '0'.$m;
+						if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
+							$d = $recMap['day'];
+							if(strlen($d) == 1) $d = '0'.$d;
+						}
+					}
+					$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
+				}
+				elseif(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
+					$dateStr = $this->formatDate($recMap['verbatimeventdate']);
+					if($dateStr) $recMap['eventdate'] = $dateStr;
 				}
 			}
-		}
-		if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
-			if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4){
-				$y = $recMap['year'];
-				$m = "00";
-				$d = "00";
-				if(array_key_exists('month',$recMap) && $recMap['month'] && is_numeric($recMap['month'])){
-					$m = $recMap['month'];
-					if(strlen($m) == 1) $m = '0'.$m;
-					if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
-						$d = $recMap['day'];
-						if(strlen($d) == 1) $d = '0'.$d;
+			//Convert UTM to Lat/Long
+			if(array_key_exists('utmnorthing',$recMap) && array_key_exists('utmeasting',$recMap) && array_key_exists('utmzoning',$recMap) 
+				&& (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']) 
+				&& (!array_key_exists('decimallongitude',$recMap) || !$recMap['decimallongitude'])){
+				$n = $recMap['utmnorthing'];
+				$e = $recMap['utmeasting'];
+				$z = $recMap['utmzoning'];
+				$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
+				if($n && $e && $z){
+					$gPoint = new GPoint($d);
+					$gPoint->setUTM($e,$n,$z);
+					$gPoint->convertTMtoLL();
+					$lat = $gPoint->Lat();
+					$lng = $gPoint->Long();
+					if($lat && $lng){
+						$recMap['decimallatitude'] = round($lat,6);
+						$recMap['decimallongitude'] = round($lng,6);
 					}
 				}
-				$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
 			}
-			elseif(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
-				$dateStr = $this->formatDate($recMap['verbatimeventdate']);
-				if($dateStr) $recMap['eventdate'] = $dateStr;
-			}
-		}
-		//Convert UTM to Lat/Long
-		if(array_key_exists('utmnorthing',$recMap) && array_key_exists('utmeasting',$recMap) && array_key_exists('utmzoning',$recMap) 
-			&& (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']) 
-			&& (!array_key_exists('decimallongitude',$recMap) || !$recMap['decimallongitude'])){
-			$n = $recMap['utmnorthing'];
-			$e = $recMap['utmeasting'];
-			$z = $recMap['utmzoning'];
-			$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
-			if($n && $e && $z){
-				$gPoint = new GPoint($d);
-				$gPoint->setUTM($e,$n,$z);
-				$gPoint->convertTMtoLL();
-				$lat = $gPoint->Lat();
-				$lng = $gPoint->Long();
-				if($lat && $lng){
-					$recMap['decimallatitude'] = round($lat,6);
-					$recMap['decimallongitude'] = round($lng,6);
+			
+			//Create update str 
+			$sqlFields = '';
+			$sqlValues = '';
+			foreach($recMap as $symbField => $valueStr){
+				$sqlFields .= ','.$symbField;
+				$valueStr = $this->encodeString($valueStr);
+				$valueStr = $this->cleanString($valueStr);
+				//Load data
+				$type = '';
+				$size = 0;
+				if(array_key_exists($symbField,$this->fieldMap)){ 
+					if(array_key_exists('type',$this->fieldMap[$symbField])){
+						$type = $this->fieldMap[$symbField]["type"];
+					}
+					if(array_key_exists('size',$this->fieldMap[$symbField])){
+						$size = $this->fieldMap[$symbField]["size"];
+					}
+				}
+				switch($type){
+					case "numeric":
+						if(is_numeric($valueStr)){
+							$sqlValues .= ",".$valueStr;
+						}
+						elseif(is_numeric(str_replace(',',"",$valueStr))){
+							$sqlValues .= ",".str_replace(',',"",$valueStr);
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
+						break;
+					case "date":
+						$dateStr = $this->formatDate($valueStr);
+						if($dateStr){
+							$sqlValues .= ',"'.$dateStr.'"';
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
+						break;
+					default:	//string
+						if($size && strlen($valueStr) > $size){
+							$valueStr = substr($valueStr,0,$size);
+						}
+						if($valueStr){
+							$sqlValues .= ',"'.$valueStr.'"';
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
 				}
 			}
-		}
-		
-		//Create update str 
-		$sqlFields = '';
-		$sqlValues = '';
-		foreach($recMap as $symbField => $valueStr){
-			$sqlFields .= ','.$symbField;
-			$valueStr = $this->encodeString($valueStr);
-			$valueStr = $this->cleanString($valueStr);
-			//Load data
-			$type = '';
-			$size = 0;
-			if(array_key_exists($symbField,$this->fieldMap)){ 
-				if(array_key_exists('type',$this->fieldMap[$symbField])){
-					$type = $this->fieldMap[$symbField]["type"];
-				}
-				if(array_key_exists('size',$this->fieldMap[$symbField])){
-					$size = $this->fieldMap[$symbField]["size"];
-				}
+			$sql = "INSERT INTO uploadspectemp(collid".$sqlFields.") ".
+				"VALUES(".$this->collId.$sqlValues.")";
+			//echo "<div>SQL: ".$sql."</div>";
+			
+			if($this->conn->query($sql)){
+				$this->transferCount++;
+				if($this->transferCount%1000 == 0) echo '<li style="font-weight:bold;">Upload count: '.$this->transferCount.'</li>';
+				ob_flush();
+				flush();
+				//echo "<li>";
+				//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
+				//echo "</li>";
 			}
-			switch($type){
-				case "numeric":
-					if(is_numeric($valueStr)){
-						$sqlValues .= ",".$valueStr;
-					}
-					elseif(is_numeric(str_replace(',',"",$valueStr))){
-						$sqlValues .= ",".str_replace(',',"",$valueStr);
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
-					break;
-				case "date":
-					$dateStr = $this->formatDate($valueStr);
-					if($dateStr){
-						$sqlValues .= ',"'.$dateStr.'"';
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
-					break;
-				default:	//string
-					if($size && strlen($valueStr) > $size){
-						$valueStr = substr($valueStr,0,$size);
-					}
-					if($valueStr){
-						$sqlValues .= ',"'.$valueStr.'"';
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
+			else{
+				echo "<li>FAILED adding record #".$this->transferCount."</li>";
+				echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
+				echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
 			}
-		}
-		$sql = "INSERT INTO uploadspectemp(collid".$sqlFields.") ".
-			"VALUES(".$this->collId.$sqlValues.")";
-		//echo "<div>SQL: ".$sql."</div>";
-		
-		if($this->conn->query($sql)){
-			$this->transferCount++;
-			if($this->transferCount%1000 == 0) echo '<li style="font-weight:bold;">Upload count: '.$this->transferCount.'</li>';
-			ob_flush();
-			flush();
-			//echo "<li>";
-			//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
-			//echo "</li>";
-		}
-		else{
-			echo "<li>FAILED adding record #".$this->transferCount."</li>";
-			echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
-			echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
 		}
 	}
 
