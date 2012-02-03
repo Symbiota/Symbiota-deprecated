@@ -636,9 +636,11 @@ class SpecUploadManager{
 		}
 		else{
 			echo '<li style="font-weight:bold;">Upload Procedure Complete';
-			if($this->transferCount) echo ': '.$this->transferCount.' records';
+			echo ': '.$this->transferCount.' records uploaded to temporary table';
 			echo '</li>';
-			if($this->transferCount) echo '<li style="font-weight:bold;">Records transferred only to temporary specimen table. Use controls below to transfer to specimen table</li>';
+			if($this->transferCount){
+				echo '<li style="font-weight:bold;">Use controls below to activate records and transfer to specimen table</li>';
+			}
 		}
 	}
 
