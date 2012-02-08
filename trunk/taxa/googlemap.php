@@ -118,8 +118,10 @@ $taxaMap = $mapManager->getTaxaMap();
 			catch(err){
 			}
 			if(puWin != null) puWin.close();
-			puWin = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			puWin = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if(puWin.opener == null) puWin.opener = self;
+			window.indspec.focus();
+			puWin.focus();
 		}
 
 		function closeAllInfoWins(){
