@@ -61,7 +61,7 @@ class OccurrenceIndividualManager {
     		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
 			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
 			'o.georeferenceremarks, verbatimattributes, '.
-			'o.typestatus, o.dbpk, o.habitat, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
+			'o.typestatus, o.dbpk, o.habitat, o.substrate, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
 			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, o.observeruid, c.rights, c.rightsholder, c.accessrights '.
 			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';
 		if($this->occId){

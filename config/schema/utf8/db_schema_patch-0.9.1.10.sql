@@ -44,7 +44,8 @@ CREATE  TABLE `fmchklstcoordinates` (
   INDEX `FKchklsttaxalink` (`clid` ASC, `tid` ASC) ,   
   CONSTRAINT `FKchklsttaxalink`     
     FOREIGN KEY (`clid` , `tid` )     
-    REFERENCES `fmchklsttaxalink` (`CLID` , `TID` )     ON DELETE CASCADE     ON UPDATE CASCADE); 
+    REFERENCES `fmchklsttaxalink` (`CLID` , `TID` )     ON DELETE CASCADE     ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 
 ALTER TABLE `omoccurrences` 

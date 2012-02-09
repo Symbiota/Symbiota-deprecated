@@ -23,7 +23,7 @@ class OccurrenceEditorManager {
 		'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
 		'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 		'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-		'o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
+		'o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
 		'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
 		'o.stateProvince, o.county, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
 		'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
@@ -343,7 +343,7 @@ class OccurrenceEditorManager {
 			"ownerInstitutionCode, family, sciname, tidinterpreted, scientificNameAuthorship, identifiedBy, dateIdentified, ".
 			"identificationReferences, identificationremarks, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
-			"verbatimEventDate, habitat, occurrenceRemarks, associatedTaxa, verbatimattributes, ".
+			"verbatimEventDate, habitat, substrate, occurrenceRemarks, associatedTaxa, verbatimattributes, ".
 			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, country, ".
 			"stateProvince, county, locality, localitySecurity, localitysecurityreason, decimalLatitude, decimalLongitude, ".
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, ".
@@ -377,6 +377,7 @@ class OccurrenceEditorManager {
 			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
 			($occArr["verbatimeventdate"]?"\"".$this->conn->real_escape_string($occArr["verbatimeventdate"])."\"":"NULL").",".
 			($occArr["habitat"]?"\"".$this->conn->real_escape_string($occArr["habitat"])."\"":"NULL").",".
+			($occArr["substrate"]?"\"".$this->conn->real_escape_string($occArr["substrate"])."\"":"NULL").",".
 			($occArr["occurrenceremarks"]?"\"".$this->conn->real_escape_string($occArr["occurrenceremarks"])."\"":"NULL").",".
 			($occArr["associatedtaxa"]?"\"".$this->conn->real_escape_string($occArr["associatedtaxa"])."\"":"NULL").",".
 			($occArr["verbatimattributes"]?"\"".$this->conn->real_escape_string($occArr["verbatimattributes"])."\"":"NULL").",".
@@ -470,8 +471,8 @@ class OccurrenceEditorManager {
 			'startdayofyear','enddayofyear','country','stateprovince','county','locality','decimallatitude','decimallongitude',
 			'verbatimcoordinates','coordinateuncertaintyinmeters','geodeticdatum','minimumelevationinmeters',
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
-			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','associatedtaxa','basisofrecord',
-			'language','labelproject');
+			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','substrate',
+			'associatedtaxa','basisofrecord','language','labelproject');
 		return array_intersect_key($fArr,array_flip($locArr)); 
 	}
 
@@ -501,7 +502,7 @@ class OccurrenceEditorManager {
 				$sqlBase = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
 					'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
 					'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.occurrenceRemarks, o.associatedTaxa, '.
+					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
 					'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
 					'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
 					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.

@@ -663,7 +663,7 @@ class SpecUploadManager{
 			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, '.
 			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
 			'o.year = u.year, o.month = u.month, o.day = u.day, o.startDayOfYear = u.startDayOfYear, o.endDayOfYear = u.endDayOfYear, '.
-			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.fieldNotes = u.fieldNotes, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
+			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.substrate = u.substrate, o.fieldNotes = u.fieldNotes, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
 			'o.associatedOccurrences = u.associatedOccurrences, o.associatedTaxa = u.associatedTaxa, '.
 			'o.dynamicProperties = u.dynamicProperties, o.verbatimAttributes = u.verbatimAttributes, '.
 			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, o.establishmentMeans = u.establishmentMeans, '.
@@ -708,7 +708,7 @@ class SpecUploadManager{
 			'sciname, tidinterpreted, genus, institutionID, collectionID, specificEpithet, datasetID, taxonRank, infraspecificEpithet, institutionCode, collectionCode, '.
 			'scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
 			'identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
-			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, fieldNotes, occurrenceRemarks, informationWithheld, '.
+			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, occurrenceRemarks, informationWithheld, '.
 			'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, stateProvince, '.
 			'county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, '.
 			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
@@ -720,7 +720,7 @@ class SpecUploadManager{
 			'u.institutionCode, u.collectionCode, u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, '.
 			'u.identificationReferences, u.identificationRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, '.
 			'u.associatedCollectors, u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, '.
-			'u.endDayOfYear, u.verbatimEventDate, u.habitat, u.fieldNotes, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, u.associatedTaxa, '.
+			'u.endDayOfYear, u.verbatimEventDate, u.habitat, u.substrate, u.fieldNotes, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, u.associatedTaxa, '.
 			'u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, u.country, u.stateProvince, u.county, '.
 			'u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, '.
 			'u.coordinatePrecision, u.locationRemarks, u.verbatimCoordinates, u.verbatimCoordinateSystem, u.georeferencedBy, u.georeferenceProtocol, '.

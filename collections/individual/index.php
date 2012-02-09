@@ -390,6 +390,14 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					</div>
 					<?php 
 				}
+				if($occArr['substrate']){ 
+					?>
+					<div style="clear:both;">
+						<b>Substrate:</b> 
+						<?php echo $occArr['substrate']; ?>
+					</div>
+					<?php 
+				}
 				if($occArr['associatedtaxa']){ 
 					?>
 					<div style="clear:both;">

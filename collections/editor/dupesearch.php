@@ -146,6 +146,7 @@ if($submitAction){
 					</div>
 					<?php 
 					if($occObj['habitat']) echo '<div title="habitat">'.$occObj['habitat'].'</div>';
+					if($occObj['substrate']) echo '<div title="substrate">'.$occObj['substrate'].'</div>';
 					if($occObj['decimallatitude'] || $occObj['verbatimcoordinates']){
 						?>
 						<div>

@@ -243,6 +243,19 @@ else{
 											</div>
 											<?php 
 										}
+										if($r->substrate){
+											?>
+											<div class="substrate">
+												<?php
+												$substrateStr = trim($r->substrate);
+												if(substr($substrateStr,-1) != '.'){
+													$substrateStr .= '.';
+												} 
+												echo $substrateStr; 
+												?> 
+											</div>
+											<?php 
+										}
 										if($r->verbatimattributes || $r->establishmentmeans){
 											?>
 											<div>

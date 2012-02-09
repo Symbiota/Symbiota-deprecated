@@ -44,7 +44,8 @@ CREATE  TABLE `fmchklstcoordinates` (
   INDEX `FKchklsttaxalink` (`clid` ASC, `tid` ASC) ,   
   CONSTRAINT `FKchklsttaxalink`     
     FOREIGN KEY (`clid` , `tid` )     
-    REFERENCES `fmchklsttaxalink` (`CLID` , `TID` )     ON DELETE CASCADE     ON UPDATE CASCADE); 
+    REFERENCES `fmchklsttaxalink` (`CLID` , `TID` )     ON DELETE CASCADE     ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1; 
 
 ALTER TABLE `omoccurrences` 
   ADD COLUMN `substrate` VARCHAR(500) NULL DEFAULT NULL  AFTER `habitat` ;
@@ -112,7 +113,7 @@ CREATE  TABLE `fmcltaxacomments` (
   INDEX `FK_clcomment_cltaxa` (`clid` ASC, `tid` ASC) , 
   CONSTRAINT `FK_clcomment_users`   FOREIGN KEY (`uid` )  REFERENCES `users` (`uid` )  ON DELETE CASCADE  ON UPDATE CASCADE, 
   CONSTRAINT `FK_clcomment_cltaxa`   FOREIGN KEY (`clid` , `tid` )  REFERENCES `fmchklsttaxalink` (`CLID` , `TID` )  ON DELETE CASCADE  ON UPDATE CASCADE
-); 
+)ENGINE=InnoDB DEFAULT CHARSET=latin1; 
 
 ALTER TABLE `fmchklsttaxalink`
   ADD COLUMN `explicitExclude` SMALLINT NULL  AFTER `Notes` ; 
