@@ -813,6 +813,10 @@ if($symbUid){
 												<input type="text" name="habitat" tabindex="82" style="width:600px;" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 											</div>
 											<div style="padding:3px;">
+												Substrate:
+												<input type="text" name="substrate" tabindex="82" style="width:600px;" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
+											</div>
+											<div style="padding:3px;">
 												Associated Taxa:
 												<input type="text" name="associatedtaxa" tabindex="84" style="width:575px;" value="<?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?>" onchange="fieldChanged('associatedtaxa');" /> 
 												<a href="#" onclick="openAssocSppAid();return false;">

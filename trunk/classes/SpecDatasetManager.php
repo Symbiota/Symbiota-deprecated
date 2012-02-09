@@ -16,7 +16,7 @@ class SpecDatasetManager {
 			'o.scientificnameauthorship, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
 			'o.identificationremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 			'DATE_FORMAT(o.eventdate,"%e %M %Y") AS eventdate, o.year, o.month, o.day, DATE_FORMAT(o.eventdate,"%M") AS monthname, '.
-			'o.verbatimeventdate, o.habitat, o.occurrenceremarks, o.associatedtaxa, o.verbatimattributes, '.
+			'o.verbatimeventdate, o.habitat, o.substrate, o.occurrenceremarks, o.associatedtaxa, o.verbatimattributes, '.
 			'o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, o.country, '.
 			'o.stateprovince, o.county, o.municipality, o.locality, o.decimallatitude, o.decimallongitude, '.
 			'o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
@@ -153,7 +153,7 @@ class SpecDatasetManager {
 				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"taxonRemarks\",\"identifiedBy\",".
 				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"identificationQualifier\",".
 	 			"\"recordedBy\",\"recordNumber\",\"associatedCollectors\",\"eventDate\",\"year\",\"month\",\"monthName\",\"day\",".
-		 		"\"verbatimEventDate\",\"habitat\",\"verbatimAttributes\",\"occurrenceRemarks\",".
+		 		"\"verbatimEventDate\",\"habitat\",\"substrate\",\"verbatimAttributes\",\"occurrenceRemarks\",".
 	 			"\"associatedTaxa\",\"reproductiveCondition\",\"establishmentMeans\",\"country\",".
 	 			"\"stateProvince\",\"county\",\"municipality\",\"locality\",\"decimalLatitude\",\"decimalLongitude\",".
 		 		"\"geodeticDatum\",\"coordinateUncertaintyInMeters\",\"verbatimCoordinates\",".
@@ -168,7 +168,8 @@ class SpecDatasetManager {
 							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
 							$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
 							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
-							$row["verbatimeventdate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["verbatimattributes"])."\",\"".
+							$row["verbatimeventdate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["substrate"])."\",\"".
+							$this->cleanStr($row["verbatimattributes"])."\",\"".
 							$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
 							$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
 							$row["county"]."\",\"".$row["municipality"]."\",\"".$this->cleanStr($row["locality"])."\",".$row["decimallatitude"].",".

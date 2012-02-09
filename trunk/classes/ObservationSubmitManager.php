@@ -87,7 +87,7 @@ class ObservationSubmitManager {
 				$sql = 'INSERT INTO omoccurrences(collid, basisofrecord, family, sciname, scientificname, '.
 					'scientificNameAuthorship, tidinterpreted, taxonRemarks, identifiedBy, dateIdentified, '.
 					'identificationReferences, recordedBy, recordNumber, '.
-					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, occurrenceRemarks, associatedTaxa, '.
+					'associatedCollectors, eventDate, year, month, day, startDayOfYear, habitat, substrate, occurrenceRemarks, associatedTaxa, '.
 					'verbatimattributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, '.
 					'stateProvince, county, locality, localitySecurity, decimalLatitude, decimalLongitude, '.
 					'geodeticDatum, coordinateUncertaintyInMeters, georeferenceRemarks, minimumElevationInMeters, observeruid) '.
@@ -105,6 +105,7 @@ class ObservationSubmitManager {
 				($occArr['associatedcollectors']?'"'.$this->cleanStr($occArr['associatedcollectors']).'"':'NULL').','.
 				'"'.$occArr['eventdate'].'",'.$eventYear.','.$eventMonth.','.$eventDay.','.$startDay.','.
 				($occArr['habitat']?'"'.$this->cleanStr($occArr['habitat']).'"':'NULL').','.
+				($occArr['substrate']?'"'.$this->cleanStr($occArr['substrate']).'"':'NULL').','.
 				($occArr['occurrenceremarks']?'"'.$this->cleanStr($occArr['occurrenceremarks']).'"':'NULL').','.
 				($occArr['associatedtaxa']?'"'.$this->cleanStr($occArr['associatedtaxa']).'"':'NULL').','.
 				($occArr['verbatimattributes']?'"'.$this->cleanStr($occArr['verbatimattributes']).'"':'NULL').','.

@@ -30,7 +30,7 @@ class ImageDetailManager{
 				"t.sciname, t.author, t.rankid ".
 				"FROM images i INNER JOIN taxa t ON i.tid = t.tid ".
 				"LEFT JOIN users u ON i.photographeruid = u.uid ".
-				"WHERE (i.imgid = ".$this->imgId.')';
+				'WHERE (i.imgid = '.$this->imgId.')';
 			//echo "<div>$sql</div>";
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){

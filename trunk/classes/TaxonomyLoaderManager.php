@@ -43,8 +43,10 @@ class TaxonomyLoaderManager{
 			$tid = $this->conn->insert_id;
 		 	//Load accepteance status into taxstatus table
 			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			if($dataArr["parenttid"]){ 
-				$hierarchy = $this->getHierarchy($dataArr["parenttid"]);
+			$parTid = $this->conn->real_escape_string($dataArr["parenttid"]);
+			if(!$parTid && $dataArr["rankid"] == 10) $parTid = $tid; 
+			if($parTid){ 
+				if($dataArr["rankid"] > 10) $hierarchy = $this->getHierarchy($dataArr["parenttid"]);
 				//Get family from hierarchy
 				$family = '';
 				$sqlFam = 'SELECT sciname FROM taxa WHERE (tid IN('.$hierarchy.')) AND rankid = 140 ';
@@ -59,7 +61,7 @@ class TaxonomyLoaderManager{
 				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
 					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
 					($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
-					",".($dataArr["parenttid"]?$this->conn->real_escape_string($dataArr["parenttid"]):"NULL").",\"".
+					",".($parTid?$parTid:"NULL").",\"".
 					$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
