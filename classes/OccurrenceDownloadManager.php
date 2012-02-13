@@ -7,8 +7,22 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  	private $dwcSql = "";
  	private $sqlFrag = "";
  	
+	private $buFileName;
+	private $buFilePath;
+	private $uploadPath;
+ 	private $zipArchive;
+
  	public function __construct(){
  		parent::__construct();
+		$this->setUploadPath();
+
+		//Create file pathName
+ 		$this->buFileName = 'symbdl_'.time();
+ 		
+ 		if(class_exists('ZipArchive')){
+			$this->zipArchive = new ZipArchive;
+			$this->zipArchive->open($this->buFilePath.$this->buFileName.'.zip', ZipArchive::CREATE);
+ 		}
 
  		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision",
@@ -37,6 +51,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 
 	public function __destruct(){
  		parent::__destruct();
+		//if($this->zipArchive) $this->zipArchive->close();
 	}
 
  	public function downloadDarwinCoreCsv(){
@@ -320,6 +335,105 @@ class OccurrenceDownloadManager extends OccurrenceManager{
         $result->close();
     }
 
+    public function dlCollectionBackup($collId){
+		$fileUrl = '';
+    	if($collId){
+    		//If zip archive can be created, the occurrences, determinations, and image records will be added to single archive file
+    		//If not, then a CSV file containing just occurrence records will be returned
+			echo '<li style="font-weight:bold;">Zip Archive created</li>';
+			echo '<li style="font-weight:bold;">Adding occurrence records to archive...';
+			ob_flush();
+			flush();
+    		//Adding occurrence records
+    		$fileName = $this->buFilePath.$this->buFileName;
+    		$specFH = fopen($fileName.'_spec.csv', "w");
+	    	//Output header 
+    		$headerStr = 'occid,dbpk,basisOfRecord,occurrenceID,otherCatalogNumbers,ownerInstitutionCode, '.
+				'family,scientificName,sciname,tidinterpreted,genus,specificEpithet,taxonRank,infraspecificEpithet,scientificNameAuthorship, '.
+				'taxonRemarks,identifiedBy,dateIdentified,identificationReferences,identificationRemarks,identificationQualifier, '.
+				'typeStatus,recordedBy,recordNumber,associatedCollectors,eventDate,year,month,day,startDayOfYear,endDayOfYear, '.
+				'verbatimEventDate,habitat,substrate,fieldNotes,occurrenceRemarks,informationWithheld,associatedOccurrences, '.
+				'dataGeneralizations,associatedTaxa,dynamicProperties,verbatimAttributes,reproductiveCondition, '.
+				'cultivationStatus,establishmentMeans,lifeStage,sex,individualCount,country,stateProvince,county,municipality, '.
+				'locality,localitySecurity,localitySecurityReason,decimalLatitude,decimalLongitude,geodeticDatum, '.
+				'coordinateUncertaintyInMeters,verbatimCoordinates,georeferencedBy,georeferenceProtocol,georeferenceSources, '.
+				'georeferenceVerificationStatus,georeferenceRemarks,minimumElevationInMeters,maximumElevationInMeters,verbatimElevation, '.
+				'previousIdentifications,disposition,modified,language,processingstatus,recordEnteredBy,duplicateQuantity, '.
+				'labelProject,dateLastModified ';
+			fputcsv($specFH, explode(',',$headerStr));
+			//Query and output values
+    		$sql = 'SELECT '.$headerStr.
+    			' FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+    			'WHERE c.collid = '.$collId;
+    		if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_row()){
+					fputcsv($specFH, $r);
+				}
+    			$rs->close();
+    		}
+    		fclose($specFH);
+	    	if($this->zipArchive){
+	    		//Add occurrence file and then rename to 
+				$this->zipArchive->addFile($fileName.'_spec.csv');
+				$this->zipArchive->renameName($fileName.'_spec.csv','occurrences.csv');
+
+				//Add determinations
+				echo 'Done!</li> ';
+				echo '<li style="font-weight:bold;">Adding determinations records to archive...';
+				ob_flush();
+				flush();
+				$detFH = fopen($fileName.'_det.csv', "w");
+				fputcsv($detFH, Array('detid','occid','sciname','scientificNameAuthorship','identifiedBy','d.dateIdentified','identificationQualifier','identificationReferences','identificationRemarks','sortsequence'));
+				//Add determination values
+				$sql = 'SELECT d.detid,d.occid,d.sciname,d.scientificNameAuthorship,d.identifiedBy,d.dateIdentified, '.
+					'd.identificationQualifier,d.identificationReferences,d.identificationRemarks,d.sortsequence '.
+					'FROM omdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
+					'WHERE o.collid = '.$collId;
+	    		if($rs = $this->conn->query($sql)){
+					while($r = $rs->fetch_row()){
+						fputcsv($detFH, $r);
+					}
+	    			$rs->close();
+	    		}
+    			fclose($detFH);
+				$this->zipArchive->addFile($fileName.'_det.csv');
+	    		$this->zipArchive->renameName($fileName.'_det.csv','determinations.csv');
+	    		
+				//Add image urls
+				echo 'Done!</li> ';
+				echo '<li style="font-weight:bold;">Adding image records to archive...';
+				ob_flush();
+				flush();
+	    		$imgFH = fopen($fileName.'_img.csv', "w");
+				fputcsv($imgFH, Array('imgid','occid','url','thumbnailurl','originalurl','caption','notes'));
+				$sql = 'SELECT i.imgid,i.occid,i.url,i.thumbnailurl,i.originalurl,i.caption,i.notes '.
+					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'WHERE o.collid = '.$collId;
+	    		if($rs = $this->conn->query($sql)){
+					while($r = $rs->fetch_row()){
+						fputcsv($imgFH, $r);
+					}
+					$rs->close();
+	    		}
+    			fclose($imgFH);
+				$this->zipArchive->addFile($fileName.'_img.csv');
+	    		$this->zipArchive->renameName($fileName.'_img.csv','images.csv');
+				echo 'Done!</li> ';
+				ob_flush();
+				flush();
+				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'.zip');
+				$this->zipArchive->close();
+				unlink($fileName.'_spec.csv');
+				unlink($fileName.'_det.csv');
+				unlink($fileName.'_img.csv');
+	    	}
+	    	else{
+				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'.csv');
+	    	}
+		}
+		return $fileUrl;
+	}
+
 /*
     private function writeTextFile($sql){
     	global $isAdmin;
@@ -443,5 +557,17 @@ xmlwriter_end_attribute($xml_resource);
         this.closeConnection();
         $result->close();
     }*/
+
+	private function setUploadPath(){
+		$tPath = $GLOBALS["serverRoot"];
+		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
+		$tPath .= "temp/";
+		if(file_exists($tPath."downloads/")){
+			$tPath .= "downloads/";
+		}
+		echo $this->buFilePath;
+		$this->buFilePath = $tPath;
+	}
+    
 }
 ?>
