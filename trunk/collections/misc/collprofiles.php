@@ -215,6 +215,11 @@ if($collId) $collData = $collManager->getCollectionData();
 									</a>
 								</li>
 								<li>
+									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
+										Download Data Backup File
+									</a>
+								</li>
+								<li>
 									<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
 										Import/Update Specimen Records
 									</a>
