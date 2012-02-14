@@ -464,6 +464,7 @@ function verifyFullFormEdits(f){
 
 function verifyFullForm(f){
 	if(abortFormVerification) return true;
+	/*
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
 		return false;
@@ -472,10 +473,10 @@ function verifyFullForm(f){
 		alert("Collector field must have a value. Enter 'unknown' if needed.");
 		return false;
 	}
-	//if(!verifyDate(f.eventdate)){
-		//alert("Event date is invalid");
-		//return false;
-	//}
+	if(!verifyDate(f.eventdate)){
+		alert("Event date is invalid");
+		return false;
+	}
 	if(f.country.value == ""){
 		alert("Country field must have a value");
 		return false;
@@ -488,6 +489,7 @@ function verifyFullForm(f){
 		alert("Locality field must have a value");
 		return false;
 	}
+	*/
 	if(!isNumeric(f.duplicatequantity.value)){
 		alert("Duplicate Quantity field must be numeric only");
 		return false;
