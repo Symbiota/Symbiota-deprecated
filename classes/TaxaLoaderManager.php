@@ -704,12 +704,6 @@ class TaxaLoaderManager{
 		if(!$tPath){
 			$tPath = $GLOBALS["serverRoot"]."/temp";
 		}
-		if(!file_exists($tPath."/symb_dl")){
-			mkdir($tPath."/symb_dl");
-		}
-		if(file_exists($tPath."/symb_dl")){
-			$tPath .= "/symb_dl";
-		}
 		$this->uploadTargetPath = $tPath."/"; 
     }
 
