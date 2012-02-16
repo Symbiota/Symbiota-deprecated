@@ -9,6 +9,7 @@ $mode = array_key_exists('mode',$_REQUEST)?$_REQUEST['mode']:'';
 $download = array_key_exists('download',$_REQUEST)?$_REQUEST['download']:'';
 $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1';
+$editorUid = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
 
 $reviewManager = new SpecEditReviewManager();
 $collName = $reviewManager->setCollId($collId);
@@ -120,6 +121,17 @@ header("Content-Type: text/html; charset=".$charset);
 												<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
 											</select>
 										</div>
+										<div style="margin:3px;">
+											Editor: 
+											<select name="editor">
+												<?php 
+												$editorArr = $reviewManager->getEditorList();
+												foreach($editorArr as $uid => $e){
+													echo '<option value="'.$uid.'" '.($editorUid==$uid?'SELECTED':'').'>'.$e.'</option>'."\n";
+												}
+												?>
+											</select>
+										</div>
 										<div style="margin:3px;text-align:right;">
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 											<input name="action" type="submit" value="Filter Records" />
@@ -150,7 +162,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<th>Timestamp</th>
 										</tr>
 										<?php 
-										$editArr = $reviewManager->getEditArr($faStatus, $frStatus);
+										$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid);
 										if($editArr){
 											$recCnt = 0;
 											foreach($editArr as $occid => $edits){
