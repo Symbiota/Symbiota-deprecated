@@ -124,6 +124,8 @@ header("Content-Type: text/html; charset=".$charset);
 										<div style="margin:3px;">
 											Editor: 
 											<select name="editor">
+												<option value="">All Editors</option>
+												<option value="">----------------------</option>
 												<?php 
 												$editorArr = $reviewManager->getEditorList();
 												foreach($editorArr as $uid => $e){
