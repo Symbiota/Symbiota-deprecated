@@ -381,30 +381,30 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 						</div>
 						<?php 
 					}
-				}
-				if($occArr['habitat']){ 
-					?>
-					<div style="clear:both;">
-						<b>Habitat:</b> 
-						<?php echo $occArr['habitat']; ?>
-					</div>
-					<?php 
-				}
-				if($occArr['substrate']){ 
-					?>
-					<div style="clear:both;">
-						<b>Substrate:</b> 
-						<?php echo $occArr['substrate']; ?>
-					</div>
-					<?php 
-				}
-				if($occArr['associatedtaxa']){ 
-					?>
-					<div style="clear:both;">
-						<b>Associated Species:</b> 
-						<?php echo $occArr['associatedtaxa']; ?>
-					</div>
-					<?php 
+					if($occArr['habitat']){ 
+						?>
+						<div style="clear:both;">
+							<b>Habitat:</b> 
+							<?php echo $occArr['habitat']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['substrate']){ 
+						?>
+						<div style="clear:both;">
+							<b>Substrate:</b> 
+							<?php echo $occArr['substrate']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['associatedtaxa']){ 
+						?>
+						<div style="clear:both;">
+							<b>Associated Species:</b> 
+							<?php echo $occArr['associatedtaxa']; ?>
+						</div>
+						<?php 
+					}
 				}
 				if($occArr['verbatimattributes']){ 
 					?>
