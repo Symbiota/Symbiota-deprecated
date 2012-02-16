@@ -1,8 +1,4 @@
 <?php
-/*
- * Built 26 Jan 2011
- * By E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
 include_once('../../config/symbini.php');
 
@@ -40,27 +36,30 @@ class SpecEditReviewManager {
 		return $collName;
 	}
 
-	public function getEditArr($aStatus, $rStatus){
+	public function getEditArr($aStatus, $rStatus, $eUid){
 		if(!$this->collId) return;
 		$retArr = Array();
 		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
-			'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE (o.collid = '.$this->collId.')';
-		if($aStatus === '0' || $aStatus == 1) $sql .= ' AND e.appliedstatus = '.$aStatus.' ';
+			'WHERE (o.collid = '.$this->collId.') ';
+		if($aStatus === '0' || $aStatus == 1) $sql .= 'AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
 			if($rStatus == '0-2'){
-				$sql .= ' AND (e.reviewstatus IN(0,1,2)) ';
+				$sql .= 'AND (e.reviewstatus IN(0,1,2)) ';
 			}
 			elseif($rStatus == '0-1'){
-				$sql .= ' AND (e.reviewstatus IN(0,1)) ';
+				$sql .= 'AND (e.reviewstatus IN(0,1)) ';
 			}
 			else{
-				$sql .= ' AND (e.reviewstatus = '.$rStatus.') ';
+				$sql .= 'AND (e.reviewstatus = '.$rStatus.') ';
 			}
 		}
-		$sql .= ' ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
+		if($eUid && is_numeric($eUid)){
+			$sql .= 'AND (e.uid = '.$eUid.') ';
+		}
+		$sql .= 'ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -135,7 +134,7 @@ class SpecEditReviewManager {
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 		//Get Records
 		$sql = 'SELECT e.ocedid,e.occid,e.dbpk, e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
-			'CONCAT_WS(" ",u.firstname,u.lastname) AS username '.
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username '.
 			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
 			'WHERE (o.collid = '.$this->collId.') AND (ocedid IN('.implode(',',$ocedidArr).')) '.
@@ -165,6 +164,39 @@ class SpecEditReviewManager {
 		}
 	}
 
+	public function exportCsvFile(){
+		$sql = 'SELECT e.ocedid,e.occid,o.dbpk,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,'.
+			'CASE e.reviewstatus WHEN 1 THEN "OPEN" WHEN 2 THEN "PENDING" WHEN 3 THEN "CLOSED" ELSE "UNKNOWN" END AS reviewstatus,'.
+			'CASE e.appliedstatus WHEN 1 THEN "APPLIED" ELSE "NOT APPLIED" END AS appliedstatus,'.
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp '.
+			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
+			'INNER JOIN users u ON e.uid = u.uid '.
+			'WHERE (o.collid = '.$this->collId.') AND e.reviewstatus <> 3';
+		
+		if($sql){
+	    	$fileName = 'edited_recordset_'.date('Ymd').".csv";
+			header ('Content-Type: text/csv');
+			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+			
+			$rs = $this->conn->query($sql);
+			if($rs){
+				echo "SEINetID,\"SourcePK\",\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
+					"\"AppliedStatus\",\"EditorName\",\"DateEdited\"\n";
+				
+				while($row = $rs->fetch_assoc()){
+					echo $row['occid'].",\"".$row["dbpk"]."\",\"".$row["catalognumber"]."\",\"".
+						$row["fieldname"]."\","."\"".$row["fieldvalueold"]."\",\"".$row["fieldvaluenew"]."\",\"".
+						$row['reviewstatus']."\",\"".$row["appliedstatus"]."\",\"".$row["username"]."\",\"".
+						$row["initialtimestamp"]."\"\n";
+				}
+			}
+			else{
+				echo "Recordset is empty.\n";
+			}
+	        exit();
+		}
+	}
+
 	public function getCollectionList(){
 		global $isAdmin, $userRights;
 		$returnArr = Array();
@@ -186,43 +218,25 @@ class SpecEditReviewManager {
 		return $returnArr;
 	}
 
-	protected function cleanStr($str){
+	public function getEditorList(){
+		$retArr = Array();
+		$sql = 'SELECT DISTINCT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS username '.
+			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
+			'INNER JOIN users u ON e.uid = u.uid '.
+			'WHERE (o.collid = '.$this->collId.') '.
+			'ORDER BY u.lastname,u.firstname';
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$retArr[$row->uid] = $row->username;
+		}
+		$result->close();
+		return $retArr;
+	}
+
+	private function cleanStr($str){
 		$str = str_replace('"','',$str);
 		return $str;
-	}
-	
-	public function exportCsvFile(){
-		$sql = 'SELECT e.ocedid,e.occid,o.dbpk,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,'.
-					'CASE e.reviewstatus WHEN 1 THEN "OPEN" WHEN 2 THEN "PENDING" WHEN 3 THEN "CLOSED" ELSE "UNKNOWN" END AS reviewstatus,'.
-					'CASE e.appliedstatus WHEN 1 THEN "APPLIED" ELSE "NOT APPLIED" END AS appliedstatus,'.
-					'CONCAT_WS(" ",u.firstname,u.lastname) AS username, e.initialtimestamp '.
-					'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
-					'INNER JOIN users u ON e.uid = u.uid '.
-					'WHERE (o.collid = '.$this->collId.') AND e.reviewstatus <> 3';
-		
-		if($sql){
-	    	$fileName = 'edited_recordset_'.date('Ymd').".csv";
-			header ('Content-Type: text/csv');
-			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
-			
-			$rs = $this->conn->query($sql);
-			if($rs){
-				echo "SEINetID,\"SourcePK\",\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
-					"\"AppliedStatus\",\"EditorName\",\"DateEdited\"\n";
-				
-				while($row = $rs->fetch_assoc()){
-					echo $row['occid'].",\"".$row["dbpk"]."\",\"".$row["catalognumber"]."\",\"".
-							$row["fieldname"]."\","."\"".$row["fieldvalueold"]."\",\"".$row["fieldvaluenew"]."\",\"".
-							$row['reviewstatus']."\",\"".$row["appliedstatus"]."\",\"".$row["username"]."\",\"".
-							$row["initialtimestamp"]."\"\n";
-					
-				}
-			}
-			else{
-				echo "Recordset is empty.\n";
-			}
-	        exit();
-		}
 	}
 }
 ?>
