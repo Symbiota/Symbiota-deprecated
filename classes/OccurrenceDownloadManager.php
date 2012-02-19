@@ -335,7 +335,9 @@ class OccurrenceDownloadManager extends OccurrenceManager{
         $result->close();
     }
 
-    public function dlCollectionBackup($collId){
+    public function dlCollectionBackup($collId, $characterSet = ''){
+    	global $charset;
+    	$cSet = str_replace('-','',strtolower($charset));
 		$fileUrl = '';
     	if($collId){
     		//If zip archive can be created, the occurrences, determinations, and image records will be added to single archive file
@@ -367,6 +369,9 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     			'WHERE c.collid = '.$collId;
     		if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_row()){
+					if($characterSet && $characterSet != $cSet){
+						$this->encodeArr($r,$characterSet);
+					}
 					fputcsv($specFH, $r);
 				}
     			$rs->close();
@@ -568,6 +573,28 @@ xmlwriter_end_attribute($xml_resource);
 		echo $this->buFilePath;
 		$this->buFilePath = $tPath;
 	}
-    
+	
+	private function encodeArr(&$inArr,$cSet){
+		foreach($inArr as $k => $v){
+			$inArr[$k] = $this->encodeString($v,$cSet);
+		}
+	}
+
+	private function encodeString($inStr,$cSet){
+ 		$retStr = $inStr;
+		if($cSet == "utf8"){
+			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				//$value = utf8_encode($value);
+				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+			}
+		}
+		elseif($cSet == "latin1"){
+			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+				//$value = utf8_decode($value);
+				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+			}
+		}
+		return $retStr;
+	}
 }
 ?>
