@@ -16,7 +16,8 @@ if($coorArr && count($coorArr) == 4){
 	$latCen = ($coorArr[0] + $coorArr[2])/2;
 	$longCen = ($coorArr[1] + $coorArr[3])/2;
 }
-$coordRange = ($coorArr[0] - $coorArr[2]);
+$coordRange = 50;
+if($coorArr && count($coorArr) == 4) $coordRange = ($coorArr[0] - $coorArr[2]);
 $zoomInt = 5;
 if($coordRange < 20){
 	$zoomInt = 6;
