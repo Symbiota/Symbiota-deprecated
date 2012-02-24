@@ -88,26 +88,29 @@ class SpecProcessorOcr{
 				//$status = imagetiff($img,$imgFile)
 				$status = imagejpeg($img,$imgFile);
 				imagedestroy($img);
-
 				//OCR image, result text is output to $outputFile
 				if($status){
 					$output = array();
-					exec('tesseract '.$imgFile.' '.$outputFile, $output);
+					//exec('tesseract '.$imgFile.' '.$outputFile,$output);
+					//Full path to tesseract with quotes needed for Windows  
+					exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$imgFile.' '.$outputFile,$output);
+					//Obtain text from tesseract output file
+					if(file_exists($outputFile.'.txt')){
+						if($fh = fopen($outputFile.'.txt', 'r')){
+							while (!feof($fh)) {
+							  $retStr .= fread($fh, 8192);
+							}
+							fclose($fh);
+						}
+						//unlink($imgFile);
+						//unlink($outputFile);
+					}
 				}
 				else{
 					//Unable to write image to temp folder
 					//Add some error reporting
 				}
 
-				//Obtain text from tesseract output file
-				if($fh = fopen($outputFile.'.txt', 'r')){
-					while (!feof($fh)) {
-					  $retStr .= fread($fh, 8192);
-					}
-					fclose($fh);
-				}
-				//unlink($imgFile);
-				//unlink($outputFile);
    			}
    			else{
    				//Unable to create image

@@ -1,52 +1,53 @@
+//http://code.google.com/p/jquery-imagetool/
 (function($) {
-        $.widget("ui.imagetool", {
-                /**
-                 * Public methods
-                 */
+    $.widget("ui.imagetool", {
+        /**
+        * Public methods
+        */
                 
-                options: {
-                        src: null /* The image src is used */
-                        ,allowZoom: true
-                        ,allowPan: true
-                        ,allowResizeX: true
-                        ,allowResizeY: true
-                        ,zoomFactor: 5
-                        ,defaultCursor: "url(openhand.cur), move"
-                        ,zoomCursor: "crosshair"
-                        ,panCursor: "url(closedhand.cur), move"
-                        ,disabledCursor: "not-allowed"
-                        ,viewportWidth: 400
-                        ,viewportHeight: 300
-                        ,viewportMinWidth: 100
-                        ,viewportMinHeight: 80
-                        ,viewportMaxWidth: 800
-                        ,viewportMaxHeight: 800
-                        ,"cursor-se":"se-resize"
-                        ,"cursor-s":"s-resize"
-                        ,"cursor-e":"e-resize"
-                        ,edgeSensitivity: 15
-                        ,imageWidth: 200 /* The width of the work image */
-                        ,imageHeight: 200 /* The height of the work image */
-                        ,imageMaxWidth: 2500
-                        ,x: 0
-                        ,y: 0
-                        ,w: 1 
-                        ,h: 1
-                        ,ready: function() {}
-                        ,change: function() {}
-                }
+        options: {
+            src: null /* The image src is used */
+            ,allowZoom: true
+            ,allowPan: true
+            ,allowResizeX: true
+            ,allowResizeY: true
+            ,zoomFactor: 5
+            ,defaultCursor: "url(openhand.cur), move"
+            ,zoomCursor: "crosshair"
+            ,panCursor: "url(closedhand.cur), move"
+            ,disabledCursor: "not-allowed"
+            ,viewportWidth: 400
+            ,viewportHeight: 300
+            ,viewportMinWidth: 100
+            ,viewportMinHeight: 80
+            ,viewportMaxWidth: 800
+            ,viewportMaxHeight: 800
+            ,"cursor-se":"se-resize"
+            ,"cursor-s":"s-resize"
+            ,"cursor-e":"e-resize"
+            ,edgeSensitivity: 15
+            ,imageWidth: 200 /* The width of the work image */
+            ,imageHeight: 200 /* The height of the work image */
+            ,imageMaxWidth: 2500
+            ,x: 0
+            ,y: 0
+            ,w: 1 
+            ,h: 1
+            ,ready: function() {}
+            ,change: function() {}
+        }
                 
-                ,reset: function(options) {
-                        $.extend(this.options, options);
-                        this._setup();
-                }
+        ,reset: function(options) {
+            $.extend(this.options, options);
+            this._setup();
+        }
         
-                        /**
-                         * Returns all options
-                         */
-                ,properties: function() {
-                        return this.options;
-                }
+        /**
+        * Returns all options
+        */
+        ,properties: function() {
+            return this.options;
+        }
                 
 
         ,_create: function() {
@@ -134,8 +135,6 @@
                 o._absy = -(o.y * o._height);
 
                 self._zoom();
-                
-
 
                 image.css({position: "relative", display: "block"});
                 self._trigger("ready", null, o);
@@ -448,9 +447,6 @@
         }
 
 
-
-
-
         /**
          * Zooms the image by setting its width/height
          * Makes sure the desired size greater or equal to the viewport size. 
@@ -547,6 +543,6 @@
                 self._move();
         }
         
-});
+    });
 
 })(jQuery);
