@@ -1,3 +1,7 @@
+var imgX1;
+var imgX2;
+var imgY1;
+var imgY2;
 
 function toggleImageTd(){
 	toggle("imgprocondiv");
@@ -23,29 +27,56 @@ function initImageTool(img){
 		        ,viewportHeight: 400
 		        ,imageWidth: 3500
 		        ,imageHeight: 5200
+		        ,change: function(event, dim) {
+					imgX1 = dim.x;
+					imgX2 = dim.w + dim.x;
+					imgY1 = dim.y;
+					imgY2 = dim.h + dim.y;
+		        }
 			});
 		});
 	}
 }
 
 function ocrImage(){
-	var imgUrl = document.getElementById("activeimage").src;
+	var imgObj = document.getElementById("activeimage");
+	var imgUrl = imgObj.src;
 	var ocrXmlHttp = GetXmlHttpObject();
 	if(ocrXmlHttp == null){
 		alert ("Your browser does not support AJAX!");
 		return false;
 	}
-	var url="rpc/ocrimage.php?url="+imgUrl;
+	var url="rpc/ocrimage.php?url="+imgUrl+"&imgX1="+imgX1+"&imgX2="+imgX2+"&imgY1="+imgY1+"&imgY2="+imgX1;
 	ocrXmlHttp.onreadystatechange=function(){
 		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
-			var rawTxtObj = document.getElementById("txtfrag");
 			var rawStr = ocrXmlHttp.responseText;
+			var rawTxtObj = document.getElementById("tfdiv-add");
 			rawTxtObj.innerText = rawStr;
 			rawTxtObj.textContent = rawStr;
 		}
 	};
 	ocrXmlHttp.open("POST",url,true);
 	ocrXmlHttp.send(null);
+}
+
+function nextRawText(imgId){
+	var imgElem = document.getElementById("tfdiv-"+imgId);
+	var fragElemArr = imgElem.getElementsByTagName("div");
+	var fragLength = fragElemArr.length - 1;
+	var fragIndex = 0;
+  	for (i = 0; i < fragLength; i++) {
+  		var divObj = fragElemArr[i];
+  		if(divObj.style.display=="block"){
+  			divObj.style.display = "none";
+  			fragIndex = i +1;
+  			if(fragIndex == fragLength){
+  				fragIndex = 0;
+  			}
+			fragElemArr[fragIndex].style.display = "block";
+			break;
+  		}
+  	}
+  	document.getElementById("tfindex-"+imgId).innerHTML = fragIndex + 1;
 }
 
 function GetXmlHttpObject(){

@@ -1,4 +1,4 @@
-<div style="width:100%;height:825px;">
+<div style="width:100%;height:950px;">
 	<fieldset style="height:95%">
 		<legend><b>Label Processing</b></legend>
 		<?php
@@ -30,6 +30,7 @@
 							if(activeImageSrc.substring(0,4)!="http") activeImageSrc = imagePrefix + activeImageSrc;
 							document.getElementById("activeimage").src = activeImageSrc;
 							document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
+							
 						}
 					</script>
 					<?php 
@@ -45,48 +46,56 @@
 			</div>
 			<?php
 		}
-		if($fragArr){
-			?>
-			<div id="rawtextdiv">
-				<?php 
-				$fragCnt = 0;
-				foreach($fragArr as $prlid => $rawStr){
+		?>
+		<div id="rawtextdiv">
+			<div id="tfdiv-add" class="tfdiv" style="width:400px;height:325px;display:none;">
+				<?php
+				foreach($specImgArr as $iId => $iArr ){ 
 					?>
-					<div id="txtfrag<?php echo $fragCnt; ?>" style="<?php echo ($fragCnt?'display:none':''); ?>">
-						<textarea id="txtfrag" name="rawtext-<?php echo $prlid; ?>" style="width:400px;height:325px;">
-							<?php echo $rawStr; ?>
-						</textarea>
-					</div>
-					<?php 
-					$fragCnt++;
-				}
+					<form id="imgaddform-<?php echo $iId; ?>" name="imgaddform-<?php echo $iId; ?>" method="post" action="occurrenceeditor.php">
+						<textarea name="rawtext"></textarea>
+						<input type="hidden" name="imgid" value="<?php echo $iId; ?>" /><br/>
+						<input name="formsubmit" type="submit" value="Save Text Fragment" /> 
+					</form>
+					<?php
+				} 
 				?>
-				<div style="width:100%;text-align:right;font-weight:bold;">
-					<span id="textfragindex">1</span> of <?php echo $fragCnt; ?>
-					<?php 
-					if($fragCnt > 1){
+			</div>
+			<?php 
+			$imgCnt = 0;
+			foreach($fragArr as $imgId => $labelArr){
+				?>
+				<div id="tfdiv-<?php echo $imgId; ?>" class="tfdiv" style="width:400px;height:325px;display:<?php echo ($imgCnt?'none':'block'); ?>">
+					<?php
+					$fragCnt = 0;
+					foreach($labelArr as $prlid => $rStr){ 
 						?>
-						<script type="text/javascript"> 
-							var textFragIndex = 0;
-							var totalFragCnt = <?php echo $fragCnt; ?>; 
-							function nextRawText(){
-								textFragIndex++;
-								document.getElementById("txtfrag"+(textFragIndex-1)).style.display = "none";
-								if(textFragIndex == totalFragCnt){
-									textFragIndex = 0;
-								}
-								document.getElementById("txtfrag"+textFragIndex).style.display = "block";
-								document.getElementById("textfragindex").innerHTML = textFragIndex + 1;
-							}
-						</script>
-						<a href="#" onclick="nextRawText();return false;">=&gt;&gt;</a>
-						<?php 
+						<div id="imgeditdiv-<?php echo $fragCnt; ?>" style="display:<?php echo ($fragCnt?'none':'block'); ?>">
+							<form name="imgeditform-<?php echo $fragCnt; ?>" method="post" action="occurrenceeditor.php">
+								<textarea name="rawtext" rows="20" cols="45" onchange="this.form.formsubmit.disabled = false;" ><?php echo $rStr; ?></textarea>
+								<input type="hidden" name="prlid" value="<?php echo $prlid; ?>" /><br/>
+								<input name="formsubmit" type="submit" value="Save Text Fragment" disabled="disabled" />
+							</form>
+						</div>
+						<?php
+						$fragCnt++;
 					}
 					?>
+					<div style="width:100%;text-align:right;font-weight:bold;">
+						<span id="tfindex-<?php echo $imgId; ?>">1</span> of <?php echo $fragCnt; ?>
+						<?php 
+						if($fragCnt > 1){
+							?>
+							<a href="#" onclick="nextRawText(<?php echo $imgId; ?>);return false;">=&gt;&gt;</a>
+							<?php 
+						}
+						?>
+					</div>
 				</div>
-			</div>
-			<?php
-		}
-		?>
+				<?php 
+				$imgCnt++;
+			}
+			?>
+		</div>
 	</fieldset>
 </div>

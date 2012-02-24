@@ -1,8 +1,4 @@
 <?php
-/*
- * 13 January 2011
- * E.E. Gilbert: egbot@asu.edu
- */
 
 include_once($serverRoot.'/config/dbconnection.php');
 
