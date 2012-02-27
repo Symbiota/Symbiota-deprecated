@@ -1,9 +1,4 @@
 <?php
-/*
- * Created on 10 Aug 2009
- * E.E. Gilbert
- */
-
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyLoaderManager.php');
@@ -74,12 +69,29 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						<input type='text' id='author' name='author' style='width:200px;border:inset;' />
 					</div>
 					<div style="margin-top:5px;">
-						<div style="float:left;width:140px;">Taxon Rank:</div>
+						<div style="float:left;width:139px;">Kingdom:</div>
+						<select id="kingdomid" name="kingdomid" style="border:inset;">
+							<?php 
+							$kArr = $loaderObj->getKingdomIds();
+							if(array_key_exists(3,$kArr)) $kArr[3] = 'Plantae';
+							if(array_key_exists(4,$kArr)) $kArr[4] = 'Fungi';
+							if(array_key_exists(5,$kArr)) $kArr[5] = 'Animalia';
+							foreach($kArr as $k => $v){
+								echo "<option value='".$k."'>".$v."</option>\n";
+							}
+							?>
+						</select>
+					</div>
+					<div>
+						<div style="float:left;width:139px;">Taxon Rank:</div>
 						<select id="rankid" name="rankid" title="Rank ID" onchange="" style="border:inset;">
 							<option value="0">Select Taxon Rank</option>
 							<option value="">--------------------------------</option>
 							<?php 
-								$loaderObj->echoTaxonRanks();
+							$tRankArr = $loaderObj->getTaxonRanks();
+							foreach($tRankArr as $rankId => $rankName){
+								echo "<option value='".$rankId."' ".($rankId==220?" SELECTED":"").">".$rankName."</option>\n";
+							}
 							?>
 						</select>
 					</div>
