@@ -14,23 +14,35 @@ class TaxonomyLoaderManager{
 		if(!($this->conn === null)) $this->conn->close();
 	}
 	
-	public function echoTaxonRanks(){
+	public function getKingdomIds(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT tu.kingdomid FROM taxonunits tu ORDER BY tu.kingdomid';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$retArr[$row->kingdomid] = $row->kingdomid;
+		}
+		return $retArr;
+	}
+	
+	public function getTaxonRanks(){
+		$retArr = array();
 		$sql = 'SELECT DISTINCT tu.rankid, tu.rankname FROM taxonunits tu ORDER BY tu.rankid';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
-			$rankId = $row->rankid;
-			$rankName = $row->rankname;
-			echo "<option value='".$rankId."' ".($rankId==220?" SELECTED":"").">".$rankName."</option>\n";
+			$retArr[$row->rankid] = $row->rankname;
 		}
+		return $retArr;
 	}
 	
 	public function loadNewName($dataArr){
 		//Load new name into taxa table
 		$tid = 0;
-		$sqlTaxa = "INSERT INTO taxa(sciname, author, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
+		$sqlTaxa = "INSERT INTO taxa(sciname, author, kingdomid, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
 			"source, notes, securitystatus) ".
 			"VALUES (\"".$this->conn->real_escape_string($dataArr["sciname"])."\",".($dataArr["author"]?"\"".$this->conn->real_escape_string($dataArr["author"])."\"":"NULL").
-			",".$dataArr["rankid"].",".($dataArr["unitind1"]?"\"".$this->conn->real_escape_string($dataArr["unitind1"])."\"":"NULL").
+			",".$dataArr["kingdomid"].
+			",".$dataArr["rankid"].
+			",".($dataArr["unitind1"]?"\"".$this->conn->real_escape_string($dataArr["unitind1"])."\"":"NULL").
 			",\"".$this->conn->real_escape_string($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->conn->real_escape_string($dataArr["unitind2"])."\"":"NULL").
 			",".($dataArr["unitname2"]?"\"".$this->conn->real_escape_string($dataArr["unitname2"])."\"":"NULL").
 			",".($dataArr["unitind3"]?"\"".$this->conn->real_escape_string($dataArr["unitind3"])."\"":"NULL").
