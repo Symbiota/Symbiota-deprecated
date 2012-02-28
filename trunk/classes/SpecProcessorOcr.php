@@ -9,6 +9,7 @@ class SpecProcessorOcr{
 
 	private $conn;
 	private $tempPath;
+	private $logPath;
 
 	function __construct() {
 	}
@@ -30,7 +31,7 @@ class SpecProcessorOcr{
 		//echo 'SQL: '.$sql."\n";
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$rawStr = $this->ocrImage($r->url);
+				$rawStr = $this->ocrImage($r->url,$r->imgid);
 				//echo 'rawStr: '.$rawStr."\n";
 				if($rawStr){
 					$this->databaseRawStr($r->imgid,$rawStr);
@@ -53,14 +54,14 @@ class SpecProcessorOcr{
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
 			}
 			$rs->close();
-			$rawStr = $this->ocrImage($imgUrl);
+			$rawStr = $this->ocrImage($imgUrl,$imgId);
 			//echo 'rawStr: '.$rawStr."\n";
 	 		if(!($this->conn === false)) $this->conn->close();
 	 		return $rawStr;
 		}
 	}
 
-	public function ocrImage($imgUrl,$grayscale = 0,$brightness = 0,$contrast = 0){
+	public function ocrImage($imgUrl,$imgId,$grayscale = 0,$brightness = 0,$contrast = 0){
 		$retStr = '';
 		if($imgUrl){
 			//If there is an image domain name is set in symbini.php and url is relative,
@@ -92,7 +93,7 @@ class SpecProcessorOcr{
 				if($status){
 					$output = array();
 					//exec('tesseract '.$imgFile.' '.$outputFile,$output);
-					//Full path to tesseract with quotes needed for Windows  
+					//Full path to tesseract with quotes needed for Windows
 					exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$imgFile.' '.$outputFile,$output);
 					//Obtain text from tesseract output file
 					if(file_exists($outputFile.'.txt')){
@@ -108,18 +109,20 @@ class SpecProcessorOcr{
 				}
 				else{
 					//Unable to write image to temp folder
-					//Add some error reporting
+					$this->setlogPath();
+					$this->logImageError("Unable to write image to temp folder, Image ID ".$imgId);
 				}
 
    			}
    			else{
    				//Unable to create image
-				//Add some error reporting
+				$this->setlogPath();
+				$this->logImageError("Unable to create image, Image ID ".$imgId.", URL, ".$imgUrl);
    			}
    		}
 		else{
-			//URL is empty
-			//Add some error reporting
+			$this->setlogPath();
+			$this->logImageError("Empty URL, Image ID ".$imgId);
 		}
 		return trim($retStr);
 	}
@@ -131,6 +134,37 @@ class SpecProcessorOcr{
 		//echo 'SQL: '.$sql."\n";
 		$status = $this->conn->query($sql);
 		return $status;
+	}
+
+	private function logImageError($msg) {
+		$tDate = getDate();
+		$msg = $msg." at ".str_pad($tDate["hours"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["minutes"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["seconds"],2,'0',STR_PAD_LEFT)."\n";
+		$imageErrorFile = $this->logPath.'image_errors_'.$tDate["year"].'-'.str_pad($tDate["mon"],2,'0',STR_PAD_LEFT).'-'.$tDate["mday"].'.log';
+		if($fh = fopen($imageErrorFile, 'at')) {
+			fwrite($fh, $msg);
+			fclose($fh);
+		}
+	}
+
+	private function setlogPath(){
+		$logPath = '';
+		if(array_key_exists('tempDirRoot',$GLOBALS)){
+			$logPath = $GLOBALS['tempDirRoot'];
+		}
+		else{
+			$logPath = ini_get('upload_tmp_dir');
+		}
+		if(!$logPath){
+			$logPath = $GLOBALS['serverRoot'];
+			if(substr($logPath,-1) != '/') $logPath .= '/';
+			$logPath .= 'temp/';
+		}
+		if(substr($logPath,-1) != '/') $logPath .= '/';
+		if(file_exists($logPath.'logs/') || mkdir($logPath.'logs/')){
+			$logPath .= 'logs/';
+		}
+
+		$this->logPath = $logPath;
 	}
 
 	private function cleanRawStr($inStr){
