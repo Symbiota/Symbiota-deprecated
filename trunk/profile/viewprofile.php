@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 26 Feb 2009
- * By E.E. Gilbert
-*/
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 include_once($serverRoot.'/classes/Person.php');
@@ -122,147 +118,7 @@ if($isEditable){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-
-	<script type="text/javascript" language="JavaScript">
-		$(document).ready(function() {
-			$('#tabs').tabs();
-		});
-
-		function openMappingAid() {
-		    mapWindow=open("../tools/mappointaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-		    if (mapWindow.opener == null) mapWindow.opener = self;
-		}
-
-		function checkEditForm(f){
-	        var errorText = "";
-	        if(f.firstname.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nFirst Name";
-	        };
-	        if(f.lastname.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nLast Name";
-	        };
-	        if(f.state.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nState";
-	        };
-	        if(f.country.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nCountry";
-	        };
-	        if(f.email.value.replace(/\s/g, "") == "" ){
-	            errorText += "\nEmail";
-	        };
-	
-	        if(errorText == ""){
-	            return true;
-	        }
-	        else{
-	            window.alert("The following fields must be filled out:\n " + errorText);
-	            return false;
-	        }
-	    }
-	    
-	    function checkPwdForm(f){
-	        var pwd1 = f.newpwd.value.replace(/\s/g, "");
-	        var pwd2 = f.newpwd2.value.replace(/\s/g, "");
-	        if(pwd1 == "" || pwd2 == ""){
-	            window.alert("Both password fields must contain a value.");
-	            return false;
-	        }
-	        if(pwd1 != pwd2){
-	            window.alert("Password do not match. Please enter again.");
-	            f.newpwd.value = "";
-	            f.newpwd2.value = "";
-	            f.newpwd.focus();
-	            return false;
-	        }
-	        return true;
-	    }
-
-	    function checkNewLoginForm(f){
-	        var pwd1 = f.newloginpwd.value.replace(/\s/g, "");
-	        var pwd2 = f.newloginpwd2.value.replace(/\s/g, "");
-	        if(pwd1 == "" || pwd2 == ""){
-	            window.alert("Both password fields must contain a value.");
-	            return false;
-	        }
-	        if(pwd1 != pwd2){
-	            window.alert("Password do not match. Please enter again.");
-	            f.newloginpwd.value = "";
-	            f.newloginpwd2.value = "";
-	            f.newloginpwd.focus();
-	            return false;
-	        }
-	        return true;
-	    }
-
-	    function deleteLogin(userId,login){
-	        if(window.confirm('Are you sure you want to delete '+login+' as a Login?')){
-				dlXmlHttp = GetXmlHttpObject();
-				if(dlXmlHttp==null){
-			  		alert ("Your browser does not support AJAX!");
-			  		return;
-			  	}
-				var url = "rpc/deletelogin.php";
-				url=url + "?userid=" + userId + "&login=" + login;
-				url=url + "&sid="+Math.random();
-				document.getElementById("un-"+login).style.display = "none";
-				dlXmlHttp.open("POST",url,true);
-				dlXmlHttp.send(null);
-	        }
-		}
-
-		function verifyClAddForm(f){
-			if(f.nclname.value == ""){
-				alert("The Checklist Name field must have a value before a new checklist can be created");
-				return false;
-			}
-			if(!isNumeric(f.ncllatcentroid.value)){
-				alert("The Latitude Centriod field must contain a numeric value only");
-				return false;
-			}
-			if(!isNumeric(f.ncllongcentroid.value)){
-				alert("The Longitude Centriod field must contain a numeric value only");
-				return false;
-			}
-			if(!isNumeric(f.nclpointradiusmeters.value)){
-				alert("The Point Radius field must contain only a numeric value");
-				return false;
-			}
-			return true;
-		} 
-		
-		function isNumeric(sText){
-		   	var ValidChars = "0123456789-.";
-		   	var IsNumber = true;
-		   	var Char;
-		 
-		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
-				if(ValidChars.indexOf(Char) == -1){
-					IsNumber = false;
-					break;
-		      	}
-		   	}
-			return IsNumber;
-		}
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
-		}
-	</script>
+	<script type="text/javascript" src="../js/symb/profile.viewprofile.js"></script>
 </head>
 <body onload="initTabs('profiletabs');">
 <?php
@@ -287,279 +143,10 @@ if(isset($profile_viewprofileCrumbs)){
 		?>
 		<div id="tabs" style="margin:10px;">
 		    <ul>
-		        <li><a href="#viewprofilediv" class="selected">View Profile</a></li>
-		        <li><a href="#editprofilediv">Edit Profile</a></li>
-		        <li><a href="#editpassworddiv">Edit Password</a></li>
-		        <li><a href="#checklistdiv">Personal Checklists</a></li>
+		        <li><a href="#checklistdiv">Species Checklists</a></li>
+		        <li><a href="personalspec.php?userid=<?php echo $userId; ?>">Specimen Management</a></li>
+		        <li><a href="#profilediv">Profile Details</a></li>
 		    </ul>
-			<div id="viewprofilediv">
-				<table cellspacing='3'>
-				    <tr>
-				        <td><b>First Name:</b></td>
-				        <td>
-				        	<?php echo $person->getFirstName();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Last Name:</b></td>
-				        <td>
-				        	<?php echo $person->getLastName();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Title:</b></td>
-				        <td>
-				        	<?php echo $person->getTitle(); ?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Institution:</b></td>
-				        <td>
-				        	<?php echo $person->getInstitution();?>
-						</td>
-				    </tr>
-				    <tr>
-				        <td><b>City:</b></td>
-				        <td>
-				        	<?php echo $person->getCity();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>State:</b></td>
-				        <td>
-				        	<?php echo $person->getState();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Zip Code:</b></td>
-				        <td>
-				        	<?php echo $person->getZip();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Country:</b></td>
-				        <td>
-				        	<?php echo $person->getCountry();?>
-						</td>
-				    </tr>
-				    <tr>
-				        <td><b>Email Address:</b></td>
-				        <td>
-				        	<?php echo $person->getEmail();?>
-			            </td>
-				    </tr>
-				    <tr>
-				        <td><b>Url:</b></td>
-				        <td>
-				        	<?php echo $person->getUrl();?>
-						</td>
-				    </tr>
-				    <tr>
-				        <td><b>Biography:</b></td>
-				        <td>
-				        	<?php echo $person->getBiography();?>
-						</td>
-				    </tr>
-				    <tr>
-				        <td><b>Logins:</b></td>
-				        <td>
-							<?php 
-								$loginArr = $person->getLoginArr();
-								if($loginArr){
-									$isFirst = true;
-									foreach($loginArr as $login){
-										echo ($isFirst?"":"; ").$login;
-										$isFirst = false;
-									}
-								}
-								else{
-									echo "No logins are registered";
-								}
-							?>
-							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-						</td>
-				    </tr>
-				    <tr>
-				        <td colspan="2">
-			        		<?php 
-			        			if($person->getIsPublic()){
-									echo "User information is displayable to public (e.g. photographer listing)";
-			        			}
-			        			else{
-			        				echo "User information is hidden from public";
-			        			}
-			        		?>	
-						</td>
-				    </tr>
-				</table>
-			</div>
-			<div id="editprofilediv">
-				<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
-					<table cellspacing='3'>
-					    <tr>
-					        <td><b>First Name:</b></td>
-					        <td>
-					            <input id="firstname" name="firstname" size="40" value="<?php echo $person->getFirstName();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Last Name:</b></td>
-					        <td>
-					            <input id="lastname" name="lastname" size="40" value="<?php echo $person->getLastName();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Title:</b></td>
-					        <td>
-					            <input name="title"  size="40" value="<?php echo $person->getTitle();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Institution:</b></td>
-					        <td>
-								<input name="institution"  size="40" value="<?php echo $person->getInstitution();?>">
-							</td>
-					    </tr>
-					    <tr>
-					        <td><b>City:</b></td>
-					        <td>
-				            	<input id="city" name="city" size="40" value="<?php echo $person->getCity();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>State:</b></td>
-					        <td>
-					            <input id="state" name="state" size="40" value="<?php echo $person->getState();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Zip Code:</b></td>
-					        <td>
-					            <input name="zip" size="40" value="<?php echo $person->getZip();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Country:</b></td>
-					        <td>
-								<input id="country" name="country" size="40" value="<?php echo $person->getCountry();?>">
-							</td>
-					    </tr>
-					    <tr>
-					        <td><b>Email Address:</b></td>
-					        <td>
-					            <input id="email" name="email" size="40" value="<?php echo $person->getEmail();?>">
-				            </td>
-					    </tr>
-					    <tr>
-					        <td><b>Url:</b></td>
-					        <td>
-								<input name="url"  size="40" value="<?php echo $person->getUrl();?>">
-							</td>
-					    </tr>
-					    <tr>
-					        <td><b>Biography:</b></td>
-					        <td>
-								<textarea name="biography" rows="4" cols="40"><?php echo $person->getBiography();?></textarea>
-							</td>
-					    </tr>
-					    <tr>
-					        <td><b>Logins:</b></td>
-					        <td>
-								<?php 
-									$loginArr = $person->getLoginArr();
-									if($loginArr){
-										$isFirst = true;
-										foreach($loginArr as $login){
-											echo "<span id='un-".$login."'>".($isFirst?"":"; ").$login;
-											echo "<span onclick=\"deleteLogin($userId,'$login');\"> ";
-											echo "<img src='../images/del.gif' title='Delete $login' />";
-											echo "</span></span>";
-											$isFirst = false;
-										}
-									}
-									else{
-										echo "No logins are registered";
-									}
-								?>
-							</td>
-					    </tr>
-					    <tr>
-					        <td colspan="2">
-								<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
-								Make user information displayable to public  
-							</td>
-					    </tr>
-					    <tr>
-							<td colspan='2' align="right">
-								<div style="margin:10px;">
-									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-									<input type="submit" name="action" value="Submit Edits" id="editprofile">
-								</div>
-							</td>
-						</tr>
-					</table>
-				</form>
-			</div>
-			<div id="editpassworddiv">
-				<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
-					<fieldset style='margin:5px;width:200px;'>
-				    	<legend>Change Password:</legend>
-						<?php if($isSelf){ ?>
-			            <div style="font-weight:bold;">
-			            	Current Password: 
-			            	<input id="oldpwd" name="oldpwd" type="password"/>
-			            </div> 
-						<?php }?>
-			            <div style="font-weight:bold;">
-			            	Choose a New Password: 
-			            	<input id="newpwd" name="newpwd" type="password"/>
-			            </div> 
-						<div style="font-weight:bold;">
-							New Password Again: 
-							<input id="newpwd2" name="newpwd2" type="password"/>
-						</div>
-						<div>
-							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-							<input type="submit" name="action" value="Change Password" id="editpwd"/>
-						</div>
-						<?php if($isSelf){ ?>
-						<div>
-							* Will change password for all logins
-						</div>
-						<?php }?>
-					</fieldset>
-				</form>
-
-				<form id="newloginform" name="newloginform" action="viewprofile.php" method="post" onsubmit="return checkNewLoginForm(this);">
-					<fieldset style='margin:5px;width:200px;'>
-				    	<legend>Create New Login</legend>
-			            <div style="font-weight:bold;">
-			            	New Login (no spaces): 
-			            	<input id="newlogin" name="newlogin" type="text">
-			            </div> 
-			            <div style="font-weight:bold;">
-			            	Choose a New Password: 
-			            	<input id="newloginpwd" name="newloginpwd" type="password">
-			            </div> 
-						<div style="font-weight:bold;">
-							New Password Again: 
-							<input id="newloginpwd2" name="newloginpwd2" type="password">
-						</div>
-						<div>
-							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-							<input type="submit" name="action" value="Create Login" id="newloginsubmit">
-						</div>
-					</fieldset>
-				</form>
-
-				<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
-					<fieldset style='margin:5px;width:200px;'>
-				    	<legend>Delete Profile:</legend>
-						<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-			    		<input type="submit" name="action" value="Delete Profile" id="submitdelete" />
-					</fieldset>
-				</form>
-			</div>
 			<div id="checklistdiv">
 				<fieldset style="margin:10px;padding:20px;">
 					<legend><b>Management</b></legend>
@@ -720,8 +307,7 @@ if(isset($profile_viewprofileCrumbs)){
 							<div style="float:left;">
 								<select name="nclaccess">
 									<option value="private">Private</option>
-									<option value="public limited">Public Limited</option>
-									<option value="public">Public Research Grade</option>
+									<option value="public">Public</option>
 								</select>
 							</div>
 						</div>
@@ -733,6 +319,260 @@ if(isset($profile_viewprofileCrumbs)){
 						</div>
 					</fieldset>
 				</form>
+			</div>
+			<div id="profilediv">
+				<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
+					<fieldset>
+						<legend><b>User Profile</b></legend>
+						<table cellspacing='1' style="width:100%;">
+						    <tr>
+						        <td><b>First Name:</b></td>
+						        <td>
+									<div style="float:right;margin:3px;cursor:pointer;" onclick="toggle('editdiv');" title="Toggle editing Controls">
+										<img style='border:0px;' src='../../images/edit.png' />
+									</div>
+									<div class="editdiv" style="float:left;">
+										<?php echo $person->getFirstName();?>
+									</div>
+									<div class="editdiv" style="display:none;float:left;">
+										<input id="firstname" name="firstname" size="40" value="<?php echo $person->getFirstName();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>Last Name:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getLastName();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<input id="lastname" name="lastname" size="40" value="<?php echo $person->getLastName();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>Title:</b></td>
+						        <td>
+									<div class="editdiv">
+										<?php echo $person->getTitle(); ?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<input name="title"  size="40" value="<?php echo $person->getTitle();?>">
+									</div>
+								</td>
+						    </tr>
+						    <tr>
+						        <td><b>Institution:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getInstitution();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<input name="institution"  size="40" value="<?php echo $person->getInstitution();?>">
+									</div>
+								</td>
+						    </tr>
+						    <tr>
+						        <td><b>City:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getCity();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+						            	<input id="city" name="city" size="40" value="<?php echo $person->getCity();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>State:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getState();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+							            <input id="state" name="state" size="40" value="<?php echo $person->getState();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>Zip Code:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getZip();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+							            <input name="zip" size="40" value="<?php echo $person->getZip();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>Country:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getCountry();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<input id="country" name="country" size="40" value="<?php echo $person->getCountry();?>">
+									</div>
+								</td>
+						    </tr>
+						    <tr>
+						        <td><b>Email Address:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getEmail();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+							            <input id="email" name="email" size="40" value="<?php echo $person->getEmail();?>">
+									</div>
+					            </td>
+						    </tr>
+						    <tr>
+						        <td><b>Url:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getUrl();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<input name="url"  size="40" value="<?php echo $person->getUrl();?>">
+									</div>
+	
+								</td>
+						    </tr>
+						    <tr>
+						        <td><b>Biography:</b></td>
+						        <td>
+									<div class="editdiv">
+							        	<?php echo $person->getBiography();?>
+									</div>
+									<div class="editdiv" style="display:none;">
+										<textarea name="biography" rows="4" cols="40"><?php echo $person->getBiography();?></textarea>
+									</div>
+								</td>
+						    </tr>
+						    <tr>
+						        <td><b>Logins:</b></td>
+						        <td>
+									<div class="editdiv">
+										<?php 
+										$loginArr = $person->getLoginArr();
+										if($loginArr){
+											$isFirst = true;
+											foreach($loginArr as $login){
+												echo '<span class="editdiv" id="un-'.$login.'">'.($isFirst?'':'; ').$login;
+												echo '<span style="display:none;" onclick="deleteLogin('.$userId.',"'.$login.'");"> ';
+												echo '<img src="../images/del.gif" title="Delete '.$login.'" />';
+												echo '</span></span>';
+											}
+										}
+										else{
+											echo "No logins are registered";
+										}
+										?>
+									</div>
+								</td>
+						    </tr>
+						    <tr>
+						        <td colspan="2">
+						        	<div class="editdiv">
+						        		<?php 
+					        			if($person->getIsPublic()){
+											echo "User information is displayable to public (e.g. photographer listing)";
+					        			}
+					        			else{
+					        				echo "User information is hidden from public";
+					        			}
+						        		?>
+						        	</div>	
+									<div class="editdiv" style="display:none;">
+										<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
+										Make user information displayable to public  
+					        		</div>
+								</td>
+						    </tr>
+						    <tr>
+								<td colspan="2">
+									<div class="editdiv" style="margin:10px;display:none;">
+										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+										<input type="submit" name="action" value="Submit Edits" id="editprofile">
+									</div>
+								</td>
+							</tr>
+						</table>
+					</fieldset>
+				</form>
+
+				<div class="editdiv" style="display:none;">
+					<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
+						<fieldset style='padding:15px;width:500px;'>
+					    	<legend><b>Change Password</b></legend>
+					    	<table>
+								<?php if($isSelf){ ?>
+					    		<tr>
+					    			<td>
+						            	<b>Current Password:</b>
+						            </td>
+						            <td> 
+						            	<input id="oldpwd" name="oldpwd" type="password"/>
+					    			</td>
+					    		</tr>
+								<?php }?>
+					    		<tr>
+					    			<td>
+						            	<b>New Password:</b> 
+						            </td>
+						            <td> 
+						            	<input id="newpwd" name="newpwd" type="password"/>
+					    			</td>
+					    		</tr>
+					    		<tr>
+					    			<td>
+										<b>New Password Again:</b> 
+						            </td>
+						            <td> 
+										<input id="newpwd2" name="newpwd2" type="password"/>
+						    		</td>
+						    	</tr>
+					    		<tr>
+					    			<td colspan="2">
+										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+										<input type="submit" name="action" value="Change Password" id="editpwd"/>
+					    			</td>
+					    		</tr>
+							</table>
+						</fieldset>
+					</form>
+	<!-- 
+					<form id="newloginform" name="newloginform" action="viewprofile.php" method="post" onsubmit="return checkNewLoginForm(this);">
+						<fieldset style='margin:5px;width:200px;'>
+					    	<legend>Create New Login</legend>
+				            <div style="font-weight:bold;">
+				            	New Login (no spaces): 
+				            	<input id="newlogin" name="newlogin" type="text">
+				            </div> 
+				            <div style="font-weight:bold;">
+				            	Choose a New Password: 
+				            	<input id="newloginpwd" name="newloginpwd" type="password">
+				            </div> 
+							<div style="font-weight:bold;">
+								New Password Again: 
+								<input id="newloginpwd2" name="newloginpwd2" type="password">
+							</div>
+							<div>
+								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+								<input type="submit" name="action" value="Create Login" id="newloginsubmit">
+							</div>
+						</fieldset>
+					</form>
+	 -->
+					<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
+						<fieldset style='padding:15px;width:200px;'>
+					    	<legend><b>Delete Profile</b></legend>
+							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+				    		<input type="submit" name="action" value="Delete Profile" id="submitdelete" />
+						</fieldset>
+					</form>
+				</div>
 			</div>
 		</div>
 	<?php 

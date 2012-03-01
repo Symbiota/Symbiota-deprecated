@@ -70,7 +70,7 @@ $smManager = new SiteMapManager();
             		<li><a href="misc/usagepolicy.php">Usage Policy and Copyright Information</a></li>
             	</ul>
 	
-	            <h2>Floristic Projects</h2>
+	            <h2>Biotic Inventory Projects</h2>
             	<ul>
             		<?php 
             		$projList = $smManager->getProjectList();
@@ -81,7 +81,7 @@ $smManager = new SiteMapManager();
             		?>
             	</ul>
 
-				<h2>Dynamic Floras</h2>
+				<h2>Dynamic Species Lists</h2>
             	<ul>
 					<li>
 						<a href="checklists/dynamicmap.php?interface=checklist">
@@ -233,7 +233,7 @@ $smManager = new SiteMapManager();
             				<?php }?>
 						</ul>
 
-						<h3>Floristic Projects</h3>
+						<h3>Biotic Inventory Projects</h3>
 						<ul>
 							<?php 
 	            			if($isAdmin){

@@ -156,9 +156,15 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
-							    	</a>
+									<?php 
+									if($collArr["icon"]){
+										?>
+								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    	</a>
+								    	<?php
+									} 
+								    ?>
 							    </td>
 							    <td width="30px">
 						    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
@@ -203,9 +209,15 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
-							    	</a>
+									<?php 
+									if($collArr["icon"]){
+										?>
+								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    	</a>
+								    	<?php
+									} 
+								    ?>
 							    </td>
 							    <td width="30px">
 						    		<input name="db[]" class="spec" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
@@ -250,9 +262,15 @@
 							?>
 						    <tr>
 								<td width="50px">
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border='1' height='30' width='30' src='../<?php echo $collArr["icon"];?>'>
-							    	</a>
+									<?php 
+									if($collArr["icon"]){
+										?>
+								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    	</a>
+								    	<?php
+									} 
+								    ?>
 							    </td>
 							    <td width="30px">
 						    		<input name="db[]" class="obs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 

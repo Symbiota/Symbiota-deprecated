@@ -10,8 +10,11 @@ class SpecProcessorOcr{
 	private $conn;
 	private $tempPath;
 	private $logPath;
+	//If silent is set, script will produce no non-fatal output.
+	private $silent = 1;
 
 	function __construct() {
+		$this->setlogPath();
 	}
 
 	function __destruct(){
@@ -61,7 +64,7 @@ class SpecProcessorOcr{
 		}
 	}
 
-	public function ocrImage($imgUrl,$imgId,$grayscale = 0,$brightness = 0,$contrast = 0){
+	public function ocrImage($imgUrl,$imgId = 0,$grayscale = 0,$brightness = 0,$contrast = 0){
 		$retStr = '';
 		if($imgUrl){
 			//If there is an image domain name is set in symbini.php and url is relative,
@@ -109,20 +112,17 @@ class SpecProcessorOcr{
 				}
 				else{
 					//Unable to write image to temp folder
-					$this->setlogPath();
-					$this->logImageError("Unable to write image to temp folder, Image ID ".$imgId);
+					$this->logImageError("Unable to write image to temp folder, ".($imgId?'Image ID: '.$imgId:'Image URL: '.$imgUrl));
 				}
 
    			}
    			else{
    				//Unable to create image
-				$this->setlogPath();
-				$this->logImageError("Unable to create image, Image ID ".$imgId.", URL, ".$imgUrl);
+				$this->logImageError("Unable to create image, ".($imgId?'Image ID: '.$imgId:'').", URL: ".$imgUrl);
    			}
    		}
 		else{
-			$this->setlogPath();
-			$this->logImageError("Empty URL, Image ID ".$imgId);
+			$this->logImageError("Empty URL, ".($imgId?'Image ID: '.$imgId:'Image URL: '.$imgUrl));
 		}
 		return trim($retStr);
 	}
