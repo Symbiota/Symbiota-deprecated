@@ -36,6 +36,7 @@ else{
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
 $collMap = Array();
 $occArr = array();
+$imgArr = array();
 $qryCnt = false;
 $statusStr = '';
 
@@ -210,6 +211,20 @@ if($symbUid){
 			$navStr .= '</b>';
 		}
 	}
+	
+	//Images and other things needed for OCR
+	$specImgArr = $occManager->getImageMap();
+	if($specImgArr){
+		$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
+		foreach($specImgArr as $imgId => $i2){
+			$iUrl = ($i2['origurl']?$i2['origurl']:$i2['url']);
+			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
+			$imgArr[$imgId] = $iUrl;
+		}
+	}
+
+	$fragArr = $occManager->getRawTextFragments();
+	
 }
 ?>
 <html>
@@ -228,6 +243,15 @@ if($symbUid){
 		var collId = "<?php echo $collId; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
+		<?php
+		if(count($imgArr)>1){
+			?>
+			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
+			var activeImageKeys = new Array(<?php echo implode(',',array_keys($imgArr)); ?>);
+			var activeImageIndex = 0; 
+			<?php 
+		}
+		?>
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
@@ -396,7 +420,7 @@ if($symbUid){
 				<?php 
 				if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 					?>
-					<table id="edittable" style="100%">
+					<table id="edittable" style="">
 						<tr><td id="editortd" style="width:785px;" valign="top">
 							<div id="occedittabs" style="clear:both;">
 								<ul>
@@ -442,8 +466,6 @@ if($symbUid){
 											<legend><b>Collector Info</b></legend>
 											<?php
 											if($occId){ 
-												$fragArr = $occManager->getRawTextFragments();
-												$specImgArr = $occManager->getImageMap();
 												if($fragArr || $specImgArr){
 													?>
 													<div id="imgprocondiv" style="float:right;margin:-7px -4px 0px 0px;font-weight:bold;">
