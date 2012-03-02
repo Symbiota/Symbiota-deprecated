@@ -124,7 +124,7 @@ class OccurrenceEditorManager {
 					$iBetweenFrag[] = 'o.othercatalognumbers BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
 				}
 				else{
-					$iInFrag[] = $v;
+					$iInFrag[] = trim($v);
 				}
 			}
 			$iWhere = '';
@@ -157,7 +157,7 @@ class OccurrenceEditorManager {
 					}
 				}
 				else{
-					$rnInFrag[] = $v;
+					$rnInFrag[] = trim($v);
 				}
 			}
 			$rnWhere = '';
