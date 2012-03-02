@@ -221,9 +221,8 @@ if($symbUid){
 			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
 			$imgArr[$imgId] = $iUrl;
 		}
+		$fragArr = $occManager->getRawTextFragments();
 	}
-
-	$fragArr = $occManager->getRawTextFragments();
 	
 }
 ?>
@@ -244,10 +243,10 @@ if($symbUid){
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
 		<?php
-		if(count($imgArr)>1){
+		if($imgArr){
 			?>
 			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
-			var activeImageKeys = new Array(<?php echo implode(',',array_keys($imgArr)); ?>);
+			var activeImageKeys = new Array(<?php echo '"'.implode('","',array_keys($imgArr)).'"'; ?>);
 			var activeImageIndex = 0; 
 			<?php 
 		}

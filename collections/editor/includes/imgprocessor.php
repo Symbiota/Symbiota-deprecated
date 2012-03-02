@@ -8,7 +8,7 @@
 				<img id="activeimage" src="<?php echo current($imgArr); ?>" style="width:400px;height:400px;" />
 			</div>
 			<div style="width:100%;">
-				<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage()" />
+				<input type="button" name="ocrsubmit" value="OCR Image" onclick="ocrImage();" />
 				<span style="float:right;margin-right:20px;font-weight:bold;">
 					Image <span id="imageindex">1</span> of  
 					<?php 
@@ -53,7 +53,7 @@
 									</div>
 									<div style="float:left;">
 										<input type="hidden" name="prlid" value="<?php echo $prlid; ?>" />
-										<input name="formsubmit" type="submit" value="Save Text Fragment" disabled="disabled" />
+										<input name="formsubmit" type="submit" value="Save Text Fragment" />
 									</div>
 									<div style="float:right;font-weight:bold;margin-right:20px;">
 										<?php 

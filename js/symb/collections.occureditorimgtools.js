@@ -53,6 +53,7 @@ function ocrImage(){
 		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
 			var rawStr = ocrXmlHttp.responseText;
 			document.getElementById("tfeditdiv").style.display = "none";
+			alert("imgaddform-"+imgId);
 			var addform = document.getElementById("imgaddform-"+imgId);
 			addform.style.display = "block";
 			addform.rawtext.innerText = rawStr;
