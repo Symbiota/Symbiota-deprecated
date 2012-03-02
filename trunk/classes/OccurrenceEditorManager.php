@@ -694,26 +694,29 @@ class OccurrenceEditorManager {
 	
 	public function getImageMap(){
 		$imageMap = Array();
-		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-			'sourceurl, copyright, notes, occid, sortsequence '.
-			'FROM images '.
-			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$imgId = $row->imgid;
-			$imageMap[$imgId]["url"] = $row->url;
-			$imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
-			$imageMap[$imgId]["origurl"] = $row->originalurl;
-			$imageMap[$imgId]["caption"] = $row->caption;
-			$imageMap[$imgId]["photographer"] = $row->photographer;
-			$imageMap[$imgId]["photographeruid"] = $row->photographeruid;
-			$imageMap[$imgId]["sourceurl"] = $row->sourceurl;
-			$imageMap[$imgId]["copyright"] = $row->copyright;
-			$imageMap[$imgId]["notes"] = $row->notes;
-			$imageMap[$imgId]["occid"] = $row->occid;
-			$imageMap[$imgId]["sortseq"] = $row->sortsequence;
+		if($this->occId){
+			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
+				'sourceurl, copyright, notes, occid, sortsequence '.
+				'FROM images '.
+				'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
+			//echo $sql;
+			$result = $this->conn->query($sql);
+			while($row = $result->fetch_object()){
+				$imgId = $row->imgid;
+				$imageMap[$imgId]["url"] = $row->url;
+				$imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
+				$imageMap[$imgId]["origurl"] = $row->originalurl;
+				$imageMap[$imgId]["caption"] = $row->caption;
+				$imageMap[$imgId]["photographer"] = $row->photographer;
+				$imageMap[$imgId]["photographeruid"] = $row->photographeruid;
+				$imageMap[$imgId]["sourceurl"] = $row->sourceurl;
+				$imageMap[$imgId]["copyright"] = $row->copyright;
+				$imageMap[$imgId]["notes"] = $row->notes;
+				$imageMap[$imgId]["occid"] = $row->occid;
+				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
+			}
+			$result->close();
 		}
-		$result->close();
 		return $imageMap;
 	}
 }

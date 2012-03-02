@@ -603,7 +603,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
-			'SET verbatimCoordinates = CONCAT_WS("; ",verbatimCoordinates,CONCAT("UTM: ",UtmZoning," ",UtmNorthing,"N ",UtmEasting,"E")) '.
+			'SET verbatimCoordinates = CONCAT_WS("; ",verbatimCoordinates,CONCAT_WS(" ","UTM:",CONCAT(UtmZoning," "),CONCAT(UtmNorthing,"N"),CONCAT(UtmEasting,"E"))) '.
 			'WHERE UtmNorthing IS NOT NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
