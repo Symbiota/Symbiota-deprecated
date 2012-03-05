@@ -471,7 +471,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 			<?php 
 			if($occArr['individualurl']){
 				$indUrl = '';
-				if(strpos($occArr['individualurl'],'--DBPK--')){
+				if(strpos($occArr['individualurl'],'--DBPK--') && $occArr['dbpk']){
 					$indUrl = str_replace('--DBPK--',$occArr['dbpk'],$occArr['individualurl']);
 				}
 				elseif(strpos($occArr['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
@@ -497,7 +497,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				$rightsStr .= '<div style="margin-top:2px;"><b>Access Rights:</b> '.$occArr['accessrights'].'</div>';
 			}
 			?>
-			<div>
+			<div style="margin:5px 0px 5px 0px;">
 				<?php 
 				if($rightsStr){
 					echo $rightsStr;
