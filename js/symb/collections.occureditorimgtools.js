@@ -8,10 +8,14 @@ function toggleImageTd(){
 	toggle("imgprocoffdiv");
 	if(document.getElementById("imgtd").style.display == "none"){
 		document.getElementById("imgtd").style.display = "block";
-		initImageTool(document.getElementById("activeimage"));
+		initImageTool(document.getElementById("activeimg-1"));
+		//Set cookie to tag td as open
+		
 	}
 	else{
 		document.getElementById("imgtd").style.display = "none";
+		//Set cookie to tag td closed
+		
 	}
 }
 
@@ -21,28 +25,35 @@ function initImageTool(img){
 	}
 	else{
 		$(function() {
-			$("#labelimagediv img").imagetool({
+			$(img).imagetool({
 				maxWidth: 6000
 				,viewportWidth: 400
 		        ,viewportHeight: 400
 		        ,imageWidth: 3500
 		        ,imageHeight: 5200
 		        ,change: function(event, dim) {
+					//If _zoom or _pan
+					alert(typeof(event));
 					imgX1 = dim.x;
 					imgX2 = dim.w + dim.x;
 					imgY1 = dim.y;
 					imgY2 = dim.h + dim.y;
+					//If img frame is resized (_handleViewPortResize), send width and height to cookies
+					
+					
 		        }
 			});
 		});
 	}
 }
 
-function ocrImage(){
-	//var imgObj = document.getElementById("activeimage");
-	//var imgUrl = imgObj.src;
-	var imgUrl = activeImageArr[activeImageIndex];
-	var imgId = activeImageKeys[activeImageIndex];
+function ocrImage(ocrButton,imgCnt){
+	ocrButton.disabled = true;
+	document.getElementById("workingcircle-"+imgCnt).style.display = "inline";
+	
+	var imgObj = document.getElementById("activeimg-"+imgCnt);
+	var imgUrl = imgObj.src;
+	
 	var ocrXmlHttp = GetXmlHttpObject();
 	if(ocrXmlHttp == null){
 		alert ("Your browser does not support AJAX!");
@@ -52,49 +63,39 @@ function ocrImage(){
 	ocrXmlHttp.onreadystatechange=function(){
 		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
 			var rawStr = ocrXmlHttp.responseText;
-			document.getElementById("tfeditdiv").style.display = "none";
-			alert("imgaddform-"+imgId);
-			var addform = document.getElementById("imgaddform-"+imgId);
-			addform.style.display = "block";
+			document.getElementById("tfeditdiv-"+imgCnt).style.display = "none";
+			document.getElementById("tfadddiv-"+imgCnt).style.display = "block";
+			var addform = document.getElementById("imgaddform-"+imgCnt);
 			addform.rawtext.innerText = rawStr;
 			addform.rawtext.textContent = rawStr;
+			document.getElementById("workingcircle-"+imgCnt).style.display = "none";
+			ocrButton.disabled = false;
 		}
 	};
 	ocrXmlHttp.open("POST",url,true);
 	ocrXmlHttp.send(null);
 }
 
-function nextLabelProcessingImage(){
-	activeImageIndex++;
-	if(activeImageIndex >= activeImageArr.length){
-		activeImageIndex = 0;
+function nextLabelProcessingImage(imgCnt){
+	document.getElementById("labeldiv-"+(imgCnt-1)).style.display = "none";
+	var imgObj = document.getElementById("labeldiv-"+imgCnt);
+	if(!imgObj){
+		imgObj = document.getElementById("labeldiv-1");
+		imgCnt = "1";
 	}
-	var activeImageSrc = activeImageArr[activeImageIndex];
-	if(activeImageSrc.substring(0,4)!="http") activeImageSrc = activeImageSrc;
-	document.getElementById("activeimage").src = activeImageSrc;
-	document.getElementById("imageindex").innerHTML = activeImageIndex + 1;
-	document.getElementById("tfadddiv").style.display = "none";
-	//Advance text fragments to match image 
-	var tfEditDiv = document.getElementById("tfeditdiv");
-	tfEditDiv.style.display = "block";
-	var tfDivs = tfEditDiv.getElementsByTagName("div");
-	for(i = 0; i < tfDivs.length; i++){
-		var tfId = tfDivs[i].id;
-		if(tfId && tfId.substring(0,10) == "tfeditdiv-"){
-			if(tfId == "tfeditdiv-"+activeImageKeys[activeImageIndex]){
-				tfDivs[i].style.display = "block";
-			}
-			else{
-				tfDivs[i].style.display = "none";
-			}
-		}
-	}
+	imgObj.style.display = "block";
+	
+	initImageTool(document.getElementById("activeimg-"+imgCnt));
+	
 	return false;
 }
 
-function nextRawText(startId,targetId){
-	document.getElementById("tfdiv-"+startId).style.display = "none";
-	document.getElementById("tfdiv-"+targetId).style.display = "block";
+function nextRawText(imgCnt,fragCnt){
+	document.getElementById("tfdiv-"+imgCnt+"-"+(fragCnt-1)).style.display = "none";
+	var fragObj = document.getElementById("tfdiv-"+imgCnt+"-"+fragCnt);
+	if(!fragObj) fragObj = document.getElementById("tfdiv-"+imgCnt+"-1");
+	fragObj.style.display = "block";
+	return false;
 }
 
 function GetXmlHttpObject(){

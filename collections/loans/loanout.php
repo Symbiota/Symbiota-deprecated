@@ -17,6 +17,7 @@ if($symbUid && $collId){
 $loanManager = new SpecLoans();
 if($collId) $loanManager->setCollId($collId);
 
+$statusStr = '';
 if($isEditor){
 	if($formSubmit){
 		if($formSubmit == 'Create Loan'){
@@ -40,9 +41,9 @@ header("Content-Type: text/html; charset=".$charset);
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 	<title><?php echo $defaultTitle; ?> Loan Management</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<script type="text/javascript" src="../../js/jquery.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script language="javascript" type="text/javascript">
 		$(document).ready(function() {
 			if(!navigator.cookieEnabled){
@@ -105,7 +106,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<?php 
 						$loanList = $loanManager->getLoanList();
 						foreach($loanList as $k => $loanArr){
-							echo '<li>'.$loanArr['title'].' ('.($loanArr['dateclosed']?$loanArr['dateclosed']:'<b>OPEN</b>').')</li>';
+							echo '<li><a href="loanout.php?collid='.$collId.'&loanoutid='.$k.'">'.$loanArr['title'].'</a> ('.($loanArr['dateclosed']?$loanArr['dateclosed']:'<b>OPEN</b>').')</li>';
 						}
 						?>
 					</ul>
