@@ -33,7 +33,6 @@ function initImageTool(img){
 		        ,imageHeight: 5200
 		        ,change: function(event, dim) {
 					//If _zoom or _pan
-					alert(typeof(event));
 					imgX1 = dim.x;
 					imgX2 = dim.w + dim.x;
 					imgY1 = dim.y;
