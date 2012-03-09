@@ -1,4 +1,5 @@
-//http://code.google.com/p/jquery-imagetool/
+//Code: http://code.google.com/p/jquery-imagetool/
+//Sample page: http://homepage.mac.com/bendik/imagetool/demo/index.html
 (function($) {
     $.widget("ui.imagetool", {
         /**
@@ -370,8 +371,8 @@
                         o.viewportHeight = targetHeight;
                 }
                 self._resize();
-
-                
+                //Set cookie to remember width and height of view port
+                document.cookie = "symbimgport=" + escape(o.viewportWidth) + ":" + escape(o.viewportHeight);
         }
 
         ,_resize: function() {
