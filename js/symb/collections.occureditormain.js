@@ -57,6 +57,9 @@ $(document).ready(function() {
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
 
+	var imgTd = getCookie("symbimgtd");
+	if(imgTd == "open") toggleImageTd(); 
+
 });
 
 window.onbeforeunload = verifyClose;
@@ -970,4 +973,17 @@ function isNumeric(sText){
       	}
    	}
 	return isNumber;
+}
+
+function getCookie(cName){
+	var i,x,y;
+	var cookieArr = document.cookie.split(";");
+	for(i=0;i<cookieArr.length;i++){
+		x=cookieArr[i].substr(0,cookieArr[i].indexOf("="));
+		y=cookieArr[i].substr(cookieArr[i].indexOf("=")+1);
+		x=x.replace(/^\s+|\s+$/g,"");
+		if (x==cName){
+			return unescape(y);
+		}
+	}
 }
