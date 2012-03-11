@@ -40,7 +40,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		if(strpos($sqlWhere,"(o.sciname") || strpos($sqlWhere,"o.family")){
 			$sql .= ",o.sciname ";
 		}
-		$sql .= ",o.recordedBy,o.recordNumber ";			
+		$sql .= ",o.recordedBy,o.recordNumber+1 ";
 		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);

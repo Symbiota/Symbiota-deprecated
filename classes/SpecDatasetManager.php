@@ -56,10 +56,7 @@ class SpecDatasetManager {
 				
 				$sqlOrderBy .= ',datelastmodified';
 			}
-			if($_POST['recordedby']){
-				$sqlWhere .= 'AND (recordedby LIKE "'.trim($_POST['recordedby']).'%") ';
-				$sqlOrderBy .= ',(recordnumber+1)';
-			}
+			$rnIsNum = false;
 			if($_POST['recordnumber']){
 				$rnArr = explode(',',$_POST['recordnumber']);
 				$rnBetweenFrag = array();
@@ -67,7 +64,17 @@ class SpecDatasetManager {
 				foreach($rnArr as $v){
 					$v = trim($v);
 					if($p = strpos($v,' - ')){
-						$rnBetweenFrag[] = '(CAST(recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
+						$term1 = trim(substr($v,0,$p));
+						$term2 = trim(substr($v,$p+3));
+						if(is_numeric($term1) && is_numeric($term2)){
+							$rnIsNum = true;
+							$rnBetweenFrag[] = '(recordnumber BETWEEN '.$term1.' AND '.$term2.')';
+						}
+						else{
+							$catTerm = 'recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(recordnumber) = '.strlen($term2); 
+							$rnBetweenFrag[] = '('.$catTerm.')';
+						}
 					}
 					else{
 						$rnInFrag[] = $v;
@@ -82,6 +89,10 @@ class SpecDatasetManager {
 				}
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
+			if($_POST['recordedby']){
+				$sqlWhere .= 'AND (recordedby LIKE "'.trim($_POST['recordedby']).'%") ';
+				$sqlOrderBy .= ',(recordnumber'.($rnIsNum?'+1':'').')';
+			}
 			if($_POST['identifier']){
 				$iArr = explode(',',$_POST['identifier']);
 				$iBetweenFrag = array();
@@ -89,8 +100,19 @@ class SpecDatasetManager {
 				foreach($iArr as $v){
 					$v = trim($v);
 					if($p = strpos($v,' - ')){
-						$iBetweenFrag[] = '(catalogNumber BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3).')';
-						$iBetweenFrag[] = '(occurrenceId BETWEEN '.substr($v,0,$p).' AND '.substr($v,$p+3).')';
+						$term1 = trim(substr($v,0,$p));
+						$term2 = trim(substr($v,$p+3));
+						if(is_numeric($term1) && is_numeric($term2)){
+							$searchIsNum = true; 
+							$iBetweenFrag[] = '(catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
+							$iBetweenFrag[] = '(occurrenceId BETWEEN '.$term1.' AND '.$term2.')';
+						}
+						else{
+							$catTerm = 'catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(catalogNumber) = '.strlen($term2); 
+							$iBetweenFrag[] = '('.$catTerm.')';
+							$iBetweenFrag[] = '(occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
+						}
 					}
 					else{
 						$iInFrag[] = $v;

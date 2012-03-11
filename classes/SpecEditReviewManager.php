@@ -180,7 +180,7 @@ class SpecEditReviewManager {
 			
 			$rs = $this->conn->query($sql);
 			if($rs){
-				echo "SEINetID,\"SourcePK\",\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
+				echo "PortalID,\"SourcePK\",\"CatalogNumber\",\"EditedFieldName\",\"OldValue\",\"NewValue\",\"ReviewStatus\",".
 					"\"AppliedStatus\",\"EditorName\",\"DateEdited\"\n";
 				
 				while($row = $rs->fetch_assoc()){

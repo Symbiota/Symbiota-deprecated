@@ -3,12 +3,12 @@
 * cont: function(res) for return of suggest results
 */ 
 
-
+/*
 $(document).ready(function() {
 
-	$("#taxa").autocomplete({ source: "rpc/taxalist.php" },{ minLength: 3, delay: 400 });
+//	$("#taxa").autocomplete({ source: "rpc/taxalist.php" },{ minLength: 3, delay: 400 });
 	
-	/*	var cache = {}, lastXhr;
+	var cache = {}, lastXhr;
 	$( "#taxa" ).autocomplete({
 		minLength: 2,
 		source: function( request, response ) {
@@ -25,13 +25,14 @@ $(document).ready(function() {
 				}
 			});
 		}
-	},{ autoFocus: true }); */
+	},{}); 
 });
+*/
 
-//$(document).ready(function() {
-//	function split( val ) {
-//		return val.split( /,\s*/ );
-/*	}
+$(document).ready(function() {
+	function split( val ) {
+		return val.split( /,\s*/ );
+	}
 	function extractLast( term ) {
 		return split( term ).pop();
 	}
@@ -70,8 +71,8 @@ $(document).ready(function() {
 				this.value = terms.join( ", " );
 				return false;
 			}
-		},{ autoFocus: true });
-}); */
+		},{});
+});
 
 function checkUpperLat(){
 	if(document.harvestparams.upperlat.value != ""){

@@ -1,9 +1,4 @@
 <?php
-/*
-* Rebuilt on Sept 2010
-* Author: E.E. Gilbert
-*/
-
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPDescEditorManager.php');
@@ -57,13 +52,29 @@ else{
 	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<link type="text/css" href="../../css/speciesprofile.css" rel="stylesheet" />
 	<script type="text/javascript">
-		function toggleById(target){
-			var obj = document.getElementById(target);
-			if(obj.style.display=="none"){
-				obj.style.display="block";
+		function toggle(target){
+			var ele = document.getElementById(target);
+			if(ele){
+				if(ele.style.display=="none"){
+					ele.style.display="block";
+		  		}
+			 	else {
+			 		ele.style.display="none";
+			 	}
 			}
-			else {
-				obj.style.display="none";
+			else{
+				var divObjs = document.getElementsByTagName("div");
+			  	for (i = 0; i < divObjs.length; i++) {
+			  		var divObj = divObjs[i];
+			  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="block";
+						}
+					 	else {
+					 		divObj.style.display="none";
+					 	}
+					}
+				}
 			}
 		}
 
@@ -116,7 +127,7 @@ if($editable && $tid){
 		?>
 		<div>
 			<b>Descriptions</b>&nbsp;&nbsp;&nbsp;
-			<span onclick="javascript:toggleById('adddescrblock');" title="Add a New Description">
+			<span onclick="toggle('adddescrblock');" title="Add a New Description">
 				<img style='border:0px;width:15px;' src='../../images/add.png'/>
 			</span>
 		</div>
@@ -158,7 +169,7 @@ if($editable && $tid){
 		    		?>
     				<fieldset style='width:90%;margin:10px 5px 5px 5px;'>
 						<legend><b><?php echo $lang.": ".($bArr["caption"]?$bArr["caption"]:"Description ".$displayLevel); ?></b></legend>
-						<div style="float:right;" onclick="javascript:toggleById('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
+						<div style="float:right;" onclick="toggle('dblock-<?php echo $bArr["tdbid"];?>');" title="Edit Description Block">
 							<img style='border:0px;width:12px;' src='../../images/edit.png'/>
 						</div>
 						<div><b>Caption:</b> <?php echo $bArr["caption"]; ?></div>
@@ -215,11 +226,34 @@ if($editable && $tid){
     					<div style="margin-top:10px;">
 							<fieldset>
 								<legend><b>Statements</b></legend>
-								<div onclick="javascript:toggleById('addstmt-<?php echo $bArr["tdbid"];?>');" style="float:right;" title="Add a New Statement">
+								<div onclick="toggle('addstmt-<?php echo $bArr["tdbid"];?>');" style="float:right;" title="Add a New Statement">
 									<img style='border:0px;width:15px;' src='../../images/add.png'/>
 								</div>
+								<div id='addstmt-<?php echo $bArr["tdbid"];?>' style='display:none;'>
+									<form name='adddescrstmtform' action="tpdesceditor.php" method="post">
+										<fieldset style='margin:5px 0px 0px 15px;'>
+							    			<legend><b>New Description Statement</b></legend>
+											<div style='margin:3px;'>
+												Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
+												<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Heading
+											</div>
+											<div style='margin:3px;'>
+												<textarea name='statement' style="width:99%;height:200px;"></textarea>
+											</div>
+											<div style="float:right;margin-right:30px;">
+												<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
+												<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
+												<input type='hidden' name='category' value='<?php echo $category; ?>' />
+												<input name='action' style='margin:3px;' type='submit' value='Add Statement' />
+											</div>
+											<div style='margin:3px;'>
+												Sort Sequence: 
+												<input name='sortsequence' style='margin-top:5px;width:40px;' type='text' value='' />
+											</div>
+										</fieldset>
+									</form>
+								</div>
 								<?php
-								$defaultSort = 5;
 								if(array_key_exists("stmts",$bArr)){
 									$sArr = $bArr["stmts"];
 									foreach($sArr as $tdsid => $stmtArr){
@@ -227,12 +261,14 @@ if($editable && $tid){
 										<div style="margin-top:3px;">
 											<b><?php echo $stmtArr["heading"];?></b>&nbsp;&nbsp;&nbsp;
 											<?php echo ($stmtArr["displayheader"]?"(header displayed)":"(heading hidden)");?>&nbsp;&nbsp;&nbsp;
-											<span onclick="javascript:toggleById('dstmt-<?php echo $tdsid;?>');" title="Edit Statement">
+											<span onclick="toggle('edstmt-<?php echo $tdsid;?>');" title="Edit Statement">
 												<img style='border:0px;width:12px;' src='../../images/edit.png'/>
 											</span>
 										</div>
-										<div style='clear:both;'><?php echo $stmtArr["statement"];?></div>
-										<div id="dstmt-<?php echo $tdsid;?>" style="display:none;">
+										<div class="edstmt-<?php echo $tdsid;?>" style='clear:both;'>
+											<?php echo $stmtArr["statement"];?>
+										</div>
+										<div class="edstmt-<?php echo $tdsid;?>" style="display:none;">
 											<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
 												<form id='updatedescr' name='updatedescr' action="tpdesceditor.php" method="post">
 													<div>
@@ -240,7 +276,7 @@ if($editable && $tid){
 														<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> Display Header
 													</div>
 													<div>
-														<textarea name='statement'  style="width:95%;height:200px;margin:3px;"><?php echo $stmtArr["statement"];?></textarea>
+														<textarea name='statement'  style="width:99%;height:200px;margin:3px;"><?php echo $stmtArr["statement"];?></textarea>
 													</div>
 													<div style="float:right;margin:10px;">
 														<input name='action' type='submit' value='Edit Statement' />
@@ -266,36 +302,9 @@ if($editable && $tid){
 											</div>
 										</div>
 										<?php
-										if($stmtArr["sortsequence"] && $stmtArr["sortsequence"] > $defaultSort){
-											$defaultSort = $stmtArr["sortsequence"] + 5;
-										}
 									}
 								}
 								?>
-								<div id='addstmt-<?php echo $bArr["tdbid"];?>' style='display:none;'>
-									<form name='adddescrstmtform' action="tpdesceditor.php" method="post">
-										<fieldset style='margin:5px 0px 0px 15px;'>
-							    			<legend><b>New Description Statement</b></legend>
-											<div style='margin:3px;'>
-												Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
-												<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Heading
-											</div>
-											<div style='margin:3px;'>
-												<textarea name='statement' style="width:95%;height:200px;"></textarea>
-											</div>
-											<div style="float:right;margin-right:30px;">
-												<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
-												<input type='hidden' name='tdbid' value='<?php echo $bArr["tdbid"];?>' />
-												<input type='hidden' name='category' value='<?php echo $category; ?>' />
-												<input name='action' style='margin:3px;' type='submit' value='Add Statement' />
-											</div>
-											<div style='margin:3px;'>
-												Sort Sequence: 
-												<input name='sortsequence' style='margin-top:5px;width:40px;' type='text' value='<?php echo $defaultSort; ?>' />
-											</div>
-										</fieldset>
-									</form>
-								</div>
 							</fieldset>
 						</div>
 					</fieldset>

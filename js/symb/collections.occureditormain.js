@@ -439,7 +439,7 @@ function toggleIdDetails(){
 	toggle("idremdiv");
 }
 
-function toogleLocSecReason(f){
+function toggleLocSecReason(f){
 	var lsrObj = document.getElementById("locsecreason");
 	if(f.localitysecurity.checked){
 		lsrObj.style.display = "inline";

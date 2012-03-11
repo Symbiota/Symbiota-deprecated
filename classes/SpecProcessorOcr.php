@@ -1,7 +1,6 @@
 <?php
 /*
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php)
- * Authors: egbot 2012
  */
 include_once($serverRoot.'/config/dbconnection.php');
 
@@ -9,6 +8,13 @@ class SpecProcessorOcr{
 
 	private $conn;
 	private $tempPath;
+	private $imgUrlLocal;
+	private $outputFile; 
+
+	private $grayscale = 0;
+	private $brightness = 0;
+	private $contrast = 0;
+	
 	private $logPath;
 	//If silent is set, script will produce no non-fatal output.
 	private $silent = 1;
@@ -18,6 +24,8 @@ class SpecProcessorOcr{
 	}
 
 	function __destruct(){
+		//unlink($this->imgUrlLocal);
+		//unlink($this->outputFile.'.txt');
 	}
 
 	public function batchOcrUnprocessed($collArr = 0){
@@ -34,7 +42,7 @@ class SpecProcessorOcr{
 		//echo 'SQL: '.$sql."\n";
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$rawStr = $this->ocrImage($r->url,$r->imgid);
+				$rawStr = $this->ocrImageByUrl($r->url);
 				//echo 'rawStr: '.$rawStr."\n";
 				if($rawStr){
 					$this->databaseRawStr($r->imgid,$rawStr);
@@ -45,9 +53,11 @@ class SpecProcessorOcr{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function ocrImageByImgId($imgId,$grayscale = 0,$brightness = 0,$contrast = 0){
+	public function ocrImageByImgId($imgId,$grayscale = 0,$brightness = 0,$contrast = 0, $x=0, $y=0, $w=1, $h=1){
+		$rawStr = '';
 		if(is_numeric($imgId)){
 			$this->conn = MySQLiConnectionFactory::getCon("write");
+
 			$imgUrl = '';
 			$sql = 'SELECT originalurl, url '.
 				'FROM images '.
@@ -57,15 +67,42 @@ class SpecProcessorOcr{
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
 			}
 			$rs->close();
-			$rawStr = $this->ocrImage($imgUrl,$imgId);
-			//echo 'rawStr: '.$rawStr."\n";
+			$rawStr = $this->ocrImageByUrl($imgUrl, $grayscale, $brightness, $contrast, $x, $y, $w, $h);
+			
 	 		if(!($this->conn === false)) $this->conn->close();
-	 		return $rawStr;
 		}
+		//echo 'rawStr: '.$rawStr."\n";
+ 		return $rawStr;
+	}
+	
+	public function ocrImageByUrl($imgUrl, $grayscale=0, $brightness=0, $contrast=0, $x=0, $y=0, $w=1, $h=1){
+		$rawStr = '';
+		if($imgUrl){
+			if($this->loadImage($imgUrl)){
+				if($grayscale || $brightness || $contrast){
+					if(!$this->filterImage($grayscale,$brightness,$contrast)){
+						//Unable to filter image
+						$this->logError('Unable to filter, URL: '.$imgUrl);
+					}
+				}
+				if($x || $y || $w < 1 || $h < 1){
+					$this->cropImage($x, $y, $w, $h);
+				}
+				$rawStr = $this->ocrImage();
+			}
+			else{
+	   			//Unable to create image
+				$this->logError('Unable to load image, URL: '.$imgUrl);
+			}
+		}
+		else{
+			$this->logError('Empty URL');
+		}
+			
+		return $rawStr;
 	}
 
-	public function ocrImage($imgUrl,$imgId = 0,$grayscale = 0,$brightness = 0,$contrast = 0){
-		$retStr = '';
+	private function loadImage($imgUrl){
 		if($imgUrl){
 			//If there is an image domain name is set in symbini.php and url is relative,
 			//then it's assumed that image is located on another server, thus add domain to url
@@ -74,57 +111,76 @@ class SpecProcessorOcr{
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
 				}
 			}
-			//echo 'URL: '.$imgUrl."\n";
 
 			//Set temp folder path and file names
 			$this->setTempPath();
 			$ts = time();
-			$imgFile = $this->tempPath.$ts.'_img.jpg';
-			$outputFile = $this->tempPath.$ts.'_output';
-
-   			if($img = imagecreatefromjpeg($imgUrl)){
-				//Optional adjustments
-   				if($grayscale) imagefilter($img,IMG_FILTER_GRAYSCALE);
-   				if($brightness) imagefilter($img,IMG_FILTER_BRIGHTNESS,$brightness);
-   				if($contrast) imagefilter($img,IMG_FILTER_CONTRAST,$contrast);
-
-				//Save image to temp folder; if prior to Tesseract ver 3.0, must save as TIF
-				//$status = imagetiff($img,$imgFile)
-				$status = imagejpeg($img,$imgFile);
-				imagedestroy($img);
-				//OCR image, result text is output to $outputFile
-				if($status){
-					$output = array();
-					//exec('tesseract '.$imgFile.' '.$outputFile,$output);
-					//Full path to tesseract with quotes needed for Windows
-					exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$imgFile.' '.$outputFile,$output);
-					//Obtain text from tesseract output file
-					if(file_exists($outputFile.'.txt')){
-						if($fh = fopen($outputFile.'.txt', 'r')){
-							while (!feof($fh)) {
-							  $retStr .= fread($fh, 8192);
-							}
-							fclose($fh);
-						}
-						//unlink($imgFile);
-						//unlink($outputFile);
-					}
-				}
-				else{
-					//Unable to write image to temp folder
-					$this->logImageError("Unable to write image to temp folder, ".($imgId?'Image ID: '.$imgId:'Image URL: '.$imgUrl));
-				}
-
-   			}
-   			else{
-   				//Unable to create image
-				$this->logImageError("Unable to create image, ".($imgId?'Image ID: '.$imgId:'').", URL: ".$imgUrl);
-   			}
-   		}
-		else{
-			$this->logImageError("Empty URL, ".($imgId?'Image ID: '.$imgId:'Image URL: '.$imgUrl));
+			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
+			$this->outputFile = $this->tempPath.$ts.'_output';
+			
+			//Copy image to temp folder
+			return copy($imgUrl,$this->imgUrlLocal);
 		}
-		return trim($retStr);
+		return false;
+	}
+
+	private function filterImage($grayscale,$brightness,$contrast){
+		$status = false;
+		if($img = imagecreatefromjpeg($this->imgUrlLocal)){
+   			if($grayscale) imagefilter($img,IMG_FILTER_GRAYSCALE);
+   			if($brightness) imagefilter($img,IMG_FILTER_BRIGHTNESS,$brightness);
+   			if($contrast) imagefilter($img,IMG_FILTER_CONTRAST,$contrast);
+
+			$status = imagejpeg($img,$this->imgUrlLocal);
+			imagedestroy($img);
+		}
+		return $status;
+	}
+	
+	private function cropImage($x, $y, $w, $h){
+		$status = false;
+		// Create image instances
+		if($src = imagecreatefromjpeg($this->imgUrlLocal)){
+			$imgW = imagesx($src);
+			$imgH = imagesy($src);
+			if(($x + $w) > 1) $w = 1 - $x;
+			if(($y + $h) > 1) $h = 1 - $y;
+			$pWidth = $imgW*$w;
+			$pHeight = $imgH*$h;
+			$dest = imagecreatetruecolor($pWidth,$pHeight);
+
+			// Copy
+			if(imagecopy($dest,$src,0,0,$imgW*$x,$imgH*$y,$pWidth,$pHeight)){
+				$status = imagejpeg($dest,$this->imgUrlLocal);
+			}
+			imagedestroy($src);
+			imagedestroy($dest);
+		}
+		return $status;
+	}
+
+	private function ocrImage(){
+		$retStr = '';
+		if($this->imgUrlLocal){
+			//OCR image, result text is output to $outputFile
+			$output = array();
+			//exec('tesseract '.$this->imgUrlLocal.' '.$outputFile,$output);
+			//Full path to tesseract with quotes needed for Windows
+			exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+			//Obtain text from tesseract output file
+			if(file_exists($this->outputFile.'.txt')){
+				if($fh = fopen($this->outputFile.'.txt', 'r')){
+					while (!feof($fh)) {
+					  $retStr .= fread($fh, 8192);
+					}
+					fclose($fh);
+				}
+			}
+			else{
+				$this->logError("\tUnable to locate output file");
+			}
+		}
+		return $this->cleanRawStr($retStr);
 	}
 
 	private function databaseRawStr($imgId,$rawStr){
@@ -136,7 +192,28 @@ class SpecProcessorOcr{
 		return $status;
 	}
 
-	private function logImageError($msg) {
+	private function setTempPath(){
+		$tempPath = '';
+		if(array_key_exists('tempDirRoot',$GLOBALS)){
+			$tempPath = $GLOBALS['tempDirRoot'];
+		}
+		else{
+			$tempPath = ini_get('upload_tmp_dir');
+		}
+		if(!$tempPath){
+			$tempPath = $GLOBALS['serverRoot'];
+			if(substr($tempPath,-1) != '/') $tempPath .= '/';
+			$tempPath .= 'temp/';
+		}
+		if(substr($tempPath,-1) != '/') $tempPath .= '/';
+		if(file_exists($tempPath.'symbocr/') || mkdir($tempPath.'symbocr/')){
+			$tempPath .= 'symbocr/';
+		}
+
+		$this->tempPath = $tempPath;
+	}
+
+	private function logError($msg) {
 		$tDate = getDate();
 		$msg = $msg." at ".str_pad($tDate["hours"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["minutes"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["seconds"],2,'0',STR_PAD_LEFT)."\n";
 		$imageErrorFile = $this->logPath.'image_errors_'.$tDate["year"].'-'.str_pad($tDate["mon"],2,'0',STR_PAD_LEFT).'-'.$tDate["mday"].'.log';
@@ -171,27 +248,6 @@ class SpecProcessorOcr{
 		$outStr = trim($inStr);
 
 		return $outStr;
-	}
-
-	private function setTempPath(){
-		$tempPath = '';
-		if(array_key_exists('tempDirRoot',$GLOBALS)){
-			$tempPath = $GLOBALS['tempDirRoot'];
-		}
-		else{
-			$tempPath = ini_get('upload_tmp_dir');
-		}
-		if(!$tempPath){
-			$tempPath = $GLOBALS['serverRoot'];
-			if(substr($tempPath,-1) != '/') $tempPath .= '/';
-			$tempPath .= 'temp/';
-		}
-		if(substr($tempPath,-1) != '/') $tempPath .= '/';
-		if(file_exists($tempPath.'symbocr/') || mkdir($tempPath.'symbocr/')){
-			$tempPath .= 'symbocr/';
-		}
-
-		$this->tempPath = $tempPath;
 	}
 }
 ?>

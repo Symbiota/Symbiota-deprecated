@@ -480,62 +480,6 @@ class TaxonomyEditorManager{
 		}
 	}
 	
-	public function buildHierarchyEnumTree($taxAuthId = 1){
-		$sql = 'SELECT ts.tid, ts.hierarchystr '.
-			'FROM taxstatus ts LEFT JOIN (SELECT tid FROM taxaenumtree WHERE taxauthid = '.$taxAuthId.') et ON ts.tid = et.tid '.
-			'WHERE et.tid IS NULL AND ts.taxauthid = '.$taxAuthId;
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$tid = $r->tid;
-				$hArr = explode(',',$r->hierarchystr);
-				$sqlInsert = 'INSERT INTO taxaenumtree(tid,taxauthid,parenttid) VALUES ';
-				foreach($hArr as $v){
-					$sqlInsert .= '('.$tid.','.$taxAuthId.','.$v.'), ';
-				}
-				$this->conn->query($sqlInsert);
-			}
-			$rs->close();
-		}
-	}
-	
-	public function buildHierarchyNestedTree($taxAuthId = 1){
-		//Get root and then build down
-		$startIndex = 1;
-		$rankId = 0;
-		$sql = 'SELECT ts.tid, t.rankid '.
-			'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-			'WHERE ts.taxauthid = '.$taxAuthId.' AND (ts.parenttid IS NULL OR ts.parenttid = ts.tid) '.
-			'ORDER BY t.rankid ';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				if($rankId && $rankId <> $r->rankid) break;
-				$rankId = $r->rankid;
-				$startIndex = $this->loadTaxonIntoNestedTree($r->tid, $taxAuthId, $startIndex);
-			}
-			$rs->close();
-		}
-	}
-	
-	private function loadTaxonIntoNestedTree($tid, $taxAuthId, $startIndex){
-		$endIndex = $startIndex + 1;
-		$sql = 'SELECT tid '.
-			'FROM taxstatus '.
-			'WHERE taxauthid = '.$taxAuthId.' AND parenttid = '.$tid;
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$endIndex = $this->loadTaxonIntoNestedTree($r->tid, $taxAuthId, $endIndex);
-			}
-			$rs->close();
-		}
-		//Load into taxanestedtree
-		$sqlInsert = 'REPLACE INTO taxanestedtree(tid,taxauthid,leftindex,rightindex) '.
-			'VALUES ('.$tid.','.$taxAuthId.','.$startIndex.','.$endIndex.')';
-		$this->conn->query($sqlInsert);
-		//Return endIndex plus one
-		$endIndex++;
-		return $endIndex;
-	}
-	
 	//Regular getter functions for this class
 	public function getTargetName(){
 		return $this->targetName;

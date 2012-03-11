@@ -18,7 +18,7 @@ $(document).ready(function() {
 	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
 });
 
-function toogle(target){
+function toggle(target){
   	var divs = document.getElementsByTagName("div");
   	var i;
   	for(i = 0; i < divs.length; i++) {
@@ -48,7 +48,7 @@ function toogle(target){
 	}
 }
 
-function toogleById(target){
+function toggleById(target){
 	var obj = document.getElementById(target);
 	if(obj.style.display=="none"){
 		obj.style.display="block";

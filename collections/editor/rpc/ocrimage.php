@@ -3,18 +3,18 @@
 	include_once($serverRoot.'/classes/SpecProcessorOcr.php');
 	
 	$imgUrl = $_REQUEST['url'];
-	$imgX1 = array_key_exists('imgx1',$_REQUEST)?$_REQUEST['imgx1']:0;
-	$imgX2 = array_key_exists('imgx2',$_REQUEST)?$_REQUEST['imgx2']:0;
-	$imgY1 = array_key_exists('imgy1',$_REQUEST)?$_REQUEST['imgy1']:0;
-	$imgY2 = array_key_exists('imgy2',$_REQUEST)?$_REQUEST['imgy2']:0;
+	$x = array_key_exists('x',$_REQUEST)?$_REQUEST['x']:0;
+	$y = array_key_exists('y',$_REQUEST)?$_REQUEST['y']:0;
+	$w = array_key_exists('w',$_REQUEST)?$_REQUEST['w']:1;
+	$h = array_key_exists('h',$_REQUEST)?$_REQUEST['h']:1;
 	
 	$rawStr = '';
 	$ocrManager = new SpecProcessorOcr();
-	if($imgX1 || $imgX2 < 1 || $imgY1 || $imgY2 < 1){
-		$rawStr = $ocrManager->ocrImage($imgUrl);
+	if($x || $y || $w < 1 || $h < 1){
+		$rawStr = $ocrManager->ocrImageByUrl($imgUrl,0,0,0,$x,$y,$w,$h);
 	}
 	else{
-		$rawStr = $ocrManager->ocrImage($imgUrl);
+		$rawStr = $ocrManager->ocrImageByUrl($imgUrl);
 	}
 
 	echo $rawStr;
