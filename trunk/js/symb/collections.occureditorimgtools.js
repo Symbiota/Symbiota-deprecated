@@ -48,17 +48,16 @@ function ocrImage(ocrButton,imgCnt){
 	var imgObj = document.getElementById("activeimg-"+imgCnt);
 	var imgUrl = imgObj.src;
 
-	var imgX1 = $(imgObj).imagetool('properties').x;
-	var imgX2 = imgX1 + $(imgObj).imagetool('properties').w;
-	var imgY1 = $(imgObj).imagetool('properties').y;
-	var imgY2 = imgY1 + $(imgObj).imagetool('properties').h;
-	
+	var x = $(imgObj).imagetool('properties').x;
+	var y = $(imgObj).imagetool('properties').y;
+	var w = $(imgObj).imagetool('properties').w;
+	var h = $(imgObj).imagetool('properties').h;
 	var ocrXmlHttp = GetXmlHttpObject();
 	if(ocrXmlHttp == null){
 		alert ("Your browser does not support AJAX!");
 		return false;
 	}
-	var url="rpc/ocrimage.php?url="+imgUrl+"&imgx1="+imgX1+"&imgx2="+imgX2+"&imgy1="+imgY1+"&imgy2="+imgY2;
+	var url="rpc/ocrimage.php?url="+imgUrl+"&x="+x+"&y="+y+"&w="+w+"&h="+h;
 	ocrXmlHttp.onreadystatechange=function(){
 		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
 			var rawStr = ocrXmlHttp.responseText;

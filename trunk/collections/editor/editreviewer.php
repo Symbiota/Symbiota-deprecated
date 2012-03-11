@@ -60,13 +60,16 @@ header("Content-Type: text/html; charset=".$charset);
 		if($mode != 'printmode'){
 			$displayLeftMenu = (isset($collections_editor_editreviewerMenu)?$collections_individual_editreviewerMenu:false);
 			include($serverRoot.'/header.php');
-			if(isset($collections_editor_editreviewerCrumbs)){
 				echo "<div class='navpath'>";
-				echo "<a href='../index.php'>Home</a> &gt; ";
-				echo $collections_editor_editreviewerCrumbs;
+				echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+				if(isset($collections_editor_editreviewerCrumbs)){
+					echo $collections_editor_editreviewerCrumbs;
+				}
+				else{
+					echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+				}
 				echo " <b>Specimen Edits Reviewer</b>";
 				echo "</div>";
-			}
 		}
 		?>
 		<!-- This is inner text! -->
@@ -261,12 +264,12 @@ header("Content-Type: text/html; charset=".$charset);
 												?>
 												<tr><td colspan="10" valign="bottom">
 													<div style="margin:10px;">
-														<span>
-															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits
+														<div style="float:left;">
+															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
 															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
-														</span>
-														<span style="margin-left:25px;">
-															Change Status to:
+														</div>
+														<div style="margin-left:30px;float:left;">
+															Review Status:
 															<select name="rstatus">
 																<option value="0">LEAVE AS IS</option>
 																<option value="1">OPEN</option>

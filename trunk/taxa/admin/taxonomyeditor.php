@@ -119,7 +119,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 		if($editable && $target){
 		?>
 		<div class="taxondisplaydiv">
-			<div style="float:right;cursor:pointer;" onclick="javascript:toogle('editfield');" title="Toogle Taxon Editing Functions">
+			<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editfield');" title="Toggle Taxon Editing Functions">
 				<img style='border:0px;' src='../../images/edit.png'/>
 			</div>
 			<div style="float:right;" title="Go to taxonomy display">
@@ -319,7 +319,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				<div style="clear:both;margin:10px;">
 					<form name="taxstatusform" action="taxonomyeditor.php" method="post">
 						<div>
-							<div style="float:right;cursor:pointer;" onclick="toogle('tsedit');">
+							<div style="float:right;cursor:pointer;" onclick="toggle('tsedit');">
 								<img style='border:0px;' src='../../images/edit.png'/>
 							</div>
 							<div style="float:left;width:110px;font-weight:bold;">Upper Taxonomy: </div>
@@ -365,7 +365,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					if($taxonEditorObj->getIsAccepted() <> 1){	//Is Not Accepted
 						$acceptedArr = $taxonEditorObj->getAcceptedArr();
 						echo "<h3>Accepted Taxon:</h3>\n";
-						echo "<div style=\"float:right;cursor:pointer;\" onclick=\"toogle('acceptedits');\">";
+						echo "<div style=\"float:right;cursor:pointer;\" onclick=\"toggle('acceptedits');\">";
 						echo "<img style='border:0px;width:15px;' src='../../images/edit.png'/>";
 						echo "</div>\n";
 						if($acceptedArr){
@@ -438,7 +438,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 					if($taxonEditorObj->getIsAccepted() <> 0){	//Is Accepted
 					?>
 						<h3>Synonyms:</h3>
-						<div style="float:right;cursor:pointer;" onclick="toogleById('tonotaccepted');">
+						<div style="float:right;cursor:pointer;" onclick="toggleById('tonotaccepted');">
 							<img style='border:0px;width:15px;' src='../../images/edit.png'/>
 						</div>
 						<ul>
@@ -448,7 +448,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							foreach($synonymArr as $tidSyn => $synArr){
 								echo "<li> ";
 								echo "<a href='taxonomyeditor.php?target=".$tidSyn."&taxauthid=".$taxonEditorObj->getTaxAuthId()."'><i>".$synArr["sciname"]."</i></a> ".$synArr["author"]." ";
-								echo "<span style=\"cursor:pointer;\" onclick=\"toogleById('syn-".$tidSyn."');\">";
+								echo "<span style=\"cursor:pointer;\" onclick=\"toggleById('syn-".$tidSyn."');\">";
 								echo "<img style='border:0px;width:10px;' src='../../images/edit.png'/>";
 								echo "</span>";
 								if($synArr["notes"] || $synArr["unacceptabilityreason"]){

@@ -4,12 +4,19 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/ExsiccatiManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$ometId = array_key_exists("ometid",$_REQUEST)?$_REQUEST["ometid"]:0;
+$ometId = array_key_exists('ometid',$_REQUEST)?$_REQUEST['ometid']:0;
+$omenId = array_key_exists('omenid',$_REQUEST)?$_REQUEST['omenid']:0;
 
 $exsManager = new ExsiccatiManager();
 
+$exsNumArr = array();
+$exsOccArr = array();
+$titleArr = array();
 if($ometId){
-	$exsicArr = $exsManager->getExsiccateArr($ometId);
+	$exsNumArr = $exsManager->getExsNumberArr($ometId);
+}
+elseif($omenId){
+	$exsOccArr = $exsManager->getExsOccArr($omenId);
 }
 else{
 	$titleArr = $exsManager->getTitleArr();
@@ -62,15 +69,61 @@ $isEditor = false;
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext" style="width:600px;">
-		<?php 
+		<?php
 		if($titleArr){
-			
+			?>
+			<ul>
+				<?php  
+				foreach($titleArr as $k => $tArr){
+					?>
+					<li>
+						<a href="index.php?ometid=<?php echo $k; ?>">
+							<?php echo $tArr['t'].', '.$tArr['e'].($tArr['r']?' ('.$tArr['r'].')':''); ?>
+						</a>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+			<?php  
 		}
-		elseif($exsicArr){
-			
+		elseif($exsNumArr){
+			$title = $exsNumArr['t'];
+			unset($exsNumArr['t']);
+			?>
+			<div style="font-weight:bold;font-size:110%;"><?php echo $title; ?></div>
+			<div style="margin-left:10px;">
+				<ul>
+					<?php 
+					foreach($exsArr as $k => $numArr){
+						?>
+						<li>
+							<a href="index.php?omenid=<?php echo $k; ?>">
+								<?php echo $tArr['n'].' - '.$tArr['c']; ?>
+							</a>
+						</li>
+						<?php
+					}
+					?>
+				</ul>
+			</div>
+			<?php 
+		}
+		elseif($exsOccArr){
+			$title = $exsOccArr['t'];
+			unset($exsOccArr['t']);
+			?>
+			<div style="font-weight:bold;font-size:110%;"><?php echo $title; ?></div>
+			<div style="margin-left:10px;">
+				<?php 
+				foreach($exsArr as $k => ){
+					
+				}
+				?>
+			</div>
+			<?php 
 		}
 		?>
-		
 	</div>
 	<?php
 	include($serverRoot."/footer.php");

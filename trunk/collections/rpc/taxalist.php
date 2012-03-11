@@ -10,9 +10,9 @@
 		$sql = "";
 		if($taxonType == 5){
 			$sql = "SELECT DISTINCT v.vernacularname AS sciname ".
-				"FROM taxavernaculars v INNER JOIN omoccurrences o ON v.tid = o.tidinterpreted ".
+				"FROM taxavernaculars v ".
 				"WHERE v.vernacularname LIKE '".$queryString."%' ".
-				"ORDER BY v.vernacularname";
+				"ORDER BY v.vernacularname ";
 		}
 		elseif($taxonType == 4){
 			$sql = "SELECT sciname ".

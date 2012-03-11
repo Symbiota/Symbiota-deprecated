@@ -37,6 +37,8 @@ $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table b
 $collMap = Array();
 $occArr = array();
 $imgArr = array();
+$specImgArr = array();
+$fragArr = array();
 $qryCnt = false;
 $statusStr = '';
 
@@ -403,7 +405,7 @@ if($symbUid){
 				<div style="width:790px;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
-						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Editor Panel</a> &gt;&gt;
+						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
 						<b>Editor</b>
 					</span>
 					<?php
@@ -664,7 +666,7 @@ if($symbUid){
 											</div>
 											<div style="margin-bottom:5px;">
 												<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
-												<input type="checkbox" name="localitysecurity" tabindex="0" style="" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toogleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
+												<input type="checkbox" name="localitysecurity" tabindex="0" style="" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
 												Locality Security
 												<span id="locsecreason" style="margin-left:40px;display:<?php echo ($hasValue?'inline':'none') ?>">
 													<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>

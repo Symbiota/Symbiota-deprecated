@@ -117,11 +117,24 @@ class OccurrenceEditorManager {
 			$iArr = explode(',',$this->qryArr['id']);
 			$iBetweenFrag = array();
 			$iInFrag = array();
+			$searchIsNum = false;
 			foreach($iArr as $v){
 				if($p = strpos($v,' - ')){
-					$iBetweenFrag[] = 'o.catalogNumber BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
-					$iBetweenFrag[] = 'o.occurrenceId BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
-					$iBetweenFrag[] = 'o.othercatalognumbers BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'" ';
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						$searchIsNum = true; 
+						$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
+						$iBetweenFrag[] = '(o.occurrenceId BETWEEN '.$term1.' AND '.$term2.')';
+						$iBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
+					}
+					else{
+						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(O.catalogNumber) = '.strlen($term2); 
+						$iBetweenFrag[] = '('.$catTerm.')';
+						$iBetweenFrag[] = '(o.occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
+						$iBetweenFrag[] = '(o.othercatalognumbers BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					}
 				}
 				else{
 					$iInFrag[] = trim($v);
@@ -130,30 +143,35 @@ class OccurrenceEditorManager {
 			$iWhere = '';
 			if($iBetweenFrag){
 				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
-				$sqlOrderBy .= ',o.catalogNumber';
+				if($searchIsNum){
+					$sqlOrderBy .= ',(o.catalogNumber+1)';
+				}
+				else{
+					$sqlOrderBy .= ',o.catalogNumber';
+				}
 			}
 			if($iInFrag){
 				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.othercatalognumbers IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}
-		if(array_key_exists('rb',$this->qryArr)){
-			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
-			$sqlOrderBy .= ',(o.recordnumber+1)';
-		}
+		$rnIsNum = false;
 		if(array_key_exists('rn',$this->qryArr)){
 			$rnArr = explode(',',$this->qryArr['rn']);
 			$rnBetweenFrag = array();
 			$rnInFrag = array();
 			foreach($rnArr as $v){
 				if($p = strpos($v,' - ')){
-					$term1 = substr($v,0,$p);
-					$term2 = substr($v,$p+3);
-					if(is_numeric(substr($term1,0,1)) && is_numeric(substr($term2,0,1))){
-						$rnBetweenFrag[] = '(CAST(o.recordnumber AS SIGNED) BETWEEN "'.$term1.'" AND "'.$term2.'")';
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						$rnIsNum = true;
+						$rnBetweenFrag[] = '(o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
 					}
 					else{
-						$rnBetweenFrag[] = '(o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'")';
+						$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
+						$rnBetweenFrag[] = '('.$catTerm.')';
 					}
 				}
 				else{
@@ -168,6 +186,10 @@ class OccurrenceEditorManager {
 				$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
+		}
+		if(array_key_exists('rb',$this->qryArr)){
+			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
+			$sqlOrderBy .= ',(o.recordnumber'.($rnIsNum?'+1':'').')';
 		}
 		if(array_key_exists('eb',$this->qryArr)){
 			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
@@ -187,7 +209,10 @@ class OccurrenceEditorManager {
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
-			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations') $sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
+			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations'){
+				//Should only see specimens that were entered under user's login id
+				$sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
+			}
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').'1';
 		}

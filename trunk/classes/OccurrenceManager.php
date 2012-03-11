@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 18 March 2009
- * @author  E. Gilbert: egbot@asu.edu
- */
 
 include_once($serverRoot.'/config/dbconnection.php');
 
@@ -157,6 +153,7 @@ class OccurrenceManager{
 						while($r2 = $rs2->fetch_object()){
 							$fStr .= "','".$r2->family;
 						}
+						$rs2->close();
 						if($fStr){
 							$sqlWhereTaxa .= "OR (o.family IN('".substr($fStr,3)."')) ";
 						}
@@ -164,10 +161,26 @@ class OccurrenceManager{
 				}
 				else{
 					if($this->taxaSearchType == 5){
+						$famArr = array();
 						if(array_key_exists("families",$valueArray)){
-							foreach($valueArray["families"] as $f){
-								$sqlWhereTaxa .= "OR (o.family = '".$f."') ";
+							$famArr = $valueArray["families"];
+						}
+						if(array_key_exists("tid",$valueArray)){
+							$tidArr = $valueArray['tid'];
+							$hSqlStr = '';
+							foreach($tidArr as $tid){
+								$hSqlStr .= 'OR (ts.hierarchystr LIKE "%,'.$tid.',%") ';
 							}
+							$sql = 'SELECT DISTINCT ts.family FROM taxstatus ts '.
+								'WHERE ts.taxauthid = 1 AND ('.substr($hSqlStr,3).')';
+							$rs = $this->conn->query($sql);
+							while($r = $rs->fetch_object()){
+								$famArr[] = $r->family;
+							}
+						}
+						if($famArr){
+							$famArr = array_unique($famArr);
+							$sqlWhereTaxa .= 'OR (o.family IN("'.implode('","',$famArr).'")) ';
 						}
 						if(array_key_exists("scinames",$valueArray)){
 							foreach($valueArray["scinames"] as $sciName){
@@ -276,10 +289,23 @@ class OccurrenceManager{
 			foreach($collNumArr as $v){
 				$v = trim($v);
 				if($p = strpos($v,' - ')){
-					$rnWhere .= 'OR (CAST(o.recordnumber AS SIGNED) BETWEEN "'.substr($v,0,$p).'" AND "'.substr($v,$p+3).'") ';
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						$rnIsNum = true;
+						$rnWhere = 'OR (o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
+					}
+					else{
+						$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
+						$rnWhere = 'OR ('.$catTerm.')';
+					}
 				}
-				elseif(preg_match('/^(\d+).*/',$v,$m)){
-					$rnWhere .= 'OR (CAST(o.recordNumber AS SIGNED) = '.$m[0].') ';
+				elseif(is_numeric($v)){
+					$rnWhere .= 'OR (o.recordNumber = '.$v.') ';
+				}
+				else{
+					$rnWhere .= 'OR (o.recordNumber = "'.$v.'") ';
 				}
 			}
 			if($rnWhere){
@@ -304,7 +330,15 @@ class OccurrenceManager{
 					$sqlWhere .= 'AND (DATE(o.eventdate) BETWEEN "'.$eDate1.'" AND "'.$eDate2.'") ';
 				}
 				else{
-					$sqlWhere .= 'AND (DATE(o.eventdate) = "'.$eDate1.'") ';
+					if(substr($eDate1,-5) == '00-00'){
+						$sqlWhere .= 'AND (o.eventdate LIKE "'.substr($eDate1,0,5).'%") ';
+					}
+					elseif(substr($eDate1,-2) == '00'){
+						$sqlWhere .= 'AND (o.eventdate LIKE "'.substr($eDate1,0,8).'%") ';
+					}
+					else{
+						$sqlWhere .= 'AND (DATE(o.eventdate) = "'.$eDate1.'") ';
+					}
 				}
 			}
 			$this->localSearchArr[] = $this->searchTermsArr['eventdate'];
@@ -335,6 +369,7 @@ class OccurrenceManager{
 			$retStr = 'WHERE '.substr($sqlWhere,4);
 		}
 		else{
+			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.collid = -1 ';
 		}
 		//echo $retStr;
@@ -364,7 +399,7 @@ class OccurrenceManager{
 				$y = $dateTokens[1];
 			}
 		}
-		elseif(preg_match('/^\d{0,2}\s*\D+ \d{2,4}$/',$inDate)){
+		elseif(preg_match('/^\d{0,2}\s*\D+\s*\d{2,4}$/',$inDate)){
 			$dateTokens = explode(' ',$inDate);
 			if(count($dateTokens) == 3){
 				$y = $dateTokens[2];
@@ -377,8 +412,11 @@ class OccurrenceManager{
 				$d = '00';
 			}
 			$mText = strtolower($mText);
-			$mNames = Array("jan"=>1,"feb"=>2,"mar"=>3,"apr"=>4,"may"=>5,"jun"=>6,"jul"=>7,"aug"=>8,"sep"=>9,"oct"=>10,"nov"=>11,"dec"=>12);
+			$mNames = Array("ene"=>1,"jan"=>1,"feb"=>2,"mar"=>3,"abr"=>4,"apr"=>4,"may"=>5,"jun"=>6,"jul"=>7,"ago"=>8,"aug"=>8,"sep"=>9,"oct"=>10,"nov"=>11,"dic"=>12,"dec"=>12);
 			$m = $mNames[$mText];
+		}
+		elseif(preg_match('/^\s*\d{4}\s*$/',$inDate)){
+			$retDate = $inDate.'-00-00';
 		}
 		elseif($dateObj = strtotime($inDate)){
 			$retDate = date('Y-m-d',$dateObj);
@@ -404,12 +442,12 @@ class OccurrenceManager{
 	}
 
     protected function setSciNamesByVerns(){
-        $sql = "SELECT DISTINCT v.VernacularName, t.sciname, ts.family, t.rankid ".
+        $sql = "SELECT DISTINCT v.VernacularName, t.tid, t.sciname, ts.family, t.rankid ".
             "FROM (taxstatus ts INNER JOIN taxavernaculars v ON ts.TID = v.TID) ".
             "INNER JOIN taxa t ON t.TID = ts.tidaccepted ";
     	$whereStr = "";
 		foreach($this->taxaArr as $key => $value){
-			$whereStr .= "OR v.VernacularName LIKE '%".$key."%' ";
+			$whereStr .= "OR v.VernacularName = '".$key."' ";
 		}
 		$sql .= "WHERE (ts.taxauthid = 1) AND (".substr($whereStr,3).") ORDER BY t.rankid LIMIT 20";
 		//echo "<div>sql: ".$sql."</div>";
@@ -417,7 +455,10 @@ class OccurrenceManager{
 		if($result->num_rows){
 			while($row = $result->fetch_object()){
 				$vernName = strtolower($row->VernacularName);
-				if($row->rankid == 140){
+				if($row->rankid < 140){
+					$this->taxaArr[$vernName]["tid"][] = $row->tid;
+				}
+				elseif($row->rankid == 140){
 					$this->taxaArr[$vernName]["families"][] = $row->sciname;
 				}
 				else{

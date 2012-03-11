@@ -111,26 +111,19 @@ if($symbUid){
 	<?php
 	$displayLeftMenu = (isset($collections_datasets_indexMenu)?$collections_datasets_indexMenu:false);
 	include($serverRoot."/header.php");
-	if(isset($collections_datasets_indexCrumbs)){
-		if($collections_datasets_indexCrumbs){
-			?>
-			<div class='navpath'>
-				<a href='../../index.php'>Home</a> &gt; 
-				<?php echo $collections_datasets_indexCrumbs; ?>
-				<b>Datasets</b>
-			</div>
-			<?php 
-		}
-	}
-	else{
-		?>
-		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt; 
-			<b>Datasets</b>
-		</div>
-		<?php 
-	}
 	?>
+	<div class='navpath'>
+		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<?php
+		if(isset($collections_datasets_indexCrumbs)){
+			echo $collections_datasets_indexCrumbs;
+		}
+		else{
+			echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+		}
+		?>
+		<b>Label Printing</b>
+	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
@@ -189,7 +182,7 @@ if($symbUid){
 							</span>
 							<!-- 
 							<span style="margin-left:150px;">
-								<a href="#" onclick="toogle('');return false;">
+								<a href="#" onclick="toggle('');return false;">
 									Hints
 								</a>
 							</span>
@@ -328,7 +321,7 @@ if($symbUid){
 			?>
 			<div style="font-weight:bold;margin:20px;font-weight:150%;">
 				Please 
-				<a href="../../profile/index.php?refurl=/seinet/collections/datasets/index.php?collid=<?php echo $collId; ?>">
+				<a href="../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/datasets/index.php?collid=<?php echo $collId; ?>">
 					login
 				</a> 
 				to access the label printing functions.
