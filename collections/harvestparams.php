@@ -28,7 +28,7 @@ $collManager->reset();
 		if($collections_harvestparamsCrumbs){
 			echo "<div class='navpath'>";
 			echo "<a href='../index.php'>Home</a> &gt; ";
-			echo $collections_harvestparamsCrumbs;
+			echo $collections_harvestparamsCrumbs.' &gt; ';
 			echo "<b>Search Criteria</b>";
 			echo "</div>";
 		}
