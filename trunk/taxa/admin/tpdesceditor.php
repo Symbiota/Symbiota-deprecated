@@ -317,10 +317,12 @@ if($editable && $tid){
 else{
 	?>
 	<div style="margin:30px;">
-		<h2>You must be logged in and authorized to taxon data.</h2>
-		<h3>
-			Click <a href="<?php $clientRoot; ?>/profile/index.php">here</a> to login
-		</h3>
+		<div style="margin:30px;font-weight:bold;font-size:120%;">
+			Please 
+			<a href="<?php echo $clientRoot; ?>/profile/index.php?tid=<?php echo $tid; ?>&refurl=<?php echo $clientRoot?>/taxa/admin/tpdesceditor.php">
+				login
+			</a>
+		</div>
 	</div>
 	<?php 
 }
