@@ -560,7 +560,14 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				echo "<div>Target Taxon missing</div>";
 			}
 			else{
-				echo "<div>You must be logged in and authorized to view internal taxonomy. Please login.</div>";
+				?>
+				<div style="margin:30px;font-weight:bold;font-size:120%;">
+					Please 
+					<a href="<?php echo $clientRoot; ?>/profile/index.php?target=<?php echo $target; ?>&refurl=<?php echo $clientRoot?>/taxa/admin/taxonomyeditor.php">
+						login
+					</a>
+				</div>
+				<?php 
 			}
 		}
 		?>

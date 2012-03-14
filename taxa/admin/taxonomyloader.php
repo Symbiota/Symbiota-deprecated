@@ -163,7 +163,14 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 		<?php 
 		}
 		else{
-			echo "<div>You must be logged in and authorized to view this page. Please login.</div>";
+			?>
+			<div style="margin:30px;font-weight:bold;font-size:120%;">
+				Please 
+				<a href="<?php echo $clientRoot; ?>/profile/index.php?refurl=<?php echo $clientRoot?>/taxa/admin/taxonomyloader.php">
+					login
+				</a>
+			</div>
+			<?php 
 		}
 		include($serverRoot.'/footer.php');
 		?>
