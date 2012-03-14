@@ -281,7 +281,10 @@ if($isAdmin){
 												<?php 
 												$clList = $userPermissions["ClAdmin"];
 												foreach($clList as $k => $v){
-													echo "<li>$v";
+													echo '<li>';
+													echo '<a href="../checklists/checklist.php?cl='.$k.'">';
+													echo $v;
+													echo '</a>';
 													echo "<a href='usermanagement.php?del=ClAdmin-$k&userid=$userId'>";
 													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
 													echo "</a></li>";
