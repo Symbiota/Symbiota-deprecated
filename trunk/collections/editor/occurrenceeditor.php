@@ -264,7 +264,12 @@ if($symbUid){
 		<?php 
 		if(!$symbUid){
 			?>
-			Please <a href="../../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">LOGIN</a> to edit or add an occurrence record 
+			<div style="font-weight:bold;font-size:120%;margin:30px;">
+				Please 
+				<a href="../../profile/index.php?refurl=<?php echo $clientRoot.'/collections/editor/occurrenceeditor.php&collid='.$collId; ?>">
+					LOGIN
+				</a> 
+			</div>
 			<?php 
 		}
 		else{

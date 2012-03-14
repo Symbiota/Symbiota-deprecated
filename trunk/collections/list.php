@@ -101,7 +101,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 		if($collections_listCrumbs){
 			echo "<div class='navpath'>";
 			echo "<a href='../index.php'>Home</a> &gt; ";
-			echo $collections_listCrumbs;
+			echo $collections_listCrumbs.' &gt; ';
 			echo " <b>Specimen Records</b>";
 			echo "</div>";
 		}
