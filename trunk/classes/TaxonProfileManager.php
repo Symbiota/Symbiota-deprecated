@@ -466,7 +466,13 @@ class TaxonProfileManager {
 				}
 				echo "<a href='../imagelib/imgdetails.php?imgid=".$imgId."'>";
 				if($useThumbnail && $imgObj["thumbnailurl"]){
-					list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
+					$width; $height;
+					try{
+						list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
+					}
+					catch(Exception $e){
+						
+					}
 					if(($start != 0 && $length != 1) || $width > 190 || $height > 190){
 						$imgUrl = $imgThumbnail;
 					}
