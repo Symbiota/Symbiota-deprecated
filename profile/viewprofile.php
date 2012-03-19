@@ -341,7 +341,7 @@ if(isset($profile_viewprofileCrumbs)){
 						        <td><b>First Name:</b></td>
 						        <td>
 									<div style="float:right;margin:3px;cursor:pointer;" onclick="toggle('editdiv');" title="Toggle editing Controls">
-										<img style='border:0px;' src='../../images/edit.png' />
+										<img style='border:0px;' src='../images/edit.png' />
 									</div>
 									<div class="editdiv" style="float:left;">
 										<?php echo $person->getFirstName();?>
