@@ -14,11 +14,22 @@ class ExsiccatiManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getTitleArr(){
+	public function getTitleArr($mode = 0){
 		$retArr = array();
-		$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.range '.
-			'FROM omexsiccatititles et '.
-			'ORDER BY et.title';
+		if($mode){
+			//Display full list
+			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.range '.
+				'FROM omexsiccatititles et '.
+				'ORDER BY et.title';
+		}
+		else{
+			//Display only exsiccati that have linked specimens
+			$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.range '.
+				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+				'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+				'INNER JOIN omoccurrences o ON ol.occid = o.occid '.
+				'ORDER BY et.title';
+		}
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->ometid]['t'] = $r->title;
@@ -34,11 +45,13 @@ class ExsiccatiManager {
 		$this->ometid = $id;
 		$retArr = array();
 		$sql = 'SELECT DISTINCT et.title, et.abbreviation, et.editor, et.range, et.source, et.notes, '.
-			'en.omenid, en.number, CONCAT(o.recordedby, " (", IFNULL(o.recordnumber,"s.n."), ")") as collector '.
+			'en.omenid, en.exsnumber, en.notes, '.
+			'CONCAT_WS(" ",o.recordedby, CONCAT("(",IFNULL(o.recordnumber,"s.n."),")"),o.eventDate) as collector '.
 			'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
 			'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
 			'INNER JOIN omoccurrences o ON ol.occid = o.occid '.
-			'WHERE et.ometid = '.$id.' ORDER BY en.number+1';
+			'WHERE et.ometid = '.$id.' ORDER BY en.exsnumber+1';
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				if(!array_key_exists('ex',$retArr)){
@@ -50,11 +63,12 @@ class ExsiccatiManager {
 					$retArr['ex']['n'] = $r->notes;
 				}
 				if(array_key_exists($r->omenid,$retArr)){
-					$retArr[$r->omenid]['c'] = $retArr[$r->omenid]['c'].', '.$r->collector;
+					$retArr[$r->omenid]['collector'] = $retArr[$r->omenid]['collector'].', '.$r->collector;
 				}
 				else{
-					$retArr[$r->omenid]['n'] = $r->number;
-					$retArr[$r->omenid]['c'] = $r->collector;
+					$retArr[$r->omenid]['number'] = $r->exsnumber;
+					$retArr[$r->omenid]['notes'] = $r->notes;
+					$retArr[$r->omenid]['collector'] = $r->collector;
 				}
 			}
 			$rs->close();
@@ -65,7 +79,8 @@ class ExsiccatiManager {
 	public function getExsOccArr($id){
 		$this->ometid = $id;
 		$retArr = array();
-		$sql = 'SELECT et.title, et.editor, et.range, en.omenid, en.number, '.
+		$sql = 'SELECT et.title, et.editor, et.range, en.omenid, en.exsnumber, '.
+			'ol.ranking, ol.notes, '.
 			'o.occid, o.recordedby, o.recordnumber, o.eventdate, i.thumbnailurl, i.url '.
 			'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
 			'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
@@ -77,14 +92,21 @@ class ExsiccatiManager {
 				if(!array_key_exists('t',$retArr)){
 					$title = $r->title;
 					if($r->editor) $title .= ', '.$r->editor; 
-					$title .= ' #'.$r->number;
+					$title .= ' #'.$r->exsnumber;
 					$retArr['t'] = $title;
 				}
-				$retArr[$r->occid]['rb'] = $r->recordedby;
-				$retArr[$r->occid]['rn'] = $r->recordnumber;
-				$retArr[$r->occid]['d'] = $r->eventdate;
-				if($r->thumbnailurl) $retArr[$r->occid]['tn'] = $r->thumbnailurl;
-				if($r->url) $retArr[$r->occid]['url'] = $r->url;
+				if(!array_key_exists($r->occid,$retArr)){
+					$retArr[$r->occid]['omenid'] = $r->omenid;
+					$retArr[$r->occid]['ranking'] = $r->ranking;
+					$retArr[$r->occid]['notes'] = $r->notes;
+					$retArr[$r->occid]['recordedby'] = $r->recordedby;
+					$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
+					$retArr[$r->occid]['eventdate'] = $r->eventdate;
+					if($r->url){ 
+						$retArr[$r->occid]['url'] = $r->url;
+						$retArr[$r->occid]['tnurl'] = ($r->thumbnailurl?$r->thumbnailurl:$r->url);
+					}
+				}
 			}
 			$rs->close();
 		}

@@ -76,6 +76,41 @@ $isEditor = false;
 	<div id="innertext" style="width:600px;">
 		<?php
 		if($titleArr){
+			if($isEditable){
+				?>
+				<div style="cursor:pointer;float:right;" onclick="toggle('adddiv');" title="Edit Exsiccati Number">
+					<img style="border:0px;" src="../../images/add.png" />
+				</div>
+				<div id="adddiv" style="display:none;">
+					<form name="exaddform" action="index.php" method="post">
+						<fieldset style="margin:10px;padding:15px;">
+							<legend><b>Add New Exsiccati</b></legend>
+							<div style="margin:2px;">
+								Title: <input name="title" type="text" value="" style="width:500px;" /><br/>
+							</div>
+							<div style="margin:2px;">
+								Abbr: <input name="abbreviation" type="text" value="" style="width:500px;" /><br/>
+							</div>
+							<div style="margin:2px;">
+								Editor: <input name="editor" type="text" value="" style="width:300px;" /><br/>
+							</div>
+							<div style="margin:2px;">
+								Range: <input name="range" type="text" value="" /><br/>
+							</div>
+							<div style="margin:2px;">
+								Source: <input name="source" type="text" value="" style="width:480px;" /><br/>
+							</div>
+							<div style="margin:2px;">
+								Notes: <input name="notes" type="text" value="" style="width:500px;" />
+							</div>
+							<div style="margin:10px;">
+								<input name="formsubmit" type="submit" value="Create New Exsiccati" /> 
+							</div>
+						</fieldset>
+					</form> 
+				</div>
+				<?php 
+			}
 			?>
 			<ul>
 				<?php  
@@ -98,14 +133,14 @@ $isEditor = false;
 			?>
 			<div style="font-weight:bold;font-size:110%;">
 				<?php 
+				echo $exArr['t'].', '.$exArr['e'].($exArr['r']?' ['.$exArr['r'].']':'');
 				if($isEditable){
 					?>
-					<div style="float:right;cursor:pointer;" onclick="toggle('editexdiv');" title="Edit Exsiccati">
+					<span style="cursor:pointer;" onclick="toggle('editexdiv');" title="Edit Exsiccati">
 						<img style="border:0px;" src="../../images/edit.png"/>
-					</div>
+					</span>
 					<?php 
 				}
-				echo $exArr['t'].', '.$exArr['e'].($exArr['r']?' ['.$exArr['r'].']':'');
 				?>
 			</div>
 			<div id="editexdiv" style="display:none;">
@@ -136,38 +171,27 @@ $isEditor = false;
 						</div>
 					</fieldset>
 				</form> 
-				<form name="exaddform" action="index.php" method="post">
-					<fieldset style="margin:10px;padding:15px;">
-						<legend><b>Add New Exsiccati</b></legend>
-						<div style="margin:2px;">
-							Title: <input name="title" type="text" value="<?php echo $exArr['t']; ?>" style="width:500px;" /><br/>
-						</div>
-						<div style="margin:2px;">
-							Abbr: <input name="abbreviation" type="text" value="<?php echo $exArr['a']; ?>" style="width:500px;" /><br/>
-						</div>
-						<div style="margin:2px;">
-							Editor: <input name="editor" type="text" value="<?php echo $exArr['e']; ?>" style="width:300px;" /><br/>
-						</div>
-						<div style="margin:2px;">
-							Range: <input name="range" type="text" value="<?php echo $exArr['r']; ?>" /><br/>
-						</div>
-						<div style="margin:2px;">
-							Source: <input name="source" type="text" value="<?php echo $exArr['s']; ?>" style="width:480px;" /><br/>
-						</div>
-						<div style="margin:2px;">
-							Notes: <input name="notes" type="text" value="<?php echo $exArr['n']; ?>" style="width:500px;" />
-						</div>
-						<div style="margin:10px;">
-							<input name="formsubmit" type="submit" value="Create New Exsiccati" /> 
-						</div>
-					</fieldset>
-				</form> 
 				<form name="exdeleteform" action="index.php" method="post">
 					<fieldset style="margin:10px;padding:15px;">
 						<legend><b>Delete Exsiccati</b></legend>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
 							<input name="formsubmit" type="submit" value="Delete Exsiccati" /> 
+						</div>
+					</fieldset>
+				</form> 
+				<form name="exnumaddform" action="index.php" method="post">
+					<fieldset style="margin:10px;padding:15px;">
+						<legend><b>Add Exsiccati Number</b></legend>
+						<div style="margin:2px;">
+							Number: <input name="number" type="text" />
+						</div>
+						<div style="margin:2px;">
+							Notes: <input name="notes" type="text" />
+						</div>
+						<div style="margin:10px;">
+							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
+							<input name="formsubmit" type="submit" value="Add Exsiccati Number" /> 
 						</div>
 					</fieldset>
 				</form> 
@@ -179,42 +203,30 @@ $isEditor = false;
 						?>
 						<li>
 							<a href="index.php?omenid=<?php echo $k; ?>">
-								<?php echo $numArr['n'].' - '.$numArr['c']; ?>
+								<?php echo '#'.$numArr['number'].' - '.$numArr['collector']; ?>
 							</a>
 							<?php 
 							if($isEditable){
 								?>
-								<span style="float:right;cursor:pointer;" onclick="toggle('editnumdiv-<?php echo $k; ?>');" title="Edit Exsiccati Number">
+								<span style="cursor:pointer;" onclick="toggle('editnumdiv-<?php echo $k; ?>');" title="Edit Exsiccati Number">
 									<img style="border:0px;" src="../../images/edit.png"/>
 								</span>
 								<?php 
 							}
 							?>
-							<div id="editnumdiv-<?php echo $k; ?>">
+							<div id="editnumdiv-<?php echo $k; ?>" style="display:none;">
 								<form name="exnumeditform" action="index.php" method="post">
 									<fieldset style="margin:10px;padding:15px;">
 										<legend><b>Edit Exsiccati Number</b></legend>
 										<div style="margin:2px;">
-											Title: <input name="title" type="text" value="<?php echo $exArr['t']; ?>" style="width:500px;" />
+											Number: <input name="exsnumber" type="text" value="<?php echo $numArr['number']; ?>" style="width:500px;" />
 										</div>
 										<div style="margin:2px;">
-											Abbr: <input name="abbreviation" type="text" value="<?php echo $exArr['a']; ?>" style="width:500px;" /><br/>
-										</div>
-										<div style="margin:2px;">
-											Editor: <input name="editor" type="text" value="<?php echo $exArr['e']; ?>" style="width:300px;" /><br/>
-										</div>
-										<div style="margin:2px;">
-											Range: <input name="range" type="text" value="<?php echo $exArr['r']; ?>" /><br/>
-										</div>
-										<div style="margin:2px;">
-											Source: <input name="source" type="text" value="<?php echo $exArr['s']; ?>" style="width:480px;" /><br/>
-										</div>
-										<div style="margin:2px;">
-											Notes: <input name="notes" type="text" value="<?php echo $exArr['n']; ?>" style="width:500px;" /><br/>
+											Notes: <input name="notes" type="text" value="<?php echo $numArr['notes']; ?>" style="width:500px;" /><br/>
 										</div>
 										<div style="margin:10px;">
-											<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
-											<input name="formsubmit" type="submit" value="Submit Edits" /> 
+											<input name="omenid" type="hidden" value="<?php echo $k; ?>" />
+											<input name="formsubmit" type="submit" value="Save Edits" /> 
 										</div>
 									</fieldset>
 								</form> 
@@ -222,7 +234,7 @@ $isEditor = false;
 									<fieldset style="margin:10px;padding:15px;">
 										<legend><b>Delete Exsiccati Number</b></legend>
 										<div style="margin:10px;">
-											<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
+											<input name="omenid" type="hidden" value="<?php echo $k; ?>" />
 											<input name="formsubmit" type="submit" value="Delete Exsiccati Number" /> 
 										</div>
 									</fieldset>
@@ -249,12 +261,53 @@ $isEditor = false;
 						<li>
 							<a href="../individual/index.php?occid=<?php echo $k; ?>">
 								<?php 
-								echo $occArr['rb'].' '.$occArr['rn'].' '.$occArr['d'].' ';
+								echo $occArr['recordedby'].' '.$occArr['recordnumber'].' '.$occArr['eventdate'].' ';
 								?>
 							</a>
-							<a href="<?php echo $occArr['url']; ?>">
-								<img src="<?php echo $occArr['tn']; ?>" style="width:75px;" />
-							</a>
+							<?php 
+							if(array_key_exists('url',$occArr)){
+								?>
+								<a href="<?php echo $occArr['url']; ?>">
+									<img src="<?php echo $occArr['tnurl']; ?>" style="width:75px;" />
+								</a>
+								<?php
+							} 
+							if($isEditable){
+								?>
+								<span style="cursor:pointer;" onclick="toggle('editoccdiv-<?php echo $k; ?>');" title="Edit Exsiccati Number">
+									<img style="border:0px;" src="../../images/edit.png"/>
+								</span>
+								<?php 
+							}
+							?>
+							<div id="editoccdiv-<?php echo $k; ?>" style="display:none;">
+								<form name="exeditoccform" action="index.php" method="post">
+									<fieldset style="margin:10px;padding:15px;">
+										<legend><b>Edit Exsiccati Occurrence Link</b></legend>
+										<div style="margin:2px;">
+											Ranking: <input name="ranking" type="text" value="<?php echo $numArr['ranking']; ?>" />
+										</div>
+										<div style="margin:2px;">
+											Notes: <input name="notes" type="text" value="<?php echo $numArr['notes']; ?>" style="width:500px;" />
+										</div>
+										<div style="margin:10px;">
+											<input name="omenid" type="hidden" value="<?php echo $occArr['omenid']; ?>" />
+											<input name="occid" type="hidden" value="<?php echo $k; ?>" />
+											<input name="formsubmit" type="submit" value="Save Edits" /> 
+										</div>
+									</fieldset>
+								</form> 
+								<form name="exnumdeleteform" action="index.php" method="post">
+									<fieldset style="margin:10px;padding:15px;">
+										<legend><b>Delete Exsiccati Specimen Link</b></legend>
+										<div style="margin:10px;">
+											<input name="omenid" type="hidden" value="<?php echo $occArr['omenid']; ?>" />
+											<input name="occid" type="hidden" value="<?php echo $k; ?>" />
+											<input name="formsubmit" type="submit" value="Delete Link to Specimen" /> 
+										</div>
+									</fieldset>
+								</form> 
+							</div>
 						</li>
 						<?php 
 					}
