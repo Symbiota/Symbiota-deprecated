@@ -4,7 +4,7 @@
  */
 include_once($serverRoot.'/config/dbconnection.php');
 
-class SpecProcessorOcr_proposed{
+class SpecProcessorOcr{
 
 	private $conn;
 	private $tempPath;
@@ -41,16 +41,13 @@ class SpecProcessorOcr_proposed{
 		$sql .= 'LIMIT 3 ';
 		//echo 'SQL: '.$sql."\n";
 		if($rs = $this->conn->query($sql)){
-			if($rs = $this->conn->query($sql)){
-				while($r = $rs->fetch_object()){
-					$rawStr = $this->getBestOCR($r->url);
-					echo "Saved:".$rawStr."\n\n";
-					if($rawStr){
-						$this->databaseRawStr($r->imgid,$rawStr);
-					}
+			while($r = $rs->fetch_object()){
+				$rawStr = $this->getBestOCR($r->url);
+				if($rawStr){
+					$this->databaseRawStr($r->imgid,$rawStr);
 				}
-	 			$rs->close();
-	 		}
+			}
+ 			$rs->close();
 		}
  		if(!($this->conn === false)) $this->conn->close();
 	}
@@ -75,24 +72,6 @@ class SpecProcessorOcr_proposed{
 		}
 		//echo 'rawStr: '.$rawStr."\n";
  		return $rawStr;
-	}
-
-	private function getBestOCR($url)
-	{
-		$rawStr = $this->ocrImageByUrl($url);
-		$unprocessedCount = $this->scoreOCR($rawStr);
-		$firstProcessedRawStr = $this->ocrImageByUrl($url,1,10,1,1,6);
-		$firstProcessedCount = $this->scoreOCR($firstProcessedRawStr);
-		$secondProcessedRawStr = $this->ocrImageByUrl($url,1,5,-3,2,1.537);
-		$secondProcessedCount = $this->scoreOCR($secondProcessedRawStr);
-		$thirdProcessedRawStr = $this->ocrImageByUrl($url,1,0,0,0,1.537);
-		$thirdProcessedCount = $this->scoreOCR($thirdProcessedRawStr);
-		$tempmax = max(array($unprocessedCount, $firstProcessedCount, $secondProcessedCount, $thirdProcessedCount));
-		if($tempmax == $unprocessedCount) return $rawStr;
-		else if($tempmax == $firstProcessedCount) return $firstProcessedRawStr;
-		else if($tempmax == $secondProcessedCount) return $secondProcessedRawStr;
-		else if($tempmax == $thirdProcessedCount) return $thirdProcessedRawStr;
-		else return "";
 	}
 
 	public function ocrImageByUrl($imgUrl, $grayscale=0, $brightness=0, $contrast=0, $sharpen=0, $gammacorrect=0, $x=0, $y=0, $w=1, $h=1){
@@ -122,25 +101,21 @@ class SpecProcessorOcr_proposed{
 		return $rawStr;
 	}
 
-	private function loadImage($imgUrl){
-		if($imgUrl){
-			//If there is an image domain name is set in symbini.php and url is relative,
-			//then it's assumed that image is located on another server, thus add domain to url
-			if(array_key_exists("imageDomain",$GLOBALS)){
-				if(substr($imgUrl,0,1)=="/"){
-					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-				}
-			}
-			//Set temp folder path and file names
-			$this->setTempPath();
-			$ts = time();
-			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
-			$this->outputFile = $this->tempPath.$ts.'_output';
-
-			//Copy image to temp folder
-			return copy($imgUrl,$this->imgUrlLocal);
-		}
-		return false;
+	private function getBestOCR($url){
+		$rawStr = $this->ocrImageByUrl($url);
+		$unprocessedCount = $this->scoreOCR($rawStr);
+		$firstProcessedRawStr = $this->ocrImageByUrl($url,1,10,1,1,6);
+		$firstProcessedCount = $this->scoreOCR($firstProcessedRawStr);
+		$secondProcessedRawStr = $this->ocrImageByUrl($url,1,5,-3,2,1.537);
+		$secondProcessedCount = $this->scoreOCR($secondProcessedRawStr);
+		$thirdProcessedRawStr = $this->ocrImageByUrl($url,1,0,0,0,1.537);
+		$thirdProcessedCount = $this->scoreOCR($thirdProcessedRawStr);
+		$tempmax = max(array($unprocessedCount, $firstProcessedCount, $secondProcessedCount, $thirdProcessedCount));
+		if($tempmax == $unprocessedCount) return $rawStr;
+		else if($tempmax == $firstProcessedCount) return $firstProcessedRawStr;
+		else if($tempmax == $secondProcessedCount) return $secondProcessedRawStr;
+		else if($tempmax == $thirdProcessedCount) return $thirdProcessedRawStr;
+		else return "";
 	}
 
 	private function filterImage($grayscale,$brightness,$contrast,$sharpen=0,$gammacorrect=0){
@@ -201,7 +176,7 @@ class SpecProcessorOcr_proposed{
 		if($this->imgUrlLocal){
 			//OCR image, result text is output to $outputFile
 			$output = array();
-			//exec('tesseract '.$this->imgUrlLocal.' '.$outputFile,$output);
+			//exec('/usr/local/bin/tesseract '.$this->imgUrlLocal.' '.$this->outputFile,$output);
 			//Full path to tesseract with quotes needed for Windows
 			exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$this->imgUrlLocal.' '.$this->outputFile,$output);
 			//Obtain text from tesseract output file
@@ -227,6 +202,27 @@ class SpecProcessorOcr_proposed{
 		//echo 'SQL: '.$sql."\n";
 		$status = $this->conn->query($sql);
 		return $status;
+	}
+
+	private function loadImage($imgUrl){
+		if($imgUrl){
+			//If there is an image domain name is set in symbini.php and url is relative,
+			//then it's assumed that image is located on another server, thus add domain to url
+			if(array_key_exists("imageDomain",$GLOBALS)){
+				if(substr($imgUrl,0,1)=="/"){
+					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				}
+			}
+			//Set temp folder path and file names
+			$this->setTempPath();
+			$ts = time();
+			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
+			$this->outputFile = $this->tempPath.$ts.'_output';
+
+			//Copy image to temp folder
+			return copy($imgUrl,$this->imgUrlLocal);
+		}
+		return false;
 	}
 
 	private function setTempPath(){

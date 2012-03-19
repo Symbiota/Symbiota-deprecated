@@ -143,183 +143,195 @@ if(isset($profile_viewprofileCrumbs)){
 		?>
 		<div id="tabs" style="margin:10px;">
 		    <ul>
+		    <?php
+		    if($floraModIsActive){ 
+		    	?>
 		        <li><a href="#checklistdiv">Species Checklists</a></li>
+		        <?php
+		    } 
+		    ?>
 		        <li><a href="personalspec.php?userid=<?php echo $userId; ?>">Specimen Management</a></li>
 		        <li><a href="#profilediv">Profile Details</a></li>
 		    </ul>
-			<div id="checklistdiv">
-				<fieldset style="margin:10px;padding:20px;">
-					<legend><b>Management</b></legend>
-					<?php 
-					$listArr = $pClManager->getManagementLists($userId);
-					echo '<div style="font-weight:bold;font:bold 14pt;">Checklists</div>'."\n";
-					if(array_key_exists('cl',$listArr)){
-						$clArr = $listArr['cl'];
-						?>
-						<ul>
+		    <?php
+		    if($floraModIsActive){ 
+		    	?>
+				<div id="checklistdiv">
+					<fieldset style="margin:10px;padding:20px;">
+						<legend><b>Management</b></legend>
 						<?php 
-						foreach($clArr as $kClid => $vName){
+						$listArr = $pClManager->getManagementLists($userId);
+						echo '<div style="font-weight:bold;font:bold 14pt;">Checklists</div>'."\n";
+						if(array_key_exists('cl',$listArr)){
+							$clArr = $listArr['cl'];
 							?>
-							<li>
-								<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
-									<?php echo $vName; ?>
-								</a>
-								<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
-									<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
-								</a>
-								<form action="viewprofile.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
-									<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
-									<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-									<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
-								</form> 
-							</li>
+							<ul>
+							<?php 
+							foreach($clArr as $kClid => $vName){
+								?>
+								<li>
+									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
+										<?php echo $vName; ?>
+									</a>
+									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
+										<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
+									</a>
+									<form action="viewprofile.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
+										<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
+										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+										<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
+									</form> 
+								</li>
+								<?php 
+							}
+							?>
+							</ul>
 							<?php 
 						}
-						?>
-						</ul>
-						<?php 
-					}
-					else{
-						echo '<div style="margin:10px;">You have no personal checklists</div>';
-					}
-
-					echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Project Administration</div>'."\n";
-					if(array_key_exists('proj',$listArr)){
-						$projArr = $listArr['proj'];
-						?>
-						<ul>
-						<?php 
-						foreach($projArr as $pid => $projName){
+						else{
+							echo '<div style="margin:10px;">You have no personal checklists</div>';
+						}
+	
+						echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Project Administration</div>'."\n";
+						if(array_key_exists('proj',$listArr)){
+							$projArr = $listArr['proj'];
 							?>
-							<li>
-								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=0">
-									<?php echo $projName; ?>
-								</a>
-								<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=1">
-									<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Project" />
-								</a>
-							</li>
+							<ul>
+							<?php 
+							foreach($projArr as $pid => $projName){
+								?>
+								<li>
+									<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=0">
+										<?php echo $projName; ?>
+									</a>
+									<a href="../projects/index.php?proj=<?php echo $pid; ?>&emode=1">
+										<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Project" />
+									</a>
+								</li>
+								<?php 
+							}
+							?>
+							</ul>
 							<?php 
 						}
+						else{
+							echo '<div style="margin:10px;">There are no Projects for which you have administrative permissions</div>';
+						}
 						?>
-						</ul>
-						<?php 
-					}
-					else{
-						echo '<div style="margin:10px;">There are no Projects for which you have administrative permissions</div>';
-					}
-					?>
-				</fieldset>
-				<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
-					<fieldset>
-						<legend style="font-weight:bold;">Create a New Checklist</legend>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Checklist Name:
-							</div>
-							<div style="float:left;">
-								<input name="nclname" type="text" maxlength="50" size="60" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Authors:
-							</div>
-							<div style="float:left;">
-								<input name="nclauthors" type="text" maxlength="250" size="60" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Locality:
-							</div>
-							<div style="float:left;">
-								<input name="ncllocality" type="text" maxlength="500" size="60" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Publication:
-							</div>
-							<div style="float:left;">
-								<input name="nclpublication" type="text" maxlength="500" size="60" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Abstract:
-							</div>
-							<div style="float:left;">
-								<textarea name="nclabstract" rows="4" cols="45"></textarea>
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Parent Checklist:
-							</div>
-							<div style="float:left;">
-								<select name="nclparentclid">
-									<option value="">Select a Parent checklist</option>
-									<option value="">----------------------------------</option>
-									<?php $pClManager->echoParentSelect(); ?>
-								</select>
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Notes:
-							</div>
-							<div style="float:left;">
-								<input name="nclnotes" type="text" maxlength="500" size="60" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Latitude Centroid:
-							</div>
-							<div style="float:left;">
-								<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
-								<span style="cursor:pointer;" onclick="openMappingAid();">
-									<img src="../images/world40.gif" style="width:12px;" />
-								</span>
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Longitude Centroid:
-							</div>
-							<div style="float:left;">
-								<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" size="10" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Point Radius (meters):
-							</div>
-							<div style="float:left;">
-								<input name="nclpointradiusmeters" type="text" maxlength="15" size="10" />
-							</div>
-						</div>
-						<div style="clear:both;">
-							<div style="width:130px;float:left;">
-								Public Access:
-							</div>
-							<div style="float:left;">
-								<select name="nclaccess">
-									<option value="private">Private</option>
-									<option value="public">Public</option>
-								</select>
-							</div>
-						</div>
-						<div style="clear:both;">
-							<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-							<div style="margin-left:20px;">
-								<input name="action" type="submit" value="Create Checklist" />
-							</div>
-						</div>
 					</fieldset>
-				</form>
-			</div>
+					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
+						<fieldset>
+							<legend style="font-weight:bold;">Create a New Checklist</legend>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Checklist Name:
+								</div>
+								<div style="float:left;">
+									<input name="nclname" type="text" maxlength="50" size="60" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Authors:
+								</div>
+								<div style="float:left;">
+									<input name="nclauthors" type="text" maxlength="250" size="60" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Locality:
+								</div>
+								<div style="float:left;">
+									<input name="ncllocality" type="text" maxlength="500" size="60" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Publication:
+								</div>
+								<div style="float:left;">
+									<input name="nclpublication" type="text" maxlength="500" size="60" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Abstract:
+								</div>
+								<div style="float:left;">
+									<textarea name="nclabstract" rows="4" cols="45"></textarea>
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Parent Checklist:
+								</div>
+								<div style="float:left;">
+									<select name="nclparentclid">
+										<option value="">Select a Parent checklist</option>
+										<option value="">----------------------------------</option>
+										<?php $pClManager->echoParentSelect(); ?>
+									</select>
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Notes:
+								</div>
+								<div style="float:left;">
+									<input name="nclnotes" type="text" maxlength="500" size="60" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Latitude Centroid:
+								</div>
+								<div style="float:left;">
+									<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
+									<span style="cursor:pointer;" onclick="openMappingAid();">
+										<img src="../images/world40.gif" style="width:12px;" />
+									</span>
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Longitude Centroid:
+								</div>
+								<div style="float:left;">
+									<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" size="10" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Point Radius (meters):
+								</div>
+								<div style="float:left;">
+									<input name="nclpointradiusmeters" type="text" maxlength="15" size="10" />
+								</div>
+							</div>
+							<div style="clear:both;">
+								<div style="width:130px;float:left;">
+									Public Access:
+								</div>
+								<div style="float:left;">
+									<select name="nclaccess">
+										<option value="private">Private</option>
+										<option value="public">Public</option>
+									</select>
+								</div>
+							</div>
+							<div style="clear:both;">
+								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
+								<div style="margin-left:20px;">
+									<input name="action" type="submit" value="Create Checklist" />
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<?php 
+		    }
+			?>
 			<div id="profilediv">
 				<form id="editprofileform" name="editprofile" action="viewprofile.php" method="post" onsubmit="return checkEditForm(this);">
 					<fieldset>
