@@ -6,16 +6,20 @@ header("Content-Type: text/html; charset=".$charset);
 
 $ometId = array_key_exists('ometid',$_REQUEST)?$_REQUEST['ometid']:0;
 $omenId = array_key_exists('omenid',$_REQUEST)?$_REQUEST['omenid']:0;
+$searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
+$displayUnlinked = array_key_exists('displayunlinked',$_POST)?$_POST['displayunlinked']:'';
+$imagesOnly = array_key_exists('imagesonly',$_POST)?$_POST['imagesonly']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
-$isEditable = 0;
+$statusStr = '';
+$isEditor = 0;
 if($isAdmin){
-	$isEditable = 1;
+	$isEditor = 1;
 }
 
 $exsManager = new ExsiccatiManager();
 
-if($isEditable && $formSubmit){
+if($isEditor && $formSubmit){
 	if($formSubmit == 'Add Exsiccati Title'){
 		$exsManager->addTitle($_POST);
 	}
@@ -34,6 +38,9 @@ if($isEditable && $formSubmit){
 	elseif($formSubmit == 'Delete Number'){
 		$exsManager->deleteNumber($omenId);
 	}
+	elseif($formSubmit == 'Add Occurrence Link'){
+		$exsManager->addOccLink($_POST);
+	}
 	elseif($formSubmit == 'Save Specimen Link Edit'){
 		$exsManager->editOccLink($_POST);
 	}
@@ -41,9 +48,6 @@ if($isEditable && $formSubmit){
 		$exsManager->deleteOccLink($omenId,$_POST['occid']);
 	}
 }
-
-$statusStr = '';
-$isEditor = false;
 
 ?>
 <html>
@@ -127,7 +131,32 @@ $isEditor = false;
 	<div id="innertext">
 		<?php
 		if(!$ometId && !$omenId){
-			if($isEditable){
+			?>
+			<div id="cloptiondiv">
+				<form name="optionform" action="index.php" method="post">
+					<fieldset>
+					    <legend><b>Options</b></legend>
+				    	<div>
+				    		<b>Search:</b> 
+							<input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+						</div>
+						<div title="including without linked specimen records">
+							<input type="checkbox" name="displayunlinked" value="1" <?php echo ($displayUnlinked?"CHECKED":"");?>/> 
+							Display all titles
+						</div>
+						<div>
+						    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> /> 
+						    Display only those w/ images
+						</div>
+						<div style="margin:5px 0px 0px 5px;">
+							<input name="formsubmit" type="submit" value="Rebuild List" />
+						</div>
+					</fieldset>
+				</form>
+			</div>			
+			<div style="font-weight:bold;font-size:120%;">Exsiccati Titles</div>
+			<?php 
+			if($isEditor){
 				?>
 				<div style="cursor:pointer;float:right;" onclick="toggle('exsadddiv');" title="Edit Exsiccati Number">
 					<img style="border:0px;" src="../../images/add.png" />
@@ -146,7 +175,7 @@ $isEditor = false;
 								Editor: <input name="editor" type="text" value="" style="width:300px;" />
 							</div>
 							<div style="margin:2px;">
-								Range: <input name="range" type="text" value="" />
+								Range: <input name="exsrange" type="text" value="" />
 							</div>
 							<div style="margin:2px;">
 								Source: <input name="source" type="text" value="" style="width:480px;" />
@@ -170,7 +199,7 @@ $isEditor = false;
 					?>
 					<li>
 						<a href="index.php?ometid=<?php echo $k; ?>">
-							<?php echo $tArr['title'].', '.$tArr['editor'].($tArr['range']?' ['.$tArr['range'].']':''); ?>
+							<?php echo $tArr['title'].', '.$tArr['editor'].($tArr['exsrange']?' ['.$tArr['exsrange'].']':''); ?>
 						</a>
 					</li>
 					<?php
@@ -185,7 +214,7 @@ $isEditor = false;
 			?>
 			<div style="font-weight:bold;font-size:120%;">
 				<?php 
-				if($isEditable){
+				if($isEditor){
 					?>
 					<div style="float:right;">
 						<span style="cursor:pointer;" onclick="toggle('exseditdiv');" title="Edit Exsiccati">
@@ -197,7 +226,7 @@ $isEditor = false;
 					</div>
 					<?php
 				}
-				echo $exsArr['title'].', '.$exsArr['editor'].($exsArr['range']?' ['.$exsArr['range'].']':'');
+				echo $exsArr['title'].', '.$exsArr['editor'].($exsArr['exsrange']?' ['.$exsArr['exsrange'].']':'');
 				if($exsArr['notes']) echo '<div>'.$exsArr['notes'].'</div>'; 
 				?>
 			</div>
@@ -215,7 +244,7 @@ $isEditor = false;
 							Editor: <input name="editor" type="text" value="<?php echo $exsArr['editor']; ?>" style="width:300px;" />
 						</div>
 						<div style="margin:2px;">
-							Range: <input name="range" type="text" value="<?php echo $exsArr['range']; ?>" />
+							Range: <input name="exsrange" type="text" value="<?php echo $exsArr['exsrange']; ?>" />
 						</div>
 						<div style="margin:2px;">
 							Source: <input name="source" type="text" value="<?php echo $exsArr['source']; ?>" style="width:480px;" />
@@ -284,7 +313,7 @@ $isEditor = false;
 		}
 		elseif($omenId){
 			$mdArr = $exsManager->getExsNumberObj($omenId);
-			if($isEditable){
+			if($isEditor){
 				?>
 				<div style="float:right;">
 					<span style="cursor:pointer;" onclick="toggle('numeditdiv');" title="Edit Exsiccati Number">
@@ -306,7 +335,7 @@ $isEditor = false;
 				<?php 
 				echo $mdArr['abbreviation'].'</br>';
 				echo $mdArr['editor'];
-				if($mdArr['range']) echo ' ['.$mdArr['range'].']';
+				if($mdArr['exsrange']) echo ' ['.$mdArr['exsrange'].']';
 				if($mdArr['notes']) echo '</br>'.$mdArr['notes'];
 				?>
 			</div>
@@ -372,13 +401,13 @@ $isEditor = false;
 											<?php
 											echo $occArr['recordedby'];
 											echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':'s.n. ');
-											echo '<span style="margin-left:100px;">'.$occArr['eventdate'].'</span> ';
+											echo '<span style="margin-left:70px;">'.$occArr['eventdate'].'</span> ';
 											?>
 										</div>
 										<div style="float:right;margin-right:30px;"> 
 											<?php 
 											if($occArr['occurrenceid']){
-												echo 'Global Unique Identifier: '.$occArr['occurrenceid'];
+												echo '<span title="Global Unique Identifier">GUID: '.$occArr['occurrenceid'].'<span>';
 											}
 											elseif($occArr['catalognumber']){
 												echo 'Catalog Number: '.$occArr['catalognumber'];
@@ -412,7 +441,7 @@ $isEditor = false;
 								</td>
 								<td>
 									<?php
-									if($isEditable){
+									if($isEditor){
 										?>
 										<div style="cursor:pointer;float:right;" onclick="toggle('occeditdiv-<?php echo $k; ?>');" title="Edit Occurrence Link">
 											<img style="border:0px;" src="../../images/edit.png"/>
@@ -483,5 +512,4 @@ $isEditor = false;
 	include($serverRoot."/footer.php");
 	?>
 </body>
-</html> 
-
+</html>
