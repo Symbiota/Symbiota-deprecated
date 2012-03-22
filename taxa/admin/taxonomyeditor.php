@@ -90,7 +90,7 @@ if($editable){
 	<script language=javascript>
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 	</script>
-	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js"></script>
+	<script language="javascript" src="../../js/symb/taxa.taxonomyeditor.js?refreshnumber=<?php echo time(); ?>"></script>
 </head>
 <body>
 <?php
