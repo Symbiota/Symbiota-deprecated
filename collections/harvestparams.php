@@ -188,7 +188,7 @@ $collManager->reset();
 			</div>
 			<div>
 				Collector's Number: 
-				<input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750" />
+				<input type="text" id="collnum" size="31" name="collnum" value="<?php if(array_key_exists("collnum",$collArray)) echo $collArray["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
 			</div>
 			<div>
 				Collection Date: 

@@ -138,11 +138,11 @@ if($symbUid){
 								Collector: 
 								<input type="text" name="recordedby" style="width:100px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
 							</span>
-							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
 								Number(s): 
 								<input type="text" name="recordnumber" style="width:100px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
 							</span>
-							<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+							<span style="margin-left:20px;" title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 								Identifier: 
 								<input type="text" name="identifier" style="width:100px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
 							</span>
@@ -152,7 +152,7 @@ if($symbUid){
 								Entered by: 
 								<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_REQUEST)?$_REQUEST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
 							</span>
-							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash requiered), e.g.: 3700 - 3750">
+							<span style="margin-left:20px;" title="Enter a range delimited by ' - ' (space before and after dash required), e.g.: 3700 - 3750">
 								Date Modified: 
 								<input type="text" name="datelastmodified" style="width:100px;" value="<?php echo (array_key_exists('datelastmodified',$_REQUEST)?$_REQUEST['datelastmodified']:''); ?>" />
 							</span>

@@ -144,7 +144,7 @@ if($isEditor){
 										<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
 											<input type="checkbox" name="renameweburl" value="1" />
-											Rename web image file on server to match above edit (web server file editing privileges requiered)
+											Rename web image file on server to match above edit (web server file editing privileges required)
 										</div>
 										<input name="oldurl" type="hidden" value="<?php echo $imgArr["url"];?>" />
 										<?php } ?>
@@ -155,7 +155,7 @@ if($isEditor){
 										<?php if(stripos($imgArr["thumbnailurl"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:70px;">
 											<input type="checkbox" name="renametnurl" value="1" />
-											Rename thumbnail image file on server to match above edit (web server file editing privileges requiered)
+											Rename thumbnail image file on server to match above edit (web server file editing privileges required)
 										</div>
 										<input name="oldthumbnailurl" type="hidden" value="<?php echo $imgArr["thumbnailurl"];?>" />
 										<?php } ?>
@@ -166,7 +166,7 @@ if($isEditor){
 										<?php if(stripos($imgArr["originalurl"],$imageRootUrl) === 0){ ?>
 										<div style="margin-left:80px;">
 											<input type="checkbox" name="renameorigurl" value="1" />
-											Rename large image file on server to match above edit (web server file editing privileges requiered)
+											Rename large image file on server to match above edit (web server file editing privileges required)
 										</div>
 										<input name="oldoriginalurl" type="hidden" value="<?php echo $imgArr["originalurl"];?>" />
 										<?php } ?>

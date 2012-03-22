@@ -254,9 +254,9 @@ if($symbUid){
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?cacherefresh=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?cacherefresh=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -327,18 +327,18 @@ if($symbUid){
 									<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
 								</span>
 								<span style="margin-left:25px;">Number:</span>
-								<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+								<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
 								</span>
 								<span style="margin-left:30px;">Identifier:</span> 
-								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash requiered), e.g.: 3542,3602,3700 - 3750">
+								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
 								</span>
 							</div>
 							<div style="margin:2px;">
 								Entered by: 
 								<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
-								<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash requiered), e.g.: 2002-01-01 - 2003-01-01">
+								<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
 									Date entered: 
 									<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
 								</span>
@@ -370,8 +370,8 @@ if($symbUid){
 									<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
 										Pending Review
 									</option>
-									<option value="expert requiered" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
-										Expert Requiered
+									<option value="expert required" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
+										Expert Required
 									</option>
 									<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
 										Reviewed
@@ -965,8 +965,8 @@ if($symbUid){
 														<option value='pending review' <?php echo (!$occId || $pStatus=='pending review'?'SELECTED':''); ?>>
 															Pending Review
 														</option>
-														<option value='expert requiered' <?php echo ($pStatus=='expert requiered'?'SELECTED':''); ?>>
-															Expert Requiered
+														<option value='expert required' <?php echo ($pStatus=='expert required'?'SELECTED':''); ?>>
+															Expert Required
 														</option>
 														<option value='reviewed' <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
 															Reviewed
@@ -1040,8 +1040,8 @@ if($symbUid){
 														<option value='pending review' <?php echo ($autoPStatus=='pending review'?'SELECTED':''); ?>>
 															Pending Review
 														</option>
-														<option value='expert requiered' <?php echo ($autoPStatus=='expert requiered'?'SELECTED':''); ?>>
-															Expert Requiered
+														<option value='expert required' <?php echo ($autoPStatus=='expert required'?'SELECTED':''); ?>>
+															Expert Required
 														</option>
 														<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
 															Reviewed
