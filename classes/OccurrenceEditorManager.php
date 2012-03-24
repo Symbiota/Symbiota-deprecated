@@ -92,13 +92,13 @@ class OccurrenceEditorManager {
 			$this->qryArr = $overrideQry;
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
-		elseif(array_key_exists('q_identifier',$_POST)){
-			if($_POST['q_identifier']) $this->qryArr['id'] = trim($_POST['q_identifier']);
-			if($_POST['q_recordedby']) $this->qryArr['rb'] = trim($_POST['q_recordedby']);
-			if($_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
-			if($_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
-			if($_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
-			if($_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
+		elseif(array_key_exists('q_identifier',$_REQUEST)){
+			if($_REQUEST['q_identifier']) $this->qryArr['id'] = trim($_REQUEST['q_identifier']);
+			if(array_key_exists('q_recordedby',$_POST) && $_POST['q_recordedby']) $this->qryArr['rb'] = trim($_POST['q_recordedby']);
+			if(array_key_exists('q_recordnumber',$_POST) && $_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
+			if(array_key_exists('q_enteredby',$_POST) && $_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
+			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
+			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
@@ -126,14 +126,13 @@ class OccurrenceEditorManager {
 						$searchIsNum = true; 
 						$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
 						$iBetweenFrag[] = '(o.occurrenceId BETWEEN '.$term1.' AND '.$term2.')';
-						$iBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
+						$iBetweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
 					}
 					else{
 						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
 						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(O.catalogNumber) = '.strlen($term2); 
 						$iBetweenFrag[] = '('.$catTerm.')';
 						$iBetweenFrag[] = '(o.occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
-						$iBetweenFrag[] = '(o.othercatalognumbers BETWEEN "'.$term1.'" AND "'.$term2.'")';
 					}
 				}
 				else{
@@ -151,7 +150,7 @@ class OccurrenceEditorManager {
 				}
 			}
 			if($iInFrag){
-				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.othercatalognumbers IN("'.implode('","',$iInFrag).'")) ';
+				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.occid IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}

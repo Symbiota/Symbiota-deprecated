@@ -10,7 +10,6 @@ $state = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 $county = array_key_exists('county',$_REQUEST)?$_REQUEST['county']:'';
 $locality = array_key_exists('locality',$_REQUEST)?$_REQUEST['locality']:'';
 $vStatus = array_key_exists('vstatus',$_REQUEST)?$_REQUEST['vstatus']:'';
-$vStatusStr = array_key_exists('vstatusstr',$_REQUEST)?$_REQUEST['vstatusstr']:'';
 
 $latDeg = array_key_exists('latdeg',$_POST)?$_POST['latdeg']:'';
 $latMin = array_key_exists('latmin',$_POST)?$_POST['latmin']:'';
@@ -38,6 +37,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
  	$editor = true;
 }
 
+$status = '';
 $localArr;
 if($editor){
 	if($action == 'Generate List'){
@@ -147,6 +147,19 @@ header("Content-Type: text/html; charset=".$charset);
 				}
 			}
 
+			function openFirstRecSet(){
+				var collId = document.georefform.collid.value;
+				var selObj = document.georefform.locallist;
+				if(selObj.selectedIndex > -1){
+					var occidStr = selObj.options[selObj.selectedIndex].value;
+					occWindow=open("occurrenceeditor.php?collid="+collId+"&q_identifier="+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=850,height=600,left=20,top=20");
+					if(occWindow.opener == null) occWindow.opener = self;
+				}
+				else{
+					alert("Select a locality in list to open that record set in the editor");
+				}
+			}
+							
 			function toggle(target){
 				var objDiv = document.getElementById(target);
 				if(objDiv){
@@ -284,14 +297,14 @@ header("Content-Type: text/html; charset=".$charset);
 								?>
 							</div>
 							<div style="">
-								<select name="locallist" size="10" multiple="multiple" style="width:95%">
+								<select name="locallist" size="10" multiple="multiple" style="width:100%">
 									<?php 
 									if(isset($localArr)){
 										if($localArr){
 											foreach($localArr as $k => $v){
 												$locStr = $v['locality'];
 												if($v['extra']) $locStr .= '; '.$v['extra'];
-												echo '<option value="'.$v['locality'].'">'.$locStr.'; '.$v['cnt'].'</option>'."\n";
+												echo '<option value="'.$v['occid'].'">'.$locStr.'; '.$v['cnt'].'</option>'."\n";
 											}
 										}
 										else{
@@ -304,7 +317,12 @@ header("Content-Type: text/html; charset=".$charset);
 									?>
 								</select>
 							</div>
-							<div style="clear:both;margin:15px;">
+							<div style="float:right;margin:10px;">
+								<a href="#" onclick="openFirstRecSet();">
+									<img src="../../images/edit.png" title="Edit first set of records" />
+								</a>
+							</div>
+							<div style="margin:15px;">
 								<table>
 									<tr>
 										<td></td>
@@ -316,7 +334,7 @@ header("Content-Type: text/html; charset=".$charset);
 										<td><b>Decimal</b></td>
 									</tr>
 									<tr>
-										<td><b>Latitude:</b> </td>
+										<td style="vertical-align:middle"><b>Latitude:</b> </td>
 										<td><input name="latdeg" type="text" value="<?php echo $latDeg; ?>" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
 										<td><input name="latmin" type="text" value="<?php echo $latMin; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
 										<td><input name="latsec" type="text" value="<?php echo $latSec; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
@@ -330,7 +348,7 @@ header("Content-Type: text/html; charset=".$charset);
 										<td><input name="latdec" type="text" value="<?php echo $latDec; ?>" style="width:80px;" /></td>
 									</tr>
 									<tr>
-										<td><b>Longitude:</b> </td>
+										<td style="vertical-align:middle"><b>Longitude:</b> </td>
 										<td><input name="lngdeg" type="text" value="<?php echo $lngDeg; ?>" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
 										<td><input name="lngmin" type="text" value="<?php echo $lngMin; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
 										<td><input name="lngsec" type="text" value="<?php echo $lngSec; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
@@ -344,26 +362,26 @@ header("Content-Type: text/html; charset=".$charset);
 										<td><input name="lngdec" type="text" value="<?php echo $latDec; ?>" style="width:80px;" /></td>
 									</tr>
 									<tr>
-										<td colspan="2"><b>Error (in meters):</b> </td>
-										<td colspan="5">
+										<td colspan="2" style="vertical-align:middle"><b>Error (in meters):</b> </td>
+										<td colspan="5" style="vertical-align:middle">
 											<input name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordUncertainty; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
 											meters
 										</td>
 									</tr>
 									<tr>
-										<td colspan="2"><b>Sources:</b> </td>
+										<td colspan="2" style="vertical-align:middle"><b>Sources:</b> </td>
 										<td colspan="5">
 											<input name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
 										</td>
 									</tr>
 									<tr>
-										<td colspan="2"><b>Remarks:</b> </td>
+										<td colspan="2" style="vertical-align:middle"><b>Remarks:</b> </td>
 										<td colspan="5">
 											<input name="georeferenceRemarks" type="text" value="<?php echo $georeferenceRemarks; ?>" style="width:500px;" />
 										</td>
 									</tr>
 									<tr>
-										<td colspan="2"><b>Verification Status:</b> </td>
+										<td colspan="2" style="vertical-align:middle"><b>Verification Status:</b> </td>
 										<td colspan="5">
 											<input name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
 										</td>
