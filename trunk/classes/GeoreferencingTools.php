@@ -18,7 +18,7 @@ class GeoreferencingTools {
 	
 	public function getLocalityArr(){
 		$retArr = array();
-		$sql = 'SELECT locality, CONCAT_WS("; ",county, verbatimcoordinates, CONCAT(minimumelevationinmeters,"m.")) AS extra, '. 
+		$sql = 'SELECT occid, locality, CONCAT_WS("; ",county, verbatimcoordinates) AS extra, '. 
 			'georeferencesources, verbatimcoordinates '. 
 			'FROM omoccurrences '. 
 			'WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) ';
@@ -43,28 +43,32 @@ class GeoreferencingTools {
 				}
 			}
 		}
-		$sql .= 'ORDER BY locality,county';
+		$sql .= 'ORDER BY locality,county,verbatimcoordinates';
 		//echo $sql;
 		$totalCnt = 0;
 		$locCnt = 1;
 		$locStr = '';$extraStr = '';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			if($locStr != $r->locality || $extraStr != $r->extra){
+			if($locStr != trim($r->locality) || $extraStr != trim($r->extra)){
 				$locStr = trim($r->locality);
 				$extraStr = trim($r->extra);
+				$totalCnt++;
+				$retArr[$totalCnt]['occid'] = $r->occid;
 				$retArr[$totalCnt]['locality'] = $locStr;
 				$retArr[$totalCnt]['extra'] = $extraStr;
 				$retArr[$totalCnt]['cnt'] = 1;
-				$totalCnt++;
 				$locCnt = 1;
 			}
 			else{
 				$locCnt++;
+				$newOccidStr = $retArr[$totalCnt]['occid'].','.$r->occid;
+				$retArr[$totalCnt]['occid'] = $newOccidStr;
 				$retArr[$totalCnt]['cnt'] = $locCnt;
 			}
 		}
 		$rs->close();
+		usort($retArr,array('GeoreferencingTools', '_cmpLocCnt'));
 		return $retArr;
 	}
 	
@@ -163,7 +167,7 @@ class GeoreferencingTools {
 		$rs->close();
 		return $retArr;
 	}
-	
+
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
@@ -171,5 +175,14 @@ class GeoreferencingTools {
  		$newStr = $this->clCon->real_escape_string($newStr);
  		return $newStr;
  	}
+
+ 	private static function _cmpLocCnt ($a, $b){
+		$aCnt = $a['cnt'];
+		$bCnt = $b['cnt'];
+		if($aCnt == $bCnt){
+			return 0;
+		}
+		return ($aCnt > $bCnt) ? -1 : 1;
+	}
 }
 ?> 

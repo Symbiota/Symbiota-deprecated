@@ -96,8 +96,26 @@ if($submitAction){
 				<?php 
 			}
 			if($occArr){
+				$collArr = array();
+				if(!$isAdmin){
+					if(array_key_exists('CollAdmin',$userRights)){
+						$collArr = $userRights['CollAdmin'];
+					}
+					if(array_key_exists('CollEditor',$userRights)){
+						$collArr = array_merge($collArr,$userRights['CollEditor']);
+					}
+				}
 				foreach($occArr as $occId => $occObj){
-					?>
+					if($isAdmin || in_array($occObj['colliddup'],$collArr)){
+						?>
+						<div style="float:right;margin:10px;">
+							<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
+								<img src="../../images/edit.png" />
+							</a>
+						</div>
+						<?php
+					}
+					?> 
 					<div style="font-weight:bold;font-size:120%;">
 						<?php echo $occObj['institutioncode'].($occObj['collectioncode']?':'.$occObj['collectioncode']:''); ?>
 					</div>

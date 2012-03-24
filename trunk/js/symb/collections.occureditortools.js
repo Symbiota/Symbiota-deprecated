@@ -258,7 +258,7 @@ function lookForDupes(f){
 	}
 
 	//dupWindow=open("dupesearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
-	dupWindow=open("dupesearch.php?cname="+collName+"&cnum="+collNum+"&cdate="+collDate+"&oid="+occId+"&collid="+collId,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
+	dupWindow=open("dupesearch.php?cname="+collName+"&cnum="+collNum+"&cdate="+collDate+"&oid="+occId+"&collid="+collId,"dupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
 	if(dupWindow.opener == null) dupWindow.opener = self;
 	if(window.focus) {dupWindow.focus()}
 
