@@ -172,13 +172,24 @@ class SpecProcessorOcr{
 	}
 
 	private function ocrImage(){
+		global $tesseractPath;
 		$retStr = '';
 		if($this->imgUrlLocal){
 			//OCR image, result text is output to $outputFile
 			$output = array();
-			//exec('/usr/local/bin/tesseract '.$this->imgUrlLocal.' '.$this->outputFile,$output);
-			//Full path to tesseract with quotes needed for Windows
-			exec('"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+			if(isset($tesseractPath) && $tesseractPath){
+				if(substr($tesseractPath,0,2) == 'C:'){
+					//Full path to tesseract with quotes needed for Windows
+					exec('"'.$tesseractPath.'" '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+				}
+				else{
+					exec($tesseractPath.' '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+				}
+			}
+			else{
+				exec('/usr/local/bin/tesseract '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+			}
+			
 			//Obtain text from tesseract output file
 			if(file_exists($this->outputFile.'.txt')){
 				if($fh = fopen($this->outputFile.'.txt', 'r')){

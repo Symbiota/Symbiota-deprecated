@@ -80,12 +80,12 @@ else{
 	
 	        function updateParentForm() {
 				try{
-		            opener.document.fullform.decimallatitude.value = document.getElementById("latbox").value;
-		            opener.document.fullform.decimallongitude.value = document.getElementById("lngbox").value;
-		            opener.document.fullform.geodeticdatum.value = "WGS84";
-		            opener.document.fullform.decimallatitude.onchange();
-		            opener.document.fullform.decimallongitude.onchange();
-		            opener.document.fullform.geodeticdatum.onchange();
+		            opener.document.getElementById("decimallatitude").value = document.getElementById("latbox").value;
+		            opener.document.getElementById("decimallongitude").value = document.getElementById("lngbox").value;
+		            opener.document.getElementById("geodeticdatum").value = "WGS84";
+		            opener.document.getElementById("decimallatitude").onchange();
+		            opener.document.getElementById("decimallongitude").onchange();
+		            opener.document.getElementById("geodeticdatum").onchange();
 				}
 				catch(myErr){
 				}

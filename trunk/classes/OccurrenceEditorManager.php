@@ -501,11 +501,34 @@ class OccurrenceEditorManager {
 	}
 
 	//Used in dupesearch.php
-	public function getDupOccurrences($collName, $collNum, $collDate, $oid, $runCnt = 0){
+	public function getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt = 0){
 		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
-		if($collName && ($collNum || $collDate)){
+		$sqlBase = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
+			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
+			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
+			'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid ';
+		if($occidQuery){
+			if(strpos($occidQuery,',')){
+				$sql = $sqlBase.'WHERE (o.occid = '.$occidQuery.') ';
+			}
+			else{
+				$sql = $sqlBase.'WHERE (o.occid IN('.$occidQuery.')) ';
+			}
+			$result = $this->conn->query($sql);
+			while ($row = $result->fetch_assoc()) {
+				$retArr[$row['occid']] = array_change_key_case($row);
+			}
+			$result->close();
+		}
+		elseif($collName && ($collNum || $collDate)){
 			//Parse last name from collector's name 
 			$lastName = "";
 			$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
@@ -523,17 +546,7 @@ class OccurrenceEditorManager {
 			}
 
 			if($lastName){
-				$sqlBase = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
-					'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-					'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-					'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-					'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-					'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
-					'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
-				$sql = $sqlBase;
+				$sql = $sqlBase.'WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
 				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
 				if($runCnt == 0){
 					//First run
@@ -622,22 +635,12 @@ class OccurrenceEditorManager {
 		return $retArr;
 	}
 	
-	public function mergeRecords($o1,$o2){
-		$status = '';
-		$targetOccid = '';
-		$sourceOccid = '';
-		if($o1 < $o2){
-			$targetOccid = $o1;
-			$sourceOccid = $o2;
-		}
-		else{
-			$targetOccid = $o2;
-			$sourceOccid = $o1;
-		}
+	public function mergeRecords($targetOccid,$sourceOccid){
+		$status = true;
 		
 		$oArr = array();
 		//Merge records
-		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$o1.' OR occid = '.$o2;
+		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_assoc()){
 			$tempArr = array();
@@ -684,6 +687,18 @@ class OccurrenceEditorManager {
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$this->conn->query($sql);
 
+		//Remap exsiccati
+		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap occurrence dataset links
+		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap loans
+		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
 		//Remap checklists voucher links
 		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$this->conn->query($sql);
@@ -695,7 +710,7 @@ class OccurrenceEditorManager {
 		//Delete source
 		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
-			$status .= 'ERROR: unable to delete source occurrence: '.$this->conn->error;
+			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$this->conn->error;
 		}
 		return $status;
 	}

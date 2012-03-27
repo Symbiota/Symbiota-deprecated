@@ -1,7 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
  
-class GeoreferencingTools {
+class OccurrenceGeorefTools {
 
 	private $conn;
 	private $collId;
@@ -15,30 +15,29 @@ class GeoreferencingTools {
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
 	public function getLocalityArr(){
 		$retArr = array();
-		$sql = 'SELECT occid, locality, CONCAT_WS("; ",county, verbatimcoordinates) AS extra, '. 
-			'georeferencesources, verbatimcoordinates '. 
+		$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates '. 
 			'FROM omoccurrences '. 
 			'WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) ';
 		if($this->qryVars){
-			if(array_key_exists('vstatus',$this->qryVars)){
-				$sql .= 'AND ((decimalLatitude IS NULL) OR (georeferenceVerificationStatus LIKE "'.$this->qryVars['vstatus'].'%")) ';
+			if(array_key_exists('qvstatus',$this->qryVars)){
+				$sql .= 'AND ((decimalLatitude IS NULL) OR (georeferenceVerificationStatus LIKE "'.$this->qryVars['qvstatus'].'%")) ';
 			}
 			else{
 				$sql .= 'AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
 			}
 			foreach($this->qryVars as $k => $v){
-				if($v && $k != 'vstatus'){
-					if($k == 'locality'){
+				if($v && $k != 'qvstatus'){
+					if($k == 'qlocality'){
 						$sql .= 'AND (locality LIKE "%'.$v.'%") ';
 					}
-					elseif($k == 'county'){
+					elseif($k == 'qcounty'){
 						$sql .= 'AND (county LIKE "'.$v.'%") ';
 					}
 					else{
-						$sql .= 'AND ('.$k.' = "'.$v.'") ';
+						$sql .= 'AND ('.substr($k,1).' = "'.$v.'") ';
 					}
 				}
 			}
@@ -56,7 +55,10 @@ class GeoreferencingTools {
 				$totalCnt++;
 				$retArr[$totalCnt]['occid'] = $r->occid;
 				$retArr[$totalCnt]['locality'] = $locStr;
-				$retArr[$totalCnt]['extra'] = $extraStr;
+				$retArr[$totalCnt]['country'] = $country;
+				$retArr[$totalCnt]['stateprovince'] = $stateprovince;
+				$retArr[$totalCnt]['county'] = $county;
+				$retArr[$totalCnt]['verbatimcoordinates'] = $verbatimcoordinates;
 				$retArr[$totalCnt]['cnt'] = 1;
 				$locCnt = 1;
 			}
@@ -68,34 +70,92 @@ class GeoreferencingTools {
 			}
 		}
 		$rs->close();
-		usort($retArr,array('GeoreferencingTools', '_cmpLocCnt'));
+		usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));
 		return $retArr;
 	}
-	
+
+	public function updateCoordinates($geoRefArr){
+		if($geoRefArr['decimallatitude'] && $geoRefArr['decimallongitude']){
+			$sql = 'UPDATE omoccurrences '.
+				'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
+				',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"'.
+				',georeferencesources = "'.$geoRefArr['georeferencesources'].'"'.
+				',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'"'.
+				',georeferencedBy = "'.$geoRefArr['georefby'].'"';
+			if($geoRefArr['coordinateuncertaintyinmeters']){
+				$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
+			}
+			if($geoRefArr['geodeticdatum']){
+				$sql .= ', geodeticdatum = '.$geoRefArr['geodeticdatum'];
+			}
+			if($geoRefArr['minimumelevationinmeters']){
+				$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
+			}
+			if($geoRefArr['maximumelevationinmeters']){
+				$sql .= ',maximumelevationinmeters = IF(maximumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
+			}
+			
+			$localList = $geoRefArr['locallist'];
+			if(is_array($localList)){
+				$sql .= ' WHERE occid IN('.implode(','.$localList).')';
+			}
+			else{
+				$sql .= ' WHERE occid = '.$localList;
+				
+			}
+			echo $sql;
+			//$this->conn->query($sql);
+		}
+	}
+
 	public function getCoordStatistics(){
 		$retArr = array();
-		$sql = 'SELECT COUNT(occid) AS cnt '. 
-			'FROM omoccurrences '. 
-			'WHERE (collid = '.$this->collId.') AND (decimalLatitude IS NULL) AND georeferenceSources IS NULL ';
-		if($this->qryVars){
-			foreach($this->qryVars as $k => $v){
-				$sql .= 'AND '.$k.' = "'.$v.'" ';
-			}
-		}
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$this->retArr['limitedcnt'] = $r->cnt;
-		}
-		$rs->close();
-		
+		$totalCnt = 0;
 		$sql = 'SELECT COUNT(occid) AS cnt '. 
 			'FROM omoccurrences '. 
 			'WHERE (collid = '.$this->collId.')'; 
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$this->retArr['totalcnt'] = $r->cnt;
+			$totalCnt = $r->cnt;
 		}
 		$rs->close();
+		
+		$sql = 'SELECT COUNT(occid) AS cnt '. 
+			'FROM omoccurrences '. 
+			'WHERE (collid = '.$this->collId.') AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
+		$k = '';
+		$limitedSql = '';
+		if($this->qryVars){
+			if(array_key_exists('qcounty',$this->qryVars)){
+				$limitedSql = 'AND county = "'.$this->qryVars['qcounty'].'" ';
+				$k = $this->qryVars['qcounty'];
+			}
+			elseif(array_key_exists('qstate',$this->qryVars)){
+				$limitedSql = 'AND stateprovince = "'.$this->qryVars['qstate'].'" ';
+				$k = $this->qryVars['qstate'];
+			}
+			elseif(array_key_exists('qcountry',$this->qryVars)){
+				$limitedSql = 'AND country = "'.$this->qryVars['qcountry'].'" ';
+				$k = $this->qryVars['qcountry'];
+			}
+		}
+		//Count limited to country, state, or county
+		if($k){
+			if($rs = $this->conn->query($sql.$limitedSql)){
+				if($r = $rs->fetch_object()){
+					$retArr[$k] = $r->cnt;
+				}
+				$rs->close();
+			}
+		}
+		//Full count
+		if($rs = $this->conn->query($sql)){
+			if($r = $rs->fetch_object()){
+				$retArr['Total Number'] = $r->cnt;
+				$retArr['Total Percentage'] = round($r->cnt*100/$totalCnt,1);
+			}
+			$rs->close();
+		}
 		
 		return $retArr;
 	} 

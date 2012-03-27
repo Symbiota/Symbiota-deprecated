@@ -64,16 +64,16 @@ $(document).ready(function() {
 
 window.onbeforeunload = verifyClose;
 
-function verifyClose() { 
+function verifyClose(){
 	if(pendingDataEdits && document.fullform.editedfields.value != ""){
 		return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
 	}
 }
 
 function initDetAddAutocomplete(){
-	$("#dafsciname").autocomplete({ 
+	$("#dafsciname").autocomplete({
 		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) { 
+		change: function(event, ui) {
 			pauseSubmit = true;
 			verifyDetSciName(document.detaddform);
 		}
@@ -82,9 +82,9 @@ function initDetAddAutocomplete(){
 }
 
 function initDetEditAutocomplete(inputName){
-	$("#"+inputName).autocomplete({ 
+	$("#"+inputName).autocomplete({
 		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) { 
+		change: function(event, ui) {
 			pauseSubmit = true;
 			verifyDetSciName(document.deteditform);
 		}
@@ -101,9 +101,10 @@ function fieldChanged(fieldName){
 	pendingDataEdits = true;
 }
 
-function catalogNumberChanged(cnValue){
+function catalogNumberChanged(f){
 	fieldChanged('catalognumber');
 
+	var cnValue = f.catalognumber.value;
 	if(cnValue){
 		cnXmlHttp = GetXmlHttpObject();
 		if(cnXmlHttp==null){
@@ -116,7 +117,8 @@ function catalogNumberChanged(cnValue){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-						occWindow=open("occurrenceeditor.php?occid="+resObj+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						var oid = f.occid.value;
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
 				}
@@ -127,9 +129,10 @@ function catalogNumberChanged(cnValue){
 	}
 }
 
-function occurrenceIdChanged(oiValue){
+function occurrenceIdChanged(f){
 	fieldChanged('occurrenceid');
 
+	var oiValue = f.occurrenceid.value;
 	if(oiValue){
 		oiXmlHttp = GetXmlHttpObject();
 		if(oiXmlHttp==null){
@@ -141,12 +144,44 @@ function occurrenceIdChanged(oiValue){
 			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
 				var resObj = eval('(' + oiXmlHttp.responseText + ')')
 				if(resObj.length > 0){
-					alert("Record(s) of same catalog number already exists: " + resObj);
+					if(confirm("Record(s) using the same occurrence ID already exists. Do you want to view this record?")){
+						var oid = f.occid.value;
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
 				}
 			}
 		};
 		oiXmlHttp.open("POST",url,true);
 		oiXmlHttp.send(null);
+	}
+}
+
+function otherCatalogNumbersChanged(f){
+	fieldChanged('othercatalognumbers');
+
+	var inValue = f.othercatalognumbers.value; 
+	if(inValue){
+		xmlHttp = GetXmlHttpObject();
+		if(xmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId;
+		xmlHttp.onreadystatechange=function(){
+			if(xmlHttp.readyState==4 && xmlHttp.status==200){
+				var resObj = eval('(' + xmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
+						var oid = f.occid.value;
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
+				}
+			}
+		};
+		xmlHttp.open("POST",url,true);
+		xmlHttp.send(null);
 	}
 }
 
