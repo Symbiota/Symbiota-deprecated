@@ -18,6 +18,8 @@ $imageRootPath = '';			//Writable path to images, especially needed for download
 //Specimen Label and Batch Image Processor variables
 //$useImageMagick = 0;			//Set to 1 to have ImageMagick resize images, given that it's installed (faster, less memory intensive)
 
+$tesseractPath = ''; //Needed for OCR function in the occurrence editor page
+
 //Module activations
 $occurrenceModIsActive = 1;
 $floraModIsActive = 1;

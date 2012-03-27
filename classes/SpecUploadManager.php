@@ -545,8 +545,8 @@ class SpecUploadManager{
 			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp %"';
 		$this->conn->query($sql);
 		
-		$sql = 'UPDATE uploadspectemp SET sciname = CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet) '.
-			'WHERE sciname IS NULL';
+		$sql = 'UPDATE uploadspectemp SET sciname = trim(CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet)) '.
+			'WHERE sciname IS NULL AND Genus IS NOT NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
@@ -881,7 +881,47 @@ class SpecUploadManager{
 					}
 				}
 			}
-			
+			//Clean and parse verbatimElevation string
+			if(array_key_exists('verbatimelevation',$recMap) && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
+				$eArr = $this->parseVerbatimElevation($recMap['verbatimelevation']);
+				if(array_key_exists('minelev',$eArr)) $recMap['minimumelevationinmeters'] = $eArr['minelev'];
+				if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
+			}
+			//Clean and parse scientific name
+			if(array_key_exists('scientificname',$recMap) && (!array_key_exists('sciname',$recMap) || !$recMap['sciname'])){
+				$parsedArr = $this->parseScientificName($recMap['scientificname']);
+				$scinameStr = '';
+				if(array_key_exists('unitname1',$parsedArr)){
+					$scinameStr = $parsedArr['unitname1'];
+					if(!array_key_exists('genus',$recMap) || $recMap['genus']){
+						$recMap['genus'] = $parsedArr['unitname1'];
+					}
+				} 
+				if(array_key_exists('unitname2',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitname2'];
+					if(!array_key_exists('specificepithet',$recMap) || !$recMap['specificepithet']){
+						$recMap['specificepithet'] = $parsedArr['unitname2'];
+					}
+				} 
+				if(array_key_exists('unitind3',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitind3'];
+					if((!array_key_exists('taxonrank',$recMap) || !$recMap['taxonrank'])){
+						$recMap['taxonrank'] = $parsedArr['unitind3'];
+					}
+				}
+				if(array_key_exists('unitname3',$parsedArr)){
+					$scinameStr .= ' '.$parsedArr['unitname3'];
+					if(!array_key_exists('infraspecificepithet',$recMap) || !$recMap['infraspecificepithet']){
+						$recMap['infraspecificepithet'] = $parsedArr['unitname3'];
+					}
+				}
+				if(array_key_exists('author',$parsedArr)){
+					if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
+						$recMap['scientificnameauthorship'] = $parsedArr['author'];
+					}
+				}
+				$recMap['sciname'] = $scinameStr;
+			}
 			//Create update str 
 			$sqlFields = '';
 			$sqlValues = '';
@@ -1094,9 +1134,120 @@ class SpecUploadManager{
 		return $dateStr;
 	}
 
+	private function parseScientificName($inStr){
+		//Converts scinetific name with author embedded into separate fields
+		$retArr = array();
+		$sciNameArr = explode(' ',$inStr);
+		if(count($sciNameArr)){
+			if(strtolower($sciNameArr[0]) == 'x'){
+				//Genus level hybrid
+				$retArr['unitind1'] = array_shift($sciNameArr);
+			}
+			//Genus
+			$retArr['unitname1'] = array_shift($sciNameArr);
+			if(count($sciNameArr)){
+				if(strtolower($sciNameArr[0]) == 'x'){
+					//Species level hybrid
+					$retArr['unitind2'] = array_shift($sciNameArr);
+				}
+				elseif((strpos($sciNameArr[0],'.') !== false) || ord($sciNameArr[0]) < 97 || ord($sciNameArr[0]) > 122){
+					//It is assumed that Author has been reached, thus stop process 
+					unset($sciNameArr);
+				}
+				else{
+					//Specific Epithet
+					$retArr['unitname2'] = array_shift($sciNameArr);
+				}
+			}
+		}
+		if(isset($sciNameArr) && $sciNameArr){
+			//Assume rest is author; if that is not true, author value will be replace in following loop
+			$retArr['author'] = implode(' ',$sciNameArr);
+			//cycles through the final terms to extract the last infraspecific data
+			while($sciStr = array_shift($sciNameArr)){
+				if($sciStr == 'f.' || $sciStr == 'fo.' || $sciStr == 'fo' || $sciStr == 'forma'){
+					if($sciNameArr){
+						$retArr['unitind3'] = 'f.';
+						$retArr['unitname3'] = array_shift($sciNameArr);
+						$retArr['author'] = implode(' ',$sciNameArr);
+					}
+				}
+				elseif($sciStr == 'var.' || $sciStr == 'var'){
+					if($sciNameArr){
+						$retArr['unitind3'] = 'var.';
+						$retArr['unitname3'] = array_shift($sciNameArr);
+						$retArr['author'] = implode(' ',$sciNameArr);
+					}
+				}
+				elseif($sciStr == 'ssp.' || $sciStr == 'ssp' || $sciStr == 'subsp.' || $sciStr == 'subsp'){
+					if($sciNameArr){
+						$retArr['unitind3'] = 'ssp.';
+						$retArr['unitname3'] = array_shift($sciNameArr);
+						$retArr['author'] = implode(' ',$sciNameArr);
+					}
+				}
+			}
+		}
+		if(array_key_exists('unitind1',$retArr)){
+			$retArr['unitname1'] = $retArr['unitind1'].' '.$retArr['unitname1'];
+			unset($retArr['unitind1']); 
+		}
+		if(array_key_exists('unitind2',$retArr)){
+			$retArr['unitname2'] = $retArr['unitind2'].' '.$retArr['unitname2'];
+			unset($retArr['unitind2']); 
+		}
+		return $retArr;
+	}
+	
+	private function parseVerbatimElevation($inStr){
+		$retArr = array();
+		if(preg_match('/(\d+)\s*-\s*(\d+)\s*meter/i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+			$retArr['maxelev'] = $m[2];
+		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*m./i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+			$retArr['maxelev'] = $m[2];
+		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*m$/i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+			$retArr['maxelev'] = $m[2];
+		}
+		elseif(preg_match('/(\d+)\s*meter/i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+		}
+		elseif(preg_match('/(\d+)\s*m./i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+		}
+		elseif(preg_match('/(\d+)\s*m$/i',$inStr,$m)){
+			$retArr['minelev'] = $m[1];
+		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*feet/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+			$retArr['maxelev'] = (round($m[2]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*ft./i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+			$retArr['maxelev'] = (round($m[2]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*ft$/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+			$retArr['maxelev'] = (round($m[2]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*feet/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*ft./i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*ft$/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		return $retArr;
+	}
+
 	protected function cleanString($inStr){
 		$retStr = trim($inStr);
-		$retStr = str_replace('"',"'",$retStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
 		$retStr = str_replace(chr(11),' ',$retStr);
 		$retStr = str_replace(chr(13),' ',$retStr);

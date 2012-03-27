@@ -120,7 +120,7 @@ $taxaMap = $mapManager->getTaxaMap();
 			if(puWin != null) puWin.close();
 			puWin = window.open('../collections/individual/index.php?occid='+occId+'&clid='+clid,'indspec','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if(puWin.opener == null) puWin.opener = self;
-			puWin.focus();
+			if(window.focus) {puWin.focus()}
 		}
 
 		function closeAllInfoWins(){

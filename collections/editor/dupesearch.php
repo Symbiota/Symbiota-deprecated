@@ -4,13 +4,14 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$collName = $_REQUEST['cname'];
+$collName = array_key_exists('cname',$_REQUEST)?$_REQUEST['cname']:'';
 $collNum = array_key_exists('cnum',$_REQUEST)?$_REQUEST['cnum']:'';
 $collDate = array_key_exists('cdate',$_REQUEST)?$_REQUEST['cdate']:'';
+$occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
 $oid = (array_key_exists('oid',$_GET)?$_REQUEST["oid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
 
-$occId = (array_key_exists('occid',$_GET)?$_GET['occid']:'');
+$occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
 $runCnt = (array_key_exists('runcnt',$_GET)?$_GET['runcnt']:0);
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
@@ -18,7 +19,7 @@ $dupeManager = new OccurrenceEditorManager();
 
 $occArr = array();
 if(!$submitAction){
-	$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $oid, $runCnt);
+	$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt);
 }
 
 $onLoadStr = '';
@@ -35,10 +36,8 @@ if($submitAction){
 	}
 	if($isEditor){
 		if($submitAction == 'mergerecs'){
-			$onLoadStr = 'window.close()';
-			if($dupeManager->mergeRecords($oid,$occId)){
-				$onLoadStr = '';
-			}
+			$statusStr = $dupeManager->mergeRecords($oid,$occIdMerge);
+			$onLoadStr = 'reloadParent()';
 		}
 	}
 }
@@ -78,6 +77,18 @@ if($submitAction){
 					}
 				}
 				window.close();
+			}
+
+			function reloadParent(){
+				opener.pendingDataEdits = false;
+				opener.location.reload();
+				<?php
+				if($statusStr === true){ 
+					?>
+					window.close();
+					<?php 
+				}
+				?>
 			}
 
 		</script>
@@ -217,7 +228,7 @@ if($submitAction){
 							</a>
 						</span>
 					<?php 
-					if($collId == $occObj['colliddup'] && $occObj['recordnumber'] == $collNum){ 
+					if($collId == $occObj['colliddup']){ 
 						?>
 						<span style="margin-left:30px;">
 							<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
@@ -228,7 +239,7 @@ if($submitAction){
 						if($oid){ 
 							?>
 							<span style="margin-left:30px;">
-								<a href="dupesearch.php?submitaction=mergerecs&oid=<?php echo $oid.'&occid='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
+								<a href="dupesearch.php?submitaction=mergerecs&oid=<?php echo $oid.'&occidmerge='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 									Merge Records
 								</a>
 							</span>
