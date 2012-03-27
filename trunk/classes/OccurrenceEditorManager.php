@@ -505,22 +505,22 @@ class OccurrenceEditorManager {
 		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
-		$sqlBase = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
-			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
-			'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid ';
 		if($occidQuery){
+			$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
+				'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+				'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+				'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
+				'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+				'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+				'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
+				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
 			if(strpos($occidQuery,',')){
-				$sql = $sqlBase.'WHERE (o.occid = '.$occidQuery.') ';
+				$sql .= 'WHERE (o.occid IN('.$occidQuery.')) ';
 			}
 			else{
-				$sql = $sqlBase.'WHERE (o.occid IN('.$occidQuery.')) ';
+				$sql .= 'WHERE (o.occid = '.$occidQuery.') ';
 			}
 			$result = $this->conn->query($sql);
 			while ($row = $result->fetch_assoc()) {
@@ -546,7 +546,17 @@ class OccurrenceEditorManager {
 			}
 
 			if($lastName){
-				$sql = $sqlBase.'WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
+				$sq = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
+					'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+					'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
+					'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+					'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+					'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
+					'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid '.
+					'WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
 				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
 				if($runCnt == 0){
 					//First run
@@ -636,6 +646,8 @@ class OccurrenceEditorManager {
 	}
 	
 	public function mergeRecords($targetOccid,$sourceOccid){
+		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
+		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
 		$status = true;
 		
 		$oArr = array();

@@ -111,13 +111,13 @@ function catalogNumberChanged(f){
 			alert ("Your browser does not support AJAX!");
 			return;
 		}
-		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId;
+		var oid = f.occid.value;
+		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "$occid=" + oid;
 		cnXmlHttp.onreadystatechange=function(){
 			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-						var oid = f.occid.value;
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
@@ -139,13 +139,13 @@ function occurrenceIdChanged(f){
 	  		alert ("Your browser does not support AJAX!");
 	  		return;
 	  	}
-		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue;
+		var oid = f.occid.value;
+		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue + "&collid=" + collId + "&occid=" + oid;
 		oiXmlHttp.onreadystatechange=function(){
 			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
 				var resObj = eval('(' + oiXmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) using the same occurrence ID already exists. Do you want to view this record?")){
-						var oid = f.occid.value;
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
@@ -167,13 +167,13 @@ function otherCatalogNumbersChanged(f){
 	  		alert ("Your browser does not support AJAX!");
 	  		return;
 	  	}
-		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId;
+		var oid = f.occid.value;
+		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + oid;
 		xmlHttp.onreadystatechange=function(){
 			if(xmlHttp.readyState==4 && xmlHttp.status==200){
 				var resObj = eval('(' + xmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
-						var oid = f.occid.value;
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
