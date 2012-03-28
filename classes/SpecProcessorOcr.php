@@ -9,11 +9,17 @@ class SpecProcessorOcr{
 	private $conn;
 	private $tempPath;
 	private $imgUrlLocal;
-	private $outputFile;
 
+	private $cropX = 0;
+	private $cropY = 0;
+	private $cropW = 1;
+	private $cropH = 1;
+	
 	private $grayscale = 0;
 	private $brightness = 0;
 	private $contrast = 0;
+	private $sharpen = 0;
+	private $gammaCorrect = 0;
 
 	private $logPath;
 	//If silent is set, script will produce no non-fatal output.
@@ -25,7 +31,6 @@ class SpecProcessorOcr{
 
 	function __destruct(){
 		//unlink($this->imgUrlLocal);
-		//unlink($this->outputFile.'.txt');
 	}
 
 	public function batchOcrUnprocessed($collArr = 0){
@@ -52,7 +57,7 @@ class SpecProcessorOcr{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function ocrImageByImgId($imgId,$grayscale = 0,$brightness = 0,$contrast = 0, $x=0, $y=0, $w=1, $h=1){
+	public function ocrImageByImgId($imgId){
 		$rawStr = '';
 		if(is_numeric($imgId)){
 			$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -66,7 +71,7 @@ class SpecProcessorOcr{
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
 			}
 			$rs->close();
-			$rawStr = $this->ocrImageByUrl($imgUrl, $grayscale, $brightness, $contrast,0,0, $x, $y, $w, $h);
+			$rawStr = $this->ocrImageByUrl($imgUrl);
 
 	 		if(!($this->conn === false)) $this->conn->close();
 		}
@@ -74,19 +79,15 @@ class SpecProcessorOcr{
  		return $rawStr;
 	}
 
-	public function ocrImageByUrl($imgUrl, $grayscale=0, $brightness=0, $contrast=0, $sharpen=0, $gammacorrect=0, $x=0, $y=0, $w=1, $h=1){
+	public function ocrImageByUrl($imgUrl){
 		$rawStr = '';
 		if($imgUrl){
 			if($this->loadImage($imgUrl)){
-				if($grayscale || $brightness || $contrast){
-					if(!$this->filterImage($grayscale,$brightness,$contrast,$sharpen,$gammacorrect)){
-						//Unable to filter image
-						$this->logError('Unable to filter, URL: '.$imgUrl);
-					}
+				if($this->grayscale || $this->brightness || $this->contrast || $this->sharpen || $this->gammaCorrect){
+					$this->filterImage($this->grayscale,$this->brightness,$this->contrast,$this->sharpen,$this->gammaCorrect);
 				}
-				if($x || $y || $w < 1 || $h < 1){
-					$this->cropImage($x, $y, $w, $h);
-				}
+				$this->cropImage();
+				//$rawStr = $this->getBestOCR();
 				$rawStr = $this->ocrImage();
 			}
 			else{
@@ -101,15 +102,33 @@ class SpecProcessorOcr{
 		return $rawStr;
 	}
 
-	private function getBestOCR($url){
-		$rawStr = $this->ocrImageByUrl($url);
+	private function getBestOCR($url = ''){
+		if($url) $this->loadImage($url);
+		//Base run
+		$rawStr = $this->ocrImage();
 		$unprocessedCount = $this->scoreOCR($rawStr);
-		$firstProcessedRawStr = $this->ocrImageByUrl($url,1,10,1,1,6);
+		//First run
+		$urlF1 = str_replace('.jpg','_f1.jpg',$this->imgUrlLocal);
+		copy($this->imgUrlLocal,$urlF1);
+		$this->filterImage(1,10,1,1,6,$urlF1);
+		$firstProcessedRawStr = $this->ocrImage($urlF1);
 		$firstProcessedCount = $this->scoreOCR($firstProcessedRawStr);
-		$secondProcessedRawStr = $this->ocrImageByUrl($url,1,5,-3,2,1.537);
+		//unlink($urlF1);
+		//Second run
+		$urlF2 = str_replace('.jpg','_f2.jpg',$this->imgUrlLocal);
+		copy($this->imgUrlLocal,$urlF2);
+		$this->filterImage(1,5,-3,2,1.537,$urlF2);
+		$secondProcessedRawStr = $this->ocrImage($urlF2);
 		$secondProcessedCount = $this->scoreOCR($secondProcessedRawStr);
-		$thirdProcessedRawStr = $this->ocrImageByUrl($url,1,0,0,0,1.537);
+		//unlink($urlF2);
+		//Third run
+		$urlF3 = str_replace('.jpg','_f3.jpg',$this->imgUrlLocal);
+		copy($this->imgUrlLocal,$urlF3);
+		$this->filterImage(1,0,0,0,1.537,$urlF3);
+		$thirdProcessedRawStr = $this->ocrImage($urlF3);
 		$thirdProcessedCount = $this->scoreOCR($thirdProcessedRawStr);
+		//unlink($urlF3);
+		//Return best results
 		$tempmax = max(array($unprocessedCount, $firstProcessedCount, $secondProcessedCount, $thirdProcessedCount));
 		if($tempmax == $unprocessedCount) return $rawStr;
 		else if($tempmax == $firstProcessedCount) return $firstProcessedRawStr;
@@ -118,9 +137,10 @@ class SpecProcessorOcr{
 		else return "";
 	}
 
-	private function filterImage($grayscale,$brightness,$contrast,$sharpen=0,$gammacorrect=0){
+	private function filterImage($grayscale,$brightness,$contrast,$sharpen=0,$gammacorrect=0,$url=''){
 		$status = false;
-		if($img = imagecreatefromjpeg($this->imgUrlLocal)){
+		if($url) $url = $this->imgUrlLocal;
+		if($img = imagecreatefromjpeg($url)){
    			if($grayscale) imagefilter($img,IMG_FILTER_GRAYSCALE);
    			if($brightness) imagefilter($img,IMG_FILTER_BRIGHTNESS,$brightness);
    			if($contrast) imagefilter($img,IMG_FILTER_CONTRAST,$contrast);
@@ -143,61 +163,70 @@ class SpecProcessorOcr{
 			}
 			if($gammacorrect) imagegammacorrect($img, $gammacorrect, 1.0);
 
-			$status = imagejpeg($img,$this->imgUrlLocal);
+			$status = imagejpeg($img,$url);
 			imagedestroy($img);
 		}
 		return $status;
 	}
 
-	private function cropImage($x, $y, $w, $h){
+	private function cropImage(){
 		$status = false;
-		// Create image instances
-		if($src = imagecreatefromjpeg($this->imgUrlLocal)){
-			$imgW = imagesx($src);
-			$imgH = imagesy($src);
-			if(($x + $w) > 1) $w = 1 - $x;
-			if(($y + $h) > 1) $h = 1 - $y;
-			$pWidth = $imgW*$w;
-			$pHeight = $imgH*$h;
-			$dest = imagecreatetruecolor($pWidth,$pHeight);
-
-			// Copy
-			if(imagecopy($dest,$src,0,0,$imgW*$x,$imgH*$y,$pWidth,$pHeight)){
-				$status = imagejpeg($dest,$this->imgUrlLocal);
+		if($this->cropX || $this->cropY || $this->cropW < 1 || $this->cropH < 1){
+			// Create image instances
+			if($src = imagecreatefromjpeg($this->imgUrlLocal)){
+				$imgW = imagesx($src);
+				$imgH = imagesy($src);
+				if(($this->cropX + $this->cropW) > 1) $this->cropW = 1 - $this->cropX;
+				if(($this->cropY + $this->cropH) > 1) $this->cropH = 1 - $this->cropY;
+				$pX = $imgW*$this->cropX;
+				$pY = $imgH*$this->cropY;
+				$pW = $imgW*$this->cropW;
+				$pH = $imgH*$this->cropH;
+				$dest = imagecreatetruecolor($pW,$pH);
+	
+				// Copy
+				if(imagecopy($dest,$src,0,0,$pX,$pY,$pW,$pH)){
+					//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
+					$status = imagejpeg($dest,$this->imgUrlLocal);
+				}
+				imagedestroy($src);
+				imagedestroy($dest);
 			}
-			imagedestroy($src);
-			imagedestroy($dest);
 		}
 		return $status;
 	}
 
-	private function ocrImage(){
+	private function ocrImage($url = ""){
 		global $tesseractPath;
 		$retStr = '';
-		if($this->imgUrlLocal){
+		if(!$url) $url = $this->imgUrlLocal;
+		if($url){
 			//OCR image, result text is output to $outputFile
 			$output = array();
+			$outputFile = substr($url,0,strlen($url)-4);
 			if(isset($tesseractPath) && $tesseractPath){
 				if(substr($tesseractPath,0,2) == 'C:'){
 					//Full path to tesseract with quotes needed for Windows
-					exec('"'.$tesseractPath.'" '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+					exec('"'.$tesseractPath.'" '.$url.' '.$outputFile,$output);
 				}
 				else{
-					exec($tesseractPath.' '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+					exec($tesseractPath.' '.$url.' '.$outputFile,$output);
 				}
 			}
 			else{
-				exec('/usr/local/bin/tesseract '.$this->imgUrlLocal.' '.$this->outputFile,$output);
+				exec('/usr/local/bin/tesseract '.$url.' '.$outputFile,$output);
 			}
 			
 			//Obtain text from tesseract output file
-			if(file_exists($this->outputFile.'.txt')){
-				if($fh = fopen($this->outputFile.'.txt', 'r')){
+			if(file_exists($outputFile.'.txt')){
+				if($fh = fopen($outputFile.'.txt', 'r')){
 					while (!feof($fh)) {
-					  $retStr .= fread($fh, 8192);
+						$retStr .= $this->encodeString(fread($fh, 8192));
+						//$retStr .= fread($fh, 8192);
 					}
 					fclose($fh);
 				}
+				//unlink($outputFile.'.txt');
 			}
 			else{
 				$this->logError("\tUnable to locate output file");
@@ -228,7 +257,6 @@ class SpecProcessorOcr{
 			$this->setTempPath();
 			$ts = time();
 			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
-			$this->outputFile = $this->tempPath.$ts.'_output';
 
 			//Copy image to temp folder
 			return copy($imgUrl,$this->imgUrlLocal);
@@ -387,5 +415,55 @@ class SpecProcessorOcr{
 		$outStr = preg_replace_callback($preg_replace_callback_pattern, create_function('$matches','return str_replace(array("l","|","!","I","O"), array("1","1","1","1","0"), $matches[0]);'), $outStr);
 		return $outStr;
 	}
+
+	private function encodeString($inStr){
+ 		global $charset;
+ 		$retStr = $inStr;
+		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(mb_detect_encoding($inStr) == "ISO-8859-1"){
+				//$retStr = utf8_encode($inStr);
+				//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				$retStr = mb_convert_encoding($inStr,"UTF-8");
+			}
+		}
+		elseif(strtolower($charset) == "iso-8859-1"){
+			if(mb_detect_encoding($inStr) == "UTF-8"){
+				//$retStr = utf8_decode($inStr);
+				//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				$retStr = mb_convert_encoding($inStr,"ISO-8859-1");
+			}
+		}
+		return $retStr;
+	}
+
+	public function setCropX($x){
+		$this->cropX = $x;
+	}
+	public function setCropY($y){
+		$this->cropY = $y;
+	}
+	public function setCropW($w){
+		$this->cropW = $w;
+	}
+	public function setCropH($h){
+		$this->cropH = $h;
+	}
+	
+	public function setGrayscale($v){
+		$this->grayscale = $v;
+	}
+	public function setBrightness($v){
+		$this->brightness = $v;
+	}
+	public function setContrast($v){
+		$this->contrast = $v;
+	}
+	public function setSharpen($v){
+		$this->sharpen = $v;
+	}
+	public function setGammaCorrect($v){
+		$this->gammaCorrect = $v;
+	}
+	
 }
 ?>

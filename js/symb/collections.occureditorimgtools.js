@@ -32,7 +32,7 @@ function initImageTool(imgId){
 			$(img).imagetool({
 				maxWidth: 6000
 				,viewportWidth: portWidth
-		        ,viewportHeight: portWidth
+		        ,viewportHeight: portHeight
 		        ,imageWidth: 3500
 		        ,imageHeight: 5200
 		        ,change: function(event, dim) {}
