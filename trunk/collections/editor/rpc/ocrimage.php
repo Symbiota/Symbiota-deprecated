@@ -10,12 +10,11 @@
 	
 	$rawStr = '';
 	$ocrManager = new SpecProcessorOcr();
-	if($x || $y || $w < 1 || $h < 1){
-		$rawStr = $ocrManager->ocrImageByUrl($imgUrl,0,0,0,$x,$y,$w,$h);
-	}
-	else{
-		$rawStr = $ocrManager->ocrImageByUrl($imgUrl);
-	}
+	$ocrManager->setCropX($x);
+	$ocrManager->setCropY($y);
+	$ocrManager->setCropW($w);
+	$ocrManager->setCropH($h);
+	$rawStr = $ocrManager->ocrImageByUrl($imgUrl);
 
 	echo $rawStr;
 ?>
