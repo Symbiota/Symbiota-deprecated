@@ -81,7 +81,11 @@ if($submitAction){
 
 			function reloadParent(){
 				opener.pendingDataEdits = false;
-				opener.location.reload();
+				var qForm = opener.document.queryform;
+				qForm.occid.value = <?php echo $oid; ?>;
+				qForm.occindex.value = opener.document.fullform.occindex.value;
+				opener.document.queryform.submit();
+				//opener.location.reload();
 				<?php
 				if($statusStr === true){ 
 					?>

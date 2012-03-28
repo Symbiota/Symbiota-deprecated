@@ -397,6 +397,7 @@ if($symbUid){
 							?>
 							<div style="margin:5px;">
 								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+								<input type="hidden" name="occid" value="" />
 								<input type="hidden" name="occindex" value="0" />
 								<input type="submit" name="submitaction" value="Query Records" />
 								<input type="hidden" name="autoprocessingstatus" value="<?php echo $autoPStatus; ?>" />
