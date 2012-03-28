@@ -112,7 +112,7 @@ function catalogNumberChanged(f){
 			return;
 		}
 		var oid = f.occid.value;
-		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "$occid=" + oid;
+		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + oid;
 		cnXmlHttp.onreadystatechange=function(){
 			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
@@ -406,7 +406,7 @@ function verifyFullformSciName(){
 
 function submitQueryForm(qryLimit){
 	var f = document.queryform;
-	f.occindex.value = qryLimit;
+	if(qryLimit) f.occindex.value = qryLimit;
 	f.submit();
 	return false;
 }
