@@ -6,7 +6,7 @@
 	$collId = $con->real_escape_string($_REQUEST['collid']);
 	$occid = $con->real_escape_string($_REQUEST['occid']);
 	
-	if($inValue && $collId && $occid){
+	if($inValue && $collId){
 		$sql = 'SELECT occid FROM omoccurrences '.
 			'WHERE othercatalognumbers = "'.$inValue.'" AND collid = '.$collId.' AND occid <> '.$occid;
 		//echo $sql;
