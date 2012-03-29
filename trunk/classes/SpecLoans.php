@@ -96,7 +96,24 @@ class SpecLoans{
 		}
 		return $retArr;
 	}
+
+	//General look up functions
+	public function getInstitutionArr(){
+		$retArr = array();
+		$sql = 'SELECT i.iid, IFNULL(c.institutioncode,i.institutioncode) as institutioncode, '. 
+			'i.institutionname '. 
+			'FROM institutions i LEFT JOIN (SELECT iid, institutioncode, collectioncode, collectionname '. 
+			'FROM omcollections WHERE colltype = "Preserved Specimens") c ON i.iid = c.iid '. 
+			'ORDER BY i.institutioncode,c.institutioncode,c.collectionname,i.institutionname';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->iid] = $r->institutioncode.' - '.$r->institutionname;
+			}
+		}
+		return $retArr;
+	} 
 	
+	//Get and set functions 
 	public function setCollId($c){
 		$this->collId = $c;
 	}
