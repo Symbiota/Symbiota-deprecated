@@ -164,6 +164,103 @@ header("Content-Type: text/html; charset=".$charset);
 									<div>
 										List input fields for creating a new loan
 									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Loan Number:
+										</span>
+										<span style="margin-left:30px;">
+											Entered By:
+										</span>
+										<span style="margin-left:30px;">
+											Processed By:
+										</span>
+										<span style="margin-left:30px;">
+											Sent To:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" name="loanIdentifier" maxlength="255" style="width:85px;background-color:lightyellow;" value=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<input type="text" name="createdBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<input type="text" name="processedBy" tabindex="96" maxlength="32" style="width:100px;" value=" " onchange=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<select name="reqInstitution" style="width:400px;">
+												<?php 
+												$instArr = $loanManager->getInstitutionArr();
+												foreach($instArr as $k => $v){
+													echo '<option value="'.$k.'">'.$v.'</option>';
+												}
+												?>
+											</select>
+										</span>
+									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Requested for:
+										</span>
+										<span style="margin-left:15px;">
+											Specimen Total:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" name="forWhom" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
+										</span>
+										<span style="margin-left:15px;">
+											<input type="text" name="totalSpecimens" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+										</span>
+									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Date Sent:
+										</span>
+										<span style="margin-left:30px;">
+											Date Due:
+										</span>
+										<span style="margin-left:15px;">
+											Total Boxes:
+										</span>
+										<span style="margin-left:15px;">
+											Shipping Service:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" name="dateSent" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<input type="text" name="dateDue" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+										</span>
+										<span style="margin-left:15px;">
+											<input type="text" name="totalBoxes" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+										</span>
+										<span style="margin-left:15px;">
+											<input type="text" name="shippingMethod" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
+										</span>
+									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Loan Description:
+										</span>
+										<span style="margin-left:30px;">
+											Notes:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<textarea name="description" rows="10" columns="30" value=" " onchange=" ">
+											</textarea>
+										</span>
+										<span>
+											<textarea name="notes" rows="10" columns="30" value=" " onchange=" ">
+											</textarea>
+										</span>
+									</div>
 									<div>
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="formsubmit" type="submit" value="Create Loan" />

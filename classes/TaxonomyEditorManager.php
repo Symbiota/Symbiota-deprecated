@@ -194,14 +194,14 @@ class TaxonomyEditorManager{
 				$sql .= $key." = NULL,";
 			}
 			else{
-				$sql .= $key." = \"".$v."\",";
+				$sql .= $key.' = "'.$v.'",';
 			}
 		}
-		$sql .= "sciname = \"".$this->conn->real_escape_string(($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
+		$sql .= 'sciname = "'.$this->conn->real_escape_string(($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
 			$taxonEditArr["unitname1"].($taxonEditArr["unitind2"]?" ".$taxonEditArr["unitind2"]:"").
 			($taxonEditArr["unitname2"]?" ".$taxonEditArr["unitname2"]:"").
 			($taxonEditArr["unitind3"]?" ".$taxonEditArr["unitind3"]:"").
-			($taxonEditArr["unitname3"]?" ".$taxonEditArr["unitname3"]:""))."\"";
+			($taxonEditArr["unitname3"]?" ".$taxonEditArr["unitname3"]:"")).'"';
 		$sql .= " WHERE (tid = ".$tid.')';
 		//echo $sql;
 		$status = $this->conn->query($sql);
