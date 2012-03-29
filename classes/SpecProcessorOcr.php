@@ -30,7 +30,7 @@ class SpecProcessorOcr{
 	}
 
 	function __destruct(){
-		//unlink($this->imgUrlLocal);
+		unlink($this->imgUrlLocal);
 	}
 
 	public function batchOcrUnprocessed($collArr = 0){
@@ -113,21 +113,21 @@ class SpecProcessorOcr{
 		$this->filterImage(1,10,1,1,6,$urlF1);
 		$firstProcessedRawStr = $this->ocrImage($urlF1);
 		$firstProcessedCount = $this->scoreOCR($firstProcessedRawStr);
-		//unlink($urlF1);
+		unlink($urlF1);
 		//Second run
 		$urlF2 = str_replace('.jpg','_f2.jpg',$this->imgUrlLocal);
 		copy($this->imgUrlLocal,$urlF2);
 		$this->filterImage(1,5,-3,2,1.537,$urlF2);
 		$secondProcessedRawStr = $this->ocrImage($urlF2);
 		$secondProcessedCount = $this->scoreOCR($secondProcessedRawStr);
-		//unlink($urlF2);
+		unlink($urlF2);
 		//Third run
 		$urlF3 = str_replace('.jpg','_f3.jpg',$this->imgUrlLocal);
 		copy($this->imgUrlLocal,$urlF3);
 		$this->filterImage(1,0,0,0,1.537,$urlF3);
 		$thirdProcessedRawStr = $this->ocrImage($urlF3);
 		$thirdProcessedCount = $this->scoreOCR($thirdProcessedRawStr);
-		//unlink($urlF3);
+		unlink($urlF3);
 		//Return best results
 		$tempmax = max(array($unprocessedCount, $firstProcessedCount, $secondProcessedCount, $thirdProcessedCount));
 		if($tempmax == $unprocessedCount) return $rawStr;
@@ -226,7 +226,7 @@ class SpecProcessorOcr{
 					}
 					fclose($fh);
 				}
-				//unlink($outputFile.'.txt');
+				unlink($outputFile.'.txt');
 			}
 			else{
 				$this->logError("\tUnable to locate output file");
