@@ -33,6 +33,9 @@ class OccurrenceGeorefTools {
 					if($k == 'qlocality'){
 						$sql .= 'AND (locality LIKE "%'.$v.'%") ';
 					}
+					elseif($k == 'qstate'){
+						$sql .= 'AND (stateProvince = "'.$v.'") ';
+					}
 					elseif($k == 'qcounty'){
 						$sql .= 'AND (county LIKE "'.$v.'%") ';
 					}
@@ -46,19 +49,23 @@ class OccurrenceGeorefTools {
 		//echo $sql;
 		$totalCnt = 0;
 		$locCnt = 1;
-		$locStr = '';$extraStr = '';
+		$countryStr='';$stateStr='';$countyStr='';$localityStr='';$verbCoordStr = '';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			if($locStr != trim($r->locality) || $extraStr != trim($r->extra)){
-				$locStr = trim($r->locality);
-				$extraStr = trim($r->extra);
+			if($countryStr != trim($r->country) || $stateStr != trim($r->stateprovince) || $countyStr != trim($r->county)  
+				|| $localityStr != trim($r->locality," .,;") || $verbCoordStr != trim($r->verbatimcoordinates)){
+				$countryStr = trim($r->country);
+				$stateStr = trim($r->stateprovince);
+				$countyStr = trim($r->county);
+				$localityStr = trim($r->locality," .,;");
+				$verbCoordStr = trim($r->verbatimcoordinates);
 				$totalCnt++;
 				$retArr[$totalCnt]['occid'] = $r->occid;
-				$retArr[$totalCnt]['locality'] = $locStr;
-				$retArr[$totalCnt]['country'] = $country;
-				$retArr[$totalCnt]['stateprovince'] = $stateprovince;
-				$retArr[$totalCnt]['county'] = $county;
-				$retArr[$totalCnt]['verbatimcoordinates'] = $verbatimcoordinates;
+				$retArr[$totalCnt]['country'] = $countryStr;
+				$retArr[$totalCnt]['stateprovince'] = $stateStr;
+				$retArr[$totalCnt]['county'] = $countyStr;
+				$retArr[$totalCnt]['locality'] = $localityStr;
+				$retArr[$totalCnt]['verbatimcoordinates'] = $verbCoordStr;
 				$retArr[$totalCnt]['cnt'] = 1;
 				$locCnt = 1;
 			}
@@ -70,7 +77,7 @@ class OccurrenceGeorefTools {
 			}
 		}
 		$rs->close();
-		usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));
+		//usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));
 		return $retArr;
 	}
 
@@ -78,15 +85,21 @@ class OccurrenceGeorefTools {
 		if($geoRefArr['decimallatitude'] && $geoRefArr['decimallongitude']){
 			$sql = 'UPDATE omoccurrences '.
 				'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
-				',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"'.
-				',georeferencesources = "'.$geoRefArr['georeferencesources'].'"'.
-				',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'"'.
 				',georeferencedBy = "'.$geoRefArr['georefby'].'"';
+			if($geoRefArr['georeferenceverificationstatus']){
+				$sql .= ',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"';
+			}
+			if($geoRefArr['georeferencesources']){
+				$sql .= ',georeferencesources = "'.$geoRefArr['georeferencesources'].'"';
+			}
+			if($geoRefArr['georeferenceremarks']){
+				$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'")';
+			}
 			if($geoRefArr['coordinateuncertaintyinmeters']){
 				$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
 			}
 			if($geoRefArr['geodeticdatum']){
-				$sql .= ', geodeticdatum = '.$geoRefArr['geodeticdatum'];
+				$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
 			}
 			if($geoRefArr['minimumelevationinmeters']){
 				$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
@@ -94,17 +107,11 @@ class OccurrenceGeorefTools {
 			if($geoRefArr['maximumelevationinmeters']){
 				$sql .= ',maximumelevationinmeters = IF(maximumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
 			}
-			
+
 			$localList = $geoRefArr['locallist'];
-			if(is_array($localList)){
-				$sql .= ' WHERE occid IN('.implode(','.$localList).')';
-			}
-			else{
-				$sql .= ' WHERE occid = '.$localList;
-				
-			}
-			echo $sql;
-			//$this->conn->query($sql);
+			$sql .= ' WHERE occid IN('.implode(',',$localList).')';
+			//echo $sql;
+			$this->conn->query($sql);
 		}
 	}
 
@@ -181,7 +188,7 @@ class OccurrenceGeorefTools {
 	public function getCountryArr(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT country '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ORDER BY country';
+			'FROM omoccurrences WHERE collid = '.$this->collId.' AND decimallatitude IS NULL ORDER BY country';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$cStr = trim($r->country);
@@ -194,7 +201,7 @@ class OccurrenceGeorefTools {
 	public function getStateArr($countryStr = ''){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT stateprovince '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ';
+			'FROM omoccurrences WHERE collid = '.$this->collId.' AND decimallatitude IS NULL ';
 		if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}
@@ -211,7 +218,7 @@ class OccurrenceGeorefTools {
 	public function getCountyArr($countryStr = '',$stateStr = ''){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT county '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ';
+			'FROM omoccurrences WHERE collid = '.$this->collId.' AND decimallatitude IS NULL ';
 		if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}

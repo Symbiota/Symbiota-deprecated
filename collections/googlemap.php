@@ -175,7 +175,7 @@ $mapManager = new OccurrenceMapManager();
                     rfIcon.iconAnchor = new GPoint(10, 13);
                     rfIcon.infoWindowAnchor = new GPoint(10, 13);
 
-                    rfIcon.image = '../../images/x.gif';
+                    rfIcon.image = '../images/x.gif';
                     var rfPoint = new GLatLng(lat,lng);
                     points.push(rfPoint);
                     markerOptions = {icon:rfIcon}; 

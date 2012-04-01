@@ -59,288 +59,309 @@ header("Content-Type: text/html; charset=".$charset);
 	<head>
 		<title>Georeferencing Tools</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
-		<script type="text/javascript" src="../../js/symb/collections.georef.batchgeoreftool.js"></script>
+		<script type="text/javascript" src="../../js/symb/collections.georef.batchgeoreftool.js?cacherefresh=<?php echo time(); ?>"></script>
 	</head>
 	<body>
 		<?php
 		$displayLeftMenu = 0;
 		//include($serverRoot.'/header.php');
 		?>
-		<div style="font-weight:bold;font-size:150%;margin-top:6px;">
-			<?php echo $geoManager->getCollName(); ?>
-		</div>
-		
-		<div class='navpath' style="margin:10px;">
-			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<?php 
-			if(isset($collections_editor_georeftoolsCrumbs)){
-				echo $collections_editor_georeftoolsCrumbs." &gt;&gt;"; 
-			}
-			else{
-				?>
-				<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Control Menu</a> &gt;&gt;
-				<?php  
-			}
-			?>
-			<b>Batch Georeferencing Tools</b>
-		</div>
 		<!-- This is inner text! -->
 		<div style="width:98%">
-			<?php 
-			if($statusStr){ 
-				?>
-				<div style='margin:20px;font-weight:bold;color:red;'>
-					<?php echo $statusStr; ?>
+			<div style="float:left;">
+				<div style="font-weight:bold;font-size:150%;margin-top:6px;">
+					<?php echo $geoManager->getCollName(); ?>
+				</div>
+				<div class='navpath' style="margin:10px;">
+					<a href='../../index.php'>Home</a> &gt;&gt; 
+					<?php 
+					if(isset($collections_editor_georeftoolsCrumbs)){
+						echo $collections_editor_georeftoolsCrumbs." &gt;&gt;"; 
+					}
+					else{
+						?>
+						<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Control Menu</a> &gt;&gt;
+						<?php  
+					}
+					?>
+					<b>Batch Georeferencing Tools</b>
 				</div>
 				<?php 
-			}
+				if($statusStr){ 
+					?>
+					<div style='margin:20px;font-weight:bold;color:red;'>
+						<?php echo $statusStr; ?>
+					</div>
+					<?php 
+				}
+				?>
+			</div>
+			<?php 
 			if($symbUid){
 				if($collId){
 					if($editor){
 						?>
-						<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
-							<fieldset style="padding:10px;width:700px;">
-								<legend><b>Query Form</b></legend>
-								<div style="margin-bottom:3px;">
-									<div style="float:left;margin-right:10px;">
-										<b>Country:</b> 
-										<select name="qcountry" style="width:150px;">
-											<option value=''>All Countries</option>
-											<option value=''>--------------------</option>
-											<?php 
-											$cArr = $geoManager->getCountryArr();
-											foreach($cArr as $c){
-												echo '<option '.($qCountry==$c?'SELECTED':'').'>'.$c.'</option>';
-											}
-											?>
-										</select>
+						<div style="float:right;">
+							<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
+								<fieldset style="padding:10px;width:700px;background-color:lightyellow;">
+									<legend><b>Query Form</b></legend>
+									<div style="margin-bottom:3px;">
+										<div style="float:left;margin-right:10px;">
+											<b>Country:</b> 
+											<select name="qcountry" style="width:150px;">
+												<option value=''>All Countries</option>
+												<option value=''>--------------------</option>
+												<?php 
+												$cArr = $geoManager->getCountryArr();
+												foreach($cArr as $c){
+													echo '<option '.($qCountry==$c?'SELECTED':'').'>'.$c.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div style="float:left;margin-right:10px;">
+											<b>State: </b>
+											<select name="qstate" style="width:150px;">
+												<option value=''>All States</option>
+												<option value=''>--------------------</option>
+												<?php 
+												$sArr = $geoManager->getStateArr($qCountry);
+												foreach($sArr as $s){
+													echo '<option '.($qState==$s?'SELECTED':'').'>'.$s.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div style="float:left;">
+											<b>County:</b> 
+											<select name="qcounty" style="width:180px;">
+												<option value=''>All Counties</option>
+												<option value=''>--------------------</option>
+												<?php 
+												$coArr = $geoManager->getCountyArr($qCountry,$qState);
+												foreach($coArr as $c){
+													echo '<option '.($qCounty==$c?'SELECTED':'').'>'.$c.'</option>';
+												}
+												?>
+											</select>
+											<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
+										</div>
 									</div>
-									<div style="float:left;margin-right:10px;">
-										<b>State: </b>
-										<select name="qstate" style="width:150px;">
-											<option value=''>All States</option>
-											<option value=''>--------------------</option>
-											<?php 
-											$sArr = $geoManager->getStateArr($country);
-											foreach($sArr as $s){
-												echo '<option '.($qState==$s?'SELECTED':'').'>'.$s.'</option>';
-											}
-											?>
-										</select>
+									<div id="advfilterdiv" style="clear:both;display:<?php echo ($qVStatus?'block':'none'); ?>;">
+										<b>Lat/Long contains coordinate values and verification status equals:</b>
+										<input name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="" />
 									</div>
-									<div style="float:left;">
-										<b>County:</b> 
-										<select name="qcounty" style="width:180px;">
-											<option value=''>All Counties</option>
-											<option value=''>--------------------</option>
-											<?php 
-											$coArr = $geoManager->getCountyArr($country,$state);
-											foreach($coArr as $c){
-												echo '<option '.($qCounty==$c?'SELECTED':'').'>'.$c.'</option>';
-											}
-											?>
-										</select>
-										<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
+									<div style="clear:both;">
+										<b>Locality Term:</b> 
+										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
+										<span style="margin-left:175px;">
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+											<input name="submitaction" type="submit" value="Generate List" />
+										</span>
 									</div>
-								</div>
-								<div id="advfilterdiv" style="clear:both;display:<?php echo ($qVStatus?'block':'none'); ?>;">
-									<b>Lat/Long contains coordinate values and verification status equals:</b>
-									<input name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="" />
-								</div>
-								<div style="clear:both;">
-									<b>Locality Term:</b> 
-									<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
-									<span style="margin-left:175px;">
-										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<input name="submitaction" type="submit" value="Generate List" />
+								</fieldset> 
+							</form>
+						</div>
+						<div style="clear:both;">
+							<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
+								<div style="float:right;">
+									<span>
+										<a href="#" onclick="geolocateLocality();"><img src="../../images/geolocate.gif" title="Geolocate locality" style="width:18px;" /></a>
+									</span>
+									<span style="margin-left:10px;">
+										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.jpg" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
+									</span>
+									<span style="margin-left:10px;">
+										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:18px;" /></a>
 									</span>
 								</div>
-							</fieldset> 
-						</form>
-						<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
-							<div style="float:right;">
-								<a href="#" onclick="openFirstRecSet();">
-									<img src="../../images/edit.png" title="Edit first set of records" style="width:13px;" />
-								</a>
-							</div>
-							<div style="font-weight:bold;">
-								<?php 
-								echo 'Return Count: '.(isset($localArr)?count($localArr):'---');
-								?>
-							</div>
-							<div style="clear:both;">
-								<select name="locallist[]" size="10" multiple="multiple" style="width:100%">
+								<div style="font-weight:bold;">
 									<?php 
-									if(isset($localArr)){
-										if($localArr){
-											foreach($localArr as $k => $v){
-												$locStr = $v['locality'];
-												if($v['extra']) $locStr .= '; '.$v['extra'];
-												echo '<option value="'.$v['occid'].'">'.$locStr.'; '.$v['cnt'].'</option>'."\n";
+									echo 'Return Count: '.(isset($localArr)?count($localArr):'---');
+									?>
+								</div>
+								<div style="clear:both;">
+									<select id="locallist" name="locallist[]" size="15" multiple="multiple" style="width:100%">
+										<?php 
+										if(isset($localArr)){
+											if($localArr){
+												foreach($localArr as $k => $v){
+													$locStr = '';
+													if($v['country'] && $v['country'] != $qCountry) $locStr = $v['country'].'; ';
+													if($v['stateprovince'] && $v['stateprovince'] != $qState) $locStr .= $v['stateprovince'].'; ';
+													if($v['county'] && $v['county'] != $qCounty) $locStr .= $v['county'].'; ';
+													if($v['locality']) $locStr .= str_replace(';',',',$v['locality']);
+													if($v['verbatimcoordinates']) $locStr .= ', '.$v['verbatimcoordinates'];
+													echo '<option value="'.$v['occid'].'">'.trim($locStr,' ,').' ['.$v['cnt'].']</option>'."\n";
+												}
+											}
+											else{
+												echo '<option value="">No localities returned matching search term</option>';
 											}
 										}
 										else{
-											echo '<option value="">No localities returned matching search term</option>';
-										}
-									}
-									else{
-										echo '<option value="">Use query form above to build locality list</option>';
-									}
-									?>
-								</select>
-							</div>
-							<div style="float:right;">
-								<fieldset>
-									<legend><b>Statistics</b></legend>
-									<div style="">
-										Records to be Georeferenced 
-									</div>
-									<div style="margin:5px;">
-										<?php 
-										$statArr = $geoManager->getCoordStatistics();
-										foreach($statArr as $k => $v){
-											echo '<div>';
-											echo $k.': '.$v;
-											if($k == 'Total Percentage') echo '%';
-											echo '</div>';
+											echo '<option value="">Use query form above to build locality list</option>';
 										}
 										?>
-									</div>
-								</fieldset>
-							</div>
-							<div style="margin:15px;">
-								<table>
-									<tr>
-										<td></td>
-										<td><b>Deg.</b></td>
-										<td style="width:55px;"><b>Min.</b></td>
-										<td style="width:55px;"><b>Sec.</b></td>
-										<td style="width:20px;">&nbsp;</td>
-										<td style="width:15px;">&nbsp;</td>
-										<td><b>Decimal</b></td>
-									</tr>
-									<tr>
-										<td style="vertical-align:middle"><b>Latitude:</b> </td>
-										<td><input name="latdeg" type="text" value="<?php echo $latDeg; ?>" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
-										<td><input name="latmin" type="text" value="<?php echo $latMin; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
-										<td><input name="latsec" type="text" value="<?php echo $latSec; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
-										<td>
-											<select name="latns" onchange="updateLatDec(this.form)">
-												<option>N</option>
-												<option <?php echo ($latNS=='S'?'SELECTED':''); ?>>S</option>
-											</select>
-										</td>
-										<td> = </td>
-										<td>
-											<input id="decimallatitude" name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
-											<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
-												<img src="../../images/world40.gif" style="border:0px;width:13px;" />
-											</span>
-										</td>
-									</tr>
-									<tr>
-										<td style="vertical-align:middle"><b>Longitude:</b> </td>
-										<td><input name="lngdeg" type="text" value="<?php echo $lngDeg; ?>" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
-										<td><input name="lngmin" type="text" value="<?php echo $lngMin; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
-										<td><input name="lngsec" type="text" value="<?php echo $lngSec; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
-										<td style="width:20px;">
-											<select name="lngew" onchange="updateLngDec(this.form)">
-												<option>E</option>
-												<option <?php echo (!$lngEW || $lngEW=='W'?'SELECTED':''); ?>>W</option>
-											</select>
-										</td>
-										<td> = </td>
-										<td><input id="decimallongitude" name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
-									</tr>
-									<tr>
-										<td colspan="3" style="vertical-align:middle">
-											<b>Error (in meters):</b> 
-										</td>
-										<td colspan="2" style="vertical-align:middle">
-											<input name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordinateUncertaintyInMeters; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
-											meters
-										</td>
-										<td colspan="2" style="vertical-align:middle">
-											<span style="margin-left:20px;font-weight:bold;">Datum:</span> 
-											<input id="geodeticdatum" name="geodeticdatum" type="text" value="<?php echo $geodeticDatum; ?>" style="width:75px;" />
-											<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
-												<img src="../../images/showedit.png" style="border:0px;width:14px;" />
-											</span>
-										</td>
-									</tr>
-									<tr>
-										<td colspan="7">
-											<div id="utmdiv" style="display:none;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:400px;margin-bottom:10px;">
-												<div style="margin:2px;">
-													Zone: <input name="utmzone" style="width:40px;" />
+									</select>
+								</div>
+								<div style="float:right;">
+									<fieldset>
+										<legend><b>Statistics</b></legend>
+										<div style="">
+											Records to be Georeferenced 
+										</div>
+										<div style="margin:5px;">
+											<?php 
+											$statArr = $geoManager->getCoordStatistics();
+											foreach($statArr as $k => $v){
+												echo '<div>';
+												echo $k.': '.$v;
+												if($k == 'Total Percentage') echo '%';
+												echo '</div>';
+											}
+											?>
+										</div>
+									</fieldset>
+								</div>
+								<div style="margin:15px;">
+									<table>
+										<tr>
+											<td></td>
+											<td><b>Deg.</b></td>
+											<td style="width:55px;"><b>Min.</b></td>
+											<td style="width:55px;"><b>Sec.</b></td>
+											<td style="width:20px;">&nbsp;</td>
+											<td style="width:15px;">&nbsp;</td>
+											<td><b>Decimal</b></td>
+										</tr>
+										<tr>
+											<td style="vertical-align:middle"><b>Latitude:</b> </td>
+											<td><input name="latdeg" type="text" value="<?php echo $latDeg; ?>" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
+											<td><input name="latmin" type="text" value="<?php echo $latMin; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
+											<td><input name="latsec" type="text" value="<?php echo $latSec; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
+											<td>
+												<select name="latns" onchange="updateLatDec(this.form)">
+													<option>N</option>
+													<option <?php echo ($latNS=='S'?'SELECTED':''); ?>>S</option>
+												</select>
+											</td>
+											<td> = </td>
+											<td>
+												<input id="decimallatitude" name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
+												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
+													<img src="../../images/world40.gif" style="border:0px;width:13px;" />
+												</span>
+											</td>
+										</tr>
+										<tr>
+											<td style="vertical-align:middle"><b>Longitude:</b> </td>
+											<td><input name="lngdeg" type="text" value="<?php echo $lngDeg; ?>" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
+											<td><input name="lngmin" type="text" value="<?php echo $lngMin; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
+											<td><input name="lngsec" type="text" value="<?php echo $lngSec; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
+											<td style="width:20px;">
+												<select name="lngew" onchange="updateLngDec(this.form)">
+													<option>E</option>
+													<option <?php echo (!$lngEW || $lngEW=='W'?'SELECTED':''); ?>>W</option>
+												</select>
+											</td>
+											<td> = </td>
+											<td><input id="decimallongitude" name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
+										</tr>
+										<tr>
+											<td colspan="3" style="vertical-align:middle">
+												<b>Error (in meters):</b> 
+											</td>
+											<td colspan="2" style="vertical-align:middle">
+												<input name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordinateUncertaintyInMeters; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
+												meters
+											</td>
+											<td colspan="2" style="vertical-align:middle">
+												<span style="margin-left:20px;font-weight:bold;">Datum:</span> 
+												<input id="geodeticdatum" name="geodeticdatum" type="text" value="<?php echo $geodeticDatum; ?>" style="width:75px;" />
+												<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
+													<img src="../../images/showedit.png" style="border:0px;width:14px;" />
+												</span>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="7">
+												<div id="utmdiv" style="display:none;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:400px;height:75px;margin-bottom:10px;">
+													<div>
+														<div style="margin:3px;float:left;">
+															East: <input name="utmeast" type="text" style="width:100px;" />
+														</div>
+														<div style="margin:3px;float:left;">
+															North: <input name="utmnorth" type="text" style="width:100px;" />
+														</div>
+														<div style="margin:3px;float:left;">
+															Zone: <input name="utmzone" style="width:40px;" />
+														</div>
+													</div>
+													<div style="clear:both;margin:3px;">
+														<div style="float:left;">
+															Hemisphere: 
+															<select name="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
+																<option value="Northern">North</option>
+																<option value="Southern">South</option>
+															</select>
+														</div>
+														<div style="margin:5px 0px 0px 15px;float:left;">
+															<input type="button" value="Convert UTM values to lat/long " onclick="insertUtm(this.form)" />
+														</div>
+													</div>
 												</div>
-												<div style="margin:2px;">
-													East: <input name="utmeast" type="text" style="width:100px;" />
-												</div>
-												<div style="margin:2px;">
-													North: <input name="utmnorth" type="text" style="width:100px;" />
-												</div>
-												<div style="margin:2px;">
-													Hemisphere: 
-													<select name="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-														<option value="Northern">North</option>
-														<option value="Southern">South</option>
-													</select>
-												</div>
-												<div style="margin-top:5px;">
-													<input type="button" value="Convert UTM values to decimal lat/long " onclick="insertUtm(this.form)" />
-												</div>
-											</div>
-										</td>
-									</tr>
-									<tr>
-										<td colspan="3" style="vertical-align:middle">
-											<b>Sources:</b> 
-										</td>
-										<td colspan="4">
-											<input name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
-										</td>
-									</tr>
-									<tr>
-										<td colspan="3" style="vertical-align:middle">
-											<b>Remarks:</b> 
-										</td>
-										<td colspan="4">
-											<input name="georeferenceRemarks" type="text" value="<?php echo $georeferenceRemarks; ?>" style="width:500px;" />
-										</td>
-									</tr>
-									<tr>
-										<td colspan="3" style="vertical-align:middle">
-											<b>Verification Status:</b> 
-										</td>
-										<td colspan="4">
-											<input name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
-										</td>
-									</tr>
-										<td colspan="3" style="vertical-align:middle">
-											<b>Elevation:</b> 
-										</td>
-										<td colspan="4">
-											<input name="minimumelevationinmeters" type="text" value="<?php echo $minimumElevationInMeters; ?>" /> to 
-											<input name="maximumelevationinmeters" type="text" value="<?php echo $maximumElevationInMeters; ?>" /> meters
-										</td>
-									</tr>
-									<tr>
-										<td colspan="7">
-											<input name="submitaction" type="submit" value="Update Coordinates" />
-											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
-											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
-											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
-											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
-											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
-											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-											<input name="georefby" type="hidden" value="<?php echo $userDisplayName; ?>" />
-										</td>
-									</tr>
-								</table>
-							</div>
-						</form>
-						
+											</td>
+										</tr>
+										<tr>
+											<td colspan="3" style="vertical-align:middle">
+												<b>Sources:</b> 
+											</td>
+											<td colspan="4">
+												<input name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
+											</td>
+										</tr>
+										<tr>
+											<td colspan="3" style="vertical-align:middle">
+												<b>Remarks:</b> 
+											</td>
+											<td colspan="4">
+												<input name="georeferenceremarks" type="text" value="<?php echo $georeferenceRemarks; ?>" style="width:500px;" />
+											</td>
+										</tr>
+										<tr>
+											<td colspan="3" style="vertical-align:middle">
+												<b>Verification Status:</b> 
+											</td>
+											<td colspan="4">
+												<input name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
+											</td>
+										</tr>
+										<tr>
+											<td colspan="3" style="vertical-align:middle">
+												<b>Elevation:</b> 
+											</td>
+											<td colspan="4">
+												<input name="minimumelevationinmeters" type="text" value="<?php echo $minimumElevationInMeters; ?>" style="width:50px;" /> to 
+												<input name="maximumelevationinmeters" type="text" value="<?php echo $maximumElevationInMeters; ?>" style="width:50px;" /> meters
+											</td>
+										</tr>
+										<tr>
+											<td colspan="7">
+												<input name="submitaction" type="submit" value="Update Coordinates" />
+												<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
+												<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
+												<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
+												<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
+												<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
+												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+												<input name="georefby" type="hidden" value="<?php echo $paramsArr['un']; ?>" />
+											</td>
+										</tr>
+									</table>
+								</div>
+							</form>
+						</div>
 						<?php
 					}
 					else{
@@ -361,7 +382,7 @@ header("Content-Type: text/html; charset=".$charset);
 			}
 			else{
 				?>
-				<div style='font-weight:bold;font-size:120%;'>
+				<div style='font-weight:bold;font-size:120%;clear:both;'>
 					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/georef/batchgeoreftool.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
 				<?php 
