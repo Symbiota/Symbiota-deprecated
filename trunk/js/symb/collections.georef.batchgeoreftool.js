@@ -15,12 +15,20 @@ function verifyGeorefForm(f){
 		alert("Please enter coordinates into lat/long decimal fields");
 		return false;
 	}
+	if(!isNumeric(f.decimallatitude.value) || !isNumeric(f.decimallongitude.value)){
+		alert("Decimal coordinates must be numeric values only");
+		return false;
+	}
 	if(f.decimallatitude.value > 90 || f.decimallatitude.value < -90){
 		alert("Decimal Latitude must be between -90 and 90 degrees");
 		return false;
 	}
 	if(f.decimallongitude.value > 180 || f.decimallongitude.value < -180){
 		alert("Decimal Longitude must be between -180 and 180 degrees");
+		return false;
+	}
+	if(!isNumeric(f.minumumelevationinmeters.value) || !isNumeric(f.maximumelevationinmeters.value)){
+		alert("Elevation field can only contain numeric values");
 		return false;
 	}
 	if(!isNumeric(f.coordinateuncertaintyinmeters.value)){
@@ -103,12 +111,98 @@ function verifyCoordUncertainty(inputObj){
 	}
 }
 
+function geolocateLocality(){
+	var selObj = document.getElementById("locallist");
+	if(selObj.selectedIndex > -1){
+		var f = document.queryform;
+		var locality = selObj.options[selObj.selectedIndex].text;
+		var country = f.qcountry.value;
+		var state = f.qstate.value;;
+		var county = f.qcounty.value;
+		occWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
+		if(occWindow.opener == null) occWindow.opener = self;
+	}
+	else{
+		alert("Select a locality in list to open that record set in the editor");
+	}
+}
+
+function analyseLocalityStr(){
+	var selObj = document.getElementById("locallist");
+	if(selObj.selectedIndex > -1){
+		var f = document.georefform;
+		var locStr = selObj.options[selObj.selectedIndex].text;
+		
+		var llRegEx1 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}\s*[NS]{0,1}[\.,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}/i  
+		var llRegEx2 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*[NS]{0,1}[,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}/i  
+		var utmRegEx1 = /(\d{7})m*N{0,1}\s+(\d{6,7})m*E{0,1}\s+(\d{1,2})/ 		//Format: #######N ######E ##
+		var utmRegEx2 = /(\d{1,2})\D{0,1}\s+(\d{7})m*N\s+(\d{6,7})m*E/ 	//Format: ## #######N ######E 
+		var utmRegEx3 = /(\d{6,7})m*E{0,1}\s+(\d{7})m*N{0,1}\s+(\d{1,2})/ 		//Format: ######E #######N ## 
+		var utmRegEx4 = /(\d{1,2})\D{0,1}\s+(\d{6,7})m*E\s+(\d{7})m*N/ 	//Format: ## ######E #######N  
+		var utmRegEx5 = /(\d{1,2})\D{1}\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mE\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mN/ //Format: ##S ## ## ###mE ## ## ###mN ##
+		var extractStr = "";
+		if(extractArr = llRegEx1.exec(locStr)){
+			f.latdeg.value = extractArr[1];
+			f.latmin.value = extractArr[2];
+			f.latsec.value = extractArr[3];
+			f.lngdeg.value = extractArr[4];
+			f.lngmin.value = extractArr[5];
+			f.lngsec.value = extractArr[6];
+			updateLatDec(f);
+			updateLngDec(f);
+		}
+		else if(extractArr = llRegEx2.exec(locStr)){
+			f.latdeg.value = extractArr[1];
+			f.latmin.value = extractArr[2];
+			f.latsec.value = "";
+			f.lngdeg.value = extractArr[3];
+			f.lngmin.value = extractArr[4];
+			f.lngsec.value = "";
+			updateLatDec(f);
+			updateLngDec(f);
+		}
+		else if(extractArr = utmRegEx1.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmnorth.value = extractArr[1];
+			f.utmeast.value = extractArr[2];
+			f.utmzone.value = extractArr[3];
+		}
+		else if(extractArr = utmRegEx2.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmzone.value = extractArr[1];
+			f.utmnorth.value = extractArr[2];
+			f.utmeast.value = extractArr[3];
+		}
+		else if(extractArr = utmRegEx3.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmeast.value = extractArr[1];
+			f.utmnorth.value = extractArr[2];
+			f.utmzone.value = extractArr[3];
+		}
+		else if(extractArr = utmRegEx4.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmzone.value = extractArr[1];
+			f.utmeast.value = extractArr[2];
+			f.utmnorth.value = extractArr[3];
+		}
+		else if(extractArr = utmRegEx3.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmzone.value = extractArr[1];
+			f.utmeast.value = extractArr[2].replace(/\s/g,'');
+			f.utmnorth.value = extractArr[3].replace(/\s/g,'');
+		}
+	}
+	else{
+		alert("Select a locality");
+	}
+}
+
 function openFirstRecSet(){
 	var collId = document.georefform.collid.value;
-	var selObj = document.georefform.locallist;
+	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var occidStr = selObj.options[selObj.selectedIndex].value;
-		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_identifier="+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=850,height=600,left=20,top=20");
+		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_identifier="+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=950,height=700,left=20,top=20");
 		if(occWindow.opener == null) occWindow.opener = self;
 	}
 	else{
