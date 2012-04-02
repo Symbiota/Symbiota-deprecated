@@ -31,6 +31,9 @@ $georeferenceVerificationStatus = array_key_exists('georeferenceverificationstat
 $minimumElevationInMeters = array_key_exists('minimumelevationinmeters',$_POST)?$_POST['minimumelevationinmeters']:'';
 $maximumElevationInMeters = array_key_exists('maximumelevationinmeters',$_POST)?$_POST['maximumelevationinmeters']:'';
 
+if(!$georeferenceSources) $georeferenceSources = 'georef batch tool '.date('Y-m-d');
+if(!$georeferenceVerificationStatus) $georeferenceVerificationStatus = 'reviewed - high confidence';
+
 $geoManager = new OccurrenceGeorefTools();
 $geoManager->setCollId($collId);
 
@@ -59,7 +62,10 @@ header("Content-Type: text/html; charset=".$charset);
 	<head>
 		<title>Georeferencing Tools</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
-		<script type="text/javascript" src="../../js/symb/collections.georef.batchgeoreftool.js?cacherefresh=<?php echo time(); ?>"></script>
+		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
+		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery.js"></script>
+		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/jquery-ui.js"></script>
+		<script type="text/javascript" src="<?php echo $clientRoot; ?>/js/symb/collections.georef.batchgeoreftool.js?cacherefresh=<?php echo time(); ?>"></script>
 	</head>
 	<body>
 		<?php
@@ -105,7 +111,7 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
 								<fieldset style="padding:10px;width:700px;background-color:lightyellow;">
 									<legend><b>Query Form</b></legend>
-									<div style="margin-bottom:3px;">
+									<div style="padding:2px">
 										<div style="float:left;margin-right:10px;">
 											<b>Country:</b> 
 											<select name="qcountry" style="width:150px;">
@@ -147,11 +153,11 @@ header("Content-Type: text/html; charset=".$charset);
 											<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
 										</div>
 									</div>
-									<div id="advfilterdiv" style="clear:both;display:<?php echo ($qVStatus?'block':'none'); ?>;">
+									<div id="advfilterdiv" style="display:<?php echo ($qVStatus?'block':'none'); ?>;padding:2px">
 										<b>Lat/Long contains coordinate values and verification status equals:</b>
-										<input name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="" />
+										<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
 									</div>
-									<div style="clear:both;">
+									<div style="padding:2px">
 										<b>Locality Term:</b> 
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 										<span style="margin-left:175px;">
@@ -334,7 +340,7 @@ header("Content-Type: text/html; charset=".$charset);
 												<b>Verification Status:</b> 
 											</td>
 											<td colspan="4">
-												<input name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
+												<input id="georeferenceverificationstatus" name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
 											</td>
 										</tr>
 										<tr>

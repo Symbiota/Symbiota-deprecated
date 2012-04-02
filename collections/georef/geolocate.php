@@ -45,10 +45,16 @@ $urlVariables = 'country='.$country.'&state='.$state.'&county='.$county.'&locali
 	        else {
 	            var breakdown = evt.data.split("|");
                 if(breakdown.length == 4){
-					opener.document.georefform.decimallatitude.value = breakdown[0];		//Lat
-					opener.document.georefform.decimallongitude.value = breakdown[1];		//Long
-					opener.document.georefform.coordinateuncertaintyinmeters.value = breakdown[2];		//Uncertainty Radius (meters)
+					opener.document.georefform.decimallatitude.value = breakdown[0];				//Lat
+					opener.document.georefform.decimallongitude.value = breakdown[1];				//Long
+					opener.document.georefform.coordinateuncertaintyinmeters.value = breakdown[2];	//Uncertainty Radius (meters)
 					//breakdown[3];		//Uncertainty Polygon
+					var baseStr = opener.document.georefform.georeferencesources.value;
+					if(baseStr){
+						var baseTokens = baseStr.split(";"); 
+						baseStr = baseTokens[0]+"; ";
+					}
+					opener.document.georefform.georeferencesources.value = baseStr+"GeoLocate";
                 }
 	        }
             self.close();

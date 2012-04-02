@@ -6,6 +6,7 @@ class OccurrenceGeorefTools {
 	private $conn;
 	private $collId;
 	private $collName;
+	private $managementType;
 	private $qryVars = array();
 
 	function __construct($type = 'readonly') {
@@ -23,7 +24,7 @@ class OccurrenceGeorefTools {
 			'WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) ';
 		if($this->qryVars){
 			if(array_key_exists('qvstatus',$this->qryVars)){
-				$sql .= 'AND ((decimalLatitude IS NULL) OR (georeferenceVerificationStatus LIKE "'.$this->qryVars['qvstatus'].'%")) ';
+				$sql .= 'AND (georeferenceVerificationStatus LIKE "'.$this->qryVars['qvstatus'].'%") ';
 			}
 			else{
 				$sql .= 'AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
@@ -82,7 +83,26 @@ class OccurrenceGeorefTools {
 	}
 
 	public function updateCoordinates($geoRefArr){
+		global $paramsArr;
 		if($geoRefArr['decimallatitude'] && $geoRefArr['decimallongitude']){
+			$localList = $geoRefArr['locallist'];
+			$localStr = implode(',',$localList);
+			if($this->managementType == 'Snapshot'){
+				//Presevre coordinate data in omoccuredits; if collection refreshes their data, coordinates will ntoe be lost 
+				$newValueArr = array($geoRefArr['decimallatitude'],$geoRefArr['decimallongitude'],$geoRefArr['coordinateuncertaintyinmeters'],
+					$geoRefArr['geodeticdatum'],$geoRefArr['georeferencesources'],$geoRefArr['georeferenceremarks'],
+					$geoRefArr['georeferenceverificationstatus'],$geoRefArr['minimumelevationinmeters'],$geoRefArr['maximumelevationinmeters']);
+				$newValueStr = str_replace("'","\\'",json_encode($newValueArr));
+				$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
+					"SELECT occid, 'georefbatchstr', '".$newValueStr."', CONCAT_WS(',',decimallatitude, decimallongitude, coordinateUncertaintyInMeters, ".
+					'geodeticdatum, georeferencesources, georeferenceRemarks, georeferenceVerificationStatus, '. 
+					'minimumElevationInMeters, maximumElevationInMeters) AS oldvalue, 1, '.$paramsArr['uid'].' '.
+					'FROM omoccurrences WHERE occid IN('.$localStr.')';
+				//echo 'sql: '.$sql.'<br/>';
+				$this->conn->query($sql);
+			}
+			
+			//Update coordinates
 			$sql = 'UPDATE omoccurrences '.
 				'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
 				',georeferencedBy = "'.$geoRefArr['georefby'].'"';
@@ -101,15 +121,14 @@ class OccurrenceGeorefTools {
 			if($geoRefArr['geodeticdatum']){
 				$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
 			}
+			if($geoRefArr['maximumelevationinmeters']){
+				$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
+			}
 			if($geoRefArr['minimumelevationinmeters']){
 				$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
 			}
-			if($geoRefArr['maximumelevationinmeters']){
-				$sql .= ',maximumelevationinmeters = IF(maximumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
-			}
 
-			$localList = $geoRefArr['locallist'];
-			$sql .= ' WHERE occid IN('.implode(',',$localList).')';
+			$sql .= ' WHERE occid IN('.$localStr.')';
 			//echo $sql;
 			$this->conn->query($sql);
 		}
@@ -169,14 +188,16 @@ class OccurrenceGeorefTools {
 
 	public function setCollId($cid){
 		$this->collId = $cid;
-		$sql = 'SELECT collectionname FROM omcollections WHERE collid = '.$cid;
+		$sql = 'SELECT collectionname, managementtype '.
+			'FROM omcollections WHERE collid = '.$cid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->collName = $r->collectionname;
+			$this->managementType = $r->managementtype;
 		}
 		$rs->close();
 	}
-	
+
 	public function setQueryVariables($k,$v){
 		$this->qryVars[$k] = $v;
 	}
@@ -238,7 +259,6 @@ class OccurrenceGeorefTools {
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
- 		$newStr = str_replace('"',"'",$newStr);
  		$newStr = $this->clCon->real_escape_string($newStr);
  		return $newStr;
  	}

@@ -230,6 +230,11 @@ if($collId) $collData = $collManager->getCollectionData();
 									</a>
 								</li>
 								<li>
+									<a href="../georef/batchgeoreftool.php?collid=<?php echo $collId; ?>">
+										Batch Georeference Specimens
+									</a>
+								</li>
+								<li>
 									<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
 										Review/Verify General Specimen Edits 
 									</a>
