@@ -223,9 +223,9 @@ class OccurrenceGeorefTools {
 		$retArr = array();
 		$sql = 'SELECT DISTINCT stateprovince '.
 			'FROM omoccurrences WHERE collid = '.$this->collId.' AND decimallatitude IS NULL ';
-		if($countryStr){
+		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
-		}
+		}*/
 		$sql .= 'ORDER BY stateprovince';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -240,13 +240,14 @@ class OccurrenceGeorefTools {
 		$retArr = array();
 		$sql = 'SELECT DISTINCT county '.
 			'FROM omoccurrences WHERE collid = '.$this->collId.' AND decimallatitude IS NULL ';
-		if($countryStr){
+		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
-		}
+		}*/
 		if($stateStr){
 			$sql .= 'AND stateprovince = "'.$stateStr.'" ';
 		}
 		$sql .= 'ORDER BY county';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$cStr = trim($r->county);
