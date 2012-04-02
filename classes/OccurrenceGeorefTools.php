@@ -9,7 +9,7 @@ class OccurrenceGeorefTools {
 	private $managementType;
 	private $qryVars = array();
 
-	function __construct($type = 'readonly') {
+	function __construct($type = 'write') {
 		$this->conn = MySQLiConnectionFactory::getCon($type);
 	}
 
