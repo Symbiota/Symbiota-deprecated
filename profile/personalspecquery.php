@@ -69,6 +69,7 @@ if($collId && $symbUid){
 			<ul>
 				<li>Show all records</li>
 				<li>Query records or open a saved dataset</li>
+					By collector name, collectornumber (range), collection data, dataset id
 					<li>Display as list</li>
 					<li>Display as table</li>
 					

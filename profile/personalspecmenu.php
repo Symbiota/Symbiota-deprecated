@@ -7,12 +7,13 @@ $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"
 
 $specHandler = new PersonalSpecimenManager();
 
-$collArr = $specHandler->getObservationArr();
-if(!$collId && $collArr) $collId = current(array_keys($collArr));
-
+$collArr = array();
 $isEditor = 0;
 if($symbUid){
 	$specHandler->setUid($symbUid);
+	$collArr = $specHandler->getObservationArr();
+	if(!$collId && $collArr) $collId = current(array_keys($collArr));
+	if($collId) $specHandler->setCollId($collId);
 	if($collId){
 		if($isAdmin	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
 			|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
@@ -73,7 +74,7 @@ if($symbUid){
 				<li><a href="">Add a new record</a></li>
 				<li><a href="">Submit image vouchered observation</a></li>
 				<li>Import csv file</li>
-				<li>Create a backup (CSV extract)</li>
+				<li>Backup file download (CSV extract)</li>
 			</ul>
 		</fieldset>
 	</div>	
