@@ -80,7 +80,7 @@ class SpecLoans{
 	public function createNewLoan($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurloans(collid) '.
-			'VALUES(".$pArr["collid"].")';
+			'VALUES("1")';
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
 		}
