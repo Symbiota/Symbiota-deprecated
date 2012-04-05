@@ -24,7 +24,7 @@ class SpecLoans{
 			$sql .= 'AND loanidentifier LIKE "%'.$searchTerm.'%" ';
 		}
 		if(!$displayAll){
-			$sql .= 'AND dateclosed IS NOT NULL ';
+			$sql .= 'AND ISNULL(dateclosed) ';
 		}
 		$sql .= 'ORDER BY loanIdentifier';
 		if($rs = $this->conn->query($sql)){
@@ -39,13 +39,25 @@ class SpecLoans{
 
 	public function getLoanDetails($loanId){
 		$retArr = array();
-		$sql = 'SELECT '.
+		$sql = 'SELECT loanid, loanidentifier, dateSent, totalBoxes, '.
+			'shippingMethod, dateDue, dateClosed, forWhom, description, '.
+			'notes, createdBy, processedBy, processedByReturn '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr['loanidentifier'] = $r->loanidentifier;
-				//$retArr[''] = $r->;
+				$retArr['dateSent'] = $r->dateSent;
+				$retArr['totalBoxes'] = $r->totalBoxes;
+				$retArr['shippingMethod'] = $r->shippingMethod;
+				$retArr['dateDue'] = $r->dateDue;
+				$retArr['dateClosed'] = $r->dateClosed;
+				$retArr['forWhom'] = $r->forWhom;
+				$retArr['description'] = $r->description;
+				$retArr['notes'] = $r->notes;
+				$retArr['createdBy'] = $r->createdBy;
+				$retArr['processedBy'] = $r->processedBy;
+				$retArr['processedByReturn'] = $r->processedByReturn;
 			}
 			$rs->close();
 		}
@@ -67,9 +79,10 @@ class SpecLoans{
 	
 	public function createNewLoan($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloans() VALUES()';
+		$sql = 'INSERT INTO omoccurloans(collid) '.
+			'VALUES(".$pArr["collid"].")';
 		if($this->conn->query($sql)){
-			$this->loanOutId = $this->conn->insert_id;
+			$this->loanId = $this->conn->insert_id;
 		}
 		else{
 			$statusStr = 'ERROR: Creation of new loan failed: '.$this->conn->error.'<br/>';
