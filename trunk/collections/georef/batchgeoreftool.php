@@ -9,6 +9,7 @@ $qCountry = array_key_exists('qcountry',$_REQUEST)?$_REQUEST['qcountry']:'';
 $qState = array_key_exists('qstate',$_REQUEST)?$_REQUEST['qstate']:'';
 $qCounty = array_key_exists('qcounty',$_REQUEST)?$_REQUEST['qcounty']:'';
 $qLocality = array_key_exists('qlocality',$_REQUEST)?$_REQUEST['qlocality']:'';
+$qDisplayAll = array_key_exists('qdisplayall',$_REQUEST)?$_REQUEST['qdisplayall']:0;
 $qVStatus = array_key_exists('qvstatus',$_REQUEST)?$_REQUEST['qvstatus']:'';
 
 $latDeg = array_key_exists('latdeg',$_POST)?$_POST['latdeg']:'';
@@ -48,6 +49,7 @@ if($editor && $submitAction && $qLocality){
 	if($qCountry) $geoManager->setQueryVariables('qcountry',$qCountry);
 	if($qState) $geoManager->setQueryVariables('qstate',$qState);
 	if($qCounty) $geoManager->setQueryVariables('qcounty',$qCounty);
+	if($qDisplayAll) $geoManager->setQueryVariables('qdisplayall',$qDisplayAll);
 	if($qVStatus) $geoManager->setQueryVariables('qvstatus',$qVStatus);
 	if($qLocality) $geoManager->setQueryVariables('qlocality',$qLocality);
 	if($submitAction == 'Update Coordinates'){
@@ -111,7 +113,7 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
 								<fieldset style="padding:10px;width:700px;background-color:lightyellow;">
 									<legend><b>Query Form</b></legend>
-									<div style="padding:2px">
+									<div style="height:20px;">
 										<div style="float:left;margin-right:10px;">
 											<b>Country:</b> 
 											<select name="qcountry" style="width:150px;">
@@ -153,9 +155,15 @@ header("Content-Type: text/html; charset=".$charset);
 											<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
 										</div>
 									</div>
-									<div id="advfilterdiv" style="display:<?php echo ($qVStatus?'block':'none'); ?>;padding:2px">
-										<b>Lat/Long contains coordinate values and verification status equals:</b>
-										<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
+									<div id="advfilterdiv" style="clear:both;margin:10px;display:<?php echo ($qVStatus || $qDisplayAll?'block':'none'); ?>;">
+										<div style="margin-top:5px;">
+											<b>Verification status:</b> 
+											<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
+										</div>
+										<div style="margin-top:5px;">
+											<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> /> 
+											Display all speciemsn inclulding previously georeferenced
+										</div>
 									</div>
 									<div style="padding:2px">
 										<b>Locality Term:</b> 
@@ -198,6 +206,9 @@ header("Content-Type: text/html; charset=".$charset);
 													if($v['county'] && $v['county'] != $qCounty) $locStr .= $v['county'].'; ';
 													if($v['locality']) $locStr .= str_replace(';',',',$v['locality']);
 													if($v['verbatimcoordinates']) $locStr .= ', '.$v['verbatimcoordinates'];
+													if(array_key_exists('decimallatitude',$v) && $v['decimallatitude']){
+														$locStr .= ' ('.$v['decimallatitude'].', '.$v['decimallongitude'].') ';
+													}
 													echo '<option value="'.$v['occid'].'">'.trim($locStr,' ,').' ['.$v['cnt'].']</option>'."\n";
 												}
 											}

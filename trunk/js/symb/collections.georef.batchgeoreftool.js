@@ -148,10 +148,11 @@ function analyseLocalityStr(){
 		var utmRegEx5 = /(\d{1,2})\D{1}\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mE\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mN/ //Format: ##S ## ## ###mE ## ## ###mN ##
 		var llRegEx1 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}\s*[NS]{0,1}[\.,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}/i  
 		var llRegEx2 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*[NS]{0,1}[,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}/i  
+		var llRegEx3 = /\((-{0,1}\d{1,2}\.{1}\d+), (-{0,1}\d{1,3}\.{1}\d+)/		//Format: (##.#####, -###.#####)
 		var utmRegEx1 = /(\d{7})m*N{0,1}\s+(\d{6,7})m*E{0,1}\s+(\d{1,2})/ 		//Format: #######N ######E ##
-		var utmRegEx2 = /(\d{1,2})\D{0,1}\s+(\d{7})m*N\s+(\d{6,7})m*E/ 	//Format: ## #######N ######E 
+		var utmRegEx2 = /(\d{1,2})\D{0,1}\s+(\d{7})m*N\s+(\d{6,7})m*E/ 			//Format: ## #######N ######E 
 		var utmRegEx3 = /(\d{6,7})m*E{0,1}\s+(\d{7})m*N{0,1}\s+(\d{1,2})/ 		//Format: ######E #######N ## 
-		var utmRegEx4 = /(\d{1,2})\D{0,1}\s+(\d{6,7})m*E\s+(\d{7})m*N/ 	//Format: ## ######E #######N  
+		var utmRegEx4 = /(\d{1,2})\D{0,1}\s+(\d{6,7})m*E\s+(\d{7})m*N/ 			//Format: ## ######E #######N  
 		var extractStr = "";
 		if(extractArr = utmRegEx5.exec(locStr)){
 			document.getElementById("utmdiv").style.display = "block";
@@ -182,6 +183,10 @@ function analyseLocalityStr(){
 			updateLatDec(f);
 			updateLngDec(f);
 			sourceStr = 'lat/long (DMS) from label';
+		}
+		else if(extractArr = llRegEx3.exec(locStr)){
+			f.decimallatitude.value = extractArr[1];
+			f.decimallongitude.value = extractArr[2];
 		}
 		else if(extractArr = utmRegEx1.exec(locStr)){
 			document.getElementById("utmdiv").style.display = "block";

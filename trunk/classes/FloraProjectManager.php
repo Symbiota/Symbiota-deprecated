@@ -10,7 +10,6 @@ class FloraProjectManager {
 	private $surveyCoord = Array();
 
 	public function __construct(){
-		global $googleMapKey;
 		$this->con = MySQLiConnectionFactory::getCon("readonly");
 		$this->googleUrl = "http://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain&sensor=false";
 	}
