@@ -161,26 +161,12 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="newloanform" action="loans.php" method="post">
 								<fieldset>
 									<legend><b>New Loan</b></legend>
-									<div style="padding-top:4px;">
-										<span style="margin-left:205px;">
-											Entered By:
-										</span>
-										<span style="margin-left:75px;">
-											Processed By:
-										</span>
-									</div>
-									<div style="padding-bottom:2px;">
+									<div style="float:right;padding-bottom:2px;">
 										<span>
-											<b>Loan Number:</b> <input type="text" name="loanIdentifier" maxlength="255" style="width:85px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " disabled />
-										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="createdBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
-										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="processedBy" tabindex="96" maxlength="32" style="width:100px;" value=" " onchange=" " />
+											<b>Loan Number: </b> <input type="text" name="loanIdentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " disabled />
 										</span>
 									</div>
-									<div style="padding-top:4px;">
+									<div style="padding-top:20px;">
 										<span>
 											Sent To:
 										</span>
@@ -201,40 +187,49 @@ header("Content-Type: text/html; charset=".$charset);
 										<span>
 											Requested for:
 										</span>
+										<span style="margin-left:125px;">
+											Entered By:
+										</span>
+										<span style="margin-left:65px;">
+											Processed By:
+										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
 											<input type="text" name="forWhom" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
 										</span>
-										<span style="margin-left:90px;">
-											<b>Specimen Total:</b> <input type="text" name="totalSpecimens" tabindex="100" maxlength="32" style="width:50px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " onchange=" " disabled />
+										<span style="margin-left:20px;">
+											<input type="text" name="createdBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:20px;">
+											<input type="text" name="processedBy" tabindex="96" maxlength="32" style="width:100px;" value=" " onchange=" " />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
 										<span>
 											Date Sent:
 										</span>
-										<span style="margin-left:30px;">
+										<span style="margin-left:40px;">
 											Date Due:
 										</span>
-										<span style="margin-left:30px;">
-											Total Boxes:
+										<span style="margin-left:40px;">
+											# of Boxes:
 										</span>
-										<span style="margin-left:20px;">
+										<span style="margin-left:5px;">
 											Shipping Service:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<input type="text" name="dateSent" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+											<input type="text" name="dateSent" tabindex="100" maxlength="32" style="width:80px;" value=" " onchange=" " />
 										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="dateDue" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
+										<span style="margin-left:10px;">
+											<input type="text" name="dateDue" tabindex="100" maxlength="32" style="width:80px;" value=" " onchange=" " />
 										</span>
-										<span style="margin-left:30px;">
+										<span style="margin-left:10px;">
 											<input type="text" name="totalBoxes" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
 										</span>
-										<span style="margin-left:30px;">
+										<span style="margin-left:10px;">
 											<input type="text" name="shippingMethod" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
 										</span>
 									</div>
@@ -264,6 +259,7 @@ header("Content-Type: text/html; charset=".$charset);
 							</form>
 						</div>
 						<div>
+							<h3>Loan Records</h3>
 							<ul>
 								<?php 
 								$loanList = $loanManager->getLoanList($searchTerm,$displayAll);
