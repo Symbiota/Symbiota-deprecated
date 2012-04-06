@@ -322,6 +322,16 @@ function utm2LatLng(zValue, eValue, nValue, datum){
 
 }
 
+function updateMinElev(minFeetValue){
+	var f = document.georefform;
+	f.minimumelevationinmeters.value = Math.round(minFeetValue*.0305)*10;
+}
+
+function updateMaxElev(maxFeetValue){
+	var f = document.georefform;
+	f.maximumelevationinmeters.value = Math.round(maxFeetValue*.0305)*10;
+}
+
 //Misc functions
 function openMappingAid() {
 	var f = document.georefform;

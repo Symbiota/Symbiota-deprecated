@@ -9,9 +9,9 @@ $county = array_key_exists('county',$_REQUEST)?$_REQUEST['county']:'';
 if(!$country || !$state || !$county){
 	$locArr = explode(";",$locality);
 	$locality = array_pop($locArr);
-	if($locArr) $country = array_shift($locArr);
-	if($locArr) $state = array_shift($locArr);
-	if($locArr) $county = array_shift($locArr);
+	if(!$country && $locArr) $country = array_shift($locArr);
+	if(!$state && $locArr) $state = array_shift($locArr);
+	if(!$county && $locArr) $county = array_shift($locArr);
 }
 if(preg_match('/\d{1,2}[NS]{1}T\s\d{1,2}[EW]{1}R\s\d{1,2}S/',$locality)){
 	$locality = preg_replace('/(\d{1,2}[NS]{1})T\s(\d{1,2}[EW]{1})R\s(\d{1,2})S/', 'T$1 R$2 Sec$3', $locality);

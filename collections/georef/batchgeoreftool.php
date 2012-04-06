@@ -31,6 +31,8 @@ $georeferenceRemarks = array_key_exists('georeferenceremarks',$_POST)?$_POST['ge
 $georeferenceVerificationStatus = array_key_exists('georeferenceverificationstatus',$_POST)?$_POST['georeferenceverificationstatus']:'';
 $minimumElevationInMeters = array_key_exists('minimumelevationinmeters',$_POST)?$_POST['minimumelevationinmeters']:'';
 $maximumElevationInMeters = array_key_exists('maximumelevationinmeters',$_POST)?$_POST['maximumelevationinmeters']:'';
+$minimumElevationInFeet = array_key_exists('minimumelevationinfeet',$_POST)?$_POST['minimumelevationinfeet']:'';
+$maximumElevationInFeet = array_key_exists('maximumelevationinfeet',$_POST)?$_POST['maximumelevationinfeet']:'';
 
 if(!$georeferenceSources) $georeferenceSources = 'georef batch tool '.date('Y-m-d');
 if(!$georeferenceVerificationStatus) $georeferenceVerificationStatus = 'reviewed - high confidence';
@@ -361,6 +363,10 @@ header("Content-Type: text/html; charset=".$charset);
 											<td colspan="4">
 												<input name="minimumelevationinmeters" type="text" value="<?php echo $minimumElevationInMeters; ?>" style="width:50px;" /> to 
 												<input name="maximumelevationinmeters" type="text" value="<?php echo $maximumElevationInMeters; ?>" style="width:50px;" /> meters
+												<span style="margin-left:80px;">
+													<input type="text" value="<?php echo $minimumElevationInFeet; ?>" style="width:50px;" onchange="updateMinElev(this.value)" /> to 
+													<input type="text" value="<?php echo $maximumElevationInFeet; ?>" style="width:50px;" onchange="updateMaxElev(this.value)" /> feet
+												</span>
 											</td>
 										</tr>
 										<tr>
