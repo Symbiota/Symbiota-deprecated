@@ -50,7 +50,7 @@
 			</div>
 
 			<a name="occurrences"></a>
-			<h2>Occurrence Records</h2>
+			<h2>Occurrence Record Use Policy</h2>
 		    <div>
 				<ul>
 					<li>

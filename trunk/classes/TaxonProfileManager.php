@@ -46,7 +46,6 @@ class TaxonProfileManager {
 		//$this->projName = "Arizona";
 		$this->language = $defaultLang;
 		$this->googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
-		//$this->googleUrl = "http://maps.google.com/staticmap?size=256x256&maptype=terrain&sensor=false&key=".$googleMapKey;
  	}
 
  	public function __destruct(){
