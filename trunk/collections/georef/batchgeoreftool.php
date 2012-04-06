@@ -172,7 +172,10 @@ header("Content-Type: text/html; charset=".$charset);
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 										<span style="margin-left:175px;">
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-											<input name="submitaction" type="submit" value="Generate List" />
+											<input name="submitaction" type="submit" value="Generate List" /> 
+											<span id="qworkingspan" style="display:none;">
+												<img src="../../images/workingcircle.gif" />
+											</span>
 										</span>
 									</div>
 								</fieldset> 
@@ -182,7 +185,7 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
 								<div style="float:right;">
 									<span>
-										<a href="#" onclick="geolocateLocality();"><img src="../../images/geolocate.gif" title="Geolocate locality" style="width:18px;" /></a>
+										<a href="#" onclick="geolocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
 										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.jpg" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
@@ -372,6 +375,9 @@ header("Content-Type: text/html; charset=".$charset);
 										<tr>
 											<td colspan="7">
 												<input name="submitaction" type="submit" value="Update Coordinates" />
+												<span id="workingspan" style="display:none;">
+													<img src="../../images/workingcircle.gif" />
+												</span>
 												<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
 												<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
 												<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />

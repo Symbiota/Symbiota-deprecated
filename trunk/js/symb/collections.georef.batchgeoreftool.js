@@ -14,6 +14,7 @@ function verifyQueryForm(f){
 		alert("Please enter a locality term");
 		return false;
 	}
+	document.getElementById("qworkingspan").style.display = "inline";
 	return true;
 }
 
@@ -38,7 +39,7 @@ function verifyGeorefForm(f){
 		alert("Decimal Longitude must be between -180 and 180 degrees");
 		return false;
 	}
-	if(!isNumeric(f.minumumelevationinmeters.value) || !isNumeric(f.maximumelevationinmeters.value)){
+	if(!isNumeric(f.minimumelevationinmeters.value) || !isNumeric(f.maximumelevationinmeters.value)){
 		alert("Elevation field can only contain numeric values");
 		return false;
 	}
@@ -49,6 +50,7 @@ function verifyGeorefForm(f){
 	if(f.coordinateuncertaintyinmeters.value == ""){
 		return confirm('An "Error (in meters)" value is strongly recommended. Select "OK" to submit without entering an error value?');
 	}
+	document.getElementById("workingspan").style.display = "inline";
 	return true;
 }
 
