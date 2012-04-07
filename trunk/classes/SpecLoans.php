@@ -40,7 +40,7 @@ class SpecLoans{
 	public function getLoanDetails($loanId){
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifier, dateSent, totalBoxes, '.
-			'shippingMethod, dateDue, dateClosed, forWhom, description, '.
+			'shippingMethod, dateDue, dateReturned, dateClosed, forWhom, description, '.
 			'notes, createdBy, processedBy, processedByReturn '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
@@ -51,6 +51,7 @@ class SpecLoans{
 				$retArr['totalBoxes'] = $r->totalBoxes;
 				$retArr['shippingMethod'] = $r->shippingMethod;
 				$retArr['dateDue'] = $r->dateDue;
+				$retArr['dateReturned'] = $r->dateReturned;
 				$retArr['dateClosed'] = $r->dateClosed;
 				$retArr['forWhom'] = $r->forWhom;
 				$retArr['description'] = $r->description;
