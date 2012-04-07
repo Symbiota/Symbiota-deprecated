@@ -15,7 +15,7 @@ $occManager = new OccurrenceEditorDeterminations();
 $occManager->setOccId($occId); 
 $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 ?>
-<div id="determdiv" style="">
+<div id="determdiv" style="width:775px;">
 	<div style="text-align:right;width:100%;">
 		<img style="border:0px;width:12px;cursor:pointer;" src="../../images/add.png" onclick="toggle('newdetdiv');" title="Add New Determination" />
 	</div>

@@ -8,8 +8,7 @@ function toggleCoordDiv(){
 	coordObj = document.getElementById("coordaiddiv");
 	if(coordObj.style.display == "none"){
 		document.getElementById("elevaiddiv").style.display = "none";
-		document.getElementById("locextradiv1").style.display = "block";
-		document.getElementById("locextradiv2").style.display = "block";
+		document.getElementById("locextradiv").style.display = "block";
 		coordObj.style.display = "block";
 	}
 	else{
@@ -33,9 +32,46 @@ function openMappingAid() {
 	var latDef = f.decimallatitude.value;
 	var lngDef = f.decimallongitude.value;
 	var zoom = 5;
-	if(latDef && lngDef) zoom = 9;
+	if(latDef && lngDef) zoom = 11;
 	mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 	if (mapWindow.opener == null) mapWindow.opener = self;
+}
+
+function geoLocateLocality(){
+	var f = document.fullform;
+	var country = f.country.value;
+	var state = f.stateprovince.value;
+	if(!state) state = "unknown";
+	var county = f.county.value;
+	if(!county) county = "unknown";
+	var locality = f.locality.value;
+
+	if(!country){
+		alert("Country is blank and it is a required field for GeoLocate");
+	}
+	else if(!locality){
+		alert("Locality is blank and it is a required field for GeoLocate");
+	}
+	else{
+		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
+		if(geolocWindow.opener == null) geolocWindow.opener = self;
+	}
+}
+
+function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
+	document.getElementById("locextradiv").style.display = "block";
+
+	var f = document.fullform;
+	f.decimallatitude.value = latValue;
+	f.decimallatitude.onchange();
+	f.decimallongitude.value = lngValue;
+	f.decimallongitude.onchange();
+	f.coordinateuncertaintyinmeters.value = coordErrValue;
+	f.coordinateuncertaintyinmeters.onchange();
+	f.georeferencesources.value = "GeoLocate";
+	f.georeferencesources.onchange();
+	f.georeferenceverificationstatus.value = "reviewed - high confidence";
+	f.georeferenceverificationstatus.onchange();
 }
 
 function insertUtm(f) {

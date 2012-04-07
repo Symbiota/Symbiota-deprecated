@@ -492,7 +492,7 @@ if($symbUid){
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:3px;">
+												<span style="margin-left:13px;">
 													Occurrence ID
 													<a href="#" onclick="return dwcDoc('occurrenceID')">
 														<img class="dwcimg" src="../../images/qmark.png" />
@@ -504,13 +504,13 @@ if($symbUid){
 												<span style="margin-left:184px;">
 													Number
 												</span>
-												<span style="margin-left:25px;">
+												<span style="margin-left:30px;">
 													Date
 												</span>
 											</div>
 											<div>
 												<span>
-													<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:100px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
+													<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
 												</span>
 												<span>
 													<input type="text" name="occurrenceid" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="occurrenceIdChanged(this.form);" title="Global Unique Identifier (GUID)" />
@@ -683,7 +683,7 @@ if($symbUid){
 												<span style="">
 													Latitude
 												</span>
-												<span style="margin-left:45px;">
+												<span style="margin-left:50px;">
 													Longitude
 												</span>
 												<span style="margin-left:36px;">
@@ -692,13 +692,13 @@ if($symbUid){
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:62px;">
+												<span style="margin-left:80px;">
 													Datum
 													<a href="#" onclick="return dwcDoc('geodeticDatum')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:30px;">
+												<span style="margin-left:35px;">
 													Elevation in Meters
 												</span>
 												<span style="margin-left:47px;">
@@ -725,10 +725,15 @@ if($symbUid){
 													<input type="text" id="decimallongitude" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
 												</span>
 												<span>
-													<input type="text" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
+													<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
 												</span>
-												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
+												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();" title="Google Maps">
 													<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
+												</span>
+												<span>
+													<a href="#" onclick="geoLocateLocality();">
+														<img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" />
+													</a>
 												</span>
 												<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleCoordDiv();" title="Other Coordinate Formats">
 													Tools
@@ -748,24 +753,33 @@ if($symbUid){
 												<span>
 													<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" style="width:100px;" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="fieldChanged('verbatimelevation');" title="" />
 												</span>
-												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('locextradiv1');toggle('locextradiv2');">
+												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('locextradiv');">
 													<img src="../../images/showedit.png" style="width:15px;" />
 												</span>
 											</div>
 											<?php 
-												$locExtraDiv1 = "none";
-												if(array_key_exists("verbatimcoordinates",$occArr) && $occArr["verbatimcoordinates"]){
-													$locExtraDiv1 = "block";
-												}
-												elseif(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
-													$locExtraDiv1 = "block";
-												}
-												elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
-													$locExtraDiv1 = "block";
-												}
-												include_once('includes/geotools.php');
+											include_once('includes/geotools.php');
+											$locExtraDiv = "none";
+											if(array_key_exists("verbatimcoordinates",$occArr) && $occArr["verbatimcoordinates"]){
+												$locExtraDiv = "block";
+											}
+											elseif(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
+												$locExtraDiv = "block";
+											}
+											elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
+												$locExtraDiv = "block";
+											}
+											elseif(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
+												$locExtraDiv = "block";
+											}
+											elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
+												$locExtraDiv = "block";
+											}
+											elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
+												$locExtraDiv = "block";
+											}
 											?>
-											<div id="locextradiv1" style="position:relative;clear:both;display:<?php echo $locExtraDiv1; ?>;">
+											<div id="locextradiv" style="position:relative;clear:both;display:<?php echo $locExtraDiv; ?>;">
 												<div>
 													<span style="">
 														Verbatim Coordinates
@@ -791,20 +805,6 @@ if($symbUid){
 														<input type="text" name="georeferenceprotocol" tabindex="68" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
 													</span>
 												</div>
-											</div>
-											<?php 
-												$locExtraDiv2 = "none";
-												if(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
-													$locExtraDiv2 = "block";
-												}
-												elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
-													$locExtraDiv2 = "block";
-												}
-												elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
-													$locExtraDiv2 = "block";
-												}
-											?>
-											<div id="locextradiv2" style="display:<?php echo $locExtraDiv2; ?>;">
 												<div>
 													<span style="">
 														Georeference Sources
@@ -812,22 +812,22 @@ if($symbUid){
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a>
 													</span>
-													<span style="margin-left:30px;">
+													<span style="margin-left:35px;">
 														Georef Verification Status
 														<a href="#" onclick="return dwcDoc('georeferenceVerificationStatus')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a>
 													</span>
-													<span style="margin-left:10px;">
+													<span style="margin-left:20px;">
 														Georeference Remarks
 													</span>
 												</div>
 												<div>
 													<span>
-														<input type="text" name="georeferencesources" tabindex="70" maxlength="255" style="width:160px;" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
+														<input type="text" name="georeferencesources" tabindex="70" maxlength="255" style="width:170px;" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
 													</span>
 													<span>
-														<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" style="width:160px;" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
+														<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" style="width:170px;" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
 													</span>
 													<span>
 														<input type="text" name="georeferenceremarks" tabindex="74" maxlength="255" style="width:250px;" value="<?php echo array_key_exists('georeferenceremarks',$occArr)?$occArr['georeferenceremarks']:''; ?>" onchange="fieldChanged('georeferenceremarks');" />
@@ -923,11 +923,11 @@ if($symbUid){
 													<a href="#" onclick="return dwcDoc('basisOfRecord')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
-													<input type="text" name="basisofrecord" tabindex="106" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
+													<input type="text" name="basisofrecord" tabindex="106" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
 												</span>
 												<span style="margin-left:10px;">
 													Language:
-													<input type="text" name="language" tabindex="108" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+													<input type="text" name="language" tabindex="108" maxlength="20" style="width:150px;" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 												</span>
 											</div>
 										</fieldset>
@@ -1078,7 +1078,7 @@ if($symbUid){
 								<?php
 								if($occId && $isEditor){
 									?>
-									<div id="admindiv" style="">
+									<div id="admindiv" style="width:775px;">
 										<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
 											<fieldset>
 												<legend>Delete Occurrence Record</legend>

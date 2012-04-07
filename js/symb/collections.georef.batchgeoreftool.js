@@ -124,7 +124,7 @@ function verifyCoordUncertainty(inputObj){
 	}
 }
 
-function geolocateLocality(){
+function geoLocateLocality(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var f = document.queryform;
@@ -132,12 +132,25 @@ function geolocateLocality(){
 		var country = f.qcountry.value;
 		var state = f.qstate.value;;
 		var county = f.qcounty.value;
-		occWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
-		if(occWindow.opener == null) occWindow.opener = self;
+		geolocWindow=open("geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
+		if(geolocWindow.opener == null) geolocWindow.opener = self;
 	}
 	else{
 		alert("Select a locality in list to open that record set in the editor");
 	}
+}
+
+function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
+	var f = document.georefform;
+	f.decimallatitude.value = latValue;
+	f.decimallongitude.value = lngValue;
+	f.coordinateuncertaintyinmeters.value = coordErrValue;
+	var baseStr = f.georeferencesources.value;
+	if(baseStr){
+		var baseTokens = baseStr.split(";"); 
+		baseStr = baseTokens[0]+"; ";
+	}
+	f.georeferencesources.value = baseStr+"GeoLocate";
 }
 
 function analyseLocalityStr(){

@@ -38,33 +38,29 @@ $urlVariables = 'country='.$country.'&state='.$state.'&county='.$county.'&locali
 		}
 	</style>
 	<script type="text/javascript">
-	    function displayMessage(evt) {
+	    function transferCoord(evt) {
 	        if(evt.origin !== "http://www.museum.tulane.edu") {
 				alert("iframe url does not have permision to interact with me");
 	        }
 	        else {
 	            var breakdown = evt.data.split("|");
                 if(breakdown.length == 4){
-					opener.document.georefform.decimallatitude.value = breakdown[0];				//Lat
-					opener.document.georefform.decimallongitude.value = breakdown[1];				//Long
-					opener.document.georefform.coordinateuncertaintyinmeters.value = breakdown[2];	//Uncertainty Radius (meters)
-					//breakdown[3];		//Uncertainty Polygon
-					var baseStr = opener.document.georefform.georeferencesources.value;
-					if(baseStr){
-						var baseTokens = baseStr.split(";"); 
-						baseStr = baseTokens[0]+"; ";
-					}
-					opener.document.georefform.georeferencesources.value = baseStr+"GeoLocate";
+                    if(breakdown[0] == ""){
+                    	alert("There are no data points to tranfer");
+                    }
+                    else{
+	                	opener.geoLocateUpdateCoord(breakdown[0],breakdown[1],breakdown[2]);
+	                    self.close();
+                    }
                 }
 	        }
-            self.close();
 	    }
 	    if(window.addEventListener) {
 	        // For standards-compliant web browsers
-	        window.addEventListener("message", displayMessage, false);
+	        window.addEventListener("message", transferCoord, false);
 	    }
 	    else {
-	        window.attachEvent("onmessage", displayMessage);
+	        window.attachEvent("onmessage", transferCoord);
 	    }
 	</script>
 </head>
