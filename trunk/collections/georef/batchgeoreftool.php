@@ -185,7 +185,7 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
 								<div style="float:right;">
 									<span>
-										<a href="#" onclick="geolocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
+										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
 										<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.jpg" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:18px;" /></a>
@@ -270,7 +270,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</td>
 											<td> = </td>
 											<td>
-												<input id="decimallatitude" name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
+												<input name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
 												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
 													<img src="../../images/world40.gif" style="border:0px;width:13px;" />
 												</span>
@@ -288,14 +288,14 @@ header("Content-Type: text/html; charset=".$charset);
 												</select>
 											</td>
 											<td> = </td>
-											<td><input id="decimallongitude" name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
+											<td><input name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
 												<b>Error (in meters):</b> 
 											</td>
 											<td colspan="2" style="vertical-align:middle">
-												<input name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordinateUncertaintyInMeters; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
+												<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordinateUncertaintyInMeters; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
 												meters
 											</td>
 											<td colspan="2" style="vertical-align:middle">
@@ -340,7 +340,7 @@ header("Content-Type: text/html; charset=".$charset);
 												<b>Sources:</b> 
 											</td>
 											<td colspan="4">
-												<input name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
+												<input id="georeferencesources" name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
 											</td>
 										</tr>
 										<tr>

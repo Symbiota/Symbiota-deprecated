@@ -15,7 +15,7 @@ $occManager->setOccId($occId);
 $imageArr = $occManager->getImageMap();
 
 ?>
-<div id="imagediv" style="">
+<div id="imagediv" style="width:775px;">
 	<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
 		<img style="border:0px;width:12px;" src="../../images/add.png" />
 	</div>
