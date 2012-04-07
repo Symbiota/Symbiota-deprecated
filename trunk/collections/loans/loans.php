@@ -317,24 +317,35 @@ header("Content-Type: text/html; charset=".$charset);
 						<form name="editloanform" action="loans.php" method="post">
 							<fieldset>
 								<legend>Loan Details</legend>
-								
 								<div style="padding-top:4px;">
-										<span style="margin-left:205px;">
+										<span style="margin-left:235px;">
 											Entered By:
 										</span>
-										<span style="margin-left:75px;">
+										<span style="margin-left:70px;">
 											Processed By:
+										</span>
+										<span style="margin-left:50px;">
+											Date Sent:
+										</span>
+										<span style="margin-left:55px;">
+											Date Due:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<b>Loan Number:</b> <input type="text" name="loanIdentifier" maxlength="255" style="width:85px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifier']; ?>" disabled />
+											<b>Loan Number:</b> <input type="text" name="loanIdentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifier']; ?>" disabled />
 										</span>
-										<span style="margin-left:30px;">
+										<span style="margin-left:25px;">
 											<input type="text" name="createdBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdBy']; ?>" onchange=" " />
 										</span>
-										<span style="margin-left:30px;">
+										<span style="margin-left:25px;">
 											<input type="text" name="processedBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedBy']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:25px;">
+											<input type="text" name="dateSent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateSent']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:25px;">
+											<input type="text" name="dateDue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateDue']; ?>" onchange=" " />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
@@ -358,35 +369,19 @@ header("Content-Type: text/html; charset=".$charset);
 										<span>
 											Requested for:
 										</span>
-									</div>
-									<div style="padding-bottom:2px;">
-										<span>
-											<input type="text" name="forWhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forWhom']; ?>" onchange=" " />
+										<span style="margin-left:340px;">
+											# of Boxes:
 										</span>
-										<span style="margin-left:90px;">
-											<b>Specimen Total:</b> <input type="text" name="totalSpecimens" tabindex="100" maxlength="32" style="width:50px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " onchange=" " disabled />
-										</span>
-									</div>
-									<div style="padding-top:4px;">
-										<span>
-											Date Sent:
-										</span>
-										<span style="margin-left:30px;">
-											Date Due:
-										</span>
-										<span style="margin-left:30px;">
-											Total Boxes:
-										</span>
-										<span style="margin-left:20px;">
+										<span style="margin-left:25px;">
 											Shipping Service:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<input type="text" name="dateSent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateSent']; ?>" onchange=" " />
+											<input type="text" name="forWhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forWhom']; ?>" onchange=" " />
 										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="dateDue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateDue']; ?>" onchange=" " />
+										<span style="margin-left:25px;">
+											<b>Specimen Total:</b> <input type="text" name="totalSpecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " onchange=" " disabled />
 										</span>
 										<span style="margin-left:30px;">
 											<input type="text" name="totalBoxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalBoxes']; ?>" onchange=" " />
@@ -399,16 +394,39 @@ header("Content-Type: text/html; charset=".$charset);
 										<span>
 											Loan Description:
 										</span>
-										<span style="margin-left:150px;">
+										<span style="margin-left:270px;">
 											Notes:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<textarea name="description" rows="10" style="width:200px;resize:vertical;" onchange=" "><?php echo $loanArr['description']; ?></textarea>
+											<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['description']; ?></textarea>
 										</span>
 										<span style="margin-left:40px;">
-											<textarea name="notes" rows="10" style="width:200px;resize:vertical;" onchange=" "><?php echo $loanArr['notes']; ?></textarea>
+											<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['notes']; ?></textarea>
+										</span>
+									</div>
+									<hr />
+									<div style="padding-top:4px;">
+										<span>
+											Date Returned:
+										</span>
+										<span style="margin-left:30px;">
+											Date Closed:
+										</span>
+										<span style="margin-left:40px;">
+											Ret. Processed By:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" name="dateReturned" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateReturned']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:25px;">
+											<input type="text" name="dateClosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateClosed']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:25px;">
+											<input type="text" name="processedByReturn" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedByReturn']; ?>" onchange=" " />
 										</span>
 									</div>
 									<div style="padding-top:8px;">
