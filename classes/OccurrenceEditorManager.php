@@ -334,12 +334,17 @@ class OccurrenceEditorManager {
 				if(in_array('sciname',$editArr)){
 					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
 					$rsTid = $this->conn->query($sqlTid);
+					$newTid = '';
 					if($r = $rsTid->fetch_object()){
-						$sql .= ',tidinterpreted = '.$r->tid;
+						$newTid = $r->tid;
+						$sql .= ',tidinterpreted = '.$newTid;
 					}
 					else{
 						$sql .= ',tidinterpreted = NULL';
 					}
+					//Remap images
+					$sqlImgTid = 'UPDATE images SET tid = '.($newTid?$newTid:'NULL').' WHERE occid = ('.$occArr['occid'].')';
+					$this->conn->query($sqlImgTid);
 				}
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
 				//echo $sql;

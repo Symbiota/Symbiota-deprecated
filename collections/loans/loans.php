@@ -24,7 +24,7 @@ if($isEditor){
 	if($formSubmit){
 		if($formSubmit == 'Create Loan'){
 			$statusStr = $loanManager->createNewLoan($_POST);
-			$loanId = $loanManager->getLoanId;
+			$loanId = $loanManager->getLoanId();
 		}
 		elseif($formSubmit == 'Submit Edits'){
 			$statusStr = $loanManager->editLoan($_POST);
@@ -128,7 +128,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<li><a href="#loanindiv">Incoming Loans</a></li>
 						<li><a href="#requestdiv">Request a Loan</a></li>
 					</ul>
-					<div id="loanoutdiv">
+					<div id="loanoutdiv" style="">
 						<div style="float:right;">
 							<form name='optionform' action='loans.php' method='post'>
 								<fieldset>
@@ -163,7 +163,8 @@ header("Content-Type: text/html; charset=".$charset);
 									<legend><b>New Loan</b></legend>
 									<div style="float:right;padding-bottom:2px;">
 										<span>
-											<b>Loan Number: </b> <input type="text" name="loanIdentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " disabled />
+											<b>Loan Number: </b> 
+											<input type="text" name="loanidentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
 									<div style="padding-top:20px;">
@@ -196,7 +197,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<input type="text" name="forWhom" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
+											<input type="text" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
 										</span>
 										<span style="margin-left:20px;">
 											<input type="text" name="createdBy" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
@@ -230,7 +231,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="totalBoxes" tabindex="100" maxlength="32" style="width:50px;" value=" " onchange=" " />
 										</span>
 										<span style="margin-left:10px;">
-											<input type="text" name="shippingMethod" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
+											<input type="text" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value=" " onchange=" " />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
@@ -278,6 +279,7 @@ header("Content-Type: text/html; charset=".$charset);
 								?>
 							</ul>
 						</div>
+						<div style="clear:both;">&nbsp;</div>
 					</div>
 					<div id="reportdiv" style="height:500px;">
 						List loans outstanding, Invoices, mailing labels, etc
@@ -355,11 +357,11 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<select name="reqInstitution" style="width:400px;">
+											<select name="iidreceiver" style="width:400px;">
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
 												foreach($instArr as $k => $v){
-													echo '<option value="'.$k.'">'.$v.'</option>';
+													echo '<option value="'.$k.'" '.($k==$loanArr['iid']?'SELECTED':'').'>'.$v.'</option>';
 												}
 												?>
 											</select>
@@ -431,6 +433,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 										<input name="formsubmit" type="submit" value="Submit Edits" />
 									</div>
 							</fieldset>

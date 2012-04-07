@@ -67,21 +67,32 @@ class SpecLoans{
 
 	public function editLoan($pArr){
 		$statusStr = '';
-		$sql = '';
-		foreach($pArr as $k => $v){
-			$sql .= ','.$k.'="'.$v.'"';
+		$loanId = $pArr['loanid'];
+		if(is_numeric($loanId)){
+			$sql = '';
+			foreach($pArr as $k => $v){
+				if($k != 'formsubmit' && $k != 'loanid' && $k != 'collid'){
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+				}
+			}
+			$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE (loanid = '.$loanId.')';
+			if($this->conn->query($sql)){
+				$statusStr = 'SUCCESS: edits submitted';
+			}
+			else{
+				$statusStr = 'ERROR: Editing of loan failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
 		}
-		$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE loanid = '.$loanId;
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR: Editing of loan failed: '.$this->conn->error.'<br/>';
-			$statusStr .= 'SQL: '.$sql;
-		}
+		return $statusStr;
 	}
 	
 	public function createNewLoan($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloans(collid) '.
-			'VALUES("1")';
+		$sql = 'INSERT INTO omoccurloans(collid,loanidentifier,forwhom,shippingmethod) '.
+			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifier']).'","'.$this->cleanString($pArr['forwhom']).'","'.
+			$this->cleanString($pArr['shippingmethod']).'")';
+		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
 		}
@@ -89,6 +100,7 @@ class SpecLoans{
 			$statusStr = 'ERROR: Creation of new loan failed: '.$this->conn->error.'<br/>';
 			$statusStr .= 'SQL: '.$sql;
 		}
+		return $statusStr;
 	}
 	
 	public function getLoansIn(){
@@ -96,7 +108,7 @@ class SpecLoans{
 		$sql = 'SELECT loanid, IFNULL(loanIdentifierReceiver, loanIdentifier) AS loanidentifier, datesent, dateclosed, '. 
 			'forwhom, description, datedue '.
 			'FROM omoccurloans l INNER JOIN institutions i ON l.iidreceiving = i.iid '.
-			'WHERE i.collid = '.$this->collId;
+			'WHERE (i.collid = '.$this->collId.')';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr['loanid']['loanidentifier'] = $r->loanidentifier;
@@ -134,6 +146,12 @@ class SpecLoans{
 	
 	public function getLoanId(){
 		return $this->loanId;
+	}
+	
+	protected function cleanString($inStr){
+		$retStr = trim($inStr);
+		$retStr = $this->conn->real_escape_string($retStr);
+		return $retStr;
 	}
 }
 ?>
