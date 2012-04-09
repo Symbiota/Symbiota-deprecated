@@ -39,26 +39,27 @@ class SpecLoans{
 
 	public function getLoanDetails($loanId){
 		$retArr = array();
-		$sql = 'SELECT loanid, loanidentifier, dateSent, totalBoxes, '.
-			'shippingMethod, dateDue, dateReturned, dateClosed, forWhom, description, '.
-			'notes, createdBy, processedBy, processedByReturn '.
+		$sql = 'SELECT loanid, loanidentifier, iidreceiver, datesent, totalboxes, '.
+			'shippingmethod, datedue, datereturned, dateclosed, forwhom, description, '.
+			'notes, createdby, processedby, processedbyreturn '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr['loanidentifier'] = $r->loanidentifier;
-				$retArr['dateSent'] = $r->dateSent;
-				$retArr['totalBoxes'] = $r->totalBoxes;
-				$retArr['shippingMethod'] = $r->shippingMethod;
-				$retArr['dateDue'] = $r->dateDue;
-				$retArr['dateReturned'] = $r->dateReturned;
-				$retArr['dateClosed'] = $r->dateClosed;
-				$retArr['forWhom'] = $r->forWhom;
+				$retArr['iidreceiver'] = $r->iidreceiver;
+				$retArr['datesent'] = $r->datesent;
+				$retArr['totalboxes'] = $r->totalboxes;
+				$retArr['shippingmethod'] = $r->shippingmethod;
+				$retArr['datedue'] = $r->datedue;
+				$retArr['datereturned'] = $r->datereturned;
+				$retArr['dateclosed'] = $r->dateclosed;
+				$retArr['forwhom'] = $r->forwhom;
 				$retArr['description'] = $r->description;
 				$retArr['notes'] = $r->notes;
-				$retArr['createdBy'] = $r->createdBy;
-				$retArr['processedBy'] = $r->processedBy;
-				$retArr['processedByReturn'] = $r->processedByReturn;
+				$retArr['createdby'] = $r->createdby;
+				$retArr['processedby'] = $r->processedby;
+				$retArr['processedbyreturn'] = $r->processedbyreturn;
 			}
 			$rs->close();
 		}
@@ -77,7 +78,7 @@ class SpecLoans{
 			}
 			$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE (loanid = '.$loanId.')';
 			if($this->conn->query($sql)){
-				$statusStr = 'SUCCESS: edits submitted';
+				$statusStr = 'SUCCESS: information saved';
 			}
 			else{
 				$statusStr = 'ERROR: Editing of loan failed: '.$this->conn->error.'<br/>';
@@ -89,9 +90,9 @@ class SpecLoans{
 	
 	public function createNewLoan($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloans(collid,loanidentifier,forwhom,shippingmethod) '.
-			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifier']).'","'.$this->cleanString($pArr['forwhom']).'","'.
-			$this->cleanString($pArr['shippingmethod']).'")';
+		$sql = 'INSERT INTO omoccurloans(collid,loanidentifier,iidreceiver,createdby) '.
+			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifier']).'","'.$this->cleanString($pArr['reqinstitution']).'",
+			"'.$this->cleanString($pArr['createdby']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
@@ -101,6 +102,21 @@ class SpecLoans{
 			$statusStr .= 'SQL: '.$sql;
 		}
 		return $statusStr;
+	}
+	
+	public function getSpecList($loanId){
+		$retArr = array();
+		$sql = 'SELECT o.catalognumber, o.sciname '.
+			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
+			'WHERE l.loanid = '.$loanId;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->loanid]['catalognumber'] = $r->catalognumber;
+				$retArr[$r->loanid]['sciname'] = $r->sciname;
+			}
+			$rs->close();
+		}
+		return $retArr;
 	}
 	
 	public function getLoansIn(){
