@@ -104,19 +104,69 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
-	public function getSpecList($loanId){
+	public function getSpecTotal($loanId){
 		$retArr = array();
-		$sql = 'SELECT o.catalognumber, o.sciname '.
-			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
-			'WHERE l.loanid = '.$loanId;
+		$sql = 'SELECT loanid, COUNT(loanid) AS speccount '.
+			'FROM omoccurloanslink '.
+			'WHERE loanid = '.$loanId.' '.
+			'GROUP BY loanid';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->loanid]['catalognumber'] = $r->catalognumber;
-				$retArr[$r->loanid]['sciname'] = $r->sciname;
+				$retArr['speccount'] = $r->speccount;
 			}
 			$rs->close();
 		}
 		return $retArr;
+	} 
+	
+	public function getSpecList($loanId){
+		$retArr = array();
+		$sql = 'SELECT l.loanid, l.occid, o.catalognumber, o.sciname '.
+			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
+			'WHERE l.loanid = '.$loanId.' '.
+			'ORDER BY o.catalognumber';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
+				$retArr[$r->occid]['sciname'] = $r->sciname;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	} 
+	
+	public function getOccID($collId,$catNum){
+		$statusStr = '';
+		$sql = 'SELECT occid '.
+			'FROM omoccurrences '.
+			'WHERE collid = '.$collId.' AND catalognumber = '.$catNum.' ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['occid'] = $r->occid;
+			}
+			$rs->close();
+		}
+		return $statusStr;
+	}
+	
+	public function addSpecimen($pArr){
+		$statusStr = '';
+		$loanId = $this->cleanString($pArr['loanid']);
+		$collId = $this->cleanString($pArr['collid']);
+		$catNum = $this->cleanString($pArr['catalognumber']);
+		$occId = $this->getOccID($collId,$catNum);
+		$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
+			'VALUES('.$loanId.','.$occId['occid'].') ';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$statusStr = 'SUCCESS: Specimen Added';
+		}
+		else{
+			$statusStr = 'ERROR: Adding of specimen failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
 	}
 	
 	public function getLoansIn(){
