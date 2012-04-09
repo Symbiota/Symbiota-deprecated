@@ -26,6 +26,10 @@ if($isEditor){
 			$statusStr = $loanManager->createNewLoan($_POST);
 			$loanId = $loanManager->getLoanId();
 		}
+		elseif($formSubmit == 'Add Specimen'){
+			$statusStr = $loanManager->addSpecimen($_POST);
+			$loanId = $loanManager->getLoanId();
+		}
 		elseif($formSubmit == 'Save'){
 			$statusStr = $loanManager->editLoan($_POST);
 		}
@@ -55,6 +59,18 @@ header("Content-Type: text/html; charset=".$charset);
 			$('#tabs').tabs();
 
 		});
+		
+		function selectAll(cb){
+			boxesChecked = true;
+			if(!cb.checked){
+				boxesChecked = false;
+			}
+			var dbElements = document.getElementsByName("occid[]");
+			for(i = 0; i < dbElements.length; i++){
+				var dbElement = dbElements[i];
+				dbElement.checked = boxesChecked;
+			}
+		}
 
 		function toggle(target){
 			var objDiv = document.getElementById(target);
@@ -93,14 +109,14 @@ header("Content-Type: text/html; charset=".$charset);
 			echo "<div class='navpath'>";
 			echo "<a href='../../index.php'>Home</a> &gt; ";
 			echo $collections_loans_indexCrumbs;
-			echo " <b>Loan Management</b>";
+			echo "<a href='loans.php?collid=1'> <b>Loan Management</b></a>";
 			echo "</div>";
 		}
 	}
 	else{
 		echo "<div class='navpath'>";
 		echo "<a href='../../index.php'>Home</a> &gt; ";
-		echo "<b>Loan Management</b>";
+		echo "<a href='loans.php?collid=1'> <b>Loan Management</b></a>";
 		echo "</div>";
 	}
 	?>
@@ -124,9 +140,10 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="#loanoutdiv">Outgoing Loans</a></li>
-						<li><a href="#reportdiv">Reports</a></li>
 						<li><a href="#loanindiv">Incoming Loans</a></li>
 						<li><a href="#requestdiv">Request a Loan</a></li>
+						<li><a href="#exchangediv">Gifts/Exchanges</a></li>
+						<li><a href="#reportdiv">Reports</a></li>
 					</ul>
 					<div id="loanoutdiv" style="">
 						<div style="float:right;">
@@ -200,40 +217,45 @@ header("Content-Type: text/html; charset=".$charset);
 							</form>
 						</div>
 						<div>
-							<h3>Loan Records</h3>
-							<ul>
-								<?php 
-								$loanList = $loanManager->getLoanList($searchTerm,$displayAll);
-								if($loanList){
-									foreach($loanList as $k => $loanArr){
-										echo '<li>';
-										echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
-										echo $loanArr['loanidentifier'];
-										echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
-										echo '</li>';
-									}
+							<?php 
+							$loanList = $loanManager->getLoanList($searchTerm,$displayAll);
+							if($loanList){
+								echo '<h3>Outgoing Loan Records</h3>';
+								echo '<ul>';
+								foreach($loanList as $k => $loanArr){
+									echo '<li>';
+									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
+									echo $loanArr['loanidentifier'];
+									echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
+									echo '</li>';
 								}
-								else{
-									echo '<div style="font-weight:bold;font-size:120%;">There are no loans registered for this collection</div>';
-								}
-								?>
-							</ul>
+								echo '</ul>';
+							}
+							else{
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans registered for this collection</div>';
+							}
+							?>
 						</div>
 						<div style="clear:both;">&nbsp;</div>
 					</div>
-					<div id="reportdiv" style="height:500px;">
-						List loans outstanding, Invoices, mailing labels, etc
-						<?php 
-						
-						?>
-					</div>
-					<div id="loanindiv" style="height:500px;">
+					<div id="loanindiv" style="height:50px;">
 						List all loans-in 
 						<?php 
 						
 						?>
 					</div>
-					<div id="requestdiv" style="height:500px;">
+					<div id="requestdiv" style="height:50px;">
+						<?php 
+						
+						?>
+					</div>
+					<div id="exchangediv" style="height:50px;">
+						<?php 
+						
+						?>
+					</div>
+					<div id="reportdiv" style="height:50px;">
+						List loans outstanding, Invoices, mailing labels, etc
 						<?php 
 						
 						?>
@@ -253,6 +275,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<?php 
 						//Show loan details
 						$loanArr = $loanManager->getLoanDetails($loanId);
+						$specTotal = $loanManager->getSpecTotal($loanId);
 						//$loanDetails = $loanManager->getLoanDetails($loanId);
 						//foreach($loanDetails as $k => $loanArr){
 						?>
@@ -323,7 +346,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value=" " onchange=" " disabled />
+											<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($specTotal?$specTotal['speccount']:0);?>" onchange=" " disabled />
 										</span>
 										<span style="margin-left:30px;">
 											<input type="text" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
@@ -383,23 +406,58 @@ header("Content-Type: text/html; charset=".$charset);
 						?>
 					</div>
 					<div id="addspecdiv">
-						<h3>Specimens on Loan</h3>
-							<table>
-								<?php 
-								$specList = $loanManager->getSpecList($loanId);
-								if($specList){
-									foreach($specList as $k => $specArr){
-										echo '<tr>';
-										echo '<td>'.$specArr['catalognumber'].'</td>';
-										echo '<td>'.$specArr['sciname'].'</td>';
-										echo '</tr>';
-									}
-								}
-								else{
-									echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan</div>';
-								}
-								?>
-							</table>
+					<div style="float:right;margin:10px;">
+							<a href="#" onclick="toggle('newspecdiv')">
+								<img src="../../images/add.png" alt="Create New Loan" />
+							</a>
+						</div>
+						<div id="newspecdiv" style="display:none;">
+							<form name="addspecform" action="loans.php" method="post">
+								<fieldset>
+									<legend><b>Add Specimen</b></legend>
+									<div style="padding-bottom:2px;">
+										<span>
+											<b>Catalog Number: </b> 
+											<input type="text" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+										</span>
+									</div>
+									<div style="padding-top:8px;">
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+										<input name="formsubmit" type="submit" value="Add Specimen" />
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<?php 
+						$specList = $loanManager->getSpecList($loanId);
+						if($specList){
+						?>
+							<h3>Specimens on Loan</h3>
+							<div style="margin-top: 15px; margin-left: 15px;">
+				         		<input name="" value="" type="checkbox" onclick="selectAll(this);" />
+				         		Select/Deselect all Specimens
+				        	</div>
+							<table class="styledtable">
+							<th style="width:25px;text-align:center;"> </th>
+							<th style="width:150px;text-align:center;">Catalog Number</th>
+							<th style="width:400px;text-align:center;">Scientific Name</th>
+						<?php
+							foreach($specList as $k => $specArr){
+								echo '<tr>';
+								echo '<td>';
+								echo '<input name="occid[]" type="checkbox" value=" " />';
+								echo '</td>';
+								echo '<td>'.$specArr['catalognumber'].'</td>';
+								echo '<td>'.$specArr['sciname'].'</td>';
+								echo '</tr>';
+							}
+							echo '</table>';
+						}
+						else{
+							echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
+						}
+						?>
 						<?php 
 						//Add specimens to loan
 						 
