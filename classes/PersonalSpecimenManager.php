@@ -5,7 +5,8 @@ class PersonalSpecimenManager {
 
 	private $conn;
 	private $collId;
-	private $obsProjArr = array();
+	private $collName;
+	private $collType;
 	private $uid;
 
 	function __construct() {
@@ -15,7 +16,7 @@ class PersonalSpecimenManager {
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
 	public function getObservationArr(){
 		global $userRights;
 		$retArr = array();
@@ -45,7 +46,7 @@ class PersonalSpecimenManager {
 				$sql .= 'collid IN('.substr($collIdStr,1).') ';
 			}
 			$sql .= 'ORDER BY collectionname';
-			echo $sql;
+			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					$retArr[$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
@@ -73,16 +74,26 @@ class PersonalSpecimenManager {
 	public function setUid($id){
 		$this->uid = $id;
 	}
-	
+
 	public function setCollId($collId){
 		$this->collId = $collId;
-		$sql = 'SELECT collectionname FROM omcollections WHERE collid = '.$collId;
+		$sql = 'SELECT collectionname, colltype FROM omcollections WHERE collid = '.$collId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$this->obsProjArr['collname'] = $r->collectionname;
+				$this->collName = $r->collectionname;
+				$this->collType = $r->colltype;
 			}
 			$rs->close();
 		}
 	}
+
+	public function getCollName(){
+		return $this->collName;
+	}
+
+	public function getCollType(){
+		return $this->collType;
+	}
+
 }
 ?> 

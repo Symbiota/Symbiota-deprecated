@@ -225,6 +225,7 @@ $mapManager = new OccurrenceMapManager();
 		}
 		newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 		if (newWindow.opener == null) newWindow.opener = self;
+		setTimeout(function () { newWindow.focus(); }, 0.5);
 	}
       //]]>
     </script>
