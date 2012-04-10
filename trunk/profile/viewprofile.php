@@ -143,14 +143,14 @@ if(isset($profile_viewprofileCrumbs)){
 		?>
 		<div id="tabs" style="margin:10px;">
 		    <ul>
-		    <?php
-		    if($floraModIsActive){ 
-		    	?>
-		        <li><a href="#checklistdiv">Species Checklists</a></li>
-		        <?php
-		    } 
-		    ?>
-		        <li><a href="personalspec.php?userid=<?php echo $userId; ?>">Specimen Management</a></li>
+			    <?php
+			    if($floraModIsActive){ 
+			    	?>
+			        <li><a href="#checklistdiv">Species Checklists</a></li>
+			        <?php
+			    } 
+			    ?>
+		        <li><a href="personalspecmenu.php">Specimen Management</a></li>
 		        <li><a href="#profilediv">Profile Details</a></li>
 		    </ul>
 		    <?php

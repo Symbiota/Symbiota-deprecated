@@ -1,7 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
  
- class RareSpeciesManager {
+class RareSpeciesManager {
     
  	private $con;
     

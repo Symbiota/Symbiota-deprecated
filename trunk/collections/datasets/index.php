@@ -12,7 +12,12 @@ $datasetManager->setCollId($collId);
 $isEditor = 0;
 $occArr = array();
 if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+	$datasetManager->setSymbUid($symbUid);
+	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+		$datasetManager->setIsAdmin(1);
+		$isEditor = 1;
+	}
+	if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 		$isEditor = 1;
 	}
 	if($isEditor){
@@ -21,7 +26,6 @@ if($symbUid){
 		}
 	}
 }
-
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -107,7 +111,6 @@ if($symbUid){
 		</script>
 	</head>
 	<body onload="init()">
-	
 	<?php
 	$displayLeftMenu = (isset($collections_datasets_indexMenu)?$collections_datasets_indexMenu:false);
 	include($serverRoot."/header.php");
@@ -129,6 +132,7 @@ if($symbUid){
 		<?php 
 		if($symbUid){
 			if($isEditor){
+				echo '<h2>'.$datasetManager->getCollName().'</h2>';
 				?>
 				<form name="datasetqueryform" action="index.php" method="post" onsubmit="return validateQueryForm(this)">
 					<fieldset>

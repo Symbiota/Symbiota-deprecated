@@ -25,17 +25,14 @@ function initImageTool(imgId){
 		var portHeight = 400;
 		var portXyCookie = getCookie("symbimgport");
 		if(portXyCookie){
-			portWidth = portXyCookie.substr(0,portXyCookie.indexOf(":"));
-			portHeight = portXyCookie.substr(portXyCookie.indexOf(":")+1);
+			portWidth = parseInt(portXyCookie.substr(0,portXyCookie.indexOf(":")));
+			portHeight = parseInt(portXyCookie.substr(portXyCookie.indexOf(":")+1));
 		}
 		$(function() {
 			$(img).imagetool({
 				maxWidth: 6000
 				,viewportWidth: portWidth
 		        ,viewportHeight: portHeight
-		        ,imageWidth: 3500
-		        ,imageHeight: 5200
-		        ,change: function(event, dim) {}
 			});
 		});
 	}

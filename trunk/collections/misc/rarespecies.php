@@ -117,8 +117,8 @@ if($editable){
 	include($serverRoot.'/header.php');
 	if(isset($collections_misc_rarespeciesCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
-		echo $collections_misc_rarespeciesCrumbs;
+		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+		echo $collections_misc_rarespeciesCrumbs." &gt;&gt;";
 		echo " <b>Sensitive Species for Masking Locality Details</b>";
 		echo "</div>";
 	}

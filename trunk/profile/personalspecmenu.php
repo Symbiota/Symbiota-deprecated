@@ -51,28 +51,50 @@ if($symbUid){
 		<?php 
 	}
 	?>
-	<div>
-		<form name="obtionsform" action="personalspec.php" method="post">
-			Project: 
-			<select name="collid" onchange="this.form.submit()">
-				<?php 
-				foreach($collArr as $k => $v){
-					echo '<option value="'.$k.'" '.($collId==$k?'SELECTED':'').'>'.$v.'</option>'."<br/>";
-				}
-				?>
-			</select>
+	<div style="float:right;">
+		<form name="obtionsform" action="viewprofile.php" method="post">
+			<fieldset>
+				<legend><b>Project:</b></legend> 
+				<select name="collid" onchange="this.form.submit()">
+					<?php 
+					foreach($collArr as $k => $v){
+						echo '<option value="'.$k.'" '.($collId==$k?'SELECTED':'').'>'.$v.'</option>'."<br/>";
+					}
+					?>
+				</select>
+			</fieldset>
 		</form>
 	</div>
-	<div style="margin:10px;">
+	<div style="float:left;margin-top:20px">
 		<b>Total Record Count:</b> <?php echo $specHandler->getRecordCount(); ?>
 	</div>
-	<div>
+	<div style="clear:both;">
 		<fieldset style="margin:15px;">
 			<legend style="font-weight:bold;">Main Menu</legend>
 			<ul>
 				<li>Display records</li>
-				<li><a href="">Add a new record</a></li>
-				<li><a href="">Submit image vouchered observation</a></li>
+				<li>
+					<a href="../collections/editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
+						Add a new record
+					</a>
+				</li>
+				<li>
+					<a href="../collections/datasets/index.php?collid=<?php echo $collId; ?>">
+						Print Labels
+					</a>
+				</li>
+				
+				<?php
+				if(stripos($specHandler->getCollType(),'observations') !== 'false'){
+					?>
+					<li>
+						<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
+							Submit image vouchered observation
+						</a>
+					</li>
+					<?php
+				}
+				?>
 				<li>Import csv file</li>
 				<li>Backup file download (CSV extract)</li>
 			</ul>

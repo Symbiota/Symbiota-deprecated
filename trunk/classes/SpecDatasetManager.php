@@ -5,9 +5,11 @@ class SpecDatasetManager {
 
 	private $conn;
 	private $collId;
-	private $collMap = Array();
-	private $occurrenceMap = Array();
+	private $collName;
+	private $collType;
+	private $symbUid;
 	private $occSql;
+	private $isAdmin = 0;
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -27,12 +29,6 @@ class SpecDatasetManager {
 
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
-	}
-	
-	public function setCollId($id){
-		if(is_numeric($id)){
-			$this->collId = $this->conn->real_escape_string($id);
-		}
 	}
 
 	public function queryOccurrences(){
@@ -216,17 +212,60 @@ class SpecDatasetManager {
 		}
 		return $sql;
 	}
-	
+
 	public function getLabelProjects(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT labelproject FROM omoccurrences '.
-			'WHERE labelproject IS NOT NULL AND collid = '.$this->collId.' ORDER BY labelproject';
+		$sql = 'SELECT DISTINCT labelproject, observeruid FROM omoccurrences '.
+			'WHERE labelproject IS NOT NULL AND collid = '.$this->collId.' ';
+		if(!$this->isAdmin){
+			$sql .= 'AND observeruid = '.$this->symbUid.' ';
+		}
+		$sql .= 'ORDER BY labelproject';
 		$rs = $this->conn->query($sql);
+		$altArr = array();
 		while($r = $rs->fetch_object()){
-			$retArr[] = $r->labelproject;
+			if($this->symbUid == $r->observeruid){
+				$retArr[] = $r->labelproject;
+			}
+			else{
+				$altArr[] = $r->labelproject;
+			}
 		}
 		$rs->close();
+		if($altArr){
+			if($retArr) $retArr[] = '------------------';
+			$retArr = array_merge($retArr,$altArr);
+		}
 		return $retArr;
+	}
+
+	public function setCollId($collId){
+		$this->collId = $collId;
+		$sql = 'SELECT institutioncode, collectioncode, collectionname, colltype '.
+			'FROM omcollections WHERE collid = '.$collId;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$this->collName = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?':'.$r->collectioncode:'').')';
+				$this->collType = $r->colltype;
+			}
+			$rs->close();
+		}
+	}
+
+	public function getCollName(){
+		return $this->collName;
+	}
+
+	public function getCollType(){
+		return $this->collType;
+	}
+
+	public function setSymbUid($uid){
+		$this->symbUid = $uid;
+	}
+	
+	public function setIsAdmin($isAdmin){
+		$this->isAdmin = $isAdmin;
 	}
 
 	protected function cleanStr($str){
