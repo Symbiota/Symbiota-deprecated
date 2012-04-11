@@ -208,7 +208,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
 		
 			    	$dispName = $collectionData["collectionname"];
-			        $icon = $collectionData["icon"];
+					$icon = (substr($collectionData["icon"],0,6)=='images'?'../':'').$collectionData["icon"]; 
 			        ?>
 					<tr>
 						<td colspan='4'>
@@ -231,7 +231,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 						<tr>
 							<td rowspan="4" width='60' valign='top' align='center'>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-			                    	<img align='bottom' height='25' width='25' src='../<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
+			                    	<img align='bottom' height='25' width='25' src='<?php echo $icon; ?>' title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
 			                    </a>
 			                    <div style='font-weight:bold;font-size:75%;'>
 			                    	<?php 

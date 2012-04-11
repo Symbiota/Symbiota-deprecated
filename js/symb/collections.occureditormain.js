@@ -37,14 +37,20 @@ $(document).ready(function() {
 	},
 	{ minLength: 3, autoFocus: true });
 
+	$("#ffexstitle").autocomplete({ 
+		source: "rpc/getexstitlesuggest.php"
+	},
+	{ minLength: 3 });
+
+
 	//Misc fields with lookups
 	$("#ffcountry").autocomplete( 
 		{ source: countryArr },
 		{ minLength: 1, autoFocus: true } 
 	);
 
-	$("#ffstate").autocomplete(
-		{source: function( request, response ) {
+	$("#ffstate").autocomplete({
+		source: function( request, response ) {
 			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
 		}},
 		{ minLength: 2, autoFocus: true, matchContains: false }
@@ -113,6 +119,11 @@ function catalogNumberChanged(f){
 		}
 		var oid = f.occid.value;
 		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + oid;
+		
+		document.getElementById("dupespan").style.display = "block";
+		document.getElementById("dupesearchspan").style.display = "block";
+		document.getElementById("dupenonespan").style.display = "none";
+
 		cnXmlHttp.onreadystatechange=function(){
 			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
@@ -121,6 +132,16 @@ function catalogNumberChanged(f){
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupespan").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupenonespan").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenonespan").style.display = "none";
+						document.getElementById("dupespan").style.display = "none";
+						}, 3000);
 				}
 			}
 		};
@@ -141,6 +162,11 @@ function occurrenceIdChanged(f){
 	  	}
 		var oid = f.occid.value;
 		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue + "&collid=" + collId + "&occid=" + oid;
+
+		document.getElementById("dupespan").style.display = "block";
+		document.getElementById("dupesearchspan").style.display = "block";
+		document.getElementById("dupenonespan").style.display = "none";
+		
 		oiXmlHttp.onreadystatechange=function(){
 			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
 				var resObj = eval('(' + oiXmlHttp.responseText + ')')
@@ -149,6 +175,16 @@ function occurrenceIdChanged(f){
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupespan").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupenonespan").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenonespan").style.display = "none";
+						document.getElementById("dupespan").style.display = "none";
+						}, 3000);
 				}
 			}
 		};
@@ -169,6 +205,11 @@ function otherCatalogNumbersChanged(f){
 	  	}
 		var oid = f.occid.value;
 		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + oid;
+
+		document.getElementById("dupespan").style.display = "block";
+		document.getElementById("dupesearchspan").style.display = "block";
+		document.getElementById("dupenonespan").style.display = "none";
+
 		xmlHttp.onreadystatechange=function(){
 			if(xmlHttp.readyState==4 && xmlHttp.status==200){
 				var resObj = eval('(' + xmlHttp.responseText + ')')
@@ -177,6 +218,16 @@ function otherCatalogNumbersChanged(f){
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupespan").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearchspan").style.display = "none";
+					document.getElementById("dupenonespan").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenonespan").style.display = "none";
+						document.getElementById("dupespan").style.display = "none";
+						}, 3000);
 				}
 			}
 		};
