@@ -115,7 +115,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 		if($occArr){
 			?>
 			<div style="float:left;padding:15px;text-align:center;font-weight:bold;width:60px;">
-				<img border='1' height='50' width='50' src='../../<?php echo $occArr['icon']; ?>'/><br/>
+				<img border='1' height='50' width='50' src='<?php echo (substr($occArr["icon"],0,6)=='images'?'../../':'').$occArr['icon']; ?>'/><br/>
 				<?php 
 				echo $occArr['institutioncode'];
 				if($occArr['collectioncode']) echo ':'.$occArr['collectioncode'];

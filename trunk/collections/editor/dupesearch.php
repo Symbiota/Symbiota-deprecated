@@ -7,6 +7,8 @@ header("Content-Type: text/html; charset=".$charset);
 $collName = array_key_exists('cname',$_REQUEST)?$_REQUEST['cname']:'';
 $collNum = array_key_exists('cnum',$_REQUEST)?$_REQUEST['cnum']:'';
 $collDate = array_key_exists('cdate',$_REQUEST)?$_REQUEST['cdate']:'';
+$exsTitle = array_key_exists('exstitle',$_REQUEST)?$_REQUEST['exstitle']:'';
+$exsNumber = array_key_exists('exsnumber',$_REQUEST)?$_REQUEST['exsnumber']:'';
 $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
 $oid = (array_key_exists('oid',$_GET)?$_REQUEST["oid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
@@ -19,7 +21,9 @@ $dupeManager = new OccurrenceEditorManager();
 
 $occArr = array();
 if(!$submitAction){
-	$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt);
+	if($collName){
+		$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt, $exsTitle, $exsNumber);
+	}
 }
 
 $onLoadStr = '';
@@ -137,6 +141,14 @@ if($submitAction){
 					<?php if($collId == $occObj['colliddup'] && $occObj['recordnumber'] == $collNum){ ?>
 						<div style="color:red;">
 							NOTICE: Matches target collection. May already exist in this collection.
+						</div>
+						<div style="font-weight:bold;">
+							<?php 
+							if($occObj['occurrenceid']) echo $occObj['occurrenceid'];
+							if($occObj['occurrenceid'] && $occObj['catalognumber']) echo ', '; 
+							if($occObj['catalognumber']) echo $occObj['catalognumber'];
+							if($occObj['othercatalognumbers']) echo ' ('.$occObj['othercatalognumbers'].')';
+							?>
 						</div>
 					<?php } ?>
 					<div>

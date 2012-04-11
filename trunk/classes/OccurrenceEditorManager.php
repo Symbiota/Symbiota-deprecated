@@ -506,21 +506,22 @@ class OccurrenceEditorManager {
 	}
 
 	//Used in dupesearch.php
-	public function getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt = 0){
+	public function getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt = 0, $exsTitle = "", $exsNumber = ""){
 		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
+		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, '.
+			'o.occid, o.collid AS colliddup, o.catalognumber, o.occurrenceid, o.othercatalognumbers, '.
+			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
+			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
+			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
+			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
+			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
+			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition ';
 		if($occidQuery){
-			$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
-				'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-				'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-				'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-				'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-				'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-				'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
-				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
+			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
 			if(strpos($occidQuery,',')){
 				$sql .= 'WHERE (o.occid IN('.$occidQuery.')) ';
 			}
@@ -551,16 +552,7 @@ class OccurrenceEditorManager {
 			}
 
 			if($lastName){
-				$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, o.occid, o.collid AS colliddup, '.
-					'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-					'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-					'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-					'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-					'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-					'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition '.
-					'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid '.
+				$sql .= 'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid '.
 					'WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
 				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
 				if($runCnt == 0){
@@ -646,6 +638,22 @@ class OccurrenceEditorManager {
 					}
 				}
 			}			
+		}
+		elseif($exsTitle && $exsNumber){
+			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '. 
+				'INNER JOIN omexsiccatiocclink el ON o.occid = el.occid '.
+				'INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
+				'INNER JOIN omexsiccatititles et ON en.ometid = en.ometid '.
+				'WHERE (et.title = "'.$exsTitle.'" OR et.abbreviation = "'.$exsTitle.'") AND en.exsnumber = "'.$exsNumber.'" ';
+			if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
+			//First run
+
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_assoc()){
+				$retArr[$row['occid']] = array_change_key_case($row);
+			}
+			$rs->close();
 		}
 		return $retArr;
 	}

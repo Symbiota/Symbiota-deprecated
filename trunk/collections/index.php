@@ -158,9 +158,10 @@
 								<td width="50px">
 									<?php 
 									if($collArr["icon"]){
+										$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"]; 
 										?>
 								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
 								    	</a>
 								    	<?php
 									} 
@@ -206,6 +207,7 @@
 						<?php
 						$collCnt = 1;
 						foreach($specArr as $collId => $collArr){
+							$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
 							?>
 						    <tr>
 								<td width="50px">
@@ -213,7 +215,7 @@
 									if($collArr["icon"]){
 										?>
 								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
 								    	</a>
 								    	<?php
 									} 
@@ -259,6 +261,7 @@
 						<?php
 						$collCnt = 1;
 						foreach($obsArr as $collId => $collArr){
+							$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
 							?>
 						    <tr>
 								<td width="50px">
@@ -266,7 +269,7 @@
 									if($collArr["icon"]){
 										?>
 								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="../<?php echo $collArr["icon"]; ?>" />
+								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
 								    	</a>
 								    	<?php
 									} 

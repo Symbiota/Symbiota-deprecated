@@ -293,42 +293,21 @@ function lookForDupes(f){
 		return;
 	}
 
-	//dupWindow=open("dupesearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
 	dupWindow=open("dupesearch.php?cname="+collName+"&cnum="+collNum+"&cdate="+collDate+"&oid="+occId+"&collid="+collId,"dupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
 	if(dupWindow.opener == null) dupWindow.opener = self;
 	if(window.focus) {dupWindow.focus()}
+}
 
-	/*document.getElementById("dupedisplayspan").style.display = "none";
-	document.getElementById("dupenonespan").style.display = "none";
-	document.getElementById("dupesearchspan").style.display = "block";
-	document.getElementById("dupespan").style.display = "block";
-
-	//Check for matching records
-	dupXmlHttp = GetXmlHttpObject();
-	if(dupXmlHttp==null){
-		alert ("Your browser does not support AJAX!");
-  		return;
+function lookForExsDupes(f){
+	var exsTitle = f.exsiccatititle.value;
+	var exsNumber = f.exsiccatinumber.value;
+		
+	if(!exsTitle || !exsNumber){
+		alert("Exsiccati title and number must have a value to search for duplicates");
+		return;
 	}
-	var url = "rpc/querydupes.php?cname=" + collName + "&cnum=" + collNum;
-	if(collDate) url = url + "&cdate=" + collDate;
-	dupXmlHttp.onreadystatechange=function(){
-		if(dupXmlHttp.readyState==4 && dupXmlHttp.status==200){
-			var resObj = eval('(' + dupXmlHttp.responseText + ')')
-			if(resObj.length > 0){
-				document.getElementById("dupesearchspan").style.display = "none";
-				document.getElementById("dupedisplayspan").style.display = "block";
-				dupWindow=open("dupesearch.php?oid="+f.occid.value+"&occids="+resObj+"&collid="+f.collid.value,"dupaid","resizable=1,scrollbars=1,width=900,height=700,left=20,top=20");
-				if(dupWindow.opener == null) dupWindow.opener = self;
-				if(window.focus) {dupWindow.focus()}
-				document.getElementById("dupespan").style.display = "none";
-			}
-			else{
-				document.getElementById("dupesearchspan").style.display = "none";
-				document.getElementById("dupenonespan").style.display = "block";
-			}
-		}
-	};
-	dupXmlHttp.open("POST",url,true);
-	dupXmlHttp.send(null);
-	*/
+
+	dupExsWindow=open("dupeexssearch.php?title="+exstitle+"&number="+exsNumber,"exsdupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
+	if(dupExsWindow.opener == null) dupExsWindow.opener = self;
+	if(window.focus) {dupExsWindow.focus()}
 }

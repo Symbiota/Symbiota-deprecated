@@ -524,8 +524,8 @@ if($symbUid){
 												<span style="margin-left:10px;" title="Earliest Date Collected">
 													<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateModified(this);" />
 												</span>
-												<span style="margin-left:5px;cursor:pointer;" onclick="">
-													<input type="button" value="Dupes" tabindex="12" onclick="lookForDupes(this.form);" />
+												<span style="margin-left:5px;cursor:pointer;">
+													<input type="button" value="Dupes?" tabindex="12" onclick="lookForDupes(this.form);" />
 												</span>
 											</div>
 											<div style="margin-top:5px;">
@@ -552,16 +552,32 @@ if($symbUid){
 												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 													<img src="../../images/showedit.png" style="width:15px;" />
 												</span>
+												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('exsiccatidiv')">
+													<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
+												</span>
+											</div>
+											<div id="exsiccatidiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
+												<span>
+													Exsiccati Title:
+													<input id="ffexstitle" name="exsiccatititle" type="text" tabindex="16" maxlength="255" style="width:400px;" value="<?php echo array_key_exists('exsiccatititle',$occArr)?$occArr['exsiccatititle']:''; ?>" onchange="fieldChanged('exsiccatititle')" />
+												</span>
+												<span style="margin-left:10px;">
+													Number:
+													<input name="exsiccatinumber" type="text" tabindex="17" style="width:45px;" value="<?php echo array_key_exists('exsiccatinumber',$occArr)?$occArr['exsiccatinumber']:''; ?>" onchange="fieldChanged('exsiccatinumber');" />
+												</span>
+												<span style="margin-left:5px;cursor:pointer;">
+													<input type="button" value="Dupes?" tabindex="18" onclick="lookForExsDupes(this.form);" />
+												</span>
 											</div>
 											<div id="dateextradiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
 												<span>
 													Verbatim Date:
-													<input type="text" name="verbatimeventdate" tabindex="16" maxlength="255" style="width:200px;" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
+													<input type="text" name="verbatimeventdate" tabindex="19" maxlength="255" style="width:200px;" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
 												</span>
 												<span style="margin-left:10px;">
 													YYYY-MM-DD:
-													<input type="text" name="year" tabindex="18" style="width:45px;" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />-
-													<input type="text" name="month" tabindex="20" style="width:30px;" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />-
+													<input type="text" name="year" tabindex="20" style="width:45px;" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />-
+													<input type="text" name="month" tabindex="21" style="width:30px;" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />-
 													<input type="text" name="day" tabindex="22" style="width:30px;" value="<?php echo array_key_exists('day',$occArr)?$occArr['day']:''; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />
 												</span>
 												<span style="margin-left:10px;">
