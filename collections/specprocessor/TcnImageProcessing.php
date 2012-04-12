@@ -101,6 +101,7 @@ class SpecProcessorManager {
 	private $exif;
 
 	function __construct(){
+  		ini_set('auto_detect_line_endings', true);
 	}
 
 	function __destruct(){

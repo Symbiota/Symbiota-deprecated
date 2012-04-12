@@ -13,8 +13,9 @@ if($symbUid){
 	$specHandler->setUid($symbUid);
 	$collArr = $specHandler->getObservationArr();
 	if(!$collId && $collArr) $collId = current(array_keys($collArr));
-	if($collId) $specHandler->setCollId($collId);
 	if($collId){
+		$specHandler->setCollId($collId);
+		$specHandler->setCollectionMetadata();
 		if($isAdmin	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
 			|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 			$isEditor = 1;
@@ -96,7 +97,11 @@ if($symbUid){
 				}
 				?>
 				<li>Import csv file</li>
-				<li>Backup file download (CSV extract)</li>
+				<li>
+					<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
+						Backup file download (CSV extract)
+					</a>
+				</li>
 			</ul>
 		</fieldset>
 	</div>	

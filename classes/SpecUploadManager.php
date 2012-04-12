@@ -821,7 +821,20 @@ class SpecUploadManager{
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
 			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
 			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
-			//Date cleaning
+			//Verify that date fields were not converted to Excel's numeric format (number of days since 01/01/1900)
+			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate'] && is_numeric($recMap['eventdate']) 
+				&& $recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
+				$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate'],1900));
+			}
+			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && is_numeric($recMap['verbatimeventdate']) 
+				&& $recMap['verbatimeventdate'] > 2100 && $recMap['verbatimeventdate'] < 45000){
+				$recMap['verbatimeventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['verbatimeventdate'],1900));
+			}
+			if(array_key_exists('dateidentified',$recMap) && $recMap['dateidentified'] && is_numeric($recMap['dateidentified']) 
+				&& $recMap['dateidentified'] > 2100 && $recMap['dateidentified'] < 45000){
+				$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified'],1900));
+			}
+			//More date cleaning
 			if(array_key_exists('month',$recMap)){
 				if(!is_numeric($recMap['month'])){
 					if(strlen($recMap['month']) > 2){
@@ -842,11 +855,11 @@ class SpecUploadManager{
 				}
 			}
 			if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
-				if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4){
+				if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4 && array_key_exists('month',$recMap) && array_key_exists('day',$recMap)){
 					$y = $recMap['year'];
 					$m = "00";
 					$d = "00";
-					if(array_key_exists('month',$recMap) && $recMap['month'] && is_numeric($recMap['month'])){
+					if($recMap['month'] && is_numeric($recMap['month'])){
 						$m = $recMap['month'];
 						if(strlen($m) == 1) $m = '0'.$m;
 						if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
@@ -1070,8 +1083,8 @@ class SpecUploadManager{
 			$m = $match[2];
 			$d = $match[3];
 		}
-		elseif(preg_match('/^(\d{1,2})\s{1}(\D{3,})\.*\s{1}(\d{2,4})/',$dateStr,$match)){
-			//Format: dd mmm yyyy, d mmm yy
+		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
+			//Format: dd mmm yyyy, d mmm yy, dd-mmm-yyyy, dd-mmm-yy
 			$d = $match[1];
 			$mStr = $match[2];
 			$y = $match[3];
@@ -1116,22 +1129,34 @@ class SpecUploadManager{
 			//Format: yyyy
 			$y = $match[1];
 		}
+		$retDate = '';
 		if($y){
+			//check to set if day is valid for month
+			if($d == 30 && $m == 2){
+				//Bad feb date
+				return '';
+			}
+			if($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
+				//Bad date, month w/o 31 days
+				return '';
+			}
+			//Do some cleaning
 			if(strlen($y) == 2){ 
 				if($y < 20) $y = '20'.$y;
 				else $y = '19'.$y;
 			}
 			if(strlen($m) == 1) $m = '0'.$m;
 			if(strlen($d) == 1) $d = '0'.$d;
-			$dateStr = $y.'-'.$m.'-'.$d;
+			//Build
+			$retDate = $y.'-'.$m.'-'.$d;
 		}
-		else{
-			
+		elseif(($timestamp = strtotime($retDate)) !== false){
+			$retDate = date('Y-m-d', $timestamp);
 		}
 		if($t){
-			$dateStr .= ' '.$t;
+			$retDate .= ' '.$t;
 		}
-		return $dateStr;
+		return $retDate;
 	}
 
 	private function parseScientificName($inStr){
