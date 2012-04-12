@@ -365,8 +365,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			fputcsv($specFH, explode(',',$headerStr));
 			//Query and output values
     		$sql = 'SELECT '.$headerStr.
-    			' FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-    			'WHERE c.collid = '.$collId;
+    			' FROM omoccurrences '.
+    			'WHERE collid = '.$collId;
     		if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_row()){
 					if($characterSet && $characterSet != $cSet){
@@ -433,7 +433,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				unlink($fileName.'_img.csv');
 	    	}
 	    	else{
-				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'.csv');
+				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'_spec.csv');
 	    	}
 		}
 		return $fileUrl;
@@ -570,7 +570,7 @@ xmlwriter_end_attribute($xml_resource);
 		if(file_exists($tPath."downloads/")){
 			$tPath .= "downloads/";
 		}
-		echo $this->buFilePath;
+		//echo $this->buFilePath;
 		$this->buFilePath = $tPath;
 	}
 	

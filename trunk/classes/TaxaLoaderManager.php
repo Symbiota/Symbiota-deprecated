@@ -17,6 +17,7 @@ class TaxaLoaderManager{
  		set_time_limit(3000);
 		ini_set("max_input_time",120);
 		ini_set("upload_max_filesize",10);
+  		ini_set('auto_detect_line_endings', true);
 	}
 
 	function __destruct(){

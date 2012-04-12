@@ -8,6 +8,7 @@ class SpecUploadFile extends SpecUploadManager{
 
 	function __construct() {
  		parent::__construct();
+  		ini_set('auto_detect_line_endings', true);
 	}
 
 	public function __destruct(){
