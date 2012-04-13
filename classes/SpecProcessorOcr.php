@@ -30,7 +30,7 @@ class SpecProcessorOcr{
 	}
 
 	function __destruct(){
-		unlink($this->imgUrlLocal);
+		//unlink($this->imgUrlLocal);
 	}
 
 	public function batchOcrUnprocessed($collArr = 0){
