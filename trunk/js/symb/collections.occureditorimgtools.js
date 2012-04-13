@@ -49,6 +49,7 @@ function ocrImage(ocrButton,imgCnt){
 	var y = $(imgObj).imagetool('properties').y;
 	var w = $(imgObj).imagetool('properties').w;
 	var h = $(imgObj).imagetool('properties').h;
+
 	var ocrXmlHttp = GetXmlHttpObject();
 	if(ocrXmlHttp == null){
 		alert ("Your browser does not support AJAX!");
