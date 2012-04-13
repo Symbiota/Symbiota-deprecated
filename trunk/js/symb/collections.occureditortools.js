@@ -307,7 +307,7 @@ function lookForExsDupes(f){
 		return;
 	}
 
-	dupExsWindow=open("dupeexssearch.php?title="+exsTitle+"&number="+exsNumber,"exsdupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
+	dupExsWindow=open("dupesearch.php?exstitle="+exsTitle+"&exsnumber="+exsNumber,"exsdupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
 	if(dupExsWindow.opener == null) dupExsWindow.opener = self;
 	if(window.focus) {dupExsWindow.focus()}
 }
