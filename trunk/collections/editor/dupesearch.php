@@ -57,7 +57,7 @@ if($submitAction){
 				foreach($occArr as $occId => $oArr){
 					echo 'var oArr = new Array();'."\n";
 					foreach($oArr as $k => $v){
-						if($v && $k != 'occid'){
+						if($v && $k != 'occid' && $k != 'catalognumber' && $k != 'occurrenceid'){
 							echo 'oArr["'.$k.'"] = "'.str_replace(array('"',"\n"),"",$v).'";'."\n";
 						}
 					}
