@@ -635,12 +635,12 @@ class OccurrenceEditorManager {
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '. 
 				'INNER JOIN omexsiccatiocclink el ON o.occid = el.occid '.
 				'INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
-				'INNER JOIN omexsiccatititles et ON en.ometid = en.ometid '.
+				'INNER JOIN omexsiccatititles et ON en.ometid = et.ometid '.
 				'WHERE (et.title = "'.$exsTitle.'" OR et.abbreviation = "'.$exsTitle.'") AND en.exsnumber = "'.$exsNumber.'" ';
 			if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
 			//First run
 
-			//echo $sql;
+			echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_assoc()){
 				$retArr[$row['occid']] = array_change_key_case($row);
