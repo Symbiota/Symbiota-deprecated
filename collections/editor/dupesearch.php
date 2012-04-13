@@ -270,14 +270,14 @@ if($submitAction){
 			}
 			else{
 				echo '<h2>No exact matches on duplicate records have been located</h2>';
-				if($runCnt == 0){
-					echo '<div>Do you want to search for possible related collection events?</div>';
-					echo '<div style="margin:10px 0px 0px 15px;">';
-					echo '<a href="dupesearch.php?cname='.$collName.'&cnum='.$collNum.'&ndate='.$collDate.'&oid='.$oid.'&collid='.$collId.'&runcnt=1">';
-					echo 'Yes';
-					echo '</a>';
-					echo '</div>';
-					echo '<div style="margin-left:15px;"><a href="#" onclick="window.close()">No</a></div>';
+				if($collName && $runCnt == 0){
+					?>
+					<div>Do you want to search for possible related collection events?</div>
+					<div style="margin:10px 0px 0px 15px;">
+						<a href="dupesearch.php?cname=<?php echo $collName.'&cnum='.$collNum.'&ndate='.$collDate.'&oid='.$oid.'&collid='.$collId; ?>&runcnt=1">Yes</a>
+					</div>
+					<div style="margin-left:15px;"><a href="#" onclick="window.close()">No</a></div>
+					<?php 
 				}
 			}
 			?>

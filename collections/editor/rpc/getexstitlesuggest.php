@@ -21,6 +21,7 @@
 		}
 	}
 	$con->close();
+	$retArr = array_unique($retArr);
 	sort($retArr);
 	echo json_encode($retArr);
 ?>
