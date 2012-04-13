@@ -463,14 +463,6 @@ class OccurrenceEditorManager {
 		}
 		return $status;
 	}
-
-	protected function cleanStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"''",$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
 	
 	public function getObserverUid(){
 		$obsId = 0;
@@ -740,7 +732,7 @@ class OccurrenceEditorManager {
 		return $status;
 	}
 
-	//Label processing methods
+	//Label OCR processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
 		if($this->occId){
@@ -755,7 +747,49 @@ class OccurrenceEditorManager {
 		} 
 		return $retArr;
 	}
-	
+
+	public function insertTextFragment($imgId, $rawFrag){
+		if($imgId && $rawFrag){
+			$statusStr = '';
+			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) '.
+				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'")';
+			//echo $sql;
+			if($this->conn->query($sql)){
+				$statusStr = $this->conn->insert_id;
+			}
+			else{
+				$statusStr = 'ERROR: unable to INSERT text fragment; '.$this->conn->error;
+			}
+			return $statusStr;
+		}
+	}
+
+	public function saveTextFragment($prlId, $rawFrag){
+		if($prlId && $rawFrag){
+			$statusStr = '';
+			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'" '.
+				'WHERE (prlid = '.$prlId.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable to UPDATE text fragment; '.$this->conn->error;
+			}
+			return $statusStr;
+		}
+	}
+
+	public function deleteTextFragment($prlId){
+		if($prlId){
+			$statusStr = '';
+			$sql = 'DELETE FROM specprocessorrawlabels '.
+				'WHERE (prlid = '.$prlId.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable DELETE text fragment; '.$this->conn->error;
+			}
+			return $statusStr;
+		}
+	}
+
 	public function getImageMap(){
 		$imageMap = Array();
 		if($this->occId){
@@ -782,6 +816,20 @@ class OccurrenceEditorManager {
 			$result->close();
 		}
 		return $imageMap;
+	}
+
+	//Misc functions
+	protected function cleanStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+
+	private function cleanRawFragment($str){
+		$newStr = trim($str);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
