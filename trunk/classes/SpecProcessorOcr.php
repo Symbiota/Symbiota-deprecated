@@ -79,7 +79,7 @@ class SpecProcessorOcr{
  		return $rawStr;
 	}
 
-	public function ocrImageByUrl($imgUrl){
+	public function ocrImageByUrl($imgUrl,$getBest = 0){
 		$rawStr = '';
 		if($imgUrl){
 			if($this->loadImage($imgUrl)){
@@ -87,8 +87,12 @@ class SpecProcessorOcr{
 					$this->filterImage($this->grayscale,$this->brightness,$this->contrast,$this->sharpen,$this->gammaCorrect);
 				}
 				$this->cropImage();
-				//$rawStr = $this->getBestOCR();
-				$rawStr = $this->ocrImage();
+				if($getBest){
+					$rawStr = $this->getBestOCR();
+				}
+				else{
+					$rawStr = $this->ocrImage();
+				}
 			}
 			else{
 				//Unable to create image
@@ -139,7 +143,7 @@ class SpecProcessorOcr{
 
 	private function filterImage($grayscale,$brightness,$contrast,$sharpen=0,$gammacorrect=0,$url=''){
 		$status = false;
-		if($url) $url = $this->imgUrlLocal;
+		if(!$url) $url = $this->imgUrlLocal;
 		if($img = imagecreatefromjpeg($url)){
    			if($grayscale) imagefilter($img,IMG_FILTER_GRAYSCALE);
    			if($brightness) imagefilter($img,IMG_FILTER_BRIGHTNESS,$brightness);

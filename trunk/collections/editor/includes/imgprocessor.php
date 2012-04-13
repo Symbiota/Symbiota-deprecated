@@ -11,9 +11,18 @@
 					<img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="width:400px;height:400px;" />
 				</div>
 				<div style="width:100%;">
-					<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgCnt; ?>);" />
-					<img id="workingcircle-<?php echo $imgCnt; ?>" src="../../images/workingcircle.gif" style="display:none;" />
-					<span style="float:right;margin-right:20px;font-weight:bold;">
+					<div style="float:left;">
+						<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgCnt; ?>);" />
+						<img id="workingcircle-<?php echo $imgCnt; ?>" src="../../images/workingcircle.gif" style="display:none;" />
+					</div>
+					<div style="float:left;">
+						<fieldset style="width:200px;background-color:lightyellow;">
+							<legend>Options</legend>
+							<input type="checkbox" id="ocrfull" value="1" /> OCR whole image<br/>
+							<input type="checkbox" id="ocrbest" value="1" /> OCR w/ analysis
+						</fieldset>
+					</div>
+					<div style="float:right;margin-right:20px;font-weight:bold;">
 						Image <?php echo $imgCnt; ?> of 
 						<?php 
 						echo count($imgArr);
@@ -21,47 +30,77 @@
 							echo '<a href="#" onclick="return nextLabelProcessingImage('.($imgCnt+1).');">=&gt;&gt;</a>';
 						}
 						?>
-					</span>
+					</div>
 				</div>
-				<div style="width:100%">
+				<div style="width:100%;clear:both;">
+					<?php 
+					$fArr = array();
+					if(array_key_exists($imgId,$fragArr)){ 
+						$fArr = $fragArr[$imgId];
+					}
+					?>
 					<div id="tfadddiv-<?php echo $imgCnt; ?>" style="display:none;">
 						<form id="imgaddform-<?php echo $imgCnt; ?>" name="imgaddform-<?php echo $imgId; ?>" method="post" action="occurrenceeditor.php">
-							<textarea name="rawtext" rows="20" cols="48" style="width:100%"></textarea>
-							<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" /><br/>
-							<!-- 
-							<input name="formsubmit" type="submit" value="Save Text Fragment" />
-							-->
+							<div>
+								<textarea name="rawtext" rows="20" cols="48" style="width:100%;background-color:#F8F8F8;"></textarea>
+							</div>
+							<div style="float:left">
+								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+								<input name="submitaction" type="submit" value="Save Text Fragment" />
+							</div>
 						</form>
+						<div style="font-weight:bold;float:right;">&lt;New&gt; of <?php echo count($fArr); ?></div>
 					</div>
-					<div id="tfeditdiv-<?php echo $imgCnt; ?>">
+					<div id="tfeditdiv-<?php echo $imgCnt; ?>" style="clear:both;">
 						<?php
 						if(array_key_exists($imgId,$fragArr)){ 
-							$fArr = $fragArr[$imgId];
 							$fragCnt = 1;
+							$targetPrlid = '';
+							if(isset($newPrlid) && $newPrlid) $targetPrlid = $newPrlid;
+							if(array_key_exists('editprlid',$_REQUEST)) $targetPrlid = $_REQUEST['editprlid'];
 							foreach($fArr as $prlid => $rStr){
+								$displayBlock = 'none';
+								if($targetPrlid){
+									if($prlid == $targetPrlid){
+										$displayBlock = 'block';
+									}
+								}
+								elseif($fragCnt==1){
+									$displayBlock = 'block';
+								}
 								?>
-								<div id="tfdiv-<?php echo $imgCnt.'-'.$fragCnt; ?>" style="display:<?php echo ($fragCnt==1?'block':'none'); ?>">
-									<form name="imgeditform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
+								<div id="tfdiv-<?php echo $imgCnt.'-'.$fragCnt; ?>" style="display:<?php echo $displayBlock; ?>;border:1px solid orange;">
+									<form name="tfeditform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
 										<div>
 											<textarea name="rawtext" rows="20" cols="48" style="width:100%"><?php echo $rStr; ?></textarea>
 										</div>
-										<div style="float:left;">
-											<input type="hidden" name="prlid" value="<?php echo $prlid; ?>" />
-											<!-- 
-											<input name="formsubmit" type="submit" value="Save Text Fragment" />
-											-->
-										</div>
-										<div style="float:right;font-weight:bold;margin-right:20px;">
-											<?php 
-											echo $fragCnt.' of '.count($fArr); 
-											if(count($fArr) > 1){
-												?>
-												<a href="#" onclick="return nextRawText(<?php echo $imgCnt.','.($fragCnt+1); ?>)">=&gt;&gt;</a>
-												<?php
-											} 
-											?>
+										<div style="float:left;margin-left:10px;">
+											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
+											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input name="submitaction" type="submit" value="Save Text Fragment Edits" />
 										</div>
 									</form>
+									<div style="float:right;font-weight:bold;margin-right:20px;">
+										<?php 
+										echo $fragCnt.' of '.count($fArr); 
+										if(count($fArr) > 1){
+											?>
+											<a href="#" onclick="return nextRawText(<?php echo $imgCnt.','.($fragCnt+1); ?>)">=&gt;&gt;</a>
+											<?php
+										} 
+										?>
+									</div>
+									<div style="clear:both;margin-left:10px;">
+										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
+											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
+											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
+											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input name="submitaction" type="submit" value="Delete Text Fragment" />
+										</form>
+									</div>
 								</div>
 								<?php
 								$fragCnt++;

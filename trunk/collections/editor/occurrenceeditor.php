@@ -129,6 +129,19 @@ if($symbUid){
 			$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
 			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
 		}
+		elseif($action == 'Save Text Fragment'){
+			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext']);
+			if(is_numeric($statusStr)){
+				$newPrlid = $statusStr;
+				$statusStr = '';
+			}
+		}
+		elseif($action == 'Save Text Fragment Edits'){
+			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext']);
+		}
+		elseif($action == 'Delete Text Fragment'){
+			$statusStr = $occManager->deleteTextFragment($_REQUEST['delprlid']);
+		}
 	}
 
 	if($goToMode){

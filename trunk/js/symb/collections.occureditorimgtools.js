@@ -54,7 +54,13 @@ function ocrImage(ocrButton,imgCnt){
 		alert ("Your browser does not support AJAX!");
 		return false;
 	}
-	var url="rpc/ocrimage.php?url="+imgUrl+"&x="+x+"&y="+y+"&w="+w+"&h="+h;
+	var url="rpc/ocrimage.php?url="+imgUrl;
+	if(document.getElementById("ocrfull").checked == false){
+		url = url+"&x="+x+"&y="+y+"&w="+w+"&h="+h;
+	}
+	if(document.getElementById("ocrbest").checked == true){
+		url = url+"&ocrbest=1";
+	}
 	ocrXmlHttp.onreadystatechange=function(){
 		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
 			var rawStr = ocrXmlHttp.responseText;
