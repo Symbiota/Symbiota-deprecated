@@ -21,7 +21,7 @@ $dupeManager = new OccurrenceEditorManager();
 
 $occArr = array();
 if(!$submitAction){
-	if($collName){
+	if($collName || $exsTitle){
 		$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt, $exsTitle, $exsNumber);
 	}
 }

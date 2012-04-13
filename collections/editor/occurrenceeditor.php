@@ -565,9 +565,11 @@ if($symbUid){
 												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 													<img src="../../images/showedit.png" style="width:15px;" />
 												</span>
+												<!-- 
 												<span style="margin-left:5px;cursor:pointer;" onclick="toggle('exsiccatidiv')">
 													<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
 												</span>
+												 -->
 											</div>
 											<div id="exsiccatidiv" style="padding:10px;margin:5px;border:1px solid gray;display:none;">
 												<span>
