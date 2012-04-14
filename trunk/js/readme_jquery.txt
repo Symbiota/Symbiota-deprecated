@@ -9,3 +9,6 @@ JQuery version history
 	JQuery: 		jquery.min.1.6.2.js 
 	JQuery UI: 	jquery-ui-1.8.14.custom.min.js
 
+2012-04-12
+	JQuery UI: 	jquery-ui-1.8.18.custom.min.js
+
