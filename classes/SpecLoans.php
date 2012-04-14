@@ -239,7 +239,7 @@ class SpecLoans{
 		}
 		return $statusStr;
 	}
-	
+
 	//Ask Ed
 	public function addSpecimen($pArr){
 		$statusStr = '';
@@ -249,6 +249,21 @@ class SpecLoans{
 		$occId = $this->getOccID($collId,$catNum);
 		$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
 			'VALUES('.$loanId.','.$occId['occid'].') ';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$statusStr = 'SUCCESS: Specimen Added';
+		}
+		else{
+			$statusStr = 'ERROR: Adding of specimen failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
+	}
+	
+	public function AjaxAddSpecimen($catalogNumber){
+		$statusStr = '';
+		$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
+			'SELECT '.$loanId.',occid FROM omoccurrences WHERE catalognumber = "'.$catalogNumber.'"';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$statusStr = 'SUCCESS: Specimen Added';
