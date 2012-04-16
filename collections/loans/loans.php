@@ -26,12 +26,12 @@ if($isEditor){
 		if($formSubmit == 'Create Loan Out'){
 			$statusStr = $loanManager->createNewLoanOut($_POST);
 			$loanId = $loanManager->getLoanId();
-			$loanType == 'Out';
+			$loanType = 'Out';
 		}
 		elseif($formSubmit == 'Create Loan In'){
 			$statusStr = $loanManager->createNewLoanIn($_POST);
 			$loanId = $loanManager->getLoanId();
-			$loanType == 'In';
+			$loanType = 'In';
 		}
 		elseif($formSubmit == 'Add Specimen'){
 			$statusStr = $loanManager->addSpecimen($_POST);
@@ -182,7 +182,7 @@ header("Content-Type: text/html; charset=".$charset);
 							</a>
 						</div>
 						<div id="newloanoutdiv" style="display:none;">
-							<form name="newloanform" action="loans.php" method="post">
+							<form name="newloanoutform" action="loans.php" method="post">
 								<fieldset>
 									<legend><b>New Loan</b></legend>
 									<div style="padding-top:4px;">
@@ -275,7 +275,7 @@ header("Content-Type: text/html; charset=".$charset);
 							</a>
 						</div>
 						<div id="newloanindiv" style="display:none;">
-							<form name="newloanform" action="loans.php" method="post">
+							<form name="newloaninform" action="loans.php" method="post">
 								<fieldset>
 									<legend><b>New Loan</b></legend>
 									<div style="padding-top:4px;">
