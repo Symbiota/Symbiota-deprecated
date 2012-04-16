@@ -98,6 +98,7 @@ function initDetEditAutocomplete(inputName){
 	{ minLength: 3 });
 }
 
+//Field changed and verification functions
 function fieldChanged(fieldName){
 	try{
 		document.fullform.editedfields.value = document.fullform.editedfields.value + fieldName + ";";
@@ -423,6 +424,130 @@ function addLookupCounty(countyStr,stateStr){
 	countyXmlHttp.send(null);
 }
 
+function decimalLatitudeChanged(f){
+	verifyDecimalLatitude(f);
+	fieldChanged('decimallatitude');
+}
+
+function decimalLongitudeChanged(f){
+	verifyDecimalLongitude(f);
+	fieldChanged('decimallongitude');
+}
+
+function coordinateUncertaintyInMetersChanged(f){
+	if(!isNumeric(f.coordinateuncertaintyinmeters.value)){
+		alert("Coordinate uncertainty field must be numeric only");
+	}
+	fieldChanged('coordinateuncertaintyinmeters');
+}
+
+function minimumElevationInMetersChanged(f){
+	verifyMinimumElevationInMeters(f);
+	fieldChanged('minimumelevationinmeters');
+}
+
+function maximumElevationInMetersChanged(f){
+	verifyMaximumElevationInMeters(f);
+	fieldChanged('maximumelevationinmeters');
+}
+
+//Form verification code
+function verifyFullForm(f){
+	if(abortFormVerification) return true;
+	/*
+	if(f.sciname.value == ""){
+		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
+		return false;
+	}
+	if(f.recordedby.value == ""){
+		alert("Collector field must have a value. Enter 'unknown' if needed.");
+		return false;
+	}
+	if(f.country.value == ""){
+		alert("Country field must have a value");
+		return false;
+	}
+	if(f.stateprovince.value == ""){
+		alert("State field must have a value");
+		return false;
+	}
+	if(f.locality.value == ""){
+		alert("Locality field must have a value");
+		return false;
+	}
+	*/
+	var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
+	if(f.eventdate.value && !validformat1.test(f.eventdate.value)){
+		alert("Event date is invalid");
+		return false;
+	}
+	if(!isNumeric(f.year.value)){
+		alert("Collection year field must be numeric only");
+		return false;
+	}
+	if(!isNumeric(f.month.value)){
+		alert("Collection month field must be numeric only");
+		return false;
+	}
+	if(!isNumeric(f.day.value)){
+		alert("Collection day field must be numeric only");
+		return false;
+	}
+	if(!isNumeric(f.startdayofyear.value)){
+		alert("Start day of year field must be numeric only");
+		return false;
+	}
+	if(!isNumeric(f.enddayofyear.value)){
+		alert("End day of year field must be numeric only");
+		return false;
+	}
+	if(!verifyDecimalLatitude(f)){
+		return false;
+	}
+	if(!verifyDecimalLongitude(f)){
+		return false;
+	}
+	if(!isNumeric(f.coordinateuncertaintyinmeters.value)){
+		alert("Coordinate uncertainty field must be numeric only");
+		return false;
+	}
+	if(!verifyMinimumElevationInMeters(f)){
+		return false;
+	}
+	if(!verifyMaximumElevationInMeters(f)){
+		return false;
+	}
+	if(f.maximumelevationinmeters.value){
+		if(!f.minimumelevationinmeters.value){
+			alert("Maximun elevation field contains a value yet minumum does not. If elevation consists of a single value rather than a range, enter the value in the minimun field.");
+			return false;
+		}
+		else if(parseInt(f.minimumelevationinmeters.value) > parseInt(f.maximumelevationinmeters.value)){
+			alert("Maximun elevation value can not be greater than the minumum value.");
+			return false;
+		}
+	}
+	if(!isNumeric(f.duplicatequantity.value)){
+		alert("Duplicate Quantity field must be numeric only");
+		return false;
+	}
+	pendingDataEdits = false;
+	return true;
+}
+
+function verifyFullFormEdits(f){
+	if(f.editedfields){
+		if(f.editedfields.value == ""){
+			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+			return false;
+		}
+	}
+}
+
+function verifyGotoNew(f){
+	abortFormVerification = true;
+}
+
 function verifyFullformSciName(){
 	var f = document.fullform;
 	var sciNameStr = f.sciname.value;
@@ -455,140 +580,60 @@ function verifyFullformSciName(){
 	snXmlHttp.send(null);
 } 
 
-function submitQueryForm(qryLimit){
-	var f = document.queryform;
-	if(qryLimit) f.occindex.value = qryLimit;
-	f.submit();
-	return false;
-}
-
-function verifyQueryForm(f){
-	if(f.q_identifier.value == "" && f.q_recordedby.value == "" && f.q_recordnumber.value == "" 
-		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == ""){
-		alert("Query form is empty! Please enter a value to query by.");
+function verifyDecimalLatitude(f){
+	if(!isNumeric(f.decimallatitude.value)){
+		alert("Input value for Decimal Latitude must be a number value only! " );
 		return false;
 	}
-
-	var dateStr = f.q_datelastmodified.value;
-	if(dateStr == "") return true;
-	try{
-		var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-		var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-		if(!validformat1.test(dateStr) && !validformat2.test(dateStr)){
-			alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-			return false;
-		}
+	if(parseInt(f.decimallatitude.value) > 90){
+		alert("Decimal Latitude can not be greater than 90 degrees " );
+		return false;
 	}
-	catch(ex){
-		
+	if(parseInt(f.decimallatitude.value) < -90){
+		alert("Decimal Latitude can not be less than -90 degrees " );
+		return false;
 	}
 	return true;
 }
 
-function resetQueryForm(f){
-	f.q_identifier.value = "";
-	f.q_recordedby.value = "";
-	f.q_recordnumber.value = "";
-	f.q_enteredby.value = "";
-	f.q_datelastmodified.value = "";
-	f.q_processingstatus.value = "";
-}
-
-function toggle(target){
-	var ele = document.getElementById(target);
-	if(ele){
-		if(ele.style.display=="none"){
-			ele.style.display="block";
-  		}
-	 	else {
-	 		ele.style.display="none";
-	 	}
-	}
-	else{
-		var divObjs = document.getElementsByTagName("div");
-	  	for (i = 0; i < divObjs.length; i++) {
-	  		var divObj = divObjs[i];
-	  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
-				if(divObj.style.display=="none"){
-					divObj.style.display="block";
-				}
-			 	else {
-			 		divObj.style.display="none";
-			 	}
-			}
-		}
-	}
-}
-
-function toggleIdDetails(){
-	toggle("idrefdiv");
-	toggle("idremdiv");
-}
-
-function toggleLocSecReason(f){
-	var lsrObj = document.getElementById("locsecreason");
-	if(f.localitysecurity.checked){
-		lsrObj.style.display = "inline";
-	}
-	else{
-		lsrObj.style.display = "none";
-	}
-}
-
-function dwcDoc(dcTag){
-    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
-    if(dwcWindow.opener == null) dwcWindow.opener = self;
-    return false;
-}
-
-//Form verification code
-function verifyFullFormEdits(f){
-	if(f.editedfields){
-		if(f.editedfields.value == ""){
-			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
-			return false;
-		}
-	}
-}
-
-function verifyFullForm(f){
-	if(abortFormVerification) return true;
-	/*
-	if(f.sciname.value == ""){
-		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
+function verifyDecimalLongitude(f){
+	if(!isNumeric(f.decimallongitude.value)){
+		alert("Input value for Decimal Longitude must be a number value only! " );
 		return false;
 	}
-	if(f.recordedby.value == ""){
-		alert("Collector field must have a value. Enter 'unknown' if needed.");
+	if(parseInt(f.decimallongitude.value) > 180){
+		alert("Decimal Longitude can not be greater than 180 degrees " );
 		return false;
 	}
-	if(!verifyDate(f.eventdate)){
-		alert("Event date is invalid");
+	if(parseInt(f.decimallongitude.value) < -180){
+		alert("Decimal Longitude can not be less than -180 degrees " );
 		return false;
 	}
-	if(f.country.value == ""){
-		alert("Country field must have a value");
-		return false;
-	}
-	if(f.stateprovince.value == ""){
-		alert("State field must have a value");
-		return false;
-	}
-	if(f.locality.value == ""){
-		alert("Locality field must have a value");
-		return false;
-	}
-	*/
-	if(!isNumeric(f.duplicatequantity.value)){
-		alert("Duplicate Quantity field must be numeric only");
-		return false;
-	}
-	pendingDataEdits = false;
 	return true;
 }
 
-function verifyGotoNew(f){
-	abortFormVerification = true;
+function verifyMinimumElevationInMeters(f){
+	if(!isNumeric(f.minimumelevationinmeters.value)){
+		alert("Elevation values must be numeric only");
+		return false;
+	}
+	if(parseInt(f.minimumelevationinmeters.value) > 8000){
+		alert("Was this collection really made above the elevation of Mount Everest?" );
+		return false;
+	}
+	return true;
+}
+
+function verifyMaximumElevationInMeters(f){
+	if(!isNumeric(f.maximumelevationinmeters.value)){
+		alert("Elevation values must be numeric only");
+		return false;
+	}
+	if(parseInt(f.maximumelevationinmeters.value) > 8000){
+		alert("Was this collection really made above the elevation of Mount Everest?" );
+		return false;
+	}
+	return true;
 }
 
 function verifyDeletion(f){
@@ -698,7 +743,6 @@ function displayDeleteSubmit(){
 	}
 }
 
-//Occurrence field verifications
 function eventDateModified(eventDateInput){
 	var dateStr = eventDateInput.value;
 	if(dateStr == "") return true;
@@ -826,9 +870,9 @@ function parseDate(dateStr){
 	var m = 0;
 	var d = 0;
 	try{
-		var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/ //Format: yyyy-mm-dd
-		var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/ //Format: mm/dd/yyyy
-		var validformat3 = /^\d{1,2} \D+ \d{2,4}$/ //Format: dd mmm yyyy
+		var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
+		var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/; //Format: mm/dd/yyyy
+		var validformat3 = /^\d{1,2} \D+ \d{2,4}$/; //Format: dd mmm yyyy
 		if(validformat1.test(dateStr)){
 			var dateTokens = dateStr.split("-");
 			y = dateTokens[0];
@@ -1015,29 +1059,115 @@ function verifyImgDelForm(f){
 	return false;
 }
 
+//Query form 
+function submitQueryForm(qryLimit){
+	var f = document.queryform;
+	if(qryLimit) f.occindex.value = qryLimit;
+	f.submit();
+	return false;
+}
+
+function verifyQueryForm(f){
+	if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
+		&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
+		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == ""){
+		alert("Query form is empty! Please enter a value to query by.");
+		return false;
+	}
+
+	var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+	var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+
+	var edDateStr = f.q_eventdate.value;
+	if(edDateStr){
+		try{
+			if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr)){
+				alert("Event date must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+				return false;
+			}
+		}
+		catch(ex){
+		}
+	}
+	
+	var modDateStr = f.q_datelastmodified.value;
+	if(modDateStr){
+		try{
+			if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr)){
+				alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+				return false;
+			}
+		}
+		catch(ex){
+		}
+	}
+
+	return true;
+}
+
+function resetQueryForm(f){
+	f.q_identifier.value = "";
+	f.q_othercatalognumbers.value = "";
+	f.q_recordedby.value = "";
+	f.q_recordnumber.value = "";
+	f.q_eventdate.value = "";
+	f.q_enteredby.value = "";
+	f.q_datelastmodified.value = "";
+	f.q_processingstatus.value = "";
+}
+
+//Misc
+function dwcDoc(dcTag){
+    dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
+    if(dwcWindow.opener == null) dwcWindow.opener = self;
+    return false;
+}
+
 function openOccurrenceSearch(target) {
 	collId = document.fullform.collid.value;
 	occWindow=open("imgremapaid.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
 	if (occWindow.opener == null) occWindow.opener = self;
 }
 
-//Misc
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
+function toggle(target){
+	var ele = document.getElementById(target);
+	if(ele){
+		if(ele.style.display=="none"){
+			ele.style.display="block";
+  		}
+	 	else {
+	 		ele.style.display="none";
+	 	}
+	}
+	else{
+		var divObjs = document.getElementsByTagName("div");
+	  	for (i = 0; i < divObjs.length; i++) {
+	  		var divObj = divObjs[i];
+	  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
+				if(divObj.style.display=="none"){
+					divObj.style.display="block";
+				}
+			 	else {
+			 		divObj.style.display="none";
+			 	}
+			}
+		}
+	}
+}
+
+function toggleIdDetails(){
+	toggle("idrefdiv");
+	toggle("idremdiv");
+}
+
+function toggleLocSecReason(f){
+	var lsrObj = document.getElementById("locsecreason");
+	if(f.localitysecurity.checked){
+		lsrObj.style.display = "inline";
+	}
+	else{
+		lsrObj.style.display = "none";
+	}
 }
 
 function inputIsNumeric(inputObj, titleStr){
@@ -1072,4 +1202,22 @@ function getCookie(cName){
 			return unescape(y);
 		}
 	}
+}
+
+function GetXmlHttpObject(){
+	var xmlHttp=null;
+	try{
+		// Firefox, Opera 8.0+, Safari, IE 7.x
+  		xmlHttp=new XMLHttpRequest();
+  	}
+	catch (e){
+  		// Internet Explorer
+  		try{
+    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+  		catch(e){
+    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+    	}
+  	}
+	return xmlHttp;
 }
