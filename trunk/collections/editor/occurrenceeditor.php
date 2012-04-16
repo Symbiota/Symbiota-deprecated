@@ -241,6 +241,7 @@ if($symbUid){
 	
 }
 ?>
+<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
@@ -319,12 +320,16 @@ if($symbUid){
 				<?php 
 			}
 			if($occId || ($isEditor && $collId)){
-				$qIdentifier=''; $qRecordedBy=''; $qRecordNumber=''; $qEnteredBy=''; $qProcessingStatus=''; $qDateLastModified='';
+				$qIdentifier=''; $qOtherCatalogNumbers=''; 
+				$qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
+				$qEnteredBy=''; $qProcessingStatus=''; $qDateLastModified='';
 				$qryArr = $occManager->getQueryVariables();
 				if($qryArr){
 					$qIdentifier = (array_key_exists('id',$qryArr)?$qryArr['id']:'');
+					$qOtherCatalogNumbers = (array_key_exists('ocn',$qryArr)?$qryArr['ocn']:'');
 					$qRecordedBy = (array_key_exists('rb',$qryArr)?$qryArr['rb']:'');
 					$qRecordNumber = (array_key_exists('rn',$qryArr)?$qryArr['rn']:'');
+					$qEventDate = (array_key_exists('ed',$qryArr)?$qryArr['ed']:'');
 					$qEnteredBy = (array_key_exists('eb',$qryArr)?$qryArr['eb']:'');
 					$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 					$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
@@ -343,9 +348,19 @@ if($symbUid){
 								<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
 								</span>
-								<span style="margin-left:30px;">Identifier:</span> 
+								<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
+									Date: 
+									<input type="text" name="q_eventdate" value="<?php echo $qEventDate; ?>" style="width:160px" />
+								</span>
+							</div>
+							<div style="margin:2px;">
+								Identifier: 
 								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 									<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
+								</span>
+								<span style="margin-left:25px;">Other Catalog Numbers:</span> 
+								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
+									<input type="text" name="q_othercatalognumbers" value="<?php echo $qOtherCatalogNumbers; ?>" />
 								</span>
 							</div>
 							<div style="margin:2px;">
@@ -505,19 +520,19 @@ if($symbUid){
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:13px;">
+												<span style="margin-left:20px;">
 													Occurrence ID
 													<a href="#" onclick="return dwcDoc('occurrenceID')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:18px;">
+												<span style="margin-left:25px;">
 													Collector
 												</span>
-												<span style="margin-left:184px;">
+												<span style="margin-left:185px;">
 													Number
 												</span>
-												<span style="margin-left:30px;">
+												<span style="margin-left:35px;">
 													Date
 												</span>
 											</div>
@@ -545,7 +560,7 @@ if($symbUid){
 												<span>
 													Associated Collectors
 												</span>
-												<span style="margin-left:226px;">
+												<span style="margin-left:230px;">
 													Other Catalog Numbers
 													<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
 														<img class="dwcimg" src="../../images/qmark.png" />
@@ -676,10 +691,10 @@ if($symbUid){
 												<span style="margin-left:110px;">
 													State/Province
 												</span>
-												<span style="margin-left:72px;">
+												<span style="margin-left:75px;">
 													County
 												</span>
-												<span style="margin-left:112px;">
+												<span style="margin-left:120px;">
 													Municipality
 												</span>
 											</div>
@@ -723,16 +738,16 @@ if($symbUid){
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:80px;">
+												<span style="margin-left:90px;">
 													Datum
 													<a href="#" onclick="return dwcDoc('geodeticDatum')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 												</span>
-												<span style="margin-left:35px;">
+												<span style="margin-left:40px;">
 													Elevation in Meters
 												</span>
-												<span style="margin-left:47px;">
+												<span style="margin-left:60px;">
 													Verbatim Elevation
 												</span>
 											</div>
@@ -744,7 +759,7 @@ if($symbUid){
 														$latValue = $occArr["decimallatitude"];
 													}
 													?>
-													<input type="text" id="decimallatitude" name="decimallatitude" tabindex="50" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="inputIsNumeric(this, 'Decimal Latitude');fieldChanged('decimallatitude');" />
+													<input type="text" id="decimallatitude" name="decimallatitude" tabindex="50" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="decimalLatitudeChanged(this.form)" />
 												</span>
 												<span>
 													<?php
@@ -753,10 +768,10 @@ if($symbUid){
 														$longValue = $occArr["decimallongitude"];
 													}
 													?>
-													<input type="text" id="decimallongitude" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="inputIsNumeric(this, 'Decimal Longitude');fieldChanged('decimallongitude');" />
+													<input type="text" id="decimallongitude" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="decimalLongitudeChanged(this.form);" />
 												</span>
 												<span>
-													<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Coordinate Uncertainty');fieldChanged('coordinateuncertaintyinmeters');" title="Uncertainty in Meters" />
+													<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="coordinateUncertaintyInMetersChanged(this.form);" title="Uncertainty in Meters" />
 												</span>
 												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();" title="Google Maps">
 													<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
@@ -773,10 +788,10 @@ if($symbUid){
 													<input type="text" id="geodeticdatum" name="geodeticdatum" tabindex="56" maxlength="255" style="width:80px;" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchange="fieldChanged('geodeticdatum');" />
 												</span>
 												<span>
-													<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Minumum Elevation');fieldChanged('minimumelevationinmeters');" title="Minumum Elevation In Meters" />
+													<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" />
 												</span> -
 												<span>
-													<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="inputIsNumeric(this, 'Maximum Elevation');fieldChanged('maximumelevationinmeters');" title="Maximum Elevation In Meters" />
+													<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
 												</span>
 												<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggleElevDiv()">
 													ft.
@@ -815,10 +830,10 @@ if($symbUid){
 													<span style="">
 														Verbatim Coordinates
 													</span>
-													<span style="margin-left:185px;">
+													<span style="margin-left:190px;">
 														Georeferenced By
 													</span>
-													<span style="margin-left:54px;">
+													<span style="margin-left:60px;">
 														Georeference Protocol
 														<a href="#" onclick="return dwcDoc('georeferenceProtocol')">
 															<img class="dwcimg" src="../../images/qmark.png" />
@@ -843,13 +858,13 @@ if($symbUid){
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a>
 													</span>
-													<span style="margin-left:35px;">
+													<span style="margin-left:40px;">
 														Georef Verification Status
 														<a href="#" onclick="return dwcDoc('georeferenceVerificationStatus')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a>
 													</span>
-													<span style="margin-left:20px;">
+													<span style="margin-left:25px;">
 														Georeference Remarks
 													</span>
 												</div>
@@ -1184,7 +1199,7 @@ if($symbUid){
 								?>
 							</div>
 						</td>
-						<td id="imgtd" style="display:none;width:430px;" valign="top";>
+						<td id="imgtd" style="display:none;width:430px;" valign="top">
 							<?php 
 							if($occId && ($fragArr || $specImgArr )){
 								include_once('includes/imgprocessor.php');

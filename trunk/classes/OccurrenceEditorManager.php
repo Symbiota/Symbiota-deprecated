@@ -94,8 +94,10 @@ class OccurrenceEditorManager {
 		}
 		elseif(array_key_exists('q_identifier',$_REQUEST)){
 			if($_REQUEST['q_identifier']) $this->qryArr['id'] = trim($_REQUEST['q_identifier']);
+			if(array_key_exists('q_othercatalognumbers',$_POST) && $_POST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_POST['q_othercatalognumbers']);
 			if(array_key_exists('q_recordedby',$_POST) && $_POST['q_recordedby']) $this->qryArr['rb'] = trim($_POST['q_recordedby']);
 			if(array_key_exists('q_recordnumber',$_POST) && $_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
+			if(array_key_exists('q_eventdate',$_POST) && $_POST['q_eventdate']) $this->qryArr['ed'] = trim($_POST['q_eventdate']);
 			if(array_key_exists('q_enteredby',$_POST) && $_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
 			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
@@ -154,6 +156,45 @@ class OccurrenceEditorManager {
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}
+		//otherCatalogNumbers
+		if(array_key_exists('ocn',$this->qryArr)){
+			$ocnIsNum = false;
+			$ocnArr = explode(',',$this->qryArr['ocn']);
+			$ocnBetweenFrag = array();
+			$ocnInFrag = array();
+			foreach($ocnArr as $v){
+				if(strpos('%',$v) !== false){
+					$ocnBetweenFrag[] = '(o.othercatalognumbers LIKE "'.$term1.'")';
+				}
+				elseif($p = strpos($v,' - ')){
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						$ocnIsNum = true;
+						$ocnBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
+					}
+					else{
+						$ocnTerm = 'o.othercatalognumbers BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $ocnTerm .= ' AND length(o.othercatalognumbers) = '.strlen($term2); 
+						$ocnBetweenFrag[] = '('.$ocnTerm.')';
+					}
+				}
+				else{
+					if(is_numeric($v)) $ocnIsNum = true;
+					$ocnInFrag[] = trim($v);
+				}
+			}
+			$ocnWhere = '';
+			if($ocnBetweenFrag){
+				$ocnWhere .= 'OR '.implode(' OR ',$ocnBetweenFrag);
+			}
+			if($ocnInFrag){
+				$ocnWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$ocnInFrag).'")) ';
+			}
+			$sqlOrderBy .= ',(o.othercatalognumbers'.($ocnIsNum?'+1':'').')';
+			$sqlWhere .= 'AND ('.substr($ocnWhere,3).') ';
+		}
+		//recordNumber: collector's number
 		$rnIsNum = false;
 		if(array_key_exists('rn',$this->qryArr)){
 			$rnArr = explode(',',$this->qryArr['rn']);
@@ -189,6 +230,15 @@ class OccurrenceEditorManager {
 		if(array_key_exists('rb',$this->qryArr)){
 			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
 			$sqlOrderBy .= ',(o.recordnumber'.($rnIsNum?'+1':'').')';
+		}
+		if(array_key_exists('ed',$this->qryArr)){
+			if($p = strpos($this->qryArr['ed'],' - ')){
+				$sqlWhere .= 'AND (o.eventdate BETWEEN "'.substr($this->qryArr['ed'],0,$p).'" AND "'.substr($this->qryArr['ed'],$p+3).'") ';
+			}
+			else{
+				$sqlWhere .= 'AND (o.eventdate = "'.$this->qryArr['ed'].'") ';
+			}
+			$sqlOrderBy .= ',o.eventdate';
 		}
 		if(array_key_exists('eb',$this->qryArr)){
 			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
