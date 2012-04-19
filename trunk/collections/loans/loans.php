@@ -34,7 +34,7 @@ if($isEditor){
 			$loanType = 'In';
 		}
 		elseif($formSubmit == 'Add Specimen'){
-			$statusStr = $loanManager->addSpecimen($_POST);
+			$statusStr = $loanManager->AjaxAddSpecimen($_POST);
 			$loanId = $loanManager->getLoanId();
 		}
 		elseif($formSubmit == 'Save'){
@@ -196,7 +196,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</span>
 										<span style="float:right;">
 											<b>Loan Number: </b> 
-											<input type="text" name="loanidentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+											<input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
 									<div style="padding-top:6;">
@@ -232,7 +232,7 @@ header("Content-Type: text/html; charset=".$charset);
 								foreach($loanList as $k => $loanArr){
 									echo '<li>';
 									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
-									echo $loanArr['loanidentifier'];
+									echo $loanArr['loanidentifierown'];
 									echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 									echo '</li>';
 								}
@@ -285,21 +285,21 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+											<input type="text" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 										<span style="float:right;">
 											<b>Loan Number: </b> 
-											<input type="text" name="loanidentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+											<input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
 									<div style="padding-top:6;">
 										<span>
-											Sent To:
+											Sent From:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<select name="reqinstitution" style="width:400px;">
+											<select name="iidowner" style="width:400px;">
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
 												foreach($instArr as $k => $v){
@@ -311,8 +311,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<input name="formsubmit" type="submit" value="Create Loan In" />
-										<!-- <button name="formsubmit" type="submit" value="Create Loan In" />Create Loan</button> -->
+										<button name="formsubmit" type="submit" value="Create Loan In" />Create Loan</button>
 									</div>
 								</fieldset>
 							</form>
@@ -321,12 +320,12 @@ header("Content-Type: text/html; charset=".$charset);
 							<?php 
 							$loanList = $loanManager->getLoanInList($searchTerm,$displayAll);
 							if($loanList){
-								echo '<h3>Outgoing Loan Records</h3>';
+								echo '<h3>Incoming Loan Records</h3>';
 								echo '<ul>';
 								foreach($loanList as $k => $loanArr){
 									echo '<li>';
 									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
-									echo $loanArr['loanidentifier'];
+									echo $loanArr['loanidentifierborr'];
 									echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 									echo '</li>';
 								}
@@ -393,7 +392,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<b>Loan Number:</b> <input type="text" name="loanidentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifier']; ?>" disabled />
+											<b>Loan Number:</b> <input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" disabled />
 										</span>
 										<span style="margin-left:25px;">
 											<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
@@ -601,7 +600,7 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<b>Loan Number:</b> <input type="text" name="loanidentifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifier']; ?>" disabled />
+											<b>Loan Number:</b> <input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierborr']; ?>" disabled />
 										</span>
 										<span style="margin-left:25px;">
 											<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
