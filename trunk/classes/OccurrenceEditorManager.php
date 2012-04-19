@@ -570,6 +570,7 @@ class OccurrenceEditorManager {
 			else{
 				$sql .= 'WHERE (o.occid = '.$occidQuery.') ';
 			}
+			//echo $sql;
 			$result = $this->conn->query($sql);
 			while ($row = $result->fetch_assoc()) {
 				$retArr[$row['occid']] = array_change_key_case($row);

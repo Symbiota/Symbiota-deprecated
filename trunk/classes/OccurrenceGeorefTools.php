@@ -20,7 +20,7 @@ class OccurrenceGeorefTools {
 	public function getLocalityArr(){
 		$retArr = array();
 		$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
-			'FROM omoccurrences WHERE (collid = '.$this->collId.') ';
+			'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
 		if($this->qryVars){
 			if(array_key_exists('qvstatus',$this->qryVars)){
 				$vs = $this->qryVars['qvstatus'];
@@ -50,7 +50,7 @@ class OccurrenceGeorefTools {
 				$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
 			}
 		}
-		$sql .= 'ORDER BY locality,county,verbatimcoordinates';
+		$sql .= 'ORDER BY locality,county,verbatimcoordinates ';
 		//echo $sql;
 		$totalCnt = 0;
 		$locCnt = 1;
@@ -85,6 +85,7 @@ class OccurrenceGeorefTools {
 				$retArr[$totalCnt]['occid'] = $newOccidStr;
 				$retArr[$totalCnt]['cnt'] = $locCnt;
 			}
+			if($totalCnt > 999) break;
 		}
 		$rs->close();
 		//usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));

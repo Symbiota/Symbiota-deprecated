@@ -10,10 +10,11 @@ $(document).ready(function() {
 });
 
 function verifyQueryForm(f){
-	if(f.qlocality.value == ""){
-		alert("Please enter a locality term");
-		return false;
-	}
+	/* if(f.qlocality.value == ""){
+	 * 	alert("Please enter a locality term");
+	 * 	return false;
+	 * }
+	*/
 	document.getElementById("qworkingspan").style.display = "inline";
 	return true;
 }
