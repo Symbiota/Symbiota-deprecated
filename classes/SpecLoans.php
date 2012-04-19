@@ -176,6 +176,23 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
+	//
+	public function getloanIdentifierBorr($pArr){
+		$statusStr = '';
+		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierborr,iidowner,createdbyborr) '.
+			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierborr']).'","'.$this->cleanString($pArr['iidowner']).'",
+			"'.$this->cleanString($pArr['createdbyborr']).'")';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$this->loanId = $this->conn->insert_id;
+		}
+		else{
+			$statusStr = 'ERROR: Creation of new loan failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
+	}
+	
 	public function createNewLoanIn($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierborr,iidowner,createdbyborr) '.
