@@ -21,7 +21,7 @@ $dupeManager = new OccurrenceEditorManager();
 
 $occArr = array();
 if(!$submitAction){
-	if($collName || $exsTitle){
+	if($occidQuery || $collName || $exsTitle){
 		$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt, $exsTitle, $exsNumber);
 	}
 }
@@ -153,23 +153,31 @@ if($submitAction){
 					<?php } ?>
 					<div>
 						<?php 
-						echo '<span title="recordedby">'.$occObj['recordedby'].'</span>';
+						echo '<span title="recordedby">'.($occObj['recordedby']?$occObj['recordedby']:'Collector field empty').'</span>';
 						if($occObj['recordnumber']) echo '<span style="margin-left:20px;" title="recordnumber">'.$occObj['recordnumber'].'</span>';
 						if($occObj['eventdate']){
 							echo '<span style="margin-left:20px;" title="eventdate">'.$occObj['eventdate'].'</span>';
 						}
-						else{
+						elseif($occObj['verbatimeventdate']){
 							echo '<span style="margin-left:20px;" title="verbatimeventdate">'.$occObj['verbatimeventdate'].'</span>';
+						}
+						else{
+							echo '<span style="margin-left:20px;" title="eventdate">Date field empty</span>';
 						}
 						if($occObj['associatedcollectors']) echo '<div style="margin-left:10px;" title="associatedcollectors">Assoc. Collectors: '.$occObj['associatedcollectors'].'</div>';
 						?> 
 					</div>
 					<div>
 						<?php
-						if($occObj['identificationqualifier']) echo '<span title="identificationqualifier">'.$occObj['identificationqualifier'].'</span> '; 
-						echo '<span title="sciname"><i>'.$occObj['sciname'].'</i></span> ';
-						echo '<span title="scientificnameauthorship">'.$occObj['scientificnameauthorship'].'</span>';
-						echo '<span style="margin-left:25px;color:red;" title="typestatus">'.$occObj['typestatus'].'</span>'; 
+						if($occObj['sciname']){
+							if($occObj['identificationqualifier']) echo '<span title="identificationqualifier">'.$occObj['identificationqualifier'].'</span> '; 
+							echo '<span title="sciname"><i>'.$occObj['sciname'].'</i></span> ';
+							echo '<span title="scientificnameauthorship">'.$occObj['scientificnameauthorship'].'</span>';
+							echo '<span style="margin-left:25px;color:red;" title="typestatus">'.$occObj['typestatus'].'</span>';
+						}
+						else{
+							echo '<span title="sciname">Scientific Name empty</span> ';
+						}
 						?>
 					</div>
 					<div style='margin-left:10px;'>
@@ -182,11 +190,11 @@ if($submitAction){
 						?>
 					</div>
 					<div>
-						<?php 
-						echo '<span title="country">'.$occObj['country'].'</span>; ';
-						echo '<span title="stateprovince">'.$occObj['stateprovince'].'</span>; ';
-						echo '<span title="county">'.$occObj['county'].'</span>; ';
-						echo '<span title="locality">'.$occObj['locality'].'</span>';
+						<?php
+						if($occObj['country']) echo '<span title="country">'.$occObj['country'].'</span>; ';
+						if($occObj['stateprovince']) echo '<span title="stateprovince">'.$occObj['stateprovince'].'</span>; ';
+						if($occObj['county']) echo '<span title="county">'.$occObj['county'].'</span>; ';
+						echo '<span title="locality">'.($occObj['locality']?$occObj['locality']:'Locality data empty').'</span>';
 						?>
 					</div>
 					<?php 

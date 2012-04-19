@@ -47,7 +47,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 
 $statusStr = '';
 $localArr;
-if($editor && $submitAction && $qLocality){
+if($editor && $submitAction){
 	if($qCountry) $geoManager->setQueryVariables('qcountry',$qCountry);
 	if($qState) $geoManager->setQueryVariables('qstate',$qState);
 	if($qCounty) $geoManager->setQueryVariables('qcounty',$qCounty);
@@ -196,7 +196,14 @@ header("Content-Type: text/html; charset=".$charset);
 								</div>
 								<div style="font-weight:bold;">
 									<?php 
-									echo 'Return Count: '.(isset($localArr)?count($localArr):'---');
+									$localCnt = '---';
+									if(isset($localArr)){
+										$localCnt = count($localArr);
+									}
+									if($localCnt == 1000){
+										$localCnt = '1000 or more';
+									}
+									echo 'Return Count: '.$localCnt;
 									?>
 								</div>
 								<div style="clear:both;">
