@@ -368,7 +368,7 @@ header("Content-Type: text/html; charset=".$charset);
 					<div id="loandiv">
 						<?php 
 						//Show loan details
-						$loanArr = $loanManager->getLoanInDetails($loanId);
+						$loanArr = $loanManager->getLoanOutDetails($loanId);
 						$specTotal = $loanManager->getSpecTotal($loanId);
 						//$loanDetails = $loanManager->getLoanDetails($loanId);
 						//foreach($loanDetails as $k => $loanArr){
