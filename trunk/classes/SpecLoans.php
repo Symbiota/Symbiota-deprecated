@@ -37,6 +37,21 @@ class SpecLoans{
 		return $retArr;
 	} 
 	
+	public function getLoanOnWayList($searchTerm,$displayAll){
+		$retArr = array();
+		$sql = 'SELECT loanid, loanidentifierborr, dateclosed '.
+			'FROM omoccurloans '.
+			'WHERE collidborr = '.$this->collId.' ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->loanid]['loanidentifierborr'] = $r->loanidentifierborr;
+				$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getLoanInList($searchTerm,$displayAll){
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifierborr, dateclosed '.
@@ -240,36 +255,31 @@ class SpecLoans{
 		return $retArr;
 	} 
 	
-	public function addSpecimen($pArr){
+	//This method is used by the ajax script insertloanspecimen.php
+	public function addSpecimen($loanId,$collId,$catNum){
 		$statusStr = '';
-		$loanId = $this->cleanString($pArr['loanid']);
-		$collId = $this->cleanString($pArr['collid']);
-		$catNum = $this->cleanString($pArr['catalognumber']);
-		//$occId = $this->getOccID($collId,$catNum);
-		$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
-			'VALUES('.$loanId.',(SELECT occid FROM omoccurrences WHERE collid = '.$collId.' AND catalognumber = "'.$catNum.'")) ';
+		$retArr = array();
+		$loanId = $this->cleanString($loanId);
+		$collId = $this->cleanString($collId);
+		$catNum = $this->cleanString($catNum);
+		$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (catalognumber = "'.$catNum.'") ';
 		//echo $sql;
-		if($this->conn->query($sql)){
-			$statusStr = 'SUCCESS: Specimen Added';
+		$result = $this->conn->query($sql);
+		while ($row = $result->fetch_object()) {
+			$retArr[] = $row->occid;
 		}
-		else{
-			$statusStr = 'ERROR: Adding of specimen failed: '.$this->conn->error.'<br/>';
-			$statusStr .= 'SQL: '.$sql;
+		if (count($retArr) == 0){
+			$statusStr = 0;
 		}
-		return $statusStr;
-	}
-	
-	public function AjaxAddSpecimen($catalogNumber){
-		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
-			'SELECT '.$loanId.',occid FROM omoccurrences WHERE catalognumber = "'.$catalogNumber.'"';
-		//echo $sql;
-		if($this->conn->query($sql)){
-			$statusStr = 'SUCCESS: Specimen Added';
+		elseif (count($retArr) > 1){
+			$statusStr = 2;
 		}
-		else{
-			$statusStr = 'ERROR: Adding of specimen failed: '.$this->conn->error.'<br/>';
-			$statusStr .= 'SQL: '.$sql;
+		else {
+			$statusStr = 1;
+			$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
+				'VALUES ('.$loanId.','.$retArr[0].') ';
+			//echo $sql;
+			$this->conn->query($sql);
 		}
 		return $statusStr;
 	}
