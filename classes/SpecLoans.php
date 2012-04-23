@@ -37,15 +37,16 @@ class SpecLoans{
 		return $retArr;
 	} 
 	
-	public function getLoanOnWayList($searchTerm,$displayAll){
+	public function getLoanOnWayList(){
 		$retArr = array();
-		$sql = 'SELECT loanid, loanidentifierborr, dateclosed '.
-			'FROM omoccurloans '.
-			'WHERE collidborr = '.$this->collId.' ';
+		$sql = 'SELECT DISTINCT o.loanid, o.loanidentifierown, c.collectionname '.
+			'FROM omoccurloans AS o LEFT OUTER JOIN omcollections AS c ON o.iidBorrower = c.iid '.
+			'WHERE c.CollID = '.$this->collId.' AND ISNULL(o.collidBorr) AND ISNULL(o.dateClosed)' ;
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->loanid]['loanidentifierborr'] = $r->loanidentifierborr;
-				$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
+				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
+				$retArr[$r->loanid]['collectionname'] = $r->collectionname;
 			}
 			$rs->close();
 		}
@@ -126,34 +127,59 @@ class SpecLoans{
 	
 	public function getLoanInDetails($loanId){
 		$retArr = array();
-		$sql = 'SELECT loanid, loanidentifierborr, iidborrower, datesent, totalboxes, '.
-			'shippingmethod, datedue, datereceivedown, dateclosed, forwhom, description, '.
-			'notes, createdbyown, processedbyown, processedbyreturnown '.
+		$sql = 'SELECT loanid, loanidentifierown, loanidentifierborr, collidown, iidowner, datesentreturn, totalboxesreturned, '.
+			'shippingmethodreturn, datedue, datereceivedborr, dateclosed, forwhom, description, numspecimens, '.
+			'notes, createdbyborr, processedbyborr, processedbyreturnborr '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
+				$retArr['loanidentifierown'] = $r->loanidentifierown;
 				$retArr['loanidentifierborr'] = $r->loanidentifierborr;
-				$retArr['iidborrower'] = $r->iidborrower;
-				$retArr['datesent'] = $r->datesent;
-				$retArr['totalboxes'] = $r->totalboxes;
-				$retArr['shippingmethod'] = $r->shippingmethod;
+				$retArr['collidown'] = $r->collidown;
+				$retArr['iidowner'] = $r->iidowner;
+				$retArr['datesentreturn'] = $r->datesentreturn;
+				$retArr['totalboxesreturned'] = $r->totalboxesreturned;
+				$retArr['shippingmethodreturn'] = $r->shippingmethodreturn;
 				$retArr['datedue'] = $r->datedue;
-				$retArr['datereceivedown'] = $r->datereceivedown;
+				$retArr['datereceivedborr'] = $r->datereceivedborr;
 				$retArr['dateclosed'] = $r->dateclosed;
 				$retArr['forwhom'] = $r->forwhom;
 				$retArr['description'] = $r->description;
+				$retArr['numspecimens'] = $r->numspecimens;
 				$retArr['notes'] = $r->notes;
-				$retArr['createdbyown'] = $r->createdbyown;
-				$retArr['processedbyown'] = $r->processedbyown;
-				$retArr['processedbyreturnown'] = $r->processedbyreturnown;
+				$retArr['createdbyborr'] = $r->createdbyborr;
+				$retArr['processedbyborr'] = $r->processedbyborr;
+				$retArr['processedbyreturnborr'] = $r->processedbyreturnborr;
 			}
 			$rs->close();
 		}
 		return $retArr;
 	} 
 
-	public function editLoan($pArr){
+	public function editLoanOut($pArr){
+		$statusStr = '';
+		$loanId = $pArr['loanid'];
+		if(is_numeric($loanId)){
+			$sql = '';
+			foreach($pArr as $k => $v){
+				if($k != 'formsubmit' && $k != 'loanid' && $k != 'collid'){
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+				}
+			}
+			$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE (loanid = '.$loanId.')';
+			if($this->conn->query($sql)){
+				$statusStr = 'SUCCESS: information saved';
+			}
+			else{
+				$statusStr = 'ERROR: Editing of loan failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
+		}
+		return $statusStr;
+	}
+	
+	public function editLoanIn($pArr){
 		$statusStr = '';
 		$loanId = $pArr['loanid'];
 		if(is_numeric($loanId)){
@@ -177,9 +203,9 @@ class SpecLoans{
 	
 	public function createNewLoanOut($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloans(collidown,loanidentifierown,iidborrower,createdbyown) '.
-			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierown']).'","'.$this->cleanString($pArr['reqinstitution']).'",
-			"'.$this->cleanString($pArr['createdbyown']).'")';
+		$sql = 'INSERT INTO omoccurloans(collidown,loanidentifierown,iidowner,iidborrower,createdbyown) '.
+			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierown']).'",(SELECT iid FROM omcollections WHERE collid = '.$this->collId.'), '.
+			'"'.$this->cleanString($pArr['reqinstitution']).'","'.$this->cleanString($pArr['createdbyown']).'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
@@ -210,8 +236,8 @@ class SpecLoans{
 	
 	public function createNewLoanIn($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierborr,iidowner,createdbyborr) '.
-			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierborr']).'","'.$this->cleanString($pArr['iidowner']).'",
+		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierown,loanidentifierborr,iidowner,createdbyborr) '.
+			'VALUES('.$this->collId.',"","'.$this->cleanString($pArr['loanidentifierborr']).'","'.$this->cleanString($pArr['iidowner']).'",
 			"'.$this->cleanString($pArr['createdbyborr']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
