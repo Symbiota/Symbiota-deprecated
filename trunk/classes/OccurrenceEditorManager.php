@@ -101,6 +101,9 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_enteredby',$_POST) && $_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
 			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
+			if(array_key_exists('q_customfield1',$_POST) && $_POST['q_customfield1']) $this->qryArr['cf1'] = $_POST['q_customfield1'];
+			if(array_key_exists('q_customtype1',$_POST) && $_POST['q_customtype1']) $this->qryArr['ct1'] = $_POST['q_customtype1'];
+			if(array_key_exists('q_customvalue1',$_POST) && $_POST['q_customvalue1']) $this->qryArr['cv1'] = trim($_POST['q_customvalue1']);
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
@@ -112,7 +115,7 @@ class OccurrenceEditorManager {
 		return $this->qryArr;
 	}
 	
-	public function setSqlWhere($occIndex=0, $isAdmin=0){
+	public function setSqlWhere($occIndex=0, $isAdmin=0, $recLimit = 1){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
 		if(array_key_exists('id',$this->qryArr)){
@@ -229,7 +232,7 @@ class OccurrenceEditorManager {
 		}
 		if(array_key_exists('rb',$this->qryArr)){
 			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
-			$sqlOrderBy .= ',(o.recordnumber'.($rnIsNum?'+1':'').')';
+			$sqlOrderBy .= ',(o.recordnumber+1)';
 		}
 		if(array_key_exists('ed',$this->qryArr)){
 			if($p = strpos($this->qryArr['ed'],' - ')){
@@ -256,6 +259,69 @@ class OccurrenceEditorManager {
 		if(array_key_exists('ps',$this->qryArr)){
 			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
 		}
+		if(array_key_exists('cv1',$this->qryArr) && array_key_exists('cf1',$this->qryArr)){
+			$cf1 = $this->qryArr['cf1'];
+			$ct1 = $this->qryArr['ct1'];
+			$cv1 = $this->qryArr['cv1'];
+			if($cf1 && $cv1){
+				if($ct1=='IS NULL'){
+					$sqlWhere .= 'AND (o.'.$cf1.' IS NULL) ';
+				}
+				elseif($ct1=='LIKE'){
+					if(strpos($cv1,'%') !== false){
+						$sqlWhere .= 'AND (o.'.$cf1.' LIKE "'.$cv1.'") ';
+					}
+					else{
+						$sqlWhere .= 'AND (o.'.$cf1.' LIKE "%'.$cv1.'%") ';
+					}
+				}
+				else{
+					$sqlWhere .= 'AND (o.'.$cf1.' = "'.$cv1.'") ';
+				}
+			}
+		}
+		if(array_key_exists('cv2',$this->qryArr) && array_key_exists('cf2',$this->qryArr)){
+			$cf2 = $this->qryArr['cf2'];
+			$ct2 = $this->qryArr['ct2'];
+			$cv2 = $this->qryArr['cv2'];
+			if($cf2 && $cv2){
+				if($ct1=='IS NULL'){
+					$sqlWhere .= 'AND (o.'.$cf2.' IS NULL) ';
+				}
+				elseif($ct2=='LIKE'){
+					if(strpos($cv2,'%') !== false){
+						$sqlWhere .= 'AND (o.'.$cf2.' LIKE "'.$cv2.'") ';
+					}
+					else{
+						$sqlWhere .= 'AND (o.'.$cf2.' LIKE "%'.$cv2.'%") ';
+					}
+				}
+				else{
+					$sqlWhere .= 'AND (o.'.$cf2.' = "'.$cv2.'") ';
+				}
+			}
+		}
+		if(array_key_exists('cv3',$this->qryArr) && array_key_exists('cf3',$this->qryArr)){
+			$cf3 = $this->qryArr['cf3'];
+			$ct3 = $this->qryArr['ct3'];
+			$cv3 = $this->qryArr['cv3'];
+			if($cf3 && $cv3){
+				if($ct3=='IS NULL'){
+					$sqlWhere .= 'AND (o.'.$cf3.' IS NULL) ';
+				}
+				elseif($ct3=='LIKE'){
+					if(strpos($cv3,'%') !== false){
+						$sqlWhere .= 'AND (o.'.$cf3.' LIKE "'.$cv3.'") ';
+					}
+					else{
+						$sqlWhere .= 'AND (o.'.$cf3.' LIKE "%'.$cv3.'%") ';
+					}
+				}
+				else{
+					$sqlWhere .= 'AND (o.'.$cf3.' = "'.$cv3.'") ';
+				}
+			}
+		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
 			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations'){
@@ -263,7 +329,7 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
 			}
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
-			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').'1';
+			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
 		}
 		//echo $sqlWhere;
 		$this->sqlWhere = $sqlWhere;
@@ -312,14 +378,14 @@ class OccurrenceEditorManager {
 		}
 		if($sql){
 			//echo "<div>".$sql."</div>";
+			$occid = 0;
 			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				foreach($row as $k => $v){
-					$retArr[strtolower($k)] = $v;
-				}
+			while($row = $rs->fetch_assoc()){
+				$occid = $row['occid'];
+				$retArr[$occid] = array_change_key_case($row);
 			}
 			$rs->close();
-			if($retArr && !$this->occId) $this->occId = $retArr['occid']; 
+			if(!$this->occId && $retArr && count($retArr) == 1) $this->occId = $occid; 
 			$this->occurrenceMap = $retArr;
 		}
 	}
@@ -378,7 +444,9 @@ class OccurrenceEditorManager {
 					if($v && array_key_exists($v,$occArr)){
 						$vStr = $this->cleanStr($occArr[$v]);
 						$sql .= ','.$v.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
-						if(array_key_exists($v,$this->occurrenceMap)) $this->occurrenceMap[$v] = $vStr;
+						if(array_key_exists($this->occId,$this->occurrenceMap) && array_key_exists($v,$this->occurrenceMap[$this->occId])){
+							$this->occurrenceMap[$this->occId][$v] = $vStr;
+						}
 					}
 				}
 				if(in_array('sciname',$editArr)){
@@ -516,12 +584,12 @@ class OccurrenceEditorManager {
 	
 	public function getObserverUid(){
 		$obsId = 0;
-		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap)){
-			$obsId = $this->occurrenceMap['observeruid'];
+		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap[$this->occId])){
+			$obsId = $this->occurrenceMap[$this->occId]['observeruid'];
 		}
 		elseif($this->occId){
 			$this->setOccurArr();
-			$obsId = $this->occurrenceMap['observeruid'];
+			$obsId = $this->occurrenceMap[$this->occId]['observeruid'];
 		}
 		return $obsId;
 	}

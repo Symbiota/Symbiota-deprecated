@@ -177,9 +177,9 @@
 							    </td>
 							    <td width="60px" align="center">
 							    	<?php if($collCnt%8 == 4 || (count($collList) < 4 && $collCnt == 1)){ ?>
-						        	<input type="image" src='../images/next1.gif'
-						                onmouseover="javascript:this.src = '../images/next1_roll.gif';" 
-						                onmouseout="javascript:this.src = '../images/next1.gif';"
+						        	<input type="image" src='../images/next.jpg'
+						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+						                onmouseout="javascript:this.src = '../images/next.jpg';"
 						                title="Click button to advance to the next step" />
 							    	<?php } ?>
 						    	</td>
@@ -231,9 +231,9 @@
 							    </td>
 							    <td width="60px" align="center">
 							    	<?php if($collCnt%8 == 4 || (count($specArr) < 4 && $collCnt == 1)){ ?>
-						        	<input type="image" src='../images/next1.gif'
-						                onmouseover="javascript:this.src = '../images/next1_roll.gif';" 
-						                onmouseout="javascript:this.src = '../images/next1.gif';"
+						        	<input type="image" src='../images/next.jpg'
+						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+						                onmouseout="javascript:this.src = '../images/next.jpg';"
 						                title="Click button to advance to the next step" />
 							    	<?php } ?>
 						    	</td>
@@ -285,9 +285,9 @@
 								</td>
 								<td width="60px" align="center">
 							    	<?php if($collCnt%8 == 4 || (count($obsArr) < 4 && $collCnt == 1)){ ?>
-						        	<input type="image" src='../images/next1.gif'
-						                onmouseover="javascript:this.src = '../images/next1_roll.gif';" 
-						                onmouseout="javascript:this.src = '../images/next1.gif';"
+						        	<input type="image" src='../images/next.jpg'
+						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+						                onmouseout="javascript:this.src = '../images/next.jpg';"
 						                title="Click button to advance to the next step" />
 							    	<?php } ?>
 							    	<input type="hidden" name="catid" value="<?php echo $catId; ?>" /> 

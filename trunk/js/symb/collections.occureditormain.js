@@ -44,22 +44,34 @@ $(document).ready(function() {
 
 
 	//Misc fields with lookups
-	$("#ffcountry").autocomplete( 
-		{ source: countryArr },
+	$("#ffcountry").autocomplete({ 
+			source: countryArr,
+			change: function(event, ui) {
+				fieldChanged('country');
+			}
+		},
 		{ minLength: 1, autoFocus: true } 
 	);
 
 	$("#ffstate").autocomplete({
-		source: function( request, response ) {
-			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
-		}},
+			source: function( request, response ) {
+				$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
+			},
+			change: function(event, ui) {
+				fieldChanged('stateprovince');
+			}		
+		},
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
 
-	$("#ffcounty").autocomplete(
-		{ source: function( request, response ) {
-			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
-		}},
+	$("#ffcounty").autocomplete({ 
+			source: function( request, response ) {
+				$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+			},
+			change: function(event, ui) {
+				fieldChanged('county');
+			}		
+		},
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
 
@@ -237,193 +249,6 @@ function otherCatalogNumbersChanged(f){
 	}
 }
 
-function countryChanged(f){
-	fieldChanged("country");
-
-	/*
-	var countryValue = f.country.value;
-	if(countryValue){
-		var isNew = true;
-		var arrLen = countryArr.length;
-		for(var i=0; i<arrLen; i++) {
-	    	if(countryArr[i] == countryValue){
-	        	isNew = false;
-	        	break;
-	        }
-	    }
-
-		if(isNew){
-			var $countryDialog = $('<div></div>').html('Country is not present in lookup tables. Would you like to add this new country?');
-			$countryDialog.dialog({
-				title: 'Country Not Found',
-				resizable: false,
-				height:140,
-				modal: true,
-				buttons: {
-					"Don't Add Country": function() {
-						$( this ).dialog( "close" );
-						f.stateprovince.focus();
-					},
-					"Add Country": function() {
-						addLookupCountry(countryValue);
-						$( this ).dialog( "close" );
-						f.stateprovince.focus();
-					}
-				}
-			});
-		}
-	}
-	*/
-}
-
-function addLookupCountry(countryValue){
-	var cXmlHttp = GetXmlHttpObject();
-	if(cXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/lookupAddCountry.php?collid=" + collId + "&country=" + countryValue;
-	cXmlHttp.onreadystatechange=function(){
-		if(cXmlHttp.readyState==4 && cXmlHttp.status==200){
-			if(cXmlHttp.responseText){
-				alert("Country successfully added to lookup table ");
-			}
-			else{
-				alert("FAILED: unable to add country to lookup table; contact site administrator.");
-			}
-		}
-	};
-	cXmlHttp.open("POST",url,true);
-	cXmlHttp.send(null);
-	
-}
-
-function stateProvinceChanged(f){
-	fieldChanged('stateprovince');
-	/*
-	var stateValue = f.stateprovince.value;
-	var countryValue = f.country.value;
-	if(stateValue && countryValue){
-		var scXmlHttp = GetXmlHttpObject();
-		if(scXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/lookupState.php?country=" + countryValue + "&term=" + stateValue;
-		scXmlHttp.onreadystatechange=function(){
-			if(scXmlHttp.readyState==4 && scXmlHttp.status==200){
-				if(!scXmlHttp.responseText){
-					var $stateDialog = $('<div></div>').html('State is not present in lookup tables for given country. Would you like to add this new state?');
-					$stateDialog.dialog({
-						title: 'State Not Found',
-						resizable: false,
-						width:350,
-						modal: true,
-						buttons: {
-							"Continue without adding state": function() {
-								$( this ).dialog( "close" );
-								f.county.focus();
-							},
-							"Add State": function() {
-								addLookupState(stateValue,countryValue);
-								$( this ).dialog( "close" );
-								f.county.focus();
-							}
-						}
-					});
-				}
-			}
-		};
-		scXmlHttp.open("POST",url,true);
-		scXmlHttp.send(null);
-	}
-	*/
-}
-
-function addLookupState(stateStr,countryStr){
-	var sXmlHttp = GetXmlHttpObject();
-	if(sXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/lookupAddState.php?collid=" + collId + "&state=" + stateStr + "&country=" + countryStr;
-	sXmlHttp.onreadystatechange=function(){
-		if(sXmlHttp.readyState==4 && sXmlHttp.status==200){
-			if(sXmlHttp.responseText){
-				alert("State successfully added to lookup table ");
-			}
-			else{
-				alert("FAILED: unable to add state to lookup table; contact site administrator.");
-			}
-		}
-	};
-	sXmlHttp.open("POST",url,true);
-	sXmlHttp.send(null);
-}
-
-function countyChanged(f){
-	fieldChanged('county');
-	/*
-	var countyValue = f.county.value;
-	var stateValue = f.stateprovince.value;
-	if(countyValue && stateValue){
-		var countyXmlHttp = GetXmlHttpObject();
-		if(countyXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/lookupCounty.php?term=" + countyValue + "&state=" + stateValue;
-		countyXmlHttp.onreadystatechange=function(){
-			if(countyXmlHttp.readyState==4 && countyXmlHttp.status==200){
-				if(!countyXmlHttp.responseText){
-					var $countyDialog = $('<div></div>').html('County is not present in lookup tables for given State. Would you like to add this new county?');
-					$countyDialog.dialog({
-						title: 'County Not Found',
-						resizable: false,
-						width:350,
-						modal: true,
-						buttons: {
-							"Continue without adding county": function() {
-								$( this ).dialog( "close" );
-								f.municipality.focus();
-							},
-							"Add County": function() {
-								addLookupCounty(countyValue,stateValue);
-								$( this ).dialog( "close" );
-								f.municipality.focus();
-							}
-						}
-					});
-				}
-			}
-		};
-		countyXmlHttp.open("POST",url,true);
-		countyXmlHttp.send(null);
-	}
-	*/
-}
-
-function addLookupCounty(countyStr,stateStr){
-	var countyXmlHttp = GetXmlHttpObject();
-	if(countyXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/lookupAddCounty.php?collid=" + collId + "&state=" + stateStr + "&county=" + countyStr;
-	countyXmlHttp.onreadystatechange=function(){
-		if(countyXmlHttp.readyState==4 && countyXmlHttp.status==200){
-			if(countyXmlHttp.responseText){
-				alert("County successfully added to lookup table ");
-			}
-			else{
-				alert("FAILED: unable to add county to lookup table; contact site administrator.");
-			}
-		}
-	};
-	countyXmlHttp.open("POST",url,true);
-	countyXmlHttp.send(null);
-}
-
 function decimalLatitudeChanged(f){
 	verifyDecimalLatitude(f);
 	fieldChanged('decimallatitude');
@@ -538,7 +363,14 @@ function verifyFullForm(f){
 function verifyFullFormEdits(f){
 	if(f.editedfields){
 		if(f.editedfields.value == ""){
-			alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+			setTimeout(function () { 
+				if(f.editedfields.value){
+					f.submitaction.click();
+				}
+				else{
+					alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+				}
+			}, 1000);
 			return false;
 		}
 	}
@@ -1057,63 +889,6 @@ function verifyImgDelForm(f){
 		return true;
 	}
 	return false;
-}
-
-//Query form 
-function submitQueryForm(qryLimit){
-	var f = document.queryform;
-	if(qryLimit) f.occindex.value = qryLimit;
-	f.submit();
-	return false;
-}
-
-function verifyQueryForm(f){
-	if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
-		&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
-		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == ""){
-		alert("Query form is empty! Please enter a value to query by.");
-		return false;
-	}
-
-	var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-	var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-
-	var edDateStr = f.q_eventdate.value;
-	if(edDateStr){
-		try{
-			if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr)){
-				alert("Event date must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-				return false;
-			}
-		}
-		catch(ex){
-		}
-	}
-	
-	var modDateStr = f.q_datelastmodified.value;
-	if(modDateStr){
-		try{
-			if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr)){
-				alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-				return false;
-			}
-		}
-		catch(ex){
-		}
-	}
-
-	return true;
-}
-
-function resetQueryForm(f){
-	f.q_identifier.value = "";
-	f.q_othercatalognumbers.value = "";
-	f.q_recordedby.value = "";
-	f.q_recordnumber.value = "";
-	f.q_eventdate.value = "";
-	f.q_enteredby.value = "";
-	f.q_datelastmodified.value = "";
-	f.q_processingstatus.value = "";
 }
 
 //Misc

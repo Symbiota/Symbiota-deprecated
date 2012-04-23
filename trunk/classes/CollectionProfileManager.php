@@ -301,46 +301,70 @@ class CollectionProfileManager {
 		echo '<li>Finished updating collection statistics</li>';
 	}
 
-	public function getFamilyRecordCounts(){
+	public function getTaxonCounts($family=''){
 		$returnArr = Array();
-		//Specimen count
-		$sql = 'SELECT o.Family, Count(*) AS cnt '.
-			'FROM omoccurrences o GROUP BY o.CollID, o.Family HAVING (o.CollID = '.$this->collId.') AND (o.Family IS NOT NULL) AND o.Family <> "" '.
-			'ORDER BY o.Family';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->Family] = $row->cnt;
+		$sql = '';
+		if($family){
+			$sql = 'SELECT t.unitname1 as taxon, Count(o.occid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'GROUP BY o.CollID, t.unitname1, o.Family '.
+				'HAVING (o.CollID = '.$this->collId.') '.
+				'AND (o.Family = "'.$family.'") AND (t.unitname1 != "'.$family.'") '.
+				'ORDER BY t.unitname1';
 		}
-		$rs->close();
-		return $returnArr;
-	}
-
-	public function getCountryRecordCounts(){
-		$returnArr = Array();
-		//Specimen count
-		$sql = "SELECT o.Country, Count(*) AS cnt ".
-			"FROM omoccurrences o GROUP BY o.CollID, o.Country HAVING (o.CollID = $this->collId) AND o.Country IS NOT NULL AND o.Country <> '' ".
-			"ORDER BY o.Country";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->Country] = $row->cnt;
+		else{
+			$sql = 'SELECT o.family as taxon, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.Family '.
+				'HAVING (o.CollID = '.$this->collId.') '.
+				'AND (o.Family IS NOT NULL) AND (o.Family <> "") '.
+				'ORDER BY o.Family';
 		}
-		$rs->close();
-		return $returnArr;
-	}
-
-	public function getStateRecordCounts(){
-		$returnArr = Array();
-		//Specimen count
-		$sql = "SELECT o.StateProvince, Count(*) AS cnt ".
-			"FROM omoccurrences o GROUP BY o.CollID, o.StateProvince, o.country ".
-			"HAVING (o.CollID = $this->collId) AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> '') ".
-			"AND o.country IN('USA','United States','United States of America','US') ".
-			"ORDER BY o.StateProvince";
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->StateProvince] = $row->cnt;
+			$returnArr[$row->taxon] = $row->cnt;
+		}
+		$rs->close();
+		return $returnArr;
+	}
+
+	public function getGeographicCounts($country="",$state=""){
+		$returnArr = Array();
+		$sql = '';
+		if($country){
+			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.StateProvince, o.country '.
+				'HAVING (o.CollID = '.$this->collId.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
+				'AND o.country = "'.$country.'" '.
+				'ORDER BY trim(o.StateProvince)';
+		}
+		elseif($state){
+			$sql = 'SELECT trim(o.county) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.StateProvince, o.county '.
+				'HAVING (o.CollID = '.$this->collId.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
+				'AND o.stateprovince = "'.$state.'" '.
+				'ORDER BY trim(o.county)';
+		}
+		else{
+			$sql = 'SELECT trim(o.country) as termstr, Count(*) AS cnt '.
+				'FROM omoccurrences o '.
+				'GROUP BY o.CollID, o.Country '.
+				'HAVING (o.CollID = '.$this->collId.') AND o.Country IS NOT NULL AND o.Country <> "" '.
+				'ORDER BY trim(o.Country)';
+		}
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$t = $row->termstr;
+			if($state){
+				$t = trim(str_ireplace(array(' county',' co.',' Counties'),'',$t));
+			}
+			if($t){
+				$returnArr[$t] = $row->cnt;
+			}
 		}
 		$rs->close();
 		return $returnArr;
