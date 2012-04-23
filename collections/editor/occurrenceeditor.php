@@ -188,8 +188,11 @@ if($symbUid){
 	}
 	
 	if(!$goToMode){
-		$occArr = $occManager->getOccurMap();
-		if(!$occId) $occId = $occManager->getOccId(); 
+		$oArr = $occManager->getOccurMap();
+		if($oArr){
+			if(!$occId) $occId = $occManager->getOccId(); 
+			$occArr = $oArr[$occId];
+		}
 	}
 	elseif($goToMode == 2){
 		$occArr = $occManager->carryOverValues($_REQUEST);
@@ -214,7 +217,7 @@ if($symbUid){
 			if($occIndex > 0) $navStr .= '</a>';
 			$recIndex = ($occIndex<$qryCnt?($occIndex + 1):'*');
 			$navStr .= '&nbsp;&nbsp;| '.$recIndex.' of '.$qryCnt.' |&nbsp;&nbsp;';
-			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+($action=="Save Edits"?0:1)).');"  title="Next Record">';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+1).');"  title="Next Record">';
 			$navStr .= '&gt;&gt;';
 			if($occIndex<$qryCnt-1) $navStr .= '</a>';
 			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -271,6 +274,7 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?cacherefresh=<?php echo time(); ?>"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?cacherefresh=<?php echo time(); ?>"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?cacherefresh=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorquery.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -287,156 +291,17 @@ if($symbUid){
 			<?php 
 		}
 		else{
-			echo '<div style="width:790px;">';
-			if($isEditor){
-				?>
-				<div style="float:right;">
-					<div style="cursor:pointer;" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';">
-						Search / Filter
-					</div>
-				</div>
-				<?php
-			}
 			if($collMap){
+				echo '<div>';
 				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
-			}
-			echo '</div>';
-			if($statusStr){
-				?>
-				<div id="statusdiv" style="margin:5px 0px 5px 15px;">
-					<b>Action Status: </b>
-					<span style="color:red;"><?php echo $statusStr; ?></span>
-					<?php 
-					if($action == 'Delete Occurrence'){
-						?>
-						<br/>
-						<a href="#" style="margin:5px;" onclick="window.opener.location.href = window.opener.location.href;window.close();">
-							Return to Search Page
-						</a>
-						<?php
-					}
-					?>
-				</div>
-				<?php 
+				echo '</div>';
 			}
 			if($occId || ($isEditor && $collId)){
-				$qIdentifier=''; $qOtherCatalogNumbers=''; 
-				$qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
-				$qEnteredBy=''; $qProcessingStatus=''; $qDateLastModified='';
-				$qryArr = $occManager->getQueryVariables();
-				if($qryArr){
-					$qIdentifier = (array_key_exists('id',$qryArr)?$qryArr['id']:'');
-					$qOtherCatalogNumbers = (array_key_exists('ocn',$qryArr)?$qryArr['ocn']:'');
-					$qRecordedBy = (array_key_exists('rb',$qryArr)?$qryArr['rb']:'');
-					$qRecordNumber = (array_key_exists('rn',$qryArr)?$qryArr['rn']:'');
-					$qEventDate = (array_key_exists('ed',$qryArr)?$qryArr['ed']:'');
-					$qEnteredBy = (array_key_exists('eb',$qryArr)?$qryArr['eb']:'');
-					$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
-					$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
-				}
+				$displayQueryForm = 0;
+				if(!$occArr && !$goToMode) $displayQueryForm = 1;
+				include 'includes/queryform.php';
 				?>
-				<div id="querydiv" style="width:790px;display:<?php echo (!$occArr&&!$goToMode?'block':'none'); ?>;">
-					<form name="queryform" action="occurrenceeditor.php" method="post" onsubmit="return verifyQueryForm(this)">
-						<fieldset style="padding:5px;">
-							<legend><b>Record Search Form</b></legend>
-							<div style="margin:2px;">
-								<span title="Full name of collector as entered in database. To search just on last name, place the wildcard character (%) before name (%Gentry).">
-									Collector: 
-									<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
-								</span>
-								<span style="margin-left:25px;">Number:</span>
-								<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
-								</span>
-								<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
-									Date: 
-									<input type="text" name="q_eventdate" value="<?php echo $qEventDate; ?>" style="width:160px" />
-								</span>
-							</div>
-							<div style="margin:2px;">
-								Identifier: 
-								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
-								</span>
-								<span style="margin-left:25px;">Other Catalog Numbers:</span> 
-								<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									<input type="text" name="q_othercatalognumbers" value="<?php echo $qOtherCatalogNumbers; ?>" />
-								</span>
-							</div>
-							<div style="margin:2px;">
-								Entered by: 
-								<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
-								<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
-									Date entered: 
-									<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
-								</span>
-								<span style="margin-left:15px;">Status:</span> 
-								<select name="q_processingstatus">
-									<option value=''>All Records</option>
-									<option>-------------------</option>
-									<option value="unprocessed" <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
-										Unprocessed
-									</option>
-									<option value="unprocessed/OCR" <?php echo ($qProcessingStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
-										Unprocessed/OCR 
-									</option>
-									<option  value="unprocessed/NLP" <?php echo ($qProcessingStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
-										Unprocessed/NLP
-									</option>
-									<option value="stage 1" <?php echo ($qProcessingStatus=='stage 1'?'SELECTED':''); ?>>
-										Stage 1
-									</option>
-									<option value="stage 2" <?php echo ($qProcessingStatus=='stage 2'?'SELECTED':''); ?>>
-										Stage 2
-									</option>
-									<option value="stage 3" <?php echo ($qProcessingStatus=='stage 3'?'SELECTED':''); ?>>
-										Stage 3
-									</option>
-									<option value="pending duplicate" <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
-										Pending Duplicate
-									</option>
-									<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
-										Pending Review
-									</option>
-									<option value="expert required" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
-										Expert Required
-									</option>
-									<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
-										Reviewed
-									</option>
-								</select>
-							</div>
-							<?php 
-							$qryStr = '';
-							if($qRecordedBy) $qryStr .= '&recordedby='.$qRecordedBy;
-							if($qRecordNumber) $qryStr .= '&recordnumber='.$qRecordNumber;
-							if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
-							if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
-							if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
-							if($qryStr){
-								?>
-								<div style="float:right;margin-top:10px;" title="Go to Label Printing Module">
-									<a href="../datasets/index.php?collid=<?php echo $collId.$qryStr; ?>">
-										<img src="../../images/list.png" style="width:15px;" />
-									</a>
-								</div>
-								<?php 
-							}
-							?>
-							<div style="margin:5px;">
-								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-								<input type="hidden" name="occid" value="" />
-								<input type="hidden" name="occindex" value="0" />
-								<input type="submit" name="submitaction" value="Query Records" />
-								<input type="hidden" name="autoprocessingstatus" value="<?php echo $autoPStatus; ?>" />
-								<span style="margin-left:10px;">
-									<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" /> 
-								</span>
-							</div>
-						</fieldset>
-					</form>
-				</div>
-				<div style="width:790px;">
+				<div style="width:790px;clear:both;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
 						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
@@ -453,6 +318,24 @@ if($symbUid){
 					?>
 				</div>
 				<?php 
+				if($statusStr){
+					?>
+					<div id="statusdiv" style="margin:5px 0px 5px 15px;">
+						<b>Action Status: </b>
+						<span style="color:red;"><?php echo $statusStr; ?></span>
+						<?php 
+						if($action == 'Delete Occurrence'){
+							?>
+							<br/>
+							<a href="#" style="margin:5px;" onclick="window.opener.location.href = window.opener.location.href;window.close();">
+								Return to Search Page
+							</a>
+							<?php
+						}
+						?>
+					</div>
+					<?php 
+				}
 				if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 					?>
 					<table id="edittable" style="">
@@ -1052,12 +935,7 @@ if($symbUid){
 											<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
 											<?php if($occId){ ?>
-												<fieldset style="float:right;margin:15px 20px 20px 0px;padding:15px;background-color:lightyellow">
-													<legend><b>Options</b></legend>
-													<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
-													<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
-												</fieldset>
-												<div style="margin:15px 0px 20px 30px;">
+												<div style="margin:15px 30px;float:left;">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" /><br/>
 													Status Auto-Set:
 													<select name="autoprocessingstatus">
@@ -1102,6 +980,13 @@ if($symbUid){
 														<?php 
 													}
 													?>
+												</div>
+												<div style="float:left;margin-left:200px;">
+													<fieldset style="padding:15px;background-color:lightyellow;">
+														<legend><b>Options</b></legend>
+														<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+														<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
+													</fieldset>
 												</div>
 											<?php }else{ ?>
 												<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">

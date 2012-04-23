@@ -61,7 +61,7 @@ header("Content-Type: text/html; charset=".$charset);
 			$displayLeftMenu = (isset($collections_editor_editreviewerMenu)?$collections_individual_editreviewerMenu:false);
 			include($serverRoot.'/header.php');
 				echo "<div class='navpath'>";
-				echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+				echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 				if(isset($collections_editor_editreviewerCrumbs)){
 					echo $collections_editor_editreviewerCrumbs;
 				}

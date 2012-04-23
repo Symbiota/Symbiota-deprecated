@@ -7,8 +7,10 @@ header("Content-Type: text/html; charset=".$charset);
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $showFamilyList = array_key_exists("sfl",$_REQUEST)?$_REQUEST["sfl"]:0;
-$showCountryList = array_key_exists("scl",$_REQUEST)?$_REQUEST["scl"]:0;
-$showStateList = array_key_exists("ssl",$_REQUEST)?$_REQUEST["ssl"]:0;
+$familyDist = array_key_exists('family',$_REQUEST)?$_REQUEST['family']:'';
+$showGeographicList = array_key_exists("sgl",$_REQUEST)?$_REQUEST["sgl"]:0;
+$countryDist = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
+$stateDist = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 $newCollRec = array_key_exists("newcoll",$_REQUEST)?1:0;
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
@@ -125,17 +127,17 @@ if($collId) $collData = $collManager->getCollectionData();
 	if(isset($collections_misc_collprofilesCrumbs)){
 		if($collections_misc_collprofilesCrumbs){
 			echo "<div class='navpath'>";
-			echo "<a href='../../index.php'>Home</a> &gt; ";
-			echo $collections_misc_collprofilesCrumbs;
-			echo " <b>".($collData?$collData["collectionname"]:"Collection Profiles")."</b>";
+			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
+			echo $collections_misc_collprofilesCrumbs.' &gt;&gt; ';
+			echo "<b>".($collData?$collData["collectionname"]:"Collection Profiles")."</b>";
 			echo "</div>";
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt; 
-			<a href='../index.php'>Collections</a> &gt; 
+			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<a href='collprofiles.php'>Collections</a> &gt;&gt; 
 			<b><?php echo ($collData?$collData['collectionname']:'Collection Profiles'); ?></b>
 		</div>
 		<?php 
@@ -532,68 +534,77 @@ if($collId) $collData = $collManager->getCollectionData();
 				</div>
 				<div style='margin:20px 0px 20px 20px;width:200px;background-color:#FFFFCC;' class='fieldset'>
 					<div class='legend'><b>Extra Statistics</b></div>
-					<div><a href='collprofiles.php?collid=<?php echo $collId;?>&sfl=1'>Show Family Coverages</a></div>
-					<div><a href='collprofiles.php?collid=<?php echo $collId;?>&scl=1'>Show Country Coverages</a></div>
-					<div><a href='collprofiles.php?collid=<?php echo $collId;?>&ssl=1'>Show State Coverages</a></div>
+					<div>
+						<a href='collprofiles.php?collid=<?php echo $collId;?>&sfl=1'>
+							Show Family/Genus Distribution
+						</a>
+					</div>
+					<div>
+						<a href='collprofiles.php?collid=<?php echo $collId;?>&sgl=1'>
+							Show Geographic Distribution
+						</a>
+					</div>
 				</div>
 				<?php
-				if($showFamilyList){
-					echo "<div style='margin:20px 0px 20px 30px;width:300px;' class='fieldset'>";
-					echo "<div class='legend'>Family Coverage</div>";
-					$familyCntArr = $collManager->getFamilyRecordCounts();
-					echo "<ul>";
-					foreach($familyCntArr as $fam=>$cnt){
-						$percentage = round(100*$cnt/$collData["recordcnt"]);
-						if($percentage > 10){
-							$cntStr = $percentage."%";
-						}
-						else{
-							$cntStr = $cnt;
-						}
-						echo "<li>$fam (".$cntStr.")</li>";
-					}
-					echo "</ul>";
-					echo "<div>* Number in parentheses are record counts. Counts greater than 10% of total are shown as percentages.</div>";
-					echo "<div>";
-				}
-				if($showCountryList){
-					echo "<div style='margin:20px 0px 20px 30px;width:300px;' class='fieldset'>";
-					echo "<div class='legend'>Country Coverage</div>";
-					$countryCntArr = $collManager->getCountryRecordCounts();
-					echo "<ul>";
-					foreach($countryCntArr as $country => $cnt){
-						$percentage = round(100*$cnt/$collData["recordcnt"]);
-						if($percentage > 10){
-							$cntStr = $percentage."%";
-						}
-						else{
-							$cntStr = $cnt;
-						}
-						echo "<li>$country (".$cntStr.")</li>";
-					}
-					echo "</ul>";
-					echo "<div>* Number in parentheses are record counts. Counts greater than 10% of total are shown as percentages.</div>";
-					echo "<div>";
-				}
-				if($showStateList){
-					echo "<div style='margin:20px 0px 20px 30px;width:300px;' class='fieldset'>";
-					echo "<div class='legend'>State (US) Coverage</div>";
-					$stateCntArr = $collManager->getStateRecordCounts();
-					echo "<ul>";
-					foreach($stateCntArr as $state => $cnt){
-						$percentage = round(100*$cnt/$collData["recordcnt"]);
-						
-						if($percentage > 10){
-							$cntStr = $percentage."%";
-						}
-						else{
-							$cntStr = $cnt;
-						}
-						echo "<li>$state (".$cntStr.")</li>";
-					}
-					echo "</ul>";
-					echo "<div>* Number in parentheses are record counts. Counts greater than 10% of total are shown as percentages.</div>";
-					echo "<div>";
+				if($showFamilyList || $showGeographicList){
+					?>
+					<fieldset style="margin:20px;width:90%;">
+						<legend>
+							<b>
+								<?php 
+								if($showFamilyList){
+									echo 'Family Distribution';
+									if($familyDist){
+										echo ' - '.$familyDist;
+									}
+								}
+								else{
+									echo 'Geographic Distribution';
+									if($countryDist){
+										echo ' - '.$countryDist;
+									}
+									elseif($stateDist){
+										echo ' - '.$stateDist;
+									}
+								}
+								?>
+							</b>
+						</legend>
+						<ul>
+							<?php 
+							$distArr = array();
+							if($showFamilyList){
+								$distArr = $collManager->getTaxonCounts($familyDist);
+							}
+							else{
+								$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
+							}
+							foreach($distArr as $term => $cnt){
+								$percentage = round(100*$cnt/$collData["recordcnt"]);
+								echo '<li>';
+								if($showGeographicList && !$stateDist){
+									echo '<a href="collprofiles.php?sgl=1&collid='.$collId.($countryDist?'&state=':'&country=').$term.'">';
+									echo $term;
+									echo '</a>';
+								}
+								elseif($showFamilyList && !$familyDist){
+									echo '<a href="collprofiles.php?sfl=1&collid='.$collId.'&family='.$term.'">';
+									echo $term;
+									echo '</a>';
+								}
+								else{
+									echo $term;
+								}
+								echo ' ('.$cnt.($percentage > 10?', '.$percentage.'%':'').')';
+								echo '</li>';
+							}
+							?>
+						</ul>
+						<?php 
+							if(!$stateDist && !$familyDist) echo '*Clicking on term in list will display distributions within that term';
+						?>
+					</fieldset>
+					<?php 
 				}
 			}
 		}
@@ -608,7 +619,11 @@ if($collId) $collData = $collManager->getCollectionData();
 					?>
 					<tr>
 						<td style='text-align:center;vertical-align:top;'>
-							<img src='../../<?php echo $collArr['icon']; ?>' style='border-size:1px;height:30;width:30;' /><br/>
+							<?php 
+							$iconStr = $collArr['icon'];
+							if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr; 
+							?>
+							<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30;width:30;' /><br/>
 							<?php echo $collArr['institutioncode']; ?>
 						</td>
 						<td>
