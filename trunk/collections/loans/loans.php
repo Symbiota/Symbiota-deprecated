@@ -4,10 +4,10 @@ include_once($serverRoot.'/classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
+$loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
 $searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
 $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
-$loanType = 0;
 
 $isEditor = 0;
 if($symbUid && $collId){
@@ -33,10 +33,12 @@ if($isEditor){
 			$loanId = $loanManager->getLoanId();
 			$loanType = 'In';
 		}
-		elseif($formSubmit == 'Save'){
-			$statusStr = $loanManager->editLoan($_POST);
+		elseif($formSubmit == 'Save Outgoing'){
+			$statusStr = $loanManager->editLoanOut($_POST);
 		}
-		
+		elseif($formSubmit == 'Save Incoming'){
+			$statusStr = $loanManager->editLoanIn($_POST);
+		}		
 	}
 }
 
@@ -277,13 +279,13 @@ header("Content-Type: text/html; charset=".$charset);
 						</div>
 						<div>
 							<?php 
-							$loanList = $loanManager->getLoanOutList($searchTerm,$displayAll);
-							if($loanList){
+							$loanOutList = $loanManager->getLoanOutList($searchTerm,$displayAll);
+							if($loanOutList){
 								echo '<h3>Outgoing Loan Records</h3>';
 								echo '<ul>';
-								foreach($loanList as $k => $loanArr){
+								foreach($loanOutList as $k => $loanArr){
 									echo '<li>';
-									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
+									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'&loantype=Out">';
 									echo $loanArr['loanidentifierown'];
 									echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 									echo '</li>';
@@ -291,7 +293,7 @@ header("Content-Type: text/html; charset=".$charset);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;">There are no loans registered for this collection</div>';
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans out registered for this collection</div>';
 							}
 							?>
 						</div>
@@ -370,13 +372,33 @@ header("Content-Type: text/html; charset=".$charset);
 						</div>
 						<div>
 							<?php 
-							$loanList = $loanManager->getLoanInList($searchTerm,$displayAll);
-							if($loanList){
+							$loansOnWay = $loanManager->getLoanOnWayList();
+							if($loansOnWay){
+								echo '<h3>Loans on Their Way</h3>';
+								echo '<ul>';
+								foreach($loansOnWay as $k => $loanArr){
+									echo '<li>';
+									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
+									echo $loanArr['loanidentifierown'];
+									echo ' from '.$loanArr['collectionname'].'</a>';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans on their way to this collection.</div>';
+							}
+							?>
+						</div>
+						<div>
+							<?php 
+							$loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
+							if($loanInList){
 								echo '<h3>Incoming Loan Records</h3>';
 								echo '<ul>';
-								foreach($loanList as $k => $loanArr){
+								foreach($loanInList as $k => $loanArr){
 									echo '<li>';
-									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'">';
+									echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
 									echo $loanArr['loanidentifierborr'];
 									echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 									echo '</li>';
@@ -384,7 +406,7 @@ header("Content-Type: text/html; charset=".$charset);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;">There are no loans registered for this collection</div>';
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans in registered for this collection</div>';
 							}
 							?>
 						</div>
@@ -520,13 +542,13 @@ header("Content-Type: text/html; charset=".$charset);
 									<hr />
 									<div style="padding-top:4px;">
 										<span>
-											Date Returned:
+											Date Received:
 										</span>
 										<span style="margin-left:30px;">
-											Date Closed:
-										</span>
-										<span style="margin-left:40px;">
 											Ret. Processed By:
+										</span>
+										<span style="margin-left:25px;">
+											Date Closed:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
@@ -534,16 +556,16 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " />
+											<input type="text" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
+											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " />
 										</span>
 									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
-										<input name="formsubmit" type="submit" value="Save" />
+										<button name="formsubmit" type="submit" value="Save Outgoing" />Save</button>
 									</div>
 							</fieldset>
 						</form>
@@ -644,55 +666,55 @@ header("Content-Type: text/html; charset=".$charset);
 											Processed By:
 										</span>
 										<span style="margin-left:50px;">
-											Date Sent:
+											Date Received:
 										</span>
-										<span style="margin-left:55px;">
+										<span style="margin-left:30px;">
 											Date Due:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<b>Loan Number:</b> <input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierborr']; ?>" disabled />
+											<b>Loan Number:</b> <input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($loanArr['loanidentifierborr']?$loanArr['loanidentifierborr']:$loanArr['loanidentifierown']); ?>" />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
+											<input type="text" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo ($loanArr['createdbyborr']?$loanArr['createdbyborr']:$paramsArr['un']); ?>" onchange=" " disabled />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="processedbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyown']; ?>" onchange=" " />
+											<input type="text" name="processedbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyborr']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange=" " />
+											<input type="text" name="datereceivedborr" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedborr']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange=" " />
+											<input type="text" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
 										<span>
-											Sent To:
+											Sent From:
+										</span>
+										<span style="margin-left:430px;">
+											Sender's Loan Number:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<select name="iidborrower" style="width:400px;" disabled >
+											<select name="iidowner" style="width:400px;" disabled >
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
 												foreach($instArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$loanArr['iidborrower']?'SELECTED':'').'>'.$v.'</option>';
+													echo '<option value="'.$k.'" '.($k==$loanArr['iidowner']?'SELECTED':'').'>'.$v.'</option>';
 												}
 												?>
 											</select>
+										</span>
+										<span style="margin-left:90px;">
+											<input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
 										<span>
 											Requested for:
-										</span>
-										<span style="margin-left:340px;">
-											# of Boxes:
-										</span>
-										<span style="margin-left:25px;">
-											Shipping Service:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
@@ -700,13 +722,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($specTotal?$specTotal['speccount']:0);?>" onchange=" " disabled />
-										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
-										</span>
-										<span style="margin-left:30px;">
-											<input type="text" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethod']; ?>" onchange=" " />
+											<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php if($loanArr['collidown']){echo ($specTotal?$specTotal['speccount']:0) ;}else{echo $loanArr['numspecimens'] ;} ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
@@ -719,10 +735,10 @@ header("Content-Type: text/html; charset=".$charset);
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['description']; ?></textarea>
+											<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" " <?php echo ($loanArr['collidown']?'disabled="disabled"':''); ?> ><?php echo $loanArr['description']; ?></textarea>
 										</span>
 										<span style="margin-left:40px;">
-											<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['notes']; ?></textarea>
+											<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" " <?php echo ($loanArr['collidown']?'disabled="disabled"':''); ?> ><?php echo $loanArr['notes']; ?></textarea>
 										</span>
 									</div>
 									<hr />
@@ -731,27 +747,39 @@ header("Content-Type: text/html; charset=".$charset);
 											Date Returned:
 										</span>
 										<span style="margin-left:30px;">
-											Date Closed:
-										</span>
-										<span style="margin-left:40px;">
 											Ret. Processed By:
+										</span>
+										<span style="margin-left:30px;">
+											# of Boxes:
+										</span>
+										<span style="margin-left:25px;">
+											Shipping Service:
+										</span>
+										<span style="margin-left:115px;">
+											Date Closed:
 										</span>
 									</div>
 									<div style="padding-bottom:2px;">
 										<span>
-											<input type="text" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange=" " />
+											<input type="text" name="datesentreturn" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesentreturn']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " />
+											<input type="text" name="processedbyreturnborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnborr']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<input type="text" name="totalboxesreturned" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxesreturned']; ?>" onchange=" " />
+										</span>
+										<span style="margin-left:30px;">
+											<input type="text" name="shippingmethodreturn" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethodreturn']; ?>" onchange=" " />
 										</span>
 										<span style="margin-left:25px;">
-											<input type="text" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
+											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 										</span>
 									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
-										<input name="formsubmit" type="submit" value="Save" />
+										<button name="formsubmit" type="submit" value="Save Incoming" />Save</button>
 									</div>
 							</fieldset>
 						</form>
