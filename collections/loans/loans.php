@@ -33,10 +33,6 @@ if($isEditor){
 			$loanId = $loanManager->getLoanId();
 			$loanType = 'In';
 		}
-		elseif($formSubmit == 'Add Specimen'){
-			$statusStr = $loanManager->AjaxAddSpecimen($_POST);
-			$loanId = $loanManager->getLoanId();
-		}
 		elseif($formSubmit == 'Save'){
 			$statusStr = $loanManager->editLoan($_POST);
 		}
@@ -102,6 +98,62 @@ header("Content-Type: text/html; charset=".$charset);
 					 	}
 					}
 				}
+			}
+		}
+		
+		function GetXmlHttpObject(){
+			var xmlHttp=null;
+			try{
+				// Firefox, Opera 8.0+, Safari, IE 7.x
+				xmlHttp=new XMLHttpRequest();
+			}
+			catch (e){
+				// Internet Explorer
+				try{
+					xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+				}
+				catch(e){
+					xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+			}
+			return xmlHttp;
+		}
+		
+		function addSpecimen(f){ 
+			var catalogNumber = f.catalognumber.value;
+			var loanid = f.loanid.value;
+			var collid = f.collid.value;
+			if(!catalogNumber){
+				alert("There are no specimens linked to that catalog number!");
+				return false;
+			}
+			else{
+				xmlHttp=GetXmlHttpObject();
+				if (xmlHttp==null){
+					alert ("Your browser does not support AJAX!");
+					return false;
+				}
+				var url="rpc/insertloanspecimens.php";
+				url=url+"?loanid="+loanid;
+				url=url+"&catalognumber="+catalogNumber;
+				url=url+"&collid="+collid;
+				xmlHttp.onreadystatechange=function(){
+					if(xmlHttp.readyState==4 && xmlHttp.status==200){
+						responseCode = xmlHttp.responseText;
+						if(responseCode == '0'){
+							alert("ERROR: Specimen record not found in database.");
+						}
+						else if(responseCode == '2'){
+							alert("ERROR: More than one specimen with that catalog number.");
+						}
+						else{
+							alert("SUCCESS: Specimen added to loan.");
+						}
+					}
+				};
+				xmlHttp.open("POST",url,true);
+				xmlHttp.send(null);
+				return false;
 			}
 		}
 		
@@ -195,7 +247,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 										<span style="float:right;">
-											<b>Loan Number: </b> 
+											<b>Loan Identifier: </b> 
 											<input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
@@ -288,7 +340,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 										<span style="float:right;">
-											<b>Loan Number: </b> 
+											<b>Loan Identifier: </b> 
 											<input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
@@ -518,7 +570,7 @@ header("Content-Type: text/html; charset=".$charset);
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
-										<input name="formsubmit" type="submit" value="Add Specimen" />
+										<input name="formsubmit" type="button" value="Add Specimen" onclick="addSpecimen(this.form)" />
 									</div>
 								</fieldset>
 							</form>
