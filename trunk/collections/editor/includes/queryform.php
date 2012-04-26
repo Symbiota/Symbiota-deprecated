@@ -124,7 +124,7 @@ if($qryArr){
 				</select>
 				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
 				<a href="#" onclick="toggle('customdiv2');return false;">
-					<img src="../../../images/showedit.png" />
+					<img src="../../images/showedit.png" />
 				</a>
 			</div>
 			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">
@@ -145,7 +145,7 @@ if($qryArr){
 				</select>
 				<input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
 				<a href="#" onclick="toggle('customdiv3');return false;">
-					<img src="../../../images/showedit.png" />
+					<img src="../../images/showedit.png" />
 				</a>
 			</div>
 			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">

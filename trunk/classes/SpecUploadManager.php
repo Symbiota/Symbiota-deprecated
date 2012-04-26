@@ -176,7 +176,7 @@ class SpecUploadManager{
     		$this->schemaName = $row->SchemaName;
     		$this->digirCode = $row->digircode;
     		$this->digirPath = $row->digirpath;
-    		$this->digirPKField = $row->digirpkfield;
+    		$this->digirPKField = strtolower($row->digirpkfield);
     		$this->queryStr = $row->querystr;
     		$this->storedProcedure = $row->cleanupsp;
     		$this->lastUploadDate = $row->uploaddate;
@@ -812,7 +812,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li>';
 	}
-	
+
 	protected function loadRecord($recMap){
 		//Only import record if at least one of the minimal fields have data 
 		if((array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
@@ -900,41 +900,57 @@ class SpecUploadManager{
 				if(array_key_exists('minelev',$eArr)) $recMap['minimumelevationinmeters'] = $eArr['minelev'];
 				if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
 			}
-			//Clean and parse scientific name
-			if(array_key_exists('scientificname',$recMap) && (!array_key_exists('sciname',$recMap) || !$recMap['sciname'])){
-				$parsedArr = $this->parseScientificName($recMap['scientificname']);
-				$scinameStr = '';
-				if(array_key_exists('unitname1',$parsedArr)){
-					$scinameStr = $parsedArr['unitname1'];
-					if(!array_key_exists('genus',$recMap) || $recMap['genus']){
-						$recMap['genus'] = $parsedArr['unitname1'];
-					}
-				} 
-				if(array_key_exists('unitname2',$parsedArr)){
-					$scinameStr .= ' '.$parsedArr['unitname2'];
-					if(!array_key_exists('specificepithet',$recMap) || !$recMap['specificepithet']){
-						$recMap['specificepithet'] = $parsedArr['unitname2'];
-					}
-				} 
-				if(array_key_exists('unitind3',$parsedArr)){
-					$scinameStr .= ' '.$parsedArr['unitind3'];
-					if((!array_key_exists('taxonrank',$recMap) || !$recMap['taxonrank'])){
-						$recMap['taxonrank'] = $parsedArr['unitind3'];
-					}
+			//Populate sciname if null
+			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
+				if(array_key_exists("genus",$recMap)){
+					//Build sciname from individual units supplied by source
+					$sciName = $recMap["genus"];
+					if(array_key_exists("specificepithet",$recMap)) $sciName .= " ".$recMap["specificepithet"];
+					if(array_key_exists("taxonrank",$recMap)) $sciName .= " ".$recMap["taxonrank"];
+					if(array_key_exists("infraspecificepithet",$recMap)) $sciName .= " ".$recMap["infraspecificepithet"];
+					$recMap['sciname'] = trim($sciName);
 				}
-				if(array_key_exists('unitname3',$parsedArr)){
-					$scinameStr .= ' '.$parsedArr['unitname3'];
-					if(!array_key_exists('infraspecificepithet',$recMap) || !$recMap['infraspecificepithet']){
-						$recMap['infraspecificepithet'] = $parsedArr['unitname3'];
+				elseif(array_key_exists('scientificname',$recMap)){
+					//Clean and parse scientific name
+					$parsedArr = $this->parseScientificName($recMap['scientificname']);
+					$scinameStr = '';
+					if(array_key_exists('unitname1',$parsedArr)){
+						$scinameStr = $parsedArr['unitname1'];
+						if(!array_key_exists('genus',$recMap) || $recMap['genus']){
+							$recMap['genus'] = $parsedArr['unitname1'];
+						}
+					} 
+					if(array_key_exists('unitname2',$parsedArr)){
+						$scinameStr .= ' '.$parsedArr['unitname2'];
+						if(!array_key_exists('specificepithet',$recMap) || !$recMap['specificepithet']){
+							$recMap['specificepithet'] = $parsedArr['unitname2'];
+						}
+					} 
+					if(array_key_exists('unitind3',$parsedArr)){
+						$scinameStr .= ' '.$parsedArr['unitind3'];
+						if((!array_key_exists('taxonrank',$recMap) || !$recMap['taxonrank'])){
+							$recMap['taxonrank'] = $parsedArr['unitind3'];
+						}
 					}
-				}
-				if(array_key_exists('author',$parsedArr)){
-					if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
-						$recMap['scientificnameauthorship'] = $parsedArr['author'];
+					if(array_key_exists('unitname3',$parsedArr)){
+						$scinameStr .= ' '.$parsedArr['unitname3'];
+						if(!array_key_exists('infraspecificepithet',$recMap) || !$recMap['infraspecificepithet']){
+							$recMap['infraspecificepithet'] = $parsedArr['unitname3'];
+						}
 					}
+					if(array_key_exists('author',$parsedArr)){
+						if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
+							$recMap['scientificnameauthorship'] = $parsedArr['author'];
+						}
+					}
+					$recMap['sciname'] = trim($scinameStr);
 				}
-				$recMap['sciname'] = $scinameStr;
 			}
+			//If a DiGIR load, set dbpk value
+			if($this->digirPKField && array_key_exists($this->digirPKField,$recMap) && !array_key_exists('dbpk',$recMap)){
+				$recMap['dbpk'] = $recMap[$this->digirPKField];
+			}
+			
 			//Create update str 
 			$sqlFields = '';
 			$sqlValues = '';
@@ -986,6 +1002,7 @@ class SpecUploadManager{
 						}
 				}
 			}
+			
 			$sql = "INSERT INTO uploadspectemp(collid".$sqlFields.") ".
 				"VALUES(".$this->collId.$sqlValues.")";
 			//echo "<div>SQL: ".$sql."</div>";
@@ -1089,7 +1106,9 @@ class SpecUploadManager{
 			$mStr = $match[2];
 			$y = $match[3];
 			$mStr = strtolower(substr($mStr,0,3));
-			$m = $this->monthNames[$mStr];
+			if(array_key_exists($mStr,$this->monthNames)){
+				$m = $this->monthNames[$mStr];
+			}
 		}
 		elseif(preg_match('/^(\d{1,2})-(\D{3,})-(\d{2,4})/',$dateStr,$match)){
 			//Format: dd-mmm-yyyy
@@ -1265,7 +1284,7 @@ class SpecUploadManager{
 		elseif(preg_match('/(\d+)\s*ft./i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
-		elseif(preg_match('/(\d+)\s*ft$/i',$inStr,$m)){
+		elseif(preg_match('/(\d+)\s*ft/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
 		return $retArr;
