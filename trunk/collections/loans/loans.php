@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
+$exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
 $loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
 $searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
 $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
@@ -33,11 +34,22 @@ if($isEditor){
 			$loanId = $loanManager->getLoanId();
 			$loanType = 'In';
 		}
+		elseif($formSubmit == 'Create Exchange'){
+			$statusStr = $loanManager->createNewExchange($_POST);
+			$exchangeId = $loanManager->getExchangeId();
+			$loanType = 'Exchange';
+		}
+		elseif($formSubmit == 'Save Exchange'){
+			$statusStr = $loanManager->editExchange($_POST);
+			$loanType = 'Exchange';
+		}
 		elseif($formSubmit == 'Save Outgoing'){
 			$statusStr = $loanManager->editLoanOut($_POST);
+			$loanType = 'Out';
 		}
 		elseif($formSubmit == 'Save Incoming'){
 			$statusStr = $loanManager->editLoanIn($_POST);
+			$loanType = 'In';
 		}		
 	}
 }
@@ -196,14 +208,13 @@ header("Content-Type: text/html; charset=".$charset);
 				<?php 
 			}
 			
-			if(!$loanId){
+			if(!$loanId && !$exchangeId){
 				?>
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="#loanoutdiv">Outgoing Loans</a></li>
 						<li><a href="#loanindiv">Incoming Loans</a></li>
-						<li><a href="#exchangediv">Gifts/Exchanges</a></li>
-						<li><a href="#requestdiv">Request a Loan</a></li>
+						<li><a href="#newexchangediv">Gifts/Exchanges</a></li>
 						<li><a href="#reportdiv">Reports</a></li>
 					</ul>
 					<div id="loanoutdiv" style="">
@@ -412,15 +423,50 @@ header("Content-Type: text/html; charset=".$charset);
 						</div>
 						<div style="clear:both;">&nbsp;</div>
 					</div>
-					<div id="requestdiv" style="height:50px;">
-						<?php 
-						
-						?>
-					</div>
-					<div id="exchangediv" style="height:50px;">
-						<?php 
-						
-						?>
+					<div id="newexchangediv" style="">
+					<!-- BEGIN EXCHANGE -->	
+					
+						<form name="newexchangegiftform" action="loans.php" method="post">
+								<fieldset>
+									<legend>New Gift/Exchange</legend>
+									<div style="padding-top:4px;">
+										<span style="margin-left:290px;">
+											Entered By:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<b>Transaction Number:</b> <input type="text" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+										</span>
+										<span style="margin-left:40px;">
+											<input type="text" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+										</span>
+									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Institution:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<select name="iid" style="width:400px;" >
+												<?php 
+												$instArr = $loanManager->getInstitutionArr();
+												foreach($instArr as $k => $v){
+													echo '<option value="'.$k.'">'.$v.'</option>';
+												}
+												?>
+											</select>
+										</span>
+									</div>
+									<div style="padding-top:8px;">
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<button name="formsubmit" type="submit" value="Create Exchange" />Create</button>
+									</div>
+								</fieldset>
+							</form>
+					
+					<!-- END OF EXCHANGE -->
 					</div>
 					<div id="reportdiv" style="height:50px;">
 						List loans outstanding, Invoices, mailing labels, etc
@@ -428,7 +474,6 @@ header("Content-Type: text/html; charset=".$charset);
 						
 						?>
 					</div>
-				</div>
 				<?php 
 			}
 			elseif($loanType == 'Out'){
@@ -436,8 +481,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="#loandiv">Loan Details</a></li>
-						<li><a href="#addspecdiv">Add Specimens</a></li>
-						<li><a href="#checkindiv">Check-in Loan</a></li>
+						<li><a href="#addspecdiv">Add/Edit Specimens</a></li>
 					</ul>
 					<div id="loandiv">
 						<?php 
@@ -562,6 +606,16 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " />
 										</span>
 									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Additional Invoice Message:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<textarea name="invoicemessageown" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $loanArr['invoicemessageown']; ?></textarea>
+										</span>
+									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
@@ -602,9 +656,14 @@ header("Content-Type: text/html; charset=".$charset);
 						if($specList){
 						?>
 							<h3>Specimens on Loan</h3>
-							<div style="margin-top: 15px; margin-left: 15px;">
-				         		<input name="" value="" type="checkbox" onclick="selectAll(this);" />
-				         		Select/Deselect all Specimens
+							<div style="margin-top:15px;">
+								<span style="float:left;margin-left:15px;">
+									<input name="" value="" type="checkbox" onclick="selectAll(this);" />
+									Select/Deselect All
+								</span>
+								<span style="float:right;margin-right:15px;">
+									<button name="formsubmit" type="submit" value="Refresh" />Refresh List</button>
+								</span>
 				        	</div>
 							<table class="styledtable">
 							<th style="width:25px;text-align:center;"> </th>
@@ -626,17 +685,47 @@ header("Content-Type: text/html; charset=".$charset);
 							echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
 						}
 						?>
-						<?php 
-						//Add specimens to loan
-						 
-						?>
-					</div>
-					<div id="checkindiv">
-						<?php 
-						//Form for check-in loan 
-						//Form lets user scan or key-in barcodes, javascript verifies accession numbers as checked in 
 						
-						?>
+						<table>
+						<tr><td colspan="10" valign="bottom">
+													<div style="margin:10px;">
+														<div style="float:left;">
+															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
+															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
+														</div>
+														<div style="margin-left:30px;float:left;">
+															Review Status:
+															<select name="rstatus">
+																<option value="0">LEAVE AS IS</option>
+																<option value="1">OPEN</option>
+																<option value="2">PENDING</option>
+																<option value="3">CLOSED</option>
+															</select>
+														</span>
+														<span style="margin-left:25px;">
+															<input name="submitstr" type="submit" value="Perform Action" />
+															<input name="collid" type="hidden" value="<?php/* echo $collId; */?>" />
+															<input name="fastatus" type="hidden" value="<?php/* echo $faStatus; */?>" />
+															<input name="frstatus" type="hidden" value="<?php/* echo $frStatus; */?>" />
+															<input name="download" type="hidden" value="" />
+														</span>
+													</div>
+													<hr/>
+													<div>
+														<b>Additional Actions:</b>
+													</div>
+													<div style="margin:5px 0px 10px 15px;">
+														<a href="editreviewer.php?collid=<?php/* echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=export'; */?>">
+															Download Records
+														</a>
+													</div>
+													<div style="margin:10px 0px 5px 15px;">
+														<a href="editreviewer.php?collid=<?php/* echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=printmode'; */?>">
+															Display as Printable Form
+														</a>
+													</div>
+												</td></tr>
+												</table
 					</div>
 				</div>
 				<?php 
@@ -776,8 +865,19 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 										</span>
 									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Additional Invoice Message:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<textarea name="invoicemessageborr" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $loanArr['invoicemessageborr']; ?></textarea>
+										</span>
+									</div>
 									<div style="padding-top:8px;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<input name="collidborr" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 										<button name="formsubmit" type="submit" value="Save Incoming" />Save</button>
 									</div>
@@ -789,6 +889,166 @@ header("Content-Type: text/html; charset=".$charset);
 					</div>
 				</div>
 			<?php 
+			}
+			elseif($loanType == 'Exchange'){
+				?>
+				<div id="tabs" style="margin:0px;">
+				    <ul>
+						<li><a href="#exchangedetaildiv">Exchange Details</a></li>
+					</ul>
+					<div id="exchangedetaildiv" style="">
+						<?php 
+							//Show loan details
+							$exchangeArr = $loanManager->getExchangeDetails($exchangeId);
+							//$specTotal = $loanManager->getSpecTotal($loanId);
+						?>
+						<form name="editexchangegiftform" action="loans.php" method="post">
+								<fieldset>
+									<legend>Edit Gift/Exchange</legend>
+									<div style="padding-top:4px;">
+											<span style="margin-left:290px;">
+												Entered By:
+											</span>
+											<span style="margin-left:80px;">
+												Date Shipped:
+											</span>
+											<span style="margin-left:50px;">
+												Date Received:
+											</span>
+										</div>
+										<div style="padding-bottom:2px;">
+											<span>
+												<b>Transaction Number:</b> <input type="text" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $exchangeArr['identifier']; ?>" disabled />
+											</span>
+											<span style="margin-left:40px;">
+												<input type="text" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $exchangeArr['createdby']; ?>" onchange=" " disabled />
+											</span>
+											<span style="margin-left:40px;">
+												<input type="text" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datesent']; ?>" onchange=" " />
+											</span>
+											<span style="margin-left:40px;">
+												<input type="text" name="datereceived" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datereceived']; ?>" onchange=" " />
+											</span>
+										</div>
+										<div style="padding-top:4px;">
+											<span>
+												Institution:
+											</span>
+											<span style="margin-left:385px;">
+												Transaction Type:
+											</span>
+											<span style="margin-left:45px;">
+												In/Out:
+											</span>
+										</div>
+										<div style="padding-bottom:2px;">
+											<span>
+												<select name="iid" style="width:400px;" >
+													<?php 
+													$instArr = $loanManager->getInstitutionArr();
+													foreach($instArr as $k => $v){
+														echo '<option value="'.$k.'" '.($k==$exchangeArr['iid']?'SELECTED':'').'>'.$v.'</option>';
+													}
+													?>
+												</select>
+											</span>
+											<span style="margin-left:40px;">
+												<select name="transactiontype" style="width:100px;" >
+													<option value="Shipment" <?php echo ('Shipment'==$exchangeArr['transactiontype']?'SELECTED':'');?>>Shipment</option>
+													<option value="Adjustment" <?php echo ('Adjustment'==$exchangeArr['transactiontype']?'SELECTED':'');?>>Adjustment</option>
+												</select>
+											</span>
+											<span style="margin-left:40px;">
+												<select name="in_out" style="width:100px;" >
+													<option value="" <?php echo (!$exchangeArr['in_out']?'SELECTED':'');?>>   </option>
+													<option value="In" <?php echo ('In'==$exchangeArr['in_out']?'SELECTED':'');?>>In</option>
+													<option value="Out" <?php echo ('Out'==$exchangeArr['in_out']?'SELECTED':'');?>>Out</option>
+												</select>
+											</span>
+										</div>
+										<div style="padding-top:8px;padding-bottom:8px;">
+											<table class="styledtable">
+												<th style="width:220px;text-align:center;">Balance Adjustment</th>
+												<th style="width:220px;text-align:center;">Gift Specimens</th>
+												<th style="width:220px;text-align:center;">Exchange Specimens</th>
+												<tr style="text-align:right;">
+													<td><b>Adjustment Amount:</b>&nbsp;&nbsp;<input type="text" name="adjustment" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['adjustment']; ?>" onchange=" " /></td>
+													<td><b>Total Gifts:</b>&nbsp;&nbsp;<input type="text" name="totalgift" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgift']; ?>" onchange=" " /></td>
+													<td><b>Total Unmounted:</b>&nbsp;&nbsp;<input type="text" name="totalexunmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexunmounted']; ?>" onchange=" " /></td>
+												</tr>
+												<tr style="text-align:right;">
+													<td> </td>
+													<td><b>Total Gifts For Det:</b>&nbsp;&nbsp;<input type="text" name="totalgiftdet" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgiftdet']; ?>" onchange=" " /></td>
+													<td><b>Total Mounted:</b>&nbsp;&nbsp;<input type="text" name="totalexmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexmounted']; ?>" onchange=" " /></td>
+												</tr>
+												<tr style="text-align:right;">
+													<td> </td>
+													<td> </td>
+													<td><b>Exchange Value:</b>&nbsp;&nbsp;<input type="text" name="exchangevalue" tabindex="100" maxlength="32" style="width:80px;" value="" onchange=" " disabled="disabled" /></td>
+												</tr>
+												<tr style="text-align:right;">
+													<td colspan="3"><b>Total Specimens (gifts + exchanges):</b>&nbsp;&nbsp;<input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;" value="" onchange=" " disabled="disabled" /></td>
+												</tr>
+											</table>	
+										</div>
+										<div style="padding-top:4px;">
+											<span style="margin-left:350px;">
+												# of Boxes:
+											</span>
+											<span style="margin-left:55px;">
+												Shipping Service:
+											</span>
+										</div>
+										<div style="padding-bottom:2px;">
+											<span style="margin-left:25px;">
+												<b>Current Balance:</b> <input type="text" name="invoicebalance" tabindex="100" maxlength="32" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $exchangeArr['invoicebalance']; ?>" onchange=" " disabled />
+											</span>
+											<span style="margin-left:100px;">
+												<input type="text" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $exchangeArr['totalboxes']; ?>" onchange=" " />
+											</span>
+											<span style="margin-left:60px;">
+												<input type="text" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $exchangeArr['shippingmethod']; ?>" onchange=" " />
+											</span>
+										</div>
+										<div style="padding-top:4px;">
+											<span>
+												Description:
+											</span>
+											<span style="margin-left:300px;">
+												Notes:
+											</span>
+										</div>
+										<div style="padding-bottom:2px;">
+											<span>
+												<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $exchangeArr['description']; ?></textarea>
+											</span>
+											<span style="margin-left:40px;">
+												<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $exchangeArr['notes']; ?></textarea>
+											</span>
+										</div>
+										<hr />
+										<div style="padding-top:4px;">
+											<span>
+												Additional Message:
+											</span>
+										</div>
+										<div style="padding-bottom:2px;">
+											<span>
+												<textarea name="invoicemessage" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $exchangeArr['invoicemessage']; ?></textarea>
+											</span>
+										</div>
+										<div style="padding-top:8px;">
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+											<input name="exchangeid" type="hidden" value="<?php echo $exchangeId; ?>" />
+											<button name="formsubmit" type="submit" value="Save Exchange" />Save</button>
+										</div>
+								</fieldset>
+							</form>
+					
+					<!-- END OF EXCHANGE -->
+					</div>
+				</div>
+				<?php 
 			}
 			else{
 				if(!$symbUid){
