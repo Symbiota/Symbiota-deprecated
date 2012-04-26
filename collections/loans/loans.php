@@ -622,6 +622,13 @@ header("Content-Type: text/html; charset=".$charset);
 										<button name="formsubmit" type="submit" value="Save Outgoing" />Save</button>
 									</div>
 							</fieldset>
+							<fieldset>
+							<legend>Generate Loan Paperwork</legend>
+								<button name="formsubmit" type="submit" value="Save Outgoing" />Invoice</button>
+								<button name="formsubmit" type="submit" value="Save Outgoing" />Specimen List</button>
+								<button name="formsubmit" type="submit" value="Save Outgoing" />Mailing Label</button>
+								<button name="formsubmit" type="submit" value="Save Outgoing" />Envelope</button>
+							</fieldset>
 						</form>
 						<?php
 						//}
@@ -685,47 +692,22 @@ header("Content-Type: text/html; charset=".$charset);
 							echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
 						}
 						?>
-						
 						<table>
-						<tr><td colspan="10" valign="bottom">
-													<div style="margin:10px;">
-														<div style="float:left;">
-															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
-															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
-														</div>
-														<div style="margin-left:30px;float:left;">
-															Review Status:
-															<select name="rstatus">
-																<option value="0">LEAVE AS IS</option>
-																<option value="1">OPEN</option>
-																<option value="2">PENDING</option>
-																<option value="3">CLOSED</option>
-															</select>
-														</span>
-														<span style="margin-left:25px;">
-															<input name="submitstr" type="submit" value="Perform Action" />
-															<input name="collid" type="hidden" value="<?php/* echo $collId; */?>" />
-															<input name="fastatus" type="hidden" value="<?php/* echo $faStatus; */?>" />
-															<input name="frstatus" type="hidden" value="<?php/* echo $frStatus; */?>" />
-															<input name="download" type="hidden" value="" />
-														</span>
-													</div>
-													<hr/>
-													<div>
-														<b>Additional Actions:</b>
-													</div>
-													<div style="margin:5px 0px 10px 15px;">
-														<a href="editreviewer.php?collid=<?php/* echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=export'; */?>">
-															Download Records
-														</a>
-													</div>
-													<div style="margin:10px 0px 5px 15px;">
-														<a href="editreviewer.php?collid=<?php/* echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=printmode'; */?>">
-															Display as Printable Form
-														</a>
-													</div>
-												</td></tr>
-												</table
+							<tr>
+								<td colspan="10" valign="bottom">
+									<div style="margin:10px;">
+										<div style="float:left;">
+											<input name="applytask" type="radio" value="delete" CHECKED title="Delete Specimens" />Delete Specimens from Loan<br/>
+											<input name="applytask" type="radio" value="check" title="Check-in Specimens" />Check-in Specimens
+										</div>
+										<span style="margin-left:25px;">
+											<input name="submitstr" type="submit" value="Perform Action" />
+											<input name="collid" type="hidden" value="<?php/* echo $collId; */?>" />
+										</span>
+									</div>
+								</td>
+							</tr>
+						</table>
 					</div>
 				</div>
 				<?php 
