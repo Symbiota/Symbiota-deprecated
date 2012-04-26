@@ -6,7 +6,6 @@ class SpecUploadDigir extends SpecUploadManager {
 	private $searchLimit = 1000;
 	private $defaultSchema = "";	//http://digir.sourceforge.net/schema/conceptual/darwin/brief/2003/1.0/darwin2brief.xsd
 	private $recCount = 0;
-	private $successCount = 0;
 	
 	//XML parser stuff
 	private $withinRecordElement = false;
@@ -133,7 +132,7 @@ class SpecUploadDigir extends SpecUploadManager {
 				}
 			    fclose($fp);
 			}
-			echo "<li style='font-weight:bold;'>Records Returned: ".$this->successCount." of ".$matchCount." (".($this->recCount-$this->successCount)." failed)</li>";
+			echo "<li style='font-weight:bold;'>Records Returned: ".$this->transferCount." of ".$matchCount." (".($this->recCount-$this->transferCount)." failed)</li>";
 			$this->searchStart += $this->searchLimit;
 			ob_flush();
 			flush();
@@ -170,7 +169,7 @@ class SpecUploadDigir extends SpecUploadManager {
 			//End of record, load record into database
 			//print_r($this->fieldDataArr);
 			$this->withinRecordElement = false;
-			$this->databaseRecord();
+			$this->loadRecord(array_change_key_case($this->fieldDataArr));
 			unset($this->fieldDataArr);
 			$this->fieldDataArr = Array();
 		}
@@ -225,6 +224,9 @@ class SpecUploadDigir extends SpecUploadManager {
 			}
 			elseif($this->activeFieldName == "SPECIES" && !array_key_exists("SPECIFICEPITHET",$this->fieldDataArr)){
 				$this->fieldDataArr["SPECIFICEPITHET"] = $this->activeFieldValue;
+			}
+			elseif($this->activeFieldName == "INFRASPECIFICRANK" && !array_key_exists("TAXONRANK",$this->fieldDataArr)){
+				$this->fieldDataArr["TAXONRANK"] = $this->activeFieldValue;
 			}
 			elseif($this->activeFieldName == "SUBSPECIES" && !array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr)){
 				$this->fieldDataArr["INFRASPECIFICEPITHET"] = $this->activeFieldValue;
@@ -282,85 +284,6 @@ class SpecUploadDigir extends SpecUploadManager {
 		$value = $this->cleanString($this->encodeString($data));
 		if($this->withinRecordElement && $value != ""){
 			$this->activeFieldValue .= $value;
-		}
-	}
-
-	private function databaseRecord(){
-		if(array_key_exists("SCIENTIFICNAME",$this->fieldDataArr) || array_key_exists("SCINAME",$this->fieldDataArr)){
-			if(!array_key_exists("SCINAME",$this->fieldDataArr)){
-				$sciName = "";
-				if(array_key_exists("GENUS",$this->fieldDataArr)){
-					$sciName = $this->fieldDataArr["GENUS"];
-					if(array_key_exists("SPECIFICEPITHET",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["SPECIFICEPITHET"];
-					if(array_key_exists("INFRASPECIFICRANK",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["INFRASPECIFICRANK"];
-					if(array_key_exists("INFRASPECIFICEPITHET",$this->fieldDataArr)) $sciName .= " ".$this->fieldDataArr["INFRASPECIFICEPITHET"];
-				}
-				else{
-					$sciArr = explode(" ",$this->fieldDataArr["SCIENTIFICNAME"]);
-					if(strlen($sciArr[0])==1){
-						//Is hybrid
-						$sciName = array_shift($sciArr)." ";
-					}
-					//Genus
-					$sciName = array_shift($sciArr);
-					if(strlen($sciArr[0])==1){
-						//is hybrid
-						$sciName = " ".array_shift($sciArr);
-					}
-					$nextStr = array_shift($sciArr);
-					if(preg_match('/^[a-z]+$/', $nextStr)){
-						//is epithet
-						$sciName = " ".array_shift($sciArr);
-						//Now look for infrasp. data
-						$infraRank = "";$infraSp = "";
-						while($nextStr = strtolower(array_shift($sciArr))){
-							if($nextStr == "ssp." || $nextStr == "subsp." || $nextStr == "var." || $nextStr == "forma" || $nextStr == "f."){
-								$infraRank = $nextStr;
-								$infraSp = array_shift($sciArr);
-							}
-						}
-						if($infraSp){
-							$sciName = " ".$infraRank;
-							$sciName = " ".$infraSp;
-						}
-					}
-				}
-				if($sciName){
-					$this->fieldDataArr["SCINAME"] = trim($sciName);
-				}
-				else{
-					$this->fieldDataArr["SCINAME"] = $this->fieldDataArr["SCIENTIFICNAME"];
-				}
-			}
-			if(!array_key_exists("SCIENTIFICNAME",$this->fieldDataArr)){
-				$this->fieldDataArr["SCIENTIFICNAME"] = $this->fieldDataArr["SCINAME"]." ".(array_key_exists("SCIENTIFICNAMEAUTHORSHIP",$this->fieldDataArr)?$this->fieldDataArr["SCIENTIFICNAMEAUTHORSHIP"]:"");
-			}
-			if(!array_key_exists("EVENTDATE",$this->fieldDataArr) && array_key_exists("YEAR",$this->fieldDataArr) && array_key_exists("MONTH",$this->fieldDataArr) && array_key_exists("DAY",$this->fieldDataArr)){
-				$datetime = strtotime($this->fieldDataArr["YEAR"]."-".$this->fieldDataArr["MONTH"]."-".$this->fieldDataArr["DAY"]);
-				if($datetime) $this->fieldDataArr["EVENTDATE"] = date('Y-m-d',$datetime);
-			}
-			$dbpk = 0;
-			if($this->digirPKField){
-				$dbpk = trim($this->fieldDataArr[strtoupper($this->digirPKField)]);
-			}
-			$sqlInsertFrag = "";
-			$sqlValuesFrag = "";
-			foreach($this->fieldDataArr as $fieldName => $fieldValue){
-				$valStr = trim(str_replace(chr(34),"'",$fieldValue));
-				if(array_key_exists(strtolower($fieldName),$this->fieldMap) && $valStr != ""){
-					$sqlInsertFrag .= ",".$fieldName;
-					$sqlValuesFrag .= "\",\"".$valStr;
-				}
-			}
-			$sql = "INSERT INTO uploadspectemp (collid,dbpk,".substr($sqlInsertFrag,1).") VALUES (".$this->collId.",".($dbpk?'"'.$dbpk.'"':'NULL').",\"".substr($sqlValuesFrag,3)."\")";
-			//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
-			if($this->conn->query($sql)){
-				$this->successCount++;
-			}
-			else{
-				echo "<div style='margin-left:10px;font-weight:bold;color:red;'>ERROR LOADING RECORD: ".$this->conn->error."</div>\n";
-				//echo "<div style='margin-left:10px;'>SQL: ".$sql."</div>\n";
-			}
 		}
 	}
 	
