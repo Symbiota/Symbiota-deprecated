@@ -100,7 +100,7 @@ class SpecLoans{
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifierown, iidborrower, datesent, totalboxes, '.
 			'shippingmethod, datedue, datereceivedown, dateclosed, forwhom, description, '.
-			'notes, createdbyown, processedbyown, processedbyreturnown '.
+			'notes, createdbyown, processedbyown, processedbyreturnown, invoicemessageown '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
 		if($rs = $this->conn->query($sql)){
@@ -119,6 +119,7 @@ class SpecLoans{
 				$retArr['createdbyown'] = $r->createdbyown;
 				$retArr['processedbyown'] = $r->processedbyown;
 				$retArr['processedbyreturnown'] = $r->processedbyreturnown;
+				$retArr['invoicemessageown'] = $r->invoicemessageown;
 			}
 			$rs->close();
 		}
@@ -129,7 +130,7 @@ class SpecLoans{
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifierown, loanidentifierborr, collidown, iidowner, datesentreturn, totalboxesreturned, '.
 			'shippingmethodreturn, datedue, datereceivedborr, dateclosed, forwhom, description, numspecimens, '.
-			'notes, createdbyborr, processedbyborr, processedbyreturnborr '.
+			'notes, createdbyborr, processedbyborr, processedbyreturnborr, invoicemessageborr '.
 			'FROM omoccurloans '.
 			'WHERE loanid = '.$loanId;
 		if($rs = $this->conn->query($sql)){
@@ -151,11 +152,46 @@ class SpecLoans{
 				$retArr['createdbyborr'] = $r->createdbyborr;
 				$retArr['processedbyborr'] = $r->processedbyborr;
 				$retArr['processedbyreturnborr'] = $r->processedbyreturnborr;
+				$retArr['invoicemessageborr'] = $r->invoicemessageborr;
 			}
 			$rs->close();
 		}
 		return $retArr;
-	} 
+	}
+	
+	public function getExchangeDetails($exchangeId){
+		$retArr = array();
+		$sql = 'SELECT exchangeid, identifier, collid, iid, transactiontype, in_out, datesent, datereceived, '.
+			'totalboxes, shippingmethod, totalexmounted, totalexunmounted, totalgift, totalgiftdet, adjustment, '.
+			'invoicebalance, invoicemessage, description, notes, createdby '.
+			'FROM omoccurexchange '.
+			'WHERE exchangeid = '.$exchangeId;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['identifier'] = $r->identifier;
+				$retArr['collid'] = $r->collid;
+				$retArr['iid'] = $r->iid;
+				$retArr['transactiontype'] = $r->transactiontype;
+				$retArr['in_out'] = $r->in_out;
+				$retArr['datesent'] = $r->datesent;
+				$retArr['datereceived'] = $r->datereceived;
+				$retArr['totalboxes'] = $r->totalboxes;
+				$retArr['shippingmethod'] = $r->shippingmethod;
+				$retArr['totalexmounted'] = $r->totalexmounted;
+				$retArr['totalexunmounted'] = $r->totalexunmounted;
+				$retArr['totalgift'] = $r->totalgift;
+				$retArr['totalgiftdet'] = $r->totalgiftdet;
+				$retArr['adjustment'] = $r->adjustment;
+				$retArr['invoicebalance'] = $r->invoicebalance;
+				$retArr['invoicemessage'] = $r->invoicemessage;
+				$retArr['description'] = $r->description;
+				$retArr['notes'] = $r->notes;
+				$retArr['createdby'] = $r->createdby;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
 
 	public function editLoanOut($pArr){
 		$statusStr = '';
@@ -195,6 +231,28 @@ class SpecLoans{
 			}
 			else{
 				$statusStr = 'ERROR: Editing of loan failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
+		}
+		return $statusStr;
+	}
+	
+	public function editExchange($pArr){
+		$statusStr = '';
+		$exchangeId = $pArr['exchangeid'];
+		if(is_numeric($exchangeId)){
+			$sql = '';
+			foreach($pArr as $k => $v){
+				if($k != 'formsubmit' && $k != 'exchangeid' && $k != 'collid'){
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+				}
+			}
+			$sql = 'UPDATE omoccurexchange SET '.substr($sql,1).' WHERE (exchangeid = '.$exchangeId.')';
+			if($this->conn->query($sql)){
+				$statusStr = 'SUCCESS: information saved';
+			}
+			else{
+				$statusStr = 'ERROR: Editing of exchange failed: '.$this->conn->error.'<br/>';
 				$statusStr .= 'SQL: '.$sql;
 			}
 		}
@@ -245,6 +303,22 @@ class SpecLoans{
 		}
 		else{
 			$statusStr = 'ERROR: Creation of new loan failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
+	}
+	
+	public function createNewExchange($pArr){
+		$statusStr = '';
+		$sql = 'INSERT INTO omoccurexchange(identifier,collid,iid,createdby) '.
+			'VALUES("'.$this->cleanString($pArr['identifier']).'",'.$this->collId.',"'.$this->cleanString($pArr['iid']).'",
+			"'.$this->cleanString($pArr['createdby']).'")';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$this->exchangeId = $this->conn->insert_id;
+		}
+		else{
+			$statusStr = 'ERROR: Creation of new exchange failed: '.$this->conn->error.'<br/>';
 			$statusStr .= 'SQL: '.$sql;
 		}
 		return $statusStr;
@@ -333,6 +407,10 @@ class SpecLoans{
 	
 	public function getLoanId(){
 		return $this->loanId;
+	}
+	
+	public function getExchangeId(){
+		return $this->exchangeId;
 	}
 	
 	protected function cleanString($inStr){
