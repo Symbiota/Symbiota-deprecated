@@ -207,13 +207,26 @@ class CollectionProfileManager {
 	public function updateStatistics(){
 		set_time_limit(200);
 		$writeConn = MySQLiConnectionFactory::getCon("write");
-		echo '<li>Updating records with null families... ';
+
+		echo '<li>Updating specimen taxon links... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-			'SET o.TidInterpreted = t.tid WHERE o.TidInterpreted IS NULL';
+			'SET o.TidInterpreted = t.tid '.
+			'WHERE o.TidInterpreted IS NULL';
 		$writeConn->query($sql);
-		
+
+		echo '<li>Update specimen image taxon links ... ';
+		ob_flush();
+		flush();
+		$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+			'SET i.tid = o.tidinterpreted '.
+			'WHERE o.tidinterpreted IS NOT NULL AND (i.tid IS NULL OR o.tidinterpreted <> i.tid)';
+		$writeConn->query($sql);
+
+		echo '<li>Updating records with null families... ';
+		ob_flush();
+		flush();
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'SET o.family = ts.family '.
 			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (o.family IS NULL OR o.family = "")';

@@ -123,7 +123,7 @@ class SpecUploadManager{
 		}
 		return $this->collMetadataArr;
 	}
-	
+
 	public function getUploadList($uspid = 0){
 		$returnArr = Array();
 		$sql = 'SELECT usp.uspid, usp.uploadtype, usp.title '.
@@ -133,7 +133,7 @@ class SpecUploadManager{
 			$sql .= 'AND (usp.uspid = '.$uspid.') ';
 		}
 		else{
-			$sql .= "ORDER BY usp.uploadtype";
+			$sql .= "ORDER BY usp.uploadtype,usp.title";
 		}
 		//echo $sql;
 		$result = $this->conn->query($sql);
@@ -753,15 +753,14 @@ class SpecUploadManager{
 		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
 		echo '<li style="font-weight:bold;">Collection transfer process finished</li>';
-		
-		//Update collection stats
-		echo '<li style="font-weight:bold;">Updating Collection Statistics</li>';
 		ob_flush();
 		flush();
+		
+		//Update collection stats
 		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
 
-		echo '<li style="margin-left:10px;">Updating total record count... ';
+		echo '<li style="font-weight:bold;">Updating total record count... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -770,7 +769,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
-		echo '<li style="margin-left:10px;">Updating family count... ';
+		echo '<li style="font-weight:bold;">Updating family count... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -780,7 +779,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
-		echo '<li style="margin-left:10px;">Updating genus count... ';
+		echo '<li style="font-weight:bold;">Updating genus count... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -791,7 +790,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li>';
 
-		echo '<li style="margin-left:10px;">Updating species count... ';
+		echo '<li style="font-weight:bold;">Updating species count... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -802,7 +801,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done</li>';
 		
-		echo '<li style="margin-left:10px;">Updating georeference count... ';
+		echo '<li style="font-weight:bold;">Updating georeference count... ';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
