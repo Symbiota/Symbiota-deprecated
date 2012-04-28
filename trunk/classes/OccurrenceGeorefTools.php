@@ -22,6 +22,9 @@ class OccurrenceGeorefTools {
 		$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
 			'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
 		if($this->qryVars){
+			if(array_key_exists('qsciname',$this->qryVars) && $this->qryVars['qsciname']){
+				$sql .= 'AND (family = "'.$this->qryVars['qsciname'].'" OR sciname LIKE "'.$this->qryVars['qsciname'].'%") ';
+			}
 			if(array_key_exists('qvstatus',$this->qryVars)){
 				$vs = $this->qryVars['qvstatus'];
 				if(strtolower($vs) == 'is null'){

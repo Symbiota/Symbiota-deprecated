@@ -11,6 +11,7 @@ $qCounty = array_key_exists('qcounty',$_REQUEST)?$_REQUEST['qcounty']:'';
 $qLocality = array_key_exists('qlocality',$_REQUEST)?$_REQUEST['qlocality']:'';
 $qDisplayAll = array_key_exists('qdisplayall',$_REQUEST)?$_REQUEST['qdisplayall']:0;
 $qVStatus = array_key_exists('qvstatus',$_REQUEST)?$_REQUEST['qvstatus']:'';
+$qSciname = array_key_exists('qsciname',$_REQUEST)?$_REQUEST['qsciname']:'';
 
 $latDeg = array_key_exists('latdeg',$_POST)?$_POST['latdeg']:'';
 $latMin = array_key_exists('latmin',$_POST)?$_POST['latmin']:'';
@@ -51,6 +52,7 @@ if($editor && $submitAction){
 	if($qCountry) $geoManager->setQueryVariables('qcountry',$qCountry);
 	if($qState) $geoManager->setQueryVariables('qstate',$qState);
 	if($qCounty) $geoManager->setQueryVariables('qcounty',$qCounty);
+	if($qSciname) $geoManager->setQueryVariables('qsciname',$qSciname);
 	if($qDisplayAll) $geoManager->setQueryVariables('qdisplayall',$qDisplayAll);
 	if($qVStatus) $geoManager->setQueryVariables('qvstatus',$qVStatus);
 	if($qLocality) $geoManager->setQueryVariables('qlocality',$qLocality);
@@ -157,10 +159,14 @@ header("Content-Type: text/html; charset=".$charset);
 											<img src="../../images/add.png" onclick="toggle('advfilterdiv')" title="Advanced Options" />
 										</div>
 									</div>
-									<div id="advfilterdiv" style="clear:both;margin:10px;display:<?php echo ($qVStatus || $qDisplayAll?'block':'none'); ?>;">
+									<div id="advfilterdiv" style="clear:both;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
 										<div style="margin-top:5px;">
 											<b>Verification status:</b> 
 											<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:200px;" />
+											<span style="margin-left:15px;">
+												<b>Family/Genus:</b> 
+												<input name="qsciname" type="text" value="<?php echo $qSciname; ?>" style="width:200px;" />
+											</span>
 										</div>
 										<div style="margin-top:5px;">
 											<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> /> 
@@ -266,18 +272,18 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td style="vertical-align:middle"><b>Latitude:</b> </td>
-											<td><input name="latdeg" type="text" value="<?php echo $latDeg; ?>" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
-											<td><input name="latmin" type="text" value="<?php echo $latMin; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
-											<td><input name="latsec" type="text" value="<?php echo $latSec; ?>" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
+											<td><input name="latdeg" type="text" value="" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
+											<td><input name="latmin" type="text" value="" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
+											<td><input name="latsec" type="text" value="" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
 											<td>
 												<select name="latns" onchange="updateLatDec(this.form)">
 													<option>N</option>
-													<option <?php echo ($latNS=='S'?'SELECTED':''); ?>>S</option>
+													<option >S</option>
 												</select>
 											</td>
 											<td> = </td>
 											<td>
-												<input id="decimallatitude" name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
+												<input id="decimallatitude" name="decimallatitude" type="text" value="" style="width:80px;" />
 												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
 													<img src="../../images/world40.gif" style="border:0px;width:13px;" />
 												</span>
@@ -285,29 +291,29 @@ header("Content-Type: text/html; charset=".$charset);
 										</tr>
 										<tr>
 											<td style="vertical-align:middle"><b>Longitude:</b> </td>
-											<td><input name="lngdeg" type="text" value="<?php echo $lngDeg; ?>" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
-											<td><input name="lngmin" type="text" value="<?php echo $lngMin; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
-											<td><input name="lngsec" type="text" value="<?php echo $lngSec; ?>" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
+											<td><input name="lngdeg" type="text" value="" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
+											<td><input name="lngmin" type="text" value="" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
+											<td><input name="lngsec" type="text" value="" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
 											<td style="width:20px;">
 												<select name="lngew" onchange="updateLngDec(this.form)">
 													<option>E</option>
-													<option <?php echo (!$lngEW || $lngEW=='W'?'SELECTED':''); ?>>W</option>
+													<option >W</option>
 												</select>
 											</td>
 											<td> = </td>
-											<td><input id="decimallongitude" name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
+											<td><input id="decimallongitude" name="decimallongitude" type="text" value="" style="width:80px;" /></td>
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
 												<b>Error (in meters):</b> 
 											</td>
 											<td colspan="2" style="vertical-align:middle">
-												<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="<?php echo $coordinateUncertaintyInMeters; ?>" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
+												<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="" style="width:50px;" onchange="verifyCoordUncertainty(this)" /> 
 												meters
 											</td>
 											<td colspan="2" style="vertical-align:middle">
 												<span style="margin-left:20px;font-weight:bold;">Datum:</span> 
-												<input id="geodeticdatum" name="geodeticdatum" type="text" value="<?php echo $geodeticDatum; ?>" style="width:75px;" />
+												<input id="geodeticdatum" name="geodeticdatum" type="text" value="" style="width:75px;" />
 												<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
 													<img src="../../images/showedit.png" style="border:0px;width:14px;" />
 												</span>
@@ -355,7 +361,7 @@ header("Content-Type: text/html; charset=".$charset);
 												<b>Remarks:</b> 
 											</td>
 											<td colspan="4">
-												<input name="georeferenceremarks" type="text" value="<?php echo $georeferenceRemarks; ?>" style="width:500px;" />
+												<input name="georeferenceremarks" type="text" value="" style="width:500px;" />
 											</td>
 										</tr>
 										<tr>
@@ -371,11 +377,11 @@ header("Content-Type: text/html; charset=".$charset);
 												<b>Elevation:</b> 
 											</td>
 											<td colspan="4">
-												<input name="minimumelevationinmeters" type="text" value="<?php echo $minimumElevationInMeters; ?>" style="width:50px;" /> to 
-												<input name="maximumelevationinmeters" type="text" value="<?php echo $maximumElevationInMeters; ?>" style="width:50px;" /> meters
+												<input name="minimumelevationinmeters" type="text" value="" style="width:50px;" /> to 
+												<input name="maximumelevationinmeters" type="text" value="" style="width:50px;" /> meters
 												<span style="margin-left:80px;">
-													<input type="text" value="<?php echo $minimumElevationInFeet; ?>" style="width:50px;" onchange="updateMinElev(this.value)" /> to 
-													<input type="text" value="<?php echo $maximumElevationInFeet; ?>" style="width:50px;" onchange="updateMaxElev(this.value)" /> feet
+													<input type="text" value="" style="width:50px;" onchange="updateMinElev(this.value)" /> to 
+													<input type="text" value="" style="width:50px;" onchange="updateMaxElev(this.value)" /> feet
 												</span>
 											</td>
 										</tr>
@@ -389,7 +395,9 @@ header("Content-Type: text/html; charset=".$charset);
 												<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
 												<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
 												<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
+												<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
 												<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
+												<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
 												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 												<input name="georefby" type="hidden" value="<?php echo $paramsArr['un']; ?>" />
 											</td>
