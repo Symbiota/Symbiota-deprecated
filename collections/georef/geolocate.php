@@ -69,7 +69,7 @@ $urlVariables = 'country='.$country.'&state='.$state.'&county='.$county.'&locali
 	<div id="container">
 		<div >
 			<!--<iframe id="da-iframe" src="http://www.museum.tulane.edu/nelson/gravier2.html"></iframe>-->
-			<iframe id="Iframe1" src="http://www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?<?php echo $urlVariables; ?>"></iframe>
+			<iframe id="Iframe1" src="http://www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&<?php echo $urlVariables; ?>"></iframe>
 		</div>
 	</div>
 </body>
