@@ -264,11 +264,11 @@ header("Content-Type: text/html; charset=".$charset);
 												?>
 												<tr><td colspan="10" valign="bottom">
 													<div style="margin:10px;">
-														<div style="float:left;">
+														<span>
 															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
 															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
-														</div>
-														<div style="margin-left:30px;float:left;">
+														</span>
+														<span style="margin-left:30px;">
 															Review Status:
 															<select name="rstatus">
 																<option value="0">LEAVE AS IS</option>

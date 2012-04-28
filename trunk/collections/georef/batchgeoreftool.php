@@ -277,7 +277,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</td>
 											<td> = </td>
 											<td>
-												<input name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
+												<input id="decimallatitude" name="decimallatitude" type="text" value="<?php echo $decimalLatitude; ?>" style="width:80px;" />
 												<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();">
 													<img src="../../images/world40.gif" style="border:0px;width:13px;" />
 												</span>
@@ -295,7 +295,7 @@ header("Content-Type: text/html; charset=".$charset);
 												</select>
 											</td>
 											<td> = </td>
-											<td><input name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
+											<td><input id="decimallongitude" name="decimallongitude" type="text" value="<?php echo $decimalLongitude; ?>" style="width:80px;" /></td>
 										</tr>
 										<tr>
 											<td colspan="3" style="vertical-align:middle">
