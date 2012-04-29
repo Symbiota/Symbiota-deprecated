@@ -297,7 +297,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<td style="width:20px;">
 												<select name="lngew" onchange="updateLngDec(this.form)">
 													<option>E</option>
-													<option >W</option>
+													<option SELECTED>W</option>
 												</select>
 											</td>
 											<td> = </td>

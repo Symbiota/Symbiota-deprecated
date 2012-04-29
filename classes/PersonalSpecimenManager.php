@@ -35,15 +35,9 @@ class PersonalSpecimenManager {
 				}
 			}
 			$sql = 'SELECT collid, collectionname, CONCAT_WS(" ",institutioncode,collectioncode) AS instcode '.
-				'FROM omcollections WHERE '; 
-			if($isAdmin){
-				$sql .= 'colltype = "general observations" ';
-				if($collIdStr){
-					$sql .= 'OR collid IN('.substr($collIdStr,1).') ';
-				}
-			}
-			else{
-				$sql .= 'collid IN('.substr($collIdStr,1).') ';
+				'FROM omcollections WHERE colltype = "general observations" '; 
+			if($collIdStr){
+				$sql .= 'AND collid IN('.substr($collIdStr,1).') ';
 			}
 			$sql .= 'ORDER BY collectionname';
 			//echo $sql;
