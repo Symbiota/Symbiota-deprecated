@@ -31,7 +31,7 @@ $urlVariables = 'country='.$country.'&state='.$state.'&county='.$county.'&locali
 	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 	<style>
 		iframe {
-			width: 990px;
+			width: 1020px;
 			height:720px;
 			margin: 0px;
 			border: 1px solid #000;
@@ -69,7 +69,7 @@ $urlVariables = 'country='.$country.'&state='.$state.'&county='.$county.'&locali
 	<div id="container">
 		<div >
 			<!--<iframe id="da-iframe" src="http://www.museum.tulane.edu/nelson/gravier2.html"></iframe>-->
-			<iframe id="Iframe1" src="http://www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&<?php echo $urlVariables; ?>"></iframe>
+			<iframe id="Iframe1" src="http://www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
 		</div>
 	</div>
 </body>

@@ -49,7 +49,7 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 						<?php 
 						$cSet = str_replace('-','',strtolower($charset));
 						?>
-						<input type="radio" name="cset" value="latin1" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
+						<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 						<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
 					</div>
 					<div style="clear:both;">

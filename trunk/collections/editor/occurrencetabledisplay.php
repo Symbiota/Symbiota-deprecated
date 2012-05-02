@@ -212,7 +212,7 @@ if($symbUid){
 							}							
 							echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 							echo '<td>';
-							echo '<a href="occurrenceeditor.php?occindex='.($recCnt+$occIndex).'&occid='.$id.'">';
+							echo '<a href="occurrenceeditor.php?occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
 							echo $id;
 							echo '</a>';
 							echo '</td>'."\n";
