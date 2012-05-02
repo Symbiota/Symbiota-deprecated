@@ -367,8 +367,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     		$sql = 'SELECT '.$headerStr.
     			' FROM omoccurrences '.
     			'WHERE collid = '.$collId;
-    		if($rs = $this->conn->query($sql)){
-				while($r = $rs->fetch_row()){
+    		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+				while($r = $rs->fetch_assoc()){
 					if($characterSet && $characterSet != $cSet){
 						$this->encodeArr($r,$characterSet);
 					}
@@ -591,7 +591,12 @@ xmlwriter_end_attribute($xml_resource);
 		elseif($cSet == "latin1"){
 			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 				//$value = utf8_decode($value);
-				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				try{
+					$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
+				catch(Exception $e){
+					echo $retStr;
+				}
 			}
 		}
 		return $retStr;
