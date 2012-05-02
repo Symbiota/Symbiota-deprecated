@@ -220,7 +220,6 @@ header("Content-Type: text/html; charset=".$charset);
 						<!-- <li><a href="#newexchangediv">Gifts/Exchanges</a></li> -->
 						<li><a href="#reportdiv">Reports</a></li>
 					</ul>
-
 					<div id="reportdiv" style="height:50px;">
 						List loans outstanding, Invoices, mailing labels, etc
 						<?php 
@@ -234,12 +233,8 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="outgoingdetails.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>"><span>Loan Details</span></a></li>
-						<!-- <li><a href="#loandiv">Loan Details</a></li> -->
 						<li><a href="addspecimen.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>"><span>Add/Edit Specimens</span></a></li>
-						<!-- <li><a href="#addspecdiv">Add/Edit Specimens</a></li> -->
 					</ul>
-					
-					
 				</div>
 				<?php 
 			}
@@ -248,9 +243,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="incomingdetails.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>"><span>Loan Details</span></a></li>
-						<!-- <li><a href="#loandiv">Loan Details</a></li> -->
 					</ul>
-					
 				</div>
 			<?php 
 			}
@@ -259,9 +252,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="exchangedetails.php"<span>Exchange Details</span></a></li>
-						<!-- <li><a href="#exchangedetaildiv">Exchange Details</a></li> -->
 					</ul>
-					
 				</div>
 				<?php 
 			}
