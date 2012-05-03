@@ -154,16 +154,28 @@ if($collId) $loanManager->setCollId($collId);
 				<button name="formsubmit" type="submit" value="Save Outgoing">Save</button>
 			</div>
 		</fieldset>
+	</form>
+	<form name="reportsform" onsubmit="return ProcessReport();" method="post" onsubmit="" target="_blank">
 		<fieldset>
 			<legend>Generate Loan Paperwork</legend>
-			<div style="float:left;margin-right:100px;">
-				<input type="radio" name="print" value="browser" checked /> Print in Browser<br/>
+			<div style="float:right;">
+				<b>International Shipment:</b> <input type="checkbox" name="international" value="1" />
+			</div>
+			<div style="padding-bottom:2px;">
+				<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
 				<input type="radio" name="print" value="doc" /> Export to doc
 			</div>
-			<button name="formsubmit" type="submit" value="Save Outgoing">Invoice</button>
-			<button name="formsubmit" type="submit" value="Save Outgoing">Specimen List</button>
-			<button name="formsubmit" type="submit" value="Save Outgoing">Mailing Label</button>
-			<button name="formsubmit" type="submit" value="Save Outgoing">Envelope</button>
+			<div style="padding-bottom:8px;">
+				<b>Invoice Language:</b> <input type="radio" name="language" value="eng" checked /> English
+				<input type="radio" name="language" value="span" /> English/Spanish
+			</div>
+			<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+			<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+			<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
+			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="invoice">Invoice</button>
+			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="spec">Specimen List</button>
+			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="label">Mailing Label</button>
+			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="envelope">Envelope</button>
 		</fieldset>
 	</form>
 </div>

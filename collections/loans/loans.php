@@ -115,6 +115,29 @@ header("Content-Type: text/html; charset=".$charset);
 			}
 		}
 		
+		function ProcessReport(){
+		  if(document.pressed == 'invoice')
+		  {
+		   document.reportsform.action ="reports/defaultinvoice.php";
+		  }
+		  else
+		  if(document.pressed == 'spec')
+		  {
+			document.reportsform.action ="reports/defaultspecimenlist.php";
+		  }
+		  else
+		  if(document.pressed == 'label')
+		  {
+			document.reportsform.action ="reports/defaultmailinglabel.php";
+		  }
+		  else
+		  if(document.pressed == 'envelope')
+		  {
+			document.reportsform.action ="reports/defaultenvelope.php";
+		  }
+		  return true;
+		}
+		
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
