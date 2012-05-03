@@ -384,6 +384,111 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
+	public function getInvoiceInfo($identifier,$loanType){
+		$retArr = array();
+		if($loanType == 'Exchange'){
+			$sql = 'SELECT e.exchangeid, e.identifier, e.iid, '.
+			'e.totalboxes, e.shippingmethod, e.totalexmounted, e.totalexunmounted, e.totalgift, e.totalgiftdet, '.
+			'e.invoicebalance, e.invoicemessage, e.description, i.contact, i.institutionname, i.institutionname2, '.
+			'i.institutioncode, i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country '.
+			'FROM omoccurexchange AS e LEFT OUTER JOIN institutions AS i ON e.iid = i.iid '.
+			'WHERE exchangeid = '.$identifier;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr['exchangeid'] = $r->exchangeid;
+					$retArr['identifier'] = $r->identifier;
+					$retArr['iid'] = $r->iid;
+					$retArr['totalboxes'] = $r->totalboxes;
+					$retArr['shippingmethod'] = $r->shippingmethod;
+					$retArr['totalexmounted'] = $r->totalexmounted;
+					$retArr['totalexunmounted'] = $r->totalexunmounted;
+					$retArr['totalgift'] = $r->totalgift;
+					$retArr['totalgiftdet'] = $r->totalgiftdet;
+					$retArr['invoicebalance'] = $r->invoicebalance;
+					$retArr['invoicemessage'] = $r->invoicemessage;
+					$retArr['description'] = $r->description;
+					$retArr['contact'] = $r->contact;
+					$retArr['institutionname'] = $r->institutionname;
+					$retArr['institutionname2'] = $r->institutionname2;
+					$retArr['institutioncode'] = $r->institutioncode;
+					$retArr['address1'] = $r->address1;
+					$retArr['address2'] = $r->address2;
+					$retArr['city'] = $r->city;
+					$retArr['stateprovince'] = $r->stateprovince;
+					$retArr['postalcode'] = $r->postalcode;
+					$retArr['country'] = $r->country;
+				}
+			}
+		}
+		else{
+			$sql = 'SELECT e.loanid, e.loanidentifierown, e.loanidentifierborr, e.datesent, e.totalboxes, e.totalboxesreturned, '.
+				'e.numspecimens, e.shippingmethod, e.shippingmethodreturn, e.datedue, e.datereceivedborr, e.forwhom, '.
+				'e.description, e.invoicemessageown, e.invoicemessageborr, i.contact, i.institutionname, i.institutionname2, '.
+				'i.institutioncode, i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country ';
+			if($loanType == 'Out'){
+				$sql .= 'FROM omoccurloans AS e LEFT OUTER JOIN institutions AS i ON e.iidborrower = i.iid ';
+			}
+			elseif($loanType == 'In'){
+				$sql .= 'FROM omoccurloans AS e LEFT OUTER JOIN institutions AS i ON e.iidowner = i.iid ';
+			}
+			$sql .= 'WHERE loanid = '.$identifier;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr['loanid'] = $r->loanid;
+					$retArr['loanidentifierown'] = $r->loanidentifierown;
+					$retArr['loanidentifierborr'] = $r->loanidentifierborr;
+					$retArr['datesent'] = $r->datesent;
+					$retArr['totalboxes'] = $r->totalboxes;
+					$retArr['totalboxesreturned'] = $r->totalboxesreturned;
+					$retArr['numspecimens'] = $r->numspecimens;
+					$retArr['shippingmethod'] = $r->shippingmethod;
+					$retArr['shippingmethodreturn'] = $r->shippingmethodreturn;
+					$retArr['datedue'] = $r->datedue;
+					$retArr['datereceivedborr'] = $r->datereceivedborr;
+					$retArr['forwhom'] = $r->forwhom;
+					$retArr['description'] = $r->description;
+					$retArr['invoicemessageown'] = $r->invoicemessageown;
+					$retArr['invoicemessageborr'] = $r->invoicemessageborr;
+					$retArr['contact'] = $r->contact;
+					$retArr['institutionname'] = $r->institutionname;
+					$retArr['institutionname2'] = $r->institutionname2;
+					$retArr['institutioncode'] = $r->institutioncode;
+					$retArr['address1'] = $r->address1;
+					$retArr['address2'] = $r->address2;
+					$retArr['city'] = $r->city;
+					$retArr['stateprovince'] = $r->stateprovince;
+					$retArr['postalcode'] = $r->postalcode;
+					$retArr['country'] = $r->country;
+				}
+			}
+		}
+		return $retArr;
+	}
+	
+	public function getFromAddress($collId){
+		$retArr = array();
+		$sql = 'SELECT i.institutionname, i.institutionname2, i.phone, '.
+			'i.institutioncode, i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country '.
+			'FROM omcollections AS o LEFT OUTER JOIN institutions AS i ON o.iid = i.iid '.
+			'WHERE o.collid = '.$collId.' ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['institutionname'] = $r->institutionname;
+				$retArr['institutionname2'] = $r->institutionname2;
+				$retArr['phone'] = $r->phone;
+				$retArr['institutioncode'] = $r->institutioncode;
+				$retArr['address1'] = $r->address1;
+				$retArr['address2'] = $r->address2;
+				$retArr['city'] = $r->city;
+				$retArr['stateprovince'] = $r->stateprovince;
+				$retArr['postalcode'] = $r->postalcode;
+				$retArr['country'] = $r->country;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	//General look up functions
 	public function getInstitutionArr(){
 		$retArr = array();
