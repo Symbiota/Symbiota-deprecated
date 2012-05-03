@@ -341,7 +341,8 @@ class SpecLoans{
 	
 	public function getSpecList($loanId){
 		$retArr = array();
-		$sql = 'SELECT l.loanid, l.occid, o.catalognumber, o.sciname '.
+		$sql = 'SELECT l.loanid, l.occid, o.catalognumber, o.sciname, o.scientificnameauthorship, '.
+			'o.recordedby, o.recordnumber '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
 			'ORDER BY o.catalognumber';
@@ -349,6 +350,9 @@ class SpecLoans{
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
 				$retArr[$r->occid]['sciname'] = $r->sciname;
+				$retArr[$r->occid]['scientificnameauthorship'] = $r->scientificnameauthorship;
+				$retArr[$r->occid]['recordedby'] = $r->recordedby;
+				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
 			}
 			$rs->close();
 		}
