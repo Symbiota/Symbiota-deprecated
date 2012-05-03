@@ -54,7 +54,6 @@ elseif($exchangeId){
 			?>
 			body {font-family:arial,sans-serif;}
 			p.printbreak {page-break-after:always;}
-			.container {height:792px;}
 			.header {width:100%;text-align:center;font:bold 12pt arial,sans-serif;margin-bottom:30px;}
 			.toaddress {float:left;text-align:left;font:10pt arial,sans-serif;margin-top:10px;}
 			.identifier {float:right;text-align:right;font:bold 10pt arial,sans-serif;margin-top:10px;}
@@ -67,12 +66,12 @@ elseif($exchangeId){
 			.loanoutinfo {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.description {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.saludos {width:100%;text-align:left;font:10pt arial,sans-serif;}
-			.return {width:100%;text-align:left;font:10pt arial,sans-serif;position:relative;bottom:0;}
+			.return {width:100%;text-align:left;font:10pt arial,sans-serif;position:absolute;bottom:0;}
 			<?php 
 			if($exportDoc) {
 				echo ('@page WordSection1
 						{size:8.5in 11.0in;
-						margin:.5in .5in .5in .5in;
+						margin:.75in .75in .75in .75in;
 						mso-header-margin:0;
 						mso-footer-margin:0;
 						mso-paper-source:0;}
@@ -83,7 +82,6 @@ elseif($exchangeId){
 		</style>
 	</head>
 	<body>
-		<div class="container">
 		<div <?php echo ($exportDoc?'class=WordSection1':'') ?>>
 			<?php
 			$invoiceArr = $loanManager->getInvoiceInfo($identifier,$loanType);
@@ -195,11 +193,11 @@ elseif($exchangeId){
 				echo 'delivered via '.$invoiceArr['shippingmethod'].'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
 				echo 'receipt by signing and returning the duplicate invoice to us.</div><br />';
 				if($spanish){
-					echo '<div>Estámos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja':$invoiceArr['totalboxes']).' cajas ';
+					echo '<div>Est&aacute;mos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja':$invoiceArr['totalboxes']).' cajas ';
 					echo 'de '.($numSpecimens == 1?'1 ejemplar':$numSpecimens).' ejemplares. ';
 					echo ($invoiceArr['totalboxes'] == 1?'Esta remesa hubiera enviado ':'Estas remesas hubieran enviado ');
-					echo 'por '.$invoiceArr['shippingmethod'].'. Al llegar la remesa, por favor verifique los contenidos y sírvase acusar ';
-					echo 'recibo de esta remesa firmiendo una de las copias y devolviéndo la por correo.</div><br />';
+					echo 'por '.$invoiceArr['shippingmethod'].'. Al llegar la remesa, por favor verifique los contenidos y s&iacute;rvase acusar ';
+					echo 'recibo de esta remesa firmiendo una de las copias y devolvi&eacute;ndo la por correo.</div><br />';
 				}
 				?>
 			</div>
@@ -211,7 +209,7 @@ elseif($exchangeId){
 				<?php } ?>
 				<div class="duedate">Loans are made for a period of 2 years. This loan will be due <?php echo $invoiceArr['datedue']; ?>.</div><br />
 				<?php if($spanish){ ?>
-					<div class="duedate">Los préstamos se extienden por un periodo de 2 años. Este préstamo tiene una fecha límite de <?php echo $invoiceArr['datedue']; ?>.</div><br />
+					<div class="duedate">Los pr&eacute;stamos se extienden por un periodo de 2 a&ntilde;os. Este pr&eacute;stamo tiene una fecha l&iacute;mite de <?php echo $invoiceArr['datedue']; ?>.</div><br />
 				<?php } ?>
 				<?php if(!$spanish){ ?>
 					<div class="loanoutinfo">When circumstances warrant, the loan period may be extended. Specimens should be returned by 
@@ -220,9 +218,9 @@ elseif($exchangeId){
 					</div><br />
 				<?php }
 				else{ ?>
-					<div class="loanoutinfo">Siempre y cuando las circunstancias se permiten, se puede pedir un prórroga de la fecha límite de este  
-						préstamo. Todo material del préstamo debe devolverse en el mismo envío. Notas y cambios de identificacion se  
-						deben indicar con notas de anotacion. Además, le pedimos mandar separatas de cualquier publicación 
+					<div class="loanoutinfo">Siempre y cuando las circunstancias se permiten, se puede pedir un pr&oacute;rroga de la fecha l&iacute;mite de este  
+						pr&eacute;stamo. Todo material del pr&eacute;stamo debe devolverse en el mismo env&iacute;o. Notas y cambios de identificaci&oacute;n se  
+						deben indicar con notas de anotaci&oacute;n. Adem&aacute;s, le pedimos mandar separatas de cualquier publicaci&oacute;n 
 						proveniente del uso de este material.
 					</div><br />
 				<?php }
@@ -241,7 +239,7 @@ elseif($exchangeId){
 					an exchange value of <?php //do something ?>. Please note that mounted specimens count as two.
 				</div><br />
 				<?php if($spanish){ ?>
-					<div class="exchangeamts">Este envío es un INTERCAMBIO, consistiendo en <?php echo $invoiceArr['totalexunmounted']; ?> ejemplares no montados 
+					<div class="exchangeamts">Este env&iacute;o es un INTERCAMBIO, consistiendo en <?php echo $invoiceArr['totalexunmounted']; ?> ejemplares no montados 
 						<?php echo ($invoiceArr['totalexmounted']?'y '.$invoiceArr['totalexmounted'].' ejemplares montados ':''); ?>,  
 						con un valor de intercambio de <?php //do something ?>. Favor de notarse que las ejemplares montados son de valor 2.
 					</div><br />
@@ -252,14 +250,14 @@ elseif($exchangeId){
 				<?php if($spanish){ ?>
 					<div class="exchangebal">Nuestros registros muestran un balance de <?php echo $invoiceArr['invoicebalance']; ?> ejemplares  
 						a <?php echo ($invoiceArr['invoicebalance']>0?'nuestro':'su'); ?> favor. Favor de contactarnos si sus 
-						registros se dífieren de una manera apreciable.
+						registros se d&iacute;fieren de una manera apreciable.
 					</div><br />
 				<?php }
 			}
 			?>
 			<div class="description">
 				<?php if($spanish){
-					echo '<b>DESCRIPTION OF THE SPECIMENS / DESCRIPCION DE LOS EJEMPLARES:</b><br /><br />' ;
+					echo '<b>DESCRIPTION OF THE SPECIMENS / DESCRIPCI&Oacute;N DE LOS EJEMPLARES:</b><br /><br />' ;
 				}
 				else{
 					echo '<b>DESCRIPTION OF THE SPECIMENS:</b><br /><br />' ;
@@ -304,7 +302,6 @@ elseif($exchangeId){
 					echo 'Signed:______________________________________  Date:______________<br />' ;
 				} ?>
 			</div>
-		</div>
 		</div>
 	</body>
 </html>
