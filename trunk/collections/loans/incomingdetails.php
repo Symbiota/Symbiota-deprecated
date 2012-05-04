@@ -173,8 +173,9 @@ if($collId) $loanManager->setCollId($collId);
 				<input type="radio" name="print" value="doc" /> Export to doc
 			</div>
 			<div style="padding-bottom:8px;">
-				<b>Invoice Language:</b> <input type="radio" name="language" value="eng" checked /> English
-				<input type="radio" name="language" value="span" /> English/Spanish
+				<b>Invoice Language:</b> <input type="radio" name="languagedef" value="0" checked /> English
+				<input type="radio" name="languagedef" value="1" /> English/Spanish
+				<input type="radio" name="languagedef" value="2" /> Spanish
 			</div>
 			<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 			<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />

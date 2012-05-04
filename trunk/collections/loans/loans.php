@@ -274,7 +274,7 @@ header("Content-Type: text/html; charset=".$charset);
 				?>
 				<div id="tabs" style="margin:0px;">
 				    <ul>
-						<li><a href="exchangedetails.php"<span>Exchange Details</span></a></li>
+						<li><a href="exchangedetails.php?collid=<?php echo $collId; ?>&exchangeid=<?php echo $exchangeId; ?>&loantype=<?php echo $loanType; ?>"><span>Exchange Details</span></a></li>
 					</ul>
 				</div>
 				<?php 
