@@ -56,7 +56,7 @@ elseif($exchangeId){
 			p.printbreak {page-break-after:always;}
 			.header {width:100%;text-align:left;font:14pt arial,sans-serif;}
 			.loaninfo {width:100%;text-align:left;font:11pt arial,sans-serif;}
-			.colheader {text-align:left;font:bold 8pt arial,sans-serif;}
+			.colheader {text-align:left;font:bold 8pt arial,sans-serif;border-bottom:1px solid black;vertical-align:text-bottom;}
 			.specimen {text-align:left;font:8pt arial,sans-serif;}
 			<?php 
 			if($exportDoc) {
@@ -78,15 +78,45 @@ elseif($exchangeId){
 			$invoiceArr = $loanManager->getInvoiceInfo($identifier,$loanType);
 			$addressArr = $loanManager->getFromAddress($collId);
 			$specTotal = $loanManager->getSpecTotal($loanId);
+			$specList = $loanManager->getSpecList($loanId);
 			?>
 			<div class="header">
 				List of specimens loaned to: <?php echo $invoiceArr['institutioncode']; ?>
 			</div>
+			<br />
 			<div class="loaninfo">
 				<?php echo $addressArr['institutioncode']; ?> loan ID: <?php echo $invoiceArr['loanidentifierown']; ?><br />
 				Date sent: <?php echo $invoiceArr['datesent']; ?><br />
 				Total specimens: <?php echo ($specTotal?$specTotal['speccount']:0);?>
 			</div>
+			<br />
+			<table class="colheader">
+				<tr>
+					<td style="width:150px;">
+						<?php echo $addressArr['institutioncode']; ?><br />
+						Catalog &#35;
+					</td>
+					<td style="width:300px;">
+						Collector + Number
+					</td>
+					<td style="width:400px;">
+						Current Determination
+					</td>
+					<td>  </td>
+				</tr>
+			</table>
+			<table class="specimen">
+				<?php
+				foreach($specList as $k => $specArr){
+					echo '<tr>';
+					echo '<td style="width:150px;">'.$specArr['catalognumber'].'</td>';
+					echo '<td style="width:300px;">'.$specArr['recordedby'].' '.$specArr['recordnumber'].'</td>';
+					echo '<td style="width:400px;">'.$specArr['sciname'].' '.$specArr['scientificnameauthorship'].'</td>';
+					echo '<td> </td>';
+					echo '</tr>';
+				}
+				?>
+			</table>
 		
 		
 		

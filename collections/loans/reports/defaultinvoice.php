@@ -4,7 +4,7 @@ include_once($serverRoot.'../classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
-$language = $_POST['language'];
+$languageDef = $_POST['languagedef'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
 $exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
 $loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
@@ -17,7 +17,9 @@ $loanManager = new SpecLoans();
 if($collId) $loanManager->setCollId($collId);
 
 $exportDoc = ($printMode == 'doc'?1:0);
-$spanish = ($language == 'span'?1:0);
+$english = ($languageDef == 0 || $languageDef == 1);
+$engspan = ($languageDef == 1);
+$spanish = ($languageDef == 1 || $languageDef == 2);
 
 $identifier = 0;
 if($loanId){
@@ -66,12 +68,12 @@ elseif($exchangeId){
 			.loanoutinfo {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.description {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.saludos {width:100%;text-align:left;font:10pt arial,sans-serif;}
-			.return {width:100%;text-align:left;font:10pt arial,sans-serif;position:absolute;bottom:0;}
+			.return {width:100%;text-align:left;font:10pt arial,sans-serif;position:relative;bottom:0;margin-top:20%;}
 			<?php 
 			if($exportDoc) {
 				echo ('@page WordSection1
 						{size:8.5in 11.0in;
-						margin:.75in .75in .75in .75in;
+						margin:.5in .5in .5in .5in;
 						mso-header-margin:0;
 						mso-footer-margin:0;
 						mso-paper-source:0;}
@@ -82,6 +84,7 @@ elseif($exchangeId){
 		</style>
 	</head>
 	<body>
+		<table style="height:10in;"><tr><td>
 		<div <?php echo ($exportDoc?'class=WordSection1':'') ?>>
 			<?php
 			$invoiceArr = $loanManager->getInvoiceInfo($identifier,$loanType);
@@ -116,12 +119,7 @@ elseif($exchangeId){
 				</tr>
 				<tr>
 					<?php 
-					if($spanish){ 
-						echo '<td>SHIPPING INVOICE / FACTURA DE REMESA</td>' ;
-					}
-					else{
-						echo '<td>SHIPPING INVOICE</td>' ;
-					}
+					echo '<td>'.($english?'SHIPPING INVOICE':'').($engspan?' / ':'').($spanish?'FACTURA DE REMESA':'').'</td>' ;
 					?>
 				</tr>
 			</table>
@@ -187,11 +185,13 @@ elseif($exchangeId){
 					}
 				}
 				
-				echo '<div>We are sending you '.($invoiceArr['totalboxes'] == 1?'1 box':$invoiceArr['totalboxes']).' boxes ';
-				echo 'containing '.($numSpecimens == 1?'1 specimen':$numSpecimens).' specimens. ';
-				echo ($invoiceArr['totalboxes'] == 1?'This package was ':'These packages were ');
-				echo 'delivered via '.$invoiceArr['shippingmethod'].'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
-				echo 'receipt by signing and returning the duplicate invoice to us.</div><br />';
+				if($english){
+					echo '<div>We are sending you '.($invoiceArr['totalboxes'] == 1?'1 box':$invoiceArr['totalboxes']).' boxes ';
+					echo 'containing '.($numSpecimens == 1?'1 specimen':$numSpecimens).' specimens. ';
+					echo ($invoiceArr['totalboxes'] == 1?'This package was ':'These packages were ');
+					echo 'delivered via '.$invoiceArr['shippingmethod'].'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
+					echo 'receipt by signing and returning the duplicate invoice to us.</div><br />';
+				}
 				if($spanish){
 					echo '<div>Est&aacute;mos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja':$invoiceArr['totalboxes']).' cajas ';
 					echo 'de '.($numSpecimens == 1?'1 ejemplar':$numSpecimens).' ejemplares. ';
@@ -203,21 +203,25 @@ elseif($exchangeId){
 			</div>
 			<?php 
 			if($loanType == 'Out'){ ?>
-				<div class="forwhom">This shipment is a LOAN for study by <?php echo $invoiceArr['forwhom']; ?>.</div><br />
-				<?php if($spanish){ ?>
+				<?php if($english){ ?>
+					<div class="forwhom">This shipment is a LOAN for study by <?php echo $invoiceArr['forwhom']; ?>.</div><br />
+				<?php }
+				if($spanish){ ?>
 					<div class="forwhom">Esta remesa es un PRESTAMO para el estudio de <?php echo $invoiceArr['forwhom']; ?>.</div><br />
-				<?php } ?>
-				<div class="duedate">Loans are made for a period of 2 years. This loan will be due <?php echo $invoiceArr['datedue']; ?>.</div><br />
-				<?php if($spanish){ ?>
+				<?php }
+				if($english){ ?>
+					<div class="duedate">Loans are made for a period of 2 years. This loan will be due <?php echo $invoiceArr['datedue']; ?>.</div><br />
+				<?php }
+				if($spanish){ ?>
 					<div class="duedate">Los pr&eacute;stamos se extienden por un periodo de 2 a&ntilde;os. Este pr&eacute;stamo tiene una fecha l&iacute;mite de <?php echo $invoiceArr['datedue']; ?>.</div><br />
-				<?php } ?>
-				<?php if(!$spanish){ ?>
+				<?php }
+				if($english){ ?>
 					<div class="loanoutinfo">When circumstances warrant, the loan period may be extended. Specimens should be returned by 
 						insured parcel post or by prepaid express. All material of this loan should be returned at the same time. Notes or 
 						changes should be written on annotation labels. Reprints dealing with taxonomic groups will be appreciated.
 					</div><br />
 				<?php }
-				else{ ?>
+				if($spanish){ ?>
 					<div class="loanoutinfo">Siempre y cuando las circunstancias se permiten, se puede pedir un pr&oacute;rroga de la fecha l&iacute;mite de este  
 						pr&eacute;stamo. Todo material del pr&eacute;stamo debe devolverse en el mismo env&iacute;o. Notas y cambios de identificaci&oacute;n se  
 						deben indicar con notas de anotaci&oacute;n. Adem&aacute;s, le pedimos mandar separatas de cualquier publicaci&oacute;n 
@@ -226,28 +230,34 @@ elseif($exchangeId){
 				<?php }
 			}	
 			elseif($loanType == 'In'){ ?>
-				<div class="loanreturn">This shipment is a return of <?php echo $invoiceArr['institutioncode']; ?>
-					loan <?php echo $invoiceArr['loanidentifierown']; ?>, received <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
-				<?php if($spanish){ ?>
+				<?php if($english){ ?>
+					<div class="loanreturn">This shipment is a return of <?php echo $invoiceArr['institutioncode']; ?>
+						loan <?php echo $invoiceArr['loanidentifierown']; ?>, received <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
+				<?php }
+				if($spanish){ ?>
 					<div class="loanreturn">En esta remesa se devuelve el prestamo <?php echo $invoiceArr['loanidentifierown']; ?>
 						de <?php echo $invoiceArr['institutioncode']; ?>, recibido <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
 				<?php } ?>
 			<?php }
 			elseif($loanType == 'Exchange'){ ?>
-				<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo $invoiceArr['totalexunmounted']; ?> unmounted 
-					<?php echo ($invoiceArr['totalexmounted']?'and '.$invoiceArr['totalexmounted'].' mounted ':''); ?>specimens, for 
-					an exchange value of <?php //do something ?>. Please note that mounted specimens count as two.
-				</div><br />
-				<?php if($spanish){ ?>
+				<?php if($english){ ?>
+					<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo $invoiceArr['totalexunmounted']; ?> unmounted 
+						<?php echo ($invoiceArr['totalexmounted']?'and '.$invoiceArr['totalexmounted'].' mounted ':''); ?>specimens, for 
+						an exchange value of <?php //do something ?>. Please note that mounted specimens count as two.
+					</div><br />
+				<?php }
+				if($spanish){ ?>
 					<div class="exchangeamts">Este env&iacute;o es un INTERCAMBIO, consistiendo en <?php echo $invoiceArr['totalexunmounted']; ?> ejemplares no montados 
 						<?php echo ($invoiceArr['totalexmounted']?'y '.$invoiceArr['totalexmounted'].' ejemplares montados ':''); ?>,  
 						con un valor de intercambio de <?php //do something ?>. Favor de notarse que las ejemplares montados son de valor 2.
 					</div><br />
-				<?php } ?>
-				<div class="exchangebal">Our records show a balance of <?php echo $invoiceArr['invoicebalance']; ?> specimens  
-					in <?php echo ($invoiceArr['invoicebalance']>0?'our':'your'); ?> favor. Please contact us if your records differ significantly. 
-				</div><br />
-				<?php if($spanish){ ?>
+				<?php }
+				if($english){ ?>
+					<div class="exchangebal">Our records show a balance of <?php echo $invoiceArr['invoicebalance']; ?> specimens  
+						in <?php echo ($invoiceArr['invoicebalance']>0?'our':'your'); ?> favor. Please contact us if your records differ significantly. 
+					</div><br />
+				<?php }
+				if($spanish){ ?>
 					<div class="exchangebal">Nuestros registros muestran un balance de <?php echo $invoiceArr['invoicebalance']; ?> ejemplares  
 						a <?php echo ($invoiceArr['invoicebalance']>0?'nuestro':'su'); ?> favor. Favor de contactarnos si sus 
 						registros se d&iacute;fieren de una manera apreciable.
@@ -256,24 +266,18 @@ elseif($exchangeId){
 			}
 			?>
 			<div class="description">
-				<?php if($spanish){
-					echo '<b>DESCRIPTION OF THE SPECIMENS / DESCRIPCI&Oacute;N DE LOS EJEMPLARES:</b><br /><br />' ;
-				}
-				else{
-					echo '<b>DESCRIPTION OF THE SPECIMENS:</b><br /><br />' ;
-				}
-				echo $invoiceArr['description'];
+				<?php
+					echo '<b>'.($english?'DESCRIPTION OF THE SPECIMENS':'').($engspan?' / ':'').($spanish?'DESCRIPCI&Oacute;N DE LOS EJEMPLARES':'').':</b><br /><br />' ;
 				?>
 			</div>
 			<br />
 			<div class="saludos">
-				<?php if($spanish){
-					echo 'Sincerely / Sinceramente,<br />' ;
-				}
-				else{
-					echo 'Sincerely,<br />' ;
-				} ?>
+				<?php
+					echo ($english?'Sincerely':'').($engspan?' / ':'').($spanish?'Sinceramente':'').',<br />' ;
+				?>
 			</div>
+			<br />
+			<br />
 			<br />
 			<br />
 			<br />
@@ -283,25 +287,23 @@ elseif($exchangeId){
 			<div class="return">
 				<hr />
 				<br />
-				PLEASE SIGN AND RETURN ONE COPY UPON RECEIPT OF THIS SHIPMENT<br />
-				<?php if($spanish){
+				<?php 
+				if($english){
+					echo 'PLEASE SIGN AND RETURN ONE COPY UPON RECEIPT OF THIS SHIPMENT<br />' ;
+				}
+				if($spanish){
 					echo 'POR FAVOR FIRME Y DEVUELVE UNA COPIA AL LLEGAR ESTA REMESA.<br />' ;
 				} ?>
 				<br />
-				<?php if($spanish){
-					echo 'The above specimens were received in good condition /	Recibido en buenas condiciones:<br />' ;
-				}
-				else{
-					echo 'The above specimens were received in good condition.<br />' ;
-				} ?>
+				<?php
+					echo ($english?'The above specimens were received in good condition':'').($engspan?' / ':'').($spanish?'Recibido en buenas condiciones':'').'.<br />' ;
+				?>
 				<br />
-				<?php if($spanish){
-					echo 'Signed/Firma:______________________________________  Date/Fecha:______________<br />' ;
-				}
-				else{
-					echo 'Signed:______________________________________  Date:______________<br />' ;
-				} ?>
+				<?php
+					echo ($english?'Signed':'').($engspan?'/':'').($spanish?'Firma':'').':______________________________________  '.($english?'Date':'').($engspan?'/':'').($spanish?'Fecha':'').':______________<br />' ;
+				?>
 			</div>
 		</div>
+	</td></tr></table>
 	</body>
 </html>
