@@ -291,7 +291,7 @@ header("Content-Type: text/html; charset=".$charset);
 									<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 									Select/Deselect All
 								</span>
-								<span style="float:right;margin-right:15px;">
+								<span style="float:right;margin-right:15px;"> 
 									<form name="refreshspeclist" action="loans.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
