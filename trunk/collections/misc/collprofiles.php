@@ -574,7 +574,7 @@ if($collId) $collData = $collManager->getCollectionData();
 							<?php 
 							$distArr = array();
 							if($showFamilyList){
-								$distArr = $collManager->getTaxonCounts($familyDist);
+								$distArr = $collManager->getTaxonCounts();
 							}
 							else{
 								$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
