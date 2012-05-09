@@ -536,7 +536,7 @@ if($collId) $collData = $collManager->getCollectionData();
 					<div class='legend'><b>Extra Statistics</b></div>
 					<div>
 						<a href='collprofiles.php?collid=<?php echo $collId;?>&sfl=1'>
-							Show Family/Genus Distribution
+							Show Family Distribution
 						</a>
 					</div>
 					<div>
@@ -588,9 +588,9 @@ if($collId) $collData = $collManager->getCollectionData();
 									echo '</a>';
 								}
 								elseif($showFamilyList && !$familyDist){
-									echo '<a href="collprofiles.php?sfl=1&collid='.$collId.'&family='.$term.'">';
+									//echo '<a href="collprofiles.php?sfl=1&collid='.$collId.'&family='.$term.'">';
 									echo $term;
-									echo '</a>';
+									//echo '</a>';
 								}
 								else{
 									echo $term;
@@ -610,9 +610,20 @@ if($collId) $collData = $collManager->getCollectionData();
 		}
 		else{
 			$collList = $collManager->getCollectionList();
+			if($isAdmin){
+				?>
+				<div style="float:right;">
+					<a href="collprofiles.php?newcoll=1">
+						<img src="../../images/add.png" title="Add a brand new collection profile to portal" />
+					</a>
+				</div>
+				<?php
+			} 
 			?>
 			<h1><?php echo $defaultTitle; ?> Collections </h1>
-			<div style='margin:10px;'>Select a collection to see full details. </div>
+			<div style='margin:10px;clear:both;'>
+				Select a collection to see full details. 
+			</div>
 			<table style='margin:10px;'>
 				<?php 
 				foreach($collList as $cId => $collArr){
