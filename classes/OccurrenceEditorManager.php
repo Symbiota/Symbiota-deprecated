@@ -99,6 +99,7 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_recordnumber',$_POST) && $_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
 			if(array_key_exists('q_eventdate',$_POST) && $_POST['q_eventdate']) $this->qryArr['ed'] = trim($_POST['q_eventdate']);
 			if(array_key_exists('q_enteredby',$_POST) && $_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
+			if(array_key_exists('q_observeruid',$_POST) && $_POST['q_observeruid']) $this->qryArr['ouid'] = $_POST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
 			if(array_key_exists('q_customfield1',$_POST) && $_POST['q_customfield1']) $this->qryArr['cf1'] = $_POST['q_customfield1'];
@@ -115,7 +116,7 @@ class OccurrenceEditorManager {
 		return $this->qryArr;
 	}
 	
-	public function setSqlWhere($occIndex=0, $isAdmin=0, $recLimit = 1){
+	public function setSqlWhere($occIndex=0, $recLimit = 1){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
 		if(array_key_exists('id',$this->qryArr)){
@@ -246,6 +247,9 @@ class OccurrenceEditorManager {
 		if(array_key_exists('eb',$this->qryArr)){
 			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
 		}
+		if(array_key_exists('ouid',$this->qryArr)){
+			$sqlWhere .= 'AND (o.observeruid = '.$this->qryArr['ouid'].') ';
+		}
 		if(array_key_exists('dm',$this->qryArr)){
 			if($p = strpos($this->qryArr['dm'],' - ')){
 				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.substr($this->qryArr['dm'],0,$p).'" AND "'.substr($this->qryArr['dm'],$p+3).'") ';
@@ -324,10 +328,6 @@ class OccurrenceEditorManager {
 		}
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
-			if(!$isAdmin && $this->collMap['colltype'] == 'General Observations'){
-				//Should only see specimens that were entered under user's login id
-				$sqlWhere .= 'AND observeruid = '.$this->symbUid.' ';
-			}
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
 		}

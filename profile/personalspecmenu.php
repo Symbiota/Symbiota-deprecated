@@ -74,10 +74,19 @@ if($symbUid){
 			<fieldset style="margin:15px;">
 				<legend style="font-weight:bold;">Main Menu</legend>
 				<ul>
-					<li>Display records</li>
+					<li>
+						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$symbUid; ?>">
+							Display All Records
+						</a>
+					</li>
+					<li>
+						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$symbUid; ?>&displayquery=1">
+							Search Records
+						</a>
+					</li>
 					<li>
 						<a href="../collections/editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
-							Add a new record
+							Add a New Record
 						</a>
 					</li>
 					<li>
@@ -97,7 +106,9 @@ if($symbUid){
 						<?php
 					}
 					?>
+					<!-- 
 					<li>Import csv file</li>
+					 -->
 					<li>
 						<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=1,resizable=1,width=400,height=200,left=20,top=20');">
 							Backup file download (CSV extract)

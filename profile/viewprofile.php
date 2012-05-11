@@ -7,6 +7,7 @@ Header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
+$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
 $isSelf = 0;
 $isEditable = 0;
@@ -118,6 +119,9 @@ if($isEditable){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
+	<script type="text/javascript">
+		var tabIndex = <?php echo $tabIndex; ?>;
+	</script>
 	<script type="text/javascript" src="../js/symb/profile.viewprofile.js"></script>
 </head>
 <body onload="initTabs('profiletabs');">

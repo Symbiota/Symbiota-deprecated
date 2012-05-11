@@ -55,18 +55,31 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 <?php 
 class BuildThumbnails{
 	
-	private $rootPath = "";
+	private $rootPathBase = "";
+	private $rootPathTn = "";
+	private $pathTnFrag = "";
 	private $urlPath = "";
 	private $conn;
 	private $thumbnailArr = Array();
 
+	private $tnPixWidth = 200;
+	private $tnPixWidthMax = 250;
+	
+	private $verbose = 1;
+	
 	function __construct() {
 		set_time_limit(200);
-		$this->rootPath = $GLOBALS["imageRootPath"];
-		if(substr($this->rootPath,-1) != "/") $this->rootPath .= "/";  
+		$this->rootPathBase = $GLOBALS["imageRootPath"];
+		if(substr($this->rootPathBase,-1) != "/") $this->rootPathBase .= "/";  
 		$this->urlPath = $GLOBALS["imageRootUrl"];
+		if(!$this->urlPath) exit('imageRootUrl is not set');
 		if(substr($this->urlPath,-1) != "/") $this->urlPath .= "/";  
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		
+		if(array_key_exists('imgTnWidth',$GLOBALS)){
+			$this->tnPixWidth = $GLOBALS['imgTnWidth'];
+			$this->tnPixWidthMax = $this->tnPixWidth + $this->tnPixWidth*0.25; 
+		}
 	}
 
 	function __destruct(){
@@ -74,80 +87,72 @@ class BuildThumbnails{
 	}
 	
 	public function buildThumbnails(){
-		$sql = "SELECT ti.imgid, trim(ti.url) AS url FROM images ti ".
-			"WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = '') AND ti.url LIKE '".$this->urlPath."%' ";
+		echo '<ul>';
+		//Hunt for images on the main iamge server yet for some reason lack thumbnails
+		echo '<li style="font-weight:bold;">Working on internal images</li>';
+		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url LIKE "'.$this->urlPath.'%" ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
-			$url = $row->url;
+			$url = trim($row->url);
+			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'</li>';
 			//if there are spaces in the file name, fix it
 			if(strpos($url," ") || strpos($url,"%20")){
-				$url = $this->removeSpacesFromFileName($imgId, $url);
+				$url = $this->removeSpacesFromFileName($imgId,$url);
 			}
-			$this->createThumbnail($url, $imgId);
+			$this->createThumbnail($imgId,$url);
 		}
+		//Hunt for images lacking thumbnails that are one an external server
+		echo '<li style="font-weight:bold;">Working images stored on an external server</li>';
+		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "")';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$imgId = $row->imgid;
+			$url = trim($row->url);
+			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'</li>';
+			//if there are spaces in the file name, fix it
+			if(strpos($url," ") || strpos($url,"%20")){
+				$url = $this->removeSpacesFromFileName($imgId,$url);
+			}
+			$this->createThumbnail($imgId,$url);
+		}
+		echo '<li style="font-weight:bold;">Finished!</li>';
+		echo '</ul>';
 	}
 	
-	private function removeSpacesFromFileName($imgId, $url){
-		$imgUrl = str_replace("%20"," ",$url);
-		$filePath = str_replace($this->urlPath,$this->rootPath,$imgUrl);
-		$newPath = str_replace(" ","_", $filePath);
-		$newPath = str_replace(Array("(",")"),"",$newPath);
-		$newPath = str_replace("JPG","jpg",$newPath);
-		$newUrl = str_replace($this->rootPath,$this->urlPath,$newPath);
-		if($filePath != $newPath){
-			if(!file_exists($newPath)){
-				if(rename($filePath, $newPath)){
-			    	$sql = "UPDATE images ti SET ti.url = '".$newUrl."' WHERE ti.imgid = ".$imgId;
-				    if($this->conn->query($sql)){
-					    echo "<div style='margin:5px;'><b>Image file ($imgId) renamed</b> from $imgUrl to $newUrl</div>";
-					    return $newUrl;
-				    }
-				    else{
-				    	echo "<div style='margin:5px;'><b>ERROR:</b> Image file ($imgId) rename successful but database update failed. Please repair.</div>";
-				    }
-				}
-			    else{
-			    	echo "<div style='margin:5px;'><b>ERROR:</b> Unable to rename image file $filePath (imgid = $imgId)</div>";
-			    }
-			}
-			else{
-			    echo "<div style='margin:5px;'><b>ERROR:</b> Unable t rename file. New file already exists: $newPath</div>";
-			}
-		}
-		return "";
-	}
-	
-	private function createThumbnail($imgUrl, $imgId){
+	private function createThumbnail($imgId,$imgUrl){
 		if($imgUrl && $imgId){
 			$filePath = "";
 			$newThumbnailUrl = "";
 			$newThumbnailPath = "";
-			if(substr($imgUrl,0,7) == "http://"){
+			if(strpos($imgUrl,$this->urlPath) !== false){
+				$filePath = str_replace($this->urlPath,$this->rootPathBase,$imgUrl);
+				$newThumbnailUrl = str_ireplace(".jpg","tn.jpg",$imgUrl);
+				$newThumbnailPath = str_replace($this->urlPath,$this->rootPathBase,$newThumbnailUrl);
+			}
+			elseif(substr($imgUrl,0,7) == "http://"){
 				$filePath = $imgUrl;
-				if(!is_dir($this->rootPath."misc_thumbnails/")){
-					if(!mkdir($this->rootPath."misc_thumbnails/")) return "";
+				if(!$this->pathTnFrag){
+					$this->pathTnFrag = 'thumbnails'.date("Ym").'/';
+					if(!is_dir($this->rootPathBase.$this->pathTnFrag)){
+						if(!mkdir($this->rootPathBase.$this->pathTnFrag)) return "";
+					}
 				}
 				$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
-				$newThumbnailPath = $this->rootPath."misc_thumbnails/".$fileName;
-				$newThumbnailUrl = $this->urlPath."misc_thumbnails/".$fileName;
-			}
-			elseif(substr($imgUrl,0,strlen($this->urlPath)) == $this->urlPath){
-				$filePath = str_replace($this->urlPath,$this->rootPath,$imgUrl);
-				$newThumbnailUrl = str_ireplace(".jpg","tn.jpg",$imgUrl);
-				$newThumbnailPath = str_replace($this->urlPath,$this->rootPath,$newThumbnailUrl);
+				$newThumbnailUrl = $this->urlPath.$this->pathTnFrag.$fileName;
+				$newThumbnailPath = $this->rootPathBase.$this->pathTnFrag.$fileName;
 			}
 
-			$idealWidth = 200;
-			$maxHeight = 250;
 			if(file_exists($filePath) || $this->url_exists($filePath)){
 				if(!file_exists($newThumbnailPath)){
 		        	list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
-		        	$newWidth = $idealWidth;
-		        	$newHeight = round($sourceHeight*($idealWidth/$sourceWidth));
-		        	if($newHeight > $maxHeight){
-		        		$newHeight = $maxHeight;
-		        		$newWidth = round($sourceWidth*($maxHeight/$sourceHeight));
+		        	$newWidth = $this->tnPixWidth;
+		        	$newHeight = round($sourceHeight*($newWidth/$sourceWidth));
+		        	if($newHeight > $this->tnPixWidthMax){
+		        		$newHeight = $this->tnPixWidthMax;
+		        		$newWidth = round($sourceWidth*($this->tnPixWidthMax/$sourceHeight));
 		        	}
 		        	
 				    switch ($imageType){
@@ -177,17 +182,17 @@ class BuildThumbnails{
 					switch ($imageType){
 				        case 1: 
 				        	if(!imagegif($tmpImg,$newThumbnailPath)){
-				        		echo "<div style='margin:5px;'>Failed to write GIF thumbnail: $newThumbnailPath</div>";
+				        		echo "<li style='margin-left:5px;color:red;'>Failed to write GIF thumbnail: $newThumbnailPath</li>";
 				        	}
 				        	break;
 				        case 2: 
 				        	if(!imagejpeg($tmpImg, $newThumbnailPath)){
-				        		echo "<div style='margin:5px;'>Failed to write JPG thumbnail: $newThumbnailPath</div>";
+				        		echo "<li style='margin-left:5px;color:red;'>Failed to write JPG thumbnail: $newThumbnailPath</li>";
 				        	}
 				        	break; // best quality
 				        case 3: 
 				        	if(!imagepng($tmpImg, $newThumbnailPath, 0)){
-				        		echo "<div style='margin:5px;'>Failed to write PNG thumbnail: $newThumbnailPath</div>";
+				        		echo "<li style='margin-left:5px;color:red;'>Failed to write PNG thumbnail: $newThumbnailPath</li>";
 				        	}
 				        	break; // no compression
 				    }
@@ -198,12 +203,42 @@ class BuildThumbnails{
 				    //Insert thumbnail path into database
 			    	$sql = "UPDATE images ti SET ti.thumbnailurl = '".$newThumbnailUrl."' WHERE ti.imgid = ".$imgId;
 				    $this->conn->query($sql);
-				    echo "<div style='margin:5px;'><b>Thumbnail Created:</b> $imgId - $newThumbnailUrl</div>";
+				    if($this->verbose) echo "<li style='margin-left:5px;'><b>Thumbnail Created:</b> $imgId - $newThumbnailUrl</li>";
 			    }
 			}
 		}
 	}
 	
+	private function removeSpacesFromFileName($imgId, $url){
+		$imgUrl = str_replace("%20"," ",$url);
+		$filePath = str_replace($this->urlPath,$this->rootPathBase,$imgUrl);
+		$newPath = str_replace(" ","_", $filePath);
+		$newPath = str_replace(Array("(",")"),"",$newPath);
+		$newPath = str_replace("JPG","jpg",$newPath);
+		$newUrl = str_replace($this->rootPathBase,$this->urlPath,$newPath);
+		if($filePath != $newPath){
+			if(!file_exists($newPath)){
+				if(rename($filePath, $newPath)){
+			    	$sql = "UPDATE images ti SET ti.url = '".$newUrl."' WHERE ti.imgid = ".$imgId;
+				    if($this->conn->query($sql)){
+					    if($this->verbose) echo "<li style='margin-left:5px;'><b>Image file ($imgId) renamed</b> from $imgUrl to $newUrl</li>";
+					    return $newUrl;
+				    }
+				    else{
+				    	echo "<li style='margin-left:5px;color:red;'><b>ERROR:</b> Image file ($imgId) rename successful but database update failed. Please repair.</li>";
+				    }
+				}
+			    else{
+			    	echo "<li style='margin-left:5px;color:red;'><b>ERROR:</b> Unable to rename image file $filePath (imgid = $imgId)</li>";
+			    }
+			}
+			else{
+			    echo "<li style='margin-left:5px;color:red;'><b>ERROR:</b> Unable t rename file. New file already exists: $newPath</li>";
+			}
+		}
+		return "";
+	}
+
 	private function url_exists($url) {
 	    // Version 4.x supported
 	    $handle   = curl_init($url);

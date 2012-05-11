@@ -12,6 +12,7 @@ $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
 $autoPStatus = array_key_exists('autoprocessingstatus',$_POST)?$_POST['autoprocessingstatus']:'';
 $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
+$ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action && array_key_exists('gotonew',$_REQUEST)){
 	if(array_key_exists('carryloc',$_REQUEST)){
@@ -34,6 +35,8 @@ else{
 }
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+$displayQuery = 0;
+$isGenObs = 0;
 $collMap = Array();
 $occArr = array();
 $imgArr = array();
@@ -53,7 +56,7 @@ if($symbUid){
 		$isEditor = 1;
 	}
 
-	$isGenObs = ($collMap['colltype']=='General Observations'?1:0);
+	if($collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
 		if($isGenObs){ 
 			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
@@ -150,10 +153,13 @@ if($symbUid){
 		$today = date('Y-m-d');
 		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>$today));
 		if(!$qryCnt){
-			$occManager->setSqlWhere(0,($isEditor==1?1:0));
+			$occManager->setSqlWhere(0);
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occIndex = $qryCnt;
 		}
+	}
+	if($ouid){
+		$occManager->setQueryVariables(array('ouid' => $ouid));
 	}
 	elseif($occIndex !== false){
 		//Query Form has been activated 
@@ -164,7 +170,7 @@ if($symbUid){
 			if($qryCnt > 1){
 				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
 				$qryCnt--;
-				$occManager->setSqlWhere($occIndex,($isEditor==1?1:0));
+				$occManager->setSqlWhere($occIndex);
 			}
 			else{
 				setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
@@ -172,13 +178,13 @@ if($symbUid){
 			}
 		}
 		elseif($action == 'Save Edits'){
-			$occManager->setSqlWhere(0,($isEditor==1?1:0));
+			$occManager->setSqlWhere(0);
 			//Get query count and then reset; don't use new count for this display
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occManager->getQueryRecordCount(1);
 		}
 		else{
-			$occManager->setSqlWhere($occIndex,($isEditor==1?1:0));
+			$occManager->setSqlWhere($occIndex);
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
@@ -297,14 +303,24 @@ if($symbUid){
 				echo '</div>';
 			}
 			if($occId || ($isEditor && $collId)){
-				$displayQueryForm = 0;
-				if(!$occArr && !$goToMode) $displayQueryForm = 1;
+				if(!$occArr && !$goToMode) $displayQuery = 1;
 				include 'includes/queryform.php';
 				?>
 				<div style="width:790px;clear:both;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
-						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
+						<?php
+						if(!$isGenObs || $isAdmin){ 
+							?>
+							<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+							<?php
+						}
+						if($isGenObs){ 
+							?>
+							<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+							<?php
+						}
+						?>
 						<b>Editor</b>
 					</span>
 					<?php
