@@ -23,7 +23,7 @@ if($collId) $loanManager->setCollId($collId);
 	//$loanDetails = $loanManager->getLoanDetails($loanId);
 	//foreach($loanDetails as $k => $loanArr){
 	?>
-	<form name="editloanform" action="loans.php" method="post">
+	<form name="editloanform" action="index.php" method="post">
 		<fieldset>
 			<legend>Loan Details</legend>
 			<div style="padding-top:4px;">

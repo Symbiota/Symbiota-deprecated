@@ -20,7 +20,7 @@ if($collId) $loanManager->setCollId($collId);
 	$identifierArr = $loanManager->getIdentifier($collId);
 	$identifierEx = ($identifierArr['ex']) + 1;
 	?>
-	<form name="newexchangegiftform" action="loans.php" method="post">
+	<form name="newexchangegiftform" action="index.php" method="post">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
 			<div style="padding-top:4px;">

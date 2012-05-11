@@ -23,7 +23,7 @@ if($collId) $loanManager->setCollId($collId);
 	$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
 	//$specTotal = $loanManager->getSpecTotal($loanId);
 	?>
-	<form name="editexchangegiftform" action="loans.php" method="post">
+	<form name="editexchangegiftform" action="index.php" method="post">
 		<fieldset>
 			<legend>Edit Gift/Exchange</legend>
 			<div style="padding-top:4px;">

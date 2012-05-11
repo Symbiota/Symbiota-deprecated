@@ -403,7 +403,7 @@ if($collMap){
 			}
 		}
 		else{
-			echo "Please <a href='../../profile/index.php?refurl=../collections/editor/observationsubmit.php'>login</a>";
+			echo 'Please <a href="../../profile/index.php?refurl=../collections/editor/observationsubmit.php?collid='.$collId.'">login</a>';
 		}
 		?>
 	</div>

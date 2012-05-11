@@ -17,7 +17,7 @@ if($collId) $loanManager->setCollId($collId);
 
 <div id="loanindiv" style="">
 	<div style="float:right;">
-		<form name='optionform' action='loans.php' method='post'>
+		<form name='optionform' action='index.php' method='post'>
 			<fieldset>
 				<legend><b>Options</b></legend>
 				<div>
@@ -46,7 +46,7 @@ if($collId) $loanManager->setCollId($collId);
 		$identifierArr = $loanManager->getIdentifier($collId);
 		$identifierIn = ($identifierArr['in']) + 1;
 		?>
-		<form name="newloaninform" action="loans.php" method="post">
+		<form name="newloaninform" action="index.php" method="post">
 			<fieldset>
 				<legend><b>New Loan</b></legend>
 				<div style="padding-top:4px;">
@@ -94,7 +94,7 @@ if($collId) $loanManager->setCollId($collId);
 			echo '<ul>';
 			foreach($loansOnWay as $k => $loanArr){
 				echo '<li>';
-				echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
+				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
 				echo $loanArr['loanidentifierown'];
 				echo ' from '.$loanArr['collectionname'].'</a>';
 				echo '</li>';
@@ -114,7 +114,7 @@ if($collId) $loanManager->setCollId($collId);
 			echo '<ul>';
 			foreach($loanInList as $k => $loanArr){
 				echo '<li>';
-				echo '<a href="loans.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
+				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
 				echo $loanArr['loanidentifierborr'];
 				echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 				echo '</li>';
