@@ -1,7 +1,9 @@
 <?php
+if(!$displayQuery && array_key_exists('displayquery',$_REQUEST)) $displayQuery = $_REQUEST['displayquery'];
+
 $qIdentifier=''; $qOtherCatalogNumbers=''; 
 $qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
-$qEnteredBy=''; $qProcessingStatus=''; $qDateLastModified='';
+$qEnteredBy=''; $qObserverUid='';$qProcessingStatus=''; $qDateLastModified='';
 $qCustomField1='';$qCustomType1='';$qCustomValue1='';
 $qCustomField2='';$qCustomType2='';$qCustomValue2='';
 $qCustomField3='';$qCustomType3='';$qCustomValue3='';
@@ -13,6 +15,7 @@ if($qryArr){
 	$qRecordNumber = (array_key_exists('rn',$qryArr)?$qryArr['rn']:'');
 	$qEventDate = (array_key_exists('ed',$qryArr)?$qryArr['ed']:'');
 	$qEnteredBy = (array_key_exists('eb',$qryArr)?$qryArr['eb']:'');
+	$qObserverUid = (array_key_exists('ouid',$qryArr)?$qryArr['ouid']:0);
 	$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 	$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
@@ -25,7 +28,7 @@ if($qryArr){
 		Search / Filter
 	</a>
 </div>
-<div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQueryForm?'block':'none'); ?>;">
+<div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
 	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return verifyQueryForm(this)">
 		<fieldset style="padding:5px;">
 			<legend><b>Record Search Form</b></legend>
@@ -44,7 +47,7 @@ if($qryArr){
 				</span>
 			</div>
 			<div style="margin:2px;">
-				Identifier: 
+				Catalog Number: 
 				<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 					<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
 				</span>
@@ -54,9 +57,26 @@ if($qryArr){
 				</span>
 			</div>
 			<div style="margin:2px;">
-				Entered by: 
-				<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
-				<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
+				<?php
+				if($isGenObs && $isAdmin){
+					?>
+					<span style="margin-right:25px;">
+						<input type="checkbox" name="q_observeruid" value="<?php echo $symbUid; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
+						Only My Records
+					</span>
+					<?php 
+				}
+				else{
+					?>
+					<input type="hidden" name="q_observeruid" value="<?php echo $isGenObs?$symbUid:''; ?>" />
+					<?php 
+				}
+				?>
+				<span style="margin-right:15px;<?php echo ($isGenObs?'display:none':''); ?>">
+					Entered by: 
+					<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
+				</span>
+				<span title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
 					Date entered: 
 					<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
 				</span>
@@ -174,6 +194,7 @@ if($qryArr){
 			if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
 			if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
 			if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
+			if($qObserverUid) $qryStr .= '&observeruid='.$qObserverUid;
 			if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
 			if($qryStr){
 				?>

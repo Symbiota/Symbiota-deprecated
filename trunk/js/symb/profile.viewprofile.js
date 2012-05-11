@@ -1,5 +1,7 @@
 $(document).ready(function() {
-	$('#tabs').tabs();
+	$('#tabs').tabs(
+		{ selected: tabIndex }
+	);
 });
 
 function openMappingAid() {

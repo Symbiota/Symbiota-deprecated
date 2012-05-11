@@ -6,11 +6,14 @@ header("Content-Type: text/html; charset=".$charset);
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:100;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
+$ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
 $occManager = new OccurrenceEditorManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+$displayQuery = 0;
+$isGenObs = 0;
 $collMap = Array();
 $recArr = array();
 $qryCnt = 0;
@@ -25,7 +28,7 @@ if($symbUid){
 		$isEditor = 1;
 	}
 
-	$isGenObs = ($collMap['colltype']=='General Observations'?1:0);
+	if($collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
 		if($isGenObs){ 
 			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
@@ -46,10 +49,15 @@ if($symbUid){
 		}
 	}
 
-	if($occIndex !== false){
+	if($ouid){
+		$occManager->setQueryVariables(array('ouid' => $ouid));
+		$occManager->setSqlWhere(0,$recLimit);
+		$qryCnt = $occManager->getQueryRecordCount();
+	}
+	elseif($occIndex !== false){
 		//Query Form has been activated 
 		$occManager->setQueryVariables();
-		$occManager->setSqlWhere($occIndex,($isEditor==1?1:0),$recLimit);
+		$occManager->setSqlWhere($occIndex,$recLimit);
 		$qryCnt = $occManager->getQueryRecordCount();
 	}
 	elseif(isset($_COOKIE["editorquery"])){
@@ -141,15 +149,25 @@ if($symbUid){
 				echo '</div>';
 			}
 			if($isEditor && $collId){
-				$displayQueryForm = 0;
-				if(!$recArr) $displayQueryForm = 1;
+				if(!$recArr) $displayQuery = 1;
 				include 'includes/queryform.php';
 				?>
 				<div style="width:790px;clear:both;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
-						<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
-						<b>Editor</b>
+						<?php
+						if(!$isGenObs || $isAdmin){ 
+							?>
+							<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+							<?php
+						}
+						if($isGenObs){ 
+							?>
+							<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+							<?php
+						}
+						?>
+						<b>Occurrence Record Table View</b>
 					</span>
 					<?php echo $navStr; ?>
 				</div>

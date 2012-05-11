@@ -15,6 +15,12 @@ $imageDomain = '';				//Domain path to images, if different from Virtual Flora p
 $imageRootUrl = '';				//URL path to images
 $imageRootPath = '';			//Writable path to images, especially needed for downloading images
 
+//Pixel witdth of web images
+$imgWebWidth = 1600;
+$imgTnWidth = 200;
+$imgLgWidth = 3200;
+$imgFileSizeLimit = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
+
 //Specimen Label and Batch Image Processor variables
 //$useImageMagick = 0;			//Set to 1 to have ImageMagick resize images, given that it's installed (faster, less memory intensive)
 

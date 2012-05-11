@@ -8,7 +8,7 @@ class TPImageEditorManager extends TPEditorManager{
 	private $imageRootUrl = "";
 
 	private $tnPixWidth = 200;
-	private $webPixWidth = 2000;
+	private $webPixWidth = 1600;
 	private $lgPixWidth = 3168;
 	private $webFileSizeLimit = 300000;
 
@@ -23,6 +23,18 @@ class TPImageEditorManager extends TPEditorManager{
 		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
+		if(array_key_exists('imgWebWidth',$GLOBALS)){
+			$this->webPixWidth = $GLOBALS['imgWebWidth'];
+		}
+		if(array_key_exists('imgTnWidth',$GLOBALS)){
+			$this->tnPixWidth = $GLOBALS['imgTnWidth'];
+		}
+		if(array_key_exists('imgLgWidth',$GLOBALS)){
+			$this->lgPixWidth = $GLOBALS['imgLgWidth'];
+		}
+		if(array_key_exists('imgFileSizeLimit',$GLOBALS)){
+			$this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
+		}
  	}
  	
  	public function __destruct(){

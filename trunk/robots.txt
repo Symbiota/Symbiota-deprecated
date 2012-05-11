@@ -1,0 +1,33 @@
+User-agent: *  
+
+Allow: /seinet/index.php 
+Allow: /seinet/checklists/index.php 
+Allow: /seinet/checklists/checklist.php 
+Allow: /seinet/games/index.php 
+Allow: /seinet/ident/index.php 
+Allow: /seinet/imagelib/index.php 
+Allow: /seinet/projects/index.php 
+Allow: /seinet/taxa/index.php
+Allow: /seinet/sitemap.php  
+
+Disallow: /seinet/checklists/clgmap.php 
+Disallow: /seinet/checklists/tools/ 
+Disallow: /seinet/checklists/rpc/ 
+Disallow: /seinet/classes/ 
+Disallow: /seinet/collections/ 
+Disallow: /seinet/css/ 
+Disallow: /seinet/docs/ 
+Disallow: /seinet/ident/clgmap.php 
+Disallow: /seinet/ident/key.php 
+Disallow: /seinet/ident/loadingcl.php 
+Disallow: /seinet/ident/tools/ 
+Disallow: /seinet/imagelib/support/ 
+Disallow: /seinet/images/ 
+Disallow: /seinet/js/ 
+Disallow: /seinet/lib/ 
+Disallow: /seinet/misc/ 
+Disallow: /seinet/profile/ 
+Disallow: /seinet/support/ 
+Disallow: /seinet/taxa/admin/ 
+Disallow: /seinet/temp/ 
+Disallow: /seinet/tools/   

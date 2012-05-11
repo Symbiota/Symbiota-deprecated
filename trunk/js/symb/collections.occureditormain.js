@@ -3,6 +3,7 @@ var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
 var pendingDataEdits = false;
+
 var abortFormVerification = false;
 
 $(document).ready(function() {
@@ -80,7 +81,7 @@ $(document).ready(function() {
 
 });
 
-window.onbeforeunload = verifyClose;
+window.onbeforeunload = verifyClose();
 
 function verifyClose(){
 	if(pendingDataEdits && document.fullform.editedfields.value != ""){
