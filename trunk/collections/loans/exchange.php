@@ -16,17 +16,30 @@ if($collId) $loanManager->setCollId($collId);
 ?>
 
 <div id="newexchangediv" style="">
+	<?php
+	$identifierArr = $loanManager->getIdentifier($collId);
+	$identifierEx = ($identifierArr['ex']) + 1;
+	?>
 	<form name="newexchangegiftform" action="loans.php" method="post">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
 			<div style="padding-top:4px;">
-				<span style="margin-left:290px;">
+				<span style="margin-left:285px;">
+					Transaction Type:
+				</span>
+				<span style="margin-left:45px;">
 					Entered By:
 				</span>
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<b>Transaction Number:</b> <input type="text" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+					<b>Transaction Number:</b> <input type="text" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierEx; ?>" />
+				</span>
+				<span style="margin-left:40px;">
+					<select name="transactiontype" style="width:100px;" >
+						<option value="Shipment" SELECTED >Shipment</option>
+						<option value="Adjustment">Adjustment</option>
+					</select>
 				</span>
 				<span style="margin-left:40px;">
 					<input type="text" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />

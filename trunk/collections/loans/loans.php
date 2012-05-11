@@ -50,7 +50,10 @@ if($isEditor){
 		elseif($formSubmit == 'Save Incoming'){
 			$statusStr = $loanManager->editLoanIn($_POST);
 			$loanType = 'In';
-		}		
+		}
+		elseif($formSubmit == 'Perform Action'){
+			$statusStr = $loanManager->editSpecimen($_REQUEST);
+		}
 	}
 }
 
@@ -161,12 +164,14 @@ header("Content-Type: text/html; charset=".$charset);
 			var loanid = f.loanid.value;
 			var collid = f.collid.value;
 			if(!catalogNumber){
+				document.addspecform.catalognumber.value = "";
 				alert("There are no specimens linked to that catalog number!");
 				return false;
 			}
 			else{
 				xmlHttp=GetXmlHttpObject();
 				if (xmlHttp==null){
+					document.addspecform.catalognumber.value = "";
 					alert ("Your browser does not support AJAX!");
 					return false;
 				}
@@ -178,12 +183,15 @@ header("Content-Type: text/html; charset=".$charset);
 					if(xmlHttp.readyState==4 && xmlHttp.status==200){
 						responseCode = xmlHttp.responseText;
 						if(responseCode == '0'){
+							document.addspecform.catalognumber.value = "";
 							alert("ERROR: Specimen record not found in database.");
 						}
 						else if(responseCode == '2'){
+							document.addspecform.catalognumber.value = "";
 							alert("ERROR: More than one specimen with that catalog number.");
 						}
 						else{
+							document.addspecform.catalognumber.value = "";
 							alert("SUCCESS: Specimen added to loan.");
 						}
 					}
@@ -193,7 +201,6 @@ header("Content-Type: text/html; charset=".$charset);
 				return false;
 			}
 		}
-		
 	</script>
 </head>
 <body>
@@ -236,11 +243,8 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="outgoing.php?collid=<?php echo $collId; ?>"><span>Outgoing Loans</span></a></li>
-						<!-- <li><a href="#loanoutdiv">Outgoing Loans</a></li> -->
 						<li><a href="incoming.php?collid=<?php echo $collId; ?>"><span>Incoming Loans</span></a></li>
-						<!-- <li><a href="#loanindiv">Incoming Loans</a></li> -->
 						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
-						<!-- <li><a href="#newexchangediv">Gifts/Exchanges</a></li> -->
 						<li><a href="#reportdiv">Reports</a></li>
 					</ul>
 					<div id="reportdiv" style="height:50px;">
@@ -265,7 +269,7 @@ header("Content-Type: text/html; charset=".$charset);
 							</a>
 						</div>
 						<div id="newspecdiv" style="display:none;">
-							<form name="addspecform" action="loans.php" method="post">
+							<form name="addspecform" action="loans.php" method="post" onsubmit="return false">
 								<fieldset>
 									<legend><b>Add Specimen</b></legend>
 									<div style="padding-bottom:2px;">
@@ -286,55 +290,60 @@ header("Content-Type: text/html; charset=".$charset);
 						if($specList){
 						?>
 							<h3>Specimens on Loan</h3>
-							<div style="margin-top:15px;">
+							<div style="height:25px;margin-top:15px;">
 								<span style="float:left;margin-left:15px;">
 									<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 									Select/Deselect All
 								</span>
-								<span style="float:right;margin-right:15px;"> 
+								<span style="float:right;margin-right:15px;">
 									<form name="refreshspeclist" action="loans.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post">
-										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 										<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
 									</form>
 								</span>
 							</div>
-							<table class="styledtable">
-								<th style="width:25px;text-align:center;"> </th>
-								<th style="width:150px;text-align:center;">Catalog Number</th>
-								<th style="width:400px;text-align:center;">Scientific Name</th>
-								<?php
-								foreach($specList as $k => $specArr){
-									echo '<tr>';
-									echo '<td>';
-									echo '<input name="occid[]" type="checkbox" value=" " />';
-									echo '</td>';
-									echo '<td>'.$specArr['catalognumber'].'</td>';
-									echo '<td>'.$specArr['sciname'].'</td>';
-									echo '</tr>';
-								}
+							<form name="speceditform" action="loans.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit=" " >
+								<table class="styledtable">
+									<th style="width:25px;text-align:center;"> </th>
+									<th style="width:100px;text-align:center;">Catalog Number</th>
+									<th style="width:375px;text-align:center;">Scientific Name</th>
+									<th style="width:75px;text-align:center;">Date Returned</th>
+									<?php
+									foreach($specList as $k => $specArr){
+										echo '<tr>';
+										echo '<td>';
+										echo '<input name="occid[]" type="checkbox" value="'.$specArr['occid'].'" />';
+										echo '</td>';
+										echo '<td>'.$specArr['catalognumber'].'</td>';
+										echo '<td>'.$specArr['sciname'].'</td>';
+										echo '<td>'.$specArr['returndate'].'</td>';
+										echo '</tr>';
+									}
 								echo '</table>';
+								?>
+								<table>
+									<tr>
+										<td colspan="10" valign="bottom">
+											<div style="margin:10px;">
+												<div style="float:left;">
+													<input name="applytask" type="radio" value="delete" CHECKED title="Delete Specimens" />Delete Specimens from Loan<br/>
+													<input name="applytask" type="radio" value="check" title="Check-in Specimens" />Check-in Specimens
+												</div>
+												<span style="margin-left:25px;">
+													<input name="formsubmit" type="submit" value="Perform Action" />
+													<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+													<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+												</span>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</form>
+						<?php
 						}
 						else{
 							echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
 						}
 						?>
-						<table>
-							<tr>
-								<td colspan="10" valign="bottom">
-									<div style="margin:10px;">
-										<div style="float:left;">
-											<input name="applytask" type="radio" value="delete" CHECKED title="Delete Specimens" />Delete Specimens from Loan<br/>
-											<input name="applytask" type="radio" value="check" title="Check-in Specimens" />Check-in Specimens
-										</div>
-										<span style="margin-left:25px;">
-											<input name="submitstr" type="submit" value="Perform Action" />
-											<input name="collid" type="hidden" value="<?php/* echo $collId; */?>" />
-										</span>
-									</div>
-								</td>
-							</tr>
-						</table>
 					</div>
 				</div>
 				<?php 
