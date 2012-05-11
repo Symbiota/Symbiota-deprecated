@@ -15,6 +15,38 @@ class SpecLoans{
  		if($this->conn) $this->conn->close();
 	}
 
+	public function getIdentifier($collId){
+		$retArrIn = array();
+		$sqlIn = 'SELECT COUNT(collidborr) AS count '.
+			'FROM omoccurloans '.
+			'WHERE collidborr = '.$this->collId.' ';
+		if($rs = $this->conn->query($sqlIn)){
+			while($r = $rs->fetch_object()){
+				$retArr['in'] = $r->count;
+			}
+			$rs->close();
+		}
+		$sqlOut = 'SELECT COUNT(collidown) AS count '.
+			'FROM omoccurloans '.
+			'WHERE collidown = '.$this->collId.' ';
+		if($rs = $this->conn->query($sqlOut)){
+			while($r = $rs->fetch_object()){
+				$retArr['out'] = $r->count;
+			}
+			$rs->close();
+		}
+		$sqlEx = 'SELECT COUNT(collid) AS count '.
+			'FROM omoccurexchange '.
+			'WHERE collid = '.$this->collId.' ';
+		if($rs = $this->conn->query($sqlEx)){
+			while($r = $rs->fetch_object()){
+				$retArr['ex'] = $r->count;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getLoanOutList($searchTerm,$displayAll){
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifierown, dateclosed '.
@@ -192,6 +224,36 @@ class SpecLoans{
 		}
 		return $retArr;
 	}
+	
+	public function getExchangeValue($exchangeId){
+		$sql = 'SELECT totalexmounted, totalexunmounted FROM omoccurexchange WHERE exchangeid = '.$exchangeId;
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['totalexmounted'] = $r->totalexmounted;
+				$retArr['totalexunmounted'] = $r->totalexunmounted;
+			}
+			$rs->close();
+		}
+		$exchangeValue = (($retArr['totalexmounted'])*2) + ($retArr['totalexunmounted']);
+		return $exchangeValue;
+	}
+	
+	public function getExchangeTotal($exchangeId){
+		$sql = 'SELECT totalexmounted, totalexunmounted, totalgift, totalgiftdet FROM omoccurexchange WHERE exchangeid = '.$exchangeId;
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['totalexmounted'] = $r->totalexmounted;
+				$retArr['totalexunmounted'] = $r->totalexunmounted;
+				$retArr['totalgift'] = $r->totalgift;
+				$retArr['totalgiftdet'] = $r->totalgiftdet;
+			}
+			$rs->close();
+		}
+		$exchangeTotal = ($retArr['totalexmounted']) + ($retArr['totalexunmounted']) + ($retArr['totalgift']) + ($retArr['totalgiftdet']);
+		return $exchangeTotal;
+	}
 
 	public function editLoanOut($pArr){
 		$statusStr = '';
@@ -239,7 +301,10 @@ class SpecLoans{
 	
 	public function editExchange($pArr){
 		$statusStr = '';
+		$retArr = array();
 		$exchangeId = $pArr['exchangeid'];
+		$collId = $pArr['collid'];
+		$Iid = $pArr['iid'];
 		if(is_numeric($exchangeId)){
 			$sql = '';
 			foreach($pArr as $k => $v){
@@ -254,6 +319,47 @@ class SpecLoans{
 			else{
 				$statusStr = 'ERROR: Editing of exchange failed: '.$this->conn->error.'<br/>';
 				$statusStr .= 'SQL: '.$sql;
+			}
+			
+			$sql = '';
+			$sql = 'SELECT invoicebalance FROM omoccurexchange '.
+				'WHERE exchangeid =  (SELECT MAX(exchangeid) FROM omoccurexchange '.
+				'WHERE (exchangeid < '.$exchangeId.') AND (collid = '.$collId.') AND (iid = '.$Iid.'))';
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr['invoicebalance'] = $r->invoicebalance;
+				}
+				$rs->close();
+			}
+			//echo $retArr['invoicebalance'];
+			if(!array_key_exists('invoicebalance',$retArr) || !$retArr['invoicebalance']){
+				$prevBalance = 0;
+			}
+			else{
+				$prevBalance = $retArr['invoicebalance'];
+			}
+			//echo $prevBalance;
+			//$prevBalance = ($retArr2['invoicebalance']?$retArr2['invoicebalance']:0);
+			$currentBalance = 0;
+			if($pArr['transactiontype'] == 'Shipment'){
+			
+				if($pArr['in_out'] == 'In'){
+					$currentBalance = ($prevBalance - ((($pArr['totalexmounted'])*2) + ($pArr['totalexunmounted'])));
+				}
+				elseif($pArr['in_out'] == 'Out'){
+					$currentBalance = ($prevBalance + ((($pArr['totalexmounted'])*2) + ($pArr['totalexunmounted'])));
+				}
+			
+			}
+			elseif($pArr['transactiontype'] == 'Adjustment'){
+				$currentBalance = ($prevBalance + $pArr['adjustment']);
+			}
+			//echo $currentBalance;
+			$sql3 = '';
+			$sql3 = 'UPDATE omoccurexchange SET invoicebalance = '.$currentBalance.' WHERE (exchangeid = '.$exchangeId.')';
+			if($this->conn->query($sql3)){
+				$statusStr .= ' and balance updated.';
 			}
 		}
 		return $statusStr;
@@ -310,9 +416,9 @@ class SpecLoans{
 	
 	public function createNewExchange($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurexchange(identifier,collid,iid,createdby) '.
+		$sql = 'INSERT INTO omoccurexchange(identifier,collid,iid,transactiontype,createdby) '.
 			'VALUES("'.$this->cleanString($pArr['identifier']).'",'.$this->collId.',"'.$this->cleanString($pArr['iid']).'",
-			"'.$this->cleanString($pArr['createdby']).'")';
+			"'.$this->cleanString($pArr['transactiontype']).'","'.$this->cleanString($pArr['createdby']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->exchangeId = $this->conn->insert_id;
@@ -342,17 +448,19 @@ class SpecLoans{
 	public function getSpecList($loanId){
 		$retArr = array();
 		$sql = 'SELECT l.loanid, l.occid, o.catalognumber, o.sciname, o.scientificnameauthorship, '.
-			'o.recordedby, o.recordnumber '.
+			'o.recordedby, o.recordnumber, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
 			'ORDER BY o.catalognumber';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
+				$retArr[$r->occid]['occid'] = $r->occid;
 				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
 				$retArr[$r->occid]['sciname'] = $r->sciname;
 				$retArr[$r->occid]['scientificnameauthorship'] = $r->scientificnameauthorship;
 				$retArr[$r->occid]['recordedby'] = $r->recordedby;
 				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->occid]['returndate'] = $r->returndate;
 			}
 			$rs->close();
 		}
@@ -386,6 +494,28 @@ class SpecLoans{
 			$this->conn->query($sql);
 		}
 		return $statusStr;
+	}
+	
+	public function editSpecimen($reqArr){
+		$status = "";
+		if(!array_key_exists('occid',$reqArr)) return;
+		$statusStr = 'SUCCESS: ';
+		$occidArr = $reqArr['occid'];
+		$applyTask = $reqArr['applytask'];
+		$loanId = $reqArr['loanid'];
+		if($occidArr){
+			if($applyTask == 'delete'){
+				$sql = 'DELETE FROM omoccurloanslink WHERE loanid = '.$loanId.' AND (occid IN('.implode(',',$occidArr).')) ';
+				$this->conn->query($sql);
+				$statusStr .= 'specimens deleted from loan.';
+			}
+			else{
+				$sql = 'UPDATE omoccurloanslink SET returndate = "'.date('Y').'-'.date('m').'-'.date('d').'" WHERE loanid = '.$loanId.' AND (occid IN('.implode(',',$occidArr).')) ';
+				$this->conn->query($sql);
+				$statusStr .= 'specimens checked in.';
+			}
+		}
+		//return $statusStr;
 	}
 	
 	public function getInvoiceInfo($identifier,$loanType){
