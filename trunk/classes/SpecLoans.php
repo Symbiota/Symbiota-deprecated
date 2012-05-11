@@ -49,19 +49,21 @@ class SpecLoans{
 	
 	public function getLoanOutList($searchTerm,$displayAll){
 		$retArr = array();
-		$sql = 'SELECT loanid, loanidentifierown, dateclosed '.
-			'FROM omoccurloans '.
-			'WHERE collidown = '.$this->collId.' ';
+		$sql = 'SELECT l.loanid, l.loanidentifierown, i.institutioncode, l.forwhom, l.dateclosed '.
+			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidborrower = i.iid '.
+			'WHERE l.collidown = '.$this->collId.' ';
 		if($searchTerm){
-			$sql .= 'AND loanidentifierown LIKE "%'.$searchTerm.'%" ';
+			$sql .= 'AND l.loanidentifierown LIKE "%'.$searchTerm.'%" ';
 		}
 		if(!$displayAll){
-			$sql .= 'AND ISNULL(dateclosed) ';
+			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY loanidentifierown';
+		$sql .= 'ORDER BY l.loanidentifierown';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
+				$retArr[$r->loanid]['institutioncode'] = $r->institutioncode;
+				$retArr[$r->loanid]['forwhom'] = $r->forwhom;
 				$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
 			}
 			$rs->close();
@@ -107,27 +109,6 @@ class SpecLoans{
 		return $retArr;
 	} 
 	
-	//Ed's version
-	/*public function getLoansIn(){
-		$retArr = array();
-		$sql = 'SELECT loanid, IFNULL(loanIdentifierReceiver, loanIdentifier) AS loanidentifier, datesent, dateclosed, '. 
-			'forwhom, description, datedue '.
-			'FROM omoccurloans l INNER JOIN institutions i ON l.iidreceiving = i.iid '.
-			'WHERE (i.collidborr = '.$this->collId.')';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr['loanid']['loanidentifier'] = $r->loanidentifier;
-				$retArr['loanid']['datesent'] = $r->datesent;
-				$retArr['loanid']['dateclosed'] = $r->dateclosed;
-				$retArr['loanid']['forwhom'] = $r->forwhom;
-				$retArr['loanid']['description'] = $r->description;
-				$retArr['loanid']['datedue'] = $r->datedue;
-			}
-			$rs->close();
-		}
-		return $retArr;
-	}*/
-
 	public function getLoanOutDetails($loanId){
 		$retArr = array();
 		$sql = 'SELECT loanid, loanidentifierown, iidborrower, datesent, totalboxes, '.
@@ -226,32 +207,28 @@ class SpecLoans{
 	}
 	
 	public function getExchangeValue($exchangeId){
+		$exchangeValue = 0;
 		$sql = 'SELECT totalexmounted, totalexunmounted FROM omoccurexchange WHERE exchangeid = '.$exchangeId;
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr['totalexmounted'] = $r->totalexmounted;
-				$retArr['totalexunmounted'] = $r->totalexunmounted;
+				$exchangeValue = (($r->totalexmounted)*2) + ($r->totalexunmounted);
 			}
 			$rs->close();
 		}
-		$exchangeValue = (($retArr['totalexmounted'])*2) + ($retArr['totalexunmounted']);
 		return $exchangeValue;
 	}
 	
 	public function getExchangeTotal($exchangeId){
+		$exchangeTotal = 0;
 		$sql = 'SELECT totalexmounted, totalexunmounted, totalgift, totalgiftdet FROM omoccurexchange WHERE exchangeid = '.$exchangeId;
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr['totalexmounted'] = $r->totalexmounted;
-				$retArr['totalexunmounted'] = $r->totalexunmounted;
-				$retArr['totalgift'] = $r->totalgift;
-				$retArr['totalgiftdet'] = $r->totalgiftdet;
+				$exchangeTotal = ($r->totalexmounted) + ($r->totalexunmounted) + ($r->totalgift) + ($r->totalgiftdet);
 			}
 			$rs->close();
 		}
-		$exchangeTotal = ($retArr['totalexmounted']) + ($retArr['totalexunmounted']) + ($retArr['totalgift']) + ($retArr['totalgiftdet']);
 		return $exchangeTotal;
 	}
 
@@ -447,7 +424,7 @@ class SpecLoans{
 	
 	public function getSpecList($loanId){
 		$retArr = array();
-		$sql = 'SELECT l.loanid, l.occid, o.catalognumber, o.sciname, o.scientificnameauthorship, '.
+		$sql = 'SELECT l.loanid, l.occid, IFNULL(o.catalognumber,o.othercatalognumbers) AS catalognumber, o.sciname, o.scientificnameauthorship, '.
 			'o.recordedby, o.recordnumber, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
