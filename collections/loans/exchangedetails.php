@@ -19,6 +19,8 @@ if($collId) $loanManager->setCollId($collId);
 	<?php 
 	//Show loan details
 	$exchangeArr = $loanManager->getExchangeDetails($exchangeId);
+	$exchangeValue = $loanManager->getExchangeValue($exchangeId);
+	$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
 	//$specTotal = $loanManager->getSpecTotal($loanId);
 	?>
 	<form name="editexchangegiftform" action="loans.php" method="post">
@@ -72,16 +74,24 @@ if($collId) $loanManager->setCollId($collId);
 					</select>
 				</span>
 				<span style="margin-left:40px;">
-					<select name="transactiontype" style="width:100px;" >
-						<option value="Shipment" <?php echo ('Shipment'==$exchangeArr['transactiontype']?'SELECTED':'');?>>Shipment</option>
-						<option value="Adjustment" <?php echo ('Adjustment'==$exchangeArr['transactiontype']?'SELECTED':'');?>>Adjustment</option>
+					<select name="transactiontype" style="width:100px;">
+						<?php if($exchangeArr['transactiontype']=='Shipment'){ ?>
+							<option value="Shipment" <?php echo ($exchangeArr['transactiontype']=='Shipment'?'SELECTED':'');?>>Shipment</option>
+						<?php }
+						if($exchangeArr['transactiontype']=='Adjustment'){ ?>
+							<option value="Adjustment" <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'SELECTED':'');?>>Adjustment</option>
+						<?php } ?>	
 					</select>
 				</span>
 				<span style="margin-left:40px;">
-					<select name="in_out" style="width:100px;" >
-						<option value="" <?php echo (!$exchangeArr['in_out']?'SELECTED':'');?>>   </option>
-						<option value="In" <?php echo ('In'==$exchangeArr['in_out']?'SELECTED':'');?>>In</option>
-						<option value="Out" <?php echo ('Out'==$exchangeArr['in_out']?'SELECTED':'');?>>Out</option>
+					<select name="in_out" style="width:100px;">
+						<?php if($exchangeArr['transactiontype']=='Adjustment'){ ?>
+							<option value="" <?php echo (!$exchangeArr['in_out']?'SELECTED':'');?>>   </option>
+						<?php }
+						if($exchangeArr['transactiontype']=='Shipment'){ ?>
+							<option value="Out" <?php echo ('Out'==$exchangeArr['in_out']?'SELECTED':'');?>>Out</option>
+							<option value="In" <?php echo ('In'==$exchangeArr['in_out']?'SELECTED':'');?>>In</option>
+						<?php } ?>
 					</select>
 				</span>
 			</div>
@@ -92,21 +102,21 @@ if($collId) $loanManager->setCollId($collId);
 					<th style="width:220px;text-align:center;">Exchange Specimens</th>
 					<tr style="text-align:right;">
 						<td><b>Adjustment Amount:</b>&nbsp;&nbsp;<input type="text" name="adjustment" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['adjustment']; ?>" onchange=" " /></td>
-						<td><b>Total Gifts:</b>&nbsp;&nbsp;<input type="text" name="totalgift" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgift']; ?>" onchange=" " /></td>
-						<td><b>Total Unmounted:</b>&nbsp;&nbsp;<input type="text" name="totalexunmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexunmounted']; ?>" onchange=" " /></td>
+						<td><b>Total Gifts:</b>&nbsp;&nbsp;<input type="text" name="totalgift" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgift']; ?>" onchange=" " <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'disabled':'');?> /></td>
+						<td><b>Total Unmounted:</b>&nbsp;&nbsp;<input type="text" name="totalexunmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexunmounted']; ?>" onchange=" " <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'disabled':'');?> /></td>
 					</tr>
 					<tr style="text-align:right;">
 						<td> </td>
-						<td><b>Total Gifts For Det:</b>&nbsp;&nbsp;<input type="text" name="totalgiftdet" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgiftdet']; ?>" onchange=" " /></td>
-						<td><b>Total Mounted:</b>&nbsp;&nbsp;<input type="text" name="totalexmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexmounted']; ?>" onchange=" " /></td>
+						<td><b>Total Gifts For Det:</b>&nbsp;&nbsp;<input type="text" name="totalgiftdet" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgiftdet']; ?>" onchange=" " <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'disabled':'');?> /></td>
+						<td><b>Total Mounted:</b>&nbsp;&nbsp;<input type="text" name="totalexmounted" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalexmounted']; ?>" onchange=" " <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'disabled':'');?> /></td>
 					</tr>
 					<tr style="text-align:right;">
 						<td> </td>
 						<td> </td>
-						<td><b>Exchange Value:</b>&nbsp;&nbsp;<input type="text" name="exchangevalue" tabindex="100" maxlength="32" style="width:80px;" value="" onchange=" " disabled="disabled" /></td>
+						<td><b>Exchange Value:</b>&nbsp;&nbsp;<input type="text" name="exchangevalue" tabindex="100" maxlength="32" style="width:80px;border:1px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($exchangeValue?$exchangeValue:'');?>" onchange=" " disabled="disabled" /></td>
 					</tr>
 					<tr style="text-align:right;">
-						<td colspan="3"><b>Total Specimens (gifts + exchanges):</b>&nbsp;&nbsp;<input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;" value="" onchange=" " disabled="disabled" /></td>
+						<td colspan="3"><b>Total Specimens (gifts + exchanges):</b>&nbsp;&nbsp;<input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:1px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($exchangeTotal?$exchangeTotal:'');?>" onchange=" " disabled="disabled" /></td>
 					</tr>
 				</table>	
 			</div>

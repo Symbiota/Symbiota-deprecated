@@ -90,6 +90,8 @@ elseif($exchangeId){
 			$invoiceArr = $loanManager->getInvoiceInfo($identifier,$loanType);
 			$addressArr = $loanManager->getFromAddress($collId);
 			$specTotal = $loanManager->getSpecTotal($loanId);
+			$exchangeValue = $loanManager->getExchangeValue($exchangeId);
+			$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
 			?>
 			<table class="header" align="center">
 				<tr>
@@ -168,20 +170,25 @@ elseif($exchangeId){
 			<div class="sending">
 				<?php 
 				$numSpecimens = 0;
-				if($specTotal){
-					if($specTotal['speccount'] == 1){
-						$numSpecimens = 1;
-					}
-					else{
-						$numSpecimens = $specTotal['speccount'];
-					}
+				if($loanType == 'Exchange'){
+					$numSpecimens = $exchangeTotal;
 				}
 				else{
-					if($invoiceArr['numspecimens'] == 1){
-						$numSpecimens = 1;
+					if($specTotal){
+						if($specTotal['speccount'] == 1){
+							$numSpecimens = 1;
+						}
+						else{
+							$numSpecimens = $specTotal['speccount'];
+						}
 					}
 					else{
-						$numSpecimens = $invoiceArr['numspecimens'];
+						if($invoiceArr['numspecimens'] == 1){
+							$numSpecimens = 1;
+						}
+						else{
+							$numSpecimens = $invoiceArr['numspecimens'];
+						}
 					}
 				}
 				
@@ -243,13 +250,13 @@ elseif($exchangeId){
 				<?php if($english){ ?>
 					<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo $invoiceArr['totalexunmounted']; ?> unmounted 
 						<?php echo ($invoiceArr['totalexmounted']?'and '.$invoiceArr['totalexmounted'].' mounted ':''); ?>specimens, for 
-						an exchange value of <?php //do something ?>. Please note that mounted specimens count as two.
+						an exchange value of <?php echo $exchangeValue; ?>. Please note that mounted specimens count as two.
 					</div><br />
 				<?php }
 				if($spanish){ ?>
 					<div class="exchangeamts">Este env&iacute;o es un INTERCAMBIO, consistiendo en <?php echo $invoiceArr['totalexunmounted']; ?> ejemplares no montados 
-						<?php echo ($invoiceArr['totalexmounted']?'y '.$invoiceArr['totalexmounted'].' ejemplares montados ':''); ?>,  
-						con un valor de intercambio de <?php //do something ?>. Favor de notarse que las ejemplares montados son de valor 2.
+						<?php echo ($invoiceArr['totalexmounted']?'y '.$invoiceArr['totalexmounted'].' ejemplares montados':''); ?>,  
+						con un valor de intercambio de <?php echo $exchangeValue; ?>. Favor de notarse que las ejemplares montados son de valor 2.
 					</div><br />
 				<?php }
 				if($english){ ?>

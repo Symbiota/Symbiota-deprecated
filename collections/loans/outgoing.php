@@ -42,6 +42,10 @@ if($collId) $loanManager->setCollId($collId);
 		</a>
 	</div>
 	<div id="newloanoutdiv" style="display:none;">
+		<?php
+		$identifierArr = $loanManager->getIdentifier($collId);
+		$identifierOut = ($identifierArr['out']) + 1;
+		?>
 		<form name="newloanoutform" action="loans.php" method="post">
 			<fieldset>
 				<legend><b>New Loan</b></legend>
@@ -55,7 +59,7 @@ if($collId) $loanManager->setCollId($collId);
 						<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 					</span>
 					<span style="float:right;">
-						<b>Loan Identifier: </b><input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+						<b>Loan Identifier: </b><input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierOut; ?>" />
 					</span>
 				</div>
 				<div style="padding-top:6;">
