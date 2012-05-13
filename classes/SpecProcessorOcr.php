@@ -14,45 +14,75 @@ class SpecProcessorOcr{
 	private $cropY = 0;
 	private $cropW = 1;
 	private $cropH = 1;
-	
-	private $grayscale = 0;
-	private $brightness = 0;
-	private $contrast = 0;
-	private $sharpen = 0;
-	private $gammaCorrect = 0;
+
+	private $filterArr = array();
+	private $filterIndex = 0;
 
 	private $logPath;
 	//If silent is set, script will produce no non-fatal output.
 	private $silent = 1;
 
 	function __construct() {
+		$this->setTempPath();
 		$this->setlogPath();
+		//Set treatments
+		$this->filterArr[1] = array('grayscale'=>1,'brightness'=>10,'contrast'=>1,'sharpen'=>1,'gammacorrect'=>6);
+		$this->filterArr[2] = array('grayscale'=>1,'brightness'=>5,'contrast'=>-3,'sharpen'=>2,'gammacorrect'=>1.537);
+		$this->filterArr[3] = array('grayscale'=>1,'gammacorrect'=>1.537);
+		$this->filterArr[4] = array('grayscale'=>1,'brightness'=>30,'contrast'=>-10,'sharpen'=>3,'gammacorrect'=>1.537,'smooth'=>6);
 	}
 
 	function __destruct(){
-		//unlink($this->imgUrlLocal);
+		unlink($this->imgUrlLocal);
 	}
 
-	public function batchOcrUnprocessed($collArr = 0){
+	public function batchOcrUnprocessed($collArr = 0,$getBest = 0){
 		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
 		//Triggered automaticly (crontab) on a nightly basis
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url '.
-			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-			'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
-			'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
-		if($collArr) $sql .= 'AND o.collid IN('.implode(',',$collArr).') ';
-		//Limit for debugging purposes only
-		$sql .= 'LIMIT 3 ';
-		//echo 'SQL: '.$sql."\n";
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$rawStr = $this->getBestOCR($r->url);
-				if($rawStr){
-					$this->databaseRawStr($r->imgid,$rawStr);
+		if(!$this->silent) $this->logMsg("Starting batch processing\n");
+		foreach($collArr as $cid){
+			if($cid){
+				if(!$this->silent) $this->logMsg("\tProcessing collid".$cid."\n");
+				$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url, o.sciName '.
+					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+					'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
+					'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL '.
+					'AND (o.collid = '.$cid.') ';
+				//Limit for debugging purposes only
+				$sql .= 'LIMIT 30 ';
+				if($rs = $this->conn->query($sql)){
+					$recCnt = 0;
+					$bestScoreCounts = array();
+					while($r = $rs->fetch_object()){
+						$rawStr = '';
+						if($getBest && $recCnt < 20){
+							$rawStr = $this->getBestOCR($r->url, $r->sciName);
+							if(!$this->silent) $this->logMsg("\tImage ".$recCnt." processed (imgid: ".$r->imgid."). Best index: ".$this->filterIndex." (".date("Y-m-d H:i:s").")\n");
+							if(array_key_exists($this->filterIndex,$bestScoreCounts)){
+								$newCnt = ++$bestScoreCounts[$this->filterIndex];
+								$bestScoreCounts[$this->filterIndex] = $newCnt;
+							}
+							else{
+								$bestScoreCounts[$this->filterIndex] = 1;
+							}
+							if($recCnt == 19){
+								asort($bestScoreCounts);
+								$this->filterIndex = array_pop(array_keys($bestScoreCounts));
+								if(!$this->silent) $this->logMsg("\tFinal best index: ".$this->filterIndex."\n");
+							}
+						}
+						else{
+							$rawStr = $this->ocrImageByUrl($r->url);
+							if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
+						}
+						if(!$rawStr) $rawStr = 'Failed OCR return';
+						$this->databaseRawStr($r->imgid,$rawStr);
+						$recCnt++;
+					}
+		 			$rs->close();
 				}
 			}
- 			$rs->close();
 		}
  		if(!($this->conn === false)) $this->conn->close();
 	}
@@ -83,8 +113,8 @@ class SpecProcessorOcr{
 		$rawStr = '';
 		if($imgUrl){
 			if($this->loadImage($imgUrl)){
-				if($this->grayscale || $this->brightness || $this->contrast || $this->sharpen || $this->gammaCorrect){
-					$this->filterImage($this->grayscale,$this->brightness,$this->contrast,$this->sharpen,$this->gammaCorrect);
+				if($this->filterIndex){
+					$this->filterImage();
 				}
 				$this->cropImage();
 				if($getBest){
@@ -96,79 +126,128 @@ class SpecProcessorOcr{
 			}
 			else{
 				//Unable to create image
-				$this->logError('Unable to load image, URL: '.$imgUrl);
+				$this->logMsg('\tERROR: Unable to load image, URL: '.$imgUrl."\n");
 			}
 		}
 		else{
-			$this->logError('Empty URL');
+			$this->logMsg('\tERROR: Empty URL'."\n");
 		}
-
 		return $rawStr;
 	}
 
-	private function getBestOCR($url = ''){
+	private function getBestOCR($url = '', $sciName = ''){
 		if($url) $this->loadImage($url);
+		
+		$scoreArr = array();
+		$rawStrArr = array();
 		//Base run
-		$rawStr = $this->ocrImage();
-		$unprocessedCount = $this->scoreOCR($rawStr);
-		//First run
-		$urlF1 = str_replace('.jpg','_f1.jpg',$this->imgUrlLocal);
-		copy($this->imgUrlLocal,$urlF1);
-		$this->filterImage(1,10,1,1,6,$urlF1);
-		$firstProcessedRawStr = $this->ocrImage($urlF1);
-		$firstProcessedCount = $this->scoreOCR($firstProcessedRawStr);
-		unlink($urlF1);
-		//Second run
-		$urlF2 = str_replace('.jpg','_f2.jpg',$this->imgUrlLocal);
-		copy($this->imgUrlLocal,$urlF2);
-		$this->filterImage(1,5,-3,2,1.537,$urlF2);
-		$secondProcessedRawStr = $this->ocrImage($urlF2);
-		$secondProcessedCount = $this->scoreOCR($secondProcessedRawStr);
-		unlink($urlF2);
-		//Third run
-		$urlF3 = str_replace('.jpg','_f3.jpg',$this->imgUrlLocal);
-		copy($this->imgUrlLocal,$urlF3);
-		$this->filterImage(1,0,0,0,1.537,$urlF3);
-		$thirdProcessedRawStr = $this->ocrImage($urlF3);
-		$thirdProcessedCount = $this->scoreOCR($thirdProcessedRawStr);
-		unlink($urlF3);
-		//Return best results
-		$tempmax = max(array($unprocessedCount, $firstProcessedCount, $secondProcessedCount, $thirdProcessedCount));
-		if($tempmax == $unprocessedCount) return $rawStr;
-		else if($tempmax == $firstProcessedCount) return $firstProcessedRawStr;
-		else if($tempmax == $secondProcessedCount) return $secondProcessedRawStr;
-		else if($tempmax == $thirdProcessedCount) return $thirdProcessedRawStr;
-		else return "";
+		$rawStrArr[0] = $this->ocrImage();
+		$scoreArr[0] = $this->scoreOCR($rawStrArr[0], $sciName);
+
+		foreach($this->filterArr as $tIndex => $tArr){
+			$urlTemp = str_replace('.jpg','_f'.$tIndex.'.jpg',$this->imgUrlLocal);
+			copy($this->imgUrlLocal,$urlTemp);
+			$this->filterImage($urlTemp,$tArr);
+			$rawStrArr[$tIndex] = $this->ocrImage($urlTemp);
+			$scoreArr[$tIndex] = $this->scoreOCR($rawStrArr[$tIndex], $sciName);
+			unlink($urlTemp);
+		}
+		
+		asort($scoreArr);
+		$bestIndex = array_pop(array_keys($scoreArr));
+		$bestValue = end($scoreArr);
+		//if base score ties for high score, make sure no treatment is the tagged as best 
+		if($bestValue==$scoreArr[0]) $bestIndex = 0;
+		$this->filterIndex = $bestIndex;
+		return $rawStrArr[$bestIndex];
 	}
 
-	private function filterImage($grayscale,$brightness,$contrast,$sharpen=0,$gammacorrect=0,$url=''){
+	private function filterImage($url='',$tArr=''){
 		$status = false;
 		if(!$url) $url = $this->imgUrlLocal;
-		if($img = imagecreatefromjpeg($url)){
-   			if($grayscale) imagefilter($img,IMG_FILTER_GRAYSCALE);
-   			if($brightness) imagefilter($img,IMG_FILTER_BRIGHTNESS,$brightness);
-   			if($contrast) imagefilter($img,IMG_FILTER_CONTRAST,$contrast);
-			if($sharpen) {
-				if($sharpen == 1) {// A sharpening matrix
-					$sharpenMatrix = array
-					(
-						array(-1.2, -1, -1.2),
-						array(-1, 20, -1),
-						array(-1.2, -1, -1.2)
-					);
-				} else if($sharpen == 2) {// A blurring matrix
-					$sharpenMatrix = array(array(1.0, 2.0, 1.0), array(2.0, 4.0, 2.0), array(1.0, 2.0, 1.0));
-				}
-				// calculate the sharpen divisor
-				$divisor = array_sum(array_map('array_sum', $sharpenMatrix));
-				$offset = 0;
-				// apply the matrix
-				imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+		if(!$tArr && $this->filterArr){
+			if($this->filterIndex){
+				$tArr = $this->filterArr[$this->filterIndex];
 			}
-			if($gammacorrect) imagegammacorrect($img, $gammacorrect, 1.0);
-
-			$status = imagejpeg($img,$url);
-			imagedestroy($img);
+			else{
+				$tArr = array_shift($this->filterArr);
+			}
+		}
+		if($tArr){
+			if($img = imagecreatefromjpeg($url)){
+	   			if(array_key_exists('grayscale',$tArr) && $tArr['grayscale']) imagefilter($img,IMG_FILTER_GRAYSCALE);
+	   			if(array_key_exists('smooth',$tArr)) {
+					if(array_key_exists('sharpen',$tArr)) {
+						if($tArr['sharpen'] == 1) {// A sharpening matrix
+							$sharpenMatrix = array
+							(
+								array(-1.2, -1, -1.2),
+								array(-1, 20, -1),
+								array(-1.2, -1, -1.2)
+							);
+						} else if($tArr['sharpen'] == 2) {// A blurring matrix
+							$sharpenMatrix = array
+							(
+								array(1.0, 2.0, 1.0),
+								array(2.0, 4.0, 2.0),
+								array(1.0, 2.0, 1.0)
+							);
+						} else if($tArr['sharpen'] == 3) {// A blurring matrix
+							$sharpenMatrix = array
+							(
+								array(1.5, 1.5, 1.5),
+								array(1.5, 3.0, 1.5),
+								array(1.5, 1.5, 1.5)
+							);
+						}
+						// calculate the sharpen divisor
+						$divisor = array_sum(array_map('array_sum', $sharpenMatrix));
+						$offset = 0;
+						// apply the matrix
+						imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+					}
+	   				if(array_key_exists('gammacorrect',$tArr)) imagegammacorrect($img, $tArr['gammacorrect'], 1.0);
+	   				if(array_key_exists('brightness',$tArr)) imagefilter($img,IMG_FILTER_BRIGHTNESS,$tArr['brightness']);
+	   				if(array_key_exists('contrast',$tArr)) imagefilter($img,IMG_FILTER_CONTRAST,$tArr['contrast']);
+	   				imagefilter($img,IMG_FILTER_SMOOTH,$tArr['smooth']);
+	   			} else {
+	   				if(array_key_exists('brightness',$tArr)) imagefilter($img,IMG_FILTER_BRIGHTNESS,$tArr['brightness']);
+	   				if(array_key_exists('contrast',$tArr)) imagefilter($img,IMG_FILTER_CONTRAST,$tArr['contrast']);
+					if(array_key_exists('sharpen',$tArr)) {
+						if($tArr['sharpen'] == 1) {// A sharpening matrix
+							$sharpenMatrix = array
+							(
+								array(-1.2, -1, -1.2),
+								array(-1, 20, -1),
+								array(-1.2, -1, -1.2)
+							);
+						} else if($tArr['sharpen'] == 2) {// A blurring matrix
+							$sharpenMatrix = array
+							(
+								array(1.0, 2.0, 1.0),
+								array(2.0, 4.0, 2.0),
+								array(1.0, 2.0, 1.0)
+							);
+						} else if($tArr['sharpen'] == 3) {// A blurring matrix
+							$sharpenMatrix = array
+							(
+								array(1.5, 1.5, 1.5),
+								array(1.5, 3.0, 1.5),
+								array(1.5, 1.5, 1.5)
+							);
+						}
+						// calculate the sharpen divisor
+						$divisor = array_sum(array_map('array_sum', $sharpenMatrix));
+						$offset = 0;
+						// apply the matrix
+						imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+					}
+					if($tArr['gammacorrect']) imagegammacorrect($img, $tArr['gammacorrect'], 1.0);
+				}
+	
+				$status = imagejpeg($img,$url);
+				imagedestroy($img);
+			}
 		}
 		return $status;
 	}
@@ -187,7 +266,7 @@ class SpecProcessorOcr{
 				$pW = $imgW*$this->cropW;
 				$pH = $imgH*$this->cropH;
 				$dest = imagecreatetruecolor($pW,$pH);
-	
+
 				// Copy
 				if(imagecopy($dest,$src,0,0,$pX,$pY,$pW,$pH)){
 					//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
@@ -218,9 +297,10 @@ class SpecProcessorOcr{
 				}
 			}
 			else{
+				//If path is not set in the $symbini.php file, we assume a typial linux install 
 				exec('/usr/local/bin/tesseract '.$url.' '.$outputFile,$output);
 			}
-			
+
 			//Obtain text from tesseract output file
 			if(file_exists($outputFile.'.txt')){
 				if($fh = fopen($outputFile.'.txt', 'r')){
@@ -233,7 +313,7 @@ class SpecProcessorOcr{
 				unlink($outputFile.'.txt');
 			}
 			else{
-				$this->logError("\tUnable to locate output file");
+				$this->logMsg("\tERROR: Unable to locate output file\n");
 			}
 		}
 		return $retStr;//$this->cleanRawStr($retStr);
@@ -241,8 +321,8 @@ class SpecProcessorOcr{
 
 	private function databaseRawStr($imgId,$rawStr){
 		$rawStr = $this->cleanRawStr($rawStr);
-		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) '.
-			'VALUE ('.$imgId.',trim(" '.$rawStr.' "))';
+		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
+			'VALUE ('.$imgId.',"'.$rawStr.'","batch OCR - '.date('Y-m-d').'")';
 		//echo 'SQL: '.$sql."\n";
 		$status = $this->conn->query($sql);
 		return $status;
@@ -258,7 +338,6 @@ class SpecProcessorOcr{
 				}
 			}
 			//Set temp folder path and file names
-			$this->setTempPath();
 			$ts = time();
 			$this->imgUrlLocal = $this->tempPath.$ts.'_img.jpg';
 
@@ -269,7 +348,7 @@ class SpecProcessorOcr{
 	}
 
 	private function setTempPath(){
-		$tempPath = '';
+		$tempPath = 0;
 		if(array_key_exists('tempDirRoot',$GLOBALS)){
 			$tempPath = $GLOBALS['tempDirRoot'];
 		}
@@ -289,65 +368,112 @@ class SpecProcessorOcr{
 		$this->tempPath = $tempPath;
 	}
 
-	private function logError($msg) {
-		$tDate = getDate();
-		$msg = $msg." at ".str_pad($tDate["hours"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["minutes"],2,'0',STR_PAD_LEFT).":".str_pad($tDate["seconds"],2,'0',STR_PAD_LEFT)."\n";
-		$imageErrorFile = $this->logPath.'image_errors_'.$tDate["year"].'-'.str_pad($tDate["mon"],2,'0',STR_PAD_LEFT).'-'.$tDate["mday"].'.log';
-		if($fh = fopen($imageErrorFile, 'at')) {
+	private function setlogPath(){
+		$this->logPath = $this->tempPath.'log_'.date('Ymd').'.log';
+	}
+
+	private function logMsg($msg) {
+		if($fh = fopen($this->logPath, 'a')) {
 			fwrite($fh, $msg);
 			fclose($fh);
 		}
 	}
 
-	private function scoreOCR($rawStr) {
-		if($rawStr) {
+	private function findSciName($rawStr,$sciName) {
+		$result = 0;
+		if(strlen($sciName) > 0) {
+			$words = explode(" ", $sciName);
+			foreach($words as $word) {
+				$wrdLen = strlen($word);
+				if($wrdLen > 4) {
+					if(stripos($rawStr,$word) !== false) $result += 0.3;
+					else if(stripos($rawStr,str_replace("g", "p", $word)) !== false) $result += 0.2;
+					else if(stripos($rawStr,str_replace("q", "p", $word)) !== false) $result += 0.2;
+					else if(stripos($rawStr,str_replace("1", "l", $word)) !== false) $result += 0.2;
+					else if(stripos($rawStr,str_replace("1", "i", $word)) !== false) $result += 0.2;
+					else if(stripos($rawStr,str_replace("b", "h", $word)) !== false) $result += 0.2;
+					else if(stripos($rawStr,str_replace("v", "y", $word)) !== false) $result += 0.2;
+					else {
+						$shrtWrd = substr($word, 1);
+						if(stripos($rawStr,$shrtWrd) !== false) $result += 0.1;
+						else if(stripos($rawStr,str_replace("I", "l", $shrtWrd)) !== false) $result += 0.1;
+						else if(stripos($rawStr,str_replace("H", "ll", $shrtWrd)) !== false) $result += 0.1;
+						else {
+							$shrtWrd = substr($word, 0, $wrdLen-1);
+							if(stripos($rawStr,$shrtWrd) !== false) $result += 0.1;
+						}
+					}
+				}
+			}
+		}
+		$goodWords =
+			array (
+					"collect", "fungi", "location", "locality", "along", "rock", "outcrop", "thallus", "pseudotsuga",
+					"habitat", "det.", "determine",	"date", "long.", "latitude", "lat.", "shale", "laevis",
+					"longitude", "elevation", "elev.", "quercus", "acer", "highway", "preserve", "hardwood",
+					"road", "sandstone", " granit", "slope", "county", "near", "north", "forest", "Bungartz",
+					"south", "east", "west", "stream", "Wetmore", "Nash", "Imsaug", "mile", "wood", "Esslinger",
+					"Thomson", "Lendemer", "Johnson", "Harris", "Rosentretter", "Hodges", "Malachowski",
+					"Tucker", "Egan", "Fink", "Shushan", "Sullivan", "Crane", "Schoknecht", "Marsh", "Lumbsch",
+					"Trana", "Phillipe", "Landron", "Eyerdam", "Sharnoff", "Schuster", "Perlmutter", "Fryday",
+					"Ohlsson", "Howard", "Taylor", "Arnot", "Gowan", "Dey", "Scotter", "Llano", "Keith", "Moberg",
+					"Brako", "Ricklefs", "Darrow", "Macoun", "Barclay", "Culberson", "Alvarez", "ground", "ridge",
+					"Wong", "Gould", "Shchepanek", "Wheeler", "Hasse", "Kashiwadani", "Havaas", "Weise", "Sheard",
+					"Malme", "Hansen", "Erbisch", "Degelius", "Hafellner", "Reed", "Sweat", "Streimann", "McCune",
+					"Ryan", "Brodo", "Bratt", "Burnett", "Knudsen", "Weber", "Vezda", "Langlois", "Follmann",
+					"Buck", "Arnold", "Thaxter", "Armstrong", "Ahti", "Wheeler", "Britton", "Marble", "national",
+					"January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+					"November", "December", "Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+					"Calkins", "McHenry", "Schofield", "SHIMEK", "Hepp", "Talbot", "Riefner", "WAGHORNE", "Becking",
+					"Nebecker", "Lebo", "Advaita", "DeBolt", "Austin", "Brouard", "Amtoft", "KIENER", "Kalb", "Hertel",
+					"Clair", "Nee", "Boykin", "Sundberg", "Elix", "Santesson", "plant", "glade", "parish", "swamp",
+					"Ilex", "Diospyros", "(Ach.)", "Leight", "river", "trail", "mount", "wall", "index", "pine",
+					"vicinity", "durango", "madre", "stalk", "moss", "down", "some", "base", "alga", "brown", "punta",
+					"dirt", "stand", "meter", "dead", "steep", "isla", "town", "station", "picea", "shore", "over",
+					"attached", "apothecia", "spruce", "upper", "rosa", "rocky", "litter", "about", "shade", "coast",
+					"tree", "live", "fork", "cliff", "amabilis", "facing", "junction", "white", "partial", "bare",
+					"scrub", "then", "boulder", "conifer", "branch", "adjacent", "peak", "sonoran", "maple", "sample",
+					"expose", "parashant", "pinyon", "growing", "fragment", "shrub", "below", "limestone", "scatter",
+					"snag", "douglas", "secondary", "state", "point", "pass", "basalt", "edge", "year", "hemlock",
+					"vigor", "association", "cedar", "community", "head", "cowlitz", "tsuga", "juniper", "monument",
+					"between", "baker-snoqualmie", "menziesii", "heterophylla", "just", "wenatchee", "ranger", "grand",
+					"mixed", "rhyolite", "plot", "growth", "desert", "spore", "sierra", "abies", "small", "gifford",
+					"pinchot", "district", "pinus", "valley", "aspect", "santa", "open", "service", "degree", "above",
+					"island", "side", "bark", "lake", "creek", "canyon", "from", "substrate", "slope", "with", "area"
+			);
+		foreach($goodWords as $goodWord) {
+			if(stripos($rawStr,$goodWord) !== false) $result += 0.2;
+		}
+		//return $index*$result;
+		return $result;
+	}
+
+	private function scoreOCR($rawStr, $sciName = '') {
+		$sLength = strlen($rawStr);
+		if($sLength > 12) {
 			$numWords = 0;
-			$numLines = 0;
 			$numBadLinesIncremented = false;
 			$numBadLines = 1;
-			$valCount = 0;
 			$lines = explode("\n", $rawStr);
 			foreach($lines as $line) {
-				$goodLine = false;
 				$line = trim($line);
-				if(strlen($line) > 1) {
-					$numLines++;
-					$firstChar = substr($line, 0, 1);
-					if(($firstChar >= "0" && $firstChar <= "9") || ($firstChar >= "A" && $firstChar <= "Z") || ($firstChar >= "a" && $firstChar <= "z") || $firstChar == "\"") {
-						$words = explode(" ", $line);
-						foreach($words as $word) {
-							if(strlen($word) > 1) {
-								$firstChar = substr($word, 0, 1);
-								if(($firstChar >= "0" && $firstChar <= "9") || ($firstChar >= "A" && $firstChar <= "Z") || ($firstChar >= "a" && $firstChar <= "z") || $firstChar == "\"") {
-									$goodChars = 0;
-									$badChars = 0;
-									foreach (count_chars($word, 1) as $i => $let) {
-										//echo "There were $val instance(s) of \"" , chr($i) , "\" (", $i, ") in the string.\n";
-										if(($i > 47 && $i < 58) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
-											$goodChars++;
-										}
-										else if(($i < 44 || $i > 59) && !($i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
-											$badChars++;
-										}
-									}
-									if($goodChars > 3*$badChars) {
-										$numWords++;
-										$goodLine = true;
-									}
+				if(strlen($line) > 2) {
+					$words = explode(" ", $line);
+					foreach($words as $word) {
+						if(strlen($word) > 2)
+						{
+							$goodChars = 0;
+							$badChars = 0;
+							foreach (count_chars($word, 1) as $i => $let) {
+								if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
+									$goodChars++;
+								}
+								else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
+									$badChars++;
 								}
 							}
+							if($goodChars > 3*$badChars) $numWords++;
 						}
-						if(!$goodLine) {
-							if($numBadLines == 1) {
-								if($numBadLinesIncremented) $numBadLines++;
-								else $numBadLinesIncremented = true;
-							} else $numBadLines++;
-						}
-					} else {
-						if($numBadLines == 1) {
-							if($numBadLinesIncremented) $numBadLines++;
-							else $numBadLinesIncremented = true;
-						} else $numBadLines++;
 					}
 				} else {
 					if($numBadLines == 1) {
@@ -356,68 +482,74 @@ class SpecProcessorOcr{
 					} else $numBadLines++;
 				}
 			}
-			$numGood = 0;
-			$numBad = 1;
+			$numGoodChars = 0;
+			$numBadChars = 1;
 			$numBadIncremented = false;
 			foreach (count_chars($rawStr, 1) as $i => $val) {
-				//echo "There were $val instance(s) of \"" , chr($i) , "\" (", $i, ") in the string.\n";
-				if(($i > 47 && $i < 58) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
-					$numGood += $val;
+				if(($i > 47 && $i < 60) || ($i > 64 && $i < 91) || ($i > 96 && $i < 123) || $i == 176) {
+					$numGoodChars += $val;
 				}
-				else if(($i < 44 || $i > 59) && !($i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
-					if($numBad == 1) {
-						if($numBadIncremented) $numBad += $val;
+				else if(($i < 44 || $i > 59) && !($i == 32 || $i == 35 || $i == 34 || $i == 39 || $i == 38 || $i == 40 || $i == 41 || $i == 61)) {
+					if($numBadChars == 1) {
+						if($numBadIncremented) $numBadChars += $val;
 						else {
 							$numBadIncremented = true;
-							$numBad += ($val-1);
+							$numBadChars += ($val-1);
 						}
-					} else $numBad += $val;
+					} else $numBadChars += $val;
 				}
 			}
-			return ($numWords*$numGood*$numLines)/(strlen($rawStr)*$numBad*$numBadLines);
+			return (($numWords*$numGoodChars)/($sLength*$numBadChars*$numBadLines)) + $this->findSciName($rawStr,$sciName);
 		} else return 0;
-	}
-
-	private function setlogPath(){
-		$logPath = '';
-		if(array_key_exists('tempDirRoot',$GLOBALS)){
-			$logPath = $GLOBALS['tempDirRoot'];
-		}
-		else{
-			$logPath = ini_get('upload_tmp_dir');
-		}
-		if(!$logPath){
-			$logPath = $GLOBALS['serverRoot'];
-			if(substr($logPath,-1) != '/') $logPath .= '/';
-			$logPath .= 'temp/';
-		}
-		if(substr($logPath,-1) != '/') $logPath .= '/';
-		if(file_exists($logPath.'logs/') || mkdir($logPath.'logs/')){
-			$logPath .= 'logs/';
-		}
-
-		$this->logPath = $logPath;
 	}
 
 	private function cleanRawStr($inStr){
 		$outStr = trim($inStr);
 
-		//replace commonly-misinterpreted characters
-		$needles = array("Ã©", "/\.", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
-		$replacements = array("e", "A.","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
+		//replace commonly misinterpreted characters
+		$needles = array(chr(226).chr(128).chr(156), "Ã©", "/\.", "/-\\", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
+		$replacements = array("\"", "e", "A.", "A","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
 		$outStr = str_replace($needles, $replacements, $outStr);
 
-		//remove barcodes (strings of ls, Is, 1s and |s more than six characters long), and latitudes and longitudes with double quotes instead of degree signs
-		$pattern = array("/[\|!Il]{6,}/", "/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(\d\d{0,2})\"/i");
-		$replacement = array("", "\${1}\${2}\$3 \${4}".chr(176));
-		$outStr = preg_replace($pattern, $replacement, $outStr);
+		$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
+		//remove barcodes (strings of ~s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long), one-character lines, and latitudes and longitudes with double quotes instead of degree signs
+		$pattern =
+			array(
+				"/[\|!Il\"'1U~()@\[\]{}H\/\\\]{6,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
+				"/^.{1,2}$/m", //one-character lines (Tesseract must generate a 2-char end of line)
+				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
+			);
+		$replacement = array("", "", "\${1}\${2}\$3 \${4}".chr(176));
+		$outStr = preg_replace($pattern, $replacement, $outStr, -1);
 		$outStr = str_replace("Â°", chr(176), $outStr);
 
 		//replace Is, ls and |s in latitudes and longitudes with ones
-		//replace Os in latitudes and longitudes with zeroes
-		$preg_replace_callback_pattern = "/[Ol|I!\d]{1,3}".chr(176)."\s?[Ol|I!\d]{1,3}'\s?([Ol|I!\d]{1,3}\"\s?)?[NSEW]\b/";
-		$outStr = preg_replace_callback($preg_replace_callback_pattern, create_function('$matches','return str_replace(array("l","|","!","I","O"), array("1","1","1","1","0"), $matches[0]);'), $outStr);
-		return $outStr;
+		//replace Os in latitudes and longitudes with zeroes, Ss with 5s and Zs with 2s
+		//latitudes and longitudes can be of the types: ddd.ddddddd°, ddd° ddd.ddd' or ddd° ddd' ddd.ddd"
+		$preg_replace_callback_pattern =
+			array(
+				"/".$false_num_class."{1,3}(\.".$false_num_class."{1,7})\s?".chr(176)."\s?[NSEW(\\\V)(\\\W)]/",
+				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\s?'\s?[NSEW(\\\V)(\\\W)]/",
+				"/".$false_num_class."{1,3}".chr(176)."\s?".$false_num_class."{1,3}\s?'\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,3})?\"\s?)?[NSEW(\\\V)(\\\W)]/"
+			);
+		$outStr = preg_replace_callback($preg_replace_callback_pattern, create_function('$matches','return str_replace(array("l","|","!","I","O","S","Z"), array("1","1","1","1","0","5","2"), $matches[0]);'), $outStr);
+		//replace \V and \W in longitudes and latitudes with W
+		$outStr = preg_replace("/(\d\s?[".chr(176)."'\"])\s?\\\[VW]/", "\${1}W", $outStr, -1);
+		//add degree signs to latitudes and longitudes that lack them
+		$outStr = preg_replace("/(\d{1,3})\s{1,2}(\d{1,3}'\s?)(\d{1,3}\"\s?)?([NSEW])/", "\${1}".chr(176)." $2$3$4", $outStr, -1);
+		//replace Zs and zs with 2s, Is, !s, |s and ls with 1s and Os and os with 0s in dates of type Mon(th) DD, YYYY
+		$outStr = preg_replace_callback(
+			"/(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)\s)(([\dOIl|!ozZS]{1,2}),?\s)([\dOI|!lozZS]{4})/",
+			create_function('$matches','return $matches[1].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[3]).str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[5]);'),
+			$outStr
+		);
+		//replace Zs with 2s, Is with 1s and Os with 0s in dates of type DD-Mon(th)-YYYY or DDMon(th)YYYY or DD Mon(th) YYYY
+		$outStr = preg_replace_callback(
+			"/([\dOIl!|ozZS]{1,2}[-\s]?)(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)[-\s]?)([\dOIl|!ozZS]{4})/i",
+			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
+			$outStr
+		);
+		return trim($outStr);
 	}
 
 	private function encodeString($inStr){
@@ -452,22 +584,9 @@ class SpecProcessorOcr{
 	public function setCropH($h){
 		$this->cropH = $h;
 	}
-	
-	public function setGrayscale($v){
-		$this->grayscale = $v;
+
+	public function addFilterVariable($k,$v){
+		$this->filterArr[0][$k] = $v;
 	}
-	public function setBrightness($v){
-		$this->brightness = $v;
-	}
-	public function setContrast($v){
-		$this->contrast = $v;
-	}
-	public function setSharpen($v){
-		$this->sharpen = $v;
-	}
-	public function setGammaCorrect($v){
-		$this->gammaCorrect = $v;
-	}
-	
 }
 ?>
