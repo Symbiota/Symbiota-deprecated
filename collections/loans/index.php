@@ -382,7 +382,7 @@ header("Content-Type: text/html; charset=".$charset);
 									<tr>
 										<th style="width:25px;text-align:center;">&nbsp;</th>
 										<th style="width:100px;text-align:center;">Catalog Number</th>
-										<th style="width:375px;text-align:center;">Scientific Name</th>
+										<th style="width:375px;text-align:center;">Details</th>
 										<th style="width:75px;text-align:center;">Date Returned</th>
 									</tr>
 									<?php
@@ -397,7 +397,15 @@ header("Content-Type: text/html; charset=".$charset);
 													<?php echo $specArr['catalognumber']; ?>
 												</a>
 											</td>
-											<td><?php echo $specArr['sciname']; ?></td>
+											<td>
+												<?php 
+												$loc = $specArr['locality'];
+												if(strlen($loc) > 500) $loc = substr($loc,400);
+												echo '<i>'.$specArr['sciname'].'</i>; ';
+												echo  $specArr['collector'].'; '.$loc;
+												?> 
+												
+											</td>
 											<td><?php echo $specArr['returndate']; ?></td>
 										</tr>
 										<?php 
