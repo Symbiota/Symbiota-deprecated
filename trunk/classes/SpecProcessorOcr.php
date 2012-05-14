@@ -76,6 +76,7 @@ class SpecProcessorOcr{
 							$rawStr = $this->ocrImageByUrl($r->url);
 							if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
 						}
+						$rawStr = $this->cleanRawStr($rawStr);
 						if(!$rawStr) $rawStr = 'Failed OCR return';
 						$this->databaseRawStr($r->imgid,$rawStr);
 						$recCnt++;
@@ -320,12 +321,16 @@ class SpecProcessorOcr{
 	}
 
 	private function databaseRawStr($imgId,$rawStr){
-		$rawStr = $this->cleanRawStr($rawStr);
 		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-			'VALUE ('.$imgId.',"'.$rawStr.'","batch OCR - '.date('Y-m-d').'")';
+			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string($rawStr).'","batch OCR - '.date('Y-m-d').'")';
 		//echo 'SQL: '.$sql."\n";
-		$status = $this->conn->query($sql);
-		return $status;
+		if($this->conn->query($sql)){
+			return true;
+		}
+		else{
+			$this->logMsg("\tERROR: Unable to load fragment into database: ".$this->conn->error."\n");
+			$this->logMsg("\t\tSQL: ".$sql."\n");
+		}
 	}
 
 	private function loadImage($imgUrl){
