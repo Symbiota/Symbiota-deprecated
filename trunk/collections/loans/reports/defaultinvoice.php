@@ -1,6 +1,6 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'../classes/SpecLoans.php');
+include_once($serverRoot.'/classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
