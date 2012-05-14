@@ -110,8 +110,8 @@ elseif($exchangeId){
 				foreach($specList as $k => $specArr){
 					echo '<tr>';
 					echo '<td style="width:150px;">'.$specArr['catalognumber'].'</td>';
-					echo '<td style="width:300px;">'.$specArr['recordedby'].' '.$specArr['recordnumber'].'</td>';
-					echo '<td style="width:400px;">'.$specArr['sciname'].' '.$specArr['scientificnameauthorship'].'</td>';
+					echo '<td style="width:300px;">'.$specArr['collector'].'</td>';
+					echo '<td style="width:400px;">'.$specArr['sciname'].'</td>';
 					echo '<td> </td>';
 					echo '</tr>';
 				}
