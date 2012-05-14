@@ -424,8 +424,9 @@ class SpecLoans{
 	
 	public function getSpecList($loanId){
 		$retArr = array();
-		$sql = 'SELECT l.loanid, l.occid, IFNULL(o.catalognumber,o.othercatalognumbers) AS catalognumber, o.sciname, o.scientificnameauthorship, '.
-			'o.recordedby, o.recordnumber, l.returndate '.
+		$sql = 'SELECT l.loanid, l.occid, IFNULL(o.catalognumber,o.othercatalognumbers) AS catalognumber, '.
+			'o.sciname, CONCAT(o.recordedby, " (", IFNULL(o.recordnumber,"s.n."),")") AS collector, '.
+			'CONCAT_WS(", ",stateprovince,county,locality) AS locality, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
 			'ORDER BY o.catalognumber + 1,o.othercatalognumbers+1';
@@ -434,9 +435,8 @@ class SpecLoans{
 				$retArr[$r->occid]['occid'] = $r->occid;
 				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
 				$retArr[$r->occid]['sciname'] = $r->sciname;
-				$retArr[$r->occid]['scientificnameauthorship'] = $r->scientificnameauthorship;
-				$retArr[$r->occid]['recordedby'] = $r->recordedby;
-				$retArr[$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->occid]['collector'] = $r->collector;
+				$retArr[$r->occid]['locality'] = $r->locality;
 				$retArr[$r->occid]['returndate'] = $r->returndate;
 			}
 			$rs->close();
