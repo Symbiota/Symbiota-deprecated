@@ -67,6 +67,7 @@ elseif($exchangeId){
 			.exchangebal {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.loanoutinfo {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.description {width:100%;text-align:left;font:10pt arial,sans-serif;}
+			.message {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.saludos {width:100%;text-align:left;font:10pt arial,sans-serif;}
 			.return {width:100%;text-align:left;font:10pt arial,sans-serif;position:relative;bottom:0;margin-top:20%;}
 			<?php 
@@ -92,6 +93,18 @@ elseif($exchangeId){
 			$specTotal = $loanManager->getSpecTotal($loanId);
 			$exchangeValue = $loanManager->getExchangeValue($exchangeId);
 			$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
+			$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
+			
+			$transType = 0;
+			if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
+				$transType = 'ex';
+			}
+			elseif(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
+				$transType = 'both';
+			}
+			elseif((!$invoiceArr['totalexunmounted'] || !$invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
+				$transType = 'gift';
+			}
 			?>
 			<table class="header" align="center">
 				<tr>
@@ -246,38 +259,75 @@ elseif($exchangeId){
 						de <?php echo $invoiceArr['institutioncode']; ?>, recibido <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
 				<?php } ?>
 			<?php }
-			elseif($loanType == 'Exchange'){ ?>
-				<?php if($english){ ?>
-					<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo $invoiceArr['totalexunmounted']; ?> unmounted 
-						<?php echo ($invoiceArr['totalexmounted']?'and '.$invoiceArr['totalexmounted'].' mounted ':''); ?>specimens, for 
-						an exchange value of <?php echo $exchangeValue; ?>. Please note that mounted specimens count as two.
-					</div><br />
-				<?php }
-				if($spanish){ ?>
-					<div class="exchangeamts">Este env&iacute;o es un INTERCAMBIO, consistiendo en <?php echo $invoiceArr['totalexunmounted']; ?> ejemplares no montados 
-						<?php echo ($invoiceArr['totalexmounted']?'y '.$invoiceArr['totalexmounted'].' ejemplares montados':''); ?>,  
-						con un valor de intercambio de <?php echo $exchangeValue; ?>. Favor de notarse que las ejemplares montados son de valor 2.
-					</div><br />
-				<?php }
-				if($english){ ?>
-					<div class="exchangebal">Our records show a balance of <?php echo $invoiceArr['invoicebalance']; ?> specimens  
-						in <?php echo ($invoiceArr['invoicebalance']>0?'our':'your'); ?> favor. Please contact us if your records differ significantly. 
-					</div><br />
-				<?php }
-				if($spanish){ ?>
-					<div class="exchangebal">Nuestros registros muestran un balance de <?php echo $invoiceArr['invoicebalance']; ?> ejemplares  
-						a <?php echo ($invoiceArr['invoicebalance']>0?'nuestro':'su'); ?> favor. Favor de contactarnos si sus 
-						registros se d&iacute;fieren de una manera apreciable.
-					</div><br />
-				<?php }
+			elseif($loanType == 'Exchange'){
+				if($transType == 'ex'){
+					if($english){ ?>
+						<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo ($invoiceArr['totalexunmounted']?$invoiceArr['totalexunmounted'].' unmounted ':''); ?>
+							<?php echo (($invoiceArr['totalexunmounted'] && $invoiceArr['totalexmounted'])?'and ':''); ?><?php echo ($invoiceArr['totalexmounted']?$invoiceArr['totalexmounted'].' mounted ':''); ?>
+							specimens, for an exchange value of <?php echo $exchangeValue; ?>. Please note that mounted specimens count as two.
+						</div><br />
+					<?php }
+					if($spanish){ ?>
+						<div class="exchangeamts">Este env&iacute;o es un INTERCAMBIO, consistiendo en <?php echo ($invoiceArr['totalexunmounted']?$invoiceArr['totalexunmounted'].' ejemplares no montados ':''); ?>
+							<?php echo (($invoiceArr['totalexunmounted'] && $invoiceArr['totalexmounted'])?'y ':''); ?><?php echo ($invoiceArr['totalexmounted']?$invoiceArr['totalexmounted'].' ejemplares montados ':''); ?>, 
+							con un valor de intercambio de <?php echo $exchangeValue; ?>. Favor de notarse que las ejemplares montados son de valor 2.
+						</div><br />
+					<?php }
+					if($transType == 'both'){
+						if($english){ ?>
+							<div class="exchangeamts">This shipment also contains <?php echo ($giftTotal == 1?'1 gift specimen.':$giftTotal); ?> gift specimens. 
+							</div><br />
+						<?php }
+						if($spanish){ ?>
+							<div class="exchangeamts">Esta remesa tambi&eacute;n contiene <?php echo ($giftTotal == 1?'1 ejemplar de regalo.':$giftTotal); ?> ejemplares de regalo. 
+							</div><br />
+						<?php }
+					}
+					if($english){ ?>
+						<div class="exchangebal">Our records show a balance of <?php echo $invoiceArr['invoicebalance']; ?> specimens  
+							in <?php echo ($invoiceArr['invoicebalance']>0?'our':'your'); ?> favor. Please contact us if your records differ significantly. 
+						</div><br />
+					<?php }
+					if($spanish){ ?>
+						<div class="exchangebal">Nuestros registros muestran un balance de <?php echo $invoiceArr['invoicebalance']; ?> ejemplares  
+							a <?php echo ($invoiceArr['invoicebalance']>0?'nuestro':'su'); ?> favor. Favor de contactarnos si sus 
+							registros se d&iacute;fieren de una manera apreciable.
+						</div><br />
+					<?php }
+				}
+				elseif($transType == 'gift'){
+					if($english){ ?>
+						<div class="exchangeamts">This shipment is a GIFT. 
+						</div><br />
+					<?php }
+					if($spanish){ ?>
+						<div class="exchangeamts">Este env&iacute;o es un REGALO. 
+						</div><br />
+					<?php }
+				}
 			}
 			?>
 			<div class="description">
 				<?php
 					echo '<b>'.($english?'DESCRIPTION OF THE SPECIMENS':'').($engspan?' / ':'').($spanish?'DESCRIPCI&Oacute;N DE LOS EJEMPLARES':'').':</b><br /><br />' ;
 				?>
+				
 			</div>
 			<br />
+			<?php 
+			if($invoiceArr['invoicemessage'] || $invoiceArr['invoicemessageown'] || $invoiceArr['invoicemessageborr']){
+				echo '<div class="message">';
+				if($loanType == 'Exchange'){
+					echo ($invoiceArr['invoicemessage']?$invoiceArr['invoicemessage']:'');
+				}
+				elseif($loanType == 'Out'){
+					echo ($invoiceArr['invoicemessageown']?$invoiceArr['invoicemessageown']:'');
+				}
+				elseif($loanType == 'In'){
+					echo ($invoiceArr['invoicemessageborr']?$invoiceArr['invoicemessageborr']:'');
+				}
+				echo '</div><br />';
+			} ?>
 			<div class="saludos">
 				<?php
 					echo ($english?'Sincerely':'').($engspan?' / ':'').($spanish?'Sinceramente':'').',<br />' ;
