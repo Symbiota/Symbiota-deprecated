@@ -97,9 +97,11 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-top:8px;padding-bottom:8px;">
 				<table class="styledtable">
-					<th style="width:220px;text-align:center;">Balance Adjustment</th>
-					<th style="width:220px;text-align:center;">Gift Specimens</th>
-					<th style="width:220px;text-align:center;">Exchange Specimens</th>
+					<tr>
+						<th style="width:220px;text-align:center;">Balance Adjustment</th>
+						<th style="width:220px;text-align:center;">Gift Specimens</th>
+						<th style="width:220px;text-align:center;">Exchange Specimens</th>
+					</tr>
 					<tr style="text-align:right;">
 						<td><b>Adjustment Amount:</b>&nbsp;&nbsp;<input type="text" name="adjustment" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['adjustment']; ?>" onchange=" " /></td>
 						<td><b>Total Gifts:</b>&nbsp;&nbsp;<input type="text" name="totalgift" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['totalgift']; ?>" onchange=" " <?php echo ($exchangeArr['transactiontype']=='Adjustment'?'disabled':'');?> /></td>

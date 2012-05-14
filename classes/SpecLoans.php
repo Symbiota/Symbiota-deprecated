@@ -428,7 +428,7 @@ class SpecLoans{
 			'o.recordedby, o.recordnumber, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
-			'ORDER BY o.catalognumber';
+			'ORDER BY o.catalognumber + 1,o.othercatalognumbers+1';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['occid'] = $r->occid;
