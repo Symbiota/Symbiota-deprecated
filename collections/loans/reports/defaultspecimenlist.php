@@ -4,7 +4,7 @@ include_once($serverRoot.'../classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
-$language = $_POST['language'];
+$language = $_POST['languagedef'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
 $exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
 $loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;

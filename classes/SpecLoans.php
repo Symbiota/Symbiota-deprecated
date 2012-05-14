@@ -446,7 +446,6 @@ class SpecLoans{
 	
 	//This method is used by the ajax script insertloanspecimen.php
 	public function addSpecimen($loanId,$collId,$catNum){
-		$statusStr = '';
 		$retArr = array();
 		$loanId = $this->cleanString($loanId);
 		$collId = $this->cleanString($collId);
@@ -454,23 +453,26 @@ class SpecLoans{
 		$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (catalognumber = "'.$catNum.'") ';
 		//echo $sql;
 		$result = $this->conn->query($sql);
-		while ($row = $result->fetch_object()) {
+		while($row = $result->fetch_object()) {
 			$retArr[] = $row->occid;
 		}
-		if (count($retArr) == 0){
-			$statusStr = 0;
+		if(count($retArr) == 0){
+			return 0;
 		}
-		elseif (count($retArr) > 1){
-			$statusStr = 2;
+		elseif(count($retArr) > 1){
+			return 2;
 		}
-		else {
-			$statusStr = 1;
+		else{
 			$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
 				'VALUES ('.$loanId.','.$retArr[0].') ';
 			//echo $sql;
-			$this->conn->query($sql);
+			if($this->conn->query($sql)){
+				return 1;
+			}
+			else{
+				return 3;
+			}
 		}
-		return $statusStr;
 	}
 	
 	public function editSpecimen($reqArr){
@@ -487,7 +489,7 @@ class SpecLoans{
 				$statusStr .= 'specimens deleted from loan.';
 			}
 			else{
-				$sql = 'UPDATE omoccurloanslink SET returndate = "'.date('Y').'-'.date('m').'-'.date('d').'" WHERE loanid = '.$loanId.' AND (occid IN('.implode(',',$occidArr).')) ';
+				$sql = 'UPDATE omoccurloanslink SET returndate = "'.date('Y-m-d H:i:s').'" WHERE loanid = '.$loanId.' AND (occid IN('.implode(',',$occidArr).')) ';
 				$this->conn->query($sql);
 				$statusStr .= 'specimens checked in.';
 			}

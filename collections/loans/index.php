@@ -141,6 +141,114 @@ header("Content-Type: text/html; charset=".$charset);
 		  return true;
 		}
 		
+		function verifyspeceditform(f){
+			//Make sure at least on specimen checkbox is checked
+			var cbChecked = false;
+			var dbElements = document.getElementsByName("occid[]");
+			for(i = 0; i < dbElements.length; i++){
+				var dbElement = dbElements[i];
+				if(dbElement.checked){
+					cbChecked = true;
+					break;
+				}
+			}
+			if(!cbChecked){
+				alert("Please select specimens to which you wish to apply the action");
+				return false;
+			}
+
+			//If task equals delete, confirm action
+			var applyTaskObj = f.applytask;
+			var l = applyTaskObj.length;
+			var applyTaskValue = "";
+			for(var i = 0; i < l; i++) {
+				if(applyTaskObj[i].checked) {
+					applyTaskValue = applyTaskObj[i].value;
+				}
+			}
+			if(applyTaskValue == "delete"){
+				return confirm("Are you sure you want to remove selected specimens from this loan?");
+			}
+
+			return true;
+		}
+		
+		function addSpecimen(f){ 
+			var catalogNumber = f.catalognumber.value;
+			var loanid = f.loanid.value;
+			var collid = f.collid.value;
+			if(!catalogNumber){
+				alert("Please enter a catalog number!");
+				return false;
+			}
+			else{
+				xmlHttp=GetXmlHttpObject();
+				if (xmlHttp==null){
+					alert ("Your browser does not support AJAX!");
+					return false;
+				}
+				var url="rpc/insertloanspecimens.php";
+				url=url+"?loanid="+loanid;
+				url=url+"&catalognumber="+catalogNumber;
+				url=url+"&collid="+collid;
+				xmlHttp.onreadystatechange=function(){
+					if(xmlHttp.readyState==4 && xmlHttp.status==200){
+						responseCode = xmlHttp.responseText;
+						if(responseCode == "0"){
+							document.getElementById("addspecsuccess").style.display = "none";
+							document.getElementById("addspecerr1").style.display = "block";
+							document.getElementById("addspecerr2").style.display = "none";
+							document.getElementById("addspecerr3").style.display = "none";
+							setTimeout(function () { 
+								document.getElementById("addspecerr1").style.display = "none";
+								}, 3000);
+							//alert("ERROR: Specimen record not found in database.");
+						}
+						else if(responseCode == "2"){
+							document.getElementById("addspecsuccess").style.display = "none";
+							document.getElementById("addspecerr1").style.display = "none";
+							document.getElementById("addspecerr2").style.display = "block";
+							document.getElementById("addspecerr3").style.display = "none";
+							setTimeout(function () { 
+								document.getElementById("addspecerr2").style.display = "none";
+								}, 3000);
+							//alert("ERROR: More than one specimen with that catalog number.");
+						}
+						else if(responseCode == "3"){
+							document.getElementById("addspecsuccess").style.display = "none";
+							document.getElementById("addspecerr1").style.display = "none";
+							document.getElementById("addspecerr2").style.display = "none";
+							document.getElementById("addspecerr3").style.display = "block";
+							setTimeout(function () { 
+								document.getElementById("addspecerr3").style.display = "none";
+								}, 3000);
+							//alert("ERROR: More than one specimen with that catalog number.");
+						}
+						else{
+							f.catalognumber.value = "";
+							document.getElementById("addspecsuccess").style.display = "block";
+							document.getElementById("addspecerr1").style.display = "none";
+							document.getElementById("addspecerr2").style.display = "none";
+							document.getElementById("addspecerr3").style.display = "none";
+							setTimeout(function () { 
+								document.getElementById("addspecsuccess").style.display = "none";
+								}, 3000);
+							//alert("SUCCESS: Specimen added to loan.");
+						}
+					}
+				};
+				xmlHttp.open("POST",url,true);
+				xmlHttp.send(null);
+				return false;
+			}
+		}
+
+		function openOccurrenceDetails(occid){
+			occWindow=open("../individual/index.php?occid="+occid,"occdetails","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+			if(occWindow.opener == null) occWindow.opener = self;
+			return false;
+		}
+
 		function GetXmlHttpObject(){
 			var xmlHttp=null;
 			try{
@@ -157,55 +265,6 @@ header("Content-Type: text/html; charset=".$charset);
 				}
 			}
 			return xmlHttp;
-		}
-		
-		function addSpecimen(f){ 
-			var catalogNumber = f.catalognumber.value;
-			var loanid = f.loanid.value;
-			var collid = f.collid.value;
-			if(!catalogNumber){
-				document.addspecform.catalognumber.value = "";
-				alert("There are no specimens linked to that catalog number!");
-				return false;
-			}
-			else{
-				xmlHttp=GetXmlHttpObject();
-				if (xmlHttp==null){
-					document.addspecform.catalognumber.value = "";
-					alert ("Your browser does not support AJAX!");
-					return false;
-				}
-				var url="rpc/insertloanspecimens.php";
-				url=url+"?loanid="+loanid;
-				url=url+"&catalognumber="+catalogNumber;
-				url=url+"&collid="+collid;
-				xmlHttp.onreadystatechange=function(){
-					if(xmlHttp.readyState==4 && xmlHttp.status==200){
-						responseCode = xmlHttp.responseText;
-						if(responseCode == '0'){
-							document.addspecform.catalognumber.value = "";
-							alert("ERROR: Specimen record not found in database.");
-						}
-						else if(responseCode == '2'){
-							document.addspecform.catalognumber.value = "";
-							alert("ERROR: More than one specimen with that catalog number.");
-						}
-						else{
-							document.addspecform.catalognumber.value = "";
-							alert("SUCCESS: Specimen added to loan.");
-						}
-					}
-				};
-				xmlHttp.open("POST",url,true);
-				xmlHttp.send(null);
-				return false;
-			}
-		}
-
-		function openOccurrenceDetails(occid){
-			occWindow=open("../individual/index.php?occid="+occid,"occdetails","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
-			if(occWindow.opener == null) occWindow.opener = self;
-			return false;
 		}
 	</script>
 </head>
@@ -254,7 +313,8 @@ header("Content-Type: text/html; charset=".$charset);
 						<li><a href="#reportdiv">Reports</a></li>
 					</ul>
 					<div id="reportdiv" style="height:50px;">
-						List loans outstanding, Invoices, mailing labels, etc
+						-- IN DEVELOPMENT --
+						List loans outstanding, Invoices, mailing labels, etc?
 						<?php 
 						
 						?>
@@ -267,11 +327,11 @@ header("Content-Type: text/html; charset=".$charset);
 				<div id="tabs" style="margin:0px;">
 				    <ul>
 						<li><a href="outgoingdetails.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>"><span>Loan Details</span></a></li>
-						<li><a href="#addspecdiv"><span>Add/Edit Specimens</span></a></li>
+						<li><a href="#addspecdiv"><span>Specimens</span></a></li>
 					</ul>
 					<div id="addspecdiv">
 						<div style="float:right;margin:10px;">
-							<a href="#" onclick="toggle('newspecdiv')">
+							<a href="#" onclick="toggle('newspecdiv');toggle('refreshbut');">
 								<img src="../../images/add.png" alt="Create New Loan" />
 							</a>
 						</div>
@@ -279,12 +339,22 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="addspecform" action="index.php" method="post" onsubmit="return false">
 								<fieldset>
 									<legend><b>Add Specimen</b></legend>
-									<div style="padding-bottom:2px;">
-										<span>
-											<b>Catalog Number: </b><input type="text" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
-										</span>
+									<div style="float:left;padding-bottom:2px;">
+										<b>Catalog Number: </b><input type="text" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 									</div>
-									<div style="padding-top:8px;">
+									<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:none;">
+										SUCCESS: Specimen record added to loan
+									</div>
+									<div id="addspecerr1" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
+										ERROR: unable to located specimen
+									</div>
+									<div id="addspecerr2" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
+										ERROR: More than one specimen located with same catalog number
+									</div>
+									<div id="addspecerr3" style="float:left;margin-left:30px;padding-bottom:2px;color:orange;display:none;">
+										Warning: Specimen already linked to loan
+									</div>
+									<div style="padding-top:8px;clear:both;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 										<input name="formsubmit" type="button" value="Add Specimen" onclick="addSpecimen(this.form)" />
@@ -296,19 +366,18 @@ header("Content-Type: text/html; charset=".$charset);
 						$specList = $loanManager->getSpecList($loanId);
 						if($specList){
 						?>
-							<h3>Specimens on Loan</h3>
 							<div style="height:25px;margin-top:15px;">
 								<span style="float:left;margin-left:15px;">
 									<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 									Select/Deselect All
 								</span>
-								<span style="float:right;margin-right:15px;">
+								<span id="refreshbut" style="display:none;float:right;margin-right:15px;">
 									<form name="refreshspeclist" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post">
 										<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
 									</form>
 								</span>
 							</div>
-							<form name="speceditform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit=" " >
+							<form name="speceditform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return verifyspeceditform(this)" >
 								<table class="styledtable">
 									<tr>
 										<th style="width:25px;text-align:center;">&nbsp;</th>
@@ -340,8 +409,8 @@ header("Content-Type: text/html; charset=".$charset);
 										<td colspan="10" valign="bottom">
 											<div style="margin:10px;">
 												<div style="float:left;">
-													<input name="applytask" type="radio" value="delete" CHECKED title="Delete Specimens" />Delete Specimens from Loan<br/>
-													<input name="applytask" type="radio" value="check" title="Check-in Specimens" />Check-in Specimens
+													<input name="applytask" type="radio" value="check" CHECKED title="Check-in Specimens" />Check-in Specimens<br/>
+													<input name="applytask" type="radio" value="delete" title="Delete Specimens" />Delete Specimens from Loan
 												</div>
 												<span style="margin-left:25px;">
 													<input name="formsubmit" type="submit" value="Perform Action" />

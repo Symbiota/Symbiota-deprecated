@@ -15,5 +15,5 @@
 			$retMsg = $loanManager->addSpecimen($loanId,$collId,$catalogNumber);		
 		}
 	}
-	//echo $retMsg;
+	echo $retMsg;
 ?>
