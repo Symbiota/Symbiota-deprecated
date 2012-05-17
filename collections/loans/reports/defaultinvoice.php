@@ -96,6 +96,17 @@ elseif($exchangeId){
 			$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
 			
 			$transType = 0;
+			/*if((array_key_exists('totalexunmounted',$invoiceArr) || array_key_exists('totalexmounted',$invoiceArr)) && (!array_key_exists('totalgift',$invoiceArr) && !array_key_exists('totalgiftdet',$invoiceArr))){
+				$transType = 'ex';
+			}
+			elseif((array_key_exists('totalexunmounted',$invoiceArr) || array_key_exists('totalexmounted',$invoiceArr)) && (array_key_exists('totalgift',$invoiceArr) || array_key_exists('totalgiftdet',$invoiceArr))){
+				$transType = 'both';
+			}
+			elseif((!array_key_exists('totalexunmounted',$invoiceArr) || !array_key_exists('totalexmounted',$invoiceArr)) && (array_key_exists('totalgift',$invoiceArr) || array_key_exists('totalgiftdet',$invoiceArr))){
+				$transType = 'gift';
+			}*/
+			
+			
 			if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
 				$transType = 'ex';
 			}
@@ -105,6 +116,9 @@ elseif($exchangeId){
 			elseif((!$invoiceArr['totalexunmounted'] || !$invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
 				$transType = 'gift';
 			}
+			
+			
+			
 			?>
 			<table class="header" align="center">
 				<tr>
@@ -260,7 +274,7 @@ elseif($exchangeId){
 				<?php } ?>
 			<?php }
 			elseif($loanType == 'Exchange'){
-				if($transType == 'ex'){
+				if($transType == 'ex' || $transType == 'both'){
 					if($english){ ?>
 						<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo ($invoiceArr['totalexunmounted']?$invoiceArr['totalexunmounted'].' unmounted ':''); ?>
 							<?php echo (($invoiceArr['totalexunmounted'] && $invoiceArr['totalexmounted'])?'and ':''); ?><?php echo ($invoiceArr['totalexmounted']?$invoiceArr['totalexmounted'].' mounted ':''); ?>
@@ -284,12 +298,12 @@ elseif($exchangeId){
 						<?php }
 					}
 					if($english){ ?>
-						<div class="exchangebal">Our records show a balance of <?php echo $invoiceArr['invoicebalance']; ?> specimens  
+						<div class="exchangebal">Our records show a balance of <?php echo abs($invoiceArr['invoicebalance']); ?> specimens  
 							in <?php echo ($invoiceArr['invoicebalance']>0?'our':'your'); ?> favor. Please contact us if your records differ significantly. 
 						</div><br />
 					<?php }
 					if($spanish){ ?>
-						<div class="exchangebal">Nuestros registros muestran un balance de <?php echo $invoiceArr['invoicebalance']; ?> ejemplares  
+						<div class="exchangebal">Nuestros registros muestran un balance de <?php echo abs($invoiceArr['invoicebalance']); ?> ejemplares  
 							a <?php echo ($invoiceArr['invoicebalance']>0?'nuestro':'su'); ?> favor. Favor de contactarnos si sus 
 							registros se d&iacute;fieren de una manera apreciable.
 						</div><br />
@@ -315,7 +329,7 @@ elseif($exchangeId){
 			</div>
 			<br />
 			<?php 
-			if($invoiceArr['invoicemessage'] || $invoiceArr['invoicemessageown'] || $invoiceArr['invoicemessageborr']){
+			if(array_key_exists('invoicemessage',$invoiceArr) || array_key_exists('invoicemessageown',$invoiceArr) || array_key_exists('invoicemessageborr',$invoiceArr)){
 				echo '<div class="message">';
 				if($loanType == 'Exchange'){
 					echo ($invoiceArr['invoicemessage']?$invoiceArr['invoicemessage']:'');
@@ -326,7 +340,7 @@ elseif($exchangeId){
 				elseif($loanType == 'In'){
 					echo ($invoiceArr['invoicemessageborr']?$invoiceArr['invoicemessageborr']:'');
 				}
-				echo '</div><br />';
+				echo '</div><br /><br />';
 			} ?>
 			<div class="saludos">
 				<?php
