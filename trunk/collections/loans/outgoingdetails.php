@@ -42,19 +42,19 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<b>Loan Number:</b> <input type="text" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" disabled />
+					<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" disabled />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
+					<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="processedbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyown']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="processedbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyown']; ?>" onchange=" " />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange="eventDateModified(this);" />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="eventDateModified(this);" />
 				</span>
 			</div>
 			<div style="padding-top:4px;">
@@ -87,16 +87,16 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<input type="text" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
 				</span>
 				<span style="margin-left:25px;">
 					<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($specTotal?$specTotal['speccount']:0);?>" onchange=" " disabled />
 				</span>
 				<span style="margin-left:30px;">
-					<input type="text" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
 				</span>
 				<span style="margin-left:30px;">
-					<input type="text" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethod']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethod']; ?>" onchange=" " />
 				</span>
 			</div>
 			<div style="padding-top:4px;">
@@ -129,13 +129,13 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<input type="text" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange="eventDateModified(this);" />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
 				</span>
 				<span style="margin-left:25px;">
-					<input type="text" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="eventDateModified(this);" />
 				</span>
 			</div>
 			<div style="padding-top:4px;">
@@ -159,7 +159,8 @@ if($collId) $loanManager->setCollId($collId);
 		<fieldset>
 			<legend>Generate Loan Paperwork</legend>
 			<div style="float:right;">
-				<b>International Shipment:</b> <input type="checkbox" name="international" value="1" />
+				<b>International Shipment:</b> <input type="checkbox" name="international" value="1" /><br /><br />
+				<b>Mailing Account #:</b> <input type="text" autocomplete="off" name="mailaccnum" tabindex="100" maxlength="32" style="width:100px;" value="" />
 			</div>
 			<div style="padding-bottom:2px;">
 				<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser

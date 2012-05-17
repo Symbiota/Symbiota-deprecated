@@ -266,6 +266,55 @@ header("Content-Type: text/html; charset=".$charset);
 			}
 			return xmlHttp;
 		}
+		
+		function eventDateModified(eventDateInput){
+			var dateStr = eventDateInput.value;
+			if(dateStr == "") return true;
+
+			var dateArr = parseDate(dateStr);
+			if(dateArr['y'] == 0){
+				alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
+				return false;
+			}
+			else{
+				//Check to see if date is in the future 
+				try{
+					var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
+					var today = new Date();
+					if(testDate > today){
+						alert("Was this plant really collected in the future? The date you entered has not happened yet. Please revise.");
+						return false;
+					}
+				}
+				catch(e){
+				}
+
+				//Check to see if day is valid
+				if(dateArr['d'] > 28){
+					if(dateArr['d'] > 31 
+						|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
+						|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
+						alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+						return false;
+					}
+				}
+
+				//Enter date into date fields
+				var mStr = dateArr['m'];
+				if(mStr.length == 1){
+					mStr = "0" + mStr;
+				}
+				var dStr = dateArr['d'];
+				if(dStr.length == 1){
+					dStr = "0" + dStr;
+				}
+				eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+				if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
+			}
+			//fieldChanged('eventdate');
+			return true;
+		}
+		
 	</script>
 </head>
 <body>
@@ -340,19 +389,19 @@ header("Content-Type: text/html; charset=".$charset);
 								<fieldset>
 									<legend><b>Add Specimen</b></legend>
 									<div style="float:left;padding-bottom:2px;">
-										<b>Catalog Number: </b><input type="text" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+										<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 									</div>
 									<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:none;">
-										SUCCESS: Specimen record added to loan
+										SUCCESS: Specimen record added to loan.
 									</div>
 									<div id="addspecerr1" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
-										ERROR: unable to located specimen
+										ERROR: No specimens found with that catalog number.
 									</div>
 									<div id="addspecerr2" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
-										ERROR: More than one specimen located with same catalog number
+										ERROR: More than one specimen located with same catalog number.
 									</div>
 									<div id="addspecerr3" style="float:left;margin-left:30px;padding-bottom:2px;color:orange;display:none;">
-										Warning: Specimen already linked to loan
+										Warning: Specimen already linked to loan.
 									</div>
 									<div style="padding-top:8px;clear:both;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />

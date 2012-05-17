@@ -38,7 +38,7 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<b>Transaction Number:</b> <input type="text" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierEx; ?>" />
+					<b>Transaction Number:</b> <input type="text" autocomplete="off" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierEx; ?>" />
 				</span>
 				<span style="margin-left:40px;">
 					<select name="transactiontype" style="width:100px;" >
@@ -47,7 +47,7 @@ if($collId) $loanManager->setCollId($collId);
 					</select>
 				</span>
 				<span style="margin-left:40px;">
-					<input type="text" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+					<input type="text" autocomplete="off" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 				</span>
 			</div>
 			<div style="padding-top:4px;">
