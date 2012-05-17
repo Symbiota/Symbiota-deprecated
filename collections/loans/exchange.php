@@ -15,7 +15,12 @@ if($collId) $loanManager->setCollId($collId);
 
 ?>
 
-<div id="newexchangediv" style="">
+<div style="float:right;margin:10px;">
+	<a href="#" onclick="toggle('newexchangediv')">
+		<img src="../../images/add.png" alt="Create New Exchange" />
+	</a>
+</div>
+<div id="newexchangediv" style="display:none;">
 	<?php
 	$identifierArr = $loanManager->getIdentifier($collId);
 	$identifierEx = ($identifierArr['ex']) + 1;
@@ -68,4 +73,24 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 		</fieldset>
 	</form>
+</div>
+<div>
+	<?php 
+	$transactionList = $loanManager->getTransactionList($collId);
+	if($transactionList){
+		echo '<h3>Transaction Records</h3>';
+		echo '<ul>';
+		foreach($transactionList as $k => $transArr){
+			echo '<li>';
+			echo '<a href="#" onclick="toggle(\''.$k.'\')">'.$k.'</a>';
+			echo '<div id="'.$k.'" style="display:none;"><ul><li>'.$transArr['exchangeid'].'</li></ul></div>';
+			echo '</li>';
+		}
+		echo '</ul>';
+	}
+		
+	else{
+		'<div style="font-weight:bold;font-size:120%;">There are no transactions registered for this collection</div>';
+	}
+	?>
 </div>
