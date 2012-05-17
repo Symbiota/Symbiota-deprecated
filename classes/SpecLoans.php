@@ -69,7 +69,27 @@ class SpecLoans{
 			$rs->close();
 		}
 		return $retArr;
-	} 
+	}
+	
+	public function getTransactionList($collId){
+		$retArr = array();
+		$sql = 'SELECT e.exchangeid, e.identifier, e.collid, i.institutioncode, e.transactiontype, '.
+			'e.in_out, e.datesent, e.datereceived, e.totalexmounted, e.totalexunmounted, '.
+			'e.totalgift, e.totalgiftdet, e.adjustment, e.invoicebalance '.
+			'FROM omoccurexchange AS e LEFT OUTER JOIN institutions AS i ON e.iid = i.iid '.
+			'WHERE e.collid = '.$this->collId.' '.
+			'ORDER BY i.institutioncode ASC, e.exchangeid ASC';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->institutioncode]['exchangeid'] = $r->exchangeid;
+				//$retArr[$r->loanid]['institutioncode'] = $r->institutioncode;
+				//$retArr[$r->loanid]['forwhom'] = $r->forwhom;
+				//$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
 	
 	public function getLoanOnWayList(){
 		$retArr = array();
