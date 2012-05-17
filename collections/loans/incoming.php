@@ -21,7 +21,7 @@ if($collId) $loanManager->setCollId($collId);
 			<fieldset>
 				<legend><b>Options</b></legend>
 				<div>
-					<b>Search: </b><input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+					<b>Search: </b><input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
 				</div>
 				<div>
 					<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> Display outstanding loans only
@@ -56,10 +56,10 @@ if($collId) $loanManager->setCollId($collId);
 				</div>
 				<div style="padding-bottom:2px;">
 					<span>
-						<input type="text" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+						<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 					</span>
 					<span style="float:right;">
-						<b>Loan Identifier: </b><input type="text" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierIn; ?>" />
+						<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierIn; ?>" />
 					</span>
 				</div>
 				<div style="padding-top:6;">

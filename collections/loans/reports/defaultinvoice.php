@@ -93,32 +93,20 @@ elseif($exchangeId){
 			$specTotal = $loanManager->getSpecTotal($loanId);
 			$exchangeValue = $loanManager->getExchangeValue($exchangeId);
 			$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
-			$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
 			
-			$transType = 0;
-			/*if((array_key_exists('totalexunmounted',$invoiceArr) || array_key_exists('totalexmounted',$invoiceArr)) && (!array_key_exists('totalgift',$invoiceArr) && !array_key_exists('totalgiftdet',$invoiceArr))){
-				$transType = 'ex';
+			if($loanType == 'Exchange'){
+				$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
+				$transType = 0;
+				if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
+					$transType = 'ex';
+				}
+				elseif(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
+					$transType = 'both';
+				}
+				elseif((!$invoiceArr['totalexunmounted'] || !$invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
+					$transType = 'gift';
+				}
 			}
-			elseif((array_key_exists('totalexunmounted',$invoiceArr) || array_key_exists('totalexmounted',$invoiceArr)) && (array_key_exists('totalgift',$invoiceArr) || array_key_exists('totalgiftdet',$invoiceArr))){
-				$transType = 'both';
-			}
-			elseif((!array_key_exists('totalexunmounted',$invoiceArr) || !array_key_exists('totalexmounted',$invoiceArr)) && (array_key_exists('totalgift',$invoiceArr) || array_key_exists('totalgiftdet',$invoiceArr))){
-				$transType = 'gift';
-			}*/
-			
-			
-			if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
-				$transType = 'ex';
-			}
-			elseif(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
-				$transType = 'both';
-			}
-			elseif((!$invoiceArr['totalexunmounted'] || !$invoiceArr['totalexmounted']) && ($invoiceArr['totalgift'] || $invoiceArr['totalgiftdet'])){
-				$transType = 'gift';
-			}
-			
-			
-			
 			?>
 			<table class="header" align="center">
 				<tr>
