@@ -1,14 +1,21 @@
+<?php 
+$specList = $loanManager->getSpecList($loanId);
+?>
 <div id="tabs" style="margin:0px;">
     <ul>
 		<li><a href="#loandiv"><span>Loan Details</span></a></li>
+		<?php 
+		if($specList){
+			?>
+			<li><a href="#specdiv"><span>Specimens</span></a></li>
+			<?php 
+		}
+		?>
 	</ul>
 	<div id="loandiv">
 		<?php 
 		//Show loan details
 		$loanArr = $loanManager->getLoanInDetails($loanId);
-		$specTotal = $loanManager->getSpecTotal($loanId);
-		//$loanDetails = $loanManager->getLoanDetails($loanId);
-		//foreach($loanDetails as $k => $loanArr){
 		?>
 		<form name="editloanform" action="index.php" method="post">
 			<fieldset>
@@ -77,7 +84,7 @@
 						<input type="text" autocomplete="off" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
 					</span>
 					<span style="margin-left:25px;">
-						<b>Specimen Total:</b> <input type="text" autocomplete="off" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php if($loanArr['collidown']){echo ($specTotal?$specTotal['speccount']:0) ;}else{echo $loanArr['numspecimens'] ;} ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+						<b>Specimen Total:</b> <input type="text" autocomplete="off" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($loanArr['collidown']?count($specList):$loanArr['numspecimens']); ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
@@ -175,4 +182,42 @@
 			</fieldset>
 		</form>
 	</div>
+	<?php 
+	if($specList){
+		?>
+		<div id="specdiv">
+			<table class="styledtable">
+				<tr>
+					<th style="width:100px;text-align:center;">Catalog Number</th>
+					<th style="width:375px;text-align:center;">Details</th>
+					<th style="width:75px;text-align:center;">Date Returned</th>
+				</tr>
+				<?php
+				foreach($specList as $k => $specArr){
+					?>
+					<tr>
+						<td>
+							<a href="#" onclick="openOccurrenceDetails(<?php echo $k; ?>);">
+								<?php echo $specArr['catalognumber']; ?>
+							</a>
+						</td>
+						<td>
+							<?php 
+							$loc = $specArr['locality'];
+							if(strlen($loc) > 500) $loc = substr($loc,400);
+							echo '<i>'.$specArr['sciname'].'</i>; ';
+							echo  $specArr['collector'].'; '.$loc;
+							?> 
+							
+						</td>
+						<td><?php echo $specArr['returndate']; ?></td>
+					</tr>
+					<?php 
+				}
+				?>
+			</table>
+		</div>
+		<?php 
+	}
+	?>
 </div>
