@@ -15,38 +15,6 @@ class SpecLoans{
  		if($this->conn) $this->conn->close();
 	}
 
-	public function getIdentifier($collId){
-		$retArrIn = array();
-		$sqlIn = 'SELECT COUNT(collidborr) AS count '.
-			'FROM omoccurloans '.
-			'WHERE collidborr = '.$this->collId.' ';
-		if($rs = $this->conn->query($sqlIn)){
-			while($r = $rs->fetch_object()){
-				$retArr['in'] = $r->count;
-			}
-			$rs->close();
-		}
-		$sqlOut = 'SELECT COUNT(collidown) AS count '.
-			'FROM omoccurloans '.
-			'WHERE collidown = '.$this->collId.' ';
-		if($rs = $this->conn->query($sqlOut)){
-			while($r = $rs->fetch_object()){
-				$retArr['out'] = $r->count;
-			}
-			$rs->close();
-		}
-		$sqlEx = 'SELECT COUNT(collid) AS count '.
-			'FROM omoccurexchange '.
-			'WHERE collid = '.$this->collId.' ';
-		if($rs = $this->conn->query($sqlEx)){
-			while($r = $rs->fetch_object()){
-				$retArr['ex'] = $r->count;
-			}
-			$rs->close();
-		}
-		return $retArr;
-	}
-	
 	public function getLoanOutList($searchTerm,$displayAll){
 		$retArr = array();
 		$sql = 'SELECT l.loanid, l.loanidentifierown, i.institutioncode, l.forwhom, l.dateclosed '.
@@ -274,6 +242,17 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
+	public function deleteLoanOut($loanId){
+		$status = 0;
+		if(is_numeric($loanId)){
+			$sql = 'DELETE FROM omoccurloans WHERE (loanid = '.$loanId.')';
+			if($this->conn->query($sql)){
+				$status = 1;
+			}
+		}
+		return $status;
+	}
+	
 	public function editLoanIn($pArr){
 		$statusStr = '';
 		$loanId = $pArr['loanid'];
@@ -426,21 +405,6 @@ class SpecLoans{
 		}
 		return $statusStr;
 	}
-	
-	public function getSpecTotal($loanId){
-		$retArr = array();
-		$sql = 'SELECT loanid, COUNT(loanid) AS speccount '.
-			'FROM omoccurloanslink '.
-			'WHERE loanid = '.$loanId.' '.
-			'GROUP BY loanid';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr['speccount'] = $r->speccount;
-			}
-			$rs->close();
-		}
-		return $retArr;
-	} 
 	
 	public function getSpecList($loanId){
 		$retArr = array();

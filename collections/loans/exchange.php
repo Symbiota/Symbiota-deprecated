@@ -3,12 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
-$loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
 $exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
-$loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
-$searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
-$displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
-$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $loanManager = new SpecLoans();
 if($collId) $loanManager->setCollId($collId);
@@ -16,15 +11,11 @@ if($collId) $loanManager->setCollId($collId);
 ?>
 
 <div style="float:right;margin:10px;">
-	<a href="#" onclick="toggle('newexchangediv')">
+	<a href="#" onclick="displayNewExchange()">
 		<img src="../../images/add.png" alt="Create New Exchange" />
 	</a>
 </div>
 <div id="newexchangediv" style="display:none;">
-	<?php
-	$identifierArr = $loanManager->getIdentifier($collId);
-	$identifierEx = ($identifierArr['ex']) + 1;
-	?>
 	<form name="newexchangegiftform" action="index.php" method="post">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
@@ -38,7 +29,8 @@ if($collId) $loanManager->setCollId($collId);
 			</div>
 			<div style="padding-bottom:2px;">
 				<span>
-					<b>Transaction Number:</b> <input type="text" autocomplete="off" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierEx; ?>" />
+					<b>Transaction Number:</b> 
+					<input type="text" autocomplete="off" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 				</span>
 				<span style="margin-left:40px;">
 					<select name="transactiontype" style="width:100px;" >
@@ -88,7 +80,6 @@ if($collId) $loanManager->setCollId($collId);
 		}
 		echo '</ul>';
 	}
-		
 	else{
 		'<div style="font-weight:bold;font-size:120%;">There are no transactions registered for this collection</div>';
 	}
