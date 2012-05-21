@@ -166,7 +166,8 @@ if($collId) $loanManager->setCollId($collId);
 		<fieldset>
 			<legend>Generate Loan Paperwork</legend>
 			<div style="float:right;">
-				<b>International Shipment:</b> <input type="checkbox" name="international" value="int" />
+				<b>International Shipment:</b> <input type="checkbox" name="international" value="1" /><br /><br />
+				<b>Mailing Account #:</b> <input type="text" autocomplete="off" name="mailaccnum" tabindex="100" maxlength="32" style="width:100px;" value="" />
 			</div>
 			<div style="padding-bottom:2px;">
 				<b>Print Method:</b> <input type="radio" name="print" value="browser" checked /> Print in Browser
@@ -181,6 +182,7 @@ if($collId) $loanManager->setCollId($collId);
 			<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 			<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
 			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="invoice">Invoice</button>
+			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="spec">Specimen List</button>
 			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="label">Mailing Label</button>
 			<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="envelope">Envelope</button>
 		</fieldset>
