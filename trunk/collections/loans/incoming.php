@@ -4,11 +4,9 @@ include_once($serverRoot.'/classes/SpecLoans.php');
 
 $collId = $_REQUEST['collid'];
 $loanId = array_key_exists('loanid',$_REQUEST)?$_REQUEST['loanid']:0;
-$exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
 $loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
 $searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
 $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
-$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $loanManager = new SpecLoans();
 if($collId) $loanManager->setCollId($collId);
@@ -37,15 +35,11 @@ if($collId) $loanManager->setCollId($collId);
 		</form>	
 	</div>
 	<div style="float:right;margin:10px;">
-		<a href="#" onclick="toggle('newloanindiv')">
+		<a href="#" onclick="displayNewLoanIn()">
 			<img src="../../images/add.png" alt="Create New Loan" />
 		</a>
 	</div>
 	<div id="newloanindiv" style="display:none;">
-		<?php
-		$identifierArr = $loanManager->getIdentifier($collId);
-		$identifierIn = ($identifierArr['in']) + 1;
-		?>
 		<form name="newloaninform" action="index.php" method="post">
 			<fieldset>
 				<legend><b>New Loan</b></legend>
@@ -59,7 +53,7 @@ if($collId) $loanManager->setCollId($collId);
 						<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 					</span>
 					<span style="float:right;">
-						<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $identifierIn; ?>" />
+						<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 					</span>
 				</div>
 				<div style="padding-top:6;">
@@ -94,7 +88,7 @@ if($collId) $loanManager->setCollId($collId);
 			echo '<ul>';
 			foreach($loansOnWay as $k => $loanArr){
 				echo '<li>';
-				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
+				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
 				echo $loanArr['loanidentifierown'];
 				echo ' from '.$loanArr['collectionname'].'</a>';
 				echo '</li>';
@@ -114,7 +108,7 @@ if($collId) $loanManager->setCollId($collId);
 			echo '<ul>';
 			foreach($loanInList as $k => $loanArr){
 				echo '<li>';
-				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=In">';
+				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
 				echo $loanArr['loanidentifierborr'];
 				echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
 				echo '</li>';

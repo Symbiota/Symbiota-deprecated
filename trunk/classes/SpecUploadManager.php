@@ -395,19 +395,30 @@ class SpecUploadManager{
  	}
 
 	public function finalUploadSteps($finalTransfer){
-		//Run cleanup Stored Procedure, if one exists 
+ 		//Run custom cleaning Stored Procedure, if one exists
+		echo '<li style="font-weight:bold;">Records Upload Complete!</li>';
+		echo '<li style="font-weight:bold;">Starting custom cleaning scripts...</li>';
+		ob_flush();
+		flush();
 		if($this->storedProcedure){
 			try{
 				if($this->conn->query('CALL '.$this->storedProcedure)){
-					echo '<li style="font-weight:bold;">';
+					echo '<li style="font-weight:bold;margin-left:10px;">';
 					echo 'Stored procedure executed: '.$this->storedProcedure;
 					echo '</li>';
 				}
 			}
 			catch(Exception $e){
-				echo '<li style="color:red;">ERROR: Record cleaning failed ('.$this->storedProcedure.')</li>';
+				echo '<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>';
 			}
+			ob_flush();
+			flush();
 		}
+		
+ 		//Prefrom general cleaning and parsing tasks
+		$this->recordCleaningStage1();
+		$this->recordCleaningStage2();
+		
 		if(!$this->transferCount){
 			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$rs = $this->conn->query($sql);
@@ -416,11 +427,128 @@ class SpecUploadManager{
 			}
 			$rs->close();
 		}
+
+		//Remove temp dbpk values, if they exists
+		$sql = 'UPDATE uploadspectemp SET dbpk = NULL WHERE (dbpk LIKE "temp-%") AND (collid = '.$this->collId.')';
+		$this->conn->query($sql);
+		
+		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
+			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
+				'SET u.occid = o.occid '.
+				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+			
+			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
+			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+				'SET u.occid = o.occid '.
+				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+		}
+		
+		if($finalTransfer){
+			$this->performFinalTransfer();
+			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
+		}
+		else{
+			echo '<li style="font-weight:bold;">Upload Procedure Complete';
+			echo ': '.$this->transferCount.' records uploaded to temporary table';
+			echo '</li>';
+			if($this->transferCount){
+				echo '<li style="font-weight:bold;">Use controls below to activate records and transfer to specimen table</li>';
+			}
+		}
+	}
+	
+	private function recordCleaningStage1(){
+		echo '<li style="font-weight:bold;">Starting Stage 1 cleaning</li>';
+		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
 		ob_flush();
 		flush();
+		$sql = 'UPDATE uploadSpecTemp u '.
+			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
+			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 ';
+		$this->conn->query($sql);
+		echo 'Done!</li> ';
+		
+		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with verbatimEventDate... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT u.dbpk, u.verbatimeventdate '.
+			'FROM uploadSpecTemp u '.
+			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$recDbpk = $r->dbpk;
+			$dateStr = $this->formatDate($r->verbatimeventdate);
+			if($dateStr && $recDbpk){
+				$sql = 'UPDATE uploadspectemp '.
+					'SET eventdate = "'.$dateStr.'" '.
+					'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+				$this->conn->query($sql);
+			}
+		}
+		$rs->close();
+		echo 'Done!</li> ';
+		
+		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse coordinates from verbatimCoordinates field... ';
+		ob_flush();
+		flush();
+		//Parse out verbatimCoordinates
+		$sql = 'SELECT dbpk, verbatimcoordinates '.
+			'FROM uploadSpecTemp '.
+			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->verbatimcoordinates){
+				$recDbpk = $r->dbpk;
+				$coordArr = $this->parseVerbatimCoordinates($r->verbatimcoordinates);
+				if($coordArr && $recDbpk){
+					$sql = 'UPDATE uploadspectemp '.
+						'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].
+						'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+					$this->conn->query($sql);
+				}
+			}
+		}
+		$rs->close();
+		echo 'Done!</li> ';
+		
+		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse coordinates from verbatimCoordinates field... ';
+		ob_flush();
+		flush();
+		//Clean and parse verbatimElevation string
+		$sql = 'SELECT dbpk, verbatimelevation '.
+			'FROM uploadSpecTemp '.
+			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$recDbpk = $r->dbpk;
+			$eArr = $this->parseVerbatimElevation($r->verbatimelevation);
+			if($eArr && $recDbpk){
+				$maxElev = 'NULL';
+				if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
+				$sql = 'UPDATE uploadspectemp '.
+					'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
+					'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+				$this->conn->query($sql);
+			}
+		}
+		$rs->close();
+		echo 'Done!</li> ';
+	}
 
-		echo '<li style="font-weight:bold;">Records Upload Complete!</li>';
-		echo '<li style="font-weight:bold;">Updating event date fields...';
+	private function recordCleaningStage2(){
+		echo '<li style="font-weight:bold;">Starting Stage 2 cleaning!</li>';
+		echo '<li style="font-weight:bold;margin-left:10px;">Further updates on event date fields...';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
@@ -449,7 +577,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 
-		echo '<li style="font-weight:bold;">Cleaning taxonomy...';
+		echo '<li style="font-weight:bold;margin-left:10px;">Cleaning taxonomy...';
 		ob_flush();
 		flush();
 
@@ -550,7 +678,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
-		echo '<li style="font-weight:bold;">Linking to taxonomic thesaurus...';
+		echo '<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...';
 		ob_flush();
 		flush();
 
@@ -580,7 +708,7 @@ class SpecUploadManager{
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 
-		echo '<li style="font-weight:bold;">Cleaning illegal and errored coordinates...';
+		echo '<li style="font-weight:bold;margin-left:10px;">Cleaning illegal and errored coordinates...';
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude '.
@@ -594,12 +722,7 @@ class SpecUploadManager{
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90';
-		$this->conn->query($sql);
-
-		$sql = 'UPDATE uploadspectemp '.
-			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLongitude < -180 OR DecimalLongitude > 180';
+			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180';
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
@@ -607,43 +730,8 @@ class SpecUploadManager{
 			'WHERE UtmNorthing IS NOT NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
-
-		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
-			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
-			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
-			ob_flush();
-			flush();
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid '.
-				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
-			$this->conn->query($sql);
-			echo 'Done!</li> ';
-			
-			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
-			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
-			ob_flush();
-			flush();
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid '.
-				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
-			$this->conn->query($sql);
-			echo 'Done!</li> ';
-		}
-		
-		if($finalTransfer){
-			$this->performFinalTransfer();
-			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
-		}
-		else{
-			echo '<li style="font-weight:bold;">Upload Procedure Complete';
-			echo ': '.$this->transferCount.' records uploaded to temporary table';
-			echo '</li>';
-			if($this->transferCount){
-				echo '<li style="font-weight:bold;">Use controls below to activate records and transfer to specimen table</li>';
-			}
-		}
 	}
-
+	
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
 		set_time_limit(1000);
@@ -833,7 +921,7 @@ class SpecUploadManager{
 				&& $recMap['dateidentified'] > 2100 && $recMap['dateidentified'] < 45000){
 				$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified'],1900));
 			}
-			//More date cleaning
+			//If month is text, avoid SQL error by converting to numeric value 
 			if(array_key_exists('month',$recMap)){
 				if(!is_numeric($recMap['month'])){
 					if(strlen($recMap['month']) > 2){
@@ -851,26 +939,6 @@ class SpecUploadManager{
 					else{
 						$recMap['month'] = '';
 					}
-				}
-			}
-			if(!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']){
-				if(array_key_exists('year',$recMap) && $recMap['year'] && is_numeric($recMap['year']) && strlen($recMap['year'])==4 && array_key_exists('month',$recMap) && array_key_exists('day',$recMap)){
-					$y = $recMap['year'];
-					$m = "00";
-					$d = "00";
-					if($recMap['month'] && is_numeric($recMap['month'])){
-						$m = $recMap['month'];
-						if(strlen($m) == 1) $m = '0'.$m;
-						if(array_key_exists('day',$recMap) && $recMap['day'] && is_numeric($recMap['day'])){
-							$d = $recMap['day'];
-							if(strlen($d) == 1) $d = '0'.$d;
-						}
-					}
-					$recMap['eventdate'] = $y.'-'.$m.'-'.$d;
-				}
-				elseif(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate']){
-					$dateStr = $this->formatDate($recMap['verbatimeventdate']);
-					if($dateStr) $recMap['eventdate'] = $dateStr;
 				}
 			}
 			//Convert UTM to Lat/Long
@@ -892,12 +960,6 @@ class SpecUploadManager{
 						$recMap['decimallongitude'] = round($lng,6);
 					}
 				}
-			}
-			//Clean and parse verbatimElevation string
-			if(array_key_exists('verbatimelevation',$recMap) && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
-				$eArr = $this->parseVerbatimElevation($recMap['verbatimelevation']);
-				if(array_key_exists('minelev',$eArr)) $recMap['minimumelevationinmeters'] = $eArr['minelev'];
-				if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
 			}
 			//Populate sciname if null
 			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
@@ -945,9 +1007,15 @@ class SpecUploadManager{
 					$recMap['sciname'] = trim($scinameStr);
 				}
 			}
+			
 			//If a DiGIR load, set dbpk value
 			if($this->digirPKField && array_key_exists($this->digirPKField,$recMap) && !array_key_exists('dbpk',$recMap)){
 				$recMap['dbpk'] = $recMap[$this->digirPKField];
+			}
+			
+			//If there is no dbpk set, set a temp value to aid in locating record in uploadspectemp during cleaning stage 
+			if(!array_key_exists('dbpk',$recMap) || !$recMap['dbpk']){
+				$recMap['dbpk'] = 'temp-'.$this->transferCount;
 			}
 			
 			//Create update str 
@@ -1140,7 +1208,12 @@ class SpecUploadManager{
 		elseif(preg_match('/^(\D{3,})\.*\s([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
 			//Format: mmm yyyy
 			$mStr = strtolower(substr($match[1],0,3));
-			$m = $this->monthNames[$mStr];
+			if(array_key_exists($mStr,$this->monthNames)){
+				$m = $this->monthNames[$mStr];
+			}
+			else{
+				$m = '00';
+			}
 			$y = $match[2];
 		}
 		elseif(preg_match('/([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
@@ -1239,6 +1312,65 @@ class SpecUploadManager{
 			$retArr['unitname2'] = $retArr['unitind2'].' '.$retArr['unitname2'];
 			unset($retArr['unitind2']); 
 		}
+		return $retArr;
+	}
+
+	private function parseVerbatimCoordinates($inStr){
+		$retArr = array();
+		//Try to parse lat/lng
+		$latDeg = 'null';$latMin = 'null';$latSec = 'null';$latNS = 'N';
+		$lngDeg = 'null';$lngMin = 'null';$lngSec = 'null';$lngEW = 'W';
+		//Grab lat deg and min
+		if(preg_match('/(\d{1,2})[°d*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*[NS]+.*)/i',$inStr,$m)){
+			$latDeg = $m[1];
+			$latMin = $m[2];
+			$leftOver = trim($m[3]);
+			//Grab lat sec
+			if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*[NS]+.*)/i',$leftOver,$m)){
+				$latSec = $m[1];
+				if(count($m)>2){
+					$leftOver = trim($m[2]);
+				}
+			}
+			//Grab lat NS
+			if(preg_match('/([NS]+)(.*[EW]+.*)/i',$leftOver,$m)){
+				$latNS = $m[1];
+				$leftOver = trim($m[2]);
+			}
+			//Grab lng deg and min
+			if(preg_match('/(\d{1,3})[°d*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*[EW]+.*)/i',$leftOver,$m)){
+				$lngDeg = $m[1];
+				$lngMin = $m[2];
+				$leftOver = trim($m[3]);
+				//Grab lng sec
+				if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*[EW]+.*)/i',$leftOver,$m)){
+					$lngSec = $m[1];
+					if(count($m)>2){
+						$leftOver = trim($m[2]);
+					}
+				}
+				//Grab lng EW
+				if(preg_match('/([EW]+)/i',$leftOver,$m)){
+					$latEW = $m[1];
+				}
+				if(is_numeric($latDeg) && is_numeric($latMin) && is_numeric($lngDeg) && is_numeric($lngMin)){
+					if($latDeg < 90 && $latMin < 60 && $lngDeg < 180 && $lngMin < 60){
+						$latDec = $latDeg + ($latMin/60) + ($latSec/3600);
+						$lngDec = $lngDeg + ($lngMin/60) + ($lngSec/3600);
+						if($latNS == 'S'){
+							$latDec = -$latDec;
+						}
+						if($lngEW == 'W'){
+							$lngDec = -$lngDec;
+						}
+						$retArr['lat'] = round($latDec,6);
+						$retArr['lng'] = round($lngDec,6);
+					}
+				}
+			}
+		}
+		//Try to parse UTM <Code still to be added>
+
 		return $retArr;
 	}
 	

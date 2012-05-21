@@ -163,6 +163,14 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 							</div>
 							<?php 
 						}
+						if(array_key_exists('loan',$occArr)){
+							?>
+							<div style="color:red;font-weight:bold;" title="<?php echo 'Loan #'.$occArr['loan']['identifier']; ?>">
+								On Loan to 
+								<?php echo $occArr['loan']['code']; ?>
+							</div>
+							<?php 
+						}
 						?>
 					</div>
 				</div>

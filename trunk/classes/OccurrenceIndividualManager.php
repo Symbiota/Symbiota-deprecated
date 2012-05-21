@@ -92,6 +92,8 @@ class OccurrenceIndividualManager {
 		}
 		$this->setImages();
 		$this->setDeterminations();
+		$this->setLoan();
+		//$this->setComments();
 		$result->close();
     }
 
@@ -133,6 +135,19 @@ class OccurrenceIndividualManager {
 			$this->occArr['dets'][$detId]['qualifier'] = $row->identificationqualifier;
 			$this->occArr['dets'][$detId]['ref'] = $row->identificationreferences;
 			$this->occArr['dets'][$detId]['notes'] = $row->identificationremarks;
+		}
+		$result->close();
+	}
+	
+	private function setLoan(){
+        $sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
+			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
+			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
+			'WHERE (llink.occid = '.$this->occId.') AND llink.returndate IS NULL';
+        $result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$this->occArr['loan']['identifier'] = $row->loanIdentifierOwn;
+			$this->occArr['loan']['code'] = $row->institutioncode;
 		}
 		$result->close();
 	}
