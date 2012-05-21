@@ -473,7 +473,7 @@ class SpecUploadManager{
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
 		ob_flush();
 		flush();
-		$sql = 'UPDATE uploadSpecTemp u '.
+		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
 			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 ';
 		$this->conn->query($sql);
@@ -483,7 +483,7 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 		$sql = 'SELECT u.dbpk, u.verbatimeventdate '.
-			'FROM uploadSpecTemp u '.
+			'FROM uploadspectemp u '.
 			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -504,7 +504,7 @@ class SpecUploadManager{
 		flush();
 		//Parse out verbatimCoordinates
 		$sql = 'SELECT dbpk, verbatimcoordinates '.
-			'FROM uploadSpecTemp '.
+			'FROM uploadspectemp '.
 			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -527,7 +527,7 @@ class SpecUploadManager{
 		flush();
 		//Clean and parse verbatimElevation string
 		$sql = 'SELECT dbpk, verbatimelevation '.
-			'FROM uploadSpecTemp '.
+			'FROM uploadspectemp '.
 			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
