@@ -81,29 +81,39 @@ elseif($exchangeId){
 			$specList = $loanManager->getSpecList($loanId);
 			?>
 			<table>
-			<tr style="height:1in;"><td> </td></tr>
-			<tr style=" "><td> </td></tr>
-			<tr style=" "><td><?php if($accountNum){echo '<div class="accnum">Acct. #'.$accountNum.'</div>';} ?></td></tr>
-			<tr style="height:1.5in;"><td>
-			<div class="toaddress">
-				<?php 
-				echo $invoiceArr['contact'].'<br />';
-				echo $invoiceArr['institutionname'].' ('.$invoiceArr['institutioncode'].')<br />';
-				if($invoiceArr['institutionname2']){
-					echo $invoiceArr['institutionname2'].'<br />';
-				}
-				echo $invoiceArr['address1'].'<br />';
-				if($invoiceArr['address2']){
-					echo $invoiceArr['address2'].'<br />';
-				}
-				echo $invoiceArr['city'].', '.$invoiceArr['stateprovince'].' '.$invoiceArr['postalcode'];
-				if($international){
-					echo '<br />'.$invoiceArr['country'];
-				}
-				?>
-			</div>
-			</td></tr>
-			<tr style=" "><td> </td></tr>
+				<tr style="height:1in;">
+					<td></td>
+				</tr>
+				<tr style=" ">
+					<td></td>
+				</tr>
+				<tr style=" ">
+					<td><?php if($accountNum){echo '<div class="accnum">Acct. #'.$accountNum.'</div>';} ?></td>
+				</tr>
+				<tr style="height:1.5in;">
+					<td>
+						<div class="toaddress">
+							<?php 
+							echo $invoiceArr['contact'].'<br />';
+							echo $invoiceArr['institutionname'].' ('.$invoiceArr['institutioncode'].')<br />';
+							if($invoiceArr['institutionname2']){
+								echo $invoiceArr['institutionname2'].'<br />';
+							}
+							echo $invoiceArr['address1'].'<br />';
+							if($invoiceArr['address2']){
+								echo $invoiceArr['address2'].'<br />';
+							}
+							echo $invoiceArr['city'].', '.$invoiceArr['stateprovince'].' '.$invoiceArr['postalcode'];
+							if($international){
+								echo '<br />'.$invoiceArr['country'];
+							}
+							?>
+						</div>
+					</td>
+				</tr>
+				<tr style=" ">
+					<td></td>
+				</tr>
 			</table>
 		</div>
 	</body>
