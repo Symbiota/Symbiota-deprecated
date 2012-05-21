@@ -126,7 +126,7 @@ elseif($exchangeId){
 					</tr>
 				<?php } ?>
 				<tr>
-					<td><?php echo $addressArr['city']; ?>, <?php echo $addressArr['stateprovince']; ?> <?php echo $addressArr['postalcode']; ?> <?php if($international){echo $addressArr['country'];} ?></td>
+					<td><?php echo $addressArr['city'].', '.$addressArr['stateprovince'].' '.$addressArr['postalcode']; ?> <?php if($international){echo $addressArr['country'];} ?></td>
 				</tr>
 				<tr>
 					<td><?php echo $addressArr['phone']; ?></td>
