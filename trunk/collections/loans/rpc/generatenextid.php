@@ -8,13 +8,13 @@ $retMsg = '';
 if($collId && is_numeric($collId)){
 	$sql = '';
 	if($idType == 'out'){
-		$sqlOut = 'SELECT loanIdentifierOwn AS ids '.
+		$sqlOut = 'SELECT loanidentifierown AS ids '.
 			'FROM omoccurloans '.
 			'WHERE collidown = '.$collId.' '.
 			'ORDER BY loanid desc LIMIT 3';
 	}
 	elseif($idType == 'in'){
-		$sqlOut = 'SELECT loanIdentifierBorr AS ids '.
+		$sqlOut = 'SELECT loanidentifierborr AS ids '.
 			'FROM omoccurloans '.
 			'WHERE collidborr = '.$collId.' '.
 			'ORDER BY loanid desc LIMIT 3';
@@ -23,7 +23,7 @@ if($collId && is_numeric($collId)){
 		$sqlOut = 'SELECT identifier AS ids '.
 			'FROM omoccurexchange '.
 			'WHERE collid = '.$collId.' '.
-			'ORDER BY loanid desc LIMIT 3';
+			'ORDER BY exchangeid desc LIMIT 3';
 	}
 	else{
 		return '';

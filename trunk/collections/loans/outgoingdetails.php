@@ -288,7 +288,7 @@ $specList = $loanManager->getSpecList($loanId);
 					echo '</div>';
 				}
 				?>
-				<input name="formsubmit" type="submit" value="Delete Outgoing Loan" <?php if($specList) echo 'DISABLED'; ?> />
+				<input name="formsubmit" type="submit" value="Delete Loan" <?php if($specList) echo 'DISABLED'; ?> />
 				<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 				<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 			</fieldset>
