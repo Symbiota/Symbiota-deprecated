@@ -84,7 +84,7 @@ $specList = $loanManager->getSpecList($loanId);
 						<input type="text" autocomplete="off" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
 					</span>
 					<span style="margin-left:25px;">
-						<b>Specimen Total:</b> <input type="text" autocomplete="off" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($loanArr['collidown']?count($specList):$loanArr['numspecimens']); ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+						<b>Specimen Total:</b> <input type="text" autocomplete="off" name="numspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo ($loanArr['collidown']?count($specList):$loanArr['numspecimens']); ?>" onchange=" " <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 					</span>
 				</div>
 				<div style="padding-top:4px;">

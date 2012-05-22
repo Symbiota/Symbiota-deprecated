@@ -16,7 +16,7 @@ if($collId) $loanManager->setCollId($collId);
 	</a>
 </div>
 <div id="newexchangediv" style="display:none;">
-	<form name="newexchangegiftform" action="index.php" method="post">
+	<form name="newexchangegiftform" action="index.php" method="post" onsubmit="return verfifyExchangeAddForm(this)">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
 			<div style="padding-top:4px;">
@@ -50,6 +50,8 @@ if($collId) $loanManager->setCollId($collId);
 			<div style="padding-bottom:2px;">
 				<span>
 					<select name="iid" style="width:400px;" >
+						<option value="0">Select Institution</option>
+						<option value="0">------------------------------------------</option>
 						<?php 
 						$instArr = $loanManager->getInstitutionArr();
 						foreach($instArr as $k => $v){

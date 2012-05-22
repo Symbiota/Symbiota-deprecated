@@ -27,25 +27,25 @@ if($isEditor){
 		if($formSubmit == 'Create Loan Out'){
 			$statusStr = $loanManager->createNewLoanOut($_POST);
 			$loanId = $loanManager->getLoanId();
-			$loanType = 'Out';
+			$loanType = 'out';
 		}
 		elseif($formSubmit == 'Create Loan In'){
 			$statusStr = $loanManager->createNewLoanIn($_POST);
 			$loanId = $loanManager->getLoanId();
-			$loanType = 'In';
+			$loanType = 'in';
 		}
 		elseif($formSubmit == 'Create Exchange'){
 			$statusStr = $loanManager->createNewExchange($_POST);
 			$exchangeId = $loanManager->getExchangeId();
-			$loanType = 'Exchange';
+			$loanType = 'exchange';
 		}
 		elseif($formSubmit == 'Save Exchange'){
 			$statusStr = $loanManager->editExchange($_POST);
-			$loanType = 'Exchange';
+			$loanType = 'exchange';
 		}
 		elseif($formSubmit == 'Save Outgoing'){
 			$statusStr = $loanManager->editLoanOut($_POST);
-			$loanType = 'Out';
+			$loanType = 'out';
 		}
 		elseif($formSubmit == 'Delete Outgoing Loan'){
 			$status = $loanManager->deleteLoanOut($loanId);
@@ -53,7 +53,7 @@ if($isEditor){
 		}
 		elseif($formSubmit == 'Save Incoming'){
 			$statusStr = $loanManager->editLoanIn($_POST);
-			$loanType = 'In';
+			$loanType = 'in';
 		}
 		elseif($formSubmit == 'Perform Action'){
 			$statusStr = $loanManager->editSpecimen($_REQUEST);

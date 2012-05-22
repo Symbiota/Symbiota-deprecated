@@ -306,6 +306,28 @@ if($collId) $collData = $collManager->getCollectionData();
 								</tr>
 								<tr>
 									<td>
+										Institution: 
+									</td>
+									<td>
+										<?php 
+										$instArr = $collManager->getInstitutionArr();
+										?>
+										<select name="iid" style="width:450px;">
+											<option>Select Institution</option>
+											<option>-----------------------</option>
+											<?php 
+											foreach($instArr as $iid => $name){
+												echo '<option value="'.$iid.'" '.($collId && $collData["iid"] == $iid?'SELECTED':'').'>'.$name.'</option>';
+											}
+											?>
+										</select>
+										<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
+											<img src="../../images/add.png" style="width:15px;" />
+										</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
 										Brief Description<br/> 
 										(300 character max): 
 									</td>
@@ -495,23 +517,38 @@ if($collId) $collData = $collManager->getCollectionData();
 						echo $collData["briefdescription"];
 					}	
 					?></div>
-					<div style='margin-top:5px;'><b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)</div>
+					<div style='margin-top:5px;'>
+						<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)
+					</div>
 					<?php 
-						if($collData["homepage"]) echo "<div style='margin-top:5px;'><b>Home Page:</b> <a href='".$collData["homepage"]."'>".$collData["homepage"]."</a></div>";
-						echo '<div style="margin-top:5px;"> ';
-						echo '<b>Management: </b> ';
+					if($collData["homepage"]){
+						?>
+						<div style="margin-top:5px;">
+							<b>Home Page:</b> 
+							<a href="<?php echo $collData["homepage"]; ?>">
+								<?php echo $collData["homepage"]; ?>
+							</a>
+						</div>
+						<?php 
+					}
+					?>
+					<div style="margin-top:5px;"> 
+						<b>Management: </b> 
+						<?php 
 						if(stripos($collData['managementtype'],'live') !== false){
 							echo 'Live Data managed directly within data portal';
 						}
 						else{
-							echo 'Data snapshot of central database <br/>';
-							echo '<b>Last Update:</b> '.$collData['uploaddate'];
+							echo 'Data snapshot of central database ';
+							echo '<div style="margin-top:5px;"><b>Last Update:</b> '.$collData['uploaddate'].'</div>';
 						}
-						echo '</div>';
-					?>
-	 				<?php if($collData["institutionname"]){ ?>
-						<div style="float:left;font-weight:bold;">Address:&nbsp;</div>
-						<div style="float:left;">
+						?>
+					</div>
+	 				<?php 
+	 				if($collData["institutionname"]){ 
+	 					?>
+						<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
+						<div style="float:left;margin-top:5px;">
 							<?php 
 							echo "<div>".$collData["institutionname"].($collData["institutioncode"]?" (".$collData["institutioncode"].")":"")."</div>";
 							if($collData["address1"]) echo "<div>".$collData["address1"]."</div>";
@@ -521,9 +558,13 @@ if($collId) $collData = $collManager->getCollectionData();
 							if($collData["phone"]) echo "<div>".$collData["phone"]."</div>";
 							?>
 						</div>
-					<?php } ?>
+						<?php 
+	 				} 
+	 				?>
+	 				<div style="clear:both;">&nbsp;</div>
 					<div style="clear:both;">
-						<ul style='margin-top:10px;'>
+						<div style="font-weight:bold;">Collection Statistics</div>
+						<ul>
 							<li><?php echo $collData["recordcnt"];?> specimens in database</li>
 							<li><?php echo $collData["georefcnt"]." (".(round(100*$collData["georefcnt"]/($collData["recordcnt"]?$collData["recordcnt"]:1)));?>%) georeferenced</li>
 							<li><?php echo $collData["familycnt"];?> families</li>
