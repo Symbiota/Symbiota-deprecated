@@ -11,6 +11,7 @@ $specList = $loanManager->getSpecList($loanId);
 			<?php 
 		}
 		?>
+		<li><a href="#inloandeldiv"><span>Admin</span></a></li>
 	</ul>
 	<div id="loandiv">
 		<?php 
@@ -176,7 +177,10 @@ $specList = $loanManager->getSpecList($loanId);
 				<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 				<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
 				<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="invoice">Invoice</button>
-				<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="spec">Specimen List</button>
+				<?php 
+				if($specList){ ?>
+					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="spec">Specimen List</button>
+				<?php } ?>
 				<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="label">Mailing Label</button>
 				<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="envelope">Envelope</button>
 			</fieldset>
@@ -220,4 +224,21 @@ $specList = $loanManager->getSpecList($loanId);
 		<?php 
 	}
 	?>
+	<div id="inloandeldiv">
+		<form name="delinloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this loan?')">
+			<fieldset style="width:350px;margin:20px;padding:20px;">
+				<legend><b>Delete Incoming Loan</b></legend>
+				<?php 
+				if($specList){
+					echo '<div style="font-weight:bold;margin-bottom:15px;">';
+					echo 'Loan cannot be delted until all linked specimens are removed';
+					echo '</div>';
+				}
+				?>
+				<input name="formsubmit" type="submit" value="Delete Loan" <?php if($specList) echo 'DISABLED'; ?> />
+				<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+				<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+			</fieldset>
+		</form>
+	</div>
 </div>

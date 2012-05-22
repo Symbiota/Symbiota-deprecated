@@ -47,9 +47,13 @@ if($isEditor){
 			$statusStr = $loanManager->editLoanOut($_POST);
 			$loanType = 'out';
 		}
-		elseif($formSubmit == 'Delete Outgoing Loan'){
-			$status = $loanManager->deleteLoanOut($loanId);
+		elseif($formSubmit == 'Delete Loan'){
+			$status = $loanManager->deleteLoan($loanId);
 			if($status) $loanId = 0;
+		}
+		elseif($formSubmit == 'Delete Exchange'){
+			$status = $loanManager->deleteExchange($exchangeId);
+			if($status) $exchangeId = 0;
 		}
 		elseif($formSubmit == 'Save Incoming'){
 			$statusStr = $loanManager->editLoanIn($_POST);
@@ -116,7 +120,7 @@ header("Content-Type: text/html; charset=".$charset);
 				<?php 
 			}
 			
-			if(!$loanId){
+			if(!$loanId && !$exchangeId){
 				?>
 				<div id="tabs" style="margin:0px;">
 				    <ul>
@@ -141,7 +145,7 @@ header("Content-Type: text/html; charset=".$charset);
 			elseif($loanType == 'in'){
 				include_once('incomingdetails.php');
 			}
-			elseif($exchangeId){
+			elseif($loanType == 'exchange'){
 				include_once('exchangedetails.php');
 			}
 			else{

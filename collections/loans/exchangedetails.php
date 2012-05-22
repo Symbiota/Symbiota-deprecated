@@ -1,6 +1,7 @@
 <div id="tabs" style="margin:0px;">
     <ul>
 		<li><a href="#exchangedetaildiv"><span>Exchange Details</span></a></li>
+		<li><a href="#exchangedeldiv"><span>Admin</span></a></li>
 	</ul>
 	<div id="exchangedetaildiv" style="">
 		<?php 
@@ -229,11 +230,20 @@
 					<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 					<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
 					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="invoice">Invoice</button>
-					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="spec">Specimen List</button>
 					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="label">Mailing Label</button>
 					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="envelope">Envelope</button>
 				</fieldset>
 			</form>
 		<?php } ?>
+	</div>
+	<div id="exchangedeldiv">
+		<form name="delexchangeform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this exchange?')">
+			<fieldset style="width:350px;margin:20px;padding:20px;">
+				<legend><b>Delete Exchange</b></legend>
+				<input name="formsubmit" type="submit" value="Delete Exchange" />
+				<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+				<input name="exchangeid" type="hidden" value="<?php echo $exchangeId; ?>" />
+			</fieldset>
+		</form>
 	</div>
 </div>
