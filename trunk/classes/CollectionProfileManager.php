@@ -44,7 +44,7 @@ class CollectionProfileManager {
 	public function getCollectionData(){
 		$returnArr = Array();
 		if($this->collId){
-			$sql = "SELECT IFNULL(i.InstitutionCode,c.InstitutionCode) AS institutioncode, i.InstitutionName, ".
+			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 				"c.collid, c.CollectionCode, c.CollectionName, ".
 				"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
@@ -59,6 +59,7 @@ class CollectionProfileManager {
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
+				$returnArr['iid'] = $row->iid;
 				$returnArr['institutionname'] = $row->InstitutionName;
 				$returnArr['address2'] = $row->Address1;
 				$returnArr['address1'] = $row->Address2;
@@ -110,6 +111,7 @@ class CollectionProfileManager {
 			$instCode = $this->cleanStr($_POST['institutioncode']);
 			$collCode = $this->cleanStr($_POST['collectioncode']);
 			$coleName = $this->cleanStr($_POST['collectionname']);
+			$iid = $_POST['iid'];
 			$briefDesc = $this->cleanStr($_POST['briefdescription']);
 			$fullDesc = $this->cleanStr($_POST['fulldescription']);
 			$homepage = $this->cleanStr($_POST['homepage']);
@@ -125,6 +127,7 @@ class CollectionProfileManager {
 				'SET institutioncode = "'.$instCode.'",'.
 				'collectioncode = '.($collCode?'"'.$collCode.'"':'NULL').','.
 				'collectionname = "'.$coleName.'",'.
+				'iid = '.($iid?$iid:'NULL').','.
 				'briefdescription = '.($briefDesc?'"'.$briefDesc.'"':'NULL').','.
 				'fulldescription = '.($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 				'homepage = '.($homepage?'"'.$homepage.'"':'NULL').','.
@@ -157,6 +160,7 @@ class CollectionProfileManager {
 		$instCode = $this->cleanStr($_POST['institutioncode']);
 		$collCode = $this->cleanStr($_POST['collectioncode']);
 		$coleName = $this->cleanStr($_POST['collectionname']);
+		$iid = $_POST['iid'];
 		$briefDesc = $this->cleanStr($_POST['briefdescription']);
 		$fullDesc = $this->cleanStr($_POST['fulldescription']);
 		$homepage = $this->cleanStr($_POST['homepage']);
@@ -173,11 +177,12 @@ class CollectionProfileManager {
 		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,briefdescription,fulldescription,homepage,'.
+		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,briefdescription,fulldescription,homepage,'.
 			'contact,email,latitudedecimal,longitudedecimal,publicedits,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
-			($collCode?'"'.$collCode.'"':'NULL').',"'.$coleName.'",'.
+			($collCode?'"'.$collCode.'"':'NULL').',"'.
+			$coleName.'",'.($iid?$iid:'NULL').
 			($briefDesc?'"'.$briefDesc.'"':'NULL').','.
 			($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 			($homepage?'"'.$homepage.'"':'NULL').','.
@@ -381,6 +386,18 @@ class CollectionProfileManager {
 		}
 		$rs->close();
 		return $returnArr;
+	}
+	
+	public function getInstitutionArr(){
+		$retArr = array();
+		$sql = 'SELECT iid,institutionname,institutioncode '.
+			'FROM institutions '.
+			'ORDER BY Institutioncode ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->iid] = $r->institutioncode.' - '.$r->institutionname;
+		}
+		return $retArr;
 	}
 
 	private function cleanStr($inStr){
