@@ -242,10 +242,21 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
-	public function deleteLoanOut($loanId){
+	public function deleteLoan($loanId){
 		$status = 0;
 		if(is_numeric($loanId)){
 			$sql = 'DELETE FROM omoccurloans WHERE (loanid = '.$loanId.')';
+			if($this->conn->query($sql)){
+				$status = 1;
+			}
+		}
+		return $status;
+	}
+	
+	public function deleteExchange($exchangeId){
+		$status = 0;
+		if(is_numeric($exchangeId)){
+			$sql = 'DELETE FROM omoccurexchange WHERE (exchangeid = '.$exchangeId.')';
 			if($this->conn->query($sql)){
 				$status = 1;
 			}
@@ -406,6 +417,21 @@ class SpecLoans{
 		return $statusStr;
 	}
 	
+	public function getSpecTotal($loanId){
+		$retArr = array();
+		$sql = 'SELECT loanid, COUNT(loanid) AS speccount '.
+			'FROM omoccurloanslink '.
+			'WHERE loanid = '.$loanId.' '.
+			'GROUP BY loanid';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['speccount'] = $r->speccount;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getSpecList($loanId){
 		$retArr = array();
 		$sql = 'SELECT l.loanid, l.occid, IFNULL(o.catalognumber,o.othercatalognumbers) AS catalognumber, '.
@@ -483,7 +509,7 @@ class SpecLoans{
 	
 	public function getInvoiceInfo($identifier,$loanType){
 		$retArr = array();
-		if($loanType == 'Exchange'){
+		if($loanType == 'exchange'){
 			$sql = 'SELECT e.exchangeid, e.identifier, e.iid, '.
 			'e.totalboxes, e.shippingmethod, e.totalexmounted, e.totalexunmounted, e.totalgift, e.totalgiftdet, '.
 			'e.invoicebalance, e.invoicemessage, e.description, i.contact, i.institutionname, i.institutionname2, '.
@@ -522,10 +548,10 @@ class SpecLoans{
 				'e.numspecimens, e.shippingmethod, e.shippingmethodreturn, e.datedue, e.datereceivedborr, e.forwhom, '.
 				'e.description, e.invoicemessageown, e.invoicemessageborr, i.contact, i.institutionname, i.institutionname2, '.
 				'i.institutioncode, i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country ';
-			if($loanType == 'Out'){
+			if($loanType == 'out'){
 				$sql .= 'FROM omoccurloans AS e LEFT OUTER JOIN institutions AS i ON e.iidborrower = i.iid ';
 			}
-			elseif($loanType == 'In'){
+			elseif($loanType == 'in'){
 				$sql .= 'FROM omoccurloans AS e LEFT OUTER JOIN institutions AS i ON e.iidowner = i.iid ';
 			}
 			$sql .= 'WHERE loanid = '.$identifier;
