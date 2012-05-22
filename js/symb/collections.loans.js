@@ -101,7 +101,43 @@ function generateNewId(collId,targetObj,idType){
 	xmlHttp.send(null);
 }
 
-function verifyspeceditform(f){
+function verfifyLoanOutAddForm(f){
+	if(f.reqinstitution.options[f.reqinstitution.selectedIndex].value == 0){
+		alert("Select an institution");
+		return false;
+	}
+	if(f.loanidentifierown.value == ""){
+		alert("Enter a loan identifier");
+		return false;
+	}
+	return true;
+}
+
+function verifyLoanInAddForm(f){
+	if(f.iidowner.options[f.iidowner.selectedIndex].value == 0){
+		alert("Select an institution");
+		return false;
+	}
+	if(f.loanidentifierborr.value == ""){
+		alert("Enter a loan identifier");
+		return false;
+	}
+	return true;
+}
+
+function verfifyExchangeAddForm(f){
+	if(f.iid.options[f.iid.selectedIndex].value == 0){
+		alert("Select an institution");
+		return false;
+	}
+	if(f.identifier.value == ""){
+		alert("Enter a loan identifier");
+		return false;
+	}
+	return true;
+}
+
+function verifySpecEditForm(f){
 	//Make sure at least on specimen checkbox is checked
 	var cbChecked = false;
 	var dbElements = document.getElementsByName("occid[]");

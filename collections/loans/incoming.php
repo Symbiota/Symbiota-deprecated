@@ -40,7 +40,7 @@ if($collId) $loanManager->setCollId($collId);
 		</a>
 	</div>
 	<div id="newloanindiv" style="display:none;">
-		<form name="newloaninform" action="index.php" method="post">
+		<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this)">
 			<fieldset>
 				<legend><b>New Loan</b></legend>
 				<div style="padding-top:4px;">
@@ -53,7 +53,8 @@ if($collId) $loanManager->setCollId($collId);
 						<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 					</span>
 					<span style="float:right;">
-						<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+						<b>Loan Identifier: </b>
+						<input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 					</span>
 				</div>
 				<div style="padding-top:6;">
@@ -64,6 +65,8 @@ if($collId) $loanManager->setCollId($collId);
 				<div style="padding-bottom:2px;">
 					<span>
 						<select name="iidowner" style="width:400px;">
+							<option value="0">Select Institution</option>
+							<option value="0">------------------------------------------</option>
 							<?php 
 							$instArr = $loanManager->getInstitutionArr();
 							foreach($instArr as $k => $v){
