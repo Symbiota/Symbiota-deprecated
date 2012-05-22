@@ -182,7 +182,7 @@ class CollectionProfileManager {
 			'managementtype,colltype,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.
-			$coleName.'",'.($iid?$iid:'NULL').
+			$coleName.'",'.($iid?$iid:'NULL').','.
 			($briefDesc?'"'.$briefDesc.'"':'NULL').','.
 			($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 			($homepage?'"'.$homepage.'"':'NULL').','.

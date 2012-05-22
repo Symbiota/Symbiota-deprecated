@@ -313,8 +313,8 @@ if($collId) $collData = $collManager->getCollectionData();
 										$instArr = $collManager->getInstitutionArr();
 										?>
 										<select name="iid" style="width:450px;">
-											<option>Select Institution</option>
-											<option>-----------------------</option>
+											<option value="">Select Institution</option>
+											<option value="">-----------------------</option>
 											<?php 
 											foreach($instArr as $iid => $name){
 												echo '<option value="'.$iid.'" '.($collId && $collData["iid"] == $iid?'SELECTED':'').'>'.$name.'</option>';
