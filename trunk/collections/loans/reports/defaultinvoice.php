@@ -85,6 +85,9 @@ elseif($exchangeId){
 		</style>
 	</head>
 	<body>
+		<?php 
+			$specList = $loanManager->getSpecList($loanId);
+		?>
 		<table style="height:10in;"><tr><td>
 		<div <?php echo ($exportDoc?'class=WordSection1':'') ?>>
 			<?php
@@ -94,7 +97,7 @@ elseif($exchangeId){
 			$exchangeValue = $loanManager->getExchangeValue($exchangeId);
 			$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
 			
-			if($loanType == 'Exchange'){
+			if($loanType == 'exchange'){
 				$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
 				$transType = 0;
 				if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
@@ -208,15 +211,15 @@ elseif($exchangeId){
 				}
 				
 				if($english){
-					echo '<div>We are sending you '.($invoiceArr['totalboxes'] == 1?'1 box':$invoiceArr['totalboxes']).' boxes ';
-					echo 'containing '.($numSpecimens == 1?'1 specimen':$numSpecimens).' specimens. ';
+					echo '<div>We are sending you '.($invoiceArr['totalboxes'] == 1?'1 box ':$invoiceArr['totalboxes'].' boxes ');
+					echo 'containing '.(count($specList) == 1?'1 specimen. ':count($specList).' specimens. ');
 					echo ($invoiceArr['totalboxes'] == 1?'This package was ':'These packages were ');
 					echo 'delivered via '.$invoiceArr['shippingmethod'].'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
 					echo 'receipt by signing and returning the duplicate invoice to us.</div><br />';
 				}
 				if($spanish){
-					echo '<div>Est&aacute;mos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja':$invoiceArr['totalboxes']).' cajas ';
-					echo 'de '.($numSpecimens == 1?'1 ejemplar':$numSpecimens).' ejemplares. ';
+					echo '<div>Est&aacute;mos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja ':$invoiceArr['totalboxes'].' cajas ');
+					echo 'de '.(count($specList) == 1?'1 ejemplar. ':count($specList).' ejemplares. ');
 					echo ($invoiceArr['totalboxes'] == 1?'Esta remesa hubiera enviado ':'Estas remesas hubieran enviado ');
 					echo 'por '.$invoiceArr['shippingmethod'].'. Al llegar la remesa, por favor verifique los contenidos y s&iacute;rvase acusar ';
 					echo 'recibo de esta remesa firmiendo una de las copias y devolvi&eacute;ndo la por correo.</div><br />';
@@ -224,7 +227,7 @@ elseif($exchangeId){
 				?>
 			</div>
 			<?php 
-			if($loanType == 'Out'){ ?>
+			if($loanType == 'out'){ ?>
 				<?php if($english){ ?>
 					<div class="forwhom">This shipment is a LOAN for study by <?php echo $invoiceArr['forwhom']; ?>.</div><br />
 				<?php }
@@ -251,7 +254,7 @@ elseif($exchangeId){
 					</div><br />
 				<?php }
 			}	
-			elseif($loanType == 'In'){ ?>
+			elseif($loanType == 'in'){ ?>
 				<?php if($english){ ?>
 					<div class="loanreturn">This shipment is a return of <?php echo $invoiceArr['institutioncode']; ?>
 						loan <?php echo $invoiceArr['loanidentifierown']; ?>, received <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
@@ -261,7 +264,7 @@ elseif($exchangeId){
 						de <?php echo $invoiceArr['institutioncode']; ?>, recibido <?php echo $invoiceArr['datereceivedborr']; ?>.</div><br />
 				<?php } ?>
 			<?php }
-			elseif($loanType == 'Exchange'){
+			elseif($loanType == 'exchange'){
 				if($transType == 'ex' || $transType == 'both'){
 					if($english){ ?>
 						<div class="exchangeamts">This shipment is an EXCHANGE, consisting of <?php echo ($invoiceArr['totalexunmounted']?$invoiceArr['totalexunmounted'].' unmounted ':''); ?>
@@ -319,13 +322,13 @@ elseif($exchangeId){
 			<?php 
 			if(array_key_exists('invoicemessage',$invoiceArr) || array_key_exists('invoicemessageown',$invoiceArr) || array_key_exists('invoicemessageborr',$invoiceArr)){
 				echo '<div class="message">';
-				if($loanType == 'Exchange'){
+				if($loanType == 'exchange'){
 					echo ($invoiceArr['invoicemessage']?$invoiceArr['invoicemessage']:'');
 				}
-				elseif($loanType == 'Out'){
+				elseif($loanType == 'out'){
 					echo ($invoiceArr['invoicemessageown']?$invoiceArr['invoicemessageown']:'');
 				}
-				elseif($loanType == 'In'){
+				elseif($loanType == 'in'){
 					echo ($invoiceArr['invoicemessageborr']?$invoiceArr['invoicemessageborr']:'');
 				}
 				echo '</div><br /><br />';

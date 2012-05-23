@@ -36,7 +36,7 @@ elseif($exchangeId){
 		<?php 
 		if($exportDoc){
 			header('Content-Type: application/msword');
-			header('Content-disposition: attachment; filename='.$identifier.'_specimen_list.doc');
+			header('Content-disposition: attachment; filename='.$identifier.'_envelope.doc');
 		?>
 		<meta charset="<?php echo $charset; ?>">
 		<xml>

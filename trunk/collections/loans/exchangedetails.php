@@ -85,10 +85,10 @@
 							<input type="text" autocomplete="off" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $exchangeArr['createdby']; ?>" onchange=" " disabled />
 						</span>
 						<span style="margin-left:40px;">
-							<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datesent']; ?>" onchange="eventDateModified(this);" />
+							<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 						</span>
 						<span style="margin-left:40px;">
-							<input type="text" autocomplete="off" name="datereceived" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datereceived']; ?>" onchange="eventDateModified(this);" />
+							<input type="text" autocomplete="off" name="datereceived" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $exchangeArr['datereceived']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 						</span>
 					</div>
 					<div style="padding-top:4px;">
