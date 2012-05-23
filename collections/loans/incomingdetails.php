@@ -46,10 +46,10 @@ $specList = $loanManager->getSpecList($loanId);
 						<input type="text" autocomplete="off" name="processedbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyborr']; ?>" onchange=" " />
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="datereceivedborr" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedborr']; ?>" onchange="eventDateModified(this);" />
+						<input type="text" autocomplete="off" name="datereceivedborr" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedborr']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="eventDateModified(this);" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
@@ -124,7 +124,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 				<div style="padding-bottom:2px;">
 					<span>
-						<input type="text" autocomplete="off" name="datesentreturn" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesentreturn']; ?>" onchange="eventDateModified(this);" />
+						<input type="text" autocomplete="off" name="datesentreturn" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesentreturn']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 					<span style="margin-left:25px;">
 						<input type="text" autocomplete="off" name="processedbyreturnborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnborr']; ?>" onchange=" " />
@@ -136,7 +136,7 @@ $specList = $loanManager->getSpecList($loanId);
 						<input type="text" autocomplete="off" name="shippingmethodreturn" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethodreturn']; ?>" onchange=" " />
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="eventDateModified(this);" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
+						<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" <?php echo ($loanArr['collidown']?'disabled':''); ?> />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
