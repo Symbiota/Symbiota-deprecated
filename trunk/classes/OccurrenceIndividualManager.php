@@ -92,7 +92,7 @@ class OccurrenceIndividualManager {
 		}
 		$this->setImages();
 		$this->setDeterminations();
-		$this->setLoan();
+		//$this->setLoan();
 		//$this->setComments();
 		$result->close();
     }
