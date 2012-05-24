@@ -2,7 +2,7 @@
 /*
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php)
  */
-include_once($serverRoot.'/config/dbconnection.php');
+//include_once($serverRoot.'/config/dbconnection.php');
 
 class SpecProcessorOcr{
 
@@ -15,7 +15,7 @@ class SpecProcessorOcr{
 	private $cropW = 1;
 	private $cropH = 1;
 
-	private $filterArr = array();
+	//private $filterArr = array();
 	private $filterIndex = 0;
 
 	private $logPath;
@@ -25,11 +25,6 @@ class SpecProcessorOcr{
 	function __construct() {
 		$this->setTempPath();
 		$this->setlogPath();
-		//Set treatments
-		$this->filterArr[1] = array('grayscale'=>1,'brightness'=>10,'contrast'=>1,'sharpen'=>1,'gammacorrect'=>6);
-		$this->filterArr[2] = array('grayscale'=>1,'brightness'=>5,'contrast'=>-3,'sharpen'=>2,'gammacorrect'=>1.537);
-		$this->filterArr[3] = array('grayscale'=>1,'gammacorrect'=>1.537);
-		$this->filterArr[4] = array('grayscale'=>1,'brightness'=>30,'contrast'=>-10,'sharpen'=>3,'gammacorrect'=>1.537,'smooth'=>6);
 	}
 
 	function __destruct(){
@@ -50,27 +45,14 @@ class SpecProcessorOcr{
 					'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL '.
 					'AND (o.collid = '.$cid.') ';
 				//Limit for debugging purposes only
-				$sql .= 'LIMIT 30 ';
+				//$sql .= 'LIMIT 30 ';
 				if($rs = $this->conn->query($sql)){
 					$recCnt = 0;
-					$bestScoreCounts = array();
 					while($r = $rs->fetch_object()){
 						$rawStr = '';
-						if($getBest && $recCnt < 20){
+						if($getBest){
 							$rawStr = $this->getBestOCR($r->url, $r->sciName);
 							if(!$this->silent) $this->logMsg("\tImage ".$recCnt." processed (imgid: ".$r->imgid."). Best index: ".$this->filterIndex." (".date("Y-m-d H:i:s").")\n");
-							if(array_key_exists($this->filterIndex,$bestScoreCounts)){
-								$newCnt = ++$bestScoreCounts[$this->filterIndex];
-								$bestScoreCounts[$this->filterIndex] = $newCnt;
-							}
-							else{
-								$bestScoreCounts[$this->filterIndex] = 1;
-							}
-							if($recCnt == 19){
-								asort($bestScoreCounts);
-								$this->filterIndex = array_pop(array_keys($bestScoreCounts));
-								if(!$this->silent) $this->logMsg("\tFinal best index: ".$this->filterIndex."\n");
-							}
 						}
 						else{
 							$rawStr = $this->ocrImageByUrl($r->url);
@@ -106,7 +88,7 @@ class SpecProcessorOcr{
 
 	 		if(!($this->conn === false)) $this->conn->close();
 		}
-		//echo 'rawStr: '.$rawStr."\n";
+		//echo "rawStr: ".$rawStr."\n";
  		return $rawStr;
 	}
 
@@ -138,117 +120,46 @@ class SpecProcessorOcr{
 
 	private function getBestOCR($url = '', $sciName = ''){
 		if($url) $this->loadImage($url);
-		
-		$scoreArr = array();
-		$rawStrArr = array();
-		//Base run
-		$rawStrArr[0] = $this->ocrImage();
-		$scoreArr[0] = $this->scoreOCR($rawStrArr[0], $sciName);
 
-		foreach($this->filterArr as $tIndex => $tArr){
-			$urlTemp = str_replace('.jpg','_f'.$tIndex.'.jpg',$this->imgUrlLocal);
-			copy($this->imgUrlLocal,$urlTemp);
-			$this->filterImage($urlTemp,$tArr);
-			$rawStrArr[$tIndex] = $this->ocrImage($urlTemp);
-			$scoreArr[$tIndex] = $this->scoreOCR($rawStrArr[$tIndex], $sciName);
-			unlink($urlTemp);
+		//Base run
+		$rawStr_base = $this->ocrImage();
+		$score_base = $this->scoreOCR($rawStr_base, $sciName);
+		$urlTemp = str_replace('.jpg','_f1.jpg',$this->imgUrlLocal);
+		copy($this->imgUrlLocal,$urlTemp);
+		$this->filterImage($urlTemp);
+		$rawStr_treated = $this->ocrImage($urlTemp);
+		$score_treated = $this->scoreOCR($rawStr_treated, $sciName);
+		unlink($urlTemp);
+		if($score_treated > $score_base) {
+			$this->filterIndex = 1;
+			return $rawStr_treated;
+		} else {
+			$this->filterIndex = 0;
+			return $rawStr_base;
 		}
-		
-		asort($scoreArr);
-		$bestIndex = array_pop(array_keys($scoreArr));
-		$bestValue = end($scoreArr);
-		//if base score ties for high score, make sure no treatment is the tagged as best 
-		if($bestValue==$scoreArr[0]) $bestIndex = 0;
-		$this->filterIndex = $bestIndex;
-		return $rawStrArr[$bestIndex];
 	}
 
-	private function filterImage($url='',$tArr=''){
+	private function filterImage($url=''){
 		$status = false;
 		if(!$url) $url = $this->imgUrlLocal;
-		if(!$tArr && $this->filterArr){
-			if($this->filterIndex){
-				$tArr = $this->filterArr[$this->filterIndex];
-			}
-			else{
-				$tArr = array_shift($this->filterArr);
-			}
-		}
-		if($tArr){
-			if($img = imagecreatefromjpeg($url)){
-	   			if(array_key_exists('grayscale',$tArr) && $tArr['grayscale']) imagefilter($img,IMG_FILTER_GRAYSCALE);
-	   			if(array_key_exists('smooth',$tArr)) {
-					if(array_key_exists('sharpen',$tArr)) {
-						if($tArr['sharpen'] == 1) {// A sharpening matrix
-							$sharpenMatrix = array
-							(
-								array(-1.2, -1, -1.2),
-								array(-1, 20, -1),
-								array(-1.2, -1, -1.2)
-							);
-						} else if($tArr['sharpen'] == 2) {// A blurring matrix
-							$sharpenMatrix = array
-							(
-								array(1.0, 2.0, 1.0),
-								array(2.0, 4.0, 2.0),
-								array(1.0, 2.0, 1.0)
-							);
-						} else if($tArr['sharpen'] == 3) {// A blurring matrix
-							$sharpenMatrix = array
-							(
-								array(1.5, 1.5, 1.5),
-								array(1.5, 3.0, 1.5),
-								array(1.5, 1.5, 1.5)
-							);
-						}
-						// calculate the sharpen divisor
-						$divisor = array_sum(array_map('array_sum', $sharpenMatrix));
-						$offset = 0;
-						// apply the matrix
-						imageconvolution($img, $sharpenMatrix, $divisor, $offset);
-					}
-	   				if(array_key_exists('gammacorrect',$tArr)) imagegammacorrect($img, $tArr['gammacorrect'], 1.0);
-	   				if(array_key_exists('brightness',$tArr)) imagefilter($img,IMG_FILTER_BRIGHTNESS,$tArr['brightness']);
-	   				if(array_key_exists('contrast',$tArr)) imagefilter($img,IMG_FILTER_CONTRAST,$tArr['contrast']);
-	   				imagefilter($img,IMG_FILTER_SMOOTH,$tArr['smooth']);
-	   			} else {
-	   				if(array_key_exists('brightness',$tArr)) imagefilter($img,IMG_FILTER_BRIGHTNESS,$tArr['brightness']);
-	   				if(array_key_exists('contrast',$tArr)) imagefilter($img,IMG_FILTER_CONTRAST,$tArr['contrast']);
-					if(array_key_exists('sharpen',$tArr)) {
-						if($tArr['sharpen'] == 1) {// A sharpening matrix
-							$sharpenMatrix = array
-							(
-								array(-1.2, -1, -1.2),
-								array(-1, 20, -1),
-								array(-1.2, -1, -1.2)
-							);
-						} else if($tArr['sharpen'] == 2) {// A blurring matrix
-							$sharpenMatrix = array
-							(
-								array(1.0, 2.0, 1.0),
-								array(2.0, 4.0, 2.0),
-								array(1.0, 2.0, 1.0)
-							);
-						} else if($tArr['sharpen'] == 3) {// A blurring matrix
-							$sharpenMatrix = array
-							(
-								array(1.5, 1.5, 1.5),
-								array(1.5, 3.0, 1.5),
-								array(1.5, 1.5, 1.5)
-							);
-						}
-						// calculate the sharpen divisor
-						$divisor = array_sum(array_map('array_sum', $sharpenMatrix));
-						$offset = 0;
-						// apply the matrix
-						imageconvolution($img, $sharpenMatrix, $divisor, $offset);
-					}
-					if($tArr['gammacorrect']) imagegammacorrect($img, $tArr['gammacorrect'], 1.0);
-				}
-	
-				$status = imagejpeg($img,$url);
-				imagedestroy($img);
-			}
+		if($img = imagecreatefromjpeg($url)){
+			imagefilter($img,IMG_FILTER_GRAYSCALE);
+			imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
+			imagefilter($img,IMG_FILTER_CONTRAST,1);
+			$sharpenMatrix = array
+			(
+				array(-1.2, -1, -1.2),
+				array(-1, 20, -1),
+				array(-1.2, -1, -1.2)
+			);
+			// calculate the sharpen divisor
+			$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
+			$offset = 0;
+			// apply the matrix
+			imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+			imagegammacorrect($img, 6, 1.0);
+			$status = imagejpeg($img,$url);
+			imagedestroy($img);
 		}
 		return $status;
 	}
@@ -298,7 +209,7 @@ class SpecProcessorOcr{
 				}
 			}
 			else{
-				//If path is not set in the $symbini.php file, we assume a typial linux install 
+				//If path is not set in the $symbini.php file, we assume a typial linux install
 				exec('/usr/local/bin/tesseract '.$url.' '.$outputFile,$output);
 			}
 
@@ -322,7 +233,7 @@ class SpecProcessorOcr{
 
 	private function databaseRawStr($imgId,$rawStr){
 		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string($rawStr).'","batch OCR - '.date('Y-m-d').'")';
+			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string($rawStr).'","batch Tesseract OCR - '.date('Y-m-d').'")';
 		//echo 'SQL: '.$sql."\n";
 		if($this->conn->query($sql)){
 			return true;
@@ -590,8 +501,8 @@ class SpecProcessorOcr{
 		$this->cropH = $h;
 	}
 
-	public function addFilterVariable($k,$v){
+	/*public function addFilterVariable($k,$v){
 		$this->filterArr[0][$k] = $v;
-	}
+	}*/
 }
 ?>
