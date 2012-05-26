@@ -470,6 +470,24 @@ class SpecUploadManager{
 	
 	private function recordCleaningStage1(){
 		echo '<li style="font-weight:bold;">Starting Stage 1 cleaning</li>';
+		
+		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+			echo '<li style="font-weight:bold;margin-left:10px;">Remove NULL dbpk values... ';
+			ob_flush();
+			flush();
+			$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+			
+			echo '<li style="font-weight:bold;margin-left:10px;">Remove duplicate dbpk values... ';
+			ob_flush();
+			flush();
+			$sql = 'DELETE u.* '.
+				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk HAVING Count(*)>1 ) t2 ON u.dbpk = t2.dbpk';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+		}
+		
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
 		ob_flush();
 		flush();
