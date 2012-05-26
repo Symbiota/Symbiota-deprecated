@@ -28,7 +28,7 @@ class SpecProcessorOcr{
 	}
 
 	function __destruct(){
-		unlink($this->imgUrlLocal);
+		//unlink($this->imgUrlLocal);
 	}
 
 	public function batchOcrUnprocessed($collArr = 0,$getBest = 0){
@@ -51,8 +51,11 @@ class SpecProcessorOcr{
 					while($r = $rs->fetch_object()){
 						$rawStr = '';
 						if($getBest){
-							$rawStr = $this->getBestOCR($r->url, $r->sciName);
-							if(!$this->silent) $this->logMsg("\tImage ".$recCnt." processed (imgid: ".$r->imgid."). Best index: ".$this->filterIndex." (".date("Y-m-d H:i:s").")\n");
+							if($this->loadImage($r->url)){
+								$rawStr = $this->getBestOCR($r->sciName);
+								if(!$this->silent) $this->logMsg("\tImage ".$recCnt." processed (imgid: ".$r->imgid."). Best index: ".$this->filterIndex." (".date("Y-m-d H:i:s").")\n");
+								unlink($this->imgUrlLocal);
+							}
 						}
 						else{
 							$rawStr = $this->ocrImageByUrl($r->url);
@@ -106,6 +109,8 @@ class SpecProcessorOcr{
 				else{
 					$rawStr = $this->ocrImage();
 				}
+				//Cleanup, remove image
+				unlink($this->imgUrlLocal);
 			}
 			else{
 				//Unable to create image
@@ -118,9 +123,7 @@ class SpecProcessorOcr{
 		return $rawStr;
 	}
 
-	private function getBestOCR($url = '', $sciName = ''){
-		if($url) $this->loadImage($url);
-
+	private function getBestOCR($sciName = ''){
 		//Base run
 		$rawStr_base = $this->ocrImage();
 		$score_base = $this->scoreOCR($rawStr_base, $sciName);
