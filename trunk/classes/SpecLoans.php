@@ -39,24 +39,27 @@ class SpecLoans{
 		return $retArr;
 	}
 	
-	public function getTransactionList($collId){
-		$retArr = array();
-		$sql = 'SELECT e.exchangeid, e.identifier, e.collid, i.institutioncode, e.transactiontype, '.
-			'e.in_out, e.datesent, e.datereceived, e.totalexmounted, e.totalexunmounted, '.
-			'e.totalgift, e.totalgiftdet, e.adjustment, e.invoicebalance '.
-			'FROM omoccurexchange AS e LEFT OUTER JOIN institutions AS i ON e.iid = i.iid '.
+	public function getTransInstList($collId){
+		$iidArr = array();
+		$sql = 'SELECT DISTINCT e.iid, i.institutioncode '.
+			'FROM omoccurexchange AS e INNER JOIN institutions AS i ON e.iid = i.iid '.
 			'WHERE e.collid = '.$this->collId.' '.
-			'ORDER BY i.institutioncode ASC, e.exchangeid ASC';
+			'ORDER BY institutioncode';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->institutioncode]['exchangeid'] = $r->exchangeid;
-				//$retArr[$r->loanid]['institutioncode'] = $r->institutioncode;
-				//$retArr[$r->loanid]['forwhom'] = $r->forwhom;
-				//$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
+				$iidArr[$r->iid]['institutioncode'] = $r->institutioncode;
+			}
+		}
+		$sql = 'SELECT rt.iid, e.invoicebalance FROM omoccurexchange AS e '.
+			'INNER JOIN (SELECT iid, MAX(exchangeid) AS exchangeid FROM omoccurexchange '.
+			'GROUP BY iid,collid HAVING (collid = '.$this->collId.')) AS rt ON e.exchangeid = rt.exchangeid ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+					$iidArr[$r->iid]['invoicebalance'] = $r->invoicebalance;
 			}
 			$rs->close();
 		}
-		return $retArr;
+		return $iidArr;
 	}
 	
 	public function getLoanOnWayList(){
@@ -312,22 +315,18 @@ class SpecLoans{
 			$sql = 'SELECT invoicebalance FROM omoccurexchange '.
 				'WHERE exchangeid =  (SELECT MAX(exchangeid) FROM omoccurexchange '.
 				'WHERE (exchangeid < '.$exchangeId.') AND (collid = '.$collId.') AND (iid = '.$Iid.'))';
-			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					$retArr['invoicebalance'] = $r->invoicebalance;
 				}
 				$rs->close();
 			}
-			//echo $retArr['invoicebalance'];
 			if(!array_key_exists('invoicebalance',$retArr) || !$retArr['invoicebalance']){
 				$prevBalance = 0;
 			}
 			else{
 				$prevBalance = $retArr['invoicebalance'];
 			}
-			//echo $prevBalance;
-			//$prevBalance = ($retArr2['invoicebalance']?$retArr2['invoicebalance']:0);
 			$currentBalance = 0;
 			if($pArr['transactiontype'] == 'Shipment'){
 			
@@ -342,7 +341,6 @@ class SpecLoans{
 			elseif($pArr['transactiontype'] == 'Adjustment'){
 				$currentBalance = ($prevBalance + $pArr['adjustment']);
 			}
-			//echo $currentBalance;
 			$sql3 = '';
 			$sql3 = 'UPDATE omoccurexchange SET invoicebalance = '.$currentBalance.' WHERE (exchangeid = '.$exchangeId.')';
 			if($this->conn->query($sql3)){
