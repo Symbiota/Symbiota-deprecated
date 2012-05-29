@@ -70,14 +70,15 @@ if($collId) $loanManager->setCollId($collId);
 </div>
 <div>
 	<?php 
-	$transactionList = $loanManager->getTransactionList($collId);
-	if($transactionList){
-		echo '<h3>Transaction Records</h3>';
+	$transInstList = $loanManager->getTransInstList($collId);
+	if($transInstList){
+		echo '<h3>Transaction Records by Institution</h3>';
 		echo '<ul>';
-		foreach($transactionList as $k => $transArr){
+		foreach($transInstList as $k => $transArr){
 			echo '<li>';
-			echo '<a href="#" onclick="toggle(\''.$k.'\')">'.$k.'</a>';
-			echo '<div id="'.$k.'" style="display:none;"><ul><li>'.$transArr['exchangeid'].'</li></ul></div>';
+			echo '<a href="#" onclick="toggle(\''.$k.'\')">'.$transArr['institutioncode'].'</a>';
+			echo ' (Balance: '.$transArr['invoicebalance'].')';
+			//echo '<div id="'.$k.'" style="display:none;"><ul><li>'.$transArr['exchangeid'].'</li></ul></div>';
 			echo '</li>';
 		}
 		echo '</ul>';
