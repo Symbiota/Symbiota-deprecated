@@ -475,7 +475,7 @@ class SpecUploadManager{
 			echo '<li style="font-weight:bold;margin-left:10px;">Remove NULL dbpk values... ';
 			ob_flush();
 			flush();
-			$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL';
+			$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collid;
 			$this->conn->query($sql);
 			echo 'Done!</li> ';
 			
@@ -483,7 +483,8 @@ class SpecUploadManager{
 			ob_flush();
 			flush();
 			$sql = 'DELETE u.* '.
-				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk HAVING Count(*)>1 ) t2 ON u.dbpk = t2.dbpk';
+				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk HAVING Count(*)>1 ) t2 ON u.dbpk = t2.dbpk'.
+				'WHERE collid = '.$this->collid;
 			$this->conn->query($sql);
 			echo 'Done!</li> ';
 		}
@@ -493,7 +494,7 @@ class SpecUploadManager{
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
-			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 ';
+			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
@@ -502,7 +503,7 @@ class SpecUploadManager{
 		flush();
 		$sql = 'SELECT u.dbpk, u.verbatimeventdate '.
 			'FROM uploadspectemp u '.
-			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL';
+			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL AND collid = '.$this->collid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$recDbpk = $r->dbpk;
@@ -523,7 +524,7 @@ class SpecUploadManager{
 		//Parse out verbatimCoordinates
 		$sql = 'SELECT dbpk, verbatimcoordinates '.
 			'FROM uploadspectemp '.
-			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL';
+			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->verbatimcoordinates){
@@ -540,13 +541,13 @@ class SpecUploadManager{
 		$rs->close();
 		echo 'Done!</li> ';
 		
-		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse coordinates from verbatimCoordinates field... ';
+		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
 		ob_flush();
 		flush();
 		//Clean and parse verbatimElevation string
 		$sql = 'SELECT dbpk, verbatimelevation '.
 			'FROM uploadspectemp '.
-			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL';
+			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$recDbpk = $r->dbpk;
@@ -601,7 +602,7 @@ class SpecUploadManager{
 
 		$taxonRank = 'ssp.';
 		$sql = 'SELECT distinct unitind3 FROM taxa '.
-			'WHERE unitind3 = "ssp." OR unitind3 = "subsp."';
+			'WHERE unitind3 = "ssp." OR unitind3 = "subsp." AND collid = '.$this->collid;
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$taxonRank = $r->unitind3;
@@ -610,89 +611,89 @@ class SpecUploadManager{
 		
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname," '.($taxonRank=='subsp.'?'ssp.':'subsp.').' "," '.$taxonRank.' ") '.
-			'WHERE sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %"';
+			'WHERE sciname like "% '.($taxonRank=='subsp.'?'ssp.':'subsp.').' %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
-		$sql = 'UPDATE uploadspectemp SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %"';
+		$sql = 'UPDATE uploadspectemp SET sciname = replace(sciname," var "," var. ") WHERE sciname like "% var %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname," cf. "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% cf. %"';
+			'WHERE sciname like "% cf. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname," cf "," "), identificationQualifier = CONCAT_WS("; ","cf.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% cf %"';
+			'WHERE sciname like "% cf %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = REPLACE(sciname," aff. "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% aff. %"';
+			'WHERE sciname like "% aff. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = REPLACE(sciname," aff "," "), identificationQualifier = CONCAT_WS("; ","aff.",identificationQualifier), tidinterpreted = null '.
-			'WHERE sciname like "% aff %"';
+			'WHERE sciname like "% aff %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = trim(sciname), tidinterpreted = null '.
-			'WHERE sciname like "% " OR sciname like " %"';
+			'WHERE sciname like "% " OR sciname like " %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname,"   "," ") '.
-			'WHERE sciname like "%   %"';
+			'WHERE sciname like "%   %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname,"  "," ") '.
-			'WHERE sciname like "%  %"';
+			'WHERE sciname like "%  %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname," sp.","") '.
-			'WHERE sciname like "% sp."';
+			'WHERE sciname like "% sp." AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET sciname = replace(sciname," sp","") '.
-			'WHERE sciname like "% sp"';
+			'WHERE sciname like "% sp" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET specificepithet = NULL '.
-			'WHERE specificepithet = "sp." OR specificepithet = "sp"';
+			'WHERE specificepithet = "sp." OR specificepithet = "sp" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% f. %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% f. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "f." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% forma %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% forma %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "var." '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% var. %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% var. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp. %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp. %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp. %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% ssp %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET taxonrank = "'.$taxonRank.'" '.
-			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp %"';
+			'WHERE taxonrank IS NULL AND InfraSpecificEpithet IS NOT NULL AND scientificname LIKE "% subsp %" AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		
 		$sql = 'UPDATE uploadspectemp SET sciname = trim(CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet)) '.
-			'WHERE sciname IS NULL AND Genus IS NOT NULL';
+			'WHERE sciname IS NULL AND Genus IS NOT NULL AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 		
@@ -701,7 +702,7 @@ class SpecUploadManager{
 		flush();
 
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '.
-			'SET u.TidInterpreted = t.tid WHERE u.TidInterpreted IS NULL';
+			'SET u.TidInterpreted = t.tid WHERE u.TidInterpreted IS NULL AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE taxa t INNER JOIN uploadspectemp u ON t.tid = u.tidinterpreted '.
@@ -711,18 +712,18 @@ class SpecUploadManager{
 		
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxstatus ts ON u.tidinterpreted = ts.tid '.
 			'SET u.family = ts.family '.
-			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+			'WHERE ts.taxauthid = 1 AND ts.family <> "" AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "") AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.genus = t.unitname1 '.
 			'INNER JOIN taxstatus ts on t.tid = ts.tid '.
 			'SET u.family = ts.family '.
-			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "")';
+			'WHERE t.rankid = 180 and ts.taxauthid = 1 AND ts.family IS NOT NULL AND (u.family IS NULL OR u.family = "") AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.tidinterpreted = t.tid '.
 			'SET u.scientificNameAuthorship = t.author '.
-			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL';
+			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 
@@ -730,22 +731,22 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude '.
-			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico")';
+			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico") AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0';
+			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0 AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180';
+			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180 AND collid = '.$this->collid;
 		$this->conn->query($sql);
 
 		$sql = 'UPDATE uploadspectemp '.
 			'SET verbatimCoordinates = CONCAT_WS("; ",verbatimCoordinates,CONCAT_WS(" ","UTM:",CONCAT(UtmZoning," "),CONCAT(UtmNorthing,"N"),CONCAT(UtmEasting,"E"))) '.
-			'WHERE UtmNorthing IS NOT NULL';
+			'WHERE UtmNorthing IS NOT NULL AND collid = '.$this->collid;
 		$this->conn->query($sql);
 		echo 'Done!</li> ';
 	}

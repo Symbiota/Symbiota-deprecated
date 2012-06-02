@@ -28,13 +28,15 @@ class OccurrenceChecklistManager extends OccurrenceManager{
         if($taxonAuthorityId){
 			$sql = "SELECT DISTINCT ts.family, t.sciname ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
 				'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) ".
 				"ORDER BY IFNULL(ts.family,o.family), o.sciname ";
         }
@@ -81,13 +83,15 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
 			if(!$taxonAuthorityId){
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+				//if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 				$sqlTaxaInsert .= $this->getSqlWhere()." AND t.RankId > 180";
 			}
 			else{
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+				//if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 				$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 			}
 			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;

@@ -1,4 +1,3 @@
-
 function toggleImageTd(){
 	toggle("imgprocondiv");
 	toggle("imgprocoffdiv");
@@ -78,6 +77,29 @@ function ocrImage(ocrButton,imgCnt){
 	ocrXmlHttp.send(null);
 }
 
+function nlpText(imgCnt){
+	nlpButton.disabled = true;
+	document.getElementById("workingcircle-"+imgCnt).style.display = "inline";
+	
+	var rawStr = document.getElementById("activeimg-"+imgCnt);
+
+	var xmlHttp = GetXmlHttpObject();
+	if(xmlHttp == null){
+		alert ("Your browser does not support AJAX!");
+		return false;
+	}
+	var url="rpc/nlptext.php?rawstr="+rawStr;
+	xmlHttp.onreadystatechange=function(){
+		if(xmlHttp.readyState==4 && xmlHttp.status==200){
+			var dcArr = xmlHttp.responseText;
+
+
+		}
+	};
+	xmlHttp.open("POST",url,true);
+	xmlHttp.send(null);
+}
+
 function nextLabelProcessingImage(imgCnt){
 	document.getElementById("labeldiv-"+(imgCnt-1)).style.display = "none";
 	var imgObj = document.getElementById("labeldiv-"+imgCnt);
@@ -117,5 +139,3 @@ function GetXmlHttpObject(){
   	}
 	return xmlHttp;
 }
-
-

@@ -133,7 +133,7 @@ if($collMap){
 									<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 								</span>
 								<span style="margin-left:5px;cursor:pointer;" onclick="toggle('obsextradiv')">
-									<img src="../../images/showedit.png" style="width:15px;" />
+									<img src="../../images/editplus.png" style="width:15px;" />
 								</span>
 							</div>
 						</div>

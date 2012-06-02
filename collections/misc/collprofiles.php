@@ -306,7 +306,7 @@ if($collId) $collData = $collManager->getCollectionData();
 								</tr>
 								<tr>
 									<td>
-										Institution: 
+										Mailing Address: 
 									</td>
 									<td>
 										<?php 
@@ -321,9 +321,22 @@ if($collId) $collData = $collManager->getCollectionData();
 											}
 											?>
 										</select>
-										<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
-											<img src="../../images/add.png" style="width:15px;" />
-										</a>
+										<?php
+										if($collId && $collData["iid"]){ 
+											?>
+											<span>
+												<a href="../admin/institutioneditor.php?iid=<?php echo $collData["iid"]; ?>" target="_blank" title="Edit institution currently linked to this collection">
+													<img src="../../images/edit.png" style="width:15px;" />
+												</a>
+											</span>
+											<?php 
+										}
+										?>
+										<span>
+											<a href="../admin/institutioneditor.php?emode=1&instcode=<?php echo ($collId?$collData["collectioncode"]:''); ?>" target="_blank" title="Add a New Institution">
+												<img src="../../images/add.png" style="width:15px;" />
+											</a>
+										</span>
 									</td>
 								</tr>
 								<tr>

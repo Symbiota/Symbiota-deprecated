@@ -40,12 +40,14 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
 	 		"o.disposition, o.modified, o.language, o.collid, o.localitySecurity, c.rights, c.rightsholder, c.accessrights ".
             "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
- 		$this->dwcSql .= $this->getSqlWhere();
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		$this->dwcSql .= $this->getSqlWhere();
 		$this->dwcSql .= "ORDER BY c.institutioncode, o.sciname";
 
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
- 		$this->sqlFrag .= $this->getSqlWhere();
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		$this->sqlFrag .= $this->getSqlWhere();
 		$this->sqlFrag .= "ORDER BY c.institutioncode, o.sciname";
  	}
 
@@ -234,7 +236,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
 			"c.CollectionName, c.institutioncode, o.occurrenceID, o.occid ".
 			"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		$sql .= $this->getSqlWhere();
 		$sql .= " AND o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL ";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
@@ -290,15 +293,17 @@ class OccurrenceDownloadManager extends OccurrenceManager{
             $sql = "SELECT DISTINCT ts.family, t.sciname, CONCAT_WS(' ',t.unitind1,t.unitname1) AS genus, ".
             	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS specificepithet, t.unitind3 AS infrarank, t.unitname3 AS infraspepithet, t.author ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-            $sql .= $this->getSqlWhere()."AND t.RankId > 140 AND (ts.taxauthid = ".$taxonFilterCode.") ORDER BY ts.family, t.SciName ";
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+			$sql .= $this->getSqlWhere()."AND t.RankId > 140 AND (ts.taxauthid = ".$taxonFilterCode.") ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = "SELECT DISTINCT o.family, o.sciname, o.genus, IFNULL(o.specificepithet,'') AS specificepithet, ".
 				"IFNULL(o.taxonrank,'') AS infrarank, ".
 				"IFNULL(o.infraspecificepithet,'') AS infraspepithet, IFNULL(t.author, o.scientificnameauthorship) AS author ".
 				"FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= $this->getSqlWhere()."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
                 "ORDER BY o.family, o.SciName ";
         }

@@ -24,9 +24,10 @@
 	 	$obsArr[$collId]["icon"] = $collObj["icon"];
 	}
  } 
- $otherCatArr = $collManager->getSurveys();
- //$ownerInstArr = $collManager->getOwnerInstitutions();
- //$specProjArr = $collManager->getSpecProjects();
+//$otherCatArr = $collManager->getSurveys();
+$otherCatArr = $collManager->getOccurVoucherProjects();
+//$ownerInstArr = $collManager->getOwnerInstitutions();
+//$specProjArr = $collManager->getSpecProjects();
  ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -133,7 +134,7 @@
 		        <?php }if($obsArr){?>
 		        <li><a href="#observationdiv">Observations</a></li>
 		        <?php }if($otherCatArr){?>
-		        <li><a href="#otherdiv">Other Categories</a></li>
+		        <li><a href="#otherdiv">Federal Units</a></li>
 		        <?php } ?>
 		    </ul>
 			<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return checkForm()">

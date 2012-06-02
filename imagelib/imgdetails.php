@@ -101,7 +101,7 @@ if($isEditor){
 										</select>
 										* Users registered within system 
 										<a href="#" onclick="toggle('iepor');return false;" title="Display photographer override field">
-											<img src="../images/showedit.png" style="border:0px;width:12px;" />
+											<img src="../images/editplus.png" style="border:0px;width:12px;" />
 										</a>
 									</div>
 									<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
