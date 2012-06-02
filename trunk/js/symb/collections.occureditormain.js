@@ -430,18 +430,52 @@ function verifyDecimalLatitude(f){
 }
 
 function verifyDecimalLongitude(f){
-	if(!isNumeric(f.decimallongitude.value)){
+	var lngValue = f.decimallongitude.value;
+	if(!isNumeric(lngValue)){
 		alert("Input value for Decimal Longitude must be a number value only! " );
 		return false;
 	}
-	if(parseInt(f.decimallongitude.value) > 180){
+	if(parseInt(lngValue) > 180){
 		alert("Decimal Longitude can not be greater than 180 degrees " );
 		return false;
 	}
-	if(parseInt(f.decimallongitude.value) < -180){
+	if(parseInt(lngValue) < -180){
 		alert("Decimal Longitude can not be less than -180 degrees " );
 		return false;
 	}
+
+	//Check to see if coordinates are within country/state
+	var latValue = f.decimallatitude.value;
+	if(latValue && lngValue){
+		xmlHttp = GetXmlHttpObject();
+		if(xmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "http://ws.geonames.org/countrySubdivisionJSON?lat="+latValue+"&lng="+lngValue;
+		xmlHttp.onreadystatechange=function(){
+			if(xmlHttp.readyState==4 && xmlHttp.status==200){
+				if(xmlHttp.responseText){
+					var retArr = eval("("+xmlHttp.responseText+")");
+					var cValue = retArr["countryName"];
+					if(cValue && !f.country.value) f.country.value = cValue; 
+					var sValue = retArr["adminName1"];
+					if(sValue){
+						var currentState = f.stateprovince.value;
+						if(currentState){
+							if(currentState.indexOf(sValue) == -1) alert("Is State accurate? Coordiantes map to: "+cValue+", "+sValue+" Click globe symbol to display coordinates in map.");
+						}
+						else{
+							f.stateprovince.value = sValue;
+						}
+					}
+				}
+			}
+		};
+		xmlHttp.open("POST",url,true);
+		xmlHttp.send(null);
+	}
+	
 	return true;
 }
 
@@ -905,32 +939,6 @@ function openOccurrenceSearch(target) {
 	if (occWindow.opener == null) occWindow.opener = self;
 }
 
-function toggle(target){
-	var ele = document.getElementById(target);
-	if(ele){
-		if(ele.style.display=="none"){
-			ele.style.display="block";
-  		}
-	 	else {
-	 		ele.style.display="none";
-	 	}
-	}
-	else{
-		var divObjs = document.getElementsByTagName("div");
-	  	for (i = 0; i < divObjs.length; i++) {
-	  		var divObj = divObjs[i];
-	  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
-				if(divObj.style.display=="none"){
-					divObj.style.display="block";
-				}
-			 	else {
-			 		divObj.style.display="none";
-			 	}
-			}
-		}
-	}
-}
-
 function toggleIdDetails(){
 	toggle("idrefdiv");
 	toggle("idremdiv");
@@ -965,35 +973,4 @@ function isNumeric(sText){
       	}
    	}
 	return isNumber;
-}
-
-function getCookie(cName){
-	var i,x,y;
-	var cookieArr = document.cookie.split(";");
-	for(i=0;i<cookieArr.length;i++){
-		x=cookieArr[i].substr(0,cookieArr[i].indexOf("="));
-		y=cookieArr[i].substr(cookieArr[i].indexOf("=")+1);
-		x=x.replace(/^\s+|\s+$/g,"");
-		if (x==cName){
-			return unescape(y);
-		}
-	}
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

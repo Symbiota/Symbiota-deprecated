@@ -248,7 +248,7 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 								<?php $imageEditor->echoPhotographerSelect($paramsArr["uid"]); ?>
 							</select>
 							<a href="#" onclick="toggle('photooveridediv');return false;" title="Display photographer override field">
-								<img src="../../images/showedit.png" style="border:0px;width:12px;" />
+								<img src="../../images/editplus.png" style="border:0px;width:12px;" />
 							</a>
 						</div>
 						<div id="photooveridediv" style='margin:2px 0px 5px 10px;display:none;'>

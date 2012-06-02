@@ -116,7 +116,8 @@ class OccurrenceManager{
 			}
 		}
 		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
-			$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
+			//$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
+			$sqlWhere .= "AND (sol.clid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)){
@@ -524,6 +525,23 @@ class OccurrenceManager{
 			$result->close();
 		}
 		return $this->collectionArr;
+	}
+
+	public function getOccurVoucherProjects(){
+		$returnArr = Array();
+		$sql = 'SELECT p.projname, cl.clid, cl.name '.
+			'FROM (fmprojects p INNER JOIN fmchklstprojlink pl ON p.pid = pl.pid) '. 
+			'INNER JOIN fmchecklists cl ON pl.clid = cl.clid '.
+			'INNER JOIN fmvouchers v ON cl.clid = v.clid '.
+			'WHERE p.occurrencesearch = 1 '. 
+			'ORDER BY p.sortsequence, p.projname, cl.name'; 
+		//echo "<div>$sql</div>";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->projname][$row->clid] = $row->name;
+		}
+		$rs->close();
+		return $returnArr;
 	}
 	
 	public function getSurveys(){

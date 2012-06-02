@@ -196,7 +196,7 @@ if(isset($profile_viewprofileCrumbs)){
 							echo '<div style="margin:10px;">You have no personal checklists</div>';
 						}
 	
-						echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Project Administration</div>'."\n";
+						echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Inventory Project Administration</div>'."\n";
 						if(array_key_exists('proj',$listArr)){
 							$projArr = $listArr['proj'];
 							?>

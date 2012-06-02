@@ -81,7 +81,7 @@ $imageArr = $occManager->getImageMap();
 						?>
 					</select>
 					<a href="#" onclick="toggle('imgaddoverride');return false;" title="Display photographer override field">
-						<img src="../../images/showedit.png" style="border:0px;width:13px;" />
+						<img src="../../images/editplus.png" style="border:0px;width:13px;" />
 					</a>
 				</div>
 				<div id="imgaddoverride" style="margin:0px 0px 5px 10px;display:none;">
@@ -228,7 +228,7 @@ $imageArr = $occManager->getImageMap();
 											?>
 										</select>
 										<a href="#" onclick="toggle('imgeditoverride<?php echo $imgId; ?>');return false;" title="Display photographer override field">
-											<img src="../../images/showedit.png" style="border:0px;width:13px;" />
+											<img src="../../images/editplus.png" style="border:0px;width:13px;" />
 										</a>
 									</div>
 									<div id="imgeditoverride<?php echo $imgId; ?>" style="display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">

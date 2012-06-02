@@ -16,6 +16,25 @@ $displayQuery = 0;
 $isGenObs = 0;
 $collMap = Array();
 $recArr = array();
+$headerMap = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Global Unique Identifier',
+	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
+	'sciname' => 'Scientific name','recordedby' => 'Recorded By','recordnumber' => 'Number',
+	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
+	'verbatimeventdate' => 'Verbatim Date','country' => 'Country','stateprovince' => 'State/Province',
+	'county' => 'county','municipality' => 'municipality','locality' => 'locality','decimallatitude' => 'Latitude',
+	'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
+	'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
+	'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
+	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
+	'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
+	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes','associatedtaxa' => 'Associated Taxa',
+	'verbatimattributes' => 'Description','reproductivecondition' => 'Reproductive Condition',
+	'identificationremarks' => 'Identification Remarks','identifiedby' => 'Identified By',
+	'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
+	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
+	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','dateLastModified' => 'Date Last Modified',
+	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+
 $qryCnt = 0;
 $statusStr = '';
 
@@ -49,6 +68,17 @@ if($symbUid){
 		}
 	}
 
+	if(array_key_exists('bufieldname',$_POST)){
+		if($ouid){
+			$occManager->setQueryVariables(array('ouid' => $ouid));
+		}
+		else{
+			$occManager->setQueryVariables();
+		}
+		$occManager->setSqlWhere();
+		$statusStr = $occManager->batchUpdateField($_POST['bufieldname'],$_POST['buoldvalue'],$_POST['bunewvalue'],$_POST['bumatch']);
+	}
+
 	if($ouid){
 		$occManager->setQueryVariables(array('ouid' => $ouid));
 		$occManager->setSqlWhere(0,$recLimit);
@@ -66,7 +96,6 @@ if($symbUid){
 	}
 	
 	$recArr = $occManager->getOccurMap();
-
 	$navStr = '<div style="float:right;">';
 	if($occIndex >= $recLimit){
 		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-$recLimit).');" title="Previous '.$recLimit.' record">&lt;&lt;</a>';
@@ -75,7 +104,7 @@ if($symbUid){
 		$navStr .= '&lt;&lt;';
 	}
 	$navStr .= ' | ';
-	$navStr .= ($occIndex+1).'-'.($qryCnt<$recLimit?$qryCnt:$recLimit+$occIndex).' of '.$qryCnt.' records';
+	$navStr .= ($occIndex+1).'-'.($qryCnt<$recLimit+$occIndex?$qryCnt:$recLimit+$occIndex).' of '.$qryCnt.' records';
 	$navStr .= ' | ';
 	if($qryCnt > ($recLimit+$occIndex)){
 		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+$recLimit).');" title="Next '.$recLimit.' records">&gt;&gt;</a>';
@@ -99,34 +128,7 @@ if($symbUid){
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		function toggle(target){
-			var ele = document.getElementById(target);
-			if(ele){
-				if(ele.style.display=="none"){
-					ele.style.display="block";
-		  		}
-			 	else {
-			 		ele.style.display="none";
-			 	}
-			}
-			else{
-				var divObjs = document.getElementsByTagName("div");
-			  	for (i = 0; i < divObjs.length; i++) {
-			  		var divObj = divObjs[i];
-			  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
-						if(divObj.style.display=="none"){
-							divObj.style.display="block";
-						}
-					 	else {
-					 		divObj.style.display="none";
-					 	}
-					}
-				}
-			}
-		}
-	</script>	
-	<script type="text/javascript" src="../../js/symb/collections.occureditorquery.js?cacherefresh=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -149,8 +151,90 @@ if($symbUid){
 				echo '</div>';
 			}
 			if($isEditor && $collId){
+				?>
+				<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
+					<a href="#" title="Search / Filter" onclick="toggleSearch();return false;"><img src="../../images/find.png" style="width:14px;" /></a>
+					<?php
+					if($isEditor == 1 || $isGenObs){
+						?>
+						<a href="#" title="Batch Update Tool" onclick="toggleBatchUpdate();return false;"><img src="../../images/editplus.png" style="width:14px;" /></a>
+						<?php
+					} 
+					?>
+				</div>
+				<?php 
 				if(!$recArr) $displayQuery = 1;
 				include 'includes/queryform.php';
+				//Setup header map
+				if($recArr){
+					$headerArr = array();
+					foreach($recArr as $id => $occArr){
+						foreach($occArr as $k => $v){
+							if(trim($v) && !array_key_exists($k,$headerArr)){
+								$headerArr[$k] = $k;
+							}
+						}
+					}
+					if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
+						$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
+					}
+					if($qCustomField2 && !array_key_exists(strtolower($qCustomField2),$headerArr)){
+						$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
+					}
+					if($qCustomField3 && !array_key_exists(strtolower($qCustomField3),$headerArr)){
+						$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
+					}
+					$headerMap = array_intersect_key($headerMap, $headerArr);
+				}
+				if($isEditor == 1 || $isGenObs){
+					?>
+					<div id="batchupdatediv" style="width:600px;clear:both;display:none;">
+						<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">
+							<fieldset>
+								<legend><b>Batch Update</b></legend>
+								<div style="float:left;">
+									<div style="margin:2px;">
+										Field name: 
+										<select name="bufieldname">
+											<option value="">Select Field Name</option>
+											<option value="">----------------------</option>
+											<?php 
+											$buFieldName = (array_key_exists('bufieldname',$_POST)?$_POST['bufieldname']:'');
+											foreach($headerMap as $k => $v){
+												echo '<option value="'.$k.'" '.($buFieldName==$k?$buFieldName:'').'>'.$v.'</option>';
+											}
+											?>
+										</select>
+									</div>
+									<div style="margin:2px;">
+										Current Value: 
+										<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_POST)?$_POST['buoldvalue']:''); ?>" /> 
+									</div>
+									<div style="margin:2px;">
+										New Value:
+										<input name="bunewvalue" type="text" value="<?php echo (array_key_exists('bunewvalue',$_POST)?$_POST['bunewvalue']:''); ?>" /> 
+									</div>
+								</div>
+								<div style="float:left;margin-left:30px;">
+									<div style="margin:2px;">
+										<input name="bumatch" type="radio" value="0" <?php echo (!array_key_exists('bumatch',$_POST) || !$_POST['bumatch']?'CHECKED':''); ?> />
+										Match Whole Field<br/> 
+										<input name="bumatch" type="radio" value="1" <?php echo (array_key_exists('bumatch',$_POST) && $_POST['bumatch']?'CHECKED':''); ?> />
+										Match Any Part of Field
+									</div>
+									<div style="margin:2px;">
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<input name="ouid" type="hidden" value="<?php echo $ouid; ?>" />
+										<input name="occid" type="hidden" value="" />
+										<input name="occindex" type="hidden" value="0" />
+										<input name="submitaction" type="submit" value="Batch Update Field" onclick="submitBatchUpdate(this.form); return false;" />
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+					<?php 
+				}					
 				?>
 				<div style="width:790px;clear:both;">
 					<span class='navpath'>
@@ -173,43 +257,6 @@ if($symbUid){
 				</div>
 				<?php 
 				if($recArr){
-					$headerMap = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Global Unique Identifier',
-						'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
-						'sciname' => 'Scientific name','recordedby' => 'Recorded By','recordnumber' => 'Number',
-						'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
-						'verbatimeventdate' => 'Verbatim Date','country' => 'Country','stateprovince' => 'State/Province',
-						'county' => 'county','municipality' => 'municipality','locality' => 'locality','decimallatitude' => 'Latitude',
-						'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
-						'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
-						'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
-						'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
-						'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
-						'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes','associatedtaxa' => 'Associated Taxa',
-						'verbatimattributes' => 'Description','reproductivecondition' => 'Reproductive Condition',
-						'identificationremarks' => 'Identification Remarks','identifiedby' => 'Identified By',
-						'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
-						'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
-						'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','dateLastModified' => 'Date Last Modified',
-						'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
-					
-					$headerArr = array();
-					foreach($recArr as $id => $occArr){
-						foreach($occArr as $k => $v){
-							if(trim($v) && !array_key_exists($k,$headerArr)){
-								$headerArr[$k] = $k;
-							}
-						}
-					}
-					if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
-						$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
-					}
-					if($qCustomField2 && !array_key_exists(strtolower($qCustomField2),$headerArr)){
-						$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
-					}
-					if($qCustomField3 && !array_key_exists(strtolower($qCustomField3),$headerArr)){
-						$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
-					}
-					$headerMap = array_intersect_key($headerMap, $headerArr);
 					?>
 					<table class="styledtable">
 						<tr>

@@ -33,7 +33,8 @@ class OccurrenceListManager extends OccurrenceManager{
 			"CONCAT_WS(', ',o.locality,CONCAT(ROUND(o.decimallatitude,5),' ',ROUND(o.decimallongitude,5))) AS locality, ".
 			"IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
 			"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
 		$sql .= "ORDER BY c.sortseq, c.collectionname ";
@@ -89,7 +90,8 @@ class OccurrenceListManager extends OccurrenceManager{
 		global $clientRoot;
 		if($sqlWhere){
 			$sql = "SELECT COUNT(o.occid) AS cnt FROM omoccurrences o ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= $sqlWhere;
 			//echo "<div>Count sql: ".$sql."</div>";
 			$result = $this->conn->query($sql);

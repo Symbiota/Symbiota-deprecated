@@ -76,7 +76,7 @@ class OccurrenceEditorManager {
 					$this->collMap['colltype'] = $row->colltype;
 					$this->collMap['managementtype'] = $row->managementtype;
 				}
-				$rs->close();
+				$rs->free();
 			}
 		}
 		return $this->collMap;
@@ -353,7 +353,7 @@ class OccurrenceEditorManager {
 			if($r = $rs->fetch_object()){
 				$recCnt = $r->reccnt;
 			}
-			$rs->close();
+			$rs->free();
 			$this->qryArr['rc'] = (int)$recCnt;
 			setCookie('editorquery',json_encode($this->qryArr),0,($clientRoot?$clientRoot:'/'));
 		}
@@ -384,9 +384,10 @@ class OccurrenceEditorManager {
 				$occid = $row['occid'];
 				$retArr[$occid] = array_change_key_case($row);
 			}
-			$rs->close();
+			$rs->free();
 			if(!$this->occId && $retArr && count($retArr) == 1) $this->occId = $occid; 
 			$this->occurrenceMap = $retArr;
+			//if($this->occId) $this->setLoanData();
 		}
 	}
 
@@ -406,7 +407,7 @@ class OccurrenceEditorManager {
 				',recordenteredby FROM omoccurrences WHERE occid = '.$occArr['occid'];
 			$rs = $this->conn->query($sql);
 			$oldValues = $rs->fetch_assoc();
-			$rs->close();
+			$rs->free();
 			//Version edits only if old processing status does not equal "unprocessed"
 			if($oldValues['processingstatus'] != 'unprocessed'){ 
 				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
@@ -582,6 +583,18 @@ class OccurrenceEditorManager {
 		return $status;
 	}
 	
+	public function setLoanData(){
+		$sql = 'SELECT l.loanid, l.datedue '.
+			'FROM omoccurloanslink ll INNER JOIN omoccurloans l ON ll.loanid = l.loanid '.
+			'WHERE ll.returndate IS NULL AND l.dateclosed IS NULL AND occid = '.$this->occId;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$this->occurrenceMap[$this->occId]['loan']['id'] = $r->loanid;
+			$this->occurrenceMap[$this->occId]['loan']['date'] = $r->datedue;
+		}
+		$rs->free();
+	}
+	
 	public function getObserverUid(){
 		$obsId = 0;
 		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap[$this->occId])){
@@ -601,8 +614,68 @@ class OccurrenceEditorManager {
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->countryname;
 		}
-		$rs->close();
+		$rs->free();
 		echo '"'.implode('","',$retArr).'"';
+	}
+
+	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
+		$statusStr = '';
+		$fn = $this->conn->real_escape_string($fieldName);
+		$ov = $this->conn->real_escape_string($oldValue);
+		$nv = $this->conn->real_escape_string($newValue);
+		if($fn && $ov && $nv){
+			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT occid FROM omoccurrences o ';
+			if(strpos($this->sqlWhere,'ORDER BY')){
+				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
+			}
+			elseif(strpos($this->sqlWhere,'LIMIT')){
+				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'LIMIT'));
+			}
+			else{
+				$sql .= $this->sqlWhere;
+			}
+			if($buMatch){
+				$sql .= 'AND (o.'.$fn.' LIKE "%'.$ov.'%")'.
+					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'") ';
+			}
+			else{
+				$sql .= 'AND (o.'.$fn.' = "'.$ov.'")'.
+					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = "'.$nv.'" ';
+			}
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable to run batch update => '.$this->conn->error;
+			}
+		}
+		return $statusStr;
+	}
+	
+	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
+		$fn = $this->conn->real_escape_string($fieldName);
+		$ov = $this->conn->real_escape_string($oldValue);
+		$sql = 'SELECT COUNT(*) AS retcnt FROM omoccurrences o ';
+		if(strpos($this->sqlWhere,'ORDER BY')){
+			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
+		}
+		elseif(strpos($this->sqlWhere,'LIMIT')){
+			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'LIMIT'));
+		}
+		else{
+			$sql .= $this->sqlWhere;
+		}
+		if($buMatch){
+			$sql .= ' AND (o.'.$fn.' LIKE "%'.$ov.'%")';
+		}
+		else{
+			$sql .= ' AND (o.'.$fn.' = "'.$ov.'")';
+		}
+		$result = $this->conn->query($sql);
+		$retCnt = '';
+		while ($row = $result->fetch_object()) {
+			$retCnt = $row->retcnt;
+		}
+		$result->free();
+		return $retCnt;
 	}
 
 	public function carryOverValues($fArr){
@@ -643,7 +716,7 @@ class OccurrenceEditorManager {
 			while ($row = $result->fetch_assoc()) {
 				$retArr[$row['occid']] = array_change_key_case($row);
 			}
-			$result->close();
+			$result->free();
 		}
 		elseif($collName && ($collNum || $collDate)){
 			//Parse last name from collector's name 
@@ -682,7 +755,7 @@ class OccurrenceEditorManager {
 					while($row = $rs->fetch_assoc()){
 						$retArr[$row['occid']] = array_change_key_case($row);
 					}
-					$rs->close();
+					$rs->free();
 				}
 				else{
 					$runQry = true;
@@ -744,7 +817,7 @@ class OccurrenceEditorManager {
 						while ($row = $result->fetch_assoc()) {
 							$retArr[$row['occid']] = array_change_key_case($row);
 						}
-						$result->close();
+						$result->free();
 						
 					}
 				}
@@ -764,7 +837,7 @@ class OccurrenceEditorManager {
 			while($row = $rs->fetch_assoc()){
 				$retArr[$row['occid']] = array_change_key_case($row);
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $retArr;
 	}
@@ -790,7 +863,7 @@ class OccurrenceEditorManager {
 			unset($tempArr['datelastmodified']);
 			$oArr[$id] = $tempArr;
 		}
-		$rs->close();
+		$rs->free();
 
 		$tArr = $oArr[$targetOccid];
 		$sArr = $oArr[$sourceOccid];
@@ -862,7 +935,7 @@ class OccurrenceEditorManager {
 			while($r = $rs->fetch_object()){
 				$retArr[$r->imgid][$r->prlid] = $r->rawstr;
 			}
-			$rs->close();
+			$rs->free();
 		} 
 		return $retArr;
 	}
@@ -932,7 +1005,7 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["occid"] = $row->occid;
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
 			}
-			$result->close();
+			$result->free();
 		}
 		return $imageMap;
 	}

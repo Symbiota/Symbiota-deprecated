@@ -21,13 +21,14 @@ if($qryArr){
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
 	$qCustomType1 = (array_key_exists('ct1',$qryArr)?$qryArr['ct1']:'');
 	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?$qryArr['cv1']:'');
+	$qCustomField2 = (array_key_exists('cf2',$qryArr)?$qryArr['cf2']:'');
+	$qCustomType2 = (array_key_exists('ct2',$qryArr)?$qryArr['ct2']:'');
+	$qCustomValue2 = (array_key_exists('cv2',$qryArr)?$qryArr['cv2']:'');
+	$qCustomField3 = (array_key_exists('cf3',$qryArr)?$qryArr['cf3']:'');
+	$qCustomType3 = (array_key_exists('ct3',$qryArr)?$qryArr['ct3']:'');
+	$qCustomValue3 = (array_key_exists('cv3',$qryArr)?$qryArr['cv3']:'');
 }
 ?>
-<div style="text-align:right;width:790px;margin:-30px 0px 5px 0px;">
-	<a href="#" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;">
-		Search / Filter
-	</a>
-</div>
 <div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
 	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return verifyQueryForm(this)">
 		<fieldset style="padding:5px;">
@@ -144,7 +145,7 @@ if($qryArr){
 				</select>
 				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
 				<a href="#" onclick="toggle('customdiv2');return false;">
-					<img src="../../images/showedit.png" />
+					<img src="../../images/editplus.png" />
 				</a>
 			</div>
 			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">
@@ -165,7 +166,7 @@ if($qryArr){
 				</select>
 				<input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
 				<a href="#" onclick="toggle('customdiv3');return false;">
-					<img src="../../images/showedit.png" />
+					<img src="../../images/editplus.png" />
 				</a>
 			</div>
 			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">

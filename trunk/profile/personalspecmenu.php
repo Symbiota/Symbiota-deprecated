@@ -52,27 +52,31 @@ if($symbUid){
 		<?php 
 	}
 	if($collArr){
+		if(count($collArr) > 1){
+			?>
+			<div style="float:right;">
+				<form name="obtionsform" action="viewprofile.php" method="post">
+					<fieldset>
+						<legend><b>Project:</b></legend> 
+						<select name="collid" onchange="this.form.submit()">
+							<?php 
+							foreach($collArr as $k => $v){
+								echo '<option value="'.$k.'" '.($collId==$k?'SELECTED':'').'>'.$v.'</option>'."<br/>";
+							}
+							?>
+						</select>
+					</fieldset>
+				</form>
+			</div>
+			<?php
+		}
 		?>
-		<div style="float:right;">
-			<form name="obtionsform" action="viewprofile.php" method="post">
-				<fieldset>
-					<legend><b>Project:</b></legend> 
-					<select name="collid" onchange="this.form.submit()">
-						<?php 
-						foreach($collArr as $k => $v){
-							echo '<option value="'.$k.'" '.($collId==$k?'SELECTED':'').'>'.$v.'</option>'."<br/>";
-						}
-						?>
-					</select>
-				</fieldset>
-			</form>
-		</div>
-		<div style="float:left;margin-top:20px">
-			<b>Total Record Count:</b> <?php echo $specHandler->getRecordCount(); ?>
-		</div>
 		<div style="clear:both;">
 			<fieldset style="margin:15px;">
-				<legend style="font-weight:bold;">Main Menu</legend>
+				<legend style="font-weight:bold;"><b><?php echo $collArr[$collId]; ?></b></legend>
+				<div style="margin-left:10px">
+					Total Record Count: <?php echo $specHandler->getRecordCount(); ?>
+				</div>
 				<ul>
 					<li>
 						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$symbUid; ?>">

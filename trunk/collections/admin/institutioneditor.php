@@ -5,6 +5,7 @@ include_once($serverRoot.'/classes/InstitutionManager.php');
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $iid = array_key_exists("iid",$_REQUEST)?$_REQUEST["iid"]:0;
 $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
+$instCodeDefault = array_key_exists("instcode",$_REQUEST)?$_REQUEST["instcode"]:'';
 $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
 
 $instManager = new InstitutionManager();
@@ -326,7 +327,7 @@ include($serverRoot.'/header.php');
 								Institution Code:
 							</div>
 							<div>
-								<input name="institutioncode" type="text" value="" />
+								<input name="institutioncode" type="text" value="<?php echo $instCodeDefault; ?>" />
 							</div>
 						</div>
 						<div style="position:relative;clear:both;">
