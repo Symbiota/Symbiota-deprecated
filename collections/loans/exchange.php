@@ -76,9 +76,37 @@ if($collId) $loanManager->setCollId($collId);
 		echo '<ul>';
 		foreach($transInstList as $k => $transArr){
 			echo '<li>';
-			echo '<a href="#" onclick="toggle(\''.$k.'\')">'.$transArr['institutioncode'].'</a>';
+			echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$transArr['institutioncode'].'</a>';
 			echo ' (Balance: '.$transArr['invoicebalance'].')';
-			//echo '<div id="'.$k.'" style="display:none;"><ul><li>'.$transArr['exchangeid'].'</li></ul></div>';
+			echo '<div id="'.$k.'" style="display:none;">';
+			$transList = $loanManager->getTransactions($collId,$k);
+			echo '<ul>';
+			foreach($transList as $t => $transArr){
+				echo '<li>';
+				echo '<a href="index.php?collid='.$collId.'&exchangeid='.$t.'&loantype=exchange">';
+				echo '#'.$transArr['identifier'].'</a>: ';
+				if($transArr['transactiontype'] == 'Shipment'){
+					if($transArr['in_out'] == 'Out'){
+						echo 'Outgoing exchange; Sent ';
+						echo $transArr['datesent'].'; Including: ';
+					}
+					else{
+						echo 'Incoming exchange, received ';
+						echo $transArr['datereceived'].', including: ';
+					}
+					echo ($transArr['totalexmounted']?$transArr['totalexmounted'].' mounted, ':'');
+					echo ($transArr['totalexunmounted']?$transArr['totalexunmounted'].' unmounted, ':'');
+					echo ($transArr['totalgift']?$transArr['totalgift'].' gift, ':'');
+					echo ($transArr['totalgiftdet']?$transArr['totalgiftdet'].' gift-for-det, ':'');
+					echo 'Balance: '.$transArr['invoicebalance'];
+				}
+				else{
+					echo 'Adjustment of '.$transArr['adjustment'].' specimens';
+				}
+				echo '</li>';
+			}
+			echo '</ul>';
+			echo '</div>';
 			echo '</li>';
 		}
 		echo '</ul>';
@@ -87,4 +115,5 @@ if($collId) $loanManager->setCollId($collId);
 		'<div style="font-weight:bold;font-size:120%;">There are no transactions registered for this collection</div>';
 	}
 	?>
+<ul id="transactionlist"></ul>
 </div>
