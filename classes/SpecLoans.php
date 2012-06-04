@@ -62,6 +62,33 @@ class SpecLoans{
 		return $iidArr;
 	}
 	
+	public function getTransactions($collId,$iid){
+		$retArr = array();
+		$sql = 'SELECT exchangeid, identifier, transactiontype, in_out, datesent, datereceived, '.
+			'totalexmounted, totalexunmounted, totalgift, totalgiftdet, adjustment, invoicebalance '.
+			'FROM omoccurexchange '.
+			'WHERE collid = '.$collId.' AND iid = '.$iid.' '.
+			'ORDER BY exchangeid DESC';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->exchangeid]['identifier'] = $r->identifier;
+				$retArr[$r->exchangeid]['transactiontype'] = $r->transactiontype;
+				$retArr[$r->exchangeid]['in_out'] = $r->in_out;
+				$retArr[$r->exchangeid]['datesent'] = $r->datesent;
+				$retArr[$r->exchangeid]['datereceived'] = $r->datereceived;
+				$retArr[$r->exchangeid]['totalexmounted'] = $r->totalexmounted;
+				$retArr[$r->exchangeid]['totalexunmounted'] = $r->totalexunmounted;
+				$retArr[$r->exchangeid]['totalgift'] = $r->totalgift;
+				$retArr[$r->exchangeid]['totalgiftdet'] = $r->totalgiftdet;
+				$retArr[$r->exchangeid]['adjustment'] = $r->adjustment;
+				$retArr[$r->exchangeid]['invoicebalance'] = $r->invoicebalance;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function getLoanOnWayList(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT o.loanid, o.loanidentifierown, c.collectionname '.
