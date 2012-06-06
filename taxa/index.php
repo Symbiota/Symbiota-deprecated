@@ -409,7 +409,7 @@ if($taxonManager->getSciName() != "unknown"){
 									if($gUrl) $iUrl = $gUrl;
 								}
 								echo "<div class='sppmap'>";
-								if($aUrl) echo "<a href=\"".$aUrl."\">";
+								if($aUrl) echo "<a href=\"".$iUrl."\">";
 								echo "<img src='".$mapUrl."' title='".$spDisplay." dot map' alt='".$spDisplay." dot map'/>";
 								if($aUrl) echo "</a>";
 								if($iUrl) echo "<br /><a href=\"".$iUrl."\">Open Interactive Map</a>";
