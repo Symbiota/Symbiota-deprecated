@@ -109,7 +109,7 @@ class TaxonProfileMap {
 	        	$llStr = $lat.','.$lng; 
 				$coordArr[$llStr][$row->occid]['d'] = $row->descr;
 				$coordArr[$llStr][$row->occid]['tid'] = $row->tidinterpreted;
-				$this->taxaMap[$row->tidinterpreted] = '';
+				//$this->taxaMap[$row->tidinterpreted] = '';
 			}
 			$result->close();
 	
@@ -163,8 +163,8 @@ class TaxonProfileMap {
 	public function getTaxaMap(){
 		//Map scientific names and icons to $taxaMap
 		$cnt = 9;
-        foreach($this->taxaMap as $key => $valueArr){
-        	$this->taxaMap[$key]['sciname'] = $this->taxaArr[$key];
+		foreach($this->taxaArr as $key => $taxonName){
+        	$this->taxaMap[$key]['sciname'] = $taxonName;
         	$this->taxaMap[$key]['icon'] = $this->sourceIcon[$cnt%9];
         	$cnt++;
         }
