@@ -136,7 +136,7 @@ class OccurrenceEditorManager {
 					}
 					else{
 						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(O.catalogNumber) = '.strlen($term2); 
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
 						$iBetweenFrag[] = '('.$catTerm.')';
 						$iBetweenFrag[] = '(o.occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
 					}
