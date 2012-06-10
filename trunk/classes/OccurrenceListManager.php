@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 1 May 2009
- * @author  E. Gilbert: egbot@asu.edu
- */
 include_once("OccurrenceManager.php");
 
 class OccurrenceListManager extends OccurrenceManager{
@@ -68,7 +64,9 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$occId]["county"] = $row->county;
 			$returnArr[$collIdStr][$occId]["observeruid"] = $row->observeruid;
 			$localitySecurity = $row->LocalitySecurity;
-			if(!$localitySecurity || $canReadRareSpp || (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
+			if(!$localitySecurity || $canReadRareSpp 
+				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
+				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
 				$returnArr[$collIdStr][$occId]["locality"] = str_replace('.,',',',$row->locality);
 			}
 			else{

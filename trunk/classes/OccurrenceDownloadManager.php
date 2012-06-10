@@ -3,9 +3,10 @@ include_once("OccurrenceManager.php");
 
 class OccurrenceDownloadManager extends OccurrenceManager{
 	
-	private $securityArr = Array();
- 	private $dwcSql = "";
- 	private $sqlFrag = "";
+	private $securityArr = array();
+	private $canReadRareSpp = false;
+ 	private $sql = "";
+ 	private $headerArr = array();
  	
 	private $buFileName;
 	private $buFilePath;
@@ -13,56 +14,98 @@ class OccurrenceDownloadManager extends OccurrenceManager{
  	private $zipArchive;
 
  	public function __construct(){
- 		parent::__construct();
+		global $userRights, $isAdmin;
+		parent::__construct();
 		$this->setUploadPath();
 
 		//Create file pathName
- 		$this->buFileName = 'symbdl_'.time();
- 		
- 		if(class_exists('ZipArchive')){
+		$this->buFileName = 'symbdl_'.time();
+
+		if(class_exists('ZipArchive')){
 			$this->zipArchive = new ZipArchive;
 			$this->zipArchive->open($this->buFilePath.$this->buFileName.'.zip', ZipArchive::CREATE);
- 		}
+		}
 
- 		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision",
 			"verbatimCoordinates","verbatimCoordinateSystem","georeferenceRemarks",
 			"verbatimLatitude","verbatimLongitude","habitat");
- 		$this->dwcSql = "SELECT o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
- 			"o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, ".
- 			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
- 			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
-	 		"o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNotes, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, ".
- 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
- 			"o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
-	 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
- 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
- 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-	 		"o.disposition, o.modified, o.language, o.collid, o.localitySecurity, c.rights, c.rightsholder, c.accessrights ".
-            "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
-		//if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->dwcSql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$this->dwcSql .= $this->getSqlWhere();
-		$this->dwcSql .= "ORDER BY c.institutioncode, o.sciname";
 
-		//if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$this->sqlFrag .= $this->getSqlWhere();
-		$this->sqlFrag .= "ORDER BY c.institutioncode, o.sciname";
- 	}
+		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$this->canReadRareSpp = true;
+		}
+	}
 
 	public function __destruct(){
  		parent::__destruct();
 		//if($this->zipArchive) $this->zipArchive->close();
 	}
+	
+	private function setSql($isDwc = false){
+		if($isDwc){
+	 		$this->sql = "SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, ".
+	 			"o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, ".
+	 			"o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, ".
+	 			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
+	 			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
+		 		"o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNotes, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, ".
+	 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
+	 			"o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
+		 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
+	 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
+	 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
+		 		"o.disposition, o.modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
+	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
+			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode",
+				"family","scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet","scientificNameAuthorship",
+	 			"taxonRemarks","identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
+				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
+	 			"verbatimEventDate","habitat","fieldNotes","occurrenceRemarks",
+	 			"dynamicProperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans","country",
+	 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
+				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+		 		"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId");
+		}
+		else{
+			$this->sql = "SELECT c.institutionCode, c.collectionCode, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
+				"o.sciname, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, ".
+				"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
+				"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, ".
+				"o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
+				"o.verbatimEventDate, o.habitat, o.substrate, o.fieldNotes, o.occurrenceRemarks, o.verbatimAttributes, o.dynamicProperties, ".
+				"o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
+				"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
+				"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
+				"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
+				"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
+				"o.disposition, o.duplicateQuantity, o.modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.collid, o.occid ".
+	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
+				"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
+			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",
+				"scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet",
+				"scientificNameAuthorship","taxonRemarks","identifiedBy","dateIdentified","identificationReferences",
+				"identificationRemarks","identificationQualifier","typeStatus","recordedBy","associatedCollectors",
+				"recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
+		 		"verbatimEventDate","habitat","substrate","fieldNotes","occurrenceRemarks","verbatimAttributes","dynamicproperties",
+				"associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
+				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
+				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+		 		"disposition","duplicatequantity","modified","language","rights","rightsHolder","accessRights","localitySecurity","collId","symbiotaId");
+		}
+
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $this->sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		$this->sql .= $this->getSqlWhere();
+		$this->sql .= "ORDER BY c.institutioncode, o.sciname";
+	}
 
  	public function downloadDarwinCoreCsv(){
-    	global $defaultTitle, $userRights, $isAdmin;
+    	global $defaultTitle, $userRights;
     	
-		$canReadRareSpp = false;
-		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
-			$canReadRareSpp = true;
-		}
     	$fileName = $defaultTitle;
 		if($fileName){
 			if(strlen($fileName) > 10){
@@ -77,58 +120,37 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		$fileName .= "_occur_".time().".csv";
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
-		$sql = 'SELECT o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, '.
-			'o.sciname, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
-			'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, '.
-			'o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-			'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNotes, CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, '.
-			'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
-			'o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-			'o.disposition, o.modified, o.language, o.localitysecurity, c.rights, c.rightsholder, c.accessrights '.
-			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ';
-		$sql .= $this->sqlFrag;
-		//echo $sql;
-		$result = $this->conn->query($sql);
+		$this->setSql(true);
+		$result = $this->conn->query($this->sql);
 		if($result){
     		$outstream = fopen("php://output", "w");
-			$headArr = array("basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",
-				"scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet","scientificNameAuthorship",
-	 			"taxonRemarks","identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
-				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-	 			"verbatimEventDate","habitat","fieldNotes","occurrenceRemarks",
-	 			"dynamicProperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans","country",
-	 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
-				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-		 		"disposition","modified","language","rights","rightsholder","accessrights");
-			fputcsv($outstream, $headArr);
+			fputcsv($outstream, $this->headerArr);
    		
 			while($row = $result->fetch_assoc()){
-				$localSecurity = (array_key_exists("localitysecurity",$row)?$row["localitysecurity"]:0);
-				unset($row["localitysecurity"]);
-				if(!$canReadRareSpp && $localSecurity == 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
-					$row["locality"] = 'Value Hidden';
-					$row["decimalLatitude"] = 'Value Hidden';
-					$row["decimalLongitude"] = 'Value Hidden';
-					$row["geodeticDatum"] = 'Value Hidden';
-					$row["coordinateUncertaintyInMeters"] = 'Value Hidden';
-					$row["coordinatePrecision"] = 'Value Hidden';
-					$row["locationRemarks"] = 'Value Hidden';
-					$row["verbatimCoordinates"] = 'Value Hidden';
-					$row["verbatimCoordinateSystem"] = 'Value Hidden';
-					$row["georeferencedBy"] = 'Value Hidden';
-					$row["georeferenceProtocol"] = 'Value Hidden';
-					$row["georeferenceSources"] = 'Value Hidden';
-					$row["georeferenceVerificationStatus"] = 'Value Hidden';
-					$row["georeferenceRemarks"] = 'Value Hidden';
-					$row["minimumElevationInMeters"] = 'Value Hidden';
-					$row["maximumElevationInMeters"] = 'Value Hidden';
-					$row["verbatimElevation"] = 'Value Hidden';
+				if(!$this->canReadRareSpp && $row["localitySecurity"] == 1 
+					&& (!array_key_exists("CollEditor", $userRights) || !in_array($row["collid"],$userRights["CollEditor"]))
+					&& (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
+					$row["habitat"] = 'Protected';
+					$row["locality"] = 'Protected';
+					$row["decimalLatitude"] = 'Protected';
+					$row["decimalLongitude"] = 'Protected';
+					$row["geodeticDatum"] = 'Protected';
+					$row["coordinateUncertaintyInMeters"] = 'Protected';
+					$row["coordinatePrecision"] = 'Protected';
+					$row["locationRemarks"] = 'Protected';
+					$row["verbatimCoordinates"] = 'Protected';
+					$row["verbatimCoordinateSystem"] = 'Protected';
+					$row["georeferencedBy"] = 'Protected';
+					$row["georeferenceProtocol"] = 'Protected';
+					$row["georeferenceSources"] = 'Protected';
+					$row["georeferenceVerificationStatus"] = 'Protected';
+					$row["georeferenceRemarks"] = 'Protected';
+					$row["minimumElevationInMeters"] = 'Protected';
+					$row["maximumElevationInMeters"] = 'Protected';
+					$row["verbatimElevation"] = 'Protected';
 				}
+				$row["localitySecurity"] = "";
+				$row["collid"] = "";
 				fputcsv($outstream, $row);
 			}
 			fclose($outstream);
@@ -144,13 +166,9 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     }
 
 	public function downloadSymbiotaCsv(){
-    	global $defaultTitle, $userRights, $isAdmin;
+    	global $defaultTitle, $userRights;
 
-    	$canReadRareSpp = false;
-		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
-			$canReadRareSpp = true;
-		}
-    	$fileName = $defaultTitle;
+		$fileName = $defaultTitle;
 		if($fileName){
 			if(strlen($fileName) > 10){
 				$nameArr = explode(" ",$fileName);
@@ -165,60 +183,35 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 		
-		$sql = "SELECT c.institutionCode, c.collectionCode, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
-			"o.sciname, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, ".
-			"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
-			"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, ".
-			"o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
-			"o.verbatimEventDate, o.habitat, o.substrate, o.fieldNotes, o.occurrenceRemarks, o.verbatimAttributes, o.dynamicProperties, ".
-			"o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
-			"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
-			"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
-			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
-			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-			"o.disposition, o.duplicatequantity, o.modified, o.language, o.collid, o.localitySecurity, c.rights, c.rightsholder, c.accessrights ".
-            "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
-			"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
-		$sql .= $this->sqlFrag;
-		//echo $sql;
-		$result = $this->conn->query($sql);
+		$this->setSql(false);
+		$result = $this->conn->query($this->sql);
 		//Write column names out to file
 		if($result){
     		$outstream = fopen("php://output", "w");
-			$headArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",
- 			"scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet",
- 			"scientificNameAuthorship","taxonRemarks","identifiedBy","dateIdentified","identificationReferences",
- 			"identificationRemarks","identificationQualifier","typeStatus","recordedBy","associatedCollectors",
- 			"recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-	 		"verbatimEventDate","habitat","substrate","fieldNotes","occurrenceRemarks","verbatimAttributes","dynamicproperties",
- 			"associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
- 			"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-	 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
- 			"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
- 			"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-	 		"disposition","duplicatequantity","modified","language","collid","localitySecurity","rights","rightsholder","accessrights");
-			fputcsv($outstream, $headArr);
+			fputcsv($outstream, $this->headerArr);
 			
 			while($row = $result->fetch_assoc()){
-				$localSecurity = (array_key_exists("localitySecurity",$row)?$row["localitySecurity"]:0);
-				if(!$canReadRareSpp && $localSecurity == 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
-					$row["locality"] = 'Value Hidden';
-					$row["decimalLatitude"] = 'Value Hidden';
-					$row["decimalLongitude"] = 'Value Hidden';
-					$row["geodeticDatum"] = 'Value Hidden';
-					$row["coordinateUncertaintyInMeters"] = 'Value Hidden';
-					$row["coordinatePrecision"] = 'Value Hidden';
-					$row["locationRemarks"] = 'Value Hidden';
-					$row["verbatimCoordinates"] = 'Value Hidden';
-					$row["verbatimCoordinateSystem"] = 'Value Hidden';
-					$row["georeferencedBy"] = 'Value Hidden';
-					$row["georeferenceProtocol"] = 'Value Hidden';
-					$row["georeferenceSources"] = 'Value Hidden';
-					$row["georeferenceVerificationStatus"] = 'Value Hidden';
-					$row["georeferenceRemarks"] = 'Value Hidden';
-					$row["minimumElevationInMeters"] = 'Value Hidden';
-					$row["maximumElevationInMeters"] = 'Value Hidden';
-					$row["verbatimElevation"] = 'Value Hidden';
+				if(!$this->canReadRareSpp && $row["localitySecurity"] == 1 
+					&& (!array_key_exists("CollEditor", $userRights) || !in_array($row["collid"],$userRights["CollEditor"]))
+					&& (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
+					$row["habitat"] = 'Protected';
+					$row["locality"] = 'Protected';
+					$row["decimalLatitude"] = 'Protected';
+					$row["decimalLongitude"] = 'Protected';
+					$row["geodeticDatum"] = 'Protected';
+					$row["coordinateUncertaintyInMeters"] = 'Protected';
+					$row["coordinatePrecision"] = 'Protected';
+					$row["locationRemarks"] = 'Protected';
+					$row["verbatimCoordinates"] = 'Protected';
+					$row["verbatimCoordinateSystem"] = 'Protected';
+					$row["georeferencedBy"] = 'Protected';
+					$row["georeferenceProtocol"] = 'Protected';
+					$row["georeferenceSources"] = 'Protected';
+					$row["georeferenceVerificationStatus"] = 'Protected';
+					$row["georeferenceRemarks"] = 'Protected';
+					$row["minimumElevationInMeters"] = 'Protected';
+					$row["maximumElevationInMeters"] = 'Protected';
+					$row["verbatimElevation"] = 'Protected';
 				}
 				fputcsv($outstream, $row);
 			}
@@ -469,7 +462,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 						fwrite($fh, $value."\t");
 					}
 					else{
-						fwrite($fh, "Value Hidden\t");
+						fwrite($fh, "Protected\t");
 					}
 				}
 				fwrite($fh, "\n");
