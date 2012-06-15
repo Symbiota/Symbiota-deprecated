@@ -811,6 +811,7 @@ function verifyDetSciName(f){
 				var retObj = eval("("+snXmlHttp.responseText+")");
 				f.scientificnameauthorship.value = retObj.author;
 				f.tidtoadd.value = retObj.tid;
+				f.family.value = retObj.family;
 			}
 			else{
 				f.scientificnameauthorship.value = "";

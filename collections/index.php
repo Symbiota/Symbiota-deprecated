@@ -117,7 +117,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	}
 	else{
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
+		echo "<a href='../index.php'>Home</a> &gt;&gt; ";
 		echo "<b>Collections</b>";
 		echo "</div>";
 	}
