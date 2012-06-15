@@ -27,8 +27,8 @@ $collManager->reset();
 	if(isset($collections_harvestparamsCrumbs)){
 		if($collections_harvestparamsCrumbs){
 			echo "<div class='navpath'>";
-			echo "<a href='../index.php'>Home</a> &gt; ";
-			echo $collections_harvestparamsCrumbs.' &gt; ';
+			echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+			echo $collections_harvestparamsCrumbs.' &gt;&gt; ';
 			echo "<b>Search Criteria</b>";
 			echo "</div>";
 		}
@@ -36,8 +36,8 @@ $collManager->reset();
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt; 
-			<a href='index.php'>Collections</a> &gt; 
+			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='index.php'>Collections</a> &gt;&gt; 
 			<b>Search Criteria</b>
 		</div>
 		<?php 

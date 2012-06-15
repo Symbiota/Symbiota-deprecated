@@ -586,7 +586,7 @@ class TaxonProfileManager {
 			"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
 			"WHERE (gi.tid IN ($tidStr)) ";
  		$sql = $sqlBase;
-		if($latlonArr){
+		if(count($latlonArr)==4){
 			$sql .= "AND (gi.DecimalLatitude BETWEEN ".$latlonArr[2]." AND ".$latlonArr[0].") ".
 				"AND (gi.DecimalLongitude BETWEEN ".$latlonArr[3]." AND ".$latlonArr[1].") ";
 		}

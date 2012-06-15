@@ -193,7 +193,7 @@ class ChecklistManager {
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		$voucherArr = Array();
 		if($this->showVouchers){
-			$vSql = 'SELECT DISTINCT v.tid, v.occid, CONCAT_WS(" ",o.recordedby,CONCAT("(",IFNULL(o.recordnumber,"s.n."),")")) AS collector, v.notes '.
+			$vSql = 'SELECT DISTINCT v.tid, v.occid, CONCAT_WS(" ",o.recordedby,CONCAT("(",IFNULL(o.recordnumber,o.catalognumber),")")) AS collector, v.notes '.
 				'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 				'WHERE (v.clid = '.$this->clid.')';
 	 		$vResult = $this->clCon->query($vSql);
