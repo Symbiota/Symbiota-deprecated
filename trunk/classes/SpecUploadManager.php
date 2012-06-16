@@ -927,18 +927,41 @@ class SpecUploadManager{
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
 			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
 			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
-			//Verify that date fields were not converted to Excel's numeric format (number of days since 01/01/1900)
-			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate'] && is_numeric($recMap['eventdate']) 
-				&& $recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
-				$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate'],1900));
+			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate'] && is_numeric($recMap['eventdate'])){
+				if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate']-1,1900));
+				}
+				elseif($recMap['eventdate'] > 2200000 && $recMap['eventdate'] < 2500000){
+					$dArr = explode('/',jdtogregorian($recMap['eventdate']));
+					$recMap['eventdate'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+				}
+				elseif($recMap['eventdate'] > 19000000){
+					$recMap['eventdate'] = substr($recMap['eventdate'],0,4).'-'.substr($recMap['eventdate'],4,2).'-'.substr($recMap['eventdate'],6,2);
+				}
+			}
+			if(array_key_exists('latestdatecollected',$recMap) && $recMap['latestdatecollected'] && is_numeric($recMap['latestdatecollected'])){
+				if($recMap['latestdatecollected'] > 2100 && $recMap['latestdatecollected'] < 45000){
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['latestdatecollected'] = date('Y-m-d', mktime(0,0,0,1,$recMap['latestdatecollected']-1,1900));
+				}
+				elseif($recMap['latestdatecollected'] > 2200000 && $recMap['latestdatecollected'] < 2500000){
+					$dArr = explode('/',jdtogregorian($recMap['latestdatecollected']));
+					$recMap['latestdatecollected'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+				}
+				elseif($recMap['latestdatecollected'] > 19000000){
+					$recMap['latestdatecollected'] = substr($recMap['latestdatecollected'],0,4).'-'.substr($recMap['latestdatecollected'],4,2).'-'.substr($recMap['latestdatecollected'],6,2);
+				}
 			}
 			if(array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && is_numeric($recMap['verbatimeventdate']) 
 				&& $recMap['verbatimeventdate'] > 2100 && $recMap['verbatimeventdate'] < 45000){
-				$recMap['verbatimeventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['verbatimeventdate'],1900));
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['verbatimeventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['verbatimeventdate']-1,1900));
 			}
 			if(array_key_exists('dateidentified',$recMap) && $recMap['dateidentified'] && is_numeric($recMap['dateidentified']) 
 				&& $recMap['dateidentified'] > 2100 && $recMap['dateidentified'] < 45000){
-				$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified'],1900));
+					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+					$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified']-1,1900));
 			}
 			//If month is text, avoid SQL error by converting to numeric value 
 			if(array_key_exists('month',$recMap)){
