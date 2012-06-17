@@ -123,7 +123,7 @@ $smManager = new SiteMapManager();
 			            			Note that you must have editing rights for that checklist.
 			            		</li>
 			            		<li>
-			            			To edit morphological characters, login and go any key. Open the 
+			            			To edit morphological characters, login and go to any key. Open the 
 			            			morphological character editor by clicking on the 
 			            			editing symbol to the right of Scientific Name that you wish to modify. 
 			            		</li>
