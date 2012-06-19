@@ -127,7 +127,7 @@ header("Content-Type: text/html; charset=".$charset);
 						<li><a href="outgoing.php?collid=<?php echo $collId.'&searchterm='.$searchTerm.'&displayall='.$displayAll; ?>"><span>Outgoing Loans</span></a></li>
 						<li><a href="incoming.php?collid=<?php echo $collId.'&searchterm='.$searchTerm.'&displayall='.$displayAll; ?>"><span>Incoming Loans</span></a></li>
 						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
-						<li><a href="#reportdiv">Reports</a></li>
+						<!-- <li><a href="#reportdiv">Reports</a></li> -->
 					</ul>
 					<div id="reportdiv" style="height:50px;">
 						-- IN DEVELOPMENT --
