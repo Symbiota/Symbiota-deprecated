@@ -17,7 +17,7 @@ class SpecLoans{
 
 	public function getLoanOutList($searchTerm,$displayAll){
 		$retArr = array();
-		$sql = 'SELECT l.loanid, l.loanidentifierown, i.institutioncode, l.forwhom, l.dateclosed '.
+		$sql = 'SELECT l.loanid, l.datesent, l.loanidentifierown, i.institutioncode, l.forwhom, l.dateclosed '.
 			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidborrower = i.iid '.
 			'WHERE l.collidown = '.$this->collId.' ';
 		if($searchTerm){
@@ -26,7 +26,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.loanidentifierown';
+		$sql .= 'ORDER BY l.datesent';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
@@ -43,8 +43,8 @@ class SpecLoans{
 		$iidArr = array();
 		$sql = 'SELECT DISTINCT e.iid, i.institutioncode '.
 			'FROM omoccurexchange AS e INNER JOIN institutions AS i ON e.iid = i.iid '.
-			'WHERE e.collid = '.$this->collId.' '.
-			'ORDER BY institutioncode';
+			'WHERE e.collid = '.$this->collId.' AND e.iid IS NOT NULL '.
+			'ORDER BY i.institutioncode';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$iidArr[$r->iid]['institutioncode'] = $r->institutioncode;
@@ -107,19 +107,21 @@ class SpecLoans{
 	
 	public function getLoanInList($searchTerm,$displayAll){
 		$retArr = array();
-		$sql = 'SELECT loanid, loanidentifierborr, dateclosed '.
-			'FROM omoccurloans '.
+		$sql = 'SELECT l.loanid, l.datereceivedborr, l.loanidentifierborr, l.dateclosed, i.institutioncode, l.forwhom '.
+			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidborrower = i.iid '.
 			'WHERE collidborr = '.$this->collId.' ';
 		if($searchTerm){
-			$sql .= 'AND loanidentifierborr LIKE "%'.$searchTerm.'%" ';
+			$sql .= 'AND l.loanidentifierborr LIKE "%'.$searchTerm.'%" ';
 		}
 		if(!$displayAll){
-			$sql .= 'AND ISNULL(dateclosed) ';
+			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY loanidentifierborr';
+		$sql .= 'ORDER BY l.datereceivedborr';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierborr'] = $r->loanidentifierborr;
+				$retArr[$r->loanid]['institutioncode'] = $r->institutioncode;
+				$retArr[$r->loanid]['forwhom'] = $r->forwhom;
 				$retArr[$r->loanid]['dateclosed'] = $r->dateclosed;
 			}
 			$rs->close();
