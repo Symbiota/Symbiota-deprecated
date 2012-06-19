@@ -113,7 +113,8 @@ if($collId) $loanManager->setCollId($collId);
 				echo '<li>';
 				echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
 				echo $loanArr['loanidentifierborr'];
-				echo '</a> ('.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>').')';
+				echo '</a>: '.$loanArr['institutioncode'].' ('.$loanArr['forwhom'].')';
+				echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>');
 				echo '</li>';
 			}
 			echo '</ul>';
