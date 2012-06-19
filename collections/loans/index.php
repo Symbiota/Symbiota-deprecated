@@ -129,13 +129,12 @@ header("Content-Type: text/html; charset=".$charset);
 						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
 						<!-- <li><a href="#reportdiv">Reports</a></li> -->
 					</ul>
-					<div id="reportdiv" style="height:50px;">
+					<!-- <div id="reportdiv" style="height:50px;">
 						-- IN DEVELOPMENT --
 						List loans outstanding, Invoices, mailing labels, etc?
-						<?php 
 						
-						?>
-					</div>
+						
+					</div> -->
 				</div>
 				<?php 
 			}
