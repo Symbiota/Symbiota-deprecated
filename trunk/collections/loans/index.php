@@ -100,7 +100,7 @@ header("Content-Type: text/html; charset=".$charset);
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt;&gt; 
 			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-			<a href='index.php?collid=1'> <b>Loan Management</b></a>
+			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management</b></a>
 		</div>
 		<?php 
 	}
