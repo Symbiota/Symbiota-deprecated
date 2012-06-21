@@ -77,7 +77,7 @@ if($collId) $loanManager->setCollId($collId);
 		foreach($transInstList as $k => $transArr){
 			echo '<li>';
 			echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$transArr['institutioncode'].'</a>';
-			echo ' (Balance: '.$transArr['invoicebalance'].')';
+			echo ' (Balance: '.($transArr['invoicebalance'] < 0?'<span style="color:red;font-weight:bold;">'.$transArr['invoicebalance'].'</span>':$transArr['invoicebalance']).')';
 			echo '<div id="'.$k.'" style="display:none;">';
 			$transList = $loanManager->getTransactions($collId,$k);
 			echo '<ul>';
