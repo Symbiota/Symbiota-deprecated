@@ -124,8 +124,8 @@ header("Content-Type: text/html; charset=".$charset);
 				?>
 				<div id="tabs" style="margin:0px;">
 				    <ul>
-						<li><a href="outgoing.php?collid=<?php echo $collId.'&searchterm='.$searchTerm.'&displayall='.$displayAll; ?>"><span>Outgoing Loans</span></a></li>
-						<li><a href="incoming.php?collid=<?php echo $collId.'&searchterm='.$searchTerm.'&displayall='.$displayAll; ?>"><span>Incoming Loans</span></a></li>
+						<li><a href="#loanoutdiv"><span>Outgoing Loans</span></a></li>
+						<li><a href="#loanindiv"><span>Incoming Loans</span></a></li>
 						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
 						<!-- <li><a href="#reportdiv">Reports</a></li> -->
 					</ul>
@@ -135,6 +135,212 @@ header("Content-Type: text/html; charset=".$charset);
 						
 						
 					</div> -->
+					<div id="loanoutdiv" style="">
+						<div style="float:right;">
+							<form name='optionform' action='index.php' method='post'>
+								<fieldset>
+									<legend><b>Options</b></legend>
+									<div>
+										<b>Search: </b>
+										<input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+									</div>
+									<div>
+										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> Display outstanding loans only
+									</div>
+									<div>
+										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
+									</div>
+									<div>
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+										<input type="submit" name="formsubmit" value="Refresh List" />
+									</div>
+								</fieldset>
+							</form>	
+						</div>
+						<div style="float:right;margin:10px;">
+							<a href="#" onclick="displayNewLoanOut();">
+								<img src="../../images/add.png" alt="Create New Loan" />
+							</a>
+						</div>
+						<div id="newloanoutdiv" style="display:none;">
+							<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this)">
+								<fieldset>
+									<legend><b>New Loan</b></legend>
+									<div style="padding-top:4px;">
+										<span>
+											Entered By:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+										</span>
+										<span style="float:right;">
+											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+										</span>
+									</div>
+									<div style="padding-top:4px;">
+										<span>
+											Send to Institution:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<select name="reqinstitution" style="width:400px;">
+												<option value="0">Select Institution</option>
+												<option value="0">------------------------------------------</option>
+												<?php 
+												$instArr = $loanManager->getInstitutionArr();
+												foreach($instArr as $k => $v){
+													echo '<option value="'.$k.'">'.$v.'</option>';
+												}
+												?>
+											</select>
+										</span>
+									</div>
+									<div style="padding-top:8px;">
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<button name="formsubmit" type="submit" value="Create Loan Out">Create Loan</button>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<div>
+							<?php 
+							$loanOutList = $loanManager->getLoanOutList($searchTerm,$displayAll);
+							if($loanOutList){
+								echo '<h3>Outgoing Loan Records</h3>';
+								echo '<ul>';
+								foreach($loanOutList as $k => $loanArr){
+									echo '<li>';
+									echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=out">';
+									echo $loanArr['loanidentifierown'];
+									echo '</a>: '.$loanArr['institutioncode'].' ('.$loanArr['forwhom'].')';
+									echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>');
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans out registered for this collection</div>';
+							}
+							?>
+						</div>
+						<div style="clear:both;">&nbsp;</div>
+					</div>
+					<div id="loanindiv" style="">
+						<div style="float:right;">
+							<form name='optionform' action='index.php' method='post'>
+								<fieldset>
+									<legend><b>Options</b></legend>
+									<div>
+										<b>Search: </b><input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+									</div>
+									<div>
+										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> Display outstanding loans only
+									</div>
+									<div>
+										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
+									</div>
+									<div>
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+										<input type="submit" name="formsubmit" value="Refresh List" />
+									</div>
+								</fieldset>
+							</form>	
+						</div>
+						<div style="float:right;margin:10px;">
+							<a href="#" onclick="displayNewLoanIn()">
+								<img src="../../images/add.png" alt="Create New Loan" />
+							</a>
+						</div>
+						<div id="newloanindiv" style="display:none;">
+							<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this)">
+								<fieldset>
+									<legend><b>New Loan</b></legend>
+									<div style="padding-top:4px;">
+										<span>
+											Entered By:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+										</span>
+										<span style="float:right;">
+											<b>Loan Identifier: </b>
+											<input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+										</span>
+									</div>
+									<div style="padding-top:6;">
+										<span>
+											Sent From:
+										</span>
+									</div>
+									<div style="padding-bottom:2px;">
+										<span>
+											<select name="iidowner" style="width:400px;">
+												<option value="0">Select Institution</option>
+												<option value="0">------------------------------------------</option>
+												<?php 
+												$instArr = $loanManager->getInstitutionArr();
+												foreach($instArr as $k => $v){
+													echo '<option value="'.$k.'">'.$v.'</option>';
+												}
+												?>
+											</select>
+										</span>
+									</div>
+									<div style="padding-top:8px;">
+										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<button name="formsubmit" type="submit" value="Create Loan In">Create Loan</button>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+						<div>
+							<?php 
+							$loansOnWay = $loanManager->getLoanOnWayList();
+							if($loansOnWay){
+								echo '<h3>Loans on Their Way</h3>';
+								echo '<ul>';
+								foreach($loansOnWay as $k => $loanArr){
+									echo '<li>';
+									echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
+									echo $loanArr['loanidentifierown'];
+									echo ' from '.$loanArr['collectionname'].'</a>';
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans on their way to this collection.</div>';
+							}
+							?>
+						</div>
+						<div>
+							<?php 
+							$loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
+							if($loanInList){
+								echo '<h3>Incoming Loan Records</h3>';
+								echo '<ul>';
+								foreach($loanInList as $k => $loanArr){
+									echo '<li>';
+									echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
+									echo $loanArr['loanidentifierborr'];
+									echo '</a>: '.$loanArr['institutioncode'].' ('.$loanArr['forwhom'].')';
+									echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>');
+									echo '</li>';
+								}
+								echo '</ul>';
+							}
+							else{
+								echo '<div style="font-weight:bold;font-size:120%;">There are no loans in registered for this collection</div>';
+							}
+							?>
+						</div>
+						<div style="clear:both;">&nbsp;</div>
+					</div>
 				</div>
 				<?php 
 			}
