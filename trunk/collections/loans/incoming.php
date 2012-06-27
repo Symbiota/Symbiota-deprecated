@@ -65,8 +65,8 @@ if($collId) $loanManager->setCollId($collId);
 				<div style="padding-bottom:2px;">
 					<span>
 						<select name="iidowner" style="width:400px;">
-							<option value="0">Select Institution</option>
-							<option value="0">------------------------------------------</option>
+							<option value="">Select Institution</option>
+							<option value="">------------------------------------------</option>
 							<?php 
 							$instArr = $loanManager->getInstitutionArr();
 							foreach($instArr as $k => $v){
