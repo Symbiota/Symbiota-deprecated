@@ -639,6 +639,31 @@ class SpecLoans{
 		return $retArr;
 	}
 	
+	public function getToAddress($institution){
+		$retArr = array();
+		$sql = 'SELECT i.contact, i.institutionname, i.institutionname2, i.phone, '.
+			'i.institutioncode, i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country '.
+			'FROM institutions AS i '.
+			'WHERE i.iid = '.$institution.' ';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['contact'] = $r->contact;
+				$retArr['institutionname'] = $r->institutionname;
+				$retArr['institutionname2'] = $r->institutionname2;
+				$retArr['phone'] = $r->phone;
+				$retArr['institutioncode'] = $r->institutioncode;
+				$retArr['address1'] = $r->address1;
+				$retArr['address2'] = $r->address2;
+				$retArr['city'] = $r->city;
+				$retArr['stateprovince'] = $r->stateprovince;
+				$retArr['postalcode'] = $r->postalcode;
+				$retArr['country'] = $r->country;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	//General look up functions
 	public function getInstitutionArr(){
 		$retArr = array();
