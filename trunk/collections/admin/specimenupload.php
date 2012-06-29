@@ -342,7 +342,7 @@ else{
 						<div style="margin:10px;">
 							<div class="ulfnoptions">
 								<b>Upload File:</b> 
-								<input name="uploadfile" type="file" size="50" />
+								<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
 							</div>
 							<div class="ulfnoptions" style="display:none;">
 								Full File Path: 
