@@ -22,21 +22,17 @@ class SpecUploadFile extends SpecUploadManager{
 	 	$fullPath = '';
 		if(!$this->ulFileName){
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
-			$fullPath = $targetPath."/".$this->ulFileName;
+			$fullPath = $targetPath.$this->ulFileName;
 		 	move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath);
 		}
 		elseif(strpos($this->ulFileName,'/') !== false || strpos($this->ulFileName,'\\') !== false){
 			if(file_exists($this->ulFileName)){
 				$extStr = substr($this->ulFileName,-4);
-				$fullPath = $targetPath.'/collTransferCollId'.$this->collId.$extStr;
+				$tempFileName = 'transCollId'.$this->collId.$extStr;
+				$fullPath = $targetPath.$tempFileName;
 				if(copy($this->ulFileName,$fullPath)){
 					unlink($this->ulFileName);
-					if(strpos($this->ulFileName,'/') !== false){
-						$this->ulFileName = substr($fullPath,strrpos($fullPath,'/'));
-					}
-					elseif(strpos($this->ulFileName,'\\') !== false){
-						$this->ulFileName = substr($fullPath,strrpos($fullPath,'\\'));
-					}
+					$this->ulFileName = $tempFileName;
 				}
 				else{
 					echo '<li>ERROR: Unable to copy file to temp locality</li>';
@@ -49,7 +45,7 @@ class SpecUploadFile extends SpecUploadManager{
 			}
 		}
 		else{
-			$fullPath = $targetPath."/".$this->ulFileName;
+			$fullPath = $targetPath.$this->ulFileName;
 		}
 		if($fullPath){
 	        if(substr($fullPath,-4) == ".zip"){
@@ -57,7 +53,7 @@ class SpecUploadFile extends SpecUploadManager{
 				$zip = new ZipArchive;
 				$zip->open($fullPath);
 				$this->ulFileName = $zip->getNameIndex(0);
-				$fullPath = $targetPath."/".$this->ulFileName; 
+				$fullPath = $targetPath.$this->ulFileName; 
 				$zip->extractTo($targetPath);
 				$zip->close();
 				unlink($zipFilePath);
@@ -78,7 +74,7 @@ class SpecUploadFile extends SpecUploadManager{
 			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$this->conn->query($sqlDel);
 			
-			$fullPath = $this->getUploadTargetPath()."/".$this->ulFileName;
+			$fullPath = $this->getUploadTargetPath().$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
 			
 			$headerArr = $this->getHeaderArr($fh);
@@ -168,6 +164,9 @@ class SpecUploadFile extends SpecUploadManager{
 		}
 		if(file_exists($tPath."/downloads")){
 			$tPath .= "/downloads";
+		}
+		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
+			$tPath .= '/';
 		}
 		$this->uploadTargetPath = $tPath;
     	return $tPath;
