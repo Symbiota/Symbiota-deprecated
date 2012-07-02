@@ -23,7 +23,7 @@ class CollectionProfileManager {
 
 	public function getCollectionList(){
 		$returnArr = Array();
-		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.briefdescription, ".
+		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.fulldescription, c.briefdescription, ".
 			"c.Homepage, c.Contact, c.email, c.icon ".
 			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
 		$rs = $this->conn->query($sql);
@@ -32,6 +32,7 @@ class CollectionProfileManager {
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
 			$returnArr[$row->collid]['collectionname'] = $row->CollectionName;
 			$returnArr[$row->collid]['briefdescription'] = $row->briefdescription;
+			$returnArr[$row->collid]['fulldescription'] = $row->briefdescription;
 			$returnArr[$row->collid]['homepage'] = $row->Homepage;
 			$returnArr[$row->collid]['contact'] = $row->Contact;
 			$returnArr[$row->collid]['email'] = $row->email;
