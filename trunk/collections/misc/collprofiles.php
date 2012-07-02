@@ -698,7 +698,7 @@ if($collId) $collData = $collManager->getCollectionData();
 								</a>
 							</h3>
 							<div style='margin:10px;'>
-								<div><?php echo $collArr['briefdescription']; ?></div>
+								<div><?php echo $collArr['fulldescription']; ?></div>
 								<div style='margin-top:5px;'>
 									<b>Contact:</b> 
 									<?php echo $collArr['contact'].' ('.str_replace('@','&lt;at&gt;',$collArr['email']).')';?>
