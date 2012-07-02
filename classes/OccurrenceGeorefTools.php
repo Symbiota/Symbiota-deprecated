@@ -40,20 +40,30 @@ class OccurrenceGeorefTools {
 			else{
 				$sql .= 'AND (decimalLatitude IS NULL) ';
 			}
+			$orderBy = '';
 			if(array_key_exists('qcountry',$this->qryVars) && $this->qryVars['qcountry']){
 				$sql .= 'AND (country = "'.$this->qryVars['qcountry'].'") ';
+			}
+			else{
+				$orderBy .= 'country,';
 			}
 			if(array_key_exists('qstate',$this->qryVars) && $this->qryVars['qstate']){
 				$sql .= 'AND (stateProvince = "'.$this->qryVars['qstate'].'") ';
 			}
+			else{
+				$orderBy .= 'stateprovince,';
+			}
 			if(array_key_exists('qcounty',$this->qryVars) && $this->qryVars['qcounty']){
 				$sql .= 'AND (county LIKE "'.$this->qryVars['qcounty'].'%") ';
+			}
+			else{
+				$orderBy .= 'county,';
 			}
 			if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
 				$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
 			}
 		}
-		$sql .= 'ORDER BY locality,county,verbatimcoordinates ';
+		$sql .= 'ORDER BY '.$orderBy.'locality,verbatimcoordinates ';
 		//echo $sql;
 		$totalCnt = 0;
 		$locCnt = 1;
