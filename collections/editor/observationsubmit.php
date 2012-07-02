@@ -11,9 +11,9 @@ $clid  = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $obsManager = new ObservationSubmitManager($collId);
 $collMap = $obsManager->getCollMap(); 
 if(!$collId && $collMap) $collId = $collMap['collid']; 
-$status = "";
 
 $isEditor = 0;
+$occid = 0;
 if($collMap){
 	if($isAdmin){
 		$isEditor = 1;
@@ -26,7 +26,7 @@ if($collMap){
 	}
 	if($isEditor && $action == "Submit Observation"){
 		if(isset($useImageMagick) && $useImageMagick) $obsManager->setUseImageMagick(1);
-		$status = $obsManager->addObservation($_POST,$symbUid);
+		$occid = $obsManager->addObservation($_POST,$symbUid);
 	}
 }
 ?>
@@ -58,31 +58,38 @@ if($collMap){
 	<div id="innertext">
 		<h1><?php echo $collMap['collectionname']; ?></h1>
 		<?php
-		if($status){
+		if($action || (isset($_SERVER['REQUEST_METHOD']) && strtolower($_SERVER['REQUEST_METHOD']) == 'post' && empty($_FILES) && empty($_POST))){
 			?>
 			<hr />
-			<div style="margin:10px;font-weight:bold;">
+			<div style="margin:15px;font-weight:bold;color:red;">
 				<?php
-				$occid = 0;
-				if(is_numeric($status)){
-					$occid = $status;
-					$status = 'SUCCESS: Image loaded successfully!';
-				}
-				echo $status;
 				if($occid){
 					?>
-					<br/>
+					<div>
+						SUCCESS: Image loaded successfully!
+					</div>
 					<div style="font:weight;font-size:120%;margin-top:10px;">
 						Open  
 						<a href="../individual/index.php?occid=<?php echo $occid; ?>">Occurrence Details Viewer</a> to see the new record 
 					</div>
 					<?php
-				} 
+				}
+				$errArr = $obsManager->getErrorArr();
+				if($errArr){
+					echo 'ERROR:<ol>';
+					foreach($errArr as $e){
+						echo '<li>'.$e.'</li>';
+					}
+					echo '</ol>';
+				}
+				if(!$action){
+					echo 'UNKNOWN ERROR: image file may have been larger than allowed by server. Try uploading a smaller image or have system administrator modify PHP configurations';
+				}
 				?>
 			</div>
 			<hr />
 			<?php
-		} 
+		}
 		if($symbUid){
 			if($isEditor){
 				?>
