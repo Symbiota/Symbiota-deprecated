@@ -219,9 +219,9 @@ header("Content-Type: text/html; charset=".$charset);
 											if($localArr){
 												foreach($localArr as $k => $v){
 													$locStr = '';
-													if($v['country'] && $v['country'] != $qCountry) $locStr = $v['country'].'; ';
-													if($v['stateprovince'] && $v['stateprovince'] != $qState) $locStr .= $v['stateprovince'].'; ';
-													if($v['county'] && $v['county'] != $qCounty) $locStr .= $v['county'].'; ';
+													if(!$qCountry && $v['country']) $locStr = $v['country'].'; ';
+													if(!$qState && $v['stateprovince']) $locStr .= $v['stateprovince'].'; ';
+													if(!$qCounty && $v['county']) $locStr .= $v['county'].'; ';
 													if($v['locality']) $locStr .= str_replace(';',',',$v['locality']);
 													if($v['verbatimcoordinates']) $locStr .= ', '.$v['verbatimcoordinates'];
 													if(array_key_exists('decimallatitude',$v) && $v['decimallatitude']){
@@ -315,7 +315,7 @@ header("Content-Type: text/html; charset=".$charset);
 												<span style="margin-left:20px;font-weight:bold;">Datum:</span> 
 												<input id="geodeticdatum" name="geodeticdatum" type="text" value="" style="width:75px;" />
 												<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
-													<img src="../../images/showedit.png" style="border:0px;width:14px;" />
+													<img src="../../images/editplus.png" style="border:0px;width:14px;" />
 												</span>
 											</td>
 										</tr>
