@@ -32,7 +32,7 @@ class CollectionProfileManager {
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
 			$returnArr[$row->collid]['collectionname'] = $row->CollectionName;
 			$returnArr[$row->collid]['briefdescription'] = $row->briefdescription;
-			$returnArr[$row->collid]['fulldescription'] = $row->briefdescription;
+			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
 			$returnArr[$row->collid]['homepage'] = $row->Homepage;
 			$returnArr[$row->collid]['contact'] = $row->Contact;
 			$returnArr[$row->collid]['email'] = $row->email;
