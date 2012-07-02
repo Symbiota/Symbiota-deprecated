@@ -54,7 +54,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 	 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 	 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-		 		"o.disposition, o.modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
+		 		"o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
 	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
 			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode",
 				"family","scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet","scientificNameAuthorship",
@@ -80,7 +80,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 				"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 				"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-				"o.disposition, o.duplicateQuantity, o.modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.collid, o.occid ".
+				"o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, ".
+				"c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.collid, o.occid ".
 	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 				"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
 			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",

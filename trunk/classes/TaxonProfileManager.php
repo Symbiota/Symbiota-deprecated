@@ -52,7 +52,8 @@ class TaxonProfileManager {
 		if(!($this->con === null)) $this->con->close();
 	}
  	
- 	public function setTaxon($t){
+ 	public function setTaxon($t,$isFinal=0){
+ 		$t = trim($t);
 		$sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted '. 
 			'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID '.
 			'WHERE (ts.taxauthid = '.($this->taxAuthId?$this->taxAuthId:'1').') ';
@@ -102,9 +103,23 @@ class TaxonProfileManager {
 				}
 			}
 		}
-	    else{
-	    	$this->sciName = "unknown";
-	    }
+		else{
+			//Try to resolve whether author is embedded into sciname
+			$sn = '';
+			if(!$isFinal && preg_match('/^([A-Z]+[a-z]*\s+x{0,1}\s{0,1}[a-z]+)/',$t,$m)){
+				$sn = $m[1];
+				if(preg_match('/\s{1}var\.\s+([a-z]+)/',$t,$m)){
+					$sn .= ' var. '.$m[1];
+				}
+				elseif(preg_match('/\s+(s[ub]*sp\.)\s+([a-z]+)/',$t,$m)){
+					$sn .= ' '.$m[1].' '.$m[2];
+				}
+				$this->setTaxon($sn,1);
+			}
+			else{
+				$this->sciName = "unknown";
+			}
+		}
 		$result->close();
  	}
  	

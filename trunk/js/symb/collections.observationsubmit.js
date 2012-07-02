@@ -1,3 +1,5 @@
+var taxonValid = false;
+
 $(document).ready(function() {
 	$("#sciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php",
@@ -23,12 +25,14 @@ function verifySciName(){
 					var retObj = eval("("+snXmlHttp.responseText+")");
 					document.obsform.scientificnameauthorship.value = retObj.author;
 					document.obsform.family.value = retObj.family;
+					taxonValid = true;
 				}
 				else{
 					document.obsform.scientificnameauthorship.value = "";
 					document.obsform.family.value = "";
 					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
 					snXmlHttp = null;
+					taxonValid = false;
 				}
 			}
 		};
@@ -118,6 +122,12 @@ function verifyObsForm(f){
     if(f.sciname.value == ""){
 		window.alert("Observation must have an identification (scientific name) assigned to it, even if it is only to family rank.");
 		return false;
+    }
+    else{
+		if(!taxonValid){
+			alert("Scientific name invalid");
+			return false;
+		}
     }
     if(f.recordedby.value == ""){
 		window.alert("Observer field must have a value.");

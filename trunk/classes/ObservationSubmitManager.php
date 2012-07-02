@@ -72,7 +72,7 @@ class ObservationSubmitManager {
 				if($row = $result->fetch_object()){
 					$tid = $row->tid;
 				}
-				if(!$tid){
+				else{
 					//Abort process
 					$this->errArr[] = 'ERROR: scientific name failed, contact admin to add name to thesaurus';
 					return;
@@ -462,6 +462,10 @@ class ObservationSubmitManager {
 	
 	public function getCollMap(){
 		return $this->collMap;
+	}
+	
+	public function getErrorArr(){
+		return $this->errArr;
 	}
 
 	private function cleanStr($str){
