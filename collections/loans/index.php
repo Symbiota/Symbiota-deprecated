@@ -90,7 +90,7 @@ header("Content-Type: text/html; charset=".$charset);
 			<div class='navpath'>
 				<a href='../../index.php'>Home</a> &gt;&gt; 
 				<?php echo $collections_loans_indexCrumbs; ?>
-				<a href='index.php?collid=1'> <b>Loan Management</b></a>
+				<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management</b></a>
 			</div>
 			<?php 
 		}
