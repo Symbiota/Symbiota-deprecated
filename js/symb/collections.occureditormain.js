@@ -903,10 +903,26 @@ function verifyDetEditForm(f){
 
 //Image tab form methods 
 function verifyImgAddForm(f){
-    if(f.elements["imgfile"].value.replace(/\s/g, "") == "" ){
-        if(f.elements["imgurl"].value.replace(/\s/g, "") == ""){
-        	window.alert("Select an image file or enter a URL to an existing image");
+    if(f.elements["imgfile"].value.replace(/\s/g, "") == ""){
+    	var imgUrl = f.elements["imgurl"].value.replace(/\s/g, "");
+    	if(imgUrl == ""){
+        	alert("Select an image file or enter a URL to an existing image");
 			return false;
+        }
+        else{
+        	var imgExt = imgUrl.split('.').pop().toLowerCase();
+        	if(imgExt != "jpg" && imgExt != "jpeg"){
+        		alert("Central image must be a JPG");
+    			return false;
+        	}
+        	var tnUrl = f.elements["tnurl"].value.replace(/\s/g, "");
+        	if(tnUrl != ""){
+            	var tnExt = tnUrl.split('.').pop().toLowerCase();
+            	if(tnExt != "jpg" && tnExt != "jpeg"){
+            		alert("Thumbnail image must be a JPG");
+        			return false;
+            	}
+        	}
         }
     }
 	pendingDataEdits = false;

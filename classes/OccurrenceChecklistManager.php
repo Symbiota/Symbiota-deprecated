@@ -26,18 +26,21 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		$this->checklistTaxaCnt = 0;
 		$sql = "";
         if($taxonAuthorityId){
-			$sql = "SELECT DISTINCT ts.family, t.sciname ".
-                "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
+			$sql = 'SELECT DISTINCT ts.family, t.sciname '.
+                'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid) '.
+                'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid) '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
 			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
+			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere())).
+				" AND ts1.taxauthid = ".$taxonAuthorityId." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
         }
         else{
 			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
 				'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
 			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) ".
+			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1) ".
 				"ORDER BY IFNULL(ts.family,o.family), o.sciname ";
         }
 		//echo "<div>".$sql."</div>";

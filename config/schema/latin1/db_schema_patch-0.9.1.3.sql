@@ -27,7 +27,11 @@ DECLARE loopCnt INT DEFAULT 1;
 DECLARE radius INT;
 
 #Delete all expired checklists
-DELETE FROM fmdynamicchecklists WHERE expiration < NOW();
+DELETE l.* 
+FROM fmdynamicchecklists cl INNER JOIN fmdyncltaxalink l ON cl.dynclid = l.dynclid
+WHERE cl.expiration < NOW();
+
+DELETE IGNORE FROM fmdynamicchecklists WHERE expiration < NOW();
 
 WHILE speccnt < 2500 AND loopCnt < 10 DO
         SET radius = radiusUnit*loopCnt;

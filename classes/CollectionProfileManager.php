@@ -23,18 +23,19 @@ class CollectionProfileManager {
 
 	public function getCollectionList(){
 		$returnArr = Array();
-		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.fulldescription, c.briefdescription, ".
-			"c.Homepage, c.Contact, c.email, c.icon ".
+		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, ".
+			"IFNULL(c.fulldescription,c.briefdescription) AS fulldescription, c.briefdescription, ".
+			"c.homepage, c.contact, c.email, c.icon ".
 			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
-			$returnArr[$row->collid]['collectionname'] = $row->CollectionName;
+			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
 			$returnArr[$row->collid]['briefdescription'] = $row->briefdescription;
 			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
-			$returnArr[$row->collid]['homepage'] = $row->Homepage;
-			$returnArr[$row->collid]['contact'] = $row->Contact;
+			$returnArr[$row->collid]['homepage'] = $row->homepage;
+			$returnArr[$row->collid]['contact'] = $row->contact;
 			$returnArr[$row->collid]['email'] = $row->email;
 			$returnArr[$row->collid]['icon'] = $row->icon;
 		}

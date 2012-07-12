@@ -21,7 +21,7 @@ class DynamicChecklistManager {
 		global $uid;
 		//set_time_limit(120);
 		$sql = "Call DynamicChecklist(".$lat.",".$lng.",".$radius.",".$tid.",".($uid?$uid:"NULL").")";
-		//echo $sql;
+		echo $sql;
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_row()){
 			$dynPk = $row[0];
