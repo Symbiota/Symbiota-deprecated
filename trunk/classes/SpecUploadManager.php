@@ -501,17 +501,17 @@ class SpecUploadManager{
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with verbatimEventDate... ';
 		ob_flush();
 		flush();
-		$sql = 'SELECT u.dbpk, u.verbatimeventdate '.
+		$sql = 'SELECT DISTINCT u.verbatimeventdate '.
 			'FROM uploadspectemp u '.
 			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$recDbpk = $r->dbpk;
-			$dateStr = $this->formatDate($r->verbatimeventdate);
-			if($dateStr && $recDbpk){
+			$vDate = $r->verbatimeventdate;
+			$dateStr = $this->formatDate($vDate);
+			if($dateStr){
 				$sql = 'UPDATE uploadspectemp '.
 					'SET eventdate = "'.$dateStr.'" '.
-					'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+					'WHERE (collid = '.$this->collId.') AND (verbatimeventdate = "'.$vDate.'")';
 				$this->conn->query($sql);
 			}
 		}
@@ -522,18 +522,18 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 		//Parse out verbatimCoordinates
-		$sql = 'SELECT dbpk, verbatimcoordinates '.
+		$sql = 'SELECT DISTINCT verbatimcoordinates '.
 			'FROM uploadspectemp '.
 			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->verbatimcoordinates){
-				$recDbpk = $r->dbpk;
-				$coordArr = $this->parseVerbatimCoordinates($r->verbatimcoordinates);
-				if($coordArr && $recDbpk){
+				$vCoord = $r->verbatimcoordinates;
+				$coordArr = $this->parseVerbatimCoordinates($vCoord);
+				if($coordArr){
 					$sql = 'UPDATE uploadspectemp '.
 						'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].
-						'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+						'WHERE (collid = '.$this->collId.') AND (verbatimcoordinates = "'.$vCoord.'")';
 					$this->conn->query($sql);
 				}
 			}
@@ -545,19 +545,19 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 		//Clean and parse verbatimElevation string
-		$sql = 'SELECT dbpk, verbatimelevation '.
+		$sql = 'SELECT DISTINCT verbatimelevation '.
 			'FROM uploadspectemp '.
 			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$recDbpk = $r->dbpk;
-			$eArr = $this->parseVerbatimElevation($r->verbatimelevation);
-			if($eArr && $recDbpk){
+			$vElev = $r->verbatimelevation;
+			$eArr = $this->parseVerbatimElevation($vElev);
+			if($eArr){
 				$maxElev = 'NULL';
 				if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
 				$sql = 'UPDATE uploadspectemp '.
 					'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
-					'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$recDbpk.'")';
+					'WHERE (collid = '.$this->collId.') AND (verbatimelevation = "'.$vElev.'")';
 				$this->conn->query($sql);
 			}
 		}
@@ -1264,6 +1264,10 @@ class SpecUploadManager{
 		}
 		$retDate = '';
 		if($y){
+			//Check to see if month is valid
+			if($m > 12){
+				return '';
+			}
 			//check to set if day is valid for month
 			if($d == 30 && $m == 2){
 				//Bad feb date

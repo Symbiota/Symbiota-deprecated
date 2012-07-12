@@ -23,39 +23,41 @@ $imageArr = $occManager->getImageMap();
 		<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
 			<fieldset>
 				<legend><b>Add a New Image</b></legend>
-				<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
+				<div style='padding:10px;width:90%;border:1px solid yellow;background-color:FFFF99;'>
 					<div class="targetdiv" style="display:block;">
 						<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
 							Select an image file located on your computer that you want to upload:
 						</div>
 				    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
-						<input type='hidden' name='MAX_FILE_SIZE' value='2000000' />
+						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 						<div>
 							<input name='imgfile' type='file' size='70'/>
 						</div>
-						<div style="margin-left:10px;">
-							<input type="checkbox" name="createlargeimg" value="1" /> Create a large version of image, when applicable
-						</div>
-						<div style="margin-left:10px;">Note: upload image size can not be greater than 1MB</div>
 						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
 							Link to External Image
 						</div>
 					</div>
 					<div class="targetdiv" style="display:none;">
-						<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
-							Enter a URL to an image already located on a web server:
+						<div style="margin-bottom:10px;">
+							Enter a URL to an image already located on a local or remote web server. 
+							If a thumbanil or large version also exists in addition to central image, 
+							enter those urls in the appropriate fields. The central and thumbnail urls 
+							must be JPGs, though the large image can be a dynamic resource (e.g. Zoomify resource).  
 						</div>
 						<div>
-							<b>URL:</b> 
+							<b>Central Image URL:</b><br/> 
 							<input type='text' name='imgurl' size='70'/>
 						</div>
 						<div>
-							<b>Thumbnail URL:</b> 
+							<b>Thumbnail URL:</b><br/> 
 							<input type='text' name='tnurl' size='70'/>
 						</div>
 						<div>
-							<b>Large URL:</b> 
+							<b>Large Image URL:</b><br/>
 							<input type='text' name='lgurl' size='70'/>
+						</div>
+						<div>
+							<input type="checkbox" name="copytoserver" value="1" /> Copy to Server
 						</div>
 						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
 							Upload Local Image
@@ -100,6 +102,9 @@ $imageArr = $occManager->getImageMap();
 				<div style="margin:0px 0px 5px 10px;">
 					<b>Source Webpage:</b>
 					<input name="sourceurl" type="text" size="40" value="" />
+				</div>
+				<div style="margin-left:10px;">
+					<input type="checkbox" name="nolgimage" value="1" /> Do not keep large version of image, when applicable 
 				</div>
 				<div style="margin:10px 0px 10px 20px;">
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />

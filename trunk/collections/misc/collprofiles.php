@@ -686,10 +686,14 @@ if($collId) $collData = $collManager->getCollectionData();
 						<td style='text-align:center;vertical-align:top;'>
 							<?php 
 							$iconStr = $collArr['icon'];
-							if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr; 
+							if($iconStr){
+								if(substr($iconStr,0,6) == 'images') $iconStr = '../../'.$iconStr; 
+								?>
+								<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30;width:30;' /><br/>
+								<?php
+								echo $collArr['institutioncode'];
+							} 
 							?>
-							<img src='<?php echo $iconStr; ?>' style='border-size:1px;height:30;width:30;' /><br/>
-							<?php echo $collArr['institutioncode']; ?>
 						</td>
 						<td>
 							<h3>

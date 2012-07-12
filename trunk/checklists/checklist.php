@@ -427,16 +427,19 @@
 									<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
 								</div>
 								<div>
-									<?php 
-										if($displayCommonNames){
-											echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names";
-										}
-									?>
-									<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
+									<div style="margin-left:10px;">
+										<?php 
+											if($displayCommonNames){
+												echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> Common Names<br/>";
+											}
+										?>
+										<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> Synonyms
+									</div>
 								</div>
 							</div>
 						    <!-- Thesaurus Filter -->
-						    <div><b>Filter:</b>
+						    <div>
+						    	<b>Filter:</b><br/>
 						    	<select id='thesfilter' name='thesfilter'>
 									<option value='0'>Original Checklist</option>
 									<?php 
