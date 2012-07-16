@@ -30,7 +30,7 @@ if($collId) $loanManager->setCollId($collId);
 			<div style="padding-bottom:2px;">
 				<span>
 					<b>Transaction Number:</b> 
-					<input type="text" autocomplete="off" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+					<input type="text" autocomplete="off" id="identifier" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="exIdentCheck(identifier,<?php echo $collId; ?>);" />
 				</span>
 				<span style="margin-left:40px;">
 					<select name="transactiontype" style="width:100px;" >
