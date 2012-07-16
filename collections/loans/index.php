@@ -176,7 +176,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 										<span style="float:right;">
-											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+											<b>Loan Identifier: </b><input type="text" autocomplete="off" id="loanidentifierown" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="outIdentCheck(loanidentifierown,<?php echo $collId; ?>);" />
 										</span>
 									</div>
 									<div style="padding-top:4px;">
@@ -269,7 +269,7 @@ header("Content-Type: text/html; charset=".$charset);
 										</span>
 										<span style="float:right;">
 											<b>Loan Identifier: </b>
-											<input type="text" autocomplete="off" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+											<input type="text" autocomplete="off" id="loanidentifierborr" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="inIdentCheck(loanidentifierborr,<?php echo $collId; ?>);" />
 										</span>
 									</div>
 									<div style="padding-top:6;">
