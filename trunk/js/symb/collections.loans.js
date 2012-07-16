@@ -371,3 +371,132 @@ function parseDate(dateStr){
 	retArr["d"] = d.toString();
 	return retArr;
 }
+
+function acroCheck(institutioncode){
+	//alert ("test");
+	var acroelement = document.getElementById('institutioncode');
+	var acronym = acroelement.value;
+	//alert (acronym);
+	if (acronym.length == 0){
+  		return;
+  	}
+	sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url="rpc/ariz_acrocheck.php";
+	url=url+"?acronym="+acronym;
+	//alert (url);
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			var responseArr = JSON.parse(sutXmlHttp.responseText); 
+			//alert (responseArr);
+			if(responseArr){
+				acroelement.value="";
+				alert("Institution already exists, please select it from drop down menu above.");
+			}
+		}
+	};
+	sutXmlHttp.open("POST",url,true);
+	sutXmlHttp.send(null);
+}
+
+function outIdentCheck(loanidentifierown,collid){
+	//alert ("test");
+	var loanoutidentelement = document.getElementById('loanidentifierown');
+	var loanidentifierown = loanoutidentelement.value;
+	var collid = collid;
+	//alert (loanidentifierown);
+	//alert (collid);
+	if (loanidentifierown.length == 0){
+  		return;
+  	}
+	sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url="rpc/loanoutidentifiercheck.php";
+	url=url+"?ident="+loanidentifierown;
+	url=url+"&collid="+collid;
+	//alert (url);
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			var responseArr = JSON.parse(sutXmlHttp.responseText); 
+			//alert (responseArr);
+			if(responseArr){
+				loanoutidentelement.value="";
+				alert("There is already a loan with that identifier, please enter a different one.");
+			}
+		}
+	};
+	sutXmlHttp.open("POST",url,true);
+	sutXmlHttp.send(null);
+}
+
+function inIdentCheck(loanidentifierborr,collid){
+	//alert ("test");
+	var loaninidentelement = document.getElementById('loanidentifierborr');
+	var loanidentifierborr = loaninidentelement.value;
+	var collid = collid;
+	//alert (loanidentifierborr);
+	//alert (collid);
+	if (loanidentifierborr.length == 0){
+  		return;
+  	}
+	sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url="rpc/loaninidentifiercheck.php";
+	url=url+"?ident="+loanidentifierborr;
+	url=url+"&collid="+collid;
+	//alert (url);
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			var responseArr = JSON.parse(sutXmlHttp.responseText); 
+			//alert (responseArr);
+			if(responseArr){
+				loaninidentelement.value="";
+				alert("There is already a loan with that identifier, please enter a different one.");
+			}
+		}
+	};
+	sutXmlHttp.open("POST",url,true);
+	sutXmlHttp.send(null);
+}
+
+function exIdentCheck(identifier,collid){
+	//alert ("test");
+	var exidentelement = document.getElementById('identifier');
+	var identifier = exidentelement.value;
+	var collid = collid;
+	//alert (identifier);
+	//alert (collid);
+	if (identifier.length == 0){
+  		return;
+  	}
+	sutXmlHttp=GetXmlHttpObject();
+	if (sutXmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url="rpc/exidentifiercheck.php";
+	url=url+"?ident="+identifier;
+	url=url+"&collid="+collid;
+	//alert (url);
+	sutXmlHttp.onreadystatechange=function(){
+		if(sutXmlHttp.readyState==4 && sutXmlHttp.status==200){
+			var responseArr = JSON.parse(sutXmlHttp.responseText); 
+			//alert (responseArr);
+			if(responseArr){
+				exidentelement.value="";
+				alert("There is already a transaction with that identifier, please enter a different one.");
+			}
+		}
+	};
+	sutXmlHttp.open("POST",url,true);
+	sutXmlHttp.send(null);
+}
