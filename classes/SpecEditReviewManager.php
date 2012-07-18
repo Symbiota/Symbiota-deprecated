@@ -7,6 +7,7 @@ class SpecEditReviewManager {
 	private $conn;
 	private $collId;
 	private $collAcronym;
+	private $recCnt=0;
 
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -36,30 +37,39 @@ class SpecEditReviewManager {
 		return $collName;
 	}
 
-	public function getEditArr($aStatus, $rStatus, $eUid){
+	public function getEditArr($aStatus, $rStatus, $eUid, $pageNumber = 0, $limitNumber = 100){
 		if(!$this->collId) return;
 		$retArr = Array();
-		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
-			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp '.
-			'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
+		//Build SQL WHERE fragment
+		$sqlBase = 'FROM omoccuredits e INNER JOIN omoccurrences o ON e.occid = o.occid '.
 			'INNER JOIN users u ON e.uid = u.uid '.
 			'WHERE (o.collid = '.$this->collId.') ';
-		if($aStatus === '0' || $aStatus == 1) $sql .= 'AND e.appliedstatus = '.$aStatus.' ';
+		if($aStatus === '0' || $aStatus == 1) $sqlBase .= 'AND e.appliedstatus = '.$aStatus.' ';
 		if($rStatus){
 			if($rStatus == '0-2'){
-				$sql .= 'AND (e.reviewstatus IN(0,1,2)) ';
+				$sqlBase .= 'AND (e.reviewstatus IN(0,1,2)) ';
 			}
 			elseif($rStatus == '0-1'){
-				$sql .= 'AND (e.reviewstatus IN(0,1)) ';
+				$sqlBase .= 'AND (e.reviewstatus IN(0,1)) ';
 			}
 			else{
-				$sql .= 'AND (e.reviewstatus = '.$rStatus.') ';
+				$sqlBase .= 'AND (e.reviewstatus = '.$rStatus.') ';
 			}
 		}
 		if($eUid && is_numeric($eUid)){
-			$sql .= 'AND (e.uid = '.$eUid.') ';
+			$sqlBase .= 'AND (e.uid = '.$eUid.') ';
 		}
-		$sql .= 'ORDER BY e.fieldname ASC, e.initialtimestamp DESC';
+		//Grab full return count
+		$rsCnt = $this->conn->query('SELECT COUNT(e.ocedid) AS fullcnt '.$sqlBase);
+		if($rCnt = $rsCnt->fetch_object()){
+			$this->recCnt = $rCnt->fullcnt;
+		}
+		$rsCnt->free();
+		//Grab records
+		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp ';
+		$sql .= $sqlBase.'ORDER BY e.fieldname ASC, e.initialtimestamp DESC ';
+		$sql .= 'LIMIT '.($pageNumber*$limitNumber).','.($limitNumber+1);
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -74,7 +84,7 @@ class SpecEditReviewManager {
 			$retArr[$occId][$ocedid]['uname'] = $r->username;
 			$retArr[$occId][$ocedid]['tstamp'] = $r->initialtimestamp;
 		}
-		$rs->close();
+		$rs->free();
 		return $retArr;
 	}
 	
@@ -116,12 +126,26 @@ class SpecEditReviewManager {
 				$statusStr .= $oCnt.' specimen records reverted to previous values';
 			}
 			//Change status
-			$sql = 'UPDATE omoccuredits SET reviewstatus = '.$reqArr['rstatus'].',appliedstatus = '.($applyTask=='apply'?1:0).' '.
-				'WHERE (ocedid IN('.implode(',',$ocedidArr).'))';
+			$sql = 'UPDATE omoccuredits SET appliedstatus = '.($applyTask=='apply'?1:0);
+			if($reqArr['rstatus']){
+				$sql .= ',reviewstatus = '.$reqArr['rstatus'];
+			}
+			$sql .= ' WHERE (ocedid IN('.implode(',',$ocedidArr).'))';
 			//echo '<div>'.$sql.'</div>';
 			$this->conn->query($sql);
 		}
 		return $statusStr;
+	}
+
+	public function deleteEdits($postArr){
+		if(!array_key_exists('ocedid',$postArr)) return;
+		$ocedidArr = $postArr['ocedid'];
+		$sql = 'DELETE FROM omoccuredits WHERE (ocedid IN('.implode(',',$ocedidArr).'))';
+		//echo '<div>'.$sql.'</div>';
+		if($this->conn->query($sql)){
+			return 'SUCCESS: Selected records deleted'; 
+		}
+		return 0;
 	}
 	
 	public function downloadRecords($reqArr){
@@ -195,6 +219,10 @@ class SpecEditReviewManager {
 			}
 	        exit();
 		}
+	}
+	
+	public function getRecCnt(){
+		return $this->recCnt;
 	}
 
 	public function getCollectionList(){

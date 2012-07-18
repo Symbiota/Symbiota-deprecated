@@ -295,6 +295,9 @@ if($symbUid){
 						}
 						?>
 					</table>
+					<div style="width:790px;">
+						<?php echo $navStr; ?>
+					</div>
 					*Click on the Symbiota identifier in the first column to open the editor.    
 					<?php 
 				}

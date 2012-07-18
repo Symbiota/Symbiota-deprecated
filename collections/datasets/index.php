@@ -275,12 +275,10 @@ if($symbUid){
 									<input type="checkbox" name="bconly" value="1" />
 									<b>Print only Barcode</b> 
 								</div>
-								<!-- 
 								<div style="margin:4px;">
 									<input type="checkbox" name="symbbc" value="1" />
 									<b>Include barcode of Symbiota Identifier</b> 
 								</div>
-								 -->
 								<fieldset style="float:left;margin:10px;width:150px;">
 									<legend><b>Label Rows Per Page</b></legend>
 									<input type="radio" name="rpp" value="1" /> 1<br/>

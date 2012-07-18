@@ -66,7 +66,7 @@ class SpecUploadFile extends SpecUploadManager{
 	public function uploadData($finalTransfer,$delimiter="\t"){
 		if($this->ulFileName){
 		 	$this->readUploadParameters();
-			set_time_limit(1800);
+			set_time_limit(7200);
 			ini_set("max_input_time",240);
 			ini_set("upload_max_filesize",30);
 	
