@@ -10,6 +10,8 @@ $download = array_key_exists('download',$_REQUEST)?$_REQUEST['download']:'';
 $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1';
 $editorUid = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
+$pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
+$limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'100';
 
 $reviewManager = new SpecEditReviewManager();
 $collName = $reviewManager->setCollId($collId);
@@ -25,14 +27,41 @@ if($editable){
 		$reviewManager->downloadRecords($_REQUEST);
 		exit();
 	}
-	elseif($submitStr == 'Perform Action'){
-		$reviewManager->applyAction($_REQUEST);
+	elseif($submitStr == 'Perform Update'){
+		$reviewManager->applyAction($_POST);
+	}
+	elseif($submitStr == 'Delete Edits'){
+		$reviewManager->deleteEdits($_POST);
 	}
 }
 
 if($mode == 'export'){
 	$reviewManager->exportCsvFile();
 }
+
+$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $pageNum, $limitCnt);
+$recCnt = $reviewManager->getRecCnt();
+$subCnt = $limitCnt*($pageNum + 1);
+if($recCnt < ($pageNum+1)*$limitCnt) $subCnt = $recCnt - ($pageNum)*$limitCnt;  
+$navPageBase = 'editreviewer.php?collid='.$collId.'&mode='.$mode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editorUid;
+
+$navStr = '<div style="float:right;">';
+if($pageNum){
+	$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum-1).'&limitcnt='.$limitCnt.'" title="Previous '.$limitCnt.' records">&lt;&lt;</a>';
+}
+else{
+	$navStr .= '&lt;&lt;';
+}
+$navStr .= ' | ';
+$navStr .= ($pageNum*$limitCnt).'-'.$subCnt.' of '.$recCnt.' records';
+$navStr .= ' | ';
+if($subCnt < $recCnt){
+	$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum+1).'&limitcnt='.$limitCnt.'" title="Next '.$limitCnt.' records">&gt;&gt;</a>';
+}
+else{
+	$navStr .= '&gt;&gt;';
+}
+$navStr .= '</div>';
 
 header("Content-Type: text/html; charset=".$charset);
 ?>
@@ -52,6 +81,16 @@ header("Content-Type: text/html; charset=".$charset);
 						elem.checked = false;
 					}
 				}
+			}
+
+			function validateEditForm(f){
+				var elements = document.getElementsByName("ocedid[]");
+				for(i = 0; i < elements.length; i++){
+					var elem = elements[i];
+					if(elem.checked) return true;
+				}
+			   	alert("Please check at least one edit from list!");
+		      	return false;
 			}
 		</script>
 	</head>
@@ -80,20 +119,13 @@ header("Content-Type: text/html; charset=".$charset);
 					?>
 					<table style="width:100%;">
 						<tr>
-						<td style="vertical-align:bottom;" <?php if($mode == 'printmode') echo 'colspan="2"'; ?>>
+						<td style="vertical-align:top;margin-top:20px;" <?php if($mode == 'printmode') echo 'colspan="2"'; ?>>
 							<div style="font-weight:bold;font-size:130%;"><?php echo $collName; ?></div>
 							<?php 
 							if($status){ 
 								?>
 								<div style='margin:20px;font-weight:bold;color:red;'>
 									<?php echo $status; ?>
-								</div>
-								<?php 
-							}
-							if($mode != 'printmode'){ 
-								?>
-								<div style="margin:10px 0px 0px 10px;">
-									<input name='selectall' type="checkbox" onclick="selectAllOcedid(this)" /> Select/Deselect All
 								</div>
 								<?php 
 							}
@@ -150,6 +182,19 @@ header("Content-Type: text/html; charset=".$charset);
 						</tr>
 						<tr>
 							<td colspan="2">
+								<?php 
+								if($mode == 'printmode'){
+									echo '<b><a href="editreviewer.php?collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
+								}
+								else{ 
+									?>
+									<div style="float:left;">
+										<input name='selectall' type="checkbox" onclick="selectAllOcedid(this)" /> Select/Deselect All
+									</div>
+									<?php 
+									echo $navStr; 
+								}
+								?>
 								<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);" >
 									<table class="styledtable" style="<?php if($mode == 'printmode') echo "width:675px;"; ?>">
 										<tr>
@@ -167,7 +212,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<th>Timestamp</th>
 										</tr>
 										<?php 
-										$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid);
+										$editArr = $reviewManager->getEditArr($faStatus, $frStatus, $editorUid, $pageNum, $limitCnt);
 										if($editArr){
 											$recCnt = 0;
 											foreach($editArr as $occid => $edits){
@@ -263,12 +308,18 @@ header("Content-Type: text/html; charset=".$charset);
 											if($mode != 'printmode'){ 
 												?>
 												<tr><td colspan="10" valign="bottom">
-													<div style="margin:10px;">
-														<span>
-															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
-															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
-														</span>
-														<span style="margin-left:30px;">
+													<div style="font-weight:bold;margin-top:3px;">
+														Update Selected Edits:
+													</div>
+													<div style="margin:10px 10px;">
+														<div style="float:left;">
+															Applied Status: 
+														</div>
+														<div style="float:left;margin-bottom:10px;">
+															<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Applied<br/>
+															<input name="applytask" type="radio" value="revert" title="Revert Edits" />Not Applied (reverts applied edits)
+														</div>
+														<div style="float:left;margin-left:30px;">
 															Review Status:
 															<select name="rstatus">
 																<option value="0">LEAVE AS IS</option>
@@ -276,27 +327,34 @@ header("Content-Type: text/html; charset=".$charset);
 																<option value="2">PENDING</option>
 																<option value="3">CLOSED</option>
 															</select>
-														</span>
-														<span style="margin-left:25px;">
-															<input name="submitstr" type="submit" value="Perform Action" />
+														</div>
+														<div style="float:left;margin-left:25px;">
+															<input name="submitstr" type="submit" value="Perform Update" />
 															<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 															<input name="fastatus" type="hidden" value="<?php echo $faStatus; ?>" />
 															<input name="frstatus" type="hidden" value="<?php echo $frStatus; ?>" />
 															<input name="download" type="hidden" value="" />
-														</span>
+														</div>
+														<div style="clear:both;margin:20px 0px;">
+															<hr/>
+														</div>
+														<div style="margin:20px;">
+															<input name="submitstr" type="submit" value="Delete Edits" onclick="return confirm('Are you sure you want to permanently remove selected edits from history?')" /><br/>
+															*Permanently clear selected edit from history. The current applied status of edit will remain.
+														</div>
 													</div>
-													<hr/>
-													<div>
+													<div style="clear:both;margin-top:10px;">
+														<hr/>
 														<b>Additional Actions:</b>
+													</div>
+													<div style="margin:10px 0px 5px 15px;">
+														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=printmode&pagenum='.$pageNum.'&limitcnt='.$limitCnt; ?>">
+															Print Friendly Page
+														</a>
 													</div>
 													<div style="margin:5px 0px 10px 15px;">
 														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=export'; ?>">
-															Download Records
-														</a>
-													</div>
-													<div style="margin:10px 0px 5px 15px;">
-														<a href="editreviewer.php?collid=<?php echo $collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&mode=printmode'; ?>">
-															Display as Printable Form
+															Download All Records
 														</a>
 													</div>
 												</td></tr>
@@ -316,7 +374,10 @@ header("Content-Type: text/html; charset=".$charset);
 									</table>
 									<?php 
 									if($mode == 'printmode'){
-										echo '<h2><a href="editreviewer.php?collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'">Return to form</a></h2>';
+										echo '<b><a href="editreviewer.php?collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
+									}
+									else{
+										echo $navStr; 
 									}
 									?>
 								</form>

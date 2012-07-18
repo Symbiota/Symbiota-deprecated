@@ -483,10 +483,15 @@ class SpecUploadManager{
 			ob_flush();
 			flush();
 			$sql = 'DELETE u.* '.
-				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk HAVING Count(*)>1 ) t2 ON u.dbpk = t2.dbpk'.
+				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk, collid HAVING Count(*)>1 AND collid = '.$this->collId.') t2 ON u.dbpk = t2.dbpk '.
 				'WHERE collid = '.$this->collId;
-			$this->conn->query($sql);
-			echo 'Done!</li> ';
+			if($this->conn->query($sql)){
+				echo 'Done! ';
+			}
+			else{
+				echo '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+			}
+			echo '</li>';
 		}
 		
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
@@ -495,8 +500,13 @@ class SpecUploadManager{
 		$sql = 'UPDATE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
 			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collId;
-		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		if($this->conn->query($sql)){
+			echo 'Done! ';
+		}
+		else{
+			echo '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+		}
+		echo '</li>';
 		
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with verbatimEventDate... ';
 		ob_flush();
@@ -505,18 +515,24 @@ class SpecUploadManager{
 			'FROM uploadspectemp u '.
 			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
+		$outStr = '';
 		while($r = $rs->fetch_object()){
 			$vDate = $r->verbatimeventdate;
 			$dateStr = $this->formatDate($vDate);
 			if($dateStr){
 				$sql = 'UPDATE uploadspectemp '.
 					'SET eventdate = "'.$dateStr.'" '.
-					'WHERE (collid = '.$this->collId.') AND (verbatimeventdate = "'.$vDate.'")';
-				$this->conn->query($sql);
+					'WHERE (collid = '.$this->collId.') AND eventDate IS NULL AND (verbatimeventdate = "'.$vDate.'")';
+				if($this->conn->query($sql)){
+					$outStr = 'Done! ';
+				}
+				else{
+					$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+				}
 			}
 		}
 		$rs->close();
-		echo 'Done!</li> ';
+		echo ($outStr?$outStr:'Not Applicable').'</li> ';
 		
 		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse coordinates from verbatimCoordinates field... ';
 		ob_flush();
@@ -526,20 +542,26 @@ class SpecUploadManager{
 			'FROM uploadspectemp '.
 			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
+		$outStr = '';
 		while($r = $rs->fetch_object()){
 			if($r->verbatimcoordinates){
 				$vCoord = $r->verbatimcoordinates;
 				$coordArr = $this->parseVerbatimCoordinates($vCoord);
 				if($coordArr){
 					$sql = 'UPDATE uploadspectemp '.
-						'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].
-						'WHERE (collid = '.$this->collId.') AND (verbatimcoordinates = "'.$vCoord.'")';
-					$this->conn->query($sql);
+						'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].' '.
+						'WHERE (collid = '.$this->collId.') AND (decimallatitude IS NULL) AND (verbatimcoordinates = "'.$vCoord.'")';
+					if($this->conn->query($sql)){
+						$outStr = 'Done! ';
+					}
+					else{
+						$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+					}
 				}
 			}
 		}
 		$rs->close();
-		echo 'Done!</li> ';
+		echo ($outStr?$outStr:'Not Applicable').'</li> ';
 		
 		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
 		ob_flush();
@@ -549,6 +571,7 @@ class SpecUploadManager{
 			'FROM uploadspectemp '.
 			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
+		$outStr = '';
 		while($r = $rs->fetch_object()){
 			$vElev = $r->verbatimelevation;
 			$eArr = $this->parseVerbatimElevation($vElev);
@@ -557,12 +580,17 @@ class SpecUploadManager{
 				if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
 				$sql = 'UPDATE uploadspectemp '.
 					'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
-					'WHERE (collid = '.$this->collId.') AND (verbatimelevation = "'.$vElev.'")';
-				$this->conn->query($sql);
+					'WHERE (collid = '.$this->collId.') AND minimumelevationinmeters IS NULL AND (verbatimelevation = "'.$vElev.'")';
+				if($this->conn->query($sql)){
+					$outStr = 'Done! ';
+				}
+				else{
+					$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+				}
 			}
 		}
 		$rs->close();
-		echo 'Done!</li> ';
+		echo ($outStr?$outStr:'Not Applicable').'</li> ';
 	}
 
 	private function recordCleaningStage2(){
@@ -983,6 +1011,25 @@ class SpecUploadManager{
 					}
 				}
 			}
+			//If lat or long are not numeric, try to make them so
+			if((array_key_exists('decimallatitude',$recMap) && !is_numeric($recMap['decimallatitude'])) 
+				|| (array_key_exists('decimallongitude',$recMap) && !is_numeric($recMap['decimallongitude']))){
+				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
+				$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
+				if($latValue && $lngValue){
+					$llArr = $this->parseVerbatimCoordinates($latValue.' '.$lngValue);
+					if($llArr){
+						$recMap['decimallatitude'] = $llArr['lat'];
+						$recMap['decimallongitude'] = $llArr['lng'];
+					}
+				}
+				$vcStr = '';
+				if(array_key_exists('verbatimcoordinates',$recMap)){
+					$vcStr .= $recMap['verbatimcoordinates'].'; ';
+				}
+				$vcStr .= $latValue.' '.$lngValue;
+				if(trim($vcStr)) $recMap['verbatimcoordinates'] = $vcStr;
+			}
 			//Convert UTM to Lat/Long
 			if(array_key_exists('utmnorthing',$recMap) && array_key_exists('utmeasting',$recMap) && array_key_exists('utmzoning',$recMap) 
 				&& (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']) 
@@ -1103,7 +1150,7 @@ class SpecUploadManager{
 						if($size && strlen($valueStr) > $size){
 							$valueStr = substr($valueStr,0,$size);
 						}
-						if($valueStr){
+						if(trim($valueStr)){
 							$sqlValues .= ',"'.$valueStr.'"';
 						}
 						else{
@@ -1364,40 +1411,38 @@ class SpecUploadManager{
 	private function parseVerbatimCoordinates($inStr){
 		$retArr = array();
 		//Try to parse lat/lng
-		$latDeg = 'null';$latMin = 'null';$latSec = 'null';$latNS = 'N';
-		$lngDeg = 'null';$lngMin = 'null';$lngSec = 'null';$lngEW = 'W';
+		$latDeg = 'null';$latMin = 0;$latSec = 0;$latNS = 'N';
+		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
-		if(preg_match('/(\d{1,2})[°d*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*[NS]+.*)/i',$inStr,$m)){
+		if(preg_match('/(\d{1,2})[°d\*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m\s]{1}(.*)/i',$inStr,$m)){
 			$latDeg = $m[1];
 			$latMin = $m[2];
 			$leftOver = trim($m[3]);
+			//Grab lat NS and lng EW
+			if(stripos($inStr,'N') === false && strpos($inStr,'S') !== false){
+				$latNS = 'S';
+			}
+			if(stripos($inStr,'W') === false && stripos($inStr,'e') !== false){
+				$lngEW = 'E';
+			}
 			//Grab lat sec
-			if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*[NS]+.*)/i',$leftOver,$m)){
+			if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
 				$latSec = $m[1];
 				if(count($m)>2){
 					$leftOver = trim($m[2]);
 				}
 			}
-			//Grab lat NS
-			if(preg_match('/([NS]+)(.*[EW]+.*)/i',$leftOver,$m)){
-				$latNS = $m[1];
-				$leftOver = trim($m[2]);
-			}
 			//Grab lng deg and min
-			if(preg_match('/(\d{1,3})[°d*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*[EW]+.*)/i',$leftOver,$m)){
+			if(preg_match('/(\d{1,3})[°d\*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m\s]{1}(.*)/i',$leftOver,$m)){
 				$lngDeg = $m[1];
 				$lngMin = $m[2];
 				$leftOver = trim($m[3]);
 				//Grab lng sec
-				if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*[EW]+.*)/i',$leftOver,$m)){
+				if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
 					$lngSec = $m[1];
 					if(count($m)>2){
 						$leftOver = trim($m[2]);
 					}
-				}
-				//Grab lng EW
-				if(preg_match('/([EW]+)/i',$leftOver,$m)){
-					$latEW = $m[1];
 				}
 				if(is_numeric($latDeg) && is_numeric($latMin) && is_numeric($lngDeg) && is_numeric($lngMin)){
 					if($latDeg < 90 && $latMin < 60 && $lngDeg < 180 && $lngMin < 60){
