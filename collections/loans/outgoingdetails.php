@@ -43,7 +43,7 @@ $specList = $loanManager->getSpecList($loanId);
 						<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
