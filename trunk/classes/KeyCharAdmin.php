@@ -49,13 +49,13 @@ class KeyAdmin{
 	//Get and set functions 
 	public function getHeadingArr(){
 		$retArr = array();
-		$sql = 'SELECT hid, headingname, language '. 
-			'FROM kmcharheading '. 
+		$sql = 'SELECT hid, headingname '. 
+			'FROM kmcharheading '.
+			'WHERE language = "English" '.
 			'ORDER BY hid';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->hid] = $r->headingname;
-				$retArr[$r->hid] = $r->language;
 			}
 		}
 		return $retArr;
