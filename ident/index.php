@@ -1,9 +1,8 @@
 <?php
- //error_reporting(E_ALL);
- include_once('../config/symbini.php');
- include_once($serverRoot.'/config/dbconnection.php');
- header("Content-Type: text/html; charset=".$charset);
- ?>
+include_once('../config/symbini.php');
+include_once($serverRoot.'/config/dbconnection.php');
+header("Content-Type: text/html; charset=".$charset);
+?>
 <html>
 <head>
 <title><?php echo $defaultTitle; ?> Identification Keys</title>

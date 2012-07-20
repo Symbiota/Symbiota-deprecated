@@ -39,39 +39,26 @@ $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled
 $displayCommonNames = 1;			//0 = false, 1 = true
 
 //Individual page menu and navigation crumbs
-	//checklists/
-		$checklists_checklistMenu = false;
-		$checklists_checklistCrumbs = "<a href='index.php'>Checklists</a> &gt; ";
+//checklists/
+	$checklists_checklistMenu = false;
+
+//collections/
+	$collections_indexMenu = false;
+	$collections_harvestparamsMenu = false;
+	$collections_listMenu = false;
+	$collections_checklistMenu = false;
+	$collections_download_downloadMenu = false;
+	$collections_maps_indexMenu = false;
 	
-	//collections/
-		$collections_indexMenu = false;
-		$collections_indexCrumbs = "&nbsp;";
-		$collections_harvestparamsMenu = false;
-		$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a> &gt; ";
-		$collections_listMenu = false;
-		$collections_listCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a> &gt; ";
-		$collections_checklistMenu = false;
-		$collections_checklistCrumbs = "<a href='index.php'>Collections</a> &gt; <a href='harvestparams.php'>Search Criteria</a> &gt; ";
-		$collections_download_downloadMenu = false;
-		$collections_download_downloadCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a> &gt; ";
-		$collections_maps_indexMenu = false;
-		$collections_maps_indexCrumbs = "<a href='../index.php'>Collections</a> &gt; <a href='../harvestparams.php'>Search Criteria</a> &gt; ";
-		$collections_editor_occurrenceeditorCrumbs = "&nbsp;";
-		$collections_editor_observationsubmitCrumbs = "&nbsp;";
-		
-	//ident/
-		$ident_keyMenu = false;
-		$ident_keyCrumbs = "<a href='../ident/index.php'>Identification Keys</a> &gt; ";
-		$ident_tools_chardeficitMenu = false;
-		$ident_tools_chardeficitCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
-		$ident_tools_massupdateMenu = false;
-		$ident_tools_massupdateCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
-		$ident_tools_editorMenu = false;
-		$ident_tools_editorCrumbs = "<a href='javascript: self.close();'> Back to Key</a> &gt; ";
-		
-	//taxa/
-		$taxa_indexMenu = false;
-		$taxa_admin_tpeditorMenu = false;
+//ident/
+	$ident_keyMenu = false;
+	$ident_tools_chardeficitMenu = false;
+	$ident_tools_massupdateMenu = false;
+	$ident_tools_editorMenu = false;
+	
+//taxa/
+	$taxa_indexMenu = false;
+	$taxa_admin_tpeditorMenu = false;
 		
 //Base code shared by all pages; leave as is
 include_once("symbbase.php");

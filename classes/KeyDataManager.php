@@ -35,7 +35,7 @@ class KeyDataManager {
 		if(!($this->keyCon === false)) $this->keyCon->close();
 	}
 
-	function setProject($projValue){
+	public function setProject($projValue){
 		if(is_numeric($projValue)){
 			$this->pid = $projValue;
 		}
@@ -47,9 +47,10 @@ class KeyDataManager {
 			}
 			$result->close();
 		}
+		return $this->pid;
 	}
  	
-	function setLanguage($l){
+	public function setLanguage($l){
 		$this->lang = $l;
 	}
 	
@@ -57,38 +58,7 @@ class KeyDataManager {
 		$this->commonDisplay = $bool;
 	}
 	
-	function getClFilterList($userid){
-		$returnList = Array();
-		
-		//Get personal checklist
-		if($userid){
-			$this->uid = $userid;
-			$sql = "SELECT DISTINCT c.Name, c.CLID ".
-				"FROM fmchecklists c WHERE (c.uid = ".$userid.") ORDER BY c.Name";
-			$result = $this->keyCon->query($sql);
-			while($row = $result->fetch_object()){
-				$returnList[$row->CLID] = $row->Name;
-			}
-			$result->free();
-			if($returnList) $returnList["break"] = "------------------------";
-		}
-
-		//Get public checklist names
-		$sql = "SELECT DISTINCT c.CLID, c.Name ".
-			"FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid ".
-			"WHERE c.Access = 'public' AND c.Type = 'static' ";
-		if($this->pid) $sql .= "AND (cpl.pid = ".$this->pid.") ";
-		$sql .= "ORDER BY c.Name";
-		//echo $sql;
-		$result = $this->keyCon->query($sql);
-		while($row = $result->fetch_object()){
-			$returnList[$row->CLID] = $row->Name;
-		}
-		$result->close();
-		return $returnList;
-	}
-
-	function getTaxaFilterList(){
+	public function getTaxaFilterList(){
 		$returnArr = Array();
 		$upperArr = Array();
 		$sql = "SELECT DISTINCT ts.UpperTaxonomy, nt.UnitName1, ts.Family ";
@@ -107,7 +77,7 @@ class KeyDataManager {
 				"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
 				"WHERE (clpl.pid = ".$this->pid.")";
 		}
-		//echo $sql;
+		//echo $sql.'<br/>';
 		$result = $this->keyCon->query($sql);
 		while($row = $result->fetch_object()){
 			$genus = $row->UnitName1;
@@ -128,11 +98,11 @@ class KeyDataManager {
 		return $returnArr;
 	}
 
-	function setTaxonFilter($t){
+	public function setTaxonFilter($t){
 		$this->taxonFilter = $t;
 	}
 
-	function setClValue($clv){
+	public function setClValue($clv){
 		$sql = "";
 		if($this->dynClid){
 			$sql = 'SELECT d.name, d.details, d.type '.
@@ -142,6 +112,7 @@ class KeyDataManager {
 				$this->clName = $row->name;
 				$this->clType = $row->type;
 			}
+			$result->close();
 		}
 		else{
 			if(is_numeric($clv)){
@@ -160,11 +131,12 @@ class KeyDataManager {
 				$this->clType = $row->Type;
 				$this->dynamicSql = $row->dynamicsql;
 			}
+			$result->close();
 		}
-		$result->close();
+		return $this->clid;
 	}
 	
-	function getClid(){
+	public function getClid(){
 		return $this->clid;
 	}
 	
@@ -172,7 +144,7 @@ class KeyDataManager {
 		$this->dynClid = $id;
 	}
 
-	function setAttrs($attrs){
+	public function setAttrs($attrs){
 		if(is_array($attrs)){
 			foreach($attrs as $attr){
 				$fragments = explode("-",$attr);
@@ -183,37 +155,37 @@ class KeyDataManager {
 		}
 	}
 
-	function getAttrs(){
+	public function getAttrs(){
 		return $this->attrs;
 	}
 
-	function getTaxaCount(){
+	public function getTaxaCount(){
 		return $this->taxaCount;
 	}
 	
-	function getClName(){
+	public function getClName(){
 		return $this->clName;
 	}
 
-	function getClAuthors(){
+	public function getClAuthors(){
 		return $this->clAuthors;
 	}
 	
-	function getClType(){
+	public function getClType(){
 		return $this->clType;
 	}
 	
-	function setRelevanceValue($rel){
+	public function setRelevanceValue($rel){
 		$this->relevanceValue = ($rel?$rel:0);
 	}
 	
-	function getRelevanceValue(){
+	public function getRelevanceValue(){
 		return $this->relevanceValue;
 	}
 
  	//$returns an Array of ("chars" => $charArray, "taxa" => $taxaArray)
  	//In coming attrs are in the form of: (cid => array of cs)
-	function getData(){
+	public function getData(){
  		$charArray = array();
 		$taxaArray = array();
 		if(($this->clid && $this->taxonFilter) || $this->dynClid){
@@ -233,135 +205,138 @@ class KeyDataManager {
 	//									[cs] => Array(language => CharStateName, "ROOT" => base-div string)
 	//								)
 	//							)
- 	function getCharList(){
-
+	public function getCharList(){
+		$returnArray = Array();
 		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than 
 		$charList = Array();
 		$countMin = $this->taxaCount * $this->relevanceValue;
-		while(!$charList){
+		$loopCnt = 0;
+		while(!$charList && $loopCnt < 10){
 			$sqlRev = "SELECT tc.CID, Count(tc.TID) AS c FROM ".
 				"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
 				"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
 			$rs = $this->keyCon->query($sqlRev);
-			//echo $sqlRev;
+			//echo $sqlRev.'<br/>';
 			while($row = $rs->fetch_object()){
 				$charList[] = $row->CID;
 			}
 			$countMin = $countMin*0.9;
+			$loopCnt++;
 		}
 		$charList = array_merge($charList,array_keys($this->charArr));
 
-		//Create sql string and get char record set
-		/*$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, charnames.CharName, charnames.Description AS chardescr, ".
-			"charnames.Heading, charnames.URL, Count(cs.CS) AS Ct, characters.DifficultyRank, charnames.Language ".
-			"FROM ((($this->sql) AS tList INNER JOIN descr ON tList.TID = descr.TID) INNER JOIN cs ON (descr.CS = cs.CS) AND (descr.CID = cs.CID)) INNER JOIN ".
-			"(characters INNER JOIN charnames ON characters.CID = charnames.CID) ON (cs.Language = charnames.Language) AND (cs.CID = charnames.CID) ".
-			"GROUP BY cs.CID, cs.CS, cs.CharStateName, charnames.CharName, charnames.Heading, charnames.URL, characters.DifficultyRank, charnames.Language, characters.Type ".
-			"HAVING (((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND ((characters.Type)='UM' Or (characters.Type)='OM') AND characters.DifficultyRank < 3) ".
-			"ORDER BY charnames.Heading, characters.SortSequence, cs.SortSequence";*/
-		$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName, 
-			chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank, 
-			chars.defaultlang FROM (((($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID) 
-			INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) 
-			INNER JOIN kmcharheading chead ON chars.hid = chead.hid 
-			GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl, 
-			chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND 
-			((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3) 
-			ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
-		//echo $sqlChar;
-		$result = $this->keyCon->query($sqlChar);
-
-		//Process recordset
-		$langList = Array();
-		$headingArray = Array();
-		$statesArray = Array();
-		if(!$result) return null;
-		while($row = $result->fetch_object()){
-			$ct = $row->Ct;			//count of how many times the CS was used in this species list
-			$charCID = $row->CID;
-			if($ct < $this->taxaCount || array_key_exists($charCID,$this->charArr)){		//add to return if stateUseCount is less than taxaCount (ie: state is useless if all taxa code true) or is an attribute selected by user
-				$language = $row->defaultlang;
-				if(!in_array($language, $langList)) $langList[] = $language;
-				$headingName = $row->headingname;
-				$headingID = $row->hid;
-				$charName = $row->CharName;
-				$charDescr = $row->chardescr;
-				if($charDescr) $charName = "<span title='".$charDescr."'>".$charName."</span>";
-				$url = $row->helpurl;
-				if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='images/info.jpg' width='12' border='0'></a>";
-				$cs = $row->CS;
-				$charStateName = $row->CharStateName;
-				$csDescr = $row->csdescr;
-				if($csDescr) $charStateName = "<span title='".$csDescr."'>".$charStateName."</span>";
-				$diffRank = false;
-				if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
-
-				//Set HeadingName within the $charArray, if not yet set
-				$headingArray[$headingID]["HeadingNames"][$language] = $headingName;
-
-				//Set CharName within the $stateArray, if not yet set
-				if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
-					$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div".($diffRank?" style='display:none;' class='dynam'":" style='display:;'")."><span lang='".$language."'".
-						($language==$this->lang?" style='display:;margin-top:0.5em;'":" style='display:none;margin-top:0.5em;'").">&nbsp;&nbsp;<b>$charName</b></span></div>";
+		if($charList){
+			//Create sql string and get char record set
+			/*$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, charnames.CharName, charnames.Description AS chardescr, ".
+				"charnames.Heading, charnames.URL, Count(cs.CS) AS Ct, characters.DifficultyRank, charnames.Language ".
+				"FROM ((($this->sql) AS tList INNER JOIN descr ON tList.TID = descr.TID) INNER JOIN cs ON (descr.CS = cs.CS) AND (descr.CID = cs.CID)) INNER JOIN ".
+				"(characters INNER JOIN charnames ON characters.CID = charnames.CID) ON (cs.Language = charnames.Language) AND (cs.CID = charnames.CID) ".
+				"GROUP BY cs.CID, cs.CS, cs.CharStateName, charnames.CharName, charnames.Heading, charnames.URL, characters.DifficultyRank, charnames.Language, characters.Type ".
+				"HAVING (((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND ((characters.Type)='UM' Or (characters.Type)='OM') AND characters.DifficultyRank < 3) ".
+				"ORDER BY charnames.Heading, characters.SortSequence, cs.SortSequence";*/
+			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName, 
+				chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank, 
+				chars.defaultlang FROM (((($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID) 
+				INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) 
+				INNER JOIN kmcharheading chead ON chars.hid = chead.hid 
+				GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl, 
+				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND 
+				((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3) 
+				ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
+			//echo $sqlChar.'<br/>';
+			$result = $this->keyCon->query($sqlChar);
+	
+			//Process recordset
+			$langList = Array();
+			$headingArray = Array();
+			$statesArray = Array();
+			if(!$result) return null;
+			while($row = $result->fetch_object()){
+				$ct = $row->Ct;			//count of how many times the CS was used in this species list
+				$charCID = $row->CID;
+				if($ct < $this->taxaCount || array_key_exists($charCID,$this->charArr)){		//add to return if stateUseCount is less than taxaCount (ie: state is useless if all taxa code true) or is an attribute selected by user
+					$language = $row->defaultlang;
+					if(!in_array($language, $langList)) $langList[] = $language;
+					$headingName = $row->headingname;
+					$headingID = $row->hid;
+					$charName = $row->CharName;
+					$charDescr = $row->chardescr;
+					if($charDescr) $charName = "<span title='".$charDescr."'>".$charName."</span>";
+					$url = $row->helpurl;
+					if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='images/info.jpg' width='12' border='0'></a>";
+					$cs = $row->CS;
+					$charStateName = $row->CharStateName;
+					$csDescr = $row->csdescr;
+					if($csDescr) $charStateName = "<span title='".$csDescr."'>".$charStateName."</span>";
+					$diffRank = false;
+					if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
+	
+					//Set HeadingName within the $charArray, if not yet set
+					$headingArray[$headingID]["HeadingNames"][$language] = $headingName;
+	
+					//Set CharName within the $stateArray, if not yet set
+					if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
+						$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div".($diffRank?" style='display:none;' class='dynam'":" style='display:;'")."><span lang='".$language."'".
+							($language==$this->lang?" style='display:;margin-top:0.5em;'":" style='display:none;margin-top:0.5em;'").">&nbsp;&nbsp;<b>$charName</b></span></div>";
+					}
+	
+					$checked = "";
+					if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
+					if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
+						$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
+							">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
+					}
+	
+					$headingArray[$headingID][$charCID][$cs][$language] = $charStateName;
 				}
-
-				$checked = "";
-				if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
-				if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
-					$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
-						">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
-				}
-
-				$headingArray[$headingID][$charCID][$cs][$language] = $charStateName;
 			}
-		}
-		$result->free();
-		//Ensures correct sorting and puts html output into returnStrings Array
-		$returnArray = Array();
-		$returnArray["Languages"] = $langList; 			//Put a list of languages in returnArray
-		foreach($headingArray as $HID => $cArray){
-			$displayHeading = true;
-			$headNameArray = $cArray["HeadingNames"];
-			unset($cArray["HeadingNames"]);
-			$endStr ="";
-			foreach($cArray as $cid => $csArray){
-				if(count($csArray) > 2 || array_key_exists($cid,$this->charArr)){
-					if($displayHeading){
-						$returnArray[] = "<div class='headingname' id='headingname".$HID."' style='font-weight:bold;margin-top:1em;font-size:125%;'>\n";
-						foreach($headNameArray as $langValue => $headValue){
-							$returnArray[] .= "<span lang='".$langValue."' style='".($langValue==$this->lang?"display:;":"display:none;")."'>$headValue</span>\n";
+			$result->free();
+			//Ensures correct sorting and puts html output into returnStrings Array
+			$returnArray["Languages"] = $langList; 			//Put a list of languages in returnArray
+			foreach($headingArray as $HID => $cArray){
+				$displayHeading = true;
+				$headNameArray = $cArray["HeadingNames"];
+				unset($cArray["HeadingNames"]);
+				$endStr ="";
+				foreach($cArray as $cid => $csArray){
+					if(count($csArray) > 2 || array_key_exists($cid,$this->charArr)){
+						if($displayHeading){
+							$returnArray[] = "<div class='headingname' id='headingname".$HID."' style='font-weight:bold;margin-top:1em;font-size:125%;'>\n";
+							foreach($headNameArray as $langValue => $headValue){
+								$returnArray[] .= "<span lang='".$langValue."' style='".($langValue==$this->lang?"display:;":"display:none;")."'>$headValue</span>\n";
+							}
+							$returnArray[] = "</div>\n";
+							$returnArray[] = "<div class='heading' id='heading".$HID."' style=''>";
+							$endStr = "</div>\n";
 						}
-						$returnArray[] = "</div>\n";
-						$returnArray[] = "<div class='heading' id='heading".$HID."' style=''>";
-						$endStr = "</div>\n";
-					}
-					$displayHeading = false;
-	//				ksort($csArray);
-					$chars = $csArray["CharNames"];
-					unset($csArray["CharNames"]);
-					$returnArray[] = "<div id='char".$charCID."'>";
-					foreach($chars as $names){
-						$returnArray[] = $names;
-					}
-					foreach($csArray as $csKey => $stateNames){
-						if(array_key_exists("ROOT",$stateNames)) $returnArray[] = $stateNames["ROOT"];
-						unset($stateNames["ROOT"]);
-						foreach($stateNames as $csLang => $csValue){
-							$returnArray[] = "<span lang='".$csLang."' ".
-								($csLang==$this->lang?" style='display:;'":" style='display:none;'").">$csValue</span>";
+						$displayHeading = false;
+		//				ksort($csArray);
+						$chars = $csArray["CharNames"];
+						unset($csArray["CharNames"]);
+						$returnArray[] = "<div id='char".$charCID."'>";
+						foreach($chars as $names){
+							$returnArray[] = $names;
+						}
+						foreach($csArray as $csKey => $stateNames){
+							if(array_key_exists("ROOT",$stateNames)) $returnArray[] = $stateNames["ROOT"];
+							unset($stateNames["ROOT"]);
+							foreach($stateNames as $csLang => $csValue){
+								$returnArray[] = "<span lang='".$csLang."' ".
+									($csLang==$this->lang?" style='display:;'":" style='display:none;'").">$csValue</span>";
+							}
+							$returnArray[] = "</div>";
 						}
 						$returnArray[] = "</div>";
 					}
-					$returnArray[] = "</div>";
 				}
+				if($endStr) $returnArray[] = $endStr;
 			}
-			if($endStr) $returnArray[] = $endStr;
 		}
 		return $returnArray;
  	}
 
  	//return an array: family => array(TID => DisplayName)
-	function getTaxaList(){
+	public function getTaxaList(){
 		$taxaList[] = null;
 	    unset($taxaList);
 	    $sqlTaxa = "";
@@ -372,7 +347,7 @@ class KeyDataManager {
 		else{
 			$sqlTaxa = $this->sql;
 		}
-		//echo $sqlTaxa;
+		//echo $sqlTaxa.'<br/>';
 		$result = $this->keyCon->query($sqlTaxa);
  		$returnArray = array();
  		$sppArr = array();
@@ -392,7 +367,7 @@ class KeyDataManager {
  		return $returnArray;		
 	}
 
-	function setTaxaListSQL(){
+	public function setTaxaListSQL(){
 		if(!$this->sql){
 			$sqlBase = "SELECT DISTINCT t.tid, ts.UpperTaxonomy, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
 			$sqlFromBase = "";
@@ -450,7 +425,7 @@ class KeyDataManager {
 		}
 	}
 	
-	function getIntroHtml(){
+	public function getIntroHtml(){
 		$returnStr = "<h2>Please enter a checklist, taxonomic group, and then select 'Submit Criteria'</h2>";
 		$returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
 			"The key has been developed to minimize the exclusion of species due to the ".

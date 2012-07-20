@@ -77,17 +77,27 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				}
 			}
 
-		    function checkForm(){
+		    function verifyCollForm(f){
 				var dbElements = document.getElementsByName("db[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];
 					if(dbElement.checked) return true;
 				}
-			   	alert("Please choose at least one database!");
+			   	alert("Please choose at least one collection!");
 		      	return false;
 		    }
 		    
-		    function checkKey(e){
+		    function verifyOtherCatForm(f){
+				var dbElements = document.getElementsByName("surveyid[]");
+				for(i = 0; i < dbElements.length; i++){
+					var dbElement = dbElements[i];
+					if(dbElement.checked) return true;
+				}
+			   	alert("Please choose at least one checkbox!");
+				return false;
+		    }
+
+			function checkKey(e){
 		        var key;
 		        if(window.event){
 		            key = window.event.keyCode;
@@ -137,168 +147,170 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		        <li><a href="#otherdiv">Federal Units</a></li>
 		        <?php } ?>
 		    </ul>
-			<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return checkForm()">
+			<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
 	        <?php 
 	        if($specArr && $obsArr){
-	        	?>
+				?>
 				<div id="specobsdiv">
-					<table width="90%">
-						<tr>
-							<td colspan="4">
-					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this,'specobs');" />
-					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-					        	</div>
-							</td>
-						</tr>
-						<?php
-						$collCnt = 1;
-						foreach($collList as $collId => $collArr){
-							?>
-						    <tr>
-								<td width="50px">
-									<?php 
-									if($collArr["icon"]){
-										$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"]; 
-										?>
-								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
-								    	</a>
-								    	<?php
-									} 
-								    ?>
-							    </td>
-							    <td width="30px">
-						    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							    </td>
-							    <td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
+		        	<div style="margin:0px 0px 10px 30px;">
+		         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this,'specobs');" />
+		         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+		        	</div>
+					<?php
+					$collCnt = 1;
+					foreach($collList as $collId => $collArr){
+						?>
+						<div style="clear:both;padding:5px;height:30px;">
+							<div style="float:left;width:50px;">
+								<?php 
+								if($collArr["icon"]){
+									$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"]; 
+									?>
+									<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+										<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+									</a>
+							    	<?php
+								}
+							    ?>
+							    &nbsp;
+							</div>
+							<div style="float:left;width:30px;padding-top:5px;">
+					    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
+							</div>
+							<div style="float:left;padding-top:6px;">
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
+					    		</a>
+					    		<span style="position:relative;top:10px;left:-25px;">
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:70%;'>
+						    			more info
 						    		</a>
-							    </td>
-							    <td width="60px" align="center">
-							    	<?php if($collCnt%8 == 4 || (count($collList) < 4 && $collCnt == 1)){ ?>
+						    	</span>
+						    </div>
+					    	<?php 
+					    	if($collCnt%8 == 4 || (count($collList) < 4 && $collCnt == 1)){ 
+					    		?>
+							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
 						        	<input type="image" src='../images/next.jpg'
 						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
 						                onmouseout="javascript:this.src = '../images/next.jpg';"
 						                title="Click button to advance to the next step" />
-							    	<?php } ?>
-						    	</td>
-						    </tr>
-						    <?php
-						    $collCnt++; 
-						}
-						?>
-					</table>
+						    	</div>
+					    		<?php 
+					    	} 
+					    	?>
+					    </div>
+					    <?php
+					    $collCnt++; 
+					}
+					?>
 				</div>
 	        <?php 
 	        }
 	        if($specArr){
 	        	?>
 				<div id="specimendiv">
-					<table width="90%">
-						<tr>
-							<td colspan="4">
-					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input name="db[]" class="spec" value='' type="checkbox" onclick="selectAll(this,'spec');" />
-					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-					        	</div>
-							</td>
-						</tr>
-						<?php
-						$collCnt = 1;
-						foreach($specArr as $collId => $collArr){
-							$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
-							?>
-						    <tr>
-								<td width="50px">
-									<?php 
-									if($collArr["icon"]){
-										?>
-								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
-								    	</a>
-								    	<?php
-									} 
-								    ?>
-							    </td>
-							    <td width="30px">
-						    		<input name="db[]" class="spec" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							    </td>
-							    <td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
-						    		</a>
-							    </td>
-							    <td width="60px" align="center">
-							    	<?php if($collCnt%8 == 4 || (count($specArr) < 4 && $collCnt == 1)){ ?>
-						        	<input type="image" src='../images/next.jpg'
-						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-						                onmouseout="javascript:this.src = '../images/next.jpg';"
-						                title="Click button to advance to the next step" />
-							    	<?php } ?>
-						    	</td>
-						    </tr>
-						    <?php
-						    $collCnt++; 
-						}
+		        	<div style="margin:0px 0px 10px 30px;">
+		         		<input name="db[]" class="spec" value='' type="checkbox" onclick="selectAll(this,'spec');" />
+		         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+		        	</div>
+					<?php
+					$collCnt = 1;
+					foreach($specArr as $collId => $collArr){
+						$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
 						?>
-					</table>
+						<div style="clear:both;padding:5px;height:30px;">
+							<div style="float:left;width:50px;">
+								<?php 
+								if($collArr["icon"]){
+									?>
+							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+							    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+							    	</a>
+							    	<?php
+								} 
+							    ?>
+							    &nbsp;
+							</div>
+							<div style="float:left;width:30px;padding-top:5px;">
+					    		<input name="db[]" class="spec" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
+							</div>
+							<div style="float:left;padding-top:6px;">
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
+					    		</a>
+							</div>
+							<?php 
+							if($collCnt%8 == 4 || (count($specArr) < 4 && $collCnt == 1)){ 
+								?>
+							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
+									<input type="image" src='../images/next.jpg'
+										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+										onmouseout="javascript:this.src = '../images/next.jpg';"
+										title="Click button to advance to the next step" />
+								</div>
+								<?php 
+							} 
+							?>
+				    	</div>
+						<?php
+						$collCnt++; 
+					}
+					?>
 				</div>
 	        	<?php 
 	        }
 	        if($obsArr){
 	        	?>
 				<div id="observationdiv">
-					<table width="90%">
-						<tr>
-							<td colspan="4">
-					        	<div style="margin:0px 0px 10px 30px;">
-					         		<input name="db[]" class="obs" value='' type="checkbox" onclick="selectAll(this,'obs');" />
-					         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-					        	</div>
-							</td>
-						</tr>
-						<?php
-						$collCnt = 1;
-						foreach($obsArr as $collId => $collArr){
-							$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
-							?>
-						    <tr>
-								<td width="50px">
-									<?php 
-									if($collArr["icon"]){
-										?>
-								    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-								    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
-								    	</a>
-								    	<?php
-									} 
-								    ?>
-							    </td>
-							    <td width="30px">
-						    		<input name="db[]" class="obs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							    </td>
-								<td>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-						    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
-						    		</a>
-								</td>
-								<td width="60px" align="center">
-							    	<?php if($collCnt%8 == 4 || (count($obsArr) < 4 && $collCnt == 1)){ ?>
+		        	<div style="margin:0px 0px 10px 30px;">
+						<input name="db[]" class="obs" value='' type="checkbox" onclick="selectAll(this,'obs');" />
+						Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+					</div>
+					<?php
+					$collCnt = 1;
+					foreach($obsArr as $collId => $collArr){
+						$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
+						?>
+						<div style="clear:both;padding:5px;height:30px;">
+							<div style="float:left;width:50px;">
+								<?php 
+								if($collArr["icon"]){
+									?>
+							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
+							    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+							    	</a>
+							    	<?php
+								} 
+							    ?>
+							    &nbsp;
+							</div>
+							<div style="float:left;width:30px;padding-top:5px;">
+					    		<input name="db[]" class="obs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
+							</div>
+							<div style="float:left;padding-top:6px;">
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
+					    		</a>
+							</div>
+					    	<?php 
+					    	if($collCnt%8 == 4 || (count($obsArr) < 4 && $collCnt == 1)){ 
+					    		?>
+							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
 						        	<input type="image" src='../images/next.jpg'
 						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
 						                onmouseout="javascript:this.src = '../images/next.jpg';"
 						                title="Click button to advance to the next step" />
-							    	<?php } ?>
-							    	<input type="hidden" name="catid" value="<?php echo $catId; ?>" /> 
-						    	</td>
-						    </tr>
-						    <?php
-						    $collCnt++; 
-						}
-						?>
-					</table>
+								</div>
+								<?php 
+					    	} 
+					    	?>
+							<input type="hidden" name="catid" value="<?php echo $catId; ?>" /> 
+					    </div>
+					    <?php
+					    $collCnt++; 
+					}
+					?>
 				</div>
 				<?php 
 	        } 
@@ -308,12 +320,18 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			if($otherCatArr){ 
 				?>
 				<div id="otherdiv">
-					<form id="othercatform" action="harvestparams.php" method="get">
+					<form id="othercatform" action="harvestparams.php" method="get" onsubmit="return verifyOtherCatForm(this)">
 						<?php 
 						foreach($otherCatArr as $projTitle => $surveyArr){
 							?>
 							<fieldset style="margin:10px;">
 								<legend style="font-weight:bold;"><?php echo $projTitle; ?></legend>
+								<div style="margin:40px 15px;float:right;">
+						        	<input type="image" src='../images/next.jpg'
+						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+						                onmouseout="javascript:this.src = '../images/next.jpg';"
+						                title="Click button to advance to the next step" />
+								</div>
 								<div style="margin:10px;">
 									<?php 
 									foreach($surveyArr as $surveyId => $surveyName){
@@ -325,9 +343,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 										<?php 
 									}
 									?>
-									<div style="margin:15px;">
-										<input type="submit" name="action" value="Submit Query" />
-									</div>
 								</div>
 							</fieldset>
 							<?php 
