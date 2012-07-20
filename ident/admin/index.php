@@ -10,8 +10,9 @@ $cId = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Save'){
-		$statusStr = $instManager->saveInstitution($_POST);
+	if($formSubmit == 'Create'){
+		$statusStr = $keyManager->createCharacter($_POST);
+		$cId = $keyManager->getcId();
 	}
 	elseif($formSubmit == 'Delete'){
 		$statusStr = $instManager->deleteInstitution($hidiid);
@@ -60,7 +61,7 @@ include($serverRoot."/header.php");
 				echo 'Please <a href="../../profile/index.php?refurl=../collections/loans/index.php?collid='.$collId.'">login</a>';
 			}
 			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add occurrence records</h2>';
+				echo '<h2>You are not authorized to add characters</h2>';
 			}
 			else{
 				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';

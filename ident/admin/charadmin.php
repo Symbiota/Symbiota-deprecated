@@ -10,14 +10,14 @@
 			</a>
 		</div>
 		<div id="addchardiv" style="display:none;">
-			<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this)">
+			<form name="newcharform" action="index.php" method="post" onsubmit=" ">
 				<fieldset>
 					<legend><b>New Character</b></legend>
 					<div style="padding-top:4px;">
 						<span>
 							Entered By:
 						</span>
-						<span style="margin-left:35px;">
+						<span style="margin-left:50px;">
 							Character Name:
 						</span>
 					</div>
