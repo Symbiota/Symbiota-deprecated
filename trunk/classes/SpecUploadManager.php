@@ -419,14 +419,12 @@ class SpecUploadManager{
 		$this->recordCleaningStage1();
 		$this->recordCleaningStage2();
 		
-		if(!$this->transferCount){
-			$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->transferCount = $row->cnt;
-			}
-			$rs->close();
+		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$this->transferCount = $row->cnt;
 		}
+		$rs->close();
 
 		//Remove temp dbpk values, if they exists
 		$sql = 'UPDATE uploadspectemp SET dbpk = NULL WHERE (dbpk LIKE "temp-%") AND (collid = '.$this->collId.')';
@@ -1024,7 +1022,7 @@ class SpecUploadManager{
 					}
 				}
 				$vcStr = '';
-				if(array_key_exists('verbatimcoordinates',$recMap)){
+				if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
 					$vcStr .= $recMap['verbatimcoordinates'].'; ';
 				}
 				$vcStr .= $latValue.' '.$lngValue;

@@ -108,9 +108,10 @@ if($taxonManager->getSciName() != "unknown"){
 				<?php 
 			}
 			if($links && $links[0]['sortseq'] == 1){
+				$uStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$links[0]['url']);
 				?>
 				<div style="margin-left:25px;clear:both;">
-					Go to <a href="<?php echo $links[0]['url']; ?>"><?php echo $links[0]['title']; ?></a>...
+					Go to <a href="<?php echo $uStr; ?>" target="_blank"><?php echo $links[0]['title']; ?></a>...
 				</div>
 				<?php 
 			}
