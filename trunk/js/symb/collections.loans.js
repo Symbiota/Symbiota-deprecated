@@ -310,6 +310,53 @@ function verifyDate(eventDateInput){
 	return true;
 }
 
+function verifyDueDate(eventDateInput){
+	//test date and return mysqlformat
+	var dateStr = eventDateInput.value;
+	if(dateStr == "") return true;
+
+	var dateArr = parseDate(dateStr);
+	if(dateArr['y'] == 0){
+		alert("Unable to interpret Date. Please use the following formats: yyyy-mm-dd, mm/dd/yyyy, or dd mmm yyyy");
+		return false;
+	}
+	else{
+		//Check to see if date is in the future 
+		try{
+			var testDate = new Date(dateArr['y'],dateArr['m']-1,dateArr['d']);
+			var today = new Date();
+			if(testDate < today){
+				alert("The due date you entered has already passed. Please revise.");
+				return false;
+			}
+		}
+		catch(e){
+		}
+
+		//Check to see if day is valid
+		if(dateArr['d'] > 28){
+			if(dateArr['d'] > 31 
+				|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
+				|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
+				alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+				return false;
+			}
+		}
+
+		//Enter date into date fields
+		var mStr = dateArr['m'];
+		if(mStr.length == 1){
+			mStr = "0" + mStr;
+		}
+		var dStr = dateArr['d'];
+		if(dStr.length == 1){
+			dStr = "0" + dStr;
+		}
+		eventDateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
+	}
+	return true;
+}
+
 function parseDate(dateStr){
 	var y = 0;
 	var m = 0;
