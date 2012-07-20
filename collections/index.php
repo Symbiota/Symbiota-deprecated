@@ -181,11 +181,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 					    		</a>
-					    		<span style="position:relative;top:10px;left:-25px;">
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:70%;'>
-						    			more info
-						    		</a>
-						    	</span>
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
+					    			more info
+					    		</a>
 						    </div>
 					    	<?php 
 					    	if($collCnt%8 == 4 || (count($collList) < 4 && $collCnt == 1)){ 
@@ -239,6 +237,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
 					    		</a>
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
+					    			more info
+					    		</a>
 							</div>
 							<?php 
 							if($collCnt%8 == 4 || (count($specArr) < 4 && $collCnt == 1)){ 
@@ -291,6 +292,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<div style="float:left;padding-top:6px;">
 					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
+					    		</a>
+					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
+					    			more info
 					    		</a>
 							</div>
 					    	<?php 
