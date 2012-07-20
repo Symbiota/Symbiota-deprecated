@@ -29,11 +29,44 @@ class KeyAdmin{
 		return $retArr;
 	}
 	
+	public function createCharacter($pArr){
+		$statusStr = '';
+		$sql = 'INSERT INTO kmcharacters(charname,enteredby) '.
+			'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['enteredby']).'") ';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$this->cId = $this->conn->insert_id;
+		}
+		else{
+			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
+	}
+	
 	
 
 	//Get and set functions 
+	public function getHeadingArr(){
+		$retArr = array();
+		$sql = 'SELECT hid, headingname, language '. 
+			'FROM kmcharheading '. 
+			'ORDER BY hid';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->hid] = $r->headingname;
+				$retArr[$r->hid] = $r->language;
+			}
+		}
+		return $retArr;
+	}
+	
 	public function setCollId($c){
 		$this->collId = $c;
+	}
+	
+	public function getcId(){
+		return $this->cId;
 	}
 	
 	protected function cleanString($inStr){
