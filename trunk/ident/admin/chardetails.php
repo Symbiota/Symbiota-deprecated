@@ -1,5 +1,5 @@
 <?php 
-//$specList = $loanManager->getSpecList($loanId);
+$charStateList = $keyManager->getCharStateList($cId);
 ?>
 <div id="tabs" style="margin:0px;">
     <ul>
@@ -154,7 +154,7 @@
 			</form>
 		</div>
 		<?php 
-		if($specList){
+		if($charStateList){
 		?>
 			<div style="height:25px;margin-top:15px;">
 				<span style="float:left;margin-left:15px;">
@@ -162,41 +162,32 @@
 					Select/Deselect All
 				</span>
 				<span id="refreshbut" style="display:none;float:right;margin-right:15px;">
-					<form name="refreshspeclist" action="index.php?collid=<?php //echo $collId; ?>&loanid=<?php //echo $loanId; ?>&loantype=<?php //echo $loanType; ?>#addspecdiv" method="post">
+					<form name="refreshstatelist" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post">
 						<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
 					</form>
 				</span>
 			</div>
-			<form name="speceditform" action="index.php?collid=<?php //echo $collId; ?>&loanid=<?php //echo $loanId; ?>&loantype=<?php //echo $loanType; ?>#addspecdiv" method="post" onsubmit="return verifyspeceditform(this)" >
+			<form name="speceditform" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post" onsubmit=" " >
 				<table class="styledtable">
 					<tr>
 						<th style="width:25px;text-align:center;">&nbsp;</th>
-						<th style="width:100px;text-align:center;">Catalog Number</th>
-						<th style="width:375px;text-align:center;">Details</th>
-						<th style="width:75px;text-align:center;">Date Returned</th>
+						<th style="width:550px;text-align:center;">Details</th>
 					</tr>
 					<?php
-					foreach($specList as $k => $specArr){
+					foreach($charStateList as $k => $stateArr){
 						?>
 						<tr>
 							<td>
-								<input name="occid[]" type="checkbox" value="<?php //echo $specArr['occid']; ?>" />
-							</td>
-							<td>
-								<a href="#" onclick="openOccurrenceDetails(<?php //echo $k; ?>);">
-									<?php //echo $specArr['catalognumber']; ?>
-								</a>
+								<input name="cs[]" type="checkbox" value="<?php echo $stateArr['cs']; ?>" />
 							</td>
 							<td>
 								<?php 
-								//$loc = $specArr['locality'];
-								//if(strlen($loc) > 500) $loc = substr($loc,400);
-								//echo '<i>'.$specArr['sciname'].'</i>; ';
-								//echo  $specArr['collector'].'; '.$loc;
+								//echo '<a href="index.php?cid='.$k.'">';
+								echo $stateArr['charstatename'];
+								//echo '</a>';
 								?> 
 								
 							</td>
-							<td><?php echo $specArr['returndate']; ?></td>
 						</tr>
 						<?php 
 					}
@@ -228,18 +219,18 @@
 		?>
 	</div>
 	<div id="chardeldiv">
-		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character?')">
+		<form name="delcharform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character?')">
 			<fieldset style="width:350px;margin:20px;padding:20px;">
 				<legend><b>Delete Character</b></legend>
 				<?php 
-				if($specList){
-					echo '<div style="font-weight:bold;margin-bottom:15px;">';
-					echo 'Loan cannot be delted until all linked specimens are removed';
-					echo '</div>';
-				}
+				//if($specList){
+				//	echo '<div style="font-weight:bold;margin-bottom:15px;">';
+				//	echo 'Character cannot be deleted until all linked character states are removed';
+				//	echo '</div>';
+				//}
 				?>
-				<input name="formsubmit" type="submit" value="Delete Loan" <?php //if($specList) echo 'DISABLED'; ?> />
-				<input name="collid" type="hidden" value="<?php //echo $collId; ?>" />
+				<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+				<input name="formsubmit" type="submit" value="Delete Char" <?php //if($specList) echo 'DISABLED'; ?> />
 			</fieldset>
 		</form>
 	</div>
