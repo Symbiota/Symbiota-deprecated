@@ -14,6 +14,9 @@ if($formSubmit){
 		$statusStr = $keyManager->createCharacter($_POST);
 		$cId = $keyManager->getcId();
 	}
+	elseif($formSubmit == 'Save Char'){
+			$statusStr = $keyManager->editCharacter($_POST);
+	}
 	elseif($formSubmit == 'Delete'){
 		$statusStr = $instManager->deleteInstitution($hidiid);
 	}

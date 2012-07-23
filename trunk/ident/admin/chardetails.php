@@ -9,8 +9,8 @@
 	</ul>
 	<div id="chardetaildiv">
 		<?php 
-		//Show loan details
-		//$loanArr = $loanManager->getLoanOutDetails($loanId);
+		//Show character details
+		$charArr = $keyManager->getCharDetails($cId);
 		?>
 		<form name="editcharform" action="index.php" method="post">
 			<fieldset>
@@ -22,59 +22,58 @@
 				</div>
 				<div style="padding-bottom:2px;">
 					<span>
-						<input type="text" autocomplete="off" name="charname" maxlength="255" style="width:400px;" value="" />
+						<input type="text" autocomplete="off" name="charname" maxlength="255" style="width:400px;" value="<?php echo $charArr['charname']; ?>" />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
 					<span>
 						Entered By:
 					</span>
-					<span style="margin-left:20px;">
+					<span style="margin-left:65px;">
 						Type:
 					</span>
-					<span style="margin-left:70px;">
+					<span style="margin-left:50px;">
 						Difficulty:
 					</span>
-					<span style="margin-left:50px;">
+					<span style="margin-left:40px;">
 						Language:
 					</span>
-					<span style="margin-left:55px;">
+					<span style="margin-left:65px;">
 						Units:
 					</span>
 				</div>
 				<div style="padding-bottom:2px;">
 					<span>
-						<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php //echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
+						<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $charArr['enteredby']; ?>" onchange=" " disabled />
 					</span>
 					<span style="margin-left:25px;">
 						<select name="chartype" style="width:55px;">
-							<option value="" <?php //echo ($exchangeArr['transactiontype']==''?'SELECTED':'');?>>--</option>
-							<option value="IN" <?php //echo ($exchangeArr['transactiontype']=='IN'?'SELECTED':'');?>>IN</option>
-							<option value="OM" <?php //echo ($exchangeArr['transactiontype']=='OM'?'SELECTED':'');?>>OM</option>
-							<option value="RN" <?php //echo ($exchangeArr['transactiontype']=='RN'?'SELECTED':'');?>>RN</option>
-							<option value="TE" <?php //echo ($exchangeArr['transactiontype']=='TE'?'SELECTED':'');?>>TE</option>
-							<option value="UM" <?php //echo ($exchangeArr['transactiontype']=='UM'?'SELECTED':'');?>>UM</option>
+							<option value="" <?php echo ($charArr['chartype']==''?'SELECTED':'');?>>--</option>
+							<option value="IN" <?php echo ($charArr['chartype']=='IN'?'SELECTED':'');?>>IN</option>
+							<option value="OM" <?php echo ($charArr['chartype']=='OM'?'SELECTED':'');?>>OM</option>
+							<option value="RN" <?php echo ($charArr['chartype']=='RN'?'SELECTED':'');?>>RN</option>
+							<option value="TE" <?php echo ($charArr['chartype']=='TE'?'SELECTED':'');?>>TE</option>
+							<option value="UM" <?php echo ($charArr['chartype']=='UM'?'SELECTED':'');?>>UM</option>
 						</select>
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="difficultyrank" tabindex="96" maxlength="32" style="width:60px;" value="<?php //echo $loanArr['processedbyown']; ?>" onchange=" " />
+						<input type="text" autocomplete="off" name="difficultyrank" tabindex="96" maxlength="32" style="width:60px;" value="<?php echo $charArr['difficultyrank']; ?>" onchange=" " />
 					</span>
 					<span style="margin-left:25px;">
 						<select name="defaultlang" style="width:100px;">
-							<option value="" <?php //echo ($exchangeArr['transactiontype']==''?'SELECTED':'');?>>-------</option>
-							<option value="English" <?php //echo ($exchangeArr['transactiontype']=='English'?'SELECTED':'');?>>English</option>
-							<option value="Spanish" <?php //echo ($exchangeArr['transactiontype']=='Spanish'?'SELECTED':'');?>>Spanish</option>
+							<option value="English" <?php echo ($charArr['defaultlang']=='English'?'SELECTED':'');?>>English</option>
+							<option value="Spanish" <?php echo ($charArr['defaultlang']=='Spanish'?'SELECTED':'');?>>Spanish</option>
 						</select>
 					</span>
 					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="units" tabindex="100" maxlength="32" style="width:100px;" value="<?php //echo $loanArr['datedue']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						<input type="text" autocomplete="off" name="units" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $charArr['units']; ?>" onchange="" title="" />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
 					<span>
 						Heading:
 					</span>
-					<span style="margin-left:340px;">
+					<span style="margin-left:90px;">
 						Help URL:
 					</span>
 				</div>
@@ -86,34 +85,38 @@
 							<?php 
 							$headingArr = $keyManager->getHeadingArr();
 							foreach($headingArr as $k => $v){
-								echo '<option value="'.$k.'">'.$v.'</option>';
+								echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v.'</option>';
 							}
 							?>
 						</select>
 					</span>
 					<span style="margin-left:15px;">
-						<input type="text" autocomplete="off" name="helpurl" tabindex="100" maxlength="32" style="width:400px;" value="<?php //echo $loanArr['totalboxes']; ?>" onchange=" " />
+						<input type="text" autocomplete="off" name="helpurl" tabindex="100" maxlength="32" style="width:400px;" value="<?php echo $charArr['helpurl']; ?>" onchange=" " />
 					</span>
 				</div>
 				<div style="padding-top:4px;">
 					<span>
 						Description:
 					</span>
-					<span style="margin-left:270px;">
+				</div>
+				<div style="padding-bottom:2px;">
+					<span>
+						<input type="text" autocomplete="off" name="description" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['description']; ?>" onchange=" " />
+					</span>
+				</div>
+				<div style="padding-top:4px;">
+					<span>
 						Notes:
 					</span>
 				</div>
 				<div style="padding-bottom:2px;">
 					<span>
-						<textarea name="description" rows="10" style="width:200px;resize:vertical;" onchange=" "><?php //echo $loanArr['description']; ?></textarea>
-					</span>
-					<span style="margin-left:40px;">
-						<textarea name="notes" rows="10" style="width:200px;resize:vertical;" onchange=" "><?php //echo $loanArr['notes']; ?></textarea>
+						<input type="text" autocomplete="off" name="notes" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['notes']; ?>" onchange=" " />
 					</span>
 				</div>
 				<div style="padding-top:8px;">
-					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-					<button name="formsubmit" type="submit" value="Save Outgoing">Save</button>
+					<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+					<button name="formsubmit" type="submit" value="Save Char">Save</button>
 				</div>
 			</fieldset>
 		</form>
@@ -225,9 +228,9 @@
 		?>
 	</div>
 	<div id="chardeldiv">
-		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this loan?')">
+		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character?')">
 			<fieldset style="width:350px;margin:20px;padding:20px;">
-				<legend><b>Delete Outgoing Loan</b></legend>
+				<legend><b>Delete Character</b></legend>
 				<?php 
 				if($specList){
 					echo '<div style="font-weight:bold;margin-bottom:15px;">';
