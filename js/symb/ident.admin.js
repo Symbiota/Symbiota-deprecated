@@ -7,6 +7,18 @@ $(document).ready(function() {
 
 });
 
+function selectAll(cb){
+	boxesChecked = true;
+	if(!cb.checked){
+		boxesChecked = false;
+	}
+	var dbElements = document.getElementsByName("occid[]");
+	for(i = 0; i < dbElements.length; i++){
+		var dbElement = dbElements[i];
+		dbElement.checked = boxesChecked;
+	}
+}
+
 function GetXmlHttpObject(){
 	var xmlHttp=null;
 	try{
