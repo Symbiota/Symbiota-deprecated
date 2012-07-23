@@ -91,6 +91,33 @@ class KeyAdmin{
 		}
 		return $retArr;
 	}
+	
+	public function deleteChar($cId){
+		$status = 0;
+		if(is_numeric($cId)){
+			$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$cId.')';
+			if($this->conn->query($sql)){
+				$status = 1;
+			}
+		}
+		return $status;
+	}
+	
+	public function getCharStateList($cId){
+		$retArr = array();
+		$sql = 'SELECT cs, charstatename '.
+			'FROM kmcs '.
+			'WHERE cid = '.$cId.' '.
+			'ORDER BY charstatename ASC';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->cs]['cs'] = $r->cs;
+				$retArr[$r->cs]['charstatename'] = $r->charstatename;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
 
 	//Get and set functions 
 	public function getHeadingArr(){
