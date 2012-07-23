@@ -15,10 +15,11 @@ if($formSubmit){
 		$cId = $keyManager->getcId();
 	}
 	elseif($formSubmit == 'Save Char'){
-			$statusStr = $keyManager->editCharacter($_POST);
+		$statusStr = $keyManager->editCharacter($_POST);
 	}
-	elseif($formSubmit == 'Delete'){
-		$statusStr = $instManager->deleteInstitution($hidiid);
+	elseif($formSubmit == 'Delete Char'){
+		$status = $keyManager->deleteChar($cId);
+		if($status) $cId = 0;
 	}
 }
  
