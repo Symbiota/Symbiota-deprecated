@@ -123,14 +123,14 @@ $charStateList = $keyManager->getCharStateList($cId);
 	</div>
 	<div id="charstatediv">
 		<div style="float:right;margin:10px;">
-			<a href="#" onclick="toggle('newspecdiv');toggle('refreshbut');">
-				<img src="../../images/add.png" alt="Create New Loan" />
+			<a href="#" onclick="toggle('newstatediv');toggle('refreshbut');">
+				<img src="../../images/add.png" alt="Create New Character State" />
 			</a>
 		</div>
-		<div id="newspecdiv" style="display:none;">
-			<form name="addspecform" action="index.php" method="post" onsubmit="return false">
+		<div id="newstatediv" style="display:none;">
+			<form name="addstateform" action="index.php" method="post" onsubmit="return false">
 				<fieldset>
-					<legend><b>Add Specimen</b></legend>
+					<legend><b>Add Character State</b></legend>
 					<div style="float:left;padding-bottom:2px;">
 						<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 					</div>
@@ -157,64 +157,30 @@ $charStateList = $keyManager->getCharStateList($cId);
 		if($charStateList){
 		?>
 			<div style="height:25px;margin-top:15px;">
-				<span style="float:left;margin-left:15px;">
-					<input name="" value="" type="checkbox" onclick="selectAll(this);" />
-					Select/Deselect All
-				</span>
 				<span id="refreshbut" style="display:none;float:right;margin-right:15px;">
 					<form name="refreshstatelist" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post">
 						<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
 					</form>
 				</span>
 			</div>
-			<form name="speceditform" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post" onsubmit=" " >
-				<table class="styledtable">
-					<tr>
-						<th style="width:25px;text-align:center;">&nbsp;</th>
-						<th style="width:550px;text-align:center;">Details</th>
-					</tr>
-					<?php
-					foreach($charStateList as $k => $stateArr){
-						?>
-						<tr>
-							<td>
-								<input name="cs[]" type="checkbox" value="<?php echo $stateArr['cs']; ?>" />
-							</td>
-							<td>
-								<?php 
-								//echo '<a href="index.php?cid='.$k.'">';
-								echo $stateArr['charstatename'];
-								//echo '</a>';
-								?> 
-								
-							</td>
-						</tr>
-						<?php 
-					}
+			<form name="stateeditform" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post" onsubmit=" " >
+				<?php 
+				echo '<h3>Character States</h3>';
+				echo '<ul>';
+				foreach($charStateList as $k => $stateArr){
+					echo '<li>';
+					//echo '<a href="index.php?cid='.$k.'">';
+					echo $stateArr['charstatename'];
+					//echo '</a>';
+					echo '</li>';
+				}
+				echo '</ul>';
 				?>
-				</table>
-				<table>
-					<tr>
-						<td colspan="10" valign="bottom">
-							<div style="margin:10px;">
-								<div style="float:left;">
-									<input name="applytask" type="radio" value="check" CHECKED title="Check-in Specimens" />Check-in Specimens<br/>
-									<input name="applytask" type="radio" value="delete" title="Delete Specimens" />Delete Specimens from Loan
-								</div>
-								<span style="margin-left:25px;">
-									<input name="formsubmit" type="submit" value="Perform Action" />
-									<input name="collid" type="hidden" value="<?php //echo $collId; ?>" />
-									<input name="loanid" type="hidden" value="<?php //echo $loanId; ?>" />
-								</span>
-							</div>
-						</td>
-					</tr>
-				</table>
 			</form>
 		<?php
 		}
 		else{
-			echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
+			echo '<div style="font-weight:bold;font-size:120%;">There are no character states for this character.</div>';
 		}
 		?>
 	</div>
@@ -223,14 +189,14 @@ $charStateList = $keyManager->getCharStateList($cId);
 			<fieldset style="width:350px;margin:20px;padding:20px;">
 				<legend><b>Delete Character</b></legend>
 				<?php 
-				//if($specList){
-				//	echo '<div style="font-weight:bold;margin-bottom:15px;">';
-				//	echo 'Character cannot be deleted until all linked character states are removed';
-				//	echo '</div>';
-				//}
+				if($charStateList){
+					echo '<div style="font-weight:bold;margin-bottom:15px;">';
+					echo 'Character cannot be deleted until all character states are removed';
+					echo '</div>';
+				}
 				?>
 				<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
-				<input name="formsubmit" type="submit" value="Delete Char" <?php //if($specList) echo 'DISABLED'; ?> />
+				<button name="formsubmit" type="submit" value="Delete Char" <?php if($charStateList) echo 'DISABLED'; ?>>Delete</button>
 			</fieldset>
 		</form>
 	</div>
