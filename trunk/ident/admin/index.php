@@ -7,6 +7,7 @@ $keyManager->setCollId($collId);
 
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 $cId = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
+$cs = array_key_exists('cs',$_REQUEST)?$_REQUEST['cs']:0;
 
 $statusStr = '';
 if($formSubmit){
@@ -16,6 +17,10 @@ if($formSubmit){
 	}
 	elseif($formSubmit == 'Save Char'){
 		$statusStr = $keyManager->editCharacter($_POST);
+	}
+	elseif($formSubmit == 'Add State'){
+		$statusStr = $keyManager->createState($_POST);
+		$cs = $keyManager->getcs();
 	}
 	elseif($formSubmit == 'Delete Char'){
 		$status = $keyManager->deleteChar($cId);
@@ -56,7 +61,10 @@ include($serverRoot."/header.php");
 			if(!$cId){
 				include_once('charadmin.php');
 			}
-			elseif($cId){
+			elseif($cId && !$cs){
+				include_once('chardetails.php');
+			}
+			elseif($cId && $cs){
 				include_once('chardetails.php');
 			}
 		}
