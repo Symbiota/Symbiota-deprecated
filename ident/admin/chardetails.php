@@ -144,23 +144,21 @@ $charStateList = $keyManager->getCharStateList($cId);
 							<input type="text" autocomplete="off" name="charstatename" maxlength="255" style="width:400px;" value="" />
 						</span>
 						<span style="margin-left:15px;">
-							<select name="defaultlang" style="width:100px;">
+							<select name="language" style="width:100px;">
 								<option value="English">English</option>
 								<option value="Spanish">Spanish</option>
 							</select>
 						</span>
 					</div>
-					<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:none;">
-						SUCCESS: Specimen record added to loan.
+					<div style="padding-top:4px;">
+						<span>
+							Entered By:
+						</span>
 					</div>
-					<div id="addspecerr1" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
-						ERROR: No specimens found with that catalog number.
-					</div>
-					<div id="addspecerr2" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
-						ERROR: More than one specimen located with same catalog number.
-					</div>
-					<div id="addspecerr3" style="float:left;margin-left:30px;padding-bottom:2px;color:orange;display:none;">
-						Warning: Specimen already linked to loan.
+					<div style="padding-bottom:2px;">
+						<span>
+							<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+						</span>
 					</div>
 					<div style="padding-top:8px;clear:both;">
 						<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
