@@ -131,8 +131,24 @@ $charStateList = $keyManager->getCharStateList($cId);
 			<form name="addstateform" action="index.php" method="post" onsubmit="return false">
 				<fieldset>
 					<legend><b>Add Character State</b></legend>
-					<div style="float:left;padding-bottom:2px;">
-						<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+					<div style="padding-top:4px;">
+						<span>
+							Character State Name:
+						</span>
+						<span style="margin-left:290px;">
+							Language:
+						</span>
+					</div>
+					<div style="padding-bottom:2px;">
+						<span>
+							<input type="text" autocomplete="off" name="charstatename" maxlength="255" style="width:400px;" value="" />
+						</span>
+						<span style="margin-left:15px;">
+							<select name="defaultlang" style="width:100px;">
+								<option value="English">English</option>
+								<option value="Spanish">Spanish</option>
+							</select>
+						</span>
 					</div>
 					<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:none;">
 						SUCCESS: Specimen record added to loan.
@@ -147,8 +163,8 @@ $charStateList = $keyManager->getCharStateList($cId);
 						Warning: Specimen already linked to loan.
 					</div>
 					<div style="padding-top:8px;clear:both;">
-						<input name="collid" type="hidden" value="<?php //echo $collId; ?>" />
-						<input name="formsubmit" type="button" value="Add Specimen" onclick="addSpecimen(this.form)" />
+						<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+						<button name="formsubmit" type="submit" value="Add State">Add Character State</button>
 					</div>
 				</fieldset>
 			</form>
