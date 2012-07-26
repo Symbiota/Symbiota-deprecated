@@ -46,6 +46,23 @@ class KeyAdmin{
 		return $statusStr;
 	}
 	
+	public function createState($pArr){
+		$statusStr = '';
+		$sql = 'INSERT INTO kmcs(cid,charstatename,defaultlang,difficultyrank,hid,enteredby) '.
+			'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
+			"'.$this->cleanString($pArr['defaultlang']).'","'.$this->cleanString($pArr['difficultyrank']).'",
+			"'.$this->cleanString($pArr['hid']).'","'.$this->cleanString($pArr['enteredby']).'") ';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$this->cId = $this->conn->insert_id;
+		}
+		else{
+			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
+		}
+		return $statusStr;
+	}
+	
 	public function editCharacter($pArr){
 		$statusStr = '';
 		$cId = $pArr['cid'];
