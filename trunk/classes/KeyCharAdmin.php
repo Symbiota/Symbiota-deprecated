@@ -48,13 +48,12 @@ class KeyAdmin{
 	
 	public function createState($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO kmcs(cid,charstatename,defaultlang,difficultyrank,hid,enteredby) '.
-			'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
-			"'.$this->cleanString($pArr['defaultlang']).'","'.$this->cleanString($pArr['difficultyrank']).'",
-			"'.$this->cleanString($pArr['hid']).'","'.$this->cleanString($pArr['enteredby']).'") ';
+		$sql = 'INSERT INTO kmcs(cid,charstatename,implicit,language,enteredby) '.
+			'VALUES("'.$this->cleanString($pArr['cid']).'","'.$this->cleanString($pArr['charstatename']).'",1,
+			"'.$this->cleanString($pArr['language']).'","'.$this->cleanString($pArr['enteredby']).'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
-			$this->cId = $this->conn->insert_id;
+			$this->cs = $this->conn->insert_id;
 		}
 		else{
 			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
@@ -102,6 +101,27 @@ class KeyAdmin{
 				$retArr['description'] = $r->description;
 				$retArr['notes'] = $r->notes;
 				$retArr['helpurl'] = $r->helpurl;
+				$retArr['enteredby'] = $r->enteredby;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
+	public function getCharStateDetails($cId,$cs){
+		$retArr = array();
+		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, '.
+			'language, enteredby '.
+			'FROM kmcs '.
+			'WHERE cid = '.$cId.' AND cs = '.$cs;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr['charstatename'] = $r->charstatename;
+				$retArr['implicit'] = $r->implicit;
+				$retArr['notes'] = $r->notes;
+				$retArr['description'] = $r->description;
+				$retArr['illustrationurl'] = $r->illustrationurl;
+				$retArr['language'] = $r->language;
 				$retArr['enteredby'] = $r->enteredby;
 			}
 			$rs->close();
@@ -157,6 +177,10 @@ class KeyAdmin{
 	
 	public function getcId(){
 		return $this->cId;
+	}
+	
+	public function getcs(){
+		return $this->cs;
 	}
 	
 	protected function cleanString($inStr){
