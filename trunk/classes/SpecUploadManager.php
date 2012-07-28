@@ -947,7 +947,8 @@ class SpecUploadManager{
 
 	protected function loadRecord($recMap){
 		//Only import record if at least one of the minimal fields have data 
-		if((array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
+		if((array_key_exists('dbpk',$recMap) && $recMap['dbpk'])
+			|| (array_key_exists('catalognumber',$recMap) && $recMap['catalognumber'])
 			|| (array_key_exists('recordedby',$recMap) && $recMap['recordedby'])
 			|| (array_key_exists('eventdate',$recMap) && $recMap['eventdate'])
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
