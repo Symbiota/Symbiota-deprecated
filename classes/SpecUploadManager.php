@@ -427,10 +427,6 @@ class SpecUploadManager{
 		}
 		$rs->close();
 
-		//Remove temp dbpk values, if they exists
-		$sql = 'UPDATE uploadspectemp SET dbpk = NULL WHERE (dbpk LIKE "temp-%") AND (collid = '.$this->collId.')';
-		$this->conn->query($sql);
-		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
 			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
@@ -1049,15 +1045,17 @@ class SpecUploadManager{
 			}
 			//If lat or long are not numeric, try to make them so
 			if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
-				if(!is_numeric($recMap['decimallatitude']) || !is_numeric($recMap['decimallongitude'])){
-					$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
-					$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
-					if($latValue || $lngValue){
-						$llArr = $this->parseVerbatimCoordinates($latValue.' '.$lngValue,'LL');
-						if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
-							$recMap['decimallatitude'] = $llArr['lat'];
-							$recMap['decimallongitude'] = $llArr['lng'];
-						}
+				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
+				$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
+				if(!is_numeric($latValue) || !is_numeric($latValue)){
+					$llArr = $this->parseVerbatimCoordinates(trim($latValue.' '.$lngValue),'LL');
+					if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
+						$recMap['decimallatitude'] = $llArr['lat'];
+						$recMap['decimallongitude'] = $llArr['lng'];
+					}
+					else{
+						unset($recMap['decimallatitude']);
+						unset($recMap['decimallongitude']);
 					}
 					$vcStr = '';
 					if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
@@ -1075,22 +1073,14 @@ class SpecUploadManager{
 				}
 			}
 			//Convert UTM to Lat/Long
-			if(array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing'] && (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude'])){
-				if(!array_key_exists('utmeasting',$recMap)){
-					//UTM was a single field which was placed in UTM northing field within uploadspectemp table
-					$coordArr = $this->parseVerbatimCoordinates($recMap['utmnorthing'],'UTM');
-					if($coordArr){
-						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
-						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
-					}
-				}
-				elseif(array_key_exists('utmzoning',$recMap)){
-					//Northing, easting, and zoning all had values
-					$n = $recMap['utmnorthing'];
-					$e = $recMap['utmeasting'];
-					$z = $recMap['utmzoning'];
+			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
+				if((!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude'])){
+					$n = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
+					$e = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
+					$z = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
 					$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
 					if($n && $e && $z){
+						//Northing, easting, and zoning all had values
 						$gPoint = new GPoint($d);
 						$gPoint->setUTM($e,$n,$z);
 						$gPoint->convertTMtoLL();
@@ -1099,6 +1089,14 @@ class SpecUploadManager{
 						if($lat && $lng){
 							$recMap['decimallatitude'] = round($lat,6);
 							$recMap['decimallongitude'] = round($lng,6);
+						}
+					}
+					else{
+						//UTM was a single field which was placed in UTM northing field within uploadspectemp table
+						$coordArr = $this->parseVerbatimCoordinates(trim($z.' '.$e.' '.$n),'UTM');
+						if($coordArr){
+							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
 						}
 					}
 				}
@@ -1160,15 +1158,15 @@ class SpecUploadManager{
 					$recMap['sciname'] = trim($scinameStr);
 				}
 			}
-			
+
 			//If a DiGIR load, set dbpk value
 			if($this->digirPKField && array_key_exists($this->digirPKField,$recMap) && !array_key_exists('dbpk',$recMap)){
 				$recMap['dbpk'] = $recMap[$this->digirPKField];
 			}
 			
-			//If there is no dbpk set, set a temp value to aid in locating record in uploadspectemp during cleaning stage 
-			if(!array_key_exists('dbpk',$recMap) || !$recMap['dbpk']){
-				$recMap['dbpk'] = 'temp-'.$this->transferCount;
+			//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
+			if(array_key_exists('dbpk',$recMap)){
+				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
 			}
 			
 			//Create update str 
