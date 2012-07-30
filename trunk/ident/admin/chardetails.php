@@ -123,12 +123,12 @@ $charStateList = $keyManager->getCharStateList($cId);
 	</div>
 	<div id="charstatediv">
 		<div style="float:right;margin:10px;">
-			<a href="#" onclick="toggle('newstatediv');toggle('refreshbut');">
+			<a href="#" onclick="toggle('newstatediv');">
 				<img src="../../images/add.png" alt="Create New Character State" />
 			</a>
 		</div>
 		<div id="newstatediv" style="display:none;">
-			<form name="addstateform" action="index.php" method="post" onsubmit="return false">
+			<form name="addstateform" action="index.php" method="post" onsubmit="">
 				<fieldset>
 					<legend><b>Add Character State</b></legend>
 					<div style="padding-top:4px;">
@@ -170,22 +170,15 @@ $charStateList = $keyManager->getCharStateList($cId);
 		<?php 
 		if($charStateList){
 		?>
-			<div style="height:25px;margin-top:15px;">
-				<span id="refreshbut" style="display:none;float:right;margin-right:15px;">
-					<form name="refreshstatelist" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post">
-						<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
-					</form>
-				</span>
-			</div>
 			<form name="stateeditform" action="index.php?cid=<?php echo $cId; ?>#charstatediv" method="post" onsubmit=" " >
 				<?php 
 				echo '<h3>Character States</h3>';
 				echo '<ul>';
 				foreach($charStateList as $k => $stateArr){
 					echo '<li>';
-					//echo '<a href="index.php?cid='.$k.'">';
+					echo '<a href="index.php?cid='.$cId.'&cs='.$k.'">';
 					echo $stateArr['charstatename'];
-					//echo '</a>';
+					echo '</a>';
 					echo '</li>';
 				}
 				echo '</ul>';
