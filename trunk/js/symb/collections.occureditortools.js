@@ -443,7 +443,7 @@ function searchDupesCollector(f,silent){
 				setTimeout(function () { 
 					document.getElementById("dupenone").style.display = "none";
 					document.getElementById("dupediv").style.display = "none";
-					}, 3000);
+					}, 5000);
 			}
 		}
 	};
