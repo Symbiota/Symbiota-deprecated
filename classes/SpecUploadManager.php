@@ -400,6 +400,11 @@ class SpecUploadManager{
 		echo '<li style="font-weight:bold;">Starting custom cleaning scripts...</li>';
 		ob_flush();
 		flush();
+
+ 		//Prefrom general cleaning and parsing tasks
+		$this->recordCleaningStage1();
+		$this->recordCleaningStage2();
+		
 		if($this->storedProcedure){
 			try{
 				if($this->conn->query('CALL '.$this->storedProcedure)){
@@ -414,10 +419,6 @@ class SpecUploadManager{
 			ob_flush();
 			flush();
 		}
-		
- 		//Prefrom general cleaning and parsing tasks
-		$this->recordCleaningStage1();
-		$this->recordCleaningStage2();
 		
 		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 		$rs = $this->conn->query($sql);
@@ -536,19 +537,58 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 		//Parse out verbatimCoordinates
-		$sql = 'SELECT DISTINCT verbatimcoordinates '.
-			'FROM uploadspectemp '.
-			'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
+		//This happens at loadRecord, but we do it again in case stored procedure concatinated some of hte verbatim coordinate fields
 		$outStr = '';
-		while($r = $rs->fetch_object()){
-			if($r->verbatimcoordinates){
-				$vCoord = $r->verbatimcoordinates;
-				$coordArr = $this->parseVerbatimCoordinates($vCoord);
-				if($coordArr){
+		if($this->storedProcedure){
+			$sql = 'SELECT DISTINCT verbatimcoordinates '.
+				'FROM uploadspectemp '.
+				'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collId;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($r->verbatimcoordinates){
+					$vCoord = $r->verbatimcoordinates;
+					$coordArr = $this->parseVerbatimCoordinates($vCoord);
+					if($coordArr){
+						$sql = 'UPDATE uploadspectemp '.
+							'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].' '.
+							'WHERE (collid = '.$this->collId.') AND (decimallatitude IS NULL) AND (verbatimcoordinates = "'.$vCoord.'")';
+						if($this->conn->query($sql)){
+							$outStr = 'Done! ';
+						}
+						else{
+							$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+						}
+					}
+				}
+			}
+			$rs->close();
+		}
+		if($outStr) { 
+			echo $outStr.'</li> ';
+		}
+		else{
+			echo 'Not Applicable</li>';
+		}
+		
+		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
+		ob_flush();
+		flush();
+		//Clean and parse verbatimElevation string
+		if($this->storedProcedure){
+			$sql = 'SELECT DISTINCT verbatimelevation '.
+				'FROM uploadspectemp '.
+				'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
+			$rs = $this->conn->query($sql);
+			$outStr = '';
+			while($r = $rs->fetch_object()){
+				$vElev = $r->verbatimelevation;
+				$eArr = $this->parseVerbatimElevation($vElev);
+				if($eArr){
+					$maxElev = 'NULL';
+					if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
 					$sql = 'UPDATE uploadspectemp '.
-						'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].' '.
-						'WHERE (collid = '.$this->collId.') AND (decimallatitude IS NULL) AND (verbatimcoordinates = "'.$vCoord.'")';
+						'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
+						'WHERE (collid = '.$this->collId.') AND minimumelevationinmeters IS NULL AND (verbatimelevation = "'.$vElev.'")';
 					if($this->conn->query($sql)){
 						$outStr = 'Done! ';
 					}
@@ -557,38 +597,14 @@ class SpecUploadManager{
 					}
 				}
 			}
+			$rs->close();
 		}
-		$rs->close();
-		echo ($outStr?$outStr:'Not Applicable').'</li> ';
-		
-		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
-		ob_flush();
-		flush();
-		//Clean and parse verbatimElevation string
-		$sql = 'SELECT DISTINCT verbatimelevation '.
-			'FROM uploadspectemp '.
-			'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-		$outStr = '';
-		while($r = $rs->fetch_object()){
-			$vElev = $r->verbatimelevation;
-			$eArr = $this->parseVerbatimElevation($vElev);
-			if($eArr){
-				$maxElev = 'NULL';
-				if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
-				$sql = 'UPDATE uploadspectemp '.
-					'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
-					'WHERE (collid = '.$this->collId.') AND minimumelevationinmeters IS NULL AND (verbatimelevation = "'.$vElev.'")';
-				if($this->conn->query($sql)){
-					$outStr = 'Done! ';
-				}
-				else{
-					$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
-				}
-			}
+		if($outStr) { 
+			echo $outStr.'</li> ';
 		}
-		$rs->close();
-		echo ($outStr?$outStr:'Not Applicable').'</li> ';
+		else{
+			echo 'Not Applicable</li>';
+		}
 	}
 
 	private function recordCleaningStage2(){
@@ -954,17 +970,38 @@ class SpecUploadManager{
 			|| (array_key_exists('locality',$recMap) && $recMap['locality'])
 			|| (array_key_exists('sciname',$recMap) && $recMap['sciname'])
 			|| (array_key_exists('scientificname',$recMap) && $recMap['scientificname'])){
-			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate'] && is_numeric($recMap['eventdate'])){
-				if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
-					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
-					$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate']-1,1900));
+			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate']){
+				if(is_numeric($recMap['eventdate'])){
+					if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
+						//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
+						$recMap['eventdate'] = date('Y-m-d', mktime(0,0,0,1,$recMap['eventdate']-1,1900));
+					}
+					elseif($recMap['eventdate'] > 2200000 && $recMap['eventdate'] < 2500000){
+						//Date is in the Gregorian format
+						$dArr = explode('/',jdtogregorian($recMap['eventdate']));
+						$recMap['eventdate'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
+					}
+					elseif($recMap['eventdate'] > 19000000){
+						//Format: 20120101 = 2012-01-01 
+						$recMap['eventdate'] = substr($recMap['eventdate'],0,4).'-'.substr($recMap['eventdate'],4,2).'-'.substr($recMap['eventdate'],6,2);
+					}
 				}
-				elseif($recMap['eventdate'] > 2200000 && $recMap['eventdate'] < 2500000){
-					$dArr = explode('/',jdtogregorian($recMap['eventdate']));
-					$recMap['eventdate'] = $dArr[2].'-'.$dArr[0].'-'.$dArr[1];
-				}
-				elseif($recMap['eventdate'] > 19000000){
-					$recMap['eventdate'] = substr($recMap['eventdate'],0,4).'-'.substr($recMap['eventdate'],4,2).'-'.substr($recMap['eventdate'],6,2);
+				else{
+					//Make sure event date is a valid format or drop into verbatimEventDate
+					$dateStr = $this->formatDate($recMap['eventdate']);
+					if($dateStr){
+						if(strpos('-00',$dateStr)) echo $recMap['eventdate'].' => '.$dateStr."<br/>"; 
+						if(strpos('-00',$dateStr) && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
+							$recMap['verbatimeventdate'] = $recMap['eventdate'];
+						}
+						$recMap['eventdate'] = $dateStr;
+					}
+					else{
+						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+							$recMap['verbatimeventdate'] = $recMap['eventdate'];
+						}
+						unset($recMap['eventdate']);
+					}
 				}
 			}
 			if(array_key_exists('latestdatecollected',$recMap) && $recMap['latestdatecollected'] && is_numeric($recMap['latestdatecollected'])){
@@ -1011,44 +1048,72 @@ class SpecUploadManager{
 				}
 			}
 			//If lat or long are not numeric, try to make them so
-			if((array_key_exists('decimallatitude',$recMap) && !is_numeric($recMap['decimallatitude'])) 
-				|| (array_key_exists('decimallongitude',$recMap) && !is_numeric($recMap['decimallongitude']))){
-				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
-				$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
-				if($latValue && $lngValue){
-					$llArr = $this->parseVerbatimCoordinates($latValue.' '.$lngValue);
-					if($llArr){
-						$recMap['decimallatitude'] = $llArr['lat'];
-						$recMap['decimallongitude'] = $llArr['lng'];
+			if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
+				if(!is_numeric($recMap['decimallatitude']) || !is_numeric($recMap['decimallongitude'])){
+					$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
+					$lngValue = (array_key_exists('decimallongitude',$recMap)?$recMap['decimallongitude']:'');
+					if($latValue || $lngValue){
+						$llArr = $this->parseVerbatimCoordinates($latValue.' '.$lngValue,'LL');
+						if(array_key_exists('lat',$llArr) && array_key_exists('lng',$llArr)){
+							$recMap['decimallatitude'] = $llArr['lat'];
+							$recMap['decimallongitude'] = $llArr['lng'];
+						}
 					}
+					$vcStr = '';
+					if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
+						$vcStr .= $recMap['verbatimcoordinates'].'; ';
+					}
+					$vcStr .= $latValue.' '.$lngValue;
+					if(trim($vcStr)) $recMap['verbatimcoordinates'] = $vcStr;
 				}
-				$vcStr = '';
-				if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
-					$vcStr .= $recMap['verbatimcoordinates'].'; ';
+			}
+			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
+				$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimcoordinates']);
+				if($coordArr){
+					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+					if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
 				}
-				$vcStr .= $latValue.' '.$lngValue;
-				if(trim($vcStr)) $recMap['verbatimcoordinates'] = $vcStr;
 			}
 			//Convert UTM to Lat/Long
-			if(array_key_exists('utmnorthing',$recMap) && array_key_exists('utmeasting',$recMap) && array_key_exists('utmzoning',$recMap) 
-				&& (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']) 
-				&& (!array_key_exists('decimallongitude',$recMap) || !$recMap['decimallongitude'])){
-				$n = $recMap['utmnorthing'];
-				$e = $recMap['utmeasting'];
-				$z = $recMap['utmzoning'];
-				$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
-				if($n && $e && $z){
-					$gPoint = new GPoint($d);
-					$gPoint->setUTM($e,$n,$z);
-					$gPoint->convertTMtoLL();
-					$lat = $gPoint->Lat();
-					$lng = $gPoint->Long();
-					if($lat && $lng){
-						$recMap['decimallatitude'] = round($lat,6);
-						$recMap['decimallongitude'] = round($lng,6);
+			if(array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing'] && (!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude'])){
+				if(!array_key_exists('utmeasting',$recMap)){
+					//UTM was a single field which was placed in UTM northing field within uploadspectemp table
+					$coordArr = $this->parseVerbatimCoordinates($recMap['utmnorthing'],'UTM');
+					if($coordArr){
+						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+					}
+				}
+				elseif(array_key_exists('utmzoning',$recMap)){
+					//Northing, easting, and zoning all had values
+					$n = $recMap['utmnorthing'];
+					$e = $recMap['utmeasting'];
+					$z = $recMap['utmzoning'];
+					$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
+					if($n && $e && $z){
+						$gPoint = new GPoint($d);
+						$gPoint->setUTM($e,$n,$z);
+						$gPoint->convertTMtoLL();
+						$lat = $gPoint->Lat();
+						$lng = $gPoint->Long();
+						if($lat && $lng){
+							$recMap['decimallatitude'] = round($lat,6);
+							$recMap['decimallongitude'] = round($lng,6);
+						}
 					}
 				}
 			}
+			//Verbatim event date
+			if(array_key_exists('verbatimElevation',$recMap) && (!array_key_exists('minimumElevationInMeters',$recMap) || !$recMap['minimumElevationInMeters'])){
+				$eArr = $this->parseVerbatimElevation($recMap['verbatimElevation']);
+				if($eArr){
+					if(array_key_exists('minelev',$eArr)){
+						$recMap['minimumElevationInMeters'] = $eArr['minelev'];
+						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
+					}
+				}
+			}
+			
 			//Populate sciname if null
 			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
 				if(array_key_exists("genus",$recMap)){
@@ -1238,19 +1303,24 @@ class SpecUploadManager{
 	public function getTransferCount(){
 		return $this->transferCount;
 	}
-	
+
 	private function formatDate($inStr){
 		$dateStr = trim($inStr);
-    	if(!$dateStr) return;
-    	$t = '';
+		if(!$dateStr) return;
+		$t = '';
 		$y = '';
 		$m = '00';
 		$d = '00';
+		//Remove time portion if it exists
 		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
 			$t = $match[0];
 		}
+		if(preg_match('/^\d{4}-\d{2}-\d{2}$/',$dateStr)){
+			//Format: yyyy-mm-dd; Therefore return as formatted 
+			return $dateStr;
+		}
 		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
-			//Format: yyyy-mm-dd, yyyy-m-d
+			//Format: yyyy-m-d
 			$y = $match[1];
 			$m = $match[2];
 			$d = $match[3];
@@ -1308,20 +1378,21 @@ class SpecUploadManager{
 			//Format: yyyy
 			$y = $match[1];
 		}
+		//Clean, configure, return
 		$retDate = '';
 		if($y){
 			//Check to see if month is valid
 			if($m > 12){
-				return '';
+				return;
 			}
 			//check to set if day is valid for month
 			if($d == 30 && $m == 2){
 				//Bad feb date
-				return '';
+				return;
 			}
 			if($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
 				//Bad date, month w/o 31 days
-				return '';
+				return;
 			}
 			//Do some cleaning
 			if(strlen($y) == 2){ 
@@ -1345,6 +1416,16 @@ class SpecUploadManager{
 	private function parseScientificName($inStr){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array();
+		$inStr = preg_replace('/_+/',' ',$inStr);
+		$inStr = preg_replace('/\s\s+/',' ',$inStr);
+		if(stripos($inStr,'cf. ') !== false){
+			$retArr['identificationqualifier'] = 'cf. ';
+			$inStr = str_ireplace('cf. ','',$inStr);
+		}
+		elseif(stripos($inStr,'aff. ') !== false){
+			$retArr['identificationqualifier'] = 'aff. ';
+			$inStr = str_ireplace('aff. ','',$inStr);
+		}
 		$sciNameArr = explode(' ',$inStr);
 		if(count($sciNameArr)){
 			if(strtolower($sciNameArr[0]) == 'x'){
@@ -1352,19 +1433,20 @@ class SpecUploadManager{
 				$retArr['unitind1'] = array_shift($sciNameArr);
 			}
 			//Genus
-			$retArr['unitname1'] = array_shift($sciNameArr);
+			$retArr['unitname1'] = ucfirst(strtolower(array_shift($sciNameArr)));
 			if(count($sciNameArr)){
 				if(strtolower($sciNameArr[0]) == 'x'){
 					//Species level hybrid
 					$retArr['unitind2'] = array_shift($sciNameArr);
+					$retArr['unitname2'] = strtolower(array_shift($sciNameArr));
 				}
-				elseif((strpos($sciNameArr[0],'.') !== false) || ord($sciNameArr[0]) < 97 || ord($sciNameArr[0]) > 122){
+				elseif((strpos($sciNameArr[0],'.') !== false) || (strpos($sciNameArr[0],'(') !== false)){
 					//It is assumed that Author has been reached, thus stop process 
 					unset($sciNameArr);
 				}
 				else{
 					//Specific Epithet
-					$retArr['unitname2'] = array_shift($sciNameArr);
+					$retArr['unitname2'] = strtolower(array_shift($sciNameArr));
 				}
 			}
 		}
@@ -1407,82 +1489,109 @@ class SpecUploadManager{
 		return $retArr;
 	}
 
-	private function parseVerbatimCoordinates($inStr){
+	private function parseVerbatimCoordinates($inStr,$target=''){
 		$retArr = array();
 		//Try to parse lat/lng
 		$latDeg = 'null';$latMin = 0;$latSec = 0;$latNS = 'N';
 		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
-		if(preg_match('/(\d{1,2})[°d\*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m\s]{1}(.*)/i',$inStr,$m)){
-			$latDeg = $m[1];
-			$latMin = $m[2];
-			$leftOver = trim($m[3]);
-			//Grab lat NS and lng EW
-			if(stripos($inStr,'N') === false && strpos($inStr,'S') !== false){
-				$latNS = 'S';
-			}
-			if(stripos($inStr,'W') === false && stripos($inStr,'e') !== false){
-				$lngEW = 'E';
-			}
-			//Grab lat sec
-			if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
-				$latSec = $m[1];
-				if(count($m)>2){
-					$leftOver = trim($m[2]);
-				}
-			}
-			//Grab lng deg and min
-			if(preg_match('/(\d{1,3})[°d\*]{1}\s*(\d{1,2}\.{0,1}\d*)[\'m\s]{1}(.*)/i',$leftOver,$m)){
-				$lngDeg = $m[1];
-				$lngMin = $m[2];
+		if($target != 'UTM'){
+			if(preg_match('/(\d{1,2})\s*\D{1,3}\s*(\d{1,2}\.{0,1}\d*)\s{0,1}[\'m]{1}(.*)/i',$inStr,$m)){
+				$latDeg = $m[1];
+				$latMin = $m[2];
 				$leftOver = trim($m[3]);
-				//Grab lng sec
+				//Grab lat NS and lng EW
+				if(stripos($inStr,'N') === false && strpos($inStr,'S') !== false){
+					$latNS = 'S';
+				}
+				if(stripos($inStr,'W') === false && stripos($inStr,'e') !== false){
+					$lngEW = 'E';
+				}
+				//Grab lat sec
 				if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
-					$lngSec = $m[1];
+					$latSec = $m[1];
 					if(count($m)>2){
 						$leftOver = trim($m[2]);
 					}
 				}
-				if(is_numeric($latDeg) && is_numeric($latMin) && is_numeric($lngDeg) && is_numeric($lngMin)){
-					if($latDeg < 90 && $latMin < 60 && $lngDeg < 180 && $lngMin < 60){
-						$latDec = $latDeg + ($latMin/60) + ($latSec/3600);
-						$lngDec = $lngDeg + ($lngMin/60) + ($lngSec/3600);
-						if($latNS == 'S'){
-							$latDec = -$latDec;
+				//Grab lng deg and min
+				if(preg_match('/(\d{1,3})\s*\D{1,3}\s*(\d{1,2}\.{0,1}\d*)\s{0,1}[\'m]{1}(.*)/i',$leftOver,$m)){
+					$lngDeg = $m[1];
+					$lngMin = $m[2];
+					$leftOver = trim($m[3]);
+					//Grab lng sec
+					if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
+						$lngSec = $m[1];
+						if(count($m)>2){
+							$leftOver = trim($m[2]);
 						}
-						if($lngEW == 'W'){
-							$lngDec = -$lngDec;
+					}
+					if(is_numeric($latDeg) && is_numeric($latMin) && is_numeric($lngDeg) && is_numeric($lngMin)){
+						if($latDeg < 90 && $latMin < 60 && $lngDeg < 180 && $lngMin < 60){
+							$latDec = $latDeg + ($latMin/60) + ($latSec/3600);
+							$lngDec = $lngDeg + ($lngMin/60) + ($lngSec/3600);
+							if($latNS == 'S'){
+								$latDec = -$latDec;
+							}
+							if($lngEW == 'W'){
+								$lngDec = -$lngDec;
+							}
+							$retArr['lat'] = round($latDec,6);
+							$retArr['lng'] = round($lngDec,6);
 						}
-						$retArr['lat'] = round($latDec,6);
-						$retArr['lng'] = round($lngDec,6);
 					}
 				}
 			}
 		}
-		elseif(preg_match('/\D*(\d{1,2})\D{0,1}\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
-			$z = $m[1];
-			$e = $m[2];
-			$n = $m[3];
-			$d = '';
-			if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
-			if($n && $e && $z){
-				$gPoint = new GPoint($d);
-				$gPoint->setUTM($e,$n,$z);
-				$gPoint->convertTMtoLL();
-				$lat = $gPoint->Lat();
-				$lng = $gPoint->Long();
-				if($lat && $lng){
-					$retArr['lat'] = round($lat,6);
-					$retArr['lng'] = round($lng,6);
+		if($target != 'LL' && !$retArr){
+			if(preg_match('/\D*(\d{1,2})\D{0,1}\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
+				$z = $m[1];
+				$e = $m[2];
+				$n = $m[3];
+				$d = '';
+				if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
+				if($n && $e && $z){
+					$gPoint = new GPoint($d);
+					$gPoint->setUTM($e,$n,$z);
+					$gPoint->convertTMtoLL();
+					$lat = $gPoint->Lat();
+					$lng = $gPoint->Long();
+					if($lat && $lng){
+						$retArr['lat'] = round($lat,6);
+						$retArr['lng'] = round($lng,6);
+					}
 				}
+				
 			}
-			
+			elseif(preg_match('/\D*(\d{1,2})\D{0,2}\s*(\d{6})\D*\s*(\d{7})/',$inStr,$m)){
+				//UTM
+				$z = $m[1];
+				$e = $m[2];
+				$n = $m[3];
+				$d = '';
+				if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
+				if($n && $e && $z){
+					$gPoint = new GPoint($d);
+					$gPoint->setUTM($e,$n,$z);
+					$gPoint->convertTMtoLL();
+					$lat = $gPoint->Lat();
+					$lng = $gPoint->Long();
+					if($lat && $lng){
+						$retArr['lat'] = round($lat,6);
+						$retArr['lng'] = round($lng,6);
+					}
+				}
+				
+			}
 		}
-		//Try to parse UTM <Code still to be added>
-
+		//Clean
+		if($retArr){
+			if($retArr['lat'] < -90 || $retArr['lat'] > 90) return;
+			if($retArr['lng'] < -180 || $retArr['lng'] > 180) return;
+		}
 		return $retArr;
 	}
-	
+
 	private function parseVerbatimElevation($inStr){
 		$retArr = array();
 		if(preg_match('/(\d+)\s*-\s*(\d+)\s*meter/i',$inStr,$m)){
@@ -1518,6 +1627,10 @@ class SpecUploadManager{
 			$retArr['minelev'] = (round($m[1]*.3048));
 			$retArr['maxelev'] = (round($m[2]*.3048));
 		}
+		elseif(preg_match("/(\d+)\s*-\s*(\d+)\s*\'$/",$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+			$retArr['maxelev'] = (round($m[2]*.3048));
+		}
 		elseif(preg_match('/(\d+)\s*feet/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
@@ -1526,6 +1639,14 @@ class SpecUploadManager{
 		}
 		elseif(preg_match('/(\d+)\s*ft/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		elseif(preg_match("/(\d+)\s*\'/",$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		//Clean
+		if($retArr){
+			if(array_key_exists('minelev',$retArr) && ($retArr['minelev'] > 8000 || $retArr['minelev'] < 0)) unset($retArr['minelev']);
+			if(array_key_exists('maxelev',$retArr) && ($retArr['maxelev'] > 8000 || $retArr['maxelev'] < 0)) unset($retArr['maxelev']);
 		}
 		return $retArr;
 	}
@@ -1544,18 +1665,20 @@ class SpecUploadManager{
 	protected function encodeString($inStr){
  		global $charset;
  		$retStr = $inStr;
-		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
-				//$value = utf8_encode($value);
-				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+ 		if($inStr){
+			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
 			}
-		}
-		elseif(strtolower($charset) == "iso-8859-1"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				//$value = utf8_decode($value);
-				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+			elseif(strtolower($charset) == "iso-8859-1"){
+				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
 			}
-		}
+ 		}
 		return $retStr;
 	}
 }

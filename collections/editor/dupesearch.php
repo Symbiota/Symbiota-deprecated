@@ -1,29 +1,22 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/OccurrenceEditorDupes.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$collName = array_key_exists('cname',$_REQUEST)?$_REQUEST['cname']:'';
-$collNum = array_key_exists('cnum',$_REQUEST)?$_REQUEST['cnum']:'';
-$collDate = array_key_exists('cdate',$_REQUEST)?$_REQUEST['cdate']:'';
-$exsTitle = array_key_exists('exstitle',$_REQUEST)?$_REQUEST['exstitle']:'';
-$exsNumber = array_key_exists('exsnumber',$_REQUEST)?$_REQUEST['exsnumber']:'';
 $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
-$oid = (array_key_exists('oid',$_GET)?$_REQUEST["oid"]:0);
+$curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
+$cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
 
 $occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
-$runCnt = (array_key_exists('runcnt',$_GET)?$_GET['runcnt']:0);
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
-$dupeManager = new OccurrenceEditorManager();
+$dupeManager = new OccurrenceEditorDupes();
 
 $occArr = array();
-if(!$submitAction){
-	if($occidQuery || $collName || $exsTitle){
-		$occArr = $dupeManager->getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt, $exsTitle, $exsNumber);
-	}
+if(!$submitAction && $occidQuery){
+	$occArr = $dupeManager->getDupesOccid($occidQuery);
 }
 
 $onLoadStr = '';
@@ -40,12 +33,11 @@ if($submitAction){
 	}
 	if($isEditor){
 		if($submitAction == 'mergerecs'){
-			$statusStr = $dupeManager->mergeRecords($oid,$occIdMerge);
+			$statusStr = $dupeManager->mergeRecords($curOccid,$occIdMerge);
 			$onLoadStr = 'reloadParent()';
 		}
 	}
 }
-
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -86,7 +78,7 @@ if($submitAction){
 			function reloadParent(){
 				opener.pendingDataEdits = false;
 				var qForm = opener.document.queryform;
-				qForm.occid.value = <?php echo $oid; ?>;
+				qForm.occid.value = <?php echo $curOccid; ?>;
 				qForm.occindex.value = opener.document.fullform.occindex.value;
 				opener.document.queryform.submit();
 				//opener.location.reload();
@@ -115,6 +107,15 @@ if($submitAction){
 				<?php 
 			}
 			if($occArr){
+				echo '<div style="font-weight:bold;font-size:130%;">';
+				$firstOcc = reset($occArr);
+				if($cNum && $cNum == $firstOcc['recordnumber']){
+					echo 'Possible EXACT duplicates';
+				}
+				else{
+					echo 'Possible matching duplicate events';
+				}
+				echo '</div><hr/>';
 				$collArr = array();
 				if(!$isAdmin){
 					if(array_key_exists('CollAdmin',$userRights)){
@@ -138,9 +139,9 @@ if($submitAction){
 					<div style="font-weight:bold;font-size:120%;">
 						<?php echo $occObj['institutioncode'].($occObj['collectioncode']?':'.$occObj['collectioncode']:''); ?>
 					</div>
-					<?php if($collId == $occObj['colliddup'] && $occObj['recordnumber'] == $collNum){ ?>
+					<?php if($collId == $occObj['colliddup'] && $occObj['recordnumber'] == $cNum){ ?>
 						<div style="color:red;">
-							NOTICE: Matches target collection. May already exist in this collection.
+							NOTICE: Possible exact matches within collection. Record may already exist.
 						</div>
 						<div style="font-weight:bold;">
 							<?php 
@@ -260,10 +261,10 @@ if($submitAction){
 							</a>
 						</span>
 						<?php 
-						if($oid){ 
+						if($curOccid){ 
 							?>
 							<span style="margin-left:30px;">
-								<a href="dupesearch.php?submitaction=mergerecs&oid=<?php echo $oid.'&occidmerge='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
+								<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 									Merge Records
 								</a>
 							</span>
@@ -277,16 +278,7 @@ if($submitAction){
 				}
 			}
 			else{
-				echo '<h2>No exact matches on duplicate records have been located</h2>';
-				if($collName && $runCnt == 0){
-					?>
-					<div>Do you want to search for possible related collection events?</div>
-					<div style="margin:10px 0px 0px 15px;">
-						<a href="dupesearch.php?cname=<?php echo $collName.'&cnum='.$collNum.'&ndate='.$collDate.'&oid='.$oid.'&collid='.$collId; ?>&runcnt=1">Yes</a>
-					</div>
-					<div style="margin-left:15px;"><a href="#" onclick="window.close()">No</a></div>
-					<?php 
-				}
+				echo '<h2>No duplicate records have been located</h2>';
 			}
 			?>
 		</div>

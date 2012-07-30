@@ -22,7 +22,7 @@ function verifyQueryForm(f){
 	if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
 		&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
 		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == "" 
-		&& f.q_customvalue1.value == "" 
+		&& (f.q_customfield1.selectedIndex == 0 && (f.q_customvalue1.value == "" || f.q_customtype1.selectedIndex != 1)) 
 		&& ((f.q_observeruid.type == "hidden" && f.q_observeruid.value == "") || (f.q_observeruid.type == "checkbox" && f.q_observeruid.checked == false))){
 		alert("Query form is empty! Please enter a value to query by.");
 		return false;
@@ -67,6 +67,16 @@ function resetQueryForm(f){
 	f.q_enteredby.value = "";
 	f.q_datelastmodified.value = "";
 	f.q_processingstatus.value = "";
+	f.q_customfield1.options[0].selected = true;
+	f.q_customtype1.options[0].selected = true;
+	f.q_customvalue1.value = "";
+	f.q_customfield2.options[0].selected = true;
+	f.q_customtype2.options[0].selected = true;
+	f.q_customvalue2.value = "";
+	f.q_customfield3.options[0].selected = true;
+	f.q_customtype3.options[0].selected = true;
+	f.q_customvalue3.value = "";
+	f.q_imgonly.checked = false;
 }
 
 function submitBatchUpdate(f){
@@ -103,6 +113,26 @@ function submitBatchUpdate(f){
 	xmlHttp.open("POST",url,true);
 	xmlHttp.send(null);
 	return false;
+}
+
+function toggleCustomDiv2(){
+	var f = document.queryform;
+	f.q_customfield2.options[0].selected = true;
+	f.q_customtype2.options[0].selected = true;
+	f.q_customvalue2.value = "";
+	f.q_customfield3.options[0].selected = true;
+	f.q_customtype3.options[0].selected = true;
+	f.q_customvalue3.value = "";
+	document.getElementById('customdiv3').style.display = "none";
+	toggle('customdiv2');
+}
+
+function toggleCustomDiv3(){
+	var f = document.queryform;
+	f.q_customfield3.options[0].selected = true;
+	f.q_customtype3.options[0].selected = true;
+	f.q_customvalue3.value = "";
+	toggle('customdiv3');
 }
 
 function toggle(target){

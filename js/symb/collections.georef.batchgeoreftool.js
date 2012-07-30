@@ -162,13 +162,15 @@ function analyseLocalityStr(){
 		var locStr = selObj.options[selObj.selectedIndex].text;
 		
 		var utmRegEx5 = /(\d{1,2})\D{1}\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mE\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mN/ //Format: ##S ## ## ###mE ## ## ###mN ##
-		var llRegEx1 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}\s*[NS]{0,1}[\.,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1,2}/i  
-		var llRegEx2 = /(\d{1,2})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}\s*[NS]{0,1}[,;]*\s*(\d{1,3})[\D\s]{1}\s*(\d{0,2}\.{0,1}\d+)[\D\s]{1}/i  
-		var llRegEx3 = /\((-{0,1}\d{1,2}\.{1}\d+), (-{0,1}\d{1,3}\.{1}\d+)/		//Format: (##.#####, -###.#####)
-		var utmRegEx1 = /(\d{7})m*N{0,1}\s+(\d{6,7})m*E{0,1}\s+(\d{1,2})/ 		//Format: #######N ######E ##
-		var utmRegEx2 = /(\d{1,2})\D{0,1}\s+(\d{7})m*N\s+(\d{6,7})m*E/ 			//Format: ## #######N ######E 
-		var utmRegEx3 = /(\d{6,7})m*E{0,1}\s+(\d{7})m*N{0,1}\s+(\d{1,2})/ 		//Format: ######E #######N ## 
-		var utmRegEx4 = /(\d{1,2})\D{0,1}\s+(\d{6,7})m*E\s+(\d{7})m*N/ 			//Format: ## ######E #######N  
+		var llRegEx1 = /(\d{1,2})[^\.\d]{1,2}(?:deg)*\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}(\d{0,2}(?:\.[0-9])*)[^\.\d,;]{1,3}[NS,;]{1}[\.,;]*\s*(\d{1,3})[^\.\d]{1}(?:deg)*\s*(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,2}(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,3}/i 
+		var llRegEx2 = /(\d{1,2})[^\.\d]{1,2}\s{0,1}(\d{1,2}(?:\.[0-9])*)[^\.\d,;]{1,2}[NS,;]{1}[\.,;]*\s*(\d{1,3})[^\.\d]{1,2}\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}/i 
+		var llRegEx3 = /(-{0,1}\d{1,2}\.{1}\d+)[^\d]{1,2},{0,1}\s*(-{0,1}\d{1,3}\.{1}\d+)[^\d]{1}/	//Format: (##.#####, -###.#####)
+		var utmRegEx1 = /(\d{7})N{0,1}\s+(\d{6,7})E{0,1}\s+(\d{1,2})/ 				//Format: #######N ######E ##
+		var utmRegEx2 = /(\d{1,2})\D{0,2}\s+(\d{7})N\s+(\d{6,7})E/ 					//Format: ## #######N ######E 
+		var utmRegEx3 = /(\d{6,7})E{0,1}\s+(\d{7})N{0,1}\s+(\d{1,2})/ 				//Format: ######E #######N ## 
+		var utmRegEx4 = /(\d{1,2})\D{0,2}\s+(\d{6,7})E\s+(\d{7})N/ 					//Format: ## ######E #######N  
+		var utmRegEx6 = /(\d{1,2})\D{0,2}\s*(\d{6})\D{0,2}\s*(\d{7})/ 				//Format: ## ###### #######  
+		var utmRegEx7 = /(\d{1,2})\D{0,2}\s*(\d{7})\D{0,2}\s*(\d{6})/ 				//Format: ## ####### ######  
 		var extractStr = "";
 		if(extractArr = utmRegEx5.exec(locStr)){
 			document.getElementById("utmdiv").style.display = "block";
@@ -233,6 +235,22 @@ function analyseLocalityStr(){
 			f.utmzone.value = extractArr[1];
 			f.utmeast.value = extractArr[2];
 			f.utmnorth.value = extractArr[3];
+			insertUtm(f);
+			sourceStr = 'UTM from label';
+		}
+		else if(extractArr = utmRegEx6.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmzone.value = extractArr[1];
+			f.utmeast.value = extractArr[2];
+			f.utmnorth.value = extractArr[3];
+			insertUtm(f);
+			sourceStr = 'UTM from label';
+		}
+		else if(extractArr = utmRegEx7.exec(locStr)){
+			document.getElementById("utmdiv").style.display = "block";
+			f.utmzone.value = extractArr[1];
+			f.utmeast.value = extractArr[3];
+			f.utmnorth.value = extractArr[2];
 			insertUtm(f);
 			sourceStr = 'UTM from label';
 		}

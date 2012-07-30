@@ -18,7 +18,7 @@ $collMap = Array();
 $recArr = array();
 $headerMap = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Global Unique Identifier',
 	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
-	'sciname' => 'Scientific name','recordedby' => 'Recorded By','recordnumber' => 'Number',
+	'sciname' => 'Scientific name','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
 	'verbatimeventdate' => 'Verbatim Date','country' => 'Country','stateprovince' => 'State/Province',
 	'county' => 'county','municipality' => 'municipality','locality' => 'locality','decimallatitude' => 'Latitude',
