@@ -22,9 +22,16 @@ if($formSubmit){
 		$statusStr = $keyManager->createState($_POST);
 		$cs = $keyManager->getcs();
 	}
+	elseif($formSubmit == 'Save State'){
+		$statusStr = $keyManager->editCharState($_POST);
+	}
 	elseif($formSubmit == 'Delete Char'){
 		$status = $keyManager->deleteChar($cId);
 		if($status) $cId = 0;
+	}
+	elseif($formSubmit == 'Delete State'){
+		$status = $keyManager->deleteCharState($cId,$cs);
+		if($status) $cs = 0;
 	}
 }
  
@@ -65,7 +72,7 @@ include($serverRoot."/header.php");
 				include_once('chardetails.php');
 			}
 			elseif($cId && $cs){
-				include_once('chardetails.php');
+				include_once('charstatedetails.php');
 			}
 		}
 		else{
