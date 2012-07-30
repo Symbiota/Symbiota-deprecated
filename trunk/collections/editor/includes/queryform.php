@@ -4,6 +4,7 @@ if(!$displayQuery && array_key_exists('displayquery',$_REQUEST)) $displayQuery =
 $qIdentifier=''; $qOtherCatalogNumbers=''; 
 $qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
 $qEnteredBy=''; $qObserverUid='';$qProcessingStatus=''; $qDateLastModified='';
+$qImgOnly='';
 $qCustomField1='';$qCustomType1='';$qCustomValue1='';
 $qCustomField2='';$qCustomType2='';$qCustomValue2='';
 $qCustomField3='';$qCustomType3='';$qCustomValue3='';
@@ -18,6 +19,7 @@ if($qryArr){
 	$qObserverUid = (array_key_exists('ouid',$qryArr)?$qryArr['ouid']:0);
 	$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 	$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
+	$qImgOnly = (array_key_exists('io',$qryArr)?$qryArr['io']:0);
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
 	$qCustomType1 = (array_key_exists('ct1',$qryArr)?$qryArr['ct1']:'');
 	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?$qryArr['cv1']:'');
@@ -115,6 +117,9 @@ if($qryArr){
 					<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
 						Reviewed
 					</option>
+					<option value="closed" <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
+						Closed
+					</option>
 				</select>
 			</div>
 			<?php 
@@ -124,7 +129,7 @@ if($qryArr){
 				'stateProvince','county','municipality','locality','decimalLatitude','decimalLongitude','geodeticDatum',
 				'coordinateUncertaintyInMeters','verbatimCoordinates','georeferencedBy','georeferenceProtocol',
 				'georeferenceSources','georeferenceVerificationStatus','georeferenceRemarks','minimumElevationInMeters',
-				'maximumElevationInMeters','verbatimElevation','disposition');
+				'maximumElevationInMeters','verbatimElevation','disposition','ocrFragment');
 			sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
@@ -144,11 +149,11 @@ if($qryArr){
 					<option <?php echo ($qCustomType1=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
 				</select>
 				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
-				<a href="#" onclick="toggle('customdiv2');return false;">
+				<a href="#" onclick="toggleCustomDiv2();return false;">
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
-			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">
+			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2||$qCustomType2=='IS NULL'?'block':'none');?>;">
 				Custom Field 2: 
 				<select name="q_customfield2">
 					<option value="">Select Field Name</option>
@@ -165,11 +170,11 @@ if($qryArr){
 					<option <?php echo ($qCustomType2=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
 				</select>
 				<input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
-				<a href="#" onclick="toggle('customdiv3');return false;">
+				<a href="#" onclick="toggleCustomDiv3();return false;">
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
-			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue2?'block':'none');?>;">
+			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue3||$qCustomType3=='IS NULL'?'block':'none');?>;">
 				Custom Field 3: 
 				<select name="q_customfield3">
 					<option value="">Select Field Name</option>
@@ -207,7 +212,7 @@ if($qryArr){
 				<?php 
 			}
 			?>
-			<div style="margin:5px;">
+			<div style="margin:5px 120px 5px 0px;float:right;">
 				<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 				<input type="hidden" name="occid" value="" />
 				<input type="hidden" name="occindex" value="0" />
@@ -217,6 +222,10 @@ if($qryArr){
 				<span style="margin-left:10px;">
 					<input type="button" name="reset" value="Reset Form" onclick="resetQueryForm(this.form)" /> 
 				</span>
+			</div>
+			<div style="margin:5px 0px;">
+				<input name="q_imgonly" type="checkbox" value="1" <?php echo ($qImgOnly==1?'checked':''); ?> /> 
+				Only occurrences with images
 			</div>
 		</fieldset>
 	</form>

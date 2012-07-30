@@ -2,7 +2,7 @@
 	<div id="coordaiddiv" style="display:none;">
 		<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:260px;">
 			<div>
-				Latitude: 
+				Lat: 
 				<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
 				<input id="latmin" style="width:50px;" title="Latitude Minutes" />' 
 				<input id="latsec" style="width:50px;" title="Latitude Seconds" />&quot; 
@@ -12,7 +12,7 @@
 				</select>
 			</div>
 			<div>
-				Longitude: 
+				Long: 
 				<input id="lngdeg" style="width:35px;" title="Longitude Degree" />&deg; 
 				<input id="lngmin" style="width:50px;" title="Longitude Minutes" />' 
 				<input id="lngsec" style="width:50px;" title="Longitude Seconds" />&quot; 
@@ -25,7 +25,7 @@
 				<input type="button" value="Insert Lat/Long Values" onclick="insertLatLng(this.form)" />
 			</div>
 		</div>
-		<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:140px;margin-bottom:10px;">
+		<div style="float:left;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:150px;margin-bottom:10px;">
 			Zone: <input id="utmzone" style="width:40px;" /><br/>
 			East: <input id="utmeast" type="text" style="width:100px;" /><br/>
 			North: <input id="utmnorth" type="text" style="width:100px;" /><br/>

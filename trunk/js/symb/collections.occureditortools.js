@@ -281,21 +281,179 @@ function insertElevFt(f){
 	}
 }
 
-function lookForDupes(f){
-	var collName = f.recordedby.value;
-	var collNum = f.recordnumber.value;
-	var collDate = f.eventdate.value;
-	var occId = f.occid.value;
-	var collId = f.collid.value;
+//Dupe searches
+function searchDupesCatalogNumber(f){
+	var cnValue = f.catalognumber.value;
+	if(cnValue){
+		cnXmlHttp = GetXmlHttpObject();
+		if(cnXmlHttp==null){
+			alert ("Your browser does not support AJAX!");
+			return;
+		}
+		var oid = f.occid.value;
+		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + oid;
 		
-	if(!collName || (!collNum && !collDate)){
-		alert("Collector name and number or date must have a value to search for duplicates");
+		document.getElementById("dupediv").style.display = "block";
+		document.getElementById("dupesearch").style.display = "block";
+		document.getElementById("dupenone").style.display = "none";
+
+		cnXmlHttp.onreadystatechange=function(){
+			if(cnXmlHttp.readyState==4 && cnXmlHttp.status==200){
+				var resObj = eval('(' + cnXmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupediv").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupenone").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenone").style.display = "none";
+						document.getElementById("dupediv").style.display = "none";
+						}, 3000);
+				}
+			}
+		};
+		cnXmlHttp.open("POST",url,true);
+		cnXmlHttp.send(null);
+	}
+}
+
+function searchDupesOccurrenceId(f){
+	var oiValue = f.occurrenceid.value;
+	if(oiValue){
+		oiXmlHttp = GetXmlHttpObject();
+		if(oiXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var oid = f.occid.value;
+		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue + "&collid=" + collId + "&occid=" + oid;
+
+		document.getElementById("dupediv").style.display = "block";
+		document.getElementById("dupesearch").style.display = "block";
+		document.getElementById("dupenone").style.display = "none";
+		
+		oiXmlHttp.onreadystatechange=function(){
+			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
+				var resObj = eval('(' + oiXmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					if(confirm("Record(s) using the same occurrence ID already exists. Do you want to view this record?")){
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupediv").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupenone").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenone").style.display = "none";
+						document.getElementById("dupediv").style.display = "none";
+						}, 3000);
+				}
+			}
+		};
+		oiXmlHttp.open("POST",url,true);
+		oiXmlHttp.send(null);
+	}
+}
+
+function searchDupesOtherCatalogNumbers(f){
+	var inValue = f.othercatalognumbers.value; 
+	if(inValue){
+		xmlHttp = GetXmlHttpObject();
+		if(xmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var oid = f.occid.value;
+		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + oid;
+
+		document.getElementById("dupediv").style.display = "block";
+		document.getElementById("dupesearch").style.display = "block";
+		document.getElementById("dupenone").style.display = "none";
+
+		xmlHttp.onreadystatechange=function(){
+			if(xmlHttp.readyState==4 && xmlHttp.status==200){
+				var resObj = eval('(' + xmlHttp.responseText + ')')
+				if(resObj.length > 0){
+					if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						if (occWindow.opener == null) occWindow.opener = self;
+					}						
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupediv").style.display = "none";
+				}
+				else{
+					document.getElementById("dupesearch").style.display = "none";
+					document.getElementById("dupenone").style.display = "block";
+					setTimeout(function () { 
+						document.getElementById("dupenone").style.display = "none";
+						document.getElementById("dupediv").style.display = "none";
+						}, 3000);
+				}
+			}
+		};
+		xmlHttp.open("POST",url,true);
+		xmlHttp.send(null);
+	}
+}
+
+function searchDupesCollector(f,silent){
+	var cName = f.recordedby.value;
+	var cNum = f.recordnumber.value;
+	var cDate = f.eventdate.value;
+	var occid = f.occid.value;
+
+	if(!cName || (!cNum && !cDate)){
+		if(!silent) alert("Collector name and number or date must have a value to search for duplicates");
+		return false;
+	}
+
+	xmlHttp = GetXmlHttpObject();
+	if(xmlHttp==null){
+		alert ("Your browser does not support AJAX!");
 		return;
 	}
 
-	dupWindow=open("dupesearch.php?cname="+collName+"&cnum="+collNum+"&cdate="+collDate+"&oid="+occId+"&collid="+collId,"dupaid","resizable=1,scrollbars=1,toolbar=1,width=900,height=700,left=20,top=20");
-	if(dupWindow.opener == null) dupWindow.opener = self;
-	if(window.focus) {dupWindow.focus()}
+	var url = "rpc/querydupescollector.php?cname=" + cName + "&cnum=" + cNum + "&cdate=" + cDate + "&curoccid=" + occid;
+	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupesearch").style.display = "block";
+	document.getElementById("dupenone").style.display = "none";
+
+	xmlHttp.onreadystatechange=function(){
+		if(xmlHttp.readyState==4 && xmlHttp.status==200){
+			var resStr = xmlHttp.responseText;
+			if(resStr){
+				var dupOccWindow=open("dupesearch.php?occidquery="+resStr+"&collid="+collId+"&curoccid="+occid+"&cnum="+cNum,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+				if(dupOccWindow.opener == null) dupOccWindow.opener = self;
+				if(window.focus) {dupOccWindow.focus()}
+				document.getElementById("dupesearch").style.display = "none";
+				document.getElementById("dupediv").style.display = "none";
+			}
+			else{
+				document.getElementById("dupesearch").style.display = "none";
+				document.getElementById("dupenone").style.display = "block";
+				setTimeout(function () { 
+					document.getElementById("dupenone").style.display = "none";
+					document.getElementById("dupediv").style.display = "none";
+					}, 3000);
+			}
+		}
+	};
+	xmlHttp.open("POST",url,true);
+	xmlHttp.send(null);
+}
+
+function autoDupeSearch(){
+	var f = document.fullform;
+	if(f.autodupe.checked == true) searchDupesCollector(f,true);
 }
 
 function lookForExsDupes(f){

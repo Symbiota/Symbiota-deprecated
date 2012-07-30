@@ -102,9 +102,12 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_observeruid',$_POST) && $_POST['q_observeruid']) $this->qryArr['ouid'] = $_POST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
-			if(array_key_exists('q_customfield1',$_POST) && $_POST['q_customfield1']) $this->qryArr['cf1'] = $_POST['q_customfield1'];
-			if(array_key_exists('q_customtype1',$_POST) && $_POST['q_customtype1']) $this->qryArr['ct1'] = $_POST['q_customtype1'];
-			if(array_key_exists('q_customvalue1',$_POST) && $_POST['q_customvalue1']) $this->qryArr['cv1'] = trim($_POST['q_customvalue1']);
+			if(array_key_exists('q_imgonly',$_POST) && $_POST['q_imgonly']) $this->qryArr['io'] = 1;
+			for($x=1;$x<4;$x++){
+				if(array_key_exists('q_customfield'.$x,$_POST) && $_POST['q_customfield'.$x]) $this->qryArr['cf'.$x] = $_POST['q_customfield'.$x];
+				if(array_key_exists('q_customtype'.$x,$_POST) && $_POST['q_customtype'.$x]) $this->qryArr['ct'.$x] = $_POST['q_customtype'.$x];
+				if(array_key_exists('q_customvalue'.$x,$_POST) && $_POST['q_customvalue'.$x]) $this->qryArr['cv'.$x] = trim($_POST['q_customvalue'.$x]);
+			}
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		elseif(isset($_COOKIE["editorquery"])){
@@ -263,66 +266,33 @@ class OccurrenceEditorManager {
 		if(array_key_exists('ps',$this->qryArr)){
 			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
 		}
-		if(array_key_exists('cv1',$this->qryArr) && array_key_exists('cf1',$this->qryArr)){
-			$cf1 = $this->qryArr['cf1'];
-			$ct1 = $this->qryArr['ct1'];
-			$cv1 = $this->qryArr['cv1'];
-			if($cf1 && $cv1){
-				if($ct1=='IS NULL'){
-					$sqlWhere .= 'AND (o.'.$cf1.' IS NULL) ';
-				}
-				elseif($ct1=='LIKE'){
-					if(strpos($cv1,'%') !== false){
-						$sqlWhere .= 'AND (o.'.$cf1.' LIKE "'.$cv1.'") ';
+		$customArr = array();
+		for($x=1;$x<4;$x++){
+			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
+			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
+			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
+			if($cf && ($cv || $ct == 'IS NULL')){
+				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr')){
+					if(strpos($cv,'%') !== false){
+						$sqlWhere .= 'AND (ocr.rawstr LIKE "'.$cv.'") ';
 					}
 					else{
-						$sqlWhere .= 'AND (o.'.$cf1.' LIKE "%'.$cv1.'%") ';
+						$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$cv.'%") ';
+					}
+				}
+				elseif($ct=='IS NULL'){
+					$sqlWhere .= 'AND (o.'.$cf.' IS NULL) ';
+				}
+				elseif($ct=='LIKE'){
+					if(strpos($cv,'%') !== false){
+						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'") ';
+					}
+					else{
+						$sqlWhere .= 'AND (o.'.$cf.' LIKE "%'.$cv.'%") ';
 					}
 				}
 				else{
-					$sqlWhere .= 'AND (o.'.$cf1.' = "'.$cv1.'") ';
-				}
-			}
-		}
-		if(array_key_exists('cv2',$this->qryArr) && array_key_exists('cf2',$this->qryArr)){
-			$cf2 = $this->qryArr['cf2'];
-			$ct2 = $this->qryArr['ct2'];
-			$cv2 = $this->qryArr['cv2'];
-			if($cf2 && $cv2){
-				if($ct1=='IS NULL'){
-					$sqlWhere .= 'AND (o.'.$cf2.' IS NULL) ';
-				}
-				elseif($ct2=='LIKE'){
-					if(strpos($cv2,'%') !== false){
-						$sqlWhere .= 'AND (o.'.$cf2.' LIKE "'.$cv2.'") ';
-					}
-					else{
-						$sqlWhere .= 'AND (o.'.$cf2.' LIKE "%'.$cv2.'%") ';
-					}
-				}
-				else{
-					$sqlWhere .= 'AND (o.'.$cf2.' = "'.$cv2.'") ';
-				}
-			}
-		}
-		if(array_key_exists('cv3',$this->qryArr) && array_key_exists('cf3',$this->qryArr)){
-			$cf3 = $this->qryArr['cf3'];
-			$ct3 = $this->qryArr['ct3'];
-			$cv3 = $this->qryArr['cv3'];
-			if($cf3 && $cv3){
-				if($ct3=='IS NULL'){
-					$sqlWhere .= 'AND (o.'.$cf3.' IS NULL) ';
-				}
-				elseif($ct3=='LIKE'){
-					if(strpos($cv3,'%') !== false){
-						$sqlWhere .= 'AND (o.'.$cf3.' LIKE "'.$cv3.'") ';
-					}
-					else{
-						$sqlWhere .= 'AND (o.'.$cf3.' LIKE "%'.$cv3.'%") ';
-					}
-				}
-				else{
-					$sqlWhere .= 'AND (o.'.$cf3.' = "'.$cv3.'") ';
+					$sqlWhere .= 'AND (o.'.$cf.' = "'.$cv.'") ';
 				}
 			}
 		}
@@ -347,7 +317,14 @@ class OccurrenceEditorManager {
 			if($obPos = strpos($sqlWhere,' LIMIT ')){
 				$sqlWhere = substr($sqlWhere,0,$obPos);
 			}
-			$sql = 'SELECT COUNT(*) AS reccnt FROM omoccurrences o '.$sqlWhere;
+			$sql = 'SELECT COUNT(o.occid) AS reccnt FROM omoccurrences o ';
+			if(strpos($sqlWhere,'ocr.rawstr') !== false){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+			elseif(array_key_exists('io',$this->qryArr)){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			$sql .= $sqlWhere;
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -369,12 +346,21 @@ class OccurrenceEditorManager {
 
 	private function setOccurArr(){
 		$retArr = Array();
-		$sql = '';
+		$sql = $this->occSql;
 		if($this->occId){
-			$sql = $this->occSql.'WHERE (o.occid = '.$this->occId.')';
+			$sql .= 'WHERE (o.occid = '.$this->occId.')';
 		}
 		elseif($this->sqlWhere){
-			$sql = $this->occSql.(strpos($this->sqlWhere,'recordedby')?'use index(Index_collector) ':'').$this->sqlWhere;
+			if(strpos($this->sqlWhere,'recordedby')){
+				$sql .= 'use index(Index_collector) ';
+			}
+			if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+			elseif(array_key_exists('io',$this->qryArr)){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			$sql .= $this->sqlWhere;
 		}
 		if($sql){
 			//echo "<div>".$sql."</div>";
@@ -624,7 +610,15 @@ class OccurrenceEditorManager {
 		$ov = $this->conn->real_escape_string($oldValue);
 		$nv = $this->conn->real_escape_string($newValue);
 		if($fn && $ov && $nv){
-			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT occid FROM omoccurrences o ';
+			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
+			//Add raw string fragment if present, yet unlikely
+			if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+			}
+			elseif(array_key_exists('io',$this->qryArr)){
+				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			//Strip ORDER BY and/or LIMIT fragments
 			if(strpos($this->sqlWhere,'ORDER BY')){
 				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
 			}
@@ -653,7 +647,15 @@ class OccurrenceEditorManager {
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$fn = $this->conn->real_escape_string($fieldName);
 		$ov = $this->conn->real_escape_string($oldValue);
-		$sql = 'SELECT COUNT(*) AS retcnt FROM omoccurrences o ';
+		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
+		//Add raw string fragment if present, yet unlikely
+		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
+			$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
+		}
+		elseif(array_key_exists('io',$this->qryArr)){
+			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+		}
+		//Strip ORDER BY and/or LIMIT fragments
 		if(strpos($this->sqlWhere,'ORDER BY')){
 			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
 		}
@@ -686,242 +688,6 @@ class OccurrenceEditorManager {
 			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','substrate',
 			'associatedtaxa','basisofrecord','language','labelproject');
 		return array_intersect_key($fArr,array_flip($locArr)); 
-	}
-
-	//Used in dupesearch.php
-	public function getDupOccurrences($collName, $collNum, $collDate, $occidQuery, $oid, $runCnt = 0, $exsTitle = "", $exsNumber = ""){
-		$collNum = $this->conn->real_escape_string($collNum);
-		$collDate = $this->conn->real_escape_string($collDate);
-		$retArr = array();
-		$sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, '.
-			'o.occid, o.collid AS colliddup, o.catalognumber, o.occurrenceid, o.othercatalognumbers, '.
-			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition ';
-		if($occidQuery){
-			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
-			if(strpos($occidQuery,',')){
-				$sql .= 'WHERE (o.occid IN('.$occidQuery.')) ';
-			}
-			else{
-				$sql .= 'WHERE (o.occid = '.$occidQuery.') ';
-			}
-			//echo $sql;
-			$result = $this->conn->query($sql);
-			while ($row = $result->fetch_assoc()) {
-				$retArr[$row['occid']] = array_change_key_case($row);
-			}
-			$result->free();
-		}
-		elseif($collName && ($collNum || $collDate)){
-			//Parse last name from collector's name 
-			$lastName = "";
-			$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
-			$lastNameArr = explode(';',$lastNameArr[0]);
-			$lastNameArr = explode('&',$lastNameArr[0]);
-			$lastNameArr = explode(' and ',$lastNameArr[0]);
-			$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
-			if($match){
-				if(count($match[0]) == 1){
-					$lastName = $match[0][0];
-				}
-				elseif(count($match[0]) > 1){
-					$lastName = $match[0][1];
-				}
-			}
-
-			if($lastName){
-				$sql .= 'FROM omcollections c INNER JOIN omoccurrences o USE INDEX(Index_collnum) ON c.collid = o.collid '.
-					'WHERE (o.recordedby LIKE "%'.$lastName.'%") ';
-				if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
-				if($runCnt == 0){
-					//First run
-					if($collNum){
-						$sql .= 'AND (o.recordnumber LIKE "'.$collNum.'") ';
-						//if($collDate) $sql .= 'AND (eventdate = "'.$collDate.'") ';
-					}
-					else{
-						$sql .= 'AND (o.eventdate = "'.$collDate.'") '.
-							'ORDER BY o.recordnumber ';
-					}
-		
-					//echo $sql;
-					$rs = $this->conn->query($sql);
-					while($row = $rs->fetch_assoc()){
-						$retArr[$row['occid']] = array_change_key_case($row);
-					}
-					$rs->free();
-				}
-				else{
-					$runQry = true;
-					if($collNum){
-						if(is_numeric($collNum)){
-							$nStart = $collNum - 4;
-							if($nStart < 1) $nStart = 1;
-							$nEnd = $collNum + 4;
-							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
-						}
-						elseif(preg_match('/^(\d+)-{0,1}[a-zA-Z]{1,2}$/',$collNum,$m)){
-							//ex: 123a, 123b, 123-a
-							$cNum = $m[1];
-							$nStart = $cNum - 4;
-							if($nStart < 1) $nStart = 1;
-							$nEnd = $cNum + 4;
-							$sql .= 'AND (CAST(o.recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
-						}
-						elseif(preg_match('/^(\D+-?)(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
-							//RM-123, RM123
-							$prefix = $m[1];
-							$num = $m[2];
-							$nStart = $num - 5;
-							if($nStart < 1) $nStart = 1;
-							$rangeArr = array();
-							for($x=1;$x<11;$x++){
-								$rangeArr[] = $prefix.($nStart+$x);
-							}
-							$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
-						}
-						elseif(preg_match('/^(\d{2,4}-{1})(\d+)-{0,1}[a-zA-Z]{0,2}$/',$collNum,$m)){
-							//95-123, 1995-123
-							$prefix = $m[1];
-							$num = $m[2];
-							$nStart = $num - 5;
-							if($nStart < 1) $nStart = 1;
-							$rangeArr = array();
-							for($x=1;$x<11;$x++){
-								$rangeArr[] = $prefix.($nStart+$x);
-							}
-							$sql .= 'AND o.recordnumber IN("'.implode('","',$rangeArr).'") ';
-						}
-						else{
-							$runQry = false;
-						}
-						if($collDate) $sql .= 'AND (o.eventdate = "'.$collDate.'") ';
-						//$sql .= 'ORDER BY o.recordnumber'; 
-					}
-					elseif($collDate){
-						$sql .= 'AND (o.eventdate = "'.$collDate.'") ';
-						$sql .= 'LIMIT 10';
-					}
-					else{
-						$runQry = false;
-					}
-					//echo $sql;
-					if($runQry){
-						$result = $this->conn->query($sql);
-						while ($row = $result->fetch_assoc()) {
-							$retArr[$row['occid']] = array_change_key_case($row);
-						}
-						$result->free();
-						
-					}
-				}
-			}			
-		}
-		elseif($exsTitle && $exsNumber){
-			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '. 
-				'INNER JOIN omexsiccatiocclink el ON o.occid = el.occid '.
-				'INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
-				'INNER JOIN omexsiccatititles et ON en.ometid = et.ometid '.
-				'WHERE (et.title = "'.$exsTitle.'" OR et.abbreviation = "'.$exsTitle.'") AND en.exsnumber = "'.$exsNumber.'" ';
-			if($oid) $sql .= 'AND (o.occid != '.$oid.') ';
-			//First run
-
-			echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_assoc()){
-				$retArr[$row['occid']] = array_change_key_case($row);
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-	
-	public function mergeRecords($targetOccid,$sourceOccid){
-		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
-		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
-		$status = true;
-		
-		$oArr = array();
-		//Merge records
-		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_assoc()){
-			$tempArr = array();
-			foreach($r as $k => $v){
-				$tempArr[strtolower($k)] = $v;
-			}
-			$id = $tempArr['occid'];
-			unset($tempArr['occid']);
-			unset($tempArr['collid']);
-			unset($tempArr['dbpk']);
-			unset($tempArr['datelastmodified']);
-			$oArr[$id] = $tempArr;
-		}
-		$rs->free();
-
-		$tArr = $oArr[$targetOccid];
-		$sArr = $oArr[$sourceOccid];
-		$sqlFrag = '';
-		foreach($sArr as $k => $v){
-			if(($v != '') && $tArr[$k] == ''){
-				$sqlFrag .= ','.$k.'="'.$v.'"';
-			} 
-		}
-		if($sqlFrag){
-			//Remap source to target
-			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
-			//echo $sqlIns;
-			$this->conn->query($sqlIns);
-		}
-
-		//Remap determinations
-		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap occurrence edits
-		$sql = 'UPDATE omoccuredits SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap images
-		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap comments
-		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap exsiccati
-		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap occurrence dataset links
-		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap loans
-		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap checklists voucher links
-		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Remap survey lists
-		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
-
-		//Delete source
-		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
-		if(!$this->conn->query($sql)){
-			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$this->conn->error;
-		}
-		return $status;
 	}
 
 	//Label OCR processing methods
