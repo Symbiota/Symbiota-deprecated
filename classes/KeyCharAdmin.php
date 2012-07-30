@@ -84,6 +84,29 @@ class KeyAdmin{
 		return $statusStr;
 	}
 	
+	public function editCharState($pArr){
+		$statusStr = '';
+		$cId = $pArr['cid'];
+		$cs = $pArr['cs'];
+		if(is_numeric($cId)){
+			$sql = '';
+			foreach($pArr as $k => $v){
+				if($k != 'formsubmit' && $k != 'cid' && $k != 'cs'){
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+				}
+			}
+			$sql = 'UPDATE kmcs SET '.substr($sql,1).' WHERE (cid = '.$cId.') AND (cs = '.$cs.')';
+			if($this->conn->query($sql)){
+				$statusStr = 'SUCCESS: information saved';
+			}
+			else{
+				$statusStr = 'ERROR: Editing of character state failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
+		}
+		return $statusStr;
+	}
+	
 	public function getCharDetails($cId){
 		$retArr = array();
 		$sql = 'SELECT cid, charname, chartype, defaultlang, difficultyrank, hid, units, '.
@@ -133,6 +156,17 @@ class KeyAdmin{
 		$status = 0;
 		if(is_numeric($cId)){
 			$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$cId.')';
+			if($this->conn->query($sql)){
+				$status = 1;
+			}
+		}
+		return $status;
+	}
+	
+	public function deleteCharState($cId,$cs){
+		$status = 0;
+		if(is_numeric($cId)){
+			$sql = 'DELETE FROM kmcs WHERE (cid = '.$cId.') AND (cs = '.$cs.')';
 			if($this->conn->query($sql)){
 				$status = 1;
 			}
