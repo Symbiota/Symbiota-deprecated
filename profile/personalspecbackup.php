@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/PersonalSpecimenManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST["collid"];
 $action = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:'';

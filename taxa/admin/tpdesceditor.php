@@ -2,7 +2,8 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPDescEditorManager.php');
- 
+header("Content-Type: text/html; charset=".$charset);
+
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $category = array_key_exists("category",$_REQUEST)?$_REQUEST["category"]:""; 
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";

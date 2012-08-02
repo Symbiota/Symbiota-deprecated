@@ -2,6 +2,7 @@
 error_reporting(0);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
 $category = array_key_exists("category",$_REQUEST)?$_REQUEST["category"]:""; 
