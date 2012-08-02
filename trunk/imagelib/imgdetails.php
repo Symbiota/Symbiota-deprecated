@@ -6,7 +6,7 @@
 //error_reporting(0);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ImageDetailManager.php');
-Header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$charset);
  
 $imgId = $_REQUEST["imgid"];
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";

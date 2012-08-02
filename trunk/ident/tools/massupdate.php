@@ -2,6 +2,7 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyMassUpdateManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
  $editable = false;
  if($isAdmin || array_key_exists("KeyEditor",$userRights)){
@@ -51,7 +52,6 @@ if(isset($ident_tools_massupdateCrumbs)){
 	echo "</div>";
 }
 
-header("Content-Type: text/html; charset=".$charset);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

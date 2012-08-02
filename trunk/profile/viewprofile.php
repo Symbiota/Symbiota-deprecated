@@ -3,7 +3,7 @@ include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
 include_once($serverRoot.'/classes/Person.php');
 include_once($serverRoot.'/classes/PersonalChecklistManager.php');
-Header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;

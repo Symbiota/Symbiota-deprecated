@@ -3,8 +3,8 @@
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/PermissionsManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
-
 header("Content-Type: text/html; charset=".$charset);
+
 $loginAs = array_key_exists("loginas",$_REQUEST)?trim($_REQUEST["loginas"]):"";
 $searchTerm = array_key_exists("searchterm",$_REQUEST)?trim($_REQUEST["searchterm"]):"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:"";
