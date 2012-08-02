@@ -47,7 +47,7 @@ class OccurrenceEditorDupes {
 		if($lastName && $collNum){
 			$sql = 'SELECT occid FROM omoccurrences ';
 
-			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") '.
+			$sql .= 'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") '.
 				'AND (recordnumber LIKE "'.$collNum.'") ';
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
 	
@@ -68,7 +68,7 @@ class OccurrenceEditorDupes {
 		$retArr = array();
 		if($lastName){
 			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (recordedby LIKE "%'.$lastName.'%") ';
+				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") ';
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
 			$runQry = true;
 			if($collNum){
