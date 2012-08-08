@@ -170,7 +170,7 @@ if($collId) $collData = $collManager->getCollectionData();
 			?>
 			<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
 				<fieldset style="padding:15px;">
-					<legend><b><?php echo ($collId?$collData['collectionname']:'');?> Management Control Panel</b></legend>
+					<legend><b>Data Management Control Panel</b></legend>
 					<ul>
 						<?php
 						if(stripos($collData['colltype'],'observation') !== false){ 

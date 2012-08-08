@@ -20,6 +20,12 @@ $(document).ready(function() {
 	
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
+			if(verifyLeaveForm()){
+				pendingDataEdits = false;
+			}
+			else{
+				return false;
+			}
 			statusObj = document.getElementById("statusdiv");
 			if(statusObj){
 				statusObj.style.display = "none";
@@ -84,9 +90,16 @@ $(document).ready(function() {
 window.onbeforeunload = verifyClose();
 
 function verifyClose(){
-	if(pendingDataEdits && document.fullform.editedfields.value != ""){
+	if(pendingDataEdits){
 		return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
 	}
+}
+
+function verifyLeaveForm(){
+	if(pendingDataEdits){
+		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
+	}
+	return true;
 }
 
 function initDetAddAutocomplete(){
@@ -760,6 +773,7 @@ function verifyDetAddForm(f){
 			curDate = new Date(); 
 		}while(curDate - date < 5000 && pauseSubmit);
 	}
+	alert("a");
 	pendingDataEdits = false;
 	return true;
 }

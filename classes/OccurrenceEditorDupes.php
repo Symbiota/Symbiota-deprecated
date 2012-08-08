@@ -13,11 +13,11 @@ class OccurrenceEditorDupes {
 			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
 			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-			'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
+			'o.dynamicProperties, o.verbatimAttributes, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
 			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition ';
+			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation ';
 	}
 
 	public function __destruct(){

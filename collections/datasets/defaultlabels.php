@@ -101,7 +101,7 @@ else{
 				<?php 
 				if($isEditor){
 					if($action){
-						$rs = $labelManager->getLabelRecordSet($occIdArr);
+						$rs = $labelManager->getLabelRecordSet();
 						$labelCnt = 0;
 						while($r = $rs->fetch_object()){
 							if($barcodeOnly){
@@ -307,7 +307,7 @@ else{
 											</div>
 											<?php 
 										}
-										if($useBarcode && $r->catalognumber){
+										if($i == 0 && $useBarcode && $r->catalognumber){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
 												<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->catalognumber; ?>" /><br/>
