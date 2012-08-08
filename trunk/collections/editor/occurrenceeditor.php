@@ -307,7 +307,7 @@ if($symbUid){
 			if($occId || ($isEditor && $collId)){
 				?>
 				<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
-					<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:14px;" /></a>
+					<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
 				</div>
 				<?php 
 				if(!$occArr && !$goToMode) $displayQuery = 1;
@@ -401,7 +401,7 @@ if($symbUid){
 									}
 									?>
 								</ul>
-								<div id="occdiv" style="position:relative;width:775px;">
+								<div id="occdiv" style="position:relative;width:795px;">
 									<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this);">
 										<fieldset>
 											<legend><b>Collector Info</b></legend>
@@ -592,7 +592,7 @@ if($symbUid){
 												<div style="float:left;">
 													County
 													<br/>
-													<input type="text" id="ffcounty" name="county" tabindex="44" style="width:150px;" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="countyChanged(this.form);" />
+													<input type="text" id="ffcounty" name="county" tabindex="44" style="width:150px;" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="fieldChanged('county');" />
 												</div>
 												<div style="float:left;">
 													Municipality
@@ -603,7 +603,7 @@ if($symbUid){
 											<div style="clear:both;margin:4px 0px 2px 0px;">
 												Locality:
 												<br />
-												<input type="text" name="locality" tabindex="46" style="width:97%;background-color:lightyellow;" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+												<input type="text" name="locality" tabindex="46" style="width:99%;background-color:lightyellow;" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 											</div>
 											<div style="clear:both;margin-bottom:5px;">
 												<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
@@ -810,52 +810,52 @@ if($symbUid){
 												}
 												?>
 											</div>
-											<div style="padding:3px;">
-												<span>
+											<div style="padding:3px;clear:both;">
+												<div style="float:left;">
 													Reproductive Condition:
 													<a href="#" onclick="return dwcDoc('reproductiveCondition')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
-												</span>
-												<span style="margin-left:30px;">
+												</div>
+												<div style="float:left;margin-left:30px;">
 													Establishment Means:
 													<a href="#" onclick="return dwcDoc('establishmentMeans')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
-												</span>
-												<span style="margin-left:15px;">
+												</div>
+												<div style="float:left;margin-left:15px;">
 													<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]?1:0; ?>
 													<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
 													Cultivated
-												</span>
+												</div>
 											</div>
-											<div style="padding:3px;">
-												<span title="If different than institution code">
+											<div style="padding:3px;clear:both;">
+												<div style="float:left;" title="If different than institution code">
 													Owner Code:
 													<a href="#" onclick="return dwcDoc('ownerInstitutionCode')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<input type="text" name="ownerinstitutioncode" tabindex="104" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
-												</span>
-												<span style="margin-left:10px;">
+												</div>
+												<div style="float:left;margin-left:10px;">
 													Basis of Record:
 													<a href="#" onclick="return dwcDoc('basisOfRecord')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<input type="text" name="basisofrecord" tabindex="106" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
-												</span>
-												<span style="margin-left:10px;">
+												</div>
+												<div style="float:left;margin-left:10px;">
 													Language:
 													<input type="text" name="language" tabindex="108" maxlength="20" style="width:150px;" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
-												</span>
+												</div>
 											</div>
 										</fieldset>
 										<fieldset>
 											<legend><b>Other</b></legend>
-											<div style="padding:3px;">
-												<span>
+											<div style="padding:3px;clear:both;">
+												<div style="float:left;">
 													Processing Status:
 													<?php 
 														$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:'';
@@ -897,26 +897,26 @@ if($symbUid){
 															Closed
 														</option>
 													</select>
-												</span>
-												<span style="margin-left:20px;">
+												</div>
+												<div style="float:left;margin-left:20px;">
 													Label Project:
 													<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" onchange="fieldChanged('labelproject');" />
-												</span>
-												<span style="margin-left:20px;" title="aka label quantity">
+												</div>
+												<div style="float:left;margin-left:20px;" title="aka label quantity">
 													Duplicate Quantity:
 													<input type="text" name="duplicatequantity" tabindex="116" style="width:35px;" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
-												</span>
+												</div>
 											</div>
-											<div style="padding:3px;">
-												<span style="" title="Internal occurrence record Primary Key">
+											<div style="padding:3px;clear:both;">
+												<div style="float:left;" title="Internal occurrence record Primary Key">
 													<?php if($occId) echo 'Primary Key: '.$occId; ?>
-												</span>
-												<span style="margin-left:90px;">
+												</div>
+												<div style="float:left;margin-left:90px;">
 													<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Date Last Modified: '.$occArr['datelastmodified']; ?>
-												</span>
-												<span style="margin-left:90px;">
+												</div>
+												<div style="float:left;margin-left:90px;">
 													<?php if(array_key_exists('recordenteredby',$occArr)) echo 'Entered By: '.$occArr['recordenteredby']; ?>
-												</span>
+												</div>
 											</div>
 										</fieldset>
 										<?php 
@@ -1007,7 +1007,7 @@ if($symbUid){
 								<?php
 								if($occId && $isEditor){
 									?>
-									<div id="admindiv" style="width:775px;">
+									<div id="admindiv" style="width:795px;">
 										<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
 											<fieldset>
 												<legend>Delete Occurrence Record</legend>

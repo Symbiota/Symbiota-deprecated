@@ -38,6 +38,10 @@ if($submitAction){
 		}
 	}
 }
+
+$isExactMatch = false;
+$firstOcc = reset($occArr);
+if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -48,10 +52,27 @@ if($submitAction){
 			if($occArr){
 				foreach($occArr as $occId => $oArr){
 					echo 'var oArr = new Array();'."\n";
-					foreach($oArr as $k => $v){
-						if($v && $k != 'occid' && $k != 'catalognumber' && $k != 'occurrenceid'){
-							echo 'oArr["'.$k.'"] = "'.str_replace(array('"',"\n"),"",$v).'";'."\n";
-						}
+					$tempOcc = $oArr;
+					unset($tempOcc['occid']);
+					unset($tempOcc['catalognumber']);
+					unset($tempOcc['occurrenceid']);
+					unset($tempOcc['othercatalognumbers']);
+					if(!$isExactMatch){
+						unset($tempOcc['family']);
+						unset($tempOcc['sciname']);
+						unset($tempOcc['tidtoadd']);
+						unset($tempOcc['scientificnameauthorship']);
+						unset($tempOcc['taxonremarks']);
+						unset($tempOcc['identifiedby']);
+						unset($tempOcc['dateidentified']);
+						unset($tempOcc['identificationreferences']);
+						unset($tempOcc['identificationremarks']);
+						unset($tempOcc['identificationqualifier']);
+						unset($tempOcc['typestatus']);
+						unset($tempOcc['recordnumber']);
+					}
+					foreach($tempOcc as $k => $v){
+						if($v) echo 'oArr["'.$k.'"] = "'.str_replace(array('"',"\n"),"",$v).'";'."\n";
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
@@ -108,8 +129,7 @@ if($submitAction){
 			}
 			if($occArr){
 				echo '<div style="font-weight:bold;font-size:130%;">';
-				$firstOcc = reset($occArr);
-				if($cNum && $cNum == $firstOcc['recordnumber']){
+				if($isExactMatch){
 					echo 'Possible EXACT duplicates';
 				}
 				else{
@@ -244,12 +264,12 @@ if($submitAction){
 					<div style="margin:10px;">
 						<span>
 							<a href="" onclick="transferRecord(<?php echo $occId; ?>,false);">
-								Import Full Record
+								Transfer All Fields
 							</a>
 						</span>
 						<span style="margin-left:30px;">
 							<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
-								Append Record
+								Transfer to Empty Fields Only 
 							</a>
 						</span>
 					<?php 

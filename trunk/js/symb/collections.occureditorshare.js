@@ -1,8 +1,10 @@
 //Query form 
 function submitQueryForm(qryIndex){
-	var f = document.queryform;
-	if(qryIndex) f.occindex.value = qryIndex;
-	if(verifyQueryForm(f)) f.submit();
+	if(verifyLeaveForm()){
+		var f = document.queryform;
+		if(qryIndex) f.occindex.value = qryIndex;
+		if(verifyQueryForm(f)) f.submit();
+	}
 	return false;
 }
 
