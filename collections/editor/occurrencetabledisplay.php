@@ -130,7 +130,7 @@ if($symbUid){
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
-<body>
+<body style="margin-left: 0px; margin-right: 0px;">
 	<!-- inner text -->
 	<div id="">
 		<?php 
