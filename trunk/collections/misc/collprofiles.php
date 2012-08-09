@@ -301,7 +301,7 @@ if($collId) $collData = $collManager->getCollectionData();
 										Collection Name: 
 									</td>
 									<td>
-										<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:350px;" />
+										<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:95%;" />
 									</td>
 								</tr>
 								<tr>

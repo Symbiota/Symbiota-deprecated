@@ -306,14 +306,14 @@ if($symbUid){
 			}
 			if($occId || ($isEditor && $collId)){
 				?>
-				<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
+				<div style="text-align:right;width:810px;margin:-30px 10px 5px 0px;">
 					<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
 				</div>
 				<?php 
 				if(!$occArr && !$goToMode) $displayQuery = 1;
 				include 'includes/queryform.php';
 				?>
-				<div style="width:790px;clear:both;">
+				<div style="width:820px;clear:both;">
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
 						<?php
@@ -333,7 +333,7 @@ if($symbUid){
 					<?php
 					if($navStr){
 						?>
-						<span style="float:right;margin-right:30px;">
+						<span style="float:right;">
 							<?php echo $navStr; ?>
 						</span>
 						<?php 

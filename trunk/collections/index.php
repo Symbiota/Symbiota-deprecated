@@ -202,6 +202,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					    $collCnt++; 
 					}
 					?>
+					<div style="clear:both;">&nbsp;</div>
 				</div>
 	        <?php 
 	        }
@@ -258,6 +259,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						$collCnt++; 
 					}
 					?>
+					<div style="clear:both;">&nbsp;</div>
 				</div>
 	        	<?php 
 	        }
@@ -315,6 +317,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					    $collCnt++; 
 					}
 					?>
+					<div style="clear:both;">&nbsp;</div>
 				</div>
 				<?php 
 	        } 
