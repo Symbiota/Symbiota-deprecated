@@ -217,12 +217,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 
 		list($width, $height) = getimagesize($sourceImgUri);
-		echo 'source width: '.$width;
+		$fileSize = 0;
 		$fileSize = filesize($sourceImgUri);
 		//Create large
 		$noLargeVersion = (array_key_exists('nolgimage',$_REQUEST)?1:0);
 		if(!$noLargeVersion && (!$lgUrl || $copyToServer)){
-			echo 'lg width: '.($this->webPixWidth*1.2);
 			if($width > ($this->webPixWidth*1.2)){
 				//Image is larger than basic web version
 				$newLgName = str_ireplace("_temp.jpg","_lg.jpg",$this->fileName);
@@ -239,7 +238,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			}
 		}
 		
-		$webUrl = '';
+		$webUrl = $sourceImgUri;
 		if(!$imgUrlLink || $copyToServer){
 			//Create web version of image unless url link that is not meant to be loaded to local server 
 			$newWebName = str_ireplace("_temp.jpg",".jpg",$this->fileName);
