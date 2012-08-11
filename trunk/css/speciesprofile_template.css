@@ -64,7 +64,7 @@ div.spptab{
 div.imgthumb{
   margin: 		2px;
   margin-top:	5px;
-  width: 		140px;
+  width: 		155px;
   float:	 	left;
   text-align: 	center;
   position:		relative;
@@ -85,7 +85,7 @@ div.imgthumb div.centertext{
 
 div.imgthumb img{
   	display: 	inline;
-  	width: 		130px;
+  	width: 		145px;
   	margin: 	0px;
 	border:		1px dotted grey;
 }
