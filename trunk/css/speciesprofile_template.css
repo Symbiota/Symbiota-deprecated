@@ -68,6 +68,8 @@ div.imgthumb{
   float:	 	left;
   text-align: 	center;
   position:		relative;
+  height:		230px;
+  overflow:		hidden;
 }
 
 div.imgthumb div.centertext{

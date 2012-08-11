@@ -66,41 +66,27 @@ class TaxonProfileManager {
 		//echo $sql;
 		$result = $this->con->query($sql);
 		if($row = $result->fetch_object()){
-			if(strpos($row->SciName," spp.") && $row->TID != $row->ParentTID){
-				$this->clid = 0;
-				$this->clName = "";
-				$this->parentClid = 0;
-				$this->parentName = "";
-				$this->setTaxon($row->ParentTID);
+			$this->submittedTid = $row->TID;
+			$this->submittedSciName = $row->SciName;
+			$this->submittedAuthor = $row->Author;
+			$this->family = $row->family;
+			$this->author = $row->Author;
+			$this->rankId = $row->RankId;
+			$this->parentTid = $row->ParentTID;
+			$this->securityStatus = $row->SecurityStatus;
+			
+			if($this->submittedTid == $row->TidAccepted){
+				$this->tid = $this->submittedTid;
+				$this->sciName = $this->submittedSciName;
 			}
 			else{
-				$this->submittedTid = $row->TID;
-				$this->submittedSciName = $row->SciName;
-				$this->submittedAuthor = $row->Author;
-				$this->family = $row->family;
-				$this->author = $row->Author;
-				$this->rankId = $row->RankId;
-				$this->parentTid = $row->ParentTID;
-				$this->securityStatus = $row->SecurityStatus;
-				
-				if($this->submittedTid == $row->TidAccepted){
-					$this->tid = $this->submittedTid;
-					$this->sciName = $this->submittedSciName;
-				}
-				else{
-					$this->tid = $row->TidAccepted;
-					$this->setAccepted();
-				}
-				
-				if($this->rankId >= 140 && $this->rankId < 220){
-					//For family and genus hits
-					$this->setSppData();
-				}
-				elseif(count($this->acceptedTaxa) < 2){
-					if($this->clid) $this->setChecklistInfo();
-					$this->setVernaculars();
-		 			$this->setSynonyms();
-				}
+				$this->tid = $row->TidAccepted;
+				$this->setAccepted();
+			}
+
+			if($this->rankId >= 140 && $this->rankId < 220){
+				//For family and genus hits
+				$this->setSppData();
 			}
 		}
 		else{
@@ -123,6 +109,15 @@ class TaxonProfileManager {
 		$result->close();
  	}
  	
+ 	public function setAttributes(){
+ 		if(count($this->acceptedTaxa) < 2){
+				if($this->clid) $this->setChecklistInfo();
+				$this->setVernaculars();
+	 			$this->setSynonyms();
+			}
+ 		
+ 	}
+
  	public function setAccepted(){
 		$this->acceptedTaxa = Array();
 		$sql = "SELECT t.Tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus ". 
@@ -416,6 +411,7 @@ class TaxonProfileManager {
  	}
  	
 	private function setTaxaImages(){
+		$this->imageArr = array();
 		$tidArr = Array($this->tid);
 		$sql1 = 'SELECT DISTINCT tid FROM taxstatus '.
 			'WHERE taxauthid = 1 AND tid = tidaccepted AND ((hierarchystr LIKE "%,'.$this->tid.',%") OR (hierarchystr LIKE "%,'.$this->tid.'"))';
@@ -424,16 +420,15 @@ class TaxonProfileManager {
 			$tidArr[] = $r1->tid;
 		}
 		$rs1->close();
-		
+
 		$tidStr = implode(",",$tidArr);
-		$this->imageArr = Array();
-		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, '.
+		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ti.occid, '.
 			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
 			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
 		if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
-		$sql .= 'ORDER BY ti.sortsequence';
+		$sql .= 'ORDER BY ti.sortsequence ';
 		//echo $sql;
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
@@ -441,74 +436,64 @@ class TaxonProfileManager {
 			$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
 			$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
 			$this->imageArr[$row->imgid]["caption"] = $row->caption;
+			$this->imageArr[$row->imgid]["occid"] = $row->occid;
 		}
 		$result->close();
 		if(!$this->imageArr) $this->imageArr = "No images";
  	}
- 	
- 	public function getTaxaImageCnt(){
- 		if(!$this->imageArr){
+
+	public function echoImages($start, $length, $useThumbnail = 1){		//length=0 => means show all images
+		if(!isset($this->imageArr)){
 			$this->setTaxaImages();
 		}
- 		if(is_array($this->imageArr)){
- 			return count($this->imageArr);
- 		}
- 		else{
- 			return 0;
- 		}
- 	}
- 	
- 	public function echoImages($start, $length, $useThumbnail = 1){		//A length of 0 means show all images
- 		if(!$this->imageArr){
-			$this->setTaxaImages();
-		}
-		if(is_array($this->imageArr) && count($this->imageArr) >= $start){
-			$length = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
-			$spDisplay = $this->getDisplayName();
-			$iArr = array_slice($this->imageArr,$start,$length,true);
-			foreach($iArr as $imgId => $imgObj){
-				if($start == 0 && $length == 1){
-					echo "<div id='centralimage'>";
-				}
-				else{
-					echo "<div class='imgthumb'>";
-				}
-				$imgUrl = $imgObj["url"];
-				$imgThumbnail = $imgObj["thumbnailurl"];
-				if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-					$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
-				}
-				echo "<a href='../imagelib/imgdetails.php?imgid=".$imgId."'>";
-				if($useThumbnail && $imgObj["thumbnailurl"]){
-					$width; $height;
-					try{
-						list($width, $height) = getimagesize((stripos($imgThumbnail,"http")===0?"":"http://".$_SERVER['HTTP_HOST']).$imgThumbnail);
-					}
-					catch(Exception $e){
-						
-					}
-					if(($start != 0 && $length != 1) || $width > 190 || $height > 190){
-						$imgUrl = $imgThumbnail;
-					}
-				}
-				echo "<img src='".$imgUrl."' title='".$imgObj["caption"]."' alt='".$spDisplay." image' />";
-				echo "</a>";
-				echo "<div class='photographer'>";
-				if($imgObj["photographer"]){
-					echo $imgObj["photographer"]."&nbsp;&nbsp;";
-				}
-				echo "<a href='../imagelib/imgdetails.php?imgid=".$imgId."'>";
-				echo "<img style='width:10px;height:10px;border:0px;' src='../images/info.jpg'/>";
-				echo "</a>";
-				echo "</div>\n";
-				echo "</div>\n";
+		if(count($this->imageArr) < $start) return false;
+		$trueLength = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
+		$spDisplay = $this->getDisplayName();
+		$iArr = array_slice($this->imageArr,$start,$trueLength,true);
+		foreach($iArr as $imgId => $imgObj){
+			if($start == 0 && $trueLength == 1){
+				echo "<div id='centralimage'>";
 			}
-			return true;
+			else{
+				echo "<div class='imgthumb'>";
+			}
+			$imgUrl = $imgObj["url"];
+			$imgAnchor = '../imagelib/imgdetails.php?imgid='.$imgId;
+			$imgThumbnail = $imgObj["thumbnailurl"];
+			if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+				//Images with relative paths are on another server
+				$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				$imgThumbnail = $GLOBALS["imageDomain"].$imgThumbnail;
+			}
+			if($imgObj['occid']){
+				$imgAnchor = '../collections/individual/index.php?occid='.$imgObj['occid'];
+			}
+			if($useThumbnail || ($imgUrl && strtolower(substr($imgUrl,-4)) != '.jpg')){
+				if($imgObj['thumbnailurl']){
+					$imgUrl = $imgThumbnail;
+				}
+			}
+			echo '<a href="'.$imgAnchor.'">';
+			echo '<img src="'.$imgUrl.'" title="'.$imgObj['caption'].'" alt="'.$spDisplay.' image" />';
+			/*
+			if($length){
+				echo '<img src="'.$imgUrl.'" title="'.$imgObj['caption'].'" alt="'.$spDisplay.' image" />';
+			}
+			else{
+				//echo '<img class="delayedimg" src="" delayedsrc="'.$imgUrl.'" />';
+			}		
+			*/	
+			echo '</a>';
+			echo '<div class="photographer">';
+			if($imgObj['photographer']){
+				echo $imgObj['photographer'].'&nbsp;&nbsp;';
+			}
+			echo '</div>';
+			echo '</div>';
 		}
-		else{
-			return false;
-		}
+		//Return true if there are more than 5 images available
+		if(count($this->imageArr) > $trueLength) return true; 
+		return false;
  	}
 
 	public function getTaxaLinks(){
@@ -784,7 +769,7 @@ class TaxonProfileManager {
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
 		if($rs = $this->con->query($sql)){
 			while($r = $rs->fetch_object()){
-				if($r->tid && $testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
+				if($testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
 			}
 		}
 		return $retArr;

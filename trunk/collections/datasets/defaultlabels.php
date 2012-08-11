@@ -108,7 +108,7 @@ else{
 								if($r->catalognumber){
 									?>
 									<div class="barcodeonly">
-										<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->catalognumber; ?>" /><br/>
+										<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->catalognumber; ?>" /><br/>
 										<?php echo strtoupper($r->catalognumber); ?>
 									</div>
 									<?php 
@@ -310,8 +310,7 @@ else{
 										if($i == 0 && $useBarcode && $r->catalognumber){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
-												<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->catalognumber; ?>" /><br/>
-												<?php echo strtoupper($r->catalognumber); ?>
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->catalognumber; ?>" /><br/>
 											</div>
 											<?php 
 										}
@@ -322,8 +321,7 @@ else{
 											?>
 											<hr style="border:dashed;" />
 											<div class="symbbarcode" style="padding:10px;">
-												<img src="getBarcodeCode39.php?bcheight=30&bctext=<?php echo $r->occid; ?>" /><br/>
-												<?php echo strtoupper($r->occid); ?>
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->occid; ?>" /><br/>
 											</div>
 											<?php 
 										}

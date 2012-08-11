@@ -180,14 +180,16 @@ div.menuitem a:hover {
 }
 
 div.tnimg{
-	width:200px;
-	height:200px;
+	width:		200px;
+	height:		200px;
+	border:		1px solid black;
+	overflow:	hidden;
 }
 
 
 /* /collections/ folder pages */
 #omlisttable{
-	 width:	610px;
+	 width:	90%;
 }
 
 #omlisttable img{

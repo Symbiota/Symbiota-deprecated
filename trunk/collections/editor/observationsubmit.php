@@ -97,71 +97,60 @@ if($collMap){
 					<fieldset>
 						<legend><b>Observation</b></legend>
 						<div style="clear:both;" class="p1">
-							<span style="width:125px;">
+							<div style="float:left;">
 								Scientific Name:
-							</span>
-							<span style="margin-left:315px;">
-								Author:
-							</span>
-						</div>
-						<div style="clear:both;" class="p1">
-							<span>
+								<br/>
 								<input type="text" id="sciname" name="sciname" maxlength="250" tabindex="2" style="width:390px;background-color:lightyellow;" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
-							</span>
-							<span style="margin-left:10px;">
+							</div>
+							<div style="float:left;">
+								Author:
+								<br/>
 								<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" style="" value="" />
-							</span>
+							</div>
 						</div>
 						<div style="clear:both;margin-left:10px;padding:3px 0px 0px 10px;">
 							<span>Family:</span>
 							<input type="text" name="family" size="30" maxlength="50" style="" tabindex="0" value="" />
 						</div>
-						<div style="float:left;">
-							<div style="clear:both;">
-								<span>
-									Observer:
-								</span>
-								<span style="margin-left:210px;">
-									Number:
-								</span>
-								<span style="margin-left:40px;">
-									Date:
-								</span>
+						<div style="clear:both;">
+							<div style="float:left;">
+								Observer:
+								<br/>
+								<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userDisplayName; ?>" />
 							</div>
-							<div style="clear:both;">
-								<span>
-									<input type="text" name="recordedby" maxlength="255" tabindex="14" style="width:250px;background-color:lightyellow;" value="<?php echo $userDisplayName; ?>" />
-								</span>
-								<span style="margin-left:10px;">
-									<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
-								</span>
-								<span style="margin-left:10px;">
-									<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
-								</span>
-								<span style="margin-left:5px;cursor:pointer;" onclick="toggle('obsextradiv')">
-									<img src="../../images/editplus.png" style="width:15px;" />
-								</span>
+							<div style="float:left">
+								Number:
+								<br/>
+								<input type="text" name="recordnumber" maxlength="45" tabindex="16" style="width:80px;" title="Observer Number, if observer uses a numbering system " />
+							</div>
+							<div style="float:left;">
+								Date:
+								<br/>
+								<input type="text" id="eventdate" name="eventdate" tabindex="18" style="width:120px;background-color:lightyellow;" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+							</div>
+							<div style="float:left;margin:15px 0px 0px 5px;cursor:pointer;" onclick="toggle('obsextradiv')">
+								<img src="../../images/editplus.png" style="width:15px;" />
 							</div>
 						</div>
 						<div id="obsextradiv" style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;display:none;">
 							<div style="clear:both;margin-top:5px;">
 								Associated Observers:<br />
-								<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" style="width:430px;" value="" />
+								<input type="text" name="associatedcollectors" tabindex="20" maxlength="255" style="width:530px;" value="" />
 							</div>
-							<div style="float:left;">
+							<div style="float:left;margin:3px 0px 0px 10px;">
 								Identified By:
 								<input type="text" name="identifiedby" maxlength="255" tabindex="6" style="" value="" />
 							</div>
-							<div style="float:left;margin-left:15px;padding:3px 0px 0px 10px;">
+							<div style="float:left;margin:3px 0px 0px 10px;">
 								Date Identified:
 								<input type="text" name="dateidentified" maxlength="45" tabindex="8" style="" value="" />
 							</div>
-							<div id="idrefdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2" >
+							<div style="clear:both;padding:3px 0px 0px 0px;" >
 								ID References:
 								<input type="text" name="identificationreferences" tabindex="10" style="width:450px;" title="cf, aff, etc" />
 							</div>
-							<div id="taxremdiv" style="display:none;padding:3px 0px 0px 10px;" class="p2">
+							<div style="clear:both;padding:3px 0px 0px 0px;" >
 								ID Remarks:
 								<input type="text" name="taxonremarks" tabindex="12" style="width:500px;" value="" />
 							</div>
@@ -169,84 +158,71 @@ if($collMap){
 					</fieldset>
 					<fieldset>
 						<legend><b>Locality</b></legend>
-						<div>
-							<span style="">
+						<div style="clear:both;">
+							<div style="float:left;">
 								Country
-							</span>
-							<span style="margin-left:110px;">
-								State/Province
-							</span>
-							<span style="margin-left:72px;">
-								County
-							</span>
-						</div>
-						<div>
-							<span>
+								<br/>
 								<input type="text" name="country" tabindex="32" style="width:150px;background-color:lightyellow;" value="" />
-							</span>
-							<span>
+							</div>
+							<div style="float:left;">
+								State/Province
+								<br/>
 								<input type="text" name="stateprovince" tabindex="34" style="width:150px;background-color:lightyellow;" value="" />
-							</span>
-							<span>
+							</div>
+							<div style="float:left;">
+								County
+								<br/>
 								<input type="text" name="county" tabindex="36" style="width:150px;" value="" />
-							</span>
+							</div>
 						</div>
-						<div style="margin:4px 0px 2px 0px;">
+						<div style="clear:both;margin:4px 0px 2px 0px;">
 							Locality:<br />
-							<input type="text" name="locality" tabindex="40" style="width:600px;background-color:lightyellow;" value="" />
+							<input type="text" name="locality" tabindex="40" style="width:95%;background-color:lightyellow;" value="" />
 						</div>
-						<div style="margin-bottom:5px;">
+						<div style="clear:both;margin-bottom:5px;">
 							<input type="checkbox" name="localitysecurity" tabindex="42" style="" value="1" title="Hide Locality Data from General Public" />
 							Hide Locality Details from General Public (rare, threatened, or sensitive species)
 						</div>
-						<div>
-							<span style="">
+						<div style="clear:both;">
+							<div style="float:left;">
 								Latitude
-							</span>
-							<span style="margin-left:45px;">
-								Longitude
-							</span>
-							<span style="margin-left:87px;">
-								Uncertainty
-							</span>
-							<span style="margin-left:8px;">
-								Datum
-							</span>
-							<span style="margin-left:43px;">
-								Elev. (meters)
-							</span>
-							<span style="margin-left:35px;">
-								Georeference Remarks
-							</span>
-						</div>
-						<div>
-							<span>
+								<br/>
 								<input type="text" id="pointlat" name="decimallatitude" tabindex="44" maxlength="10" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLatValue(this)" title="Decimal Format (eg 34.5436)" />
-							</span>
-							<span>
+							</div>
+							<div style="float:left;">
+								Longitude
+								<br/>
 								<input type="text" id="pointlong" name="decimallongitude" tabindex="46" maxlength="13" style="width:88px;background-color:lightyellow;" value="" onchange="verifyLngValue(this)" title="Decimal Format (eg -112.5436)" />
-							</span>
-							<span style="cursor:pointer;" onclick="openMappingAid('obsform','decimallatitude','decimallongitude');">
-								<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
-							</span>
-							<span style="text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('dmsdiv');">
-								DMS
-							</span>
-							<span>
+								<span style="margin:15px 5px 0px 5px;cursor:pointer;" onclick="openMappingAid('obsform','decimallatitude','decimallongitude');">
+									<img src="../../images/world40.gif" style="width:12px;" title="Coordinate Map Aid" />
+								</span>
+								<span style="margin:15px 2px 0px 2px;text-align:center;font-size:85%;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('dmsdiv');">
+									DMS
+								</span>
+							</div>
+							<div style="float:left;">
+								Uncertainty
+								<br/>
 								<input type="text" name="coordinateuncertaintyinmeters" tabindex="48" maxlength="10" style="width:70px;" onchange="inputIsNumeric(this, 'Lat/long uncertainty')" title="Uncertainty in Meters" />
-							</span>
-							<span>
+							</div>
+							<div style="float:left;">
+								Datum
+								<br/>
 								<input type="text" name="geodeticdatum" tabindex="50" maxlength="255" style="width:80px;" value="" />
-							</span>
-							<span>
+							</div>
+							<div style="float:left;">
+								Elev. (meters)
+								<br/>
 								<input type="text" name="minimumelevationinmeters" tabindex="52" maxlength="6" style="width:85px;" value="" onchange="verifyElevValue(this)" title="Minumum Elevation In Meters" />
-							</span>
-							<span style="text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;margin:3px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('elevftdiv');">
-								ft.
-							</span>
-							<span>
+								<span style="margin:15px 3px 0px 3px;text-align:center;font-weight:bold;color:maroon;background-color:#FFFFD7;padding:2px;border:1px outset #A0A0A0;cursor:pointer;" onclick="toggle('elevftdiv');">
+									ft.
+								</span>
+							</div>
+							<div style="float:left;">
+								Georeference Remarks
+								<br/>
 								<input type="text" name="georeferenceremarks" tabindex="70" maxlength="255" style="width:250px;" value="" />
-							</span>
+							</div>
 						</div>
 						<div id="dmsdiv" style="display:none;float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:270px;">
 							<div>
