@@ -524,11 +524,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 									<?php 
 									if(array_key_exists("url",$imgArr)){ 
 										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["url"],0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgArr["url"];
-										list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
-										$dim = ($width > $height?"width":"height"); 
 										?>
 										<a href="../taxa/index.php?taxon=<?php echo $tid; ?>">
-											<img src="<?php echo $imgSrc;?>" style="<?php echo $dim; ?>:196px;" />
+											<img src="<?php echo $imgSrc;?>" style="height:100%;" />
 										</a>
 										<?php 
 									}

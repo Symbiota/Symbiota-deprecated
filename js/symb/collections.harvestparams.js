@@ -167,11 +167,11 @@ function checkForm(){
 			alert("Longitude values can not be greater than 180 or less than -180.");
 			return false;
 		} 
-		if(frm.upperlat.value < frm.bottomlat.value){
+		if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
 			alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
 			return false;
 		}
-		if(eval(frm.leftlong.value) > eval(frm.rightlong.value)){
+		if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
 			alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
 			return false;
 		}

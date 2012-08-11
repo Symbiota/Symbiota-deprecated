@@ -76,9 +76,9 @@ $imageArr = $occManager->getImageMap();
 						<?php
 							$pArr = $occManager->getPhotographerArr();
 							foreach($pArr as $id => $uname){
-								echo "<option value='".$id."' ".($id == $paramsArr["uid"]?"SELECTED":"").">";
+								echo '<option value="'.$id.'" >';
 								echo $uname;
-								echo "</option>\n";
+								echo '</option>';
 							}
 						?>
 					</select>
@@ -142,9 +142,13 @@ $imageArr = $occManager->getImageMap();
 								$tnUrl = $GLOBALS["imageDomain"].$tnUrl;
 							}
 						}
+						$displayUrl = $imgUrl;
+						if(strtolower(substr($displayUrl,-4)) != '.jpg' && $tnUrl){
+							$displayUrl = $tnUrl;
+						}
 						?>
-						<a href="<?php echo $imgUrl;?>">
-							<img src="<?php echo $imgUrl;?>" style="width:90%;" title="<?php echo $imgArr["caption"]; ?>" />
+						<a href="<?php echo $imgUrl;?>" target="_blank">
+							<img src="<?php echo $displayUrl;?>" style="width:90%;" title="<?php echo $imgArr["caption"]; ?>" />
 						</a>
 						<?php 
 						if($origUrl){

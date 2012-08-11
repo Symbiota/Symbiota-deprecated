@@ -627,9 +627,7 @@
 								if($imgSrc){
 									$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 									echo "<a href='".$spUrl."' target='_blank'>";
-									list($width, $height) = getimagesize((substr($imgSrc,0,4)=="http"?"":"http://".$_SERVER["HTTP_HOST"]).$imgSrc);
-									$dim = ($width > $height?"width":"height"); 
-									echo "<img src='".$imgSrc."' style='$dim:196px;' />";
+									echo "<img src='".$imgSrc."' style='height:100%;' />";
 									echo "</a>";
 								}
 								else{

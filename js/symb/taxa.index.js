@@ -86,11 +86,9 @@ function findPos(obj){
 	return [curleft,curtop];
 }	
 
-function expandImages(){
-	eiObj = document.getElementById("imgextra");
-	eiObj.style.display = "block";
-	mpObj = document.getElementById("morephotos");
-	mpObj.style.display = "none";
+function expandExtraImages(){
+	document.getElementById("moreimages").style.display = "none";
+	document.getElementById("imgextra").style.display = "block";
 }
 
 function GetXmlHttpObject(){

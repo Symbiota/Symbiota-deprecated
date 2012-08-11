@@ -21,7 +21,10 @@ if($taxAuthId || $taxAuthId === "0") {
 if($clValue) $taxonManager->setClName($clValue);
 if($projValue) $taxonManager->setProj($projValue);
 if($lang) $taxonManager->setLanguage($lang);
-if($taxonValue) $taxonManager->setTaxon($taxonValue);
+if($taxonValue) {
+	$taxonManager->setTaxon($taxonValue);
+	$taxonManager->setAttributes();
+}
 $spDisplay = $taxonManager->getDisplayName();
 $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
@@ -61,6 +64,7 @@ $descr = Array();
 	<script type="text/javascript">
 		var currentLevel = <?php echo ($descrDisplayLevel?$descrDisplayLevel:"1"); ?>;
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
+		var tid = <?php echo $taxonManager->getTid(); ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/taxa.index.js"></script>
 </head>
@@ -216,7 +220,7 @@ if($taxonManager->getSciName() != "unknown"){
 		<?php 
 		//Bottom Section - Pics and Map
 		//Display next 4 pics along bottom to left of map
-		$taxonManager->echoImages(1,4);
+		$moreImages = $taxonManager->echoImages(1,4);
 		
 		//Map
 		$mapSrc = $taxonManager->getMapUrl();
@@ -439,7 +443,13 @@ if($taxonManager->getSciName() != "unknown"){
 	//Bottom line listing options
 	echo "<div style='margin-top:15px;text-align:center;'>";
 	if($taxonRank > 180){
-		if($taxonManager->getTaxaImageCnt() > 5) echo "<span id='morephotos'><a href='javascript:expandImages();'>More Photos</a></span>";
+		if($moreImages){
+			?>
+			<span id="moreimages">
+				<a href="#" onclick="expandExtraImages();return false;">More Images</a>
+			</span>
+			<?php 
+		}
 		echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"javascript:toggle('links')\">Web Links</a>";
 	}
 

@@ -332,12 +332,16 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					if($p = strpos($tn,'(')){
 						$tn = substr($tn,0,$p);
 					}
-					if($sn = $collManager->getCloseTaxaMatch(trim($tn))){
+					if($closeArr = $collManager->getCloseTaxaMatch(trim($tn))){
 						?>
-						<div style="margin-left: 15px;font-weight:bold;;">
+						<div style="margin: 40px 0px 200px 20px;font-weight:bold;font-size:140%;">
 							Did you mean:
 							<?php
-							echo '<a href="list.php?taxa='.$sn.'">'.$sn.'</a><br/>';
+							$delimiter = '';
+							foreach($closeArr as $v){
+								echo $delimiter.'<a href="harvestparams.php?taxa='.$v.'">'.$v.'</a>';
+								$delimiter = ', ';
+							}
 							?>
 						</div>
 						<?php 

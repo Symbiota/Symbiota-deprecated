@@ -15,7 +15,6 @@ if($phUid) $pManager->setUid($phUid);
 <head>
 <title><?php echo $defaultTitle; ?> Photographer List</title>
 	<link rel="stylesheet" href="../css/main.css" type="text/css" />
-	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
 	<meta name='keywords' content='' />
 </head>
 
@@ -104,13 +103,13 @@ if($phUid) $pManager->setUid($phUid);
 						$imgUrl = $imageDomain.$imgUrl;
 					}
 					?>
-					<div style="float:left;height:160px;" class="imgthumb">
+					<div style="float:left;width:155px;height:165px;overflow:hidden;text-align:center;padding:3px;">
 						<a href="imgdetails.php?imgid=<?php echo $imgId; ?>">
 							<img src="<?php echo $imgUrl; ?>" style="height:130px;" />
-						</a><br />
-						<a href="../taxa/index.php?taxon=<?php echo $imgArr['tid']; ?>">
-							<i><?php echo $imgArr['sciname']; ?></i>
 						</a>
+						<div>
+							<a href="../taxa/index.php?taxon=<?php echo $imgArr['tid']; ?>"><i><?php echo $imgArr['sciname']; ?></i></a>
+						</div>
 					</div>
 					<?php 
 				}
