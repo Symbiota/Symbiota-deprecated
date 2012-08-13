@@ -126,7 +126,7 @@ $imageArr = $occManager->getImageMap();
 			foreach($imageArr as $imgId => $imgArr){
 				?>
 				<tr>
-					<td style="width:45%;text-align:center;padding:20px;">
+					<td style="width:300px;text-align:center;padding:20px;">
 						<?php
 						$imgUrl = $imgArr["url"];
 						$origUrl = $imgArr["origurl"];
@@ -148,7 +148,7 @@ $imageArr = $occManager->getImageMap();
 						}
 						?>
 						<a href="<?php echo $imgUrl;?>" target="_blank">
-							<img src="<?php echo $displayUrl;?>" style="width:90%;" title="<?php echo $imgArr["caption"]; ?>" />
+							<img src="<?php echo $displayUrl;?>" style="width:250px;" title="<?php echo $imgArr["caption"]; ?>" />
 						</a>
 						<?php 
 						if($origUrl){
