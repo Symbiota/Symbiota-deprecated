@@ -130,8 +130,9 @@ div.menuitem a:hover {
 
 /*Central div in the middle center table div */
 #innertext{
-	margin:	15px;	
-	font-size: 12px;
+	padding:	15px;
+	font-size:	12px;
+	background-color: #ffffff;;
 }
 
 #innertext div{
