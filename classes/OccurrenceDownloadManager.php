@@ -597,7 +597,7 @@ xmlwriter_end_attribute($xml_resource);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif($targetCharset == "latin1" && $portalCharset == 'utf-8'){
+			elseif($targetCharset == "iso88591" && $portalCharset == 'utf-8'){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
