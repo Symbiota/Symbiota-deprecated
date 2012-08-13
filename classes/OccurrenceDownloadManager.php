@@ -573,31 +573,38 @@ xmlwriter_end_attribute($xml_resource);
 		$this->buFilePath = $tPath;
 	}
 	
-	private function encodeArr(&$inArr,$cSet){
+	private function encodeArr(&$inArr,$targetCharset){
 		foreach($inArr as $k => $v){
-			$inArr[$k] = $this->encodeString($v,$cSet);
+			$inArr[$k] = $this->encodeString($v,$targetCharset);
 		}
 	}
 
-	private function encodeString($inStr,$cSet){
- 		$retStr = $inStr;
-		if($cSet == "utf8"){
-			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
-				//$value = utf8_encode($value);
-				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+	private function encodeString($inStr,$targetCharset){
+		global $charset;
+		$retStr = $inStr;
+		
+		$portalCharset = ''; 
+		if(strtolower($charset) == 'utf-8' || strtolower($charset) == 'utf8'){
+			$portalCharset = 'utf-8';
+		}
+		elseif(strtolower($charset) == 'iso-8859-1'){
+			$portalCharset = 'iso-8859-1';
+		}
+		if($portalCharset){
+			if($targetCharset == 'utf8' && $portalCharset == 'iso-8859-1'){
+				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+			}
+			elseif($targetCharset == "latin1" && $portalCharset == 'utf-8'){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
 			}
 		}
-		elseif($cSet == "latin1"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				//$value = utf8_decode($value);
-				try{
-					$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
-				}
-				catch(Exception $e){
-					echo $retStr;
-				}
-			}
-		}
+		
 		return $retStr;
 	}
 }
