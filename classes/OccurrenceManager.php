@@ -190,10 +190,10 @@ class OccurrenceManager{
 						}
 					}
 					else{
-						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (substr($key,-5) == "aceae" || substr($key,-4) == "idae"))){
+						if($this->taxaSearchType == 2 || ($this->taxaSearchType == 1 && (strtolower(substr($key,-5)) == "aceae" || strtolower(substr($key,-4)) == "idae"))){
 							$sqlWhereTaxa .= "OR (o.family = '".$key."') ";
 						}
-						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && substr($key,-5) != "aceae" && substr($key,-4) != "idae")){
+						if($this->taxaSearchType == 3 || ($this->taxaSearchType == 1 && strtolower(substr($key,-5)) != "aceae" && strtolower(substr($key,-4)) != "idae")){
 							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$key."%') ";
 						}
 					}
