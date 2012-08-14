@@ -154,7 +154,7 @@ class EOLManager {
 						$locStr = '';
 						if(array_key_exists('mediaURL',$objArr)) $resourceArr['url'] = $objArr['mediaURL'];
 						if(!array_key_exists('url',$resourceArr)) $resourceArr['url'] = $objArr['eolMediaURL'];
-						if(array_key_exists('eolThumbnailURL',$objArr)) $resourceArr['urltn'] = $objArr['eolThumbnailURL'];
+						//if(array_key_exists('eolThumbnailURL',$objArr)) $resourceArr['urltn'] = $objArr['eolThumbnailURL'];
 
 						if(array_key_exists('agents',$objArr)){
 							foreach($objArr['agents'] as $agentObj){
