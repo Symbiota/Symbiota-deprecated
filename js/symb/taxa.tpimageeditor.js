@@ -55,7 +55,8 @@ function expandImages(){
 function submitAddForm(f){
 	var imgUploadPath = f.elements["userfile"].value.replace(/\s/g, "");
 	if(imgUploadPath == "" ){
-        if(f.elements["filepath"].value.replace(/\s/g, "") == ""){
+		imgUploadPath = f.elements["filepath"].value.replace(/\s/g, "");
+        if(imgUploadPath == ""){
 			alert("File path must be entered");
 			return false;
         }
