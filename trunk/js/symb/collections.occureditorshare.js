@@ -8,6 +8,13 @@ function submitQueryForm(qryIndex){
 	return false;
 }
 
+function verifyLeaveForm(){
+	if(typeof pendingDataEdits != 'undefined' && pendingDataEdits){
+		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
+	}
+	return true;
+}
+
 function submitQueryEditor(f){
 	f.action = "occurrenceeditor.php"
 	if(verifyQueryForm(f)) f.submit();

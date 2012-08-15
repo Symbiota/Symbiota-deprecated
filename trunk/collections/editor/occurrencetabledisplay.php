@@ -18,7 +18,7 @@ $collMap = Array();
 $recArr = array();
 $headerMap = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Global Unique Identifier',
 	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
-	'sciname' => 'Scientific name','recordedby' => 'Collector','recordnumber' => 'Number',
+	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
 	'verbatimeventdate' => 'Verbatim Date','country' => 'Country','stateprovince' => 'State/Province',
 	'county' => 'county','municipality' => 'municipality','locality' => 'locality','decimallatitude' => 'Latitude',
@@ -271,9 +271,7 @@ if($symbUid){
 						$recCnt = 0;
 						foreach($recArr as $id => $occArr){
 							if($occArr['sciname']){
-								$scinameStr = '<i>'.$occArr['sciname'].'</i> ';
-								$scinameStr .= $occArr['scientificnameauthorship'];
-								$occArr['sciname'] = $scinameStr;
+								$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
 							}							
 							echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 							echo '<td>';
