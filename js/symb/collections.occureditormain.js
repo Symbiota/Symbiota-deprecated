@@ -95,13 +95,6 @@ function verifyClose(){
 	}
 }
 
-function verifyLeaveForm(){
-	if(pendingDataEdits){
-		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
-	}
-	return true;
-}
-
 function initDetAddAutocomplete(){
 	$("#dafsciname").autocomplete({
 		source: "rpc/getspeciessuggest.php",
