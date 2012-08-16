@@ -405,28 +405,6 @@ class SpecUploadManager{
 		$this->recordCleaningStage1();
 		$this->recordCleaningStage2();
 		
-		if($this->storedProcedure){
-			try{
-				if($this->conn->query('CALL '.$this->storedProcedure)){
-					echo '<li style="font-weight:bold;margin-left:10px;">';
-					echo 'Stored procedure executed: '.$this->storedProcedure;
-					echo '</li>';
-				}
-			}
-			catch(Exception $e){
-				echo '<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>';
-			}
-			ob_flush();
-			flush();
-		}
-		
-		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$this->transferCount = $row->cnt;
-		}
-		$rs->close();
-
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
 			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
@@ -449,6 +427,28 @@ class SpecUploadManager{
 			echo 'Done!</li> ';
 		}
 		
+		if($this->storedProcedure){
+			try{
+				if($this->conn->query('CALL '.$this->storedProcedure)){
+					echo '<li style="font-weight:bold;margin-left:10px;">';
+					echo 'Stored procedure executed: '.$this->storedProcedure;
+					echo '</li>';
+				}
+			}
+			catch(Exception $e){
+				echo '<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>';
+			}
+			ob_flush();
+			flush();
+		}
+		
+		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$this->transferCount = $row->cnt;
+		}
+		$rs->close();
+
 		if($finalTransfer){
 			$this->performFinalTransfer();
 			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';

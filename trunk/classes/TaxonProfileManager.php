@@ -443,6 +443,7 @@ class TaxonProfileManager {
  	}
 
 	public function echoImages($start, $length, $useThumbnail = 1){		//length=0 => means show all images
+		$status = false;
 		if(!isset($this->imageArr)){
 			$this->setTaxaImages();
 		}
@@ -490,10 +491,14 @@ class TaxonProfileManager {
 			}
 			echo '</div>';
 			echo '</div>';
+			$status = true;
 		}
-		//Return true if there are more than 5 images available
-		if(count($this->imageArr) > $trueLength) return true; 
-		return false;
+		return $status;
+ 	}
+
+ 	public function getImageCount(){
+ 		if(!isset($this->imageArr)) return 0;
+ 		return count($this->imageArr);
  	}
 
 	public function getTaxaLinks(){

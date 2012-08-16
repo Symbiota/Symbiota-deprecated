@@ -443,7 +443,7 @@ if($taxonManager->getSciName() != "unknown"){
 	//Bottom line listing options
 	echo "<div style='margin-top:15px;text-align:center;'>";
 	if($taxonRank > 180){
-		if($moreImages){
+		if($taxonManager->getimageCount() > 5){
 			?>
 			<span id="moreimages">
 				<a href="#" onclick="expandExtraImages();return false;">More Images</a>
