@@ -180,6 +180,9 @@ class OccurrenceEditorDupes {
 		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
 		$status = true;
 		
+		$connWrite = MySQLiConnectionFactory::getCon("write");
+		
+		
 		$oArr = array();
 		//Merge records
 		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
@@ -210,49 +213,49 @@ class OccurrenceEditorDupes {
 			//Remap source to target
 			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
 			//echo $sqlIns;
-			$this->conn->query($sqlIns);
+			$connWrite->query($sqlIns);
 		}
 
 		//Remap determinations
 		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap occurrence edits
 		$sql = 'UPDATE omoccuredits SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap images
 		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap comments
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap exsiccati
 		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap occurrence dataset links
 		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap loans
 		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap checklists voucher links
 		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Remap survey lists
 		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
-		$this->conn->query($sql);
+		$connWrite->query($sql);
 
 		//Delete source
 		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
-		if(!$this->conn->query($sql)){
-			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$this->conn->error;
+		if(!$connWrite->query($sql)){
+			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$connWrite->error;
 		}
 		return $status;
 	}
