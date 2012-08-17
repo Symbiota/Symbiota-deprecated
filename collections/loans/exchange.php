@@ -15,39 +15,39 @@ if($collId) $loanManager->setCollId($collId);
 		<img src="../../images/add.png" alt="Create New Exchange" />
 	</a>
 </div>
-<div id="newexchangediv" style="display:none;">
+<div id="newexchangediv" style="display:none;width:550px;">
 	<form name="newexchangegiftform" action="index.php" method="post" onsubmit="return verfifyExchangeAddForm(this)">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
-			<div style="padding-top:4px;">
-				<span style="margin-left:285px;">
-					Transaction Type:
-				</span>
-				<span style="margin-left:45px;">
-					Entered By:
-				</span>
-			</div>
-			<div style="padding-bottom:2px;">
+			<div style="padding-top:4px;float:left;">
 				<span>
 					<b>Transaction Number:</b> 
 					<input type="text" autocomplete="off" id="identifier" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="exIdentCheck(identifier,<?php echo $collId; ?>);" />
 				</span>
-				<span style="margin-left:40px;">
+			</div>
+			<div style="padding-top:6px;margin-left:20px;float:left;">
+				<span>
+					Transaction Type:
+				</span><br />
+				<span>
 					<select name="transactiontype" style="width:100px;" >
 						<option value="Shipment" SELECTED >Shipment</option>
 						<option value="Adjustment">Adjustment</option>
 					</select>
 				</span>
-				<span style="margin-left:40px;">
+			</div>
+			<div style="padding-top:6px;margin-left:20px;float:left;">
+				<span>
+					Entered By:
+				</span><br />
+				<span>
 					<input type="text" autocomplete="off" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 				</span>
-			</div>
-			<div style="padding-top:4px;">
+			</div><br />
+			<div style="padding-top:6px;float:left;">
 				<span>
 					Institution:
-				</span>
-			</div>
-			<div style="padding-bottom:2px;">
+				</span><br />
 				<span>
 					<select name="iid" style="width:400px;" >
 						<option value="">Select Institution</option>
@@ -61,7 +61,7 @@ if($collId) $loanManager->setCollId($collId);
 					</select>
 				</span>
 			</div>
-			<div style="padding-top:8px;">
+			<div style="padding-top:20px;float:right;">
 				<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 				<button name="formsubmit" type="submit" value="Create Exchange">Create</button>
 			</div>
