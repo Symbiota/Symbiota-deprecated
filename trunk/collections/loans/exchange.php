@@ -19,7 +19,7 @@ if($collId) $loanManager->setCollId($collId);
 	<form name="newexchangegiftform" action="index.php" method="post" onsubmit="return verfifyExchangeAddForm(this)">
 		<fieldset>
 			<legend>New Gift/Exchange</legend>
-			<div style="padding-top:4px;float:left;">
+			<div style="padding-top:20px;float:left;">
 				<span>
 					<b>Transaction Number:</b> 
 					<input type="text" autocomplete="off" id="identifier" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="exIdentCheck(identifier,<?php echo $collId; ?>);" />

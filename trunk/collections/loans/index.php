@@ -174,7 +174,7 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 									</div>
-									<div style="float:right;">
+									<div style="padding-top:15px;float:right;">
 										<span>
 											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
@@ -264,8 +264,8 @@ header("Content-Type: text/html; charset=".$charset);
 											<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
 									</div>
-									<div style="float:right;">
-										<span style="float:right;">
+									<div style="padding-top:15px;float:right;">
+										<span>
 											<b>Loan Identifier: </b>
 											<input type="text" autocomplete="off" id="loanidentifierborr" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="inIdentCheck(loanidentifierborr,<?php echo $collId; ?>);" />
 										</span>
