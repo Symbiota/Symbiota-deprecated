@@ -15,43 +15,47 @@ $specList = $loanManager->getSpecList($loanId);
 		<form name="editloanform" action="index.php" method="post">
 			<fieldset>
 				<legend>Loan Details</legend>
-				<div style="padding-top:4px;">
-					<span style="margin-left:235px;">
-						Entered By:
-					</span>
-					<span style="margin-left:70px;">
-						Processed By:
-					</span>
-					<span style="margin-left:50px;">
-						Date Sent:
-					</span>
-					<span style="margin-left:55px;">
-						Date Due:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+				<div style="padding-top:18px;float:left;">
 					<span>
 						<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" disabled />
 					</span>
-					<span style="margin-left:25px;">
+				</div>
+				<div style="margin-left:20px;padding-top:4px;float:left;">
+					<span>
+						Entered By:
+					</span><br />
+					<span>
 						<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['createdbyown']; ?>" onchange=" " disabled />
 					</span>
-					<span style="margin-left:25px;">
+				</div>
+				<div style="margin-left:20px;padding-top:4px;float:left;">
+					<span>
+						Processed By:
+					</span><br />
+					<span>
 						<input type="text" autocomplete="off" name="processedbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyown']; ?>" onchange=" " />
 					</span>
-					<span style="margin-left:25px;">
+				</div>
+				<div style="margin-left:20px;padding-top:4px;float:left;">
+					<span>
+						Date Sent:
+					</span><br />
+					<span>
 						<input type="text" autocomplete="off" name="datesent" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datesent']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
 					</span>
-					<span style="margin-left:25px;">
+				</div>
+				<div style="margin-left:20px;padding-top:4px;float:left;">
+					<span>
+						Date Due:
+					</span><br />
+					<span>
 						<input type="text" autocomplete="off" name="datedue" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datedue']; ?>" onchange="verifyDueDate(this);" title="format: yyyy-mm-dd" />
 					</span>
 				</div>
-				<div style="padding-top:4px;">
+				<div style="padding-top:8px;float:left;">
 					<span>
 						Sent To:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+					</span><br />
 					<span>
 						<select name="iidborrower" style="width:400px;" disabled >
 							<?php 
@@ -63,81 +67,93 @@ $specList = $loanManager->getSpecList($loanId);
 						</select>
 					</span>
 				</div>
-				<div style="padding-top:4px;">
-					<span>
-						Requested for:
-					</span>
-					<span style="margin-left:340px;">
-						# of Boxes:
-					</span>
-					<span style="margin-left:25px;">
-						Shipping Service:
-					</span>
+				<div style="padding-top:8px;float:left;">
+					<div style="float:left;">
+						<span>
+							Requested for:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
+						</span>
+					</div>
+					<div style="padding-top:15px;margin-left:20px;float:left;">
+						<span>
+							<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo count($specList); ?>" onchange=" " disabled />
+						</span>
+					</div>
+					<div style="margin-left:20px;float:left;">
+						<span>
+							# of Boxes:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
+						</span>
+					</div>
+					<div style="margin-left:20px;float:left;">
+						<span>
+							Shipping Service:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethod']; ?>" onchange=" " />
+						</span>
+					</div>
 				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<input type="text" autocomplete="off" name="forwhom" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['forwhom']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:25px;">
-						<b>Specimen Total:</b> <input type="text" name="totalspecimens" tabindex="100" maxlength="32" style="width:80px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo count($specList); ?>" onchange=" " disabled />
-					</span>
-					<span style="margin-left:30px;">
-						<input type="text" autocomplete="off" name="totalboxes" tabindex="100" maxlength="32" style="width:50px;" value="<?php echo $loanArr['totalboxes']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:30px;">
-						<input type="text" autocomplete="off" name="shippingmethod" tabindex="100" maxlength="32" style="width:180px;" value="<?php echo $loanArr['shippingmethod']; ?>" onchange=" " />
-					</span>
+				<div style="padding-top:8px;float:left;">
+					<div style="float:left;">
+						<span>
+							Loan Description:
+						</span><br />
+						<span>
+							<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['description']; ?></textarea>
+						</span>
+					</div>
+					<div style="margin-left:20px;float:left;">
+						<span>
+							Notes:
+						</span><br />
+						<span>
+							<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['notes']; ?></textarea>
+						</span>
+					</div>
 				</div>
-				<div style="padding-top:4px;">
-					<span>
-						Loan Description:
-					</span>
-					<span style="margin-left:270px;">
-						Notes:
-					</span>
+				<div style="width:100%;padding-top:8px;float:left;">
+					<hr />
 				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<textarea name="description" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['description']; ?></textarea>
-					</span>
-					<span style="margin-left:40px;">
-						<textarea name="notes" rows="10" style="width:320px;resize:vertical;" onchange=" "><?php echo $loanArr['notes']; ?></textarea>
-					</span>
+				<div style="padding-top:8px;float:left;">
+					<div style="float:left;">
+						<span>
+							Date Received:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						</span>
+					</div>
+					<div style="margin-left:40px;float:left;">
+						<span>
+							Ret. Processed By:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
+						</span>
+					</div>
+					<div style="margin-left:40px;float:left;">
+						<span>
+							Date Closed:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
+						</span>
+					</div>
 				</div>
-				<hr />
-				<div style="padding-top:4px;">
-					<span>
-						Date Received:
-					</span>
-					<span style="margin-left:30px;">
-						Ret. Processed By:
-					</span>
-					<span style="margin-left:25px;">
-						Date Closed:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<input type="text" autocomplete="off" name="datereceivedown" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['datereceivedown']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
-					</span>
-					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="processedbyreturnown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $loanArr['processedbyreturnown']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="dateclosed" tabindex="100" maxlength="32" style="width:80px;" value="<?php echo $loanArr['dateclosed']; ?>" onchange="verifyDate(this);" title="format: yyyy-mm-dd" />
-					</span>
-				</div>
-				<div style="padding-top:4px;">
+				<div style="padding-top:8px;float:left;">
 					<span>
 						Additional Invoice Message:
 					</span>
-				</div>
-				<div style="padding-bottom:2px;">
 					<span>
 						<textarea name="invoicemessageown" rows="5" style="width:700px;resize:vertical;" onchange=" "><?php echo $loanArr['invoicemessageown']; ?></textarea>
 					</span>
 				</div>
-				<div style="padding-top:8px;">
+				<div style="padding-top:8px;float:left;">
 					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 					<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
 					<button name="formsubmit" type="submit" value="Save Outgoing">Save</button>
