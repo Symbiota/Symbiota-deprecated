@@ -68,9 +68,11 @@ class ObservationSubmitManager {
 				}
 				//Get tid for scinetific name
 				$tid = 0;
-				$result = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")');
+				$localitySecurity = (array_key_exists('localitysecurity',$occArr)?1:0);
+				$result = $this->conn->query('SELECT tid, securitystatus FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")');
 				if($row = $result->fetch_object()){
 					$tid = $row->tid;
+					if($row->securitystatus > 0) $localitySecurity = $row->securitystatus;
 				}
 				else{
 					//Abort process
@@ -115,7 +117,7 @@ class ObservationSubmitManager {
 				'"'.$this->cleanStr($occArr['country']).'",'.
 				($occArr['stateprovince']?'"'.$this->cleanStr($occArr['stateprovince']).'"':'NULL').','.
 				($occArr['county']?'"'.$this->cleanStr($occArr['county']).'"':'NULL').','.
-				'"'.$this->cleanStr($occArr['locality']).'",'.(array_key_exists('localitysecurity',$occArr)?'1':'0').','.
+				'"'.$this->cleanStr($occArr['locality']).'",'.$localitySecurity.','.
 				$occArr['decimallatitude'].','.$occArr['decimallongitude'].','.
 				($occArr['geodeticdatum']?'"'.$this->cleanStr($occArr['geodeticdatum']).'"':'NULL').','.
 				($occArr['coordinateuncertaintyinmeters']?'"'.$occArr['coordinateuncertaintyinmeters'].'"':'NULL').','.
