@@ -29,6 +29,36 @@ class KeyAdmin{
 		return $retArr;
 	}
 	
+	public function getCharHeadList(){
+		$hidArr = array();
+		$sql = 'SELECT DISTINCT c.hid, h.headingname '.
+			'FROM kmcharacters AS c INNER JOIN kmcharheading AS h ON c.hid = h.hid '.
+			'WHERE h.language = "English" '.
+			'ORDER BY h.headingname';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$hidArr[$r->hid]['headingname'] = $r->headingname;
+			}
+		}
+		return $hidArr;
+	}
+	
+	public function getCharacters($hid){
+		$retArr = array();
+		$sql = 'SELECT cid, charname '.
+			'FROM kmcharacters '.
+			'WHERE hid = '.$hid.' '.
+			'ORDER BY charname ASC';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->cid]['charname'] = $r->charname;
+			}
+			$rs->close();
+		}
+		return $retArr;
+	}
+	
 	public function createCharacter($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO kmcharacters(charname,chartype,defaultlang,difficultyrank,hid,enteredby) '.
