@@ -314,22 +314,39 @@ if($symbUid){
 				include 'includes/queryform.php';
 				?>
 				<div style="width:820px;clear:both;">
-					<span class='navpath'>
-						<a href="../../index.php">Home</a> &gt;&gt;
-						<?php
-						if(!$isGenObs || $isAdmin){ 
+					<?php
+					if(isset($collections_editor_occurrenceeditorCrumbs)){
+						if($collections_editor_occurrenceeditorCrumbs){
 							?>
-							<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-							<?php
+							<div class='navpath'>
+								<a href='../../index.php'>Home</a> &gt;&gt; 
+								<?php echo $collections_editor_occurrenceeditorCrumbs; ?>
+								<b>Editor</b>
+							</div>
+							<?php 
 						}
-						if($isGenObs){ 
+					}
+					else{
+					?>
+						<span class='navpath'>
+							<a href="../../index.php">Home</a> &gt;&gt;
+							<?php
+							if(!$isGenObs || $isAdmin){ 
+								?>
+								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+								<?php
+							}
+							if($isGenObs){ 
+								?>
+								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+								<?php
+							}
 							?>
-							<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
-							<?php
-						}
-						?>
-						<b>Editor</b>
-					</span>
+							<b>Editor</b>
+						</span>
+					<?php
+					}
+					?>
 					<?php
 					if($navStr){
 						?>
