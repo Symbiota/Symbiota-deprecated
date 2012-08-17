@@ -79,15 +79,24 @@
 	</div>
 	<div id="charlist">
 		<?php 
-		$charList = $keyManager->getCharList();
-		if($charList){
-			echo '<h3>Characters</h3>';
+		$charHeadList = $keyManager->getCharHeadList();
+		if($charHeadList){
+			echo '<h3>Characters by Heading</h3>';
 			echo '<ul>';
-			foreach($charList as $k => $charArr){
+			foreach($charHeadList as $k => $charArr){
 				echo '<li>';
-				echo '<a href="index.php?cid='.$k.'">';
-				echo $charArr['charname'];
-				echo '</a>';
+				echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$charArr['headingname'].'</a>';
+				echo '<div id="'.$k.'" style="display:none;">';
+				$charList = $keyManager->getCharacters($k);
+				echo '<ul>';
+				foreach($charList as $c => $charArr){
+					echo '<li>';
+					echo '<a href="index.php?cid='.$c.'">';
+					echo $charArr['charname'].'</a>';
+					echo '</li>';
+				}
+				echo '</ul>';
+				echo '</div>';
 				echo '</li>';
 			}
 			echo '</ul>';
