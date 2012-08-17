@@ -15,20 +15,6 @@ class KeyAdmin{
  		if($this->conn) $this->conn->close();
 	}
 	
-	public function getCharList(){
-		$retArr = array();
-		$sql = 'SELECT cid, charname '.
-			'FROM kmcharacters '.
-			'ORDER BY charname ASC';
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr[$r->cid]['charname'] = $r->charname;
-			}
-			$rs->close();
-		}
-		return $retArr;
-	}
-	
 	public function getCharHeadList(){
 		$hidArr = array();
 		$sql = 'SELECT DISTINCT c.hid, h.headingname '.
