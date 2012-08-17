@@ -166,29 +166,27 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this)">
 								<fieldset>
 									<legend><b>New Loan</b></legend>
-									<div style="padding-top:4px;">
+									<div style="padding-top:4px;float:left;">
 										<span>
 											Entered By:
-										</span>
-									</div>
-									<div style="padding-bottom:2px;">
+										</span><br />
 										<span>
 											<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
-										<span style="float:right;">
-											<b>Loan Identifier: </b><input type="text" autocomplete="off" id="loanidentifierown" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="outIdentCheck(loanidentifierown,<?php echo $collId; ?>);" />
+									</div>
+									<div style="float:right;">
+										<span>
+											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
-									<div style="padding-top:4px;">
+									<div style="padding-top:6px;float:left;">
 										<span>
 											Send to Institution:
-										</span>
-									</div>
-									<div style="padding-bottom:2px;">
+										</span><br />
 										<span>
 											<select name="reqinstitution" style="width:400px;">
-												<option value="0">Select Institution</option>
-												<option value="0">------------------------------------------</option>
+												<option value="">Select Institution</option>
+												<option value="">------------------------------------------</option>
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
 												foreach($instArr as $k => $v){
@@ -198,7 +196,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</select>
 										</span>
 									</div>
-									<div style="padding-top:8px;">
+									<div style="padding-top:8px;float:left;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<button name="formsubmit" type="submit" value="Create Loan Out">Create Loan</button>
 									</div>
@@ -258,26 +256,24 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this)">
 								<fieldset>
 									<legend><b>New Loan</b></legend>
-									<div style="padding-top:4px;">
+									<div style="padding-top:4px;float:left;">
 										<span>
 											Entered By:
-										</span>
-									</div>
-									<div style="padding-bottom:2px;">
+										</span><br />
 										<span>
 											<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
 										</span>
+									</div>
+									<div style="float:right;">
 										<span style="float:right;">
 											<b>Loan Identifier: </b>
 											<input type="text" autocomplete="off" id="loanidentifierborr" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="inIdentCheck(loanidentifierborr,<?php echo $collId; ?>);" />
 										</span>
 									</div>
-									<div style="padding-top:6;">
+									<div style="padding-top:6px;float:left;">
 										<span>
 											Sent From:
-										</span>
-									</div>
-									<div style="padding-bottom:2px;">
+										</span><br />
 										<span>
 											<select name="iidowner" style="width:400px;">
 												<option value="0">Select Institution</option>
@@ -291,7 +287,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</select>
 										</span>
 									</div>
-									<div style="padding-top:8px;">
+									<div style="padding-top:8px;float:left;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<button name="formsubmit" type="submit" value="Create Loan In">Create Loan</button>
 									</div>
