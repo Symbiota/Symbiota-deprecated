@@ -51,6 +51,26 @@ if($formSubmit){
 <?php
 $displayLeftMenu = (isset($ident_admin_indexMenu)?$ident_admin_indexMenu:true);
 include($serverRoot."/header.php");
+if(isset($collections_loans_indexCrumbs)){
+	if($collections_loans_indexCrumbs){
+		?>
+		<div class='navpath'>
+			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<?php echo $ident_admin_indexCrumbs; ?>
+			<a href='index.php'> <b>Character Management</b></a>
+		</div>
+		<?php 
+	}
+}
+else{
+	?>
+	<div class='navpath'>
+		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href="../../collections/misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+		<a href='index.php'> <b>Character Management</b></a>
+	</div>
+	<?php 
+}
 ?>
 	<!-- This is inner text! -->
 	<div id="innertext">
