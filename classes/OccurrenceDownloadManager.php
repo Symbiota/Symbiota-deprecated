@@ -391,8 +391,9 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				//Add determination values
 				$sql = 'SELECT d.detid,d.occid,d.sciname,d.scientificNameAuthorship,d.identifiedBy,d.dateIdentified, '.
 					'd.identificationQualifier,d.identificationReferences,d.identificationRemarks,d.sortsequence '.
-					'FROM omdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
+					'FROM omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 					'WHERE o.collid = '.$collId;
+				//echo $sql;
 	    		if($rs = $this->conn->query($sql)){
 					while($r = $rs->fetch_row()){
 						fputcsv($detFH, $r);
@@ -413,7 +414,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				$sql = 'SELECT i.imgid,i.occid,i.url,i.thumbnailurl,i.originalurl,i.caption,i.notes '.
 					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 					'WHERE o.collid = '.$collId;
-	    		if($rs = $this->conn->query($sql)){
+				//echo $sql;
+				if($rs = $this->conn->query($sql)){
 					while($r = $rs->fetch_row()){
 						fputcsv($imgFH, $r);
 					}

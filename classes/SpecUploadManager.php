@@ -203,7 +203,7 @@ class SpecUploadManager{
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
-    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid"){
+    		if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
 	    		if($this->uploadType == $this->DIGIRUPLOAD){
 					$this->fieldMap[$field]["field"] = $field;
 	    		} 
@@ -288,7 +288,7 @@ class SpecUploadManager{
 		foreach($this->sourceArr as $fieldName){
 			if($dbpk != $fieldName){
 				$isAutoMapped = false;
-				if($autoMap && in_array(strtolower($fieldName),$this->symbFields)){
+				if($autoMap && in_array($fieldName,$this->symbFields)){
 					$isAutoMapped = true;
 					$autoMapArr[] = $fieldName;
 				}
@@ -328,11 +328,9 @@ class SpecUploadManager{
 			$sqlInsert = "INSERT INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
 			$sqlValues = "VALUES (".$this->uspid;
 			foreach($autoMapArr as $v){
-				if($v != "dbpk"){
-					$sql = $sqlInsert.$sqlValues.",'".$v."','".$v."')";
-					//echo $sql;
-					$this->conn->query($sql);
-				}
+				$sql = $sqlInsert.$sqlValues.",'".$v."','".$v."')";
+				//echo $sql;
+				$this->conn->query($sql);
 			}
 		}
 	}
