@@ -53,6 +53,7 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 	
 //ident/
 	$ident_keyMenu = false;
+	$ident_admin_indexCrumbs = false;
 	$ident_tools_chardeficitMenu = false;
 	$ident_tools_massupdateMenu = false;
 	$ident_tools_editorMenu = false;
