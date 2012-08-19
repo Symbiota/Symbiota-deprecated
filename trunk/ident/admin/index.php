@@ -91,9 +91,6 @@ else{
 			elseif($cId && !$cs){
 				include_once('chardetails.php');
 			}
-			elseif($cId && $cs){
-				include_once('charstatedetails.php');
-			}
 		}
 		else{
 			if(!$symbUid){

@@ -126,7 +126,7 @@ $charStateList = $keyManager->getCharStateList($cId);
 				<img src="../../images/add.png" alt="Create New Character State" />
 			</a>
 		</div>
-		<div id="newstatediv" style="display:none;">
+		<div id="newstatediv" style="display:<?php echo (!$charStateList?'block':'none');?>;">
 			<form name="addstateform" action="index.php" method="post" onsubmit="">
 				<fieldset>
 					<legend><b>Add Character State</b></legend>
