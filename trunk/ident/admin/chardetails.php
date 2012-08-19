@@ -29,7 +29,7 @@ $charStateList = $keyManager->getCharStateList($cId);
 							Type:
 						</span><br />
 						<span>
-							<select name="chartype" style="width:180px;">
+							<select id="type" name="chartype" style="width:180px;" onchange="updateUnits(type);">
 								<option value="" <?php echo ($charArr['chartype']==''?'SELECTED':'');?>>------------------------</option>
 								<option value="UM" <?php echo ($charArr['chartype']=='UM'?'SELECTED':'');?>>Unordered Multi-state</option>
 								<option value="IN" <?php echo ($charArr['chartype']=='IN'?'SELECTED':'');?>>Integer</option>
@@ -51,7 +51,7 @@ $charStateList = $keyManager->getCharStateList($cId);
 							</select>
 						</span>
 					</div>
-					<div style="margin-left:30px;float:left;">
+					<div id="units" style="display:block;margin-left:30px;float:left;">
 						<span>
 							Units:
 						</span><br />
