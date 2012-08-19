@@ -164,9 +164,70 @@ $charStateList = $keyManager->getCharStateList($cId);
 				echo '<ul>';
 				foreach($charStateList as $k => $stateArr){
 					echo '<li>';
-					echo '<a href="index.php?cid='.$cId.'&cs='.$k.'">';
-					echo $stateArr['charstatename'];
-					echo '</a>';
+					echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$stateArr['charstatename'].'</a>';
+					?>
+					<div id="<?php echo $k; ?>" style="display:none;">
+						<?php 
+						//Show character state details
+						$charStateArr = $keyManager->getCharStateDetails($cId,$k);
+						?>
+						<form name="editcharstateform" action="index.php" method="post">
+							<fieldset>
+								<legend>Character State Details</legend>
+								<div>
+									<span>
+										Character State Name:
+									</span><br />
+									<span>
+										<input type="text" autocomplete="off" name="charstatename" maxlength="255" style="width:400px;" value="<?php echo $charStateArr['charstatename']; ?>" />
+									</span>
+								</div>
+								<div style="padding-top:2px;float:left;">
+									<span>
+										Illustration URL:
+									</span><br />
+									<span>
+										<input type="text" autocomplete="off" name="illustrationurl" tabindex="100" maxlength="32" style="width:400px;" value="<?php echo $charStateArr['illustrationurl']; ?>" onchange=" " />
+									</span>
+								</div>
+								<div style="padding-top:2px;float:left;">
+									<span>
+										Description:
+									</span><br />
+									<span>
+										<input type="text" autocomplete="off" name="description" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charStateArr['description']; ?>" onchange=" " />
+									</span>
+								</div>
+								<div style="padding-top:2px;float:left;">
+									<span>
+										Notes:
+									</span><br />
+									<span>
+										<input type="text" autocomplete="off" name="notes" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charStateArr['notes']; ?>" onchange=" " />
+									</span>
+								</div>
+								<div style="width:100%;padding-top:4px;float:left;">
+									<div style="float:left;">
+										<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+										<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+										<button name="formsubmit" type="submit" value="Save State">Save</button>
+									</div>
+									<div style="margin-left:5px;float:left;">
+										<button name="formsubmit" type="submit" value="Delete State">Delete</button>
+									</div>
+									<div style="float:right;">
+										<span>
+											Entered By:
+										</span>
+										<span>
+											<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $charStateArr['enteredby']; ?>" onchange=" " disabled />
+										</span>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+					<?php
 					echo '</li>';
 				}
 				echo '</ul>';
