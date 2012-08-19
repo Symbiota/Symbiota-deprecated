@@ -18,105 +18,104 @@ $charStateList = $keyManager->getCharStateList($cId);
 				<div style="padding-top:4px;">
 					<span>
 						Character Name:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+					</span><br />
 					<span>
 						<input type="text" autocomplete="off" name="charname" maxlength="255" style="width:400px;" value="<?php echo $charArr['charname']; ?>" />
 					</span>
 				</div>
-				<div style="padding-top:4px;">
-					<span>
-						Entered By:
-					</span>
-					<span style="margin-left:65px;">
-						Type:
-					</span>
-					<span style="margin-left:50px;">
-						Difficulty:
-					</span>
-					<span style="margin-left:40px;">
-						Language:
-					</span>
-					<span style="margin-left:65px;">
-						Units:
-					</span>
+				<div style="padding-top:8px;float:left;">
+					<div style="float:left;">
+						<span>
+							Type:
+						</span><br />
+						<span>
+							<select name="chartype" style="width:180px;">
+								<option value="" <?php echo ($charArr['chartype']==''?'SELECTED':'');?>>------------------------</option>
+								<option value="UM" <?php echo ($charArr['chartype']=='UM'?'SELECTED':'');?>>Unordered Multi-state</option>
+								<option value="IN" <?php echo ($charArr['chartype']=='IN'?'SELECTED':'');?>>Integer</option>
+								<option value="RN" <?php echo ($charArr['chartype']=='RN'?'SELECTED':'');?>>Real Number</option>
+							</select>
+						</span>
+					</div>
+					<div style="margin-left:30px;float:left;">
+						<span>
+							Difficulty:
+						</span><br />
+						<span>
+							<select name="difficultyrank" style="width:100px;">
+								<option value="" <?php echo ($charArr['difficultyrank']==''?'SELECTED':'');?>>---------------</option>
+								<option value="1" <?php echo ($charArr['difficultyrank']=='1'?'SELECTED':'');?>>Easy</option>
+								<option value="2" <?php echo ($charArr['difficultyrank']=='2'?'SELECTED':'');?>>Intermediate</option>
+								<option value="3" <?php echo ($charArr['difficultyrank']=='3'?'SELECTED':'');?>>Advanced</option>
+								<option value="4" <?php echo ($charArr['difficultyrank']=='4'?'SELECTED':'');?>>Hidden</option>
+							</select>
+						</span>
+					</div>
+					<div style="margin-left:30px;float:left;">
+						<span>
+							Units:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="units" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $charArr['units']; ?>" onchange="" title="" />
+						</span>
+					</div>
 				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $charArr['enteredby']; ?>" onchange=" " disabled />
-					</span>
-					<span style="margin-left:25px;">
-						<select name="chartype" style="width:55px;">
-							<option value="" <?php echo ($charArr['chartype']==''?'SELECTED':'');?>>--</option>
-							<option value="IN" <?php echo ($charArr['chartype']=='IN'?'SELECTED':'');?>>IN</option>
-							<option value="OM" <?php echo ($charArr['chartype']=='OM'?'SELECTED':'');?>>OM</option>
-							<option value="RN" <?php echo ($charArr['chartype']=='RN'?'SELECTED':'');?>>RN</option>
-							<option value="TE" <?php echo ($charArr['chartype']=='TE'?'SELECTED':'');?>>TE</option>
-							<option value="UM" <?php echo ($charArr['chartype']=='UM'?'SELECTED':'');?>>UM</option>
-						</select>
-					</span>
-					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="difficultyrank" tabindex="96" maxlength="32" style="width:60px;" value="<?php echo $charArr['difficultyrank']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:25px;">
-						<select name="defaultlang" style="width:100px;">
-							<option value="English" <?php echo ($charArr['defaultlang']=='English'?'SELECTED':'');?>>English</option>
-							<option value="Spanish" <?php echo ($charArr['defaultlang']=='Spanish'?'SELECTED':'');?>>Spanish</option>
-						</select>
-					</span>
-					<span style="margin-left:25px;">
-						<input type="text" autocomplete="off" name="units" tabindex="100" maxlength="32" style="width:100px;" value="<?php echo $charArr['units']; ?>" onchange="" title="" />
-					</span>
+				<div style="padding-top:8px;float:left;">
+					<div style="float:left;">
+						<span>
+							Heading:
+						</span><br />
+						<span>
+							<select name="hid" style="width:125px;">
+								<option value="">Select Heading</option>
+								<option value="">---------------------</option>
+								<?php 
+								$headingArr = $keyManager->getHeadingArr();
+								foreach($headingArr as $k => $v){
+									echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v.'</option>';
+								}
+								?>
+							</select>
+						</span>
+					</div>
+					<div style="margin-left:30px;float:left;">
+						<span>
+							Help URL:
+						</span><br />
+						<span>
+							<input type="text" autocomplete="off" name="helpurl" tabindex="100" maxlength="32" style="width:400px;" value="<?php echo $charArr['helpurl']; ?>" onchange=" " />
+						</span>
+					</div>
 				</div>
-				<div style="padding-top:4px;">
-					<span>
-						Heading:
-					</span>
-					<span style="margin-left:90px;">
-						Help URL:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<select name="hid" style="width:125px;">
-							<option value="">Select Heading</option>
-							<option value="">---------------------</option>
-							<?php 
-							$headingArr = $keyManager->getHeadingArr();
-							foreach($headingArr as $k => $v){
-								echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v.'</option>';
-							}
-							?>
-						</select>
-					</span>
-					<span style="margin-left:15px;">
-						<input type="text" autocomplete="off" name="helpurl" tabindex="100" maxlength="32" style="width:400px;" value="<?php echo $charArr['helpurl']; ?>" onchange=" " />
-					</span>
-				</div>
-				<div style="padding-top:4px;">
+				<div style="padding-top:8px;float:left;">
 					<span>
 						Description:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+					</span><br />
 					<span>
 						<input type="text" autocomplete="off" name="description" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['description']; ?>" onchange=" " />
 					</span>
 				</div>
-				<div style="padding-top:4px;">
+				<div style="padding-top:8px;float:left;">
 					<span>
 						Notes:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+					</span><br />
 					<span>
 						<input type="text" autocomplete="off" name="notes" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['notes']; ?>" onchange=" " />
 					</span>
 				</div>
-				<div style="padding-top:8px;">
-					<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
-					<button name="formsubmit" type="submit" value="Save Char">Save</button>
+				<div style="width:100%;padding-top:6px;float:left;">
+					<div style="float:left;">
+						<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+						<button name="formsubmit" type="submit" value="Save Char">Save</button>
+					</div>
+					<div style="float:right;">
+						<span>
+							Entered By:
+						</span>
+						<span>
+							<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $charArr['enteredby']; ?>" onchange=" " disabled />
+						</span>
+					</div>
 				</div>
 			</fieldset>
 		</form>
@@ -134,35 +133,24 @@ $charStateList = $keyManager->getCharStateList($cId);
 					<div style="padding-top:4px;">
 						<span>
 							Character State Name:
-						</span>
-						<span style="margin-left:290px;">
-							Language:
-						</span>
-					</div>
-					<div style="padding-bottom:2px;">
+						</span><br />
 						<span>
 							<input type="text" autocomplete="off" name="charstatename" maxlength="255" style="width:400px;" value="" />
 						</span>
-						<span style="margin-left:15px;">
-							<select name="language" style="width:100px;">
-								<option value="English">English</option>
-								<option value="Spanish">Spanish</option>
-							</select>
-						</span>
 					</div>
-					<div style="padding-top:4px;">
-						<span>
-							Entered By:
-						</span>
-					</div>
-					<div style="padding-bottom:2px;">
-						<span>
-							<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
-						</span>
-					</div>
-					<div style="padding-top:8px;clear:both;">
-						<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
-						<button name="formsubmit" type="submit" value="Add State">Add Character State</button>
+					<div style="width:100%;padding-top:6px;float:left;">
+						<div style="float:left;">
+							<input name="cid" type="hidden" value="<?php echo $cId; ?>" />
+							<button name="formsubmit" type="submit" value="Add State">Add Character State</button>
+						</div>
+						<div style="float:right;">
+							<span>
+								Entered By:
+							</span>
+							<span>
+								<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+							</span>
+						</div>
 					</div>
 				</fieldset>
 			</form>
