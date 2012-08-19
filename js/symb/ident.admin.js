@@ -63,3 +63,13 @@ function toggle(target){
 	}
 }
 
+function updateUnits(type) { 
+	var type = document.getElementById('type').value;
+	var units = document.getElementById('units');
+	if ((type == 'IN') || (type == 'RN')) {
+        document.getElementById('units').style.display = 'block';
+    }else{
+        document.getElementById('units').style.display = 'none';
+    }
+}
+
