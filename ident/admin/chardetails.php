@@ -51,7 +51,7 @@ $charStateList = $keyManager->getCharStateList($cId);
 							</select>
 						</span>
 					</div>
-					<div id="units" style="display:block;margin-left:30px;float:left;">
+					<div id="units" style="display:<?php echo ((($charArr['chartype']=='IN')||($charArr['chartype']=='RN'))?'block':'none');?>;margin-left:30px;float:left;">
 						<span>
 							Units:
 						</span><br />
