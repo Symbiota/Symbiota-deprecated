@@ -8,71 +8,72 @@
 		<form name="newcharform" action="index.php" method="post" onsubmit=" ">
 			<fieldset>
 				<legend><b>New Character</b></legend>
-				<div style="padding-top:4px;">
+				<div>
 					<span>
 						Character Name:
-					</span>
-				</div>
-				<div style="padding-bottom:2px;">
+					</span><br />
 					<span>
 						<input type="text" autocomplete="off" name="charname" maxlength="255" style="width:400px;" value="" />
 					</span>
 				</div>
-				<div style="padding-top:4px;">
-					<span>
-						Entered By:
-					</span>
-					<span style="margin-left:55px;">
-						Type:
-					</span>
-					<span style="margin-left:40px;">
-						Difficulty:
-					</span>
-					<span style="margin-left:30px;">
-						Language:
-					</span>
-					<span style="margin-left:55px;">
-						Heading:
-					</span>
+				<div style="padding-top:6px;float:left;">
+					<div style="float:left;">
+						<span>
+							Type:
+						</span><br />
+						<span>
+							<select name="chartype" style="width:180px;">
+								<option value="">------------------------</option>
+								<option value="UM">Unordered Multi-state</option>
+								<option value="IN">Integer</option>
+								<option value="RN">Real Number</option>
+							</select>
+						</span>
+					</div>
+					<div style="margin-left:30px;float:left;">
+						<span>
+							Difficulty:
+						</span><br />
+						<span>
+							<select name="difficultyrank" style="width:100px;">
+								<option value="">---------------</option>
+								<option value="1">Easy</option>
+								<option value="2">Intermediate</option>
+								<option value="3">Advanced</option>
+								<option value="4">Hidden</option>
+							</select>
+						</span>
+					</div>
+					<div style="margin-left:30px;float:left;">
+						<span>
+							Heading:
+						</span><br />
+						<span>
+							<select name="hid" style="width:125px;">
+								<option value="">Select Heading</option>
+								<option value="">---------------------</option>
+								<?php 
+								$headingArr = $keyManager->getHeadingArr();
+								foreach($headingArr as $k => $v){
+									echo '<option value="'.$k.'">'.$v.'</option>';
+								}
+								?>
+							</select>
+						</span>
+					</div>
 				</div>
-				<div style="padding-bottom:2px;">
-					<span>
-						<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:15px;">
-						<select name="chartype" style="width:55px;">
-							<option value="">--</option>
-							<option value="IN">IN</option>
-							<option value="OM">OM</option>
-							<option value="RN">RN</option>
-							<option value="TE">TE</option>
-							<option value="UM">UM</option>
-						</select>
-					</span>
-					<span style="margin-left:15px;">
-						<input type="text" autocomplete="off" name="difficultyrank" tabindex="96" maxlength="32" style="width:60px;" value="<?php //echo $loanArr['processedbyown']; ?>" onchange=" " />
-					</span>
-					<span style="margin-left:15px;">
-						<select name="defaultlang" style="width:100px;">
-							<option value="English">English</option>
-							<option value="Spanish">Spanish</option>
-						</select>
-					</span>
-					<span style="margin-left:15px;">
-						<select name="hid" style="width:125px;">
-							<option value="">Select Heading</option>
-							<option value="">---------------------</option>
-							<?php 
-							$headingArr = $keyManager->getHeadingArr();
-							foreach($headingArr as $k => $v){
-								echo '<option value="'.$k.'">'.$v.'</option>';
-							}
-							?>
-						</select>
-					</span>
-				</div>
-				<div style="padding-top:8px;">
-					<button name="formsubmit" type="submit" value="Create">Create</button>
+				<div style="width:100%;padding-top:6px;float:left;">
+					<div style="float:left;">
+						<button name="formsubmit" type="submit" value="Create">Create</button>
+					</div>
+					<div style="float:right;">
+						<span>
+							Entered By:
+						</span>
+						<span>
+							<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
+						</span>
+					</div>
 				</div>
 			</fieldset>
 		</form>
