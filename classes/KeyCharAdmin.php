@@ -46,27 +46,54 @@ class KeyAdmin{
 	}
 	
 	public function createCharacter($pArr){
-		$statusStr = '';
-		$sql = 'INSERT INTO kmcharacters(charname,chartype,defaultlang,difficultyrank,hid,enteredby) '.
-			'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
-			"'.$this->cleanString($pArr['defaultlang']).'","'.$this->cleanString($pArr['difficultyrank']).'",
-			"'.$this->cleanString($pArr['hid']).'","'.$this->cleanString($pArr['enteredby']).'") ';
-		//echo $sql;
-		if($this->conn->query($sql)){
-			$this->cId = $this->conn->insert_id;
+		if (($pArr['chartype'] == 'IN') || ($pArr['chartype'] == 'RN')){
+			$statusStr = '';
+			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
+				'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
+				"'.$this->cleanString($pArr['difficultyrank']).'","'.$this->cleanString($pArr['hid']).'",
+				"'.$this->cleanString($pArr['enteredby']).'") ';
+			//echo $sql;
+			if($this->conn->query($sql)){
+				$this->cId = $this->conn->insert_id;
+			}
+			else{
+				$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
+			$sql2 = 'INSERT INTO kmcs(cid,cs,charstatename) '.
+				'VALUES('.$this->cId.',"+High","Upper value of unspecified range (could be µ+s.d., but not known)"),'.
+				'('.$this->cId.',"-Low","Lower value of unspecified range (could be µ-s.d., but not known)"),'.
+				'('.$this->cId.',"Max","Maximum value"),'.
+				'('.$this->cId.',"Mean","Mean (= average)"),'.
+				'('.$this->cId.',"Min","Minimum value")';
+			if($this->conn->query($sql2)){
+				
+			}
+			return $statusStr;
 		}
 		else{
-			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
-			$statusStr .= 'SQL: '.$sql;
+			$statusStr = '';
+			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
+				'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
+				"'.$this->cleanString($pArr['difficultyrank']).'","'.$this->cleanString($pArr['hid']).'",
+				"'.$this->cleanString($pArr['enteredby']).'") ';
+			//echo $sql;
+			if($this->conn->query($sql)){
+				$this->cId = $this->conn->insert_id;
+			}
+			else{
+				$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
+				$statusStr .= 'SQL: '.$sql;
+			}
+			return $statusStr;
 		}
-		return $statusStr;
 	}
 	
 	public function createState($pArr){
 		$statusStr = '';
-		$sql = 'INSERT INTO kmcs(cid,charstatename,implicit,language,enteredby) '.
+		$sql = 'INSERT INTO kmcs(cid,charstatename,implicit,enteredby) '.
 			'VALUES("'.$this->cleanString($pArr['cid']).'","'.$this->cleanString($pArr['charstatename']).'",1,
-			"'.$this->cleanString($pArr['language']).'","'.$this->cleanString($pArr['enteredby']).'") ';
+			"'.$this->cleanString($pArr['enteredby']).'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->cs = $this->conn->insert_id;
