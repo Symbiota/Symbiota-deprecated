@@ -179,7 +179,7 @@ class KeyAdmin{
 		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, '.
 			'language, enteredby '.
 			'FROM kmcs '.
-			'WHERE cid = '.$cId.' AND cs = '.$cs;
+			'WHERE cid = '.$cId.' AND cs = "'.$cs.'"';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr['charstatename'] = $r->charstatename;
