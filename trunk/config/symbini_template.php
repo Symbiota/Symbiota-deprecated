@@ -49,7 +49,6 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 	$collections_checklistMenu = false;
 	$collections_download_downloadMenu = false;
 	$collections_maps_indexMenu = false;
-	$collections_editor_occurrenceeditorCrumbs = false;
 	
 //ident/
 	$ident_keyMenu = false;
