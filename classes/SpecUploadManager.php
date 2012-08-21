@@ -490,7 +490,7 @@ class SpecUploadManager{
 		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
 		ob_flush();
 		flush();
-		$sql = 'UPDATE uploadspectemp u '.
+		$sql = 'UPDATE IGNORE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
 			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collId;
 		if($this->conn->query($sql)){
@@ -513,7 +513,7 @@ class SpecUploadManager{
 			$vDate = $r->verbatimeventdate;
 			$dateStr = $this->formatDate($vDate);
 			if($dateStr){
-				$sql = 'UPDATE uploadspectemp '.
+				$sql = 'UPDATE IGNORE uploadspectemp '.
 					'SET eventdate = "'.$dateStr.'" '.
 					'WHERE (collid = '.$this->collId.') AND eventDate IS NULL AND (verbatimeventdate = "'.$vDate.'")';
 				if($this->conn->query($sql)){
@@ -1021,24 +1021,48 @@ class SpecUploadManager{
 					//Date field was converted to Excel's numeric format (number of days since 01/01/1900)
 					$recMap['dateidentified'] = date('Y-m-d', mktime(0,0,0,1,$recMap['dateidentified']-1,1900));
 			}
-			//If month is text, avoid SQL error by converting to numeric value 
-			if(array_key_exists('month',$recMap)){
+			//If month, day, or year are text, avoid SQL error by converting to numeric value 
+			if(array_key_exists('year',$recMap) || array_key_exists('month',$recMap) || array_key_exists('day',$recMap)){
+				$y = (array_key_exists('year',$recMap)?$recMap['year']:'00');
+				$m = (array_key_exists('month',$recMap)?$recMap['month']:'00');
+				$d = (array_key_exists('day',$recMap)?$recMap['day']:'00');
+				$vDate = trim($y.'-'.$m.'-'.$d,'- ');
+				if(!is_numeric($recMap['day'])){
+					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+						$recMap['verbatimeventdate'] = $vDate;
+					}
+					unset($recMap['day']);
+					$d = '00';
+				}
+				if(!is_numeric($recMap['year'])){
+					if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
+						$recMap['verbatimeventdate'] = $vDate;
+					}
+					unset($recMap['year']);
+				}
 				if(!is_numeric($recMap['month'])){
 					if(strlen($recMap['month']) > 2){
 						$monAbbr = strtolower(substr($recMap['month'],0,3));
-						if(array_key_exists('month',$recMap)){
+						if(array_key_exists($monAbbr,$this->monthNames)){
 							$recMap['month'] = $this->monthNames[$monAbbr];
+							$recMap['eventdate'] = $this->formatDate(trim($y.'-'.$recMap['month'].'-'.($d?$d:'00'),'- '));
 						}
 						else{
 							if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']){
-								$recMap['verbatimeventdate'] = $recMap['day'].' '.$recMap['month'].' '.$recMap['year'];
+								$recMap['verbatimeventdate'] = $vDate;
 							}
-							$recMap['month'] = '';
+							unset($recMap['month']);
 						}
 					}
 					else{
-						$recMap['month'] = '';
+						if(!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate']) {
+							$recMap['verbatimeventdate'] = $vDate;
+						}
+						unset($recMap['month']);
 					}
+				}
+				if($vDate && (!array_key_exists('eventdate',$recMap) || !$recMap['eventdate'])){
+					$recMap['eventdate'] = $this->formatDate($vDate);
 				}
 			}
 			//If lat or long are not numeric, try to make them so
@@ -1301,6 +1325,7 @@ class SpecUploadManager{
 	}
 
 	private function formatDate($inStr){
+		$retDate = '';
 		$dateStr = trim($inStr);
 		if(!$dateStr) return;
 		$t = '';
@@ -1311,12 +1336,8 @@ class SpecUploadManager{
 		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
 			$t = $match[0];
 		}
-		if(preg_match('/^\d{4}-\d{2}-\d{2}$/',$dateStr)){
-			//Format: yyyy-mm-dd; Therefore return as formatted 
-			return $dateStr;
-		}
 		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
-			//Format: yyyy-m-d
+			//Format: yyyy-m-d or yyyy-mm-dd
 			$y = $match[1];
 			$m = $match[2];
 			$d = $match[3];
@@ -1375,28 +1396,28 @@ class SpecUploadManager{
 			$y = $match[1];
 		}
 		//Clean, configure, return
-		$retDate = '';
 		if($y){
+			if(strlen($m) == 1) $m = '0'.$m;
+			if(strlen($d) == 1) $d = '0'.$d;
 			//Check to see if month is valid
 			if($m > 12){
-				return;
+				$m = '00';
+				$d = '00';
 			}
 			//check to set if day is valid for month
 			if($d == 30 && $m == 2){
 				//Bad feb date
-				return;
+				$d = '00';
 			}
 			if($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
 				//Bad date, month w/o 31 days
-				return;
+				$d = '00';
 			}
 			//Do some cleaning
 			if(strlen($y) == 2){ 
 				if($y < 20) $y = '20'.$y;
 				else $y = '19'.$y;
 			}
-			if(strlen($m) == 1) $m = '0'.$m;
-			if(strlen($d) == 1) $d = '0'.$d;
 			//Build
 			$retDate = $y.'-'.$m.'-'.$d;
 		}
