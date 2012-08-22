@@ -1084,7 +1084,7 @@ class SpecUploadManager{
 						$vcStr .= $recMap['verbatimcoordinates'].'; ';
 					}
 					$vcStr .= $latValue.' '.$lngValue;
-					if(trim($vcStr)) $recMap['verbatimcoordinates'] = $vcStr;
+					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
 			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
