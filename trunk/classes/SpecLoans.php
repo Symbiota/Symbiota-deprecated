@@ -26,7 +26,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.datesent';
+		$sql .= 'ORDER BY l.datesent DESC';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
