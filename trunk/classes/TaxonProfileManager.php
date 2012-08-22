@@ -320,28 +320,30 @@ class TaxonProfileManager {
 	}
 	
 	public function setVernaculars(){
-		$this->vernaculars = Array();
-		$sql = 'SELECT DISTINCT v.VernacularName, v.language '.
-			'FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
-			'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) '.
-			'ORDER BY v.SortSequence,v.VernacularName';
-		//echo $sql;
-		$result = $this->con->query($sql);
-		$tempVernArr = array();
-		while($row = $result->fetch_object()){
-			$langStr = ucwords($row->language);
-			if($this->language != $langStr){
-				$tempVernArr[$langStr][] = $row->VernacularName;
+		if($this->tid){
+			$this->vernaculars = Array();
+			$sql = 'SELECT DISTINCT v.VernacularName, v.language '.
+				'FROM taxavernaculars v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
+				'WHERE (ts.TID = '.$this->tid.') AND (v.SortSequence < 90) '.
+				'ORDER BY v.SortSequence,v.VernacularName';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			$tempVernArr = array();
+			while($row = $result->fetch_object()){
+				$langStr = ucwords($row->language);
+				if($this->language != $langStr){
+					$tempVernArr[$langStr][] = $row->VernacularName;
+				}
+				else{
+					$this->vernaculars[] = $row->VernacularName;
+				}
 			}
-			else{
-				$this->vernaculars[] = $row->VernacularName;
+			ksort($tempVernArr);
+			foreach($tempVernArr as $lang => $vArr){
+				$this->vernaculars[] = '('.$lang.': '.implode(', ',$vArr).')';
 			}
+			$result->close();
 		}
-		ksort($tempVernArr);
-		foreach($tempVernArr as $lang => $vArr){
-			$this->vernaculars[] = '('.$lang.': '.implode(', ',$vArr).')';
-		}
-		$result->close();
 	}
  	
  	public function getVernaculars(){
@@ -363,23 +365,25 @@ class TaxonProfileManager {
  	}
  	
  	public function setSynonyms(){
-		$this->synonyms = Array();
-		$sql = 'SELECT t.tid, t.SciName, t.Author '.
-			'FROM taxstatus ts INNER JOIN taxa t ON ts.Tid = t.TID '.
-			'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = '.
-			($this->taxAuthId?$this->taxAuthId:'1').') AND ts.SortSequence < 90 '.
-			'ORDER BY ts.SortSequence, t.SciName';
-		//echo $sql;
-		$result = $this->con->query($sql);
-		while($row = $result->fetch_object()){
-			$this->synonyms[$row->tid] = '<i>'.$row->SciName.'</i> '.$row->Author;
-		}
-		$result->close();
-		if(!$this->taxAuthId && ($this->tid != $this->submittedTid)){
-			unset($this->synonyms[$this->submittedTid]);
-		}
-		else{
-			unset($this->synonyms[$this->tid]);
+		if($this->tid){
+			$this->synonyms = Array();
+			$sql = 'SELECT t.tid, t.SciName, t.Author '.
+				'FROM taxstatus ts INNER JOIN taxa t ON ts.Tid = t.TID '.
+				'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = '.
+				($this->taxAuthId?$this->taxAuthId:'1').') AND ts.SortSequence < 90 '.
+				'ORDER BY ts.SortSequence, t.SciName';
+			//echo $sql;
+			$result = $this->con->query($sql);
+			while($row = $result->fetch_object()){
+				$this->synonyms[$row->tid] = '<i>'.$row->SciName.'</i> '.$row->Author;
+			}
+			$result->close();
+			if(!$this->taxAuthId && ($this->tid != $this->submittedTid)){
+				unset($this->synonyms[$this->submittedTid]);
+			}
+			else{
+				unset($this->synonyms[$this->tid]);
+			}
 		}
  	}
  	
@@ -447,7 +451,7 @@ class TaxonProfileManager {
 		if(!isset($this->imageArr)){
 			$this->setTaxaImages();
 		}
-		if(count($this->imageArr) < $start) return false;
+		if(!$this->imageArr || count($this->imageArr) < $start) return false;
 		$trueLength = ($length&&count($this->imageArr)>$length+$start?$length:count($this->imageArr)-$start);
 		$spDisplay = $this->getDisplayName();
 		$iArr = array_slice($this->imageArr,$start,$trueLength,true);
