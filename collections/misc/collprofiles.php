@@ -163,9 +163,9 @@ if($collId) $collData = $collManager->getCollectionData();
 			</div>
 			<?php 
 		}
-		?>
-		<h1><?php echo ($collId?$collData['collectionname']:'');?></h1>
-		<?php
+		if($collId){
+			echo '<h1>'.$collData['collectionname'].(array_key_exists('institutioncode',$collData)?' ('.$collData['institutioncode'].')':'').'</h1>';
+		}
 		if($editCode > 0 && $collId){
 			?>
 			<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
