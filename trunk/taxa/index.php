@@ -66,7 +66,7 @@ $descr = Array();
 		var levelArr = new Array(<?php echo ($descr?"'".implode("','",array_keys($descr))."'":""); ?>);
 		var tid = <?php echo $taxonManager->getTid(); ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/taxa.index.js"></script>
+	<script type="text/javascript" src="../js/symb/taxa.index.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
 <body>
 <?php
