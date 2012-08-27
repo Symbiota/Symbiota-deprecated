@@ -21,13 +21,10 @@ class PersonalSpecimenManager {
 		global $userRights;
 		$retArr = array();
 		if($this->uid){
-			$isAdmin = 0;
+			$isAdmin = (array_key_exists('SuperAdmin',$userRights)?1:0);
 			$collIdStr = '';
-			foreach($userRights as $k => $v){
-				if($k == 'SuperAdmin'){
-					$isAdmin = 1;
-				}
-				else{
+			if(!$isAdmin){
+				foreach($userRights as $k => $v){
 					if($k == 'CollAdmin'){
 						$collIdStr .= ','.implode(',',$v);
 					}
