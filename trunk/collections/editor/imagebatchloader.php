@@ -40,7 +40,7 @@ if($isEditable){
 	}
 
 	function validateQueryForm(f){
-		if(f.qgui.value == "" && f.qloaddate.value == "" && f.qobserver.value == "" && f.qfamily.value == "" && f.qsciname.value == ""){
+		if(f.qloaddate.value == "" && f.qobserver.value == "" && f.qfamily.value == "" && f.qsciname.value == ""){
 			alert("Please enter a search term in at least one of the fields below ");
 			return false;
 		}
@@ -91,10 +91,6 @@ if($isEditable){
 								<?php echo $uploadManager->echoOccurrenceHoldings(); ?>
 							</select>
 						</div>
-					</div>
-					<div style="clear:both;">
-						<div style="float:left;width:130px;">Occurrence ID (GUID):</div>
-						<div style="float:left;"><input type="text" name="qgui" /></div>
 					</div>
 					<div style="clear:both;">
 						<div style="float:left;width:130px;">Upload Date:</div> 
@@ -156,7 +152,6 @@ if($isEditable){
 			<?php
 			if($action == "Query Records" && $collId){
 				$queryArr = Array("collid"=>$collId);
-				$queryArr["gui"] = $_REQUEST["qgui"];
 				$queryArr["loaddate"] = $_REQUEST["qloaddate"];
 				$queryArr["observer"] = $_REQUEST["qobserver"];
 				$queryArr["family"] = $_REQUEST["qfamily"];
@@ -168,7 +163,7 @@ if($isEditable){
 						<div>
 							<form action="<?php echo $clientRoot;?>/collections/editor/occurrenceeditor.php" method="post" enctype='multipart/form-data' target="_blank" onsubmit="return validateImageSubmitForm(this)">
 								<fieldset>
-									<legend><b><?php echo $v["occurrenceid"]; ?></b></legend>
+									<legend><b><?php echo $v["catalognumber"]; ?></b></legend>
 									<div style="margin:3px;">
 										<a href="<?php echo $clientRoot."/collections/individual/index.php?occid=".$occId;?>" target="_blank">
 											<?php echo $occId;?>
@@ -349,22 +344,19 @@ class ImageUploadManager{
 	
 	public function getOccurrenceRecords($queryArr){
 		$returnArr = Array();
-		$sql = "SELECT o.occid, o.tidinterpreted, o.occurrenceid, o.recordedby, o.recordnumber, o.eventdate, ".
+		$sql = "SELECT o.occid, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, ".
 			"o.family, o.sciname, o.locality, o.datelastmodified ".
 			"FROM omoccurrences o ".
 			"WHERE o.collid = ".$queryArr["collid"]." AND o.tidinterpreted IS NOT NULL ";
-		if($queryArr["gui"]) $sql .= "AND o.occurrenceId LIKE '".$queryArr["gui"]."%' "; 
 		if($queryArr["loaddate"]) $sql .= "AND o.datelastmodified = '".$queryArr["loaddate"]."' "; 
 		if($queryArr["observer"]) $sql .= "AND o.recordedby LIKE '%".$queryArr["observer"]."%' "; 
 		if($queryArr["family"]) $sql .= "AND o.family = '".$queryArr["family"]."' "; 
 		if($queryArr["sciname"]) $sql .= "AND o.sciname LIKE '".$queryArr["sciname"]."%' ";
-		$sql .= "ORDER BY o.occurrenceid "; 
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$occId = $row->occid;
 			$returnArr[$occId]["tid"] = $row->tidinterpreted;
-			$returnArr[$occId]["occurrenceid"] = $row->occurrenceid;
 			$returnArr[$occId]["recordedby"] = $row->recordedby;
 			$returnArr[$occId]["recordnumber"] = $row->recordnumber;
 			$returnArr[$occId]["eventdate"] = $row->eventdate;

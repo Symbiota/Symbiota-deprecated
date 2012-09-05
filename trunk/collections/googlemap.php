@@ -71,12 +71,10 @@ $mapManager = new OccurrenceMapManager();
 					foreach($dataArr as $occId => $spArr){
 						if(count($dataArr) == 1){
 							$functionStr = $occId.",".$clid;
-							if($spArr["gui"]) $titleStr = $spArr["gui"];
 						}
 						else{
-							$gui = $spArr["gui"];
-							if(!$gui) $gui = "occurrence #".$occId;
-							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".(array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"0").")'>".$gui."</a><br/>";
+							$id = "occurrence #".$occId;
+							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".(array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"0").")'>".$id."</a><br/>";
 						}
 					}
 					echo 'var m'.$markerCnt.' = getMarker('.$latLng.',"'.$titleStr.'","'.$iconUrl.'");',"\n";

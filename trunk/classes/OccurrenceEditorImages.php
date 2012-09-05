@@ -397,10 +397,10 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
  		}
  		if($identifier){
  			if(strpos($identifier,'%') !== false){
-	 			$sql .= 'AND ((o.occurrenceId LIKE "'.$identifier.'") OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumber LIKE "'.$identifier.'"))';
+	 			$sql .= 'AND (OR (o.catalognumber LIKE "'.$identifier.'") OR (o.othercatalognumber LIKE "'.$identifier.'"))';
  			}
  			else{
-	 			$sql .= 'AND ((o.occurrenceId = "'.$identifier.'") OR (o.catalognumber = "'.$identifier.'") OR (o.othercatalognumber = "'.$identifier.'"))';
+	 			$sql .= 'AND ((o.catalognumber = "'.$identifier.'") OR (o.othercatalognumber = "'.$identifier.'"))';
  			}
  		}
  		if($collector){
@@ -409,14 +409,13 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
  		if($collNumber){
  			$sql .= 'AND (o.recordnumber LIKE "%'.$collNumber.'%") ';
  		}
- 		$sql = 'SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, o.sciname, '.
+ 		$sql = 'SELECT o.occid, o.recordedby, o.recordnumber, o.sciname, '.
  			'CONCAT_WS("; ",o.stateprovince, o.county, o.locality) AS locality '.
  			'FROM omoccurrences o WHERE '.substr($sql,4);
  		//echo $sql;
  		$rs = $this->conn->query($sql);
  		while($row = $rs->fetch_object()){
  			$occId = $row->occid;
- 			$returnArr[$occId]['occurrenceid'] = $row->occurrenceid;
  			$returnArr[$occId]['sciname'] = $row->sciname;
  			$returnArr[$occId]['recordedby'] = $row->recordedby;
  			$returnArr[$occId]['recordnumber'] = $row->recordnumber;

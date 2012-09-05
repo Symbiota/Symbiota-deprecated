@@ -45,7 +45,7 @@ header("Content-Type: text/html; charset=".$charset);
 					</div>
 				</div>
 				<div style="clear:both;padding:2px;">
-					<div style="float:left;width:130px;">Identifier (GUID, Catalog #):</div>
+					<div style="float:left;width:130px;">Catalog #:</div>
 					<div style="float:left;"><input name="identifier" type="text" /></div>
 				</div>
 				<div style="clear:both;padding:2px;">
@@ -67,7 +67,7 @@ header("Content-Type: text/html; charset=".$charset);
 			foreach($occArr as $occId => $vArr){
 				?>
 				<div style="margin:10px;">
-					<?php echo "<b>OccId ".$occId.":</b> ".$vArr["occurrenceid"]."; ".$vArr["recordedby"]." [".($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];?>
+					<?php echo "<b>OccId ".$occId.":</b> ".$vArr["recordedby"]." [".($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];?>
 					<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
 						Select Occurrence Record
 					</div>
@@ -110,7 +110,7 @@ header("Content-Type: text/html; charset=".$charset);
  			$sql .= "AND o.collid = ".$collId." ";
  		}
  		if($identifier){
- 			$sql .= "AND (o.occurrenceId LIKE \"%".$identifier."%\" OR o.catalognumber LIKE \"%".$identifier."%\")";
+ 			$sql .= "AND (o.catalognumber LIKE \"%".$identifier."%\")";
  		}
  		if($collector){
  			$sql .= "AND o.recordedby LIKE '%".$collector."%' ";
@@ -118,13 +118,12 @@ header("Content-Type: text/html; charset=".$charset);
  		if($collNumber){
  			$sql .= "AND o.recordnumber LIKE '%".$collNumber."%' ";
  		}
- 		$sql = "SELECT o.occid, o.occurrenceid, o.recordedby, o.recordnumber, CONCAT_WS('; ',o.stateprovince, o.county, o.locality) AS locality ".
+ 		$sql = "SELECT o.occid, o.recordedby, o.recordnumber, CONCAT_WS('; ',o.stateprovince, o.county, o.locality) AS locality ".
  			"FROM omoccurrences o WHERE ".substr($sql,4);
  		//echo $sql;
  		$rs = $this->conn->query($sql);
  		while($row = $rs->fetch_object()){
  			$occId = $row->occid;
- 			$returnArr[$occId]["occurrenceid"] = $row->occurrenceid;
  			$returnArr[$occId]["recordedby"] = $row->recordedby;
  			$returnArr[$occId]["recordnumber"] = $row->recordnumber;
  			$returnArr[$occId]["locality"] = $row->locality;

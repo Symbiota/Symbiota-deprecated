@@ -271,7 +271,7 @@ class ProfileManager{
 			//Send email
 			$subject = "Your password";
 			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."</a>) password has been reset to: ".$newPassword." ";
-			$bodyStr .= "<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."/profile/viewprofile.php'>View Profile</a> link and then selecting Edit Password.";
+			$bodyStr .= "<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["clientRoot"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.";
 			$bodyStr .= "<br/>If you have problems with the new password, contact the System Administrator ";
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
@@ -406,15 +406,35 @@ class ProfileManager{
     }
     
     public function lookupLogin($emailAddr){
-    	$returnStr = '';
+    	global $charset;
+    	$login = '';
     	$sql = 'SELECT u.uid, ul.username '.
 			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 			'WHERE (u.email = "'.$emailAddr.'")';
     	$result = $this->con->query($sql);
     	if($row = $result->fetch_object()){
-    		$returnStr = $row->username;
+    		$login = $row->username;
     	}
-   		return $returnStr;
+    	$result->free();
+
+    	if($login){
+			$subject = $GLOBALS['defaultTitle'].' Login Name';
+			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'">http://'.
+				$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'</a>) login name is: '.$login.' ';
+			$bodyStr .= "<br/>If you continue to have login issues, contact the System Administrator ";
+			if(array_key_exists("adminEmail",$GLOBALS)){
+				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
+			}
+			$headerStr = "MIME-Version: 1.0 \r\n".
+				"Content-type: text/html; charset=".$charset." \r\n".
+				"To: ".$emailAddr." \r\n";
+			if(array_key_exists("adminEmail",$GLOBALS)){
+				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
+			}
+			mail($emailAddr,$subject,$bodyStr,$headerStr);
+			return 1;
+    	}    	
+		return 0;
     }
     
     public function createNewLogin($userId, $newLogin, $newPwd){

@@ -220,7 +220,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 	private function addVoucherRecord($vOccId, $vNotes, $vEditNotes){
 		$insertArr = Array();
 		//Checklist-taxon combination already exists
-		$sql = 'SELECT DISTINCT o.occid, o.occurrenceID, ctl.tid, ctl.clid, o.recordedby, o.recordnumber, '.
+		$sql = 'SELECT DISTINCT o.occid, ctl.tid, ctl.clid, o.recordedby, o.recordnumber, '.
 			'"'.$vNotes.'" AS Notes, "'.$vEditNotes.'" AS editnotes '.
 			'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) '.

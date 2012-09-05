@@ -13,22 +13,6 @@ $smManager = new SiteMapManager();
     <title><?php echo $defaultTitle; ?> Site Map</title>
     <link rel="stylesheet" href="css/main.css" type="text/css" />
     <script type="text/javascript">
-	    function openPopup(urlStr,windowName){
-	    	var wWidth = 900;
-	    	try{
-		    	if(document.getElementById('maintable').offsetWidth){
-		    		wWidth = document.getElementById('maintable').offsetWidth*1.05;
-		    	}
-		    	else if(document.body.offsetWidth){
-		    		wWidth = document.body.offsetWidth*0.9;
-		    	}
-	    	}
-	    	catch(e){
-	    	}
-	    	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
-	    	if (newWindow.opener == null) newWindow.opener = self;
-	    }
-
 	    function submitTaxaNoImgForm(f){
 			if(f.clid.value != ""){
 				f.submit();
@@ -45,7 +29,7 @@ $smManager = new SiteMapManager();
 	include($serverRoot.'/header.php');
 	if(isset($sitemapCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
+		echo "<a href='index.php'>Home</a> &gt; ";
 		echo $sitemapCrumbs;
 		echo " <b>Sitemap</b>";
 		echo "</div>";
@@ -385,7 +369,7 @@ $smManager = new SiteMapManager();
 						<h3>Observations</h3>
 						<div style="margin:10px;">
 							Data management for observation projects is handled in a similar manner to what is described in the Collections paragraph above.
-							One difference is the General Observation project. This project servers two central purposes: 
+							One difference is the General Observation project. This project serves two central purposes: 
 							1) Allows registered users to submit a image voucherd field observation. 
 							2) Allows collectors to enter their own collection data for label printing and to make it available for transfer 
 							to collections obtaining the physical specimens through donations or exchange.

@@ -44,7 +44,9 @@
 	if($showCommon) $clManager->setShowCommon();
 	if($showImages) $clManager->setShowImages();
 	if($showVouchers) $clManager->setShowVouchers();
-
+	$clid = $clManager->getClid();
+	$pid = $clManager->getPid();
+	
 	if(array_key_exists('dllist_x',$_POST)){
 		$clManager->downloadChecklistCsv();
 		exit();
@@ -52,7 +54,7 @@
 
 	$dynSqlExists = false;
 	$statusStr = "";
-	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clManager->getClid(),$userRights["ClAdmin"]))){
+	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 		$clManager->setEditable(true);
 		
 		//Submit checklist MetaData edits
@@ -71,7 +73,13 @@
 		elseif($action == 'Delete SQL Fragment'){
 			$statusStr = $clManager->deleteSql();
 		}
-	 	//Add species to checklist
+		elseif($action == 'Add Editor'){
+			$statusStr = $clManager->addEditor($_POST['editoruid']);
+		}
+		elseif(array_key_exists('deleteuid',$_REQUEST)){
+			$statusStr = $clManager->deleteEditor($_REQUEST['deleteuid']);
+		}
+		//Add species to checklist
 		if(array_key_exists("tidtoadd",$_REQUEST)){
 			$dataArr["tid"] = $_REQUEST["tidtoadd"];
 			if($_REQUEST["familyoverride"]) $dataArr["familyoverride"] = $_REQUEST["familyoverride"];
@@ -115,7 +123,7 @@
 	</script>
 	<script type="text/javascript">
 		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
-		var clid = <?php echo $clManager->getClid(); ?>;
+		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js"></script>
@@ -140,7 +148,7 @@
 	if($proj){
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt; ';
-		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$clManager->getPid().'">';
+		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
 		echo $clManager->getProjName();
 		echo '</a> &gt; ';
 		echo '<b>'.$clManager->getClName().'</b>';
@@ -198,7 +206,7 @@
 			}
 			?>
 			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
-				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$clManager->getPid()."&dynclid=".$dynClid; ?>">
+				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>">
 					<?php echo $clManager->getClName(); ?>
 				</a>
 			</div>
@@ -206,7 +214,7 @@
 			if($keyModIsActive){
 				?>
 				<div style="float:left;padding-top:5px;">
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$clManager->getPid()."&dynclid=".$dynClid;?>&taxon=All+Species">
+					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
 						<img src='../images/key.jpg' style="width:15px;border:0px;" title='Open Symbiota Key' />
 					</a>&nbsp;&nbsp;&nbsp;
 				</div>
@@ -221,7 +229,7 @@
 				    	</span>
 				        <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 				        	<?php 
-								$varStr = "?clid=".$clManager->getClid()."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():""); 
+								$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():""); 
 				        	?>
 					        <a href="../games/namegame.php<?php echo $varStr; ?>">Name Game</a>
 					        <a href="../games/flashcards.php<?php echo $varStr; ?>">Flash Card Quiz</a>
@@ -286,7 +294,7 @@
 					        <?php
 						}
 					    ?>
-				        <li><a href="chvoucheradmin.php?clid=<?php echo $clManager->getClid().($proj?'&proj='.$clManager->getPid():'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
+				        <li><a href="chvoucheradmin.php?clid=<?php echo $clid.($proj?'&proj='.$pid:'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 				        <li><a href="#editortab"><span>Editors</span></a></li>
 				    </ul>
 					<div id="mdtab">
@@ -294,27 +302,27 @@
 							<fieldset style="margin:15px;padding:10px;">
 								<legend><b>Edit Checklist Details</b></legend>
 								<div>
-									<span>Checklist Name: </span>
-									<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
+									Checklist Name<br/>
+									<input type="text" name="eclname" style="width:95%" value="<?php echo $clManager->getClName();?>" />
 								</div>
 								<div>
-									<span>Authors: </span>
-									<input type="text" name="eclauthors" size="70" value="<?php echo $clArray["authors"]; ?>" />
+									Authors<br/>
+									<input type="text" name="eclauthors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
 								</div>
 								<div>
-									<span>Locality: </span>
-									<input type="text" name="ecllocality" size="80" value="<?php echo $clArray["locality"]; ?>" />
+									Locality<br/>
+									<input type="text" name="ecllocality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
 								</div> 
 								<div>
-									<span>Publication: </span>
-									<input type="text" name="eclpublication" size="80" value="<?php echo $clArray["publication"]; ?>" />
+									Publication<br/>
+									<input type="text" name="eclpublication" style="width:95%" value="<?php echo $clArray["publication"]; ?>" />
 								</div>
 								<div>
-									<span>Abstract: </span>
-									<textarea name="eclabstract" cols="70" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
+									Abstract<br/>
+									<textarea name="eclabstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 								</div>
 								<div>
-									<span>Parent Checklist: </span>
+									Parent Checklist<br/>
 									<select name="eclparentclid">
 										<option value="">Select a Parent checklist</option>
 										<option value="">----------------------------------</option>
@@ -322,26 +330,26 @@
 									</select>
 								</div>
 								<div>
-									<span>Notes: </span>
-									<input type="text" name="eclnotes" size="80" value="<?php echo $clArray["notes"]; ?>" />
+									Notes:<br/>
+									<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 								</div>
-								<div>
-									<span>Latitude Centroid: </span>
-									<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
-									<span style="cursor:pointer;" onclick="openMappingAid();">
-										<img src="../images/world40.gif" style="width:12px;" />
-									</span>
+								<div style="float:left;">
+									Latitude Centroid<br/>
+									<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
 								</div>
-								<div>
-									<span>Longitude Centroid: </span>
-									<input id="lngdec" type="text" name="ecllongcentroid" value="<?php echo $clArray["longcentroid"]; ?>" />
+								<div style="float:left;margin-left:5px;">
+									Longitude Centroid<br/>
+									<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
 								</div>
-								<div>
-									<span>Point Radius (meters): </span>
-									<input type="text" name="eclpointradiusmeters" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
+								<div style="float:left;margin-left:5px;">
+									Point Radius (meters)<br/>
+									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 								</div>
-								<div>
-									<span>Public Access: </span>
+								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
+									<img src="../images/world40.gif" style="width:12px;" />
+								</div>
+								<div style="clear:both;">
+									Public Access:<br/>
 									<select name="eclaccess">
 										<option value="private">Private</option>
 										<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
@@ -351,8 +359,8 @@
 								<div>
 									<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 								</div>
-								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
-								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
+								<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
+								<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
 							</fieldset>
 						</form>
 					</div>
@@ -374,7 +382,7 @@
 											}
 											?>
 										</select><br/>
-										<input type="hidden" name="clid" value="<?php echo $clManager->getClid(); ?>" />
+										<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
 									</div>
 									<div style="margin:5px;">
 										<input type="submit" name="submitvoucher" value="Add Image Voucher" /><br/>
@@ -387,16 +395,20 @@
 					?>
 					<div id="editortab">
 						<div style="margin:30px 0px 30px 15px;">
+							<div style="font-weight:bold;font-size:120%;">Current Editors</div>
 							<?php 
 								$editorArr = $clManager->getEditors();
 								if($editorArr){
 									echo "<ul>\n";
-									foreach($editorArr as $uid => $eArr){
-										echo '<li>';
-										echo $eArr['name'];
-										if($eArr['email']) echo ' ('.$eArr['email'].')';
-										if($eArr['assignedby']) echo ' - assigned by: '.$eArr['assignedby'];
-										echo "</li>\n";
+									foreach($editorArr as $uid => $uName){
+										?>
+										<li>
+											<?php echo $uName; ?> 
+											<a href="checklist.php?cl=<?php echo $clid.'&deleteuid='.$uid.'&proj='.$pid; ?>" onclick="return confirm('Are you sure you want to remove editing rights for this user?');" title="Delete this user">
+												<img src="../../images/drop.png" style="width:12px;" />
+											</a>
+										</li>
+										<?php 
 									}
 									echo "</ul>\n";
 								}
@@ -404,6 +416,26 @@
 									echo "<div>No one has been explicitly assigned as an editor</div>\n";
 								}
 							?>
+							<fieldset style="margin:40px 5px;padding:15px;">
+								<legend><b>Add New User</b></legend>
+								<form name="adduser" action="checklist.php" method="post" onsubmit="return verifyAddUser(this)">
+									<div>
+										<select name="editoruid">
+											<option value="">Select User</option>
+											<option value="">--------------------</option>
+											<?php 
+											$userArr = $clManager->getUserList();
+											foreach($userArr as $uid => $uName){
+												echo '<option value="'.$uid.'">'.$uName.'</option>';
+											}
+											?>
+										</select> 
+										<input name="submitaction" type="submit" value="Add Editor" />
+										<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
+										<input type="hidden" name="cl" value="<?php echo $clid; ?>" />
+									</div> 
+								</form>
+							</fieldset>
 						</div>
 					</div>
 				</div>
@@ -475,9 +507,9 @@
 							    Taxon Authors
 							</div>
 							<div style="margin:5px 0px 0px 5px;">
-								<input type='hidden' name='cl' value='<?php echo $clManager->getClid(); ?>' />
+								<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
 								<input type='hidden' name='dynclid' value='<?php echo $dynClid; ?>' />
-								<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
+								<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
 								<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
 								<input type="submit" name="submitaction" value="Rebuild List" />
 								<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
@@ -494,47 +526,49 @@
 								<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 									<legend><b>Add New Species to Checklist</b></legend>
 									<div>
-										<b>Taxon:</b> 
+										<b>Taxon:</b><br/> 
 										<input type="text" id="speciestoadd" name="speciestoadd" style="width:174px;" />
 										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 									</div>
 									<div>
-										<b>Family Override:</b> 
+										<b>Family Override:</b><br/>
 										<input type="text" name="familyoverride" style="width:122px;" title="Only enter if you want to override current family" />
 									</div>
 									<div>
-										<b>Habitat:</b> 
+										<b>Habitat:</b><br/>
 										<input type="text" name="habitat" style="width:170px;" />
 									</div>
 									<div>
-										<b>Abundance:</b> 
+										<b>Abundance:</b><br/>
 										<input type="text" name="abundance" style="width:145px;" />
 									</div>
 									<div>
-										<b>Notes:</b> 
+										<b>Notes:</b><br/>
 										<input type="text" name="notes" style="width:175px;" />
 									</div>
 									<div style="padding:2px;">
-										<b>Internal Notes:</b> 
+										<b>Internal Notes:</b><br/>
 										<input type="text" name="internalnotes" style="width:126px;" title="Displayed to administrators only" />
 									</div>
 									<div>
-										<b>Source:</b> 
+										<b>Source:</b><br/>
 										<input type="text" name="source" style="width:167px;" />
 									</div>
-									<input type="hidden" name="cl" value="<?php echo $clManager->getClid(); ?>" />
-									<input type="hidden" name="proj" value="<?php echo $clManager->getPid(); ?>" />
-									<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
-									<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
-									<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
-									<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
-									<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
-									<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
-									<input type="hidden" name="emode" value="1" />
-									<input type="submit" name="submitadd" value="Add Species to List"/>
-									<hr />
+									<div>
+										<input type="hidden" name="cl" value="<?php echo $clid; ?>" />
+										<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
+										<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
+										<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
+										<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
+										<input type='hidden' name='thesfilter' value='<?php echo $clManager->getThesFilter(); ?>' />
+										<input type='hidden' name='taxonfilter' value='<?php echo $taxonFilter; ?>' />
+										<input type='hidden' name='searchcommon' value='<?php echo $searchCommon; ?>' />
+										<input type="hidden" name="emode" value="1" />
+										<input type="submit" name="submitadd" value="Add Species to List"/>
+										<hr />
+									</div>
 									<div style="text-align:center;">
-										<a href="tools/checklistloader.php?clid=<?php echo $clManager->getClid();?>">Batch Upload Spreadsheet</a>
+										<a href="tools/checklistloader.php?clid=<?php echo $clid;?>">Batch Upload Spreadsheet</a>
 									</div>
 								</fieldset>
 							</form>
@@ -545,7 +579,7 @@
 						if($coordArr = $clManager->getCoordinates(0,true)){
 							?>
 							<div style="text-align:center;padding:10px">
-								<a href="checklistmap.php?clid=<?php echo $clManager->getClid().'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" >
+								<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" >
 									<img src="http://maps.google.com/maps/api/staticmap?size=170x170&maptype=terrain&sensor=false&markers=size:tiny|<?php echo implode('|',$coordArr); ?>" style="border:0px;" />
 								</a>
 							</div>
@@ -582,7 +616,7 @@
 						if(($pageNumber)>$pageCount) $pageNumber = 1;  
 						$argStr .= "&cl=".$clValue."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-						$argStr .= ($proj?"&proj=".$clManager->getPid():"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+						$argStr .= ($proj?"&proj=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
 						echo "<hr /><div>Page <b>".($pageNumber)."</b> of <b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
@@ -620,7 +654,7 @@
 							$u = (array_key_exists('url',$sppArr)?$sppArr['url']:'');
 							$imgSrc = ($tu?$tu:$u);
 							echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
-							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
+							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
 							if($imgSrc){
 								$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 								echo "<a href='".$spUrl."' target='_blank'>";
@@ -646,7 +680,7 @@
 								<?php
 								$prevfam = $family;
 							}
-							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
+							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
 							echo "<div id='tid-$tid' style='margin-left:10px;'>";
 							echo "<div>";
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
@@ -656,11 +690,11 @@
 							if($clManager->getEditable()){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
-								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clManager->getClid(); ?>','editorwindow');">
+								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
 									<img src='../images/edit.png' style='width:13px;' title='edit details' />
 								</span>
 								<?php if($showVouchers && $dynSqlExists){ ?>
-								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clManager->getClid()."&targettid=".$tid;?>','editorwindow');">
+								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clid."&targettid=".$tid;?>','editorwindow');">
 									<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
 								</span>
 								<?php

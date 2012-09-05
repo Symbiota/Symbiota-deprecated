@@ -45,6 +45,7 @@ function geoLocateLocality(){
 	var county = f.county.value;
 	if(!county) county = "unknown";
 	var locality = f.locality.value;
+	if(f.verbatimcoordinates.value) locality = locality + "; " + f.verbatimcoordinates.value;
 
 	if(!country){
 		alert("Country is blank and it is a required field for GeoLocate");
@@ -320,47 +321,6 @@ function searchDupesCatalogNumber(f){
 		};
 		cnXmlHttp.open("POST",url,true);
 		cnXmlHttp.send(null);
-	}
-}
-
-function searchDupesOccurrenceId(f){
-	var oiValue = f.occurrenceid.value;
-	if(oiValue){
-		oiXmlHttp = GetXmlHttpObject();
-		if(oiXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var oid = f.occid.value;
-		var url = "rpc/queryoccurrenceid.php?oi=" + oiValue + "&collid=" + collId + "&occid=" + oid;
-
-		document.getElementById("dupediv").style.display = "block";
-		document.getElementById("dupesearch").style.display = "block";
-		document.getElementById("dupenone").style.display = "none";
-		
-		oiXmlHttp.onreadystatechange=function(){
-			if(oiXmlHttp.readyState==4 && oiXmlHttp.status==200){
-				var resObj = eval('(' + oiXmlHttp.responseText + ')')
-				if(resObj.length > 0){
-					if(confirm("Record(s) using the same occurrence ID already exists. Do you want to view this record?")){
-						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
-						if (occWindow.opener == null) occWindow.opener = self;
-					}						
-					document.getElementById("dupesearch").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
-				}
-				else{
-					document.getElementById("dupesearch").style.display = "none";
-					document.getElementById("dupenone").style.display = "block";
-					setTimeout(function () { 
-						document.getElementById("dupenone").style.display = "none";
-						document.getElementById("dupediv").style.display = "none";
-						}, 3000);
-				}
-			}
-		};
-		oiXmlHttp.open("POST",url,true);
-		oiXmlHttp.send(null);
 	}
 }
 

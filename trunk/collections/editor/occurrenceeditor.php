@@ -292,7 +292,7 @@ if($symbUid){
 			?>
 			<div style="font-weight:bold;font-size:120%;margin:30px;">
 				Please 
-				<a href="../../profile/index.php?refurl=<?php echo $clientRoot.'/collections/editor/occurrenceeditor.php&collid='.$collId; ?>">
+				<a href="../../profile/index.php?refurl=<?php echo $clientRoot.'/collections/editor/occurrenceeditor.php?collid='.$collId; ?>">
 					LOGIN
 				</a> 
 			</div>
@@ -446,12 +446,12 @@ if($symbUid){
 													<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
 												</div>
 												<div style="float:left;">
-													Occurrence ID
-													<a href="#" onclick="return dwcDoc('occurrenceID')">
+													Other Numbers
+													<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<br/>
-													<input type="text" name="occurrenceid" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="occurrenceIdChanged(this.form);" title="Global Unique Identifier (GUID)" />
+													<input type="text" name="othercatalognumbers" tabindex="4" maxlength="255" style="width:110px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="otherCatalogNumbersChanged(this.form);" />
 												</div>
 												<div style="float:left;margin-top:2px;">
 													Collector
@@ -479,14 +479,6 @@ if($symbUid){
 													Associated Collectors
 													<br/>
 													<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:330px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
-												</div>
-												<div style="float:left;">
-													Other Catalog Numbers
-													<a href="#" onclick="return dwcDoc('otherCatalogNumbers')">
-														<img class="dwcimg" src="../../images/qmark.png" />
-													</a>
-													<br/>
-													<input type="text" name="othercatalognumbers" tabindex="15" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="otherCatalogNumbersChanged(this.form);" />
 												</div>
 												<div style="float:left;margin:15px 5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 													<img src="../../images/editplus.png" style="width:15px;" />

@@ -155,7 +155,7 @@ if(isset($profile_viewprofileCrumbs)){
 			    } 
 			    ?>
 		        <li><a href="personalspecmenu.php">Specimen Management</a></li>
-		        <li><a href="#profilediv">Profile Details</a></li>
+		        <li><a href="#profilediv">Edit Profile</a></li>
 		    </ul>
 		    <?php
 		    if($floraModIsActive){ 
@@ -344,13 +344,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>First Name:</b></td>
 						        <td>
-									<div style="float:right;margin:3px;cursor:pointer;" onclick="toggle('editdiv');" title="Toggle editing Controls">
-										<img style='border:0px;' src='../images/edit.png' />
-									</div>
-									<div class="editdiv" style="float:left;">
-										<?php echo $person->getFirstName();?>
-									</div>
-									<div class="editdiv" style="display:none;float:left;">
+									<div>
 										<input id="firstname" name="firstname" size="40" value="<?php echo $person->getFirstName();?>">
 									</div>
 					            </td>
@@ -358,10 +352,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Last Name:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getLastName();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input id="lastname" name="lastname" size="40" value="<?php echo $person->getLastName();?>">
 									</div>
 					            </td>
@@ -369,10 +360,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Title:</b></td>
 						        <td>
-									<div class="editdiv">
-										<?php echo $person->getTitle(); ?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input name="title"  size="40" value="<?php echo $person->getTitle();?>">
 									</div>
 								</td>
@@ -380,10 +368,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Institution:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getInstitution();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input name="institution"  size="40" value="<?php echo $person->getInstitution();?>">
 									</div>
 								</td>
@@ -391,10 +376,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>City:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getCity();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 						            	<input id="city" name="city" size="40" value="<?php echo $person->getCity();?>">
 									</div>
 					            </td>
@@ -402,10 +384,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>State:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getState();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 							            <input id="state" name="state" size="40" value="<?php echo $person->getState();?>">
 									</div>
 					            </td>
@@ -413,10 +392,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Zip Code:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getZip();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 							            <input name="zip" size="40" value="<?php echo $person->getZip();?>">
 									</div>
 					            </td>
@@ -424,10 +400,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Country:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getCountry();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input id="country" name="country" size="40" value="<?php echo $person->getCountry();?>">
 									</div>
 								</td>
@@ -435,10 +408,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Email Address:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getEmail();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 							            <input id="email" name="email" size="40" value="<?php echo $person->getEmail();?>">
 									</div>
 					            </td>
@@ -446,10 +416,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Url:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getUrl();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input name="url"  size="40" value="<?php echo $person->getUrl();?>">
 									</div>
 	
@@ -458,10 +425,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Biography:</b></td>
 						        <td>
-									<div class="editdiv">
-							        	<?php echo $person->getBiography();?>
-									</div>
-									<div class="editdiv" style="display:none;">
+									<div>
 										<textarea name="biography" rows="4" cols="40"><?php echo $person->getBiography();?></textarea>
 									</div>
 								</td>
@@ -469,14 +433,14 @@ if(isset($profile_viewprofileCrumbs)){
 						    <tr>
 						        <td><b>Logins:</b></td>
 						        <td>
-									<div class="editdiv">
+									<div>
 										<?php 
 										$loginArr = $person->getLoginArr();
 										if($loginArr){
 											$isFirst = true;
 											foreach($loginArr as $login){
-												echo '<span class="editdiv" id="un-'.$login.'">'.($isFirst?'':'; ').$login;
-												echo '<span style="display:none;" onclick="deleteLogin('.$userId.',"'.$login.'");"> ';
+												echo '<span id="un-'.$login.'">'.($isFirst?'':'; ').$login;
+												echo '<span onclick="deleteLogin('.$userId.',"'.$login.'");"> ';
 												echo '<img src="../images/del.gif" title="Delete '.$login.'" />';
 												echo '</span></span>';
 											}
@@ -490,7 +454,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    </tr>
 						    <tr>
 						        <td colspan="2">
-						        	<div class="editdiv">
+						        	<div>
 						        		<?php 
 					        			if($person->getIsPublic()){
 											echo "User information is displayable to public (e.g. photographer listing)";
@@ -500,7 +464,7 @@ if(isset($profile_viewprofileCrumbs)){
 					        			}
 						        		?>
 						        	</div>	
-									<div class="editdiv" style="display:none;">
+									<div>
 										<input type="checkbox" name="ispublic" value="1" <?php if($person->getIsPublic()) echo "CHECKED"; ?> /> 
 										Make user information displayable to public  
 					        		</div>
@@ -508,7 +472,7 @@ if(isset($profile_viewprofileCrumbs)){
 						    </tr>
 						    <tr>
 								<td colspan="2">
-									<div class="editdiv" style="margin:10px;display:none;">
+									<div style="margin:10px;">
 										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
 										<input type="submit" name="action" value="Submit Edits" id="editprofile">
 									</div>
@@ -518,7 +482,7 @@ if(isset($profile_viewprofileCrumbs)){
 					</fieldset>
 				</form>
 
-				<div class="editdiv" style="display:none;">
+				<div>
 					<form id="changepwd" name="changepwd" action="viewprofile.php" method="post" onsubmit="return checkPwdForm(this);">
 						<fieldset style='padding:15px;width:500px;'>
 					    	<legend><b>Change Password</b></legend>
@@ -558,29 +522,6 @@ if(isset($profile_viewprofileCrumbs)){
 							</table>
 						</fieldset>
 					</form>
-	<!-- 
-					<form id="newloginform" name="newloginform" action="viewprofile.php" method="post" onsubmit="return checkNewLoginForm(this);">
-						<fieldset style='margin:5px;width:200px;'>
-					    	<legend>Create New Login</legend>
-				            <div style="font-weight:bold;">
-				            	New Login (no spaces): 
-				            	<input id="newlogin" name="newlogin" type="text">
-				            </div> 
-				            <div style="font-weight:bold;">
-				            	Choose a New Password: 
-				            	<input id="newloginpwd" name="newloginpwd" type="password">
-				            </div> 
-							<div style="font-weight:bold;">
-								New Password Again: 
-								<input id="newloginpwd2" name="newloginpwd2" type="password">
-							</div>
-							<div>
-								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-								<input type="submit" name="action" value="Create Login" id="newloginsubmit">
-							</div>
-						</fieldset>
-					</form>
-	 -->
 					<form action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
 						<fieldset style='padding:15px;width:200px;'>
 					    	<legend><b>Delete Profile</b></legend>

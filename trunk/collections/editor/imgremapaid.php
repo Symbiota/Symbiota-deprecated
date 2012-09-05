@@ -35,7 +35,7 @@ $occManager = new OccurrenceEditorImages();
 			<fieldset style="width:450px;">
 				<legend><b>Voucher Search Pane</b></legend>
 				<div style="clear:both;padding:2px;">
-					<div style="float:left;width:130px;">Identifier (GUID, Catalog #):</div>
+					<div style="float:left;width:130px;">Catalog #:</div>
 					<div style="float:left;"><input name="identifier" type="text" /></div>
 				</div>
 				<div style="clear:both;padding:2px;">
@@ -62,7 +62,6 @@ $occManager = new OccurrenceEditorImages();
 						<div style="margin:10px;">
 							<?php 
 							echo '<b>OccId <a href="../individual/index.php?occid='.$occId.'">'.$occId.'</a>:</b> <i>'.$vArr["sciname"].'</i>; ';
-							if($vArr['occurrenceid']) echo $vArr['occurrenceid'].'; ';
 							echo $vArr['recordedby'].' ['.($vArr["recordnumber"]?$vArr["recordnumber"]:"s.n.")."]; ".$vArr["locality"];
 							?>
 							<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occId;?>')">
