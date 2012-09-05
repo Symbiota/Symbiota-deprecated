@@ -673,7 +673,7 @@ class ChecklistManager {
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 
 		$this->setDynamicSql();
-		$sql = 'SELECT o.family, o.sciname, c.institutioncode, o.occurrenceid, o.catalognumber, o.identifiedby, o.dateidentified, '.
+		$sql = 'SELECT o.family, o.sciname, c.institutioncode, o.catalognumber, o.identifiedby, o.dateidentified, '.
 			'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
 			'o.decimallatitude, o.decimallongitude, o.minimumelevationinmeters, o.habitat, o.occurrenceremarks, o.occid, '.
 			'o.localitysecurity, o.collid '.
@@ -686,12 +686,12 @@ class ChecklistManager {
 			'ORDER BY o.family, o.sciname, c.institutioncode ';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->clCon->query($sql)){
-			echo '"family","scientificName","institutionCode","occurrenceId","catalogNumber","identifiedBy","dateIdentified",'.
+			echo '"family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",'.
  			'"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",'.
  			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
 			
 			while($row = $rs->fetch_assoc()){
-				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.$row["occurrenceid"].'","'.
+				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
 					$row["catalognumber"].'","'.$row["identifiedby"].'","'.$row["dateidentified"].'","'.$row["recordedby"].'","'.
 					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
 					$row["county"].'","'.$row["municipality"].'",';
@@ -744,18 +744,44 @@ class ChecklistManager {
 	
 	public function getEditors(){
 		$editorArr = array();
-		$sql = 'SELECT u.uid, CONCAT_WS(" ",u.lastname,u.firstname) as uname, u.email, up.assignedby '.
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
 			'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
 			'WHERE up.pname = "ClAdmin-'.$this->clid.'" ORDER BY u.lastname,u.firstname';
 		if($rs = $this->clCon->query($sql)){
 			while($r = $rs->fetch_object()){
-				$editorArr[$r->uid]['name'] = $r->uname;
-				$editorArr[$r->uid]['email'] = $r->email;
-				$editorArr[$r->uid]['assignedby'] = $r->assignedby;
+				$uName = $r->uname;
+				if(strlen($uName) > 60) $uName = substr($uName,0,60);
+				$editorArr[$r->uid] = $r->uname;
 			}
 			$rs->close();
 		}
 		return $editorArr;
+	}
+
+	public function addEditor($u){
+		$sql = 'INSERT INTO userpermissions(uid,pname) '.
+			'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
+		$this->clCon->query($sql);
+	}
+
+	public function deleteEditor($u){
+		$sql = 'DELETE FROM userpermissions '.
+			'WHERE uid = '.$u.' AND pname = "ClAdmin-'.$this->clid.'"';
+		$this->clCon->query($sql);
+	}
+
+	public function getUserList(){
+		$returnArr = Array();
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
+			'FROM users u '.
+			'ORDER BY u.lastname,u.firstname';
+		//echo $sql;
+		$rs = $this->clCon->query($sql);
+		while($r = $rs->fetch_object()){
+			$returnArr[$r->uid] = $r->uname;
+		}
+		$rs->close();
+		return $returnArr;
 	}
 	
 	public function getVoucherProjects(){

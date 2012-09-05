@@ -53,13 +53,11 @@ elseif($action == "Login"){
         }
     }
 }
-elseif($action == "Search for Login"){
+elseif($action == "Retrieve Login"){
 	$emailAddr = $_REQUEST["emailaddr"];
 	if($emailAddr){
-		$returnStr = $pHandler->lookupLogin($emailAddr);
-		if($returnStr){
-			$login = $returnStr;
-			$statusStr = "Your login is: ".$login;
+		if($pHandler->lookupLogin($emailAddr)){
+			$statusStr = "Your login name will be emailed to you.";
 		}
 		else{
 			$statusStr = "There are no users registered to email address: ".$emailAddr;
@@ -171,11 +169,11 @@ if(isset($profile_indexCrumbs)){
 				Can't Remember Login Name?
 			</div>
 			<div style="color:blue;cursor:pointer;" onclick="document.getElementById('emaildiv').style.display = 'block'">
-				Lookup Login Name
+				Retrieve Login
 			</div>
 			<div class="fieldset" id="emaildiv" style="display:none;margin:5px;">
 				<div>Your Email? <input type="text" name="emailaddr" /></div>
-				<div><input type="submit" name="action" value="Search for Login"/></div>
+				<div><input type="submit" name="action" value="Retrieve Login"/></div>
 			</div>
 		</div>
 	</form>

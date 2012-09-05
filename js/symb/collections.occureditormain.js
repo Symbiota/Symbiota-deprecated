@@ -132,11 +132,6 @@ function catalogNumberChanged(f){
 	searchDupesCatalogNumber(f);
 }
 
-function occurrenceIdChanged(f){
-	fieldChanged('occurrenceid');
-	searchDupesOccurrenceId(f);
-}
-
 function recordNumberChanged(){
 	fieldChanged('recordnumber');
 	autoDupeSearch();
@@ -766,7 +761,6 @@ function verifyDetAddForm(f){
 			curDate = new Date(); 
 		}while(curDate - date < 5000 && pauseSubmit);
 	}
-	alert("a");
 	pendingDataEdits = false;
 	return true;
 }

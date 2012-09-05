@@ -253,11 +253,11 @@ if($isAdmin){
 										</li>
 										<?php 
 									}
-									//Floristic Projects
+									//Inventory Projects
 									if(array_key_exists("ProjAdmin",$userPermissions)){
 										?>
 										<li>
-											<b>Floristic Project Administrator for following projects</b>
+											<b>Administrator for following inventory projects</b>
 											<ul>
 												<?php 
 												$projList = $userPermissions["ProjAdmin"];
@@ -453,7 +453,7 @@ if($isAdmin){
 										}
 										$projectArr = $userManager->getProjectArr($pidArr);
 										if($projectArr){
-											echo "<h2>Floristic Project Management</h2>";
+											echo "<h2>Inventory Project Management</h2>";
 											foreach($projectArr as $k=>$v){
 												?>
 												<div style='margin-left:15px;'>

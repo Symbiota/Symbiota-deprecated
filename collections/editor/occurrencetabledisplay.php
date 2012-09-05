@@ -16,7 +16,7 @@ $displayQuery = 0;
 $isGenObs = 0;
 $collMap = Array();
 $recArr = array();
-$headerMap = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Global Unique Identifier',
+$headerMap = array('catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
 	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',

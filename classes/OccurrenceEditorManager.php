@@ -17,7 +17,7 @@ class OccurrenceEditorManager {
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->occSql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, '.
+		$this->occSql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, '.
 		'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
 		'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
 		'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
@@ -134,14 +134,12 @@ class OccurrenceEditorManager {
 					if(is_numeric($term1) && is_numeric($term2)){
 						$searchIsNum = true; 
 						$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
-						$iBetweenFrag[] = '(o.occurrenceId BETWEEN '.$term1.' AND '.$term2.')';
 						$iBetweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
 					}
 					else{
 						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
 						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
 						$iBetweenFrag[] = '('.$catTerm.')';
-						$iBetweenFrag[] = '(o.occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
 					}
 				}
 				else{
@@ -159,7 +157,7 @@ class OccurrenceEditorManager {
 				}
 			}
 			if($iInFrag){
-				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occurrenceId IN("'.implode('","',$iInFrag).'") OR o.occid IN("'.implode('","',$iInFrag).'")) ';
+				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occid IN("'.implode('","',$iInFrag).'")) ';
 			}
 			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}
@@ -473,7 +471,7 @@ class OccurrenceEditorManager {
 		$status = "SUCCESS: new occurrence record submitted successfully";
 
 		if($occArr){
-			$sql = "INSERT INTO omoccurrences(collid, basisOfRecord, occurrenceID, catalogNumber, otherCatalogNumbers, ".
+			$sql = "INSERT INTO omoccurrences(collid, basisOfRecord, catalogNumber, otherCatalogNumbers, ".
 			"ownerInstitutionCode, family, sciname, tidinterpreted, scientificNameAuthorship, identifiedBy, dateIdentified, ".
 			"identificationReferences, identificationremarks, identificationQualifier, typeStatus, recordedBy, recordNumber, ".
 			"associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, ".
@@ -486,7 +484,6 @@ class OccurrenceEditorManager {
 			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy, observeruid) ".
 			"VALUES (".$occArr["collid"].",".
 			($occArr["basisofrecord"]?"\"".$occArr["basisofrecord"]."\"":"NULL").",".
-			($occArr["occurrenceid"]?"\"".$occArr["occurrenceid"]."\"":"NULL").",".
 			($occArr["catalognumber"]?"\"".$occArr["catalognumber"]."\"":"NULL").",".
 			($occArr["othercatalognumbers"]?"\"".$occArr["othercatalognumbers"]."\"":"NULL").",".
 			($occArr["ownerinstitutioncode"]?"\"".$occArr["ownerinstitutioncode"]."\"":"NULL").",".

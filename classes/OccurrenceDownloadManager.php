@@ -44,7 +44,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	private function setSql($isDwc = false){
 		if($isDwc){
 	 		$this->sql = "SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, ".
-	 			"o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, ".
+	 			"o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, ".
 	 			"o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, ".
 	 			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
 	 			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
@@ -56,7 +56,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
 		 		"o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
 	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) ";
-			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode",
+			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","ownerInstitutionCode",
 				"family","scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet","scientificNameAuthorship",
 	 			"taxonRemarks","identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
 				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
@@ -69,7 +69,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		 		"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId");
 		}
 		else{
-			$this->sql = "SELECT c.institutionCode, c.collectionCode, o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
+			$this->sql = "SELECT c.institutionCode, c.collectionCode, o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, ".
 				"o.sciname, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, ".
 				"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
 				"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, ".
@@ -84,7 +84,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.collid, o.occid ".
 	            "FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ".
 				"LEFT JOIN taxa t ON o.tidinterpreted = t.TID ";
-			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","occurrenceID","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",
+			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","ownerInstitutionCode","family",
 				"scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet",
 				"scientificNameAuthorship","taxonRemarks","identifiedBy","dateIdentified","identificationReferences",
 				"identificationRemarks","identificationQualifier","typeStatus","recordedBy","associatedCollectors",
@@ -228,7 +228,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     	global $userRights, $defaultTitle;
 		$sql = "SELECT o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, ". 
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
-			"c.CollectionName, c.institutioncode, o.occurrenceID, o.occid ".
+			"c.CollectionName, c.institutioncode, o.occid ".
 			"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
@@ -267,7 +267,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     		$outstream = fopen("php://output", "w");
 			$headArr = array("DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters",
 				"GeoreferenceProtocol","GeoreferenceSources","GeoreferenceVerificationStatus","GeoreferenceRemarks",
-				"CollectionName","institutioncode","occurrenceID","occid");
+				"CollectionName","institutioncode","occid");
 			fputcsv($outstream, $headArr);
 			while($row = $result->fetch_row()){
 				fputcsv($outstream, $row);
@@ -349,7 +349,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     		$fileName = $this->buFilePath.$this->buFileName;
     		$specFH = fopen($fileName.'_spec.csv', "w");
 	    	//Output header 
-    		$headerStr = 'occid,dbpk,basisOfRecord,catalogNumber,occurrenceID,otherCatalogNumbers,ownerInstitutionCode, '.
+    		$headerStr = 'occid,dbpk,basisOfRecord,catalogNumber,otherCatalogNumbers,ownerInstitutionCode, '.
 				'family,scientificName,sciname,tidinterpreted,genus,specificEpithet,taxonRank,infraspecificEpithet,scientificNameAuthorship, '.
 				'taxonRemarks,identifiedBy,dateIdentified,identificationReferences,identificationRemarks,identificationQualifier, '.
 				'typeStatus,recordedBy,recordNumber,associatedCollectors,eventDate,year,month,day,startDayOfYear,endDayOfYear, '.

@@ -136,7 +136,6 @@ class DataLoader{
 	
 	//SourceField => ObservationField
 	private $fieldMapArr = Array(
-		//"occurrenceid" => "gui",
 		"identificationQualifier" => "taxonnotes",
 		"dbpk" => "gui",
 		"stateprovince" => "state",

@@ -406,10 +406,7 @@ if($isEditor && $formSubmit){
 										</div>
 										<div style="float:right;margin-right:30px;"> 
 											<?php 
-											if($occArr['occurrenceid']){
-												echo '<span title="Global Unique Identifier">GUID: '.$occArr['occurrenceid'].'<span>';
-											}
-											elseif($occArr['catalognumber']){
+											if($occArr['catalognumber']){
 												echo 'Catalog Number: '.$occArr['catalognumber'];
 											}
 											?>

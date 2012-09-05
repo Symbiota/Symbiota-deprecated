@@ -13,7 +13,7 @@ class SpecDatasetManager {
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		$this->occSql = 'SELECT o.occid, o.collid, o.occurrenceid, o.catalognumber, o.othercatalognumbers, '.
+		$this->occSql = 'SELECT o.occid, o.collid, o.catalognumber, o.othercatalognumbers, '.
 			'o.family, o.sciname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
 			'o.scientificnameauthorship, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
 			'o.identificationremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
@@ -101,13 +101,11 @@ class SpecDatasetManager {
 						if(is_numeric($term1) && is_numeric($term2)){
 							$searchIsNum = true; 
 							$iBetweenFrag[] = '(catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
-							$iBetweenFrag[] = '(occurrenceId BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
 							$catTerm = 'catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
 							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(catalogNumber) = '.strlen($term2); 
 							$iBetweenFrag[] = '('.$catTerm.')';
-							$iBetweenFrag[] = '(occurrenceId BETWEEN "'.$term1.'" AND "'.$term2.'")';
 						}
 					}
 					else{
@@ -119,10 +117,10 @@ class SpecDatasetManager {
 					$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
 				}
 				if($iInFrag){
-					$iWhere .= 'OR (catalogNumber IN("'.implode('","',$iInFrag).'")) OR (occurrenceId IN("'.implode('","',$iInFrag).'")) ';
+					$iWhere .= 'OR (catalogNumber IN("'.implode('","',$iInFrag).'")) ';
 				}
 				$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
-				$sqlOrderBy .= ',catalogNumber,occurrenceId';
+				$sqlOrderBy .= ',catalogNumber';
 			}
 			if($sqlWhere){
 				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT(recordedby," (",IFNULL(recordnumber,"s.n."),")") AS collector, '.
@@ -167,7 +165,7 @@ class SpecDatasetManager {
 			
 			$rs = $this->conn->query($sql);
 			if($rs){
-				echo "\"occid\",\"occurrenceId\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
+				echo "\"occid\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
 				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"taxonRemarks\",\"identifiedBy\",".
 				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"identificationQualifier\",".
 	 			"\"recordedBy\",\"recordNumber\",\"associatedCollectors\",\"eventDate\",\"year\",\"month\",\"monthName\",\"day\",".
@@ -180,7 +178,7 @@ class SpecDatasetManager {
 				while($row = $rs->fetch_assoc()){
 					$dupCnt = $_POST['q-'.$row['occid']];
 					for($i = 0;$i < $dupCnt;$i++){
-						echo $row['occid'].",\"".$row["occurrenceid"]."\",\"".$row["catalognumber"]."\",\"".
+						echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
 							$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
 							$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
 							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".

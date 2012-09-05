@@ -134,11 +134,12 @@ class ChecklistMapper{
         while($row = $result->fetch_object()){
             $idStr = $row->clid;
             $nameStr = $row->name;
+            if(strpos($nameStr,'"') !== false) $nameStr = str_replace('"',"'",$nameStr);
 			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
 			echo "points.push( point".$idStr." );\n";
-			echo "var marker".$idStr." = new google.maps.Marker({ position: point".$idStr.", map: map, title: '".$nameStr."' });\n";
+			echo 'var marker'.$idStr.' = new google.maps.Marker({ position: point'.$idStr.', map: map, title: "'.$nameStr.'" });'."\n";
 			//Single click event
-			echo "var infoWin".$idStr." = new google.maps.InfoWindow({ content: '<div style=\"width:300px;\"><b>".$nameStr."</b><br/>Double Click to open</div>' });\n";
+			echo 'var infoWin'.$idStr.' = new google.maps.InfoWindow({ content: "<div style=\'width:300px;\'><b>'.$nameStr.'</b><br/>Double Click to open</div>" });'."\n";
 			echo "infoWins.push( infoWin".$idStr." );\n";
 			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
 			//Double click event

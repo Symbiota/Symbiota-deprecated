@@ -132,49 +132,41 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				</span>
 			</div>
 			<div style="clear:both;">
-				<div style='clear:both;'>
-					<div style='float:left;'>
-						<b>Taxon:</b> 
-						<?php echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); ?>
-						<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?><br/>
-						<b>Family:</b> <?php echo $occArr['family']; ?>
-					</div>
-					<div style='float:right;'>
-						<?php
-						if($occArr['catalognumber']){ 
-							?>
-							<b>Catalog Number:</b> 
-							<?php 
-							echo $occArr['catalognumber'];
-						}
-						if($occArr['occurrenceid']){
-							?> 
-							<div title="Global Unique Identifier">
-								<b>GUID: </b>
-								<?php echo $occArr['occurrenceid']; ?>
-							</div>
-							<?php 
-						}
-						if($occArr['othercatalognumbers']){
-							?>
-							<div title="Other Catalog Numbers">
-								<b>Additional Catalog #:</b>
-								<?php echo $occArr['othercatalognumbers']; ?>
-							</div>
-							<?php 
-						}
-						if(array_key_exists('loan',$occArr)){
-							?>
-							<div style="color:red;font-weight:bold;" title="<?php echo 'Loan #'.$occArr['loan']['identifier']; ?>">
-								On Loan to 
-								<?php echo $occArr['loan']['code']; ?>
-							</div>
-							<?php 
-						}
+				<div>
+					<?php
+					if(array_key_exists('loan',$occArr)){
 						?>
-					</div>
+						<div style="float:right;color:red;font-weight:bold;" title="<?php echo 'Loan #'.$occArr['loan']['identifier']; ?>">
+							On Loan to 
+							<?php echo $occArr['loan']['code']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['catalognumber']){ 
+						?>
+						<div>
+							<b>Catalog #:</b> 
+							<?php echo $occArr['catalognumber']; ?>
+						</div>
+						<?php 
+					}
+					if($occArr['othercatalognumbers']){
+						?>
+						<div title="Other Catalog Numbers">
+							<b>Secondary Catalog #:</b>
+							<?php echo $occArr['othercatalognumbers']; ?>
+						</div>
+						<?php 
+					}
+					?>
 				</div>
-				<div style="clear:both;">
+				<div>
+					<b>Taxon:</b> 
+					<?php echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); ?>
+					<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?><br/>
+					<b>Family:</b> <?php echo $occArr['family']; ?>
+				</div>
+				<div>
 					<?php 
 					if($occArr['identifiedby']){ 
 						?>
@@ -274,20 +266,19 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
 					?>
 				</div>
-				<div>
-					<?php
-					if($occArr['eventdate']){
-						echo '<b>Collection Date: </b>'; 
-						echo $occArr['eventdate']; 
-						if($occArr['eventdateend']){
-							echo ' - '.$occArr['eventdateend'];
-						}
+				<?php
+				if($occArr['eventdate']){
+					echo '<div><b>Date: </b>'; 
+					echo $occArr['eventdate']; 
+					if($occArr['eventdateend']){
+						echo ' - '.$occArr['eventdateend'];
 					}
-					if($occArr['verbatimeventdate']){
-						echo '<span style="margin-left:30px;"><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</span>';
-					}
-					?>
-				</div> 
+					echo '</div>';
+				}
+				if($occArr['verbatimeventdate']){
+					echo '<div><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</div>';
+				}
+				?>
 				<div>
 					<?php 
 					if($occArr['associatedcollectors']){ 
@@ -360,34 +351,30 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					}
 					if($occArr['minimumelevationinmeters'] || $occArr['verbatimelevation']){
 						?>
-						<div style="clear:both;margin-left:10px;">
-							<div style="float:left;">
-								<b>Elevation:</b>
-								<?php 
-								echo $occArr['minimumelevationinmeters'];
-								if($occArr['maximumelevationinmeters']){
-									echo '-'.$occArr['maximumelevationinmeters'];
-								} 
-								?>
-								meters 
-								<?php
-								if(!$occArr['verbatimelevation']){
-									echo '('.round($occArr['minimumelevationinmeters']*3.28).($occArr['maximumelevationinmeters']?'-'.round($occArr['maximumelevationinmeters']*3.28):'').'ft)'; 
-								}
-								?>
-							</div>
+						<div style="margin-left:10px;">
+							<b>Elevation:</b>
+							<?php 
+							echo $occArr['minimumelevationinmeters'];
+							if($occArr['maximumelevationinmeters']){
+								echo '-'.$occArr['maximumelevationinmeters'];
+							} 
+							?>
+							meters 
 							<?php
-							if($occArr['verbatimelevation']){
-								?>
-								<div style="float:right;">
-									<b>Verbatim Elevation: </b>
-									<?php echo $occArr['verbatimelevation']; ?>
-								</div>
-								<?php 
+							if(!$occArr['verbatimelevation']){
+								echo '('.round($occArr['minimumelevationinmeters']*3.28).($occArr['maximumelevationinmeters']?'-'.round($occArr['maximumelevationinmeters']*3.28):'').'ft)'; 
 							}
 							?>
 						</div>
-						<?php 
+						<?php
+						if($occArr['verbatimelevation']){
+							?>
+							<div>
+								<b>Verbatim Elevation: </b>
+								<?php echo $occArr['verbatimelevation']; ?>
+							</div>
+							<?php 
+						}
 					}
 					if($occArr['habitat']){ 
 						?>

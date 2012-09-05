@@ -52,7 +52,6 @@ HAVING Count(*)>1 AND collid = 1 AND catalognumber IS NOT NULL) rt ON o.catalogn
 WHERE o.collid = 1;
 			
 			
-			//Look for duplicate occurrenceids
 
 			//Look for bad taxonomic names
 			

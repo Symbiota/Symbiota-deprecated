@@ -55,7 +55,6 @@ if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 					$tempOcc = $oArr;
 					unset($tempOcc['occid']);
 					unset($tempOcc['catalognumber']);
-					unset($tempOcc['occurrenceid']);
 					unset($tempOcc['othercatalognumbers']);
 					if(!$isExactMatch){
 						unset($tempOcc['family']);
@@ -165,8 +164,6 @@ if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 						</div>
 						<div style="font-weight:bold;">
 							<?php 
-							if($occObj['occurrenceid']) echo $occObj['occurrenceid'];
-							if($occObj['occurrenceid'] && $occObj['catalognumber']) echo ', '; 
 							if($occObj['catalognumber']) echo $occObj['catalognumber'];
 							if($occObj['othercatalognumbers']) echo ' ('.$occObj['othercatalognumbers'].')';
 							?>

@@ -9,7 +9,7 @@ class OccurrenceEditorDupes {
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 		$this->sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, '.
-			'o.occid, o.collid AS colliddup, o.catalognumber, o.occurrenceid, o.othercatalognumbers, '.
+			'o.occid, o.collid AS colliddup, o.catalognumber, o.othercatalognumbers, '.
 			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
 			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
 			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
@@ -47,10 +47,10 @@ class OccurrenceEditorDupes {
 		if($lastName && $collNum){
 			$sql = 'SELECT occid FROM omoccurrences ';
 
-			$sql .= 'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") '.
+			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") '.
 				'AND (recordnumber LIKE "'.$collNum.'") ';
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
-	
+
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -165,7 +165,7 @@ class OccurrenceEditorDupes {
 				$this->sql .= 'WHERE (o.occid = '.$occidQuery.') ';
 			}
 			$this->sql .= 'ORDER BY recordnumber';
-			//echo $sql;
+			//echo $this->sql;
 			$result = $this->conn->query($this->sql);
 			while ($row = $result->fetch_assoc()) {
 				$retArr[$row['occid']] = array_change_key_case($row);

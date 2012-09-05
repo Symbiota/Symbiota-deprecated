@@ -99,7 +99,7 @@ class ExsiccatiManager {
 
 	public function getExsOccArr($omenid){
 		$retArr = array();
-		$sql = 'SELECT ol.ranking, ol.notes, o.occid, o.occurrenceid, o.catalognumber, '.
+		$sql = 'SELECT ol.ranking, ol.notes, o.occid, o.catalognumber, '.
 			'o.sciname, o.scientificnameauthorship, o.recordedby, o.recordnumber, DATE_FORMAT(o.eventdate,"%d %M %Y") AS eventdate, '.
 			'trim(o.country) AS country, trim(o.stateprovince) AS stateprovince, trim(o.county) AS county, '.
 			'trim(o.municipality) AS municipality, o.locality, i.thumbnailurl, i.url '.
@@ -110,7 +110,6 @@ class ExsiccatiManager {
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['ranking'] = $r->ranking;
 				$retArr[$r->occid]['notes'] = $r->notes;
-				$retArr[$r->occid]['occurrenceid'] = $r->occurrenceid;
 				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
 				$retArr[$r->occid]['sciname'] = $r->sciname;
 				$retArr[$r->occid]['author'] = $r->scientificnameauthorship;
