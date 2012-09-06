@@ -1023,7 +1023,7 @@ if($symbUid){
 												<div style="margin:15px">
 													Record first needs to be evaluated before it can be deleted from the system. 
 													The evaluation ensures that the deletion of this record will not interfer with 
-													the integrity of other data linked to this record. Note that all determination and 
+													the integrity of other linked data. Note that all determination and 
 													comments for this occurrence will be automatically deleted. Links to images, checklist vouchers, 
 													and surveys will have to be individually addressed before can be deleted.      
 													<div style="margin:15px;display:block;">

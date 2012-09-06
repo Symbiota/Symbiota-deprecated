@@ -30,19 +30,8 @@ class TaxonomyEditorManager{
 	private $acceptedArr = Array();
 	private $synonymArr = Array();
 
-	function __construct($target) {
+	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		if(is_numeric($target)){
-			$this->tid = $target;
-		}
-		else{
-			$sql = "SELECT T.tid FROM taxa t WHERE (t.sciname = '".$this->conn->real_escape_string($target)."')";
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->tid = $row->tid;
-			}
-			$rs->close();
-		}
 	}
 	
 	function __destruct(){
@@ -50,7 +39,6 @@ class TaxonomyEditorManager{
 	}
 	
 	public function setTaxon(){
-		
 		$sqlTaxon = "SELECT t.tid, t.kingdomid, t.rankid, tu.rankname, t.sciname, t.unitind1, t.unitname1, ".
 			"t.unitind2, t.unitname2, t.unitind3, t.unitname3, t.author, ts.parenttid, t.source, t.notes, ts.hierarchystr, ".
 			"t.securitystatus, t.initialtimestamp, ts.tidaccepted, ts.unacceptabilityreason, ".
@@ -480,11 +468,261 @@ class TaxonomyEditorManager{
 		}
 	}
 	
+	//Load Taxon functions
+	public function getKingdomIds(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT tu.kingdomid FROM taxonunits tu ORDER BY tu.kingdomid';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$retArr[$row->kingdomid] = $row->kingdomid;
+		}
+		return $retArr;
+	}
+	
+	public function getTaxonRanks(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT tu.rankid, tu.rankname FROM taxonunits tu ORDER BY tu.rankid';
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$retArr[$row->rankid] = $row->rankname;
+		}
+		return $retArr;
+	}
+	
+	public function loadNewName($dataArr){
+		//Load new name into taxa table
+		$tid = 0;
+		$sqlTaxa = "INSERT INTO taxa(sciname, author, kingdomid, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
+			"source, notes, securitystatus) ".
+			"VALUES (\"".$this->conn->real_escape_string($dataArr["sciname"])."\",".($dataArr["author"]?"\"".$this->conn->real_escape_string($dataArr["author"])."\"":"NULL").
+			",".$dataArr["kingdomid"].
+			",".$dataArr["rankid"].
+			",".($dataArr["unitind1"]?"\"".$this->conn->real_escape_string($dataArr["unitind1"])."\"":"NULL").
+			",\"".$this->conn->real_escape_string($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->conn->real_escape_string($dataArr["unitind2"])."\"":"NULL").
+			",".($dataArr["unitname2"]?"\"".$this->conn->real_escape_string($dataArr["unitname2"])."\"":"NULL").
+			",".($dataArr["unitind3"]?"\"".$this->conn->real_escape_string($dataArr["unitind3"])."\"":"NULL").
+			",".($dataArr["unitname3"]?"\"".$this->conn->real_escape_string($dataArr["unitname3"])."\"":"NULL").
+			",".($dataArr["source"]?"\"".$this->conn->real_escape_string($dataArr["source"])."\"":"NULL").",".
+			($dataArr["notes"]?"\"".$this->conn->real_escape_string($dataArr["notes"])."\"":"NULL").
+			",".$this->conn->real_escape_string($dataArr["securitystatus"]).")";
+		//echo "sqlTaxa: ".$sqlTaxa;
+		if($this->conn->query($sqlTaxa)){
+			$tid = $this->conn->insert_id;
+		 	//Load accepteance status into taxstatus table
+			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
+			$parTid = $this->conn->real_escape_string($dataArr["parenttid"]);
+			if(!$parTid && $dataArr["rankid"] == 10) $parTid = $tid; 
+			if($parTid){ 
+				if($dataArr["rankid"] > 10) $hierarchy = $this->buildHierarchy($dataArr["parenttid"]);
+				//Get family from hierarchy
+				$family = '';
+				$sqlFam = 'SELECT sciname FROM taxa WHERE (tid IN('.$hierarchy.')) AND rankid = 140 ';
+				$rsFam = $this->conn->query($sqlFam);
+				if($rsFam){
+					if($r = $rsFam->fetch_object()){
+						$family = $r->sciname;
+					}
+				}
+				
+				//Load new record into taxstatus table
+				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
+					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
+					($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
+					",".($parTid?$parTid:"NULL").",\"".
+					$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
+				//echo "sqlTaxStatus: ".$sqlTaxStatus;
+				if(!$this->conn->query($sqlTaxStatus)){
+					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
+				}
+			}
+		 	
+			//Link new name to existing specimens and set locality secirity if needed
+			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
+			if($dataArr['securitystatus'] == 1) $sql1 .= ',o.localitysecurity = 1 '; 
+			$sql1 .= 'WHERE (o.sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'") ';
+			$this->conn->query($sql1);
+			//Link occurrence images to the new name
+			$sql2 = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'SET i.tid = o.tidinterpreted '.
+				'WHERE i.tid is null AND o.tidinterpreted IS NOT NULL';
+			$this->conn->query($sql2);
+			//Add their geopoints to omoccurgeoindex 
+			$sql3 = "INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) ".
+				"SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) ".
+				"FROM omoccurrences o ".
+				"WHERE (o.tidinterpreted = ".$tid.") AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL";
+			$this->conn->query($sql3);
+			
+		}
+		else{
+			return 'Taxon Insert FAILED: '.$this->conn->error.'; SQL = '.$sqlTaxa;
+		}
+		return $tid;
+	}
+	
+	private function buildHierarchy($tid){
+		$parentArr = Array($tid);
+		$parCnt = 0;
+		$targetTid = $this->conn->real_escape_string($tid);
+		do{
+			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE (ts.tid = ".$targetTid.')';
+			//echo "<div>".$sqlParents."</div>";
+			$resultParent = $this->conn->query($sqlParents);
+			if($rowParent = $resultParent->fetch_object()){
+				$parentTid = $rowParent->parenttid;
+				if($parentTid) {
+					$parentArr[$parentTid] = $parentTid;
+				}
+			}
+			else{
+				break;
+			}
+			$resultParent->close();
+			$parCnt++;
+			if($targetTid == $parentTid) break;
+			$targetTid = $parentTid;
+		}while($targetTid && $parCnt < 16);
+		
+		return implode(",",array_reverse($parentArr));
+	}
+
+	//Delete taxon functions
+	public function verifyDeleteTaxon(){
+		$retArr = array();
+		
+		//Field images
+		$sql ='SELECT COUNT(imgid) AS cnt FROM images WHERE tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['img'] = $r->cnt;
+		}
+		$rs->free();
+		
+		//Vernaculars
+		$sql ='SELECT vernacularname FROM taxavernaculars WHERE tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['vern'][] = $r->vernacularname;
+		}
+		$rs->free();
+		
+		//Text Descriptions
+		$sql ='SELECT tdbid,caption FROM taxadescrblock WHERE tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['tdesc'][$r->tdbid] = $r->caption;
+		}
+		$rs->free();
+		
+		//Checklists and Vouchers
+		$sql ='SELECT c.clid, c.name '.
+			'FROM fmchecklists c INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid '.
+			'WHERE cl.tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['cl'][$r->clid] = $r->name;
+		}
+		$rs->free();
+		
+		//Key descriptions
+		$sql ='SELECT COUNT(*) AS cnt FROM kmdescr WHERE inherited IS NULL AND tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['kmdesc'] = $r->cnt;
+		}
+		$rs->free();
+		
+		//Taxon links
+		$sql ='SELECT title FROM taxalinks WHERE tid = '.$this->tid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['link'][] = $r->title;
+		}
+		$rs->free();
+		
+		return $retArr;
+	}
+	
+	public function transferResources($targetTid){
+		if($targetTid){
+			//Field images
+			$sql ='UPDATE IGNORE images SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			//Vernaculars
+			$sql ='UPDATE IGNORE taxavernaculars SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			//Text Descriptions
+			$sql ='UPDATE IGNORE taxadescrblock SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			//Checklists and Vouchers
+			$sql ='UPDATE IGNORE fmchklsttaxalink SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			//Key descriptions
+			$sql ='UPDATE IGNORE kmdescr SET tid = '.$targetTid.' WHERE inherited IS NULL AND tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			//Taxon links
+			$sql ='UPDATE IGNORE taxalinks SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			
+			return $this->deleteTaxon();
+		}
+	}
+	
+	public function deleteTaxon(){
+		//Field images
+		$sql ='DELETE FROM images WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Vernaculars
+		$sql ='DELETE FROM taxavernaculars WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Text Descriptions
+		$sql ='DELETE FROM taxadescrblock WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Vouchers
+		$sql ='DELETE FROM fmvouchers WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Checklists
+		$sql ='DELETE FROM fmchklsttaxalink WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Key descriptions
+		$sql ='DELETE FROM kmdescr WHERE inherited IS NULL AND tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Taxon links
+		$sql ='DELETE FROM taxalinks WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+
+		//Taxon status
+		$sql ='DELETE FROM taxstatus WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+		
+		//Delete taxon
+		$sql ='DELETE FROM taxa WHERE tid = '.$this->tid;
+		if($this->conn->query($sql)){
+			return 'SUCCESS: taxon deleted!<br/><a href="taxonomydisplay.php">Return to taxonomy display page</a>';
+		}
+		return 0;
+	}
+	
 	//Regular getter functions for this class
 	public function getTargetName(){
 		return $this->targetName;
 	}
 
+	public function setTid($tid){
+		$this->tid = $tid;
+	}
+	
 	public function getTid(){
 		return $this->tid;
 	}
@@ -590,5 +828,6 @@ class TaxonomyEditorManager{
 	public function getSynonyms(){
 		return $this->synonymArr;
 	}
+
 }
 ?>

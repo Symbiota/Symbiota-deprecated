@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/TaxonomyLoaderManager.php');
+include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -10,7 +10,7 @@ $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 $status = "";
 
-$loaderObj = new TaxonomyLoaderManager();
+$loaderObj = new TaxonomyEditorManager();
  
 $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
@@ -118,7 +118,7 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 						</span>
 						<input type="hidden" id="parenttid" name="parenttid" value="" />
 					</div>
-					<div id="uppertaxondiv" name="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
+					<div id="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
 						<div style="float:left;width:140px;">Upper Taxon Grouping:</div>
 						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" />
 					</div>
