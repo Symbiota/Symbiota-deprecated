@@ -4,18 +4,22 @@ var rankHigh;
 var taxAuthId;
 
 $(document).ready(function() {
-	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3, autoFocus: true });
+
+	$('#tabs').tabs();
+
+	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3 });
 
 	$("#parentstr").autocomplete({
 		source: function( request, response ) {
 			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.taxauthidform.taxauthid.value, rhigh: document.taxoneditform.rankid.value }, response );
 		}
-	},{ minLength: 3, autoFocus: true }
+	},{ minLength: 3 }
 	);
 
-	$("#aefacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+	$("#aefacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3 });
 
-	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3, autoFocus: true });
+	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3 });
+
 });
 
 function toggle(target){
