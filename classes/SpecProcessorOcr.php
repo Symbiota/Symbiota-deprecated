@@ -48,7 +48,7 @@ class SpecProcessorOcr{
 			while($r = $rs->fetch_object()){
 				$collArr[] = $r->collid; 
 			}
-			$rs-free();
+			$rs->free();
 		}
 		if(!$this->silent) $this->logMsg("Starting batch processing\n");
 		foreach($collArr as $cid){
