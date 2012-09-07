@@ -675,6 +675,8 @@ class TaxonomyEditorManager{
 	
 	public function deleteTaxon(){
 		//Field images
+		$sql ='UPDATE images SET tid = NULL WHERE occid IS NOT NULL AND tid = '.$this->tid;
+		$this->conn->query($sql);
 		$sql ='DELETE FROM images WHERE tid = '.$this->tid;
 		$this->conn->query($sql);
 		
@@ -684,6 +686,10 @@ class TaxonomyEditorManager{
 		
 		//Text Descriptions
 		$sql ='DELETE FROM taxadescrblock WHERE tid = '.$this->tid;
+		$this->conn->query($sql);
+
+		//occurrences
+		$sql = 'UPDATE omoccurrences SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
 		$this->conn->query($sql);
 		
 		//Vouchers

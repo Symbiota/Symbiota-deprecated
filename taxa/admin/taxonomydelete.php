@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 
 $tid = $_REQUEST["tid"];
+$genusStr = array_key_exists('genusstr',$_REQUEST)?$_REQUEST["genusstr"]:'';
 
 $taxonEditorObj = new TaxonomyEditorManager();
 $taxonEditorObj->setTid($tid);
@@ -42,16 +43,16 @@ function validateRemapTaxonForm(f){
 
 </script>
 	<div style="min-height:400px; height:auto !important; height:400px; ">
-		Taxon record first needs to be evaluated before it can be deleted from the system. 
-		The evaluation ensures that the deletion of this record will not interfer with 
-		data integrity.      
-		
-		<div style="font-weight:bold;font-size:110%;margin-bottom:10px;">Linked Data</div>
+		<div style="margin:15px 0px">
+			Taxon record first needs to be evaluated before it can be deleted from the system. 
+			The evaluation ensures that the deletion of this record will not interfer with 
+			data integrity.      
+		</div>
 		<div style="margin:15px;">
 			<b>Images</b>
 			<div style="margin:10px"> 
 				<?php 
-				if(array_key_exists('img',$verifyArr)){
+				if($verifyArr['img'] > 0){
 					?>
 					<span style="color:red;">Warning: <?php echo $verifyArr['img']; ?> images linked to this taxon</span> 
 					<?php 
@@ -183,7 +184,8 @@ function validateRemapTaxonForm(f){
 					</div>
 					<div>
 						<input name="submitaction" type="submit" value="Remap Taxon" /> 
-						<input name="target" type="hidden" value="<?php echo $tid; ?>" /> 
+						<input name="target" type="hidden" value="<?php echo $tid; ?>" />
+						<input name="genusstr" type="hidden" value="<?php echo $genusStr; ?>" /> 
 					</div>
 				</form>
 			</fieldset>
@@ -197,6 +199,7 @@ function validateRemapTaxonForm(f){
 					<div>
 						<input name="submitaction" type="submit" value="Delete Taxon" /> 
 						<input name="target" type="hidden" value="<?php echo $tid; ?>" /> 
+						<input name="genusstr" type="hidden" value="<?php echo $genusStr; ?>" /> 
 					</div>
 				</form>
 			</fieldset>

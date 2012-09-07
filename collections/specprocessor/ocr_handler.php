@@ -1,15 +1,24 @@
 <?php
-date_default_timezone_set('America/Phoenix');
-$charset = 'ISO-8859-1';//"UTF-8";
-$tempDirRoot = $SERVER['PHP_SELF'];
-$tesseractPath = 'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe';
-include_once('dbconnection.php');
-include_once('SpecProcessorOcr.php');
+//This file can be triggered by a CRON job for automatci OCR of unprocessed images
+//Following example OCR collection ids 1,4, and 5. Script will also out to log file  
+//php ocr_handler.php '1,4,5' 0
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/classes/SpecProcessorOcr.php');
+
+$silent = 1;
+$collStr = '';
+if(array_key_exists(1,$argv)){
+	$collStr = $argv[1];
+} 
+if(array_key_exists(2,$argv)){
+	$silect = $argv[2];
+} 
 
 $ocrManager = new SpecProcessorOcr();
+$ocrManager->setSilent($silent);		//Turn on logging
 
-$collArr = array(28);
-//$collArr = array(2,22,28,31,32);
+$collArr = array();
+if($collStr) $collArr = explode(',',$collStr);		
 $ocrManager->batchOcrUnprocessed($collArr,1);
 
 ?>

@@ -77,7 +77,7 @@ if($editable){
 	}
 	elseif($submitAction == 'Remap Taxon'){
 		$statusStr = $taxonEditorObj->transferResources($_REQUEST['remaptid']);
-		header('Location: taxonomydisplay.php');
+		header('Location: taxonomydisplay.php?target='.$_REQUEST["genusstr"]);
 	}
 	elseif($submitAction == 'Delete Taxon'){
 		$statusStr = $taxonEditorObj->deleteTaxon();
@@ -151,7 +151,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 		        <li><a href="#editdiv">Editor</a></li>
 		        <li><a href="#taxonstatusdiv">Taxonomic Status</a></li>
 		        <li><a href="#hierarchydiv">Hierarchy</a></li>
-		        <li><a href="taxonomydelete.php?tid=<?php echo $target; ?>">Delete</a></li>
+		        <li><a href="taxonomydelete.php?tid=<?php echo $target; ?>&genusstr=<?php echo $taxonEditorObj->getUnitName1(); ?>">Delete</a></li>
 		    </ul>
 			<div id="editdiv" style="height:400px;">
 				<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editfield');" title="Toggle Taxon Editing Functions">
