@@ -19,7 +19,7 @@ $ocrManager->setSilent($silent);		//Turn on logging
 
 $collArr = array();
 if($collStr) $collArr = explode(',',$collStr);		
-set_time_limit(10800);
+set_time_limit(7200);
 $ocrManager->batchOcrUnprocessed($collArr,1);
 
 ?>
