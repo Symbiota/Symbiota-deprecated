@@ -2,7 +2,7 @@
 /*
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php)
  */
-//include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/config/dbconnection.php');
 
 class SpecProcessorOcr{
 
@@ -31,13 +31,28 @@ class SpecProcessorOcr{
 		//unlink($this->imgUrlLocal);
 	}
 
-	public function batchOcrUnprocessed($collArr = 0,$getBest = 0){
+	public function batchOcrUnprocessed($inCollArr = 0,$getBest = 0){
 		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
 		//Triggered automaticly (crontab) on a nightly basis
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		$collArr = array();
+		if($inCollArr && is_array($inCollArr) && count($inCollArr) > 0){
+			$collArr = $inCollArr;
+		}
+		else{
+			$sql = 'SELECT DISTINCT collid '.
+				'FROM omoccurrences o INNER JOIN images i ON i.occid = o.occid '.
+				'LEFT JOIN specprocessorrawlabels rl ON i.imgid = rl.imgid '.
+				'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$collArr[] = $r->collid; 
+			}
+			$rs-free();
+		}
 		if(!$this->silent) $this->logMsg("Starting batch processing\n");
 		foreach($collArr as $cid){
-			if($cid){
+			if($cid && is_numeric($cid)){
 				if(!$this->silent) $this->logMsg("\tProcessing collid".$cid."\n");
 				$sql = 'SELECT i.imgid, IFNULL(i.originalurl, i.url) AS url, o.sciName '.
 					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
@@ -502,6 +517,10 @@ class SpecProcessorOcr{
 	}
 	public function setCropH($h){
 		$this->cropH = $h;
+	}
+	
+	public function setSilent($s){
+		$this->silent = $s;
 	}
 
 	/*public function addFilterVariable($k,$v){
