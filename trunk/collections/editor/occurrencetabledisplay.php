@@ -237,23 +237,39 @@ if($symbUid){
 				}					
 				?>
 				<div style="width:790px;clear:both;">
-					<span class='navpath'>
-						<a href="../../index.php">Home</a> &gt;&gt;
-						<?php
-						if(!$isGenObs || $isAdmin){ 
+					<?php
+					if(isset($collections_editor_occurrencetableviewCrumbs)){
+						if($collections_editor_occurrencetableviewCrumbs){
 							?>
-							<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-							<?php
+							<div class='navpath'>
+								<a href='../../index.php'>Home</a> &gt;&gt; 
+								<?php echo $collections_editor_occurrencetableviewCrumbs; ?>
+								<b>Occurrence Record Table View</b>
+							</div>
+							<?php 
 						}
-						if($isGenObs){ 
+					}
+					else{
+					?>
+						<span class='navpath'>
+							<a href="../../index.php">Home</a> &gt;&gt;
+							<?php
+							if(!$isGenObs || $isAdmin){ 
+								?>
+								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+								<?php
+							}
+							if($isGenObs){ 
+								?>
+								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+								<?php
+							}
 							?>
-							<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
-							<?php
-						}
-						?>
-						<b>Occurrence Record Table View</b>
-					</span>
-					<?php echo $navStr; ?>
+							<b>Occurrence Record Table View</b>
+						</span>
+					<?php
+					}
+					echo $navStr; ?>
 				</div>
 				<?php 
 				if($recArr){
