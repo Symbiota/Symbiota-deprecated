@@ -196,12 +196,12 @@ elseif($exchangeId){
 					$numSpecimens = $exchangeTotal;
 				}
 				else{
-					if($specTotal){
-						if($specTotal['speccount'] == 1){
+					if($specList){
+						if(count($specList) == 1){
 							$numSpecimens = 1;
 						}
 						else{
-							$numSpecimens = $specTotal['speccount'];
+							$numSpecimens = count($specList);
 						}
 					}
 					else{
@@ -214,18 +214,41 @@ elseif($exchangeId){
 					}
 				}
 				
+				$numBoxes = 0;
+				if($loanType == 'Exchange'){
+					$numBoxes = $exchangeTotal;
+				}
+				else{
+					if($loanType == 'out'){
+						if($invoiceArr['totalboxes'] == 1){
+							$numBoxes = 1;
+						}
+						else{
+							$numBoxes = $invoiceArr['totalboxes'];
+						}
+					}
+					else{
+						if($invoiceArr['totalboxesreturned'] == 1){
+							$numBoxes = 1;
+						}
+						else{
+							$numBoxes = $invoiceArr['totalboxesreturned'];
+						}
+					}
+				}
+				
 				if($english){
-					echo '<div>We are sending you '.($invoiceArr['totalboxes'] == 1?'1 box ':$invoiceArr['totalboxes'].' boxes ');
-					echo 'containing '.(count($specList) == 1?'1 specimen. ':count($specList).' specimens. ');
-					echo ($invoiceArr['totalboxes'] == 1?'This package was ':'These packages were ');
-					echo 'delivered via '.$invoiceArr['shippingmethod'].'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
+					echo '<div>We are sending you '.($numBoxes == 1?'1 box ':$numBoxes.' boxes ');
+					echo 'containing '.($numSpecimens == 1?'1 specimen. ':$numSpecimens.' specimens. ');
+					echo ($numBoxes == 1?'This package was ':'These packages were ');
+					echo 'delivered via '.($loanType == 'in'?$invoiceArr['shippingmethodreturn']:$invoiceArr['shippingmethod']).'. Upon arrival of the shipment, kindly verify its contents and acknowledge ';
 					echo 'receipt by signing and returning the duplicate invoice to us.</div><br />';
 				}
 				if($spanish){
-					echo '<div>Est&aacute;mos remitiendo a Uds. '.($invoiceArr['totalboxes'] == 1?'1 caja ':$invoiceArr['totalboxes'].' cajas ');
-					echo 'de '.(count($specList) == 1?'1 ejemplar. ':count($specList).' ejemplares. ');
-					echo ($invoiceArr['totalboxes'] == 1?'Esta remesa hubiera enviado ':'Estas remesas hubieran enviado ');
-					echo 'por '.$invoiceArr['shippingmethod'].'. Al llegar la remesa, por favor verifique los contenidos y s&iacute;rvase acusar ';
+					echo '<div>Est&aacute;mos remitiendo a Uds. '.($numBoxes == 1?'1 caja ':$numBoxes.' cajas ');
+					echo 'de '.($numSpecimens == 1?'1 ejemplar. ':$numSpecimens.' ejemplares. ');
+					echo ($numBoxes == 1?'Esta remesa hubiera enviado ':'Estas remesas hubieran enviado ');
+					echo 'por '.($loanType == 'in'?$invoiceArr['shippingmethodreturn']:$invoiceArr['shippingmethod']).'. Al llegar la remesa, por favor verifique los contenidos y s&iacute;rvase acusar ';
 					echo 'recibo de esta remesa firmiendo una de las copias y devolvi&eacute;ndo la por correo.</div><br />';
 				}
 				?>
