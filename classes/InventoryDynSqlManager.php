@@ -5,7 +5,7 @@
  */
 include_once($serverRoot.'/config/dbconnection.php');
  
-class FloraDynSqlManager {
+class InventoryDynSqlManager {
 
 	private $conn;
 	private $clid;

@@ -821,7 +821,7 @@ if($symbUid){
 											</div>
 											<div style="padding:3px;clear:both;">
 												<div style="float:left;">
-													Reproductive Condition:
+													Phenology:
 													<a href="#" onclick="return dwcDoc('reproductiveCondition')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
