@@ -761,13 +761,17 @@ class ChecklistManager {
 	public function addEditor($u){
 		$sql = 'INSERT INTO userpermissions(uid,pname) '.
 			'VALUES('.$u.',"ClAdmin-'.$this->clid.'")';
-		$this->clCon->query($sql);
+		$conn = MySQLiConnectionFactory::getCon("write");
+		$conn->query($sql);
+		$conn->close();
 	}
 
 	public function deleteEditor($u){
 		$sql = 'DELETE FROM userpermissions '.
 			'WHERE uid = '.$u.' AND pname = "ClAdmin-'.$this->clid.'"';
-		$this->clCon->query($sql);
+		$conn = MySQLiConnectionFactory::getCon("write");
+		$conn->query($sql);
+		$conn->close();
 	}
 
 	public function getUserList(){
