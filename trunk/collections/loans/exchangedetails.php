@@ -249,7 +249,7 @@
 						<input type="radio" name="languagedef" value="2" /> Spanish
 					</div>
 					<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-					<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+					<input name="exchangeid" type="hidden" value="<?php echo $exchangeId; ?>" />
 					<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
 					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="invoice">Invoice</button>
 					<button name="formsubmit" type="submit" onclick="document.pressed=this.value" value="label">Mailing Label</button>
