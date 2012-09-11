@@ -405,7 +405,7 @@
 										<li>
 											<?php echo $uName; ?> 
 											<a href="checklist.php?cl=<?php echo $clid.'&deleteuid='.$uid.'&proj='.$pid; ?>" onclick="return confirm('Are you sure you want to remove editing rights for this user?');" title="Delete this user">
-												<img src="../../images/drop.png" style="width:12px;" />
+												<img src="../images/drop.png" style="width:12px;" />
 											</a>
 										</li>
 										<?php 
