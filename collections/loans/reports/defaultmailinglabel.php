@@ -90,7 +90,9 @@ elseif($exchangeId){
 							if($addressArr['institutionname2']){
 								echo $addressArr['institutionname2'].'<br />';
 							}
-							echo $addressArr['address1'].'<br />';
+							if($addressArr['address1']){
+								echo $addressArr['address1'].'<br />';
+							}
 							if($addressArr['address2']){
 								echo $addressArr['address2'].'<br />';
 							}
@@ -111,7 +113,9 @@ elseif($exchangeId){
 							if($invoiceArr['institutionname2']){
 								echo $invoiceArr['institutionname2'].'<br />';
 							}
-							echo $invoiceArr['address1'].'<br />';
+							if($invoiceArr['address1']){
+								echo $invoiceArr['address1'].'<br />';
+							}
 							if($invoiceArr['address2']){
 								echo $invoiceArr['address2'].'<br />';
 							}
