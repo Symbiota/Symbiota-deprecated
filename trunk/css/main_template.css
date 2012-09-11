@@ -186,6 +186,11 @@ div.tnimg{
 	overflow:	hidden;
 }
 
+div.tnimg a{
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+}
 
 /* /collections/ folder pages */
 #omlisttable{

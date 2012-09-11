@@ -1,13 +1,14 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
  
-class FloraProjectManager {
+class InventoryProjectManager {
 
 	private $con;
 	private $projId;
 	private $googleUrl;
 	private $researchCoord = Array();
 	private $surveyCoord = Array();
+	private $isPublic = 1;
 
 	public function __construct(){
 		$this->con = MySQLiConnectionFactory::getCon("readonly");
@@ -74,6 +75,9 @@ class FloraProjectManager {
 				$returnArr['occurrencesearch'] = $row->occurrencesearch;
 				$returnArr['ispublic'] = $row->ispublic;
 				$returnArr['sortsequence'] = $row->sortsequence;
+				if($row->ispublic == 0){
+					$this->isPublic = 0;
+				}
 			}
 			$rs->close();
 		}
@@ -113,8 +117,9 @@ class FloraProjectManager {
 		$returnArr = Array();
 		$sql = "SELECT c.clid, c.name, c.latcentroid, c.longcentroid ".
 			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".
-			"WHERE (c.access = 'public') AND (cpl.pid = ".$this->projId.") ".
-			"ORDER BY c.SortSequence, c.name";
+			"WHERE (cpl.pid = ".$this->projId.")  ";
+		if($this->isPublic) $sql .= 'AND (c.access != "private") ';
+		$sql .= "ORDER BY c.SortSequence, c.name";
 		$rs = $this->con->query($sql);
 		echo "<ul>";
 		while($row = $rs->fetch_object()){

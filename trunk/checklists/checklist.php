@@ -658,7 +658,7 @@
 							if($imgSrc){
 								$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 								echo "<a href='".$spUrl."' target='_blank'>";
-								echo "<img src='".$imgSrc."' style='height:100%;' />";
+								echo "<img src='".$imgSrc."' />";
 								echo "</a>";
 							}
 							else{

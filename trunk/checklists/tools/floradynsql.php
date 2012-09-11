@@ -4,7 +4,7 @@
  * By E.E. Gilbert
  */
 	include_once('../../config/symbini.php');
-	include_once($serverRoot.'/classes/FloraDynSqlManager.php');
+	include_once($serverRoot.'/classes/InventoryDynSqlManager.php');
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -12,7 +12,7 @@
 	$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 	$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 	
-	$dynSqlManager = new FloraDynSqlManager($clid);
+	$dynSqlManager = new InventoryDynSqlManager($clid);
 	$isEditable = false;
 	$statusStr = "";
 	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid(),$userRights["ClAdmin"]))){

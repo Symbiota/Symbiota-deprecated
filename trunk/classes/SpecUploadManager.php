@@ -419,7 +419,7 @@ class SpecUploadManager{
 			ob_flush();
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid '.
+				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
 				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
 			$this->conn->query($sql);
 			echo 'Done!</li> ';

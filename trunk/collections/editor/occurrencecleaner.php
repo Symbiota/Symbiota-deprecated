@@ -4,7 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
+$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
 $cleanManager = new OccurrenceCleaner();
 if($collId) $cleanManager->setCollId($collId);
@@ -28,7 +28,7 @@ if($isEditor){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
+	<title><?php echo $defaultTitle; ?> Occurrence Cleaner</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script type="text/javascript">
 
@@ -42,14 +42,31 @@ if($isEditor){
 	<div id="innertext">
 		<?php 
 		if($symbUid && $collId && $isEditor){
+			?>
+			<fieldset style="padding:20px;">
+				<legend>Duplicate Catalog Numbers</legend>
+				<?php 
+				//Look for duplicate catalognumbers 
+				if($action == 'listdups'){
+					$dupArr = $cleanManager->getDuplicateRecords();
+					if($dupArr){
+						//Get fields and remove unactivated fields
+						$fieldArr = $dupArr['fields'];
+						unset($dupArr['fields']);
+						foreach($fieldArr as $k => $v){
+							if($v === '') unset($fieldArr[$k]);
+						}
+						//Build table
+						
+					}
+				}
+				else{
+					echo '<a ref="occurrencecleaner.php?collid='.$collId.'&action=listdups"></a>';
+				}
+				?>
+			</fieldset>
+			<?php 
 			
-			//Look for duplicate catalognumbers 
-			SELECT o.* 
-FROM omoccurrences o INNER JOIN (SELECT catalognumber
-FROM omoccurrences 
-GROUP BY catalognumber, collid 
-HAVING Count(*)>1 AND collid = 1 AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber
-WHERE o.collid = 1;
 			
 			
 

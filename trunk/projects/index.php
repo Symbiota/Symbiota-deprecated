@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/FloraProjectManager.php');
+include_once($serverRoot.'/classes/InventoryProjectManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
@@ -11,7 +11,7 @@ $projSubmit = array_key_exists("projsubmit",$_REQUEST)?$_REQUEST["projsubmit"]:"
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 $statusStr = '';
 
-$projManager = new FloraProjectManager();
+$projManager = new InventoryProjectManager();
 $projManager->setProj($proj);
 
 $isEditable = 0;
