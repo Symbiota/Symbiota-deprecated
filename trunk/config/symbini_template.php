@@ -39,6 +39,9 @@ $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled
 $displayCommonNames = 1;			//0 = false, 1 = true
 
 //Individual page menu and navigation crumbs
+//set terms for reproductiveCondition drop-down menu
+//$reproductiveConditionTerms = array("term1", "term2", "term3", "term4", "term5", "etc..");
+
 //checklists/
 	$checklists_checklistMenu = false;
 
