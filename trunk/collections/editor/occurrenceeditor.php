@@ -825,7 +825,28 @@ if($symbUid){
 													<a href="#" onclick="return dwcDoc('reproductiveCondition')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
-													<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
+													<?php
+													if(isset($reproductiveConditionTerms)){
+														if($reproductiveConditionTerms){
+															?>
+															<select name="reproductivecondition" style="width:140px;" onchange="fieldChanged('reproductivecondition');" />
+																<option value="">-----------------</option>
+																<?php
+																foreach($reproductiveConditionTerms as $term){
+																	echo '<option value="'.$term.'" '.($term==$occArr['reproductivecondition']?'SELECTED':'').'>'.$term.'</option>';
+																}
+																?>
+															</select>
+															<?php 
+														}
+													}
+													else{
+													?>
+														<input type="text" name="reproductivecondition" tabindex="98" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
+													<?php
+													}
+													?>
+													
 												</div>
 												<div style="float:left;margin-left:30px;">
 													Establishment Means:
