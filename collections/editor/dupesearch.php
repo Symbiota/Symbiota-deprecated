@@ -8,6 +8,7 @@ $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'
 $curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
 $cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
+$isExactMatch = (array_key_exists('exact',$_GET)?$_GET['exact']:1);
 
 $occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
@@ -39,9 +40,7 @@ if($submitAction){
 	}
 }
 
-$isExactMatch = false;
 $firstOcc = reset($occArr);
-if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -99,7 +98,7 @@ if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 				opener.pendingDataEdits = false;
 				var qForm = opener.document.queryform;
 				qForm.occid.value = <?php echo $curOccid; ?>;
-				qForm.occindex.value = opener.document.fullform.occindex.value;
+				if(opener.document.fullform.occindex) qForm.occindex.value = opener.document.fullform.occindex.value;
 				opener.document.queryform.submit();
 				//opener.location.reload();
 				<?php
@@ -158,7 +157,7 @@ if($cNum && $cNum == $firstOcc['recordnumber']) $isExactMatch = true;
 					<div style="font-weight:bold;font-size:120%;">
 						<?php echo $occObj['institutioncode'].($occObj['collectioncode']?':'.$occObj['collectioncode']:''); ?>
 					</div>
-					<?php if($collId == $occObj['colliddup'] && $occObj['recordnumber'] == $cNum){ ?>
+					<?php if($collId == $occObj['colliddup'] && $isExactMatch){ ?>
 						<div style="color:red;">
 							NOTICE: Possible exact matches within collection. Record may already exist.
 						</div>

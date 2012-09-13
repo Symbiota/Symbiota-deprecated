@@ -16,8 +16,9 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 	$isEditor = 1;
 }
 if($isEditor){
-	if($action == ''){
-		
+	if($action == 'Merge Records'){
+		$cleanManager->mergeDupeArr($_POST['dupid']);
+		$action = 'listdups';
 	}
 	
 }
@@ -30,12 +31,19 @@ if($isEditor){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Cleaner</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+    <style type="text/css">
+		table.styledtable td { white-space: nowrap; }
+    </style>
 	<script type="text/javascript">
+		function validateMergeForm(f){
 
+			return true;
+		}
 	</script>
 </head>
 <body>
 	<?php 	
+	$displayLeftMenu = false;
 	include($serverRoot.'/header.php');
 	?>
 	<!-- inner text -->
@@ -57,11 +65,58 @@ if($isEditor){
 							if($v === '') unset($fieldArr[$k]);
 						}
 						//Build table
-						
+						?>
+						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
+							<table class="styledtable">
+								<tr>
+									<th>PK</th>
+									<th>&nbsp;</th>
+									<th>Catalog Number</th>
+									<?php 
+									foreach($fieldArr as $v){
+										echo '<th>'.$v.'</th>';
+									}
+									?>
+								</tr>
+								<?php 
+								$setCnt = 0;
+								foreach($dupArr as $catNum => $setArr){
+									$setCnt++;
+									foreach($setArr as $occid => $occArr){
+										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
+										echo '<td><a href="occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a></td>'."\n";
+										echo '<td><input name="dupid[]" type="checkbox" value="'.$catNum.':'.$occid.'" /></td>';
+										echo '<td>'.$catNum.'</td>'."\n";
+										foreach($fieldArr as $v){
+											if(array_key_exists($v,$occArr)){
+												$outStr = htmlentities($occArr[$v]);
+												$titleStr = '';
+												if(strlen($outStr) > 150){
+													$titleStr = $outStr;
+													$outStr = substr($outStr,150).'...';
+												} 
+												echo '<td'.($titleStr?' title="'.$occArr[$v].'"':'').'>'.$outStr.'</td>'."\n";
+											}
+											else{
+												echo '<td>&nbsp;</td>';
+											}
+										}
+										echo '</tr>';
+									}
+								}
+								?>
+							
+							</table>
+							<div style="margin:15px;">
+								<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+								<input name="action" type="submit" value="Merge Records" />
+							</div>
+						</form>
+						<?php 
 					}
 				}
 				else{
-					echo '<a ref="occurrencecleaner.php?collid='.$collId.'&action=listdups"></a>';
+					echo '<a href="occurrencecleaner.php?collid='.$collId.'&action=listdups">List duplicate Catalog Numbers</a>';
 				}
 				?>
 			</fieldset>
