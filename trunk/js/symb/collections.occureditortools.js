@@ -291,8 +291,8 @@ function searchDupesCatalogNumber(f){
 			alert ("Your browser does not support AJAX!");
 			return;
 		}
-		var oid = f.occid.value;
-		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + oid;
+		var occid = f.occid.value;
+		var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + occid;
 		
 		document.getElementById("dupediv").style.display = "block";
 		document.getElementById("dupesearch").style.display = "block";
@@ -303,7 +303,7 @@ function searchDupesCatalogNumber(f){
 				var resObj = eval('(' + cnXmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
 					document.getElementById("dupesearch").style.display = "none";
@@ -332,8 +332,8 @@ function searchDupesOtherCatalogNumbers(f){
 	  		alert ("Your browser does not support AJAX!");
 	  		return;
 	  	}
-		var oid = f.occid.value;
-		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + oid;
+		var occid = f.occid.value;
+		var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + occid;
 
 		document.getElementById("dupediv").style.display = "block";
 		document.getElementById("dupesearch").style.display = "block";
@@ -344,7 +344,7 @@ function searchDupesOtherCatalogNumbers(f){
 				var resObj = eval('(' + xmlHttp.responseText + ')')
 				if(resObj.length > 0){
 					if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
-						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&oid="+oid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 						if (occWindow.opener == null) occWindow.opener = self;
 					}						
 					document.getElementById("dupesearch").style.display = "none";
@@ -391,7 +391,48 @@ function searchDupesCollector(f,silent){
 		if(xmlHttp.readyState==4 && xmlHttp.status==200){
 			var resStr = xmlHttp.responseText;
 			if(resStr){
-				var dupOccWindow=open("dupesearch.php?occidquery="+resStr+"&collid="+collId+"&curoccid="+occid+"&cnum="+cNum,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+				var dupOccWindow=open("dupesearch.php?occidquery="+resStr+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+				if(dupOccWindow.opener == null) dupOccWindow.opener = self;
+				if(window.focus) {dupOccWindow.focus()}
+				document.getElementById("dupesearch").style.display = "none";
+				document.getElementById("dupediv").style.display = "none";
+			}
+			else{
+				searchDupesCollectorEvent(f,silent);
+			}
+		}
+	};
+	xmlHttp.open("POST",url,true);
+	xmlHttp.send(null);
+}
+
+function searchDupesCollectorEvent(f,silent){
+	var cName = f.recordedby.value;
+	var cNum = f.recordnumber.value;
+	var cDate = f.eventdate.value;
+	var occid = f.occid.value;
+
+	if(!cName || (!cNum && !cDate)){
+		if(!silent) alert("Collector name and number or date must have a value to search for duplicates");
+		return false;
+	}
+
+	xmlHttp = GetXmlHttpObject();
+	if(xmlHttp==null){
+		alert ("Your browser does not support AJAX!");
+		return;
+	}
+
+	var url = "rpc/querydupescollectorevent.php?cname=" + cName + "&cnum=" + cNum + "&cdate=" + cDate + "&curoccid=" + occid;
+	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupesearch").style.display = "block";
+	document.getElementById("dupenone").style.display = "none";
+
+	xmlHttp.onreadystatechange=function(){
+		if(xmlHttp.readyState==4 && xmlHttp.status==200){
+			var resStr = xmlHttp.responseText;
+			if(resStr){
+				var dupOccWindow=open("dupesearch.php?occidquery="+resStr+"&collid="+collId+"&curoccid="+occid+"&exact=0","occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 				if(dupOccWindow.opener == null) dupOccWindow.opener = self;
 				if(window.focus) {dupOccWindow.focus()}
 				document.getElementById("dupesearch").style.display = "none";

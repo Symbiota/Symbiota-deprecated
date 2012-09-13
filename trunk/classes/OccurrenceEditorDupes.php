@@ -48,7 +48,7 @@ class OccurrenceEditorDupes {
 			$sql = 'SELECT occid FROM omoccurrences ';
 
 			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") '.
-				'AND (recordnumber LIKE "'.$collNum.'") ';
+				'AND (recordnumber = "'.$collNum.'") ';
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
 
 			//echo $sql;
@@ -58,14 +58,28 @@ class OccurrenceEditorDupes {
 			}
 			$rs->free();
 		}
-		if(!$retArr && $collDate){
-			$retArr = $this->getDupesCollectorEvent($lastName, $collNum, $collDate, $currentOccid);
-		}
 		return $retArr;
 	}
 	
-	private function getDupesCollectorEvent($lastName, $collNum, $collDate, $currentOccid){
+	public function getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid){
+		$collNum = $this->conn->real_escape_string($collNum);
+		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
+		$lastName = "";
+		//Parse last name from collector's name 
+		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
+		$lastNameArr = explode(';',$lastNameArr[0]);
+		$lastNameArr = explode('&',$lastNameArr[0]);
+		$lastNameArr = explode(' and ',$lastNameArr[0]);
+		$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
+		if($match){
+			if(count($match[0]) == 1){
+				$lastName = $match[0][0];
+			}
+			elseif(count($match[0]) > 1){
+				$lastName = $match[0][1];
+			}
+		}
 		if($lastName){
 			$sql = 'SELECT occid FROM omoccurrences '.
 				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") ';

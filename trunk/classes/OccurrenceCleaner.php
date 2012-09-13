@@ -7,20 +7,20 @@ class OccurrenceCleaner {
 	private $collId;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function setCollectionId($collId){
+	public function setCollId($collId){
 		if(is_numeric($collId)){
 			$this->collId = $collId;
 		}
 	}
 
-	public function getCollectionData(){
+	public function getCollMap(){
 		$returnArr = Array();
 		if($this->collId){
 			$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, '.
@@ -31,8 +31,8 @@ class OccurrenceCleaner {
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
-				$returnArr['collectioncode'] = $row->CollectionCode;
-				$returnArr['collectionname'] = $row->CollectionName;
+				$returnArr['collectioncode'] = $row->collectioncode;
+				$returnArr['collectionname'] = $row->collectionname;
 				$returnArr['icon'] = $row->icon;
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
@@ -59,7 +59,7 @@ class OccurrenceCleaner {
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '. 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
 			'WHERE o.collid = '.$this->collId.' ORDER BY o.catalognumber LIMIT 230';
-		echo $sql;
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		$fieldArr = array();
@@ -80,6 +80,102 @@ class OccurrenceCleaner {
 		$retArr['fields'] = $fieldArr;
 		return $retArr;
 	}
+	
+	public function mergeDupeArr($occidArr){
+		$dupArr = array();
+		foreach($occidArr as $v){
+			$vArr = explode(':',$v);
+			$dupArr[$vArr[0]][] = $vArr[1];
+		}
+		foreach($dupArr as $catNum => $occArr){
+			if(count($occArr) > 1){
+				$targetOccid = array_shift($occArr);
+				foreach($occArr as $sourceOccid){
+					$this->mergeRecords($targetOccid,$sourceOccid);
+				}
+			}
+		}
+	}
+	
+	public function mergeRecords($targetOccid,$sourceOccid){
+		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
+		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
+		$status = true;
+
+		$oArr = array();
+		//Merge records
+		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_assoc()){
+			$tempArr = array_change_key_case($r);
+			$id = $tempArr['occid'];
+			unset($tempArr['occid']);
+			unset($tempArr['collid']);
+			unset($tempArr['dbpk']);
+			unset($tempArr['datelastmodified']);
+			$oArr[$id] = $tempArr;
+		}
+		$rs->free();
+
+		$tArr = $oArr[$targetOccid];
+		$sArr = $oArr[$sourceOccid];
+		$sqlFrag = '';
+		foreach($sArr as $k => $v){
+			if(($v != '') && $tArr[$k] == ''){
+				$sqlFrag .= ','.$k.'="'.$v.'"';
+			} 
+		}
+		if($sqlFrag){
+			//Remap source to target
+			$sqlIns = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$targetOccid;
+			//echo $sqlIns;
+			$this->conn->query($sqlIns);
+		}
+
+		//Remap determinations
+		$sql = 'UPDATE omoccurdeterminations SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Delete occurrence edits
+		$sql = 'DELETE FROM omoccuredits WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap images
+		$sql = 'UPDATE images SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap comments
+		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap exsiccati
+		$sql = 'UPDATE omexsiccatiocclink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap occurrence dataset links
+		$sql = 'UPDATE omoccurdatasetlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap loans
+		$sql = 'UPDATE omoccurloanslink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap checklists voucher links
+		$sql = 'UPDATE fmvouchers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Remap survey lists
+		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$this->conn->query($sql);
+
+		//Delete source
+		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
+		if(!$this->conn->query($sql)){
+			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$this->conn->error;
+		}
+		return $status;
+	}
+		
 }
 
 ?>
