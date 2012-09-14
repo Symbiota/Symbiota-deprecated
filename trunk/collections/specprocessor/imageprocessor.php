@@ -357,6 +357,7 @@ if($spprId){
 									<tr>
 										<td colspan="2">
 											<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+											<input name="tabindex" type="hidden" value="1" />
 											<input name="submitaction" type="submit" value="Add New Project" />
 										</td>
 									</tr>
@@ -474,6 +475,7 @@ if($spprId){
 												<td colspan="2">
 													<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 													<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+													<input name="tabindex" type="hidden" value="1" />
 													<input name="submitaction" type="submit" value="Edit Project" />
 												</td>
 											</tr>
@@ -623,6 +625,7 @@ if($spprId){
 									<div style="margin:15px 0px 0px 15px;">
 										<input name="spprid" type="hidden" value="<?php echo $spprId; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+										<input name="tabindex" type="hidden" value="1" />
 										<input name="submitaction" type="submit" value="Process Images" />
 									</div>
 									<div style="margin:20px;">
@@ -647,6 +650,7 @@ if($spprId){
 								</div>
 								<div style="margin:15px;">
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" /> 
+									<input name="tabindex" type="hidden" value="1" />
 									<input type="submit" name="action" value="Select Collection Project" />
 								</div>
 							</fieldset>
@@ -655,28 +659,7 @@ if($spprId){
 					}
 				}
 				else{
-					if($collList = $specManager->getCollectionList()){
-						?>
-						<form name="collidform" action="index.php" method="post" onsubmit="return validateCollidForm(this);">
-							<fieldset>
-								<legend><b>Collection Projects</b></legend>
-								<div style="margin:15px;">
-									<?php 
-									foreach($collList as $cId => $cName){
-										echo '<input type="radio" name="collid" value="'.$cId.'" /> '.$cName.'<br/>';
-									}
-									?>
-								</div>
-								<div style="margin:15px;">
-									<input type="submit" name="action" value="Select Collection Project" />
-								</div>
-							</fieldset>
-						</form>
-						<?php
-					}
-					else{
-						echo '<div>There are no Collection Project for which you have authority to update</div>';						
-					} 
+					echo '<div>ERROR: collection identifier not defined. Contact administrator</div>';
 				}
 			}
 			else{

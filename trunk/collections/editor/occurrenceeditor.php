@@ -327,7 +327,7 @@ if($symbUid){
 						}
 					}
 					else{
-					?>
+						?>
 						<span class='navpath'>
 							<a href="../../index.php">Home</a> &gt;&gt;
 							<?php
@@ -344,7 +344,7 @@ if($symbUid){
 							?>
 							<b>Editor</b>
 						</span>
-					<?php
+						<?php
 					}
 					?>
 					<?php
@@ -478,7 +478,7 @@ if($symbUid){
 												<div style="float:left;margin-top:2px;">
 													Associated Collectors
 													<br/>
-													<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:330px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
+													<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:400px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
 												</div>
 												<div style="float:left;margin:15px 5px;cursor:pointer;" onclick="toggle('dateextradiv')">
 													<img src="../../images/editplus.png" style="width:15px;" />

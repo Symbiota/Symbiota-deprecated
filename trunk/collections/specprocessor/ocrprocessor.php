@@ -9,6 +9,7 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 	<?php 
 	
 	?>
+	<h2>Work in progress</h2>
 	<fieldset style="padding:20px;">
 		<legend><b>Statistics</b></legend> 
 		<ul>
@@ -34,6 +35,7 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 				<div style="margin:10px;">
 					<input type="hidden" name="spprid" value="<?php echo $spprId; ?>" />
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" >
+					<input name="tabindex" type="hidden" value="2" />
 					<input type="submit" name="action" value="Upload ABBYY File" />
 				</div>
 			</fieldset>

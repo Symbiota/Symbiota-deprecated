@@ -315,27 +315,6 @@ class SpecProcessorManager {
 		return $projArr;
 	}
 
-	public function getCollectionList(){
-		global $isAdmin, $userRights;
-		$returnArr = Array();
-		if($isAdmin || array_key_exists("CollAdmin",$userRights)){
-			$sql = 'SELECT DISTINCT c.CollID, c.CollectionName, c.icon '.
-				'FROM omcollections c ';
-			if(array_key_exists('CollAdmin',$userRights)){
-				$sql .= 'WHERE (c.collid IN('.implode(',',$userRights['CollAdmin']).')) '; 
-			}
-			$sql .= 'ORDER BY c.CollectionName';
-			//echo $sql;
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$collId = $row->CollID;
-				$returnArr[$collId] = $row->CollectionName;
-			}
-			$result->close();
-		}
-		return $returnArr;
-	}
-
 	//Set and Get functions
 	public function setSpprId($id) {
 		if($id && is_numeric($id)){
