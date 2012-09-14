@@ -97,39 +97,35 @@ if($spprId){
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<h1>Specimen Processor Control Panel</h1>
-			<div style="clear:both;padding:15px;">
-				<?php 
-				if($status){ 
-					?>
-					<div style='margin:20px 0px 20px 0px;'>
-						<hr/>
-						<?php echo $status; ?>
-						<hr/>
-					</div>
-					<?php 
-				}
-				if($action == 'Upload ABBYY File'){
-					$statusArr = $specManager->loadLabelFile();
-					if($statusArr){
-						$status = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
-					}
-				}
-				elseif($action == 'Process Images'){
-					echo '<h3>Batch Processing Images</h3>'."\n";
-					echo '<ul>'."\n";
-					$specManager->setCreateWebImg(array_key_exists('mapweb',$_REQUEST)?$_REQUEST['mapweb']:1);
-					$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:1);
-					$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maplarge']:1);
-					$specManager->setCreateNewRec($_REQUEST['createnewrec']);
-					$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
-					if(isset($useImageMagick) && $useImageMagick) $specManager->setUseImageMagick(1);
-					$specManager->batchLoadImages();
-					echo '</ul>'."\n";
-				}
-				?>
-			</div>
+			<h2><?php echo $specManager->getCollectionName(); ?></h2>
 			<?php 
+			if($action == 'Upload ABBYY File'){
+				$statusArr = $specManager->loadLabelFile();
+				if($statusArr){
+					$status = '<div style="padding:15px;"><ul><li>'.implode('</li><li>',$statusArr).'</li></ul></div>';
+				}
+			}
+			elseif($action == 'Process Images'){
+				echo '<div style="padding:15px;">'."\n";
+				echo '<ul>'."\n";
+				$specManager->setCreateWebImg(array_key_exists('mapweb',$_REQUEST)?$_REQUEST['mapweb']:1);
+				$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:1);
+				$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maplarge']:1);
+				$specManager->setCreateNewRec($_REQUEST['createnewrec']);
+				$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
+				if(isset($useImageMagick) && $useImageMagick) $specManager->setUseImageMagick(1);
+				$specManager->batchLoadImages();
+				echo '</ul></div>'."\n";
+			}
+			if($status){ 
+				?>
+				<div style='margin:20px 0px 20px 0px;'>
+					<hr/>
+					<?php echo $status; ?>
+					<hr/>
+				</div>
+				<?php 
+			}
 			if($symbUid && $collId){
 				?>
 				<div id="tabs" class="taxondisplaydiv">
@@ -140,6 +136,7 @@ if($spprId){
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collId.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
 				    </ul>
 					<div id="introdiv" style="height:400px;">
+						<h1>Specimen Processor Control Panel</h1>
 						<div style="margin:10px">
 							This an management module designed to aid in establishing advanced processing workflows 
 							for specimen images. The three central functions available within this module are
