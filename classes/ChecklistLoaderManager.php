@@ -79,19 +79,33 @@ class ChecklistLoaderManager {
 				$tid = 0;
 				$rankId = 0;
 				$sciName = ""; $family = "";
-				$sciNameStr = $valueArr[$headerArr["sciname"]];
+				$sciNameStr = trim($valueArr[$headerArr["sciname"]]);
 				if($sciNameStr){
+					//Do some minor cleaning
+					$sciNameStr = str_replace(array('?','*'),'',$sciNameStr);
+					$sciNameStr = preg_replace('/\s\s+/',' ',$sciNameStr);
+					$noteStr = '';
+					if(stripos($sciNameStr,' cf ') || stripos($sciNameStr,' c.f. ') || stripos($sciNameStr,' cf. ')){
+						$sciNameStr = str_replace(array(' cf ',' c.f. ',' cf. '),' ',$sciNameStr);
+						$noteStr = 'cf';
+					}
+					elseif(stripos($sciNameStr,' aff ') || stripos($sciNameStr,' aff. ')){
+						$sciNameStr = str_replace(array(' aff ',' aff. '),' ',$sciNameStr);
+						$noteStr = 'aff';
+					}
+					$sciNameStr = str_replace(' sp.','',$sciNameStr);
+					//Check is name is in taxa table and grab tid if it is
 					$sql = "";
 					if($thesId){
-						$sql = "SELECT t2.tid, ts.family, t2.rankid ".
-							"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-							"INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid ".
-							"WHERE (ts.taxauthid = ".$thesId.") AND (t.sciname = \"".$sciNameStr."\")";
+						$sql = 'SELECT t2.tid, ts.family, t2.rankid '.
+							'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
+							'INNER JOIN taxa t2 ON ts.tidaccepted = t2.tid '.
+							'WHERE (ts.taxauthid = '.$thesId.') AND (t.sciname = "'.$sciNameStr.'")';
 					}
 					else{
-						$sql = "SELECT t.tid, ts.family, t.rankid ".
-							"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-							"WHERE ts.taxauthid = 1 AND (t.sciname = \"".$sciNameStr."\")";
+						$sql = 'SELECT t.tid, ts.family, t.rankid '.
+							'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+							'WHERE ts.taxauthid = 1 AND (t.sciname = "'.$sciNameStr.'")';
 					}
 					$rs = $this->conn->query($sql);
 					if($rs){
@@ -176,7 +190,7 @@ class ChecklistLoaderManager {
 					
 					//Load taxon into checklist
 					if($tid){
-						if($rankId > 180){
+						if($rankId >= 180){
 							$sqlInsert = '';
 							$sqlValues = '';
 							if(array_key_exists('family',$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr['family']])){
@@ -191,9 +205,13 @@ class ChecklistLoaderManager {
 								$sqlInsert .= ',abundance';
 								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['abundance']]).'"';
 							}
-							if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
+							if($noteStr || (array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']])){
+								if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
+									if($noteStr) $noteStr .= '; '.
+									$noteStr .= $valueArr[$headerArr['notes']];
+								}
 								$sqlInsert .= ',notes';
-								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['notes']]).'"';
+								$sqlValues .= ',"'.$this->cleanStr($noteStr).'"';
 							}
 							$sql = 'INSERT INTO fmchklsttaxalink (tid,clid'.$sqlInsert.') VALUES ('.$tid.', '.$this->clid.$sqlValues.')';
 							//echo $sql;
@@ -232,7 +250,7 @@ class ChecklistLoaderManager {
 
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
-		$outStr = str_replace('"',"''",$outStr);
+		$outStr = $this->conn->real_escape_string($outStr);
 		return $outStr;
 	}
 }

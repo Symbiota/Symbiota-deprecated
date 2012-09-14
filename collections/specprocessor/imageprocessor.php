@@ -171,7 +171,6 @@ if($spprId){
 				<?php
 			}
 			?>
-			<h1>Specimen Processor Control Panel</h1>
 			<div style="clear:both;padding:15px;">
 				<?php 
 				if($status){ 
