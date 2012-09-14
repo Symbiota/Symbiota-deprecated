@@ -241,13 +241,11 @@ if($collId) $collData = $collManager->getCollectionData();
 										Review/Verify General Specimen Edits 
 									</a>
 								</li>
-								<!-- 
 								<li>
-									<a href="../admin/spectaxcleaner.php?collid=<?php echo $collId; ?>">
-										Manage/Clean Scientific Names 
+									<a href="../editor/occurrencecleaner.php?collid=<?php echo $collId; ?>">
+										Data Cleaning Tools 
 									</a>
 								</li>
-								 -->
 							</ul>
 						<?php } ?>
 					</ul>
