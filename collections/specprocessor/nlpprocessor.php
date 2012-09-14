@@ -117,6 +117,7 @@ if($isEditor){
 								</div>
 								<div>
 									<input name="formsubmit" type="submit" value="Add New Profile" />
+									<input name="tabindex" type="hidden" value="3" />
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 								</div>
 							</fieldset>
@@ -194,6 +195,7 @@ if($isEditor){
 								<input name="formsubmit" type="submit" value="Edit Profile" />
 								<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 								<input name="spnlpid" type="hidden" value="<?php echo $spNlpId; ?>" />
+								<input name="tabindex" type="hidden" value="3" />
 							</div>
 						</form>
 						<div style="font-weight:bold;clear:both;">Field Parsing Fragments</div>
@@ -224,6 +226,7 @@ if($isEditor){
 										<input name="formsubmit" type="submit" value="Add Fragment" />
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 										<input name="spnlpid" type="hidden" value="<?php echo $spNlpId; ?>" />
+										<input name="tabindex" type="hidden" value="3" />
 									</div>
 								</fieldset>
 							</form>
@@ -263,6 +266,7 @@ if($isEditor){
 															<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 															<input name="spnlpid" type="hidden" value="<?php echo $spNlpId; ?>" />
 															<input name="spnlpfragid" type="hidden" value="<?php echo $k; ?>" />
+															<input name="tabindex" type="hidden" value="3" />
 														</div>
 													</fieldset>
 												</form>
@@ -274,6 +278,7 @@ if($isEditor){
 															<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 															<input name="spnlpid" type="hidden" value="<?php echo $spNlpId; ?>" />
 															<input name="spnlpfragid" type="hidden" value="<?php echo $k; ?>" />
+															<input name="tabindex" type="hidden" value="3" />
 														</div>
 													</fieldset>
 												</form>
@@ -297,6 +302,7 @@ if($isEditor){
 									<input name="formsubmit" type="submit" value="Delete Profile" />
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 									<input name="spnlpid" type="hidden" value="<?php echo $spNlpId; ?>" />
+									<input name="tabindex" type="hidden" value="3" />
 								</div>
 							</fieldset>
 						</form>

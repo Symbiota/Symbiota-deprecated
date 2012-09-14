@@ -90,7 +90,7 @@ if($spprId){
 		else{
 			echo '<div class="navpath">';
 			echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-			echo '<a href="../misc/collprofileS.php?collid='.$collId.'emode=1">Collection Control Panel</a> &gt;&gt; ';
+			echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Control Panel</a> &gt;&gt; ';
 			echo '<b>Specimen Processor Control Panel</b>';
 			echo '</div>';
 		}
@@ -136,8 +136,8 @@ if($spprId){
 				    <ul>
 				        <li><a href="#introdiv">Introduction</a></li>
 				        <li><a href="imageprocessor.php?collid=<?php echo $collId; ?>">Image Loading</a></li>
-				        <li><a href="ocrprocessor.php?collid=<?php echo $collId.'&spprid='.$spprId; ?>">OCR</a></li>
-				        <li><a href="nlpprocessor.php?collid=<?php echo $collId.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
+				        <li><a href="ocrprocessor.php?collid=<?php echo $collId.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
+				        <li><a href="nlpprocessor.php?collid=<?php echo $collId.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
 				    </ul>
 					<div id="introdiv" style="height:400px;">
 						<div style="margin:10px">

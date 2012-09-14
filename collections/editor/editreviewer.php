@@ -187,12 +187,12 @@ header("Content-Type: text/html; charset=".$charset);
 									echo '<b><a href="editreviewer.php?collid='.$collId.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&pagenum='.$pageNum.'&limitcnt='.$limitCnt.'">Return to Main Page</a></b>';
 								}
 								else{ 
+									echo $navStr; 
 									?>
-									<div style="float:left;">
+									<div>
 										<input name='selectall' type="checkbox" onclick="selectAllOcedid(this)" /> Select/Deselect All
 									</div>
 									<?php 
-									echo $navStr; 
 								}
 								?>
 								<form name="editform" action="editreviewer.php" method="post" onsubmit="return validateEditForm(this);" >

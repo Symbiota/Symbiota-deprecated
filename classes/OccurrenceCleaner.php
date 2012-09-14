@@ -78,6 +78,7 @@ class OccurrenceCleaner {
 		}
 		$rs->close();
 		$retArr['fields'] = $fieldArr;
+		$retArr['reccnt'] = $recCnt;
 		return $retArr;
 	}
 	
@@ -90,9 +91,15 @@ class OccurrenceCleaner {
 		foreach($dupArr as $catNum => $occArr){
 			if(count($occArr) > 1){
 				$targetOccid = array_shift($occArr);
+				$statusStr = $targetOccid;
 				foreach($occArr as $sourceOccid){
 					$this->mergeRecords($targetOccid,$sourceOccid);
+					$statusStr .= ', '.$sourceOccid;
 				}
+				echo '<li>Merging records: '.$statusStr.'</li>';
+			}
+			else{
+				echo '<li>Record # '.array_shift($occArr).' skipped because only one record was selected</li>';
 			}
 		}
 	}
@@ -171,7 +178,8 @@ class OccurrenceCleaner {
 		//Delete source
 		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
 		if(!$this->conn->query($sql)){
-			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$this->conn->error;
+			$status .= '<li><span style="color:red">ERROR:</span> unable to delete occurrence record #'.$sourceOccid.
+			': '.$this->conn->error.'</li>';
 		}
 		return $status;
 	}
