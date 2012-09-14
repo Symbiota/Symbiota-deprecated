@@ -449,7 +449,7 @@ class SpecUploadManager{
 
 		if($finalTransfer){
 			$this->performFinalTransfer();
-			echo '<li style="font-weight:bold;">Transfer process Complete!</li>';
+			echo '<li style="font-weight:bold;">Transfer process Complete! Click <a href="../misc/collprofile.php?collid='.$this->collId.'">here</a> to view stats page</li>';
 		}
 		else{
 			echo '<li style="font-weight:bold;">Upload Procedure Complete';
@@ -953,6 +953,23 @@ class SpecUploadManager{
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		echo 'Done!</li>';
+		
+		echo '<li style="font-weight:bold;">Searching for duplicate Catalog Numbers... ';
+		ob_flush();
+		flush();
+		$sql = 'SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.
+			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows){
+			echo '<span style="color:red;">Duplicate Catalog Numbers exist</span></li>';
+			echo '<li style="margin-left:10px;">';
+			echo 'Open <a href="../editor/occurrencecleaner.php?collid='.$this->collId.'&action=listdups" target="_blank">Occurrence Cleaner</a> to resolve this issue';
+			echo '</li>';
+		}
+		else{
+			echo 'All good!</li>';
+		}
+		$rs->free();
 	}
 
 	protected function loadRecord($recMap){
