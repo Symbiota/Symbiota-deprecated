@@ -287,6 +287,7 @@ function verifyFullformSciName(){
 		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
 			if(snXmlHttp.responseText){
 				var retObj = eval("("+snXmlHttp.responseText+")");
+				f.tidtoadd.value = retObj.tid;
 				f.scientificnameauthorship.value = retObj.author;
 				f.family.value = retObj.family;
 			}
