@@ -252,8 +252,8 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 						<div class="editfield">
 							<?php echo $taxonEditorObj->getNotes();?>
 						</div>
-						<div class="editfield" style="display:none;width:275px;">
-							<input type="text" id="notes" name="notes" value="<?php echo $taxonEditorObj->getNotes(); ?>" />
+						<div class="editfield" style="display:none;">
+							<input type="text" id="notes" name="notes" value="<?php echo $taxonEditorObj->getNotes(); ?>" style="width:450px;" />
 						</div>
 					</div>
 					<div style="clear:both;">
@@ -262,7 +262,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 							<?php echo $taxonEditorObj->getSource();?>
 						</div>
 						<div class="editfield" style="display:none;">
-							<input type="text" id="source" name="source" style="width:250px;" value="<?php echo $taxonEditorObj->getSource(); ?>" />
+							<input type="text" id="source" name="source" style="width:450px;" value="<?php echo $taxonEditorObj->getSource(); ?>" />
 						</div>
 					</div>
 					<div style="clear:both;">

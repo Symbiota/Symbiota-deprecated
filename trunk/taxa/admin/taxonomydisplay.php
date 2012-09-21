@@ -7,6 +7,8 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
   
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
+$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
+
 $taxonDisplayObj = new TaxonomyDisplayManager($target);
  
 $editable = false;
@@ -19,10 +21,27 @@ if($isAdmin || array_key_exists("Taxonomy",$userRights)){
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxonomy Display: ".$taxonDisplayObj->getTargetStr(); ?></title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<link rel="stylesheet" href="../../css/main.css" type="text/css"/>
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
+	<script type="text/javascript" src="../../js/jquery.js"></script>
+	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+
+			$("#taxontarget").autocomplete({
+				source: function( request, response ) {
+					$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.tdform.taxauthid.value }, response );
+				}
+			},{ minLength: 3 }
+			);
+
+
+		});
+		
+	</script>
 </head>
-<body onload="">
+<body>
 <?php
 $displayLeftMenu = (isset($taxa_admin_taxonomydisplayMenu)?$taxa_admin_taxonomydisplayMenu:"true");
 include($serverRoot.'/header.php');
@@ -49,10 +68,12 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 				<fieldset style="padding:10px;width:500px;">
 					<legend><b>Enter a taxon</b></legend>
 					<div>
-						<b>Taxon:</b> <input type="text" name="target" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
+						<b>Taxon:</b> 
+						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
 					</div>
 					<div style="margin:15px 0px 15px 300px;">
 						<input type="submit" name="tdsubmit" value="Display Taxon Tree"/>
+						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
 					</div>
 				</fieldset>
 			</form>

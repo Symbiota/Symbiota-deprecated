@@ -61,15 +61,15 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 				<fieldset>
 					<legend>New Taxon</legend>
 					<div>
-						<div style="float:left;width:140px;">Taxon Name:</div>
+						<div style="float:left;width:170px;">Taxon Name:</div>
 						<input type="text" id="sciname" name="sciname" style="width:200px;border:inset;" value="<?php echo $target;?>" onchange="parseName(this.form)"/>
 					</div>
 					<div>
-						<div style="float:left;width:140px;">Author:</div>
+						<div style="float:left;width:170px;">Author:</div>
 						<input type='text' id='author' name='author' style='width:200px;border:inset;' />
 					</div>
-					<div style="margin-top:5px;">
-						<div style="float:left;width:139px;">Kingdom:</div>
+					<div style="margin-top:5px;clear:both;">
+						<div style="float:left;width:170px;">Kingdom:</div>
 						<select id="kingdomid" name="kingdomid" style="border:inset;">
 							<?php 
 							$kArr = $loaderObj->getKingdomIds();
@@ -82,8 +82,8 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 							?>
 						</select>
 					</div>
-					<div>
-						<div style="float:left;width:139px;">Taxon Rank:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Taxon Rank:</div>
 						<select id="rankid" name="rankid" title="Rank ID" onchange="" style="border:inset;">
 							<option value="0">Select Taxon Rank</option>
 							<option value="">--------------------------------</option>
@@ -95,65 +95,67 @@ if(isset($taxa_admin_taxonomyloaderCrumbs)){
 							?>
 						</select>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Base Name (eg genus):</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Unit Name 1:</div>
 						<input type='text' id='unitind1' name='unitind1' style='width:20px;border:inset;' title='Genus hybrid indicator'/>
 						<input type='text' id='unitname1' name='unitname1' style='width:200px;border:inset;' title='Genus or Base Name'/>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Epithet:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Unit Name 2:</div>
 						<input type='text' id='unitind2' name='unitind2' style='width:20px;border:inset;' title='Species hybrid indicator'/>
 						<input type='text' id='unitname2' name='unitname2' style='width:200px;border:inset;' title='epithet'/>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Infrasp:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Unit Name 3:</div>
 						<input type='text' id='unitind3' name='unitind3' style='width:40px;border:inset;' title='Rank: e.g. ssp., var., f.'/>
 						<input type='text' id='unitname3' name='unitname3' style='width:200px;border:inset;' title='infrasp. epithet'/>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Parent Taxon:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Parent Taxon:</div>
 						<input type="text" id="parentname" name="parentname" style="width:200px;border:inset;" onchange="checkParentExistance(this.form)" />
 						<span id="addparentspan" style="display:none;">
 							<a id="addparentanchor" href="taxonomyloader.php?target=" target="_blank">Add Parent</a>
 						</span>
 						<input type="hidden" id="parenttid" name="parenttid" value="" />
 					</div>
-					<div id="uppertaxondiv" style="margin-top:5px;position:relative;overflow:visible">
-						<div style="float:left;width:140px;">Upper Taxon Grouping:</div>
+					<div id="uppertaxondiv" style="clear:both;margin-top:5px;position:relative;overflow:visible">
+						<div style="float:left;width:170px;">Upper Taxonomy:</div>
 						<input id="uppertaxonomy" name="uppertaxonomy" type="text" style="width:200px;border:inset;" />
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Notes:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Notes:</div>
 						<input type='text' id='notes' name='notes' style='width:200px;border:inset;' title=''/>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Source:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Source:</div>
 						<input type='text' id='source' name='source' style='width:200px;border:inset;' title=''/>
 					</div>
-					<div>
-						<div style="float:left;width:140px;">Locality Security Status:</div>
+					<div style="clear:both;">
+						<div style="float:left;width:170px;">Locality Security Status:</div>
 						<select id="securitystatus" name="securitystatus" style='border:inset;'>
 							<option value="0">No Security</option>
 							<option value="1">Hide Locality Details</option>
 						</select>
 					</div>
-					<fieldset>
-						<legend><b>Acceptance Status</b></legend>
-						<div>
-							<input type="radio" id="isaccepted" name="acceptstatus" value="1" onchange="acceptanceChanged(this.form)" checked> Accepted
-							<input type="radio" id="isnotaccepted" name="acceptstatus" value="0" onchange="acceptanceChanged(this.form)"> Not Accepted
-						</div>
-						<div id="accdiv" style="display:none;margin-top:3px;">
-							Accepted Taxon:
-							<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;border:inset;" />
-							<input type="hidden" name="tidaccepted" /> 
-							<div style="margin-top:3px;">
-								UnacceptabilityReason: 
-								<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;' title=''/>
+					<div style="clear:both;">
+						<fieldset>
+							<legend><b>Acceptance Status</b></legend>
+							<div>
+								<input type="radio" id="isaccepted" name="acceptstatus" value="1" onchange="acceptanceChanged(this.form)" checked> Accepted
+								<input type="radio" id="isnotaccepted" name="acceptstatus" value="0" onchange="acceptanceChanged(this.form)"> Not Accepted
 							</div>
-						</div>
-					</fieldset>
-					<div>
+							<div id="accdiv" style="display:none;margin-top:3px;">
+								Accepted Taxon:
+								<input type="text" id="acceptedstr" name="acceptedstr" style="width:300px;border:inset;" />
+								<input type="hidden" name="tidaccepted" /> 
+								<div style="margin-top:3px;">
+									UnacceptabilityReason: 
+									<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;' title=''/>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+					<div style="clear:both;">
 						<input type="hidden" name="submitaction" value="loadnewtaxon" />
 						<input type="button" name="taxonsubmit" value="Submit New Name" onclick="submitLoadForm(this.form)" />
 					</div>
