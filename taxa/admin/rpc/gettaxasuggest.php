@@ -36,8 +36,10 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-       	$returnArr[] = $row->sciname.' ['.$row->tid.']';
+		//$returnArr[] = '{ "value": "'.$row->sciname.'", "tid": "'.$row->tid.'" }';
+		$returnArr[] = $row->sciname;
 	}
 	$con->close();
+	//echo '[ '.implode(',',$returnArr).' ]';
 	echo json_encode($returnArr);
 ?>

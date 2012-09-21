@@ -454,7 +454,9 @@ function searchDupesCollectorEvent(f,silent){
 
 function autoDupeSearch(){
 	var f = document.fullform;
-	if(f.autodupe.checked == true) searchDupesCollector(f,true);
+	if(f.autodupe && f.autodupe.checked == true){
+		searchDupesCollector(f,true);
+	}
 }
 
 function lookForExsDupes(f){

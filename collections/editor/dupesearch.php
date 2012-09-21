@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
 $curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
-$collId = (array_key_exists('collid',$_GET)?$_GET['collid']:'');
+$collId = (array_key_exists('collid',$_GET)?$_GET['collid']:0);
 $cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
 $isExactMatch = (array_key_exists('exact',$_GET)?$_GET['exact']:1);
 
@@ -27,9 +27,6 @@ if($submitAction){
 	if($isAdmin 
 		|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) 
 		|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
-		$isEditor = 1;
-	}
-	if(!$isEditor && $occManager->getObserverUid() == $symbUid){
 		$isEditor = 1;
 	}
 	if($isEditor){

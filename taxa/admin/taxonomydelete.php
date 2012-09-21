@@ -15,30 +15,56 @@ $(document).ready(function() {
 
 	$("#remaptvalue").autocomplete({ 
 			source: "rpc/gettaxasuggest.php",  
-			minLength: 3,
-			select: function( event, ui ) {
-				if(ui.item) {
-					var v = ui.item.value;
-					var v2 = v.substring(v.indexOf("[")+1);
-					document.remaptaxonform.remaptid.value = v2.substring(0,v2.length-1);
-				}
-			},
-			change: function(event, ui){
-				if(!ui.item){
-					alert("Target taxon not on list. Select a valid taxon!");
-					document.remaptaxonform.remaptid.value = "";
-				}
-			}
+			minLength: 2
 		}
 	);
 });
 
-function validateRemapTaxonForm(f){
-	if(f.remaptid.value == ""){
-		alert("Target taxon does not appear to be valid. Are you sure it was listed?");
+function submitRemapTaxonForm(f){
+	taxonValue = f.remaptvalue.value;
+	if(taxonValue == ""){
+		alert("Target taxon does not appear to be null. Please submit a taxon to remap the resources");
 		return false;
 	}
-	return true;
+	var xmlHttp=GetXmlHttpObject();
+	if(xmlHttp==null){
+  		alert ("Your browser does not support AJAX!");
+  		return;
+  	}
+	var url="rpc/gettid.php?sciname="+taxonValue;
+	xmlHttp.onreadystatechange=function(){
+		if(xmlHttp.readyState==4 && xmlHttp.status==200){
+			var remapTid = xmlHttp.responseText;
+			if(remapTid){
+				f.remaptid.value = remapTid;
+				f.submit();
+			}
+			else{
+				alert("ERROR: Remapping taxon not found in thesaurus. Is the name spelled correctly?");
+				f.remaptid.value = "";
+			}
+		}
+	}
+	xmlHttp.open("POST",url,true);
+	xmlHttp.send(null);
+}
+
+function GetXmlHttpObject(){
+	var xmlHttp=null;
+	try{
+		// Firefox, Opera 8.0+, Safari, IE 7.x
+  		xmlHttp=new XMLHttpRequest();
+  	}
+	catch (e){
+  		// Internet Explorer
+  		try{
+    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+  		catch(e){
+    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+    	}
+  	}
+	return xmlHttp;
 }
 
 </script>
@@ -176,14 +202,15 @@ function validateRemapTaxonForm(f){
 		<div style="margin:15px;">
 			<fieldset style="padding:15px;">
 				<legend><b>Remap Resources to Another Taxon</b></legend>
-				<form name="remaptaxonform" method="post" action="taxonomyeditor.php" onsubmit="return validateRemapTaxonForm(this)">
+				<form name="remaptaxonform" method="post" action="taxonomyeditor.php">
 					<div style="margin-bottom:5px;">
 						Target taxon: 
 						<input id="remaptvalue" name="remaptvalue" type="text" value="" /><br/>
-						<input id="remaptid" name="remaptid" type="hidden" value="" />
+						<input name="remaptid" type="hidden" value="" />
 					</div>
 					<div>
-						<input name="submitaction" type="submit" value="Remap Taxon" /> 
+						<input name="submitbutton" type="button" value="Remap Taxon" onclick="submitRemapTaxonForm(this.form)" /> 
+						<input name="submitaction" type="hidden" value="Remap Taxon" /> 
 						<input name="target" type="hidden" value="<?php echo $tid; ?>" />
 						<input name="genusstr" type="hidden" value="<?php echo $genusStr; ?>" /> 
 					</div>

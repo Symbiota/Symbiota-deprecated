@@ -468,11 +468,17 @@ if($symbUid){
 													<br/>
 													<input type="text" name="eventdate" tabindex="10" style="width:110px;" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateChanged(this);" />
 												</div>
-												<div style="float:left;margin:5px 5px;">
-													<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
-													<input type="checkbox" name="autodupe" value="<?php echo $autoDupeSearch; ?>" checked />
-													Auto search
-												</div>
+												<?php
+												if(!$isGenObs){ 
+													?>
+													<div style="float:left;margin:5px 5px;">
+														<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
+														<input type="checkbox" name="autodupe" value="<?php echo $autoDupeSearch; ?>" checked />
+														Auto search
+													</div>
+													<?php
+												}
+												?>
 											</div>
 											<div style="clear:both;">
 												<div style="float:left;margin-top:2px;">
