@@ -277,7 +277,7 @@ $firstOcc = reset($occArr);
 						if($curOccid){ 
 							?>
 							<span style="margin-left:30px;">
-								<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
+								<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId.'&collid='.$collId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
 									Merge Records
 								</a>
 							</span>
