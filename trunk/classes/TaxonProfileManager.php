@@ -443,7 +443,6 @@ class TaxonProfileManager {
 			$this->imageArr[$row->imgid]["occid"] = $row->occid;
 		}
 		$result->close();
-		if(!$this->imageArr) $this->imageArr = "No images";
  	}
 
 	public function echoImages($start, $length, $useThumbnail = 1){		//length=0 => means show all images
