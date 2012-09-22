@@ -209,6 +209,58 @@ class SpecProcessorOcr{
 		return $status;
 	}
 
+	function trimImage($im,$c,$t) {
+		// if trim colour ($c) isn't a number between 0 - 255
+		if (!is_numeric($c) || $c < 0 || $c > 255) {
+			// grab the colour from the top left corner and use that as default
+			$rgb = imagecolorat($im, 2, 2); // 2 pixels in to avoid messy edges
+			$r = ($rgb >> 16) & 0xFF;
+			$g = ($rgb >> 8) & 0xFF;
+			$b = $rgb & 0xFF;
+			$c = round(($r+$g+$b)/3); // average of rgb is good enough for a default
+		}
+		// if tolerance ($t) isn't a number between 0 - 255 use 10 as default
+		if (!is_numeric($t) || $t < 0 || $t > 255) $t = 10;
+	
+		$w = imagesx($im); // image width
+		$h = imagesy($im); // image height
+		for($x = 0; $x < $w; $x++) {
+			for($y = 0; $y < $h; $y++) {
+				$rgb = imagecolorat($im, $x, $y);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				if (($r < $c-$t || $r > $c+$t) && // red not within tolerance of trim colour
+					($g < $c-$t || $g > $c+$t) && // green not within tolerance of trim colour
+					($b < $c-$t || $b > $c+$t) // blue not within tolerance of trim colour
+					) {
+					// using x and y as keys condenses all rows and all columns
+					// into just one X array and one Y array.
+					// however, the keys are treated as literal and therefore are not in
+					// numeric order, so we need to sort them in order to get the first
+					// and last X and Y occurances of wanted pixels.
+					// normal sorting will remove keys so we also use x and y as values,
+					// this way they are still available without preserving keys.
+					$y_axis[$y] = $y; 
+					$x_axis[$x] = $x;
+					// note: $y_axis[] = $y; and $x_axis[] = $x; works just as well
+					// but results in much much larger arrays than is necessary
+					// array_unique would reduce size again but this method is quicker
+				}
+			}
+		}
+		// sort them so first and last occurances are at start and end
+		sort($y_axis);
+		sort($x_axis); 
+	
+		$top = array_shift($y_axis); // first wanted pixel on Y axis
+		$right = array_pop($x_axis); // last wanted pixel on X axis
+		$bottom = array_pop($y_axis); // last wanted pixel on Y axis
+		$left = array_shift($x_axis); // first wanted pixel on X axis
+	
+		return array($top,$right,$bottom,$left);
+	}
+
 	private function ocrImage($url = ""){
 		global $tesseractPath;
 		$retStr = '';

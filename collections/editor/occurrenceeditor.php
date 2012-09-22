@@ -559,9 +559,9 @@ if($symbUid){
 													</a>
 													<input type="text" name="identificationqualifier" tabindex="30" size="25" style="" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 												</div>
-												<div style="float:left;margin:0px 93px;">
+												<div style="float:left;margin:0px 60px;">
 													Family:
-													<input type="text" name="family" size="30" maxlength="50" style="" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
+													<input type="text" name="family" style="width:100;" maxlength="50" style="" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;">
