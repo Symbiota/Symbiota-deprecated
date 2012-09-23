@@ -8,6 +8,7 @@ class TaxonomyDisplayManager{
 	private $indentValue = 0;
 	private $taxaArr = Array();
 	private $targetStr = "";
+	private $searchTaxonRank = 0;
 	
 	function __construct($target){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -23,7 +24,6 @@ class TaxonomyDisplayManager{
 		$hArray = Array();
 		$hierarchyArr = Array();
 		$taxaParentIndex = Array();
-		$rankId = 0;
 		if($this->targetStr){
 			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr '.
 				'FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
@@ -49,7 +49,7 @@ class TaxonomyDisplayManager{
 					$this->taxaArr[$tid]["author"] = $row->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 					$this->taxaArr[$tid]["rankid"] = $row->rankid;
-					$rankId = $row->rankid;
+					$this->searchTaxonRank = $row->rankid;
 					if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 					if($row->hierarchystr) $hArray = array_merge($hArray,explode(",",$row->hierarchystr));
 				}
@@ -72,7 +72,7 @@ class TaxonomyDisplayManager{
 			}
 			if($hArray) $innerSql .= "OR (t.tid IN(".implode(",",array_unique($hArray)).")) ";
 			$sql .= substr($innerSql,3).") ";
-			if($rankId < 140) $sql .= "AND rankid <= 140 ";
+			if($this->searchTaxonRank < 140) $sql .= "AND rankid <= 140 ";
 			//echo $sql."<br>";
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
@@ -141,9 +141,11 @@ class TaxonomyDisplayManager{
 			$this->indentValue += 10;
 			foreach($node as $key => $value){
 				$sciName = "";
+				$taxonRankId = 0;
 				if(array_key_exists($key,$this->taxaArr)){
 					$sciName = $this->taxaArr[$key]["sciname"];
 					$sciName = str_replace($this->targetStr,"<b>".$this->targetStr."</b>",$sciName);
+					$taxonRankId = $this->taxaArr[$key]["rankid"];
 					if($this->taxaArr[$key]["rankid"] >= 180){
 						$sciName = "<i>".$sciName."</i>";
 					}
@@ -156,6 +158,11 @@ class TaxonomyDisplayManager{
 				}
 				echo "<div style='margin-left:".$indent.";'>";
 				echo "<a href='taxonomyeditor.php?target=".$key."'>".$sciName."</a>";
+				if($this->searchTaxonRank < 140 && $taxonRankId == 140){
+					echo '<a href="taxonomydisplay.php?target='.$sciName.'">';
+					echo '<img src="../../images/tochild.png" style="width:9px;" />';
+					echo '</a>';
+				}
 				echo "</div>";
 				if(array_key_exists($key,$this->taxaArr) && array_key_exists("synonyms",$this->taxaArr[$key])){
 					$synNameArr = $this->taxaArr[$key]["synonyms"];
