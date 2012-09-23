@@ -161,22 +161,27 @@ class SpecProcessorOcr{
 		$status = false;
 		if(!$url) $url = $this->imgUrlLocal;
 		if($img = imagecreatefromjpeg($url)){
-			imagefilter($img,IMG_FILTER_GRAYSCALE);
-			imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
-			imagefilter($img,IMG_FILTER_CONTRAST,1);
-			$sharpenMatrix = array
-			(
-				array(-1.2, -1, -1.2),
-				array(-1, 20, -1),
-				array(-1.2, -1, -1.2)
-			);
-			// calculate the sharpen divisor
-			$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
-			$offset = 0;
-			// apply the matrix
-			imageconvolution($img, $sharpenMatrix, $divisor, $offset);
-			imagegammacorrect($img, 6, 1.0);
-			$status = imagejpeg($img,$url);
+			try{
+				imagefilter($img,IMG_FILTER_GRAYSCALE);
+				imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
+				imagefilter($img,IMG_FILTER_CONTRAST,1);
+				$sharpenMatrix = array
+				(
+					array(-1.2, -1, -1.2),
+					array(-1, 20, -1),
+					array(-1.2, -1, -1.2)
+				);
+				// calculate the sharpen divisor
+				$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
+				$offset = 0;
+				// apply the matrix
+				imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+				imagegammacorrect($img, 6, 1.0);
+				$status = imagejpeg($img,$url);
+			}
+			catch(Exception $e){
+				echo 'Unable to run filter on image: '.$url;
+			}
 			imagedestroy($img);
 		}
 		return $status;
@@ -209,56 +214,88 @@ class SpecProcessorOcr{
 		return $status;
 	}
 
-	function trimImage($im,$c,$t) {
-		// if trim colour ($c) isn't a number between 0 - 255
+	function imageTrimBorder($img,$c=0,$t=100){
 		if (!is_numeric($c) || $c < 0 || $c > 255) {
-			// grab the colour from the top left corner and use that as default
+			// Color ($c) not valid, thus grab the color from the top left corner and use that as default
 			$rgb = imagecolorat($im, 2, 2); // 2 pixels in to avoid messy edges
 			$r = ($rgb >> 16) & 0xFF;
 			$g = ($rgb >> 8) & 0xFF;
 			$b = $rgb & 0xFF;
 			$c = round(($r+$g+$b)/3); // average of rgb is good enough for a default
 		}
-		// if tolerance ($t) isn't a number between 0 - 255 use 10 as default
-		if (!is_numeric($t) || $t < 0 || $t > 255) $t = 10;
+		// if tolerance ($t) isn't a number between 0 - 255, set default
+		if (!is_numeric($t) || $t < 0 || $t > 255) $t = 30;
+		
+		$width = imagesx($img);
+		$height = imagesy($img);
+		$bTop = 0;
+		$bLeft = 0;
+		$bBottom = $height - 1;
+		$bRight = $width - 1;
 	
-		$w = imagesx($im); // image width
-		$h = imagesy($im); // image height
-		for($x = 0; $x < $w; $x++) {
-			for($y = 0; $y < $h; $y++) {
-				$rgb = imagecolorat($im, $x, $y);
+		//top
+		for(; $bTop < $height; $bTop=$bTop+2) {
+			for($x = 0; $x < $width; $x=$x+2) {
+				$rgb = imagecolorat($img, $x, $bTop);
 				$r = ($rgb >> 16) & 0xFF;
 				$g = ($rgb >> 8) & 0xFF;
 				$b = $rgb & 0xFF;
-				if (($r < $c-$t || $r > $c+$t) && // red not within tolerance of trim colour
-					($g < $c-$t || $g > $c+$t) && // green not within tolerance of trim colour
-					($b < $c-$t || $b > $c+$t) // blue not within tolerance of trim colour
-					) {
-					// using x and y as keys condenses all rows and all columns
-					// into just one X array and one Y array.
-					// however, the keys are treated as literal and therefore are not in
-					// numeric order, so we need to sort them in order to get the first
-					// and last X and Y occurances of wanted pixels.
-					// normal sorting will remove keys so we also use x and y as values,
-					// this way they are still available without preserving keys.
-					$y_axis[$y] = $y; 
-					$x_axis[$x] = $x;
-					// note: $y_axis[] = $y; and $x_axis[] = $x; works just as well
-					// but results in much much larger arrays than is necessary
-					// array_unique would reduce size again but this method is quicker
+				if(($r < $c-$t || $r > $c+$t) && ($g < $c-$t || $g > $c+$t) && ($b < $c-$t || $b > $c+$t)){
+					break 2;
 				}
 			}
 		}
-		// sort them so first and last occurances are at start and end
-		sort($y_axis);
-		sort($x_axis); 
 	
-		$top = array_shift($y_axis); // first wanted pixel on Y axis
-		$right = array_pop($x_axis); // last wanted pixel on X axis
-		$bottom = array_pop($y_axis); // last wanted pixel on Y axis
-		$left = array_shift($x_axis); // first wanted pixel on X axis
+		// return false when all pixels are trimmed
+		if ($bTop == $height) return false;
 	
-		return array($top,$right,$bottom,$left);
+		// bottom
+		for(; $bBottom >= 0; $bBottom=$bBottom-2) {
+			for($x = 0; $x < $width; $x=$x+2) {
+				$rgb = imagecolorat($img, $x, $bBottom);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				if(($r < $c-$t || $r > $c+$t) && ($g < $c-$t || $g > $c+$t) && ($b < $c-$t || $b > $c+$t)){
+					break 2;
+				}
+			}
+		}
+	
+		// left
+		for(; $bLeft < $width; $bLeft=$bLeft+2) {
+			for($y = $bTop; $y <= $bBottom; $y=$y+2) {
+				$rgb = imagecolorat($img, $bLeft, $y);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				if(($r < $c-$t || $r > $c+$t) && ($g < $c-$t || $g > $c+$t) && ($b < $c-$t || $b > $c+$t)){
+					break 2;
+				}
+			}
+		}
+	
+		// right
+		for(; $bRight >= 0; $bRight=$bRight-2) {
+			for($y = $bTop; $y <= $bBottom; $y=$y+2) {
+				$rgb = imagecolorat($img, $bRight, $y);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				if(($r < $c-$t || $r > $c+$t) && ($g < $c-$t || $g > $c+$t) && ($b < $c-$t || $b > $c+$t)){
+					break 2;
+				}
+			}
+		}
+	
+		$bBottom++;
+		$bRight++;
+
+		$w = $bRight - $bLeft;
+		$h = $bBottom - $bTop;
+		$img2 = imagecreate($w, $h);
+		imagecopy($img2, $img, 0, 0, $bLeft, $bTop, $w, $h);
+		
 	}
 
 	private function ocrImage($url = ""){
