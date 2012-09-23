@@ -63,7 +63,7 @@ class SpecProcessorOcr{
 					$recCnt = 0;
 					while($r = $rs->fetch_object()){
 						$rawStr = '';
-						$rawStr = $this->ocrImageByUrl($r->url,$getBest,$sciName);
+						$rawStr = $this->ocrImageByUrl($r->url,$getBest,$r->sciName);
 						if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
 						$this->databaseRawStr($r->imgid,$rawStr);
 						$recCnt++;
