@@ -57,28 +57,28 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	<div id="innertext">
 		<?php 
 		if($editable){
-		?>
-		<div style="float:right;" title="Add a New Taxon">
-			<a href="taxonomyloader.php">
-				<img style='border:0px;width:15px;' src='../../images/add.png'/>
-			</a>
-		</div>
-		<div>
-			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
-				<fieldset style="padding:10px;width:500px;">
-					<legend><b>Enter a taxon</b></legend>
-					<div>
-						<b>Taxon:</b> 
-						<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
-					</div>
-					<div style="margin:15px 0px 15px 300px;">
-						<input type="submit" name="tdsubmit" value="Display Taxon Tree"/>
-						<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
-					</div>
-				</fieldset>
-			</form>
-		</div>
-		<?php 
+			?>
+			<div style="float:right;" title="Add a New Taxon">
+				<a href="taxonomyloader.php">
+					<img style='border:0px;width:15px;' src='../../images/add.png'/>
+				</a>
+			</div>
+			<div>
+				<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
+					<fieldset style="padding:10px;width:500px;">
+						<legend><b>Enter a taxon</b></legend>
+						<div>
+							<b>Taxon:</b> 
+							<input id="taxontarget" name="target" type="text" style="width:400px;" value="<?php echo $taxonDisplayObj->getTargetStr(); ?>" /> 
+						</div>
+						<div style="margin:15px 0px 15px 300px;">
+							<input type="submit" name="tdsubmit" value="Display Taxon Tree"/>
+							<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId; ?>" /> 
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<?php 
 			if($target){
 				$taxonDisplayObj->getTaxa();
 			}
