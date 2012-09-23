@@ -14,10 +14,7 @@ class SpecProcessorOcr{
 	private $cropY = 0;
 	private $cropW = 1;
 	private $cropH = 1;
-
-	//private $filterArr = array();
-	private $filterIndex = 0;
-
+	
 	private $logPath;
 	//If silent is set, script will produce no non-fatal output.
 	private $silent = 1;
@@ -34,6 +31,7 @@ class SpecProcessorOcr{
 	public function batchOcrUnprocessed($inCollArr = 0,$getBest = 0){
 		//OCR all images with a status of "unprocessed" and change to "unprocessed/OCR"
 		//Triggered automaticly (crontab) on a nightly basis
+		ini_set('memory_limit','512M');
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$collArr = array();
 		if($inCollArr && is_array($inCollArr) && count($inCollArr) > 0){
@@ -65,19 +63,8 @@ class SpecProcessorOcr{
 					$recCnt = 0;
 					while($r = $rs->fetch_object()){
 						$rawStr = '';
-						if($getBest){
-							if($this->loadImage($r->url)){
-								$rawStr = $this->getBestOCR($r->sciName);
-								if(!$this->silent) $this->logMsg("\tImage ".$recCnt." processed (imgid: ".$r->imgid."). Best index: ".$this->filterIndex." (".date("Y-m-d H:i:s").")\n");
-								unlink($this->imgUrlLocal);
-							}
-						}
-						else{
-							$rawStr = $this->ocrImageByUrl($r->url);
-							if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
-						}
-						$rawStr = $this->cleanRawStr($rawStr);
-						if(!$rawStr) $rawStr = 'Failed OCR return';
+						$rawStr = $this->ocrImageByUrl($r->url,$getBest,$sciName);
+						if(!$this->silent) $this->logMsg("\tImage ".$r->imgid." processed (".date("Y-m-d H:i:s").")\n");
 						$this->databaseRawStr($r->imgid,$rawStr);
 						$recCnt++;
 					}
@@ -88,41 +75,30 @@ class SpecProcessorOcr{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function ocrImageByImgId($imgId){
-		$rawStr = '';
-		if(is_numeric($imgId)){
-			$this->conn = MySQLiConnectionFactory::getCon("write");
-
-			$imgUrl = '';
-			$sql = 'SELECT originalurl, url '.
-				'FROM images '.
-				'WHERE (imgid = '.$imgId.')';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
-			}
-			$rs->close();
-			$rawStr = $this->ocrImageByUrl($imgUrl);
-
-	 		if(!($this->conn === false)) $this->conn->close();
-		}
-		//echo "rawStr: ".$rawStr."\n";
- 		return $rawStr;
-	}
-
-	public function ocrImageByUrl($imgUrl,$getBest = 0){
+	public function ocrImageByUrl($imgUrl,$getBest = 0,$sciName=''){
 		$rawStr = '';
 		if($imgUrl){
 			if($this->loadImage($imgUrl)){
-				if($this->filterIndex){
-					$this->filterImage();
-				}
 				$this->cropImage();
 				if($getBest){
-					$rawStr = $this->getBestOCR();
+					$rawStr = $this->getBestOCR($sciName);
 				}
 				else{
 					$rawStr = $this->ocrImage();
+				}
+				$rawStr = $this->cleanRawStr($rawStr);
+				if(!$rawStr) {
+					//Check for and remove problematic boarder 
+					if($this->imageTrimBorder()){
+						if($getBest){
+							$rawStr = $this->getBestOCR($sciName);
+						}
+						else{
+							$rawStr = $this->ocrImage();
+						}
+						$rawStr = $this->cleanRawStr($rawStr);
+					}
+					if(!$rawStr) $rawStr = 'Failed OCR return';
 				}
 				//Cleanup, remove image
 				unlink($this->imgUrlLocal);
@@ -149,10 +125,9 @@ class SpecProcessorOcr{
 		$score_treated = $this->scoreOCR($rawStr_treated, $sciName);
 		unlink($urlTemp);
 		if($score_treated > $score_base) {
-			$this->filterIndex = 1;
+			if(!$this->silent) $this->logMsg("\t\tBest Score applied \n");
 			return $rawStr_treated;
 		} else {
-			$this->filterIndex = 0;
 			return $rawStr_base;
 		}
 	}
@@ -161,27 +136,22 @@ class SpecProcessorOcr{
 		$status = false;
 		if(!$url) $url = $this->imgUrlLocal;
 		if($img = imagecreatefromjpeg($url)){
-			try{
-				imagefilter($img,IMG_FILTER_GRAYSCALE);
-				imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
-				imagefilter($img,IMG_FILTER_CONTRAST,1);
-				$sharpenMatrix = array
-				(
-					array(-1.2, -1, -1.2),
-					array(-1, 20, -1),
-					array(-1.2, -1, -1.2)
-				);
-				// calculate the sharpen divisor
-				$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
-				$offset = 0;
-				// apply the matrix
-				imageconvolution($img, $sharpenMatrix, $divisor, $offset);
-				imagegammacorrect($img, 6, 1.0);
-				$status = imagejpeg($img,$url);
-			}
-			catch(Exception $e){
-				echo 'Unable to run filter on image: '.$url;
-			}
+			imagefilter($img,IMG_FILTER_GRAYSCALE);
+			imagefilter($img,IMG_FILTER_BRIGHTNESS,10);
+			imagefilter($img,IMG_FILTER_CONTRAST,1);
+			$sharpenMatrix = array
+			(
+				array(-1.2, -1, -1.2),
+				array(-1, 20, -1),
+				array(-1.2, -1, -1.2)
+			);
+			// calculate the sharpen divisor
+			$divisor = array_sum(array_map("array_sum", $sharpenMatrix));
+			$offset = 0;
+			// apply the matrix
+			imageconvolution($img, $sharpenMatrix, $divisor, $offset);
+			imagegammacorrect($img, 6, 1.0);
+			$status = imagejpeg($img,$url);
 			imagedestroy($img);
 		}
 		return $status;
@@ -191,9 +161,9 @@ class SpecProcessorOcr{
 		$status = false;
 		if($this->cropX || $this->cropY || $this->cropW < 1 || $this->cropH < 1){
 			// Create image instances
-			if($src = imagecreatefromjpeg($this->imgUrlLocal)){
-				$imgW = imagesx($src);
-				$imgH = imagesy($src);
+			if($img = imagecreatefromjpeg($this->imgUrlLocal)){
+				$imgW = imagesx($img);
+				$imgH = imagesy($img);
 				if(($this->cropX + $this->cropW) > 1) $this->cropW = 1 - $this->cropX;
 				if(($this->cropY + $this->cropH) > 1) $this->cropH = 1 - $this->cropY;
 				$pX = $imgW*$this->cropX;
@@ -203,18 +173,19 @@ class SpecProcessorOcr{
 				$dest = imagecreatetruecolor($pW,$pH);
 
 				// Copy
-				if(imagecopy($dest,$src,0,0,$pX,$pY,$pW,$pH)){
+				if(imagecopy($dest,$img,0,0,$pX,$pY,$pW,$pH)){
 					//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
 					$status = imagejpeg($dest,$this->imgUrlLocal);
 				}
-				imagedestroy($src);
 				imagedestroy($dest);
+				imagedestroy($img);
 			}
 		}
 		return $status;
 	}
 
-	function imageTrimBorder($img,$c=0,$t=100){
+	private function imageTrimBorder($c=0,$t=100){
+		$img = imagecreatefromjpeg($this->imgUrlLocal);
 		if (!is_numeric($c) || $c < 0 || $c > 255) {
 			// Color ($c) not valid, thus grab the color from the top left corner and use that as default
 			$rgb = imagecolorat($im, 2, 2); // 2 pixels in to avoid messy edges
@@ -293,9 +264,16 @@ class SpecProcessorOcr{
 
 		$w = $bRight - $bLeft;
 		$h = $bBottom - $bTop;
-		$img2 = imagecreate($w, $h);
-		imagecopy($img2, $img, 0, 0, $bLeft, $bTop, $w, $h);
-		
+		if($w < $width || $h < $height){
+			$dest = imagecreatetruecolor($w,$h);
+			if(imagecopy($dest, $img, 0, 0, $bLeft, $bTop, $w, $h)){
+				$status = imagejpeg($dest,$this->imgUrlLocal);
+			}
+			imagedestroy($dest);
+			imagedestroy($img);
+			return true;
+		}
+		return false;
 	}
 
 	private function ocrImage($url = ""){
