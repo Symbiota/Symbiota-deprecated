@@ -60,11 +60,11 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			});
 		
 			function selectAll(cb){
-				boxesChecked = true;
+				var boxesChecked = true;
 				if(!cb.checked){
 					boxesChecked = false;
 				}
-				cName = cb.className;
+				var cName = cb.className;
 				var dbElements = document.getElementsByName("db[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];

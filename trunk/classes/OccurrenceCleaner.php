@@ -44,12 +44,11 @@ class OccurrenceCleaner {
 
 	public function getDuplicateRecords(){
 		$retArr = array();
-		$sql = 'SELECT o.occid, o.catalognumber, o.dbpk, o.basisOfRecord, o.otherCatalogNumbers, o.ownerInstitutionCode, o.family, '.
-			'o.sciname, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
+		$sql = 'SELECT o.occid, o.catalognumber, o.otherCatalogNumbers, o.family, o.sciname, o.scientificNameAuthorship, '.
 			'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, '.
 			'o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
-			'o.eventDate, o.Year, o.Month, o.Day, o.startDayOfYear, o.endDayOfYear, o.verbatimEventDate, o.habitat, o.substrate, '.
-			'o.fieldNotes, o.occurrenceRemarks, o.informationWithheld, o.associatedOccurrences, o.associatedTaxa, o.dynamicProperties, '.
+			'o.eventDate, o.Year, o.Month, o.Day, o.verbatimEventDate, o.habitat, o.substrate, '.
+			'o.occurrenceRemarks, o.informationWithheld, o.associatedOccurrences, o.associatedTaxa, o.dynamicProperties, '.
 			'o.verbatimAttributes, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, o.stateProvince, '.
 			'o.county, o.municipality, o.locality, o.localitySecurity, o.localitySecurityReason, o.decimalLatitude, o.decimalLongitude, '.
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.

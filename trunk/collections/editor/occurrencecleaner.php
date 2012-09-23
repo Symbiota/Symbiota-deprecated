@@ -35,6 +35,17 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 		   	alert("Please select specimens to be merged!");
 	      	return false;
 		}
+
+		function selectAllDuplicates(f){
+			var boxesChecked = true;
+			if(!f.selectalldupes.checked){
+				boxesChecked = false;
+			}
+			var dbElements = document.getElementsByName("dupid[]");
+			for(i = 0; i < dbElements.length; i++){
+				dbElements[i].checked = boxesChecked;
+			}
+		}
 	</script>
 </head>
 <body>
@@ -75,7 +86,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								<table class="styledtable">
 									<tr>
 										<th>PK</th>
-										<th>&nbsp;</th>
+										<th><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
 										<th>Catalog Number</th>
 										<?php 
 										foreach($fieldArr as $v){
