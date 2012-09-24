@@ -550,7 +550,7 @@ class SpecProcessorOcr{
 			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
 			$outStr
 		);
-		return trim($outStr." trimmed");
+		return trim($outStr);
 		//return trim($inStr)." trimmed";
 	}
 
