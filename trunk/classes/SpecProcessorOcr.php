@@ -505,7 +505,7 @@ class SpecProcessorOcr{
 	}
 
 	private function cleanRawStr($inStr){
-		/*$outStr = trim($inStr);
+		$outStr = trim($inStr);
 
 		//replace commonly misinterpreted characters
 		$needles = array(chr(226).chr(128).chr(156), "Ã©", "/\.", "/-\\", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
@@ -549,9 +549,9 @@ class SpecProcessorOcr{
 			"/([\dOIl!|ozZS]{1,2}[-\s]?)(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)[-\s]?)([\dOIl|!ozZS]{4})/i",
 			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
 			$outStr
-		);*/
-		//return trim($outStr." trimmed");
-		return trim($inStr)." trimmed";
+		);
+		return trim($outStr." trimmed");
+		//return trim($inStr)." trimmed";
 	}
 
 	private function encodeString($inStr){
