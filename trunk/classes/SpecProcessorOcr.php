@@ -551,7 +551,7 @@ class SpecProcessorOcr{
 			$outStr
 		);*/
 		//return trim($outStr." trimmed");
-		return trim($inStr." trimmed");
+		return trim($inStr)." trimmed";
 	}
 
 	private function encodeString($inStr){
