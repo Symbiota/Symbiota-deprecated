@@ -14,7 +14,7 @@ class SpecProcessorOcr{
 	private $cropY = 0;
 	private $cropW = 1;
 	private $cropH = 1;
-	
+
 	private $logPath;
 	//If silent is set, script will produce no non-fatal output.
 	private $silent = 1;
@@ -44,7 +44,7 @@ class SpecProcessorOcr{
 				'WHERE o.processingstatus = "unprocessed" AND rl.prlid IS NULL ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$collArr[] = $r->collid; 
+				$collArr[] = $r->collid;
 			}
 			$rs->free();
 		}
@@ -88,7 +88,7 @@ class SpecProcessorOcr{
 				}
 				$rawStr = $this->cleanRawStr($rawStr);
 				if(!$rawStr) {
-					//Check for and remove problematic boarder 
+					//Check for and remove problematic boarder
 					if($this->imageTrimBorder()){
 						if($getBest){
 							$rawStr = $this->getBestOCR($sciName);
@@ -196,14 +196,14 @@ class SpecProcessorOcr{
 		}
 		// if tolerance ($t) isn't a number between 0 - 255, set default
 		if (!is_numeric($t) || $t < 0 || $t > 255) $t = 30;
-		
+
 		$width = imagesx($img);
 		$height = imagesy($img);
 		$bTop = 0;
 		$bLeft = 0;
 		$bBottom = $height - 1;
 		$bRight = $width - 1;
-	
+
 		//top
 		for(; $bTop < $height; $bTop=$bTop+2) {
 			for($x = 0; $x < $width; $x=$x+2) {
@@ -216,10 +216,10 @@ class SpecProcessorOcr{
 				}
 			}
 		}
-	
+
 		// return false when all pixels are trimmed
 		if ($bTop == $height) return false;
-	
+
 		// bottom
 		for(; $bBottom >= 0; $bBottom=$bBottom-2) {
 			for($x = 0; $x < $width; $x=$x+2) {
@@ -232,7 +232,7 @@ class SpecProcessorOcr{
 				}
 			}
 		}
-	
+
 		// left
 		for(; $bLeft < $width; $bLeft=$bLeft+2) {
 			for($y = $bTop; $y <= $bBottom; $y=$y+2) {
@@ -245,7 +245,7 @@ class SpecProcessorOcr{
 				}
 			}
 		}
-	
+
 		// right
 		for(; $bRight >= 0; $bRight=$bRight-2) {
 			for($y = $bTop; $y <= $bBottom; $y=$y+2) {
@@ -258,7 +258,7 @@ class SpecProcessorOcr{
 				}
 			}
 		}
-	
+
 		$bBottom++;
 		$bRight++;
 
@@ -508,7 +508,7 @@ class SpecProcessorOcr{
 		$outStr = trim($inStr);
 
 		//replace commonly misinterpreted characters
-		$needles = array(chr(226).chr(128).chr(156), "Ã©", "/\.", "/-\\", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
+		/*$needles = array(chr(226).chr(128).chr(156), "Ã©", "/\.", "/-\\", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
 		$replacements = array("\"", "e", "A.", "A","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
 		$outStr = str_replace($needles, $replacements, $outStr);
 
@@ -549,7 +549,7 @@ class SpecProcessorOcr{
 			"/([\dOIl!|ozZS]{1,2}[-\s]?)(((?i)January|Jan\.?|February|Feb\.?|March|Mar\.?|April|Apr\.?|May|June|Jun\.?|July|Jul\.?|August|Aug\.?|September|Sept?\.?|October|Oct\.?|November|Nov\.?|December|Dec\.?)[-\s]?)([\dOIl|!ozZS]{4})/i",
 			create_function('$matches','return str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[1]).$matches[2].str_replace(array("l","|","!","I","O","o","Z","z","S"), array("1","1","1","1","0","0","2","2","5"), $matches[4]);'),
 			$outStr
-		);
+		);*/
 		return trim($outStr);
 	}
 
@@ -585,7 +585,7 @@ class SpecProcessorOcr{
 	public function setCropH($h){
 		$this->cropH = $h;
 	}
-	
+
 	public function setSilent($s){
 		$this->silent = $s;
 	}
