@@ -86,7 +86,8 @@ class SpecProcessorOcr{
 				else{
 					$rawStr = $this->ocrImage();
 				}
-				$rawStr = $this->cleanRawStr($rawStr);
+				//$rawStr = $this->cleanRawStr($rawStr);
+				$rawStr = $rawStr;
 				if(!$rawStr) {
 					//Check for and remove problematic boarder
 					if($this->imageTrimBorder()){
@@ -96,7 +97,8 @@ class SpecProcessorOcr{
 						else{
 							$rawStr = $this->ocrImage();
 						}
-						$rawStr = $this->cleanRawStr($rawStr);
+						//$rawStr = $this->cleanRawStr($rawStr);
+						$rawStr = $rawStr;
 					}
 					if(!$rawStr) $rawStr = 'Failed OCR return';
 				}
