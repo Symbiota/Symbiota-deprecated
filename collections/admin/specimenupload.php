@@ -337,7 +337,7 @@ else{
 				<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 				<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
 				<?php if($uploadType == $FILEUPLOAD && stripos($action,"initialize") !== false){ ?>
-					<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
+					<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 					<div>
 						<div style="margin:10px;">
 							<div class="ulfnoptions">
