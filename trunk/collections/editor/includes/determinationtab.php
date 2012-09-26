@@ -10,6 +10,11 @@ $identBy = $_GET['identby'];
 $dateIdent = $_GET['dateident'];
 $sciName = $_GET['sciname'];
 
+$annotatorname = $_GET['annotatorname'];
+$annotatoremail = $_GET['annotatoremail'];
+$catalognumber = $_GET['catalognumber'];
+$institutioncode = $_GET['institutioncode'];
+
 $occManager = new OccurrenceEditorDeterminations();
 
 $occManager->setOccId($occId); 

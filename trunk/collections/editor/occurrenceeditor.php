@@ -2,6 +2,7 @@
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -397,6 +398,16 @@ if($symbUid){
 									<?php
 									if($occId && $isEditor){
 										$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'];
+										// Get symbiota user email as the annotator email (for fp)
+										$pHandler = new ProfileManager();
+										$person = $pHandler->getPersonByUid($symbUid);
+										$userEmail = $person->getEmail();
+										
+										$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'].
+											'&annotatorname='.$userDisplayName.'&annotatoremail='.$userEmail.
+											($collMap['collectioncode']?'&collectioncode='.$collMap['collectioncode']:'').
+											'&institutioncode='.$collMap['institutioncode'].'&catalognumber='.$occArr['catalognumber'];
+										
 										$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
 										?>
 										<li>
@@ -880,7 +891,7 @@ if($symbUid){
 													<a href="#" onclick="return dwcDoc('basisOfRecord')">
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
-													<input type="text" name="basisofrecord" tabindex="106" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:''; ?>" onchange="fieldChanged('basisofrecord');" />
+													<input type="text" name="basisofrecord" tabindex="106" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
 												</div>
 												<div style="float:left;margin-left:10px;">
 													Language:

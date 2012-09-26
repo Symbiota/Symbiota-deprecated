@@ -8,30 +8,27 @@ class OccurrenceEditorManager {
 	protected $conn;
 	protected $occId;
 	private $collId;
-	private $collMap = Array();
-	private $occurrenceMap = Array();
-	private $occSql;
+	private $collMap = array();
+	private $occurrenceMap = array();
+	private $occFieldArr = array();
 	private $sqlWhere;
-	private $qryArr = Array();
+	private $qryArr = array();
 	private $symbUid;
 	
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->occSql = 'SELECT o.occid, o.collid, o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, '.
-		'o.ownerInstitutionCode, o.family, o.scientificName, o.sciname, o.tidinterpreted, o.genus, o.institutionID, o.collectionID, '.
-		'o.specificEpithet, o.taxonRank, o.infraspecificEpithet, '.
-		'o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
-		'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-		'o.associatedCollectors, o.eventdate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-		'o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, o.verbatimAttributes, '.
-		'o.dynamicProperties, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, '.
-		'o.stateProvince, o.county, o.municipality, o.locality, o.localitySecurity, o.localitySecurityreason, o.decimalLatitude, o.decimalLongitude, '.
-		'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-		'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, '.
-		'o.georeferenceVerificationStatus, o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, '.
-		'o.verbatimElevation, o.disposition, o.modified, o.language, o.duplicateQuantity, o.labelProject, o.observeruid, '.
-		'o.dateLastModified, o.processingstatus, o.recordEnteredBy '.
-		'FROM omoccurrences o ';
+		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'family', 'scientificname', 'sciname', 
+			'tidinterpreted', 'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
+			'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+			'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+			'verbatimeventdate', 'habitat', 'substrate', 'occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+			'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans', 'country', 
+			'stateprovince', 'county', 'municipality', 'locality', 'localitysecurity', 'localitysecurityreason', 
+			'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters', 'coordinateprecision', 
+			'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 
+			'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+			'verbatimelevation', 'disposition', 'language', 'duplicatequantity', 'labelproject', 'observeruid', 
+			'basisofrecord','ownerinstitutioncode','datelastmodified', 'processingstatus', 'recordenteredby');
 	}
 
 	public function __destruct(){
@@ -344,7 +341,7 @@ class OccurrenceEditorManager {
 
 	private function setOccurArr(){
 		$retArr = Array();
-		$sql = $this->occSql;
+		$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
 		if($this->occId){
 			$sql .= 'WHERE (o.occid = '.$this->occId.')';
 		}
@@ -425,7 +422,16 @@ class OccurrenceEditorManager {
 					$k2d = array_search('processingstatus',$editArr);
 					if($k2d) unset($editArr[$k2d]);
 				}
-				foreach($editArr as $v){
+				foreach($occArr as $ok => $ov){
+					if(in_array($ok,$this->occFieldArr) && $ok != 'observeruid'){
+						$vStr = $this->cleanStr($ov);
+						$sql .= ','.$ok.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
+						if(array_key_exists($this->occId,$this->occurrenceMap) && array_key_exists($ok,$this->occurrenceMap[$this->occId])){
+							$this->occurrenceMap[$this->occId][$ok] = $vStr;
+						}
+					}
+				}
+/*				foreach($editArr as $v){
 					if($v && array_key_exists($v,$occArr)){
 						$vStr = $this->cleanStr($occArr[$v]);
 						$sql .= ','.$v.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
@@ -434,6 +440,7 @@ class OccurrenceEditorManager {
 						}
 					}
 				}
+*/
 				if(in_array('sciname',$editArr)){
 					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
 					$rsTid = $this->conn->query($sqlTid);
