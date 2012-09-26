@@ -2,6 +2,7 @@
 function openAssocSppAid(){
 	assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=200,left=20,top=20");
 	if (assocWindow.opener == null) assocWindow.opener = self;
+	fieldChanged("associatedtaxa");
 }
 
 function toggleCoordDiv(){
@@ -341,7 +342,7 @@ function searchDupesOtherCatalogNumbers(f){
 
 		xmlHttp.onreadystatechange=function(){
 			if(xmlHttp.readyState==4 && xmlHttp.status==200){
-				var resObj = eval('(' + xmlHttp.responseText + ')')
+				var resObj = eval('(' + xmlHttp.responseText + ')');
 				if(resObj.length > 0){
 					if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
 						occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
