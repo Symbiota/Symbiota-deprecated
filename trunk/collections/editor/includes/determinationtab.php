@@ -61,12 +61,27 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 				<div style='margin:15px;'>
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+					
+					<input type="hidden" name="annotatorname" value="<?php echo $annotatorname; ?>" />
+					<input type="hidden" name="annotatoremail" value="<?php echo $annotatoremail; ?>" />
+					<input type="hidden" name="catalognumber" value="<?php echo $catalognumber; ?>" />
+					<input type="hidden" name="institutioncode" value="<?php echo $institutioncode; ?>" />
+					<?php 
+					if (isset($_GET['collectioncode']))
+						echo '<input type="hidden" name="collectioncode" value="'.$_GET['collectioncode'].'" />'; 
+					?>
+					
 					<div style="float:left;">
 						<input type="submit" name="submitaction" value="Add New Determination" />
 					</div>
 					<div style="float:left;margin-left:30px;">
-						<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination <br/>
-						<input type="checkbox" name="remapimages" value="1" /> Remap images to new taxonomic name
+						<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination <br />
+						<input type="checkbox" name="remapimages" value="1" /> Remap images to new taxonomic name<br />
+						<?php 
+						global $fpEnabled;
+						if($fpEnabled)
+							echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
+						?>
 					</div>
 				</div>
 			</fieldset>

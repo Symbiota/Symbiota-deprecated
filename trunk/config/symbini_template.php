@@ -22,21 +22,23 @@ $imgLgWidth = 3200;
 $imgFileSizeLimit = 300000;		//Files above this size limit and still within pixel width limits will still be resaved w/ some compression  
 
 //Specimen Label and Batch Image Processor variables
-//$useImageMagick = 0;			//Set to 1 to have ImageMagick resize images, given that it's installed (faster, less memory intensive)
+//$useImageMagick = false;		//true = ImageMagick resize images, given that it's installed (faster, less memory intensive)
 
-$tesseractPath = ''; //Needed for OCR function in the occurrence editor page
+$tesseractPath = ''; 			//Needed for OCR function in the occurrence editor page
+
+$fpEnabled = false;				//Enable Filtered-Push modules
 
 //Module activations
-$occurrenceModIsActive = 1;
-$floraModIsActive = 1;
-$keyModIsActive = 1;
+$occurrenceModIsActive = true;
+$floraModIsActive = true;
+$keyModIsActive = true;
 
 //Misc variables
 $googleMapKey = '';					//Needed for Google Map; get from Google 
 $mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
 $googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
-$displayCommonNames = 1;			//0 = false, 1 = true
+$displayCommonNames = true;
 
 //Individual page menu and navigation crumbs
 //set terms for reproductiveCondition drop-down menu
@@ -55,7 +57,6 @@ $displayCommonNames = 1;			//0 = false, 1 = true
 	
 //ident/
 	$ident_keyMenu = false;
-	$ident_admin_indexCrumbs = false;
 	$ident_tools_chardeficitMenu = false;
 	$ident_tools_massupdateMenu = false;
 	$ident_tools_editorMenu = false;
