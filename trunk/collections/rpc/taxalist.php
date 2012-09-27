@@ -2,7 +2,7 @@
 	include_once('../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$queryString = $con->real_escape_string($_REQUEST['term']);
+	$queryString = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
 	$taxonType = array_key_exists('t',$_REQUEST)?$con->real_escape_string($_REQUEST['t']):1;
 	// Is the string length greater than 0?
 	if($queryString) {

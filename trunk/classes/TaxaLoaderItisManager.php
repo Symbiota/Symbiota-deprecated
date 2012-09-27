@@ -38,14 +38,14 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 			if(substr($record,4) != '[TU]'){
 				$recordArr = explode($delimtStr,$record);
 				if($recordArr[0] == "[SY]"){
-					$this->extraArr[$recordArr[2]]['s'] = $this->conn->real_escape_string($recordArr[3]);
+					$this->extraArr[$recordArr[2]]['s'] = $this->cleanStr($recordArr[3]);
 				}
 				elseif($recordArr[0] == "[TA]"){
-					$this->authArr[$recordArr[1]] = $this->conn->real_escape_string($recordArr[2]);
+					$this->authArr[$recordArr[1]] = $this->cleanStr($recordArr[2]);
 				}
 				elseif($recordArr[0] == "[VR]"){
-					$this->extraArr[$recordArr[4]]['v'] = $this->conn->real_escape_string($recordArr[3]);
-					$this->extraArr[$recordArr[4]]['l'] = $this->conn->real_escape_string($recordArr[5]);
+					$this->extraArr[$recordArr[4]]['v'] = $this->cleanStr($recordArr[3]);
+					$this->extraArr[$recordArr[4]]['l'] = $this->cleanStr($recordArr[5]);
 				}
 			}
 		}
@@ -85,15 +85,15 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 	private function loadTaxonUnit($tuArr){
 		if(count($tuArr) > 24){
 			
-			$unitInd3 = $this->conn->real_escape_string($tuArr[8]?$tuArr[8]:$tuArr[6]);
-			$unitName3 = $this->conn->real_escape_string($tuArr[9]?$tuArr[9]:$tuArr[7]);
-			$sciName = $this->conn->real_escape_string(trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3));
+			$unitInd3 = $this->cleanStr($tuArr[8]?$tuArr[8]:$tuArr[6]);
+			$unitName3 = $this->cleanStr($tuArr[9]?$tuArr[9]:$tuArr[7]);
+			$sciName = $this->cleanStr(trim($tuArr[2]." ".$tuArr[3].($tuArr[4]?" ".$tuArr[4]:"")." ".$tuArr[5]." ".$unitInd3." ".$unitName3));
 			$author = '';
 			if($tuArr[20] && array_key_exists($tuArr[20],$this->authArr)){
 				$author = $this->authArr[$tuArr[20]];
 				unset($this->authArr[$tuArr[20]]);
 			}
-			$sourceId = $this->conn->real_escape_string($tuArr[1]);
+			$sourceId = $this->cleanStr($tuArr[1]);
 			$sourceAcceptedId = '';
 			$acceptance = '1';
 			$vernacular = '';
@@ -113,15 +113,15 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 			$sql = "INSERT INTO uploadtaxa(SourceId,scinameinput,sciname,unitind1,unitname1,unitind2,unitname2,unitind3,".
 				"unitname3,SourceParentId,author,kingdomid,rankid,SourceAcceptedId,acceptance,vernacular,vernlang) ".
 				"VALUES (".$sourceId.',"'.$sciName.'","'.$sciName.'",'.
-				($tuArr[2]?'"'.$this->conn->real_escape_string($tuArr[2]).'"':"NULL").",".
-				($tuArr[3]?'"'.$this->conn->real_escape_string($tuArr[3]).'"':"NULL").",".
-				($tuArr[4]?'"'.$this->conn->real_escape_string($tuArr[4]).'"':"NULL").",".
-				($tuArr[5]?'"'.$this->conn->real_escape_string($tuArr[5]).'"':"NULL").",".
+				($tuArr[2]?'"'.$this->cleanStr($tuArr[2]).'"':"NULL").",".
+				($tuArr[3]?'"'.$this->cleanStr($tuArr[3]).'"':"NULL").",".
+				($tuArr[4]?'"'.$this->cleanStr($tuArr[4]).'"':"NULL").",".
+				($tuArr[5]?'"'.$this->cleanStr($tuArr[5]).'"':"NULL").",".
 				($unitInd3?'"'.$unitInd3.'"':"NULL").",".($unitName3?'"'.$unitName3.'"':"NULL").",".
-				($tuArr[18]?$this->conn->real_escape_string($tuArr[18]):"NULL").",".
+				($tuArr[18]?$this->cleanStr($tuArr[18]):"NULL").",".
 				($author?'"'.$author.'"':"NULL").",".
-				($tuArr[23]?$this->conn->real_escape_string($tuArr[23]):"NULL").",".
-				($tuArr[24]?$this->conn->real_escape_string($tuArr[24]):"NULL").",".
+				($tuArr[23]?$this->cleanStr($tuArr[23]):"NULL").",".
+				($tuArr[24]?$this->cleanStr($tuArr[24]):"NULL").",".
 				($sourceAcceptedId?$sourceAcceptedId:'NULL').','.$acceptance.','.
 				($vernacular?'"'.$vernacular.'"':'NULL').','.
 				($vernlang?'"'.$vernlang.'"':'NULL').')';
@@ -135,5 +135,6 @@ class TaxaLoaderItisManager extends TaxaLoaderManager{
 			}
 		}
 	}
+	
 }
 ?>

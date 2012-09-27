@@ -176,13 +176,13 @@ class TPImageEditorManager extends TPEditorManager{
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 				"owner, sourceurl, copyright, locality, occid, notes, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographer?"\"".$this->taxonCon->real_escape_string($photographer)."\"":"NULL").",".
+				($photographer?"\"".$this->cleanStr($photographer)."\"":"NULL").",".
 				($photographerUid?$photographerUid:"NULL").",\"".
-				$this->taxonCon->real_escape_string($caption)."\",\"".$this->taxonCon->real_escape_string($owner).
-				"\",\"".$this->taxonCon->real_escape_string($sourceUrl)."\",\"".$this->taxonCon->real_escape_string($copyRight).
-				"\",\"".$this->taxonCon->real_escape_string($locality)."\",".
-				($occId?$occId:"NULL").",\"".$this->taxonCon->real_escape_string($notes)."\",".
-				($sortSequence?$this->taxonCon->real_escape_string($sortSequence):"50").")";
+				$this->cleanStr($caption)."\",\"".$this->cleanStr($owner).
+				"\",\"".$sourceUrl."\",\"".$this->cleanStr($copyRight).
+				"\",\"".$this->cleanStr($locality)."\",".
+				($occId?$occId:"NULL").",\"".$this->cleanStr($notes)."\",".
+				($sortSequence?$this->cleanStr($sortSequence):"50").")";
 			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
@@ -190,12 +190,12 @@ class TPImageEditorManager extends TPEditorManager{
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 						"owner, sourceurl, copyright, locality, occid, notes) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-						($photographer?"\"".$this->taxonCon->real_escape_string($photographer)."\"":"NULL").
+						($photographer?"\"".$this->cleanStr($photographer)."\"":"NULL").
 						",".($photographerUid?$photographerUid:"NULL").",\"".
-						$this->taxonCon->real_escape_string($imageType)."\",\"".$this->taxonCon->real_escape_string($caption).
-						"\",\"".$this->taxonCon->real_escape_string($owner)."\",\"".$this->taxonCon->real_escape_string($sourceUrl).
-						"\",\"".$this->taxonCon->real_escape_string($copyRight)."\",\"".$this->taxonCon->real_escape_string($locality)."\",".
-						($occId?$occId:"NULL").",\"".$this->taxonCon->real_escape_string($notes)."\")";
+						$this->cleanStr($imageType)."\",\"".$this->cleanStr($caption).
+						"\",\"".$this->cleanStr($owner)."\",\"".$sourceUrl.
+						"\",\"".$this->cleanStr($copyRight)."\",\"".$this->cleanStr($locality)."\",".
+						($occId?$occId:"NULL").",\"".$this->cleanStr($notes)."\")";
 					//echo $sql;
 					if(!$this->taxonCon->query($sql)){
 						$status = "Error: unable to upload image for related taxon";

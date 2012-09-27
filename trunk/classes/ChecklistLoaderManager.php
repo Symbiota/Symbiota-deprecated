@@ -250,7 +250,7 @@ class ChecklistLoaderManager {
 
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
-		$outStr = $this->conn->real_escape_string($outStr);
+		$outStr = $this->conn->real_escape_string(htmlspecialchars($outStr));
 		return $outStr;
 	}
 }

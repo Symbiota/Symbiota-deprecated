@@ -89,12 +89,12 @@ class SurveyManager {
 		$setSql = "";
 		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'UPDATE omsurveys SET '.
-			'projectname = '.($_POST['projectname']?'"'.$con->real_escape_string(trim($_POST['projectname'])).'"':'NULL').', '.
-			'managers = '.($_POST['managers']?'"'.$con->real_escape_string(trim($_POST['managers'])).'"':'NULL').', '.
-			'locality = '.($_POST['locality']?'"'.$con->real_escape_string(trim($_POST['locality'])).'"':'NULL').', '.
-			'notes = '.($_POST['notes']?'"'.$con->real_escape_string(trim($_POST['notes'])).'"':'NULL').', '.
-			'latcentroid = '.($_POST['latcentroid']?$con->real_escape_string($_POST['latcentroid']):'NULL').', '.
-			'longcentroid = '.($_POST['longcentroid']?$con->real_escape_string($_POST['longcentroid']):'NULL').', '.
+			'projectname = '.($_POST['projectname']?'"'.$this->cleanStr(trim($_POST['projectname'])).'"':'NULL').', '.
+			'managers = '.($_POST['managers']?'"'.$this->cleanStr(trim($_POST['managers'])).'"':'NULL').', '.
+			'locality = '.($_POST['locality']?'"'.$this->cleanStr(trim($_POST['locality'])).'"':'NULL').', '.
+			'notes = '.($_POST['notes']?'"'.$this->cleanStr(trim($_POST['notes'])).'"':'NULL').', '.
+			'latcentroid = '.($_POST['latcentroid']?$this->cleanStr($_POST['latcentroid']):'NULL').', '.
+			'longcentroid = '.($_POST['longcentroid']?$this->cleanStr($_POST['longcentroid']):'NULL').', '.
 			'ispublic = '.($_POST['ispublic']?1:0).' '.
 			'WHERE (surveyid = '.$this->surveyId.')';
 		//echo $sql;
@@ -353,6 +353,14 @@ class SurveyManager {
 	public function getSpeciesCount(){
 		return $this->speciesCount;
 	}
+	
+	private function cleanStr($inStr){
+		$retStr = trim($inStr);
+		$retStr = htmlspecialchars($retStr);
+		$retStr = $this->conn->real_escape_string($retStr);
+		return $retStr;
+	}
+	
 }
 ?>
  

@@ -6,7 +6,7 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $con = MySQLiConnectionFactory::getCon("readonly");
-$q = $con->real_escape_string($_REQUEST['term']);
+$q = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
 
 $upperTax = Array();
 $sql = 'SELECT DISTINCT uppertaxonomy FROM taxstatus '.

@@ -6,7 +6,7 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $con = MySQLiConnectionFactory::getCon("readonly");
-$sciName = $con->real_escape_string($_REQUEST['sciname']); 
+$sciName = $con->real_escape_string(htmlspecialchars($_REQUEST['sciname'])); 
 $taxAuthId = array_key_exists('taxauthid',$_REQUEST)?$con->real_escape_string($_REQUEST['taxauthid']):0;
 
 $responseStr = "";

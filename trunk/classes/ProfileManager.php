@@ -185,21 +185,21 @@ class ProfileManager{
         	$editCon = $this->getConnection("write");
     		$fields = 'UPDATE users SET ';
             $where = 'WHERE (uid = '.$person->getUid().')';
-            $values = 'firstname = "'.$this->con->real_escape_string($person->getFirstName()).'"';
-            $values .= ', lastname= "'.$this->con->real_escape_string($person->getLastName()).'"';
-            $values .= ', title= "'.$this->con->real_escape_string($person->getTitle()).'"';
-            $values .= ', institution="'.$this->con->real_escape_string($person->getInstitution()).'"';
-            $values .= ', department= "'.$this->con->real_escape_string($person->getDepartment()).'"';
-            $values .= ', address= "'.$this->con->real_escape_string($person->getAddress()).'"';
-            $values .= ', city="'.$this->con->real_escape_string($person->getCity()).'"';
-            $values .= ', state="'.$this->con->real_escape_string($person->getState()).'"';
-            $values .= ', zip="'.$this->con->real_escape_string($person->getZip()).'"';
-            $values .= ', country= "'.$this->con->real_escape_string($person->getCountry()).'"';
-            $values .= ', phone="'.$this->con->real_escape_string($person->getPhone()).'"';
-            $values .= ', email="'.$this->con->real_escape_string($person->getEmail()).'"';
-            $values .= ', url="'.$this->con->real_escape_string($person->getUrl()).'"';
-            $values .= ', biography="'.$this->con->real_escape_string($person->getBiography()).'"';
-            $values .= ', ispublic='.$this->con->real_escape_string($person->getIsPublic()).' ';
+            $values = 'firstname = "'.$this->cleanStr($person->getFirstName()).'"';
+            $values .= ', lastname= "'.$this->cleanStr($person->getLastName()).'"';
+            $values .= ', title= "'.$this->cleanStr($person->getTitle()).'"';
+            $values .= ', institution="'.$this->cleanStr($person->getInstitution()).'"';
+            $values .= ', department= "'.$this->cleanStr($person->getDepartment()).'"';
+            $values .= ', address= "'.$this->cleanStr($person->getAddress()).'"';
+            $values .= ', city="'.$this->cleanStr($person->getCity()).'"';
+            $values .= ', state="'.$this->cleanStr($person->getState()).'"';
+            $values .= ', zip="'.$this->cleanStr($person->getZip()).'"';
+            $values .= ', country= "'.$this->cleanStr($person->getCountry()).'"';
+            $values .= ', phone="'.$this->cleanStr($person->getPhone()).'"';
+            $values .= ', email="'.$this->cleanStr($person->getEmail()).'"';
+            $values .= ', url="'.$this->cleanStr($person->getUrl()).'"';
+            $values .= ', biography="'.$this->cleanStr($person->getBiography()).'"';
+            $values .= ', ispublic='.$this->cleanStr($person->getIsPublic()).' ';
             $sql = $fields." ".$values." ".$where;
 			//echo $sql;
             $success = $editCon->query($sql);
@@ -231,12 +231,12 @@ class ProfileManager{
 	        	$rsTest = $editCon->query($sqlTest);
 	        	if(!$rsTest->num_rows) return false;
         	}
-    		$sql = "UPDATE userlogin ul SET ul.password = PASSWORD(\"".$this->con->real_escape_string($newPwd)."\") "; 
+    		$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->con->real_escape_string($newPwd).'") '; 
     		if($isSelf){
-    			$sql .= "WHERE (ul.username = \"".$this->con->real_escape_string($id)."\")";
+    			$sql .= 'WHERE (ul.username = "'.$this->con->real_escape_string($id).'")';
     		}
     		else{
-    			$sql .= "WHERE (uid = ".$this->con->real_escape_string($id).')';
+    			$sql .= 'WHERE (uid = '.$this->con->real_escape_string($id).')';
     		}
 			$successCnt = $editCon->query($sql);
         	$editCon->close();
@@ -323,48 +323,48 @@ class ProfileManager{
 			$fields = 'INSERT INTO users (';
 			$values = 'VALUES (';
 			$fields .= 'firstname ';
-            $values .= '"'.$this->con->real_escape_string($person->getFirstName()).'"';
+            $values .= '"'.$this->cleanStr($person->getFirstName()).'"';
 			$fields .= ', lastname';
-			$values .= ', "'.$this->con->real_escape_string($person->getLastName()).'"';
+			$values .= ', "'.$this->cleanStr($person->getLastName()).'"';
             if($person->getTitle()){
 	            $fields .= ', title';
-                $values .= ', "'.$this->con->real_escape_string($person->getTitle()).'"';
+                $values .= ', "'.$this->cleanStr($person->getTitle()).'"';
             }
             if($person->getInstitution()){
             	$fields .= ', institution';
-                $values .= ', "'.$this->con->real_escape_string($person->getInstitution()).'"';
+                $values .= ', "'.$this->cleanStr($person->getInstitution()).'"';
             }
             if($person->getDepartment()){
             	$fields .= ', department';
-                $values .= ', "'.$this->con->real_escape_string($person->getDepartment()).'"';
+                $values .= ', "'.$this->cleanStr($person->getDepartment()).'"';
             }
             if($person->getAddress()){
 				$fields .= ', address';
-                $values .= ', "'.$this->con->real_escape_string($person->getAddress()).'"';
+                $values .= ', "'.$this->cleanStr($person->getAddress()).'"';
             }
             if($person->getCity()){
 				$fields .= ', city';
-                $values .= ', "'.$this->con->real_escape_string($person->getCity()).'"';
+                $values .= ', "'.$this->cleanStr($person->getCity()).'"';
             }
             if($person->getState()){
 				$fields .= ', state';
-                $values .= ', "'.$this->con->real_escape_string($person->getState()).'"';
+                $values .= ', "'.$this->cleanStr($person->getState()).'"';
             }
             if($person->getZip()){
             	$fields .= ', zip';
-				$values .= ', "'.$this->con->real_escape_string($person->getZip()).'"';
+				$values .= ', "'.$this->cleanStr($person->getZip()).'"';
             }
             if($person->getCountry()){
             	$fields .= ', country';
-                $values .= ', "'.$this->con->real_escape_string($person->getCountry()).'"';
+                $values .= ', "'.$this->cleanStr($person->getCountry()).'"';
             }
             if($person->getPhone()){
             	$fields .= ', phone';
-                $values .= ', "'.$this->con->real_escape_string($person->getPhone()).'"';
+                $values .= ', "'.$this->cleanStr($person->getPhone()).'"';
             }
             if($person->getEmail()){
 	            $fields .= ', email';
-                $values .= ', "'.$this->con->real_escape_string($person->getEmail()).'"';
+                $values .= ', "'.$this->cleanStr($person->getEmail()).'"';
             }
             if($person->getUrl()){
             	$fields .= ', url';
@@ -372,7 +372,7 @@ class ProfileManager{
             }
             if($person->getBiography()){
             	$fields .= ', biography';
-				$values .= ', "'.$this->con->real_escape_string($person->getBiography()).'"';
+				$values .= ', "'.$this->cleanStr($person->getBiography()).'"';
             }
             if($person->getIsPublic()){
 				$fields .= ', ispublic';
@@ -492,6 +492,13 @@ class ProfileManager{
 
     public function getRememberMe(){
         return $this->rememberMe;
+    }
+    
+    private function cleanStr($inStr){
+    	$outStr = trim($inStr);
+    	$outStr = htmlspecialchars($outStr);
+    	$outStr = $this->con->real_escape_string($outStr);
+    	return $inStr;
     }
 } 
 ?>

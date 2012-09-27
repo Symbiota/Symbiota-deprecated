@@ -771,12 +771,13 @@ class TaxaLoaderManager{
 		return $retArr;
 	}
 	
- 	protected function cleanField($fieldValue){
+ 	protected function cleanStr($fieldValue){
  		$rStr = trim($fieldValue);
-		$rStr = str_replace("\"","'",$rStr);
+		$rStr = htmlspecialchars($rStr);
+		$rStr = $this->conn->real_escape_string($rStr);
 		return $rStr;
 	}
-
+	
 	protected function encodeString($inStr){
  		global $charset;
  		$retStr = trim($inStr);

@@ -93,7 +93,7 @@ class ChecklistManager {
 	}
 	
 	public function setClValue($clValue){
-		$clValue = $this->clCon->real_escape_string($clValue);
+		$clValue = $this->clCon->real_escape_string(htmlspecialchars($clValue));
 		if(is_numeric($clValue)){
 			$this->clid = $clValue;
 		}
@@ -943,7 +943,7 @@ class ChecklistManager {
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
- 		$newStr = str_replace('"',"'",$newStr);
+		$newStr = htmlspecialchars($newStr);
  		$newStr = $this->clCon->real_escape_string($newStr);
  		return $newStr;
  	}

@@ -227,14 +227,13 @@ class EOLManager {
 	
 	private function cleanStr($str){
 		$newStr = trim($str);
-		$newStr = str_replace('"',"'",$newStr);
 		$newStr = str_replace(chr(9)," ",$newStr);
 		$newStr = str_replace(chr(10)," ",$newStr);
 		$newStr = str_replace(chr(13)," ",$newStr);
 
 		$newStr = $this->encodeString($newStr);
 		
-		$newStr = $this->conn->real_escape_string($newStr);
+		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
 		return $newStr;
 	}
 }

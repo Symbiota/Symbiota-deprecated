@@ -320,7 +320,7 @@ class SpecProcessorOcr{
 
 	private function databaseRawStr($imgId,$rawStr){
 		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string($rawStr).'","batch Tesseract OCR - '.date('Y-m-d').'")';
+			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string(htmlspecialchars($rawStr)).'","batch Tesseract OCR - '.date('Y-m-d').'")';
 		//echo 'SQL: '.$sql."\n";
 		if($this->conn->query($sql)){
 			return true;

@@ -8,7 +8,7 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $conn = MySQLiConnectionFactory::getCon("write");
 $userid = array_key_exists("userid",$_REQUEST)?$conn->real_escape_string($_REQUEST["userid"]):""; 
-$login = array_key_exists("login",$_REQUEST)?$conn->real_escape_string($_REQUEST["login"]):""; 
+$login = array_key_exists("login",$_REQUEST)?$conn->real_escape_string(htmlspecialchars($_REQUEST["login"])):""; 
 
 if($userid && $login && ($isAdmin || $userid == $uid )){
 	$delStatus = "false";

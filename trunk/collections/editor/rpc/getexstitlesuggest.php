@@ -2,7 +2,7 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
-	$queryString = $con->real_escape_string($_REQUEST['term']);
+	$queryString = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
 
 	$sql = 'SELECT DISTINCT title, abbreviation '. 
 		'FROM omexsiccatititles '.

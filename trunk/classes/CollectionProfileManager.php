@@ -405,7 +405,7 @@ class CollectionProfileManager {
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
 		$outStr = str_replace('"',"'",$inStr);
-		$outStr = $this->conn->real_escape_string($outStr);
+		$outStr = $this->conn->real_escape_string(htmlspecialchars($outStr));
 		return $outStr;
 	}
 }
