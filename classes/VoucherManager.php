@@ -137,10 +137,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 				$internalNotesStr = $internalNotesTarget.(($internalNotesTarget && $internalNotesSource)?"; ":"").$internalNotesSource;
 				$sourceStr = $sourceTarget.(($sourceTarget && $sourceSource)?"; ":"").$sourceSource;
 				$nativeStr = $nativeTarget.(($nativeTarget && $nativeSource)?"; ":"").$nativeSource;
-				$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->conn->real_escape_string($habitatStr).'", '. 
-					'Abundance = "'.$this->conn->real_escape_string($abundStr).'", Notes = "'.$this->conn->real_escape_string($notesStr).
-					'", internalnotes = "'.$this->conn->real_escape_string($internalNotesStr).'", source = "'.
-					$this->conn->real_escape_string($sourceStr).'", Nativity = "'.$this->conn->real_escape_string($nativeStr).'" '.
+				$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanStr($habitatStr).'", '. 
+					'Abundance = "'.$this->cleanStr($abundStr).'", Notes = "'.$this->cleanStr($notesStr).
+					'", internalnotes = "'.$this->cleanStr($internalNotesStr).'", source = "'.
+					$this->cleanStr($sourceStr).'", Nativity = "'.$this->cleanStr($nativeStr).'" '.
 					'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
 				$this->conn->query($sqlCl);
 				//Delete unwanted taxon
@@ -187,11 +187,11 @@ include_once($serverRoot.'/config/dbconnection.php');
 			unset($editArr['occid']);
 			$setStr = '';
 			foreach($editArr as $k => $v){
-				$setStr .= ', '.$k.' = "'.trim($v).'"';
+				$setStr .= ', '.$k.' = "'.$this->cleanStr($v).'"';
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = 'UPDATE fmvouchers v '.
-				'SET '.$this->conn->real_escape_string($setStr).' WHERE (v.occid = "'.
+				'SET '.$setStr.' WHERE (v.occid = "'.
 				$this->conn->real_escape_string($occId).'") AND (v.TID = '.$this->tid.
 				') AND (v.CLID = '.$this->clid.')';
 			$this->conn->query($sqlVoucUpdate);
@@ -263,7 +263,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
-		$outStr = str_replace(chr('34'),"&quot;",$outStr);
+		$outStr = htmlspecialchars($outStr);
+		$outStr = $this->conn->real_escape_string($outStr);
 		return $outStr;
 	}
 }

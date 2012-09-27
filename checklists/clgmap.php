@@ -95,7 +95,7 @@ class ChecklistMapper{
 			$sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
         }
         else{
-            $sql .= " WHERE p.projname = '".$this->conn->real_escape_string($projValue)."'";
+            $sql .= " WHERE p.projname = '".$this->conn->real_escape_string(htmlspecialchars($projValue))."'";
         }
         $result = $this->conn->query($sql);
         if($row = $result->fetch_object()){

@@ -205,7 +205,7 @@ class ExsiccatiManager {
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
- 		$newStr = $this->conn->real_escape_string($newStr);
+ 		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
  		return $newStr;
  	}
 }

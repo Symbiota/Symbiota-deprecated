@@ -492,25 +492,25 @@ class TaxonomyEditorManager{
 	public function loadNewName($dataArr){
 		//Load new name into taxa table
 		$tid = 0;
-		$sqlTaxa = "INSERT INTO taxa(sciname, author, kingdomid, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, ".
-			"source, notes, securitystatus) ".
-			"VALUES (\"".$this->conn->real_escape_string($dataArr["sciname"])."\",".($dataArr["author"]?"\"".$this->conn->real_escape_string($dataArr["author"])."\"":"NULL").
+		$sqlTaxa = 'INSERT INTO taxa(sciname, author, kingdomid, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
+			'source, notes, securitystatus) '.
+			'VALUES ("'.$this->cleanStr($dataArr["sciname"]).'",'.($dataArr["author"]?'"'.$this->cleanStr($dataArr["author"]).'"':'NULL').
 			",".$dataArr["kingdomid"].
 			",".$dataArr["rankid"].
-			",".($dataArr["unitind1"]?"\"".$this->conn->real_escape_string($dataArr["unitind1"])."\"":"NULL").
-			",\"".$this->conn->real_escape_string($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->conn->real_escape_string($dataArr["unitind2"])."\"":"NULL").
-			",".($dataArr["unitname2"]?"\"".$this->conn->real_escape_string($dataArr["unitname2"])."\"":"NULL").
-			",".($dataArr["unitind3"]?"\"".$this->conn->real_escape_string($dataArr["unitind3"])."\"":"NULL").
-			",".($dataArr["unitname3"]?"\"".$this->conn->real_escape_string($dataArr["unitname3"])."\"":"NULL").
-			",".($dataArr["source"]?"\"".$this->conn->real_escape_string($dataArr["source"])."\"":"NULL").",".
-			($dataArr["notes"]?"\"".$this->conn->real_escape_string($dataArr["notes"])."\"":"NULL").
-			",".$this->conn->real_escape_string($dataArr["securitystatus"]).")";
+			",".($dataArr["unitind1"]?"\"".$this->cleanStr($dataArr["unitind1"])."\"":"NULL").
+			",\"".$this->cleanStr($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->cleanStr($dataArr["unitind2"])."\"":"NULL").
+			",".($dataArr["unitname2"]?"\"".$this->cleanStr($dataArr["unitname2"])."\"":"NULL").
+			",".($dataArr["unitind3"]?"\"".$this->cleanStr($dataArr["unitind3"])."\"":"NULL").
+			",".($dataArr["unitname3"]?"\"".$this->cleanStr($dataArr["unitname3"])."\"":"NULL").
+			",".($dataArr["source"]?"\"".$this->cleanStr($dataArr["source"])."\"":"NULL").",".
+			($dataArr["notes"]?"\"".$this->cleanStr($dataArr["notes"])."\"":"NULL").
+			",".$this->cleanStr($dataArr["securitystatus"]).")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
 		 	//Load accepteance status into taxstatus table
 			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			$parTid = $this->conn->real_escape_string($dataArr["parenttid"]);
+			$parTid = $this->cleanStr($dataArr["parenttid"]);
 			if(!$parTid && $dataArr["rankid"] == 10) $parTid = $tid; 
 			if($parTid){ 
 				if($dataArr["rankid"] > 10) $hierarchy = $this->buildHierarchy($dataArr["parenttid"]);
@@ -526,10 +526,10 @@ class TaxonomyEditorManager{
 				
 				//Load new record into taxstatus table
 				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->conn->real_escape_string($family)."\"":"NULL").",".
-					($dataArr["uppertaxonomy"]?"\"".$this->conn->real_escape_string($dataArr["uppertaxonomy"])."\"":"NULL").
+					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->cleanStr($family)."\"":"NULL").",".
+					($dataArr["uppertaxonomy"]?"\"".$this->cleanStr($dataArr["uppertaxonomy"])."\"":"NULL").
 					",".($parTid?$parTid:"NULL").",\"".
-					$this->conn->real_escape_string($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
+					$this->cleanStr($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
 					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
@@ -539,7 +539,7 @@ class TaxonomyEditorManager{
 			//Link new name to existing specimens and set locality secirity if needed
 			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
 			if($dataArr['securitystatus'] == 1) $sql1 .= ',o.localitysecurity = 1 '; 
-			$sql1 .= 'WHERE (o.sciname = "'.$this->conn->real_escape_string($dataArr["sciname"]).'") ';
+			$sql1 .= 'WHERE (o.sciname = "'.$this->cleanStr($dataArr["sciname"]).'") ';
 			$this->conn->query($sql1);
 			//Link occurrence images to the new name
 			$sql2 = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
@@ -835,5 +835,11 @@ class TaxonomyEditorManager{
 		return $this->synonymArr;
 	}
 
+	private function cleanStr($inStr){
+		$outStr = trim($inStr);
+		$outStr = htmlspecialchars($outStr);
+		$outStr = $this->conn->real_escape_string($outStr);
+		return $outStr;
+	}
 }
 ?>

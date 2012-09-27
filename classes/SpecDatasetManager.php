@@ -268,7 +268,7 @@ class SpecDatasetManager {
 
 	protected function cleanStr($str){
 		$newStr = trim($str);
-		$newStr = $this->conn->real_escape_string($newStr);
+		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
 		return $newStr;
 	}
 }

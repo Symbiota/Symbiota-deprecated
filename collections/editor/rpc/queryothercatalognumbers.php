@@ -2,7 +2,7 @@
 	include_once('../../../config/dbconnection.php');
 	$retArr = Array();
 	$con = MySQLiConnectionFactory::getCon("readonly");
-	$inValue = $con->real_escape_string($_REQUEST['invalue']);
+	$inValue = $con->real_escape_string(htmlspecialchars($_REQUEST['invalue']));
 	$collId = $con->real_escape_string($_REQUEST['collid']);
 	$occid = $con->real_escape_string($_REQUEST['occid']);
 	

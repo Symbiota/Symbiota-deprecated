@@ -270,10 +270,11 @@ class TPEditorManager {
  	}
 	
  	protected function cleanStr($str){
- 		$newStr = trim($str);
- 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace("\"","&quot;",$newStr);
- 		return $newStr;
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = htmlspecialchars($newStr);
+		$newStr = $this->taxonCon->real_escape_string($newStr);
+		return $newStr;
  	}
 }
 ?>

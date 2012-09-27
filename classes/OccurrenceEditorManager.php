@@ -497,7 +497,7 @@ class OccurrenceEditorManager {
 			($occArr["family"]?"\"".$occArr["family"]."\"":"NULL").",".
 			"\"".$occArr["sciname"]."\",".
 			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").",".
-			($occArr["scientificnameauthorship"]?"\"".$this->conn->real_escape_string($occArr["scientificnameauthorship"])."\"":"NULL").",".
+			($occArr["scientificnameauthorship"]?"\"".$this->cleanStr($occArr["scientificnameauthorship"])."\"":"NULL").",".
 			($occArr["identifiedby"]?"\"".$occArr["identifiedby"]."\"":"NULL").",".
 			($occArr["dateidentified"]?"\"".$occArr["dateidentified"]."\"":"NULL").",".
 			($occArr["identificationreferences"]?"\"".$occArr["identificationreferences"]."\"":"NULL").",".
@@ -506,42 +506,42 @@ class OccurrenceEditorManager {
 			($occArr["typestatus"]?"\"".$occArr["typestatus"]."\"":"NULL").",".
 			($occArr["recordedby"]?"\"".$occArr["recordedby"]."\"":"NULL").",".
 			($occArr["recordnumber"]?"\"".$occArr["recordnumber"]."\"":"NULL").",".
-			($occArr["associatedcollectors"]?"\"".$this->conn->real_escape_string($occArr["associatedcollectors"])."\"":"NULL").",".
+			($occArr["associatedcollectors"]?"\"".$this->cleanStr($occArr["associatedcollectors"])."\"":"NULL").",".
 			($occArr["eventdate"]?"'".$occArr["eventdate"]."'":"NULL").",".
 			($occArr["year"]?$occArr["year"]:"NULL").",".
 			($occArr["month"]?$occArr["month"]:"NULL").",".
 			($occArr["day"]?$occArr["day"]:"NULL").",".
 			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
 			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			($occArr["verbatimeventdate"]?"\"".$this->conn->real_escape_string($occArr["verbatimeventdate"])."\"":"NULL").",".
-			($occArr["habitat"]?"\"".$this->conn->real_escape_string($occArr["habitat"])."\"":"NULL").",".
-			($occArr["substrate"]?"\"".$this->conn->real_escape_string($occArr["substrate"])."\"":"NULL").",".
-			($occArr["occurrenceremarks"]?"\"".$this->conn->real_escape_string($occArr["occurrenceremarks"])."\"":"NULL").",".
-			($occArr["associatedtaxa"]?"\"".$this->conn->real_escape_string($occArr["associatedtaxa"])."\"":"NULL").",".
-			($occArr["verbatimattributes"]?"\"".$this->conn->real_escape_string($occArr["verbatimattributes"])."\"":"NULL").",".
-			($occArr["dynamicproperties"]?"\"".$this->conn->real_escape_string($occArr["dynamicproperties"])."\"":"NULL").",".
+			($occArr["verbatimeventdate"]?"\"".$this->cleanStr($occArr["verbatimeventdate"])."\"":"NULL").",".
+			($occArr["habitat"]?"\"".$this->cleanStr($occArr["habitat"])."\"":"NULL").",".
+			($occArr["substrate"]?"\"".$this->cleanStr($occArr["substrate"])."\"":"NULL").",".
+			($occArr["occurrenceremarks"]?"\"".$this->cleanStr($occArr["occurrenceremarks"])."\"":"NULL").",".
+			($occArr["associatedtaxa"]?"\"".$this->cleanStr($occArr["associatedtaxa"])."\"":"NULL").",".
+			($occArr["verbatimattributes"]?"\"".$this->cleanStr($occArr["verbatimattributes"])."\"":"NULL").",".
+			($occArr["dynamicproperties"]?"\"".$this->cleanStr($occArr["dynamicproperties"])."\"":"NULL").",".
 			($occArr["reproductivecondition"]?"\"".$occArr["reproductivecondition"]."\"":"NULL").",".
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			($occArr["establishmentmeans"]?"\"".$this->conn->real_escape_string($occArr["establishmentmeans"])."\"":"NULL").",".
+			($occArr["establishmentmeans"]?"\"".$this->cleanStr($occArr["establishmentmeans"])."\"":"NULL").",".
 			($occArr["country"]?"\"".$occArr["country"]."\"":"NULL").",".
 			($occArr["stateprovince"]?"\"".$occArr["stateprovince"]."\"":"NULL").",".
 			($occArr["county"]?"\"".$occArr["county"]."\"":"NULL").",".
-			($occArr["locality"]?"\"".$this->conn->real_escape_string($occArr["locality"])."\"":"NULL").",".
+			($occArr["locality"]?"\"".$this->cleanStr($occArr["locality"])."\"":"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
 			($occArr["localitysecurityreason"]?$occArr["localitysecurityreason"]:"NULL").",".
 			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
 			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			($occArr["geodeticdatum"]?"\"".$this->conn->real_escape_string($occArr["geodeticdatum"])."\"":"NULL").",".
+			($occArr["geodeticdatum"]?"\"".$this->cleanStr($occArr["geodeticdatum"])."\"":"NULL").",".
 			($occArr["coordinateuncertaintyinmeters"]?"\"".$occArr["coordinateuncertaintyinmeters"]."\"":"NULL").",".
 			($occArr["verbatimcoordinates"]?"\"".$this->cleanStr($occArr["verbatimcoordinates"])."\"":"NULL").",".
 			($occArr["georeferencedby"]?"\"".$occArr["georeferencedby"]."\"":"NULL").",".
-			($occArr["georeferenceprotocol"]?"\"".$this->conn->real_escape_string($occArr["georeferenceprotocol"])."\"":"NULL").",".
-			($occArr["georeferencesources"]?"\"".$this->conn->real_escape_string($occArr["georeferencesources"])."\"":"NULL").",".
+			($occArr["georeferenceprotocol"]?"\"".$this->cleanStr($occArr["georeferenceprotocol"])."\"":"NULL").",".
+			($occArr["georeferencesources"]?"\"".$this->cleanStr($occArr["georeferencesources"])."\"":"NULL").",".
 			($occArr["georeferenceverificationstatus"]?"\"".$occArr["georeferenceverificationstatus"]."\"":"NULL").",".
-			($occArr["georeferenceremarks"]?"\"".$this->conn->real_escape_string($occArr["georeferenceremarks"])."\"":"NULL").",".
+			($occArr["georeferenceremarks"]?"\"".$this->cleanStr($occArr["georeferenceremarks"])."\"":"NULL").",".
 			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			($occArr["verbatimelevation"]?"\"".$this->conn->real_escape_string($occArr["verbatimelevation"])."\"":"NULL").",".
+			($occArr["verbatimelevation"]?"\"".$this->cleanStr($occArr["verbatimelevation"])."\"":"NULL").",".
 			($occArr["disposition"]?"\"".$occArr["disposition"]."\"":"NULL").",".
 			($occArr["language"]?"\"".$occArr["language"]."\"":"NULL").",".
 			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
@@ -611,8 +611,8 @@ class OccurrenceEditorManager {
 	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
 		$statusStr = '';
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string($oldValue);
-		$nv = $this->conn->real_escape_string($newValue);
+		$ov = $this->conn->real_escape_string(htmlspecialchars($oldValue));
+		$nv = $this->conn->real_escape_string(htmlspecialchars($newValue));
 		if($fn && $ov && $nv){
 			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
 			//Add raw string fragment if present, yet unlikely
@@ -650,7 +650,7 @@ class OccurrenceEditorManager {
 	
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string($oldValue);
+		$ov = $this->conn->real_escape_string(htmlspecialchars($oldValue));
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
 		//Add raw string fragment if present, yet unlikely
 		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
@@ -784,13 +784,14 @@ class OccurrenceEditorManager {
 	protected function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = htmlspecialchars($newStr); 
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 
 	private function cleanRawFragment($str){
 		$newStr = trim($str);
-		$newStr = $this->conn->real_escape_string($newStr);
+		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
 		return $newStr;
 	}
 }

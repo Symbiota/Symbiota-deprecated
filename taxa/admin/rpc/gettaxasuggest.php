@@ -3,7 +3,7 @@
 	include_once($serverRoot.'/config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$q = $con->real_escape_string($_REQUEST['term']);
+	$q = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
 	$taxAuthId = array_key_exists('taid',$_REQUEST)?$con->real_escape_string($_REQUEST['taid']):0;
 	$rankLimit = array_key_exists('rlimit',$_REQUEST)?$con->real_escape_string($_REQUEST['rlimit']):0;
 	$rankLow = array_key_exists('rlow',$_REQUEST)?$con->real_escape_string($_REQUEST['rlow']):0;
