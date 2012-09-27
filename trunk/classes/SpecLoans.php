@@ -108,7 +108,7 @@ class SpecLoans{
 	public function getLoanInList($searchTerm,$displayAll){
 		$retArr = array();
 		$sql = 'SELECT l.loanid, l.datereceivedborr, l.loanidentifierborr, l.dateclosed, i.institutioncode, l.forwhom '.
-			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidborrower = i.iid '.
+			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidowner = i.iid '.
 			'WHERE collidborr = '.$this->collId.' ';
 		if($searchTerm){
 			$sql .= 'AND l.loanidentifierborr LIKE "%'.$searchTerm.'%" ';
