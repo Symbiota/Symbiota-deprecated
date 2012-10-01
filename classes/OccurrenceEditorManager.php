@@ -698,14 +698,13 @@ class OccurrenceEditorManager {
 	public function getRawTextFragments(){
 		$retArr = array();
 		if($this->occId){
-			$sql = 'SELECT r.prlid, r.imgid, r.rawstr, r.notes, r.source '.
+			$sql = 'SELECT r.prlid, r.imgid, r.rawstr, r.notes '.
 				'FROM specprocessorrawlabels r INNER JOIN images i ON r.imgid = i.imgid '.
 				'WHERE i.occid = '.$this->occId;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->imgid][$r->prlid]['raw'] = $r->rawstr;
 				$retArr[$r->imgid][$r->prlid]['notes'] = $r->notes;
-				$retArr[$r->imgid][$r->prlid]['source'] = $r->source;
 			}
 			$rs->free();
 		} 
