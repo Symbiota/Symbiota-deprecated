@@ -1,4 +1,3 @@
-
 function openAssocSppAid(){
 	assocWindow = open("assocsppaid.php","assocaid","resizable=0,width=550,height=200,left=20,top=20");
 	if (assocWindow.opener == null) assocWindow.opener = self;
@@ -320,7 +319,7 @@ function searchDupesCatalogNumber(f){
 			}
 		}
 	};
-	cnXmlHttp.open("POST",url,true);
+	cnXmlHttp.open("POST",url,false);
 		cnXmlHttp.send(null);
 	}
 }
@@ -361,7 +360,7 @@ function searchDupesOtherCatalogNumbers(f){
 			}
 		}
 	};
-	xmlHttp.open("POST",url,true);
+	xmlHttp.open("POST",url,false);
 		xmlHttp.send(null);
 	}
 }
@@ -403,7 +402,7 @@ xmlHttp.onreadystatechange=function(){
 		}
 	}
 };
-xmlHttp.open("POST",url,true);
+xmlHttp.open("POST",url,false);
 	xmlHttp.send(null);
 }
 
@@ -449,7 +448,7 @@ xmlHttp.onreadystatechange=function(){
 		}
 	}
 };
-xmlHttp.open("POST",url,true);
+xmlHttp.open("POST",url,false);
 	xmlHttp.send(null);
 }
 
