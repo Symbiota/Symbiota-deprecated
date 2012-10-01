@@ -135,14 +135,14 @@ if($symbUid){
 			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
 		}
 		elseif($action == 'Save Text Fragment'){
-			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext']);
+			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
 			if(is_numeric($statusStr)){
 				$newPrlid = $statusStr;
 				$statusStr = '';
 			}
 		}
 		elseif($action == 'Save Text Fragment Edits'){
-			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext']);
+			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
 		}
 		elseif($action == 'Delete Text Fragment'){
 			$statusStr = $occManager->deleteTextFragment($_REQUEST['delprlid']);
