@@ -698,23 +698,25 @@ class OccurrenceEditorManager {
 	public function getRawTextFragments(){
 		$retArr = array();
 		if($this->occId){
-			$sql = 'SELECT r.prlid, r.imgid, r.rawstr, r.notes '.
+			$sql = 'SELECT r.prlid, r.imgid, r.rawstr, r.notes, r.source '.
 				'FROM specprocessorrawlabels r INNER JOIN images i ON r.imgid = i.imgid '.
 				'WHERE i.occid = '.$this->occId;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->imgid][$r->prlid] = $r->rawstr;
+				$retArr[$r->imgid][$r->prlid]['raw'] = $r->rawstr;
+				$retArr[$r->imgid][$r->prlid]['notes'] = $r->notes;
+				$retArr[$r->imgid][$r->prlid]['source'] = $r->source;
 			}
 			$rs->free();
 		} 
 		return $retArr;
 	}
 
-	public function insertTextFragment($imgId, $rawFrag){
+	public function insertTextFragment($imgId,$rawFrag,$notes){
 		if($imgId && $rawFrag){
 			$statusStr = '';
-			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) '.
-				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'")';
+			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
+				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'","'.$this->cleanRawFragment($notes).'")';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$statusStr = $this->conn->insert_id;
@@ -726,10 +728,10 @@ class OccurrenceEditorManager {
 		}
 	}
 
-	public function saveTextFragment($prlId, $rawFrag){
+	public function saveTextFragment($prlId, $rawFrag,$notes){
 		if($prlId && $rawFrag){
 			$statusStr = '';
-			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'" '.
+			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", notes = "'.$notes.'" '.
 				'WHERE (prlid = '.$prlId.')';
 			//echo $sql;
 			if(!$this->conn->query($sql)){

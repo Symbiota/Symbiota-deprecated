@@ -1,4 +1,4 @@
-<div style="width:100%;height:950px;">
+<div style="width:100%;height:1050px;">
 	<fieldset style="height:95%">
 		<legend><b>Label Processing</b></legend>
 		<div id="labelprocessingdiv">
@@ -42,7 +42,10 @@
 					<div id="tfadddiv-<?php echo $imgCnt; ?>" style="display:none;">
 						<form id="imgaddform-<?php echo $imgCnt; ?>" name="imgaddform-<?php echo $imgId; ?>" method="post" action="occurrenceeditor.php">
 							<div>
-								<textarea name="rawtext" rows="20" cols="48" style="width:100%;background-color:#F8F8F8;"></textarea>
+								<textarea name="rawtext" rows="20" cols="48" style="width:97%;background-color:#F8F8F8;"></textarea>
+							</div>
+							<div title="OCR Notes">
+								<input name="rawnotes" type="text" value="" style="width:97%;" />
 							</div>
 							<div style="float:left">
 								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
@@ -60,7 +63,7 @@
 							$targetPrlid = '';
 							if(isset($newPrlid) && $newPrlid) $targetPrlid = $newPrlid;
 							if(array_key_exists('editprlid',$_REQUEST)) $targetPrlid = $_REQUEST['editprlid'];
-							foreach($fArr as $prlid => $rStr){
+							foreach($fArr as $prlid => $rArr){
 								$displayBlock = 'none';
 								if($targetPrlid){
 									if($prlid == $targetPrlid){
@@ -74,7 +77,10 @@
 								<div id="tfdiv-<?php echo $imgCnt.'-'.$fragCnt; ?>" style="display:<?php echo $displayBlock; ?>;border:1px solid orange;">
 									<form name="tfeditform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
 										<div>
-											<textarea name="rawtext" rows="20" cols="48" style="width:100%"><?php echo $rStr; ?></textarea>
+											<textarea name="rawtext" rows="20" cols="48" style="width:97%"><?php echo $rArr['raw']; ?></textarea>
+										</div>
+										<div title="OCR Notes">
+											<input name="rawnotes" type="text" value="<?php echo $rArr['notes']; ?>" style="width:97%;" />
 										</div>
 										<div style="float:left;margin-left:10px;">
 											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
