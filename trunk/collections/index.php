@@ -167,7 +167,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 									$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"]; 
 									?>
 									<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-										<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+										<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
 									</a>
 							    	<?php
 								}
@@ -224,7 +224,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 								if($collArr["icon"]){
 									?>
 							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+							    		<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
 							    	</a>
 							    	<?php
 								} 
@@ -281,7 +281,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 								if($collArr["icon"]){
 									?>
 							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border="1" height="30" width="30" src="<?php echo $collIcon; ?>" />
+							    		<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
 							    	</a>
 							    	<?php
 								} 
