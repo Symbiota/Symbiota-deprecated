@@ -232,7 +232,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 						<tr>
 							<td rowspan="4" width='60' valign='top' align='center'>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId."&acronym=".$fieldArr["institutioncode"]; ?>">
-			                    	<img align='bottom' width='25' src='<?php echo $icon; ?>' style="border:0px;" title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
+			                    	<img align='bottom' width='30' src='<?php echo $icon; ?>' style="border:0px;" title='<?php echo ($instCode2?$instCode2:$instCode1); ?> Collection Statistics' />
 			                    </a>
 			                    <div style='font-weight:bold;font-size:75%;'>
 			                    	<?php 
