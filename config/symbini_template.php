@@ -23,15 +23,14 @@ $imgFileSizeLimit = 300000;		//Files above this size limit and still within pixe
 
 //Specimen Label and Batch Image Processor variables
 //$useImageMagick = false;		//true = ImageMagick resize images, given that it's installed (faster, less memory intensive)
-
 $tesseractPath = ''; 			//Needed for OCR function in the occurrence editor page
-
-$fpEnabled = false;				//Enable Filtered-Push modules
 
 //Module activations
 $occurrenceModIsActive = true;
 $floraModIsActive = true;
 $keyModIsActive = true;
+
+$fpEnabled = false;				//Enable Filtered-Push modules
 
 //Misc variables
 $googleMapKey = '';					//Needed for Google Map; get from Google 
