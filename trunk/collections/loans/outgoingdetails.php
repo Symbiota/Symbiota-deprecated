@@ -17,7 +17,7 @@ $specList = $loanManager->getSpecList($loanId);
 				<legend>Loan Details</legend>
 				<div style="padding-top:18px;float:left;">
 					<span>
-						<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" disabled />
+						<b>Loan Number:</b> <input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="<?php echo $loanArr['loanidentifierown']; ?>" />
 					</span>
 				</div>
 				<div style="margin-left:20px;padding-top:4px;float:left;">
