@@ -89,7 +89,16 @@ elseif($exchangeId){
 					<td></td>
 				</tr>
 				<tr style=" ">
-					<td><?php if($accountNum){echo '<div class="accnum">Acct. #'.$accountNum.'</div>';} ?></td>
+					<td>
+						<?php 
+							if($accountNum){
+								echo '<div class="accnum">Acct. #'.$accountNum.'</div>';
+							}
+							elseif($mailingAccount){
+								echo '<div class="accnum">Acct. #'.$mailingAccount.'</div>';
+							}
+						?>
+					</td>
 				</tr>
 				<tr style="height:1.5in;">
 					<td>

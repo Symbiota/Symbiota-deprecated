@@ -103,6 +103,9 @@ elseif($exchangeId){
 							if($accountNum){
 								echo '(Acct. #'.$accountNum.')<br />';
 							}
+							elseif($mailingAccount){
+								echo '(Acct. #'.$mailingAccount.')<br />';
+							}
 							echo '<br />';
 							?>
 						</div>
