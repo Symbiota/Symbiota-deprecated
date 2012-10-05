@@ -26,7 +26,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.datesent DESC';
+		$sql .= 'ORDER BY l.loanid DESC';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
@@ -107,7 +107,7 @@ class SpecLoans{
 	
 	public function getLoanInList($searchTerm,$displayAll){
 		$retArr = array();
-		$sql = 'SELECT l.loanid, l.datereceivedborr, l.loanidentifierborr, l.dateclosed, i.institutioncode, l.forwhom '.
+		$sql = 'SELECT l.loanid, l.datereceivedborr, l.loanidentifierborr, l.datedue, l.dateclosed, i.institutioncode, l.forwhom '.
 			'FROM omoccurloans l LEFT JOIN institutions i ON l.iidowner = i.iid '.
 			'WHERE collidborr = '.$this->collId.' ';
 		if($searchTerm){
@@ -116,7 +116,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.datereceivedborr';
+		$sql .= 'ORDER BY l.datedue';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierborr'] = $r->loanidentifierborr;
