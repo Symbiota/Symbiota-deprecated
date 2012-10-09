@@ -98,7 +98,6 @@ elseif($exchangeId){
 			$exchangeTotal = $loanManager->getExchangeTotal($exchangeId);
 			
 			if($loanType == 'exchange'){
-				$giftTotal = $invoiceArr['totalgift'] + $invoiceArr['totalgiftdet'];
 				$transType = 0;
 				if(($invoiceArr['totalexunmounted'] || $invoiceArr['totalexmounted']) && (!$invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet'])){
 					$transType = 'ex';
@@ -307,11 +306,42 @@ elseif($exchangeId){
 					<?php }
 					if($transType == 'both'){
 						if($english){ ?>
-							<div class="exchangeamts">This shipment also contains <?php echo ($giftTotal == 1?'1 gift specimen.':$giftTotal); ?> gift specimens. 
+							<div class="exchangeamts">
+								<?php
+									echo 'This shipment also contains ';
+									if($invoiceArr['totalgift']){
+										echo ($invoiceArr['totalgift'] == 1?'1 gift specimen':$invoiceArr['totalgift'].' gift');
+									}
+									if($invoiceArr['totalgift'] == 1 && !$invoiceArr['totalgiftdet']){
+										echo '.';
+									}
+									if($invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+										echo ' and ';
+									}
+									if($invoiceArr['totalgiftdet']){
+										echo ($invoiceArr['totalgiftdet'] == 1?'1 gift-for-det specimen.':$invoiceArr['totalgiftdet'].' gift-for-det');
+									}
+									if($invoiceArr['totalgift'] > 1 || $invoiceArr['totalgiftdet'] > 1){
+										echo ' specimens.';
+									}
+								?>
 							</div><br />
 						<?php }
 						if($spanish){ ?>
-							<div class="exchangeamts">Esta remesa tambi&eacute;n contiene <?php echo ($giftTotal == 1?'1 ejemplar de regalo.':$giftTotal); ?> ejemplares de regalo. 
+							<div class="exchangeamts">
+								<?php
+									echo 'Esta remesa tambi&eacute;n contiene ';
+									if($invoiceArr['totalgift']){
+										echo ($invoiceArr['totalgift'] == 1?'1 ejemplar de regalo':$invoiceArr['totalgift'].' ejemplares de regalo');
+									}
+									if($invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+										echo ' y ';
+									}
+									if($invoiceArr['totalgiftdet']){
+										echo ($invoiceArr['totalgiftdet'] == 1?'1 ejemplar de regalo para identificaci&oacute;n':$invoiceArr['totalgiftdet'].' ejemplares de regalo para identificaci&oacute;n');
+									}
+									echo '.';
+								?>
 							</div><br />
 						<?php }
 					}
@@ -329,11 +359,35 @@ elseif($exchangeId){
 				}
 				elseif($transType == 'gift'){
 					if($english){ ?>
-						<div class="exchangeamts">This shipment is a GIFT. 
+						<div class="exchangeamts">
+							<?php
+								echo 'This shipment is a ';
+								if($invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet']){
+									echo 'GIFT.';
+								}
+								if($invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+									echo 'GIFT and GIFT-FOR-DET.';
+								}
+								if(!$invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+									echo 'GIFT-FOR-DET.';
+								}
+							?>
 						</div><br />
 					<?php }
 					if($spanish){ ?>
-						<div class="exchangeamts">Este env&iacute;o es un REGALO. 
+						<div class="exchangeamts">
+							<?php
+								echo 'Este env&iacute;o es un ';
+								if($invoiceArr['totalgift'] && !$invoiceArr['totalgiftdet']){
+									echo 'REGALO.';
+								}
+								if($invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+									echo 'REGALO y un REGALO PARA IDENTIFICACI&Oacute;N.';
+								}
+								if(!$invoiceArr['totalgift'] && $invoiceArr['totalgiftdet']){
+									echo 'REGALO PARA IDENTIFICACI&Oacute;N.';
+								}
+							?>
 						</div><br />
 					<?php }
 				}
