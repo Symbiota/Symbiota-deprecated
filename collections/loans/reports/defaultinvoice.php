@@ -174,13 +174,13 @@ elseif($exchangeId){
 						<div class="identifier">
 							<?php 
 							echo date('l').', '.date('F').' '.date('j').', '.date('Y').'<br />';
-							if($loanType == 'Out'){
+							if($loanType == 'out'){
 								echo $addressArr['institutioncode'].' Loan ID: '.$invoiceArr['loanidentifierown'];
 							}
-							elseif($loanType == 'In'){
+							elseif($loanType == 'in'){
 								echo $addressArr['institutioncode'].' Loan-in ID: '.$invoiceArr['loanidentifierborr'];
 							}
-							elseif($loanType == 'Exchange'){
+							elseif($loanType == 'exchange'){
 								echo $addressArr['institutioncode'].' Transaction ID: '.$invoiceArr['identifier'];
 							}
 							?>
@@ -192,7 +192,7 @@ elseif($exchangeId){
 			<div class="sending">
 				<?php 
 				$numSpecimens = 0;
-				if($loanType == 'Exchange'){
+				if($loanType == 'exchange'){
 					$numSpecimens = $exchangeTotal;
 				}
 				else{
@@ -215,8 +215,8 @@ elseif($exchangeId){
 				}
 				
 				$numBoxes = 0;
-				if($loanType == 'Exchange'){
-					$numBoxes = $exchangeTotal;
+				if($loanType == 'exchange'){
+					$numBoxes = $invoiceArr['totalboxes'];
 				}
 				else{
 					if($loanType == 'out'){
@@ -342,6 +342,7 @@ elseif($exchangeId){
 			<div class="description">
 				<?php
 					echo '<b>'.($english?'DESCRIPTION OF THE SPECIMENS':'').($engspan?' / ':'').($spanish?'DESCRIPCI&Oacute;N DE LOS EJEMPLARES':'').':</b><br /><br />' ;
+					echo ($invoiceArr['description']?$invoiceArr['description']:'');
 				?>
 				
 			</div>
