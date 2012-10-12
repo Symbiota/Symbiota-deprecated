@@ -26,12 +26,12 @@ class OccurrenceEditorDupes {
 
 	//Used in dupesearch.php
 	public function getDupesCollector($collName, $collNum, $collDate, $currentOccid){
-		$collNum = $this->conn->real_escape_string(htmlspecialchars($collNum));
+		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
 		$lastName = "";
 		//Parse last name from collector's name 
-		$lastNameArr = explode(',',$this->conn->real_escape_string(htmlspecialchars($collName)));
+		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
 		$lastNameArr = explode(';',$lastNameArr[0]);
 		$lastNameArr = explode('&',$lastNameArr[0]);
 		$lastNameArr = explode(' and ',$lastNameArr[0]);
@@ -62,12 +62,12 @@ class OccurrenceEditorDupes {
 	}
 	
 	public function getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid){
-		$collNum = $this->conn->real_escape_string(htmlspecialchars($collNum));
+		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
 		$retArr = array();
 		$lastName = "";
 		//Parse last name from collector's name 
-		$lastNameArr = explode(',',$this->conn->real_escape_string(htmlspecialchars($collName)));
+		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
 		$lastNameArr = explode(';',$lastNameArr[0]);
 		$lastNameArr = explode('&',$lastNameArr[0]);
 		$lastNameArr = explode(' and ',$lastNameArr[0]);
@@ -278,7 +278,9 @@ class OccurrenceEditorDupes {
 	private function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }

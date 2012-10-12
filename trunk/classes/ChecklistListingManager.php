@@ -19,7 +19,7 @@
 			$this->projectId = $projValue;
 		}
 		else{
-			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$this->con->real_escape_string(htmlspecialchars($projValue))."'";
+			$sql = "SELECT p.pid FROM fmprojects p WHERE p.projname = '".$this->con->real_escape_string($projValue)."'";
 			$result = $this->con->query($sql);
 			if($row = $result->fetch_object()){
 				$this->projectId = $row->pid;

@@ -49,9 +49,9 @@ class TPDescEditorManager extends TPEditorManager{
 		$sql = "UPDATE taxadescrblock ".
 			"SET language = ".($_REQUEST["language"]?"\"".$this->cleanStr($_REQUEST["language"])."\"":"NULL").
 			",displaylevel = ".$this->cleanStr($_REQUEST["displaylevel"]).
-			",notes = ".($_REQUEST["notes"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["notes"]))."\"":"NULL").
-			",caption = ".($_REQUEST["caption"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["caption"]))."\"":"NULL").
-			",source = ".($_REQUEST["source"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["source"]))."\"":"NULL").
+			",notes = ".($_REQUEST["notes"]?"\"".$this->cleanStr($_REQUEST["notes"])."\"":"NULL").
+			",caption = ".($_REQUEST["caption"]?"\"".$this->cleanStr($_REQUEST["caption"])."\"":"NULL").
+			",source = ".($_REQUEST["source"]?"\"".$this->cleanStr($_REQUEST["source"])."\"":"NULL").
 			",sourceurl = ".($_REQUEST["sourceurl"]?"\"".$this->cleanStr($_REQUEST["sourceurl"])."\"":"NULL").
 			" WHERE (tdbid = ".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]).')';
 		//echo $sql;
@@ -81,9 +81,9 @@ class TPDescEditorManager extends TPEditorManager{
 			"VALUES(".$this->taxonCon->real_escape_string($_REQUEST["tid"]).",".$this->taxonCon->real_escape_string($symbUid).
 			",".($_REQUEST["language"]?"\"".$this->cleanStr($_REQUEST["language"])."\",":"").
 			($_REQUEST["displaylevel"]?$this->taxonCon->real_escape_string($_REQUEST["displaylevel"]).",":"").
-			($_REQUEST["notes"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["notes"]))."\",":"NULL,").
-			($_REQUEST["caption"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["caption"]))."\",":"NULL,").
-			($_REQUEST["source"]?"\"".$this->cleanStr($this->cleanStr($_REQUEST["source"]))."\",":"NULL,").
+			($_REQUEST["notes"]?"\"".$this->cleanStr($_REQUEST["notes"])."\",":"NULL,").
+			($_REQUEST["caption"]?"\"".$this->cleanStr($_REQUEST["caption"])."\",":"NULL,").
+			($_REQUEST["source"]?"\"".$this->cleanStr($_REQUEST["source"])."\",":"NULL,").
 			($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").")";
 			//echo $sql;
 		$status = "";
@@ -97,7 +97,7 @@ class TPDescEditorManager extends TPEditorManager{
 	public function editStatement(){
 		$sql = "UPDATE taxadescrstmts ".
 			"SET heading = \"".$this->cleanStr($_REQUEST["heading"])."\",".
-			"statement = \"".$this->cleanStr($this->cleanStr($_REQUEST["statement"]))."\"".
+			"statement = \"".$this->cleanStr($_REQUEST["statement"])."\"".
 			(array_key_exists("displayheader",$_REQUEST)?",displayheader = 1":",displayheader = 0").
 			($_REQUEST["sortsequence"]?",sortsequence = ".$this->taxonCon->real_escape_string($_REQUEST["sortsequence"]):"").
 			" WHERE (tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]).')';
@@ -124,7 +124,7 @@ class TPDescEditorManager extends TPEditorManager{
 	public function addStatement(){
 		$sql = "INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader".($_REQUEST["sortsequence"]?",sortsequence":"").") ".
 			"VALUES(".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]).",\"".$this->cleanStr($_REQUEST["heading"]).
-			"\",\"".$this->cleanStr($this->cleanStr($_REQUEST["statement"]))."\",".
+			"\",\"".$this->cleanStr($_REQUEST["statement"])."\",".
 			(array_key_exists("displayheader",$_REQUEST)?"1":"0").
 			($_REQUEST["sortsequence"]?",".$this->taxonCon->real_escape_string($_REQUEST["sortsequence"]):"").")";
 		//echo $sql;

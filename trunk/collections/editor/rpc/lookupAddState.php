@@ -15,8 +15,8 @@ if($countryStr && $collId
 	|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))))){
 
 	$conn = MySQLiConnectionFactory::getCon("write");
-	$stateStr = $conn->real_escape_string(htmlspecialchars($stateStr));
-	$countryStr = $conn->real_escape_string(htmlspecialchars($countryStr));
+	$stateStr = $conn->real_escape_string($stateStr);
+	$countryStr = $conn->real_escape_string($countryStr);
 	$sql = 'INSERT INTO lkupstateprovince(statename,countryid) SELECT "'.$stateStr.'", countryid '.
 		'FROM lkupcountry WHERE countryname = "'.$countryStr.'"';
 	//echo $sql;

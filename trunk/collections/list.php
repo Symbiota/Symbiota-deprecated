@@ -320,7 +320,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			else{
 				?>
 				<div>
-					<h3>Your query produced no results. Please modify your query parameters.</h3>
+					<h3>Your query did not return any results. Please modify your query parameters.</h3>
 					<?php
 					$tn = $collManager->getTaxaSearchStr();
 					if($p = strpos($tn,';')){
@@ -335,7 +335,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					if($closeArr = $collManager->getCloseTaxaMatch(trim($tn))){
 						?>
 						<div style="margin: 40px 0px 200px 20px;font-weight:bold;font-size:140%;">
-							Did you mean:
+							Perhaps you were looking for:
 							<?php
 							$delimiter = '';
 							foreach($closeArr as $v){

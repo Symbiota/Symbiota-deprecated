@@ -3,7 +3,7 @@ include_once('../../../config/dbconnection.php');
 
 $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();
-$sciName = $con->real_escape_string(htmlspecialchars($_REQUEST['sciname']));
+$sciName = $con->real_escape_string($_REQUEST['sciname']);
 // Is the string length greater than 0?
 if($sciName){
 	$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, ts.family '.

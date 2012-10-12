@@ -611,8 +611,8 @@ class OccurrenceEditorManager {
 	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
 		$statusStr = '';
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string(htmlspecialchars($oldValue));
-		$nv = $this->conn->real_escape_string(htmlspecialchars($newValue));
+		$ov = $this->conn->real_escape_string($oldValue);
+		$nv = $this->conn->real_escape_string($newValue);
 		if($fn && $ov && $nv){
 			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
 			//Add raw string fragment if present, yet unlikely
@@ -650,7 +650,7 @@ class OccurrenceEditorManager {
 	
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string(htmlspecialchars($oldValue));
+		$ov = $this->conn->real_escape_string($oldValue);
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
 		//Add raw string fragment if present, yet unlikely
 		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
@@ -785,14 +785,17 @@ class OccurrenceEditorManager {
 	protected function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = htmlspecialchars($newStr); 
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 
 	private function cleanRawFragment($str){
 		$newStr = trim($str);
-		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }

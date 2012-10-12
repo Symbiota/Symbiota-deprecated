@@ -3,7 +3,7 @@ var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
 var pendingDataEdits = false;
-
+var catalogNumberIsDupe = false;
 var abortFormVerification = false;
 
 $(document).ready(function() {
@@ -82,12 +82,19 @@ $(document).ready(function() {
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
 
+	//$("#catalognumber").onkeydown = function(){alert("cat")};
+	document.getElementById("catalognumber").onkeydown = function(evt) {
+		var evt  = (evt) ? evt : ((event) ? event : null);
+		if ((evt.keyCode == 13)) { return false; }
+	};
+	
 	var imgTd = getCookie("symbimgtd");
 	if(imgTd == "open") toggleImageTd(); 
 
 });
 
-window.onbeforeunload = verifyClose();
+//document.getElementById("catalognumber").onkeydown = stopRKey;
+window.onbeforeunload = verifyClose;
 
 function verifyClose(){
 	if(pendingDataEdits){
@@ -171,29 +178,10 @@ function maximumElevationInMetersChanged(f){
 
 //Form verification code
 function verifyFullForm(f){
+
 	if(abortFormVerification) return true;
-	/*
-	if(f.sciname.value == ""){
-		alert("Scientific Name field must have a value. Enter closest know identification, even if it's only to family, order, or above. ");
-		return false;
-	}
-	if(f.recordedby.value == ""){
-		alert("Collector field must have a value. Enter 'unknown' if needed.");
-		return false;
-	}
-	if(f.country.value == ""){
-		alert("Country field must have a value");
-		return false;
-	}
-	if(f.stateprovince.value == ""){
-		alert("State field must have a value");
-		return false;
-	}
-	if(f.locality.value == ""){
-		alert("Locality field must have a value");
-		return false;
-	}
-	*/
+
+	if(!verifyDupeCatalogNumber(f)) return false;
 	var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
 	if(f.eventdate.value && !validformat1.test(f.eventdate.value)){
 		alert("Event date is invalid");
@@ -254,19 +242,18 @@ function verifyFullForm(f){
 }
 
 function verifyFullFormEdits(f){
-	if(f.editedfields){
-		if(f.editedfields.value == ""){
-			setTimeout(function () { 
-				if(f.editedfields.value){
-					f.submitaction.click();
-				}
-				else{
-					alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
-				}
-			}, 1000);
-			return false;
-		}
+	if(f.editedfields && f.editedfields.value == ""){
+		setTimeout(function () { 
+			if(f.editedfields.value){
+				f.submitaction.click();
+			}
+			else{
+				alert("No fields appear to have been changed. If you have just changed the scientific name field, there may not have enough time to verify name. Try to submit again.");
+			}
+		}, 1000);
+		return false;
 	}
+	return true;
 }
 
 function verifyGotoNew(f){
@@ -872,3 +859,16 @@ function isNumeric(sText){
    	}
 	return isNumber;
 }
+
+function checkKey(e){
+    var key;
+    if(window.event){
+        key = window.event.keyCode;
+    }else{
+        key = e.keyCode;
+    }
+    if(key == 13){
+    	document.fullform.submit();
+    }
+}
+

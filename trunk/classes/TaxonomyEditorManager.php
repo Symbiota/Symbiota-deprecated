@@ -837,7 +837,8 @@ class TaxonomyEditorManager{
 
 	private function cleanStr($inStr){
 		$outStr = trim($inStr);
-		$outStr = htmlspecialchars($outStr);
+		$outStr = str_replace('"',"&quot;",$outStr);
+		$outStr = str_replace("'","&apos;",$outStr);
 		$outStr = $this->conn->real_escape_string($outStr);
 		return $outStr;
 	}

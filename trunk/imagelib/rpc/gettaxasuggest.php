@@ -3,7 +3,7 @@
 	include_once($serverRoot.'/config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$q = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
+	$q = $con->real_escape_string($_REQUEST['term']);
 
 	$sql = 'SELECT t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 		'WHERE ts.taxauthid = 1 AND t.rankid > 140 AND t.sciname LIKE "'.$q.'%" ';
