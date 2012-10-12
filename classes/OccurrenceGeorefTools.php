@@ -283,7 +283,9 @@ class OccurrenceGeorefTools {
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
- 		$newStr = $this->clCon->real_escape_string(htmlspecialchars($newStr));
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
+ 		$newStr = $this->clCon->real_escape_string($newStr);
  		return $newStr;
  	}
 

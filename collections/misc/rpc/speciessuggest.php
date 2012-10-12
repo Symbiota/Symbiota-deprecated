@@ -2,7 +2,7 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$returnArr = Array();
-	$queryString = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
+	$queryString = $con->real_escape_string($_REQUEST['term']);
 	
 	$sql = "SELECT t.tid, t.sciname ". 
 		"FROM taxa t ".

@@ -6,7 +6,7 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $con = MySQLiConnectionFactory::getCon("readonly");
-$sciname = $con->real_escape_string(htmlspecialchars($_REQUEST["sciname"]));
+$sciname = $con->real_escape_string($_REQUEST["sciname"]);
 
 $responseStr = "";
 $sql = "SELECT ts.uppertaxonomy FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".

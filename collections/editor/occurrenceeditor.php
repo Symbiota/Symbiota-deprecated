@@ -285,7 +285,7 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?cacherefresh=<?php echo time(); ?>"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
-<body>
+<body style="margin:0px;">
 	<!-- inner text -->
 	<div id="innertext">
 		<?php 
@@ -454,7 +454,7 @@ if($symbUid){
 														<img class="dwcimg" src="../../images/qmark.png" />
 													</a>
 													<br/>
-													<input type="text" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
+													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
 												</div>
 												<div style="float:left;">
 													Other Numbers

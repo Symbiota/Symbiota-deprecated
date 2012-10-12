@@ -3,8 +3,8 @@
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
-	$queryString = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
-	$countryStr = array_key_exists('country',$_REQUEST)?$con->real_escape_string(htmlspecialchars($_REQUEST['country'])):'';
+	$queryString = $con->real_escape_string($_REQUEST['term']);
+	$countryStr = array_key_exists('country',$_REQUEST)?$con->real_escape_string($_REQUEST['country']):'';
 
 	$sql = 'SELECT DISTINCT s.statename FROM lkupstateprovince s ';
 	$sqlWhere = 'WHERE s.statename LIKE "'.$queryString.'%" ';

@@ -473,7 +473,9 @@ class ObservationSubmitManager {
 	private function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }

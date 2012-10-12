@@ -159,7 +159,7 @@ class TPEditorManager {
 		unset($editArr["vid"]);
 		$setFrag = "";
 		foreach($editArr as $keyField => $value){
-			$setFrag .= ",".$keyField." = \"".$value."\" ";
+			$setFrag .= ','.$keyField.' = "'.$value.'" ';
 		}
 		$sql = "UPDATE taxavernaculars SET ".substr($setFrag,1)." WHERE (vid = ".$this->taxonCon->real_escape_string($vid).')';
 		//echo $sql;
@@ -272,7 +272,8 @@ class TPEditorManager {
  	protected function cleanStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = htmlspecialchars($newStr);
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
 		$newStr = $this->taxonCon->real_escape_string($newStr);
 		return $newStr;
  	}

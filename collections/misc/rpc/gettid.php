@@ -6,7 +6,7 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
 $con = MySQLiConnectionFactory::getCon("readonly");
-$sciName = $con->real_escape_string(htmlspecialchars($_REQUEST["sciname"])); 
+$sciName = $con->real_escape_string($_REQUEST["sciname"]); 
 
 $responseStr = "";
 $sql = "SELECT t.tid FROM taxa t ".

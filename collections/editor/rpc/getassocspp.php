@@ -1,7 +1,7 @@
 <?php
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
-	$queryStr = $con->real_escape_string(htmlspecialchars($_REQUEST['term']));
+	$queryStr = $con->real_escape_string($_REQUEST['term']);
 
 	$str1 = '';$str2 = '';$str3 = '';
 	$strArr = explode(' ',$queryStr);

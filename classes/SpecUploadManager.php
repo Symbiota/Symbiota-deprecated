@@ -1692,7 +1692,8 @@ class SpecUploadManager{
 		$retStr = str_replace(chr(13),' ',$retStr);
 		$retStr = str_replace(chr(20),' ',$retStr);
 		$retStr = str_replace(chr(30),' ',$retStr);
-		$retStr = htmlspecialchars($retStr);
+		$retStr = str_replace('"',"&quot;",$retStr);
+		$retStr = str_replace("'","&apos;",$retStr);
 		$retStr = $this->conn->real_escape_string($retStr);
 		return $retStr;
 	}

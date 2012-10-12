@@ -773,7 +773,8 @@ class TaxaLoaderManager{
 	
  	protected function cleanStr($fieldValue){
  		$rStr = trim($fieldValue);
-		$rStr = htmlspecialchars($rStr);
+		$rStr = str_replace('"',"&quot;",$rStr);
+		$rStr = str_replace("'","&apos;",$rStr);
 		$rStr = $this->conn->real_escape_string($rStr);
 		return $rStr;
 	}

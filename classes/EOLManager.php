@@ -233,7 +233,9 @@ class EOLManager {
 
 		$newStr = $this->encodeString($newStr);
 		
-		$newStr = $this->conn->real_escape_string(htmlspecialchars($newStr));
+		$newStr = str_replace('"',"&quot;",$newStr);
+		$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }

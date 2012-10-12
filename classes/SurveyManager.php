@@ -356,7 +356,8 @@ class SurveyManager {
 	
 	private function cleanStr($inStr){
 		$retStr = trim($inStr);
-		$retStr = htmlspecialchars($retStr);
+		$retStr = str_replace('"',"&quot;",$retStr);
+		$retStr = str_replace("'","&apos;",$retStr);
 		$retStr = $this->conn->real_escape_string($retStr);
 		return $retStr;
 	}

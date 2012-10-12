@@ -1,6 +1,6 @@
 <div style="width:100%;height:1050px;">
-	<fieldset style="height:95%">
-		<legend><b>Label Processing</b></legend>
+	<fieldset style="height:95%;background-color:white;">
+		<legend style="background-color:#FFFFFF;padding:3px;width:150px;"><b>Label Processing</b></legend>
 		<div id="labelprocessingdiv">
 		<?php
 		$imgCnt = 1;

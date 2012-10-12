@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
-$sciname = $conn->real_escape_string(htmlspecialchars($_REQUEST["sciname"])); 
+$sciname = $conn->real_escape_string($_REQUEST["sciname"]); 
 $responseStr = "";
 $vTaxon = new VerifyTaxon();
 $vTaxon->verifyTaxonTropicos($sciname);

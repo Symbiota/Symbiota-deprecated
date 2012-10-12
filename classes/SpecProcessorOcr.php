@@ -320,7 +320,7 @@ class SpecProcessorOcr{
 
 	private function databaseRawStr($imgId,$rawStr){
 		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-			'VALUE ('.$imgId.',"'.$this->conn->real_escape_string(htmlspecialchars($rawStr)).'","batch Tesseract OCR - '.date('Y-m-d').'")';
+			'VALUE ('.$imgId.',"'.$this->cleanStr($rawStr).'","batch Tesseract OCR - '.date('Y-m-d').'")';
 		//echo 'SQL: '.$sql."\n";
 		if($this->conn->query($sql)){
 			return true;
@@ -596,5 +596,14 @@ class SpecProcessorOcr{
 	/*public function addFilterVariable($k,$v){
 		$this->filterArr[0][$k] = $v;
 	}*/
+	
+	protected function cleanStr($str){
+		$newStr = trim($str);
+		$newStr = str_replace('"',"&quot;",$newStr);
+		//$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = $this->taxonCon->real_escape_string($newStr);
+		return $newStr;
+ 	}
+	
 }
 ?>
