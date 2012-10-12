@@ -695,7 +695,9 @@ class SpecLoans{
 	
 	protected function cleanString($inStr){
 		$retStr = trim($inStr);
-		$retStr = $this->conn->real_escape_string(htmlspecialchars($retStr));
+		$retStr = str_replace('"',"&quot;",$retStr);
+		$retStr = str_replace("'","&apos;",$retStr);
+		$retStr = $this->conn->real_escape_string($retStr);
 		return $retStr;
 	}
 }
