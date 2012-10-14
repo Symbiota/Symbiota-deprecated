@@ -372,7 +372,8 @@ class SpecUploadManager{
 
  	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
-	 	$this->readUploadParameters();
+		set_time_limit(7200);
+ 		$this->readUploadParameters();
 
 	 	//First, delete all records in uploadspectemp table associated with this collection
 		$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
@@ -789,8 +790,7 @@ class SpecUploadManager{
 	
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
-		set_time_limit(1000);
-
+		
 		echo '<li style="font-weight:bold;">Updating existing occurrence records... ';
 		ob_flush();
 		flush();
