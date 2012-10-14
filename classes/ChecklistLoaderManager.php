@@ -80,12 +80,12 @@ class ChecklistLoaderManager {
 				$rankId = 0;
 				$sciName = ""; $family = "";
 				$sciNameStr = trim($valueArr[$headerArr["sciname"]]);
+				$noteStr = '';
 				if($sciNameStr){
 					//Do some minor cleaning
 					$sciNameStr = str_replace(array('?','*'),'',$sciNameStr);
 					$sciNameStr = preg_replace('/\s\s+/',' ',$sciNameStr);
-					$noteStr = '';
-					if(stripos($sciNameStr,' cf ') || stripos($sciNameStr,' c.f. ') || stripos($sciNameStr,' cf. ')){
+					if(stripos($sciNameStr,' cf ') || strpos($sciNameStr,' c.f. ') || stripos($sciNameStr,' cf. ')){
 						$sciNameStr = str_replace(array(' cf ',' c.f. ',' cf. '),' ',$sciNameStr);
 						$noteStr = 'cf';
 					}
@@ -207,7 +207,7 @@ class ChecklistLoaderManager {
 							}
 							if($noteStr || (array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']])){
 								if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
-									if($noteStr) $noteStr .= '; '.
+									if($noteStr) $noteStr .= '; ';
 									$noteStr .= $valueArr[$headerArr['notes']];
 								}
 								$sqlInsert .= ',notes';
