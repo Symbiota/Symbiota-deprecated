@@ -67,8 +67,8 @@ class SpecUploadFile extends SpecUploadManager{
 		if($this->ulFileName){
 		 	$this->readUploadParameters();
 			set_time_limit(7200);
-			ini_set("max_input_time",240);
-			ini_set("upload_max_filesize",30);
+		 	ini_set("max_input_time",240);
+			ini_set("upload_max_filesize",40);
 	
 			//First, delete all records in uploadspectemp table associated with this collection
 			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
