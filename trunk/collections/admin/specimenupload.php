@@ -107,11 +107,17 @@ if($isEditable){
 		}
 
 		function verifyInitForm(f){
-			var ufObj = f.uploadfile;
-			var ufOverrideObj = f.ulfnoverride;
-			if(ufObj && ufOverrideObj){
-				if(ufObj.value == "" && ufOverrideObj == ""){
-					alert("File path is empty. Please select the file that is to be loaded.");
+			var fileName = "";
+			if(f.uploadfile) fileName = f.uploadfile.value;
+			if(fileName == "" && f.ulfnoverride && f.ulfnoverride.value != "") fileName = f.ulfnoverride.value;
+			if(fileName == ""){
+				alert("File path is empty. Please select the file that is to be loaded.");
+				return false;
+			}
+			else{
+				var ext = fileName.split('.').pop();
+				if(ext != 'csv' && ext != 'CSV'){
+					alert("File must be a valid comma separated text file with a .csv extension");
 					return false;
 				}
 			}
