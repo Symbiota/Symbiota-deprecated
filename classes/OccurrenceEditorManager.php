@@ -385,12 +385,14 @@ class OccurrenceEditorManager {
 			//Add edits to omoccuredits
 			//Get old values before they are changed
 			$sql = 'SELECT '.implode(',',$editArr).(in_array('processingstatus',$editArr)?'':',processingstatus').
+				(in_array('recordenteredby',$editArr)?'':',recordenteredby').
 				',recordenteredby FROM omoccurrences WHERE occid = '.$occArr['occid'];
 			$rs = $this->conn->query($sql);
 			$oldValues = $rs->fetch_assoc();
 			$rs->free();
-			//Version edits only if old processing status does not equal "unprocessed"
-			if($oldValues['processingstatus'] != 'unprocessed'){ 
+			//Version edits 
+			if($oldValues['processingstatus'] != 'unprocessed' || $oldValues['recordenteredby']){ 
+				//Don't version auto-submitted records (old processing status = "unprocessed" and editor Is Null)
 				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
 					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
 				foreach($editArr as $v){
@@ -402,7 +404,7 @@ class OccurrenceEditorManager {
 					$newValue = $this->cleanStr($occArr[$v]);
 					$oldValue = $this->cleanStr($oldValues[$v]);
 					//Version edits only if value has changed and old value was not null 
-					if($v && $oldValue && $oldValue != $newValue){
+					if($v && $oldValue != $newValue){
 						$sqlEdit = $sqlEditsBase.'"'.$v.'","'.$newValue.'","'.$oldValue.'")';
 						//echo '<div>'.$sqlEdit.'</div>';
 						$this->conn->query($sqlEdit);
@@ -415,12 +417,10 @@ class OccurrenceEditorManager {
 				//If processing status was "unprocessed" and recordEnteredBy is null, populate with user login
 				$sql = '';
 				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
-					$sql = ',recordenteredby = "'.$paramsArr['un'].'"';
+					$occArr['recordenteredby'] = $paramsArr['un'];
 				}
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
-					$sql .= ',processingstatus = "'.$occArr['autoprocessingstatus'].'"';
-					$k2d = array_search('processingstatus',$editArr);
-					if($k2d) unset($editArr[$k2d]);
+					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
 				}
 				foreach($occArr as $ok => $ov){
 					if(in_array($ok,$this->occFieldArr) && $ok != 'observeruid'){

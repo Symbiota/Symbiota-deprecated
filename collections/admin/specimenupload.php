@@ -108,17 +108,23 @@ if($isEditable){
 
 		function verifyInitForm(f){
 			var fileName = "";
-			if(f.uploadfile) fileName = f.uploadfile.value;
-			if(fileName == "" && f.ulfnoverride && f.ulfnoverride.value != "") fileName = f.ulfnoverride.value;
-			if(fileName == ""){
-				alert("File path is empty. Please select the file that is to be loaded.");
-				return false;
-			}
-			else{
-				var ext = fileName.split('.').pop();
-				if(ext != 'csv' && ext != 'CSV'){
-					alert("File must be a valid comma separated text file with a .csv extension");
+			if(f.uploadfile || f.ulfnoverride){
+				if(f.uploadfile){
+					 fileName = f.uploadfile.value;
+				}
+				else{
+					fileName = f.ulfnoverride.value;
+				}
+				if(fileName == ""){
+					alert("File path is empty. Please select the file that is to be loaded.");
 					return false;
+				}
+				else{
+					var ext = fileName.split('.').pop();
+					if(ext != 'csv' && ext != 'CSV'){
+						alert("File must be a valid comma separated text file with a .csv extension");
+						return false;
+					}
 				}
 			}
 			return true;
