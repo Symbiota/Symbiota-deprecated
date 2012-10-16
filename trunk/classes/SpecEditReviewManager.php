@@ -68,7 +68,7 @@ class SpecEditReviewManager {
 		//Grab records
 		$sql = 'SELECT e.ocedid,e.occid,o.catalognumber,e.fieldname,e.fieldvaluenew,e.fieldvalueold,e.reviewstatus,e.appliedstatus,'.
 			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp ';
-		$sql .= $sqlBase.'ORDER BY e.fieldname ASC, e.initialtimestamp DESC ';
+		$sql .= $sqlBase.'ORDER BY e.initialtimestamp DESC, e.fieldname ASC ';
 		$sql .= 'LIMIT '.($pageNumber*$limitNumber).','.($limitNumber+1);
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
