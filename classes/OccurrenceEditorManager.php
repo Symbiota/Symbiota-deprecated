@@ -14,7 +14,7 @@ class OccurrenceEditorManager {
 	private $sqlWhere;
 	private $qryArr = array();
 	private $symbUid;
-	
+
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->occFieldArr = array('catalognumber', 'othercatalognumbers', 'family', 'scientificname', 'sciname', 
@@ -787,7 +787,7 @@ class OccurrenceEditorManager {
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = str_replace('"',"&quot;",$newStr);
 		$newStr = str_replace("'","&apos;",$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 
@@ -795,7 +795,7 @@ class OccurrenceEditorManager {
 		$newStr = trim($str);
 		$newStr = str_replace('"',"&quot;",$newStr);
 		$newStr = str_replace("'","&apos;",$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }
