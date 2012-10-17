@@ -82,18 +82,16 @@ $(document).ready(function() {
 		{ minLength: 2, autoFocus: true, matchContains: false }
 	);
 
-	//$("#catalognumber").onkeydown = function(){alert("cat")};
-	document.getElementById("catalognumber").onkeydown = function(evt) {
+	$("#catalognumber").keydown(function(evt){
 		var evt  = (evt) ? evt : ((event) ? event : null);
 		if ((evt.keyCode == 13)) { return false; }
-	};
+	});
 	
 	var imgTd = getCookie("symbimgtd");
 	if(imgTd == "open") toggleImageTd(); 
 
 });
 
-//document.getElementById("catalognumber").onkeydown = stopRKey;
 window.onbeforeunload = verifyClose;
 
 function verifyClose(){
@@ -859,16 +857,3 @@ function isNumeric(sText){
    	}
 	return isNumber;
 }
-
-function checkKey(e){
-    var key;
-    if(window.event){
-        key = window.event.keyCode;
-    }else{
-        key = e.keyCode;
-    }
-    if(key == 13){
-    	document.fullform.submit();
-    }
-}
-

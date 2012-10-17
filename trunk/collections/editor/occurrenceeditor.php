@@ -411,19 +411,23 @@ if($symbUid){
 										$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
 										?>
 										<li>
-											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$detVars; ?>" style="margin:0px 20px 0px 20px;">
-												Determination History
-											</a>
+											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$detVars; ?>" 
+												style="margin:0px 20px 0px 20px;">Determination History</a>
+										</li>
+										<?php 
+										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
+											echo '<li>';
+											echo '<a href="includes/findannotations.php?catalogNumber='.$detVars .'"';
+											echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
+											echo '</li>';
+										} 
+										?>
+										<li>
+											<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$imgVars; ?>" 
+												style="margin:0px 20px 0px 20px;">Images</a>
 										</li>
 										<li>
-											<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$imgVars; ?>" style="margin:0px 20px 0px 20px;">
-												Images
-											</a>
-										</li>
-										<li>
-											<a href="#admindiv" style="margin:0px 20px 0px 20px;">
-												Admin
-											</a>
+											<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
 										</li>
 										<?php
 									}
