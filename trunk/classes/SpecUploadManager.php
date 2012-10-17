@@ -415,15 +415,6 @@ class SpecUploadManager{
 			$this->conn->query($sql);
 			echo 'Done!</li> ';
 			
-			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
-			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
-			ob_flush();
-			flush();
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
-				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
-			$this->conn->query($sql);
-			echo 'Done!</li> ';
 		}
 		
 		if($this->storedProcedure){
@@ -441,6 +432,18 @@ class SpecUploadManager{
 			flush();
 		}
 		
+		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
+			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
+			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
+			ob_flush();
+			flush();
+			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
+				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
+			$this->conn->query($sql);
+			echo 'Done!</li> ';
+		}
+
 		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
