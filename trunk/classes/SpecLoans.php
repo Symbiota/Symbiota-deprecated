@@ -26,7 +26,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.loanid DESC';
+		$sql .= 'ORDER BY l.loanidentifierown + 1 DESC';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierown'] = $r->loanidentifierown;
@@ -116,7 +116,7 @@ class SpecLoans{
 		if(!$displayAll){
 			$sql .= 'AND ISNULL(l.dateclosed) ';
 		}
-		$sql .= 'ORDER BY l.datedue';
+		$sql .= 'ORDER BY l.loanidentifierborr + 1';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->loanid]['loanidentifierborr'] = $r->loanidentifierborr;
