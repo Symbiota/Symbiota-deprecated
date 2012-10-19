@@ -397,13 +397,12 @@ if($symbUid){
 									</li>
 									<?php
 									if($occId && $isEditor){
-										$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'];
 										// Get symbiota user email as the annotator email (for fp)
 										$pHandler = new ProfileManager();
 										$person = $pHandler->getPersonByUid($symbUid);
 										$userEmail = $person->getEmail();
 										
-										$detVars = '&identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'].
+										$detVars = 'identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'].
 											'&annotatorname='.$userDisplayName.'&annotatoremail='.$userEmail.
 											($collMap['collectioncode']?'&collectioncode='.$collMap['collectioncode']:'').
 											'&institutioncode='.$collMap['institutioncode'].'&catalognumber='.$occArr['catalognumber'];
@@ -411,13 +410,13 @@ if($symbUid){
 										$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
 										?>
 										<li>
-											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$detVars; ?>" 
+											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&'.$detVars; ?>" 
 												style="margin:0px 20px 0px 20px;">Determination History</a>
 										</li>
 										<?php 
 										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
 											echo '<li>';
-											echo '<a href="includes/findannotations.php?catalogNumber='.$detVars .'"';
+											echo '<a href="includes/findannotations.php?'.$detVars.'"';
 											echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
 											echo '</li>';
 										} 
