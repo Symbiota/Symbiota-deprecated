@@ -161,7 +161,7 @@ $smManager = new SiteMapManager();
 											<option value="">Select a Checklist</option>
 											<option value="">-------------------------------</option>
 											<?php 
-	            								$clArr = $smManager->getChecklistList($isAdmin,true);
+	            								$clArr = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
 												foreach($clArr as $clid => $clname){
 													echo '<option value="'.$clid.'">'.$clname."</option>\n";
 												}
