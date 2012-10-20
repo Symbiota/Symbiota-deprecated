@@ -68,7 +68,7 @@ class BuildThumbnails{
 	private $verbose = 1;
 	
 	function __construct() {
-		set_time_limit(200);
+		set_time_limit(2000);
 		$this->rootPathBase = $GLOBALS["imageRootPath"];
 		if(substr($this->rootPathBase,-1) != "/") $this->rootPathBase .= "/";  
 		$this->urlPath = $GLOBALS["imageRootUrl"];
@@ -96,7 +96,7 @@ class BuildThumbnails{
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
 			$url = trim($row->url);
-			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'... ';
+			if($this->verbose) echo '<li>Building thumbnail for image: <a href="http://swbiodiversity.org/seinet/imagelib/imgdetails.php?imgid='.$imgId.'">'.$imgId.'</a>... ';
 			ob_flush();
 			flush();
 			//if there are spaces in the file name, fix it
