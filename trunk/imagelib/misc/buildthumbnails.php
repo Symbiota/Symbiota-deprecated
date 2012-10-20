@@ -87,7 +87,7 @@ class BuildThumbnails{
 	}
 	
 	public function buildThumbnails(){
-		echo '<ul>';
+		echo '<ol>';
 		//Hunt for images on the main image server yet for some reason lack thumbnails
 		echo '<li style="font-weight:bold;">Working on internal and external images</li>';
 		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
@@ -96,18 +96,23 @@ class BuildThumbnails{
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
 			$url = trim($row->url);
-			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'</li>';
+			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'... ';
+			ob_flush();
+			flush();
 			//if there are spaces in the file name, fix it
 			if(strpos($url," ") || strpos($url,"%20")){
 				$url = $this->removeSpacesFromFileName($imgId,$url);
 			}
-			$this->createThumbnail($imgId,$url);
+			$statusStr = 'failed';
+			if($this->createThumbnail($imgId,$url)) $statusStr = 'done!';
+			if($this->verbose) echo $statusStr.'</li>';
 		}
 		echo '<li style="font-weight:bold;">Finished!</li>';
-		echo '</ul>';
+		echo '</ol>';
 	}
 	
 	private function createThumbnail($imgId,$imgUrl){
+		$status = false;
 		if($imgUrl && $imgId){
 			$filePath = "";
 			$newThumbnailUrl = "";
@@ -133,10 +138,8 @@ class BuildThumbnails{
 				$newThumbnailUrl = $this->urlPath.$this->pathTnFrag.$fileName;
 				$newThumbnailPath = $this->rootPathBase.$this->pathTnFrag.$fileName;
 			}
-echo 'filePath: '.$filePath.'<br/>';
+			if(array_key_exists('imageDomain',$GLOBALS) && $GLOBALS['imageDomain'] && substr($filePath,0,1) == '/') $filePath = $GLOBALS['imageDomain'].$filePath;
 			if(file_exists($filePath) || $this->url_exists($filePath)){
-echo 'newUrl: '.$newThumbnailUrl.'<br/>';
-echo 'newPath: '.$newThumbnailPath.'<br/>';
 				if(!file_exists($newThumbnailPath)){
 					list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
 		        	$newWidth = $this->tnPixWidth;
@@ -194,10 +197,11 @@ echo 'newPath: '.$newThumbnailPath.'<br/>';
 				    //Insert thumbnail path into database
 			    	$sql = "UPDATE images ti SET ti.thumbnailurl = '".$newThumbnailUrl."' WHERE ti.imgid = ".$imgId;
 				    $this->conn->query($sql);
-				    if($this->verbose) echo "<li style='margin-left:5px;'><b>Thumbnail Created:</b> $imgId - $newThumbnailUrl</li>";
+				    $status = true;
 			    }
 			}
 		}
+	    return $status;
 	}
 	
 	private function removeSpacesFromFileName($imgId, $url){
