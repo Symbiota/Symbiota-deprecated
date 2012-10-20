@@ -91,7 +91,7 @@ class BuildThumbnails{
 		//Hunt for images on the main image server yet for some reason lack thumbnails
 		echo '<li style="font-weight:bold;">Working on internal and external images</li>';
 		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") limit 2 ';
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
