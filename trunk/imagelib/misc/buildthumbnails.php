@@ -69,6 +69,7 @@ class BuildThumbnails{
 	
 	function __construct() {
 		set_time_limit(2000);
+		ini_set('memory_limit', '512M');
 		$this->rootPathBase = $GLOBALS["imageRootPath"];
 		if(substr($this->rootPathBase,-1) != "/") $this->rootPathBase .= "/";  
 		$this->urlPath = $GLOBALS["imageRootUrl"];
@@ -143,8 +144,8 @@ class BuildThumbnails{
 					$filePath = $GLOBALS['imageDomain'].$filePath;
 				}
 				else{
-					if(file_exists(str_replace($imageRootUrl,$imageRootPath,$filePath))){
-						$filePath = str_replace($imageRootUrl,$imageRootPath,$filePath);
+					if(file_exists(str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$filePath))){
+						$filePath = str_replace($GLOBALS['imageRootUrl'],$GLOBALS['imageRootPath'],$filePath);
 					}
 					else{
 						$filePath = 'http://'.$_SERVER['HTTP_HOST'].$filePath;
