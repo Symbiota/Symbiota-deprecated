@@ -97,7 +97,7 @@ class BuildThumbnails{
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
 			$url = trim($row->url);
-			if($this->verbose) echo '<li>Building thumbnail for image: <a href="http://swbiodiversity.org/seinet/imagelib/imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>... ';
+			if($this->verbose) echo '<li>Building thumbnail for image: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>... ';
 			ob_flush();
 			flush();
 			//if there are spaces in the file name, fix it
