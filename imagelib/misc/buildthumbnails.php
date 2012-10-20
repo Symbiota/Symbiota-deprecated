@@ -143,7 +143,7 @@ class BuildThumbnails{
 					$filePath = $GLOBALS['imageDomain'].$filePath;
 				}
 				else{
-					$filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+					$filePath = 'http://'.$_SERVER['HTTP_HOST'].$filePath;
 				}
 			}
 			if(file_exists($filePath) || $this->url_exists($filePath)){
