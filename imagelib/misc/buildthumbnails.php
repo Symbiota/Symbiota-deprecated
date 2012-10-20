@@ -87,9 +87,9 @@ class BuildThumbnails{
 	}
 	
 	public function buildThumbnails(){
+		echo '<div style="font-weight:bold;">Working on internal and external images</div>';
 		echo '<ol>';
 		//Hunt for images on the main image server yet for some reason lack thumbnails
-		echo '<li style="font-weight:bold;">Working on internal and external images</li>';
 		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
 			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") ';
 		$result = $this->conn->query($sql);
