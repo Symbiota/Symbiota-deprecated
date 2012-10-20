@@ -107,8 +107,8 @@ class BuildThumbnails{
 			if($this->createThumbnail($imgId,$url)) $statusStr = 'done!';
 			if($this->verbose) echo $statusStr.'</li>';
 		}
-		echo '<li style="font-weight:bold;">Finished!</li>';
 		echo '</ol>';
+		echo '<div style="font-weight:bold;">Finished!</div>';
 	}
 	
 	private function createThumbnail($imgId,$imgUrl){
@@ -138,7 +138,14 @@ class BuildThumbnails{
 				$newThumbnailUrl = $this->urlPath.$this->pathTnFrag.$fileName;
 				$newThumbnailPath = $this->rootPathBase.$this->pathTnFrag.$fileName;
 			}
-			if(array_key_exists('imageDomain',$GLOBALS) && $GLOBALS['imageDomain'] && substr($filePath,0,1) == '/') $filePath = $GLOBALS['imageDomain'].$filePath;
+			if(substr($filePath,0,1) == '/'){
+				if(array_key_exists('imageDomain',$GLOBALS) && $GLOBALS['imageDomain']){
+					$filePath = $GLOBALS['imageDomain'].$filePath;
+				}
+				else{
+					$filePath = $_SERVER['DOCUMENT_ROOT'].$filePath;
+				}
+			}
 			if(file_exists($filePath) || $this->url_exists($filePath)){
 				if(!file_exists($newThumbnailPath)){
 					list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
@@ -192,6 +199,9 @@ class BuildThumbnails{
 				    }
 				    imagedestroy($tmpImg);
 				}
+				else{
+					if($this->verbose) echo '<div style="margin-left:10px;">Bad target path: '.$newThumbnailPath.'</div>';
+				}
 			    
 			    if(file_exists($newThumbnailPath)){
 				    //Insert thumbnail path into database
@@ -199,6 +209,9 @@ class BuildThumbnails{
 				    $this->conn->query($sql);
 				    $status = true;
 			    }
+			}
+			else{
+				if($this->verbose) echo '<div style="margin-left:10px;">Bad source path: '.$filePath.'</div>';
 			}
 		}
 	    return $status;
