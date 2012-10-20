@@ -73,12 +73,12 @@ class BuildThumbnails{
 		if(substr($this->rootPathBase,-1) != "/") $this->rootPathBase .= "/";  
 		$this->urlPath = $GLOBALS["imageRootUrl"];
 		if(!$this->urlPath) exit('imageRootUrl is not set');
-		if(substr($this->urlPath,-1) != "/") $this->urlPath .= "/";  
+		if(substr($this->urlPath,-1) != "/") $this->urlPath .= "/";
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		
 		if(array_key_exists('imgTnWidth',$GLOBALS)){
 			$this->tnPixWidth = $GLOBALS['imgTnWidth'];
-			$this->tnPixWidthMax = $this->tnPixWidth + $this->tnPixWidth*0.25; 
+			$this->tnPixWidthMax = $this->tnPixWidth*1.25; 
 		}
 	}
 
@@ -88,25 +88,10 @@ class BuildThumbnails{
 	
 	public function buildThumbnails(){
 		echo '<ul>';
-		//Hunt for images on the main iamge server yet for some reason lack thumbnails
-		echo '<li style="font-weight:bold;">Working on internal images</li>';
+		//Hunt for images on the main image server yet for some reason lack thumbnails
+		echo '<li style="font-weight:bold;">Working on internal and external images</li>';
 		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url LIKE "'.$this->urlPath.'%" ';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$imgId = $row->imgid;
-			$url = trim($row->url);
-			if($this->verbose) echo '<li>Building thumbnail for image: '.$imgId.'</li>';
-			//if there are spaces in the file name, fix it
-			if(strpos($url," ") || strpos($url,"%20")){
-				$url = $this->removeSpacesFromFileName($imgId,$url);
-			}
-			$this->createThumbnail($imgId,$url);
-		}
-		//Hunt for images lacking thumbnails that are one an external server
-		echo '<li style="font-weight:bold;">Working images stored on an external server</li>';
-		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "")';
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") limit 10 ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$imgId = $row->imgid;
@@ -129,25 +114,31 @@ class BuildThumbnails{
 			$newThumbnailPath = "";
 			if(strpos($imgUrl,$this->urlPath) !== false){
 				$filePath = str_replace($this->urlPath,$this->rootPathBase,$imgUrl);
-				$newThumbnailUrl = str_ireplace(".jpg","tn.jpg",$imgUrl);
+				$newThumbnailUrl = str_ireplace(".jpg","_tn.jpg",$imgUrl);
 				$newThumbnailPath = str_replace($this->urlPath,$this->rootPathBase,$newThumbnailUrl);
 			}
-			elseif(substr($imgUrl,0,7) == "http://"){
+			else{
 				$filePath = $imgUrl;
 				if(!$this->pathTnFrag){
-					$this->pathTnFrag = 'thumbnails'.date("Ym").'/';
+					$this->pathTnFrag = 'thumbnails/';
+					if(!is_dir($this->rootPathBase.$this->pathTnFrag)){
+						if(!mkdir($this->rootPathBase.$this->pathTnFrag)) return "";
+					}
+					$this->pathTnFrag .= date("Ym").'/';
 					if(!is_dir($this->rootPathBase.$this->pathTnFrag)){
 						if(!mkdir($this->rootPathBase.$this->pathTnFrag)) return "";
 					}
 				}
-				$fileName = str_ireplace(".jpg","tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
+				$fileName = str_ireplace(".jpg","_tn.jpg",substr($imgUrl,strrpos($imgUrl,"/")));
 				$newThumbnailUrl = $this->urlPath.$this->pathTnFrag.$fileName;
 				$newThumbnailPath = $this->rootPathBase.$this->pathTnFrag.$fileName;
 			}
-
+echo 'filePath: '.$filePath.'<br/>';
 			if(file_exists($filePath) || $this->url_exists($filePath)){
+echo 'newUrl: '.$newThumbnailUrl.'<br/>';
+echo 'newPath: '.$newThumbnailPath.'<br/>';
 				if(!file_exists($newThumbnailPath)){
-		        	list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
+					list($sourceWidth, $sourceHeight, $imageType) = getimagesize($filePath);
 		        	$newWidth = $this->tnPixWidth;
 		        	$newHeight = round($sourceHeight*($newWidth/$sourceWidth));
 		        	if($newHeight > $this->tnPixWidthMax){
