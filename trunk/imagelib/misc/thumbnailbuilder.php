@@ -116,7 +116,7 @@ class ThumbnailBuilder{
 
 	public function buildThumbnailImages(){
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND imgid = 191668'; 
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND imgid = 191668 '; //191668 
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
@@ -132,10 +132,6 @@ class ThumbnailBuilder{
 			if($this->verbose) echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">#'.$imgId.'</a>... ';
 			ob_flush();
 			flush();
-			//if there are spaces in the file name, fix it
-			if(strpos($imgUrl," ") || strpos($imgUrl,"%20")){
-				$imgUrl = $this->removeSpacesFromThumbnail($imgId,$imgUrl);
-			}
 			//Get source path
 			$sourcePath = $imgUrl;
 			if(substr($imgUrl,0,1) == '/'){
