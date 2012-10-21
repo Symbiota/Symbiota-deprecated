@@ -50,7 +50,7 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 					?>
 				</div>
 				<div style="margin:10px;">
-					<form name="tnbuilderform" action="imagebuilder.php" method="post">
+					<form name="tnbuilderform" action="thumbnailbuilder.php" method="post">
 						<input type="submit" name="action" value="Build Thumbnails">
 					</form>
 				</div>
@@ -116,7 +116,7 @@ class ThumbnailBuilder{
 
 	public function buildThumbnailImages(){
 		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url IS NOT NULL AND imgid =21546 ';
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url IS NOT NULL AND imgid =191668 ';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
