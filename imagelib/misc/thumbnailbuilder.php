@@ -184,6 +184,8 @@ class ThumbnailBuilder{
 
 					//Create thumbnail
 					$tnFileName = str_ireplace(".jpg","_tn.jpg",$fileName);
+					if(strpos($tnFileName,' ')) $tnFileName = str_replace(' ','',$tnFileName);
+					if(strpos($tnFileName,'%20')) $tnFileName = str_replace('%20','',$tnFileName);
 					$newTnHeight = round($sourceHeight*($this->tnPixWidth/$sourceWidth));
 		        	
 		    		$tmpTnImg = imagecreatetruecolor($this->tnPixWidth,$newTnHeight);
