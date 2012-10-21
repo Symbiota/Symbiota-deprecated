@@ -193,9 +193,16 @@ class ThumbnailBuilder{
 				    //Create large image is too large
 				    $lgFileName = '';
 				    $webFileName = '';
+				    $fileSize = 0;
+				    try{
+				    	
+				    }
+				    catch(Exception $e){
+				    	filesize($sourcePath);
+				    }
 				    if(filesize($sourcePath) > $this->imgFileSizeLimit){
 						$lgFileName = str_ireplace(".jpg","_lg.jpg",$fileName);
-				    	if(rename($sourcePath,$targetPath.$lgFileName)){
+				    	if(substr($sourcePath,0,1) == '/' && rename($sourcePath,$targetPath.$lgFileName)){
 				    		$webFileName = $fileName;
 				    	}
 				    	else{
