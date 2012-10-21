@@ -115,13 +115,20 @@ class ThumbnailBuilder{
 	}
 
 	public function buildThumbnailImages(){
-		$sql = 'SELECT ti.imgid, ti.url FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url IS NOT NULL AND imgid =191668 ';
+		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl FROM images ti '.
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND imgid = 191668'; 
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
+			$webIsEmpty = false;
 			$imgId = $row->imgid;
-			$imgUrl = trim($row->url);
+			if($row->url == 'empty' && $row->originalurl){
+				$imgUrl = trim($row->originalurl);
+				$webIsEmpty = true;
+			}
+			else{
+				$imgUrl = trim($row->url);
+			}
 			if($this->verbose) echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">#'.$imgId.'</a>... ';
 			ob_flush();
 			flush();
@@ -130,7 +137,7 @@ class ThumbnailBuilder{
 				$imgUrl = $this->removeSpacesFromThumbnail($imgId,$imgUrl);
 			}
 			//Get source path
-			$sourcePath = "";
+			$sourcePath = $imgUrl;
 			if(substr($imgUrl,0,1) == '/'){
 				if(array_key_exists('imageDomain',$GLOBALS) && $GLOBALS['imageDomain']){
 					$sourcePath = $GLOBALS['imageDomain'].$imgUrl;
@@ -194,29 +201,31 @@ class ThumbnailBuilder{
 				    $lgFileName = '';
 				    $webFileName = '';
 				    $fileSize = 0;
-				    try{
-				    	
+				    if(!$webIsEmpty){
+					    if(strtolower(substr($sourcePath,0,7)) == 'http://'){
+					    	$fileSize = $this->getRemoteSize($sourcePath);
+					    }
+					    else{
+					    	$fileSize = filesize($sourcePath);
+					    }
 				    }
-				    catch(Exception $e){
-				    	filesize($sourcePath);
-				    }
-				    if(filesize($sourcePath) > $this->imgFileSizeLimit){
-						$lgFileName = str_ireplace(".jpg","_lg.jpg",$fileName);
-				    	if(substr($sourcePath,0,1) == '/' && rename($sourcePath,$targetPath.$lgFileName)){
-				    		$webFileName = $fileName;
-				    	}
-				    	else{
-				    		$lgFileName = $fileName;
-				    		$webFileName = str_ireplace(".jpg","_web.jpg",$fileName);
-				    	}
-						$newWebHeight = round($sourceHeight*($this->webPixWidth/$sourceWidth));
+				    if($webIsEmpty || $fileSize > $this->imgFileSizeLimit){
+			    		$lgFileName = $imgUrl;
+			    		$webFileName = str_ireplace(".jpg","_web.jpg",$fileName);
+
+			    		$newWebHeight = round($sourceHeight*($this->webPixWidth/$sourceWidth));
 			        	
 			    		$tmpWebImg = imagecreatetruecolor($this->webPixWidth,$newWebHeight);
 						imagecopyresampled($tmpWebImg,$sourceImg,0,0,0,0,$this->webPixWidth, $newWebHeight,$sourceWidth,$sourceHeight);
 			        	if(!imagejpeg($tmpWebImg, $targetPath.$webFileName)){
-			        		$webFileName = '';
+			        		if($webIsEmpty){
+			        			$webFileName = $imgUrl;
+			        		}
+			        		else{
+								$webFileName = '';
+			        		}
 			        		$lgFileName = '';
-			        		echo "<li style='margin-left:5px;color:red;'>Failed to write JPG: $targetPath.$webFileName</li>";
+			        		echo "<div style='margin-left:10px;color:red;'>Failed to write JPG: $targetPath.$webFileName</div>";
 			        	}
 					    imagedestroy($tmpWebImg);
 				    }
@@ -225,13 +234,24 @@ class ThumbnailBuilder{
 				    imagedestroy($sourceImg);
 				
 				    if(file_exists($targetPath.$tnFileName)){
-					    //Insert thumbnail path into database
-				    	$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$targetUrl.$tnFileName.'" ';
+					    //Insert urls into database
+					    $webFullUrl = '';
 				    	if($webFileName && $webFileName != $fileName){
-				    		$sql .= ',url = "'.$targetUrl.$webFileName.'" ';
+				    		if(strtolower(substr($webFileName,0,4)) != "http") $webFullUrl = $targetUrl;
+				    		$webFullUrl .= $webFileName;
 				    	}
-				    	if($lgFileName){
-				    		$sql .= ',originalurl = "'.$targetUrl.$lgFileName.'" ';
+					    $lgFullUrl = '';
+					    if($lgFileName){
+				    		if(strtolower(substr($lgFileName,0,4)) != "http") $lgFullUrl = $targetUrl;
+					    	$lgFullUrl .= $lgFileName;
+					    }
+
+				    	$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$targetUrl.$tnFileName.'" ';
+				    	if($webFullUrl){
+				    		$sql .= ',url = "'.$webFullUrl.'" ';
+				    	}
+				    	if($lgFullUrl){
+				    		$sql .= ',originalurl = "'.$lgFullUrl.'" ';
 				    	}
 				    	
 				    	$sql .= "WHERE ti.imgid = ".$imgId;
@@ -297,6 +317,24 @@ class ThumbnailBuilder{
 	    $connectable = curl_exec($handle);
 	    curl_close($handle);  
 	    return $connectable;
-	}	
+	}
+	
+	private function getRemoteSize($remoteFile){
+		$ch = curl_init($remoteFile);
+		curl_setopt($ch, CURLOPT_NOBODY, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		if($data === false) {
+			return 0;
+		}
+		
+		$contentLength = 0;
+		if(preg_match('/Content-Length: (\d+)/', $data, $matches)) {
+		  $contentLength = (int)$matches[1];
+		}
+		return $contentLength;
+	}
 }
 ?>
