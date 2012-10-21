@@ -105,7 +105,7 @@ class ThumbnailBuilder{
 	public function getMissingTnCount(){
 		$tnCnt = 0;
 		$sql = 'SELECT count(ti.imgid) AS tnCnt FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND ti.url != "empty" ';
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "")';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$tnCnt = $row->tnCnt;
@@ -116,7 +116,7 @@ class ThumbnailBuilder{
 
 	public function buildThumbnailImages(){
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") AND imgid = 191668 '; //191668 
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") '; 
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
@@ -210,7 +210,9 @@ class ThumbnailBuilder{
 				    if($webIsEmpty || $fileSize > $this->imgFileSizeLimit){
 			    		$lgFileName = $imgUrl;
 			    		$webFileName = str_ireplace(".jpg","_web.jpg",$fileName);
-
+						if(strpos($webFileName,' ')) $webFileName = str_replace(' ','',$webFileName);
+						if(strpos($webFileName,'%20')) $webFileName = str_replace('%20','',$webFileName);
+			    		
 			    		$newWebHeight = round($sourceHeight*($this->webPixWidth/$sourceWidth));
 			        	
 			    		$tmpWebImg = imagecreatetruecolor($this->webPixWidth,$newWebHeight);
