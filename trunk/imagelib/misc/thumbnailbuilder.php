@@ -116,7 +116,7 @@ class ThumbnailBuilder{
 
 	public function buildThumbnailImages(){
 		$sql = 'SELECT ti.imgid, ti.url, ti.originalurl FROM images ti '.
-			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") '; 
+			'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "")'; 
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
@@ -129,6 +129,7 @@ class ThumbnailBuilder{
 			else{
 				$imgUrl = trim($row->url);
 			}
+			$origUrl = $row->originalurl;
 			if($this->verbose) echo '<li>Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">#'.$imgId.'</a>... ';
 			ob_flush();
 			flush();
@@ -181,91 +182,116 @@ class ThumbnailBuilder{
 					list($sourceWidth, $sourceHeight) = getimagesize($sourcePath);
 
 					$sourceImg = imagecreatefromjpeg($sourcePath);  
-
-					//Create thumbnail
-					$tnFileName = str_ireplace(".jpg","_tn.jpg",$fileName);
-					if(strpos($tnFileName,' ')) $tnFileName = str_replace(' ','',$tnFileName);
-					if(strpos($tnFileName,'%20')) $tnFileName = str_replace('%20','',$tnFileName);
-					$newTnHeight = round($sourceHeight*($this->tnPixWidth/$sourceWidth));
-		        	
-		    		$tmpTnImg = imagecreatetruecolor($this->tnPixWidth,$newTnHeight);
-					imagecopyresampled($tmpTnImg,$sourceImg,0,0,0,0,$this->tnPixWidth, $newTnHeight,$sourceWidth,$sourceHeight);
-		        	if(!imagejpeg($tmpTnImg, $targetPath.$tnFileName)){
-		        		echo "<li style='margin-left:5px;color:red;'>Failed to write JPG: $targetPath.$tnFileName</li>";
-		        	}
-				    imagedestroy($tmpTnImg);
-				    
-				    //Create large image is too large
-				    $lgFileName = '';
-				    $webFileName = '';
-				    $fileSize = 0;
-				    if(!$webIsEmpty){
-					    if(strtolower(substr($sourcePath,0,7)) == 'http://'){
-					    	$fileSize = $this->getRemoteSize($sourcePath);
-					    }
-					    else{
-					    	$fileSize = filesize($sourcePath);
-					    }
-				    }
-				    if($webIsEmpty || $fileSize > $this->imgFileSizeLimit){
-			    		$lgFileName = $imgUrl;
-			    		$webFileName = str_ireplace(".jpg","_web.jpg",$fileName);
-						if(strpos($webFileName,' ')) $webFileName = str_replace(' ','',$webFileName);
-						if(strpos($webFileName,'%20')) $webFileName = str_replace('%20','',$webFileName);
-			    		
-			    		$newWebHeight = round($sourceHeight*($this->webPixWidth/$sourceWidth));
+					
+					if($sourceImg){
+						//Create thumbnail
+						if(strtolower(substr($fileName,-4)) == '.jpg"'){
+							$tnFileName = str_ireplace(".jpg","_tn.jpg",$fileName);
+							if(strpos($tnFileName,' ')) $tnFileName = str_replace(' ','',$tnFileName);
+							if(strpos($tnFileName,'%20')) $tnFileName = str_replace('%20','',$tnFileName);
+						}
+						else{
+							$tnFileName = 'imgid-'.$imgId."_tn.jpg";
+						}
+						$imgCnt = 1;
+						while(file_exists($targetPath.$tnFileName)){
+							$tnFileName = substr($tnFileName,0,strrpos($tnFileName,'_')).'_'.$imgCnt.'-tn.jpg';
+							$imgCnt++;
+						}
+						
+						$newTnHeight = round($sourceHeight*($this->tnPixWidth/$sourceWidth));
 			        	
-			    		$tmpWebImg = imagecreatetruecolor($this->webPixWidth,$newWebHeight);
-						imagecopyresampled($tmpWebImg,$sourceImg,0,0,0,0,$this->webPixWidth, $newWebHeight,$sourceWidth,$sourceHeight);
-			        	if(!imagejpeg($tmpWebImg, $targetPath.$webFileName)){
-			        		if($webIsEmpty){
-			        			$webFileName = $imgUrl;
-			        		}
-			        		else{
-								$webFileName = '';
-			        		}
-			        		$lgFileName = '';
-			        		echo "<div style='margin-left:10px;color:red;'>Failed to write JPG: $targetPath.$webFileName</div>";
+			    		$tmpTnImg = imagecreatetruecolor($this->tnPixWidth,$newTnHeight);
+						imagecopyresampled($tmpTnImg,$sourceImg,0,0,0,0,$this->tnPixWidth, $newTnHeight,$sourceWidth,$sourceHeight);
+			        	if(!imagejpeg($tmpTnImg, $targetPath.$tnFileName)){
+			        		echo "<li style='margin-left:5px;color:red;'>Failed to write JPG: $targetPath.$tnFileName</li>";
 			        	}
-					    imagedestroy($tmpWebImg);
-				    }
+					    imagedestroy($tmpTnImg);
+					    
+					    if(file_exists($targetPath.$tnFileName)){
+					    	//If web image is too large, transfer to large image and create new web image
+						    $lgFileName = '';
+						    $webFileName = '';
+						    $fileSize = 0;
+						    if(!$webIsEmpty){
+							    if(strtolower(substr($sourcePath,0,7)) == 'http://'){
+							    	$fileSize = $this->getRemoteSize($sourcePath);
+							    }
+							    else{
+							    	$fileSize = filesize($sourcePath);
+							    }
+						    }
+						    if($webIsEmpty || (!$origUrl && $fileSize > $this->imgFileSizeLimit)){
+					    		$lgFileName = $imgUrl;
+								if(strtolower(substr($fileName,-4)) == '.jpg"'){
+					    			$webFileName = str_ireplace(".jpg","_web.jpg",$fileName);
+									if(strpos($webFileName,' ')) $webFileName = str_replace(' ','',$webFileName);
+									if(strpos($webFileName,'%20')) $webFileName = str_replace('%20','',$webFileName);
+								}
+								else{
+									$webFileName = 'imgid-'.$imgId.'_web.jpg';
+								}
+								$imgCnt = 1;
+								while(file_exists($targetPath.$webFileName)){
+									$webFileName = substr($webFileName,0,strrpos($webFileName,'_')).'_'.$imgCnt.'-web.jpg';
+									$imgCnt++;
+								}
 
-				    //Final cleanup
-				    imagedestroy($sourceImg);
-				
-				    if(file_exists($targetPath.$tnFileName)){
-					    //Insert urls into database
-					    $webFullUrl = '';
-				    	if($webFileName && $webFileName != $fileName){
-				    		if(strtolower(substr($webFileName,0,4)) != "http") $webFullUrl = $targetUrl;
-				    		$webFullUrl .= $webFileName;
-				    	}
-					    $lgFullUrl = '';
-					    if($lgFileName){
-				    		if(strtolower(substr($lgFileName,0,4)) != "http") $lgFullUrl = $targetUrl;
-					    	$lgFullUrl .= $lgFileName;
-					    }
+					    		$newWebHeight = round($sourceHeight*($this->webPixWidth/$sourceWidth));
 
-				    	$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$targetUrl.$tnFileName.'" ';
-				    	if($webFullUrl){
-				    		$sql .= ',url = "'.$webFullUrl.'" ';
-				    	}
-				    	if($lgFullUrl){
-				    		$sql .= ',originalurl = "'.$lgFullUrl.'" ';
-				    	}
-				    	
-				    	$sql .= "WHERE ti.imgid = ".$imgId;
-				    	//echo $sql;
-					    $this->conn->query($sql);
-					    $statusStr = 'Done!';
-				    }
+					    		$tmpWebImg = imagecreatetruecolor($this->webPixWidth,$newWebHeight);
+								imagecopyresampled($tmpWebImg,$sourceImg,0,0,0,0,$this->webPixWidth, $newWebHeight,$sourceWidth,$sourceHeight);
+					        	if(!imagejpeg($tmpWebImg, $targetPath.$webFileName)){
+					        		if($webIsEmpty){
+					        			$webFileName = $imgUrl;
+					        		}
+					        		else{
+										$webFileName = '';
+					        		}
+					        		$lgFileName = '';
+					        		echo "<div style='margin-left:10px;color:red;'>Failed to write JPG: $targetPath.$webFileName</div>";
+					        	}
+							    imagedestroy($tmpWebImg);
+						    }
+		
+						    //Insert urls into database
+						    $webFullUrl = '';
+					    	if($webFileName && $webFileName != $fileName){
+					    		if(strtolower(substr($webFileName,0,4)) != "http") $webFullUrl = $targetUrl;
+					    		$webFullUrl .= $webFileName;
+					    	}
+						    $lgFullUrl = '';
+						    if($lgFileName){
+					    		if(strtolower(substr($lgFileName,0,4)) != "http") $lgFullUrl = $targetUrl;
+						    	$lgFullUrl .= $lgFileName;
+						    }
+	
+					    	$sql = 'UPDATE images ti SET ti.thumbnailurl = "'.$targetUrl.$tnFileName.'" ';
+					    	if($webFullUrl){
+					    		$sql .= ',url = "'.$webFullUrl.'" ';
+					    	}
+					    	if($lgFullUrl){
+					    		$sql .= ',originalurl = "'.$lgFullUrl.'" ';
+					    	}
+					    	
+					    	$sql .= "WHERE ti.imgid = ".$imgId;
+					    	//echo $sql;
+						    $this->conn->query($sql);
+						    $statusStr = 'Done!';
+						    //Final cleanup
+						    imagedestroy($sourceImg);
+						}
+					}
+					else{
+						if($this->verbose) echo '<div style="margin-left:10px;">ERROR: Unable to create source image object</div>';
+					}
 				}
 				else{
-					if($this->verbose) echo '<div style="margin-left:10px;">Bad target path: '.$targetPath.'</div>';
+					if($this->verbose) echo '<div style="margin-left:10px;">ERROR: Bad target path: '.$targetPath.'</div>';
 				}
 			}
 			else{
-				if($this->verbose) echo '<div style="margin-left:10px;">Bad source path: '.$sourcePath.'</div>';
+				if($this->verbose) echo '<div style="margin-left:10px;">ERROR: Bad source path: '.$sourcePath.'</div>';
 			}
 
 			if($this->verbose) echo $statusStr.'</li>';
