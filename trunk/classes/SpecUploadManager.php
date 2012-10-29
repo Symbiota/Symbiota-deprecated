@@ -505,79 +505,16 @@ class SpecUploadManager{
 		}
 		echo '</li>';
 		
-		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with verbatimEventDate... ';
-		ob_flush();
-		flush();
-		$sql = 'SELECT DISTINCT u.verbatimeventdate '.
-			'FROM uploadspectemp u '.
-			'WHERE u.eventDate IS NULL AND u.verbatimeventdate IS NOT NULL AND collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-		$outStr = '';
-		while($r = $rs->fetch_object()){
-			$vDate = $r->verbatimeventdate;
-			$dateStr = $this->formatDate($vDate);
-			if($dateStr){
-				$sql = 'UPDATE IGNORE uploadspectemp '.
-					'SET eventdate = "'.$dateStr.'" '.
-					'WHERE (collid = '.$this->collId.') AND eventDate IS NULL AND (verbatimeventdate = "'.$vDate.'")';
-				if($this->conn->query($sql)){
-					$outStr = 'Done! ';
-				}
-				else{
-					$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
-				}
-			}
-		}
-		$rs->close();
-		echo ($outStr?$outStr:'Not Applicable').'</li> ';
-		
-		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse coordinates from verbatimCoordinates field... ';
-		ob_flush();
-		flush();
-		//Parse out verbatimCoordinates
-		//This happens at loadRecord, but we do it again in case stored procedure concatinated some of hte verbatim coordinate fields
-		$outStr = '';
-		if($this->storedProcedure){
-			$sql = 'SELECT DISTINCT verbatimcoordinates '.
-				'FROM uploadspectemp '.
-				'WHERE decimallatitude IS NULL AND verbatimcoordinates IS NOT NULL AND collid = '.$this->collId;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				if($r->verbatimcoordinates){
-					$vCoord = $r->verbatimcoordinates;
-					$coordArr = $this->parseVerbatimCoordinates($vCoord);
-					if($coordArr){
-						$sql = 'UPDATE uploadspectemp '.
-							'SET decimallatitude = '.$coordArr['lat'].',decimallongitude = '.$coordArr['lng'].' '.
-							'WHERE (collid = '.$this->collId.') AND (decimallatitude IS NULL) AND (verbatimcoordinates = "'.$vCoord.'")';
-						if($this->conn->query($sql)){
-							$outStr = 'Done! ';
-						}
-						else{
-							$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
-						}
-					}
-				}
-			}
-			$rs->close();
-		}
-		if($outStr) { 
-			echo $outStr.'</li> ';
-		}
-		else{
-			echo 'Not Applicable</li>';
-		}
-		
 		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
 		ob_flush();
 		flush();
 		//Clean and parse verbatimElevation string
+		$outStr = '';
 		if($this->storedProcedure){
 			$sql = 'SELECT DISTINCT verbatimelevation '.
 				'FROM uploadspectemp '.
 				'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
 			$rs = $this->conn->query($sql);
-			$outStr = '';
 			while($r = $rs->fetch_object()){
 				$vElev = $r->verbatimelevation;
 				$eArr = $this->parseVerbatimElevation($vElev);
@@ -1085,6 +1022,11 @@ class SpecUploadManager{
 					$recMap['eventdate'] = $this->formatDate($vDate);
 				}
 			}
+			//eventDate NULL && verbatimEventDate NOT NULL && year NOT NULL 
+			if((!array_key_exists('eventdate',$recMap) || !$recMap['eventdate']) && array_key_exists('verbatimeventdate',$recMap) && $recMap['verbatimeventdate'] && (!array_key_exists('year',$recMap) || !$recMap['year'])){
+				$dateStr = $this->formatDate($recMap['verbatimeventdate']);
+				if($dateStr) $recMap['eventdate'] = $dateStr;
+			}
 			//If lat or long are not numeric, try to make them so
 			if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
 				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
@@ -1107,7 +1049,7 @@ class SpecUploadManager{
 					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
-			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates']){
+			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && !$recMap['decimallatitude']){
 				$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 				if($coordArr){
 					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
