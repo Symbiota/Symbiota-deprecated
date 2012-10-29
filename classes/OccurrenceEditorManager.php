@@ -6,7 +6,7 @@ include_once($serverRoot.'/classes/OccurrenceEditorImages.php');
 class OccurrenceEditorManager {
 
 	protected $conn;
-	protected $occId;
+	protected $occid;
 	private $collId;
 	private $collMap = array();
 	private $occurrenceMap = array();
@@ -37,12 +37,12 @@ class OccurrenceEditorManager {
 	
 	public function setOccId($id){
 		if(is_numeric($id)){
-			$this->occId = $this->conn->real_escape_string($id);
+			$this->occid = $this->conn->real_escape_string($id);
 		}
 	}
 	
 	public function getOccId(){
-		return $this->occId;
+		return $this->occid;
 	}
 
 	public function setCollId($id){
@@ -53,15 +53,15 @@ class OccurrenceEditorManager {
 
 	public function getCollMap(){
 		if(!$this->collMap){
-			if($this->collId || $this->occId){
+			if($this->collId || $this->occid){
 				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.colltype, c.managementtype '.
 					'FROM omcollections c ';
 				if($this->collId){
 					$sql .= 'WHERE (c.collid = '.$this->collId.')';
 				}
-				elseif($this->occId){
+				elseif($this->occid){
 					$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
-						'WHERE (o.occid = '.$this->occId.')';
+						'WHERE (o.occid = '.$this->occid.')';
 				}
 				$rs = $this->conn->query($sql);
 				if($row = $rs->fetch_object()){
@@ -333,7 +333,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function getOccurMap(){
-		if(!$this->occurrenceMap && ($this->occId || $this->sqlWhere)){
+		if(!$this->occurrenceMap && ($this->occid || $this->sqlWhere)){
 			$this->setOccurArr();
 		}
 		return $this->occurrenceMap;
@@ -342,8 +342,8 @@ class OccurrenceEditorManager {
 	private function setOccurArr(){
 		$retArr = Array();
 		$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
-		if($this->occId){
-			$sql .= 'WHERE (o.occid = '.$this->occId.')';
+		if($this->occid){
+			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
 		elseif($this->sqlWhere){
 			if(strpos($this->sqlWhere,'recordedby')){
@@ -366,9 +366,9 @@ class OccurrenceEditorManager {
 				$retArr[$occid] = array_change_key_case($row);
 			}
 			$rs->free();
-			if(!$this->occId && $retArr && count($retArr) == 1) $this->occId = $occid; 
+			if(!$this->occid && $retArr && count($retArr) == 1) $this->occid = $occid; 
 			$this->occurrenceMap = $retArr;
-			//if($this->occId) $this->setLoanData();
+			//if($this->occid) $this->setLoanData();
 		}
 	}
 
@@ -426,8 +426,8 @@ class OccurrenceEditorManager {
 					if(in_array($ok,$this->occFieldArr) && $ok != 'observeruid'){
 						$vStr = $this->cleanStr($ov);
 						$sql .= ','.$ok.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
-						if(array_key_exists($this->occId,$this->occurrenceMap) && array_key_exists($ok,$this->occurrenceMap[$this->occId])){
-							$this->occurrenceMap[$this->occId][$ok] = $vStr;
+						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($ok,$this->occurrenceMap[$this->occid])){
+							$this->occurrenceMap[$this->occid][$ok] = $vStr;
 						}
 					}
 				}
@@ -435,8 +435,8 @@ class OccurrenceEditorManager {
 					if($v && array_key_exists($v,$occArr)){
 						$vStr = $this->cleanStr($occArr[$v]);
 						$sql .= ','.$v.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
-						if(array_key_exists($this->occId,$this->occurrenceMap) && array_key_exists($v,$this->occurrenceMap[$this->occId])){
-							$this->occurrenceMap[$this->occId][$v] = $vStr;
+						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($v,$this->occurrenceMap[$this->occid])){
+							$this->occurrenceMap[$this->occid][$v] = $vStr;
 						}
 					}
 				}
@@ -550,7 +550,7 @@ class OccurrenceEditorManager {
 			$occArr["userid"]."\",".$occArr["observeruid"].") ";
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
-				$this->occId = $this->conn->insert_id;
+				$this->occid = $this->conn->insert_id;
 			}
 			else{
 				$status = "ERROR - failed to add occurrence record: ".$this->conn->error;
@@ -559,10 +559,10 @@ class OccurrenceEditorManager {
 		return $status;
 	}
 	
-	public function deleteOccurrence($occId){
+	public function deleteOccurrence($delOccid){
 		$status = '';
-		if(is_numeric($occId)){
-			$sql = 'DELETE FROM omoccurrences WHERE (occid = '.$occId.')';
+		if(is_numeric($delOccid)){
+			$sql = 'DELETE FROM omoccurrences WHERE (occid = '.$delOccid.')';
 			if($this->conn->query($sql)){
 				$status = 'SUCCESS: Occurrence Record Deleted!';
 			}
@@ -576,23 +576,23 @@ class OccurrenceEditorManager {
 	public function setLoanData(){
 		$sql = 'SELECT l.loanid, l.datedue '.
 			'FROM omoccurloanslink ll INNER JOIN omoccurloans l ON ll.loanid = l.loanid '.
-			'WHERE ll.returndate IS NULL AND l.dateclosed IS NULL AND occid = '.$this->occId;
+			'WHERE ll.returndate IS NULL AND l.dateclosed IS NULL AND occid = '.$this->occid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$this->occurrenceMap[$this->occId]['loan']['id'] = $r->loanid;
-			$this->occurrenceMap[$this->occId]['loan']['date'] = $r->datedue;
+			$this->occurrenceMap[$this->occid]['loan']['id'] = $r->loanid;
+			$this->occurrenceMap[$this->occid]['loan']['date'] = $r->datedue;
 		}
 		$rs->free();
 	}
 	
 	public function getObserverUid(){
 		$obsId = 0;
-		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap[$this->occId])){
-			$obsId = $this->occurrenceMap[$this->occId]['observeruid'];
+		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap[$this->occid])){
+			$obsId = $this->occurrenceMap[$this->occid]['observeruid'];
 		}
-		elseif($this->occId){
+		elseif($this->occid){
 			$this->setOccurArr();
-			$obsId = $this->occurrenceMap[$this->occId]['observeruid'];
+			$obsId = $this->occurrenceMap[$this->occid]['observeruid'];
 		}
 		return $obsId;
 	}
@@ -697,10 +697,10 @@ class OccurrenceEditorManager {
 	//Label OCR processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
-		if($this->occId){
+		if($this->occid){
 			$sql = 'SELECT r.prlid, r.imgid, r.rawstr, r.notes '.
 				'FROM specprocessorrawlabels r INNER JOIN images i ON r.imgid = i.imgid '.
-				'WHERE i.occid = '.$this->occId;
+				'WHERE i.occid = '.$this->occid;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->imgid][$r->prlid]['raw'] = $r->rawstr;
@@ -755,11 +755,11 @@ class OccurrenceEditorManager {
 
 	public function getImageMap(){
 		$imageMap = Array();
-		if($this->occId){
+		if($this->occid){
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
 				'sourceurl, copyright, notes, occid, sortsequence '.
 				'FROM images '.
-				'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
+				'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 			//echo $sql;
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
@@ -781,6 +781,21 @@ class OccurrenceEditorManager {
 		return $imageMap;
 	}
 
+	//Edit locking functions (seesion variables)
+	public function getLock(){
+		$isLocked = false;
+		//Check lock
+		$delSql = 'DELETE FROM omoccureditlocks WHERE (ts < '.(time()-900).') OR (uid = '.$this->symbUid.')';
+		if(!$this->conn->query($delSql)) return false;
+		//Try to insert lock for , existing lock is assumed if fails  
+		$sql = 'INSERT INTO omoccureditlocks(occid,uid,ts) '.
+			'VALUES ('.$this->occid.','.$this->symbUid.','.time().')';
+		if(!$this->conn->query($sql)){
+			$isLocked = true;
+		}
+		return $isLocked;
+	}
+	
 	//Misc functions
 	protected function cleanStr($str){
 		$newStr = trim($str);

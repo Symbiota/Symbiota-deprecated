@@ -9,7 +9,7 @@ function submitLoadForm(f){
 	var errorStr = "";
 	var rankId = f.rankid.value;
 	if(f.sciname.value == "") errorStr += ", Scientific Name"; 
-	if(f.unitname1.value == "") errorStr += ", Base Name (eg Genus)"; 
+	if(f.unitname1.value == "") errorStr += ", Unit Name 1 (genus or uninomial)"; 
 	if(rankId == 0 || rankId == "") errorStr += ", Taxon Rank"; 
 	if(f.parenttid.value == "" && rankId != "10") errorStr += ", Parent Taxon"; 
 	if(errorStr != ""){
