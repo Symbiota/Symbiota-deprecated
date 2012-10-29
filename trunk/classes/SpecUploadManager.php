@@ -504,42 +504,8 @@ class SpecUploadManager{
 			echo '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
 		}
 		echo '</li>';
-		
-		echo '<li style="font-weight:bold;margin-left:10px;">Attempting to parse elevation from verbatimElevation field... ';
 		ob_flush();
 		flush();
-		//Clean and parse verbatimElevation string
-		$outStr = '';
-		if($this->storedProcedure){
-			$sql = 'SELECT DISTINCT verbatimelevation '.
-				'FROM uploadspectemp '.
-				'WHERE minimumelevationinmeters IS NULL AND verbatimelevation IS NOT NULL AND collid = '.$this->collId;
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$vElev = $r->verbatimelevation;
-				$eArr = $this->parseVerbatimElevation($vElev);
-				if($eArr){
-					$maxElev = 'NULL';
-					if(array_key_exists('maxelev',$eArr)) $maxElev = $eArr['maxelev'];
-					$sql = 'UPDATE uploadspectemp '.
-						'SET minimumelevationinmeters = '.$eArr['minelev'].',maximumelevationinmeters = '.$maxElev.' '.
-						'WHERE (collid = '.$this->collId.') AND minimumelevationinmeters IS NULL AND (verbatimelevation = "'.$vElev.'")';
-					if($this->conn->query($sql)){
-						$outStr = 'Done! ';
-					}
-					else{
-						$outStr = '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
-					}
-				}
-			}
-			$rs->close();
-		}
-		if($outStr) { 
-			echo $outStr.'</li> ';
-		}
-		else{
-			echo 'Not Applicable</li>';
-		}
 	}
 
 	private function recordCleaningStage2(){
@@ -1085,8 +1051,8 @@ class SpecUploadManager{
 					}
 				}
 			}
-			//Verbatim event date
-			if(array_key_exists('verbatimElevation',$recMap) && (!array_key_exists('minimumElevationInMeters',$recMap) || !$recMap['minimumElevationInMeters'])){
+			//Verbatim elevation
+			if(array_key_exists('verbatimElevation',$recMap) && $recMap['verbatimElevation'] && (!array_key_exists('minimumElevationInMeters',$recMap) || !$recMap['minimumElevationInMeters'])){
 				$eArr = $this->parseVerbatimElevation($recMap['verbatimElevation']);
 				if($eArr){
 					if(array_key_exists('minelev',$eArr)){
