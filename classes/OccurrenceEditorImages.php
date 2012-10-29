@@ -180,6 +180,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		//Set download paths and variables
 		set_time_limit(120);
 		ini_set("max_input_time",120);
+		ini_set('memory_limit','512M');
 		$this->setRootPaths();
 		$this->setTargetPaths();
 		if(array_key_exists('imgWebWidth',$GLOBALS)) $this->webPixWidth = $GLOBALS['imgWebWidth'];
