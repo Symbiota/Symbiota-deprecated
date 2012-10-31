@@ -28,39 +28,43 @@ function submitQueryTable(f){
 }
 
 function verifyQueryForm(f){
-	if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
-		&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
-		&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == "" 
-		&& (f.q_customfield1.selectedIndex == 0 && (f.q_customvalue1.value == "" || f.q_customtype1.selectedIndex != 1)) 
-		&& ((f.q_observeruid.type == "hidden" && f.q_observeruid.value == "") || (f.q_observeruid.type == "checkbox" && f.q_observeruid.checked == false))){
-		alert("Query form is empty! Please enter a value to query by.");
-		return false;
-	}
+	//if(f.q_identifier.value == "" && f.q_othercatalognumbers.value == ""  
+	//	&& f.q_recordedby.value == "" && f.q_recordnumber.value == "" && f.q_eventdate.value == ""
+	//	&& f.q_enteredby.value == "" && f.q_processingstatus.value == "" && f.q_datelastmodified.value == "" 
+	//	&& (f.q_customfield1.selectedIndex == 0 && (f.q_customvalue1.value == "" || f.q_customtype1.selectedIndex != 1)) 
+	//	&& ((f.q_observeruid.type == "hidden" && f.q_observeruid.value == "") || (f.q_observeruid.type == "checkbox" && f.q_observeruid.checked == false))){
+	//	alert("Query form is empty! Please enter a value to query by.");
+	//	return false;
+	//}
 
 	var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
 	var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
 
-	var edDateStr = f.q_eventdate.value;
-	if(edDateStr){
-		try{
-			if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr)){
-				alert("Event date must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-				return false;
+	if(f.q_eventdate){
+		var edDateStr = f.q_eventdate.value;
+		if(edDateStr){
+			try{
+				if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr)){
+					alert("Event date must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+					return false;
+				}
 			}
-		}
-		catch(ex){
+			catch(ex){
+			}
 		}
 	}
 	
-	var modDateStr = f.q_datelastmodified.value;
-	if(modDateStr){
-		try{
-			if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr)){
-				alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
-				return false;
+	if(f.q_datelastmodified){
+		var modDateStr = f.q_datelastmodified.value;
+		if(modDateStr){
+			try{
+				if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr)){
+					alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+					return false;
+				}
 			}
-		}
-		catch(ex){
+			catch(ex){
+			}
 		}
 	}
 
@@ -171,7 +175,7 @@ function toggle(target){
 }
 
 function toggleSearch(){
-	document.getElementById("batchupdatediv").style.display = "none";
+	if(document.getElementById("batchupdatediv")) document.getElementById("batchupdatediv").style.display = "none";
 	toggle("querydiv");
 }
 

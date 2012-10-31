@@ -8,7 +8,8 @@ class OccurrenceIndividualManager {
 	private $occId;
     private $collId;
     private $dbpk;
-	private $occArr = Array();
+	private $occArr = array();
+	private $metadataArr = array();
 
  	public function __construct($occid){
  		$this->occId = $occid;
@@ -34,6 +35,20 @@ class OccurrenceIndividualManager {
 	public function setDbpk($pk){
 		$this->dbpk = $pk;
 	}
+	
+	private function setMetadata(){
+    	$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
+    		'publicedits, rights, rightsholder, accessrights '.
+			'FROM omcollections WHERE collid = '.$this->collId;
+		//echo '<div>SQL: '.$sql.'</div>';
+		$rs = $this->conn->query($sql);
+		$this->metadataArr = $rs->fetch_assoc();
+		$rs->free();
+	}
+	
+	public function getMetadata(){
+		return $this->metadataArr;
+	}
 
     public function getOccData($fieldKey = ""){
 		if(!$this->occArr) $this->setOccArr();
@@ -47,24 +62,23 @@ class OccurrenceIndividualManager {
     }
 
 	private function setOccArr(){
-    	$sql = 'SELECT o.occid, c.collid, c.institutioncode, o.institutioncode AS secondaryinstcode, c.collectioncode, '.
-    		'o.collectioncode AS secondarycollcode, c.collectionname, c.homepage, c.individualurl, c.contact, c.email, c.icon, c.publicedits, '.
-    		'o.catalognumber, o.occurrenceremarks, o.tidinterpreted, o.family, o.sciname, '.
-    		'o.scientificnameauthorship, o.identificationqualifier, o.identificationremarks, o.identificationreferences, '.
-			'o.identifiedby, dateidentified, o.recordedby, o.associatedcollectors, o.recordnumber, '.
-			'DATE_FORMAT(o.eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
-    		'o.verbatimeventdate, o.country, o.stateprovince, o.county, o.locality, '.
-    		'o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.localitysecurity, o.localitysecurityreason, '.
-			'o.decimallatitude, o.decimallongitude, o.geodeticdatum, o.coordinateuncertaintyinmeters, o.verbatimcoordinates, '.
-			'o.georeferenceremarks, verbatimattributes, '.
-			'o.typestatus, o.dbpk, o.habitat, o.substrate, o.associatedtaxa, o.reproductivecondition, o.cultivationstatus, o.establishmentmeans, '.
-			'o.ownerinstitutioncode, o.othercatalognumbers, o.disposition, o.modified, o.observeruid, c.rights, c.rightsholder, c.accessrights '.
-			'FROM omcollections AS c INNER JOIN omoccurrences o ON c.CollID = o.CollID ';
+    	$sql = 'SELECT occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
+    		'catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
+    		'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
+			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
+			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
+    		'verbatimeventdate, country, stateprovince, county, locality, '.
+    		'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
+			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
+			'georeferenceremarks, verbatimattributes, '.
+			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid '.
+			'FROM omoccurrences ';
 		if($this->occId){
-			$sql .= 'WHERE (o.occid = '.$this->occId.')';
+			$sql .= 'WHERE (occid = '.$this->occId.')';
 		}
 		elseif($this->collId && $this->dbpk){
-			$sql .= 'WHERE (o.collid = '.$this->collId.') AND (o.dbpk = "'.$this->dbpk.'")';
+			$sql .= 'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$this->dbpk.'")';
 		}
 		else{
 			return 'ERROR: Collection acronym was null or empty';
@@ -74,19 +88,26 @@ class OccurrenceIndividualManager {
 		$result = $this->conn->query($sql);
 		if(!$result) return 'ERROR: unable to return record data';
 		$this->occArr = $result->fetch_assoc();
-		if(!$this->occId) $this->occId = $this->occArr['occid'];
+		if(!$this->occId){ 
+			$this->occId = $this->occArr['occid'];
+		}
+		if(!$this->collId){
+			$this->collId = $this->occArr['collid'];
+		}
+		$this->setMetadata();
+		
 		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] == $this->occArr['institutioncode']){
 			$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 			'FROM omcollsecondary '.
 			'WHERE (collid = '.$this->occArr['collid'].')';
 			$rsSec = $this->conn->query($sqlSec);
 			if($r = $rsSec->fetch_object()){
-				$this->occArr['collectionname'] = $r->collectionname;
-				$this->occArr['homepage'] = $r->homepage;
-				$this->occArr['individualurl'] = $r->individualurl;
-				$this->occArr['contact'] = $r->contact;
-				$this->occArr['email'] = $r->email;
-				$this->occArr['icon'] = $r->icon;
+				$this->metadataArr['collectionname'] = $r->collectionname;
+				$this->metadataArr['homepage'] = $r->homepage;
+				$this->metadataArr['individualurl'] = $r->individualurl;
+				$this->metadataArr['contact'] = $r->contact;
+				$this->metadataArr['email'] = $r->email;
+				$this->metadataArr['icon'] = $r->icon;
 			}
 			$rsSec->close();
 		}
@@ -186,8 +207,10 @@ class OccurrenceIndividualManager {
 		if(array_key_exists("ClAdmin",$uRights)){
 			$sqlWhere .= "OR clid IN(".implode(",",$uRights["ClAdmin"]).") ";
 		}
+		if(!$sqlWhere) return $returnArr;
 		$sql = 'SELECT name, clid '.
-			'FROM fmchecklists '.substr($sqlWhere,2).' ORDER BY Name';
+			'FROM fmchecklists WHERE '.substr($sqlWhere,2).' ORDER BY Name';
+		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$returnArr[$row->clid] = $row->name;

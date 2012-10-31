@@ -15,6 +15,7 @@ $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
 $autoPStatus = array_key_exists('autoprocessingstatus',$_POST)?$_POST['autoprocessingstatus']:'';
 $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
+$crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 if(!$action && array_key_exists('gotonew',$_REQUEST)){
 	if(array_key_exists('carryloc',$_REQUEST)){
@@ -34,6 +35,11 @@ elseif(strpos($action,'Image')){
 }
 else{
 	$occManager = new OccurrenceEditorManager();
+}
+
+if($crowdSourceMode){
+	$occManager->setCrowdSourceMode(1);
+	if(!$autoPStatus) $autoPStatus = 'pending review';
 }
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
@@ -80,6 +86,24 @@ if($symbUid){
 	}
 	$retainCurrentRec = 0;
 	$resetCnt = 0;
+	if($isEditor || $crowdSourceMode){
+		if($action == "Save Edits"){
+			$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
+		}
+		elseif($action == 'Save OCR'){
+			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
+			if(is_numeric($statusStr)){
+				$newPrlid = $statusStr;
+				$statusStr = '';
+			}
+		}
+		elseif($action == 'Save OCR Edits'){
+			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
+		}
+		elseif($action == 'Delete OCR'){
+			$statusStr = $occManager->deleteTextFragment($_REQUEST['delprlid']);
+		}
+	}
 	if($isEditor){
 		if($action == 'Add Record'){
 			$statusStr = $occManager->addOccurrence($_REQUEST);
@@ -96,9 +120,6 @@ if($symbUid){
 					$occId = $occManager->getOccId();
 				}
 			}
-		}
-		elseif($action == "Save Edits"){
-			$statusStr = $occManager->editOccurrence($_POST,$isEditor);
 		}
 		elseif($action == 'Delete Occurrence'){
 			$statusStr = $occManager->deleteOccurrence($occId);
@@ -133,19 +154,6 @@ if($symbUid){
 		elseif($action == "Make Determination Current"){
 			$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
 			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
-		}
-		elseif($action == 'Save Text Fragment'){
-			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
-			if(is_numeric($statusStr)){
-				$newPrlid = $statusStr;
-				$statusStr = '';
-			}
-		}
-		elseif($action == 'Save Text Fragment Edits'){
-			$statusStr = $occManager->saveTextFragment($_REQUEST['editprlid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
-		}
-		elseif($action == 'Delete Text Fragment'){
-			$statusStr = $occManager->deleteTextFragment($_REQUEST['delprlid']);
 		}
 	}
 
@@ -232,8 +240,10 @@ if($symbUid){
 			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($qryCnt-1).');" title="Last Record">';
 			$navStr .= '&gt;|';
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
-			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-			$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" title="New Record">&gt;*</a>';
+			if(!$crowdSourceMode){
+				$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+				$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" title="New Record">&gt;*</a>';
+			}
 			$navStr .= '</b>';
 		}
 	}
@@ -308,14 +318,19 @@ if($symbUid){
 				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 				echo '</div>';
 			}
-			if($occId || ($isEditor && $collId)){
+			if($occId || $crowdSourceMode || ($isEditor && $collId)){
 				?>
 				<div style="text-align:right;width:810px;margin:-30px 10px 5px 0px;">
 					<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
 				</div>
 				<?php 
 				if(!$occArr && !$goToMode) $displayQuery = 1;
-				include 'includes/queryform.php';
+				if($crowdSourceMode){
+					include 'includes/queryformcrowdsource.php';
+				}
+				else{
+					include 'includes/queryform.php';
+				}
 				?>
 				<div style="width:820px;clear:both;">
 					<?php
@@ -335,15 +350,22 @@ if($symbUid){
 						<span class='navpath'>
 							<a href="../../index.php">Home</a> &gt;&gt;
 							<?php
-							if(!$isGenObs || $isAdmin){ 
+							if($crowdSourceMode){
 								?>
-								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+								<a href="crowdsourcecentral.php?">Crowd Sourcing Central</a> &gt;&gt;
 								<?php
 							}
-							if($isGenObs){ 
-								?>
-								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
-								<?php
+							else{
+								if(!$isGenObs || $isAdmin){ 
+									?>
+									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+									<?php
+								}
+								if($isGenObs){ 
+									?>
+									<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+									<?php
+								}
 							}
 							?>
 							<b>Editor</b>
@@ -959,12 +981,19 @@ if($symbUid){
 															<option value='expert required' <?php echo ($pStatus=='expert required'?'SELECTED':''); ?>>
 																Expert Required
 															</option>
-															<option value='reviewed' <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
-																Reviewed
-															</option>
-															<option value='closed' <?php echo ($pStatus=='closed'?'SELECTED':''); ?>>
-																Closed
-															</option>
+															<?php
+															if($isEditor){
+																//Don't display these options is editor is crowd sourced 
+																?>
+																<option value='reviewed' <?php echo ($pStatus=='reviewed'?'SELECTED':''); ?>>
+																	Reviewed
+																</option>
+																<option value='closed' <?php echo ($pStatus=='closed'?'SELECTED':''); ?>>
+																	Closed
+																</option>
+																<?php 
+															}
+															?>
 														</select>
 													</div>
 													<div style="float:left;margin-left:20px;">
@@ -998,7 +1027,10 @@ if($symbUid){
 												<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 												<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
 												<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
-												<?php if($occId){ ?>
+												<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+												<?php 
+												if($occId){ 
+													?>
 													<div style="margin:15px 30px;float:left;">
 														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" /><br/>
 														Status Auto-Set:
@@ -1032,12 +1064,19 @@ if($symbUid){
 															<option value='expert required' <?php echo ($autoPStatus=='expert required'?'SELECTED':''); ?>>
 																Expert Required
 															</option>
-															<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
-																Reviewed
-															</option>
-															<option value='closed' <?php echo ($autoPStatus=='closed'?'SELECTED':''); ?>>
-																Closed
-															</option>
+															<?php
+															if($isEditor){
+																//Don't display these options is editor is crowd sourced 
+																?>
+																<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
+																	Reviewed
+																</option>
+																<option value='closed' <?php echo ($autoPStatus=='closed'?'SELECTED':''); ?>>
+																	Closed
+																</option>
+																<?php
+															} 
+															?>
 														</select><br/>
 														<input type="hidden" name="editedfields" value="" />
 														<?php 
@@ -1048,14 +1087,21 @@ if($symbUid){
 														}
 														?>
 													</div>
-													<div style="float:left;margin-left:200px;">
-														<fieldset style="padding:15px;background-color:lightyellow;">
-															<legend><b>Options</b></legend>
-															<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
-															<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
-														</fieldset>
-													</div>
-												<?php }else{ ?>
+													<?php
+													if(!$crowdSourceMode){ 
+														?>
+														<div style="float:left;margin-left:200px;">
+															<fieldset style="padding:15px;background-color:lightyellow;">
+																<legend><b>Options</b></legend>
+																<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+																<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
+															</fieldset>
+														</div>
+														<?php
+													} 
+												}
+												else{ 
+													?>
 													<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
 														<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" />
 														<input type="hidden" name="qrycnt" value="<?php echo $qryCnt?$qryCnt:''; ?>" />
@@ -1068,7 +1114,9 @@ if($symbUid){
 															<input type="radio" name="gotomode" value="0" <?php echo (!$goToMode?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)
 														</div>
 													</div>
-												<?php } ?>
+													<?php 
+												} 
+												?>
 											</div>
 											<div style="clear:both;">&nbsp;</div>
 										</form>

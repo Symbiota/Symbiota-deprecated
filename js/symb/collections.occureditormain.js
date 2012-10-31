@@ -26,7 +26,7 @@ $(document).ready(function() {
 			else{
 				return false;
 			}
-			statusObj = document.getElementById("statusdiv");
+			var statusObj = document.getElementById("statusdiv");
 			if(statusObj){
 				statusObj.style.display = "none";
 			}

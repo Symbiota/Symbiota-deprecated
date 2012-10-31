@@ -7,14 +7,17 @@ $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:100;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
+$crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
 $occManager = new OccurrenceEditorManager();
 
+if($crowdSourceMode) $occManager->setCrowdSourceMode(1);
+
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
 $displayQuery = 0;
 $isGenObs = 0;
-$collMap = Array();
+$collMap = array();
 $recArr = array();
 $headerMap = array('catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
@@ -150,7 +153,7 @@ if($symbUid){
 				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
 				echo '</div>';
 			}
-			if($isEditor && $collId){
+			if(($isEditor || $crowdSourceMode) && $collId){
 				?>
 				<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
 					<a href="#" title="Search / Filter" onclick="toggleSearch();return false;"><img src="../../images/find.png" style="width:14px;" /></a>
@@ -164,7 +167,12 @@ if($symbUid){
 				</div>
 				<?php 
 				if(!$recArr) $displayQuery = 1;
-				include 'includes/queryform.php';
+				if($crowdSourceMode){
+					include 'includes/queryformcrowdsource.php';
+				}
+				else{
+					include 'includes/queryform.php';
+				}
 				//Setup header map
 				if($recArr){
 					$headerArr = array();
@@ -178,10 +186,10 @@ if($symbUid){
 					if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
 						$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
 					}
-					if($qCustomField2 && !array_key_exists(strtolower($qCustomField2),$headerArr)){
+					if(isset($qCustomField2) && !array_key_exists(strtolower($qCustomField2),$headerArr)){
 						$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
 					}
-					if($qCustomField3 && !array_key_exists(strtolower($qCustomField3),$headerArr)){
+					if(isset($qCustomField3) && !array_key_exists(strtolower($qCustomField3),$headerArr)){
 						$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
 					}
 					$headerMap = array_intersect_key($headerMap, $headerArr);
@@ -254,15 +262,22 @@ if($symbUid){
 						<span class='navpath'>
 							<a href="../../index.php">Home</a> &gt;&gt;
 							<?php
-							if(!$isGenObs || $isAdmin){ 
+							if($crowdSourceMode){
 								?>
-								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+								<a href="crowdsourcecentral.php?">Crowd Sourcing Central</a> &gt;&gt;
 								<?php
 							}
-							if($isGenObs){ 
-								?>
-								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
-								<?php
+							else{
+								if(!$isGenObs || $isAdmin){ 
+									?>
+									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+									<?php
+								}
+								if($isGenObs){ 
+									?>
+									<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+									<?php
+								}
 							}
 							?>
 							<b>Occurrence Record Table View</b>
@@ -291,7 +306,7 @@ if($symbUid){
 							}							
 							echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 							echo '<td>';
-							echo '<a href="occurrenceeditor.php?occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
+							echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
 							echo $id;
 							echo '</a>';
 							echo '</td>'."\n";

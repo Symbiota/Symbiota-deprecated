@@ -12,7 +12,7 @@ class OccurrenceCrowdSource {
 	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-
+	
 	public function getTopScores(){
 		$retArr = array(); 
 		$sql = 'SELECT CONCAT_WS(u.firstname,u.lastname) as user, sum(q.points) AS toppoints '.
@@ -30,28 +30,29 @@ class OccurrenceCrowdSource {
 
 	public function getUserStats($symbUid){
 		$retArr = array();
-		$sql = 'SELECT CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
-			'q.reviewstatus, COUNT(q.occid) AS cnt, sum(q.points) AS points '.
+		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
+			'q.reviewstatus, IFNULL(COUNT(q.occid),0) AS cnt, IFNULL(SUM(q.points),0) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 			'INNER JOIN omcollections c ON csc.collid = c.collid '.
-			'GROUP BY q.reviewstatus,q.uidprocessor '.
-			'HAVING q.uidprocessor = '.$symbUid.' AND q.reviewstatus IN(5,10) '.
+			'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
+			'HAVING (q.uidprocessor = '.$symbUid.' OR q.uidprocessor IS NULL) '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$pPoints = 0;
 		$aPoints = 0;
 		$totalCnt = 0;
 		while($r = $rs->fetch_object()){
-			$rStat = $r->reviewstatus;
-			$retArr[$r->collname]['cnt'][$rStat] = $r->cnt;
-			$retArr[$r->collname]['points'][$rStat] = $r->points;
-			if($rPoints==10){
-				$pPoints += $r->points;
-			}
-			else{
+			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->collcode.')';
+			$retArr[$r->collid]['cnt'][$r->reviewstatus] = $r->cnt;
+			$retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
+			if($r->points==10){
 				$aPoints += $r->points;
 			}
-			$totalCnt += $r->cnt;
+			elseif($r->points==5){
+				$pPoints += $r->points;
+			}
+			if($r->reviewstatus > 0) $totalCnt += $r->cnt;
 		}
 		$retArr['ppoints'] = $pPoints;
 		$retArr['apoints'] = $aPoints;
@@ -120,21 +121,6 @@ class OccurrenceCrowdSource {
 			$retArr['name'] = $r->collectionname.' ('.$r->collcode.')';
 			$retArr['instr'] = $r->instructions;
 			$retArr['url'] = $r->trainingurl;
-		}
-		$rs->free();
-		return $retArr;
-	}
-
-	public function getQueueArr($collId){
-		$retArr = array();
-		$sql = 'SELECT o.occid,  '.
-			'csc.instructions, csc.trainingurl '.
-			'FROM omcrowdsourcequeue q INNER JOIN omoccurrences o ON q.occid = o.occid '.
-			'WHERE q.reviewstatus = 0 '.
-			'ORDER BY c.collectionname';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->collid] = $r->collectionname.' ('.$r->collcode.')';
 		}
 		$rs->free();
 		return $retArr;

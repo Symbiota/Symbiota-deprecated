@@ -13,6 +13,7 @@ class OccurrenceEditorManager {
 	private $occFieldArr = array();
 	private $sqlWhere;
 	private $qryArr = array();
+	private $crowdSourceMode = 0;
 	private $symbUid;
 
 	public function __construct(){
@@ -82,7 +83,11 @@ class OccurrenceEditorManager {
 	public function setSymbUid($id){
 		$this->symbUid = $id;
 	}
-	
+
+	public function setCrowdSourceMode($m){
+		$this->crowdSourceMode = $m;
+	}
+
 	public function setQueryVariables($overrideQry = ''){
 		global $clientRoot;
 		if($overrideQry){
@@ -99,6 +104,7 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_observeruid',$_POST) && $_POST['q_observeruid']) $this->qryArr['ouid'] = $_POST['q_observeruid'];
 			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
 			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
+			if(array_key_exists('q_ocrfrag',$_POST) && $_POST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_POST['q_ocrfrag']); 
 			if(array_key_exists('q_imgonly',$_POST) && $_POST['q_imgonly']) $this->qryArr['io'] = 1;
 			for($x=1;$x<4;$x++){
 				if(array_key_exists('q_customfield'.$x,$_POST) && $_POST['q_customfield'.$x]) $this->qryArr['cf'.$x] = $_POST['q_customfield'.$x];
@@ -120,130 +126,180 @@ class OccurrenceEditorManager {
 		$sqlWhere = '';
 		$sqlOrderBy = '';
 		if(array_key_exists('id',$this->qryArr)){
-			$iArr = explode(',',$this->qryArr['id']);
-			$iBetweenFrag = array();
-			$iInFrag = array();
-			$searchIsNum = false;
-			foreach($iArr as $v){
-				if($p = strpos($v,' - ')){
-					$term1 = trim(substr($v,0,$p));
-					$term2 = trim(substr($v,$p+3));
-					if(is_numeric($term1) && is_numeric($term2)){
-						$searchIsNum = true; 
-						$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
-						$iBetweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
+			$idTerm = $this->qryArr['id'];
+			if(strtolower($idTerm) == 'is null'){
+				$sqlWhere .= 'AND (o.catalognumber IS NULL) ';
+			}
+			else{
+				$isOccid = false;
+				if(substr($idTerm,0,5) == 'occid'){
+					$idTerm = trim(substr($idTerm,5));
+					$isOccid = true;
+				}
+				$iArr = explode(',',$this->qryArr['id']);
+				$iBetweenFrag = array();
+				$iInFrag = array();
+				$searchIsNum = false;
+				foreach($iArr as $v){
+					if($p = strpos($v,' - ')){
+						$term1 = trim(substr($v,0,$p));
+						$term2 = trim(substr($v,$p+3));
+						if(is_numeric($term1) && is_numeric($term2)){
+							$searchIsNum = true;
+							if($isOccid){
+								$iBetweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
+							}
+							else{
+								$iBetweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
+							} 
+						}
+						else{
+							$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
+							$iBetweenFrag[] = '('.$catTerm.')';
+						}
 					}
 					else{
-						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
-						$iBetweenFrag[] = '('.$catTerm.')';
+						$iInFrag[] = trim($v);
 					}
 				}
-				else{
-					$iInFrag[] = trim($v);
+				$iWhere = '';
+				if($iBetweenFrag){
+					$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
 				}
-			}
-			$iWhere = '';
-			if($iBetweenFrag){
-				$iWhere .= 'OR '.implode(' OR ',$iBetweenFrag);
+				if($iInFrag){
+					if($isOccid){
+						$iWhere .= 'OR (o.occid IN("'.implode('","',$iInFrag).'")) ';
+					}
+					else{
+						$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'")) ';
+					} 
+				}
 				if($searchIsNum){
-					$sqlOrderBy .= ',(o.catalogNumber+1)';
+					if($isOccid){
+						$sqlOrderBy .= ',(o.occid+1)';
+					}
+					else{
+						$sqlOrderBy .= ',(o.catalogNumber+1)';
+					}
 				}
 				else{
 					$sqlOrderBy .= ',o.catalogNumber';
 				}
+				$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 			}
-			if($iInFrag){
-				$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'") OR o.occid IN("'.implode('","',$iInFrag).'")) ';
-			}
-			$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
 		}
 		//otherCatalogNumbers
 		if(array_key_exists('ocn',$this->qryArr)){
-			$ocnIsNum = false;
-			$ocnArr = explode(',',$this->qryArr['ocn']);
-			$ocnBetweenFrag = array();
-			$ocnInFrag = array();
-			foreach($ocnArr as $v){
-				if(strpos('%',$v) !== false){
-					$ocnBetweenFrag[] = '(o.othercatalognumbers LIKE "'.$term1.'")';
-				}
-				elseif($p = strpos($v,' - ')){
-					$term1 = trim(substr($v,0,$p));
-					$term2 = trim(substr($v,$p+3));
-					if(is_numeric($term1) && is_numeric($term2)){
-						$ocnIsNum = true;
-						$ocnBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
+			if(strtolower($this->qryArr['ocn']) == 'is null'){
+				$sqlWhere .= 'AND (o.othercatalognumbers IS NULL) ';
+			}
+			else{
+				$ocnIsNum = false;
+				$ocnArr = explode(',',$this->qryArr['ocn']);
+				$ocnBetweenFrag = array();
+				$ocnInFrag = array();
+				foreach($ocnArr as $v){
+					if(strpos('%',$v) !== false){
+						$ocnBetweenFrag[] = '(o.othercatalognumbers LIKE "'.$term1.'")';
+					}
+					elseif($p = strpos($v,' - ')){
+						$term1 = trim(substr($v,0,$p));
+						$term2 = trim(substr($v,$p+3));
+						if(is_numeric($term1) && is_numeric($term2)){
+							$ocnIsNum = true;
+							$ocnBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
+						}
+						else{
+							$ocnTerm = 'o.othercatalognumbers BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $ocnTerm .= ' AND length(o.othercatalognumbers) = '.strlen($term2); 
+							$ocnBetweenFrag[] = '('.$ocnTerm.')';
+						}
 					}
 					else{
-						$ocnTerm = 'o.othercatalognumbers BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $ocnTerm .= ' AND length(o.othercatalognumbers) = '.strlen($term2); 
-						$ocnBetweenFrag[] = '('.$ocnTerm.')';
+						if(is_numeric($v)) $ocnIsNum = true;
+						$ocnInFrag[] = trim($v);
 					}
 				}
-				else{
-					if(is_numeric($v)) $ocnIsNum = true;
-					$ocnInFrag[] = trim($v);
+				$ocnWhere = '';
+				if($ocnBetweenFrag){
+					$ocnWhere .= 'OR '.implode(' OR ',$ocnBetweenFrag);
 				}
+				if($ocnInFrag){
+					$ocnWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$ocnInFrag).'")) ';
+				}
+				$sqlOrderBy .= ',(o.othercatalognumbers'.($ocnIsNum?'+1':'').')';
+				$sqlWhere .= 'AND ('.substr($ocnWhere,3).') ';
 			}
-			$ocnWhere = '';
-			if($ocnBetweenFrag){
-				$ocnWhere .= 'OR '.implode(' OR ',$ocnBetweenFrag);
-			}
-			if($ocnInFrag){
-				$ocnWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$ocnInFrag).'")) ';
-			}
-			$sqlOrderBy .= ',(o.othercatalognumbers'.($ocnIsNum?'+1':'').')';
-			$sqlWhere .= 'AND ('.substr($ocnWhere,3).') ';
 		}
 		//recordNumber: collector's number
 		$rnIsNum = false;
 		if(array_key_exists('rn',$this->qryArr)){
-			$rnArr = explode(',',$this->qryArr['rn']);
-			$rnBetweenFrag = array();
-			$rnInFrag = array();
-			foreach($rnArr as $v){
-				if($p = strpos($v,' - ')){
-					$term1 = trim(substr($v,0,$p));
-					$term2 = trim(substr($v,$p+3));
-					if(is_numeric($term1) && is_numeric($term2)){
-						$rnIsNum = true;
-						$rnBetweenFrag[] = '(o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
-					}
-					else{
-						$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
-						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
-						$rnBetweenFrag[] = '('.$catTerm.')';
-					}
-				}
-				else{
-					$rnInFrag[] = trim($v);
-				}
-			}
-			$rnWhere = '';
-			if($rnBetweenFrag){
-				$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
-			}
-			if($rnInFrag){
-				$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
-			}
-			$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
-		}
-		if(array_key_exists('rb',$this->qryArr)){
-			$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
-			$sqlOrderBy .= ',(o.recordnumber+1)';
-		}
-		if(array_key_exists('ed',$this->qryArr)){
-			if($p = strpos($this->qryArr['ed'],' - ')){
-				$sqlWhere .= 'AND (o.eventdate BETWEEN "'.substr($this->qryArr['ed'],0,$p).'" AND "'.substr($this->qryArr['ed'],$p+3).'") ';
+			if(strtolower($this->qryArr['rn']) == 'is null'){
+				$sqlWhere .= 'AND (o.recordnumber IS NULL) ';
 			}
 			else{
-				$sqlWhere .= 'AND (o.eventdate = "'.$this->qryArr['ed'].'") ';
+				$rnArr = explode(',',$this->qryArr['rn']);
+				$rnBetweenFrag = array();
+				$rnInFrag = array();
+				foreach($rnArr as $v){
+					if($p = strpos($v,' - ')){
+						$term1 = trim(substr($v,0,$p));
+						$term2 = trim(substr($v,$p+3));
+						if(is_numeric($term1) && is_numeric($term2)){
+							$rnIsNum = true;
+							$rnBetweenFrag[] = '(o.recordnumber BETWEEN '.$term1.' AND '.$term2.')';
+						}
+						else{
+							$catTerm = 'o.recordnumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+							if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.recordnumber) = '.strlen($term2); 
+							$rnBetweenFrag[] = '('.$catTerm.')';
+						}
+					}
+					else{
+						$rnInFrag[] = trim($v);
+					}
+				}
+				$rnWhere = '';
+				if($rnBetweenFrag){
+					$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
+				}
+				if($rnInFrag){
+					$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
+				}
+				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
-			$sqlOrderBy .= ',o.eventdate';
+		}
+		if(array_key_exists('rb',$this->qryArr)){
+			if(strtolower($this->qryArr['rb']) == 'is null'){
+				$sqlWhere .= 'AND (o.recordedby IS NULL) ';
+			}
+			else{
+				$sqlWhere .= 'AND (o.recordedby LIKE "'.$this->qryArr['rb'].'%") ';
+				$sqlOrderBy .= ',(o.recordnumber+1)';
+			}
+		}
+		if(array_key_exists('ed',$this->qryArr)){
+			if(strtolower($this->qryArr['ed']) == 'is null'){
+				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
+			}
+			else{
+				if($p = strpos($this->qryArr['ed'],' - ')){
+					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.substr($this->qryArr['ed'],0,$p).'" AND "'.substr($this->qryArr['ed'],$p+3).'") ';
+				}
+				else{
+					$sqlWhere .= 'AND (o.eventdate = "'.$this->qryArr['ed'].'") ';
+				}
+				$sqlOrderBy .= ',o.eventdate';
+			}
 		}
 		if(array_key_exists('eb',$this->qryArr)){
-			$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
+			if(strtolower($this->qryArr['eb']) == 'is null'){
+				$sqlWhere .= 'AND (o.recordEnteredBy IS NULL) ';
+			}
+			else{
+				$sqlWhere .= 'AND (o.recordEnteredBy LIKE "'.$this->qryArr['eb'].'%") ';
+			}
 		}
 		if(array_key_exists('ouid',$this->qryArr)){
 			$sqlWhere .= 'AND (o.observeruid = '.$this->qryArr['ouid'].') ';
@@ -259,15 +315,24 @@ class OccurrenceEditorManager {
 			$sqlOrderBy .= ',o.datelastmodified';
 		}
 		if(array_key_exists('ps',$this->qryArr)){
-			$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
+			if(strtolower($this->qryArr['ps']) == 'is null'){
+				$sqlWhere .= 'AND (o.processingstatus IS NULL) ';
+			}
+			else{
+				$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
+			}
 		}
-		$customArr = array();
+		if(array_key_exists('ocr',$this->qryArr)){
+			//Used when OCR frag comes from set field within queryformcrowdsourcing
+			$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$this->qryArr['ocr'].'%") ';
+		}
 		for($x=1;$x<4;$x++){
 			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
 			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
 			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
 			if($cf && ($cv || $ct == 'IS NULL')){
 				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr')){
+					//Used when OCR frag comes from custom field search within basic query form 
 					if(strpos($cv,'%') !== false){
 						$sqlWhere .= 'AND (ocr.rawstr LIKE "'.$cv.'") ';
 					}
@@ -291,6 +356,7 @@ class OccurrenceEditorManager {
 				}
 			}
 		}
+		if($this->crowdSourceMode) $sqlWhere .= 'AND q.reviewstatus = 0 ';
 		if($sqlWhere){
 			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
 			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
@@ -318,6 +384,9 @@ class OccurrenceEditorManager {
 			}
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			if($this->crowdSourceMode){
+				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 			}
 			$sql .= $sqlWhere;
 			//echo '<div>'.$sql.'</div>';
@@ -354,6 +423,9 @@ class OccurrenceEditorManager {
 			}
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			if($this->crowdSourceMode){
+				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 			}
 			$sql .= $this->sqlWhere;
 		}
