@@ -51,7 +51,7 @@
 								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-								<input name="submitaction" type="submit" value="Save Text Fragment" />
+								<input name="submitaction" type="submit" value="Save OCR" />
 							</div>
 						</form>
 						<div style="font-weight:bold;float:right;">&lt;New&gt; of <?php echo count($fArr); ?></div>
@@ -86,7 +86,7 @@
 											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-											<input name="submitaction" type="submit" value="Save Text Fragment Edits" />
+											<input name="submitaction" type="submit" value="Save OCR Edits" />
 										</div>
 									</form>
 									<div style="float:right;font-weight:bold;margin-right:20px;">
@@ -104,7 +104,7 @@
 											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-											<input name="submitaction" type="submit" value="Delete Text Fragment" />
+											<input name="submitaction" type="submit" value="Delete OCR" />
 										</form>
 									</div>
 								</div>

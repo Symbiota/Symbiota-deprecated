@@ -13,6 +13,7 @@ if($collId) $indManager->setCollId($collId);
 if($pk) $indManager->setDbpk($pk);
 
 $occArr = $indManager->getOccData();
+$collMetadata = $indManager->getMetadata();
 
 $statusStr = '';
 
@@ -115,10 +116,10 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 		if($occArr){
 			?>
 			<div style="float:left;padding:15px;text-align:center;font-weight:bold;width:60px;">
-				<img border='1' height='50' width='50' src='<?php echo (substr($occArr["icon"],0,6)=='images'?'../../':'').$occArr['icon']; ?>'/><br/>
+				<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
 				<?php 
-				echo $occArr['institutioncode'];
-				if($occArr['collectioncode']) echo ':'.$occArr['collectioncode'];
+				echo $collMetadata['institutioncode'];
+				if($collMetadata['collectioncode']) echo ':'.$collMetadata['collectioncode'];
 				if($occArr['secondaryinstcode']){
 					echo '<br/>';
 					echo $occArr['secondaryinstcode'];
@@ -128,7 +129,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 			</div>
 			<div style="float:left;padding:25px;width:450px;">
 				<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
-					<?php echo $occArr['collectionname']; ?>
+					<?php echo $collMetadata['collectionname']; ?>
 				</span>
 			</div>
 			<div style="clear:both;">
@@ -464,32 +465,32 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				?>
 			</div>
 			<?php 
-			if($occArr['individualurl']){
+			if($collMetadata['individualurl']){
 				$indUrl = '';
-				if(strpos($occArr['individualurl'],'--DBPK--') && $occArr['dbpk']){
-					$indUrl = str_replace('--DBPK--',$occArr['dbpk'],$occArr['individualurl']);
+				if(strpos($collMetadata['individualurl'],'--DBPK--') && $occArr['dbpk']){
+					$indUrl = str_replace('--DBPK--',$occArr['dbpk'],$collMetadata['individualurl']);
 				}
-				elseif(strpos($occArr['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
-					$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$occArr['individualurl']);
+				elseif(strpos($collMetadata['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
+					$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$collMetadata['individualurl']);
 				}
 				if($indUrl){
 					echo '<div style="margin-top:10px;clear:both;">';
 					echo '<b>Source Display:</b> <a href="'.$indUrl.'">';
-					echo $occArr['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
+					echo $collMetadata['institutioncode'].' #'.($occArr['catalognumber']?$occArr['catalognumber']:$occArr['dbpk']);
 					echo '</a></div>';
 				}
 			}
 			$rightsStr = '';
-			if($occArr['rights']){
-				$rightsStr = $occArr['rights'];
-				if(substr($occArr['rights'],0,4) == 'http') $rightsStr = '<a href="'.$rightsStr.'">'.$rightsStr.'</a>';
+			if($collMetadata['rights']){
+				$rightsStr = $collMetadata['rights'];
+				if(substr($collMetadata['rights'],0,4) == 'http') $rightsStr = '<a href="'.$rightsStr.'">'.$rightsStr.'</a>';
 				$rightsStr = '<div style="margin-top:2px;"><b>Usage Rights:</b> '.$rightsStr.'</div>';
 			}
-			if($occArr['rightsholder']){
-				$rightsStr .= '<div style="margin-top:2px;"><b>Rights Holder:</b> '.$occArr['rightsholder'].'</div>';
+			if($collMetadata['rightsholder']){
+				$rightsStr .= '<div style="margin-top:2px;"><b>Rights Holder:</b> '.$collMetadata['rightsholder'].'</div>';
 			}
-			if($occArr['accessrights']){
-				$rightsStr .= '<div style="margin-top:2px;"><b>Access Rights:</b> '.$occArr['accessrights'].'</div>';
+			if($collMetadata['accessrights']){
+				$rightsStr .= '<div style="margin-top:2px;"><b>Access Rights:</b> '.$collMetadata['accessrights'].'</div>';
 			}
 			?>
 			<div style="margin:5px 0px 5px 0px;">
@@ -510,8 +511,8 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
 				$emailRef = 'subject='.$emailSubject.'&cc='.$adminEmail.'&body='.$emailBody;
 				?>
-				<a href="mailto:<?php echo $occArr['email'].'?'.$emailRef; ?>">
-					<?php echo $occArr['contact'].' ('.$occArr['email'].')'; ?>
+				<a href="mailto:<?php echo $collMetadata['email'].'?'.$emailRef; ?>">
+					<?php echo $collMetadata['contact'].' ('.$collMetadata['email'].')'; ?>
 				</a>
 			</div>
 			<?php 
@@ -532,7 +533,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					<?php 
 				}
 			}
-			if($displayLocality){
+			if($isEditor || $collMetadata['publicedits']){
 				?>
 				<fieldset style="margin:10px 0px;padding:10px;">
 					<legend><b>User Input</b></legend>
@@ -540,14 +541,18 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					if($symbUid){
 						?>
 						<ul>
-							<?php if($isEditor || $occArr['publicedits'] !== 0){ ?>
-							<li>
-								Do you see an obvious error? If so, errors can fixed using the  
-								<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
-									Occurrence Editor.
-								</a>
-							</li>
-							<?php } ?>
+							<?php 
+							if($isEditor || ($displayLocality && $collMetadata['publicedits'])){ 
+								?>
+								<li>
+									Do you see an obvious error? If so, errors can fixed using the  
+									<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
+										Occurrence Editor.
+									</a>
+								</li>
+								<?php 
+							} 
+							?>
 							<div style="display:none;">
 								<li>
 									<a href="#" onclick="toggle('commentform');return false;">
@@ -600,7 +605,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 	    					<legend>Voucher Assignment:</legend>
 							<?php
 				    		if($occArr['tidinterpreted']){
-								if($clArr = $indManager->getChecklists($paramsArr)){
+								if($clArr = $indManager->getChecklists($userRights)){
 									?>
 									<form action="../../checklists/clsppeditor.php" onsubmit="return verifyVoucherForm(this);">
 										<div style='margin:5px 0px 0px 10px;'>

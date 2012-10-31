@@ -17,7 +17,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	}
 
 	public function getDetMap($identBy, $dateIdent, $sciName){
-		if(!$this->detMap && $this->occId){
+		if(!$this->detMap && $this->occid){
 			$this->setDeterminations($identBy, $dateIdent, $sciName);
 		}
 		return $this->detMap;
@@ -27,7 +27,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
 			"identificationQualifier, identificationReferences, identificationRemarks, sortsequence ".
 			"FROM omoccurdeterminations ".
-			"WHERE (occid = ".$this->occId.") ORDER BY sortsequence";
+			"WHERE (occid = ".$this->occid.") ORDER BY sortsequence";
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -160,7 +160,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, '.
 			'IFNULL(dateidentified,"assumed to be collection date") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-			'FROM omoccurrences WHERE (occid = '.$this->occId.')';
+			'FROM omoccurrences WHERE (occid = '.$this->occid.')';
 		$this->conn->query($sqlInsert);
 		//echo "<div>".$sqlInsert."</div>";
 		//Update omoccurrences to reflect this determination
@@ -190,7 +190,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		
 		if($remapImages){
 			if($tid){
-				$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occId.')';
+				$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occid.')';
 				//echo $sql;
 				$this->conn->query($sql);
 			}

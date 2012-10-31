@@ -1,16 +1,19 @@
 function toggleImageTd(){
 	toggle("imgprocondiv");
 	toggle("imgprocoffdiv");
-	if(document.getElementById("imgtd").style.display == "none"){
-		document.getElementById("imgtd").style.display = "block";
-		initImageTool("activeimg-1");
-		//Set cookie to tag td as open
-        document.cookie = "symbimgtd=open";
-	}
-	else{
-		document.getElementById("imgtd").style.display = "none";
-		//Set cookie to tag td closed
-        document.cookie = "symbimgtd=close";
+	var imgTdObj = document.getElementById("imgtd");
+	if(imgTdObj){
+		if(document.getElementById("imgtd").style.display == "none"){
+			document.getElementById("imgtd").style.display = "block";
+			initImageTool("activeimg-1");
+			//Set cookie to tag td as open
+	        document.cookie = "symbimgtd=open";
+		}
+		else{
+			document.getElementById("imgtd").style.display = "none";
+			//Set cookie to tag td closed
+	        document.cookie = "symbimgtd=close";
+		}
 	}
 }
 

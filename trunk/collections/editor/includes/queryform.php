@@ -123,14 +123,20 @@ if($qryArr){
 				</select>
 			</div>
 			<?php 
-			$advFieldArr = array('family','sciname','identifiedBy','identificationReferences','identificationRemarks','identificationQualifier',
-				'typeStatus','associatedCollectors','verbatimEventDate','habitat','substrate','occurrenceRemarks','associatedTaxa',
-				'verbatimAttributes','reproductiveCondition','establishmentMeans','lifeStage','sex','individualCount','country',
-				'stateProvince','county','municipality','locality','decimalLatitude','decimalLongitude','geodeticDatum',
-				'coordinateUncertaintyInMeters','verbatimCoordinates','georeferencedBy','georeferenceProtocol',
-				'georeferenceSources','georeferenceVerificationStatus','georeferenceRemarks','minimumElevationInMeters',
-				'maximumElevationInMeters','verbatimElevation','disposition','ocrFragment');
-			sort($advFieldArr);
+			$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By',
+				'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks',
+				'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status','associatedCollectors'=>'Associated Collectors',
+				'verbatimEventDate'=>'Verbatim Event Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
+				'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
+				'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','individualCount'=>'Individual Count',
+				'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
+				'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
+				'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates','georeferencedBy'=>'Georeferenced By',
+				'georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
+				'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
+				'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
+				'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment');
+			//sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
 				Custom Field 1: 
@@ -138,8 +144,8 @@ if($qryArr){
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
-					foreach($advFieldArr as $v){
-						echo '<option '.($v==$qCustomField1?'SELECTED':'').'>'.$v.'</option>';
+					foreach($advFieldArr as $k => $v){
+						echo '<option value="'.$k.'" '.($k==$qCustomField1?'SELECTED':'').'>'.$v.'</option>';
 					}
 					?>
 				</select>
@@ -159,8 +165,8 @@ if($qryArr){
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
-					foreach($advFieldArr as $v){
-						echo '<option '.($v==$qCustomField2?'SELECTED':'').'>'.$v.'</option>';
+					foreach($advFieldArr as $k => $v){
+						echo '<option value="'.$k.'" '.($k==$qCustomField2?'SELECTED':'').'>'.$v.'</option>';
 					}
 					?>
 				</select>
@@ -180,8 +186,8 @@ if($qryArr){
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
 					<?php 
-					foreach($advFieldArr as $v){
-						echo '<option '.($v==$qCustomField3?'SELECTED':'').'>'.$v.'</option>';
+					foreach($advFieldArr as $k => $v){
+						echo '<option value="'.$k.'" '.($k==$qCustomField3?'SELECTED':'').'>'.$v.'</option>';
 					}
 					?>
 				</select>
@@ -198,7 +204,7 @@ if($qryArr){
 			if($qRecordNumber) $qryStr .= '&recordnumber='.$qRecordNumber;
 			if($qEventDate) $qryStr .= '&eventdate='.$qEventDate;
 			if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
-			if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
+			if($qOtherCatalogNumbers) $qryStr .= '&othercatalognumbers='.$qOtherCatalogNumbers;
 			if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
 			if($qObserverUid) $qryStr .= '&observeruid='.$qObserverUid;
 			if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
