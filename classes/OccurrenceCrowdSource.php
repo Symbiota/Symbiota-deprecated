@@ -15,7 +15,7 @@ class OccurrenceCrowdSource {
 	
 	public function getTopScores(){
 		$retArr = array(); 
-		$sql = 'SELECT CONCAT_WS(u.firstname,u.lastname) as user, sum(q.points) AS toppoints '.
+		$sql = 'SELECT CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
 			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid '.
 			'GROUP BY firstname,u.lastname '.
 			'ORDER BY sum(q.points) DESC '.
