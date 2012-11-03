@@ -96,7 +96,7 @@ class OccurrenceIndividualManager {
 		}
 		$this->setMetadata();
 		
-		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] == $this->metadataArr['institutioncode']){
+		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
 			$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 			'FROM omcollsecondary '.
 			'WHERE (collid = '.$this->occArr['collid'].')';
