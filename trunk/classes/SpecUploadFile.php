@@ -146,7 +146,7 @@ class SpecUploadFile extends SpecUploadManager{
 			$recordArr = fgetcsv($fHandler,0,$this->delimiter);
     	}
     	else{
-	    	$record = fgets($fh);
+	    	$record = fgets($fHandler);
     		$recordArr = explode($this->delimiter,$record);
     	}
     	return $recordArr;

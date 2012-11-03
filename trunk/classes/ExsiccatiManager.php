@@ -13,29 +13,53 @@ class ExsiccatiManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getTitleArr($ometid = 0, $mode = 0){
+	public function getTitleObj($ometid){
 		$retArr = array();
-		$sql = '';
 		if($ometid){
 			//Display full list
 			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
 				'FROM omexsiccatititles et '.
 				'WHERE ometid = '.$ometid;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr['title'] = $r->title;
+					$retArr['abbreviation'] = $r->abbreviation;
+					$retArr['editor'] = $r->editor;
+					$retArr['exsrange'] = $r->exsrange;
+					$retArr['source'] = $r->source;
+					$retArr['notes'] = $r->notes;
+				}
+				$rs->close();
+			}
 		}
-		elseif($mode){
-			//Display full list
-			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
-				'FROM omexsiccatititles et '.
-				'ORDER BY et.title';
-		}
-		else{
-			//Display only exsiccati that have linked specimens
+		return $retArr;
+	}
+
+	public function getTitleArr($searchTerm, $specimenOnly, $imagesOnly){ 
+		$retArr = array();
+		$sql = '';
+		if($imagesOnly){
 			$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
 				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
 				'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				'INNER JOIN omoccurrences o ON ol.occid = o.occid '.
-				'ORDER BY et.title';
+				'INNER JOIN images i ON ol.occid = i.occid ';
 		}
+		elseif($specimenOnly){
+			//Display only exsiccati that have linked specimens
+			$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
+				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+				'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
+		}
+		else{
+			//Display full list
+			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
+				'FROM omexsiccatititles et ';
+		}
+		if($searchTerm){
+			$sql .= 'WHERE et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%"';
+		}
+		$sql .= 'ORDER BY et.title';
+		
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->ometid]['title'] = $r->title;
@@ -50,15 +74,16 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 
-	public function getExsNumberArr($ometid){
+	public function getExsNumberArr($ometid,$imagesOnly=0){
 		$retArr = array();
 		if($ometid){
 			//Grab all numbers for that exsiccati title; only show number that have occid links
 			$sql = 'SELECT DISTINCT en.omenid, en.exsnumber, en.notes, '.
 				'CONCAT_WS(" ",o.recordedby, CONCAT("(",IFNULL(o.recordnumber,"s.n."),")"),o.eventDate) as collector '.
 				'FROM omexsiccatinumbers en INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				'INNER JOIN omoccurrences o ON ol.occid = o.occid '.
-				'WHERE en.ometid = '.$ometid.' ORDER BY en.exsnumber+1,en.exsnumber';
+				'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+			if($imagesOnly) $sql .= 'INNER JOIN images i ON o.occid = i.occid '; 
+			$sql .= 'WHERE en.ometid = '.$ometid.' ORDER BY en.exsnumber+1,en.exsnumber';
 			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
@@ -78,12 +103,13 @@ class ExsiccatiManager {
 		$retArr = array();
 		if($omenid){
 			//Grab info for just that exsiccati number with the title info
-			$sql = 'SELECT et.title, et.abbreviation, et.editor, et.exsrange, en.exsnumber, en.notes '.
+			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, en.exsnumber, en.notes '.
 				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '. 
 				'WHERE en.omenid = '.$omenid;
 			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				if($r = $rs->fetch_object()){
+					$retArr['ometid'] = $r->ometid;
 					$retArr['title'] = $r->title;
 					$retArr['abbreviation'] = $r->abbreviation;
 					$retArr['editor'] = $r->editor;
@@ -134,8 +160,9 @@ class ExsiccatiManager {
 	public function addTitle($pArr){
 		$sql = 'INSERT INTO omexsiccatititles(title, abbreviation, editor, exsrange, source, notes) '.
 			'VALUES("'.$this->cleanStr($pArr['title']).'","'.$this->cleanStr($pArr['abbreviation']).'","'.
-			$this->cleanStr($pArr['editor']).'","'.$this->cleanStr($pArr['exsrange']).
-			'","'.$this->cleanStr($pArr['source']).'","'.$this->cleanStr($pArr['notes']).'")';
+			$this->cleanStr($pArr['editor']).'",'.($pArr['exsrange']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').','.
+			($pArr['source']?'"'.$this->cleanStr($pArr['source']).'"':'NULL').','.
+			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
 		//echo $sql;
 		$this->conn->query($sql);
 	}
@@ -143,29 +170,38 @@ class ExsiccatiManager {
 	public function editTitle($pArr){
 		$sql = 'UPDATE omexsiccatititles '.
 			'SET title = "'.$this->cleanStr($pArr['title']).'", abbreviation = "'.$this->cleanStr($pArr['abbreviation']).
-			'", editor = "'.$this->cleanStr($pArr['editor']).'", exsrange = "'.$this->cleanStr($pArr['exsrange']).
-			'", source = "'.$this->cleanStr($pArr['source']).'", notes = "'.$this->cleanStr($pArr['notes']).'" '.
+			'", editor = "'.$this->cleanStr($pArr['editor']).'"'.
+			', exsrange = '.($pArr['exsrange']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').
+			', source = '.($pArr['source']?'"'.$this->cleanStr($pArr['source']).'"':'NULL').
+			', notes = '.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').' '.
 			'WHERE (ometid = '.$pArr['ometid'].')';
+		//echo $sql;
 		$this->conn->query($sql);
 	}
 
 	public function deleteTitle($ometid){
+		$retStr = '';
 		if($ometid && is_numeric($ometid)){
 			$sql = 'DELETE FROM omexsiccatititles WHERE (ometid = '.$ometid.')';
-			$this->conn->query($sql);
+			//echo $sql;
+			if(!$this->conn->query($sql)) $retStr = 'DELETE Failed: possibly due to existing exsiccati numbers, which first have to be deleted.';
 		}
+		return $retStr;
 	}
 
 	public function addNumber($pArr){
 		$sql = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber,notes) '.
-			'VALUES('.$pArr['ometid'].',"'.$this->cleanStr($pArr['exsnumber']).'","'.$this->cleanStr($pArr['notes']).'")';
+			'VALUES('.$pArr['ometid'].',"'.$this->cleanStr($pArr['exsnumber']).'",'.
+			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
+		echo $sql;
 		$this->conn->query($sql);
 	}
 
 	public function editNumber($pArr){
 		if($pArr['omenid'] && is_numeric($pArr['omenid'])){
 			$sql = 'UPDATE omexsiccatinumbers '.
-				'SET exsnumber = "'.$this->cleanStr($pArr['exsnumber']).'",notes = "'.$this->cleanStr($pArr['notes']).'" '.
+				'SET exsnumber = "'.$this->cleanStr($pArr['exsnumber']).'",'.
+				'notes = '.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').' '.
 				'WHERE (omenid = '.$this->cleanStr($pArr['omenid']).')';
 			$this->conn->query($sql);
 		}
@@ -179,9 +215,11 @@ class ExsiccatiManager {
 	}
 
 	public function addOccLink($pArr){
-		if($pArr['omenid'] && $pArr['occid'] && is_numeric($pArr['omenid']) && is_numeric($pArr['occid']) && is_numeric($pArr['ranking'])){
+		$ranking = 10;
+		if($pArr['ranking'] && is_numeric($pArr['ranking'])) $ranking = $pArr['ranking'];
+		if($pArr['omenid'] && $pArr['occid'] && is_numeric($pArr['omenid']) && is_numeric($pArr['occid'])){
 			$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
-				'VALUES ('.$pArr['omenid'].','.$pArr['occid'].','.$pArr['ranking'].',"'.$this->cleanStr($pArr['notes']).'")';
+				'VALUES ('.$pArr['omenid'].','.$pArr['occid'].','.$ranking.','.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
 			$this->conn->query($sql);
 		}
 	}
@@ -195,9 +233,9 @@ class ExsiccatiManager {
 		}
 	}
 
-	public function deleteOccLink($emenid, $occid){
-		if($emenid && $occid && is_numeric($emenid) && is_numeric($occid)){
-			$sql = 'DELETE FROM omexsiccatioccid WHERE (omenid = '.$omenid.') AND (occid = '.$occid.')';
+	public function deleteOccLink($omenid, $occid){
+		if($omenid && $occid && is_numeric($omenid) && is_numeric($occid)){
+			$sql = 'DELETE FROM omexsiccatiocclink WHERE (omenid = '.$omenid.') AND (occid = '.$occid.')';
 			$this->conn->query($sql);
 		}
 	}

@@ -136,7 +136,7 @@ class OccurrenceEditorManager {
 					$idTerm = trim(substr($idTerm,5));
 					$isOccid = true;
 				}
-				$iArr = explode(',',$this->qryArr['id']);
+				$iArr = explode(',',$idTerm);
 				$iBetweenFrag = array();
 				$iInFrag = array();
 				$searchIsNum = false;
