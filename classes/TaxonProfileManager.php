@@ -140,19 +140,21 @@ class TaxonProfileManager {
  	}
 
  	private function setChecklistInfo(){
-		$sql = "SELECT DISTINCT ctl.Habitat, ctl.Abundance, ctl.Notes ". 
-			"FROM fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid ".
-			"WHERE (ctl.tid = ".$this->tid.") AND (ctl.clid = ".$this->clid.") ";
-		//echo $sql;
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_object()){
-			$info = "";
-			if($row->Habitat) $info .= "; ".$row->Habitat;
-			if($row->Abundance) $info .= "; ".$row->Abundance;
-			if($row->Notes) $info .= "; ".$row->Notes;
-			$this->clInfo = substr($info,2);
-		}
-		$result->close();
+ 		if($this->tid && $this->clid){
+			$sql = "SELECT DISTINCT ctl.Habitat, ctl.Abundance, ctl.Notes ". 
+				"FROM fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid ".
+				"WHERE (ctl.tid = ".$this->tid.") AND (ctl.clid = ".$this->clid.") ";
+			//echo $sql;
+			$result = $this->con->query($sql);
+			if($row = $result->fetch_object()){
+				$info = "";
+				if($row->Habitat) $info .= "; ".$row->Habitat;
+				if($row->Abundance) $info .= "; ".$row->Abundance;
+				if($row->Notes) $info .= "; ".$row->Notes;
+				$this->clInfo = substr($info,2);
+			}
+			$result->close();
+ 		}
  	}
  	
  	public function getTid(){
