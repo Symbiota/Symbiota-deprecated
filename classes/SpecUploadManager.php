@@ -1614,13 +1614,13 @@ class SpecUploadManager{
  		$retStr = $inStr;
  		if($inStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "ISO-8859-1"){
+				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
 			elseif(strtolower($charset) == "iso-8859-1"){
-				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "UTF-8"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 				}

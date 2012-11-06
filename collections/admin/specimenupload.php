@@ -121,7 +121,7 @@ if($isEditable){
 				}
 				else{
 					var ext = fileName.split('.').pop();
-					if(ext != 'csv' && ext != 'CSV' && ext != 'zip' && ext != 'ZIP'){
+					if(ext != 'csv' && ext != 'CSV' && ext != 'zip' && ext != 'ZIP' && ext != 'txt' && ext != 'TXT' && ext != 'tab' && ext != 'tab'){
 						alert("File must be a valid comma separated text file (.csv) or a ZIP file (.zip)");
 						return false;
 					}

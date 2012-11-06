@@ -84,12 +84,15 @@ class SpecUploadFile extends SpecUploadManager{
 				$recMap = Array();
 				foreach($this->fieldMap as $symbField => $sMap){
 					$indexArr = array_keys($headerArr,$sMap['field']);
-					$valueStr = $recordArr[array_shift($indexArr)];
-					//If value is enclosed by quotes, remove quotes
-					if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
-						$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+					$index = array_shift($indexArr);
+					if(array_key_exists($index,$recordArr)){
+						$valueStr = $recordArr[$index];
+						//If value is enclosed by quotes, remove quotes
+						if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
+							$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+						}
+						$recMap[$symbField] = $valueStr;
 					}
-					$recMap[$symbField] = $valueStr;
 				}
 				$this->loadRecord($recMap);
 				unset($recMap);
@@ -146,8 +149,8 @@ class SpecUploadFile extends SpecUploadManager{
 			$recordArr = fgetcsv($fHandler,0,$this->delimiter);
     	}
     	else{
-	    	$record = fgets($fHandler);
-    		$recordArr = explode($this->delimiter,$record);
+			$record = fgets($fHandler);
+			if($record) $recordArr = explode($this->delimiter,$record);
     	}
     	return $recordArr;
     }
