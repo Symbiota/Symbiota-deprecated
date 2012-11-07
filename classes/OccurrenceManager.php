@@ -506,7 +506,11 @@ class OccurrenceManager{
 				"c.IndividualUrl, c.icon, c.colltype, c.Contact, c.email, c.SortSeq ".
 				"FROM omcollections c ";
 			if($catId){
-				$sql .= "INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid WHERE (ccl.ccpk = ".$catId.") ";
+				$sql .= 'INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid ';
+			}
+			$sql .= 'WHERE c.colltype <> "off" ';
+			if($catId){
+				 $sql .= 'AND (ccl.ccpk = '.$catId.') ';
 			}
 			$sql .= "ORDER BY c.SortSeq, c.CollectionName ";
 			//echo "<div>SQL: ".$sql."</div>";

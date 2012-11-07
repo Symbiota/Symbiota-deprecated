@@ -16,7 +16,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 		$(document).ready(function() {
 			$("#taxonname").autocomplete({ source: "rpc/getassocspp.php" },
-			{ minLength: 6, autoFocus: true, delay: 200 });
+			{ minLength: 4, autoFocus: true, delay: 200 });
 
 			$("#taxonname").focus();
 		});

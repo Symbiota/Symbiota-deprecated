@@ -66,7 +66,7 @@ $statusStr = '';
 				echo '<div style="margin:20px;"><table>'."\n";
 				echo '<tr><td>Record</td><td>Status</td><td>Points</td><td>Notes</td><td>Edit Date</td></tr>'."\n";
 				foreach($cArr as $occid => $c2Arr){
-					echo '<tr><td><a href="../individual.php?occid='.$occid.'">'.$occid.'</a></td>';
+					echo '<tr><td><a href="../individual/index.php?occid='.$occid.'">'.$occid.'</a></td>';
 					echo '<td>'.($c2Arr['rs']==5?'pending':'closed').'</td>';
 					echo '<td>'.$c2Arr['pts'].' </td><td>'.$c2Arr['n'].' </td><td>'.$c2Arr['ts'].' </td></tr>';
 				}

@@ -6,13 +6,11 @@
 	$str1 = '';$str2 = '';$str3 = '';
 	$strArr = explode(' ',$queryStr);
 	$strCnt = count($strArr);
-	if($strCnt == 2){
-		$str1 = $strArr[0];
+	$str1 = $strArr[0];
+	if($strCnt > 1){
 		$str2 = $strArr[1];
 	}
-	else if($strCnt > 2){
-		$str1 = $strArr[0];
-		$str2 = $strArr[1];
+	if($strCnt > 2){
 		$str3 = $strArr[2];
 	}
 	
@@ -20,14 +18,14 @@
 		$retArr = Array();
 		$sql = 'SELECT sciname '. 
 			'FROM taxa '.
-			'WHERE unitname1 LIKE "'.$str1.'%" AND unitname2 LIKE "'.$str2.'%" ';
+			'WHERE unitname1 LIKE "'.$str1.'%" ';
+		if($str2){
+			$sql .= 'AND unitname2 LIKE "'.$str2.'%" ';
+		}
 		if($str3){
 			$sql .= 'AND unitname3 LIKE "'.$str3.'%" ';
 		}
-		else{
-			//$sql .= 'AND rankid = 220 ';
-		}
-		$sql .= 'ORDER BY sciname LIMIT 10';
+		$sql .= 'AND rankid > 140 ORDER BY sciname LIMIT 10';
 		//echo $sql;
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {
