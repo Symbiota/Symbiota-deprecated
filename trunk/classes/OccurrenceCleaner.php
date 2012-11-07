@@ -57,14 +57,14 @@ class OccurrenceCleaner {
 			'o.verbatimElevation, o.disposition, o.modified, o.recordEnteredBy '. 
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '. 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
-			'WHERE o.collid = '.$this->collId.' ORDER BY o.catalognumber LIMIT 230';
+			'WHERE o.collid = '.$this->collId.' ORDER BY o.catalognumber LIMIT 530';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		$fieldArr = array();
 		while($r = $rs->fetch_assoc()){
 			$catalognumber = $r['catalognumber'];
-			if($recCnt > 200 && !array_key_exists($catalognumber,$retArr)) break; 
+			if($recCnt > 500 && !array_key_exists($catalognumber,$retArr)) break; 
 			$occid = $r['occid'];
 			foreach($r as $k =>$v){
 				if($recCnt == 1) $fieldArr[$k] = '';
