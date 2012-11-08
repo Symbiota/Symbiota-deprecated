@@ -584,8 +584,8 @@ if($collId) $collData = $collManager->getCollectionData();
 						</ul>
 					</div>
 				</div>
-				<div style='margin:20px 0px 20px 20px;width:200px;background-color:#FFFFCC;' class='fieldset'>
-					<div class='legend'><b>Extra Statistics</b></div>
+				<fieldset style='margin:20px;width:200px;background-color:#FFFFCC;'>
+					<legend><b>Extra Statistics</b></legend>
 					<div>
 						<a href='collprofiles.php?collid=<?php echo $collId;?>&sfl=1'>
 							Show Family Distribution
@@ -596,7 +596,7 @@ if($collId) $collData = $collManager->getCollectionData();
 							Show Geographic Distribution
 						</a>
 					</div>
-				</div>
+				</fieldset>
 				<?php
 				if($showFamilyList || $showGeographicList){
 					?>
@@ -622,6 +622,7 @@ if($collId) $collData = $collManager->getCollectionData();
 								?>
 							</b>
 						</legend>
+						<div style="margin:15px;">Click on the specimen record counts within the parenthesis to return the records for that term</div>
 						<ul>
 							<?php 
 							$distArr = array();
@@ -632,22 +633,26 @@ if($collId) $collData = $collManager->getCollectionData();
 								$distArr = $collManager->getGeographicCounts($countryDist,$stateDist);
 							}
 							foreach($distArr as $term => $cnt){
-								$percentage = round(100*$cnt/$collData["recordcnt"]);
 								echo '<li>';
+								$colTarget = 'county';
 								if($showGeographicList && !$stateDist){
 									echo '<a href="collprofiles.php?sgl=1&collid='.$collId.($countryDist?'&state=':'&country=').$term.'">';
 									echo $term;
 									echo '</a>';
+									$colTarget = 'country';
+									if($countryDist) $colTarget = 'state';
+									echo ' (<a href="../list.php?db[]='.$collId.'&reset=1&'.$colTarget.'='.$term.'" target="_blank">'.$cnt.'</a>)';
 								}
 								elseif($showFamilyList && !$familyDist){
 									//echo '<a href="collprofiles.php?sfl=1&collid='.$collId.'&family='.$term.'">';
 									echo $term;
 									//echo '</a>';
+									echo ' (<a href="../list.php?db[]='.$collId.'&type=1&reset=1&taxa='.$term.'" target="_blank">'.$cnt.'</a>)';
 								}
 								else{
 									echo $term;
+									echo ' (<a href="../list.php?db[]='.$collId.'&reset=1&'.$colTarget.'='.$term.'" target="_blank">'.$cnt.'</a>)';
 								}
-								echo ' ('.$cnt.($percentage > 10?', '.$percentage.'%':'').')';
 								echo '</li>';
 							}
 							?>

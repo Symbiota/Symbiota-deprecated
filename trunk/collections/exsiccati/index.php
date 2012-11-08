@@ -6,25 +6,27 @@ header("Content-Type: text/html; charset=".$charset);
 
 $ometId = array_key_exists('ometid',$_REQUEST)?$_REQUEST['ometid']:0;
 $omenId = array_key_exists('omenid',$_REQUEST)?$_REQUEST['omenid']:0;
+$occidToAdd = array_key_exists('occidtoadd',$_REQUEST)?$_REQUEST['occidtoadd']:0;
 $searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
 $specimenOnly = array_key_exists('specimenonly',$_POST)?$_REQUEST['specimenonly']:0;
+$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $imagesOnly = array_key_exists('imagesonly',$_REQUEST)?$_REQUEST['imagesonly']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
-if(!$formSubmit) $specimenOnly = 1;
+if(!$formSubmit && !$ometId) $specimenOnly = 1;
 
 $statusStr = '';
 $isEditor = 0;
-if($isAdmin){
+if($isAdmin || array_key_exists('CollAdmin',$userRights)){
 	$isEditor = 1;
 }
 
 $exsManager = new ExsiccatiManager();
 if($isEditor && $formSubmit){
 	if($formSubmit == 'Add Exsiccati Title'){
-		$exsManager->addTitle($_POST);
+		$exsManager->addTitle($_POST,$paramsArr['un']);
 	}
 	elseif($formSubmit == 'Save'){
-		$exsManager->editTitle($_POST);
+		$exsManager->editTitle($_POST,$paramsArr['un']);
 	}
 	elseif($formSubmit == 'Delete Exsiccati'){
 		$statusStr = $exsManager->deleteTitle($ometId);
@@ -84,6 +86,26 @@ if($isEditor && $formSubmit){
 			}
 		}
 
+		function toggleExsEditDiv(){
+			toggle('exseditdiv');
+			document.getElementById("numadddiv").style.display = "none";
+		}
+
+		function toggleNumAddDiv(){
+			toggle('numadddiv');
+			document.getElementById("exseditdiv").style.display = "none";
+		}
+
+		function toggleNumEditDiv(){
+			toggle('numeditdiv');
+			document.getElementById("occadddiv").style.display = "none";
+		}
+
+		function toggleOccAddDiv(){
+			toggle('occadddiv');
+			document.getElementById("numeditdiv").style.display = "none";
+		}
+
 		function verfifyExsAddForm(f){
 			if(f.title.value == ""){
 				alert("Title can't be empty");
@@ -117,19 +139,36 @@ if($isEditor && $formSubmit){
 		}
 
 		function verifyOccAddForm(f){
-			if(f.occid.value == ""){
-				alert("Occurrence ID can't be empty");
+			if(f.identifier.value == ""){
+				alert("Catalog Number can't be empty");
 				return false;
 			}
 			return true;
 		}
 
 		function verifyOccEditForm(f){
+			if(f.collid.options[0].selected == true || f.collid.options[1].selected){
+				alert("The Collection pulldown need to be selected");
+				return false;
+			}
 			if(f.occid.value == ""){
 				alert("Occurrences ID can't be empty");
 				return false;
 			}
 			return true;
+		}
+
+		function specimenOnlyChanged(cbObj){
+			var divObj = document.getElementById('qryextradiv');
+			var f = cbObj.form;
+			if(cbObj.checked == true){
+				divObj.style.display = "block";
+			}
+			else{
+				divObj.style.display = "none";
+				f.imagesonly.checked = false;
+				f.collid.options[0].selected = true;
+			}
 		}
 
 		function openIndPU(occId){
@@ -167,21 +206,36 @@ if($isEditor && $formSubmit){
 		}
 		if(!$ometId && !$omenId){
 			?>
-			<div id="cloptiondiv">
+			<div id="cloptiondiv" style="width:240px;">
 				<form name="optionform" action="index.php" method="post">
-					<fieldset>
+					<fieldset style="background-color:#FFD700;">
 					    <legend><b>Options</b></legend>
 				    	<div>
 				    		<b>Search:</b> 
 							<input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
 						</div>
 						<div title="including without linked specimen records">
-							<input type="checkbox" name="specimenonly" value="1" <?php echo ($specimenOnly?"CHECKED":"");?>/> 
-							Display only those w/ specimen links
+							<input type="checkbox" name="specimenonly" value="1" <?php echo ($specimenOnly?"CHECKED":"");?> onchange="specimenOnlyChanged(this)" /> 
+							Display only those w/ specimens
 						</div>
-						<div>
-						    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> /> 
-						    Display only those w/ images
+						<div id="qryextradiv" style="margin-left:15px;display:<?php echo ($specimenOnly?'block':'none'); ?>;" title="including without linked specimen records">
+							<div>
+								Limit to: 
+								<select name="collid" style="width:230px;">
+									<option value="">All Collections</option>
+									<option value="">-----------------------</option>
+									<?php 
+									$acroArr = $exsManager->getCollArr(1);
+									foreach($acroArr as $id => $collTitle){
+										echo '<option value="'.$id.'" '.($id==$collId?'SELECTED':'').'>'.$collTitle.'</option>';
+									}
+									?>
+								</select>
+							</div>
+							<div>
+							    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> /> 
+							    Display only those w/ images
+							</div>
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
 							<input name="formsubmit" type="submit" value="Rebuild List" />
@@ -198,25 +252,30 @@ if($isEditor && $formSubmit){
 				</div>
 				<div id="exsadddiv" style="display:none;">
 					<form name="exsaddform" action="index.php" method="post" onsubmit="return verfifyExsAddForm(this)">
-						<fieldset style="margin:10px;padding:15px;">
+						<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 							<legend><b>Add New Exsiccati</b></legend>
 							<div style="margin:2px;">
-								Title: <input name="title" type="text" value="" style="width:500px;" />
+								Title:<br/><input name="title" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:2px;">
-								Abbr: <input name="abbreviation" type="text" value="" style="width:500px;" />
+								Abbr:<br/><input name="abbreviation" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:2px;">
-								Editor: <input name="editor" type="text" value="" style="width:300px;" />
+								Editor:<br/><input name="editor" type="text" value="" style="width:300px;" />
 							</div>
 							<div style="margin:2px;">
-								Range: <input name="exsrange" type="text" value="" />
+								Number Range:<br/><input name="exsrange" type="text" value="" />
 							</div>
 							<div style="margin:2px;">
-								Source: <input name="source" type="text" value="" style="width:480px;" />
+								Date range:<br/>
+								<input name="startdate" type="text" value="" /> - 
+								<input name="enddate" type="text" value="" />
 							</div>
 							<div style="margin:2px;">
-								Notes: <input name="notes" type="text" value="" style="width:500px;" />
+								Source:<br/><input name="source" type="text" value="" style="width:480px;" />
+							</div>
+							<div style="margin:2px;">
+								Notes:<br/><input name="notes" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:10px;">
 								<input name="formsubmit" type="submit" value="Add Exsiccati Title" /> 
@@ -229,11 +288,11 @@ if($isEditor && $formSubmit){
 			?>
 			<ul>
 				<?php  
-				$titleArr = $exsManager->getTitleArr($searchTerm, $specimenOnly, $imagesOnly);
+				$titleArr = $exsManager->getTitleArr($searchTerm, $specimenOnly, $imagesOnly, $collId);
 				foreach($titleArr as $k => $tArr){
 					?>
 					<li>
-						<a href="index.php?ometid=<?php echo $k.'&imagesonly='.$imagesOnly; ?>">
+						<a href="index.php?ometid=<?php echo $k.'&specimenonly='.$specimenOnly.'&imagesonly='.$imagesOnly.'&collid='.$collId; ?>">
 							<?php echo $tArr['title'].', '.$tArr['editor']; ?>
 						</a>
 					</li>
@@ -251,10 +310,10 @@ if($isEditor && $formSubmit){
 				if($isEditor){
 					?>
 					<div style="float:right;">
-						<span style="cursor:pointer;" onclick="toggle('exseditdiv');" title="Edit Exsiccati">
+						<span style="cursor:pointer;" onclick="toggleExsEditDiv('exseditdiv');" title="Edit Exsiccati">
 							<img style="border:0px;" src="../../images/edit.png" />
 						</span>
-						<span style="cursor:pointer;" onclick="toggle('numadddiv');" title="Add Exsiccati Number">
+						<span style="cursor:pointer;" onclick="toggleNumAddDiv('numadddiv');" title="Add Exsiccati Number">
 							<img style="border:0px;" src="../../images/add.png" />
 						</span>
 					</div>
@@ -266,25 +325,30 @@ if($isEditor && $formSubmit){
 			</div>
 			<div id="exseditdiv" style="display:none;">
 				<form name="exseditform" action="index.php" method="post" onsubmit="return verifyExsEditForm(this);">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Edit Title</b></legend>
 						<div style="margin:2px;">
-							Title: <input name="title" type="text" value="<?php echo $exsArr['title']; ?>" style="width:500px;" />
+							Title:<br/><input name="title" type="text" value="<?php echo $exsArr['title']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:2px;">
-							Abbr: <input name="abbreviation" type="text" value="<?php echo $exsArr['abbreviation']; ?>" style="width:500px;" />
+							Abbr:<br/><input name="abbreviation" type="text" value="<?php echo $exsArr['abbreviation']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:2px;">
-							Editor: <input name="editor" type="text" value="<?php echo $exsArr['editor']; ?>" style="width:300px;" />
+							Editor:<br/><input name="editor" type="text" value="<?php echo $exsArr['editor']; ?>" style="width:300px;" />
 						</div>
 						<div style="margin:2px;">
-							Range: <input name="exsrange" type="text" value="<?php echo $exsArr['exsrange']; ?>" />
+							Number range:<br/><input name="exsrange" type="text" value="<?php echo $exsArr['exsrange']; ?>" />
 						</div>
 						<div style="margin:2px;">
-							Source: <input name="source" type="text" value="<?php echo $exsArr['source']; ?>" style="width:480px;" />
+							Date range:<br/>
+							<input name="startdate" type="text" value="<?php echo $exsArr['startdate']; ?>" /> - 
+							<input name="enddate" type="text" value="<?php echo $exsArr['enddate']; ?>" />
 						</div>
 						<div style="margin:2px;">
-							Notes: <input name="notes" type="text" value="<?php echo $exsArr['notes']; ?>" style="width:500px;" />
+							Source:<br/><input name="source" type="text" value="<?php echo $exsArr['source']; ?>" style="width:480px;" />
+						</div>
+						<div style="margin:2px;">
+							Notes:<br/><input name="notes" type="text" value="<?php echo $exsArr['notes']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
@@ -293,7 +357,7 @@ if($isEditor && $formSubmit){
 					</fieldset>
 				</form> 
 				<form name="exdeleteform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete this exsiccati?');">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Delete Exsiccati</b></legend>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
@@ -305,7 +369,7 @@ if($isEditor && $formSubmit){
 			<hr/> 
 			<div id="numadddiv" style="display:none;">
 				<form name="numaddform" action="index.php" method="post" onsubmit="return verifyNumAddForm(this);">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Add Exsiccati Number</b></legend>
 						<div style="margin:2px;">
 							Exsiccati Number: <input name="exsnumber" type="text" />
@@ -323,15 +387,15 @@ if($isEditor && $formSubmit){
 			<div style="margin-left:10px;">
 				<ul>
 					<?php 
-					$exsNumArr = $exsManager->getExsNumberArr($ometId,$imagesOnly);
+					$exsNumArr = $exsManager->getExsNumberArr($ometId,$specimenOnly,$imagesOnly,$collId);
 					if($exsNumArr){
 						foreach($exsNumArr as $k => $numArr){
 							?>
 							<li>
-								<a href="index.php?omenid=<?php echo $k; ?>">
-									<?php echo '#'.$numArr['number'].' - '.$numArr['collector']; ?>
-								</a>
 								<?php 
+								echo '<div><a href="index.php?omenid='.$k.'">';
+								echo '#'.$numArr['number'].' - '.($numArr['collector']?$numArr['collector']:'no specimens linked'); 
+								echo '</a></div>';
 								if($numArr['notes']) echo '<div style="margin-left:15px;">'.$numArr['notes'].'</div>';
 								?>
 							</li>
@@ -339,7 +403,9 @@ if($isEditor && $formSubmit){
 						}
 					}
 					else{
-						echo '<div style="font-weight:bold;font-size:110%;">There are no exsiccati numbers with links to specimens within the system</div>';
+						echo '<div style="font-weight:bold;font-size:110%;">';
+						echo 'There are no exsiccati numbers in database ';
+						echo '</div>';
 					}
 					?>
 				</ul>
@@ -351,10 +417,10 @@ if($isEditor && $formSubmit){
 			if($isEditor){
 				?>
 				<div style="float:right;">
-					<span style="cursor:pointer;" onclick="toggle('numeditdiv');" title="Edit Exsiccati Number">
+					<span style="cursor:pointer;" onclick="toggleNumEditDiv('numeditdiv');" title="Edit Exsiccati Number">
 						<img style="border:0px;" src="../../images/edit.png"/>
 					</span>
-					<span style="cursor:pointer;" onclick="toggle('occadddiv');" title="Add Occurrence to Exsiccati Number">
+					<span style="cursor:pointer;" onclick="toggleOccAddDiv('occadddiv');" title="Add Occurrence to Exsiccati Number">
 						<img style="border:0px;" src="../../images/add.png" />
 					</span>
 				</div>
@@ -376,7 +442,7 @@ if($isEditor && $formSubmit){
 			</div>
 			<div id="numeditdiv" style="display:none;">
 				<form name="numeditform" action="index.php" method="post" onsubmit="return verifyNumEditForm(this)">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Edit Exsiccati Number</b></legend>
 						<div style="margin:2px;">
 							Number: <input name="exsnumber" type="text" value="<?php echo $mdArr['exsnumber']; ?>" style="width:500px;" />
@@ -391,7 +457,7 @@ if($isEditor && $formSubmit){
 					</fieldset>
 				</form>
 				<form name="numdelform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete this exsiccati number?')">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Delete Exsiccati Number</b></legend>
 						<div style="margin:10px;">
 							<input name="omenid" type="hidden" value="<?php echo $omenId; ?>" />
@@ -401,12 +467,27 @@ if($isEditor && $formSubmit){
 					</fieldset>
 				</form> 
 			</div>
-			<div id="occadddiv" style="display:none;">
+			<div id="occadddiv" style="display:<?php echo ($occidToAdd?'block':'none') ?>;">
 				<form name="occaddform" action="index.php" method="post" onsubmit="return verifyOccAddForm(this)">
-					<fieldset style="margin:10px;padding:15px;">
+					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Add Occurrence Record to Exsiccati Number</b></legend>
 						<div style="margin:2px;">
-							Occid: <input name="occid" type="text" value="" />
+							Collection: 
+							<select name="occaddcollid">
+								<option value="">Select a Collection</option>
+								<option value="">----------------------</option>
+								<?php 
+								$collArr = $exsManager->getCollArr(0);
+								foreach($collArr as $id => $collName){
+									echo '<option value="'.$id.'">'.$collName.'</option>';
+								}
+								?>
+								<option value="occid">Symbiota Primary Key (occid)</option>
+							</select> 
+						</div>
+						<div style="margin:2px;">
+							Catalog Number: 
+							<input name="identifier" type="text" value="" />
 						</div>
 						<div style="margin:2px;">
 							Ranking: <input name="ranking" type="text" value="" />
@@ -496,7 +577,7 @@ if($isEditor && $formSubmit){
 								<td colspan="2">
 									<div id="occeditdiv-<?php echo $k; ?>" style="display:none;">
 										<form name="occeditform-<?php echo $k; ?>" action="index.php" method="post" onsubmit="return verifyOccEditForm(this)">
-											<fieldset style="margin:10px;padding:15px;">
+											<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 												<legend><b>Edit Occurrence Link</b></legend>
 												<div style="margin:2px;">
 													Ranking: <input name="ranking" type="text" value="<?php echo $occArr['ranking']; ?>" />
@@ -512,7 +593,7 @@ if($isEditor && $formSubmit){
 											</fieldset>
 										</form> 
 										<form name="exnumdeleteform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete the link to this specimen?')">
-											<fieldset style="margin:10px;padding:15px;">
+											<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 												<legend><b>Delete Exsiccati Specimen Link</b></legend>
 												<div style="margin:10px;">
 													<input name="omenid" type="hidden" value="<?php echo $omenId; ?>" />

@@ -17,17 +17,22 @@ class ExsiccatiManager {
 		$retArr = array();
 		if($ometid){
 			//Display full list
-			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
+			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
+				'et.source, et.notes, et.lasteditedby '.
 				'FROM omexsiccatititles et '.
 				'WHERE ometid = '.$ometid;
+			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					$retArr['title'] = $r->title;
 					$retArr['abbreviation'] = $r->abbreviation;
 					$retArr['editor'] = $r->editor;
 					$retArr['exsrange'] = $r->exsrange;
+					$retArr['startdate'] = $r->startdate;
+					$retArr['enddate'] = $r->enddate;
 					$retArr['source'] = $r->source;
 					$retArr['notes'] = $r->notes;
+					$retArr['lasteditedby'] = $r->lasteditedby;
 				}
 				$rs->close();
 			}
@@ -35,56 +40,80 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 
-	public function getTitleArr($searchTerm, $specimenOnly, $imagesOnly){ 
+	public function getTitleArr($searchTerm, $specimenOnly, $imagesOnly, $collId){
 		$retArr = array();
 		$sql = '';
-		if($imagesOnly){
-			$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
-				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
-				'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				'INNER JOIN images i ON ol.occid = i.occid ';
-		}
-		elseif($specimenOnly){
-			//Display only exsiccati that have linked specimens
-			$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
-				'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
-				'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
+		$sqlWhere = '';
+		if($specimenOnly){
+			if($imagesOnly){
+				$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
+					'et.source, et.notes, et.lasteditedby '.
+					'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+					'INNER JOIN images i ON ol.occid = i.occid ';
+				if($collId){
+					$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+					$sqlWhere = 'WHERE o.collid = '.$collId.' ';
+				}
+			}
+			else{
+				//Display only exsiccati that have linked specimens
+				$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
+					'et.source, et.notes, et.lasteditedby '.
+					'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
+				if($collId){
+					$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+					$sqlWhere = 'WHERE o.collid = '.$collId.' ';
+				}
+			}
 		}
 		else{
 			//Display full list
-			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.source, et.notes '.
+			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
+				'et.source, et.notes, et.lasteditedby '.
 				'FROM omexsiccatititles et ';
 		}
 		if($searchTerm){
-			$sql .= 'WHERE et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%"';
+			if($sqlWhere){
+				$sqlWhere .= 'AND ';
+			}
+			else{
+				$sqlWhere = 'WHERE ';
+			}
+			$sqlWhere .= 'et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%"';
 		}
-		$sql .= 'ORDER BY et.title';
-		
+		$sql = $sql.$sqlWhere.'ORDER BY et.title';
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->ometid]['title'] = $r->title;
 				$retArr[$r->ometid]['abbreviation'] = $r->abbreviation;
 				$retArr[$r->ometid]['editor'] = $r->editor;
 				$retArr[$r->ometid]['exsrange'] = $r->exsrange;
+				$retArr[$r->ometid]['startdate'] = $r->startdate;
+				$retArr[$r->ometid]['enddate'] = $r->enddate;
 				$retArr[$r->ometid]['source'] = $r->source;
 				$retArr[$r->ometid]['notes'] = $r->notes;
+				$retArr[$r->ometid]['lasteditedby'] = $r->lasteditedby;
 			}
 			$rs->close();
 		}
 		return $retArr;
 	}
 
-	public function getExsNumberArr($ometid,$imagesOnly=0){
+	public function getExsNumberArr($ometid,$specimenOnly,$imagesOnly,$collId){
 		$retArr = array();
 		if($ometid){
 			//Grab all numbers for that exsiccati title; only show number that have occid links
 			$sql = 'SELECT DISTINCT en.omenid, en.exsnumber, en.notes, '.
-				'CONCAT_WS(" ",o.recordedby, CONCAT("(",IFNULL(o.recordnumber,"s.n."),")"),o.eventDate) as collector '.
-				'FROM omexsiccatinumbers en INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+				'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),") ",IFNULL(o.eventDate,"date unknown")) as collector '.
+				'FROM omexsiccatinumbers en '.($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+				($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omoccurrences o ON ol.occid = o.occid ';
 			if($imagesOnly) $sql .= 'INNER JOIN images i ON o.occid = i.occid '; 
-			$sql .= 'WHERE en.ometid = '.$ometid.' ORDER BY en.exsnumber+1,en.exsnumber';
-			//echo $sql;
+			$sql .= 'WHERE en.ometid = '.$ometid.' ';
+			if($collId) $sql .= 'AND o.collid = '.$collId.' ';
+			$sql .= 'ORDER BY en.exsnumber+1,en.exsnumber,ol.ranking';
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					if(!array_key_exists($r->omenid,$retArr)){
@@ -157,23 +186,30 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 	
-	public function addTitle($pArr){
-		$sql = 'INSERT INTO omexsiccatititles(title, abbreviation, editor, exsrange, source, notes) '.
+	public function addTitle($pArr,$editedBy){
+		$sql = 'INSERT INTO omexsiccatititles(title, abbreviation, editor, exsrange, startdate, enddate, source, notes,lasteditedby) '.
 			'VALUES("'.$this->cleanStr($pArr['title']).'","'.$this->cleanStr($pArr['abbreviation']).'","'.
-			$this->cleanStr($pArr['editor']).'",'.($pArr['exsrange']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').','.
+			$this->cleanStr($pArr['editor']).'",'.
+			($pArr['exsrange']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').','.
+			($pArr['startdate']?'"'.$this->cleanStr($pArr['startdate']).'"':'NULL').','.
+			($pArr['enddate']?'"'.$this->cleanStr($pArr['enddate']).'"':'NULL').','.
 			($pArr['source']?'"'.$this->cleanStr($pArr['source']).'"':'NULL').','.
-			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
+			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').',"'.
+			$editedBy.'")';
 		//echo $sql;
 		$this->conn->query($sql);
 	}
 	
-	public function editTitle($pArr){
+	public function editTitle($pArr,$editedBy){
 		$sql = 'UPDATE omexsiccatititles '.
 			'SET title = "'.$this->cleanStr($pArr['title']).'", abbreviation = "'.$this->cleanStr($pArr['abbreviation']).
 			'", editor = "'.$this->cleanStr($pArr['editor']).'"'.
 			', exsrange = '.($pArr['exsrange']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').
+			', startdate = '.($pArr['startdate']?'"'.$this->cleanStr($pArr['exsrange']).'"':'NULL').
+			', enddate = '.($pArr['enddate']?'"'.$this->cleanStr($pArr['enddate']).'"':'NULL').
 			', source = '.($pArr['source']?'"'.$this->cleanStr($pArr['source']).'"':'NULL').
 			', notes = '.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').' '.
+			', lasteditedby = "'.$editedBy.'" '.
 			'WHERE (ometid = '.$pArr['ometid'].')';
 		//echo $sql;
 		$this->conn->query($sql);
@@ -193,7 +229,7 @@ class ExsiccatiManager {
 		$sql = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber,notes) '.
 			'VALUES('.$pArr['ometid'].',"'.$this->cleanStr($pArr['exsnumber']).'",'.
 			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
-		echo $sql;
+		//echo $sql;
 		$this->conn->query($sql);
 	}
 
@@ -215,11 +251,25 @@ class ExsiccatiManager {
 	}
 
 	public function addOccLink($pArr){
-		$ranking = 10;
-		if($pArr['ranking'] && is_numeric($pArr['ranking'])) $ranking = $pArr['ranking'];
-		if($pArr['omenid'] && $pArr['occid'] && is_numeric($pArr['omenid']) && is_numeric($pArr['occid'])){
-			$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
-				'VALUES ('.$pArr['omenid'].','.$pArr['occid'].','.$ranking.','.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
+		$collId = $pArr['occaddcollid'];
+		if($collId && $pArr['omenid'] && is_numeric($pArr['omenid'])){
+			$ranking = 10;
+			if($pArr['ranking'] && is_numeric($pArr['ranking'])) $ranking = $pArr['ranking'];
+			$identifier = $pArr['identifier'];
+			$sql = '';
+			if($collId == 'occid' && $identifier && is_numeric($identifier)){
+				$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
+					'VALUES ('.$pArr['omenid'].','.$identifier.','.$ranking.','.
+					($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
+			}
+			else{
+				$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
+					'SELECT '.$pArr['omenid'].' AS omenid,o.occid,'.$ranking.' AS ranking,'.
+					($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').' AS notes '.
+					'FROM omoccurrences o '.
+					'WHERE o.collid = '.$collId.' AND o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"');
+			}
+			//echo $sql;
 			$this->conn->query($sql);
 		}
 	}
@@ -240,6 +290,23 @@ class ExsiccatiManager {
 		}
 	}
 
+	public function getCollArr($exsOnly){
+		$retArr = array();
+		$sql ='SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode '.
+			'FROM omcollections c ';
+		if($exsOnly){
+			$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
+				'INNER JOIN omexsiccatiocclink ol ON o.occid = ol.occid ';
+		}
+		$sql .= 'ORDER BY c.collectionname, c.institutioncode';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid] = $r->collectionname.' ('.$r->institutioncode.($r->collectioncode?' - '.$r->collectioncode:'').')';
+		}
+		$rs->close();
+		return $retArr;
+	}
+	
 	private function cleanStr($str){
  		$newStr = trim($str);
  		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
