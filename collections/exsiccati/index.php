@@ -394,7 +394,7 @@ if($isEditor && $formSubmit){
 							<li>
 								<?php 
 								echo '<div><a href="index.php?omenid='.$k.'">';
-								echo '#'.$numArr['number'].' - '.($numArr['collector']?$numArr['collector']:'no specimens linked'); 
+								echo '#'.$numArr['number'].' - '.(array_key_exists('collcode',$numArr)?$numArr['collcode']:'').' '.$numArr['catnum'].' '.($numArr['collector']?$numArr['collector']:'no specimens linked'); 
 								echo '</a></div>';
 								if($numArr['notes']) echo '<div style="margin-left:15px;">'.$numArr['notes'].'</div>';
 								?>
