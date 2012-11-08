@@ -394,7 +394,8 @@ if($isEditor && $formSubmit){
 							<li>
 								<?php 
 								echo '<div><a href="index.php?omenid='.$k.'">';
-								echo '#'.$numArr['number'].' - '.(array_key_exists('collcode',$numArr)?$numArr['collcode']:'').' '.$numArr['catnum'].' '.($numArr['collector']?$numArr['collector']:'no specimens linked'); 
+								echo '#'.$numArr['number'].' - '.(array_key_exists('collcode',$numArr)?$numArr['collcode']:'').' '.$numArr['catnum'].' ['.
+									($numArr['collector']?$numArr['collector']:'no specimens linked').']'; 
 								echo '</a></div>';
 								if($numArr['notes']) echo '<div style="margin-left:15px;">'.$numArr['notes'].'</div>';
 								?>
@@ -514,21 +515,20 @@ if($isEditor && $formSubmit){
 							?>
 							<tr>
 								<td>
-									<div style="font-weight:bold;">
-										<div style="float:left;"> 
-											<?php
-											echo $occArr['recordedby'];
-											echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':'s.n. ');
-											echo '<span style="margin-left:70px;">'.$occArr['eventdate'].'</span> ';
-											?>
-										</div>
-										<div style="float:right;margin-right:30px;"> 
-											<?php 
-											if($occArr['catalognumber']){
-												echo 'Catalog Number: '.$occArr['catalognumber'];
-											}
-											?>
-										</div>
+									<div style="font-weight:bold;"> 
+										<?php
+										echo $occArr['collname'];
+										if($occArr['catalognumber']){
+											echo ' - '.$occArr['catalognumber'];
+										}
+										?>
+									</div>
+									<div style="">
+										<?php
+										echo $occArr['recordedby'];
+										echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':'s.n. ');
+										echo '<span style="margin-left:70px;">'.$occArr['eventdate'].'</span> ';
+										?>
 									</div>
 									<div style="clear:both;">
 										<?php
