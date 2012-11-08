@@ -187,6 +187,7 @@ class ExsiccatiManager {
 	}
 	
 	public function addTitle($pArr,$editedBy){
+		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omexsiccatititles(title, abbreviation, editor, exsrange, startdate, enddate, source, notes,lasteditedby) '.
 			'VALUES("'.$this->cleanStr($pArr['title']).'","'.$this->cleanStr($pArr['abbreviation']).'","'.
 			$this->cleanStr($pArr['editor']).'",'.
@@ -197,7 +198,8 @@ class ExsiccatiManager {
 			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').',"'.
 			$editedBy.'")';
 		//echo $sql;
-		$this->conn->query($sql);
+		$con->query($sql);
+		$con->close();
 	}
 	
 	public function editTitle($pArr,$editedBy){
