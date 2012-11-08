@@ -201,6 +201,7 @@ class ExsiccatiManager {
 	}
 	
 	public function editTitle($pArr,$editedBy){
+		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'UPDATE omexsiccatititles '.
 			'SET title = "'.$this->cleanStr($pArr['title']).'", abbreviation = "'.$this->cleanStr($pArr['abbreviation']).
 			'", editor = "'.$this->cleanStr($pArr['editor']).'"'.
@@ -212,47 +213,57 @@ class ExsiccatiManager {
 			', lasteditedby = "'.$editedBy.'" '.
 			'WHERE (ometid = '.$pArr['ometid'].')';
 		//echo $sql;
-		$this->conn->query($sql);
+		$con->query($sql);
+		$con->close();
 	}
 
 	public function deleteTitle($ometid){
 		$retStr = '';
 		if($ometid && is_numeric($ometid)){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM omexsiccatititles WHERE (ometid = '.$ometid.')';
 			//echo $sql;
-			if(!$this->conn->query($sql)) $retStr = 'DELETE Failed: possibly due to existing exsiccati numbers, which first have to be deleted.';
+			if(!$con->query($sql)) $retStr = 'DELETE Failed: possibly due to existing exsiccati numbers, which first have to be deleted.';
+			$con->close();
 		}
 		return $retStr;
 	}
 
 	public function addNumber($pArr){
+		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber,notes) '.
 			'VALUES('.$pArr['ometid'].',"'.$this->cleanStr($pArr['exsnumber']).'",'.
 			($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').')';
 		//echo $sql;
-		$this->conn->query($sql);
+		$con->query($sql);
+		$con->close();
 	}
 
 	public function editNumber($pArr){
 		if($pArr['omenid'] && is_numeric($pArr['omenid'])){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omexsiccatinumbers '.
 				'SET exsnumber = "'.$this->cleanStr($pArr['exsnumber']).'",'.
 				'notes = '.($pArr['notes']?'"'.$this->cleanStr($pArr['notes']).'"':'NULL').' '.
 				'WHERE (omenid = '.$this->cleanStr($pArr['omenid']).')';
-			$this->conn->query($sql);
+			$con->query($sql);
+			$con->close();
 		}
 	}
 
 	public function deleteNumber($omenid){
 		if($omenid && is_numeric($omenid)){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM omexsiccatinumbers WHERE (omenid = '.$omenid.')';
-			$this->conn->query($sql);
+			$con->query($sql);
+			$con->close();
 		}
 	}
 
 	public function addOccLink($pArr){
 		$collId = $pArr['occaddcollid'];
 		if($collId && $pArr['omenid'] && is_numeric($pArr['omenid'])){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$ranking = 10;
 			if($pArr['ranking'] && is_numeric($pArr['ranking'])) $ranking = $pArr['ranking'];
 			$identifier = $pArr['identifier'];
@@ -270,23 +281,28 @@ class ExsiccatiManager {
 					'WHERE o.collid = '.$collId.' AND o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"');
 			}
 			//echo $sql;
-			$this->conn->query($sql);
+			$con->query($sql);
+			$con->close();
 		}
 	}
 
 	public function editOccLink($pArr){
 		if($pArr['omenid'] && $pArr['occid'] && is_numeric($pArr['omenid']) && is_numeric($pArr['occid']) && is_numeric($pArr['ranking'])){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omexsiccatiocclink '.
 				'SET ranking = '.$pArr['ranking'].', notes = "'.$this->cleanStr($pArr['notes']).'" '.
 				'WHERE (omenid = '.$pArr['omenid'].') AND (occid = '.$pArr['occid'].')';
-			$this->conn->query($sql);
+			$con->query($sql);
+			$con->close();
 		}
 	}
 
 	public function deleteOccLink($omenid, $occid){
 		if($omenid && $occid && is_numeric($omenid) && is_numeric($occid)){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM omexsiccatiocclink WHERE (omenid = '.$omenid.') AND (occid = '.$occid.')';
-			$this->conn->query($sql);
+			$con->query($sql);
+			$con->close();
 		}
 	}
 
