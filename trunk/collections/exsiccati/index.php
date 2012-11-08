@@ -518,15 +518,24 @@ if($isEditor && $formSubmit){
 									<div style="font-weight:bold;"> 
 										<?php
 										echo $occArr['collname'];
-										if($occArr['catalognumber']){
-											echo ' - '.$occArr['catalognumber'];
-										}
 										?>
 									</div>
 									<div style="">
+										<div style="">
+											Catalog #: <?php echo $occArr['catalognumber']; ?>
+										</div>
+										<?php 
+										if($occArr['occurrenceid']){
+											echo '<div style="float:right;">';
+											echo $occArr['occurrenceid'];
+											echo '</div>';
+										}
+										?>
+									</div>
+									<div style="clear:both;">
 										<?php
 										echo $occArr['recordedby'];
-										echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':'s.n. ');
+										echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':' s.n. ');
 										echo '<span style="margin-left:70px;">'.$occArr['eventdate'].'</span> ';
 										?>
 									</div>
