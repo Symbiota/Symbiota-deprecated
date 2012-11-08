@@ -159,17 +159,20 @@ class ExsiccatiManager {
 
 	public function getExsOccArr($omenid){
 		$retArr = array();
-		$sql = 'SELECT ol.ranking, ol.notes, o.occid, o.catalognumber, '.
+		$sql = 'SELECT ol.ranking, ol.notes, o.occid, IFNULL(o.occurrenceid,o.catalognumber) AS catalognumber, '.
+			'CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")") AS collname, '.
 			'o.sciname, o.scientificnameauthorship, o.recordedby, o.recordnumber, DATE_FORMAT(o.eventdate,"%d %M %Y") AS eventdate, '.
 			'trim(o.country) AS country, trim(o.stateprovince) AS stateprovince, trim(o.county) AS county, '.
 			'trim(o.municipality) AS municipality, o.locality, i.thumbnailurl, i.url '.
 			'FROM omexsiccatiocclink ol INNER JOIN omoccurrences o ON ol.occid = o.occid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'LEFT JOIN images i ON o.occid = i.occid '.
 			'WHERE ol.omenid = '.$omenid.' ORDER BY ol.ranking, o.recordedby, o.recordnumber';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['ranking'] = $r->ranking;
 				$retArr[$r->occid]['notes'] = $r->notes;
+				$retArr[$r->occid]['collname'] = $r->collname;
 				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
 				$retArr[$r->occid]['sciname'] = $r->sciname;
 				$retArr[$r->occid]['author'] = $r->scientificnameauthorship;
