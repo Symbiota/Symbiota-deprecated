@@ -66,6 +66,8 @@ class OccurrenceCleaner {
 			$catalognumber = $r['catalognumber'];
 			if($recCnt > 500 && !array_key_exists($catalognumber,$retArr)) break; 
 			$occid = $r['occid'];
+			//Prime the record so that if record contains no values, it's still included in output 
+			$retArr[$catalognumber][$occid] = array();
 			foreach($r as $k =>$v){
 				if($recCnt == 1) $fieldArr[$k] = '';
 				if($v && $k != 'occid' && $k != 'catalognumber'){

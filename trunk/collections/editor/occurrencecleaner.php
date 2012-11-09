@@ -82,7 +82,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 							//Build table
 							?>
 							<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
-								<div><b>Duplicate Record Count: <?php echo ($recCnt>200?'> 200':$recCnt); ?></b></div>
+								<div><b>Duplicate Record Count: <?php echo ($recCnt>500?'> 500':$recCnt); ?></b></div>
 								<table class="styledtable">
 									<tr>
 										<th>PK</th>
@@ -152,7 +152,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 							Results will be listed in a table grouped by the catlog number. Clicking on the number in the 
 							left most column will open the editor for that record. Selecting the checkboxes for two or more 
 							records within the groups and submitting the form will merge selected records. Select link below to 
-							query database for possible duplicate records. Note that a maximun of around 200 records will 
+							query database for possible duplicate records. Note that a maximun of around 500 records will 
 							be returned at a time.
 						</div>
 						<div style="margin:25px;font-weight:bold;font-size:120%;">
