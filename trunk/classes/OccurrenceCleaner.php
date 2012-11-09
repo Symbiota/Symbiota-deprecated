@@ -78,8 +78,10 @@ class OccurrenceCleaner {
 			$recCnt++;
 		}
 		$rs->close();
+		foreach($fieldArr as $k => $v){
+			if($v === '') unset($fieldArr[$k]);
+		}
 		$retArr['fields'] = $fieldArr;
-		$retArr['reccnt'] = $recCnt;
 		return $retArr;
 	}
 	
