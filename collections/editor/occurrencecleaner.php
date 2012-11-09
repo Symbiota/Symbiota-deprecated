@@ -74,11 +74,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 							//Get fields and remove unactivated fields
 							$fieldArr = $dupArr['fields'];
 							unset($dupArr['fields']);
-							$recCnt = $dupArr['reccnt'];
-							unset($dupArr['reccnt']);
-							foreach($fieldArr as $k => $v){
-								if($v === '') unset($fieldArr[$k]);
-							}
+							$recCnt = count($dupArr);
 							//Build table
 							?>
 							<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
