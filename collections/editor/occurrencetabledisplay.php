@@ -19,7 +19,7 @@ $displayQuery = 0;
 $isGenObs = 0;
 $collMap = array();
 $recArr = array();
-$headerMap = array('catalognumber' => 'Catalog Number',
+$headerMapBase = array('catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
 	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
@@ -37,6 +37,7 @@ $headerMap = array('catalognumber' => 'Catalog Number',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','dateLastModified' => 'Date Last Modified',
 	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+$headMap = array();
 
 $qryCnt = 0;
 $statusStr = '';
@@ -192,7 +193,7 @@ if($symbUid){
 					if(isset($qCustomField3) && !array_key_exists(strtolower($qCustomField3),$headerArr)){
 						$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
 					}
-					$headerMap = array_intersect_key($headerMap, $headerArr);
+					$headerMap = array_intersect_key($headerMapBase, $headerArr);
 				}
 				if($isEditor == 1 || $isGenObs){
 					?>
@@ -208,8 +209,8 @@ if($symbUid){
 											<option value="">----------------------</option>
 											<?php 
 											$buFieldName = (array_key_exists('bufieldname',$_POST)?$_POST['bufieldname']:'');
-											foreach($headerMap as $k => $v){
-												echo '<option value="'.$k.'" '.($buFieldName==$k?$buFieldName:'').'>'.$v.'</option>';
+											foreach($headerMapBase as $k => $v){
+												echo '<option value="'.$k.'">'.$v.'</option>';
 											}
 											?>
 										</select>
@@ -225,9 +226,9 @@ if($symbUid){
 								</div>
 								<div style="float:left;margin-left:30px;">
 									<div style="margin:2px;">
-										<input name="bumatch" type="radio" value="0" <?php echo (!array_key_exists('bumatch',$_POST) || !$_POST['bumatch']?'CHECKED':''); ?> />
+										<input name="bumatch" type="radio" value="0" checked />
 										Match Whole Field<br/> 
-										<input name="bumatch" type="radio" value="1" <?php echo (array_key_exists('bumatch',$_POST) && $_POST['bumatch']?'CHECKED':''); ?> />
+										<input name="bumatch" type="radio" value="1" />
 										Match Any Part of Field
 									</div>
 									<div style="margin:2px;">

@@ -685,7 +685,7 @@ class OccurrenceEditorManager {
 		$fn = $this->conn->real_escape_string($fieldName);
 		$ov = $this->conn->real_escape_string($oldValue);
 		$nv = $this->conn->real_escape_string($newValue);
-		if($fn && $ov && $nv){
+		if($fn && ($ov || $nv)){
 			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
 			//Add raw string fragment if present, yet unlikely
 			if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
@@ -704,13 +704,14 @@ class OccurrenceEditorManager {
 			else{
 				$sql .= $this->sqlWhere;
 			}
-			if($buMatch){
-				$sql .= 'AND (o.'.$fn.' LIKE "%'.$ov.'%")'.
-					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'") ';
+			if(!$buMatch || $ov===''){
+				$sql .= 'AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').')'.
+					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = '.($nv===''?'NULL':'"'.$nv.'"').' ';
 			}
 			else{
-				$sql .= 'AND (o.'.$fn.' = "'.$ov.'")'.
-					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = "'.$nv.'" ';
+				//Selected "Match any part of field"
+				$sql .= 'AND (o.'.$fn.' LIKE "%'.$ov.'%")'.
+					') rt ON o2.occid = rt.occid SET o2.'.$fn.' = REPLACE(o2.'.$fn.',"'.$ov.'","'.$nv.'") ';
 			}
 			//echo $sql;
 			if(!$this->conn->query($sql)){
@@ -741,11 +742,11 @@ class OccurrenceEditorManager {
 		else{
 			$sql .= $this->sqlWhere;
 		}
-		if($buMatch){
-			$sql .= ' AND (o.'.$fn.' LIKE "%'.$ov.'%")';
+		if(!$buMatch || $ov===""){
+			$sql .= ' AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').')';
 		}
 		else{
-			$sql .= ' AND (o.'.$fn.' = "'.$ov.'")';
+			$sql .= ' AND (o.'.$fn.' LIKE "%'.$ov.'%")';
 		}
 		$result = $this->conn->query($sql);
 		$retCnt = '';
