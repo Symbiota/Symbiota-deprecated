@@ -100,8 +100,16 @@ function submitBatchUpdate(f){
 	var ouid = f.ouid.value;
 	var buMatch = 0;
 	if(f.bumatch[1].checked) buMatch = 1;
-	if(!fieldName || !oldValue || !newValue){
-		alert("Please select a field name and enter a value in the current and new value fields");
+	if(!fieldName){
+		alert("Please select a target field name");
+		return false;
+	}
+	if(!oldValue && !newValue){
+		alert("Please enter a value in the current or new value fields");
+		return false;
+	}
+	if(oldValue == newValue){
+		alert("The values within current and new fields cannot be equal to one another");
 		return false;
 	}
 	xmlHttp = GetXmlHttpObject();
