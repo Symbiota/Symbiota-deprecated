@@ -17,44 +17,41 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 	include($serverRoot.'/header.php');
 	if(isset($collections_download_downloadCrumbs)){
 		if($collections_download_downloadCrumbs){
-			echo "<div class='navpath'>";
-			echo "<a href='../../index.php'>Home</a> &gt; ";
-			echo $collections_download_downloadCrumbs;
-			echo " <b>Specimen Download</b>";
-			echo "</div>";
+			?>
+			<div class='navpath'>
+				<a href='../../index.php'>Home</a> &gt; 
+				<?php echo $collections_download_downloadCrumbs; ?>
+				<b>Specimen Download</b>
+			</div>
+			<?php 
 		}
 	}
 	else{
-		echo '<div class="navpath">';
-		echo '<a href="../../index.php">Home</a> &gt; ';
-		echo '<a href="../index.php">Collections</a> &gt; ';
-		echo '<a href="../harvestparams.php">Search Criteria</a> &gt; ';
-		echo '<a href="../list.php">Occurrence Listing</a> &gt; ';
-		echo ' <b>Specimen Download</b>';
-		echo '</div>';
+		?>
+		<div class="navpath">
+			<a href="../../index.php">Home</a> &gt; 
+			<a href="../index.php">Collections</a> &gt; 
+			<a href="../harvestparams.php">Search Criteria</a> &gt; 
+			<a href="../list.php">Occurrence Listing</a> &gt; 
+			<b>Specimen Download</b>
+		</div>
+		<?php 
 	}
 	?>
 
 	<div id="innertext">
-	    <div style="margin:25px;">
-	        <h3 style="margin-top:10px;">Guidelines for Acceptable Use of Data: </H3>
+		<h2>Data Usage Guidelines</h2>
+        <div style="margin:15px;">
+        	By downloading data, the user confirms that he/she has read and agrees with the general 
+        	<a href="../../misc/usagepolicy.php#images">data usage terms</a>. 
+        	Note that additional terms of use specific to the individual collections 
+        	may be distributed with the data download. When present, the terms 
+        	supplied by the owning institution should take precedence over the 
+        	general terms posted on the website.
+        </div>
+        <div style='margin:30px;'>
+	        <h2>Download Results:</h2>
 	        <ul>
-		        <li>While <?php echo $defaultTitle; ?> will make every effort possible to control and document the quality of the data it publishes, the data are made available "as is". Any report of errors in the data should be directed to the appropriate curators and/or collections managers. </li>
-		        <li><?php echo $defaultTitle; ?> cannot assume responsibility for damages resulting from mis-use or mis-interpretation of datasets or from errors or omissions that may exist in the data. </li>
-		        <li>It is considered a matter of professional ethics to acknowledge the work of other scientists that has resulted in data used in subsequent research. </li>
-		        <li><?php echo $defaultTitle; ?> expects that any use of data from this server will be accompanied with the appropriate citations and acknowledgments. </li>
-		        <li><?php echo $defaultTitle; ?> encourages users to contact the original investigator responsible for the data that they are accessing. Where appropriate, researchers whose projects 
-		            are integrally dependent on particular group of specimen data are encouraged to consider collaboration and/or co-authorship with original investigators. </li>
-		        <li><?php echo $defaultTitle; ?> asks that users not redistribute data obtained from this site. However, links or references to this site may be freely posted.</li>
-	        </ul>
-	    </div>
-	    <div>
-	    	<hr>
-	    </div>
-	    <div style="margin:25px;">
-	        <div style="margin:5px 0px 10px 10px;font-weight:bold;">By downloading data, the user confirms that he/she has read and agrees with the above terms.</div>
-	        <div style="margin-left:25px;font-weight:bold;font-size:130%;">Download Results:</div>
-	        <ul style='margin:5px 0px 0px 35px;'>
 				<?php  
 				if($downloadType == "checklist"){
 				    echo "<li style='font-weight:bold;'><a class='bodylink' target='_blank' href='downloadhandler.php?dltype=checklist&taxonfilter=".$taxonFilterCode."'>Checklist tab-delimited text file</a></li>";
@@ -68,7 +65,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 				   
 				?>
 	        </ul>
-	    </div>
+	       </div>
 	</div>
 <?php 
 	include($serverRoot.'/footer.php');

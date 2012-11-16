@@ -687,10 +687,6 @@ class SpecUploadManager{
 			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180 AND collid = '.$this->collId;
 		$this->conn->query($sql);
 
-		$sql = 'UPDATE uploadspectemp '.
-			'SET verbatimCoordinates = CONCAT_WS("; ",verbatimCoordinates,CONCAT_WS(" ","UTM:",CONCAT(UtmZoning," "),CONCAT(UtmNorthing,"N"),CONCAT(UtmEasting,"E"))) '.
-			'WHERE UtmNorthing IS NOT NULL AND collid = '.$this->collId;
-		$this->conn->query($sql);
 		echo 'Done!</li> ';
 	}
 	
@@ -1015,7 +1011,7 @@ class SpecUploadManager{
 					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
-			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && !$recMap['decimallatitude']){
+			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && !isset($recMap['decimallatitude'])){
 				$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 				if($coordArr){
 					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
@@ -1024,15 +1020,15 @@ class SpecUploadManager{
 			}
 			//Convert UTM to Lat/Long
 			if((array_key_exists('utmnorthing',$recMap) && $recMap['utmnorthing']) || (array_key_exists('utmeasting',$recMap) && $recMap['utmeasting'])){
+				$no = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
+				$ea = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
+				$zo = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
+				$da = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
 				if((!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude'])){
-					$n = (array_key_exists('utmnorthing',$recMap)?$recMap['utmnorthing']:'');
-					$e = (array_key_exists('utmeasting',$recMap)?$recMap['utmeasting']:'');
-					$z = (array_key_exists('utmzoning',$recMap)?$recMap['utmzoning']:'');
-					$d = (array_key_exists('geodeticdatum',$recMap)?$recMap['geodeticdatum']:'');
-					if($n && $e && $z){
+					if($no && $ea && $zo){
 						//Northing, easting, and zoning all had values
-						$gPoint = new GPoint($d);
-						$gPoint->setUTM($e,$n,$z);
+						$gPoint = new GPoint($da);
+						$gPoint->setUTM($ea,$no,$zo);
 						$gPoint->convertTMtoLL();
 						$lat = $gPoint->Lat();
 						$lng = $gPoint->Long();
@@ -1043,13 +1039,15 @@ class SpecUploadManager{
 					}
 					else{
 						//UTM was a single field which was placed in UTM northing field within uploadspectemp table
-						$coordArr = $this->parseVerbatimCoordinates(trim($z.' '.$e.' '.$n),'UTM');
+						$coordArr = $this->parseVerbatimCoordinates(trim($zo.' '.$ea.' '.$no),'UTM');
 						if($coordArr){
 							if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
 							if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
 						}
 					}
 				}
+				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
+				if(!strpos($vCoord,$no)) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
 			}
 			//Verbatim elevation
 			if(array_key_exists('verbatimElevation',$recMap) && $recMap['verbatimElevation'] && (!array_key_exists('minimumElevationInMeters',$recMap) || !$recMap['minimumElevationInMeters'])){
@@ -1489,7 +1487,7 @@ class SpecUploadManager{
 			}
 		}
 		if($target != 'LL' && !$retArr){
-			if(preg_match('/\D*(\d{1,2})\D{0,1}\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
+			if(preg_match('/\D*(\d{1,2}\D{0,1})\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
 				$z = $m[1];
 				$e = $m[2];
 				$n = $m[3];
@@ -1508,25 +1506,48 @@ class SpecUploadManager{
 				}
 				
 			}
-			elseif(preg_match('/\D*(\d{1,2})\D{0,2}\s*(\d{6})\D*\s*(\d{7})/',$inStr,$m)){
+			elseif(preg_match('/UTM/',$inStr) || preg_match('/\d{1,2}[\D\s]+\d{6,7}[\D\s]+\d{6,7}/',$inStr)){
 				//UTM
-				$z = $m[1];
-				$e = $m[2];
-				$n = $m[3];
-				$d = '';
-				if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
-				if($n && $e && $z){
-					$gPoint = new GPoint($d);
-					$gPoint->setUTM($e,$n,$z);
-					$gPoint->convertTMtoLL();
-					$lat = $gPoint->Lat();
-					$lng = $gPoint->Long();
-					if($lat && $lng){
-						$retArr['lat'] = round($lat,6);
-						$retArr['lng'] = round($lng,6);
+				$z = ''; $e = ''; $n = ''; $d = '';
+				if(preg_match('/[\s\D]*(\d{1,2}\D{0,1})[\s\D]*/',$inStr,$m)) $z = $m[1];
+				if($z){
+					if(preg_match('/(\d{6,7})E{1}[\D\s]+(\d{7})N{1}/i',$inStr,$m)){
+						$e = $m[1];
+						$n = $m[2];
+					} 
+					elseif(preg_match('/E{1}(\d{6,7})[\D\s]+N{1}(\d{7})/i',$inStr,$m)){
+						$e = $m[1];
+						$n = $m[2];
+					} 
+					elseif(preg_match('/(\d{7})N{1}[\D\s]+(\d{6,7})E{1}/i',$inStr,$m)){
+						$e = $m[2];
+						$n = $m[1];
+					} 
+					elseif(preg_match('/N{1}(\d{7})[\D\s]+E{1}(\d{6,7})/i',$inStr,$m)){
+						$e = $m[2];
+						$n = $m[1];
+					} 
+					elseif(preg_match('/(\d{6})[\D\s]+(\d{7})/',$inStr,$m)){
+						$e = $m[1];
+						$n = $m[2];
+					} 
+					elseif(preg_match('/(\d{7})[\D\s]+(\d{6})/',$inStr,$m)){
+						$e = $m[2];
+						$n = $m[1];
+					} 
+					if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
+					if($n && $e){
+						$gPoint = new GPoint($d);
+						$gPoint->setUTM($e,$n,$z);
+						$gPoint->convertTMtoLL();
+						$lat = $gPoint->Lat();
+						$lng = $gPoint->Long();
+						if($lat && $lng){
+							$retArr['lat'] = round($lat,6);
+							$retArr['lng'] = round($lng,6);
+						}
 					}
-				}
-				
+				}				
 			}
 		}
 		//Clean

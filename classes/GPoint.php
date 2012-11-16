@@ -331,7 +331,19 @@ class GPoint
 		{ // It is a UTM coordinate we want to convert
 			sscanf($this->utmZone,"%d%s",$ZoneNumber,$ZoneLetter);
 			$NorthernHemisphere = 1;	//point is in northern hemisphere
-			if($ZoneLetter && (strtoupper($ZoneLetter) == 'S' || strtoupper($ZoneLetter) < 'N')){
+			$isSouthern = false;
+			if($ZoneLetter){
+				if(strtoupper($ZoneLetter) < 'N'){
+					$isSouthern = true;
+				}
+				if(strtoupper($ZoneLetter) == 'S'){
+					if(($ZoneNumber > 18 && $ZoneNumber < 23) || $y < 3200000 || $y > 4000000){
+						//Is not MGRS grid zone S within the northern hemisphere
+						$isSouthern = true;
+					}
+				}
+			}			
+			if($isSouthern){
 				$NorthernHemisphere = 0;//point is in southern hemisphere
 				$y -= 10000000.0;	//remove 10,000,000 meter offset used for southern hemisphere
 			}

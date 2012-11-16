@@ -24,15 +24,13 @@ class CollectionProfileManager {
 	public function getCollectionList(){
 		$returnArr = Array();
 		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, ".
-			"IFNULL(c.fulldescription,c.briefdescription) AS fulldescription, c.briefdescription, ".
-			"c.homepage, c.contact, c.email, c.icon ".
+			"c.fulldescription, c.homepage, c.contact, c.email, c.icon ".
 			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
 			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
-			$returnArr[$row->collid]['briefdescription'] = $row->briefdescription;
 			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
 			$returnArr[$row->collid]['homepage'] = $row->homepage;
 			$returnArr[$row->collid]['contact'] = $row->contact;
@@ -49,7 +47,7 @@ class CollectionProfileManager {
 			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 				"c.collid, c.CollectionCode, c.CollectionName, ".
-				"c.BriefDescription, c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
+				"c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
 				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
 				"c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
@@ -72,7 +70,6 @@ class CollectionProfileManager {
 				$returnArr['phone'] = $row->Phone;
 				$returnArr['collectioncode'] = $row->CollectionCode;
 				$returnArr['collectionname'] = $row->CollectionName;
-				$returnArr['briefdescription'] = $row->BriefDescription;
 				$returnArr['fulldescription'] = $row->FullDescription;
 				$returnArr['homepage'] = $row->Homepage;
 				$returnArr['individualurl'] = $row->individualurl;
@@ -114,7 +111,6 @@ class CollectionProfileManager {
 			$collCode = $this->cleanStr($_POST['collectioncode']);
 			$coleName = $this->cleanStr($_POST['collectionname']);
 			$iid = $_POST['iid'];
-			$briefDesc = $this->cleanStr($_POST['briefdescription']);
 			$fullDesc = $this->cleanStr($_POST['fulldescription']);
 			$homepage = $this->cleanStr($_POST['homepage']);
 			$contact = $this->cleanStr($_POST['contact']);
@@ -130,7 +126,6 @@ class CollectionProfileManager {
 				'collectioncode = '.($collCode?'"'.$collCode.'"':'NULL').','.
 				'collectionname = "'.$coleName.'",'.
 				'iid = '.($iid?$iid:'NULL').','.
-				'briefdescription = '.($briefDesc?'"'.$briefDesc.'"':'NULL').','.
 				'fulldescription = '.($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 				'homepage = '.($homepage?'"'.$homepage.'"':'NULL').','.
 				'contact = '.($contact?'"'.$contact.'"':'NULL').','.
@@ -163,7 +158,6 @@ class CollectionProfileManager {
 		$collCode = $this->cleanStr($_POST['collectioncode']);
 		$coleName = $this->cleanStr($_POST['collectionname']);
 		$iid = $_POST['iid'];
-		$briefDesc = $this->cleanStr($_POST['briefdescription']);
 		$fullDesc = $this->cleanStr($_POST['fulldescription']);
 		$homepage = $this->cleanStr($_POST['homepage']);
 		$contact = $this->cleanStr($_POST['contact']);
@@ -179,13 +173,12 @@ class CollectionProfileManager {
 		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,briefdescription,fulldescription,homepage,'.
+		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,fulldescription,homepage,'.
 			'contact,email,latitudedecimal,longitudedecimal,publicedits,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.
 			$coleName.'",'.($iid?$iid:'NULL').','.
-			($briefDesc?'"'.$briefDesc.'"':'NULL').','.
 			($fullDesc?'"'.$fullDesc.'"':'NULL').','.
 			($homepage?'"'.$homepage.'"':'NULL').','.
 			($contact?'"'.$contact.'"':'NULL').','.
@@ -410,5 +403,4 @@ class CollectionProfileManager {
 		return $outStr;
 	}
 }
-
- ?>
+?>

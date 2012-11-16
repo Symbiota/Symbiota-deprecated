@@ -30,7 +30,6 @@ if($isEditable && $projSubmit){
 		$projEditArr = Array();
 		$projEditArr["projname"] = $_REQUEST["projname"];
 		$projEditArr["managers"] = $_REQUEST["managers"];
-		$projEditArr["briefdescription"] = $_REQUEST["briefdescription"];
 		$projEditArr["fulldescription"] = $_REQUEST["fulldescription"];
 		$projEditArr["notes"] = $_REQUEST["notes"];
 		$projEditArr["ispublic"] = $_REQUEST["ispublic"];
@@ -140,12 +139,8 @@ if($isEditable && $projSubmit){
 				alert("Sort sequence can only be a numeric value.");
 				return false;
 			}
-			else if(f.briefdescription.value.length > 300){
-				alert("Brief description can only have a maximum of 300 characters. The description is currently " + f.briefdescription.value.length + " characters long.");
-				return false;
-			}
-			else if(f.fulldescription.value.length > 1000){
-				alert("Full description can only have a maximum of 1000 characters. The description is currently " + f.fulldescription.value.length + " characters long.");
+			else if(f.fulldescription.value.length > 2000){
+				alert("Description can only have a maximum of 2000 characters. The description is currently " + f.fulldescription.value.length + " characters long.");
 				return false;
 			}
 			return true;
@@ -258,18 +253,10 @@ if($isEditable && $projSubmit){
 								</tr>	
 								<tr>
 									<td>
-										Brief Description: 
+										Description: 
 									</td>
 									<td>
-										<textarea rows="2" cols="45" name="briefdescription" style="width:95%" ><?php if($projArr) echo $projArr["briefdescription"];?></textarea>
-									</td>
-								</tr>	
-								<tr>
-									<td>
-										Full Description: 
-									</td>
-									<td>
-										<textarea rows="3" cols="45" name="fulldescription" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
+										<textarea rows="3" cols="45" name="fulldescription" maxlength="2000" style="width:95%"><?php if($projArr) echo $projArr["fulldescription"];?></textarea>
 									</td>
 								</tr>	
 								<tr>
@@ -286,8 +273,8 @@ if($isEditable && $projSubmit){
 									</td>
 									<td>
 										<select name="ispublic">
-											<option value="0">Not Public</option>
-											<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Is Public</option>
+											<option value="0">Public</option>
+											<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Public</option>
 										</select>
 									</td>
 								</tr>	
