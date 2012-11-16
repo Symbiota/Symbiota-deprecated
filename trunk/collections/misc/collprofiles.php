@@ -339,17 +339,8 @@ if($collId) $collData = $collManager->getCollectionData();
 								</tr>
 								<tr>
 									<td>
-										Brief Description<br/> 
-										(300 character max): 
-									</td>
-									<td>
-										<textarea name="briefdescription" style="width:95%;height:60px;"><?php echo ($collId?$collData["briefdescription"]:'');?></textarea>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										Full Description<br/>
-										(1000 character max): 
+										Description<br/>
+										(2000 character max): 
 									</td>
 									<td>
 										<textarea name="fulldescription" style="width:95%;height:90px;"><?php echo ($collId?$collData["fulldescription"]:'');?></textarea>
@@ -411,7 +402,35 @@ if($collId) $collData = $collManager->getCollectionData();
 										Rights:
 									</td>
 									<td>
-										<input type="text" name="rights" value="<?php echo ($collId?$collData["rights"]:'');?>" style="width:350px;" />
+										<?php 
+										if(isset($rightsTerms)){
+											?>
+											<select name="rights">
+												<option value="">Select usage rights</option>
+												<option value="">-----------------------</option>
+												<?php
+												$hasOrphanTerm = true; 
+												foreach($rightsTerms as $k => $v){
+													$selectedTerm = '';
+													if($collId && strtolower($collData["rights"])==strtolower($v)){
+														$selectedTerm = 'SELECTED';
+														$hasOrphanTerm = false;
+													}
+													echo '<option value="'.$v.'" '.$selectedTerm.'>'.$k.'</option>'."\n";
+												}
+												if($hasOrphanTerm && $collData["rights"]){
+													echo '<option value="'.$collData["rights"].'" SELECTED>'.$collData["rights"].' [orphaned term]</option>'."\n";
+												}
+												?>
+											</select>
+											<?php 
+										}
+										else{
+											?>
+											<input type="text" name="rights" value="<?php echo ($collId?$collData["rights"]:'');?>" style="width:350px;" />
+											<?php 
+										}
+										?>
 										<a href="#" onclick="return dwcDoc('dcterms:rights')">
 											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
 										</a>
@@ -520,14 +539,9 @@ if($collId) $collData = $collManager->getCollectionData();
 			if(!$newCollRec){
 				?>
 				<div style='margin:10px;'>
-					<div><?php 
-					if($collData["fulldescription"]){
-						echo $collData["fulldescription"];
-					}
-					else{
-						echo $collData["briefdescription"];
-					}	
-					?></div>
+					<div>
+						<?php echo $collData["fulldescription"]; ?>
+					</div>
 					<div style='margin-top:5px;'>
 						<b>Contact:</b> <?php echo $collData["contact"]." (".str_replace("@","&lt;at&gt;",$collData["email"]);?>)
 					</div>

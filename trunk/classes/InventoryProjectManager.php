@@ -41,7 +41,7 @@ class InventoryProjectManager {
 
 	public function getProjectList(){
 		$returnArr = Array();
-		$sql = "SELECT p.pid, p.projname, p.managers, p.briefdescription ".
+		$sql = "SELECT p.pid, p.projname, p.managers, p.fulldescription ".
 			"FROM fmprojects p WHERE p.ispublic = 1 ".
 			"ORDER BY p.SortSequence, p.projname";
 		$rs = $this->con->query($sql);
@@ -49,7 +49,7 @@ class InventoryProjectManager {
 			$projId = $row->pid;
 			$returnArr[$projId]["projname"] = $row->projname;
 			$returnArr[$projId]["managers"] = $row->managers;
-			$returnArr[$projId]["descr"] = $row->briefdescription;
+			$returnArr[$projId]["descr"] = $row->fulldescription;
 		}
 		$rs->close();
 		return $returnArr;
@@ -58,7 +58,7 @@ class InventoryProjectManager {
 	public function getProjectData(){
 		$returnArr = Array();
 		if($this->projId){
-			$sql = 'SELECT p.pid, p.projname, p.managers, p.briefdescription, p.fulldescription, p.notes, '.
+			$sql = 'SELECT p.pid, p.projname, p.managers, p.fulldescription, p.notes, '.
 				'p.occurrencesearch, p.ispublic, p.sortsequence '.
 				'FROM fmprojects p '.
 				'WHERE (p.pid = '.$this->projId.') '.
@@ -69,7 +69,6 @@ class InventoryProjectManager {
 				$this->projId = $row->pid;
 				$returnArr['projname'] = $row->projname;
 				$returnArr['managers'] = $row->managers;
-				$returnArr['briefdescription'] = $row->briefdescription;
 				$returnArr['fulldescription'] = $row->fulldescription;
 				$returnArr['notes'] = $row->notes;
 				$returnArr['occurrencesearch'] = $row->occurrencesearch;
@@ -100,9 +99,9 @@ class InventoryProjectManager {
 	public function addNewProject($projArr){
 		$pid = 0;
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO fmprojects(projname,managers,briefdescription,fulldescription,notes,ispublic,sortsequence) '.
+		$sql = 'INSERT INTO fmprojects(projname,managers,fulldescription,notes,ispublic,sortsequence) '.
 			'VALUES("'.$this->cleanString($projArr['projname']).'","'.$this->cleanString($projArr['managers']).'","'.
-			$this->cleanString($projArr['briefdescription']).'","'.$this->cleanString($projArr['fulldescription']).'","'.
+			$this->cleanString($projArr['fulldescription']).'","'.
 			$this->cleanString($projArr['notes']).'",'.$projArr['ispublic'].','.
 			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
 		//echo $sql;

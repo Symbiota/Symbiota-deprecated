@@ -480,10 +480,13 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 					echo '</a></div>';
 				}
 			}
-			$rightsStr = '';
+			$rightsStr = $collMetadata['rights'];
 			if($collMetadata['rights']){
-				$rightsStr = $collMetadata['rights'];
-				if(substr($collMetadata['rights'],0,4) == 'http') $rightsStr = '<a href="'.$rightsStr.'">'.$rightsStr.'</a>';
+				$rightsHeading = '';
+				if(isset($rightsTerms)) $rightsHeading = array_search($rightsStr,$rightsTerms);
+				if(substr($collMetadata['rights'],0,4) == 'http'){
+					$rightsStr = '<a href="'.$rightsStr.'">'.($rightsHeading?$rightsHeading:$rightsStr).'</a>';
+				}
 				$rightsStr = '<div style="margin-top:2px;"><b>Usage Rights:</b> '.$rightsStr.'</div>';
 			}
 			if($collMetadata['rightsholder']){

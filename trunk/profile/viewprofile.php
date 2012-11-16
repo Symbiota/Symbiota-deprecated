@@ -226,105 +226,65 @@ if(isset($profile_viewprofileCrumbs)){
 					<form id="checklistaddform" name="checklistaddform" action="viewprofile.php" method="get" style="margin:10px;" onsubmit="return verifyClAddForm(this);">
 						<fieldset>
 							<legend style="font-weight:bold;">Create a New Checklist</legend>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Checklist Name:
-								</div>
-								<div style="float:left;">
-									<input name="nclname" type="text" maxlength="50" size="60" />
-								</div>
+							<div style="margin:3px;">
+								<b>Checklist Name</b><br/>
+								<input name="nclname" type="text" maxlength="50" style="width:90%;" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Authors:
-								</div>
-								<div style="float:left;">
-									<input name="nclauthors" type="text" maxlength="250" size="60" />
-								</div>
+							<div style="margin:3px;">
+								<b>Authors</b><br/>
+								<input name="nclauthors" type="text" maxlength="250" style="width:90%;" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Locality:
-								</div>
-								<div style="float:left;">
-									<input name="ncllocality" type="text" maxlength="500" size="60" />
-								</div>
+							<div style="margin:3px;">
+								<b>Locality</b><br/>
+								<input name="ncllocality" type="text" maxlength="500" style="width:90%;" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Publication:
-								</div>
-								<div style="float:left;">
-									<input name="nclpublication" type="text" maxlength="500" size="60" />
-								</div>
+							<div style="margin:3px;">
+								<b>Publication</b><br/>
+								<input name="nclpublication" type="text" maxlength="500" style="width:90%;" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Abstract:
-								</div>
-								<div style="float:left;">
-									<textarea name="nclabstract" rows="4" cols="45"></textarea>
-								</div>
+							<div style="margin:3px;">
+								<b>Abstract</b><br/>
+								<textarea name="nclabstract" style="width:90%;height:60px;"></textarea>
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Parent Checklist:
-								</div>
-								<div style="float:left;">
-									<select name="nclparentclid">
-										<option value="">Select a Parent checklist</option>
-										<option value="">----------------------------------</option>
-										<?php $pClManager->echoParentSelect(); ?>
-									</select>
-								</div>
+							<div style="margin:3px;">
+								<b>Notes</b><br/>
+								<input name="nclnotes" type="text" maxlength="500" size="60" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Notes:
-								</div>
-								<div style="float:left;">
-									<input name="nclnotes" type="text" maxlength="500" size="60" />
-								</div>
+							<div style="float:left;margin:3px;">
+								<b>Latitude Centroid</b><br/>
+								<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" style="width:110px;"/>
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Latitude Centroid:
-								</div>
-								<div style="float:left;">
-									<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" size="10" />
-									<span style="cursor:pointer;" onclick="openMappingAid();">
-										<img src="../images/world40.gif" style="width:12px;" />
-									</span>
-								</div>
+							<div style="float:left;margin:3px;">
+								<b>Longitude Centroid</b><br/>
+								<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" style="width:110px;" />
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Longitude Centroid:
-								</div>
-								<div style="float:left;">
-									<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" size="10" />
-								</div>
+							<div style="float:left;margin:3px;">
+								<b>Point Radius (meters)</b><br/>
+								<input name="nclpointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Point Radius (meters):
-								</div>
-								<div style="float:left;">
-									<input name="nclpointradiusmeters" type="text" maxlength="15" size="10" />
-								</div>
+							<div style="float:left;margin:20px 0px 0px 3px;">
+								<span style="cursor:pointer;" onclick="openMappingAid();">
+									<img src="../images/world40.gif" style="width:12px;" />
+								</span>
 							</div>
-							<div style="clear:both;">
-								<div style="width:130px;float:left;">
-									Public Access:
-								</div>
-								<div style="float:left;">
+							<div style="clear:both;margin:3px;">
+								<b>Parent Checklist:</b><br/> 
+								<select name="nclparentclid">
+									<option value="">Select a Parent checklist</option>
+									<option value="">----------------------------------</option>
+									<?php $pClManager->echoParentSelect(); ?>
+								</select>
+							</div>
+							<div style="clear:both;margin:3px;">
+								<div style="font-weight:bold;">
+									<b>Access:</b> 
 									<select name="nclaccess">
 										<option value="private">Private</option>
 										<option value="public">Public</option>
 									</select>
 								</div>
 							</div>
-							<div style="clear:both;">
+							<div style="clear:both;margin:10px;">
 								<input type="hidden" name="userid" value="<?php echo $userId;?>" />
 								<div style="margin-left:20px;">
 									<input name="action" type="submit" value="Create Checklist" />

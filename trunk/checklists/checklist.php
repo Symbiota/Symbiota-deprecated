@@ -349,11 +349,10 @@
 									<img src="../images/world40.gif" style="width:12px;" />
 								</div>
 								<div style="clear:both;">
-									Public Access:<br/>
+									Access:<br/>
 									<select name="eclaccess">
 										<option value="private">Private</option>
-										<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
-										<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public Research Grade</option>
+										<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public</option>
 									</select>
 								</div>
 								<div>

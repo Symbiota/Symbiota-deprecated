@@ -63,22 +63,13 @@
 						mis-interpretation of datasets or from errors or omissions that may exist in the data. 
 					</li>
 					<li>
-						It is considered a matter of professional ethics to acknowledge the work of other scientists that 
-						has resulted in data used in subsequent research. 
+						It is considered a matter of professional ethics to cite and acknowledge the work of other scientists that 
+						has resulted in data used in subsequent research. We encourages users to 
+						contact the original investigator responsible for the data that they are accessing. 
 					</li>
 					<li>
-						<?php echo $defaultTitle; ?> expects that any use of data from this server will be accompanied with 
-						the appropriate citations and acknowledgments. 
-					</li>
-			        <li>
-			        	<?php echo $defaultTitle; ?> encourages users to contact the original investigator responsible for 
-						the data that they are accessing. Where appropriate, researchers whose projects 
-						are integrally dependent on particular group of specimen data are encouraged to consider collaboration 
-						and/or co-authorship with original investigators. 
-					</li>
-					<li>
-						<?php echo $defaultTitle; ?> asks that users not redistribute data obtained from this site. However, 
-						links or references to this site may be freely posted.
+						<?php echo $defaultTitle; ?> asks that users not redistribute data obtained from this site without permission for data owners. 
+						However, links or references to this site may be freely posted.
 					</li>
 				</ul>
 		    </div>
@@ -88,17 +79,14 @@
 		    <div style="margin:15px;">
 		    	Images within this website have been generously contributed by their owners to 
 		    	promote education and research. These contributors retain the full copyright for 
-		    	their images. Unless stated otherwise, images are made available under the “Fair Use” 
-		    	provision of the U.S. Copyright Law (
-		    	<a href="http://lcweb.loc.gov/copyright">http://www.copyright.gov/</a>). They may be used 
-		    	only for personal or educational use and are NOT available for commercial use unless 
-		    	permission is first obtained from the copyright holder. If any image is used in a 
-		    	non-commercial publication, report, or as a web link, one must credit the photographer 
-		    	as well as the name of the website hosting the image. If you have any doubt or 
-		    	questions regarding the use of an image, contact the author or the site manager.
+		    	their images. Unless stated otherwise, images are made available under the Creative Commons
+		    	Attribution-ShareAlike (<a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>) 
+				Users are allowed to copy, transmit, reuse, and/or adapt content, as long as attribution 
+				regarding the source of the content is made. If the content is altered, transformed, or enhanced, 
+				it may be re-distributed only under the same or similar license by which it was acquired. 
 		    </div>
 
-			<h2>Notes on Specimen Images</h2> 
+			<h2>Notes on Specimen Records and Images</h2> 
 		    <div style="margin:15px;">
 				Specimens are used for scientific research and because of skilled preparation and 
 				careful use they may last for hundreds of years. Some collections have specimens 
@@ -108,7 +96,7 @@
 				if you are considering making specimens, remember collecting normally requires 
 				permission of the landowner and, in the case of rare and endangered plants, 
 				additional permits may be required. It is best to coordinate such efforts with a 
-				local institution that manages a publically accessable collection.
+				regional institution that manages a publically accessable collection.
 			</div> 
 		</div>
 		<?php
