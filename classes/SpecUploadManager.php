@@ -1050,11 +1050,11 @@ class SpecUploadManager{
 				if(!strpos($vCoord,$no)) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
 			}
 			//Verbatim elevation
-			if(array_key_exists('verbatimElevation',$recMap) && $recMap['verbatimElevation'] && (!array_key_exists('minimumElevationInMeters',$recMap) || !$recMap['minimumElevationInMeters'])){
-				$eArr = $this->parseVerbatimElevation($recMap['verbatimElevation']);
+			if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
+				$eArr = $this->parseVerbatimElevation($recMap['verbatimelevation']);
 				if($eArr){
 					if(array_key_exists('minelev',$eArr)){
-						$recMap['minimumElevationInMeters'] = $eArr['minelev'];
+						$recMap['minimumelevationinmeters'] = $eArr['minelev'];
 						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
 					}
 				}
