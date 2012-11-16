@@ -337,7 +337,7 @@ class GPoint
 					$isSouthern = true;
 				}
 				if(strtoupper($ZoneLetter) == 'S'){
-					if(($ZoneNumber > 18 && $ZoneNumber < 23) || $y < 3200000 || $y > 4000000){
+					if(($ZoneNumber > 18 && $ZoneNumber < 23) || $y < 3540000 || $y > 4420000){
 						//Is not MGRS grid zone S within the northern hemisphere
 						$isSouthern = true;
 					}
