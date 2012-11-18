@@ -36,6 +36,12 @@
 		elseif($action == 'Delete SQL Fragment'){
 			$statusStr = $clManager->deleteSql();
 		}
+		elseif($action == 'Add Editor'){
+			$statusStr = $clManager->addEditor($_POST['editoruid']);
+		}
+		elseif(array_key_exists('deleteuid',$_REQUEST)){
+			$statusStr = $clManager->deleteEditor($_REQUEST['deleteuid']);
+		}
 	}
 	$clArray = $clManager->getClMetaData();
 
@@ -52,23 +58,10 @@
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
-		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js"></script>
-	<style type="text/css">
-		#sddm{margin:0;padding:0;z-index:30;}
-		#sddm:hover {background-color:#EAEBD8;}
-		#sddm img{padding:3px;}
-		#sddm:hover img{background-color:#EAEBD8;}
-		#sddm li{margin:0px;padding: 0;list-style: none;float: left;font: bold 11px arial}
-		#sddm li a{display: block;margin: 0 1px 0 0;padding: 4px 10px;width: 60px;background: #5970B2;color: #FFF;text-align: center;text-decoration: none}
-		#sddm li a:hover{background: #49A3FF}
-		#sddm div{position: absolute;visibility:hidden;margin:0;padding:0;background:#EAEBD8;border:1px solid #5970B2}
-		#sddm div a	{position: relative;display:block;margin:0;padding:5px 10px;width:auto;white-space:nowrap;text-align:left;text-decoration:none;background:#EAEBD8;color:#2875DE;font-weight:bold;}
-		#sddm div a:hover{background:#49A3FF;color:#FFF}
-	</style>
+	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js"></script>
 </head>
 
 <body>
@@ -110,7 +103,7 @@
 				        <?php
 					}
 				    ?>
-			        <li><a href="chvoucheradmin.php?clid=<?php echo $clid.'&pid='.$pid.($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
+			        <li><a href="chvoucheradmin.php?clid=<?php echo $clid.($proj?'&proj='.$pid:'').($startPos?'&start='.$startPos:'').'&submitaction='.$action; ?>">Voucher Admin</a></li>
 			        <li><a href="#editortab"><span>Editors</span></a></li>
 			    </ul>
 				<div id="mdtab">
@@ -118,27 +111,27 @@
 						<fieldset style="margin:15px;padding:10px;">
 							<legend><b>Edit Checklist Details</b></legend>
 							<div>
-								<span>Checklist Name: </span>
-								<input type="text" name="eclname" size="80" value="<?php echo $clManager->getClName();?>" />
+								Checklist Name<br/>
+								<input type="text" name="eclname" style="width:95%" value="<?php echo $clManager->getClName();?>" />
 							</div>
 							<div>
-								<span>Authors: </span>
-								<input type="text" name="eclauthors" size="70" value="<?php echo $clArray["authors"]; ?>" />
+								Authors<br/>
+								<input type="text" name="eclauthors" style="width:95%" value="<?php echo $clArray["authors"]; ?>" />
 							</div>
 							<div>
-								<span>Locality: </span>
-								<input type="text" name="ecllocality" size="80" value="<?php echo $clArray["locality"]; ?>" />
+								Locality<br/>
+								<input type="text" name="ecllocality" style="width:95%" value="<?php echo $clArray["locality"]; ?>" />
 							</div> 
 							<div>
-								<span>Publication: </span>
-								<input type="text" name="eclpublication" size="80" value="<?php echo $clArray["publication"]; ?>" />
+								Publication<br/>
+								<input type="text" name="eclpublication" style="width:95%" value="<?php echo $clArray["publication"]; ?>" />
 							</div>
 							<div>
-								<span>Abstract: </span>
-								<textarea name="eclabstract" cols="70" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
+								Abstract<br/>
+								<textarea name="eclabstract" style="width:95%" rows="3"><?php echo $clArray["abstract"]; ?></textarea>
 							</div>
 							<div>
-								<span>Parent Checklist: </span>
+								Parent Checklist<br/>
 								<select name="eclparentclid">
 									<option value="">Select a Parent checklist</option>
 									<option value="">----------------------------------</option>
@@ -146,37 +139,36 @@
 								</select>
 							</div>
 							<div>
-								<span>Notes: </span>
-								<input type="text" name="eclnotes" size="80" value="<?php echo $clArray["notes"]; ?>" />
+								Notes:<br/>
+								<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
-							<div>
-								<span>Latitude Centroid: </span>
-								<input id="latdec" type="text" name="ecllatcentroid" value="<?php echo $clArray["latcentroid"]; ?>" />
-								<span style="cursor:pointer;" onclick="openMappingAid();">
-									<img src="../images/world40.gif" style="width:12px;" />
-								</span>
+							<div style="float:left;">
+								Latitude Centroid<br/>
+								<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
 							</div>
-							<div>
-								<span>Longitude Centroid: </span>
-								<input id="lngdec" type="text" name="ecllongcentroid" value="<?php echo $clArray["longcentroid"]; ?>" />
+							<div style="float:left;margin-left:5px;">
+								Longitude Centroid<br/>
+								<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
 							</div>
-							<div>
-								<span>Point Radius (meters): </span>
-								<input type="text" name="eclpointradiusmeters" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
+							<div style="float:left;margin-left:5px;">
+								Point Radius (meters)<br/>
+								<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
 							</div>
-							<div>
-								<span>Public Access: </span>
+							<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
+								<img src="../images/world40.gif" style="width:12px;" />
+							</div>
+							<div style="clear:both;">
+								Access:<br/>
 								<select name="eclaccess">
 									<option value="private">Private</option>
-									<option value="public limited" <?php echo ($clArray["access"]=="public limited"?"selected":""); ?>>Public Limited</option>
-									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public Research Grade</option>
+									<option value="public" <?php echo ($clArray["access"]=="public"?"selected":""); ?>>Public</option>
 								</select>
 							</div>
 							<div>
 								<input type='submit' name='submitaction' id='editsubmit' value='Submit Changes' />
 							</div>
-							<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
-							<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
+							<input type='hidden' name='cl' value='<?php echo $clid; ?>' />
+							<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
 						</fieldset>
 					</form>
 				</div>
@@ -213,28 +205,24 @@
 					<div style="margin:30px 0px 30px 15px;">
 						<div style="font-weight:bold;font-size:120%;">Current Editors</div>
 						<?php 
-							$editorArr = $clManager->getEditors();
-							if($editorArr){
+						$editorArr = $clManager->getEditors();
+						if($editorArr){
+							echo "<ul>\n";
+							foreach($editorArr as $uid => $uName){
 								?>
-								<ul>
-									<?php 
-									foreach($editorArr as $uid => $uName){
-										?>
-										<li>
-											<?php echo $uName; ?> 
-											<a href="checklistadmin.php?clid=<?php echo $clid.'&deleteuid='.$uid.'&pid='.$pid; ?>" onclick="return confirm('Are you sure you want to remove editing rights for this user?');" title="Delete this user">
-												<img src="../../images/drop.png" style="width:12px;" />
-											</a>
-										</li>
-										<?php 
-									}
-									?>
-								</ul>
+								<li>
+									<?php echo $uName; ?> 
+									<a href="checklist.php?cl=<?php echo $clid.'&deleteuid='.$uid.'&proj='.$pid; ?>" onclick="return confirm('Are you sure you want to remove editing rights for this user?');" title="Delete this user">
+										<img src="../images/drop.png" style="width:12px;" />
+									</a>
+								</li>
 								<?php 
 							}
-							else{
-								echo "<div>No one has been explicitly assigned as an editor</div>\n";
-							}
+							echo "</ul>\n";
+						}
+						else{
+							echo "<div>No one has been explicitly assigned as an editor</div>\n";
+						}
 						?>
 						<fieldset style="margin:40px 5px;padding:15px;">
 							<legend><b>Add New User</b></legend>

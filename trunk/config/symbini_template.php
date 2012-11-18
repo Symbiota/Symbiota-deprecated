@@ -38,6 +38,7 @@ $mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 
 $googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = true;
+$activateExsiccati = 1;
 
 $rightsTerms = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',

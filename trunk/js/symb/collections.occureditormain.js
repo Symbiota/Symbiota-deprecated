@@ -535,7 +535,8 @@ function eventDateChanged(eventDateInput){
 		if(dateArr['y'] > 0) distributeEventDate(dateArr['y'],dateArr['m'],dateArr['d']);
 	}
 	fieldChanged('eventdate');
-	autoDupeSearch();
+	var f = eventDateInput.form;
+	if(!eventDateInput.form.recordnumber.value && f.recordedby.value) autoDupeSearch();
 	return true;
 }
 
