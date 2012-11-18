@@ -86,11 +86,11 @@ if($symbUid){
 	}
 	$retainCurrentRec = 0;
 	$resetCnt = 0;
+	if($action == "Save Edits"){
+		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
+	}
 	if($isEditor || $crowdSourceMode){
-		if($action == "Save Edits"){
-			$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
-		}
-		elseif($action == 'Save OCR'){
+		if($action == 'Save OCR'){
 			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
 			if(is_numeric($statusStr)){
 				$newPrlid = $statusStr;
@@ -319,11 +319,13 @@ if($symbUid){
 				echo '</div>';
 			}
 			if($occId || $crowdSourceMode || ($isEditor && $collId)){
-				?>
-				<div style="text-align:right;width:810px;margin:-30px 10px 5px 0px;">
-					<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
-				</div>
-				<?php 
+				if($isEditor){
+					?>
+					<div style="text-align:right;width:810px;margin:-30px 10px 5px 0px;">
+						<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
+					</div>
+					<?php
+				}
 				if(!$occArr && !$goToMode) $displayQuery = 1;
 				if($crowdSourceMode){
 					include 'includes/queryformcrowdsource.php';
@@ -463,7 +465,7 @@ if($symbUid){
 											} 
 											?>
 											<li>
-												<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.$imgVars; ?>" 
+												<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
 													style="margin:0px 20px 0px 20px;">Images</a>
 											</li>
 											<li>
@@ -498,7 +500,7 @@ if($symbUid){
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a>
 														<br/>
-														<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" />
+														<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" style="width:110px;" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" <?php if(!$isEditor) echo 'disabled'; ?> />
 													</div>
 													<div style="float:left;">
 														Other Numbers
@@ -535,38 +537,31 @@ if($symbUid){
 													}
 													?>
 												</div>
-												<div style="clear:both;">
+												<div style="clear:both;height:40px;">
 													<div style="float:left;margin-top:2px;">
 														Associated Collectors
 														<br/>
 														<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" style="width:400px;" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
 													</div>
-													<div style="float:left;margin:15px 5px;cursor:pointer;" onclick="toggle('dateextradiv')">
-														<img src="../../images/editplus.png" style="width:15px;" />
+													<div style="float:left;margin:15px 5px;">
+														<a href="#" onclick="toggle('dateextradiv');return false;">
+															<img src="../../images/editplus.png" style="width:15px;" />
+														</a>
+														<?php
+														if(isset($activateExsiccati) && $activateExsiccati){ 
+															?>
+															<a href="#" style="margin:20px 0px 0px 5px;" onclick="toggle('exsdiv');return false;">
+																<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
+															</a>
+															<?php
+														}
+														?>
 													</div>
-													<!-- 
-													<div style="margin-left:5px;cursor:pointer;" onclick="toggle('exsiccatidiv')">
-														<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
-													</div>
-													 -->
 													<div id="dupediv" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
 														<span id="dupesearch">Searching for Dupes...</span>
 														<span id="dupenone" style="display:none;color:red;">No Dupes Found</span>
 														<span id="dupedisplay" style="display:none;color:green;">Displaying Dupes</span>
 													</div>
-												</div>
-												<div id="exsiccatidiv" style="clear:both;padding:10px;margin:5px;border:1px solid gray;display:none;">
-													<span>
-														Exsiccati Title:
-														<input id="ffexstitle" name="exsiccatititle" type="text" tabindex="16" maxlength="255" style="width:400px;" value="<?php echo array_key_exists('exsiccatititle',$occArr)?$occArr['exsiccatititle']:''; ?>" onchange="fieldChanged('exsiccatititle')" />
-													</span>
-													<span style="margin-left:10px;">
-														Number:
-														<input name="exsiccatinumber" type="text" tabindex="17" style="width:45px;" value="<?php echo array_key_exists('exsiccatinumber',$occArr)?$occArr['exsiccatinumber']:''; ?>" onchange="fieldChanged('exsiccatinumber');" />
-													</span>
-													<span style="margin-left:5px;cursor:pointer;">
-														<input type="button" value="Dupes?" tabindex="18" onclick="lookForExsDupes(this.form);" />
-													</span>
 												</div>
 												<div id="dateextradiv" style="clear:both;padding:10px;margin:5px;border:1px solid gray;display:none;">
 													<span>
@@ -585,6 +580,15 @@ if($symbUid){
 														<input type="text" name="enddayofyear" tabindex="26" style="width:40px;" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
 													</span>
 												</div>
+												<?php
+												if(isset($activateExsiccati) && $activateExsiccati){ 
+													?>
+													<div id="exsdiv" style="display:none;">
+														<iframe id="exsiframe" src="includes/exsiccatiframe.php?occid=<?php echo $occId; ?>" style="width:95%;height:100px;"></iframe>
+													</div>
+													<?php 
+												}
+												?>
 											</fieldset>
 											<fieldset>
 												<legend><b>Latest Identification</b></legend>
@@ -1032,52 +1036,60 @@ if($symbUid){
 												if($occId){ 
 													?>
 													<div style="margin:15px 30px;float:left;">
-														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" /><br/>
-														Status Auto-Set:
-														<select name="autoprocessingstatus">
-															<option value=''>Not Activated</option>
-															<option value=''>-------------------</option>
-															<option value='unprocessed' <?php echo ($autoPStatus=='unprocessed'?'SELECTED':''); ?>>
-																Unprocessed
-															</option>
-															<option value='unprocessed/OCR' <?php echo ($autoPStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
-																Unprocessed/OCR
-															</option>
-															<option value='unprocessed/NLP' <?php echo ($autoPStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
-																Unprocessed/NLP
-															</option>
-															<option value='stage 1' <?php echo ($autoPStatus=='stage 1'?'SELECTED':''); ?>>
-																Stage 1
-															</option>
-															<option value='stage 2' <?php echo ($autoPStatus=='stage 2'?'SELECTED':''); ?>>
-																Stage 2
-															</option>
-															<option value='stage 3' <?php echo ($autoPStatus=='stage 3'?'SELECTED':''); ?>>
-																Stage 3
-															</option>
-															<option value='pending duplicate' <?php echo ($autoPStatus=='pending duplicate'?'SELECTED':''); ?>>
-																Pending Duplicate
-															</option>
-															<option value='pending review' <?php echo ($autoPStatus=='pending review'?'SELECTED':''); ?>>
-																Pending Review
-															</option>
-															<option value='expert required' <?php echo ($autoPStatus=='expert required'?'SELECTED':''); ?>>
-																Expert Required
-															</option>
-															<?php
-															if($isEditor){
-																//Don't display these options is editor is crowd sourced 
-																?>
-																<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
-																	Reviewed
+														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" />
+														<br/>
+														<?php 
+														if($isEditor){
+															?>
+															Status Auto-Set:
+															<select name="autoprocessingstatus">
+																<option value=''>Not Activated</option>
+																<option value=''>-------------------</option>
+																<option value='unprocessed' <?php echo ($autoPStatus=='unprocessed'?'SELECTED':''); ?>>
+																	Unprocessed
 																</option>
-																<option value='closed' <?php echo ($autoPStatus=='closed'?'SELECTED':''); ?>>
-																	Closed
+																<option value='unprocessed/OCR' <?php echo ($autoPStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
+																	Unprocessed/OCR
+																</option>
+																<option value='unprocessed/NLP' <?php echo ($autoPStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
+																	Unprocessed/NLP
+																</option>
+																<option value='stage 1' <?php echo ($autoPStatus=='stage 1'?'SELECTED':''); ?>>
+																	Stage 1
+																</option>
+																<option value='stage 2' <?php echo ($autoPStatus=='stage 2'?'SELECTED':''); ?>>
+																	Stage 2
+																</option>
+																<option value='stage 3' <?php echo ($autoPStatus=='stage 3'?'SELECTED':''); ?>>
+																	Stage 3
+																</option>
+																<option value='pending duplicate' <?php echo ($autoPStatus=='pending duplicate'?'SELECTED':''); ?>>
+																	Pending Duplicate
+																</option>
+																<option value='pending review' <?php echo ($autoPStatus=='pending review'?'SELECTED':''); ?>>
+																	Pending Review
+																</option>
+																<option value='expert required' <?php echo ($autoPStatus=='expert required'?'SELECTED':''); ?>>
+																	Expert Required
 																</option>
 																<?php
-															} 
-															?>
-														</select><br/>
+																if($isEditor){
+																	//Don't display these options is editor is crowd sourced 
+																	?>
+																	<option value='reviewed' <?php echo ($autoPStatus=='reviewed'?'SELECTED':''); ?>>
+																		Reviewed
+																	</option>
+																	<option value='closed' <?php echo ($autoPStatus=='closed'?'SELECTED':''); ?>>
+																		Closed
+																	</option>
+																	<?php
+																} 
+																?>
+															</select>
+															<br/>
+															<?php
+														}
+														?>
 														<input type="hidden" name="editedfields" value="" />
 														<?php 
 														if($occIndex !== false){
@@ -1088,7 +1100,7 @@ if($symbUid){
 														?>
 													</div>
 													<?php
-													if(!$crowdSourceMode){ 
+													if($isEditor && !$crowdSourceMode){ 
 														?>
 														<div style="float:left;margin-left:200px;">
 															<fieldset style="padding:15px;background-color:lightyellow;">

@@ -830,7 +830,7 @@ class OccurrenceEditorManager {
 		$imageMap = Array();
 		if($this->occid){
 			$sql = 'SELECT imgid, url, thumbnailurl, originalurl, caption, photographer, photographeruid, '.
-				'sourceurl, copyright, notes, occid, sortsequence '.
+				'sourceurl, copyright, notes, occid, username, sortsequence '. 
 				'FROM images '.
 				'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 			//echo $sql;
@@ -847,6 +847,7 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["copyright"] = $row->copyright;
 				$imageMap[$imgId]["notes"] = $row->notes;
 				$imageMap[$imgId]["occid"] = $row->occid;
+				$imageMap[$imgId]["username"] = $row->username;
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
 			}
 			$result->free();

@@ -322,7 +322,7 @@ function searchDupesCatalogNumber(f){
 			}
 		}
 	};
-	cnXmlHttp.open("POST",url,false);
+	cnXmlHttp.open("POST",url,true);
 		cnXmlHttp.send(null);
 	}
 }
@@ -391,7 +391,7 @@ function searchDupesOtherCatalogNumbers(f){
 			}
 		}
 	};
-	xmlHttp.open("POST",url,false);
+	xmlHttp.open("POST",url,true);
 		xmlHttp.send(null);
 	}
 }
@@ -433,7 +433,7 @@ function searchDupesCollector(f,silent){
 			}
 		}
 	};
-	xmlHttp.open("POST",url,false);
+	xmlHttp.open("POST",url,true);
 	xmlHttp.send(null);
 }
 
@@ -479,7 +479,7 @@ function searchDupesCollectorEvent(f,silent){
 			}
 		}
 	};
-	xmlHttp.open("POST",url,false);
+	xmlHttp.open("POST",url,true);
 	xmlHttp.send(null);
 }
 

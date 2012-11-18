@@ -122,7 +122,6 @@ $imageArr = $occManager->getImageMap();
 			?>
 			<table>
 			<?php 
-			$imageArr = $occManager->getImageMap();
 			foreach($imageArr as $imgId => $imgArr){
 				?>
 				<tr>
@@ -298,37 +297,43 @@ $imageArr = $occManager->getImageMap();
 									</div>
 								</fieldset>
 							</form>
-							<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
-								<fieldset>
-									<legend><b>Delete Image</b></legend>
-									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-									<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-									<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
-									<div style="margin-left:20px;">
-										(Note: leaving unchecked removes image from database w/o removing from server)
-									</div>
-									<input type="submit" name="submitaction" value="Delete Image" />
-								</fieldset>
-							</form>
-							<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
-								<fieldset>
-									<legend><b>Remap to Another Specimen</b></legend>
-									<div>
-										<b>Occurrence Record #:</b> 
-										<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
-										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
-											Open Occurrence Linking Aid
-										</span>
-									</div>
-									<div style="margin-left:20px;">
-										* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
+							<?php 
+							if($_REQUEST['em'] == 1 || $paramsArr['un'] == $imgArr["username"]){
+								?>
+								<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
+									<fieldset>
+										<legend><b>Delete Image</b></legend>
+										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-										<input type="submit" name="submitaction" value="Remap Image" />
-									</div>
-								</fieldset>
-							</form>
+										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+										<div style="margin-left:20px;">
+											(Note: leaving unchecked removes image from database w/o removing from server)
+										</div>
+										<input type="submit" name="submitaction" value="Delete Image" />
+									</fieldset>
+								</form>
+								<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
+									<fieldset>
+										<legend><b>Remap to Another Specimen</b></legend>
+										<div>
+											<b>Occurrence Record #:</b> 
+											<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
+											<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
+												Open Occurrence Linking Aid
+											</span>
+										</div>
+										<div style="margin-left:20px;">
+											* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
+											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input type="submit" name="submitaction" value="Remap Image" />
+										</div>
+									</fieldset>
+								</form>
+								<?php
+							}
+							?>
 						</div>
 						<hr/>
 					</td>

@@ -273,6 +273,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	}
 
 	private function databaseImage($webUrl,$tnUrl,$lgUrl){
+		global $paramsArr;
 		if(!$webUrl) return 'ERROR: web url is null ';
 		$status = 'Image added successfully!';
 		$occId = $_REQUEST["occid"];
@@ -284,15 +285,19 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
 		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
 		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-			'owner, sourceurl, copyright, occid, notes) '.
+			'owner, sourceurl, copyright, occid, username, notes) '.
 			'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$webUrl.'",'.
 			($tnUrl?'"'.$tnUrl.'"':'NULL').','.
 			($lgUrl?'"'.$lgUrl.'"':'NULL').','.
 			($photographer?'"'.$photographer.'"':'NULL').','.
 			($photographerUid?$photographerUid:'NULL').','.
 			($caption?'"'.$caption.'"':'NULL').','.
-			($owner?'"'.$owner.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
-			($copyRight?'"'.$copyRight.'"':'NULL').','.($occId?$occId:'NULL').','.($notes?'"'.$notes.'"':'NULL').')';
+			($owner?'"'.$owner.'"':'NULL').','.
+			($sourceUrl?'"'.$sourceUrl.'"':'NULL').','.
+			($copyRight?'"'.$copyRight.'"':'NULL').','.
+			($occId?$occId:'NULL').','.
+			(isset($paramsArr['un'])?'"'.$paramsArr['un'].'"':'NULL').','.
+			($notes?'"'.$notes.'"':'NULL').')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			$status = "ERROR Loading Image Data: ".$this->conn->error."<br/>SQL: ".$sql;
