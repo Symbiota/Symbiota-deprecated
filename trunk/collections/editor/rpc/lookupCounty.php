@@ -16,7 +16,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = $row->countyname;
+		$retArr[] = htmlentities($row->countyname);
 	}
 	$result->close();
 	$con->close();

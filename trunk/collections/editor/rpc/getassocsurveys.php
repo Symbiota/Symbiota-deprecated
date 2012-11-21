@@ -10,7 +10,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[$row->surveyid] = $row->projectname;
+		$retArr[$row->surveyid] = htmlentities($row->projectname);
 	}
 	$result->close();
 	$con->close();

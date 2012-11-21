@@ -16,7 +16,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = $row->statename;
+		$retArr[] = htmlentities($row->statename);
 	}
 	$result->close();
 	$con->close();

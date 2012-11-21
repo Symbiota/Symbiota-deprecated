@@ -11,8 +11,8 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$title = $row->title;
-		$abbr = $row->abbreviation;
+		$title = htmlentities($row->title);
+		$abbr = htmlentities($row->abbreviation);
 		if(stripos($title,$queryString) !== false){
 			$retArr[] = $title;
 		}
