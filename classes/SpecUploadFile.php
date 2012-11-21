@@ -41,7 +41,7 @@ class SpecUploadFile extends SpecUploadManager{
 				}
 			}
 			else{
-				echo '<li>ERROR: File not found ('.$this->ulFileName.')</li>';
+				echo '<li>ERROR: File not found or folder where file resides can\'t be read due to permission settings ('.$this->ulFileName.')</li>';
 			}
 		}
 		else{

@@ -9,7 +9,7 @@ if($sciName){
 	$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, ts.family '.
 		'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 		'WHERE t.sciname = "'.$sciName.'" AND ts.taxauthid = 1 ';
-	echo $sql;
+	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
 		$retArr['tid'] = $row->tid;
