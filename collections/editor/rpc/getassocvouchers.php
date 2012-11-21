@@ -10,7 +10,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while($row = $result->fetch_object()) {
-		$retArr[$row->clid] = $row->name;
+		$retArr[$row->clid] = htmlentities($row->name);
 	}
 	$result->close();
 	$con->close();
