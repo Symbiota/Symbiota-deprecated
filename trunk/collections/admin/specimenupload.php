@@ -109,7 +109,7 @@ if($isEditable){
 		function verifyInitForm(f){
 			var fileName = "";
 			if(f.uploadfile || f.ulfnoverride){
-				if(f.uploadfile){
+				if(f.uploadfile && f.uploadfile.value){
 					 fileName = f.uploadfile.value;
 				}
 				else{
