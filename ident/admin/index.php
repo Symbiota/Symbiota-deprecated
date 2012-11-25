@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyCharAdmin.php');
 
 $keyManager = new KeyAdmin();
-$keyManager->setCollId($collId);
+//$keyManager->setCollId($collId);
 
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 $cId = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
