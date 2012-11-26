@@ -89,14 +89,4 @@
 			</div>
 		</div>
 	</div>
-	<div id="elevaiddiv" style="display:none;">
-		<div style="float:right;padding:15px;background-color:lightyellow;border:1px solid yellow;width:180px;margin-bottom:10px;">
-			Elevation: 
-			<input id="elevminft" style="width:45px;" /> - 
-			<input id="elevmaxft" style="width:45px;" /> feet
-			<div style="margin:5px;">
-				<input type="button" value="Insert Elevation" onclick="insertElevFt(this.form)" />
-			</div>
-		</div>
-	</div>
 </div>

@@ -87,7 +87,7 @@
 			foreach($charHeadList as $k => $charArr){
 				echo '<li>';
 				echo '<a href="#" onclick="toggle(\''.$k.'\');">'.$charArr['headingname'].'</a>';
-				echo '<div id="'.$k.'" style="display:none;">';
+				echo '<div id="'.$k.'" style="display:block;">';
 				$charList = $keyManager->getCharacters($k);
 				echo '<ul>';
 				foreach($charList as $c => $charArr){

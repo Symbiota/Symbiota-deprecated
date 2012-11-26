@@ -27,7 +27,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		}
 
 		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision",
+			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision",
 			"verbatimCoordinates","verbatimCoordinateSystem","georeferenceRemarks",
 			"verbatimLatitude","verbatimLongitude","habitat");
 
@@ -48,10 +48,11 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 			"o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, ".
 	 			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
 	 			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
-		 		"o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNotes, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, ".
-	 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, o.country, ".
-	 			"o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
-		 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
+		 		"o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, ".
+	 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
+	 			"o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, ".
+	 			"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
+		 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 	 			"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 	 			"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
 		 		"o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
@@ -60,10 +61,11 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"family","scientificName","genus","specificEpithet","taxonRank","infraspecificEpithet","scientificNameAuthorship",
 	 			"taxonRemarks","identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
 				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-	 			"verbatimEventDate","habitat","fieldNotes","occurrenceRemarks",
-	 			"dynamicProperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans","country",
-	 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
+	 			"verbatimEventDate","habitat","fieldNotes","fieldNumber","occurrenceRemarks",
+	 			"dynamicProperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
+	 			"lifeStage","sex","individualCount","samplingProtocol","preparations",
+	 			"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision","locationRemarks","verbatimCoordinates",
 				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 		 		"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId");
@@ -74,10 +76,11 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, ".
 				"o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, ".
 				"o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
-				"o.verbatimEventDate, o.habitat, o.substrate, o.fieldNotes, o.occurrenceRemarks, o.verbatimAttributes, o.dynamicProperties, ".
+				"o.verbatimEventDate, o.habitat, o.substrate, o.fieldNotes, o.fieldNumber, o.occurrenceRemarks, o.verbatimAttributes, o.dynamicProperties, ".
 				"o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
+	 			"o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, ".
 				"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
-				"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
+				"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
 				"o.verbatimCoordinateSystem, o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 				"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
 				"o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, ".
@@ -89,10 +92,11 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				"scientificNameAuthorship","taxonRemarks","identifiedBy","dateIdentified","identificationReferences",
 				"identificationRemarks","identificationQualifier","typeStatus","recordedBy","associatedCollectors",
 				"recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-		 		"verbatimEventDate","habitat","substrate","fieldNotes","occurrenceRemarks","verbatimAttributes","dynamicproperties",
+		 		"verbatimEventDate","habitat","substrate","fieldNotes","fieldNumber","occurrenceRemarks","verbatimAttributes","dynamicproperties",
 				"associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
+	 			"lifeStage", "sex", "individualCount", "samplingProtocol", "preparations",
 				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","coordinatePrecision","locationRemarks","verbatimCoordinates",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision","locationRemarks","verbatimCoordinates",
 				"verbatimCoordinateSystem","georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 		 		"disposition","duplicatequantity","modified","language","rights","rightsHolder","accessRights","localitySecurity","collId","symbiotaId");
@@ -137,6 +141,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["decimalLongitude"] = 'Protected';
 					$row["geodeticDatum"] = 'Protected';
 					$row["coordinateUncertaintyInMeters"] = 'Protected';
+					$row["footprintWKT"] = 'Protected';
 					$row["coordinatePrecision"] = 'Protected';
 					$row["locationRemarks"] = 'Protected';
 					$row["verbatimCoordinates"] = 'Protected';
@@ -201,6 +206,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$row["decimalLongitude"] = 'Protected';
 					$row["geodeticDatum"] = 'Protected';
 					$row["coordinateUncertaintyInMeters"] = 'Protected';
+					$row["footprintWKT"] = 'Protected';
 					$row["coordinatePrecision"] = 'Protected';
 					$row["locationRemarks"] = 'Protected';
 					$row["verbatimCoordinates"] = 'Protected';
@@ -226,7 +232,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 
 	public function downloadGeorefCsv(){
     	global $userRights, $defaultTitle;
-		$sql = "SELECT o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, ". 
+		$sql = "SELECT o.DecimalLatitude, o.DecimalLongitude, o.GeodeticDatum, o.CoordinateUncertaintyInMeters, o.footprintWKT, ". 
 			"o.GeoreferenceProtocol, o.GeoreferenceSources, o.GeoreferenceVerificationStatus, o.GeoreferenceRemarks, ".
 			"c.CollectionName, c.institutioncode, o.occid ".
 			"FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) ";
@@ -265,7 +271,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		//Write column names out to file
 		if($result){
     		$outstream = fopen("php://output", "w");
-			$headArr = array("DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters",
+			$headArr = array("DecimalLatitude","DecimalLongitude","GeodeticDatum","CoordinateUncertaintyInMeters","footprintWKT",
 				"GeoreferenceProtocol","GeoreferenceSources","GeoreferenceVerificationStatus","GeoreferenceRemarks",
 				"CollectionName","institutioncode","occid");
 			fputcsv($outstream, $headArr);
@@ -353,11 +359,12 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 				'family,scientificName,sciname,tidinterpreted,genus,specificEpithet,taxonRank,infraspecificEpithet,scientificNameAuthorship, '.
 				'taxonRemarks,identifiedBy,dateIdentified,identificationReferences,identificationRemarks,identificationQualifier, '.
 				'typeStatus,recordedBy,recordNumber,associatedCollectors,eventDate,year,month,day,startDayOfYear,endDayOfYear, '.
-				'verbatimEventDate,habitat,substrate,fieldNotes,occurrenceRemarks,informationWithheld,associatedOccurrences, '.
+				'verbatimEventDate,habitat,substrate,fieldNotes,fieldNumber,occurrenceRemarks,informationWithheld,associatedOccurrences, '.
 				'dataGeneralizations,associatedTaxa,dynamicProperties,verbatimAttributes,reproductiveCondition, '.
-				'cultivationStatus,establishmentMeans,lifeStage,sex,individualCount,country,stateProvince,county,municipality, '.
+				'cultivationStatus,establishmentMeans,lifeStage,sex,individualCount,samplingProtocol,preparations, '.
+    			'country,stateProvince,county,municipality, '.
 				'locality,localitySecurity,localitySecurityReason,decimalLatitude,decimalLongitude,geodeticDatum, '.
-				'coordinateUncertaintyInMeters,verbatimCoordinates,georeferencedBy,georeferenceProtocol,georeferenceSources, '.
+				'coordinateUncertaintyInMeters,footprintWKT,verbatimCoordinates,georeferencedBy,georeferenceProtocol,georeferenceSources, '.
 				'georeferenceVerificationStatus,georeferenceRemarks,minimumElevationInMeters,maximumElevationInMeters,verbatimElevation, '.
 				'previousIdentifications,disposition,modified,language,processingstatus,recordEnteredBy,duplicateQuantity, '.
 				'labelProject,dateLastModified ';

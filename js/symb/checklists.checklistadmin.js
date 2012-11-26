@@ -45,8 +45,14 @@ function toggle(target){
 }
 
 function openMappingAid() {
-	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=ecllatcentroid&longname=ecllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=ecllatcentroid&longname=ecllongcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
     if(mapWindow.opener == null) mapWindow.opener = self;
+}
+
+function openPointAid(latDef,lngDef) {
+	var tid = document.pointaddform.pointtid.value;
+	pointWindow=open("mappointaid.php?latcenter="+latDef+"&lngcenter="+lngDef+"&tid="+tid,"pointaid","resizable=0,width=800,height=700,left=20,top=20");
+    if(pointWindow.opener == null) pointWindow.opener = self;
 }
 
 function openPopup(urlStr,windowName){
@@ -100,6 +106,30 @@ function validateMetadataForm(f){
 	return true;
 }
 
+function togglePoint(f){
+	var objDiv = document.getElementById('pointlldiv');
+	if(objDiv){
+		if(f.pointtid.value == ""){
+			objDiv.style.display = "none";
+		}
+		else{
+			objDiv.style.display = "block";
+		}
+	}
+}
+
+function verifyPointAddForm(f){
+	if(f.pointtid.value == ""){
+		alert("Please select a taxon");
+		return false;
+	}
+	if(f.pointlat.value == "" || f.pointlng.value == ""){
+		alert("Please enter coordinates");
+		return false;
+	}
+	return true;
+}
+
 function validateSqlFragForm(f){
 	if(!isNumeric(f.latnorth.value) || !isNumeric(f.latsouth.value) || !isNumeric(f.lngwest.value) || !isNumeric(f.lngeast.value)){
 		alert("Latitude and longitudes values muct be numeric values only");
@@ -125,4 +155,3 @@ function isNumeric(sText){
    	}
 	return IsNumber;
 }
-

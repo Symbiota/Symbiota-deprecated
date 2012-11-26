@@ -7,23 +7,11 @@ function openAssocSppAid(){
 function toggleCoordDiv(){
 	coordObj = document.getElementById("coordaiddiv");
 	if(coordObj.style.display == "none"){
-		document.getElementById("elevaiddiv").style.display = "none";
 		document.getElementById("locextradiv").style.display = "block";
 		coordObj.style.display = "block";
 	}
 	else{
 		coordObj.style.display = "none";
-	}
-}
-
-function toggleElevDiv(){
-	elevObj = document.getElementById("elevaiddiv");
-	if(elevObj.style.display == "none"){
-		document.getElementById("coordaiddiv").style.display = "none";
-		elevObj.style.display = "block";
-	}
-	else{
-		elevObj.style.display = "none";
 	}
 }
 
@@ -252,34 +240,6 @@ function insertTRS(f) {
 		if(vCoord.value) vCoord.value = vCoord.value + "; "; 
 		vCoord.value = vCoord.value + "TRS: T"+township+townshipNS+" R"+range+rangeEW+" sec "+section+" "+secdetails+" "+meridian;
 		fieldChanged("verbatimcoordinates");
-	}
-}
-
-function insertElevFt(f){
-	var elevMin = document.getElementById("elevminft").value;
-	var elevMax = document.getElementById("elevmaxft").value;
-	if(elevMin){
-		if(isNumeric(elevMin)){
-			f.minimumelevationinmeters.value = Math.round(elevMin*.03048)*10;
-			fieldChanged("minimumelevationinmeters");
-			verbStr = elevMin;
-			if(elevMax){
-				if(isNumeric(elevMax)){
-					f.maximumelevationinmeters.value = Math.round(elevMax*.03048)*10;
-					fieldChanged("maximumelevationinmeters");
-					if(elevMax) verbStr += " - " + elevMax;
-				}
-				else{
-					alert("Elevation fields must be numeric values only (no text)!");
-				}
-			}
-			verbStr += "ft";
-			f.verbatimelevation.value = verbStr;
-			fieldChanged("verbatimelevation");
-		}
-		else{
-			alert("Elevation fields must be numeric values only (no text)!");
-		}
 	}
 }
 

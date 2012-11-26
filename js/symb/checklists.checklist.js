@@ -10,10 +10,6 @@ $(document).ready(function() {
 	},{ minLength: 4, }
 	);
 
-	$('#tabs').tabs(
-		{ selected: tabIndex }
-	);
-
 });
 
 function toggle(target){

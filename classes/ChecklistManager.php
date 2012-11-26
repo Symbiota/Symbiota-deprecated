@@ -64,7 +64,7 @@ class ChecklistManager {
 	        		echo "<option>".$row->sciname."</option>\n";
 	        	}
 	       	}
-	       	$result->close();
+	       	$result->free();
 		}
 	}
 
@@ -156,7 +156,7 @@ class ChecklistManager {
 					$this->clMetaData["datelastmodified"] = $row->datelastmodified;
 				}
 	    	}
-	    	$result->close();
+	    	$result->free();
 		}
 	}
 	
@@ -184,7 +184,7 @@ class ChecklistManager {
 		while ($row = $rs->fetch_object()){
 			$taxonAuthList[$row->taxauthid] = $row->name;
 		}
-		$rs->close();
+		$rs->free();
 		return $taxonAuthList;
 	}
 
@@ -263,7 +263,7 @@ class ChecklistManager {
 		}
 		$this->filterArr = array_keys($this->filterArr);
 		sort($this->filterArr);
-		$result->close();
+		$result->free();
 		if($this->taxaCount < (($pageNumber-1)*$retLimit)){
 			$this->taxaCount = 0; $this->genusCount = 0; $this->familyCount = 0;
 			unset($this->filterArr);
@@ -288,7 +288,7 @@ class ChecklistManager {
 				$this->taxaList[$row->tid]["url"] = $row->url;
 				$this->taxaList[$row->tid]["tnurl"] = $row->thumbnailurl;
 			}
-			$rs->close();
+			$rs->free();
 		}
 	}
 
@@ -306,7 +306,7 @@ class ChecklistManager {
 			while($row = $rs->fetch_object()){
 				$this->taxaList[$row->tid]["vern"] = $row->vernacularname;
 			}
-			$rs->close();
+			$rs->free();
 		}
 	}
 
@@ -351,7 +351,7 @@ class ChecklistManager {
 						}
 						$retCnt++;
 					}
-					$rs1->close();
+					$rs1->free();
 				}
 			}
 			catch(Exception $e){
@@ -395,7 +395,7 @@ class ChecklistManager {
 								if($maxLng < $r2->decimallongitude) $maxLng = $r2->decimallongitude;
 							}
 						}
-						$rs2->close();
+						$rs2->free();
 					}
 				}
 				catch(Exception $e){

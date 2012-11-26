@@ -66,7 +66,6 @@ else{
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
-		<a href="../../collections/misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
 		<a href='index.php'> <b>Character Management</b></a>
 	</div>
 	<?php 
@@ -94,7 +93,7 @@ else{
 		}
 		else{
 			if(!$symbUid){
-				echo 'Please <a href="../../profile/index.php?refurl=../collections/loans/index.php?collid='.$collId.'">login</a>';
+				echo 'Please <a href="../../profile/index.php?refurl=../ident/admin/index.php">login</a>';
 			}
 			elseif(!$isEditor){
 				echo '<h2>You are not authorized to add characters</h2>';
