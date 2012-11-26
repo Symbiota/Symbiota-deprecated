@@ -174,6 +174,146 @@ function maximumElevationInMetersChanged(f){
 	fieldChanged('maximumelevationinmeters');
 }
 
+function verbatimElevationChanged(f){
+	if(!f.minimumelevationinmeters.value){
+		parseVerbatimElevation(f);
+	}
+	fieldChanged("verbatimelevation");
+}
+
+function parseVerbatimElevation(f){
+	if(f.verbatimelevation.value){
+		var ftMin = "";
+		var ftMax = "";
+		var verbElevStr = f.verbatimelevation.value;
+		
+		var regEx1 = /(\d+)\s*-\s*(\d+)\s*[ft|feet|']/i; 
+		var regEx2 = /(\d+)\s*[ft|feet|']/i; 
+		var extractStr = "";
+		if(extractArr = regEx1.exec(verbElevStr)){
+			ftMin = extractArr[1];
+			ftMax = extractArr[2];
+		}
+		else if(extractArr = regEx2.exec(verbElevStr)){
+			ftMin = extractArr[1];
+		}
+
+		if(ftMin){
+			f.minimumelevationinmeters.value = Math.round(ftMin*.3048);
+			fieldChanged("minimumelevationinmeters");
+			if(ftMax){
+				f.maximumelevationinmeters.value = Math.round(ftMax*.3048);
+				fieldChanged("maximumelevationinmeters");
+			}
+		}
+	}
+}
+
+function verbatimCoordinatesChanged(f){
+	if(!f.decimallatitude.value){
+		parseVerbatimCoordinates(f);
+	}
+	fieldChanged("verbatimcoordinates");
+}
+
+function parseVerbatimCoordinates(f){
+	if(f.verbatimcoordinates.value){
+		var latDec = "";
+		var lngDec = "";
+		var verbCoordStr = f.verbatimcoordinates.value;
+		
+		var utmEx1 = /(\d{1,2})\D{0,1}\s+(\d{6})E\D{0,1}\s+(\d{7})N/i; 
+		var llEx1 = /(\d{1,2})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([NS]{1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([EW]{1})/i 
+		var llEx2 = /(\d{1,2})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([NS]{1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([EW]{1})/i 
+		var extractStr = "";
+		if(extractArr = utmEx1.exec(verbCoordStr)){
+			var z = extractArr[1];
+			var e = extractArr[2];
+			var n = extractArr[3];
+			var datum = f.geodeticdatum.value
+			var llStr = utm2LatLng(z, e, n, datum);
+			if(llStr){
+				var llArr = llStr.split(",");
+				if(llArr.length == 2){
+					latDec = Math.round(llArr[0]*1000000)/1000000;
+					lngDec = Math.round(llArr[1]*1000000)/1000000;
+				}
+			}
+		}
+		else if(extractArr = llEx1.exec(verbCoordStr)){
+			var latDeg = parseInt(extractArr[1]);
+			var latMin = parseInt(extractArr[2]);
+			var latSec = parseFloat(extractArr[3]);
+			if(latDeg > 90){
+				alert("Latitude degrees cannot be greater than 90");
+				return '';
+			}
+			if(latMin > 60){
+				alert("Latitude minutes cannot be greater than 60");
+				return '';
+			}
+			if(latSec > 60){
+				alert("Latitude seconds cannot be greater than 60");
+				return '';
+			}
+			var lngDeg = parseInt(extractArr[5]);
+			var lngMin = parseInt(extractArr[6]);
+			var lngSec = parseFloat(extractArr[7]);
+			if(lngDeg > 180){
+				alert("Longitude degrees cannot be greater than 180");
+				return '';
+			}
+			if(lngMin > 60){
+				alert("Longitude minutes cannot be greater than 60");
+				return '';
+			}
+			if(lngSec > 60){
+				alert("Longitude seconds cannot be greater than 60");
+				return '';
+			}
+			//Convert to decimal format
+			latDec = latDeg+(latMin/60)+(latSec/3600);
+			lngDec = lngDeg+(lngMin/60)+(lngSec/3600);
+			if(extractArr[4] == "S" || extractArr[4] == "s") latDec = latDec*-1;
+			if(extractArr[8] == "W" || extractArr[8] == "w") lngDec = lngDec*-1;
+		}
+		else if(extractArr = llEx2.exec(verbCoordStr)){
+			var latDeg = parseInt(extractArr[1]);
+			var latMin = parseFloat(extractArr[2]);
+			if(latDeg > 90){
+				alert("Latitude degrees cannot be greater than 90");
+				return '';
+			}
+			if(latMin > 60){
+				alert("Latitude minutes cannot be greater than 60");
+				return '';
+			}
+			var lngDeg = parseInt(extractArr[4]);
+			var lngMin = parseFloat(extractArr[5]);
+			if(lngDeg > 180){
+				alert("Longitude degrees cannot be greater than 180");
+				return '';
+			}
+			if(lngMin > 60){
+				alert("Longitude minutes cannot be greater than 60");
+				return '';
+			}
+			//Convert to decimal format
+			latDec = latDeg+(latMin/60);
+			lngDec = lngDeg+(lngMin/60);
+			if(extractArr[3] == "S" || extractArr[3] == "s") latDec = latDec*-1;
+			if(extractArr[6] == "W" || extractArr[6] == "w") lngDec = lngDec*-1;
+		}
+
+		if(latDec && lngDec){
+			f.decimallatitude.value = Math.round(latDec*1000000)/1000000;
+			f.decimallongitude.value = Math.round(lngDec*1000000)/1000000;
+			decimalLatitudeChanged(f);
+			decimalLongitudeChanged(f);
+		}
+	}
+}
+
 //Form verification code
 function verifyFullForm(f){
 

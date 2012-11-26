@@ -705,16 +705,18 @@ class SpecUploadManager{
 			'o.scientificNameAuthorship = u.scientificNameAuthorship, o.taxonRemarks = u.taxonRemarks, o.identifiedBy = u.identifiedBy, '.
 			'o.dateIdentified = u.dateIdentified, o.identificationReferences = u.identificationReferences, '.
 			'o.identificationRemarks = u.identificationRemarks, o.identificationQualifier = u.identificationQualifier, o.typeStatus = u.typeStatus, '.
-			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, '.
+			'o.recordedBy = u.recordedBy, o.recordNumber = u.recordNumber, o.fieldnumber = u.fieldnumber, '.
 			'o.associatedCollectors = u.associatedCollectors, o.eventDate = u.eventDate, '.
 			'o.year = u.year, o.month = u.month, o.day = u.day, o.startDayOfYear = u.startDayOfYear, o.endDayOfYear = u.endDayOfYear, '.
 			'o.verbatimEventDate = u.verbatimEventDate, o.habitat = u.habitat, o.substrate = u.substrate, o.fieldNotes = u.fieldNotes, o.occurrenceRemarks = u.occurrenceRemarks, o.informationWithheld = u.informationWithheld, '.
 			'o.associatedOccurrences = u.associatedOccurrences, o.associatedTaxa = u.associatedTaxa, '.
 			'o.dynamicProperties = u.dynamicProperties, o.verbatimAttributes = u.verbatimAttributes, '.
-			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, o.establishmentMeans = u.establishmentMeans, '.
+			'o.reproductiveCondition = u.reproductiveCondition, o.cultivationStatus = u.cultivationStatus, '.
+			'o.establishmentMeans = u.establishmentMeans, o.lifestage = u.lifestage, o.sex = u.sex, o.individualcount = u.individualcount, '.
+			'o.samplingprotocol = u.samplingprotocol, o.preparations = u.preparations, '.
 			'o.country = u.country, o.stateProvince = u.stateProvince, o.county = u.county, o.municipality = u.municipality, o.locality = u.locality, '.
 			'o.localitySecurity = u.localitySecurity, o.localitySecurityReason = u.localitySecurityReason, o.decimalLatitude = u.decimalLatitude, o.decimalLongitude = u.decimalLongitude, '.
-			'o.geodeticDatum = u.geodeticDatum, o.coordinateUncertaintyInMeters = u.coordinateUncertaintyInMeters, '.
+			'o.geodeticDatum = u.geodeticDatum, o.coordinateUncertaintyInMeters = u.coordinateUncertaintyInMeters, o.footprintWKT = u.footprintWKT, '.
 			'o.coordinatePrecision = u.coordinatePrecision, o.locationRemarks = u.locationRemarks, o.verbatimCoordinates = u.verbatimCoordinates, '.
 			'o.verbatimCoordinateSystem = u.verbatimCoordinateSystem, o.georeferencedBy = u.georeferencedBy, o.georeferenceProtocol = u.georeferenceProtocol, '.
 			'o.georeferenceSources = u.georeferenceSources, o.georeferenceVerificationStatus = u.georeferenceVerificationStatus, '.
@@ -749,25 +751,31 @@ class SpecUploadManager{
 		echo '<li style="font-weight:bold;">Inserting new records into active occurrence table... ';
 		ob_flush();
 		flush();
-		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, family, scientificName, '.
-			'sciname, tidinterpreted, genus, institutionID, collectionID, specificEpithet, datasetID, taxonRank, infraspecificEpithet, institutionCode, collectionCode, '.
+		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, '.
+			'institutionID, collectionID, institutionCode, collectionCode, '.
+			'family, scientificName, sciname, tidinterpreted, genus, specificEpithet, datasetID, taxonRank, infraspecificEpithet, '.
 			'scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
 			'identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
-			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, habitat, substrate, fieldNotes, occurrenceRemarks, informationWithheld, '.
-			'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, country, stateProvince, '.
-			'county, municipality, locality, localitySecurity, localitySecurityReason, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, '.
+			'eventDate, Year, Month, Day, startDayOfYear, endDayOfYear, verbatimEventDate, '.
+			'habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, associatedOccurrences, '.
+			'associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, cultivationStatus, establishmentMeans, '.
+			'lifestage, sex, individualcount, samplingprotocol, preparations, '.
+			'country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
+			'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, '.
 			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
 			'georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, '.
 			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, duplicateQuantity ) '.
 			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.ownerInstitutionCode, '.
-			'u.family, u.scientificName, '.
-			'u.sciname, u.tidinterpreted, u.genus, u.institutionID, u.collectionID, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
-			'u.institutionCode, u.collectionCode, u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, '.
-			'u.identificationReferences, u.identificationRemarks, u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, '.
-			'u.associatedCollectors, u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, '.
-			'u.endDayOfYear, u.verbatimEventDate, u.habitat, u.substrate, u.fieldNotes, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, u.associatedTaxa, '.
-			'u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, u.country, u.stateProvince, u.county, '.
-			'u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, '.
+			'u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
+			'u.family, u.scientificName, u.sciname, u.tidinterpreted, u.genus, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
+			'u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
+			'u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
+			'u.eventDate, u.Year, u.Month, u.Day, u.startDayOfYear, u.endDayOfYear, u.verbatimEventDate, '.
+			'u.habitat, u.substrate, u.fieldNotes, u.fieldnumber, u.occurrenceRemarks, u.informationWithheld, u.associatedOccurrences, '.
+			'u.associatedTaxa, u.dynamicProperties, u.verbatimAttributes, u.reproductiveCondition, u.cultivationStatus, u.establishmentMeans, '.
+			'u.lifestage, u.sex, u.individualcount, u.samplingprotocol, u.preparations, '.
+			'u.country, u.stateProvince, u.county, u.municipality, u.locality, u.localitySecurity, u.localitySecurityReason, '.
+			'u.decimalLatitude, u.decimalLongitude, u.geodeticDatum, u.coordinateUncertaintyInMeters, u.footprintWKT, '.
 			'u.coordinatePrecision, u.locationRemarks, u.verbatimCoordinates, u.verbatimCoordinateSystem, u.georeferencedBy, u.georeferenceProtocol, '.
 			'u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters, '.
 			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.duplicateQuantity '.
