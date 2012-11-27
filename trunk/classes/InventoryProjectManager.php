@@ -113,11 +113,17 @@ class InventoryProjectManager {
 	}
 	
 	public function getResearchChecklists(){
+		global $userRights;
 		$returnArr = Array();
-		$sql = "SELECT c.clid, c.name, c.latcentroid, c.longcentroid ".
-			"FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid ".
-			"WHERE (cpl.pid = ".$this->projId.")  ";
-		if($this->isPublic) $sql .= 'AND (c.access != "private") ';
+		$sql = 'SELECT c.clid, c.name, c.latcentroid, c.longcentroid, c.access '.
+			'FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid '.
+			'WHERE (cpl.pid = '.$this->projId.') AND ((c.access != "private")';
+		if(array_key_exists('ClAdmin',$userRights)){
+			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).')) ';
+		}
+		else{
+			$sql .= ') ';
+		}
 		$sql .= "ORDER BY c.SortSequence, c.name";
 		$rs = $this->con->query($sql);
 		echo "<ul>";

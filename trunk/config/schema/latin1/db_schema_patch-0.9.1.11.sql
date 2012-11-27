@@ -571,5 +571,31 @@ ALTER TABLE `users`
   ADD COLUMN `rightsholder` VARCHAR(250) NULL  AFTER `defaultrights` ; 
 
 
-#sql for transferring locality lookup to other tables
+ALTER TABLE `omcollections`
+  ADD COLUMN `guidtarget` VARCHAR(45) NULL  AFTER `PublicEdits` ; 
 
+
+#briefdescription field is being depricated
+UPDATE omcollections
+SET fulldescription = briefdescription
+WHERE briefdescription IS NOT NULL AND briefdescription <> "" AND (fulldescription IS NULL OR fulldescription = "");
+
+UPDATE fmprojects
+SET fulldescription = briefdescription
+WHERE briefdescription IS NOT NULL AND briefdescription <> "" AND (fulldescription IS NULL OR fulldescription = "");
+
+
+#transferring locality lookup data to new tables
+INSERT INTO geothescountry(countryterm,iso,iso3,numcode)
+SELECT DISTINCT countryName, iso, iso3, numcode
+FROM lkupcountry;
+
+INSERT INTO geothesstateprovince(countryid, stateterm, abbreviation)
+SELECT DISTINCT gtc.gtcid, s.stateName, s.abbrev
+FROM geothescountry gtc INNER JOIN lkupcountry c ON gtc.countryterm = c.countryname
+INNER JOIN lkupstateprovince s ON c.countryid = s.countryid;
+
+INSERT INTO geothescounty(stateid, countyterm)
+SELECT DISTINCT gts.gtspid, trim(replace(c.countyName," County","")) as cn
+FROM geothesstateprovince gts INNER JOIN lkupstateprovince s ON gts.stateterm = s.statename
+INNER JOIN lkupcounty c ON s.stateid = c.stateid;
