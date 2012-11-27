@@ -895,14 +895,14 @@ if($symbUid){
 														<a href="#" onclick="return dwcDoc('samplingProtocol')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="samplingprotocol" tabindex="98" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('samplingprotocol',$occArr)?$occArr['samplingprotocol']:''; ?>" onchange="fieldChanged('samplingprotocol');" />
+														<input type="text" name="samplingprotocol" tabindex="95" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('samplingprotocol',$occArr)?$occArr['samplingprotocol']:''; ?>" onchange="fieldChanged('samplingprotocol');" />
 													</div>
 													<div style="float:left;margin:3px;">
 														Preparations
 														<a href="#" onclick="return dwcDoc('preparations')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="preparations" tabindex="100" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('preparations',$occArr)?$occArr['preparations']:''; ?>" onchange="fieldChanged('preparations');" />
+														<input type="text" name="preparations" tabindex="97" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('preparations',$occArr)?$occArr['preparations']:''; ?>" onchange="fieldChanged('preparations');" />
 													</div>
 													<div style="float:left;margin:3px;">
 														Phenology
@@ -913,7 +913,7 @@ if($symbUid){
 														if(isset($reproductiveConditionTerms)){
 															if($reproductiveConditionTerms){
 																?>
-																<select name="reproductivecondition" style="width:140px;" onchange="fieldChanged('reproductivecondition');" />
+																<select name="reproductivecondition" style="width:140px;" onchange="fieldChanged('reproductivecondition');" tabindex="99" />
 																	<option value="">-----------------</option>
 																	<?php
 																	foreach($reproductiveConditionTerms as $term){
@@ -926,7 +926,7 @@ if($symbUid){
 														}
 														else{
 														?>
-															<input type="text" name="reproductivecondition" tabindex="95" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
+															<input type="text" name="reproductivecondition" tabindex="99" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
 														<?php
 														}
 														?>
@@ -937,11 +937,11 @@ if($symbUid){
 														<a href="#" onclick="return dwcDoc('establishmentMeans')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="establishmentmeans" tabindex="97" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
+														<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
 													</div>
 													<div style="float:left;margin:15px 3px 3px 3px;">
 														<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]?1:0; ?>
-														<input type="checkbox" name="cultivationstatus" tabindex="99" style="" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
+														<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
 														Cultivated
 													</div>
 												</div>
@@ -954,7 +954,7 @@ if($symbUid){
 														<a href="#" onclick="return dwcDoc('typeStatus')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="typestatus" tabindex="102" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
+														<input type="text" name="typestatus" tabindex="103" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
 													</div>
 													<div style="float:left;margin:3px;">
 														Disposition
@@ -980,32 +980,32 @@ if($symbUid){
 														<a href="#" onclick="return dwcDoc('occurrenceid')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="occurrenceid" tabindex="102" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="fieldChanged('occurrenceid');" />
+														<input type="text" name="occurrenceid" tabindex="105" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="fieldChanged('occurrenceid');" />
 													</div>
 													<div style="float:left;margin:3px;" title="If different than institution code">
 														Field Number
 														<a href="#" onclick="return dwcDoc('fieldnumber')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="fieldnumber" tabindex="103" maxlength="45" style="width:150px;" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
+														<input type="text" name="fieldnumber" tabindex="107" maxlength="45" style="width:150px;" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
 													</div>
 													<div style="float:left;margin:3px;" title="If different than institution code">
 														Owner Code
 														<a href="#" onclick="return dwcDoc('ownerInstitutionCode')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="ownerinstitutioncode" tabindex="105" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
+														<input type="text" name="ownerinstitutioncode" tabindex="108" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 													</div>
 													<div style="float:left;margin:3px;">
 														Basis of Record
 														<a href="#" onclick="return dwcDoc('basisOfRecord')">
 															<img class="dwcimg" src="../../images/qmark.png" />
 														</a><br/>
-														<input type="text" name="basisofrecord" tabindex="106" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
+														<input type="text" name="basisofrecord" tabindex="109" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
 													</div>
 													<div style="float:left;margin:4px 3px;">
 														Language<br/>
-														<input type="text" name="language" tabindex="108" maxlength="20" style="width:150px;" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+														<input type="text" name="language" tabindex="111" maxlength="20" style="width:150px;" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 													</div>
 													<div style="float:left;margin:5px 3px;">
 														Label Project<br/>
@@ -1020,7 +1020,7 @@ if($symbUid){
 														<?php 
 															$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:'';
 														?>
-														<select name="processingstatus" tabindex="110" onchange="fieldChanged('processingstatus');">
+														<select name="processingstatus" tabindex="120" onchange="fieldChanged('processingstatus');">
 															<option value=''>No Set Status</option>
 															<option value=''>-------------------</option>
 															<option value='unprocessed' <?php echo ($pStatus=='unprocessed'?'SELECTED':''); ?>>

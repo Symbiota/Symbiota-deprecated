@@ -599,12 +599,12 @@ class OccurrenceEditorManager {
 			($occArr["reproductivecondition"]?'"'.$this->cleanStr($occArr["reproductivecondition"]).'"':"NULL").",".
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
 			($occArr["establishmentmeans"]?'"'.$this->cleanStr($occArr["establishmentmeans"]).'"':"NULL").",".
-			($occArr['country']?'"'.$this->cleanStr($occArr['country']).'"':'NULL').','.
 			($occArr['lifestage']?'"'.$this->cleanStr($occArr['lifestage']).'"':'NULL').','.
 			($occArr['sex']?'"'.$this->cleanStr($occArr['sex']).'"':'NULL').','.
 			($occArr['individualcount']?'"'.$this->cleanStr($occArr['individualcount']).'"':'NULL').','.
 			($occArr['samplingprotocol']?'"'.$this->cleanStr($occArr['samplingprotocol']).'"':'NULL').','.
 			($occArr['preparations']?'"'.$this->cleanStr($occArr['preparations']).'"':'NULL').','.
+			($occArr['country']?'"'.$this->cleanStr($occArr['country']).'"':'NULL').','.
 			($occArr["stateprovince"]?'"'.$this->cleanStr($occArr["stateprovince"]).'"':"NULL").",".
 			($occArr["county"]?'"'.$this->cleanStr($occArr["county"]).'"':"NULL").",".
 			($occArr["locality"]?'"'.$this->cleanStr($occArr["locality"]).'"':"NULL").",".
