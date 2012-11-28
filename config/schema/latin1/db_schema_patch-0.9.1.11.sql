@@ -90,6 +90,9 @@ ALTER TABLE `uploadspectemp`
   ADD COLUMN `samplingProtocol` VARCHAR(100) NULL DEFAULT NULL  AFTER `individualCount`,
   ADD COLUMN `preparations` VARCHAR(100) NULL DEFAULT NULL  AFTER `samplingProtocol`;
 
+ALTER TABLE `uploadspectemp`
+  ADD COLUMN `footprintWKT` TEXT NULL DEFAULT NULL  AFTER `coordinateUncertaintyInMeters`;
+
 
 ALTER TABLE `omcollectors`
   ADD COLUMN `rating` INT NULL DEFAULT 10  AFTER `notes` ;
