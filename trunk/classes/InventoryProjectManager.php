@@ -119,7 +119,7 @@ class InventoryProjectManager {
 			'FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid '.
 			'WHERE (cpl.pid = '.$this->projId.') AND ((c.access != "private")';
 		if(array_key_exists('ClAdmin',$userRights)){
-			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).')) ';
+			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).'))) ';
 		}
 		else{
 			$sql .= ') ';
@@ -128,7 +128,7 @@ class InventoryProjectManager {
 		$rs = $this->con->query($sql);
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+			$returnArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
 			if($row->latcentroid){
 				$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
 			}
