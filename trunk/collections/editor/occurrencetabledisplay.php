@@ -316,7 +316,6 @@ if($symbUid){
 								if(strlen($displayStr) > 50){
 									$displayStr = substr($displayStr,0,50).'...';
 								}
-								if($k != 'sciname') $displayStr = htmlentities($displayStr);
 								if(!$displayStr) $displayStr = '&nbsp;';
 								echo '<td>'.$displayStr.'</td>'."\n";
 							}
