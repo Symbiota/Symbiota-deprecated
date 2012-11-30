@@ -101,7 +101,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 											echo '<td>'.$catNum.'</td>'."\n";
 											foreach($fieldArr as $v){
 												if(array_key_exists($v,$occArr)){
-													$outStr = htmlentities($occArr[$v]);
+													$outStr = $occArr[$v];
 													$titleStr = '';
 													if(strlen($outStr) > 150){
 														$titleStr = $outStr;

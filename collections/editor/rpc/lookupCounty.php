@@ -16,7 +16,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = htmlentities($row->countyname);
+		$retArr[] = utf8_encode($row->countyname);
 	}
 	$result->close();
 	$con->close();
