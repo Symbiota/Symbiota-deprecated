@@ -16,7 +16,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = htmlentities($row->statename);
+		$retArr[] = utf8_encode($row->statename);
 	}
 	$result->close();
 	$con->close();
