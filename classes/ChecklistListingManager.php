@@ -43,7 +43,7 @@
 		//echo $sql;
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->pid."::".$row->projname][$row->CLID] = $row->Name;
+			$returnArr[$row->pid."::".$row->projname][$row->CLID] = $this->cleanOutStr($row->Name);
 		}
 		return $returnArr;
 	}
@@ -59,9 +59,16 @@
 		//echo $sql;
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->pid."::".$row->projname][$row->surveyid] = $row->projectname;
+			$returnArr[$row->pid."::".$row->projname][$row->surveyid] = $this->cleanOutStr($row->projectname);
 		}
 		return $returnArr;
+	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

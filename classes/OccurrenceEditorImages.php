@@ -90,12 +90,12 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	 		}
 		}
 		$occId = $_REQUEST["occid"];
-		$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographer = $_REQUEST["photographer"];
+		$caption = $this->cleanInStr($_REQUEST["caption"]);
+		$photographer = $this->cleanInStr($_REQUEST["photographer"]);
 		$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST['photographeruid']:'');
-		$notes = $this->cleanStr($_REQUEST["notes"]);
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
+		$notes = $this->cleanInStr($_REQUEST["notes"]);
+		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
+		$sourceUrl = $this->cleanInStr($_REQUEST["sourceurl"]);
 
 		$sql = "UPDATE images ".
 			"SET url = \"".$url."\", thumbnailurl = ".($tnUrl?"\"".$tnUrl."\"":"NULL").
@@ -278,12 +278,12 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$status = 'Image added successfully!';
 		$occId = $_REQUEST["occid"];
 		$owner = $_REQUEST["institutioncode"];
-		$caption = $this->cleanStr($_REQUEST["caption"]);
+		$caption = $this->cleanInStr($_REQUEST["caption"]);
 		$photographerUid = (array_key_exists('photographeruid',$_REQUEST)?$_REQUEST["photographeruid"]:'');
-		$photographer = (array_key_exists('photographer',$_REQUEST)?$_REQUEST["photographer"]:'');
+		$photographer = (array_key_exists('photographer',$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):'');
 		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
+		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
+		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
 		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
 			'owner, sourceurl, copyright, occid, username, notes) '.
 			'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$webUrl.'",'.
@@ -386,7 +386,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 				"FROM users u ORDER BY u.lastname, u.firstname ";
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
-				$this->photographerArr[$row->uid] = $row->fullname;
+				$this->photographerArr[$row->uid] = $this->cleanOutStr($row->fullname);
 			}
 			$result->close();
 		}
@@ -422,10 +422,10 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
  		$rs = $this->conn->query($sql);
  		while($row = $rs->fetch_object()){
  			$occId = $row->occid;
- 			$returnArr[$occId]['sciname'] = $row->sciname;
- 			$returnArr[$occId]['recordedby'] = $row->recordedby;
- 			$returnArr[$occId]['recordnumber'] = $row->recordnumber;
- 			$returnArr[$occId]['locality'] = $row->locality;
+ 			$returnArr[$occId]['sciname'] = $this->cleanOutStr($row->sciname);
+ 			$returnArr[$occId]['recordedby'] = $this->cleanOutStr($row->recordedby);
+ 			$returnArr[$occId]['recordnumber'] = $this->cleanOutStr($row->recordnumber);
+ 			$returnArr[$occId]['locality'] = $this->cleanOutStr($row->locality);
  		}
  		$rs->close();
  		return $returnArr;

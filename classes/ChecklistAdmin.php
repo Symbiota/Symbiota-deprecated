@@ -28,13 +28,13 @@ class ChecklistAdmin {
 				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
-				$this->clName = $row->name;
-				$retArr["locality"] = $row->locality; 
-				$retArr["notes"] = $row->notes;
+				$this->clName = $this->cleanOutStr($row->name);
+				$retArr["locality"] = $this->cleanOutStr($row->locality); 
+				$retArr["notes"] = $this->cleanOutStr($row->notes);
 				$retArr["type"] = $row->type;
-				$retArr["publication"] = $row->publication;
-				$retArr["abstract"] = $row->abstract;
-				$retArr["authors"] = $row->authors;
+				$retArr["publication"] = $this->cleanOutStr($row->publication);
+				$retArr["abstract"] = $this->cleanOutStr($row->abstract);
+				$retArr["authors"] = $this->cleanOutStr($row->authors);
 				$retArr["parentclid"] = $row->parentclid;
 				$retArr["uid"] = $row->uid;
 				$retArr["latcentroid"] = $row->latcentroid;
@@ -54,7 +54,7 @@ class ChecklistAdmin {
 		$setSql = "";
 		foreach($editArr as $key =>$value){
 			if($value){
-				$setSql .= ', '.$key.' = "'.$this->cleanStr($value).'"';
+				$setSql .= ', '.$key.' = "'.$this->cleanInStr($value).'"';
 			}
 			else{
 				$setSql .= ', '.$key.' = NULL';
@@ -83,7 +83,7 @@ class ChecklistAdmin {
 				echo "Family,ScientificName,ScientificNameAuthorship,";
 				echo "TaxonId\n";
 				foreach($taxaArr as $tid => $tArr){
-					echo '"'.$tArr['family'].'","'.$tArr['sciname'].'","'.$tArr['author'].'"';
+					echo '"'.$this->cleanOutStr($tArr['family']).'","'.$this->cleanOutStr($tArr['sciname']).'","'.$this->cleanOutStr($tArr['author']).'"';
 					echo ',"'.$tid.'"'."\n";
 				}
 			}
@@ -98,7 +98,7 @@ class ChecklistAdmin {
     	$statusStr = '';
     	if(is_numeric($tid) && is_numeric($lat) && is_numeric($lng)){
     		$sql = 'INSERT INTO fmchklstcoordinates(clid,tid,decimallatitude,decimallongitude,notes) '.
-    			'VALUES('.$this->clid.','.$tid.','.$lat.','.$lng.',"'.$this->cleanStr($notes).'")';
+    			'VALUES('.$this->clid.','.$tid.','.$lat.','.$lng.',"'.$this->cleanInStr($notes).'")';
     		if(!$this->conn->query($sql)){
     			$statusStr = 'ERROR: unable to add point. '.$this->conn->error;
     		}
@@ -134,16 +134,16 @@ class ChecklistAdmin {
 		$statusStr = false;
 		$sqlFrag = "";
 		if($sqlFragArr['country']){
-			$sqlFrag = 'AND (o.country = "'.$this->cleanStr($sqlFragArr['country']).'") ';
+			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($sqlFragArr['country']).'") ';
 		}
 		if($sqlFragArr['state']){
-			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanStr($sqlFragArr['state']).'") ';
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($sqlFragArr['state']).'") ';
 		}
 		if($sqlFragArr['county']){
-			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanStr($sqlFragArr['county']).'%") ';
+			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanInStr($sqlFragArr['county']).'%") ';
 		}
 		if($sqlFragArr['locality']){
-			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanStr($sqlFragArr['locality']).'%") ';
+			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($sqlFragArr['locality']).'%") ';
 		}
 		$llStr = '';
 		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth'] && is_numeric($sqlFragArr['latnorth']) && is_numeric($sqlFragArr['latsouth'])){
@@ -209,7 +209,7 @@ class ChecklistAdmin {
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->family][$row->tid] = $row->sciname;
+			$retArr[$row->family][$row->tid] = $this->cleanOutStr($row->sciname);
 		}
 		$rs->free();
 		return $retArr;
@@ -229,11 +229,11 @@ class ChecklistAdmin {
 			$retArr[$row->tid]['listid'] = $row->listid;
 			$collStr = $row->recordedby;
 			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
-			$retArr[$row->tid]['recordnumber'] = $collStr;
-			$retArr[$row->tid]['specid'] = $row->sciname;
+			$retArr[$row->tid]['recordnumber'] = $this->cleanOutStr($collStr);
+			$retArr[$row->tid]['specid'] = $this->cleanOutStr($row->sciname);
 			$idBy = $row->identifiedby;
-			if($row->dateidentified) $idBy .= ' ('.$row->dateidentified.')';
-			$retArr[$row->tid]['identifiedby'] = $idBy;
+			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
+			$retArr[$row->tid]['identifiedby'] = $this->cleanOutStr($idBy);
 		}
 		$rs->free();
 		return $retArr;
@@ -254,7 +254,7 @@ class ChecklistAdmin {
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				$retArr[$row->tidinterpreted] = $row->sciname;
+				$retArr[$row->tidinterpreted] = $this->cleanOutStr($row->sciname);
 			}
 			$rs->free();
 		}
@@ -302,13 +302,14 @@ class ChecklistAdmin {
 			
 			while($row = $rs->fetch_assoc()){
 				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
-					$row["catalognumber"].'","'.$row["identifiedby"].'","'.$row["dateidentified"].'","'.$row["recordedby"].'","'.
+					$row["catalognumber"].'","'.$this->cleanOutStr($row["identifiedby"]).'","'.
+					$this->cleanOutStr($row["dateidentified"]).'","'.$this->cleanOutStr($row["recordedby"]).'","'.
 					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
 					$row["county"].'","'.$row["municipality"].'",';
 				
 				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo '"'.$this->cleanStr($row["locality"]).'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
+					echo '"'.$this->cleanOutStr($row["locality"]).'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
 					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
 				}
 				else{
@@ -494,13 +495,18 @@ class ChecklistAdmin {
 		return $retArr;
 	}
 
-	private function cleanStr($str){
- 		$newStr = trim($str);
- 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"&quot;",$newStr);
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
- 		$newStr = $this->conn->real_escape_string($newStr);
- 		return $newStr;
- 	}
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?>

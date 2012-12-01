@@ -1,8 +1,4 @@
 <?php
-/*
- * Rebuilt 29 Jan 2010
- * By E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
  
 class InventoryDynSqlManager {

@@ -41,7 +41,7 @@ class EOLManager {
 		echo "<ul>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
-			$sciName = $r->sciname;
+			$sciName = $this->cleanOutStr($r->sciname);
 			if($this->queryEolIdentifier($tid, $sciName, $makePrimaryLink)){
 				$successCnt++;
 			}
@@ -70,7 +70,7 @@ class EOLManager {
 				//Load link
 				if($identifier){
 					$sql = 'INSERT INTO taxalinks(tid, url, sourceIdentifier, owner, title, sortsequence) '.
-						'VALUES('.$tid.',"'.$link.'","'.$identifier.'","EOL","Encyclopedia of Life", '.($makePrimaryLink?1:50).') ';
+						'VALUES('.$tid.',"'.$link.'","'.$this->cleanInStr($identifier).'","EOL","Encyclopedia of Life", '.($makePrimaryLink?1:50).') ';
 					if($this->conn->query($sql)){
 						echo '<li>Identifier mapped successfully</li>'."\n";
 						$retStatus = 1;
@@ -121,8 +121,8 @@ class EOLManager {
 		echo "<ul>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
-			echo '<li>Mapping images for '.$r->sciname.' (tid: '.$tid.'; EOL:'.$r->sourceidentifier.")</li>\n";
-			if($this->mapEolImages($tid, $r->sourceidentifier)){
+			echo '<li>Mapping images for '.$this->cleanOutStr($r->sciname).' (tid: '.$tid.'; EOL:'.$this->cleanOutStr($r->sourceidentifier).")</li>\n";
+			if($this->mapEolImages($tid, $this->cleanOutStr($r->sourceidentifier))){
 				$successCnt++;
 			}
 		}
@@ -158,19 +158,19 @@ class EOLManager {
 
 						if(array_key_exists('agents',$objArr)){
 							foreach($objArr['agents'] as $agentObj){
-								if($agentObj['full_name']) $resourceArr['photographer'] = $this->cleanStr($agentObj['full_name']);
+								if($agentObj['full_name']) $resourceArr['photographer'] = $this->cleanInStr($agentObj['full_name']);
 								if($agentObj['role'] == 'photographer') break; 
 							}
 						}
-						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanStr($objArr['description']);
-						if(array_key_exists('rights',$objArr)) $resourceArr['notes'] = $this->cleanStr($objArr['rights']);
-						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanStr($objArr['title']);
-						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanStr($objArr['rightsHolder']);
-						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanStr($objArr['source']);
-						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $this->cleanStr($objArr['license']);
-						if(array_key_exists('location',$objArr)) $locStr = $this->cleanStr($objArr['location']);
+						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['description']);
+						if(array_key_exists('rights',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['rights']);
+						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanInStr($objArr['title']);
+						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanInStr($objArr['rightsHolder']);
+						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanInStr($objArr['source']);
+						if(array_key_exists('license',$objArr)) $resourceArr['license'] = $this->cleanInStr($objArr['license']);
+						if(array_key_exists('location',$objArr)) $locStr = $this->cleanInStr($objArr['location']);
 						if(array_key_exists('latitude',$objArr) && array_key_exists('longitude',$objArr)){
-							$locStr .= ' ('.$this->cleanStr($objArr['latitude']).', '.$this->cleanStr($objArr['longitude']).')';
+							$locStr .= ' ('.$this->cleanInStr($objArr['latitude']).', '.$this->cleanInStr($objArr['longitude']).')';
 						}
 						$sourceStr = (array_key_exists('source',$resourceArr)?trim($resourceArr['source']):'');
 						if($resourceArr && !in_array('MBG',$resourceArr) && !stripos($sourceStr,'tropicos')){
@@ -225,16 +225,22 @@ class EOLManager {
 		return $retStr;
 	}
 	
-	private function cleanStr($str){
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
 		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = str_replace(chr(9)," ",$newStr);
 		$newStr = str_replace(chr(10)," ",$newStr);
 		$newStr = str_replace(chr(13)," ",$newStr);
 
 		$newStr = $this->encodeString($newStr);
 		
-		$newStr = str_replace('"',"&quot;",$newStr);
-		$newStr = str_replace("'","&apos;",$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}

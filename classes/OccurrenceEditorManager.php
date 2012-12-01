@@ -69,7 +69,7 @@ class OccurrenceEditorManager {
 				if($row = $rs->fetch_object()){
 					$this->collMap['collid'] = $row->collid;
 					!$this->collId = $row->collid;
-					$this->collMap['collectionname'] = $row->collectionname;
+					$this->collMap['collectionname'] = $this->cleanOutStr($row->collectionname);
 					$this->collMap['institutioncode'] = $row->institutioncode;
 					$this->collMap['collectioncode'] = $row->collectioncode;
 					$this->collMap['colltype'] = $row->colltype;
@@ -440,8 +440,8 @@ class OccurrenceEditorManager {
 			}
 			$rs->free();
 			if(!$this->occid && $retArr && count($retArr) == 1) $this->occid = $occid; 
-			$this->occurrenceMap = $retArr;
-			//if($this->occid) $this->setLoanData();
+			$this->occurrenceMap = $this->cleanOutArr($retArr);
+			if($this->occid) $this->setLoanData();
 		}
 	}
 
@@ -474,8 +474,8 @@ class OccurrenceEditorManager {
 						//Field is a checkbox that is unchecked
 						$occArr[$v] = 0;
 					}
-					$newValue = $this->cleanStr($occArr[$v]);
-					$oldValue = $this->cleanStr($oldValues[$v]);
+					$newValue = $this->cleanInStr($occArr[$v]);
+					$oldValue = $this->cleanInStr($oldValues[$v]);
 					//Version edits only if value has changed and old value was not null 
 					if($v && $oldValue != $newValue){
 						$sqlEdit = $sqlEditsBase.'"'.$v.'","'.$newValue.'","'.$oldValue.'")';
@@ -497,7 +497,7 @@ class OccurrenceEditorManager {
 				}
 				foreach($occArr as $ok => $ov){
 					if(in_array($ok,$this->occFieldArr) && $ok != 'observeruid'){
-						$vStr = $this->cleanStr($ov);
+						$vStr = $this->cleanInStr($ov);
 						$sql .= ','.$ok.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
 						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($ok,$this->occurrenceMap[$this->occid])){
 							$this->occurrenceMap[$this->occid][$ok] = $vStr;
@@ -564,70 +564,70 @@ class OccurrenceEditorManager {
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
 			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy, observeruid) ".
 			"VALUES (".$occArr["collid"].",".
-			($occArr["basisofrecord"]?'"'.$this->cleanStr($occArr["basisofrecord"]).'"':"NULL").",".
-			($occArr["catalognumber"]?'"'.$this->cleanStr($occArr["catalognumber"]).'"':"NULL").",".
-			($occArr['othercatalognumbers']?'"'.$this->cleanStr($occArr['othercatalognumbers']).'"':'NULL').','.
-			($occArr['occurrenceid']?'"'.$this->cleanStr($occArr['occurrenceid']).'"':'NULL').','.
-			($occArr["ownerinstitutioncode"]?'"'.$this->cleanStr($occArr["ownerinstitutioncode"]).'"':"NULL").",".
-			($occArr["family"]?'"'.$this->cleanStr($occArr["family"]).'"':"NULL").",".
-			'"'.$this->cleanStr($occArr["sciname"]).'",'.
+			($occArr["basisofrecord"]?'"'.$this->cleanInStr($occArr["basisofrecord"]).'"':"NULL").",".
+			($occArr["catalognumber"]?'"'.$this->cleanInStr($occArr["catalognumber"]).'"':"NULL").",".
+			($occArr['othercatalognumbers']?'"'.$this->cleanInStr($occArr['othercatalognumbers']).'"':'NULL').','.
+			($occArr['occurrenceid']?'"'.$this->cleanInStr($occArr['occurrenceid']).'"':'NULL').','.
+			($occArr["ownerinstitutioncode"]?'"'.$this->cleanInStr($occArr["ownerinstitutioncode"]).'"':"NULL").",".
+			($occArr["family"]?'"'.$this->cleanInStr($occArr["family"]).'"':"NULL").",".
+			'"'.$this->cleanInStr($occArr["sciname"]).'",'.
 			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").",".
-			($occArr["scientificnameauthorship"]?'"'.$this->cleanStr($occArr["scientificnameauthorship"]).'"':"NULL").",".
-			($occArr["identifiedby"]?'"'.$this->cleanStr($occArr["identifiedby"]).'"':"NULL").",".
-			($occArr["dateidentified"]?'"'.$this->cleanStr($occArr["dateidentified"]).'"':"NULL").",".
-			($occArr["identificationreferences"]?'"'.$this->cleanStr($occArr["identificationreferences"]).'"':"NULL").",".
-			($occArr["identificationremarks"]?'"'.$this->cleanStr($occArr["identificationremarks"]).'"':"NULL").",".
-			($occArr["identificationqualifier"]?'"'.$this->cleanStr($occArr["identificationqualifier"]).'"':"NULL").",".
-			($occArr["typestatus"]?'"'.$this->cleanStr($occArr["typestatus"]).'"':"NULL").",".
-			($occArr["recordedby"]?'"'.$this->cleanStr($occArr["recordedby"]).'"':"NULL").",".
-			($occArr["recordnumber"]?'"'.$this->cleanStr($occArr["recordnumber"]).'"':"NULL").",".
-			($occArr["associatedcollectors"]?'"'.$this->cleanStr($occArr["associatedcollectors"]).'"':"NULL").",".
+			($occArr["scientificnameauthorship"]?'"'.$this->cleanInStr($occArr["scientificnameauthorship"]).'"':"NULL").",".
+			($occArr["identifiedby"]?'"'.$this->cleanInStr($occArr["identifiedby"]).'"':"NULL").",".
+			($occArr["dateidentified"]?'"'.$this->cleanInStr($occArr["dateidentified"]).'"':"NULL").",".
+			($occArr["identificationreferences"]?'"'.$this->cleanInStr($occArr["identificationreferences"]).'"':"NULL").",".
+			($occArr["identificationremarks"]?'"'.$this->cleanInStr($occArr["identificationremarks"]).'"':"NULL").",".
+			($occArr["identificationqualifier"]?'"'.$this->cleanInStr($occArr["identificationqualifier"]).'"':"NULL").",".
+			($occArr["typestatus"]?'"'.$this->cleanInStr($occArr["typestatus"]).'"':"NULL").",".
+			($occArr["recordedby"]?'"'.$this->cleanInStr($occArr["recordedby"]).'"':"NULL").",".
+			($occArr["recordnumber"]?'"'.$this->cleanInStr($occArr["recordnumber"]).'"':"NULL").",".
+			($occArr["associatedcollectors"]?'"'.$this->cleanInStr($occArr["associatedcollectors"]).'"':"NULL").",".
 			($occArr["eventdate"]?"'".$occArr["eventdate"]."'":"NULL").",".
 			($occArr["year"]?$occArr["year"]:"NULL").",".
 			($occArr["month"]?$occArr["month"]:"NULL").",".
 			($occArr["day"]?$occArr["day"]:"NULL").",".
 			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
 			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			($occArr["verbatimeventdate"]?'"'.$this->cleanStr($occArr["verbatimeventdate"]).'"':"NULL").",".
-			($occArr["habitat"]?'"'.$this->cleanStr($occArr["habitat"]).'"':"NULL").",".
-			($occArr["substrate"]?'"'.$this->cleanStr($occArr["substrate"]).'"':"NULL").",".
-			($occArr['fieldnumber']?'"'.$this->cleanStr($occArr['fieldnumber']).'"':'NULL').','.
-			($occArr["occurrenceremarks"]?'"'.$this->cleanStr($occArr["occurrenceremarks"]).'"':"NULL").",".
-			($occArr["associatedtaxa"]?'"'.$this->cleanStr($occArr["associatedtaxa"]).'"':"NULL").",".
-			($occArr["verbatimattributes"]?'"'.$this->cleanStr($occArr["verbatimattributes"]).'"':"NULL").",".
-			($occArr["dynamicproperties"]?'"'.$this->cleanStr($occArr["dynamicproperties"]).'"':"NULL").",".
-			($occArr["reproductivecondition"]?'"'.$this->cleanStr($occArr["reproductivecondition"]).'"':"NULL").",".
+			($occArr["verbatimeventdate"]?'"'.$this->cleanInStr($occArr["verbatimeventdate"]).'"':"NULL").",".
+			($occArr["habitat"]?'"'.$this->cleanInStr($occArr["habitat"]).'"':"NULL").",".
+			($occArr["substrate"]?'"'.$this->cleanInStr($occArr["substrate"]).'"':"NULL").",".
+			($occArr['fieldnumber']?'"'.$this->cleanInStr($occArr['fieldnumber']).'"':'NULL').','.
+			($occArr["occurrenceremarks"]?'"'.$this->cleanInStr($occArr["occurrenceremarks"]).'"':"NULL").",".
+			($occArr["associatedtaxa"]?'"'.$this->cleanInStr($occArr["associatedtaxa"]).'"':"NULL").",".
+			($occArr["verbatimattributes"]?'"'.$this->cleanInStr($occArr["verbatimattributes"]).'"':"NULL").",".
+			($occArr["dynamicproperties"]?'"'.$this->cleanInStr($occArr["dynamicproperties"]).'"':"NULL").",".
+			($occArr["reproductivecondition"]?'"'.$this->cleanInStr($occArr["reproductivecondition"]).'"':"NULL").",".
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			($occArr["establishmentmeans"]?'"'.$this->cleanStr($occArr["establishmentmeans"]).'"':"NULL").",".
-			($occArr['lifestage']?'"'.$this->cleanStr($occArr['lifestage']).'"':'NULL').','.
-			($occArr['sex']?'"'.$this->cleanStr($occArr['sex']).'"':'NULL').','.
-			($occArr['individualcount']?'"'.$this->cleanStr($occArr['individualcount']).'"':'NULL').','.
-			($occArr['samplingprotocol']?'"'.$this->cleanStr($occArr['samplingprotocol']).'"':'NULL').','.
-			($occArr['preparations']?'"'.$this->cleanStr($occArr['preparations']).'"':'NULL').','.
-			($occArr['country']?'"'.$this->cleanStr($occArr['country']).'"':'NULL').','.
-			($occArr["stateprovince"]?'"'.$this->cleanStr($occArr["stateprovince"]).'"':"NULL").",".
-			($occArr["county"]?'"'.$this->cleanStr($occArr["county"]).'"':"NULL").",".
-			($occArr["locality"]?'"'.$this->cleanStr($occArr["locality"]).'"':"NULL").",".
+			($occArr["establishmentmeans"]?'"'.$this->cleanInStr($occArr["establishmentmeans"]).'"':"NULL").",".
+			($occArr['lifestage']?'"'.$this->cleanInStr($occArr['lifestage']).'"':'NULL').','.
+			($occArr['sex']?'"'.$this->cleanInStr($occArr['sex']).'"':'NULL').','.
+			($occArr['individualcount']?'"'.$this->cleanInStr($occArr['individualcount']).'"':'NULL').','.
+			($occArr['samplingprotocol']?'"'.$this->cleanInStr($occArr['samplingprotocol']).'"':'NULL').','.
+			($occArr['preparations']?'"'.$this->cleanInStr($occArr['preparations']).'"':'NULL').','.
+			($occArr['country']?'"'.$this->cleanInStr($occArr['country']).'"':'NULL').','.
+			($occArr["stateprovince"]?'"'.$this->cleanInStr($occArr["stateprovince"]).'"':"NULL").",".
+			($occArr["county"]?'"'.$this->cleanInStr($occArr["county"]).'"':"NULL").",".
+			($occArr["locality"]?'"'.$this->cleanInStr($occArr["locality"]).'"':"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
-			($occArr["localitysecurityreason"]?$this->cleanStr($occArr["localitysecurityreason"]):"NULL").",".
+			($occArr["localitysecurityreason"]?$this->cleanInStr($occArr["localitysecurityreason"]):"NULL").",".
 			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
 			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			($occArr["geodeticdatum"]?'"'.$this->cleanStr($occArr["geodeticdatum"]).'"':"NULL").",".
+			($occArr["geodeticdatum"]?'"'.$this->cleanInStr($occArr["geodeticdatum"]).'"':"NULL").",".
 			($occArr['coordinateuncertaintyinmeters']?$occArr['coordinateuncertaintyinmeters']:'NULL').','.
-			($occArr["verbatimcoordinates"]?'"'.$this->cleanStr($occArr["verbatimcoordinates"]).'"':"NULL").",".
+			($occArr["verbatimcoordinates"]?'"'.$this->cleanInStr($occArr["verbatimcoordinates"]).'"':"NULL").",".
 			($occArr['footprintwkt']?'"'.$occArr['footprintwkt'].'"':'NULL').','.
-			($occArr["georeferencedby"]?'"'.$this->cleanStr($occArr["georeferencedby"]).'"':"NULL").",".
-			($occArr["georeferenceprotocol"]?'"'.$this->cleanStr($occArr["georeferenceprotocol"]).'"':"NULL").",".
-			($occArr["georeferencesources"]?'"'.$this->cleanStr($occArr["georeferencesources"]).'"':"NULL").",".
-			($occArr["georeferenceverificationstatus"]?'"'.$this->cleanStr($occArr["georeferenceverificationstatus"]).'"':"NULL").",".
-			($occArr["georeferenceremarks"]?'"'.$this->cleanStr($occArr["georeferenceremarks"]).'"':"NULL").",".
+			($occArr["georeferencedby"]?'"'.$this->cleanInStr($occArr["georeferencedby"]).'"':"NULL").",".
+			($occArr["georeferenceprotocol"]?'"'.$this->cleanInStr($occArr["georeferenceprotocol"]).'"':"NULL").",".
+			($occArr["georeferencesources"]?'"'.$this->cleanInStr($occArr["georeferencesources"]).'"':"NULL").",".
+			($occArr["georeferenceverificationstatus"]?'"'.$this->cleanInStr($occArr["georeferenceverificationstatus"]).'"':"NULL").",".
+			($occArr["georeferenceremarks"]?'"'.$this->cleanInStr($occArr["georeferenceremarks"]).'"':"NULL").",".
 			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
 			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			($occArr["verbatimelevation"]?'"'.$this->cleanStr($occArr["verbatimelevation"]).'"':"NULL").",".
-			($occArr['disposition']?'"'.$this->cleanStr($occArr["disposition"]).'"':'NULL').','.
-			($occArr["language"]?'"'.$this->cleanStr($occArr["language"]).'"':"NULL").",".
+			($occArr["verbatimelevation"]?'"'.$this->cleanInStr($occArr["verbatimelevation"]).'"':"NULL").",".
+			($occArr['disposition']?'"'.$this->cleanInStr($occArr["disposition"]).'"':'NULL').','.
+			($occArr["language"]?'"'.$this->cleanInStr($occArr["language"]).'"':"NULL").",".
 			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
-			($occArr["labelproject"]?'"'.$this->cleanStr($occArr["labelproject"]).'"':"NULL").",".
+			($occArr["labelproject"]?'"'.$this->cleanInStr($occArr["labelproject"]).'"':"NULL").",".
 			($occArr["processingstatus"]?'"'.$occArr["processingstatus"].'"':"NULL").',"'.
 			$occArr["userid"].'",'.$occArr["observeruid"].") ";
 			//echo "<div>".$sql."</div>";
@@ -684,7 +684,7 @@ class OccurrenceEditorManager {
 		$sql = 'SELECT countryname FROM lkupcountry ORDER BY countryname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[] = $r->countryname;
+			$retArr[] = $this->cleanOutStr($r->countryname);
 		}
 		$rs->free();
 		echo '"'.implode('","',$retArr).'"';
@@ -693,8 +693,8 @@ class OccurrenceEditorManager {
 	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
 		$statusStr = '';
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string($oldValue);
-		$nv = $this->conn->real_escape_string($newValue);
+		$ov = $this->cleanInStr($oldValue);
+		$nv = $this->cleanInStr($newValue);
 		if($fn && ($ov || $nv)){
 			$sql = 'UPDATE omoccurrences o2 INNER JOIN (SELECT o.occid FROM omoccurrences o ';
 			//Add raw string fragment if present, yet unlikely
@@ -733,7 +733,7 @@ class OccurrenceEditorManager {
 	
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->real_escape_string($oldValue);
+		$ov = $this->conn->cleanInStr($oldValue);
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
 		//Add raw string fragment if present, yet unlikely
 		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
@@ -787,8 +787,8 @@ class OccurrenceEditorManager {
 				'WHERE i.occid = '.$this->occid;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->imgid][$r->prlid]['raw'] = $r->rawstr;
-				$retArr[$r->imgid][$r->prlid]['notes'] = $r->notes;
+				$retArr[$r->imgid][$r->prlid]['raw'] = $this->cleanOutStr($r->rawstr);
+				$retArr[$r->imgid][$r->prlid]['notes'] = $this->cleanOutStr($r->notes);
 			}
 			$rs->free();
 		} 
@@ -799,7 +799,7 @@ class OccurrenceEditorManager {
 		if($imgId && $rawFrag){
 			$statusStr = '';
 			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
-				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'","'.$this->cleanRawFragment($notes).'")';
+				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'","'.$this->cleanInStr($notes).'")';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$statusStr = $this->conn->insert_id;
@@ -814,7 +814,7 @@ class OccurrenceEditorManager {
 	public function saveTextFragment($prlId, $rawFrag,$notes){
 		if($prlId && $rawFrag){
 			$statusStr = '';
-			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", notes = "'.$notes.'" '.
+			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", notes = "'.$this->cleanInStr($notes).'" '.
 				'WHERE (prlid = '.$prlId.')';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
@@ -851,14 +851,14 @@ class OccurrenceEditorManager {
 				$imageMap[$imgId]["url"] = $row->url;
 				$imageMap[$imgId]["tnurl"] = $row->thumbnailurl;
 				$imageMap[$imgId]["origurl"] = $row->originalurl;
-				$imageMap[$imgId]["caption"] = $row->caption;
-				$imageMap[$imgId]["photographer"] = $row->photographer;
+				$imageMap[$imgId]["caption"] = $this->cleanOutStr($row->caption);
+				$imageMap[$imgId]["photographer"] = $this->cleanOutStr($row->photographer);
 				$imageMap[$imgId]["photographeruid"] = $row->photographeruid;
 				$imageMap[$imgId]["sourceurl"] = $row->sourceurl;
-				$imageMap[$imgId]["copyright"] = $row->copyright;
-				$imageMap[$imgId]["notes"] = $row->notes;
+				$imageMap[$imgId]["copyright"] = $this->cleanOutStr($row->copyright);
+				$imageMap[$imgId]["notes"] = $this->cleanOutStr($row->notes);
 				$imageMap[$imgId]["occid"] = $row->occid;
-				$imageMap[$imgId]["username"] = $row->username;
+				$imageMap[$imgId]["username"] = $this->cleanOutStr($row->username);
 				$imageMap[$imgId]["sortseq"] = $row->sortsequence;
 			}
 			$result->free();
@@ -882,20 +882,31 @@ class OccurrenceEditorManager {
 	}
 	
 	//Misc functions
-	protected function cleanStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"&quot;",$newStr);
+	protected function cleanOutArr($inArr){
+		$outArr = array();
+		foreach($inArr as $k => $v){
+			$outArr[$k] = $this->cleanOutStr($v);
+		}
+		return $outArr;
+	}
+	
+	protected function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
 		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
-
+	
+	protected function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
 	private function cleanRawFragment($str){
 		$newStr = trim($str);
-		$newStr = str_replace('"',"&quot;",$newStr);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }

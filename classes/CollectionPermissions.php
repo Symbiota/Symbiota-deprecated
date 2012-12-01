@@ -30,7 +30,7 @@ class CollectionPermissions {
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$returnArr['collectioncode'] = $row->CollectionCode;
-				$returnArr['collectionname'] = $row->CollectionName;
+				$returnArr['collectionname'] = $this->cleanOutStr($row->CollectionName);
 			}
 			$rs->close();
 		}
@@ -50,7 +50,7 @@ class CollectionPermissions {
 				$pGroup = 'rarespp';
 				if(substr($r->pname,0,9) == 'CollAdmin') $pGroup = 'admin';
 				elseif(substr($r->pname,0,10) == 'CollEditor') $pGroup = 'editor'; 
-				$returnArr[$pGroup][$r->uid] = $r->uname;
+				$returnArr[$pGroup][$r->uid] = $this->cleanOutStr($r->uname);
 			}
 			$rs->close();
 		}
@@ -65,7 +65,7 @@ class CollectionPermissions {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$returnArr[$r->uid] = $r->uname;
+			$returnArr[$r->uid] = $this->cleanOutStr($r->uname);
 		}
 		$rs->close();
 		return $returnArr;
@@ -107,13 +107,11 @@ class CollectionPermissions {
 		}
 	}
 	
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
-
- ?>
+?>

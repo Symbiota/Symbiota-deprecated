@@ -1,8 +1,4 @@
 <?php
-/*
- * Modified on 19 March 2011
- * By E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
 
 class ImageDetailManager{
@@ -36,20 +32,20 @@ class ImageDetailManager{
 			if($row = $rs->fetch_object()){
 				$retArr["tid"] = $row->tid;
 				$retArr["sciname"] = $row->sciname;
-				$retArr["author"] = $this->cleanStr($row->author);
+				$retArr["author"] = $this->cleanOutStr($row->author);
 				$retArr["rankid"] = $row->rankid;
 				$retArr["url"] = $row->url;
 				$retArr["thumbnailurl"] = $row->thumbnailurl;
 				$retArr["originalurl"] = $row->originalurl;
-				$retArr["photographer"] = $this->cleanStr($row->photographer);
+				$retArr["photographer"] = $this->cleanOutStr($row->photographer);
 				$retArr["photographerdisplay"] = $row->photographerdisplay;
 				$retArr["photographeruid"] = $row->photographeruid;
-				$retArr["caption"] = $this->cleanStr($row->caption);
-				$retArr["owner"] = $this->cleanStr($row->owner);
-				$retArr["sourceurl"] = $this->cleanStr($row->sourceurl);
-				$retArr["copyright"] = $this->cleanStr($row->copyright);
-				$retArr["locality"] = $this->cleanStr($row->locality);
-				$retArr["notes"] = $this->cleanStr($row->notes);
+				$retArr["caption"] = $this->cleanOutStr($row->caption);
+				$retArr["owner"] = $this->cleanOutStr($row->owner);
+				$retArr["sourceurl"] = $this->cleanOutStr($row->sourceurl);
+				$retArr["copyright"] = $this->cleanOutStr($row->copyright);
+				$retArr["locality"] = $this->cleanOutStr($row->locality);
+				$retArr["notes"] = $this->cleanOutStr($row->notes);
 				$retArr["sortsequence"] = $row->sortsequence;
 				$retArr["occid"] = $row->occid;
 			}
@@ -127,15 +123,15 @@ class ImageDetailManager{
 	 			}
 	 		}
 		}
-	 	$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographer = $this->cleanStr($_REQUEST["photographer"]);
+	 	$caption = $this->cleanInStr($_REQUEST["caption"]);
+		$photographer = $this->cleanInStr($_REQUEST["photographer"]);
 		$photographerUid = $_REQUEST["photographeruid"];
-		$owner = $this->cleanStr($_REQUEST["owner"]);
-		$locality = $this->cleanStr($_REQUEST["locality"]);
+		$owner = $this->cleanInStr($_REQUEST["owner"]);
+		$locality = $this->cleanInStr($_REQUEST["locality"]);
 		$occId = $_REQUEST["occid"];
-		$notes = $this->cleanStr($_REQUEST["notes"]);
-		$sourceUrl = $this->cleanStr($_REQUEST["sourceurl"]);
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
+		$notes = $this->cleanInStr($_REQUEST["notes"]);
+		$sourceUrl = $this->cleanInStr($_REQUEST["sourceurl"]);
+		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
 		$sortSequence = (array_key_exists("sortsequence",$_REQUEST)?$_REQUEST["sortsequence"]:0);
 		//$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
 		//if(array_key_exists("addtotid",$_REQUEST)){
@@ -277,11 +273,18 @@ class ImageDetailManager{
 		$result->close();
 	}
 
- 	protected function cleanStr($str){
- 		$newStr = trim($str);
- 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"'",$newStr);
- 		return $newStr;
- 	}
+ 	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?>

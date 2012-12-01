@@ -26,7 +26,7 @@ class InstitutionManager {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_assoc()){
-			$returnArr[$row['iid']] = $row;
+			$returnArr[$row['iid']] = $this->cleanOutArr($row);
 		}
 		$rs->close();
 		return $returnArr;
@@ -36,20 +36,20 @@ class InstitutionManager {
 		$statusStr = '';
 		if($postData['institutioncode'] && $postData['institutionname']){
 			$sql = 'UPDATE institutions SET '.
-				'institutioncode = "'.$this->cleanStr($postData['institutioncode']).'",'.
-				'institutionname = "'.$this->cleanStr($postData['institutionname']).'",'.
-				'institutionname2 = '.($postData['institutionname2']?'"'.$this->cleanStr($postData['institutionname2']).'"':'NULL').','.
-				'address1 = '.($postData['address1']?'"'.$this->cleanStr($postData['address1']).'"':'NULL').','.
-				'address2 = '.($postData['address2']?'"'.$this->cleanStr($postData['address2']).'"':'NULL').','.
-				'city = '.($postData['city']?'"'.$this->cleanStr($postData['city']).'"':'NULL').','.
-				'stateprovince = '.($postData['stateprovince']?'"'.$this->cleanStr($postData['stateprovince']).'"':'NULL').','.
-				'postalcode = '.($postData['postalcode']?'"'.$this->cleanStr($postData['postalcode']).'"':'NULL').','.
-				'country = '.($postData['country']?'"'.$this->cleanStr($postData['country']).'"':'NULL').','.
-				'phone = '.($postData['phone']?'"'.$this->cleanStr($postData['phone']).'"':'NULL').','.
-				'contact = '.($postData['contact']?'"'.$this->cleanStr($postData['contact']).'"':'NULL').','.
-				'email = '.($postData['email']?'"'.$this->cleanStr($postData['email']).'"':'NULL').','.
-				'url = '.($postData['url']?'"'.$this->cleanStr($postData['url']).'"':'NULL').','.
-				'notes = '.($postData['notes']?'"'.$this->cleanStr($postData['notes']).'"':'NULL').' '.
+				'institutioncode = "'.$this->cleanInStr($postData['institutioncode']).'",'.
+				'institutionname = "'.$this->cleanInStr($postData['institutionname']).'",'.
+				'institutionname2 = '.($postData['institutionname2']?'"'.$this->cleanInStr($postData['institutionname2']).'"':'NULL').','.
+				'address1 = '.($postData['address1']?'"'.$this->cleanInStr($postData['address1']).'"':'NULL').','.
+				'address2 = '.($postData['address2']?'"'.$this->cleanInStr($postData['address2']).'"':'NULL').','.
+				'city = '.($postData['city']?'"'.$this->cleanInStr($postData['city']).'"':'NULL').','.
+				'stateprovince = '.($postData['stateprovince']?'"'.$this->cleanInStr($postData['stateprovince']).'"':'NULL').','.
+				'postalcode = '.($postData['postalcode']?'"'.$this->cleanInStr($postData['postalcode']).'"':'NULL').','.
+				'country = '.($postData['country']?'"'.$this->cleanInStr($postData['country']).'"':'NULL').','.
+				'phone = '.($postData['phone']?'"'.$this->cleanInStr($postData['phone']).'"':'NULL').','.
+				'contact = '.($postData['contact']?'"'.$this->cleanInStr($postData['contact']).'"':'NULL').','.
+				'email = '.($postData['email']?'"'.$this->cleanInStr($postData['email']).'"':'NULL').','.
+				'url = '.($postData['url']?'"'.$this->cleanInStr($postData['url']).'"':'NULL').','.
+				'notes = '.($postData['notes']?'"'.$this->cleanInStr($postData['notes']).'"':'NULL').' '.
 				'WHERE iid = '.$postData['iid'];
 			//echo "<div>$sql</div>";
 			if(!$this->conn->query($sql)){
@@ -64,19 +64,19 @@ class InstitutionManager {
 		$sql = 'INSERT INTO institutions (institutioncode, institutionname, institutionname2, address1, address2, city, '.
 			'stateprovince, postalcode, country, phone, contact, email, url, notes) '.
 			'VALUES ("'.$postData['institutioncode'].'","'.
-			$postData['institutionname'].'",'.
-			($postData['institutionname2']?'"'.$postData['institutionname2'].'"':'NULL').','.
-			($postData['address1']?'"'.$postData['address1'].'"':'NULL').','.
-			($postData['address2']?'"'.$postData['address2'].'"':'NULL').','.
-			($postData['city']?'"'.$postData['city'].'"':'NULL').','.
-			($postData['stateprovince']?'"'.$postData['stateprovince'].'"':'NULL').','.
-			($postData['postalcode']?'"'.$postData['postalcode'].'"':'NULL').','.
-			($postData['country']?'"'.$postData['country'].'"':'NULL').','.
-			($postData['phone']?'"'.$postData['phone'].'"':'NULL').','.
-			($postData['contact']?'"'.$postData['contact'].'"':'NULL').','.
-			($postData['email']?'"'.$postData['email'].'"':'NULL').','.
+			$this->cleanInStr($postData['institutionname']).'",'.
+			($postData['institutionname2']?'"'.$this->cleanInStr($postData['institutionname2']).'"':'NULL').','.
+			($postData['address1']?'"'.$this->cleanInStr($postData['address1']).'"':'NULL').','.
+			($postData['address2']?'"'.$this->cleanInStr($postData['address2']).'"':'NULL').','.
+			($postData['city']?'"'.$this->cleanInStr($postData['city']).'"':'NULL').','.
+			($postData['stateprovince']?'"'.$this->cleanInStr($postData['stateprovince']).'"':'NULL').','.
+			($postData['postalcode']?'"'.$this->cleanInStr($postData['postalcode']).'"':'NULL').','.
+			($postData['country']?'"'.$this->cleanInStr($postData['country']).'"':'NULL').','.
+			($postData['phone']?'"'.$this->cleanInStr($postData['phone']).'"':'NULL').','.
+			($postData['contact']?'"'.$this->cleanInStr($postData['contact']).'"':'NULL').','.
+			($postData['email']?'"'.$this->cleanInStr($postData['email']).'"':'NULL').','.
 			($postData['url']?'"'.$postData['url'].'"':'NULL').','.
-			($postData['notes']?'"'.$postData['notes'].'"':'NULL').') ';
+			($postData['notes']?'"'.$this->cleanInStr($postData['notes']).'"':'NULL').') ';
 		//echo "<div>$sql</div>";
 		if($this->conn->query($sql)){
 			$newIid = $this->conn->insert_id;
@@ -149,12 +149,26 @@ class InstitutionManager {
 		return $this->iid;
 	}
 	
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutArr($inArr){
+		$outArr = array();
+		foreach($inArr as $k => $v){
+			$outArr[$k] = $this->cleanOutStr($v);
+		}
+		return $outArr;
+	}
+	
+ 	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
