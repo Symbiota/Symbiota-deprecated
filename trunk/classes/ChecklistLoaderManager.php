@@ -23,8 +23,8 @@ class ChecklistLoaderManager {
 			$sql = "SELECT c.name, c.authors FROM fmchecklists c WHERE c.clid = ".$c;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
-				$this->clName = $row->name;
-				$this->clAuthors = $row->authors;
+				$this->clName = $this->cleanOutStr($row->name);
+				$this->clAuthors = $this->cleanOutStr($row->authors);
 			}
 		}
 	}
@@ -42,7 +42,7 @@ class ChecklistLoaderManager {
 		$sql = "SELECT taxauthid, name FROM taxauthority WHERE isactive = 1";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->taxauthid] = $row->name; 
+			$retArr[$row->taxauthid] = $this->cleanOutStr($row->name);
 		}
 		return $retArr;
 	}
@@ -111,7 +111,7 @@ class ChecklistLoaderManager {
 					if($rs){
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
-							$family = $row->family;
+							$family = $this->cleanOutStr($row->family);
 							$rankId = $row->rankid;
 						}
 						$rs->close();
@@ -182,7 +182,7 @@ class ChecklistLoaderManager {
 						$rs = $this->conn->query($sql);
 						if($row = $rs->fetch_object()){
 							$tid = $row->tid;
-							$family = $row->family;
+							$family = $this->cleanOutStr($row->family);
 							$rankId = $row->rankid;
 						}
 						$rs->close();
@@ -195,15 +195,15 @@ class ChecklistLoaderManager {
 							$sqlValues = '';
 							if(array_key_exists('family',$headerArr) && strtolower($family) != strtolower($valueArr[$headerArr['family']])){
 								$sqlInsert .= ',familyoverride';
-								$sqlValues .= ',"'.$valueArr[$headerArr['family']].'"';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['family']]).'"';
 							}
 							if(array_key_exists('habitat',$headerArr) && $valueArr[$headerArr['habitat']]){
 								$sqlInsert .= ',habitat';
-								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['habitat']]).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['habitat']]).'"';
 							}
 							if(array_key_exists('abundance',$headerArr) && $valueArr[$headerArr['abundance']]){
 								$sqlInsert .= ',abundance';
-								$sqlValues .= ',"'.$this->cleanStr($valueArr[$headerArr['abundance']]).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['abundance']]).'"';
 							}
 							if($noteStr || (array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']])){
 								if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
@@ -211,7 +211,7 @@ class ChecklistLoaderManager {
 									$noteStr .= $valueArr[$headerArr['notes']];
 								}
 								$sqlInsert .= ',notes';
-								$sqlValues .= ',"'.$this->cleanStr($noteStr).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($noteStr).'"';
 							}
 							$sql = 'INSERT INTO fmchklsttaxalink (tid,clid'.$sqlInsert.') VALUES ('.$tid.', '.$this->clid.$sqlValues.')';
 							//echo $sql;
@@ -248,12 +248,18 @@ class ChecklistLoaderManager {
 		}
 	}
 
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

@@ -35,10 +35,16 @@ class DynamicChecklistManager {
 		$sql = "SELECT t.tid, t.sciname FROM taxa t WHERE t.rankid <= 140 ORDER BY t.sciname ";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->tid] = $row->sciname;
+			$retArr[$row->tid] = $this->cleanOutStr($row->sciname);
 		}
 		return $retArr;
 	}
-}
 
- ?>
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+}
+?>

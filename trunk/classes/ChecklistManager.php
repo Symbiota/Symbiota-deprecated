@@ -58,10 +58,10 @@ class ChecklistManager {
 		if($result){
 	        while($row = $result->fetch_object()){
 	        	if($this->taxonFilter){
-	        		echo "<option value='".$row->tid."'>".$row->sciname."</option>\n";
+	        		echo "<option value='".$row->tid."'>".$this->cleanOutStr($row->sciname)."</option>\n";
 	        	}
 	        	else{
-	        		echo "<option>".$row->sciname."</option>\n";
+	        		echo "<option>".$this->cleanOutStr($row->sciname)."</option>\n";
 	        	}
 	       	}
 	       	$result->free();
@@ -75,7 +75,7 @@ class ChecklistManager {
 		foreach($dataArr as $k =>$v){
 			$colSql .= ','.$k;
 			if($v){
-				$valueSql .= ',"'.$this->cleanStr($v).'"';
+				$valueSql .= ',"'.$this->cleanInStr($v).'"';
 			}
 			else{
 				$valueSql .= ',NULL';
@@ -139,13 +139,13 @@ class ChecklistManager {
 	 		$result = $this->clCon->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
-				$this->clMetaData["locality"] = $row->locality; 
-				$this->clMetaData["notes"] = $row->notes;
+				$this->clMetaData["locality"] = $this->cleanOutStr($row->locality); 
+				$this->clMetaData["notes"] = $this->cleanOutStr($row->notes);
 				$this->clMetaData["type"] = $row->type;
 				if($this->clid){
-					$this->clMetaData["publication"] = $row->publication;
-					$this->clMetaData["abstract"] = $row->abstract;
-					$this->clMetaData["authors"] = $row->authors;
+					$this->clMetaData["publication"] = $this->cleanOutStr($row->publication);
+					$this->clMetaData["abstract"] = $this->cleanOutStr($row->abstract);
+					$this->clMetaData["authors"] = $this->cleanOutStr($row->authors);
 					$this->clMetaData["parentclid"] = $row->parentclid;
 					$this->clMetaData["uid"] = $row->uid;
 					$this->clMetaData["latcentroid"] = $row->latcentroid;
@@ -164,7 +164,7 @@ class ChecklistManager {
 		$setSql = "";
 		foreach($editArr as $key =>$value){
 			if($value){
-				$setSql .= ', '.$key.' = "'.$this->cleanStr($value).'"';
+				$setSql .= ', '.$key.' = "'.$this->cleanInStr($value).'"';
 			}
 			else{
 				$setSql .= ', '.$key.' = NULL';
@@ -182,7 +182,7 @@ class ChecklistManager {
 		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
  		$rs = $this->clCon->query($sql);
 		while ($row = $rs->fetch_object()){
-			$taxonAuthList[$row->taxauthid] = $row->name;
+			$taxonAuthList[$row->taxauthid] = $this->cleanOutStr($row->name);
 		}
 		$rs->free();
 		return $taxonAuthList;
@@ -198,7 +198,7 @@ class ChecklistManager {
 				'WHERE (v.clid = '.$this->clid.')';
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
-				$voucherArr[$row->tid][$row->occid] = $row->collector;
+				$voucherArr[$row->tid][$row->occid] = $this->cleanOutStr($row->collector);
 				//$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".
 				//	$row->occid."','individwindow')\">".$row->collector."</a>\n";
 			}
@@ -211,12 +211,12 @@ class ChecklistManager {
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->clCon->query($this->basicSql);
 		while($row = $result->fetch_object()){
-			$this->filterArr[$row->uppertaxonomy] = "";
-			$family = strtoupper($row->family);
+			$this->filterArr[$this->cleanOutStr($row->uppertaxonomy)] = "";
+			$family = strtoupper($this->cleanOutStr($row->family));
 			if(!$family) $family = 'Family Incertae Sedis';
 			$this->filterArr[$family] = '';
 			$tid = $row->tid;
-			$sciName = $row->sciname;
+			$sciName = $this->cleanOutStr($row->sciname);
 			$taxonTokens = explode(" ",$sciName);
 			if(in_array("x",$taxonTokens) || in_array("X",$taxonTokens)){
 				if(in_array("x",$taxonTokens)) unset($taxonTokens[array_search("x",$taxonTokens)]);
@@ -231,10 +231,10 @@ class ChecklistManager {
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
 				if($this->showVouchers){
 					$clStr = "";
-					if($row->habitat) $clStr = ", ".$row->habitat;
-					if($row->abundance) $clStr .= ", ".$row->abundance;
-					if($row->notes) $clStr .= ", ".$row->notes;
-					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
+					if($row->habitat) $clStr = ", ".$this->cleanOutStr($row->habitat);
+					if($row->abundance) $clStr .= ", ".$this->cleanOutStr($row->abundance);
+					if($row->notes) $clStr .= ", ".$this->cleanOutStr($row->notes);
+					if($row->source) $clStr .= ", <u>source</u>: ".$this->cleanOutStr($row->source);
 					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
 					if(array_key_exists($tid,$voucherArr)){
 						$this->taxaList[$tid]["vouchers"] = $voucherArr[$tid];  
@@ -244,7 +244,7 @@ class ChecklistManager {
 				$this->taxaList[$tid]["family"] = $family;
 				$tidReturn[] = $tid;
 				if($this->showAuthors){
-					$this->taxaList[$tid]["author"] = $row->author;
+					$this->taxaList[$tid]["author"] = $this->cleanOutStr($row->author);
 				}
     		}
     		if($family != $familyPrev) $this->familyCount++;
@@ -304,7 +304,7 @@ class ChecklistManager {
 			//echo $sql;
 			$rs = $this->clCon->query($sql);
 			while($row = $rs->fetch_object()){
-				$this->taxaList[$row->tid]["vern"] = $row->vernacularname;
+				$this->taxaList[$row->tid]["vern"] = $this->cleanOutStr($row->vernacularname);
 			}
 			$rs->free();
 		}
@@ -343,7 +343,7 @@ class ChecklistManager {
 							$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
 						}
 						else{
-							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$r1->sciname,'notes'=>$r1->notes);
+							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
 							if($minLat > $r1->decimallatitude) $minLat = $r1->decimallatitude;
 							if($maxLat < $r1->decimallatitude) $maxLat = $r1->decimallatitude;
 							if($minLng > $r1->decimallongitude) $minLng = $r1->decimallongitude;
@@ -388,7 +388,7 @@ class ChecklistManager {
 								$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
 							}
 							else{
-								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$r2->notes,'occid'=>$r2->occid);
+								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
 								if($minLat > $r2->decimallatitude) $minLat = $r2->decimallatitude;
 								if($maxLat < $r2->decimallatitude) $maxLat = $r2->decimallatitude;
 								if($minLng > $r2->decimallongitude) $minLng = $r2->decimallongitude;
@@ -520,16 +520,16 @@ class ChecklistManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sqlFrag = "";
 		if($sqlFragArr['country']){
-			$sqlFrag = 'AND (o.country = "'.$this->cleanStr($sqlFragArr['country']).'") ';
+			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($sqlFragArr['country']).'") ';
 		}
 		if($sqlFragArr['state']){
-			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanStr($sqlFragArr['state']).'") ';
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($sqlFragArr['state']).'") ';
 		}
 		if($sqlFragArr['county']){
-			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanStr($sqlFragArr['county']).'%") ';
+			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanInStr($sqlFragArr['county']).'%") ';
 		}
 		if($sqlFragArr['locality']){
-			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanStr($sqlFragArr['locality']).'%") ';
+			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($sqlFragArr['locality']).'%") ';
 		}
 		$llStr = '';
 		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth']){
@@ -599,7 +599,7 @@ class ChecklistManager {
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->family][$row->tid] = $row->sciname;
+			$retArr[$this->cleanOutStr($row->family)][$row->tid] = $this->cleanOutStr($row->sciname);
 		}
 		$rs->close();
 		return $retArr;
@@ -617,12 +617,12 @@ class ChecklistManager {
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
 			$retArr[$row->tid]['listid'] = $row->listid;
-			$collStr = $row->recordedby;
-			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
+			$collStr = $this->cleanOutStr($row->recordedby);
+			if($row->recordnumber) $collStr .= ' ('.$this->cleanOutStr($row->recordnumber).')';
 			$retArr[$row->tid]['recordnumber'] = $collStr;
-			$retArr[$row->tid]['specid'] = $row->sciname;
-			$idBy = $row->identifiedby;
-			if($row->dateidentified) $idBy .= ' ('.$row->dateidentified.')';
+			$retArr[$row->tid]['specid'] = $this->cleanOutStr($row->sciname);
+			$idBy = $this->cleanOutStr($row->identifiedby);
+			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
 			$retArr[$row->tid]['identifiedby'] = $idBy;
 		}
 		$rs->close();
@@ -644,7 +644,7 @@ class ChecklistManager {
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->clCon->query($sql);
 			while($row = $rs->fetch_object()){
-				$retArr[$row->tidinterpreted] = $row->sciname;
+				$retArr[$row->tidinterpreted] = $this->cleanOutStr($row->sciname);
 			}
 			$rs->close();
 		}
@@ -691,15 +691,16 @@ class ChecklistManager {
  			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
 			
 			while($row = $rs->fetch_assoc()){
-				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
-					$row["catalognumber"].'","'.$row["identifiedby"].'","'.$row["dateidentified"].'","'.$row["recordedby"].'","'.
-					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
-					$row["county"].'","'.$row["municipality"].'",';
+				echo '"'.$this->cleanOutStr($row["family"]).'","'.$this->cleanOutStr($row["sciname"]).'","'.$row["institutioncode"].'","'.
+					$row["catalognumber"].'","'.$this->cleanOutStr($row["identifiedby"]).'","'.
+					$this->cleanOutStr($row["dateidentified"]).'","'.$this->cleanOutStr($row["recordedby"]).'","'.
+					$this->cleanOutStr($row["recordnumber"]).'","'.$row["eventdate"].'","'.$this->cleanOutStr($row["country"]).'","'.
+					$this->cleanOutStr($row["stateprovince"]).'","'.$this->cleanOutStr($row["county"]).'","'.$this->cleanOutStr($row["municipality"]).'",';
 				
 				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
 				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo '"'.$this->cleanStr($row["locality"]).'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
-					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
+					echo '"'.$this->cleanOutStr($row["locality"]).'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
+					$row["minimumelevationinmeters"].',"'.$this->cleanOutStr($row["habitat"]).'","'.$this->cleanOutStr($row["occurrenceremarks"]).'",';
 				}
 				else{
 					echo '"Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden",';
@@ -735,8 +736,8 @@ class ChecklistManager {
 			'ORDER BY t.sciname';
 		$rs = $this->clCon->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->tid]['sciname'] = $r->sciname;
-			$retArr[$r->tid]['cl'] = $r->name;
+			$retArr[$r->tid]['sciname'] = $this->cleanOutStr($r->sciname);
+			$retArr[$r->tid]['cl'] = $this->cleanOutStr($r->name);
 		}
 		$rs->close();
 		return $retArr;
@@ -749,9 +750,9 @@ class ChecklistManager {
 			'WHERE up.pname = "ClAdmin-'.$this->clid.'" ORDER BY u.lastname,u.firstname';
 		if($rs = $this->clCon->query($sql)){
 			while($r = $rs->fetch_object()){
-				$uName = $r->uname;
+				$uName = $this->cleanOutStr($r->uname);
 				if(strlen($uName) > 60) $uName = substr($uName,0,60);
-				$editorArr[$r->uid] = $r->uname;
+				$editorArr[$r->uid] = $uName;
 			}
 			$rs->close();
 		}
@@ -782,7 +783,7 @@ class ChecklistManager {
 		//echo $sql;
 		$rs = $this->clCon->query($sql);
 		while($r = $rs->fetch_object()){
-			$returnArr[$r->uid] = $r->uname;
+			$returnArr[$r->uid] = $this->cleanOutStr($r->uname);
 		}
 		$rs->close();
 		return $returnArr;
@@ -813,7 +814,7 @@ class ChecklistManager {
 		if($runQuery){
 			if($rs = $this->clCon->query($sql)){
 				while($r = $rs->fetch_object()){
-					$retArr[$r->collid] = $r->collectionname;
+					$retArr[$r->collid] = $this->cleanOutStr($r->collectionname);
 				}
 				$rs->close();
 			}
@@ -873,7 +874,7 @@ class ChecklistManager {
 		if($rs){
 			if($r = $rs->fetch_object()){
 				$this->pid = $r->pid;
-				$this->projName = $r->projname;
+				$this->projName = $this->cleanOutStr($r->projname);
 			}
 			$rs->close();
 		}
@@ -935,18 +936,23 @@ class ChecklistManager {
 		$sql = 'SELECT c.clid, c.name FROM fmchecklists c WHERE type = "static" AND access <> "private" ORDER BY c.name';
 		$rs = $this->clCon->query($sql);
 		while($row = $rs->fetch_object()){
-			echo "<option value='".$row->clid."' ".($this->clMetaData["parentclid"]==$row->clid?" selected":"").">".$row->name."</option>";
+			echo "<option value='".$row->clid."' ".($this->clMetaData["parentclid"]==$row->clid?" selected":"").">".$this->cleanOutStr($row->name)."</option>";
 		}
 		$rs->close();
 	}
 
-	private function cleanStr($str){
- 		$newStr = trim($str);
- 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"&quot;",$newStr);
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
- 		$newStr = $this->clCon->real_escape_string($newStr);
- 		return $newStr;
- 	}
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?> 

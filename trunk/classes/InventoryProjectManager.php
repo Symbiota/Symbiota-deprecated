@@ -47,9 +47,9 @@ class InventoryProjectManager {
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
 			$projId = $row->pid;
-			$returnArr[$projId]["projname"] = $row->projname;
-			$returnArr[$projId]["managers"] = $row->managers;
-			$returnArr[$projId]["descr"] = $row->fulldescription;
+			$returnArr[$projId]["projname"] = $this->cleanOutStr($row->projname);
+			$returnArr[$projId]["managers"] = $this->cleanOutStr($row->managers);
+			$returnArr[$projId]["descr"] = $this->cleanOutStr($row->fulldescription);
 		}
 		$rs->close();
 		return $returnArr;
@@ -67,10 +67,10 @@ class InventoryProjectManager {
 			$rs = $this->con->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->projId = $row->pid;
-				$returnArr['projname'] = $row->projname;
-				$returnArr['managers'] = $row->managers;
-				$returnArr['fulldescription'] = $row->fulldescription;
-				$returnArr['notes'] = $row->notes;
+				$returnArr['projname'] = $this->cleanOutStr($row->projname);
+				$returnArr['managers'] = $this->cleanOutStr($row->managers);
+				$returnArr['fulldescription'] = $this->cleanOutStr($row->fulldescription);
+				$returnArr['notes'] = $this->cleanOutStr($row->notes);
 				$returnArr['occurrencesearch'] = $row->occurrencesearch;
 				$returnArr['ispublic'] = $row->ispublic;
 				$returnArr['sortsequence'] = $row->sortsequence;
@@ -87,7 +87,7 @@ class InventoryProjectManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "";
 		foreach($projArr as $field => $value){
-			$v = $this->cleanString($value);
+			$v = $this->cleanInString($value);
 			$sql .= ','.$field.' = "'.$v.'"';
 		}
 		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE (pid = '.$this->projId.')';
@@ -100,9 +100,9 @@ class InventoryProjectManager {
 		$pid = 0;
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO fmprojects(projname,managers,fulldescription,notes,ispublic,sortsequence) '.
-			'VALUES("'.$this->cleanString($projArr['projname']).'","'.$this->cleanString($projArr['managers']).'","'.
-			$this->cleanString($projArr['fulldescription']).'","'.
-			$this->cleanString($projArr['notes']).'",'.$projArr['ispublic'].','.
+			'VALUES("'.$this->cleanInString($projArr['projname']).'","'.$this->cleanInString($projArr['managers']).'","'.
+			$this->cleanInString($projArr['fulldescription']).'","'.
+			$this->cleanInString($projArr['notes']).'",'.$projArr['ispublic'].','.
 			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
 		//echo $sql;
 		if($conn->query($sql)){
@@ -128,7 +128,7 @@ class InventoryProjectManager {
 		$rs = $this->con->query($sql);
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
+			$returnArr[$row->clid] = $this->cleanOutStr($row->name).($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
 			if($row->latcentroid){
 				$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
 			}
@@ -147,7 +147,7 @@ class InventoryProjectManager {
 		$rs = $this->con->query($sql);
 		echo "<ul>";
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->surveyid] = $row->projectname;
+			$returnArr[$row->surveyid] = $this->cleanOutStr($row->projectname);
 			if($row->latcentroid){
 				$this->surveyCoord[] = $row->latcentroid.','.$row->longcentroid;
 			}
@@ -180,7 +180,7 @@ class InventoryProjectManager {
 			'ORDER BY name';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+			$returnArr[$row->clid] = $this->cleanOutStr($row->name);
 		}
 		$rs->close();
 		return $returnArr;
@@ -194,7 +194,7 @@ class InventoryProjectManager {
 			'ORDER BY name';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
+			$returnArr[$row->clid] = $this->cleanOutStr($row->name);
 		}
 		$rs->close();
 		return $returnArr;
@@ -224,14 +224,21 @@ class InventoryProjectManager {
 		if(!($conn === null)) $conn->close();
 	}
 
-	private function cleanString($inStr){
-		$retStr = trim($inStr);
+ 	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 
-		$retStr = str_replace('"',"'",$retStr);
-		$retStr = str_replace(chr(10),' ',$retStr);
-		$retStr = str_replace(chr(11),' ',$retStr);
-		$retStr = str_replace(chr(13),' ',$retStr);
-		return $retStr;
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = str_replace(chr(10),' ',$newStr);
+		$newStr = str_replace(chr(11),' ',$newStr);
+		$newStr = str_replace(chr(13),' ',$newStr);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

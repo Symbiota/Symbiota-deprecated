@@ -32,13 +32,13 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$detId = $row->detid;
-			$this->detMap[$detId]["identifiedby"] = $row->identifiedBy;
-			$this->detMap[$detId]["dateidentified"] = $row->dateIdentified;
-			$this->detMap[$detId]["sciname"] = $row->sciname;
-			$this->detMap[$detId]["scientificnameauthorship"] = $row->scientificNameAuthorship;
-			$this->detMap[$detId]["identificationqualifier"] = $row->identificationQualifier;
-			$this->detMap[$detId]["identificationreferences"] = $row->identificationReferences;
-			$this->detMap[$detId]["identificationremarks"] = $row->identificationRemarks;
+			$this->detMap[$detId]["identifiedby"] = $this->cleanOutStr($row->identifiedBy);
+			$this->detMap[$detId]["dateidentified"] = $this->cleanOutStr($row->dateIdentified);
+			$this->detMap[$detId]["sciname"] = $this->cleanOutStr($row->sciname);
+			$this->detMap[$detId]["scientificnameauthorship"] = $this->cleanOutStr($row->scientificNameAuthorship);
+			$this->detMap[$detId]["identificationqualifier"] = $this->cleanOutStr($row->identificationQualifier);
+			$this->detMap[$detId]["identificationreferences"] = $this->cleanOutStr($row->identificationReferences);
+			$this->detMap[$detId]["identificationremarks"] = $this->cleanOutStr($row->identificationRemarks);
 			$this->detMap[$detId]["sortsequence"] = $row->sortsequence;
 			if($row->identifiedBy == $identBy && $row->dateIdentified == $dateIdent && $row->sciname == $sciName){
 				$this->detMap[$detId]["iscurrent"] = "1";
@@ -58,11 +58,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//Load new determination into omoccurdeterminations
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'VALUES ('.$detArr['occid'].',"'.$detArr['identifiedby'].'","'.$detArr['dateidentified'].'","'.
-			$this->cleanStr($detArr['sciname']).'",'.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
-			($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
-			($detArr['identificationreferences']?'"'.$this->cleanStr($detArr['identificationreferences']).'"':'NULL').','.
-			($detArr['identificationremarks']?'"'.$this->cleanStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
+			'VALUES ('.$detArr['occid'].',"'.$this->cleanInStr($detArr['identifiedby']).'","'.$this->cleanInStr($detArr['dateidentified']).'","'.
+			$this->cleanInStr($detArr['sciname']).'",'.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
+			($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
+			($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
+			($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
 		//echo "<div>".$sql."</div>";
 		if($this->conn->query($sql)){
 			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
@@ -77,13 +77,13 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				//echo "<div>".$sqlInsert."</div>";
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
-					'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'",'.
-					'family = '.($detArr['family']?'"'.$detArr['family'].'"':'NULL').','.
-					'sciname = "'.$detArr['sciname'].'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
-					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
-					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
-					'identificationReferences = '.($detArr['identificationreferences']?'"'.$detArr['identificationreferences'].'"':'NULL').','.
-					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$detArr['identificationremarks'].'"':'NULL').', '.
+					'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
+					'family = '.($detArr['family']?'"'.$this->cleanInStr($detArr['family']).'"':'NULL').','.
+					'sciname = "'.$this->cleanInStr($detArr['sciname']).'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
+					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
+					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
+					'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
+					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').', '.
 					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' '.
 					'WHERE (occid = '.$detArr['occid'].')';
 				//echo "<div>".$sqlNewDet."</div>";
@@ -130,11 +130,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	public function editDetermination($detArr){
 		$status = "Determination editted successfully!";
 		$sql = 'UPDATE omoccurdeterminations '.
-			'SET identifiedBy = "'.$detArr['identifiedby'].'", dateIdentified = "'.$detArr['dateidentified'].'", sciname = "'.$this->cleanStr($detArr['sciname']).
-			'", scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$detArr['scientificnameauthorship'].'"':'NULL').','.
-			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$detArr['identificationqualifier'].'"':'NULL').','.
-			'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanStr($detArr['identificationreferences']).'"':'NULL').','.
-			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanStr($detArr['identificationremarks']).'"':'NULL').','.
+			'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'", sciname = "'.$this->cleanInStr($detArr['sciname']).
+			'", scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
+			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
+			'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
+			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.
 			'sortsequence = '.($detArr['sortsequence']?$detArr['sortsequence']:'10').' '.
 			'WHERE (detid = '.$detArr['detid'].')';
 		if(!$this->conn->query($sql)){

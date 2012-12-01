@@ -30,10 +30,10 @@ class CollectionProfileManager {
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
-			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
-			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
+			$returnArr[$row->collid]['collectionname'] = $this->cleanOutStr($row->collectionname);
+			$returnArr[$row->collid]['fulldescription'] = $this->cleanOutStr($row->fulldescription);
 			$returnArr[$row->collid]['homepage'] = $row->homepage;
-			$returnArr[$row->collid]['contact'] = $row->contact;
+			$returnArr[$row->collid]['contact'] = $this->cleanOutStr($row->contact);
 			$returnArr[$row->collid]['email'] = $row->email;
 			$returnArr[$row->collid]['icon'] = $row->icon;
 		}
@@ -60,30 +60,30 @@ class CollectionProfileManager {
 			while($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['iid'] = $row->iid;
-				$returnArr['institutionname'] = $row->InstitutionName;
-				$returnArr['address2'] = $row->Address1;
-				$returnArr['address1'] = $row->Address2;
-				$returnArr['city'] = $row->City;
-				$returnArr['stateprovince'] = $row->StateProvince;
+				$returnArr['institutionname'] = $this->cleanOutStr($row->InstitutionName);
+				$returnArr['address2'] = $this->cleanOutStr($row->Address1);
+				$returnArr['address1'] = $this->cleanOutStr($row->Address2);
+				$returnArr['city'] = $this->cleanOutStr($row->City);
+				$returnArr['stateprovince'] = $this->cleanOutStr($row->StateProvince);
 				$returnArr['postalcode'] = $row->PostalCode;
-				$returnArr['country'] = $row->Country;
+				$returnArr['country'] = $this->cleanOutStr($row->Country);
 				$returnArr['phone'] = $row->Phone;
 				$returnArr['collectioncode'] = $row->CollectionCode;
-				$returnArr['collectionname'] = $row->CollectionName;
-				$returnArr['fulldescription'] = $row->FullDescription;
+				$returnArr['collectionname'] = $this->cleanOutStr($row->CollectionName);
+				$returnArr['fulldescription'] = $this->cleanOutStr($row->FullDescription);
 				$returnArr['homepage'] = $row->Homepage;
 				$returnArr['individualurl'] = $row->individualurl;
-				$returnArr['contact'] = $row->Contact;
-				$returnArr['email'] = $row->email;
+				$returnArr['contact'] = $this->cleanOutStr($row->Contact);
+				$returnArr['email'] = $this->cleanOutStr($row->email);
 				$returnArr['latitudedecimal'] = $row->latitudedecimal;
 				$returnArr['longitudedecimal'] = $row->longitudedecimal;
 				$returnArr['icon'] = $row->icon;
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
 				$returnArr['publicedits'] = $row->publicedits;
-				$returnArr['rights'] = $row->rights;
-				$returnArr['rightsholder'] = $row->rightsholder;
-				$returnArr['accessrights'] = $row->accessrights;
+				$returnArr['rights'] = $this->cleanOutStr($row->rights);
+				$returnArr['rightsholder'] = $this->cleanOutStr($row->rightsholder);
+				$returnArr['accessrights'] = $this->cleanOutStr($row->accessrights);
 				$returnArr['sortseq'] = $row->sortseq;
 				$uDate = "";
 				if($row->uploaddate){
@@ -107,17 +107,17 @@ class CollectionProfileManager {
 
 	public function submitCollEdits(){
 		if($this->collId){
-			$instCode = $this->cleanStr($_POST['institutioncode']);
-			$collCode = $this->cleanStr($_POST['collectioncode']);
-			$coleName = $this->cleanStr($_POST['collectionname']);
+			$instCode = $this->cleanInStr($_POST['institutioncode']);
+			$collCode = $this->cleanInStr($_POST['collectioncode']);
+			$coleName = $this->cleanInStr($_POST['collectionname']);
 			$iid = $_POST['iid'];
-			$fullDesc = $this->cleanStr($_POST['fulldescription']);
-			$homepage = $this->cleanStr($_POST['homepage']);
-			$contact = $this->cleanStr($_POST['contact']);
-			$email = $this->cleanStr($_POST['email']);
-			$rights = $this->cleanStr($_POST['rights']);
-			$rightsHolder = $this->cleanStr($_POST['rightsholder']);
-			$accessRights = $this->cleanStr($_POST['accessrights']);
+			$fullDesc = $this->cleanInStr($_POST['fulldescription']);
+			$homepage = $this->cleanInStr($_POST['homepage']);
+			$contact = $this->cleanInStr($_POST['contact']);
+			$email = $this->cleanInStr($_POST['email']);
+			$rights = $this->cleanInStr($_POST['rights']);
+			$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
+			$accessRights = $this->cleanInStr($_POST['accessrights']);
 			$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
@@ -137,8 +137,8 @@ class CollectionProfileManager {
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
 			if(array_key_exists('icon',$_POST)){
-				$icon = $this->cleanStr($_POST['icon']);
-				$indUrl = $this->cleanStr($_POST['individualurl']);
+				$icon = $this->cleanInStr($_POST['icon']);
+				$indUrl = $this->cleanInStr($_POST['individualurl']);
 				$sql .= ',icon = '.($icon?'"'.$icon.'"':'NULL').','.
 					'managementtype = "'.$_POST['managementtype'].'",'.
 					'colltype = "'.$_POST['colltype'].'",'.
@@ -154,22 +154,22 @@ class CollectionProfileManager {
 
 	public function submitCollAdd(){
 		global $symbUid;
-		$instCode = $this->cleanStr($_POST['institutioncode']);
-		$collCode = $this->cleanStr($_POST['collectioncode']);
-		$coleName = $this->cleanStr($_POST['collectionname']);
+		$instCode = $this->cleanInStr($_POST['institutioncode']);
+		$collCode = $this->cleanInStr($_POST['collectioncode']);
+		$coleName = $this->cleanInStr($_POST['collectionname']);
 		$iid = $_POST['iid'];
-		$fullDesc = $this->cleanStr($_POST['fulldescription']);
-		$homepage = $this->cleanStr($_POST['homepage']);
-		$contact = $this->cleanStr($_POST['contact']);
-		$email = $this->cleanStr($_POST['email']);
-		$rights = $this->cleanStr($_POST['rights']);
-		$rightsHolder = $this->cleanStr($_POST['rightsholder']);
-		$accessRights = $this->cleanStr($_POST['accessrights']);
+		$fullDesc = $this->cleanInStr($_POST['fulldescription']);
+		$homepage = $this->cleanInStr($_POST['homepage']);
+		$contact = $this->cleanInStr($_POST['contact']);
+		$email = $this->cleanInStr($_POST['email']);
+		$rights = $this->cleanInStr($_POST['rights']);
+		$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
+		$accessRights = $this->cleanInStr($_POST['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
-		$icon = array_key_exists('icon',$_POST)?$this->cleanStr($_POST['icon']):'';
-		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanStr($_POST['managementtype']):'';
-		$collType = array_key_exists('colltype',$_POST)?$this->cleanStr($_POST['colltype']):'';
-		$indUrl = array_key_exists('individualurl',$_POST)?$this->cleanStr($_POST['individualurl']):'';
+		$icon = array_key_exists('icon',$_POST)?$this->cleanInStr($_POST['icon']):'';
+		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanInStr($_POST['managementtype']):'';
+		$collType = array_key_exists('colltype',$_POST)?$this->cleanInStr($_POST['colltype']):'';
+		$indUrl = array_key_exists('individualurl',$_POST)?$this->cleanInStr($_POST['individualurl']):'';
 		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
@@ -395,12 +395,18 @@ class CollectionProfileManager {
 		return $retArr;
 	}
 
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

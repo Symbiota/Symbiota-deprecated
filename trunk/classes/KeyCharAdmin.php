@@ -23,7 +23,7 @@ class KeyAdmin{
 			'ORDER BY h.headingname';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$hidArr[$r->hid]['headingname'] = $r->headingname;
+				$hidArr[$r->hid]['headingname'] = $this->cleanOutStr($r->headingname);
 			}
 		}
 		return $hidArr;
@@ -38,7 +38,7 @@ class KeyAdmin{
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->cid]['charname'] = $r->charname;
+				$retArr[$r->cid]['charname'] = $this->cleanOutStr($r->charname);
 			}
 			$rs->close();
 		}
@@ -49,9 +49,9 @@ class KeyAdmin{
 		if (($pArr['chartype'] == 'IN') || ($pArr['chartype'] == 'RN')){
 			$statusStr = '';
 			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
-				'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
-				"'.$this->cleanString($pArr['difficultyrank']).'","'.$this->cleanString($pArr['hid']).'",
-				"'.$this->cleanString($pArr['enteredby']).'") ';
+				'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",
+				"'.$this->cleanInStr($pArr['difficultyrank']).'","'.$this->cleanInStr($pArr['hid']).'",
+				"'.$this->cleanInStr($pArr['enteredby']).'") ';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$this->cId = $this->conn->insert_id;
@@ -74,9 +74,9 @@ class KeyAdmin{
 		else{
 			$statusStr = '';
 			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
-				'VALUES("'.$this->cleanString($pArr['charname']).'","'.$this->cleanString($pArr['chartype']).'",
-				"'.$this->cleanString($pArr['difficultyrank']).'","'.$this->cleanString($pArr['hid']).'",
-				"'.$this->cleanString($pArr['enteredby']).'") ';
+				'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",
+				"'.$this->cleanInStr($pArr['difficultyrank']).'","'.$this->cleanInStr($pArr['hid']).'",
+				"'.$this->cleanInStr($pArr['enteredby']).'") ';
 			//echo $sql;
 			if($this->conn->query($sql)){
 				$this->cId = $this->conn->insert_id;
@@ -92,8 +92,8 @@ class KeyAdmin{
 	public function createState($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO kmcs(cid,charstatename,implicit,enteredby) '.
-			'VALUES("'.$this->cleanString($pArr['cid']).'","'.$this->cleanString($pArr['charstatename']).'",1,
-			"'.$this->cleanString($pArr['enteredby']).'") ';
+			'VALUES("'.$this->cleanInStr($pArr['cid']).'","'.$this->cleanInStr($pArr['charstatename']).'",1,
+			"'.$this->cleanInStr($pArr['enteredby']).'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->cs = $this->conn->insert_id;
@@ -112,7 +112,7 @@ class KeyAdmin{
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'cid'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 				}
 			}
 			$sql = 'UPDATE kmcharacters SET '.substr($sql,1).' WHERE (cid = '.$cId.')';
@@ -135,7 +135,7 @@ class KeyAdmin{
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'cid' && $k != 'cs'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 				}
 			}
 			$sql = 'UPDATE kmcs SET '.substr($sql,1).' WHERE (cid = '.$cId.') AND (cs = '.$cs.')';
@@ -158,14 +158,14 @@ class KeyAdmin{
 			'WHERE cid = '.$cId;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr['charname'] = $r->charname;
+				$retArr['charname'] = $this->cleanOutStr($r->charname);
 				$retArr['chartype'] = $r->chartype;
-				$retArr['defaultlang'] = $r->defaultlang;
+				$retArr['defaultlang'] = $this->cleanOutStr($r->defaultlang);
 				$retArr['difficultyrank'] = $r->difficultyrank;
 				$retArr['hid'] = $r->hid;
-				$retArr['units'] = $r->units;
-				$retArr['description'] = $r->description;
-				$retArr['notes'] = $r->notes;
+				$retArr['units'] = $this->cleanOutStr($r->units);
+				$retArr['description'] = $this->cleanOutStr($r->description);
+				$retArr['notes'] = $this->cleanOutStr($r->notes);
 				$retArr['helpurl'] = $r->helpurl;
 				$retArr['enteredby'] = $r->enteredby;
 			}
@@ -182,12 +182,12 @@ class KeyAdmin{
 			'WHERE cid = '.$cId.' AND cs = "'.$cs.'"';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr['charstatename'] = $r->charstatename;
+				$retArr['charstatename'] = $this->cleanOutStr($r->charstatename);
 				$retArr['implicit'] = $r->implicit;
-				$retArr['notes'] = $r->notes;
-				$retArr['description'] = $r->description;
+				$retArr['notes'] = $this->cleanOutStr($r->notes);
+				$retArr['description'] = $this->cleanOutStr($r->description);
 				$retArr['illustrationurl'] = $r->illustrationurl;
-				$retArr['language'] = $r->language;
+				$retArr['language'] = $this->cleanOutStr($r->language);
 				$retArr['enteredby'] = $r->enteredby;
 			}
 			$rs->close();
@@ -226,7 +226,7 @@ class KeyAdmin{
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->cs]['cs'] = $r->cs;
-				$retArr[$r->cs]['charstatename'] = $r->charstatename;
+				$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
 			}
 			$rs->close();
 		}
@@ -242,7 +242,7 @@ class KeyAdmin{
 			'ORDER BY hid';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->hid] = $r->headingname;
+				$retArr[$r->hid] = $this->cleanOutStr($r->headingname);
 			}
 		}
 		return $retArr;
@@ -260,12 +260,18 @@ class KeyAdmin{
 		return $this->cs;
 	}
 	
-	protected function cleanString($inStr){
-		$retStr = trim($inStr);
-		$retStr = str_replace('"',"&quot;",$retStr);
-		$retStr = str_replace("'","&apos;",$retStr);
-		$retStr = $this->conn->real_escape_string($retStr);
-		return $retStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
