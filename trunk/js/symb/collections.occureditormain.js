@@ -479,14 +479,15 @@ function verifyDecimalLongitude(f){
 					if(cValue && !f.country.value) f.country.value = cValue; 
 					var sValue = retArr["adminName1"];
 					if(sValue){
-						sValue = sValue.toLowerCase();
 						var currentState = f.stateprovince.value;
 						if(currentState){
+							sValue = sValue.toLowerCase();
 							currentState = currentState.toLowerCase();
 							if(currentState.indexOf(sValue) == -1) alert("Is State accurate? Coordiantes map to: "+cValue+", "+sValue+" Click globe symbol to display coordinates in map.");
 						}
 						else{
 							f.stateprovince.value = sValue;
+							//http://api.geonames.org/findNearbyPostalCodes?lat=-32&lng=-64&username=demo
 						}
 					}
 				}

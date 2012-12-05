@@ -733,7 +733,7 @@ class OccurrenceEditorManager {
 	
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
 		$fn = $this->conn->real_escape_string($fieldName);
-		$ov = $this->conn->cleanInStr($oldValue);
+		$ov = $this->cleanInStr($oldValue);
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
 		//Add raw string fragment if present, yet unlikely
 		if(strpos($this->sqlWhere,'ocr.rawstr') !== false){
