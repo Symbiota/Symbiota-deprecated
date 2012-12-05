@@ -186,5 +186,12 @@ class OccurrenceCleaner {
 		}
 		return $status;
 	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?>
