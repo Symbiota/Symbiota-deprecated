@@ -1,9 +1,4 @@
 <?php
-/*
- * Built 3 Feb 2011
- * By E.E. Gilbert
- */
- 
 class SpecProcessorAbbyy extends SpecProcessorManager{
 
 	private $recDelimiter = '/--END--/';

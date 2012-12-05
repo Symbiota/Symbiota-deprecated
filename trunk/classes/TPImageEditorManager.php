@@ -121,15 +121,15 @@ class TPImageEditorManager extends TPEditorManager{
 			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
 		}
 		if(!$imgUrl) return;
-		$caption = $this->cleanStr($_REQUEST["caption"]);
-		$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanStr($_REQUEST["photographer"]):"");
+		$caption = $this->cleanInStr($_REQUEST["caption"]);
+		$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):"");
 		$photographerUid = $_REQUEST["photographeruid"];
 		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-		$copyRight = $this->cleanStr($_REQUEST["copyright"]);
-		$owner = $this->cleanStr($_REQUEST["owner"]);
-		$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanStr($_REQUEST["locality"]):"");
+		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
+		$owner = $this->cleanInStr($_REQUEST["owner"]);
+		$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanInStr($_REQUEST["locality"]):"");
 		$occId = $_REQUEST["occid"];
-		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanStr($_REQUEST["notes"]):"");
+		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
 		$sortSequence = $_REQUEST["sortsequence"];
 		$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
 		if(array_key_exists("addtotid",$_REQUEST)){
@@ -176,13 +176,13 @@ class TPImageEditorManager extends TPEditorManager{
 			$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 				"owner, sourceurl, copyright, locality, occid, notes, sortsequence) ".
 				"VALUES (".$this->tid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-				($photographer?"\"".$this->cleanStr($photographer)."\"":"NULL").",".
+				($photographer?"\"".$this->cleanInStr($photographer)."\"":"NULL").",".
 				($photographerUid?$photographerUid:"NULL").",\"".
-				$this->cleanStr($caption)."\",\"".$this->cleanStr($owner).
-				"\",\"".$sourceUrl."\",\"".$this->cleanStr($copyRight).
-				"\",\"".$this->cleanStr($locality)."\",".
-				($occId?$occId:"NULL").",\"".$this->cleanStr($notes)."\",".
-				($sortSequence?$this->cleanStr($sortSequence):"50").")";
+				$this->cleanInStr($caption)."\",\"".$this->cleanInStr($owner).
+				"\",\"".$sourceUrl."\",\"".$this->cleanInStr($copyRight).
+				"\",\"".$this->cleanInStr($locality)."\",".
+				($occId?$occId:"NULL").",\"".$this->cleanInStr($notes)."\",".
+				($sortSequence?$this->cleanInStr($sortSequence):"50").")";
 			//echo $sql;
 			$status = "";
 			if($this->taxonCon->query($sql)){
@@ -190,12 +190,12 @@ class TPImageEditorManager extends TPEditorManager{
 					$sql = "INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, ".
 						"owner, sourceurl, copyright, locality, occid, notes) ". 
 						"VALUES (".$addToTid.",\"".$imgWebUrl."\",".($imgTnUrl?"\"".$imgTnUrl."\"":"NULL").",".($imgLgUrl?"\"".$imgLgUrl."\"":"NULL").",".
-						($photographer?"\"".$this->cleanStr($photographer)."\"":"NULL").
+						($photographer?"\"".$this->cleanInStr($photographer)."\"":"NULL").
 						",".($photographerUid?$photographerUid:"NULL").",\"".
-						$this->cleanStr($imageType)."\",\"".$this->cleanStr($caption).
-						"\",\"".$this->cleanStr($owner)."\",\"".$sourceUrl.
-						"\",\"".$this->cleanStr($copyRight)."\",\"".$this->cleanStr($locality)."\",".
-						($occId?$occId:"NULL").",\"".$this->cleanStr($notes)."\")";
+						$this->cleanInStr($imageType)."\",\"".$this->cleanInStr($caption).
+						"\",\"".$this->cleanInStr($owner)."\",\"".$sourceUrl.
+						"\",\"".$this->cleanInStr($copyRight)."\",\"".$this->cleanInStr($locality)."\",".
+						($occId?$occId:"NULL").",\"".$this->cleanInStr($notes)."\")";
 					//echo $sql;
 					if(!$this->taxonCon->query($sql)){
 						$status = "Error: unable to upload image for related taxon";

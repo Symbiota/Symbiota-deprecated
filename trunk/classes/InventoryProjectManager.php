@@ -237,7 +237,7 @@ class InventoryProjectManager {
 		$newStr = str_replace(chr(11),' ',$newStr);
 		$newStr = str_replace(chr(13),' ',$newStr);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
+		$newStr = $this->con->real_escape_string($newStr);
 		return $newStr;
 	}
 }

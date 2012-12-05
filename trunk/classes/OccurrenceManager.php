@@ -856,5 +856,19 @@ class OccurrenceManager{
 	public function getClName(){
 		return $this->clName;
 	}
+
+	protected function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+
+	protected function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 }
 ?>

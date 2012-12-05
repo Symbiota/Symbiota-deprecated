@@ -51,12 +51,12 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$occId]["institutioncode"] = $row->institutioncode;
 			$returnArr[$collIdStr][$occId]["collectioncode"] = $row->collectioncode;
 			$returnArr[$collIdStr][$occId]["accession"] = $row->catalognumber;
-			$returnArr[$collIdStr][$occId]["family"] = $row->family;
-			$returnArr[$collIdStr][$occId]["sciname"] = $row->sciname;
+			$returnArr[$collIdStr][$occId]["family"] = $this->cleanOutStr($row->family);
+			$returnArr[$collIdStr][$occId]["sciname"] = $this->cleanOutStr($row->sciname);
 			$returnArr[$collIdStr][$occId]["tid"] = $row->tidinterpreted;
-			$returnArr[$collIdStr][$occId]["author"] = $row->author;
-			$returnArr[$collIdStr][$occId]["collector"] = $row->recordedby;
-			$returnArr[$collIdStr][$occId]["collnumber"] = $row->recordnumber;
+			$returnArr[$collIdStr][$occId]["author"] = $this->cleanOutStr($row->author);
+			$returnArr[$collIdStr][$occId]["collector"] = $this->cleanOutStr($row->recordedby);
+			$returnArr[$collIdStr][$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
 			$returnArr[$collIdStr][$occId]["date1"] = $row->date1;
 			$returnArr[$collIdStr][$occId]["date2"] = $row->date2;
 			$returnArr[$collIdStr][$occId]["country"] = $row->country;

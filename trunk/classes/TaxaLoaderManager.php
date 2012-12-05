@@ -770,12 +770,18 @@ class TaxaLoaderManager{
 		return $retArr;
 	}
 	
- 	protected function cleanStr($fieldValue){
- 		$rStr = trim($fieldValue);
-		$rStr = str_replace('"',"&quot;",$rStr);
-		$rStr = str_replace("'","&apos;",$rStr);
-		$rStr = $this->conn->real_escape_string($rStr);
-		return $rStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 	
 	protected function encodeString($inStr){

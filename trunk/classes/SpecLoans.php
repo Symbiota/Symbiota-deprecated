@@ -259,7 +259,7 @@ class SpecLoans{
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'loanid' && $k != 'collid'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 				}
 			}
 			$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE (loanid = '.$loanId.')';
@@ -303,7 +303,7 @@ class SpecLoans{
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'loanid' && $k != 'collid'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 				}
 			}
 			$sql = 'UPDATE omoccurloans SET '.substr($sql,1).' WHERE (loanid = '.$loanId.')';
@@ -328,7 +328,7 @@ class SpecLoans{
 			$sql = '';
 			foreach($pArr as $k => $v){
 				if($k != 'formsubmit' && $k != 'exchangeid' && $k != 'collid'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanString($v).'"':'NULL');
+					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 				}
 			}
 			$sql = 'UPDATE omoccurexchange SET '.substr($sql,1).' WHERE (exchangeid = '.$exchangeId.')';
@@ -382,8 +382,8 @@ class SpecLoans{
 	public function createNewLoanOut($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurloans(collidown,loanidentifierown,iidowner,iidborrower,createdbyown) '.
-			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierown']).'",(SELECT iid FROM omcollections WHERE collid = '.$this->collId.'), '.
-			'"'.$this->cleanString($pArr['reqinstitution']).'","'.$this->cleanString($pArr['createdbyown']).'") ';
+			'VALUES('.$this->collId.',"'.$this->cleanInStr($pArr['loanidentifierown']).'",(SELECT iid FROM omcollections WHERE collid = '.$this->collId.'), '.
+			'"'.$this->cleanInStr($pArr['reqinstitution']).'","'.$this->cleanInStr($pArr['createdbyown']).'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
@@ -399,8 +399,8 @@ class SpecLoans{
 	public function getloanIdentifierBorr($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierborr,iidowner,createdbyborr) '.
-			'VALUES('.$this->collId.',"'.$this->cleanString($pArr['loanidentifierborr']).'","'.$this->cleanString($pArr['iidowner']).'",
-			"'.$this->cleanString($pArr['createdbyborr']).'")';
+			'VALUES('.$this->collId.',"'.$this->cleanInStr($pArr['loanidentifierborr']).'","'.$this->cleanInStr($pArr['iidowner']).'",
+			"'.$this->cleanInStr($pArr['createdbyborr']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
@@ -415,8 +415,8 @@ class SpecLoans{
 	public function createNewLoanIn($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurloans(collidborr,loanidentifierown,loanidentifierborr,iidowner,createdbyborr) '.
-			'VALUES('.$this->collId.',"","'.$this->cleanString($pArr['loanidentifierborr']).'","'.$this->cleanString($pArr['iidowner']).'",
-			"'.$this->cleanString($pArr['createdbyborr']).'")';
+			'VALUES('.$this->collId.',"","'.$this->cleanInStr($pArr['loanidentifierborr']).'","'.$this->cleanInStr($pArr['iidowner']).'",
+			"'.$this->cleanInStr($pArr['createdbyborr']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->loanId = $this->conn->insert_id;
@@ -431,8 +431,8 @@ class SpecLoans{
 	public function createNewExchange($pArr){
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurexchange(identifier,collid,iid,transactiontype,createdby) '.
-			'VALUES("'.$this->cleanString($pArr['identifier']).'",'.$this->collId.',"'.$this->cleanString($pArr['iid']).'",
-			"'.$this->cleanString($pArr['transactiontype']).'","'.$this->cleanString($pArr['createdby']).'")';
+			'VALUES("'.$this->cleanInStr($pArr['identifier']).'",'.$this->collId.',"'.$this->cleanInStr($pArr['iid']).'",
+			"'.$this->cleanInStr($pArr['transactiontype']).'","'.$this->cleanInStr($pArr['createdby']).'")';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->exchangeId = $this->conn->insert_id;
@@ -484,9 +484,9 @@ class SpecLoans{
 	//This method is used by the ajax script insertloanspecimen.php
 	public function addSpecimen($loanId,$collId,$catNum){
 		$retArr = array();
-		$loanId = $this->cleanString($loanId);
-		$collId = $this->cleanString($collId);
-		$catNum = $this->cleanString($catNum);
+		$loanId = $this->cleanInStr($loanId);
+		$collId = $this->cleanInStr($collId);
+		$catNum = $this->cleanInStr($catNum);
 		$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (catalognumber = "'.$catNum.'") ';
 		//echo $sql;
 		$result = $this->conn->query($sql);
@@ -692,13 +692,19 @@ class SpecLoans{
 	public function getExchangeId(){
 		return $this->exchangeId;
 	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
 	
-	protected function cleanString($inStr){
-		$retStr = trim($inStr);
-		$retStr = str_replace('"',"&quot;",$retStr);
-		$retStr = str_replace("'","&apos;",$retStr);
-		$retStr = $this->conn->real_escape_string($retStr);
-		return $retStr;
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

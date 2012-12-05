@@ -344,7 +344,7 @@ ALTER TABLE `fmchecklists`
   CHANGE COLUMN `Name` `Name` VARCHAR(100) NOT NULL  ; 
 
 ALTER TABLE `fmchklsttaxalink`
-  ADD COLUMN `morphospecies` VARCHAR(45) NOT NULL  AFTER `CLID`  ,
+  ADD COLUMN `morphospecies` VARCHAR(45) NULL DEFAULT NULL AFTER `CLID`  ,
   DROP PRIMARY KEY  ,
   ADD PRIMARY KEY (`TID`, `CLID`, `morphospecies`) ; 
 

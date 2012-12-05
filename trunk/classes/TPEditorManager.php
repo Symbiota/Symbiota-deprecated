@@ -154,7 +154,7 @@ class TPEditorManager {
 	}
 	
 	public function editVernacular($inArray){
-		$editArr = $this->cleanArray($inArray);
+		$editArr = $this->cleanInArray($inArray);
 		$vid = $editArr["vid"];
 		unset($editArr["vid"]);
 		$setFrag = "";
@@ -171,7 +171,7 @@ class TPEditorManager {
 	}
 	
 	public function addVernacular($inArray){
-		$newVerns = $this->cleanArray($inArray);
+		$newVerns = $this->cleanInArray($inArray);
 		$sql = "INSERT INTO taxavernaculars (tid,".implode(",",array_keys($newVerns)).") VALUES (".$this->getTid().",\"".implode("\",\"",$newVerns)."\")";
 		//echo $sql;
 		$status = "";
@@ -261,22 +261,20 @@ class TPEditorManager {
  		return $this->language = $this->taxonCon->real_escape_string($lang);
  	}
  	
- 	protected function cleanArray($arr){
+ 	protected function cleanInArray($arr){
  		$newArray = Array();
  		foreach($arr as $key => $value){
- 			$newArray[$this->cleanStr($key)] = $this->cleanStr($value);
+ 			$newArray[$this->cleanInStr($key)] = $this->cleanInStr($value);
  		}
  		return $newArray;
  	}
 	
- 	protected function cleanStr($str){
+	protected function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"&quot;",$newStr);
-		$newStr = str_replace("'","&apos;",$newStr);
 		$newStr = $this->taxonCon->real_escape_string($newStr);
 		return $newStr;
- 	}
+	}
 }
 ?>
 

@@ -261,11 +261,6 @@ class SpecEditReviewManager {
 		$result->close();
 		return $retArr;
 	}
-
-	private function cleanStr($str){
-		$str = str_replace('"','',$str);
-		return $str;
-	}
 }
 ?>
  

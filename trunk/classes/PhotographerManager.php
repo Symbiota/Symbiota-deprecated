@@ -43,18 +43,18 @@ class PhotographerManager{
 		//echo "SQL: ".$sql;
 		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
-			$retArr['name'] = $row->pname;
+			$retArr['name'] = $this->cleanOutStr($row->pname);
 			$retArr['ispublic'] = $row->ispublic;
-			$retArr['title'] = $row->title;
-			$retArr['institution'] = $row->institution;
-			$retArr['department'] = $row->department;
+			$retArr['title'] = $this->cleanOutStr($row->title);
+			$retArr['institution'] = $this->cleanOutStr($row->institution);
+			$retArr['department'] = $this->cleanOutStr($row->department);
 			$retArr['city'] = $row->city;
 			$retArr['state'] = $row->state;
 			$retArr['zip'] = $row->zip;
 			$retArr['country'] = $row->country;
-			$retArr['email'] = $row->email;
-			$retArr['notes'] = $row->notes;
-			$retArr['biography'] = $row->biography;
+			$retArr['email'] = $this->cleanOutStr($row->email);
+			$retArr['notes'] = $this->cleanOutStr($row->notes);
+			$retArr['biography'] = $this->cleanOutStr($row->biography);
 			$retArr['url'] = $row->url;
 		}
     	$result->close();
@@ -85,10 +85,17 @@ class PhotographerManager{
 			$retArr[$imgId]['url'] = $row->url;
 			$retArr[$imgId]['tnurl'] = $row->thumbnailurl;
 			$retArr[$imgId]['tid'] = $row->tid;
-			$retArr[$imgId]['sciname'] = $row->sciname;
+			$retArr[$imgId]['sciname'] = $this->cleanOutStr($row->sciname);
 		}
     	$result->close();
     	return $retArr;
+	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

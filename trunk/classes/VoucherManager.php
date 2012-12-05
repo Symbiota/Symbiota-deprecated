@@ -1,12 +1,7 @@
 <?php
-/*
- * 15 Jan 2010
- * E.E. Gilbert
- */
-
 include_once($serverRoot.'/config/dbconnection.php');
  
- class VoucherManager {
+class VoucherManager {
 
 	private $conn;
 	private $tid;
@@ -100,12 +95,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 				"FROM fmchklsttaxalink cllink WHERE (TID = ".$nTaxon.") AND (CLID = ".$this->clid.')';
 			$rsTarget = $this->conn->query($sqlTarget);
 			if($row = $rsTarget->fetch_object()){
-				$habitatTarget = $this->cleanStr($row->Habitat);
-				$abundTarget = $this->cleanStr($row->Abundance);
-				$notesTarget = $this->cleanStr($row->Notes);
-				$internalNotesTarget = $this->cleanStr($row->internalnotes);
-				$sourceTarget = $this->cleanStr($row->source);
-				$nativeTarget = $this->cleanStr($row->Nativity);
+				$habitatTarget = $this->cleanInStr($row->Habitat);
+				$abundTarget = $this->cleanInStr($row->Abundance);
+				$notesTarget = $this->cleanInStr($row->Notes);
+				$internalNotesTarget = $this->cleanInStr($row->internalnotes);
+				$sourceTarget = $this->cleanInStr($row->source);
+				$nativeTarget = $this->cleanInStr($row->Nativity);
 			
 				//Move all vouchers to new name
 				$sqlVouch = "UPDATE fmvouchers SET TID = ".$nTaxon." ".
@@ -122,12 +117,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 					"FROM fmchklsttaxalink ctl WHERE (ctl.TID = ".$this->tid.") AND (ctl.CLID = ".$this->clid.')';
 				$rsSourceCl =  $this->conn->query($sqlSourceCl);
 				if($row = $rsSourceCl->fetch_object()){
-					$habitatSource = $this->cleanStr($row->Habitat);
-					$abundSource = $this->cleanStr($row->Abundance);
-					$notesSource = $this->cleanStr($row->Notes);
-					$internalNotesSource = $this->cleanStr($row->internalnotes);
-					$sourceSource = $this->cleanStr($row->source);
-					$nativeSource = $this->cleanStr($row->Nativity);
+					$habitatSource = $this->cleanInStr($row->Habitat);
+					$abundSource = $this->cleanInStr($row->Abundance);
+					$notesSource = $this->cleanInStr($row->Notes);
+					$internalNotesSource = $this->cleanInStr($row->internalnotes);
+					$sourceSource = $this->cleanInStr($row->source);
+					$nativeSource = $this->cleanInStr($row->Nativity);
 				}
 				$rsSourceCl->close();
 				//Transfer source chklsttaxalink data to target record
@@ -137,10 +132,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 				$internalNotesStr = $internalNotesTarget.(($internalNotesTarget && $internalNotesSource)?"; ":"").$internalNotesSource;
 				$sourceStr = $sourceTarget.(($sourceTarget && $sourceSource)?"; ":"").$sourceSource;
 				$nativeStr = $nativeTarget.(($nativeTarget && $nativeSource)?"; ":"").$nativeSource;
-				$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanStr($habitatStr).'", '. 
-					'Abundance = "'.$this->cleanStr($abundStr).'", Notes = "'.$this->cleanStr($notesStr).
-					'", internalnotes = "'.$this->cleanStr($internalNotesStr).'", source = "'.
-					$this->cleanStr($sourceStr).'", Nativity = "'.$this->cleanStr($nativeStr).'" '.
+				$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanInStr($habitatStr).'", '. 
+					'Abundance = "'.$this->cleanInStr($abundStr).'", Notes = "'.$this->cleanInStr($notesStr).
+					'", internalnotes = "'.$this->cleanInStr($internalNotesStr).'", source = "'.
+					$this->cleanInStr($sourceStr).'", Nativity = "'.$this->cleanInStr($nativeStr).'" '.
 					'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
 				$this->conn->query($sqlCl);
 				//Delete unwanted taxon
@@ -187,7 +182,7 @@ include_once($serverRoot.'/config/dbconnection.php');
 			unset($editArr['occid']);
 			$setStr = '';
 			foreach($editArr as $k => $v){
-				$setStr .= ', '.$k.' = "'.$this->cleanStr($v).'"';
+				$setStr .= ', '.$k.' = "'.$this->cleanInStr($v).'"';
 			}
 			$setStr = substr($setStr,2);
 			$sqlVoucUpdate = 'UPDATE fmvouchers v '.
@@ -199,8 +194,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 	}
 	
 	public function addVoucher($vOccId, $vNotes, $vEditNotes){
-		$vNotes = $this->cleanStr($vNotes);
-		$vEditNotes = $this->cleanStr($vEditNotes);
+		$vNotes = $this->cleanInStr($vNotes);
+		$vEditNotes = $this->cleanInStr($vEditNotes);
 		if(is_numeric($vOccId)){
 			if($vOccId && $this->clid){
 				$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
@@ -232,10 +227,10 @@ include_once($serverRoot.'/config/dbconnection.php');
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
 			$occId = $row->occid;
-			$recNum = $this->cleanStr($row->recordnumber);
-			$collector = $this->cleanStr($row->recordedby).' ('.($recNum?$recNum:'s.n.').')';
-			$notes = $this->cleanStr($row->Notes);
-			$editNotes = $this->cleanStr($row->editnotes);
+			$recNum = $this->cleanInStr($row->recordnumber);
+			$collector = $this->cleanInStr($row->recordedby).' ('.($recNum?$recNum:'s.n.').')';
+			$notes = $this->cleanInStr($row->Notes);
+			$editNotes = $this->cleanInStr($row->editnotes);
 			
 			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) '.
 				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"'.$collector.'","'.
@@ -261,13 +256,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 		}
 	}
 
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
-}
+ }
 ?>
  

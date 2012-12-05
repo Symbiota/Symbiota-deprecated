@@ -32,7 +32,7 @@ class OccurrenceCleaner {
 			while($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['collectioncode'] = $row->collectioncode;
-				$returnArr['collectionname'] = $row->collectionname;
+				$returnArr['collectionname'] = $this->cleanOutStr($row->collectionname);
 				$returnArr['icon'] = $row->icon;
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
@@ -71,7 +71,7 @@ class OccurrenceCleaner {
 			foreach($r as $k =>$v){
 				if($recCnt == 1) $fieldArr[$k] = '';
 				if($v && $k != 'occid' && $k != 'catalognumber'){
-					$retArr[$catalognumber][$occid][$k] = $v;
+					$retArr[$catalognumber][$occid][$k] = $this->cleanOutStr($v);
 					$fieldArr[$k] = $k;
 				}
 			} 
@@ -186,7 +186,5 @@ class OccurrenceCleaner {
 		}
 		return $status;
 	}
-		
 }
-
 ?>

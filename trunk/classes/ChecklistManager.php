@@ -72,10 +72,11 @@ class ChecklistManager {
 		$insertStatus = false;
 		$colSql = '';
 		$valueSql = '';
+		$conn = MySQLiConnectionFactory::getCon("write");
 		foreach($dataArr as $k =>$v){
 			$colSql .= ','.$k;
 			if($v){
-				$valueSql .= ',"'.$this->cleanInStr($v).'"';
+				$valueSql .= ',"'.$this->cleanInStr($conn->real_escape_string($v)).'"';
 			}
 			else{
 				$valueSql .= ',NULL';
@@ -83,12 +84,11 @@ class ChecklistManager {
 		}
 		$sql = 'INSERT INTO fmchklsttaxalink (clid'.$colSql.') '.
 			'VALUES ('.$this->clid.$valueSql.')';
-		//echo $sql;
-		$con = MySQLiConnectionFactory::getCon("write");
-		if($con->query($sql)){
+		echo $sql;
+		if($conn->query($sql)){
 			$insertStatus = true;
 		}
-		$con->close();
+		$conn->close();
 		return $insertStatus;
 	}
 	
@@ -162,9 +162,10 @@ class ChecklistManager {
 	
 	public function editMetaData($editArr){
 		$setSql = "";
+		$conn = MySQLiConnectionFactory::getCon("write");
 		foreach($editArr as $key =>$value){
 			if($value){
-				$setSql .= ', '.$key.' = "'.$this->cleanInStr($value).'"';
+				$setSql .= ', '.$key.' = "'.$this->cleanInStr($conn->real_escape_string($value)).'"';
 			}
 			else{
 				$setSql .= ', '.$key.' = NULL';
@@ -172,9 +173,8 @@ class ChecklistManager {
 		}
 		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE (clid = '.$this->clid.')';
 		//echo $sql;
-		$con = MySQLiConnectionFactory::getCon("write");
-		$con->query($sql);
-		$con->close();
+		$conn->query($sql);
+		$conn->close();
 	}
 
 	public function getTaxonAuthorityList(){
@@ -198,7 +198,7 @@ class ChecklistManager {
 				'WHERE (v.clid = '.$this->clid.')';
 	 		$vResult = $this->clCon->query($vSql);
 			while ($row = $vResult->fetch_object()){
-				$voucherArr[$row->tid][$row->occid] = $this->cleanOutStr($row->collector);
+				$voucherArr[$row->tid][$row->occid] = $row->collector;
 				//$this->voucherArr[$row->tid][] = "<a style='cursor:pointer' onclick=\"openPopup('../collections/individual/index.php?occid=".
 				//	$row->occid."','individwindow')\">".$row->collector."</a>\n";
 			}
@@ -211,8 +211,8 @@ class ChecklistManager {
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->clCon->query($this->basicSql);
 		while($row = $result->fetch_object()){
-			$this->filterArr[$this->cleanOutStr($row->uppertaxonomy)] = "";
-			$family = strtoupper($this->cleanOutStr($row->family));
+			$this->filterArr[$row->uppertaxonomy] = "";
+			$family = strtoupper($row->family);
 			if(!$family) $family = 'Family Incertae Sedis';
 			$this->filterArr[$family] = '';
 			$tid = $row->tid;
@@ -520,16 +520,16 @@ class ChecklistManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sqlFrag = "";
 		if($sqlFragArr['country']){
-			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($sqlFragArr['country']).'") ';
+			$sqlFrag = 'AND (o.country = "'.$this->cleanInStr($conn->real_escape_string($sqlFragArr['country'])).'") ';
 		}
 		if($sqlFragArr['state']){
-			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($sqlFragArr['state']).'") ';
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($conn->real_escape_string($sqlFragArr['state'])).'") ';
 		}
 		if($sqlFragArr['county']){
-			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanInStr($sqlFragArr['county']).'%") ';
+			$sqlFrag .= 'AND (o.county LIKE "%'.$this->cleanInStr($conn->real_escape_string($sqlFragArr['county'])).'%") ';
 		}
 		if($sqlFragArr['locality']){
-			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($sqlFragArr['locality']).'%") ';
+			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($conn->real_escape_string($sqlFragArr['locality'])).'%") ';
 		}
 		$llStr = '';
 		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth']){
@@ -951,7 +951,7 @@ class ChecklistManager {
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
+		//$newStr = $this->clCon->real_escape_string($newStr);
 		return $newStr;
 	}
 }

@@ -115,7 +115,7 @@ class OccurrenceGeorefTools {
 				$newValueArr = array($geoRefArr['decimallatitude'],$geoRefArr['decimallongitude'],$geoRefArr['coordinateuncertaintyinmeters'],
 					$geoRefArr['geodeticdatum'],$geoRefArr['georeferencesources'],$geoRefArr['georeferenceremarks'],
 					$geoRefArr['georeferenceverificationstatus'],$geoRefArr['minimumelevationinmeters'],$geoRefArr['maximumelevationinmeters']);
-				$newValueStr = str_replace("'","\\'",json_encode($newValueArr));
+				$newValueStr = $this->cleanInStr(json_encode($newValueArr));
 				$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
 					"SELECT occid, 'georefbatchstr', '".$newValueStr."', CONCAT_WS(',',decimallatitude, decimallongitude, coordinateUncertaintyInMeters, ".
 					'geodeticdatum, georeferencesources, georeferenceRemarks, georeferenceVerificationStatus, '. 
@@ -130,19 +130,19 @@ class OccurrenceGeorefTools {
 				'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
 				',georeferencedBy = "'.$geoRefArr['georefby'].'"';
 			if($geoRefArr['georeferenceverificationstatus']){
-				$sql .= ',georeferenceverificationstatus = "'.$geoRefArr['georeferenceverificationstatus'].'"';
+				$sql .= ',georeferenceverificationstatus = "'.$this->cleanInStr($geoRefArr['georeferenceverificationstatus']).'"';
 			}
 			if($geoRefArr['georeferencesources']){
-				$sql .= ',georeferencesources = "'.$geoRefArr['georeferencesources'].'"';
+				$sql .= ',georeferencesources = "'.$this->cleanInStr($geoRefArr['georeferencesources']).'"';
 			}
 			if($geoRefArr['georeferenceremarks']){
-				$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$geoRefArr['georeferenceremarks'].'")';
+				$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$this->cleanInStr($geoRefArr['georeferenceremarks']).'")';
 			}
 			if($geoRefArr['coordinateuncertaintyinmeters']){
 				$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
 			}
 			if($geoRefArr['geodeticdatum']){
-				$sql .= ', geodeticdatum = "'.$geoRefArr['geodeticdatum'].'"';
+				$sql .= ', geodeticdatum = "'.$this->cleanInStr($geoRefArr['geodeticdatum']).'"';
 			}
 			if($geoRefArr['maximumelevationinmeters']){
 				$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
@@ -280,16 +280,21 @@ class OccurrenceGeorefTools {
 		return $retArr;
 	}
 
-	private function cleanStr($str){
- 		$newStr = trim($str);
- 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = str_replace('"',"&quot;",$newStr);
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
- 		$newStr = $this->clCon->real_escape_string($newStr);
- 		return $newStr;
- 	}
-
- 	private static function _cmpLocCnt ($a, $b){
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+ 	
+	private static function _cmpLocCnt ($a, $b){
 		$aCnt = $a['cnt'];
 		$bCnt = $b['cnt'];
 		if($aCnt == $bCnt){
