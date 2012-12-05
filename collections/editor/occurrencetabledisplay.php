@@ -313,8 +313,8 @@ if($symbUid){
 							echo '</td>'."\n";
 							foreach($headerMap as $k => $v){
 								$displayStr = $occArr[$k];
-								if(strlen($displayStr) > 50){
-									$displayStr = substr($displayStr,0,50).'...';
+								if(strlen($displayStr) > 60){
+									$displayStr = substr($displayStr,0,60).'...';
 								}
 								if(!$displayStr) $displayStr = '&nbsp;';
 								echo '<td>'.$displayStr.'</td>'."\n";
