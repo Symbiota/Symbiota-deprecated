@@ -1625,19 +1625,18 @@ class SpecUploadManager{
 		return $retArr;
 	}
 
-	protected function cleanString($inStr){
+	protected function cleaninStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
 		$retStr = str_replace(chr(11),' ',$retStr);
 		$retStr = str_replace(chr(13),' ',$retStr);
 		$retStr = str_replace(chr(20),' ',$retStr);
 		$retStr = str_replace(chr(30),' ',$retStr);
-		$retStr = str_replace('"',"&quot;",$retStr);
-		$retStr = str_replace("'","&apos;",$retStr);
+		$retStr = preg_replace('/\s\s+/', ' ',$retStr);
 		$retStr = $this->conn->real_escape_string($retStr);
 		return $retStr;
 	}
-
+	
 	protected function encodeString($inStr){
  		global $charset;
  		$retStr = $inStr;

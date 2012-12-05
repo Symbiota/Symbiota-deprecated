@@ -494,23 +494,23 @@ class TaxonomyEditorManager{
 		$tid = 0;
 		$sqlTaxa = 'INSERT INTO taxa(sciname, author, kingdomid, rankid, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, '.
 			'source, notes, securitystatus) '.
-			'VALUES ("'.$this->cleanStr($dataArr["sciname"]).'",'.($dataArr["author"]?'"'.$this->cleanStr($dataArr["author"]).'"':'NULL').
+			'VALUES ("'.$this->cleanInStr($dataArr["sciname"]).'",'.($dataArr["author"]?'"'.$this->cleanInStr($dataArr["author"]).'"':'NULL').
 			",".$dataArr["kingdomid"].
 			",".$dataArr["rankid"].
-			",".($dataArr["unitind1"]?"\"".$this->cleanStr($dataArr["unitind1"])."\"":"NULL").
-			",\"".$this->cleanStr($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->cleanStr($dataArr["unitind2"])."\"":"NULL").
-			",".($dataArr["unitname2"]?"\"".$this->cleanStr($dataArr["unitname2"])."\"":"NULL").
-			",".($dataArr["unitind3"]?"\"".$this->cleanStr($dataArr["unitind3"])."\"":"NULL").
-			",".($dataArr["unitname3"]?"\"".$this->cleanStr($dataArr["unitname3"])."\"":"NULL").
-			",".($dataArr["source"]?"\"".$this->cleanStr($dataArr["source"])."\"":"NULL").",".
-			($dataArr["notes"]?"\"".$this->cleanStr($dataArr["notes"])."\"":"NULL").
-			",".$this->cleanStr($dataArr["securitystatus"]).")";
+			",".($dataArr["unitind1"]?"\"".$this->cleanInStr($dataArr["unitind1"])."\"":"NULL").
+			",\"".$this->cleanInStr($dataArr["unitname1"])."\",".($dataArr["unitind2"]?"\"".$this->cleanInStr($dataArr["unitind2"])."\"":"NULL").
+			",".($dataArr["unitname2"]?"\"".$this->cleanInStr($dataArr["unitname2"])."\"":"NULL").
+			",".($dataArr["unitind3"]?"\"".$this->cleanInStr($dataArr["unitind3"])."\"":"NULL").
+			",".($dataArr["unitname3"]?"\"".$this->cleanInStr($dataArr["unitname3"])."\"":"NULL").
+			",".($dataArr["source"]?"\"".$this->cleanInStr($dataArr["source"])."\"":"NULL").",".
+			($dataArr["notes"]?"\"".$this->cleanInStr($dataArr["notes"])."\"":"NULL").
+			",".$this->cleanInStr($dataArr["securitystatus"]).")";
 		//echo "sqlTaxa: ".$sqlTaxa;
 		if($this->conn->query($sqlTaxa)){
 			$tid = $this->conn->insert_id;
 		 	//Load accepteance status into taxstatus table
 			$tidAccepted = ($dataArr["acceptstatus"]?$tid:$dataArr["tidaccepted"]);
-			$parTid = $this->cleanStr($dataArr["parenttid"]);
+			$parTid = $this->cleanInStr($dataArr["parenttid"]);
 			if(!$parTid && $dataArr["rankid"] == 10) $parTid = $tid; 
 			if($parTid){ 
 				if($dataArr["rankid"] > 10) $hierarchy = $this->buildHierarchy($dataArr["parenttid"]);
@@ -526,10 +526,10 @@ class TaxonomyEditorManager{
 				
 				//Load new record into taxstatus table
 				$sqlTaxStatus = "INSERT INTO taxstatus(tid, tidaccepted, taxauthid, family, uppertaxonomy, parenttid, unacceptabilityreason, hierarchystr) ".
-					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->cleanStr($family)."\"":"NULL").",".
-					($dataArr["uppertaxonomy"]?"\"".$this->cleanStr($dataArr["uppertaxonomy"])."\"":"NULL").
+					"VALUES (".$tid.",".$tidAccepted.",1,".($family?"\"".$this->cleanInStr($family)."\"":"NULL").",".
+					($dataArr["uppertaxonomy"]?"\"".$this->cleanInStr($dataArr["uppertaxonomy"])."\"":"NULL").
 					",".($parTid?$parTid:"NULL").",\"".
-					$this->cleanStr($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
+					$this->cleanInStr($dataArr["unacceptabilityreason"])."\",\"".$hierarchy."\") ";
 				//echo "sqlTaxStatus: ".$sqlTaxStatus;
 				if(!$this->conn->query($sqlTaxStatus)){
 					return "ERROR: Taxon loaded into taxa, but falied to load taxstatus: sql = ".$sqlTaxa;
@@ -539,7 +539,7 @@ class TaxonomyEditorManager{
 			//Link new name to existing specimens and set locality secirity if needed
 			$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid ';
 			if($dataArr['securitystatus'] == 1) $sql1 .= ',o.localitysecurity = 1 '; 
-			$sql1 .= 'WHERE (o.sciname = "'.$this->cleanStr($dataArr["sciname"]).'") ';
+			$sql1 .= 'WHERE (o.sciname = "'.$this->cleanInStr($dataArr["sciname"]).'") ';
 			$this->conn->query($sql1);
 			//Link occurrence images to the new name
 			$sql2 = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
@@ -835,12 +835,18 @@ class TaxonomyEditorManager{
 		return $this->synonymArr;
 	}
 
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

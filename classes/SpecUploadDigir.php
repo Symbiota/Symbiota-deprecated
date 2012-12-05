@@ -281,7 +281,7 @@ class SpecUploadDigir extends SpecUploadManager {
 	}
 
 	private function characterData($parser, $data){
-		$value = $this->cleanString($this->encodeString($data));
+		$value = $this->cleanInStr($this->encodeString($data));
 		if($this->withinRecordElement && $value != ""){
 			$this->activeFieldValue .= $value;
 		}

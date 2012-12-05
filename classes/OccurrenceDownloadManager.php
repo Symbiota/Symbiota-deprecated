@@ -49,7 +49,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 			"o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, ".
 	 			"o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, ".
 		 		"o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, ".
-	 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, ".
+	 			"o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, ".
 	 			"o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, ".
 	 			"o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, ".
 		 		"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, ".
@@ -62,7 +62,7 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	 			"taxonRemarks","identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
 				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
 	 			"verbatimEventDate","habitat","fieldNotes","fieldNumber","occurrenceRemarks",
-	 			"dynamicProperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
+	 			"dynamicProperties","associatedTaxa","reproductiveCondition","establishmentMeans",
 	 			"lifeStage","sex","individualCount","samplingProtocol","preparations",
 	 			"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
 		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision","locationRemarks","verbatimCoordinates",

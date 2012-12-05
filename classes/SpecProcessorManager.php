@@ -222,7 +222,7 @@ class SpecProcessorManager {
 	protected function loadRawFragment($imgId,$labelBlock){
 		//load raw label record
 		$status = true;
-		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) VALUES('.$imgId.',"'.$this->cleanStr($labelBlock).'")';
+		$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr) VALUES('.$imgId.',"'.$this->cleanInStr($labelBlock).'")';
 		if(!$this->conn->query($sql)){
 			if($this->logErrFH){
 				fwrite($this->logErrFH, "\tERROR: Unable to load Raw Text Fragment into database specprocessorrawlabels: ");
@@ -239,7 +239,7 @@ class SpecProcessorManager {
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
-				'SET title = "'.$editArr['title'].'", speckeypattern = "'.str_replace('\\','\\\\',$editArr['speckeypattern']).
+				'SET title = "'.$this->cleanInStr($editArr['title']).'", speckeypattern = "'.str_replace('\\','\\\\',$editArr['speckeypattern']).
 				'", speckeyretrieval = "'.(array_key_exists('speckeyretrieval',$editArr)?$editArr['speckeyretrieval']:'filename').
 				'", sourcepath = "'.$editArr['sourcepath'].'", targetpath = "'.$editArr['targetpath'].'", imgurl = "'.$editArr['imgurl'].
 				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
@@ -255,7 +255,7 @@ class SpecProcessorManager {
 	public function addProject($addArr){
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
-			'VALUES('.$this->collId.',"'.$addArr['title'].'","'.$addArr['speckeypattern'].'","'.$addArr['speckeyretrieval'].'","'.
+			'VALUES('.$this->collId.',"'.$this->cleanInStr($addArr['title']).'","'.$addArr['speckeypattern'].'","'.$addArr['speckeyretrieval'].'","'.
 			$addArr['sourcepath'].'","'.$addArr['targetpath'].'","'.$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
 			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgcompression'].','.
 			(array_key_exists('createtnimg',$addArr)?'1':'0').','.(array_key_exists('createlgimg',$addArr)?'1':'0').')';
@@ -508,9 +508,11 @@ class SpecProcessorManager {
  	}
 
 	//Misc functions
-	protected function cleanStr($str){
-		$str = str_replace('"','',$str);
-		return $str;
+	protected function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

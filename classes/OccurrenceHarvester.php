@@ -42,13 +42,13 @@ class OccurrenceHarvester {
 							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
 							$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
 							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
-							$row["verbatimeventdate"]."\",\"".$this->cleanStr($row["habitat"])."\",\"".$this->cleanStr($row["substrate"])."\",\"".
-							$this->cleanStr($row["verbatimattributes"])."\",\"".
+							$row["verbatimeventdate"]."\",\"".$row["habitat"]."\",\"".$row["substrate"]."\",\"".
+							$row["verbatimattributes"]."\",\"".
 							$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
 							$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
-							$row["county"]."\",\"".$row["municipality"]."\",\"".$this->cleanStr($row["locality"])."\",".$row["decimallatitude"].",".
+							$row["county"]."\",\"".$row["municipality"]."\",\"".$row["locality"]."\",".$row["decimallatitude"].",".
 							$row["decimallongitude"].",\"".$row["geodeticdatum"]."\",".$row["coordinateuncertaintyinmeters"].",\"".
-							$this->cleanStr($row["verbatimcoordinates"])."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
+							$row["verbatimcoordinates"]."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
 							$row["verbatimelevation"]."\",\"".$row["disposition"]."\"\n";
 					}
 				}

@@ -134,10 +134,10 @@ class SpecDatasetManager {
 				while($r = $rs->fetch_object()){
 					$occId = $r->occid;
 					$retArr[$occId]['q'] = $r->q;
-					$retArr[$occId]['c'] = $r->collector;
-					//$retArr[$occId]['f'] = $r->family;
-					$retArr[$occId]['s'] = $r->sciname;
-					$retArr[$occId]['l'] = $r->locality;
+					$retArr[$occId]['c'] = $this->cleanOutStr($r->collector);
+					//$retArr[$occId]['f'] = $this->cleanOutStr($r->family);
+					$retArr[$occId]['s'] = $this->cleanOutStr($r->sciname);
+					$retArr[$occId]['l'] = $this->cleanOutStr($r->locality);
 				}
 				$rs->close();
 			}
@@ -223,10 +223,10 @@ class SpecDatasetManager {
 		$altArr = array();
 		while($r = $rs->fetch_object()){
 			if($this->symbUid == $r->observeruid){
-				$retArr[] = $r->labelproject;
+				$retArr[] = $this->cleanOutStr($r->labelproject);
 			}
 			else{
-				$altArr[] = $r->labelproject;
+				$altArr[] = $this->cleanOutStr($r->labelproject);
 			}
 		}
 		$rs->close();
@@ -266,10 +266,16 @@ class SpecDatasetManager {
 		$this->isAdmin = $isAdmin;
 	}
 
-	protected function cleanStr($str){
-		$newStr = trim($str);
-		$newStr = str_replace('"',"&quot;",$newStr);
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}

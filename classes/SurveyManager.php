@@ -89,12 +89,12 @@ class SurveyManager {
 		$setSql = "";
 		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'UPDATE omsurveys SET '.
-			'projectname = '.($_POST['projectname']?'"'.$this->cleanStr(trim($_POST['projectname'])).'"':'NULL').', '.
-			'managers = '.($_POST['managers']?'"'.$this->cleanStr(trim($_POST['managers'])).'"':'NULL').', '.
-			'locality = '.($_POST['locality']?'"'.$this->cleanStr(trim($_POST['locality'])).'"':'NULL').', '.
-			'notes = '.($_POST['notes']?'"'.$this->cleanStr(trim($_POST['notes'])).'"':'NULL').', '.
-			'latcentroid = '.($_POST['latcentroid']?$this->cleanStr($_POST['latcentroid']):'NULL').', '.
-			'longcentroid = '.($_POST['longcentroid']?$this->cleanStr($_POST['longcentroid']):'NULL').', '.
+			'projectname = '.($_POST['projectname']?'"'.$this->cleanInStr(trim($_POST['projectname'])).'"':'NULL').', '.
+			'managers = '.($_POST['managers']?'"'.$this->cleanInStr(trim($_POST['managers'])).'"':'NULL').', '.
+			'locality = '.($_POST['locality']?'"'.$this->cleanInStr(trim($_POST['locality'])).'"':'NULL').', '.
+			'notes = '.($_POST['notes']?'"'.$this->cleanInStr(trim($_POST['notes'])).'"':'NULL').', '.
+			'latcentroid = '.($_POST['latcentroid']?$this->cleanInStr($_POST['latcentroid']):'NULL').', '.
+			'longcentroid = '.($_POST['longcentroid']?$this->cleanInStr($_POST['longcentroid']):'NULL').', '.
 			'ispublic = '.($_POST['ispublic']?1:0).' '.
 			'WHERE (surveyid = '.$this->surveyId.')';
 		//echo $sql;
@@ -353,13 +353,19 @@ class SurveyManager {
 	public function getSpeciesCount(){
 		return $this->speciesCount;
 	}
-	
-	private function cleanStr($inStr){
-		$retStr = trim($inStr);
-		$retStr = str_replace('"',"&quot;",$retStr);
-		$retStr = str_replace("'","&apos;",$retStr);
-		$retStr = $this->conn->real_escape_string($retStr);
-		return $retStr;
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 	
 }

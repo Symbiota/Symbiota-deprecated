@@ -130,22 +130,22 @@ class ProfileManager{
         if($row = $result->fetch_object()){
 	        $person = new Person();
             $person->setUid($row->uid);
-            $person->setFirstName($row->firstname);
-            $person->setLastName($row->lastname);
-            $person->setTitle($row->title);
-            $person->setInstitution($row->institution);
-            $person->setDepartment($row->department);
-            $person->setAddress($row->address);
-            $person->setCity($row->city);
-            $person->setState($row->state);
+            $person->setFirstName($this->cleanOutStr($row->firstname));
+            $person->setLastName($this->cleanOutStr($row->lastname));
+            $person->setTitle($this->cleanOutStr($row->title));
+            $person->setInstitution($this->cleanOutStr($row->institution));
+            $person->setDepartment($this->cleanOutStr($row->department));
+            $person->setAddress($this->cleanOutStr($row->address));
+            $person->setCity($this->cleanOutStr($row->city));
+            $person->setState($this->cleanOutStr($row->state));
             $person->setZip($row->zip);
-            $person->setCountry($row->country);
+            $person->setCountry($this->cleanOutStr($row->country));
             $person->setPhone($row->phone);
-            $person->setEmail($row->email);
+            $person->setEmail($this->cleanOutStr($row->email));
             $person->setUrl($row->url);
-            $person->setBiography($row->biography);
+            $person->setBiography($this->cleanOutStr($row->biography));
             $person->setIsPublic($row->ispublic);
-            $person->addLogin($row->username);
+			$person->addLogin($row->username);
             while($row = $result->fetch_object()){
             	$person->addLogin($row->username);
             }
@@ -185,21 +185,21 @@ class ProfileManager{
         	$editCon = $this->getConnection("write");
     		$fields = 'UPDATE users SET ';
             $where = 'WHERE (uid = '.$person->getUid().')';
-            $values = 'firstname = "'.$this->cleanStr($person->getFirstName()).'"';
-            $values .= ', lastname= "'.$this->cleanStr($person->getLastName()).'"';
-            $values .= ', title= "'.$this->cleanStr($person->getTitle()).'"';
-            $values .= ', institution="'.$this->cleanStr($person->getInstitution()).'"';
-            $values .= ', department= "'.$this->cleanStr($person->getDepartment()).'"';
-            $values .= ', address= "'.$this->cleanStr($person->getAddress()).'"';
-            $values .= ', city="'.$this->cleanStr($person->getCity()).'"';
-            $values .= ', state="'.$this->cleanStr($person->getState()).'"';
-            $values .= ', zip="'.$this->cleanStr($person->getZip()).'"';
-            $values .= ', country= "'.$this->cleanStr($person->getCountry()).'"';
-            $values .= ', phone="'.$this->cleanStr($person->getPhone()).'"';
-            $values .= ', email="'.$this->cleanStr($person->getEmail()).'"';
-            $values .= ', url="'.$this->cleanStr($person->getUrl()).'"';
-            $values .= ', biography="'.$this->cleanStr($person->getBiography()).'"';
-            $values .= ', ispublic='.$this->cleanStr($person->getIsPublic()).' ';
+            $values = 'firstname = "'.$this->cleanInStr($person->getFirstName()).'"';
+            $values .= ', lastname= "'.$this->cleanInStr($person->getLastName()).'"';
+            $values .= ', title= "'.$this->cleanInStr($person->getTitle()).'"';
+            $values .= ', institution="'.$this->cleanInStr($person->getInstitution()).'"';
+            $values .= ', department= "'.$this->cleanInStr($person->getDepartment()).'"';
+            $values .= ', address= "'.$this->cleanInStr($person->getAddress()).'"';
+            $values .= ', city="'.$this->cleanInStr($person->getCity()).'"';
+            $values .= ', state="'.$this->cleanInStr($person->getState()).'"';
+            $values .= ', zip="'.$this->cleanInStr($person->getZip()).'"';
+            $values .= ', country= "'.$this->cleanInStr($person->getCountry()).'"';
+            $values .= ', phone="'.$this->cleanInStr($person->getPhone()).'"';
+            $values .= ', email="'.$this->cleanInStr($person->getEmail()).'"';
+            $values .= ', url="'.$this->cleanInStr($person->getUrl()).'"';
+            $values .= ', biography="'.$this->cleanInStr($person->getBiography()).'"';
+            $values .= ', ispublic='.$this->cleanInStr($person->getIsPublic()).' ';
             $sql = $fields." ".$values." ".$where;
 			//echo $sql;
             $success = $editCon->query($sql);
@@ -323,48 +323,48 @@ class ProfileManager{
 			$fields = 'INSERT INTO users (';
 			$values = 'VALUES (';
 			$fields .= 'firstname ';
-            $values .= '"'.$this->cleanStr($person->getFirstName()).'"';
+            $values .= '"'.$this->cleanInStr($person->getFirstName()).'"';
 			$fields .= ', lastname';
-			$values .= ', "'.$this->cleanStr($person->getLastName()).'"';
+			$values .= ', "'.$this->cleanInStr($person->getLastName()).'"';
             if($person->getTitle()){
 	            $fields .= ', title';
-                $values .= ', "'.$this->cleanStr($person->getTitle()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getTitle()).'"';
             }
             if($person->getInstitution()){
             	$fields .= ', institution';
-                $values .= ', "'.$this->cleanStr($person->getInstitution()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getInstitution()).'"';
             }
             if($person->getDepartment()){
             	$fields .= ', department';
-                $values .= ', "'.$this->cleanStr($person->getDepartment()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getDepartment()).'"';
             }
             if($person->getAddress()){
 				$fields .= ', address';
-                $values .= ', "'.$this->cleanStr($person->getAddress()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getAddress()).'"';
             }
             if($person->getCity()){
 				$fields .= ', city';
-                $values .= ', "'.$this->cleanStr($person->getCity()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getCity()).'"';
             }
             if($person->getState()){
 				$fields .= ', state';
-                $values .= ', "'.$this->cleanStr($person->getState()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getState()).'"';
             }
             if($person->getZip()){
             	$fields .= ', zip';
-				$values .= ', "'.$this->cleanStr($person->getZip()).'"';
+				$values .= ', "'.$this->cleanInStr($person->getZip()).'"';
             }
             if($person->getCountry()){
             	$fields .= ', country';
-                $values .= ', "'.$this->cleanStr($person->getCountry()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getCountry()).'"';
             }
             if($person->getPhone()){
             	$fields .= ', phone';
-                $values .= ', "'.$this->cleanStr($person->getPhone()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getPhone()).'"';
             }
             if($person->getEmail()){
 	            $fields .= ', email';
-                $values .= ', "'.$this->cleanStr($person->getEmail()).'"';
+                $values .= ', "'.$this->cleanInStr($person->getEmail()).'"';
             }
             if($person->getUrl()){
             	$fields .= ', url';
@@ -372,7 +372,7 @@ class ProfileManager{
             }
             if($person->getBiography()){
             	$fields .= ', biography';
-				$values .= ', "'.$this->cleanStr($person->getBiography()).'"';
+				$values .= ', "'.$this->cleanInStr($person->getBiography()).'"';
             }
             if($person->getIsPublic()){
 				$fields .= ', ispublic';
@@ -494,12 +494,18 @@ class ProfileManager{
         return $this->rememberMe;
     }
     
-    private function cleanStr($inStr){
-    	$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-    	$outStr = $this->con->real_escape_string($outStr);
-    	return $inStr;
-    }
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->con->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->con->real_escape_string($newStr);
+		return $newStr;
+	}
 } 
 ?>

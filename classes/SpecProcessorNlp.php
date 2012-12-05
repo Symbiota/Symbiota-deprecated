@@ -57,8 +57,8 @@ class SpecProcessorNlp{
 	public function addProfile($postArr){
 		$status = '';
 		$sql = 'INSERT INTO specprocnlp(title,sqlfrag,patternmatch,notes,collid) '.
-			'VALUES("'.$this->cleanStr($postArr['title']).'","'.$this->cleanStr($postArr['sqlfrag']).'","'.
-			$this->cleanStr($postArr['patternmatch']).'","'.$this->cleanStr($postArr['notes']).'",'.$postArr['collid'].')';
+			'VALUES("'.$this->cleanInStr($postArr['title']).'","'.$this->cleanInStr($postArr['sqlfrag']).'","'.
+			$this->cleanInStr($postArr['patternmatch']).'","'.$this->cleanInStr($postArr['notes']).'",'.$postArr['collid'].')';
 		if(!$this->conn->query($sql)){
 			$status = 'ERROR: unable to add NLP profile; ERR: '.$this->conn->error;
 		}
@@ -67,8 +67,8 @@ class SpecProcessorNlp{
 	
 	public function editProfile($postArr){
 		$status = '';
-		$sql = 'UPDATE specprocnlp SET title = "'.$this->cleanStr($postArr['title']).'",sqlfrag = "'.$this->cleanStr($postArr['sqlfrag']).
-		'",patternmatch = "'.$this->cleanStr($postArr['patternmatch']).'",notes = "'.$this->cleanStr($postArr['notes']).'" '.
+		$sql = 'UPDATE specprocnlp SET title = "'.$this->cleanInStr($postArr['title']).'",sqlfrag = "'.$this->cleanInStr($postArr['sqlfrag']).
+		'",patternmatch = "'.$this->cleanInStr($postArr['patternmatch']).'",notes = "'.$this->cleanInStr($postArr['notes']).'" '.
 			'WHERE spnlpid = '.$postArr['spnlpid'].'  ';
 		if(!$this->conn->query($sql)){
 			$status = 'ERROR: unable to edit NLP profile; ERR: '.$this->conn->error;
@@ -88,8 +88,8 @@ class SpecProcessorNlp{
 	public function addProfileFrag($postArr){
 		$status = '';
 		$sql = 'INSERT INTO specprocnlpfrag(spnlpid,fieldname,patternmatch,notes,sortseq) '.
-			'VALUES("'.$this->cleanStr($postArr['spnlpid']).'","'.$this->cleanStr($postArr['fieldname']).'","'.
-			$this->cleanStr($postArr['patternmatch']).'","'.$this->cleanStr($postArr['notes']).'",'.$postArr['sortseq'].')';
+			'VALUES("'.$this->cleanInStr($postArr['spnlpid']).'","'.$this->cleanInStr($postArr['fieldname']).'","'.
+			$this->cleanInStr($postArr['patternmatch']).'","'.$this->cleanInStr($postArr['notes']).'",'.$postArr['sortseq'].')';
 		if(!$this->conn->query($sql)){
 			$status = 'ERROR: unable to add NLP fragment; ERR: '.$this->conn->error;
 		}
@@ -98,8 +98,8 @@ class SpecProcessorNlp{
 	
 	public function editProfileFrag($postArr){
 		$status = '';
-		$sql = 'UPDATE specprocnlpfrag SET fieldname = "'.$postArr['fieldname'].'",patternmatch = "'.$this->cleanStr($postArr['patternmatch']).
-			'",notes = "'.$this->cleanStr($postArr['notes']).'",sortseq = '.$postArr['sortseq'].' '.
+		$sql = 'UPDATE specprocnlpfrag SET fieldname = "'.$postArr['fieldname'].'",patternmatch = "'.$this->cleanInStr($postArr['patternmatch']).
+			'",notes = "'.$this->cleanInStr($postArr['notes']).'",sortseq = '.$postArr['sortseq'].' '.
 			'WHERE spnlpfragid = '.$postArr['spnlpfragid'].'  ';
 		if(!$this->conn->query($sql)){
 			$status = 'ERROR: unable to edit NLP fragment; ERR: '.$this->conn->error;
@@ -253,12 +253,18 @@ class SpecProcessorNlp{
 	}
 	
 	//Misc functions
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"&quot;",$outStr);
-		$outStr = str_replace("'","&apos;",$outStr);
-		$outStr = $this->conn->real_escape_string($outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

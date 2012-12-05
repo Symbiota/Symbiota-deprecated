@@ -59,7 +59,7 @@ class PersonalChecklistManager{
 		foreach($newClArr as $k => $v){
 			$sqlInsert .= ','.$k;
 			if($v){
-				$sqlValues .= ',"'.$this->cleanStr($v).'"';
+				$sqlValues .= ',"'.$this->cleanInStr($v).'"';
 			}
 			else{
 				$sqlValues .= ',NULL';
@@ -102,10 +102,18 @@ class PersonalChecklistManager{
 		$rs->close();
 	}
 
-	private function cleanStr($inStr){
-		$outStr = trim($inStr);
-		$outStr = str_replace('"',"''",$outStr);
-		return $outStr;
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
+	}
+	
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>
