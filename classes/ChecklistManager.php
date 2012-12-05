@@ -75,8 +75,14 @@ class ChecklistManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		foreach($dataArr as $k =>$v){
 			$colSql .= ','.$k;
+			
 			if($v){
-				$valueSql .= ',"'.$this->cleanInStr($conn->real_escape_string($v)).'"';
+				if(is_numeric($v)){
+					$valueSql .= ','.$v;
+				}
+				else{
+					$valueSql .= ',"'.$this->cleanInStr($conn->real_escape_string($v)).'"';
+				}
 			}
 			else{
 				$valueSql .= ',NULL';
@@ -84,7 +90,7 @@ class ChecklistManager {
 		}
 		$sql = 'INSERT INTO fmchklsttaxalink (clid'.$colSql.') '.
 			'VALUES ('.$this->clid.$valueSql.')';
-		echo $sql;
+		//echo $sql;
 		if($conn->query($sql)){
 			$insertStatus = true;
 		}
