@@ -95,7 +95,7 @@ class ChecklistMapper{
 			$sql .= " WHERE p.pid = ".$this->conn->real_escape_string($projValue);
         }
         else{
-            $sql .= " WHERE p.projname = '".$this->cleanStr($projValue)."'";
+            $sql .= " WHERE p.projname = '".$projValue."'";
         }
         $result = $this->conn->query($sql);
         if($row = $result->fetch_object()){
@@ -175,13 +175,5 @@ class ChecklistMapper{
 		}
 		$result->close();
 	}
-
-	protected function cleanStr($str){
-		$newStr = trim($str);
-		$newStr = str_replace('"',"&quot;",$newStr);
-		$newStr = str_replace("'","&apos;",$newStr);
-		return $newStr;
- 	}
-	
 }
 ?>

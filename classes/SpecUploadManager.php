@@ -240,7 +240,7 @@ class SpecUploadManager{
 		if(array_key_exists("eupdigircode",$_REQUEST)) $sql .= ", digircode = \"".$_REQUEST["eupdigircode"]."\"";
 		if(array_key_exists("eupdigirpath",$_REQUEST)) $sql .= ", digirpath = \"".$_REQUEST["eupdigirpath"]."\"";
 		if(array_key_exists("eupdigirpkfield",$_REQUEST)) $sql .= ", digirpkfield = \"".$_REQUEST["eupdigirpkfield"]."\"";
-		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanString($_REQUEST["eupquerystr"])."\"";
+		if(array_key_exists("eupquerystr",$_REQUEST)) $sql .= ", querystr = \"".$this->cleanInStr($_REQUEST["eupquerystr"])."\"";
 		if(array_key_exists("eupcleanupsp",$_REQUEST)) $sql .= ", cleanupsp = \"".$_REQUEST["eupcleanupsp"]."\"";
 		$sql .= ' WHERE (uspid = '.$this->uspid.')';
 		//echo $sql;
@@ -257,7 +257,7 @@ class SpecUploadManager{
 			($_REQUEST["aupport"]?$_REQUEST["aupport"]:"NULL").",\"".$_REQUEST["aupdigircode"].
 			"\",\"".$_REQUEST["aupdigirpath"]."\",\"".$_REQUEST["aupdigirpkfield"]."\",\"".$_REQUEST["aupusername"].
 			"\",\"".$_REQUEST["auppassword"]."\",\"".$_REQUEST["aupschemaname"]."\",\"".$_REQUEST["aupcleanupsp"]."\",\"".
-			$this->cleanString($_REQUEST["aupquerystr"])."\")";
+			$this->cleanInStr($_REQUEST["aupquerystr"])."\")";
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			return "<div>Error Adding Upload Parameters: ".$this->conn->error."</div><div>$sql</div>";
@@ -1131,7 +1131,7 @@ class SpecUploadManager{
 			foreach($recMap as $symbField => $valueStr){
 				$sqlFields .= ','.$symbField;
 				$valueStr = $this->encodeString($valueStr);
-				$valueStr = $this->cleanString($valueStr);
+				$valueStr = $this->cleanInStr($valueStr);
 				//Load data
 				$type = '';
 				$size = 0;
@@ -1625,7 +1625,7 @@ class SpecUploadManager{
 		return $retArr;
 	}
 
-	protected function cleaninStr($inStr){
+	protected function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
 		$retStr = str_replace(chr(11),' ',$retStr);
