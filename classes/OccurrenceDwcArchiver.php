@@ -206,7 +206,7 @@ class OccurrenceDwcArchiver{
 		$fieldCnt = 0;
 		foreach($this->occurrenceFieldArr as $k => $v){
 			if($v){
-				echo '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+				$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			}
 			$fieldCnt++;
 		}
@@ -219,7 +219,7 @@ class OccurrenceDwcArchiver{
 		$fieldCnt = 0;
 		foreach($this->determinationFieldArr as $k => $v){
 			if($v){
-				echo '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+				$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			}
 			$fieldCnt++;
 		}
@@ -232,7 +232,7 @@ class OccurrenceDwcArchiver{
 		$fieldCnt = 0;
 		foreach($this->imageFieldArr as $k => $v){
 			if($v){
-				echo '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+				$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			}
 			$fieldCnt++;
 		}
