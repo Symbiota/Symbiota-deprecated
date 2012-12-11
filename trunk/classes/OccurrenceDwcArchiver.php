@@ -161,6 +161,7 @@ class OccurrenceDwcArchiver{
 		$this->logOrEcho("DateTime: ".date('Y-m-d h:i:s A')."\n");
 		
 		$archiveFile = $this->targetPath.'DwC_Archive_'.$this->nameTemplate.'.zip';
+		if(file_exists($archiveFile)) unlink($archiveFile);
 		$this->zipArchive = new ZipArchive;
 		$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
 		
@@ -211,7 +212,7 @@ class OccurrenceDwcArchiver{
 			$fieldCnt++;
 		}
 		$outStr .= '</core>
-			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy=\'"\' linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Identification">
+			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Identification">
 				<files>
 					<location>indentifications.csv</location>
 				</files>
@@ -224,7 +225,7 @@ class OccurrenceDwcArchiver{
 			$fieldCnt++;
 		}
 		$outStr .= '</extension>
-			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="\t" linesTerminatedBy="\n" fieldsEnclosedBy="" ignoreHeaderLines="0" rowType="http://rs.gbif.org/terms/1.0/Image">
+			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Image">
 				<files>
 					<location>images.csv</location>
 				</files>
