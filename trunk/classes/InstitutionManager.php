@@ -116,7 +116,8 @@ class InstitutionManager {
 
 		if(!$status){
 			//If record is not linked to other data, OK to delete
-			$sql = 'DELETE dd FROM institutions WHERE iid = '.$delIid;
+			$sql = 'DELETE FROM institutions WHERE iid = '.$delIid;
+			//echo $sql;
 			if($this->conn->query($sql)){
 				$status = 1;
 			}

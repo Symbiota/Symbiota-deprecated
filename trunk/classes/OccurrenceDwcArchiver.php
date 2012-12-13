@@ -145,7 +145,7 @@ class OccurrenceDwcArchiver{
 		}
 	}
 
-	public function createDwcArchive(){
+	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
 		global $serverRoot;
 		//ini_set('memory_limit','512M');
 		set_time_limit(500);
@@ -168,9 +168,9 @@ class OccurrenceDwcArchiver{
 		$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 		
 		$this->writeMetaFile();
-		$this->writeOccurrenceFile();
-		$this->writeDeterminationFile();
-		$this->writeImageFile();
+		$this->writeOccurrenceFile($redactLocalities);
+		if($includeDets) $this->writeDeterminationFile();
+		if($includeImgs) $this->writeImageFile($redactLocalities);
 		$this->zipArchive->close();
 		
 		$this->writeRssFile();
@@ -248,7 +248,7 @@ class OccurrenceDwcArchiver{
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
 
-	private function writeOccurrenceFile(){
+	private function writeOccurrenceFile($redactLocalities){
 		$this->logOrEcho("Creating occurrences.csv (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->nameTemplate.'-occur.csv', 'w');
 		
@@ -274,7 +274,7 @@ class OccurrenceDwcArchiver{
 			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid';
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
-				if($r["localitySecurity"] == 1 && !$this->canReadRareSpp){
+				if($redactLocalities && $r["localitySecurity"] > 0 && !$this->canReadRareSpp){
 					$r["habitat"] = '[Redacted]';
 					$r["locality"] = '[Redacted]';
 					$r["decimalLatitude"] = '[Redacted]';
@@ -346,7 +346,7 @@ class OccurrenceDwcArchiver{
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
 
-	private function writeImageFile(){
+	private function writeImageFile($redactLocalities){
 		global $clientRoot;
 
 		$this->logOrEcho("Creating images.csv (".date('h:i:s A').")... ");
@@ -361,7 +361,11 @@ class OccurrenceDwcArchiver{
 			'c.rights, c.initialtimestamp '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid';
+			'WHERE c.collid = '.$this->collId.' ';
+		if($redactLocalities && !$this->canReadRareSpp){
+			$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
+		}
+		$sql .= 'ORDER BY o.occid';
 		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
@@ -462,6 +466,7 @@ class OccurrenceDwcArchiver{
 	}
 	
 	public function getDwcaItem(){
+		global $serverRoot;
 		$retArr = Array();
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(file_exists($rssFile)){
@@ -469,24 +474,25 @@ class OccurrenceDwcArchiver{
 			$xmlDoc = new DOMDocument();
 			$xmlDoc->load($rssFile);
 			$items = $xmlDoc->getElementsByTagName("item");
+			$cnt = 0;
 			foreach($items as $i ){
 				$titles = $i->getElementsByTagName("title");
 				$title = $titles->item(0)->nodeValue;
 				if(strpos($title,substr($this->nameTemplate,0,strpos($this->nameTemplate,'_'))) !== false){
-					$retArr['title'] = $title;
+					$retArr[$cnt]['title'] = $title;
 					$ids = $i->getElementsByTagName("id");
-					$retArr['id'] = $ids->item(0)->nodeValue;
+					$retArr[$cnt]['id'] = $ids->item(0)->nodeValue;
 					$descriptions = $i->getElementsByTagName("description");
-					$retArr['description'] = $descriptions->item(0)->nodeValue;
+					$retArr[$cnt]['description'] = $descriptions->item(0)->nodeValue;
 					$types = $i->getElementsByTagName("type");
-					$retArr['type'] = $types->item(0)->nodeValue;
+					$retArr[$cnt]['type'] = $types->item(0)->nodeValue;
 					$recordTypes = $i->getElementsByTagName("recordType");
-					$retArr['recordType'] = $recordTypes->item(0)->nodeValue;
+					$retArr[$cnt]['recordType'] = $recordTypes->item(0)->nodeValue;
 					$links = $i->getElementsByTagName("link");
-					$retArr['link'] = $links->item(0)->nodeValue;
+					$retArr[$cnt]['link'] = $links->item(0)->nodeValue;
 					$pubDates = $i->getElementsByTagName("pubDate");
-					$retArr['pubDate'] = $pubDates->item(0)->nodeValue;
-					break;
+					$retArr[$cnt]['pubDate'] = $pubDates->item(0)->nodeValue;
+					$cnt++;
 				}
 			}
 		}
