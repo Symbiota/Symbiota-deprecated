@@ -298,7 +298,7 @@ if($symbUid){
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?cacherefresh=<?php echo time(); ?>"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?cacherefresh=<?php echo time(); ?>"></script>
 </head>
-<body style="margin:0px;">
+<body>
 	<!-- inner text -->
 	<div id="innertext">
 		<?php 
