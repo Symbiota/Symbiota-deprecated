@@ -20,10 +20,10 @@ if($isAdmin){
 	elseif($del){
 		$userManager->deletionPermissions($del,$userId);
 	}
-	elseif(array_key_exists("apsubmit",$_REQUEST)){
+	elseif(array_key_exists("apsubmit",$_POST)){
 		$perToAdd = Array();
-		if(array_key_exists("p",$_REQUEST)){
-			$perToAdd = $_REQUEST["p"];
+		if(array_key_exists("p",$_POST)){
+			$perToAdd = $_POST["p"];
 		}
 		if($perToAdd){
 			$userManager->addPermissions($perToAdd,$userId);
@@ -148,7 +148,7 @@ if($isAdmin){
 									if(array_key_exists("SuperAdmin",$userPermissions)){ 
 										?>
 										<li>
-											<b>Super Administrator</b> 
+											<b><?php echo str_replace('SuperAdmin','Super Administrator',$userPermissions["SuperAdmin"]); ?></b> 
 											<a href="usermanagement.php?del=SuperAdmin&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -158,7 +158,7 @@ if($isAdmin){
 									if(array_key_exists("Taxonomy",$userPermissions)){ 
 										?>
 										<li>
-											<b>Taxonomy Editor</b> 
+											<b><?php echo str_replace('Taxonomy','Taxonomy Editor',$userPermissions["Taxonomy"]); ?></b> 
 											<a href="usermanagement.php?del=Taxonomy&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -168,7 +168,7 @@ if($isAdmin){
 									if(array_key_exists("TaxonProfile",$userPermissions)){ 
 										?>
 										<li>
-											<b>Taxon Profile Editor</b> 
+											<b><?php echo str_replace('TaxonProfile','Taxon Profile Editor',$userPermissions["TaxonProfile"]); ?></b> 
 											<a href="usermanagement.php?del=TaxonProfile&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -178,7 +178,7 @@ if($isAdmin){
 									if(array_key_exists("KeyEditor",$userPermissions)){ 
 										?>
 										<li>
-											<b>Identification Keys Editor</b>
+											<b><?php echo str_replace('KeyEditor','Identification Keys Editor',$userPermissions["KeyEditor"]); ?></b>
 											<a href="usermanagement.php?del=KeyEditor&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -188,7 +188,7 @@ if($isAdmin){
 									if(array_key_exists("RareSppAdmin",$userPermissions)){ 
 										?>
 										<li>
-											<b>Rare Species List Administrator</b>
+											<b><?php echo str_replace('RareSppAdmin','Rare Species List Administrator',$userPermissions["RareSppAdmin"]); ?></b>
 											<a href="usermanagement.php?del=RareSppAdmin&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -198,7 +198,7 @@ if($isAdmin){
 									if(array_key_exists("RareSppReadAll",$userPermissions)){ 
 										?>
 										<li>
-											<b>View and Map Specimens of Rare Species from all Collections</b>
+											<b><?php echo str_replace('RareSppReadAll','View and Map Specimens of Rare Species from all Collections',$userPermissions["RareSppReadAll"]); ?></b>
 											<a href="usermanagement.php?del=RareSppReadAll&userid=<?php echo $userId; ?>">
 												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
@@ -209,6 +209,7 @@ if($isAdmin){
 									if(array_key_exists("CollAdmin",$userPermissions)){
 										echo "<li><b>Collection Administrator for following collections</b></li>";
 										$collList = $userPermissions["CollAdmin"];
+										sort($collList);
 										echo "<ul>";
 										foreach($collList as $k => $v){
 											echo "<li>$v ";
@@ -222,6 +223,7 @@ if($isAdmin){
 									if(array_key_exists("CollEditor",$userPermissions)){
 										echo "<li><b>Collection Editor for following collections</b></li>";
 										$collList = $userPermissions["CollEditor"];
+										sort($collList);
 										echo "<ul>";
 										foreach($collList as $k => $v){
 											echo "<li>$v ";
@@ -238,6 +240,7 @@ if($isAdmin){
 											<ul>
 											<?php 
 											$rsrArr = $userPermissions["RareSppReader"];
+											sort($rsrArr);
 											foreach($rsrArr as $collId => $collName){
 												?>
 												<li>
@@ -261,6 +264,7 @@ if($isAdmin){
 											<ul>
 												<?php 
 												$projList = $userPermissions["ProjAdmin"];
+												sort($projList);
 												foreach($projList as $k => $v){
 													echo "<li>$v";
 													echo "<a href='usermanagement.php?del=ProjAdmin-$k&userid=$userId'>";
@@ -280,6 +284,7 @@ if($isAdmin){
 											<ul>
 												<?php 
 												$clList = $userPermissions["ClAdmin"];
+												sort($clList);
 												foreach($clList as $k => $v){
 													echo '<li>';
 													echo '<a href="../checklists/checklist.php?cl='.$k.'">';

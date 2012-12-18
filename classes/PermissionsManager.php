@@ -82,33 +82,35 @@ class PermissionsManager{
 	public function getUserPermissions($uid){
 		$perArr = Array();
 		if(is_numeric($uid)){
-			$sql = "SELECT up.pname FROM userpermissions up WHERE (up.uid = ".$this->conn->real_escape_string($uid).')';
+			$sql = 'SELECT up.pname, up.assignedby, up.initialtimestamp '.
+				'FROM userpermissions up WHERE (up.uid = '.$this->conn->real_escape_string($uid).')';
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$pName = $row->pname;
+				$assignedBy = 'assigned by: '.($row->assignedby?$row->assignedby.' ('.$row->initialtimestamp.')':'unknown');
 				if(strpos($pName,"CollAdmin-") !== false){
 					$collId = substr($pName,10);
-					$perArr["CollAdmin"][$collId] = $collId;
+					$perArr["CollAdmin"][$collId] = $assignedBy;
 				}
 				elseif(strpos($pName,"CollEditor-") !== false){
 					$collId = substr($pName,11);
-					$perArr["CollEditor"][$collId] = $collId;
+					$perArr["CollEditor"][$collId] = $assignedBy;
 				}
 				elseif(strpos($pName,"RareSppReader-") !== false){
 					$collId = substr($pName,14);
-					$perArr["RareSppReader"][$collId] = $collId;
+					$perArr["RareSppReader"][$collId] = $assignedBy;
 				}
 				elseif(strpos($pName,"ClAdmin-") !== false){
 					$clid = substr($pName,8);
-					$perArr["ClAdmin"][$clid] = $clid;
+					$perArr["ClAdmin"][$clid] = $assignedBy;
 				}
 				elseif(strpos($pName,"ProjAdmin-") !== false){
 					$pid = substr($pName,10);
-					$perArr["ProjAdmin"][$pid] = $pid;
+					$perArr["ProjAdmin"][$pid] = $assignedBy;
 				}
 				else{
 					//RareSppAdmin, RareSppReader, KeyEditor, TaxonProfile, Taxonomy
-					$perArr[$pName] = $pName;
+					$perArr[$pName] = '<span title="'.$assignedBy.'">'.$pName.'</span>';
 				}
 			}
 			$result->close();
@@ -116,28 +118,31 @@ class PermissionsManager{
 			//If there are collections, get names
 			if(array_key_exists("CollAdmin",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",$perArr["CollAdmin"])."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollAdmin"]))."))";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$perArr["CollAdmin"][$row->collid] = $row->collectionname;
+					$cName = '<span title="'.$perArr["CollAdmin"][$row->collid].'">'.$row->collectionname.'</span>';
+					$perArr["CollAdmin"][$row->collid] = $cName;
 				}
 				$result->close();
 			}
 			if(array_key_exists("CollEditor",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",$perArr["CollEditor"])."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["CollEditor"]))."))";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$perArr["CollEditor"][$row->collid] = $row->collectionname;
+					$cName = '<span title="'.$perArr["CollEditor"][$row->collid].'">'.$row->collectionname.'</span>';
+					$perArr["CollEditor"][$row->collid] = $cName;
 				}
 				$result->close();
 			}
 			if(array_key_exists("RareSppReader",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
-					"WHERE (c.collid IN(".implode(",",$perArr["RareSppReader"])."))";
+					"WHERE (c.collid IN(".implode(",",array_keys($perArr["RareSppReader"]))."))";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$perArr["RareSppReader"][$row->collid] = $row->collectionname;
+					$cName = '<span title="'.$perArr["RareSppReader"][$row->collid].'">'.$row->collectionname.'</span>';
+					$perArr["RareSppReader"][$row->collid] = $cName;
 				}
 				$result->close();
 			}
@@ -145,10 +150,11 @@ class PermissionsManager{
 			//If there are checklist, fetch names
 			if(array_key_exists("ClAdmin",$perArr)){
 				$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
-					"WHERE (cl.clid IN(".implode(",",$perArr["ClAdmin"])."))";
+					"WHERE (cl.clid IN(".implode(",",array_keys($perArr["ClAdmin"]))."))";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$perArr["ClAdmin"][$row->clid] = $row->name;
+					$clName = '<span title="'.$perArr["ClAdmin"][$row->clid].'">'.$row->name.'</span>';
+					$perArr["ClAdmin"][$row->clid] = $clName;
 				}
 				$result->close();
 			}
@@ -156,10 +162,11 @@ class PermissionsManager{
 			//If there are project admins, fetch project names
 			if(array_key_exists("ProjAdmin",$perArr)){
 				$sql = "SELECT pid, projname FROM fmprojects ".
-					"WHERE (pid IN(".implode(",",$perArr["ProjAdmin"])."))";
+					"WHERE (pid IN(".implode(",",array_keys($perArr["ProjAdmin"]))."))";
 				$result = $this->conn->query($sql);
 				while($row = $result->fetch_object()){
-					$perArr["ProjAdmin"][$row->pid] = $row->projname;
+					$pName = '<span title="'.$perArr["ProjAdmin"][$row->pid].'">'.$row->projname.'</span>';
+					$perArr["ProjAdmin"][$row->pid] = $pName;
 				}
 				$result->close();
 			}
@@ -176,9 +183,13 @@ class PermissionsManager{
 	}
 	
 	public function addPermissions($addList,$id){
+		global $paramsArr;
 		if($addList){
-			$addStr = "(".$id.",'".implode("'),($id,'",$addList)."')"; 
-			$sql = 'INSERT INTO userpermissions(uid,pname) VALUES'.$addStr;
+			$addStr = '';
+			foreach($addList as $v){
+				$addStr .= ',('.$id.',"'.$v.'","'.$paramsArr['un'].'")';
+			} 
+			$sql = 'INSERT INTO userpermissions(uid,pname,assignedby) VALUES'.substr($addStr,1);
 			//echo $sql;
 			$this->conn->query($sql);
 		}
