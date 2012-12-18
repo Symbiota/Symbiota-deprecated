@@ -40,17 +40,19 @@ class CollectionPermissions {
 	public function getEditors(){
 		$returnArr = Array();
 		if($this->collId){
-			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname '.
+			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, up.assignedby, up.initialtimestamp '.
 				'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
 				'WHERE up.pname = "CollAdmin-'.$this->collId.'" OR up.pname = "CollEditor-'.$this->collId.'" '. 
-				'OR up.pname = "RareSppReader-'.$this->collId.'" ';
+				'OR up.pname = "RareSppReader-'.$this->collId.'" '.
+				'ORDER BY u.lastname,u.firstname';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$pGroup = 'rarespp';
 				if(substr($r->pname,0,9) == 'CollAdmin') $pGroup = 'admin';
-				elseif(substr($r->pname,0,10) == 'CollEditor') $pGroup = 'editor'; 
-				$returnArr[$pGroup][$r->uid] = $this->cleanOutStr($r->uname);
+				elseif(substr($r->pname,0,10) == 'CollEditor') $pGroup = 'editor';
+				$outStr = '<span title="assigned by: '.($r->assignedby?$r->assignedby.' ('.$r->initialtimestamp.')':'unknown').'">'.$this->cleanOutStr($r->uname).'</span>';
+				$returnArr[$pGroup][$r->uid] = $outStr;
 			}
 			$rs->close();
 		}
@@ -90,6 +92,7 @@ class CollectionPermissions {
 	}
 	
 	public function addUser($uid,$ur){
+		global $paramsArr;
 		$userRight = '';
 		if($ur == 'admin'){
 			$userRight = 'CollAdmin-'.$this->collId;
@@ -101,7 +104,7 @@ class CollectionPermissions {
 			$userRight = 'RareSppReader-'.$this->collId;
 		}
 		if($userRight){
-			$sql = 'INSERT INTO userpermissions(uid,pname) VALUES('.$uid.',"'.$userRight.'") ';
+			$sql = 'INSERT INTO userpermissions(uid,pname,assignedby) VALUES('.$uid.',"'.$userRight.'","'.$paramsArr['un'].'") ';
 			//echo $sql;
 			$this->conn->query($sql);
 		}

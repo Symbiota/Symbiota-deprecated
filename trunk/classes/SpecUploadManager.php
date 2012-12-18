@@ -400,10 +400,6 @@ class SpecUploadManager{
 		ob_flush();
 		flush();
 
- 		//Prefrom general cleaning and parsing tasks
-		$this->recordCleaningStage1();
-		$this->recordCleaningStage2();
-		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
 			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
@@ -431,6 +427,10 @@ class SpecUploadManager{
 			ob_flush();
 			flush();
 		}
+		
+ 		//Prefrom general cleaning and parsing tasks
+		$this->recordCleaningStage1();
+		$this->recordCleaningStage2();
 		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 

@@ -164,8 +164,7 @@ class OccurrenceDwcArchiver{
 		if(file_exists($archiveFile)) unlink($archiveFile);
 		$this->zipArchive = new ZipArchive;
 		$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
-		
-		$this->logOrEcho("DWCA created: ".$archiveFile."\n");
+		//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 		
 		$this->writeMetaFile();
 		$this->writeOccurrenceFile($redactLocalities);
@@ -182,7 +181,7 @@ class OccurrenceDwcArchiver{
 		unlink($this->targetPath.$this->nameTemplate.'-det.csv');
 		
 		//Close log file
-		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
+		$this->logOrEcho("Data publishing process finished! (".date('Y-m-d h:i:s A').") \n");
 		$this->logOrEcho("----------------------------\n\n");
 		if($this->logFH){
 			fclose($this->logFH);
@@ -393,7 +392,7 @@ class OccurrenceDwcArchiver{
 		global $defaultTitle, $serverRoot, $clientRoot;
 
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		$this->logOrEcho('Rebuilding rss.xml file: '.$rssFile."... ");
+		$this->logOrEcho("Mapping data to RSS feed... \n");
 		
 		$targetIndex = false;
 		$datasets = Array();
@@ -462,7 +461,7 @@ class OccurrenceDwcArchiver{
 		fwrite($dsHandle,'</rss>');
 		fclose($dsHandle);
 
-		$this->logOrEcho("Rebuilt!\n");
+		$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
 	}
 	
 	public function getDwcaItem(){
@@ -495,6 +494,19 @@ class OccurrenceDwcArchiver{
 					$cnt++;
 				}
 			}
+		}
+		return $retArr;
+	}
+	
+	public function getCollectionArr(){
+		$retArr = array();
+		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
+			'FROM omcollections '.
+			'WHERE colltype = "Preserved Specimens" '.
+			'ORDER BY collectionname ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid] = $r->collectionname.' ('.$r->instcode.')';
 		}
 		return $retArr;
 	}
