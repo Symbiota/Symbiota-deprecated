@@ -216,9 +216,7 @@ include($serverRoot."/header.php");
 						<td><?php echo substr($v['description'],24); ?></td>
 						<td>
 							<?php 
-							$statArr = stat($serverRoot.substr($v['link'],strpos($v['link'],$clientRoot)+strlen($clientRoot)));
-							$sizeStr = round($statArr['size']/1000).'KB';
-							if($statArr['size'] > 1000000) $sizeStr = round($statArr['size']/1000000,1).'MB';
+							$sizeStr = $dwcaManager->humanFilesize($serverRoot.substr($v['link'],strpos($v['link'],$clientRoot)+strlen($clientRoot)));
 							echo '<a href="'.$v['link'].'">DwC-A ('.$sizeStr.')</a>';
 							if($isAdmin){
 								?>
@@ -230,7 +228,7 @@ include($serverRoot."/header.php");
 							}
 							?>
 						</td> 
-						<td><?php echo date("Y-m-d", $statArr["mtime"]); ?></td>
+						<td><?php echo date("Y-m-d", strtotime($v['pubDate'])); ?></td>
 					</tr>
 					<?php 
 				}

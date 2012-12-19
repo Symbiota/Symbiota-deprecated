@@ -67,10 +67,9 @@ class OccurrenceDwcArchiver{
  			'dynamicProperties' => 'http://rs.tdwg.org/dwc/terms/dynamicProperties',
  			'associatedTaxa' => 'http://rs.tdwg.org/dwc/terms/associatedTaxa',
  			'reproductiveCondition' => 'http://rs.tdwg.org/dwc/terms/reproductiveCondition',
- 			'cultivationStatus' => 'http://rs.tdwg.org/dwc/terms/cultivationStatus',
- 			'establishmentMeans' => 'http://rs.tdwg.org/dwc/terms/establishmentMeans',
- 			'lifeStage' => 'http://rs.tdwg.org/dwc/terms/lifeStage',
- 			'sex' => 'http://rs.tdwg.org/dwc/terms/sex',
+			'establishmentMeans' => 'http://rs.tdwg.org/dwc/terms/establishmentMeans',
+			'lifeStage' => 'http://rs.tdwg.org/dwc/terms/lifeStage',
+			'sex' => 'http://rs.tdwg.org/dwc/terms/sex',
  			'individualCount' => 'http://rs.tdwg.org/dwc/terms/individualCount',
  			'samplingProtocol' => 'http://rs.tdwg.org/dwc/terms/samplingProtocol',
  			'preparations' => 'http://rs.tdwg.org/dwc/terms/preparations',
@@ -595,6 +594,15 @@ class OccurrenceDwcArchiver{
 		}
 		
 		return $retStr;
+	}
+
+	public function humanFilesize($filePath) {
+		if(!file_exists($filePath)) return '';
+		$decimals = 1;
+		$bytes = filesize($filePath);
+		$sz = 'BKMGTP';
+		$factor = floor((strlen($bytes) - 1) / 3);
+		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
 	}
 }
 ?>
