@@ -112,7 +112,7 @@ class OccurrenceDwcArchiver{
 			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
 			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks'
-			);
+		);
 		$this->imageFieldArr = array(
 			'coreid' => '',
 			'identifier' => 'http://purl.org/dc/terms/identifier',
@@ -197,7 +197,7 @@ class OccurrenceDwcArchiver{
 		$this->writeRssFile();
 
 		//Clean up
-    	unlink($this->targetPath.$this->collCode.'-meta.xml');
+		unlink($this->targetPath.$this->collCode.'-meta.xml');
 		unlink($this->targetPath.$this->collCode.'-occur.csv');
 		unlink($this->targetPath.$this->collCode.'-images.csv');
 		unlink($this->targetPath.$this->collCode.'-det.csv');
@@ -363,7 +363,7 @@ class OccurrenceDwcArchiver{
 	}
 
 	private function writeImageFile($redactLocalities){
-		global $clientRoot;
+		global $clientRoot,$imageDomain;
 
 		$this->logOrEcho("Creating images.csv (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->collCode.'-images.csv', 'w');
@@ -385,8 +385,13 @@ class OccurrenceDwcArchiver{
 		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
-				if(substr($r['identifier'],1) == '/'){
-					$r['identifier'] = 'http://'.$_SERVER["SERVER_NAME"].$r['identifier'];
+				if(substr($r['identifier'],0,1) == '/'){
+					if(isset($imageDomain) && $imageDomain){
+						$r['identifier'] = $imageDomain.$r['identifier'];
+					}
+					else{
+						$r['identifier'] = 'http://'.$_SERVER["SERVER_NAME"].$r['identifier'];
+					}
 				}
 				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				fputcsv($fh, $r);

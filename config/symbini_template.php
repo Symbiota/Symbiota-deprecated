@@ -3,7 +3,7 @@ $defaultLang = 'English';		//Default language
 $defaultProjId = 1;
 $defaultTitle = '';
 $adminEmail = '';
-$charset = 'ISO-8859-1';		//ISO-8859-1 or UTF-8
+$charset = '';					//ISO-8859-1 or UTF-8
 
 $clientRoot = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
 $serverRoot = '';				//Full path to Symbiota project root folder
@@ -42,16 +42,16 @@ $activateExsiccati = 1;
 
 $rightsTerms = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
-	'CC BY (Attribution) <DEFAULT>' => 'http://creativecommons.org/licenses/by/3.0/',
+	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/3.0/',
 	'CC BY-SA (Attribution-ShareAlike)' => 'http://creativecommons.org/licenses/by-sa/3.0/',
 	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/3.0/',
 	'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/'
 );
 
-//Individual page menu and navigation crumbs
 //set terms for reproductiveCondition drop-down menu
 //$reproductiveConditionTerms = array("term1", "term2", "term3", "term4", "term5", "etc..");
 
+//Individual page menu and navigation crumbs
 //checklists/
 	$checklists_checklistMenu = false;
 
