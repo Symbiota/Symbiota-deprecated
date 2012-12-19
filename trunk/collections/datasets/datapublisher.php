@@ -216,8 +216,9 @@ include($serverRoot."/header.php");
 						<td><?php echo substr($v['description'],24); ?></td>
 						<td>
 							<?php 
-							$sizeStr = $dwcaManager->humanFilesize($serverRoot.substr($v['link'],strpos($v['link'],$clientRoot)+strlen($clientRoot)));
-							echo '<a href="'.$v['link'].'">DwC-A ('.$sizeStr.')</a>';
+							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
+							$sizeStr = $dwcaManager->humanFilesize($filePath);
+							echo '<a href="'.$filePath.'">DwC-A ('.$sizeStr.')</a>';
 							if($isAdmin){
 								?>
 								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
