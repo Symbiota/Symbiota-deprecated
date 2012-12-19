@@ -148,7 +148,13 @@ include($serverRoot."/header.php");
 			foreach($dwcaArr as $k => $v){ 
 				?>
 				<div style="margin:10px;">
-					<div><b>Title:</b> <?php echo $v['title']; ?></div>
+					<div>
+						<b>Title:</b> <?php echo $v['title']; ?> 
+						<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
+							<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
+							<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+						</form>
+					</div>
 					<div><b>Description:</b> <?php echo $v['description']; ?></div>
 					<div><b>Link:</b> <a href="<?php echo $v['link']; ?>"><?php echo $v['link']; ?></a></div>
 					<div><b>Type:</b> <?php echo $v['type']; ?></div>
