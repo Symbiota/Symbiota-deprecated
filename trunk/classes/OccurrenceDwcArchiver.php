@@ -5,6 +5,8 @@ class OccurrenceDwcArchiver{
 
 	private $conn;
 	private $collId;
+	private $collectionName;
+	private $collCode;
 	private $nameTemplate;
 	private $targetPath;
 	private $zipArchive;
@@ -19,7 +21,11 @@ class OccurrenceDwcArchiver{
 	
 	public function __construct(){
 		global $serverRoot, $userRights, $isAdmin;
+		//ini_set('memory_limit','512M');
+		set_time_limit(500);
+
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+
 		$tsStr = time();
 
 		$this->occurrenceFieldArr = array(
@@ -129,38 +135,55 @@ class OccurrenceDwcArchiver{
 
 	public function __destruct(){
 		if(!($this->conn === false)) $this->conn->close();
+		if($this->logFH){
+			fclose($this->logFH);
+		}
 	}
 
 	public function setCollId($id){
 		if(is_numeric($id)){
 			$this->collId = $id;
-			$sql = 'SELECT institutioncode, collectioncode FROM omcollections WHERE collid = '.$id;
+			$sql = 'SELECT institutioncode, collectioncode, collectionname '.
+				'FROM omcollections WHERE collid = '.$id;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$inst = $r->institutioncode;
 				if($r->collectioncode) $inst .= '-'.$r->collectioncode;
-				$this->nameTemplate = $inst.'_'.date('Y-m-d');
+				$this->collCode = $inst;
+				$this->collectionName = $r->collectionname;
 			}
 			$rs->close();
 		}
 	}
 
+	public function batchCreateDwca($collIdArr, $includeDets, $includeImgs, $redactLocalities){
+		global $serverRoot;
+		//Create log File
+		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+		$this->logFH = fopen($logFile, 'a');
+		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
+		$this->logOrEcho("\n-----------------------------------------------------\n\n");
+		
+		foreach($collIdArr as $id){
+			$this->setCollId($id);
+			$this->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
+		}
+		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
+	}
+	
 	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
 		global $serverRoot;
-		//ini_set('memory_limit','512M');
-		set_time_limit(500);
+		if(!$this->logFH){
+			$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+			$this->logFH = fopen($logFile, 'a');
+		}
+		$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName.' ('.date('Y-m-d h:i:s A').')\n');
 		
 		if(!class_exists('ZipArchive')){
 			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
 		}
-		
-		//Create log File
-		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-		$this->logFH = fopen($logFile, 'a');
-		$this->logOrEcho("\n\n-----------------------------------------------------\n");
-		$this->logOrEcho("DateTime: ".date('Y-m-d h:i:s A')."\n");
-		
-		$archiveFile = $this->targetPath.'DwC_Archive_'.$this->nameTemplate.'.zip';
+
+		$archiveFile = $this->targetPath.$this->collCode.'_DwC-A.zip';
 		if(file_exists($archiveFile)) unlink($archiveFile);
 		$this->zipArchive = new ZipArchive;
 		$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
@@ -175,24 +198,19 @@ class OccurrenceDwcArchiver{
 		$this->writeRssFile();
 
 		//Clean up
-    	unlink($this->targetPath.$this->nameTemplate.'-meta.xml');
-		unlink($this->targetPath.$this->nameTemplate.'-occur.csv');
-		unlink($this->targetPath.$this->nameTemplate.'-images.csv');
-		unlink($this->targetPath.$this->nameTemplate.'-det.csv');
-		
-		//Close log file
-		$this->logOrEcho("Data publishing process finished! (".date('Y-m-d h:i:s A').") \n");
-		$this->logOrEcho("----------------------------\n\n");
-		if($this->logFH){
-			fclose($this->logFH);
-		}
+    	unlink($this->targetPath.$this->collCode.'-meta.xml');
+		unlink($this->targetPath.$this->collCode.'-occur.csv');
+		unlink($this->targetPath.$this->collCode.'-images.csv');
+		unlink($this->targetPath.$this->collCode.'-det.csv');
+
+		$this->logOrEcho("\n-----------------------------------------------------\n");
 	}
 	
 	private function writeMetaFile(){
 		global $charset;
 
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->nameTemplate.'-meta.xml', 'w');
+		$fh = fopen($this->targetPath.$this->collCode.'-meta.xml', 'w');
 
 		//Output header 
 		$outStr = '<archive xmlns="http://rs.tdwg.org/dwc/text/" 
@@ -241,15 +259,15 @@ class OccurrenceDwcArchiver{
 		
 		fwrite($fh,$outStr);
    		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->nameTemplate.'-meta.xml');
-    	$this->zipArchive->renameName($this->targetPath.$this->nameTemplate.'-meta.xml','meta.xml');
+		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-meta.xml');
+    	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-meta.xml','meta.xml');
 		
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
 
 	private function writeOccurrenceFile($redactLocalities){
 		$this->logOrEcho("Creating occurrences.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->nameTemplate.'-occur.csv', 'w');
+		$fh = fopen($this->targetPath.$this->collCode.'-occur.csv', 'w');
 		
 		//Output header
 		fputcsv($fh, array_keys($this->occurrenceFieldArr));
@@ -304,8 +322,8 @@ class OccurrenceDwcArchiver{
 		}
 
 		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->nameTemplate.'-occur.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->nameTemplate.'-occur.csv','occurrences.csv');
+		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-occur.csv');
+		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-occur.csv','occurrences.csv');
 
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
@@ -313,7 +331,7 @@ class OccurrenceDwcArchiver{
 	private function writeDeterminationFile(){
 
 		$this->logOrEcho("Creating identifications.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->nameTemplate.'-det.csv', 'w');
+		$fh = fopen($this->targetPath.$this->collCode.'-det.csv', 'w');
 		
 		//Output header
 		fputcsv($fh, array_keys($this->determinationFieldArr));
@@ -339,8 +357,8 @@ class OccurrenceDwcArchiver{
 		}
 			
 		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->nameTemplate.'-det.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->nameTemplate.'-det.csv','identifications.csv');
+		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-det.csv');
+		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-det.csv','identifications.csv');
 
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
@@ -349,7 +367,7 @@ class OccurrenceDwcArchiver{
 		global $clientRoot;
 
 		$this->logOrEcho("Creating images.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->nameTemplate.'-images.csv', 'w');
+		$fh = fopen($this->targetPath.$this->collCode.'-images.csv', 'w');
 		
 		//Output header
 		fputcsv($fh, array_keys($this->imageFieldArr));
@@ -382,56 +400,62 @@ class OccurrenceDwcArchiver{
 		}
 		
 		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->nameTemplate.'-images.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->nameTemplate.'-images.csv','images.csv');
+		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-images.csv');
+		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-images.csv','images.csv');
 
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
 	
-	private function writeRssFile(){
+	private function writeRssFile($delCollId = 0){
 		global $defaultTitle, $serverRoot, $clientRoot;
 
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		$this->logOrEcho("Mapping data to RSS feed... \n");
+		if(!$delCollId) $this->logOrEcho("Mapping data to RSS feed... \n");
 		
-		$targetIndex = false;
 		$datasets = Array();
 		if(file_exists($rssFile)){
 			//Get other existing DWCAs by reading and parsing current rss.xml feed and load into array
 			$xmlDoc = new DOMDocument();
 			$xmlDoc->load($rssFile);
 			$items = $xmlDoc->getElementsByTagName("item");
-			$itemCnt = 0;
 			foreach($items as $i ){
-				$titles = $i->getElementsByTagName("title");
-				$title = $titles->item(0)->nodeValue;
-				if($title == $this->nameTemplate) $targetIndex = $itemCnt;
-				$datasets[$itemCnt]['title'] = $title;
-				$ids = $i->getElementsByTagName("id");
-				$datasets[$itemCnt]['id'] = $ids->item(0)->nodeValue;
-				$descriptions = $i->getElementsByTagName("description");
-				$datasets[$itemCnt]['description'] = $descriptions->item(0)->nodeValue;
-				$types = $i->getElementsByTagName("type");
-				$datasets[$itemCnt]['type'] = $types->item(0)->nodeValue;
-				$recordTypes = $i->getElementsByTagName("recordType");
-				$datasets[$itemCnt]['recordType'] = $recordTypes->item(0)->nodeValue;
+				$collIds = $i->getElementsByTagName("collid");
+				$curCollId = $collIds->item(0)->nodeValue;
 				$links = $i->getElementsByTagName("link");
-				$datasets[$itemCnt]['link'] = $links->item(0)->nodeValue;
-				$pubDates = $i->getElementsByTagName("pubDate");
-				$datasets[$itemCnt]['pubDate'] = $pubDates->item(0)->nodeValue;
-				$itemCnt++;
+				$link = $links->item(0)->nodeValue;
+				if(($this->collId && $curCollId != $this->collId) || ($delCollId && $curCollId != $delCollId)){
+					$titles = $i->getElementsByTagName("title");
+					$title = $titles->item(0)->nodeValue;
+					$datasets[$title]['title'] = $title;
+					$descriptions = $i->getElementsByTagName("description");
+					$datasets[$title]['description'] = $descriptions->item(0)->nodeValue;
+					$types = $i->getElementsByTagName("type");
+					$datasets[$title]['type'] = $types->item(0)->nodeValue;
+					$recordTypes = $i->getElementsByTagName("recordType");
+					$datasets[$title]['recordType'] = $recordTypes->item(0)->nodeValue;
+					$pubDates = $i->getElementsByTagName("pubDate");
+					$datasets[$title]['pubDate'] = $pubDates->item(0)->nodeValue;
+					$datasets[$title]['link'] = $link;
+					$datasets[$title]['collid'] = $curCollId;
+				}
+				if($delCollId && $delCollId == $curCollId){
+					unlink(str_replace($clientRoot,$serverRoot,substr($link,strpos($link,$clientRoot))));
+				}
 			}
-			if($targetIndex === false) $targetIndex = $itemCnt;
 		}
-		//Add or replace new archive that was just created 
-		$datasets[$targetIndex]['title'] = $this->nameTemplate;
-		$datasets[$targetIndex]['id'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/DwC_Archive_'.$this->nameTemplate.'.zip';
-		$datasets[$targetIndex]['description'] = 'Darwin Core Archive for '.$this->nameTemplate;
-		$datasets[$targetIndex]['type'] = 'DWCA';
-		$datasets[$targetIndex]['recordType'] = 'DWCA';
-		$datasets[$targetIndex]['link'] = $clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/DwC_Archive_'.$this->nameTemplate.'.zip';
-		$dsStat = stat($this->targetPath.'DwC_Archive_'.$this->nameTemplate.'.zip');
-		$datasets[$targetIndex]['pubDate'] = date("D, d M Y H:i:s O", $dsStat["mtime"]);
+		
+		if($this->collId){
+			//Add or replace new archive that was just created 
+			$title = $this->collCode.' DwC-Archive';
+			$datasets[$title]['title'] = $title;
+			$datasets[$title]['description'] = 'Darwin Core Archive for '.$this->collectionName;
+			$datasets[$title]['type'] = 'DWCA';
+			$datasets[$title]['recordType'] = 'DWCA';
+			$datasets[$title]['link'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$this->collCode.'_DwC-A.zip';
+			$dsStat = stat($this->targetPath.$this->collCode.'_DwC-A.zip');
+			$datasets[$title]['pubDate'] = date("D, d M Y H:i:s O", $dsStat["mtime"]);
+			$datasets[$title]['collid'] = $this->collId;
+		}
 		
 		//Write out datasets to $rssFile
 		$dsHandle = fopen($rssFile,"w");
@@ -444,27 +468,35 @@ class OccurrenceDwcArchiver{
 		fwrite($dsHandle,'<description>'.$defaultTitle.' Darwin Core Archive rss feed</description>');
 		fwrite($dsHandle,'<language>en-us</language>');
 
-		//Rewrite rss.xml file with updated archive  
+		//Rewrite rss.xml file with updated archive
+		ksort($datasets);  
 		foreach($datasets as $dataset){
-			fwrite($dsHandle,'<item>');
-			fwrite($dsHandle,'<title>' . $dataset["title"] . '</title>');
-			fwrite($dsHandle,'<id>' . $dataset["id"] . '</id>');
-			fwrite($dsHandle,'<description>' . $dataset["description"] . '</description>');
-			fwrite($dsHandle,'<type>' . $dataset["type"] . '</type>');
-			fwrite($dsHandle,'<recordType>' . $dataset["recordType"] . '</recordType>');
-			fwrite($dsHandle,'<link>' . $dataset["link"] . '</link>');
-			fwrite($dsHandle,'<pubDate>' . $dataset["pubDate"] . '</pubDate>');
-			fwrite($dsHandle,'</item>');
+			if(isset($dataset["collid"])){
+				fwrite($dsHandle,'<item>');
+				fwrite($dsHandle,'<title>' . $dataset["title"] . '</title>');
+				fwrite($dsHandle,'<description>' . $dataset["description"] . '</description>');
+				fwrite($dsHandle,'<type>' . $dataset["type"] . '</type>');
+				fwrite($dsHandle,'<recordType>' . $dataset["recordType"] . '</recordType>');
+				fwrite($dsHandle,'<link>' . $dataset["link"] . '</link>');
+				fwrite($dsHandle,'<pubDate>' . $dataset["pubDate"] . '</pubDate>');
+				fwrite($dsHandle,'<collid>' . $dataset["collid"] . '</collid>');
+				fwrite($dsHandle,'</item>');
+			}
 		}
 
 		fwrite($dsHandle,'</channel>');
 		fwrite($dsHandle,'</rss>');
 		fclose($dsHandle);
 
-		$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
+		if(!$delCollId) $this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
 	}
 	
-	public function getDwcaItem(){
+	public function deleteArchive($collId){
+		$this->writeRssFile($collId);
+	}
+
+	//Misc functions
+	public function getDwcaItems($collid = 0){
 		global $serverRoot;
 		$retArr = Array();
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
@@ -475,12 +507,11 @@ class OccurrenceDwcArchiver{
 			$items = $xmlDoc->getElementsByTagName("item");
 			$cnt = 0;
 			foreach($items as $i ){
-				$titles = $i->getElementsByTagName("title");
-				$title = $titles->item(0)->nodeValue;
-				if(strpos($title,substr($this->nameTemplate,0,strpos($this->nameTemplate,'_'))) !== false){
-					$retArr[$cnt]['title'] = $title;
-					$ids = $i->getElementsByTagName("id");
-					$retArr[$cnt]['id'] = $ids->item(0)->nodeValue;
+				$collIds = $i->getElementsByTagName("collid");
+				$id = $collIds->item(0)->nodeValue;
+				if(!$collid || $collid == $id){
+					$titles = $i->getElementsByTagName("title");
+					$retArr[$cnt]['title'] = $titles->item(0)->nodeValue;
 					$descriptions = $i->getElementsByTagName("description");
 					$retArr[$cnt]['description'] = $descriptions->item(0)->nodeValue;
 					$types = $i->getElementsByTagName("type");
@@ -491,6 +522,7 @@ class OccurrenceDwcArchiver{
 					$retArr[$cnt]['link'] = $links->item(0)->nodeValue;
 					$pubDates = $i->getElementsByTagName("pubDate");
 					$retArr[$cnt]['pubDate'] = $pubDates->item(0)->nodeValue;
+					$retArr[$cnt]['collid'] = $id;
 					$cnt++;
 				}
 			}

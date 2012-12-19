@@ -42,9 +42,16 @@ $smManager = new SiteMapManager();
             <div style="margin:10px;">
 	            <h2>Collections</h2>
             	<ul>
-            		<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
             		<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
+            		<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
+            		<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
+            		<?php 
+            		if(file_exists('webservices/dwc/rss.xml')){
+            			echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">RSS Feed</a></li>';
+            		}
+            		?>
             		<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
+            		
             	</ul>
 	            	
 	            <h2>Image Library</h2>
