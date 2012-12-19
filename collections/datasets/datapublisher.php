@@ -101,7 +101,7 @@ include($serverRoot."/header.php");
 		?>
 		<div style="float:right;">
 			<a href="#" title="Display Publishing Control Panel" onclick="toggle('dwcaadmindiv')">
-				<img style="border:0px;width:12px;" src="../../../images/edit.png" />
+				<img style="border:0px;width:12px;" src="../../images/edit.png" />
 			</a>
 		</div>
 		<?php
@@ -128,8 +128,8 @@ include($serverRoot."/header.php");
 	<div style="margin:20px;">
 		RSS Feed: 
 		<?php 
-		$feedLink = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(file_exists($feedLink)){
+		if(file_exists('../../webservices/dwc/rss.xml')){
+			$feedLink = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 			echo '<a href="'.$feedLink.'" target="_blank">'.$feedLink.'</a>';
 		}
 		else{
@@ -159,7 +159,7 @@ include($serverRoot."/header.php");
 			}
 		}
 		else{
-			echo '<div style="margin:10px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
+			echo '<div style="margin:10px;font-weight:bold;color:red;">No data archives have been published for this portal</div>';
 		}
 		?>
 		<hr/>

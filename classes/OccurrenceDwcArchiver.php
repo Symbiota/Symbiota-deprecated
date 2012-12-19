@@ -177,7 +177,7 @@ class OccurrenceDwcArchiver{
 			$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
 			$this->logFH = fopen($logFile, 'a');
 		}
-		$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName.' ('.date('Y-m-d h:i:s A').')\n');
+		$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName."\n");
 		
 		if(!class_exists('ZipArchive')){
 			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
