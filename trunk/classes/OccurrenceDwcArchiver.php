@@ -105,11 +105,11 @@ class OccurrenceDwcArchiver{
 			'dateIdentified' => 'http://rs.tdwg.org/dwc/terms/dateIdentified',
 			'identificationQualifier' => 'http://rs.tdwg.org/dwc/terms/identificationQualifier',
 			'scientificName' => 'http://rs.tdwg.org/dwc/terms/scientificName',
+			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
 			'genus' => 'http://rs.tdwg.org/dwc/terms/genus',
 			'specificEpithet' => 'http://rs.tdwg.org/dwc/terms/specificEpithet',
 			'taxonRank' => 'http://rs.tdwg.org/dwc/terms/taxonRank',
 			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
-			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
 			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks'
 		);
@@ -328,7 +328,6 @@ class OccurrenceDwcArchiver{
 	}
 	
 	private function writeDeterminationFile(){
-
 		$this->logOrEcho("Creating identifications.csv (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->collCode.'-det.csv', 'w');
 		
