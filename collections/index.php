@@ -1,17 +1,17 @@
 <?php
- include_once('../config/symbini.php');
- include_once($serverRoot.'/classes/OccurrenceManager.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/OccurrenceManager.php');
+header("Content-Type: text/html; charset=".$charset);
 
- $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
- 
- $collManager = new OccurrenceManager();
- $collManager->reset();
- 
- $specArr = Array();
- $obsArr = Array();
- $collList = $collManager->getCollectionArr($catId);
- foreach($collList as $collId => $collObj){
+$catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
+
+$collManager = new OccurrenceManager();
+$collManager->reset();
+
+$specArr = Array();
+$obsArr = Array();
+$collList = $collManager->getCollectionArr($catId);
+foreach($collList as $collId => $collObj){
 	$collType = $collObj["colltype"];
 	if(stripos($collType, "specimen") !== false){
 	 	$specArr[$collId]["institutioncode"] = $collObj["institutioncode"];
@@ -23,15 +23,14 @@
 		$obsArr[$collId]["collectionname"] = $collObj["collectionname"];
 	 	$obsArr[$collId]["icon"] = $collObj["icon"];
 	}
- } 
+} 
 //$otherCatArr = $collManager->getSurveys();
 $otherCatArr = $collManager->getOccurVoucherProjects();
 //$ownerInstArr = $collManager->getOwnerInstitutions();
 //$specProjArr = $collManager->getSpecProjects();
- ?>
+?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
