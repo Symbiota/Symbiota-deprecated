@@ -409,93 +409,96 @@ class OccurrenceDwcArchiver{
     	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
 	}
 	
-	private function writeRssFile($delCollId = 0){
+	private function writeRssFile(){
 		global $defaultTitle, $serverRoot, $clientRoot;
 
+		$this->logOrEcho("Mapping data to RSS feed... \n");
+		
+		//Create new document and write out to target
+		$newDoc = new DOMDocument('1.0', 'iso-8859-1');
+
+		//Add root element 
+		$rootElem = $newDoc->createElement('rss');
+		$rootAttr = $newDoc->createAttribute('version');
+		$rootAttr->value = '2.0';
+		$rootElem->appendChild($rootAttr);
+		$newDoc->appendChild($rootElem);
+
+		//Add Channel
+		$channelElem = $newDoc->createElement('channel');
+		$rootElem->appendChild($channelElem);
+		
+		//Add title, link, description, language
+		$titleElem = $newDoc->createElement('title',$defaultTitle.' Darwin Core Archive rss feed');
+		$channelElem->appendChild($titleElem);
+		$linkElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"]);
+		$channelElem->appendChild($linkElem);
+		$descriptionElem = $newDoc->createElement('description',$defaultTitle.' Darwin Core Archive rss feed</description>');
+		$channelElem->appendChild($descriptionElem);
+		$languageElem = $newDoc->createElement('language','en-us');
+		$channelElem->appendChild($languageElem);
+
+		//Create new item for target archive and load into array
+		$itemElem = $newDoc->createElement('item');
+		$itemAttr = $newDoc->createAttribute('collid');
+		$itemAttr->value = $this->collId;
+		$itemElem->appendChild($itemAttr);
+		//Add title, description, type, recordType, link, pubDate
+		$title = $this->collCode.' DwC-Archive';
+		$itemTitleElem = $newDoc->createElement('title',$title);
+		$itemElem->appendChild($itemTitleElem);
+		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$this->collectionName);
+		$itemElem->appendChild($descTitleElem);
+		$typeTitleElem = $newDoc->createElement('type','DWCA');
+		$itemElem->appendChild($typeTitleElem);
+		$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
+		$itemElem->appendChild($recTypeTitleElem);
+		$linkTitleElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$this->collCode.'_DwC-A.zip');
+		$itemElem->appendChild($linkTitleElem);
+		$dsStat = stat($this->targetPath.$this->collCode.'_DwC-A.zip');
+		$pubDateTitleElem = $newDoc->createElement('pubDate',date("D, d M Y H:i:s O", $dsStat["mtime"]));
+		$itemElem->appendChild($pubDateTitleElem);
+		$itemArr = array();
+		$itemArr[$title] = $itemElem;
+		
+		//Add existing items
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
-		if(!$delCollId) $this->logOrEcho("Mapping data to RSS feed... \n");
-		
-		$datasets = Array();
 		if(file_exists($rssFile)){
-			//Get other existing DWCAs by reading and parsing current rss.xml feed and load into array
-			$xmlDoc = new DOMDocument();
-			$xmlDoc->load($rssFile);
-			$items = $xmlDoc->getElementsByTagName("item");
-			foreach($items as $i ){
-				$collIds = $i->getElementsByTagName("collid");
-				$curCollId = $collIds->item(0)->nodeValue;
-				$links = $i->getElementsByTagName("link");
-				$link = $links->item(0)->nodeValue;
-				if(($this->collId && $curCollId != $this->collId) || ($delCollId && $curCollId != $delCollId)){
-					$titles = $i->getElementsByTagName("title");
-					$title = $titles->item(0)->nodeValue;
-					$datasets[$title]['title'] = $title;
-					$descriptions = $i->getElementsByTagName("description");
-					$datasets[$title]['description'] = $descriptions->item(0)->nodeValue;
-					$types = $i->getElementsByTagName("type");
-					$datasets[$title]['type'] = $types->item(0)->nodeValue;
-					$recordTypes = $i->getElementsByTagName("recordType");
-					$datasets[$title]['recordType'] = $recordTypes->item(0)->nodeValue;
-					$pubDates = $i->getElementsByTagName("pubDate");
-					$datasets[$title]['pubDate'] = $pubDates->item(0)->nodeValue;
-					$datasets[$title]['link'] = $link;
-					$datasets[$title]['collid'] = $curCollId;
-				}
-				if($delCollId && $delCollId == $curCollId){
-					unlink(str_replace($clientRoot,$serverRoot,substr($link,strpos($link,$clientRoot))));
-				}
-			}
-		}
-		
-		if($this->collId){
-			//Add or replace new archive that was just created 
-			$title = $this->collCode.' DwC-Archive';
-			$datasets[$title]['title'] = $title;
-			$datasets[$title]['description'] = 'Darwin Core Archive for '.$this->collectionName;
-			$datasets[$title]['type'] = 'DWCA';
-			$datasets[$title]['recordType'] = 'DWCA';
-			$datasets[$title]['link'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$this->collCode.'_DwC-A.zip';
-			$dsStat = stat($this->targetPath.$this->collCode.'_DwC-A.zip');
-			$datasets[$title]['pubDate'] = date("D, d M Y H:i:s O", $dsStat["mtime"]);
-			$datasets[$title]['collid'] = $this->collId;
-		}
-		
-		//Write out datasets to $rssFile
-		$dsHandle = fopen($rssFile,"w");
-		
-		fwrite($dsHandle,'<?xml version="1.0" encoding="ISO-8859-1"?>');
-		fwrite($dsHandle,'<rss version="2.0">');
-		fwrite($dsHandle,'<channel>');
-		fwrite($dsHandle,'<title>'.$defaultTitle.' Darwin Core Archive rss feed</title>');
-		fwrite($dsHandle,'<link>http://'.$_SERVER["SERVER_NAME"].'</link>');
-		fwrite($dsHandle,'<description>'.$defaultTitle.' Darwin Core Archive rss feed</description>');
-		fwrite($dsHandle,'<language>en-us</language>');
-
-		//Rewrite rss.xml file with updated archive
-		ksort($datasets);  
-		foreach($datasets as $dataset){
-			if(isset($dataset["collid"])){
-				fwrite($dsHandle,'<item>');
-				fwrite($dsHandle,'<title>' . $dataset["title"] . '</title>');
-				fwrite($dsHandle,'<description>' . $dataset["description"] . '</description>');
-				fwrite($dsHandle,'<type>' . $dataset["type"] . '</type>');
-				fwrite($dsHandle,'<recordType>' . $dataset["recordType"] . '</recordType>');
-				fwrite($dsHandle,'<link>' . $dataset["link"] . '</link>');
-				fwrite($dsHandle,'<pubDate>' . $dataset["pubDate"] . '</pubDate>');
-				fwrite($dsHandle,'<collid>' . $dataset["collid"] . '</collid>');
-				fwrite($dsHandle,'</item>');
+			//Get other existing DWCAs by reading and parsing current rss.xml
+			$oldDoc = new DOMDocument();
+			$oldDoc->load($rssFile);
+			$items = $oldDoc->getElementsByTagName("item");
+			foreach($items as $i){
+				//Filter out item for active collection
+				$t = $i->getElementsByTagName("title")->item(0)->nodeValue;
+				if($i->getAttribute('collid') != $this->collId) $itemArr[$t] = $newDoc->importNode($i,true);
 			}
 		}
 
-		fwrite($dsHandle,'</channel>');
-		fwrite($dsHandle,'</rss>');
-		fclose($dsHandle);
+		//Sort and add items to channel
+		ksort($itemArr);
+		foreach($itemArr as $i){
+			$channelElem->appendChild($i);
+		}
+		
+		$newDoc->save($rssFile);
 
-		if(!$delCollId) $this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
+		$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
 	}
 	
 	public function deleteArchive($collId){
-		$this->writeRssFile($collId);
+		global $serverRoot;
+		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
+		if(!file_exists($rssFile)) return false;
+		$doc = new DOMDocument();
+		$doc->load($rssFile);
+		$cElem = $doc->getElementsByTagName("channel")->item(0);
+		$items = $cElem->getElementsByTagName("item");
+		foreach($items as $i){
+			if($i->getAttribute('collid') == $collId) $cElem->removeChild($i);
+		}
+		$doc->save($rssFile);
+		return true;
 	}
 
 	//Misc functions
@@ -510,8 +513,7 @@ class OccurrenceDwcArchiver{
 			$items = $xmlDoc->getElementsByTagName("item");
 			$cnt = 0;
 			foreach($items as $i ){
-				$collIds = $i->getElementsByTagName("collid");
-				$id = $collIds->item(0)->nodeValue;
+				$id = $i->getAttribute("collid");
 				if(!$collid || $collid == $id){
 					$titles = $i->getElementsByTagName("title");
 					$retArr[$cnt]['title'] = $titles->item(0)->nodeValue;
