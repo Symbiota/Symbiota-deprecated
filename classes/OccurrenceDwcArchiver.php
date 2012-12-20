@@ -447,7 +447,7 @@ class OccurrenceDwcArchiver{
 		$title = $this->collCode.' DwC-Archive';
 		$itemTitleElem = $newDoc->createElement('title',$title);
 		$itemElem->appendChild($itemTitleElem);
-		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$this->collectionName);
+		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.htmlspecialchars($this->collectionName));
 		$itemElem->appendChild($descTitleElem);
 		$typeTitleElem = $newDoc->createElement('type','DWCA');
 		$itemElem->appendChild($typeTitleElem);
@@ -604,7 +604,7 @@ class OccurrenceDwcArchiver{
 
 	public function humanFilesize($filePath) {
 		if(!file_exists($filePath)) return '';
-		$decimals = 1;
+		$decimals = 0;
 		$bytes = filesize($filePath);
 		$sz = 'BKMGTP';
 		$factor = floor((strlen($bytes) - 1) / 3);
