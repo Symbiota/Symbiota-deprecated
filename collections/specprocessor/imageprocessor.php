@@ -211,9 +211,9 @@ if($spprId){
 						created are: basic web, thumbnail, and a large version for optional download by users. 
 						This application is capable of creating the web versions 
 						of the image using the PHP GD image library. If managers wish to use other image resizing and compression 
-						algorythms, they can preprocess the images before hand and then use this application for the file  
+						algorithms, they can process the images beforehand and then use this application for the file  
 						transfer and linking steps. 
-						Maximun image file size is dictated by the PHP configuration settings (e.g. memory_limit) of the web server.
+						Maximum image file size is dictated by the PHP configuration settings (e.g. memory_limit) of the web server.
 					</li>
 					<li>
 						<b>Obtain the unique identifier for the specimen record</b> - 
@@ -227,9 +227,9 @@ if($spprId){
 					</li>
 					<li>
 						<b>Transfer images to storage</b> - 
-						Given that the images are to be displaed within the user's web browser, 
-						the storage location must be accessable to the web. In general, it is a good practive to store only a 
-						couple thousand images per folder. For this reason, the transfer process will atempt to 
+						Given that the images are to be displayed within the user's web browser, 
+						the storage location must be accessible to the web. In general, it is a good practice to store only a 
+						couple thousand images per folder. For this reason, the transfer process will attempt to 
 						make use of the specimen identification value (Primary Key) to to establish a practical storage system 
 						(UTC00413000 to UTC00413999 goes into folder called UTC00413). Another option is to place the unprocessed 
 						images within folders using the preferred naming schema. This will trigger the transfer scripts to 
@@ -238,7 +238,7 @@ if($spprId){
 					<li>
 						<b>Integrate images into portal</b> - 
 						This is done by loading image metadata into the portal's database along with links to the prospective 
-						specimen record. The specimmen identifier obtained in step 2 is used to locate existing specimen records. 
+						specimen record. The specimen identifier obtained in step 2 is used to locate existing specimen records. 
 						If the specimen record does not yet exists, there is an option of creating a blank record 
 						to which the image will be linked so that the specimen label can then be processed online using the image.  
 						Note that it is important that the image URLs are stable. If an image is moved or renamed, 
