@@ -20,8 +20,7 @@ $dwcaManager = new OccurrenceDwcArchiver();
 if($collId) $dwcaManager->setCollId($collId);
 
 ?>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

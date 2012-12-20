@@ -93,12 +93,13 @@ class OccurrenceDwcArchiver{
 			'maximumElevationInMeters' => 'http://rs.tdwg.org/dwc/terms/maximumElevationInMeters',
 			'verbatimElevation' => 'http://rs.tdwg.org/dwc/terms/verbatimElevation',
 	 		'disposition' => 'http://rs.tdwg.org/dwc/terms/disposition',
-	 		'modified' => 'http://purl.org/dc/terms/modified',
 	 		'language' => 'http://purl.org/dc/terms/language',
 	 		'rights' => 'http://rs.tdwg.org/dwc/terms/rights',
 	 		'rightsHolder' => 'http://rs.tdwg.org/dwc/terms/rightsHolder',
-	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights'
-		);
+	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights',
+	 		'modified' => 'http://purl.org/dc/terms/modified',
+			'references' => 'http://purl.org/dc/terms/references'
+ 		);
 		$this->determinationFieldArr = array(
 	 		'coreid' => '',
 			'identifiedBy' => 'http://rs.tdwg.org/dwc/terms/identifiedBy',
@@ -265,6 +266,7 @@ class OccurrenceDwcArchiver{
 	}
 
 	private function writeOccurrenceFile($redactLocalities){
+		global $clientRoot;
 		$this->logOrEcho("Creating occurrences.csv (".date('h:i:s A').")... ");
 		$fh = fopen($this->targetPath.$this->collCode.'-occur.csv', 'w');
 		
@@ -285,7 +287,7 @@ class OccurrenceDwcArchiver{
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
-			'IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.localitySecurity '.
+			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, o.localitySecurity '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid';
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
@@ -311,6 +313,7 @@ class OccurrenceDwcArchiver{
 					$r["informationWithheld"] = 'Locality Redacted';
 				}
 				unset($r['localitySecurity']);
+				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				fputcsv($fh, $r);
 			}
 			$rs->free();
@@ -383,15 +386,10 @@ class OccurrenceDwcArchiver{
 		$sql .= 'ORDER BY o.occid';
 		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
+			if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
 			while($r = $rs->fetch_assoc()){
-				if(substr($r['identifier'],0,1) == '/'){
-					if(isset($imageDomain) && $imageDomain){
-						$r['identifier'] = $imageDomain.$r['identifier'];
-					}
-					else{
-						$r['identifier'] = 'http://'.$_SERVER["SERVER_NAME"].$r['identifier'];
-					}
-				}
+				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $referencePrefix.$r['identifier'];
 				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				fputcsv($fh, $r);
 			}
