@@ -189,17 +189,17 @@ $specList = $loanManager->getSpecList($loanId);
 	<div id="outloanspecdiv">
 		<div style="float:right;margin:10px;">
 			<a href="#" onclick="toggle('newspecdiv');toggle('refreshbut');">
-				<img src="../../images/add.png" alt="Create New Loan" />
+				<img src="../../images/add.png" title="Add New Specimen" />
 			</a>
 		</div>
-		<div id="newspecdiv" style="display:none;">
-			<form name="addspecform" action="index.php" method="post" onsubmit="return false">
+		<div id="newspecdiv" style="display:<?php echo ($eMode?'block':'none'); ?>;">
+			<form name="addspecform" action="index.php" method="post" onsubmit="return addSpecimen(this);">
 				<fieldset>
 					<legend><b>Add Specimen</b></legend>
 					<div style="float:left;padding-bottom:2px;">
 						<b>Catalog Number: </b><input type="text" autocomplete="off" name="catalognumber" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 					</div>
-					<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:none;">
+					<div id="addspecsuccess" style="float:left;margin-left:30px;padding-bottom:2px;color:green;display:<?php echo ($eMode?'block':'none'); ?>;">
 						SUCCESS: Specimen record added to loan.
 					</div>
 					<div id="addspecerr1" style="float:left;margin-left:30px;padding-bottom:2px;color:red;display:none;">
@@ -214,7 +214,7 @@ $specList = $loanManager->getSpecList($loanId);
 					<div style="padding-top:8px;clear:both;">
 						<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 						<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
-						<input name="formsubmit" type="button" value="Add Specimen" onclick="addSpecimen(this.form)" />
+						<input name="formsubmit" type="submit" value="Add Specimen" />
 					</div>
 				</fieldset>
 			</form>
@@ -223,17 +223,22 @@ $specList = $loanManager->getSpecList($loanId);
 		if($specList){
 		?>
 			<div style="height:25px;margin-top:15px;">
-				<span style="float:left;margin-left:15px;">
+				<div style="float:left;margin-left:15px;">
 					<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 					Select/Deselect All
-				</span>
-				<span id="refreshbut" style="display:none;float:right;margin-right:15px;">
-					<form name="refreshspeclist" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post">
-						<button name="formsubmit" type="submit" value="Refresh">Refresh List</button>
+				</div>
+				<div id="refreshbut" style="display:none;float:right;margin-right:15px;">
+					<form name="refreshspeclist" action="index.php" method="post">
+						<input name="loantype" type="hidden" value="<?php echo $loanType; ?>" />
+						<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+						<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+						<input name="emode" type="hidden" value="0" />
+						<input name="tabindex" type="hidden" value="1" />
+						<input name="formsubmit" type="submit" value="Refresh List" />
 					</form>
-				</span>
+				</div>
 			</div>
-			<form name="speceditform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return verifyspeceditform(this)" >
+			<form name="speceditform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return verifySpecEditForm(this)" >
 				<table class="styledtable">
 					<tr>
 						<th style="width:25px;text-align:center;">&nbsp;</th>
@@ -280,6 +285,7 @@ $specList = $loanManager->getSpecList($loanId);
 									<input name="formsubmit" type="submit" value="Perform Action" />
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 									<input name="loanid" type="hidden" value="<?php echo $loanId; ?>" />
+									<input name="tabindex" type="hidden" value="1" />
 								</span>
 							</div>
 						</td>

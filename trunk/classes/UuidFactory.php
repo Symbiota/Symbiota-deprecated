@@ -6,84 +6,109 @@ class UuidFactory {
 	private $silent = 0;
 
 	public function populateGuids($collId = 0){
+		set_time_limit(1000);
+		
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$this->echoStr("Starting batch GUID processing (".date('Y-m-d h:i:s A').")\n");
 
 		//Populate Collection GUIDs
-		$this->echoStr("Populating collection GUIDs\n");
 		$sql = 'SELECT c.collid '.
-			'FROM omcollections c LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omcollections") g ON c.collid = g.tablepk '.
-			'WHERE g.tablepk IS NULL LIMIT 10 ';
+			'FROM omcollections c '.
+			'WHERE c.collid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omcollections") ';
 		$rs = $conn->query($sql);
+		if($rs->num_rows) $this->echoStr("Populating collection GUIDs\n");
+		$recCnt = 0;
 		while($r = $rs->fetch_object()){
 			$id = $r->collid;
 			$guid = UuidFactory::getUuidV4();
 			$insSql = 'INSERT INTO guids(guid,tablename,tablepk) '.
 				'VALUES("'.$guid.'","omcollections",'.$id.')';
-			$conn->query($insSql);
+			if(!$conn->query($insSql)){
+				$this->echoStr('ERROR: '.$conn->error);
+			}
+			$recCnt++;
 		}
-		$this->echoStr("Starting batch process (".date('Y-m-d h:i:s A').")\n");
+		$rs->free();
+		if($recCnt) $this->echoStr("&nbsp;&nbsp;&nbsp;Finished: $recCnt collection records processed\n");
 		
 		//Populate occurrence GUIDs
-		$this->echoStr("Populating occurrence GUIDs\n");
 		$sql = 'SELECT o.occid '.
-			'FROM omoccurrences o LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omoccurrences") g ON o.occid = g.tablepk '.
-			'WHERE g.tablepk IS NULL ';
+			'FROM omoccurrences o '.
+			'WHERE o.occid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omoccurrences") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
-		$sql .= ' LIMIT 10';
 		$rs = $conn->query($sql);
+		if($rs->num_rows) $this->echoStr("Populating occurrence GUIDs\n");
+		$recCnt = 0;
 		while($r = $rs->fetch_object()){
 			$id = $r->occid;
 			$guid = UuidFactory::getUuidV4();
 			$insSql = 'INSERT INTO guids(guid,tablename,tablepk) '.
 				'VALUES("'.$guid.'","omoccurrences",'.$id.')';
-			$conn->query($insSql);
+			if(!$conn->query($insSql)){
+				$this->echoStr('ERROR: '.$conn->error);
+			}
+			$recCnt++;
+			if($recCnt%1000 === 0) $this->echoStr('&nbsp;&nbsp;&nbsp;'.$recCnt.' records processed');
 		}
-
+		$rs->free();
+		if($recCnt) $this->echoStr("&nbsp;&nbsp;&nbsp;Finished: $recCnt occurrence records processed\n");
+		
 		//Populate determination GUIDs
-		$this->echoStr("Populating determination GUIDs\n");
 		$sql = 'SELECT d.detid '.
-			'FROM omoccurdeterminations d LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omcollections") g ON d.detid = g.tablepk ';
+			'FROM omoccurdeterminations d ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE g.tablepk IS NULL ';
+		$sql .= 'WHERE d.detid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omoccurdeterminations") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
-		$sql .= ' LIMIT 10';
 		$rs = $conn->query($sql);
+		if($rs->num_rows) $this->echoStr("Populating determination GUIDs\n");
+		$recCnt = 0;
 		while($r = $rs->fetch_object()){
 			$id = $r->detid;
 			$guid = UuidFactory::getUuidV4();
 			$insSql = 'INSERT INTO guids(guid,tablename,tablepk) '.
 				'VALUES("'.$guid.'","omoccurdeterminations",'.$id.')';
-			$conn->query($insSql);
+			if(!$conn->query($insSql)){
+				$this->echoStr('ERROR: '.$conn->error);
+			}
+			$recCnt++;
+			if($recCnt%1000 === 0) $this->echoStr('&nbsp;&nbsp;&nbsp;'.$recCnt.' records processed');
 		}
-
+		$rs->free();
+		if($recCnt) $this->echoStr("&nbsp;&nbsp;&nbsp;Finished: $recCnt determination records processed\n");
+		
 		//Populate image GUIDs
-		$this->echoStr("Populating image GUIDs\n");
 		$sql = 'SELECT i.imgid '.
-			'FROM images i LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omcollections") g ON i.imgid = g.tablepk ';
+			'FROM images i ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE g.tablepk IS NULL ';
+		$sql .= 'WHERE i.imgid NOT IN(SELECT tablepk FROM guids WHERE tablename = "images") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
-		$sql .= ' LIMIT 10';
 		$rs = $conn->query($sql);
+		if($rs->num_rows) $this->echoStr("Populating image GUIDs\n");
+		$recCnt = 0;
 		while($r = $rs->fetch_object()){
 			$id = $r->imgid;
 			$guid = UuidFactory::getUuidV4();
 			$insSql = 'INSERT INTO guids(guid,tablename,tablepk) '.
 				'VALUES("'.$guid.'","images",'.$id.')';
-			$conn->query($insSql);
+			if(!$conn->query($insSql)){
+				$this->echoStr('ERROR: '.$conn->error);
+			}
+			$recCnt++;
+			if($recCnt%1000 === 0) $this->echoStr('&nbsp;&nbsp;&nbsp;'.$recCnt.' records processed');
 		}
-
+		$rs->free();
+		if($recCnt) $this->echoStr("&nbsp;&nbsp;&nbsp;Finished: $recCnt image records processed\n");
+		
 		$this->echoStr("GUID batch processing complete (".date('Y-m-d h:i:s A').")\n");
 		if(!($conn === false)) $conn->close();
 	}
-
+	
 	public function getCollectionCount(){
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT count(c.collid) as reccnt '.
-			'FROM omcollections c LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omcollections") g ON c.collid = g.tablepk '.
-			'WHERE g.tablepk IS NULL ';
+			'FROM omcollections c '.
+			'WHERE c.collid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omcollections") ';
 		//echo $sql;
 		$rs = $conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -98,8 +123,8 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(o.occid) as reccnt '.
-			'FROM omoccurrences o LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omoccurrences") g ON o.occid = g.tablepk '.
-			'WHERE g.tablepk IS NULL ';
+			'FROM omoccurrences o '.
+			'WHERE o.occid NOT IN (SELECT tablepk FROM guids WHERE tablename = "omoccurrences") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -115,9 +140,9 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(d.detid) as reccnt '.
-			'FROM omoccurdeterminations d LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "omoccurdeterminations") g ON d.detid = g.tablepk ';
+			'FROM omoccurdeterminations d ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE g.tablepk IS NULL ';
+		$sql .= 'WHERE d.detid NOT IN (SELECT tablepk FROM guids WHERE tablename = "omoccurdeterminations") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -133,9 +158,9 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(i.imgid) as reccnt '.
-			'FROM images i LEFT JOIN (SELECT tablepk, tablename FROM guids WHERE tablename = "images") g ON i.imgid = g.tablepk ';
+			'FROM images i ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE g.tablepk IS NULL ';
+		$sql .= 'WHERE i.imgid NOT IN(SELECT tablepk FROM guids WHERE tablename = "images") ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -145,6 +170,21 @@ class UuidFactory {
 		$rs->free();
 		if(!($conn === false)) $conn->close();
 		return $retCnt;
+	}
+	
+	public function getCollectionName($collId){
+		$retStr = '';
+		$conn = MySQLiConnectionFactory::getCon("readonly");
+		$sql = 'SELECT CONCAT(collectionname," (",CONCAT_WS("-",institutioncode,collectioncode),")") as collname '.
+			'FROM omcollections WHERE collid = '.$collId;
+		//echo $sql;
+		$rs = $conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retStr = $r->collname;
+		}
+		$rs->free();
+		if(!($conn === false)) $conn->close();
+		return $retStr;
 	}
 
 	public function setSilent($c){

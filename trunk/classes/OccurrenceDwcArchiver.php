@@ -290,6 +290,25 @@ class OccurrenceDwcArchiver{
 			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, o.localitySecurity '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid';
+		/*
+		$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
+			'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
+			'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
+			'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
+			'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
+			'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, '.
+			'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.
+			'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
+			'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
+			'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
+			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
+			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
+			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, g.guid, o.localitySecurity '.
+			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
+			'INNER JOIN guids g ON o.occid = g.tablepk '.
+			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid'; */
+		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
 				if($redactLocalities && $r["localitySecurity"] > 0 && !$this->canReadRareSpp){
