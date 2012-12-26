@@ -9,6 +9,8 @@ $loanType = array_key_exists('loantype',$_REQUEST)?$_REQUEST['loantype']:0;
 $searchTerm = array_key_exists('searchterm',$_POST)?$_POST['searchterm']:'';
 $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
+$tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
+$eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
 $isEditor = 0;
 if($symbUid && $collId){
@@ -78,6 +80,9 @@ header("Content-Type: text/html; charset=".$charset);
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	<script type="text/javascript">
+		var tabIndex = <?php echo $tabIndex; ?>;
+	</script>
 	<script type="text/javascript" src="../../js/symb/collections.loans.js"></script>
 </head>
 <body>

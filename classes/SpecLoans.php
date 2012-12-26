@@ -466,7 +466,7 @@ class SpecLoans{
 			'CONCAT_WS(", ",stateprovince,county,locality) AS locality, l.returndate '.
 			'FROM omoccurloanslink AS l LEFT OUTER JOIN omoccurrences AS o ON l.occid = o.occid '.
 			'WHERE l.loanid = '.$loanId.' '.
-			'ORDER BY o.catalognumber + 1,o.othercatalognumbers + 1';
+			'ORDER BY o.catalognumber desc,o.catalognumber+1 desc';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['occid'] = $r->occid;
@@ -480,34 +480,42 @@ class SpecLoans{
 		}
 		return $retArr;
 	} 
-	
+
 	//This method is used by the ajax script insertloanspecimen.php
 	public function addSpecimen($loanId,$collId,$catNum){
-		$retArr = array();
-		$loanId = $this->cleanInStr($loanId);
-		$collId = $this->cleanInStr($collId);
-		$catNum = $this->cleanInStr($catNum);
-		$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (catalognumber = "'.$catNum.'") ';
-		//echo $sql;
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()) {
-			$retArr[] = $row->occid;
-		}
-		if(count($retArr) == 0){
-			return 0;
-		}
-		elseif(count($retArr) > 1){
-			return 2;
-		}
-		else{
-			$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
-				'VALUES ('.$loanId.','.$retArr[0].') ';
+		$occArr = array();
+		if(is_numeric($collId) && is_numeric($loanId)){
+			$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (catalognumber = "'.trim($catNum).'") ';
 			//echo $sql;
-			if($this->conn->query($sql)){
-				return 1;
+			$result = $this->conn->query($sql);
+			while($row = $result->fetch_object()) {
+				$occArr[] = $row->occid;
+			}
+			//Check to see if number exists in the otherCatalogNumbers
+			if(count($occArr) == 0){
+				$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$collId.') AND (othercatalognumbers = "'.trim($catNum).'")';
+				$result = $this->conn->query($sql);
+				while($row = $result->fetch_object()) {
+					$occArr[] = $row->occid;
+				}
+			}
+			//Return results
+			if(count($occArr) == 0){
+				return 0;
+			}
+			elseif(count($occArr) > 1){
+				return 2;
 			}
 			else{
-				return 3;
+				$sql = 'INSERT INTO omoccurloanslink(loanid,occid) '.
+					'VALUES ('.$loanId.','.$occArr[0].') ';
+				//echo $sql;
+				if($this->conn->query($sql)){
+					return 1;
+				}
+				else{
+					return 3;
+				}
 			}
 		}
 	}

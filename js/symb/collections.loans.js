@@ -3,7 +3,7 @@ $(document).ready(function() {
 		alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 	}
 
-	$('#tabs').tabs();
+	$('#tabs').tabs({ selected: tabIndex });
 
 });
 
@@ -222,6 +222,9 @@ function addSpecimen(f){
 				}
 				else{
 					f.catalognumber.value = "";
+					document.refreshspeclist.emode.value = 1;
+					document.refreshspeclist.submit();
+					/*
 					document.getElementById("addspecsuccess").style.display = "block";
 					document.getElementById("addspecerr1").style.display = "none";
 					document.getElementById("addspecerr2").style.display = "none";
@@ -229,7 +232,8 @@ function addSpecimen(f){
 					setTimeout(function () { 
 						document.getElementById("addspecsuccess").style.display = "none";
 						}, 5000);
-					//alert("SUCCESS: Specimen added to loan.");
+					alert("SUCCESS: Specimen added to loan.");
+					*/
 				}
 			}
 		};

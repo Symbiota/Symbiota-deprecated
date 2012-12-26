@@ -958,15 +958,16 @@ function dwcDoc(dcTag){
     return false;
 }
 
+function openDoc(dcTag){
+    docWindow=open("http://symbiota.org/tiki/tiki-index.php?page=Occurrence+Fields#"+dcTag,"docpopup","width=900,height=550,left=20,top=20,scrollbars=1");
+    if(dwcWindow.opener == null) dwcWindow.opener = self;
+    return false;
+}
+
 function openOccurrenceSearch(target) {
 	collId = document.fullform.collid.value;
 	occWindow=open("imgremapaid.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
 	if (occWindow.opener == null) occWindow.opener = self;
-}
-
-function toggleIdDetails(){
-	toggle("idrefdiv");
-	toggle("idremdiv");
 }
 
 function toggleLocSecReason(f){
