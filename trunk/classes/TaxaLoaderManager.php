@@ -76,16 +76,25 @@ class TaxaLoaderManager{
 				$sql = "INSERT INTO uploadtaxa(".implode(",",$this->fieldMap).") ";
 				$valueSql = "";
 				foreach($keys as $sourceName){
-					$valueSql .= '","'.$this->encodeString($recordArr[array_search($sourceName,$headerArr)]);
+					$valIn = $this->encodeString($recordArr[array_search($sourceName,$headerArr)]);
+					$targetField = $this->fieldMap[$sourceName];
+					if($targetField == 'acceptance' && !is_numeric($valIn)){
+						if(strtolower($valIn) == 'accepted'){
+							$valIn = 1;
+						}
+						elseif(strtolower($valIn) == 'not accepted'){
+							$valIn = 1;
+						}
+						else{
+							$valIn = '';
+						}
+					}
+					$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
 				}
-				$valueSql = str_replace('""','NULL',$valueSql);
-				$sql .= "VALUES (".substr($valueSql,2)."\")";
+				$sql .= 'VALUES ('.substr($valueSql,1).')';
 				//echo "<div>".$sql."</div>";
 				if(!$this->conn->query($sql)){
-					//if($this->fieldMap['']){
-						//$sql = 'REPLACE'.substr($sql,6);
-						//$this->conn->query($sql);
-					//}
+					echo '<li>ERROR loading taxon, SQL: '.$sql.'</li>';
 				}
 				$recordCnt++;
 			}

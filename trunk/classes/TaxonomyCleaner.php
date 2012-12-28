@@ -4,6 +4,9 @@ include_once($serverRoot.'/config/dbconnection.php');
 class TaxonomyCleaner{
 
 	protected $conn;
+	protected $logFH;
+	protected $silent = 0;
+	
 	private $taxAuthId = 1;
 	private $testValidity = 1;
 	private $testTaxonomy = 1;
@@ -12,49 +15,78 @@ class TaxonomyCleaner{
 	
 	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon('write');
+		set_time_limit(500);
+		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/taxonomyVerification_".date('Y-m-d').".log";
+		$this->logFH = fopen($logFile, 'a');
+		$this->logOrEcho("Taxa Verification process starts (".date('Y-m-d h:i:s A').")");
+		$this->logOrEcho("-----------------------------------------------------\n");
 	}
 
 	function __destruct(){
 		if($this->conn) $this->conn->close();
+		if($this->logFH){
+			fclose($this->logFH);
+		}
 	}
 
-	public function verifyTaxaNames(){
+	public function verifyTaxa($verSource){
 		//Check accepted taxa first
-		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND ts.tid = ts.tidaccepted '; 
-		if($this->testValidity){
-			$sql .= 'AND t.validitystatus IS NULL ';
-		}
+		$this->logOrEcho("Starting accepted taxa verification");
+		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) '.
+			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)'; 
 		$sql .= 'LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_assoc()){
-				$externalTaxonObj = $this->getTaxonObjSpecies2000($taxonArr['sciname']);
-				$this->verifyTaxonObj($externalTaxonObj,$r,$r['tid']);
+			while($accArr = $rs->fetch_assoc()){
+				$externalTaxonObj = array();
+				if($verSource == 'col') $externalTaxonObj = $this->getTaxonObjSpecies2000($accArr['sciname']);
+				if($externalTaxonObj){
+					$this->verifyTaxonObj($externalTaxonObj,$accArr,$accArr['tid']);
+				}
+				else{
+					$this->logOrEcho('Taxon not found', 1);
+				}
 			}
 			$rs->close();
 		}
+		else{
+			$this->logOrEcho('ERROR: unable query accepted taxa',1);
+			$this->logOrEcho($sql);
+		}
+		$this->logOrEcho("Finished accepted taxa verification");
 		
 		//Check remaining taxa 
+		$this->logOrEcho("Starting remaining taxa verification");
 		$sql = 'SELECT t.sciname, t.tid, t.author, ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = '.$this->taxAuthId.') '; 
-		if($this->testValidity){
-			$sql .= 'AND t.validitystatus IS NULL ';
-		}
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') '. 
+			'AND (t.verificationStatus IS NULL OR t.verificationStatus = 0 OR t.verificationStatus = 2 OR t.verificationStatus = 3)'; 
 		$sql .= 'LIMIT 1';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
 			while($taxonArr = $rs->fetch_assoc()){
-				$externalTaxonObj = $this->getTaxonObjSpecies2000($taxonArr['sciname']);
-				$this->verifyTaxonObj($externalTaxonObj,$taxonArr,$taxonArr['tid']);
+				$externalTaxonObj = array();
+				if($verSource == 'col') $externalTaxonObj = $this->getTaxonObjSpecies2000($taxonArr['sciname']);
+				if($externalTaxonObj){
+					$this->verifyTaxonObj($externalTaxonObj,$taxonArr,$taxonArr['tidaccepted']);
+				}
+				else{
+					$this->logOrEcho('Taxon not found', 1);
+				}
 			}
 			$rs->close();
 		}
+		else{
+			$this->logOrEcho('ERROR: unable query unaccepted taxa',1);
+			$this->logOrEcho($sql);
+		}
+		$this->logOrEcho("Finishing remaining taxa verification");
 	}
 	
 	private function getTaxonObjSpecies2000($sciName, $resultIndex = 0){
 		$resultArr = Array();
-		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/2010/webservice?format=php&response=full&name=";
+		$urlTemplate = "http://www.catalogueoflife.org/annual-checklist/webservice?format=php&response=full&name=";
 		$url = $urlTemplate.str_replace(" ","%20",$sciName);
 		if($fh = fopen($url, 'r')){
 			$content = "";
@@ -429,5 +461,46 @@ class TaxonomyCleaner{
 		return $retArr;
 	}
 
+	//Misc counts
+	public function getVerificationCounts(){
+		$retArr;
+		$sql = 'SELECT IFNULL(t.verificationStatus,0) as verificationStatus, COUNT(t.tid) AS cnt '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE ts.taxauthid = '.$this->taxAuthId.' AND (t.verificationStatus IS NULL OR t.verificationStatus = 0) '.
+			'GROUP BY t.verificationStatus';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->verificationStatus] = $r->cnt;
+			}
+			$rs->close();
+		}
+		ksort($retArr);
+		return $retArr;
+	}
+	
+	//Basic setters and getters
+	public function setTaxAuthId($id){
+		if(is_numeric($id)) $this->taxAuthId = $id;
+	}
+	
+	public function setSilent($c){
+		$this->silent = $c;
+	}
+
+	public function getSilent(){
+		return $this->silent;
+	}
+
+	//Misc functions
+	private function logOrEcho($str,$indexLevel=0){
+		if(!$this->silent){
+			if($this->logFH){
+				fwrite($this->logFH,$str);
+			} 
+			echo '<li style="'.($indexLevel?'Margin:'.($indexLevel*5).'px':'').'">'.$str.'</li>';
+			ob_flush();
+			flush();
+		}
+	}
 }
 ?>
