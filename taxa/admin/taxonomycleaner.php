@@ -5,17 +5,38 @@ include_once($serverRoot.'/classes/TaxonomyCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST["collid"];
-$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $displayIndex = array_key_exists('displayindex',$_REQUEST)?$_REQUEST['displayindex']:0;
 $analyzeIndex = array_key_exists('analyzeindex',$_REQUEST)?$_REQUEST['analyzeindex']:0;
+$taxAuthId = array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:0;
 
-$cleanManager = new TaxonomyCleaner();
-$cleanManager->setCollId($collId);
-$collName = $cleanManager->getCollectionName();
+$cleanManager;
+$collName = '';
+
+if($collId){
+	$cleanManager = new TaxonomyCleanerOccurrences();
+	$cleanManager->setCollId($collId);
+	$collName = $cleanManager->getCollectionName();
+}
+else{
+	$cleanManager = new TaxonomyCleaner();
+}
+if($taxAuthId){
+	$cleanManager->setTaxAuthId($taxAuthId);
+}
 
 $isEditor = false;
-if($symbUid && ($isAdmin || ($collId && (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))))){
- 	$isEditor = true;
+if($isAdmin){
+	$isEditor = true;
+}
+else{
+	if($collId){
+		if(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
+			$isEditor = true;
+		}
+	}
+	else{
+		if(array_key_exists("Taxonomy",$userRights)) $isEditor = true;
+	}
 }
 
 $status = "";
@@ -23,7 +44,7 @@ $status = "";
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> Specimen Taxonomic Name Cleaner</title>
+		<title><?php echo $defaultTitle; ?> Taxonomic Name Cleaner</title>
 		<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 		<script language="javascript">
 			function toggle(divName){
@@ -57,19 +78,19 @@ $status = "";
 	</head>
 	<body>
 		<?php
-		$displayLeftMenu = (isset($collections_admin_spectaxcleanerMenu)?$collections_admin_spectaxcleanerMenu:'true');
+		$displayLeftMenu = (isset($taxa_admin_taxonomycleanerMenu)?$taxa_admin_taxonomycleanerMenu:'true');
 		include($serverRoot.'/header.php');
-		if(isset($collections_admin_spectaxcleanerCrumbs)){
+		if(isset($taxa_admin_taxonomycleanerCrumbs)){
 			?>
 			<div class='navpath'>
 				<a href='../index.php'>Home</a> &gt; 
-				<?php echo $collections_admin_spectaxcleanerCrumbs; ?>
-				<b>Specimen Taxonomic Name Cleaner</b>
+				<?php echo $taxa_admin_taxonomycleanerCrumbs; ?>
+				<b>Taxonomic Name Cleaner</b>
 			</div>
 			<?php 
 		}
 		?>
-		<!-- This is inner text! -->
+		<!-- inner text block -->
 		<div id="innertext">
 			<?php 
 			if($symbUid){
@@ -82,22 +103,23 @@ $status = "";
 					</div>
 					<?php 
 				}
-				if($collId){
-					if($isEditor){
+				if($isEditor){
+					if($collId){
 						?>
 						<h1><?php echo $collName; ?></h1>
 						<div>
 							This module is designed to aid in cleaning scientific names that are not mapping  
 							to the taxonomic thesaurus. Unmapped names are likely due to misspelllings, illegidimate names, 
-							or simply because they just have not been added to the thesaurus.   
+							or simply because they just have not yet been added to the thesaurus.   
 						</div>
 						<div>
 							Number of mismapped names: <?php echo $cleanManager->getTaxaCount(); ?>
 						</div>
 						<?php 
+						$action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 						if(!$action){
 							?>
-							<form name="mainmenu" action="spectaxcleaner.php" method="get">
+							<form name="occurmainmenu" action="taxonomycleaner.php" method="post">
 								<fieldset>
 									<legend><b>Main Menu</b></legend>
 									<div>
@@ -167,8 +189,51 @@ $status = "";
 					}
 					else{
 						?>
-						<div style="margin:20px;font-weight:bold;font-size:120%;">
-							ERROR: You don't have the necessary permissions to access the editing tools for this collection.
+						<h1>Taxonomic Thesaurus Validator</h1>
+						<div style="margin:15px;">
+							This module is designed to aid in validating scientific names within the taxonomic thesauri. 
+						</div>
+						<?php
+						$taxonomyAction = array_key_exists('taxonomysubmit',$_POST)?$_POST['taxonomysubmit']:'';
+						if($taxonomyAction == 'Validate Names'){
+							?>
+							<div style="margin:15px;">
+								<b>Validation Status:</b>
+								<ul>
+									<?php $cleanManager->verifyTaxa($_POST['versource']); ?>
+								</ul>
+							</div>
+							<?php
+						}
+						?>
+						<div style="margin:15px;">
+							<fieldset>
+								<legend><b>Verification Status</b></legend>
+								<?php 
+								$vetArr = $cleanManager->getVerificationCounts();
+								?>
+								Full Verification: <?php $vetArr[1]; ?><br/>
+								Suspect Status: <?php $vetArr[2]; ?><br/>
+								Name Validated Only: <?php $vetArr[3]; ?><br/>
+								Untested: <?php $vetArr[0]; ?>
+							</fieldset>
+						</div>
+						<div style="margin:15px;">
+							<form name="taxonomymainmenu" action="taxonomycleaner.php" method="post">
+								<fieldset>
+									<legend><b>Main Menu</b></legend>
+									<div>
+										<b>Testing Resource:</b><br/> 
+										<input type="radio" name="versource" value="col" CHECKED /> 
+										Catalogue of Life<br/>
+									</div>
+									<div>
+										<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId; ?>" />
+										<input type="submit" name="taxonomysubmit" value="Validate Names" />
+									</div>								
+								</fieldset>
+							</form>
+						
 						</div>
 						<?php 
 					}
@@ -176,7 +241,7 @@ $status = "";
 				else{
 					?>
 					<div style="margin:20px;font-weight:bold;font-size:120%;">
-						ERROR: No collection selected.
+						ERROR: You don't have the necessary permissions to access this data cleaning module.
 					</div>
 					<?php 
 				}
@@ -184,7 +249,7 @@ $status = "";
 			else{
 				?>
 				<div style="font-weight:bold;">
-					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/admin/spectaxcleaner.php?collid=<?php echo $collId; ?>'>login</a>!
+					Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/taxa/admin/taxonomycleaner.php?collid=<?php echo $collId; ?>'>login</a>!
 				</div>
 				<?php 
 			}
