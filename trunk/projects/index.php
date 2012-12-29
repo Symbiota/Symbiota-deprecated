@@ -41,8 +41,8 @@ if($isEditable && $projSubmit){
 			$proj = $projManager->addNewProject($projEditArr);
 			if($proj){
 				$projManager->setProj($proj);
-				$statusStr = 'Flora/Fauna Project created! To add checklists, open the editing pane by '.
-					'clicking on editing symbol to the far right of project name and select the Checklist Management tab.';
+				$statusStr = 'Success: Inventory Project created! To add checklists to the project, open the editing pane by '.
+					'clicking on editing symbol to the far right of project name and then select the Checklist Management tab.';
 			}
 		}
 	}
@@ -192,7 +192,7 @@ if($isEditable && $projSubmit){
 	if($statusStr){
 		?>
 		<hr/>
-		<div style="margin:20px;font-weight:bold;color:red;">
+		<div style="margin:20px;font-weight:bold;color:<?php echo (stripos($statusStr,'success')!==false?'green':'red');?>;">
 			<?php echo $statusStr; ?>
 		</div>
 		<hr/>
