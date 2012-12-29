@@ -273,7 +273,7 @@ if($isEditable && $projSubmit){
 									</td>
 									<td>
 										<select name="ispublic">
-											<option value="0">Public</option>
+											<option value="0">Private</option>
 											<option value="1" <?php echo ($projArr&&$projArr['ispublic']?'SELECTED':''); ?>>Public</option>
 										</select>
 									</td>
