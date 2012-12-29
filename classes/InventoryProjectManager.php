@@ -87,7 +87,7 @@ class InventoryProjectManager {
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = "";
 		foreach($projArr as $field => $value){
-			$v = $this->cleanInString($value);
+			$v = $this->cleanInStr($value);
 			$sql .= ','.$field.' = "'.$v.'"';
 		}
 		$sql = 'UPDATE fmprojects SET '.substr($sql,1).' WHERE (pid = '.$this->projId.')';
@@ -100,9 +100,9 @@ class InventoryProjectManager {
 		$pid = 0;
 		$conn = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO fmprojects(projname,managers,fulldescription,notes,ispublic,sortsequence) '.
-			'VALUES("'.$this->cleanInString($projArr['projname']).'","'.$this->cleanInString($projArr['managers']).'","'.
-			$this->cleanInString($projArr['fulldescription']).'","'.
-			$this->cleanInString($projArr['notes']).'",'.$projArr['ispublic'].','.
+			'VALUES("'.$this->cleanInStr($projArr['projname']).'","'.$this->cleanInStr($projArr['managers']).'","'.
+			$this->cleanInStr($projArr['fulldescription']).'","'.
+			$this->cleanInStr($projArr['notes']).'",'.$projArr['ispublic'].','.
 			($projArr['sortsequence']?$projArr['sortsequence']:'50').')';
 		//echo $sql;
 		if($conn->query($sql)){
