@@ -142,8 +142,8 @@ class CollectionProfileManager {
 				$sql .= ',icon = '.($icon?'"'.$icon.'"':'NULL').','.
 					'managementtype = "'.$_POST['managementtype'].'",'.
 					'colltype = "'.$_POST['colltype'].'",'.
-					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').' '.
-					($_POST['sortseq']?',sortseq = '.$_POST['sortseq']:'').' ';
+					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').', '.
+					'sortseq = '.($_POST['sortseq']?$_POST['sortseq']:'NULL').' ';
 			}
 			$sql .= 'WHERE (collid = '.$this->collId.')';
 			//echo $sql;
