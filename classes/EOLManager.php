@@ -18,7 +18,8 @@ class EOLManager {
 		$sql = 'SELECT COUNT(t.tid) as tidcnt '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.tid > (SELECT IFNULL(max(tid),0) AS maxtid FROM taxalinks WHERE owner = "EOL") AND t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
+			//AND t.tid > (SELECT IFNULL(max(tid),0) AS maxtid FROM taxalinks WHERE owner = "EOL")
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$tidCnt = $r->tidcnt;
