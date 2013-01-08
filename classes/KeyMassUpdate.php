@@ -1,10 +1,12 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 
-class KeyMassUpdateManager{
+class KeyMassUpdate{
 	
 	private $con;
 	private $taxonNameFilter;
+	private $taxonFilterTid;
+	private $taxonFilterRank;
 	private $tidFilter;
 	private $clidFilter;
 	private $generaOnly;
@@ -27,7 +29,13 @@ class KeyMassUpdateManager{
 	}
 	
 	public function setTaxonFilter($name){
-		$this->taxonNameFilter = $name;
+		$sql = 'SELECT tid, rankid FROM taxa WHERE sciname = "'.$name.'"';
+		$rs = $this->con->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->taxonFilterTid = $r->tid;
+			$this->taxonFilterRankid = $r->rankid;
+		}
+		$rs->free();
 	}
 	
 	public function setClFilter($clid){
@@ -72,8 +80,11 @@ class KeyMassUpdateManager{
 		$returnList = Array();
 		$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ";
 		if($this->pid) {
-			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.clid = cpl.clid ".
-				"WHERE (cpl.pid = ".$this->pid.") ";
+			$sql .= "INNER JOIN fmchklstprojlink cpl ON cl.clid = cpl.clid ";
+		}
+		$sql .= "WHERE cl.access = 'public' ";
+		if($this->pid) {
+			$sql .= "AND (cpl.pid = ".$this->pid.") ";
 		}
 		$sql .= "ORDER BY cl.name";
 		$result = $this->con->query($sql);
@@ -110,13 +121,13 @@ class KeyMassUpdateManager{
 		$result->close();
 		//sort($upperArr);
 		sort($familyArr);
-		return array_merge($familyArr,$genusArr);
+		return array_merge($this->getFamilyParents($familyArr),$familyArr,$genusArr);
 	}
 
 	public function getCharList(){
 		$headingArray = Array();		//Heading => Array(CID => CharName)
-		if($this->taxonNameFilter){
-			$strFrag = implode(",",$this->getParents($this->taxonNameFilter));
+		if($this->taxonFilterTid){
+			$strFrag = implode(",",$this->getParents($this->taxonFilterTid));
 			$sql = "SELECT DISTINCT ch.headingname, c.CID, c.CharName ".
 				"FROM ((kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID) ".
 				"INNER JOIN kmcharheading ch ON c.hid = ch.hid) ".
@@ -141,13 +152,13 @@ class KeyMassUpdateManager{
 		$targetTaxon = $t;
 		while($targetTaxon){
 			$sql = "SELECT t.TID, ts.ParentTID FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
-				"WHERE ts.taxauthid = 1 AND ".(intval($targetTaxon)?"(t.TID = ".$targetTaxon.")":"(t.SciName = '".$t."')");
+				"WHERE ts.taxauthid = 1 AND (t.TID = ".$targetTaxon.")";
 			$result = $this->con->query($sql);
 		    if ($row = $result->fetch_object()){
-					$targetTaxon = $row->ParentTID;
-					$tid = $row->TID;
-					if(in_array($tid, $returnList)) break;
-					$returnList[] = $tid;
+				$targetTaxon = $row->ParentTID;
+				$tid = $row->TID;
+				if(in_array($tid, $returnList)) break;
+				$returnList[] = $tid;
 		    }
 		    else{
 		    	break;
@@ -157,6 +168,33 @@ class KeyMassUpdateManager{
 		return $returnList;
 	}
 
+	private function getFamilyParents($famArr){
+		//Returns parents of the family list 
+		$retArr = Array();
+		$sql = 'SELECT DISTINCT ts.hierarchystr '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE ts.taxauthid = 1 AND t.sciname IN ("'.implode('","',$famArr).'") AND ts.hierarchystr IS NOT NULL';
+		//echo $sql;
+		$result = $this->con->query($sql);
+		$tidArr = array();
+		while($row = $result->fetch_object()){
+			$tidArr = array_merge($tidArr,explode(',',$row->hierarchystr));
+		}
+		$result->free();
+		if($tidArr){
+			$sql = 'SELECT t.sciname '.
+				'FROM taxa t '.
+				'WHERE t.tid IN('.implode(',',array_unique($tidArr)).') AND t.rankid IN (100,60,30) '.
+				'ORDER BY t.rankid, t.sciname';
+			$rs = $this->con->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[] = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	public function getStates(){
 		$stateArr = Array();
 		$sql = 'SELECT kmcs.CharStateName, kmcs.CS FROM kmcs '.
@@ -171,57 +209,92 @@ class KeyMassUpdateManager{
 	}
 	
 	public function getTaxaList(){
-		
 		//Get all Taxa found in checklist 
 		$taxaList = Array();
-		$parArr = Array();
-		$famArr = Array();
-		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, ts.ParentTID, t.RankId, d.CID, d.CS, d.Inherited ".
-			"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-			"LEFT JOIN (SELECT d.TID, d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (d.CID=".$this->cid.")) AS d ON t.TID = d.TID) ";
-		if($this->clidFilter && $this->clidFilter != "all"){
-			$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
-		}
-		$sql .= "WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.Family='".$this->taxonNameFilter."' OR t.SciName Like '".$this->taxonNameFilter." %') ";
-		if($this->clidFilter && $this->clidFilter != "all"){
-			$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
-		}
-		//echo $sql;
-		$rs = $this->con->query($sql);
-		while($row1 = $rs->fetch_object()){
-			$sciName = $row1->SciName;
-			$sciNameDisplay = "<div style='margin-left:6px'>$sciName</div>";
-			$family = $row1->Family;
-			if(!$this->generaOnly){
-				$taxaList[$family][$sciName]["TID"] = $row1->TID;
-				$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
-				$taxaList[$family][$sciName]["csArray"][$row1->CS] = $row1->Inherited;
+		if($this->taxonFilterRankid > 100){
+			$parArr = Array();
+			$famArr = Array();
+			$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, ts.ParentTID, t.RankId, d.CID, d.CS, d.Inherited ".
+				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
+				"LEFT JOIN (SELECT d.TID, d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (d.CID=".$this->cid.")) AS d ON t.TID = d.TID) ";
+			if($this->clidFilter && $this->clidFilter != "all"){
+				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
 			}
-			$parTID = $row1->ParentTID;
-			if(!in_array($parTID,$parArr)) $parArr[] = $parTID;
-			if(!in_array($family,$famArr)) $famArr[] = $family;
+			$sql .= "WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.hierarchystr LIKE '%,".$this->taxonFilterTid.",%') ";
+			if($this->clidFilter && $this->clidFilter != "all"){
+				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
+			}
+			//echo $sql;
+			$rs = $this->con->query($sql);
+			while($row1 = $rs->fetch_object()){
+				$sciName = $row1->SciName;
+				$sciNameDisplay = "<div style='margin-left:10px'><i>$sciName</i></div>";
+				$family = $row1->Family;
+				if(!$this->generaOnly){
+					$taxaList[$family][$sciName]["TID"] = $row1->TID;
+					$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
+					$taxaList[$family][$sciName]["csArray"][$row1->CS] = $row1->Inherited;
+				}
+				$parTID = $row1->ParentTID;
+				if(!in_array($parTID,$parArr)) $parArr[] = $parTID;
+				if(!in_array($family,$famArr)) $famArr[] = $family;
+			}
+			$rs->close();
+	
+			//Get all genera and family and add them to list
+			$taxaStr = implode(",",$parArr);
+			$famStr = implode("','",$famArr);
+			$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
+				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+				"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
+				"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
+				"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
+			$rs = $this->con->query($sql);
+			while($row = $rs->fetch_object()){
+				$sciName = $row->SciName;
+				$rankId = $row->RankId;
+				$family = ($rankId == 140?$sciName:$row->Family);
+				$sciNameDisplay = '<div style="margin-left:5px;font-style:italic;">'.$sciName.'</div>';
+				$taxaList[$family][$sciName]["TID"] = $row->TID;
+				$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
+				$taxaList[$family][$sciName]["csArray"][$row->CS] = $row->Inherited;
+			}
+			$rs->close();
 		}
-		$rs->close();
-
-		//Get all genera and family and add them to list
-		$taxaStr = implode(",",$parArr);
-		$famStr = implode("','",$famArr);
-		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
-			"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-			"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
-			"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
-			"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
-		$rs = $this->con->query($sql);
-		while($row = $rs->fetch_object()){
-			$sciName = $row->SciName;
-			$rankId = $row->RankId;
-			$family = ($rankId == 140?$sciName:$row->Family);
-			$sciNameDisplay = "<div style='margin-left:3px'>$sciName</div>";
-			$taxaList[$family][$sciName]["TID"] = $row->TID;
-			$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
-			$taxaList[$family][$sciName]["csArray"][$row->CS] = $row->Inherited;
+		else{
+			//Get all relavent family
+			$famArr = Array();
+			$sql = "SELECT DISTINCT ts.family ".
+				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted ";
+			if($this->clidFilter && $this->clidFilter != "all"){
+				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
+			}
+			$sql .= "WHERE (ts.taxauthid = 1) AND (ts.hierarchystr LIKE '%,".$this->taxonFilterTid.",%') ";
+			if($this->clidFilter && $this->clidFilter != "all"){
+				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
+			}
+			//echo $sql;
+			$rs = $this->con->query($sql);
+			while($r = $rs->fetch_object()){
+				$famArr[] = $r->family;
+			}
+			$rs->close();
+			//Add all families to ouput list
+			$famStr = implode("','",$famArr);
+			$sql = "SELECT DISTINCT t.TID, t.sciname, d.cs, d.inherited ".
+				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+				"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
+				"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
+				"WHERE (ts.taxauthid = 1 AND t.SciName IN('$famStr'))";
+			$rs = $this->con->query($sql);
+			while($row = $rs->fetch_object()){
+				$family = $row->sciname;
+				$taxaList[$family][$family]["TID"] = $row->TID;
+				$taxaList[$family][$family]["display"] = '<div style="margin-left:3px">'.$family.'</div>';
+				$taxaList[$family][$family]["csArray"][$row->cs] = $row->inherited;
+			}
+			$rs->close();
 		}
-		$rs->close();
 		return $taxaList;
 	}
 
