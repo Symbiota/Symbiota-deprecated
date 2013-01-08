@@ -1,15 +1,15 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyMassUpdateManager.php');
+include_once($serverRoot.'/classes/KeyMassUpdate.php');
 header("Content-Type: text/html; charset=".$charset);
 
- $editable = false;
+ $isEditor = false;
  if($isAdmin || array_key_exists("KeyEditor",$userRights)){
- 	$editable = true;
+ 	$isEditor = true;
  }
   	
- $muManager = new KeyMassUpdateManager();
+ $muManager = new KeyMassUpdate();
 
 $removeAttrs = Array();
 $addAttrs = Array();
@@ -40,16 +40,6 @@ if($addAttrs || $removeAttrs){
 	$muManager->deleteInheritance();
 	$muManager->processAttrs();
 	$muManager->resetInheritance();
-}
-
-$displayLeftMenu = (isset($ident_tools_massupdateMenu)?$ident_tools_massupdateMenu:"true");
-include($serverRoot.'/header.php');
-if(isset($ident_tools_massupdateCrumbs)){
-	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
-	echo $ident_tools_massupdateCrumbs;
-	echo "<b>Character Mass Update Editor</b>";
-	echo "</div>";
 }
 
 ?>
@@ -139,11 +129,37 @@ if(isset($ident_tools_massupdateCrumbs)){
 	</script>
 </head>
 <body>
-
+<?php 
+$displayLeftMenu = (isset($ident_tools_massupdateMenu)?$ident_tools_massupdateMenu:false);
+include($serverRoot.'/header.php');
+if(isset($ident_tools_massupdateCrumbs)){
+	if($ident_tools_massupdateCrumbs){
+		?>
+		<div class='navpath'>
+			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<?php echo $ident_tools_massupdateCrumbs; ?>
+			<a href='massupdate.php'>
+				<b>Character Mass-update Editor</b>
+			</a>
+		</div>
+		<?php 
+	}
+}
+else{
+	?>
+	<div class='navpath'>
+		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='massupdate.php'>
+			<b>Character Mass-update Editor</b>
+		</a>
+	</div>
+	<?php 
+}
+?>
 <!-- This is inner text! -->
 <div id="innertext">
 	<?php 	
-	if($editable){
+	if($isEditor){
 		if(!$clFilter || !$taxonFilter || !$cidValue){
 			?>
 			<table>
@@ -165,7 +181,7 @@ if(isset($ident_tools_massupdateCrumbs)){
 					  		</select>
 					  		<div style='font-weight:bold;'>Taxon:</div>
 							<select name="tf">
-					 			<option value='0'>-- Select a Family or Genus --</option>
+					 			<option value='0'>-- Select Taxon --</option>
 					 			<option value='0'>--------------------------</option>
 						  		<?php 
 						  		$selectList = $muManager->getTaxaQueryList();
@@ -232,7 +248,13 @@ if(isset($ident_tools_massupdateCrumbs)){
 	     		}
 	     		$headerStr .= '</tr>'."\n";
 	     		echo $headerStr;
-				
+	     		?>
+				<tr>
+					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
+						<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
+					</td>
+				</tr>
+	     		<?php 
 	     		$count = 0;
 	     		//Array(familyName => Array(SciName => Array("TID" => TIDvalue,"csArray" => Array(csValues => Inheritance))))
 	     		$tList = $muManager->getTaxaList();
@@ -244,7 +266,7 @@ if(isset($ident_tools_massupdateCrumbs)){
 	      				?>
 						<tr>
 							<td>
-								<span style='margin-left:1px'>
+								<span style='font-weight:bold;'>
 									<a href='editor.php?taxon=<?php echo $fam; ?>&action=Get+Character+Info' target='_blank'>
 										<?php echo $fam; ?>
 									</a>
@@ -262,11 +284,11 @@ if(isset($ident_tools_massupdateCrumbs)){
 								}
 								if($isSelected && !$isInherited){
 									//State is true and not inherited for this taxon
-									$jsStr = "javascript: removeAttr('".$t."-".$cs."');";
+									$jsStr = "removeAttr('".$t."-".$cs."');";
 								}
 								else{
 									//State is false for this taxon or it is inherited
-									$jsStr = "javascript: addAttr('".$t."-".$cs."');";	
+									$jsStr = "addAttr('".$t."-".$cs."');";	
 								}
 								echo "<td align='center' width='15'>";
 								echo "<input type=\"checkbox\" name=\"csDisplay\" onclick=\"".$jsStr."\" ".($isSelected && !$isInherited?"CHECKED":"")." title=\"".$csName."\"/>".($isInherited?"(I)":"");
@@ -325,22 +347,20 @@ if(isset($ident_tools_massupdateCrumbs)){
 							?>
 							<tr>
 								<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
-									<input type='submit' name='action' value='Save Changes' onclick='javascript: submitAttrs();' />
+									<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
 								</td>
 							</tr>
 							<?php 
 	     					echo $headerStr;
 						}
 					}
-					?>
-					<tr>
-						<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
-							<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
-						</td>
-					</tr>
-					<?php 
 	     		}
 				?>
+				<tr>
+					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
+						<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
+					</td>
+				</tr>
 			</table>
 			<form name="submitform" action="massupdate.php" method="post">
 				<input type='hidden' name='clf' value='<?php echo $clFilter; ?>' />
@@ -352,8 +372,18 @@ if(isset($ident_tools_massupdateCrumbs)){
 			<?php
      	}
 	}
+	elseif(!$symbUid){
+		?>
+		<div style="font-weight:bold;font-size:120%;margin:30px;">
+			Please 
+			<a href="../../profile/index.php?refurl=<?php echo $clientRoot; ?>/ident/tools/massupdate.php">
+				LOGIN
+			</a> 
+		</div>
+		<?php 
+	}
 	else{  //Not editable or writable connection is not set
-		echo "<h1>You do not have authority to edit character data.</h1> <h3>You must first login to the system.</h3>";
+		echo "<h1>You appear not to have necessary premissions to edit character data.</h1>";
 	}
 	?>
 </div>
