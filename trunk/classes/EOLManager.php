@@ -17,8 +17,8 @@ class EOLManager {
 		$tidCnt = 0;
 		$sql = 'SELECT COUNT(t.tid) as tidcnt '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+			'AND t.TID NOT IN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) ';
 			//AND t.tid > (SELECT IFNULL(max(tid),0) AS maxtid FROM taxalinks WHERE owner = "EOL")
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -44,9 +44,10 @@ class EOLManager {
 		//Start mapping taxa
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL '.
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
+			'AND t.tid NOT IN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) '.
 			'AND t.tid > '.$startingTid.' ORDER BY t.tid';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
 		echo '<div style="font-weight:">';
@@ -109,9 +110,9 @@ class EOLManager {
 		$tidCnt = 0;
 		$sql = 'SELECT COUNT(t.tid) AS tidcnt '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
-			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) i ON t.tid = i.tidaccepted '. 
-			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" ';
+			'WHERE t.rankid >= 220 AND l.owner = "EOL" '.
+			'AND t.tid NOT IN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
+			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$tidCnt = $r->tidcnt;
@@ -121,6 +122,7 @@ class EOLManager {
 	}
 	
 	public function mapImagesForTaxa($startIndex = 0){
+		if(!is_numeric($startIndex)) return;
 		if(!$startIndex){
 			//Get tid last image mapped as the start index
 			$sql = 'SELECT tid '.
@@ -138,10 +140,10 @@ class EOLManager {
 		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
 			'FROM taxa t INNER JOIN taxalinks l ON t.tid = l.tid '.
-			'LEFT JOIN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
-			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL)) i ON t.tid = i.tidaccepted '. 
-			'WHERE t.rankid >= 220 AND i.tidaccepted IS NULL AND l.owner = "EOL" ';
-		if($startIndex && is_numeric($startIndex)) $sql .= 'AND t.tid >= '.$startIndex.' '; 
+			'WHERE t.rankid >= 220 AND l.owner = "EOL" '.
+			'AND t.tid NOT IN (SELECT ts1.tidaccepted FROM images ii INNER JOIN taxstatus ts1 ON ii.tid = ts1.tid '.
+			'WHERE ts1.taxauthid = 1 AND (ii.imagetype NOT LIKE "%specimen%" OR ii.imagetype IS NULL))';
+		if($startIndex) $sql .= 'AND t.tid >= '.$startIndex.' '; 
 		$sql .= 'ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
@@ -191,7 +193,7 @@ class EOLManager {
 							}
 						}
 						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['description']);
-						$noteStr = 'Harvest via EOL on '.date(Y-m-d);
+						$noteStr = 'Harvest via EOL on '.date('Y-m-d');
 						if(array_key_exists('rights',$objArr)) $noteStr .= '; '.$this->cleanInStr($objArr['rights']);  
 						$resourceArr['notes'] = $noteStr;
 						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanInStr($objArr['title']);
@@ -242,14 +244,14 @@ class EOLManager {
  		$retStr = $inStr;
 		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
 			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
-				//$value = utf8_encode($value);
-				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				$retStr = utf8_encode($inStr);
+				//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 			}
 		}
 		elseif(strtolower($charset) == "iso-8859-1"){
 			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				//$value = utf8_decode($value);
-				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				$retStr = utf8_decode($inStr);
+				//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 			}
 		}
 		return $retStr;
@@ -271,7 +273,7 @@ class EOLManager {
 
 		$newStr = $this->encodeString($newStr);
 		
-		$newStr = $this->conn->real_escape_string($newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
 }
