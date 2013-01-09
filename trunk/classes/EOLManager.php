@@ -31,15 +31,28 @@ class EOLManager {
 	public function mapTaxa($makePrimaryLink = 1){
 		$successCnt = 0;
 		set_time_limit(6000);
+		//Get last tid mapped within the lasat week, this will be used to start maping that may have been stopped early
+		$startingTid = 0;
+		$sql = 'SELECT tid FROM taxalinks '.
+			'WHERE owner = "EOL" AND initialtimestamp > "'.date('Y-m-d',time()-(7 * 24 * 60 * 60)).'" '.
+			'ORDER BY initialtimestamp DESC LIMIT 1';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$startingTid = $r->tid;
+		}
+		$rs->free();
+		//Start mapping taxa
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			'LEFT JOIN (SELECT tid FROM taxalinks WHERE title = "Encyclopedia of Life" AND sourceidentifier IS NOT NULL) tl ON t.tid = tl.tid '.
-			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL ';
-			//AND t.tid > (SELECT IFNULL(max(tid),0) AS maxtid FROM taxalinks WHERE owner = "EOL");
-		$sql .= 'ORDER BY t.tid';
+			'WHERE t.rankid >= 220 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tl.TID IS NULL '.
+			'AND t.tid > '.$startingTid.' ORDER BY t.tid';
 		$rs = $this->conn->query($sql);
 		$recCnt = $rs->num_rows;
-		echo '<div style="font-weight:">Mapping EOL identifiers for '.$recCnt.' taxa</div>'."\n";
+		echo '<div style="font-weight:">';
+		echo 'Mapping EOL identifiers for '.$recCnt.' taxa ';
+		if($startingTid) echo '(starting tid: '.$startingTid;
+		echo '</div>'."\n";
 		echo "<ul>\n";
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
@@ -108,6 +121,19 @@ class EOLManager {
 	}
 	
 	public function mapImagesForTaxa($startIndex = 0){
+		if(!$startIndex){
+			//Get tid last image mapped as the start index
+			$sql = 'SELECT tid '.
+				'FROM images '.
+				'WHERE notes LIKE "Harvest via EOL%" AND initialtimestamp > "'.date('Y-m-d',time()-(7 * 24 * 60 * 60)).'" '.
+				'ORDER BY initialtimestamp DESC LIMIT 1';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$startingTid = $r->tid;
+			}
+			$rs->free();
+		}
+		
 		$successCnt = 0;
 		set_time_limit(6000);
 		$sql = 'SELECT t.tid, t.sciname, l.sourceidentifier '.
@@ -165,7 +191,9 @@ class EOLManager {
 							}
 						}
 						if(array_key_exists('description',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['description']);
-						if(array_key_exists('rights',$objArr)) $resourceArr['notes'] = $this->cleanInStr($objArr['rights']);
+						$noteStr = 'Harvest via EOL on '.date(Y-m-d);
+						if(array_key_exists('rights',$objArr)) $noteStr .= '; '.$this->cleanInStr($objArr['rights']);  
+						$resourceArr['notes'] = $noteStr;
 						if(array_key_exists('title',$objArr)) $resourceArr['title'] = $this->cleanInStr($objArr['title']);
 						if(array_key_exists('rightsHolder',$objArr)) $resourceArr['owner'] = $this->cleanInStr($objArr['rightsHolder']);
 						if(array_key_exists('source',$objArr)) $resourceArr['source'] = $this->cleanInStr($objArr['source']);
