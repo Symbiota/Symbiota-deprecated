@@ -20,22 +20,22 @@ $isGenObs = 0;
 $collMap = array();
 $recArr = array();
 $headerMapBase = array('catalognumber' => 'Catalog Number',
-	'othercatalognumbers' => 'Other Catalog Number','family' => 'Family','identificationqualifier' => 'ID Qualifier',
+	'othercatalognumbers' => 'Other Catalog #','family' => 'Family','identificationqualifier' => 'ID Qualifier',
 	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
-	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date',
-	'verbatimeventdate' => 'Verbatim Date','country' => 'Country','stateprovince' => 'State/Province',
-	'county' => 'county','municipality' => 'municipality','locality' => 'locality','decimallatitude' => 'Latitude',
-	'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
+	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date','verbatimeventdate' => 'Verbatim Date',
+	'identificationremarks' => 'Identification Remarks','identifiedby' => 'Identified By',
+	'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
+	'country' => 'Country','stateprovince' => 'State/Province','county' => 'county','municipality' => 'municipality',
+	'locality' => 'locality','decimallatitude' => 'Latitude', 'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
 	'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
 	'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
 	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
 	'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
 	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes','associatedtaxa' => 'Associated Taxa',
-	'verbatimattributes' => 'Description','reproductivecondition' => 'Reproductive Condition',
-	'identificationremarks' => 'Identification Remarks','identifiedby' => 'Identified By',
-	'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
+	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
+	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
-	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','dateLastModified' => 'Date Last Modified',
+	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
 	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
 $headMap = array();
 
