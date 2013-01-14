@@ -1367,8 +1367,8 @@ class SpecUploadManager{
 	private function parseScientificName($inStr){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array();
+		//Remove underscores, common in NPS data
 		$inStr = preg_replace('/_+/',' ',$inStr);
-		$inStr = preg_replace('/\s\s+/',' ',$inStr);
 		if(stripos($inStr,'cf. ') !== false){
 			$retArr['identificationqualifier'] = 'cf. ';
 			$inStr = str_ireplace('cf. ','',$inStr);
@@ -1377,6 +1377,9 @@ class SpecUploadManager{
 			$retArr['identificationqualifier'] = 'aff. ';
 			$inStr = str_ireplace('aff. ','',$inStr);
 		}
+		//Remove extra species
+		$inStr = preg_replace('/\s\s+/',' ',$inStr);
+		
 		$sciNameArr = explode(' ',$inStr);
 		if(count($sciNameArr)){
 			if(strtolower($sciNameArr[0]) == 'x'){
@@ -1428,6 +1431,21 @@ class SpecUploadManager{
 					}
 				}
 			}
+			//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
+			if(!array_key_exists('unitname3',$retArr)){
+				if(preg_match('/\s+([a-z]{3,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{3,})([\sA-Z]*.*)/',$retArr['author'],$m)){
+					$sql = 'SELECT unitind3 FROM taxa '.
+						'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$m[1].'" '.
+						'ORDER BY unitind3 DESC';
+					$rs = $this->conn->query($sql);
+					if($r = $rs->fetch_object()){
+						$retArr['unitname3'] = $m[1];
+						$retArr['unitind3'] = $r->unitind3;
+						$retArr['author'] = $m[2];
+					}
+					$rs->close();
+				}
+			}
 		}
 		if(array_key_exists('unitind1',$retArr)){
 			$retArr['unitname1'] = $retArr['unitind1'].' '.$retArr['unitname1'];
@@ -1447,7 +1465,17 @@ class SpecUploadManager{
 		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
 		if($target != 'UTM'){
-			if(preg_match('/(\d{1,2})\s*\D{1,3}\s*(\d{1,2}\.{0,1}\d*)\s{0,1}[\'m]{1}(.*)/i',$inStr,$m)){
+			if(preg_match('/(-*\d+\.+\d+)([NSns]{0,1})\s*(-*\d+\.+\d+)([EWew]{0,1})/i',$inStr,$m)){
+				//Decimal degree format
+				$retArr['lat'] = $m[1];
+				$retArr['lng'] = $m[3];
+				$latDir = $m[2];
+				if($retArr['lat'] > 0 && $latDir && ($latDir = 'S' || $latDir = 's')) $retArr['lat'] = -1*$retArr['lat'];
+				$lngDir = $m[4];
+				if($retArr['lng'] > 0 && $latDir && ($lngDir = 'W' || $lngDir = 'w')) $retArr['lng'] = -1*$retArr['lng'];
+			}
+			elseif(preg_match('/(\d{1,2})\s*\D{1,3}\s*(\d{1,2}\.{0,1}\d*)\s{0,1}[\'m]{1}(.*)/i',$inStr,$m)){
+				//DMS format
 				$latDeg = $m[1];
 				$latMin = $m[2];
 				$leftOver = trim($m[3]);
@@ -1455,7 +1483,7 @@ class SpecUploadManager{
 				if(stripos($inStr,'N') === false && strpos($inStr,'S') !== false){
 					$latNS = 'S';
 				}
-				if(stripos($inStr,'W') === false && stripos($inStr,'e') !== false){
+				if(stripos($inStr,'W') === false && stripos($inStr,'E') !== false){
 					$lngEW = 'E';
 				}
 				//Grab lat sec
@@ -1495,6 +1523,7 @@ class SpecUploadManager{
 			}
 		}
 		if($target != 'LL' && !$retArr){
+			//UTM parsing 
 			if(preg_match('/\D*(\d{1,2}\D{0,1})\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
 				$z = $m[1];
 				$e = $m[2];
