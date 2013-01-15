@@ -213,11 +213,6 @@ if($collId) $collData = $collManager->getCollectionData();
 								Download Data Backup File
 							</a>
 						</li>
-						<li>
-							<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=UpdateStatistics" >
-								Update Statistics
-							</a>
-						</li>
 					</ul>
 				</fieldset>
 				<?php 
@@ -229,6 +224,11 @@ if($collId) $collData = $collManager->getCollectionData();
 							<li>
 								<a href="#" onclick="toggleById('colledit');" >
 									Edit Metadata and Contact Information
+								</a>
+							</li>
+							<li>
+								<a href="collprofiles.php?collid=<?php echo $collId; ?>&action=UpdateStatistics" >
+									Update Statistics
 								</a>
 							</li>
 							<li>

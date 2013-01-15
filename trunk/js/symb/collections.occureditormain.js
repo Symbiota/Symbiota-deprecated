@@ -320,8 +320,9 @@ function verifyFullForm(f){
 	if(abortFormVerification) return true;
 
 	if(!verifyDupeCatalogNumber(f)) return false;
-	var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
-	if(f.eventdate.value && !validformat1.test(f.eventdate.value)){
+	var validformat1 = /^\d{4}-[0]{1}[0-9]{1}-\d{1,2}$/; //Format: yyyy-mm-dd
+	var validformat2 = /^\d{4}-[1]{1}[0-2]{1}-\d{1,2}$/; //Format: yyyy-mm-dd
+	if(f.eventdate.value && !(validformat1.test(f.eventdate.value) || validformat2.test(f.eventdate.value))){
 		alert("Event date is invalid");
 		return false;
 	}
@@ -651,6 +652,12 @@ function eventDateChanged(eventDateInput){
 			}
 		}
 		catch(e){
+		}
+
+		//Invalid format is month > 12
+		if(dateArr['m'] > 12){
+			alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
+			return false;
 		}
 
 		//Check to see if day is valid

@@ -40,10 +40,14 @@ class OccurrenceIndividualManager {
     	$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
     		'publicedits, rights, rightsholder, accessrights '.
 			'FROM omcollections WHERE collid = '.$this->collId;
-		//echo '<div>SQL: '.$sql.'</div>';
 		$rs = $this->conn->query($sql);
-		$this->metadataArr = $rs->fetch_assoc();
-		$rs->free();
+    	if($rs){
+			$this->metadataArr = $rs->fetch_assoc();
+			$rs->free();
+    	}
+		else{
+			trigger_error('Unable to set collection metadata; '.$this->conn->error,E_USER_ERROR);
+		}
 	}
 	
 	public function getMetadata(){
@@ -81,96 +85,114 @@ class OccurrenceIndividualManager {
 			$sql .= 'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$this->dbpk.'")';
 		}
 		else{
-			return 'ERROR: Collection acronym was null or empty';
+			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
 		}
-		//echo '<div>SQL: '.$sql.'</div>';
 
 		$result = $this->conn->query($sql);
-		if(!$result) return 'ERROR: unable to return record data';
-		$this->occArr = $result->fetch_assoc();
-		if(!$this->occId){ 
-			$this->occId = $this->occArr['occid'];
-		}
-		if(!$this->collId){
-			$this->collId = $this->occArr['collid'];
-		}
-		$this->setMetadata();
-		
-		if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
-			$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
-			'FROM omcollsecondary '.
-			'WHERE (collid = '.$this->occArr['collid'].')';
-			$rsSec = $this->conn->query($sqlSec);
-			if($r = $rsSec->fetch_object()){
-				$this->metadataArr['collectionname'] = $r->collectionname;
-				$this->metadataArr['homepage'] = $r->homepage;
-				$this->metadataArr['individualurl'] = $r->individualurl;
-				$this->metadataArr['contact'] = $r->contact;
-				$this->metadataArr['email'] = $r->email;
-				$this->metadataArr['icon'] = $r->icon;
+		if($result){
+			$this->occArr = $result->fetch_assoc();
+			if(!$this->occId){ 
+				$this->occId = $this->occArr['occid'];
 			}
-			$rsSec->close();
+			if(!$this->collId){
+				$this->collId = $this->occArr['collid'];
+			}
+			$this->setMetadata();
+			
+			if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
+				$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
+				'FROM omcollsecondary '.
+				'WHERE (collid = '.$this->occArr['collid'].')';
+				$rsSec = $this->conn->query($sqlSec);
+				if($r = $rsSec->fetch_object()){
+					$this->metadataArr['collectionname'] = $r->collectionname;
+					$this->metadataArr['homepage'] = $r->homepage;
+					$this->metadataArr['individualurl'] = $r->individualurl;
+					$this->metadataArr['contact'] = $r->contact;
+					$this->metadataArr['email'] = $r->email;
+					$this->metadataArr['icon'] = $r->icon;
+				}
+				$rsSec->close();
+			}
+			$this->setImages();
+			$this->setDeterminations();
+			$this->setLoan();
+			//$this->setComments();
+			$result->free();
 		}
-		$this->setImages();
-		$this->setDeterminations();
-		$this->setLoan();
-		//$this->setComments();
-		$result->close();
+		else{
+			trigger_error('Unable to set occurrence array; '.$this->conn->error,E_USER_ERROR);
+		}
     }
 
     private function setImages(){
     	global $imageDomain;
         $sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
 			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
-        $result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$imgId = $row->imgid;
-			$url = $row->url;
-			$tnUrl = $row->thumbnailurl;
-			$lgUrl = $row->originalurl;
-			if($imageDomain && substr($url,0,1)=="/"){
-				$url = $imageDomain.$url;
-				if($lgUrl) $lgUrl = $imageDomain.$lgUrl;
-				if($tnUrl) $tnUrl = $imageDomain.$tnUrl;
+		$result = $this->conn->query($sql);
+		if($result){
+			while($row = $result->fetch_object()){
+				$imgId = $row->imgid;
+				$url = $row->url;
+				$tnUrl = $row->thumbnailurl;
+				$lgUrl = $row->originalurl;
+				if($imageDomain && substr($url,0,1)=="/"){
+					$url = $imageDomain.$url;
+					if($lgUrl) $lgUrl = $imageDomain.$lgUrl;
+					if($tnUrl) $tnUrl = $imageDomain.$tnUrl;
+				}
+				$this->occArr['imgs'][$imgId]['url'] = $url;
+				$this->occArr['imgs'][$imgId]['tnurl'] = $tnUrl;
+				$this->occArr['imgs'][$imgId]['lgurl'] = $lgUrl;
+				$this->occArr['imgs'][$imgId]['caption'] = $row->caption;
 			}
-			$this->occArr['imgs'][$imgId]['url'] = $url;
-			$this->occArr['imgs'][$imgId]['tnurl'] = $tnUrl;
-			$this->occArr['imgs'][$imgId]['lgurl'] = $lgUrl;
-			$this->occArr['imgs'][$imgId]['caption'] = $row->caption;
-		}
-		$result->close();
+			$result->free();
+        }
+        else{
+        	trigger_error('Unable to set images; '.$this->conn->error,E_USER_WARNING);
+        }
     }
 
 	private function setDeterminations(){
-        $sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
-        	'identificationreferences, identificationremarks '.
-        	'FROM omoccurdeterminations '.
+		$sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
+			'identificationreferences, identificationremarks '.
+			'FROM omoccurdeterminations '.
 			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
-        $result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$detId = $row->detid;
-			$this->occArr['dets'][$detId]['date'] = $row->dateidentified;
-			$this->occArr['dets'][$detId]['identifiedby'] = $row->identifiedby;
-			$this->occArr['dets'][$detId]['sciname'] = $row->sciname;
-			$this->occArr['dets'][$detId]['author'] = $row->scientificnameauthorship;
-			$this->occArr['dets'][$detId]['qualifier'] = $row->identificationqualifier;
-			$this->occArr['dets'][$detId]['ref'] = $row->identificationreferences;
-			$this->occArr['dets'][$detId]['notes'] = $row->identificationremarks;
+		$result = $this->conn->query($sql);
+		if($result){
+			while($row = $result->fetch_object()){
+				$detId = $row->detid;
+				$this->occArr['dets'][$detId]['date'] = $row->dateidentified;
+				$this->occArr['dets'][$detId]['identifiedby'] = $row->identifiedby;
+				$this->occArr['dets'][$detId]['sciname'] = $row->sciname;
+				$this->occArr['dets'][$detId]['author'] = $row->scientificnameauthorship;
+				$this->occArr['dets'][$detId]['qualifier'] = $row->identificationqualifier;
+				$this->occArr['dets'][$detId]['ref'] = $row->identificationreferences;
+				$this->occArr['dets'][$detId]['notes'] = $row->identificationremarks;
+			}
+			$result->free();
 		}
-		$result->close();
+		else{
+			trigger_error('Unable to setDeterminations; '.$this->conn->error,E_USER_NOTICE);
+		}
 	}
-	
+
 	private function setLoan(){
         $sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
 			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
 			'WHERE (llink.occid = '.$this->occId.') AND llink.returndate IS NULL';
         $result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$this->occArr['loan']['identifier'] = $row->loanIdentifierOwn;
-			$this->occArr['loan']['code'] = $row->institutioncode;
+        if($result){
+			while($row = $result->fetch_object()){
+				$this->occArr['loan']['identifier'] = $row->loanIdentifierOwn;
+				$this->occArr['loan']['code'] = $row->institutioncode;
+			}
+			$result->free();
 		}
-		$result->close();
+		else{
+			trigger_error('Unable to set loan info; '.$this->conn->error,E_USER_WARNING);
+		}
 	}
 
 	private function setComments(){
@@ -179,13 +201,18 @@ class OccurrenceIndividualManager {
 			'WHERE (c.occid = '.$this->occId.') AND c.reviewstatus = 1 '.
 			'ORDER BY  c.initialtimestamp, u.lastlogin';
         $result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$comId = $row->comid;
-			$this->occArr['comments'][$comId]['comment'] = $row->comment;
-			$this->occArr['comments'][$comId]['username'] = $row->username;
-			$this->occArr['comments'][$comId]['initialtimestamp'] = $row->initialtimestamp;
+		if($result){
+			while($row = $result->fetch_object()){
+				$comId = $row->comid;
+				$this->occArr['comments'][$comId]['comment'] = $row->comment;
+				$this->occArr['comments'][$comId]['username'] = $row->username;
+				$this->occArr['comments'][$comId]['initialtimestamp'] = $row->initialtimestamp;
+			}
+			$result->free();
 		}
-		$result->close();
+        else{
+        	trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
+        }
 	}
 
 	public function addComment($commentStr,$autoApprove){
@@ -212,10 +239,15 @@ class OccurrenceIndividualManager {
 			'FROM fmchecklists WHERE '.substr($sqlWhere,2).' ORDER BY Name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$returnArr[$row->clid] = $row->name;
-		}
-		$result->close();
+		if($result){
+			while($row = $result->fetch_object()){
+				$returnArr[$row->clid] = $row->name;
+			}
+			$result->free();
+        }
+        else{
+        	trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+        }
 		return $returnArr;
 	}
 }

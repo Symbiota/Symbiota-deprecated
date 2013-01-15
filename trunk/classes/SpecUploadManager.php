@@ -1433,7 +1433,7 @@ class SpecUploadManager{
 			}
 			//Double check to see if infraSpecificEpithet is still embedded in author due initial lack of taxonRank indicator
 			if(!array_key_exists('unitname3',$retArr)){
-				if(preg_match('/\s+([a-z]{3,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{3,})([\sA-Z]*.*)/',$retArr['author'],$m)){
+				if(preg_match('/\s+([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m) || preg_match('/^([a-z]{4,})([\sA-Z]*.*)/',$retArr['author'],$m)){
 					$sql = 'SELECT unitind3 FROM taxa '.
 						'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$m[1].'" '.
 						'ORDER BY unitind3 DESC';
