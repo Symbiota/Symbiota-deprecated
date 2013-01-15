@@ -585,7 +585,7 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 				?>
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
 					Please 
-					<a href="<?php echo $clientRoot; ?>/profile/index.php?target=<?php echo $target; ?>&refurl=<?php echo $clientRoot?>/taxa/admin/taxonomyeditor.php">
+					<a href="<?php echo $clientRoot; ?>/profile/index.php?refurl=<?php echo $clientRoot?>/taxa/admin/taxonomyeditor.php?target=<?php echo $target; ?>">
 						login
 					</a>
 				</div>

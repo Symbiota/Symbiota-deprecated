@@ -404,7 +404,7 @@ if($isEditable && $projSubmit){
 							foreach($researchList as $key=>$value){
 			            ?>
 							<li>
-								<a href='../checklists/checklist.php?cl=<?php echo $key."&proj=".$projManager->getProjectId(); ?>'>
+								<a href='../checklists/checklist.php?cl=<?php echo $key."&pid=".$projManager->getProjectId(); ?>'>
 									<?php echo $value; ?>
 								</a> 
 								<?php 

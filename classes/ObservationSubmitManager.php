@@ -151,9 +151,8 @@ class ObservationSubmitManager {
 									$this->conn->query($sql);
 									$clTid = $tid;
 								}
-								$collectorStr = $occArr['recordedby'].' ('.($occArr['recordnumber']?$occArr['recordnumber']:$eventDate).')';
 								$sql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) '.
-									'VALUES('.$clTid.','.$targetClid.','.$newOccId.',"'.$this->cleanInStr($collectorStr).'") ';
+									'VALUES('.$clTid.','.$targetClid.','.$newOccId.',"") ';
 								$this->conn->query($sql);
 							}
 							else{

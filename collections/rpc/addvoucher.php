@@ -23,16 +23,7 @@ elseif(!($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,
 	echo "ERROR: Permissions Error";
 }
 else{
-	$collStr = "";
-	$sql = 'SELECT recordedby, recordnumber '.
-		'FROM omoccurrences '.
-		'WHERE TidInterpreted IS NOT NULL AND occid = '.$occid;
-	$rs = $con->query($sql);
-	if($row = $rs->fetch_object()){
-		$recNum = trim($row->recordnumber);
-		$collStr = $row->recordedby.' ('.($recNum?$recNum:'s.n.').')';
-	}
-	$insSql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) VALUES('.$tid.','.$clid.','.$occid.',"'.$collStr.'")';
+	$insSql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) VALUES('.$tid.','.$clid.','.$occid.',"")';
 	if(!$collStr){
 		echo 'ERROR: Collector must not be NULL for occurrence record';
 	}
