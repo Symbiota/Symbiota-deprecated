@@ -119,11 +119,17 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 				<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
 				<?php 
 				echo $collMetadata['institutioncode'];
-				if($collMetadata['collectioncode']) echo ':'.$collMetadata['collectioncode'];
+				if(isset($collMetadata['collectioncode'])){
+					echo ':'.$collMetadata['collectioncode'];
+				}
+				elseif(!isset($occArr['secondaryinstcode']) && isset($occArr['secondarycollcode'])){
+					
+				}
 				if($occArr['secondaryinstcode']){
-					echo '<br/>';
+					echo '<div>';
 					echo $occArr['secondaryinstcode'];
-					if($occArr['secondarycollcode']) echo ':'.$occArr['secondarycollcode'];
+					if(isset($occArr['secondarycollcode'])) echo ':'.$occArr['secondarycollcode'];
+					echo '</div>';
 				}
 				?>
 			</div>
