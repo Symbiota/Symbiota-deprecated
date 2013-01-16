@@ -133,15 +133,6 @@ if($collId) $collData = $collManager->getCollectionData();
 			echo "</div>";
 		}
 	}
-	else{
-		?>
-		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<a href='collprofiles.php'>Collections</a> &gt;&gt; 
-			<b><?php echo ($collData?$collData['collectionname']:'Collection Profiles'); ?></b>
-		</div>
-		<?php 
-	}
 	?>
 
 	<!-- This is inner text! -->
