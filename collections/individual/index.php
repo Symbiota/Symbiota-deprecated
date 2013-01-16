@@ -96,7 +96,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 	include($serverRoot."/header.php");
 ?>
 	<!-- This is inner text! -->
-	<div id="innertext" style="width:600px;">
+	<div id="innertext">
 		<div>
 			<?php 
 			if($statusStr){
@@ -115,25 +115,28 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 		<?php
 		if($occArr){
 			?>
-			<div style="float:left;padding:15px;text-align:center;font-weight:bold;width:60px;">
+			<div style="float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
 				<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
 				<?php 
 				echo $collMetadata['institutioncode'];
 				if(isset($collMetadata['collectioncode'])){
-					echo ':'.$collMetadata['collectioncode'];
+					echo (strlen($collMetadata['institutioncode'])<7?' : ':'<br/>').$collMetadata['collectioncode'];
 				}
 				elseif(!isset($occArr['secondaryinstcode']) && isset($occArr['secondarycollcode'])){
-					
+					echo (strlen($collMetadata['institutioncode'])<7?' : ':'<br/>').$occArr['secondarycollcode'];
 				}
 				if($occArr['secondaryinstcode']){
 					echo '<div>';
 					echo $occArr['secondaryinstcode'];
-					if(isset($occArr['secondarycollcode'])) echo ':'.$occArr['secondarycollcode'];
+					if(isset($occArr['secondarycollcode'])){
+						echo (strlen($occArr['secondaryinstcode'])<7?' : ':'<br/>');
+						echo $occArr['secondarycollcode'];
+					}
 					echo '</div>';
 				}
 				?>
 			</div>
-			<div style="float:left;padding:25px;width:450px;">
+			<div style="float:left;padding:25px;">
 				<span style="font-size:18px;font-weight:bold;vertical-align:60%;">
 					<?php echo $collMetadata['collectionname']; ?>
 				</span>
