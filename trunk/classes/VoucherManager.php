@@ -163,13 +163,14 @@ class VoucherManager {
 	public function getVoucherData(){
 		$voucherData = Array();
  		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = "SELECT v.occid, v.Collector, v.Notes, v.editornotes FROM fmvouchers v ".
-			"WHERE (v.TID = ".$this->tid.") AND (v.CLID = ".$this->clid.")";
+		$sql = 'SELECT v.occid, CONCAT(o.recordedby," ",IFNULL(o.recordnumber,"s.n.")) AS collector, v.notes, v.editornotes '.
+			'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+			'WHERE (v.TID = '.$this->tid.') AND (v.CLID = '.$this->clid.')';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$occId = $row->occid;
-			$voucherData[$occId]["collector"] = $row->Collector;
-			$voucherData[$occId]["notes"] = $row->Notes;
+			$voucherData[$occId]["collector"] = $row->collector;
+			$voucherData[$occId]["notes"] = $row->notes;
 			$voucherData[$occId]["editornotes"] = $row->editornotes;
 		}
 		$result->close();
@@ -189,6 +190,7 @@ class VoucherManager {
 				'SET '.$setStr.' WHERE (v.occid = "'.
 				$this->conn->real_escape_string($occId).'") AND (v.TID = '.$this->tid.
 				') AND (v.CLID = '.$this->clid.')';
+			//echo $sqlVoucUpdate;
 			$this->conn->query($sqlVoucUpdate);
 		}
 	}
@@ -228,12 +230,11 @@ class VoucherManager {
 		if($row = $rs->fetch_object()){
 			$occId = $row->occid;
 			$recNum = $this->cleanInStr($row->recordnumber);
-			$collector = $this->cleanInStr($row->recordedby).' ('.($recNum?$recNum:'s.n.').')';
 			$notes = $this->cleanInStr($row->Notes);
 			$editNotes = $this->cleanInStr($row->editnotes);
 			
 			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Collector, Notes, editornotes ) '.
-				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"'.$collector.'","'.
+				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"","'.
 				$notes.'","'.$editNotes.'") ';
 			//echo "<div>".$sqlInsert."</div>";
 			if(!$this->conn->query($sqlInsert)){

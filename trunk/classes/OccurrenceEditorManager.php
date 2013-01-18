@@ -656,13 +656,15 @@ class OccurrenceEditorManager {
 	}
 	
 	public function setLoanData(){
-		$sql = 'SELECT l.loanid, l.datedue '.
+		$sql = 'SELECT l.loanid, l.datedue, i.institutioncode '.
 			'FROM omoccurloanslink ll INNER JOIN omoccurloans l ON ll.loanid = l.loanid '.
+			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
 			'WHERE ll.returndate IS NULL AND l.dateclosed IS NULL AND occid = '.$this->occid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->occurrenceMap[$this->occid]['loan']['id'] = $r->loanid;
 			$this->occurrenceMap[$this->occid]['loan']['date'] = $r->datedue;
+			$this->occurrenceMap[$this->occid]['loan']['code'] = $r->institutioncode;
 		}
 		$rs->free();
 	}

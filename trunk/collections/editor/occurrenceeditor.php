@@ -566,6 +566,18 @@ if($symbUid){
 														}
 														?>
 													</div>
+													<?php
+													if(array_key_exists('loan',$occArr)){ 
+														?>
+														<fieldset style="float:right;margin:3px;border:1px solid red;">
+															<legend style="color:red;font-weight:bold;">Out On Loan</legend>
+															<b>To:</b> <a href="../loans/index.php?loantype=out&collid=<?php echo $collId.'&loanid='.$occArr['loan']['id']; ?>">
+																<?php echo $occArr['loan']['code']; ?></a><br/>
+															<b>Due date:</b> <?php echo (isset($occArr['loan']['date'])?$occArr['loan']['date']:'Not Defined'); ?> 
+														</fieldset>
+														<?php 
+													}
+													?>
 													<div id="dupediv" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
 														<span id="dupesearch">Searching for Dupes...</span>
 														<span id="dupenone" style="display:none;color:red;">No Dupes Found</span>
@@ -999,18 +1011,6 @@ if($symbUid){
 														</a><br/>
 														<input type="text" name="disposition" tabindex="104" maxlength="32" style="width:200px;" value="<?php echo array_key_exists('disposition',$occArr)?$occArr['disposition']:''; ?>" onchange="fieldChanged('disposition');" />
 													</div>
-													<?php
-													if(array_key_exists('loan',$occArr)){ 
-														?>
-														<div style="float:right;margin:3px;color:red;">
-															<a href="../loans/index=php?loantype=out&collid=<?php echo $collId.'&loanid='.$occArr['loan']['id']; ?>">
-																Out On Loan
-															</a><br/>
-															(<?php echo $occArr['loan']['date'] ?> due date) 
-														</div>
-														<?php 
-													}
-													?>
 													<div style="float:left;margin:3px;" title="If different than institution code">
 														Occurrence ID
 														<a href="#" onclick="return openDoc('occurrenceid')">
