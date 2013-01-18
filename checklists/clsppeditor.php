@@ -40,7 +40,6 @@ elseif($action == "Delete Taxon From Checklist"){
 elseif($action == "Submit Voucher Edits"){
 	$vStrings = Array();
 	$vStrings["occid"] = $_REQUEST["occid"];
-	$vStrings["collector"] = $_REQUEST["collector"];
 	$vStrings["notes"] = $_REQUEST["notes"];
 	$vStrings["editornotes"] = $_REQUEST["editornotes"];
 	$status = $vManager->editVoucher($vStrings);
@@ -312,16 +311,16 @@ $clArray = $vManager->getChecklistData();
 						?>
 						<ul>
 						<?php 
-						foreach($vArray as $occId => $iArray){
+						foreach($vArray as $occid => $iArray){
 						?>
 							<li><?php
-								echo "<a style=\"cursor:pointer\" onclick=\"openPopup('../collections/individual/index.php?occid=".$occId."','indpane')\">".$occId."</a>: \n";
+								echo "<a style=\"cursor:pointer\" onclick=\"openPopup('../collections/individual/index.php?occid=".$occid."','indpane')\">".$occid."</a>: \n";
 								echo $iArray["collector"].($iArray["notes"]?"; ".$iArray["notes"]:"").($iArray["editornotes"]?"; ".$iArray["editornotes"]:"");
 								?>
 								<form action="clsppeditor.php" method='post' name='delform' style="display:inline;;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">
 									<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 									<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
-									<input type='hidden' name='oiddel' id='oiddel' value="<?php echo $occId;?>" />
+									<input type='hidden' name='oiddel' id='oiddel' value="<?php echo $occid;?>" />
 									<input type="image" name="action" src="../images/del.gif" style="width:13px;" value="Delete Voucher" title="Delete Voucher" />
 								</form>
 								<div style='margin:10px;clear:both;'>
@@ -331,10 +330,6 @@ $clArray = $vManager->getChecklistData();
 											<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 											<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
 											<input type='hidden' name='occid' value="<?php echo $occid;?>" />
-											<div style='margin-top:0.5em;'>
-												<b>Collector:</b> 
-												<input name='collector' type='text' value="<?php echo $iArray["collector"];?>" size='30' maxlength='100' />
-											</div>
 											<div style='margin-top:0.5em;'>
 												<b>Notes:</b>
 												<input name='notes' type='text' value="<?php echo $iArray["notes"];?>" size='60' maxlength='250' />

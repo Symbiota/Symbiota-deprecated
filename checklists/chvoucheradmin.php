@@ -1,10 +1,13 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
 $startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
-$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:''; 
 $clManager = new ChecklistManager();
 $clManager->setClValue($clid);
@@ -87,11 +90,11 @@ elseif($action == 'ListNonVouchered'){
 			}
 			if($nonVoucherCnt > 100){
 				echo '<div style="text-weight:bold;">';
-				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) echo '<a href="checklist.php?cl='.$clid.'&proj='.$pid.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
 				echo '&lt;&lt; Previous';
 				if($startPos > 100) echo '</a>';
 				echo ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) echo '<a href="checklist.php?cl='.$clid.'&proj='.$pid.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
 				echo 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) echo '</a>';
 				echo '</div>';
@@ -125,11 +128,11 @@ elseif($action == 'ListMissingTaxa'){
 			$paginationStr = '';
 			if(count($missingArr) > 100){
 				$paginationStr = '<div style="margin:15px;text-weight:bold;width:100%;text-align:right;">';
-				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
+				if($startPos > 100) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$pid.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos-100).'">';
 				$paginationStr .= '&lt;&lt; Previous';
 				if($startPos > 100) $paginationStr .= '</a>';
 				$paginationStr .= ' || '.$startPos.'-'.($startPos+100).' Records || ';
-				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$proj.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
+				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '<a href="checklist.php?cl='.$clid.'&proj='.$pid.'&submitaction=ListNonVouchered&tabindex=2&emode=2&start='.($startPos+100).'">';
 				$paginationStr .= 'Next &gt;&gt;';
 				if(($startPos + 100) <= $nonVoucherCnt) $paginationStr .= '</a>';
 				$paginationStr .= '</div>';

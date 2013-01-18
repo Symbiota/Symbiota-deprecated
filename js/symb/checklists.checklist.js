@@ -52,11 +52,6 @@ function toggle(target){
 	return false;
 }
 
-function openMappingAid() {
-	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=ecllatcentroid&longname=ecllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-    if(mapWindow.opener == null) mapWindow.opener = self;
-}
-
 function openPopup(urlStr,windowName){
 	var wWidth = 900;
 	if(document.getElementById('maintable').offsetWidth){
@@ -70,24 +65,6 @@ function openPopup(urlStr,windowName){
 	return false;
 }
 
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
-}
-
 function showImagesChecked(cbObj){
 	if(cbObj.checked){
 		document.getElementById("showvouchers").checked = false;
@@ -96,44 +73,6 @@ function showImagesChecked(cbObj){
 	else{
 		document.getElementById("showvouchersdiv").style.display = "block"; 
 	}
-}
-
-function validateMetadataForm(f){ 
-	if(f.ecllatcentroid.value == "" && f.ecllongcentroid.value == ""){
-		return true;
-	}
-	if(f.ecllatcentroid.value == ""){
-		alert("If longitude has a value, latitude must also have a value");
-		return false;
-	} 
-	if(f.ecllongcentroid.value == ""){
-		alert("If latitude has a value, longitude must also have a value");
-		return false;
-	} 
-	if(!isNumeric(f.ecllatcentroid.value)){
-		alert("Latitude must be strictly numeric (decimal format: e.g. 34.2343)");
-		return false;
-	}
-	if(Math.abs(f.ecllatcentroid.value) > 90){
-		alert("Latitude values can not be greater than 90 or less than -90.");
-		return false;
-	} 
-	if(!isNumeric(f.ecllongcentroid.value)){
-		alert("Longitude must be strictly numeric (decimal format: e.g. -112.2343)");
-		return false;
-	}
-	if(Math.abs(f.ecllongcentroid.value) > 180){
-		alert("Longitude values can not be greater than 180 or less than -180.");
-		return false;
-	}
-	if(f.ecllongcentroid.value > 1){
-		alert("Is this checklist in the western hemisphere?\nIf so, decimal longitude should be a negative value (e.g. -112.2343)");
-	} 
-	if(!isNumeric(f.eclpointradiusmeters.value)){
-		alert("Point radius must be a numeric value only");
-		return false;
-	}
-	return true;
 }
 
 function validateAddSpecies(f){ 
@@ -169,15 +108,23 @@ function validateAddSpecies(f){
 	}
 }
 
-function validateSqlFragForm(f){
-	if(!isNumeric(f.latnorth.value) || !isNumeric(f.latsouth.value) || !isNumeric(f.lngwest.value) || !isNumeric(f.lngeast.value)){
-		alert("Latitude and longitudes values muct be numeric values only");
-		return false;
-	}
-	if(confirm("If an SQL fragment already exists, you will replace it with the new one. Are you sure you want to continue?")){
-		return true;
-	}
-	return false;
+//Misc functions
+function GetXmlHttpObject(){
+	var xmlHttp=null;
+	try{
+		// Firefox, Opera 8.0+, Safari, IE 7.x
+  		xmlHttp=new XMLHttpRequest();
+  	}
+	catch (e){
+  		// Internet Explorer
+  		try{
+    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+    	}
+  		catch(e){
+    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+    	}
+  	}
+	return xmlHttp;
 }
 
 function isNumeric(sText){

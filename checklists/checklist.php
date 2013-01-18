@@ -1,14 +1,16 @@
 <?php
 	include_once('../config/symbini.php');
 	include_once($serverRoot.'/classes/ChecklistManager.php');
+	include_once($serverRoot.'/classes/ChecklistAdmin.php');
 	header("Content-Type: text/html; charset=".$charset);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+
 	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:1;
-	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+	$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
 	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
 	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
@@ -18,18 +20,21 @@
 	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
+
+	$statusStr='';
 	
 	//Search Synonyms is default
 	if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
 
 	$clManager = new ChecklistManager();
 	if($clValue){
-		$clManager->setClValue($clValue);
+		$statusStr = $clManager->setClValue($clValue);
 	}
 	elseif($dynClid){
 		$clManager->setDynClid($dynClid);
 	}
-	if($proj) $clManager->setProj($proj);
+	if($pid) $clManager->setProj($pid);
+	elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
 	if($thesFilter) $clManager->setThesFilter($thesFilter);
 	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 	if($searchCommon){
@@ -50,20 +55,23 @@
 	}
 
 	$dynSqlExists = false;
-	$statusStr = "";
+	$isEditor = false;
 	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
-		$clManager->setEditable(true);
+		$isEditor = true;
 		
 		//Add species to checklist
-		if(array_key_exists("tidtoadd",$_REQUEST)){
-			$dataArr["tid"] = $_REQUEST["tidtoadd"];
-			if($_REQUEST["familyoverride"]) $dataArr["familyoverride"] = $_REQUEST["familyoverride"];
-			if($_REQUEST["habitat"]) $dataArr["habitat"] = $_REQUEST["habitat"];
-			if($_REQUEST["abundance"]) $dataArr["abundance"] = $_REQUEST["abundance"];
-			if($_REQUEST["notes"]) $dataArr["notes"] = $_REQUEST["notes"];
-			if($_REQUEST["source"]) $dataArr["source"] = $_REQUEST["source"];
-			if($_REQUEST["internalnotes"]) $dataArr["internalnotes"] = $_REQUEST["internalnotes"];
-			$clManager->addNewSpecies($dataArr);
+		if(array_key_exists("tidtoadd",$_POST)){
+			$dataArr = array();
+			$dataArr["tid"] = $_POST["tidtoadd"];
+			if($_POST["familyoverride"]) $dataArr["familyoverride"] = $_POST["familyoverride"];
+			if($_POST["habitat"]) $dataArr["habitat"] = $_POST["habitat"];
+			if($_POST["abundance"]) $dataArr["abundance"] = $_POST["abundance"];
+			if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
+			if($_POST["source"]) $dataArr["source"] = $_POST["source"];
+			if($_POST["internalnotes"]) $dataArr["internalnotes"] = $_POST["internalnotes"];
+			$clAdmin = new ChecklistAdmin();
+			$clAdmin->setClid($clid);
+			$statusStr = $clAdmin->addNewSpecies($dataArr);
 		}
 	}
 	$clArray = Array();
@@ -75,8 +83,6 @@
 	if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 		$dynSqlExists = true;
 	}
-
-	$voucherProjects = $clManager->getVoucherProjects(); 
 ?>
 
 <!DOCTYPE html >
@@ -119,7 +125,7 @@
 <?php
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:true);
 	include($serverRoot.'/header.php');
-	if($proj){
+	if($pid){
 		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt; ';
 		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
@@ -166,21 +172,21 @@
 	<div id='innertext'>
 		<?php
 		if($clValue || $dynClid){
-			if($clValue && $clManager->getEditable()){
+			if($clValue && $isEditor){
 				?>
-				<div style="float:right;width:50px;">
-					<div style="float:left;">
-						<a href="checklistadmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" target="_blank" style="margin-right:10px;" title="Edit MetaData">
-							<img style="border:0px;width:12px;" src="../images/edit.png" /><br/>
-							<span style="font-size:70%;">MD</span>
-						</a>
-					</div>
-					<div style="float:left;" onclick="toggle('editspp');return false;" >
+				<div style="float:right;width:90px;">
+					<span style="">
+						<a href="checklistadmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Checklist Administration">
+							<img style="border:0px;height:15px;" src="../images/editadmin.png" /></a>
+					</span>
+					<span style="">
+						<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Manage Linked Voucher">
+							<img style="border:0px;height:15px;" src="../images/editvoucher.png" /></a>
+					</span>
+					<span style="" onclick="toggle('editspp');return false;" >
 						<a href="#" title="Edit Species List">
-							<img style="border:0px;width:12px;" src="../images/edit.png" /><br/>
-							<span style="font-size:70%;">Spp.</span>
-						</a>
-					</div>
+							<img style="border:0px;height:17px;" src="../images/editspp.png" /></a>
+					</span>
 				</div>
 				<?php 
 			}
@@ -235,20 +241,25 @@
 			}
 		
 			if($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"]){
-				echo "<div class=\"moredetails\" style=\"color:blue;cursor:pointer;\" onclick=\"toggle('moredetails')\">More Details</div>";
-				echo "<div class='moredetails' style='display:none'>";
-				$locStr = $clArray["locality"];
-				if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
-				if($locStr){
-					echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
-				}
-				if($clValue && $clArray["abstract"]){
-					echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
-				}
-				if($clValue && $clArray["notes"]){
-					echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
-				}
-				echo "</div>";
+				?>
+				<div class="moredetails" style="color:blue;cursor:pointer;" onclick="toggle('moredetails')">More Details</div>
+				<div class="moredetails" style="display:none;color:blue;cursor:pointer;" onclick="toggle('moredetails')">Less Details</div>
+				<div class="moredetails" style="display:none">
+					<?php 
+					$locStr = $clArray["locality"];
+					if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
+					if($locStr){
+						echo "<div><span style='font-weight:bold;'>Locality: </span>".$locStr."</div>";
+					}
+					if($clValue && $clArray["abstract"]){
+						echo "<div><span style='font-weight:bold;'>Abstract: </span>".$clArray["abstract"]."</div>";
+					}
+					if($clValue && $clArray["notes"]){
+						echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
+					}
+					?>
+				</div>
+				<?php 
 			}
 			if($statusStr){ 
 				?>
@@ -336,7 +347,7 @@
 						</fieldset>
 					</form>
 					<?php 
-					if($clValue && $clManager->getEditable()){
+					if($clValue && $isEditor){
 						?>
 						<div class="editspp" style="display:<?php echo ($editMode==1?'block':'none');?>;width:250px;margin-top:10px;">
 							<form id='addspeciesform' action='checklist.php' method='post' name='addspeciesform' onsubmit="return validateAddSpecies(this);">
@@ -373,7 +384,7 @@
 									</div>
 									<div>
 										<input type="hidden" name="cl" value="<?php echo $clid; ?>" />
-										<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
+										<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
 										<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 										<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
 										<input type='hidden' name='showauthors' value='<?php echo $showAuthors; ?>' />
@@ -433,7 +444,7 @@
 						if(($pageNumber)>$pageCount) $pageNumber = 1;  
 						$argStr .= "&cl=".$clValue."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-						$argStr .= ($proj?"&proj=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+						$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
 						echo "<hr /><div>Page <b>".($pageNumber)."</b> of <b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
@@ -504,7 +515,7 @@
 							echo "<b><i>".$sppArr["sciname"]."</b></i> ";
 							if(array_key_exists("author",$sppArr)) echo $sppArr["author"];
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "</a>";
-							if($clManager->getEditable()){
+							if($isEditor){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
 								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">

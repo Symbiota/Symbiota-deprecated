@@ -1,49 +1,26 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
-header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
- 
-$con = MySQLiConnectionFactory::getCon("write");
-$clid = array_key_exists("clid",$_REQUEST)?$con->real_escape_string($_REQUEST["clid"]):0; 
-$occid = array_key_exists("occid",$_REQUEST)?$con->real_escape_string($_REQUEST["occid"]):0; 
-$tid = array_key_exists("tid",$_REQUEST)?$con->real_escape_string($_REQUEST["tid"]):0; 
+include_once($serverRoot.'/classes/ChecklistVoucherAdmin.php');
 
-if(!$clid){
+$clid = $_REQUEST["clid"];
+$occid = $_REQUEST["occid"];
+$tid = $_REQUEST["tid"];
+
+if(!$clid || !is_numeric($clid)){
 	echo "ERROR: Checklist ID is null";
 }
-elseif(!$occid){
+elseif(!$occid || !is_numeric($occid)){
 	echo "ERROR: Occurrence ID is null";
 }
-elseif(!$tid){
+elseif(!$tid || !is_numeric($tid)){
 	echo "ERROR: Problem with taxon name (null tid), contact administrator"; 
 }
 elseif(!($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"])))){
 	echo "ERROR: Permissions Error";
 }
 else{
-	$insSql = 'INSERT INTO fmvouchers(tid,clid,occid,collector) VALUES('.$tid.','.$clid.','.$occid.',"")';
-	if(!$collStr){
-		echo 'ERROR: Collector must not be NULL for occurrence record';
-	}
-	elseif($con->query($insSql)){
-		echo '1';
-	}
-	else{
-		$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid) VALUES('.$tid.','.$clid.')';
-		if($con->query($sql2)){
-			if($con->query($insSql)){
-				echo '1';
-			}
-			else{
-				echo 'Name added to list, though still unable to link voucher: SQL = '.$insSql;
-			}
-		}
-		else{
-			echo 'Unknown Error: SQL = '.$sql2;
-		}
-	}
+	$clManager = new ChecklistVoucherAdmin();
+	$clManager->setClid($clid);
+	echo $clManager->linkVoucher($tid,$occid,1);
 }
-$con->close();
 ?>
