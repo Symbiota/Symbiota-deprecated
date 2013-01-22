@@ -130,7 +130,7 @@ class ChecklistManager {
 	//return an array: family => array(TID => sciName)
 	public function getTaxaList($pageNumber = 1,$retLimit = 500){
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
-		if(!$this->clid) return;
+		if(!$this->clid && !$this->dynClid) return;
 		$voucherArr = Array();
 		if($this->showVouchers){
 			$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
