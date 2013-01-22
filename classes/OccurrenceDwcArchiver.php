@@ -98,6 +98,7 @@ class OccurrenceDwcArchiver{
 	 		'rightsHolder' => 'http://rs.tdwg.org/dwc/terms/rightsHolder',
 	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights',
 	 		'modified' => 'http://purl.org/dc/terms/modified',
+	 		'symbiotaGuid' => '',
 			'references' => 'http://purl.org/dc/terms/references'
  		);
 		$this->determinationFieldArr = array(
@@ -112,7 +113,8 @@ class OccurrenceDwcArchiver{
 			'taxonRank' => 'http://rs.tdwg.org/dwc/terms/taxonRank',
 			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
-			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks'
+			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
+	 		'symbiotaGuid' => ''
 		);
 		$this->imageFieldArr = array(
 			'coreid' => '',
@@ -122,6 +124,7 @@ class OccurrenceDwcArchiver{
 			'publisher' => 'http://purl.org/dc/terms/publisher',
 			'license' => 'http://purl.org/dc/terms/license',
 			'created' => 'http://purl.org/dc/terms/created',
+	 		'symbiotaGuid' => '',
 			'references' => 'http://purl.org/dc/terms/references'
 		);
 
@@ -262,7 +265,7 @@ class OccurrenceDwcArchiver{
 		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-meta.xml');
     	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-meta.xml','meta.xml');
 		
-    	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
 	private function writeOccurrenceFile($redactLocalities){
@@ -274,6 +277,7 @@ class OccurrenceDwcArchiver{
 		fputcsv($fh, array_keys($this->occurrenceFieldArr));
 		
 		//Output records
+		/*
 		$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 			'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
 			'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
@@ -290,7 +294,7 @@ class OccurrenceDwcArchiver{
 			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, o.localitySecurity '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid';
-		/*
+		*/
 		$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 			'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
 			'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
@@ -304,10 +308,11 @@ class OccurrenceDwcArchiver{
 			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
-			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, g.guid, o.localitySecurity '.
+			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
+			'g.guid AS symbiotaGuid, o.localitySecurity '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
-			'INNER JOIN guids g ON o.occid = g.tablepk '.
-			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid'; */
+			'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid'; 
 		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
@@ -346,7 +351,7 @@ class OccurrenceDwcArchiver{
 		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-occur.csv');
 		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-occur.csv','occurrences.csv');
 
-    	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 	
 	private function writeDeterminationFile(){
@@ -360,8 +365,9 @@ class OccurrenceDwcArchiver{
 		$sql = 'SELECT d.occid, d.identifiedBy, d.dateIdentified, d.identificationQualifier, d.sciName AS scientificName, '.
 			'd.scientificNameAuthorship, CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus, '. 
 			'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, '. 
-			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks '.
+			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid '.
 			'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
+			'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
 			'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
 			'WHERE o.collid = '.$this->collId.' ORDER BY o.occid';
 		//echo $sql;
@@ -380,7 +386,7 @@ class OccurrenceDwcArchiver{
 		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-det.csv');
 		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-det.csv','identifications.csv');
 
-    	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
 	private function writeImageFile($redactLocalities){
@@ -395,9 +401,10 @@ class OccurrenceDwcArchiver{
 		//Output records
 		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as identifier, o.sciname, IFNULL(i.caption,i.notes) as description, '.
 			'CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")") AS publisher, '.
-			'c.rights, c.initialtimestamp '.
+			'c.rights, c.initialtimestamp, g.guid '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'INNER JOIN guidimages g ON i.imgid = g.imgid '.
 			'WHERE c.collid = '.$this->collId.' ';
 		if($redactLocalities && !$this->canReadRareSpp){
 			$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
@@ -423,7 +430,7 @@ class OccurrenceDwcArchiver{
 		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-images.csv');
 		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-images.csv','images.csv');
 
-    	$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!! (".date('h:i:s A').")\n");
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 	
 	private function writeRssFile(){
@@ -500,7 +507,7 @@ class OccurrenceDwcArchiver{
 		
 		$newDoc->save($rssFile);
 
-		$this->logOrEcho("&nbsp;&nbsp;&nbsp;&nbsp;Done!!\n");
+		$this->logOrEcho("Done!!\n");
 	}
 	
 	public function deleteArchive($collId){
