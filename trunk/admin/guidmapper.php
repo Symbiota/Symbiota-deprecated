@@ -84,7 +84,7 @@ include($serverRoot."/header.php");
 			echo '</ul>';
 		}
 		
-		$collCnt = $uuidManager->getCollectionCount();
+		//$collCnt = $uuidManager->getCollectionCount();
 		$occCnt = $uuidManager->getOccurrenceCount($collId);
 		$detCnt = $uuidManager->getDeterminationCount($collId);
 		$imgCnt = $uuidManager->getImageCount($collId);
@@ -92,7 +92,6 @@ include($serverRoot."/header.php");
 		<?php if($collId) echo '<h3>'.$uuidManager->getCollectionName($collId).'</h3>'; ?>
 		<div style="font-weight:bold;">Records without GUIDs (UUIDs)</div>
 		<div style="margin:10px;">
-			<?php if(!$collId) echo '<div><b>Collections: </b>'.$collCnt.'</div>'; ?>
 			<div><b>Occurrences: </b><?php echo $occCnt; ?></div>
 			<div><b>Determinations: </b><?php echo $detCnt; ?></div>
 			<div><b>Images: </b><?php echo $imgCnt; ?></div>
