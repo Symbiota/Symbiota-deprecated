@@ -358,11 +358,9 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($this->crowdSourceMode) $sqlWhere .= 'AND q.reviewstatus = 0 ';
-		if($sqlWhere){
-			$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
-			if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
-			$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
-		}
+		$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
+		if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
+		$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
 		//echo $sqlWhere;
 		$this->sqlWhere = $sqlWhere;
 	}
