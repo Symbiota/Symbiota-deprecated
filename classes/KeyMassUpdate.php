@@ -100,12 +100,11 @@ class KeyMassUpdate{
 		$familyArr = Array();
 		$genusArr = Array();
 		$sql = 'SELECT DISTINCT ts.UpperTaxonomy, ts.Family, t.UnitName1 '. 
-			'FROM ((fmchklstprojlink cpl INNER JOIN fmchklsttaxalink ctl ON cpl.clid = ctl.CLID) '.
-			'INNER JOIN taxstatus ts ON ctl.tid = ts.tid) '. 
+			'FROM fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid '. 
 			'INNER JOIN taxa t ON ts.tidaccepted = t.TID ';
 		$sqlWhere = '';
 		if($this->clidFilter && $this->clidFilter != 'all') $sqlWhere .= '(ctl.CLID = '.$this->clidFilter.') ';
-		if($this->pid) $sqlWhere .= ($sqlWhere?'AND ':'').'(cpl.pid = '.$this->pid.') ';
+		//if($this->pid) $sqlWhere .= ($sqlWhere?'AND ':'').'(cpl.pid = '.$this->pid.') ';
 		if($sqlWhere) $sql .= 'WHERE '.$sqlWhere;
 		$sql .= ' ORDER BY t.unitname1';
 		//echo $sql;
