@@ -122,9 +122,6 @@ if($chars){
 	
 ?>
 <div id="innertext">
-	<?php 
-	if($keyModIsActive){
-	?>
 	<form name="keyform" id="keyform" action="key.php" method="get">
 		<table border="0" width="590">
 			<tr>
@@ -237,12 +234,6 @@ if($chars){
 		if(array_key_exists("crumbtitle",$_REQUEST)) echo "<input type='hidden' name='crumbtitle' value='".$_REQUEST["crumbtitle"]."' />";
 		?>
 	</form>
-	<?php 
-	}
-	else{
-		echo '<h1>Identification key module has not been activated for this data portal</h1>';
-	}
-	?>
 </div>
 <?php
 	include($serverRoot.'/footer.php');
