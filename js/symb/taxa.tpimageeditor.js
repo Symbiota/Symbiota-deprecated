@@ -61,7 +61,7 @@ function submitAddForm(f){
 			return false;
         }
     }
-	if((imgUploadPath.indexOf(".jpg") == -1) && (imgUploadPath.indexOf(".JPG") == -1)){
+	if((imgUploadPath.indexOf(".jpg") == -1) && (imgUploadPath.indexOf(".JPG") == -1) && (imgUploadPath.indexOf(".jpeg") == -1) && (imgUploadPath.indexOf(".JPEG") == -1)){
 		alert("Image file upload must be a JPG file (with a .jpg extension)");
 		return false;
 	}
