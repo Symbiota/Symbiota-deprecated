@@ -108,6 +108,7 @@ class OccurrenceGeorefTools {
 	public function updateCoordinates($geoRefArr){
 		global $paramsArr;
 		if($geoRefArr['decimallatitude'] && $geoRefArr['decimallongitude']){
+			set_time_limit(1000);
 			$localList = $geoRefArr['locallist'];
 			$localStr = implode(',',$localList);
 			if($this->managementType == 'Snapshot'){
