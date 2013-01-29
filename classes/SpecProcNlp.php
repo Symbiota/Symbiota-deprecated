@@ -3,12 +3,15 @@ include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
 include_once($serverRoot.'/classes/SpecProcNlpParser.php');
 
-class SpecProcessorNlp{
+class SpecProcNlp{
 
 	protected $conn;
 	protected $collId;
 	protected $rawText;
-
+	
+	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
+		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
+	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -55,54 +58,60 @@ class SpecProcessorNlp{
 	}
 	
 	/*
-	 * @param 	Array of parsed term/values. Key: DwC term; Value: Output text 
-	 * 			SQL limit start
-	 * @return 	Array of raw OCR text blocks 
+	 * @param 	Array of parsed term/values. 
+	 * 			Key: DwC term; Value: Output text 
+	 * @return 	TRUE on success; Array of warning returned on minor error; ERROR thrown on failure;  
 	 */
 	public function loadParsedData($inArr){
-		$retStatus = '';
-		if(!is_array($dwcArr)) throw new Exception('input is not an array');
+		$warningArr = array();
+		if(!is_array($inArr)){
+			throw new Exception('input is not an array');
+			return false;
+		}
 		$dwcArr = array_change_key_case($inArr);
 		
-		//Set occid and prlid variables (both required)
+		//Obtain occid and prlid variables (both required)
 		$occid = 0;
-		if(!isset($dwcArr['prlid'])) throw new Exception('prlid is needed to load parsed data');
+		if(!isset($dwcArr['prlid'])){
+			throw new Exception('prlid is needed to load parsed data');
+			return false;
+		}
 		$prlid = $dwcArr['prlid'];
+		unset($dwcArr['prlid']);
 		if(isset($dwcArr['occid'])){
 			$occid = $dwcArr['occid'];
 			unset($dwcArr['occid']);
 		}
-		elseif(isset($dwcArr['prlid'])){
+		elseif($prlid){
 			//Grab occid using the prlid identifier
 			$sql = 'SELECT IFNULL(i.occid,r.occid) as occid '.
 				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid'. 
-				'WHERE r.prlid = '.$dwcArr['prlid'];
+				'WHERE r.prlid = '.$prlid;
 			if($rs = $this->conn->query($sql)){
 				if($r = $r->fetch_object()){
 					$occid = $r->occid;
-					unset($dwcArr['prlid']);
 				}
 				else{
 					throw new Exception('unable to grab occid using prlid ');
-					return;
+					return false;
 				}
 				$rs->free();
 			}
 			else{
 				throw new Exception('unable to grab occid using prlid ');
-				return;
+				return false;
 			}
 		}
 		else{
 			throw new Exception('Missing occurrence identifier (occid) ');
-			return;
+			return false;
 		}
 		
 		//Grab target fields
 		$targetFields = array();
 		$rsMD = $this->conn->query('SHOW COLUMNS FROM omoccurrences');
-		while($r = $rsMD->fetch_object){
-			$targetFields[strtolower($r->Field)] = $r->type;
+		while($r = $rsMD->fetch_object()){
+			$targetFields[strtolower($r->Field)] = $r->Type;
 		}
 		$rsMD->free();
 		//Remove some internal system fields
@@ -126,45 +135,71 @@ class SpecProcessorNlp{
 		}
 		else{ 
 			throw new Exception('CRITICAL ERROR: unable to populate $curOccArr');
+			return false;
 		}
 
 		//Load data
-		$occData = array_interset_key($dwcArr,$targetFields);
+		$occData = array_intersect_key($dwcArr,$targetFields);
 		$leftOverData = array_diff_key($dwcArr,$targetFields);
-		$fieldSql = '';
-		$valueSql = '';
+		$sqlFrag = '';
+		$finalFields = array();
 		//int, double, varchar, text, date 
-		foreach($occData as $fieldTerm => $valueStr){
-			//Only load field if data doesn't already exist (IS NULL or empty string)
-			$valueIn = '';
-			if(strpos($targetFields[$fieldTerm],'int') === 0 || strpos($targetFields[$fieldTerm],'double') === 0){
-				if(is_numeric($valueStr)){
-					$valueIn = $valueStr;
+		foreach($occData as $fieldTerm => $value){
+			$valueStr = $this->encodeString($value);
+			$valueStr = $this->cleanInStr($valueStr);
+			if($valueStr && !$curOccArr[$fieldTerm]){
+				//A value does not already exist in existing record, thus OK to populate field 
+				$valueIn = '';
+				if(strpos($targetFields[$fieldTerm],'int') === 0 || strpos($targetFields[$fieldTerm],'double') === 0 || strpos($targetFields[$fieldTerm],'decimal') === 0){
+					//Target field is a numeric data type
+					if(is_numeric($valueStr)){
+						$valueIn = $valueStr;
+					}
+					else{
+						$warningArr[] = 'WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not numeric)';
+						//throw new Exception('');
+					}
+				}
+				elseif(strpos($targetFields[$fieldTerm],'date') === 0){
+					//Target field is a date data type
+					$dateValue = $this->formatDate($valueStr);
+					if($dateValue){
+						$valueIn = '"'.$dateValue.'"';
+					}
+					else{
+						$warningArr[] = 'WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not a valid date)';
+					}
 				}
 				else{
-					throw new Exception('');
+					//Target field is a text data type
+					$valueIn = '"'.$valueStr.'"';
 				}
-			}
-			else{
-				
-			}
-			//Add to SQL if has value
-			if($valueIn){
-				$fieldSql .= ','.$fieldTerm;
-				$valueSql .= $valueIn;
+				//Add to SQL if has value
+				if($valueIn){
+					$finalFields[] = $fieldTerm;
+					$sqlFrag .= ','.$fieldTerm.'='.$valueIn;
+				}
 			}
 		}
 
-		//Version field that were modified along with the time stamp
-		$valueSql = $this->cleanInStr($this->encodeString($valueSql));
-		if($valueSql){
-			$sql = 'INSERT INTO specprocnlpversion('.substr($fieldSql,1).') '.
-				'VALUES('.substr($valueSql,1).')';
+		if($sqlFrag){
+			//Load data into existing record
+			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$occid;
+			if($this->conn->query($sql)){
+				//Version field that were modified along with the time stamp
+				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
+					'VALUES('.$prlid.',"'.implode(',',$finalFields).'")';
+				$this->conn->query($sql);
+			}
+			else{
+				throw new Exception('CRITICAL ERROR: unable to load data; '.$this->conn->error);
+				return false;
+			}
 		}
+
+		if(count($leftOverData)) $warningArr[] = 'Unmatched data fields: '.implode(', ',array_keys($leftOverData)); 
 		
-		if(count($leftOverData)) $retStatus = 'Unmatched data fields: '.implode(', ',array_keys($leftOverData)); 
-		
-		return $retStatus;
+		return ($warningArr?$warningArr:true);
 	}
 
 	//Setters, getters
@@ -195,6 +230,116 @@ class SpecProcessorNlp{
 	}
 	
 	//Misc functions
+	private function formatDate($inStr){
+		$retDate = '';
+		$dateStr = trim($inStr);
+		if(!$dateStr) return;
+		$t = '';
+		$y = '';
+		$m = '00';
+		$d = '00';
+		//Remove time portion if it exists
+		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
+			$t = $match[0];
+		}
+		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
+			//Format: yyyy-m-d or yyyy-mm-dd
+			$y = $match[1];
+			$m = $match[2];
+			$d = $match[3];
+		}
+		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
+			//Format: dd mmm yyyy, d mmm yy, dd-mmm-yyyy, dd-mmm-yy
+			$d = $match[1];
+			$mStr = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			if(array_key_exists($mStr,$this->monthNames)){
+				$m = $this->monthNames[$mStr];
+			}
+		}
+		elseif(preg_match('/^(\d{1,2})-(\D{3,})-(\d{2,4})/',$dateStr,$match)){
+			//Format: dd-mmm-yyyy
+			$d = $match[1];
+			$mStr = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			$m = $this->monthNames[$mStr];
+		}
+		elseif(preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/',$dateStr,$match)){
+			//Format: mm/dd/yyyy, m/d/yy
+			$m = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+		}
+		elseif(preg_match('/^(\D{3,})\.*\s{1}(\d{1,2}),{0,1}\s{1}(\d{2,4})/',$dateStr,$match)){
+			//Format: mmm dd, yyyy
+			$mStr = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+			$mStr = strtolower(substr($mStr,0,3));
+			$m = $this->monthNames[$mStr];
+		}
+		elseif(preg_match('/^(\d{1,2})-(\d{1,2})-(\d{2,4})/',$dateStr,$match)){
+			//Format: mm-dd-yyyy, mm-dd-yy
+			$m = $match[1];
+			$d = $match[2];
+			$y = $match[3];
+		}
+		elseif(preg_match('/^(\D{3,})\.*\s([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
+			//Format: mmm yyyy
+			$mStr = strtolower(substr($match[1],0,3));
+			if(array_key_exists($mStr,$this->monthNames)){
+				$m = $this->monthNames[$mStr];
+			}
+			else{
+				$m = '00';
+			}
+			$y = $match[2];
+		}
+		elseif(preg_match('/([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
+			//Format: yyyy
+			$y = $match[1];
+		}
+		//Clean, configure, return
+		if($y){
+			if(strlen($m) == 1) $m = '0'.$m;
+			if(strlen($d) == 1) $d = '0'.$d;
+			//Check to see if month is valid
+			if($m > 12){
+				$m = '00';
+				$d = '00';
+			}
+			//check to see if day is valid for month
+			if($d > 31){
+				//Bad day for any month
+				$d = '00';
+			}
+			elseif($d == 30 && $m == 2){
+				//Bad feb date
+				$d = '00';
+			}
+			elseif($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
+				//Bad date, month w/o 31 days
+				$d = '00';
+			}
+			//Do some cleaning
+			if(strlen($y) == 2){ 
+				if($y < 20) $y = '20'.$y;
+				else $y = '19'.$y;
+			}
+			//Build
+			$retDate = $y.'-'.$m.'-'.$d;
+		}
+		elseif(($timestamp = strtotime($retDate)) !== false){
+			$retDate = date('Y-m-d', $timestamp);
+		}
+		if($t){
+			$retDate .= ' '.$t;
+		}
+		return $retDate;
+	}
+	
 	protected function encodeString($inStr){
  		global $charset;
  		$retStr = $inStr;

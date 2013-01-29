@@ -1,5 +1,5 @@
 <?php
-class SpecProcessorNlp extends SpecProcNlp{
+class SpecProcNlpParser extends SpecProcNlp{
 
 	private $dcArr = array();
 	private $tokenArr = array();

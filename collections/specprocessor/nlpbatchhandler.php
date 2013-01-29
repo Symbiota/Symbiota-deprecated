@@ -1,9 +1,11 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcNlp.php');
-include_once($serverRoot.'/collections/spcprocessor/MyCustomParser.php');
+//Include additional parsing classes; example below
+//include_once($serverRoot.'/collections/spcprocessor/MyCustomParser.php');
 
-$nlpHandler = new SpecProcNlp();
+
+$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
 //Set up log file
 $logFH = null;
@@ -12,7 +14,10 @@ if(($logFH = fopen($serverRoot.'/temp/logs/batchNlp_'.date('Ymd').'.log', 'a')) 
 }
 fwrite($logFH,"DateTime: ".date('Y-m-d h:i:s A')."\n\n");
 
-
+$nlpHandler = new SpecProcNlp();
+//If supplied, set collid; If null, OCR blocks will be returned for any collection
+if($collId) $nlpHandler->setCollId($collId);
+//Get OCR text blocks
 $ocrArr = $nlpHandler->getOcrRawArr();
 
 foreach($ocrArr as $occid => $prlArr){
@@ -22,36 +27,37 @@ foreach($ocrArr as $occid => $prlArr){
 		
 		//Process string and load results into $dwcArr
 		//Exceptions must be caught in try/catch blocks
+		$dwcArr = array();
 		try{
-			$dwcArr = array();
+			/* Enter processing code below comment box...
+			 * Output should be an array with Symbiota fild names a keys, for exmaple:
+			 * $dwcArr['catalogNumber'] = 'DUKE-L-0123456';
+			 * $dwcArr['recordedBy'] = 'T.H. Nash';
+			 */
+
+			
+			
+			
+
+			//Below is an example of how to integrate ones php code, note that special classes need to be included as done above
+			//$myParse = new MyCustomParser();
+			//$dwcArr = $wcParse->parseOcr($rawStr,$source);
+			
 		}
 		catch(Exception $e){
 			fwrite($logFH,"ERROR: ".$e->getMessage()."\n");
 		}
 			
 
-		/* Below is an example of how to integrate ones php code
-		 * Output should be an array with Symbiota fild names a keys, for exmaple:
-		 * $dwcArr['catalogNumber'] = 'DUKE-L-0123456';
-		 * $dwcArr['recordedBy'] = 'T.H. Nash';
-		 */
-		try{
-			$myParse = new MyCustomParser();
-			$dwcArr = $wcParse->parseOcr($rawStr,$source);
-		}
-		catch(Exception $e){
-			fwrite($logFH,"ERROR: ".$e->getMessage()."\n");
-		}
-		
-		
 		//Add occid and prlid, which will be needed to upload data 
 		$dwcArr['occid'] = $occid;
-		$dwcArr['ocprlidcid'] = $prlid;
+		$dwcArr['prlid'] = $prlid;
 		
 		//Load results
 		//Exceptions must be caught in try/catch blocks
 		try{
-			$nlpHandler->loadParsedData($dwcArr);
+			$loadResult = $nlpHandler->loadParsedData($dwcArr);
+			var_dump($loadResult);
 		}
 		catch(Exception $e){
 			fwrite($logFH,"ERROR: ".$e->getMessage()."\n");
@@ -63,5 +69,4 @@ foreach($ocrArr as $occid => $prlArr){
 //Close log file
 fwrite($logFH,"Done processing ".date('Y-m-d h:i:s A')."\n\n");
 if($logFH) fclose($logFH);
-
 ?>
