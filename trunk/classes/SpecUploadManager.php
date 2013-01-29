@@ -1338,12 +1338,16 @@ class SpecUploadManager{
 				$m = '00';
 				$d = '00';
 			}
-			//check to set if day is valid for month
-			if($d == 30 && $m == 2){
-				//Bad feb date
+			//check to see if day is valid for month
+			if($d > 31){
+				//Bad day for any month
 				$d = '00';
 			}
-			if($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
+			elseif($d == 30 && $m == 2){
+				//Bad day for feb
+				$d = '00';
+			}
+			elseif($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
 				//Bad date, month w/o 31 days
 				$d = '00';
 			}

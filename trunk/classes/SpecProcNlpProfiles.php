@@ -1,5 +1,5 @@
 <?php
-class SpecProcessorNlp extends SpecProcNlp{
+class SpecProcNlpProfiles extends SpecProcNlp{
 
 	function __construct() {
  		parent::__construct();
