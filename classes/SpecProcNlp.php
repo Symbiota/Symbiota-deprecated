@@ -185,6 +185,12 @@ class SpecProcNlp{
 		if($sqlFrag){
 			//Load data into existing record
 			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$occid;
+			
+			//Code that modifies the processing status
+			//processingStatus = unprocessed-NLP
+			
+			
+
 			if($this->conn->query($sql)){
 				//Version field that were modified along with the time stamp
 				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
