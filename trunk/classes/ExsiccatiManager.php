@@ -217,7 +217,7 @@ class ExsiccatiManager {
 			'SET title = "'.$this->cleanInStr($pArr['title']).'", abbreviation = "'.$this->cleanInStr($pArr['abbreviation']).
 			'", editor = "'.$this->cleanInStr($pArr['editor']).'"'.
 			', exsrange = '.($pArr['exsrange']?'"'.$this->cleanInStr($pArr['exsrange']).'"':'NULL').
-			', startdate = '.($pArr['startdate']?'"'.$this->cleanInStr($pArr['exsrange']).'"':'NULL').
+			', startdate = '.($pArr['startdate']?'"'.$this->cleanInStr($pArr['startdate']).'"':'NULL').
 			', enddate = '.($pArr['enddate']?'"'.$this->cleanInStr($pArr['enddate']).'"':'NULL').
 			', source = '.($pArr['source']?'"'.$this->cleanInStr($pArr['source']).'"':'NULL').
 			', notes = '.($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').' '.

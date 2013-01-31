@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcNlp.php');
 //Include additional parsing classes; example below
-//include_once($serverRoot.'/collections/spcprocessor/MyCustomParser.php');
+include_once($serverRoot.'/collections/spcprocessor/MyCustomParser.php');
 
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -40,8 +40,8 @@ foreach($ocrArr as $occid => $prlArr){
 			
 
 			//Below is an example of how to integrate ones php code, note that special classes need to be included as done above
-			//$myParse = new MyCustomParser();
-			//$dwcArr = $wcParse->parseOcr($rawStr,$source);
+			$myParse = new MyCustomParser();
+			$dwcArr = $wcParse->parseOcr($rawStr,$source);
 			
 		}
 		catch(Exception $e){
