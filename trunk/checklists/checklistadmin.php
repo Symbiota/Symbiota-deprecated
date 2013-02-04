@@ -30,6 +30,12 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 		$clManager->editMetaData($editArr);
 		header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
 	}
+	elseif($action == 'Delete Checklist'){
+		$statusStr = $clManager->deleteChecklist($_POST['delclid']);
+		if($statusStr === true) header('Location: ../index.php');
+		$clid = $_POST['delclid'];
+		$clManager->setClid($clid);
+	}
 	elseif($action == 'Add Editor'){
 		$statusStr = $clManager->addEditor($_POST['editoruid']);
 	}
@@ -94,9 +100,9 @@ $voucherProjects = $clManager->getVoucherProjects();
 			?>
 			<div id="tabs" style="margin:10px;">
 			    <ul>
-			        <li><a href="#editortab"><span>Editors</span></a></li>
-			        <li><a href="#mdtab"><span>Metadata</span></a></li>
-			        <li><a href="#pointtab"><span>Non-vouchered Points</span></a></li>
+			        <li><a href="#admintab"><span>Admin</span></a></li>
+			        <li><a href="#desctab"><span>Description</span></a></li>
+<!-- 			        <li><a href="#pointtab"><span>Non-vouchered Points</span></a></li> -->
 					<?php
 					if($voucherProjects){
 						?>
@@ -105,8 +111,8 @@ $voucherProjects = $clManager->getVoucherProjects();
 					}
 				    ?>
 			    </ul>
-				<div id="editortab">
-					<div style="margin:30px 0px 30px 15px;">
+				<div id="admintab">
+					<div style="margin:20px;">
 						<div style="font-weight:bold;font-size:120%;">Current Editors</div>
 						<?php
 						$editorArr = $clManager->getEditors();
@@ -153,8 +159,42 @@ $voucherProjects = $clManager->getVoucherProjects();
 							</form>
 						</fieldset>
 					</div>
+					<hr/>
+					<div style="margin:20px;">
+						<div style="font-weight:bold;font-size:120%;">Inventory Project Assignments</div>
+						<ul>
+							<?php 
+							$projArr = $clManager->getInventoryProjects();
+							if($projArr){
+								foreach($projArr as $pid => $pName){
+									echo '<li>';
+									echo '<a href="../projects/index.php?proj='.$pid.'">'.$pName.'</a>';
+									echo '</li>';
+								}
+							}
+							else{
+								echo '<li>Checklist has not been assigned to any inventory projects</li>';
+							}
+							?>
+						</ul>
+					</div>
+					<hr/>
+					<div style="margin:20px;">
+						<div style="font-weight:bold;font-size:120%;">Permanently Remove Checklist</div>
+						<div style="margin:10px;">
+							Before a checklist can be deleted, all editors (except yourself) and inventory project assignments must be removed. 
+							Inventory project assignments can only be removed by active managers of the project or a system administrator. <br/> 
+							<b>WARNING: Action cannot be undone.</b>
+						</div>
+						<div style="margin:15px;">  
+							<form action="checklistadmin.php" method="post" name="deleteclform" onsubmit="return window.confirm('Are you sure you want to permanently remove checklist? This action cannot be undone!')">
+								<input name="delclid" type="hidden" value="<?php echo $clid; ?>" />
+								<input name="submitaction" type="submit" value="Delete Checklist" <?php if($projArr || count($editorArr) > 1) echo 'DISABLED'; ?> /> 
+							</form>
+						</div>
+					</div>
 				</div>
-				<div id="mdtab">
+				<div id="desctab">
 					<form id="checklisteditform" action="checklistadmin.php" method="post" name="editclmatadata" onsubmit="return validateMetadataForm(this)">
 						<fieldset style="margin:15px;padding:10px;">
 							<legend><b>Edit Checklist Details</b></legend>
@@ -226,6 +266,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 						</fieldset>
 					</form>
 				</div>
+<!-- 
 				<div id="pointtab">
 					<fieldset>
 						<legend><b>Add New Point</b></legend>
@@ -267,7 +308,8 @@ $voucherProjects = $clManager->getVoucherProjects();
 						</form>
 					</fieldset>
 				</div>
-				<?php
+ -->
+ 				<?php
 				if($voucherProjects){
 					?>
 					<div id="imgvouchertab">

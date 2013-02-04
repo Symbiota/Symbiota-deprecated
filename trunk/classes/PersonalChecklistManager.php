@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 26 Feb 2009
- * By E.E. Gilbert
-*/
 include_once($serverRoot.'/config/dbconnection.php');
 include_once('ProfileManager.php');
 
@@ -23,7 +19,8 @@ class PersonalChecklistManager{
 		//Get project and checklist IDs from userpermissions
 		$clStr = '';
 		$projStr = '';
-		$sql = 'SELECT pname FROM userpermissions WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%")';
+		$sql = 'SELECT pname FROM userpermissions '.
+			'WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%") ';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$pArr = explode('-',$r->pname);
@@ -34,7 +31,9 @@ class PersonalChecklistManager{
 		}
 		if($clStr){
 			//Get checklists
-			$sql = "SELECT clid, name FROM fmchecklists WHERE (clid IN(".substr($clStr,1).'))';
+			$sql = 'SELECT clid, name FROM fmchecklists '.
+				'WHERE (clid IN('.substr($clStr,1).')) '.
+				'ORDER BY name';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$returnArr['cl'][$row->clid] = $row->name;
@@ -43,7 +42,10 @@ class PersonalChecklistManager{
 		}
 		if($projStr){
 			//Get projects
-			$sql = "SELECT pid, projname FROM fmprojects WHERE (pid IN(".substr($projStr,1).'))';
+			$sql = 'SELECT pid, projname '.
+				'FROM fmprojects '.
+				'WHERE (pid IN('.substr($projStr,1).')) '.
+				'ORDER BY projname';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$returnArr['proj'][$row->pid] = $row->projname;
@@ -78,21 +80,6 @@ class PersonalChecklistManager{
 		return $newClId;
 	}
 
-	public function deleteChecklist($clidDel){
-		$status = '';
-		$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$clidDel.')';
-		$this->conn->query($sql);
-		$sql = "DELETE FROM fmchecklists WHERE (clid = ".$clidDel.')';
-		if($this->conn->query($sql)){
-			$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$clidDel.'")';
-			$this->conn->query($sql);
-		}
-		else{
-			$status = 'Checklist Deletion falsed. Please contact data administrator.';
-		}
-		return $status;
-	}
-	
 	public function echoParentSelect(){
 		$sql = "SELECT c.clid, c.name FROM fmchecklists c ORDER BY c.name";
 		$rs = $this->conn->query($sql);

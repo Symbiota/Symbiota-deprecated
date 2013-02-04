@@ -104,14 +104,9 @@ if($isEditable){
 		$newClid = $pClManager->createChecklist($newClArr);
 		header("Location: ".$clientRoot."/checklists/checklist.php?cl=".$newClid."&emode=1");
 	}
-	elseif(array_key_exists('cliddel',$_POST)){
-	    if(!$pClManager->deleteChecklist($_POST["cliddel"])){
-		    $displayMsg = "Checklist deletion failed! Please contact the system administrator";
-	    }
-	}
 }
 ?>
-
+<!DOCTYPE html>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> - View User Profile</title>
@@ -177,14 +172,9 @@ if(isset($profile_viewprofileCrumbs)){
 									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
 										<?php echo $vName; ?>
 									</a>
-									<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=1">
+									<a href="../checklists/checklistadmin.php?clid=<?php echo $kClid; ?>&emode=1">
 										<img src="../images/edit.png" style="width:15px;border:0px;" title="Edit Checklist" />
 									</a>
-									<form action="viewprofile.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete <?php echo $vName; ?>?');">
-										<input type="hidden" name="cliddel" value="<?php echo $kClid; ?>">
-										<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-										<input type="image" src="../images/del.gif" name="action" value="DeleteChecklist" title="Delete Checklist" style="width:15px;" />
-									</form> 
 								</li>
 								<?php 
 							}
@@ -400,7 +390,7 @@ if(isset($profile_viewprofileCrumbs)){
 											$isFirst = true;
 											foreach($loginArr as $login){
 												echo '<span id="un-'.$login.'">'.($isFirst?'':'; ').$login;
-												echo '<span onclick="deleteLogin('.$userId.',"'.$login.'");"> ';
+												echo '<span onclick="deleteLogin('.$userId.",'".$login."')\"> ";
 												echo '<img src="../images/del.gif" title="Delete '.$login.'" />';
 												echo '</span></span>';
 											}
