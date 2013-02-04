@@ -209,7 +209,7 @@ if($isAdmin){
 									if(array_key_exists("CollAdmin",$userPermissions)){
 										echo "<li><b>Collection Administrator for following collections</b></li>";
 										$collList = $userPermissions["CollAdmin"];
-										sort($collList);
+										asort($collList);
 										echo "<ul>";
 										foreach($collList as $k => $v){
 											echo "<li>$v ";
@@ -223,7 +223,7 @@ if($isAdmin){
 									if(array_key_exists("CollEditor",$userPermissions)){
 										echo "<li><b>Collection Editor for following collections</b></li>";
 										$collList = $userPermissions["CollEditor"];
-										sort($collList);
+										asort($collList);
 										echo "<ul>";
 										foreach($collList as $k => $v){
 											echo "<li>$v ";
@@ -240,7 +240,7 @@ if($isAdmin){
 											<ul>
 											<?php 
 											$rsrArr = $userPermissions["RareSppReader"];
-											sort($rsrArr);
+											asort($rsrArr);
 											foreach($rsrArr as $collId => $collName){
 												?>
 												<li>
@@ -264,7 +264,7 @@ if($isAdmin){
 											<ul>
 												<?php 
 												$projList = $userPermissions["ProjAdmin"];
-												sort($projList);
+												asort($projList);
 												foreach($projList as $k => $v){
 													echo "<li>$v";
 													echo "<a href='usermanagement.php?del=ProjAdmin-$k&userid=$userId'>";
@@ -284,7 +284,7 @@ if($isAdmin){
 											<ul>
 												<?php 
 												$clList = $userPermissions["ClAdmin"];
-												sort($clList);
+												asort($clList);
 												foreach($clList as $k => $v){
 													echo '<li>';
 													echo '<a href="../checklists/checklist.php?cl='.$k.'">';

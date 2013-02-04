@@ -272,6 +272,7 @@ if($symbUid){
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
     <link type="text/css" href="../../css/occureditor.css" rel="stylesheet" />
+    <!-- <link type="text/css" href="../../css/occureditorcrowdsource.css" rel="stylesheet" />  --> 
 	<link type="text/css" href="../../css/jquery-ui.css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>

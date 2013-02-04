@@ -66,6 +66,29 @@ class ChecklistAdmin {
 		return $statusStr;
 	}
 
+	public function deleteChecklist($delClid){
+		global $symbUid;
+		$statusStr = true;
+		$sql = 'SELECT uid FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'") AND uid <> '.$symbUid;
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows == 0){
+			$sql = "DELETE FROM fmchklsttaxalink WHERE (clid = ".$delClid.')';
+			$this->conn->query($sql);
+			$sql = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
+			if($this->conn->query($sql)){
+				$sql = 'DELETE FROM userpermissions WHERE (pname = "ClAdmin-'.$delClid.'")';
+				$this->conn->query($sql);
+			}
+			else{
+				$statusStr = 'Checklist Deletion failed ('.$this->conn->error.'). Please contact data administrator.';
+			}
+		}
+		else{
+			$statusStr = 'Checklist cannot be deleted until all editors are removed. Remove editors and then try again.';
+		}
+		return $statusStr;
+	}
+	
 	//Species editing functions (called from checklist.php)
 	public function echoSpeciesAddList(){
 		$sql = "SELECT DISTINCT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
@@ -234,6 +257,22 @@ class ChecklistAdmin {
 		}
 		$rs->free();
 		return $returnArr;
+	}
+
+	public function getInventoryProjects(){
+		$retArr = Array();
+		if($this->clid){
+			$sql = 'SELECT p.pid, p.projname '.
+				'FROM fmprojects p INNER JOIN fmchklstprojlink pl ON p.pid = pl.pid '.
+				'WHERE pl.clid = '.$this->clid.' ORDER BY p.projname';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->pid] = $r->projname;
+			}
+			$rs->free();
+		}
+		return $retArr;
 	}
 
 	public function getVoucherProjects(){
