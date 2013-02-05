@@ -266,7 +266,7 @@ if($isAdmin){
 												$projList = $userPermissions["ProjAdmin"];
 												asort($projList);
 												foreach($projList as $k => $v){
-													echo "<li>$v";
+													echo '<li><a href="../projects/index.php?proj='.$k.'" target="_blank">'.$v.'</a>';
 													echo "<a href='usermanagement.php?del=ProjAdmin-$k&userid=$userId'>";
 													echo "<img src='../images/del.gif' style='border:0px;width:15px;' title='Delete permission' />";
 													echo "</a></li>";
@@ -462,7 +462,10 @@ if($isAdmin){
 											foreach($projectArr as $k=>$v){
 												?>
 												<div style='margin-left:15px;'>
-													<?php echo '<input type="checkbox" name="p[]" value="ProjAdmin-'.$k.'" />'.$v; ?>
+													<?php 
+													echo '<input type="checkbox" name="p[]" value="ProjAdmin-'.$k.'" />';
+													echo '<a href="../projects/index.php?proj='.$k.'" target="_blank">'.$v.'</a>'; 
+													?>
 												</div>
 												<?php 
 											}
@@ -484,7 +487,10 @@ if($isAdmin){
 											foreach($checklistArr as $k=>$v){
 												?>
 												<div style='margin-left:15px;'>
-													<?php echo '<input type="checkbox" name="p[]" value="ClAdmin-'.$k.'" />'.$v; ?>
+													<?php 
+													echo '<input type="checkbox" name="p[]" value="ClAdmin-'.$k.'" />';
+													echo '<a href="../checklists/checklist.php?cl='.$k.'" target="_blank">'.$v.'</a>';
+													?>
 												</div>
 												<?php 
 											}

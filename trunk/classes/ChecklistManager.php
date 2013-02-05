@@ -86,13 +86,13 @@ class ChecklistManager {
 			if($result){
 		 		if($row = $result->fetch_object()){
 					$this->clName = $row->name;
-					$retArr["locality"] = $this->cleanOutStr($row->locality); 
-					$retArr["notes"] = $this->cleanOutStr($row->notes);
+					$retArr["locality"] = $row->locality;
+					$retArr["notes"] = $row->notes;
 					$retArr["type"] = $row->type;
 					if($this->clid){
-						$retArr["publication"] = $this->cleanOutStr($row->publication);
-						$retArr["abstract"] = $this->cleanOutStr($row->abstract);
-						$retArr["authors"] = $this->cleanOutStr($row->authors);
+						$retArr["publication"] = $row->publication;
+						$retArr["abstract"] = $row->abstract;
+						$retArr["authors"] = $row->authors;
 						$retArr["parentclid"] = $row->parentclid;
 						$retArr["uid"] = $row->uid;
 						$retArr["latcentroid"] = $row->latcentroid;
@@ -121,7 +121,7 @@ class ChecklistManager {
 		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
  		$rs = $this->conn->query($sql);
 		while ($row = $rs->fetch_object()){
-			$taxonAuthList[$row->taxauthid] = $this->cleanOutStr($row->name);
+			$taxonAuthList[$row->taxauthid] = $row->name;
 		}
 		$rs->free();
 		return $taxonAuthList;
@@ -171,10 +171,10 @@ class ChecklistManager {
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
 				if($this->showVouchers){
 					$clStr = "";
-					if($row->habitat) $clStr = ", ".$this->cleanOutStr($row->habitat);
-					if($row->abundance) $clStr .= ", ".$this->cleanOutStr($row->abundance);
-					if($row->notes) $clStr .= ", ".$this->cleanOutStr($row->notes);
-					if($row->source) $clStr .= ", <u>source</u>: ".$this->cleanOutStr($row->source);
+					if($row->habitat) $clStr = ", ".$row->habitat;
+					if($row->abundance) $clStr .= ", ".$row->abundance;
+					if($row->notes) $clStr .= ", ".$row->notes;
+					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
 					if(array_key_exists($tid,$voucherArr)){
 						$this->taxaList[$tid]["vouchers"] = $voucherArr[$tid];  
