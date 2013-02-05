@@ -373,7 +373,7 @@ class OccurrenceManager{
 			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.collid = -1 ';
 		}
-		echo $retStr;
+		//echo $retStr;
 		return $retStr; 
 	}
 

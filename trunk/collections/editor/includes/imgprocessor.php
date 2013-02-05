@@ -80,7 +80,12 @@
 											<textarea name="rawtext" rows="20" cols="48" style="width:97%"><?php echo $rArr['raw']; ?></textarea>
 										</div>
 										<div title="OCR Notes">
+											<b>Notes:</b>
 											<input name="rawnotes" type="text" value="<?php echo $rArr['notes']; ?>" style="width:97%;" />
+										</div>
+										<div title="OCR Source">
+											<b>Source:</b>
+											<input name="rawnotes" type="text" value="<?php echo $rArr['source']; ?>" style="width:97%;" />
 										</div>
 										<div style="float:left;margin-left:10px;">
 											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
