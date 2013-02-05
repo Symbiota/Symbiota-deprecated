@@ -8,6 +8,7 @@ class SpecProcNlp{
 	protected $conn;
 	protected $collId;
 	protected $rawText;
+	protected $errArr = array();
 	
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');

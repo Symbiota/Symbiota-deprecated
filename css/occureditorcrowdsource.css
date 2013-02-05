@@ -1,0 +1,184 @@
+
+#catalogNumberDiv {
+	float:	left;
+}
+
+#catalogNumberDiv input{
+	width:	110px;
+}
+
+#otherCatalogNumbersDiv {
+	float:	left;
+}
+
+#otherCatalogNumbersDiv input{
+	width:	110px;
+}
+
+#recordedByDiv {
+	float:	left;
+}
+
+#recordedByDiv input{
+	width:	220px;
+}
+
+#recordNumberDiv {
+	float:	left;
+}
+
+#recordNumberDiv input{
+	width:	60px;
+}
+
+#eventDateDiv {
+	float:	left;
+}
+
+#eventDateDiv input{
+	width:	110px;
+}
+
+#associatedCollectorsDiv {
+	float:	left;
+}
+
+#associatedCollectorsDiv input{
+	width:	400px;
+}
+
+#verbatimEventDateDiv {
+	float:	left;
+}
+
+#verbatimEventDateDiv input{
+	width:	200px;
+}
+
+#ymdDiv {
+	float:	left;
+	margin-left: 5px;
+}
+
+#ymdDiv input{
+	width:	40px;
+}
+
+#dayOfYearDiv {
+	float:	left;
+	margin-left: 5px;
+}
+
+#dayOfYearDiv input{
+	width:	40px;
+}
+
+#scinameDiv {
+	float:	left;
+}
+
+#scinameDiv input{
+	width:390px;
+}
+
+#scientificNameAuthorshipDiv {
+	float:			left;
+	margin-left:	10px;
+}
+
+#scientificNameAuthorshipDiv input{
+	width:	200px;
+}
+
+#identificationQualifierDiv {
+	float:	left;
+}
+
+#familyDiv {
+	float:	left;
+	margin:	0px 60px;
+}
+
+#familyDiv input{
+	width:	150px;
+}
+
+#identifiedByDiv {
+	float:	left;
+}
+
+#identifiedByDiv input{
+	width:	200px;
+}
+
+#dateIdentifiedDiv{
+	float:			left;
+	margin-left:	15px;
+}
+
+#dateIdentifiedDiv input{
+	width:	200px;
+}
+
+#identificationReferencesDiv{
+	padding:	3px 0px 0px 10px;
+}
+
+#identificationReferencesDiv input{
+	width:	450px;
+}
+
+#identificationRemarksDiv{
+	padding:	3px 0px 0px 10px;
+}
+
+#identificationRemarksDiv input{
+	width:	500px;
+}
+
+#countryDiv{
+	float:	left;
+}
+
+#countryDiv input{
+	width:	150px;
+}
+
+#stateProvinceDiv{
+	float:	left;
+}
+
+#stateProvinceDiv input{
+	width:	150px;
+}
+
+#countyDiv{
+	float:	left;
+}
+
+#countyDiv input{
+	width:	150px;
+}
+
+#municipalityRemarksDiv{
+	float:	left;
+}
+
+#municipalityDiv input{
+	width:	150px;
+}
+
+
+/*Misc styling*/
+img.docimg { 
+	border:			0px;
+	width:			9px;
+	margin-bottom:	2px; 
+}
+
+table { 
+	font-family: 	Arial, Helvetica, sans-serif; 
+	font-size: 		12px;
+}
+
+
