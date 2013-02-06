@@ -5,7 +5,7 @@ class KeyAdmin{
 
 	private $conn;
 	private $collId = 0;
-	private $cId = 0;
+	private $cid = 0;
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -45,117 +45,104 @@ class KeyAdmin{
 		return $retArr;
 	}
 	
-	public function createCharacter($pArr){
-		if (($pArr['chartype'] == 'IN') || ($pArr['chartype'] == 'RN')){
-			$statusStr = '';
-			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
-				'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",
-				"'.$this->cleanInStr($pArr['difficultyrank']).'","'.$this->cleanInStr($pArr['hid']).'",
-				"'.$this->cleanInStr($pArr['enteredby']).'") ';
-			//echo $sql;
-			if($this->conn->query($sql)){
-				$this->cId = $this->conn->insert_id;
-			}
-			else{
-				$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
-				$statusStr .= 'SQL: '.$sql;
-			}
-			$sql2 = 'INSERT INTO kmcs(cid,cs,charstatename) '.
-				'VALUES('.$this->cId.',"+High","Upper value of unspecified range (could be µ+s.d., but not known)"),'.
-				'('.$this->cId.',"-Low","Lower value of unspecified range (could be µ-s.d., but not known)"),'.
-				'('.$this->cId.',"Max","Maximum value"),'.
-				'('.$this->cId.',"Mean","Mean (= average)"),'.
-				'('.$this->cId.',"Min","Minimum value")';
-			if($this->conn->query($sql2)){
-				
-			}
-			return $statusStr;
-		}
-		else{
-			$statusStr = '';
-			$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
-				'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",
-				"'.$this->cleanInStr($pArr['difficultyrank']).'","'.$this->cleanInStr($pArr['hid']).'",
-				"'.$this->cleanInStr($pArr['enteredby']).'") ';
-			//echo $sql;
-			if($this->conn->query($sql)){
-				$this->cId = $this->conn->insert_id;
-			}
-			else{
-				$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
-				$statusStr .= 'SQL: '.$sql;
-			}
-			return $statusStr;
-		}
-	}
-	
-	public function createState($pArr){
+	public function createCharacter($pArr,$un){
 		$statusStr = '';
-		$sql = 'INSERT INTO kmcs(cid,charstatename,implicit,enteredby) '.
-			'VALUES("'.$this->cleanInStr($pArr['cid']).'","'.$this->cleanInStr($pArr['charstatename']).'",1,
-			"'.$this->cleanInStr($pArr['enteredby']).'") ';
+		$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
+			'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",
+			"'.$this->cleanInStr($pArr['difficultyrank']).'","'.$this->cleanInStr($pArr['hid']).'",
+			"'.$un.'") ';
 		//echo $sql;
 		if($this->conn->query($sql)){
-			$this->cs = $this->conn->insert_id;
+			$this->cid = $this->conn->insert_id;
+			if(($pArr['chartype'] == 'IN') || ($pArr['chartype'] == 'RN')){
+				//If new character is a numeric type, automatically load character sets with set values 
+				$sql2 = 'INSERT INTO kmcs(cid,cs,charstatename) '.
+					'VALUES('.$this->cid.',"+High","Upper value of unspecified range (could be µ+s.d., but not known)"),'.
+					'('.$this->cid.',"-Low","Lower value of unspecified range (could be µ-s.d., but not known)"),'.
+					'('.$this->cid.',"Max","Maximum value"),'.
+					'('.$this->cid.',"Mean","Mean (= average)"),'.
+					'('.$this->cid.',"Min","Minimum value")';
+				if(!$this->conn->query($sql2)){
+					trigger_error('unable to load numeric character set values; '.$this->conn->error);
+					$statusStr = 'unable to load numeric character set values; '.$this->conn->error;
+				}
+			}
 		}
 		else{
+			trigger_error('Creation of new character failed; '.$this->conn->error);
 			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
-			$statusStr .= 'SQL: '.$sql;
 		}
 		return $statusStr;
 	}
 	
-	public function editCharacter($pArr){
-		$statusStr = '';
-		$cId = $pArr['cid'];
-		if(is_numeric($cId)){
-			$sql = '';
-			foreach($pArr as $k => $v){
-				if($k != 'formsubmit' && $k != 'cid'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
+	public function createState($csName,$un){
+		$csValue = 1;
+		if($this->cid){
+			//Get highest character set ID value (CS) and increase by 1
+			$sql1 = 'SELECT cs FROM kmcs WHERE cid = '.$this->cid.' ORDER BY (cs+1) DESC ';
+			if($rs1 = $this->conn->query($sql1)){
+				if($r1 = $rs1->fetch_object()){
+					$csTemp = $r1->cs + 1;
+					if(is_numeric($csTemp)) $csValue = $csTemp;
 				}
 			}
-			$sql = 'UPDATE kmcharacters SET '.substr($sql,1).' WHERE (cid = '.$cId.')';
-			if($this->conn->query($sql)){
-				$statusStr = 'SUCCESS: information saved';
+			//Load new character set
+			$sql = 'INSERT INTO kmcs(cid,cs,charstatename,implicit,sortsequence,enteredby) '.
+				'VALUES('.$this->cid.',"'.$csValue.'","'.$this->cleanInStr($csName).'",1,'.$csValue.',"'.$un.'") ';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				trigger_error('ERROR: Creation of new character failed: '.$this->conn->error);
 			}
-			else{
-				$statusStr = 'ERROR: Editing of character failed: '.$this->conn->error.'<br/>';
-				$statusStr .= 'SQL: '.$sql;
+		}
+		return $csValue;
+	}
+	
+	public function editCharacter($pArr){
+		$statusStr = '';
+		$sql = '';
+		foreach($pArr as $k => $v){
+			if($k != 'formsubmit' && $k != 'cid'){
+				$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 			}
+		}
+		$sql = 'UPDATE kmcharacters SET '.substr($sql,1).' WHERE (cid = '.$this->cid.')';
+		if($this->conn->query($sql)){
+			$statusStr = 'SUCCESS: information saved';
+		}
+		else{
+			$statusStr = 'ERROR: Editing of character failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
 		}
 		return $statusStr;
 	}
 	
 	public function editCharState($pArr){
 		$statusStr = '';
-		$cId = $pArr['cid'];
 		$cs = $pArr['cs'];
-		if(is_numeric($cId)){
-			$sql = '';
-			foreach($pArr as $k => $v){
-				if($k != 'formsubmit' && $k != 'cid' && $k != 'cs'){
-					$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
-				}
+		$sql = '';
+		foreach($pArr as $k => $v){
+			if($k != 'formsubmit' && $k != 'cid' && $k != 'cs'){
+				$sql .= ','.$k.'='.($v?'"'.$this->cleanInStr($v).'"':'NULL');
 			}
-			$sql = 'UPDATE kmcs SET '.substr($sql,1).' WHERE (cid = '.$cId.') AND (cs = '.$cs.')';
-			if($this->conn->query($sql)){
-				$statusStr = 'SUCCESS: information saved';
-			}
-			else{
-				$statusStr = 'ERROR: Editing of character state failed: '.$this->conn->error.'<br/>';
-				$statusStr .= 'SQL: '.$sql;
-			}
+		}
+		$sql = 'UPDATE kmcs SET '.substr($sql,1).' WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+		//echo $sql;
+		if($this->conn->query($sql)){
+			$statusStr = 'SUCCESS: information saved';
+		}
+		else{
+			$statusStr = 'ERROR: Editing of character state failed: '.$this->conn->error.'<br/>';
+			$statusStr .= 'SQL: '.$sql;
 		}
 		return $statusStr;
 	}
 	
-	public function getCharDetails($cId){
+	public function getCharDetails(){
 		$retArr = array();
 		$sql = 'SELECT cid, charname, chartype, defaultlang, difficultyrank, hid, units, '.
 			'description, notes, helpurl, enteredby '.
 			'FROM kmcharacters '.
-			'WHERE cid = '.$cId;
+			'WHERE cid = '.$this->cid;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr['charname'] = $this->cleanOutStr($r->charname);
@@ -174,61 +161,62 @@ class KeyAdmin{
 		return $retArr;
 	}
 	
-	public function getCharStateDetails($cId,$cs){
+	public function getCharStateArr(){
 		$retArr = array();
-		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, '.
-			'language, enteredby '.
+		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, language, enteredby '.
 			'FROM kmcs '.
-			'WHERE cid = '.$cId.' AND cs = "'.$cs.'"';
+			'WHERE cid = '.$this->cid;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr['charstatename'] = $this->cleanOutStr($r->charstatename);
-				$retArr['implicit'] = $r->implicit;
-				$retArr['notes'] = $this->cleanOutStr($r->notes);
-				$retArr['description'] = $this->cleanOutStr($r->description);
-				$retArr['illustrationurl'] = $r->illustrationurl;
-				$retArr['language'] = $this->cleanOutStr($r->language);
-				$retArr['enteredby'] = $r->enteredby;
+				$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
+				$retArr[$r->cs]['implicit'] = $r->implicit;
+				$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
+				$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
+				$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
+				$retArr[$r->cs]['language'] = $this->cleanOutStr($r->language);
+				$retArr[$r->cs]['enteredby'] = $r->enteredby;
 			}
 			$rs->close();
+		}
+		else{
+			trigger_error('unable to return character state array; '.$this->conn->error);
 		}
 		return $retArr;
+		
 	}
-	
-	public function deleteChar($cId){
+
+	public function deleteChar(){
 		$status = 0;
-		if(is_numeric($cId)){
-			$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$cId.')';
-			if($this->conn->query($sql)){
-				$status = 1;
-			}
+		$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$this->cid.')';
+		if($this->conn->query($sql)){
+			$status = 1;
 		}
 		return $status;
 	}
 	
-	public function deleteCharState($cId,$cs){
+	public function deleteCharState($cs){
 		$status = 0;
-		if(is_numeric($cId)){
-			$sql = 'DELETE FROM kmcs WHERE (cid = '.$cId.') AND (cs = '.$cs.')';
-			if($this->conn->query($sql)){
-				$status = 1;
-			}
+		$sql = 'DELETE FROM kmcs WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+		if($this->conn->query($sql)){
+			$status = 1;
 		}
 		return $status;
 	}
-	
-	public function getCharStateList($cId){
+
+	public function getTaxonLinks(){
 		$retArr = array();
-		$sql = 'SELECT cs, charstatename '.
-			'FROM kmcs '.
-			'WHERE cid = '.$cId.' '.
-			'ORDER BY charstatename ASC';
+		$sql = 'SELECT l.tid, l.relation, t.sciname '.
+			'FROM kmchartaxalink l INNER JOIN taxa t ON l.tid = t.tid '.
+			'WHERE l.cid = '.$this->cid;
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->cs]['cs'] = $r->cs;
-				$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
+				$retArr[$r->tid]['relation'] = $r->relation;
+				$retArr[$r->tid]['sciname'] = $r->sciname;
 			}
-			$rs->close();
+		}
+		else{
+			trigger_error('unable to get Taxon Links; '.$this->conn->error);
 		}
 		return $retArr;
 	}
@@ -252,12 +240,12 @@ class KeyAdmin{
 		$this->collId = $c;
 	}
 	
-	public function getcId(){
-		return $this->cId;
+	public function getCid(){
+		return $this->cid;
 	}
 	
-	public function getcs(){
-		return $this->cs;
+	public function setCid($cid){
+		if(is_numeric($cid)) $this->cid = $cid;
 	}
 	
 	private function cleanOutStr($str){

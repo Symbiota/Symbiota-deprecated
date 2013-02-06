@@ -3,7 +3,7 @@ $(document).ready(function() {
 		alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 	}
 
-	$('#tabs').tabs();
+	$('#tabs').tabs({selected: tabIndex});
 
 });
 
