@@ -4,11 +4,11 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	private $dcArr = array();
 
 	function __construct() {
- 		parent::__construct();
+		parent::__construct();
 	}
 
 	public function __destruct(){
- 		parent::__destruct();
+		parent::__destruct();
 	}
 
 	//Parsing functions

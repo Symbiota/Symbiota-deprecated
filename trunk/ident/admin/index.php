@@ -6,32 +6,35 @@ $keyManager = new KeyAdmin();
 //$keyManager->setCollId($collId);
 
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
-$cId = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
-$cs = array_key_exists('cs',$_REQUEST)?$_REQUEST['cs']:0;
+$cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
+$tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
+
+if($cid) $keyManager->setCid($cid);
 
 $statusStr = '';
 if($formSubmit){
 	if($formSubmit == 'Create'){
-		$statusStr = $keyManager->createCharacter($_POST);
-		$cId = $keyManager->getcId();
+		$statusStr = $keyManager->createCharacter($_POST,$paramsArr['un']);
+		$cid = $keyManager->getcId();
 	}
 	elseif($formSubmit == 'Save Char'){
 		$statusStr = $keyManager->editCharacter($_POST);
 	}
 	elseif($formSubmit == 'Add State'){
-		$statusStr = $keyManager->createState($_POST);
-		$cs = $keyManager->getcs();
+		$keyManager->createState($_POST['charstatename'],$paramsArr['un']);
+		$tabIndex = 2;
 	}
 	elseif($formSubmit == 'Save State'){
 		$statusStr = $keyManager->editCharState($_POST);
+		$tabIndex = 2;
 	}
 	elseif($formSubmit == 'Delete Char'){
-		$status = $keyManager->deleteChar($cId);
-		if($status) $cId = 0;
+		$status = $keyManager->deleteChar();
+		if($status) $cid = 0;
 	}
 	elseif($formSubmit == 'Delete State'){
-		$status = $keyManager->deleteCharState($cId,$cs);
-		if($status) $cs = 0;
+		$status = $keyManager->deleteCharState($_POST['cs']);
+		$tabIndex = 2;
 	}
 }
  
@@ -45,6 +48,9 @@ if($formSubmit){
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	<script type="text/javascript">
+		var tabIndex = <?php echo $tabIndex; ?>;
+	</script>
 	<script type="text/javascript" src="../../js/symb/ident.admin.js"></script>
 </head>
 <body>
@@ -84,10 +90,10 @@ else{
 				<hr/>
 				<?php 
 			}
-			if(!$cId){
+			if(!$cid){
 				include_once('charadmin.php');
 			}
-			elseif($cId && !$cs){
+			elseif($cid){
 				include_once('chardetails.php');
 			}
 		}

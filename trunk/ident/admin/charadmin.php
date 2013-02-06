@@ -63,17 +63,7 @@
 					</div>
 				</div>
 				<div style="width:100%;padding-top:6px;float:left;">
-					<div style="float:left;">
-						<button name="formsubmit" type="submit" value="Create">Create</button>
-					</div>
-					<div style="float:right;">
-						<span>
-							Entered By:
-						</span>
-						<span>
-							<input type="text" autocomplete="off" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
-						</span>
-					</div>
+					<button name="formsubmit" type="submit" value="Create">Create</button>
 				</div>
 			</fieldset>
 		</form>
