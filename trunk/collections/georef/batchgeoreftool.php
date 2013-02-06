@@ -42,7 +42,9 @@ $geoManager = new OccurrenceGeorefTools();
 $geoManager->setCollId($collId);
 
 $editor = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($isAdmin 
+	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
+	|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
  	$editor = true;
 }
 
