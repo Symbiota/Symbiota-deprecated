@@ -171,19 +171,25 @@ class ChecklistVoucherAdmin {
 	public function getConflictVouchers(){
 		$retArr = Array();
 		$sql = 'SELECT t.tid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified '.
-			'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '.
-			'INNER JOIN fmvouchers v ON o.occid = v.occid '.
-			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '.
-			'INNER JOIN taxa t ON v.tid = t.tid '.
+			'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '. 
+			'INNER JOIN fmvouchers v ON o.occid = v.occid '. 
+			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '. 
+			'INNER JOIN taxa t ON v.tid = t.tid '. 
+			'INNER JOIN taxstatus ts3 ON ts1.tidaccepted = ts3.tid '. 
 			'WHERE (v.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
+			'AND ts1.parenttid <> ts2.tidaccepted AND v.tid <> o.tidinterpreted AND ts3.parenttid <> v.tid '.
 			'ORDER BY t.sciname ';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
-			$retArr[$row->tid]['listid'] = $row->listid;
+			$clSciname = $row->listid;
+			$voucherSciname = $row->sciname;
+			//if(str_replace($voucherSciname)) continue;
+			$retArr[$row->tid]['listid'] = $clSciname;
 			$collStr = $row->recordedby;
 			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
 			$retArr[$row->tid]['recordnumber'] = $this->cleanOutStr($collStr);
-			$retArr[$row->tid]['specid'] = $this->cleanOutStr($row->sciname);
+			$retArr[$row->tid]['specid'] = $this->cleanOutStr($voucherSciname);
 			$idBy = $row->identifiedby;
 			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
 			$retArr[$row->tid]['identifiedby'] = $this->cleanOutStr($idBy);
