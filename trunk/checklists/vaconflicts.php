@@ -25,20 +25,23 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	</div>
 	<?php 
 	if($conflictArr = $vManager->getConflictVouchers()){
+		echo '<div style="font-weight:bold;">Conflict Count: '.count($conflictArr).'</div>';
 		?>
 		<table class="styledtable">
 			<tr><th><b>Checklist ID</b></th><th><b>Collector</b></th><th><b>Specimen ID</b></th><th><b>Identified By</b></th></tr>
 			<?php
-			foreach($conflictArr as $tid => $vArr){
+			foreach($conflictArr as $id => $vArr){
 				?>
 				<tr>
 					<td>
-						<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
+						<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $vArr['tid']."&clid=".$clid; ?>','editorwindow');">
 							<?php echo $vArr['listid'] ?>
 						</a>
 					</td>
 					<td>
-						<?php echo $vArr['recordnumber'] ?>
+						<a href="#" onclick="return openPopup('../collections/individual/index.php?occid=<?php echo $vArr['occid']; ?>','occwindow');">
+							<?php echo $vArr['recordnumber']; ?>
+						</a>
 					</td>
 					<td>
 						<?php echo $vArr['specid'] ?>
