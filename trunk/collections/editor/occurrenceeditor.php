@@ -273,12 +273,12 @@ if($symbUid){
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="../../css/occureditorcrowdsource.css" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="../../css/occureditorcrowdsource.css?ver=1302" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=1302" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
     }
     ?>
