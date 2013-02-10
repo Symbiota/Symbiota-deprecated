@@ -122,6 +122,16 @@ function initDetEditAutocomplete(inputName){
 	{ minLength: 3 });
 }
 
+function toggleStyle(){
+	var cssObj = document.getElementById('editorCssLink');
+	if(cssObj.href == "../../css/occureditorcrowdsource.css"){
+		cssObj.href = "../../css/occureditor.css";
+	}
+	else{
+		cssObj.href = "../../css/occureditorcrowdsource.css";
+	}
+}
+
 //Field changed and verification functions
 function fieldChanged(fieldName){
 	try{

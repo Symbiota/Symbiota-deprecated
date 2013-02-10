@@ -314,16 +314,19 @@ class OccurrenceManager{
 				$this->localSearchArr[] = implode(", ",$collNumArr);
 			}
 		}
-		if(array_key_exists('eventdate',$this->searchTermsArr)){
+		if(array_key_exists('eventdate1',$this->searchTermsArr)){
 			$dateArr = array();
-			if(strpos($this->searchTermsArr['eventdate'],' to ')){
-				$dateArr = explode(' to ',$this->searchTermsArr['eventdate']);
+			if(strpos($this->searchTermsArr['eventdate1'],' to ')){
+				$dateArr = explode(' to ',$this->searchTermsArr['eventdate1']);
 			}
-			elseif(strpos($this->searchTermsArr['eventdate'],' - ')){
-				$dateArr = explode(' - ',$this->searchTermsArr['eventdate']);
+			elseif(strpos($this->searchTermsArr['eventdate1'],' - ')){
+				$dateArr = explode(' - ',$this->searchTermsArr['eventdate1']);
 			}
 			else{
-				$dateArr[] = $this->searchTermsArr['eventdate'];
+				$dateArr[] = $this->searchTermsArr['eventdate1'];
+				if(isset($this->searchTermsArr['eventdate2'])){
+					$dateArr[] = $this->searchTermsArr['eventdate2'];
+				}
 			}
 			if($eDate1 = $this->formatDate($dateArr[0])){
 				$eDate2 = (count($dateArr)>1?$this->formatDate($dateArr[1]):'');
@@ -342,7 +345,58 @@ class OccurrenceManager{
 					}
 				}
 			}
-			$this->localSearchArr[] = $this->searchTermsArr['eventdate'];
+			$this->localSearchArr[] = $this->searchTermsArr['eventdate1'].(isset($this->searchTermsArr['eventdate2'])?' to '.$this->searchTermsArr['eventdate2']:'');
+		}
+		if(array_key_exists('catnum',$this->searchTermsArr)){
+			$catStr = $this->searchTermsArr['catnum'];
+			$isOccid = false;
+			if(substr($catStr,0,5) == 'occid'){
+				$catStr = trim(substr($catStr,5));
+				$isOccid = true;
+			}
+			$catArr = explode(',',str_replace(';',',',$catStr));
+			$betweenFrag = array();
+			$inFrag = array();
+			foreach($catArr as $v){
+				if($p = strpos($v,' - ')){
+					$term1 = trim(substr($v,0,$p));
+					$term2 = trim(substr($v,$p+3));
+					if(is_numeric($term1) && is_numeric($term2)){
+						if($isOccid){
+							$betweenFrag[] = '(o.occid BETWEEN '.$term1.' AND '.$term2.')';
+						}
+						else{
+							$betweenFrag[] = '(o.catalogNumber BETWEEN '.$term1.' AND '.$term2.')';
+						} 
+					}
+					else{
+						$catTerm = 'o.catalogNumber BETWEEN "'.$term1.'" AND "'.$term2.'"';
+						if(strlen($term1) == strlen($term2)) $catTerm .= ' AND length(o.catalogNumber) = '.strlen($term2); 
+						$betweenFrag[] = '('.$catTerm.')';
+					}
+				}
+				else{
+					$vStr = trim($v);
+					$inFrag[] = $vStr;
+					if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
+						$inFrag[] = ltrim($vStr,0);
+					}
+				}
+			}
+			$catWhere = '';
+			if($betweenFrag){
+				$catWhere .= 'OR '.implode(' OR ',$betweenFrag);
+			}
+			if($inFrag){
+				if($isOccid){
+					$catWhere .= 'OR (o.occid IN('.implode(',',$inFrag).')) ';
+				}
+				else{
+					$catWhere .= 'OR (o.catalogNumber IN("'.implode('","',$inFrag).'")) ';
+				} 
+			}
+			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
+			$this->localSearchArr[] = $this->searchTermsArr['catnum'];
 		}
 		if(array_key_exists("clid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["clid"];
@@ -745,7 +799,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("local",$_REQUEST)){
-			$local = $this->conn->real_escape_string($_REQUEST["local"]);
+			$local = $this->conn->real_escape_string(trim($_REQUEST["local"]));
 			if($local){
 				$str = str_replace(",",";",$local);
 				$searchArr[] = "local:".$str;
@@ -757,7 +811,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collector",$_REQUEST)){
-			$collector = $this->conn->real_escape_string($_REQUEST["collector"]);
+			$collector = $this->conn->real_escape_string(trim($_REQUEST["collector"]));
 			if($collector){
 				$str = str_replace(",",";",$collector);
 				$searchArr[] = "collector:".$str;
@@ -769,7 +823,7 @@ class OccurrenceManager{
 			$searchFieldsActivated = true;
 		}
 		if(array_key_exists("collnum",$_REQUEST)){
-			$collNum = $this->conn->real_escape_string($_REQUEST["collnum"]);
+			$collNum = $this->conn->real_escape_string(trim($_REQUEST["collnum"]));
 			if($collNum){
 				$str = str_replace(",",";",$collNum);
 				$searchArr[] = "collnum:".$str;
@@ -780,15 +834,36 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
-		if(array_key_exists("eventdate",$_REQUEST)){
-			$eventDate = $this->conn->real_escape_string($_REQUEST["eventdate"]);
-			if($eventDate){
-				$str = str_replace(",",";",$eventDate);
-				$searchArr[] = "eventdate:".$str;
-				$this->searchTermsArr["eventdate"] = $str;
+		if(array_key_exists("eventdate1",$_REQUEST)){
+			if($eventDate = $this->conn->real_escape_string(trim($_REQUEST["eventdate1"]))){
+				$searchArr[] = "eventdate1:".$eventDate;
+				$this->searchTermsArr["eventdate1"] = $eventDate;
+				if(array_key_exists("eventdate2",$_REQUEST)){
+					if($eventDate2 = $this->conn->real_escape_string(trim($_REQUEST["eventdate2"]))){
+						if($eventDate2 != $eventDate){
+							$searchArr[] = "eventdate2:".$eventDate2;
+							$this->searchTermsArr["eventdate2"] = $eventDate2;
+						}
+					}
+					else{
+						unset($this->searchTermsArr["eventdate2"]);
+					}
+				}
 			}
 			else{
-				unset($this->searchTermsArr["eventdate"]);
+				unset($this->searchTermsArr["eventdate1"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("catnum",$_REQUEST)){
+			$catNum = $this->conn->real_escape_string(trim($_REQUEST["catnum"]));
+			if($catNum){
+				$str = str_replace(",",";",$catNum);
+				$searchArr[] = "catnum:".$str;
+				$this->searchTermsArr["catnum"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["catnum"]);
 			}
 			$searchFieldsActivated = true;
 		}

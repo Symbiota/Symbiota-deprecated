@@ -270,10 +270,19 @@ if($symbUid){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
-    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
-    <link type="text/css" href="../../css/occureditor.css" rel="stylesheet" />
-    <!-- <link type="text/css" href="../../css/occureditorcrowdsource.css" rel="stylesheet" />  --> 
-	<link type="text/css" href="../../css/jquery-ui.css" rel="stylesheet" />
+    <?php 
+    if($crowdSourceMode == 1){
+		?>
+		<link href="../../css/occureditorcrowdsource.css" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<?php 
+    }
+    else{
+		?>
+		<link href="../../css/occureditor.css" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<?php 
+    }
+    ?>
+	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
@@ -291,10 +300,10 @@ if($symbUid){
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=1212"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=1212"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=1212"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=1212"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=1302"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=1302"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=1302"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=1302"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -312,18 +321,23 @@ if($symbUid){
 		}
 		else{
 			if($collMap){
-				echo '<div>';
-				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
-				echo '</div>';
+				?>
+				<div id="titleDiv">
+					<?php 
+					echo $collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')'; 
+					if($isEditor || $crowdSourceMode){
+						?>
+						<div id="querySymbolDiv">
+							<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
+						</div>
+						
+						<?php 
+					}
+					?> 
+				</div>
+				<?php 
 			}
 			if($occId || $crowdSourceMode || ($isEditor && $collId)){
-				if($isEditor){
-					?>
-					<div style="text-align:right;width:810px;margin:-30px 10px 5px 0px;">
-						<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
-					</div>
-					<?php
-				}
 				if(!$occArr && !$goToMode) $displayQuery = 1;
 				if($crowdSourceMode){
 					include 'includes/queryformcrowdsource.php';
@@ -332,12 +346,19 @@ if($symbUid){
 					include 'includes/queryform.php';
 				}
 				?>
-				<div style="width:820px;clear:both;">
+				<div id="navDiv">
 					<?php
+					if($navStr){
+						?>
+						<div style="float:right;">
+							<?php echo $navStr; ?>
+						</div>
+						<?php 
+					}
 					if(isset($collections_editor_occurrenceeditorCrumbs)){
 						if($collections_editor_occurrenceeditorCrumbs){
 							?>
-							<div class='navpath'>
+							<div class="navpath">
 								<a href='../../index.php'>Home</a> &gt;&gt; 
 								<?php echo $collections_editor_occurrenceeditorCrumbs; ?>
 								<b>Editor</b>
@@ -347,7 +368,7 @@ if($symbUid){
 					}
 					else{
 						?>
-						<span class='navpath'>
+						<div class='navpath'>
 							<a href="../../index.php">Home</a> &gt;&gt;
 							<?php
 							if($crowdSourceMode){
@@ -369,17 +390,8 @@ if($symbUid){
 							}
 							?>
 							<b>Editor</b>
-						</span>
+						</div>
 						<?php
-					}
-					?>
-					<?php
-					if($navStr){
-						?>
-						<span style="float:right;">
-							<?php echo $navStr; ?>
-						</span>
-						<?php 
 					}
 					?>
 				</div>
@@ -405,7 +417,7 @@ if($symbUid){
 				if($occArr || $goToMode == 1 || $goToMode == 2){		//$action == 'gotonew'
 					if($occId && $isLocked){
 						?>
-						<div style="margin:25px;border:2px double;padding:20px;width:700px;">
+						<div style="margin:25px;border:2px double;padding:20px;width:90%;">
 							<div style="color:red;font-weight:bold;font-size:110%;">
 								Record Locked! 
 							</div>
@@ -441,7 +453,7 @@ if($symbUid){
 											// Get symbiota user email as the annotator email (for fp)
 											$pHandler = new ProfileManager();
 											$person = $pHandler->getPersonByUid($symbUid);
-											$userEmail = $person->getEmail();
+											$userEmail = ($person?$person->getEmail():'');
 											
 											$detVars = 'identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'].
 												'&annotatorname='.$userDisplayName.'&annotatoremail='.$userEmail.
@@ -450,7 +462,7 @@ if($symbUid){
 											
 											$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
 											?>
-											<li>
+											<li id="detTab">
 												<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&'.$detVars; ?>" 
 													style="margin:0px 20px 0px 20px;">Determination History</a>
 											</li>
@@ -462,18 +474,18 @@ if($symbUid){
 												echo '</li>';
 											} 
 											?>
-											<li>
+											<li id="imgTab">
 												<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
 													style="margin:0px 20px 0px 20px;">Images</a>
 											</li>
-											<li>
+											<li id="adminTab">
 												<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
 											</li>
 											<?php
 										}
 										?>
 									</ul>
-									<div id="occdiv" style="position:relative;width:795px;">
+									<div id="occdiv">
 										<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this);">
 											<fieldset>
 												<legend><b>Collector Info</b></legend>
@@ -494,48 +506,38 @@ if($symbUid){
 												<div style="clear:both;">
 													<div id="catalogNumberDiv">
 														Catalog Number
-														<a href="#" onclick="return openDoc('catalogNumber')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('catalogNumber')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="catalogNumberChanged(this.form)" <?php if(!$isEditor) echo 'disabled'; ?> />
 													</div>
 													<div id="otherCatalogNumbersDiv">
 														Other Numbers
-														<a href="#" onclick="return openDoc('otherCatalogNumbers')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('otherCatalogNumbers')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="othercatalognumbers" tabindex="4" maxlength="255" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="otherCatalogNumbersChanged(this.form);" />
 													</div>
 													<div id="recordedByDiv">
 														Collector
-														<a href="#" onclick="return openDoc('recordedBy')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('recordedBy')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="recordedby" tabindex="6" maxlength="255" value="<?php echo array_key_exists('recordedby',$occArr)?$occArr['recordedby']:''; ?>" onchange="fieldChanged('recordedby');" />
 													</div>
 													<div id="recordNumberDiv">
 														Number
-														<a href="#" onclick="return openDoc('recordNumber')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('recordNumber')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="recordnumber" tabindex="8" maxlength="45" value="<?php echo array_key_exists('recordnumber',$occArr)?$occArr['recordnumber']:''; ?>" onchange="recordNumberChanged(this);" />
 													</div>
 													<div id="eventDateDiv" title="Earliest Date Collected">
 														Date
-														<a href="#" onclick="return openDoc('eventDate')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('eventDate')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="eventdate" tabindex="10" value="<?php echo array_key_exists('eventdate',$occArr)?$occArr['eventdate']:''; ?>" onchange="eventDateChanged(this);" />
 													</div>
 													<?php
 													if(!$isGenObs){ 
 														?>
-														<div style="float:left;margin:5px 5px;">
+														<div id="dupesDiv">
 															<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
 															<input type="checkbox" name="autodupe" value="<?php echo $autoDupeSearch; ?>" checked />
 															Auto search
@@ -547,16 +549,12 @@ if($symbUid){
 												<div style="clear:both;height:40px;">
 													<div id="associatedCollectorsDiv">
 														Associated Collectors
-														<a href="#" onclick="return openDoc('associatedCollectors')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('associatedCollectors')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="associatedcollectors" tabindex="14" maxlength="255" value="<?php echo array_key_exists('associatedcollectors',$occArr)?$occArr['associatedcollectors']:''; ?>" onchange="fieldChanged('associatedcollectors');" />
 													</div>
-													<div style="float:left;margin:15px 5px;">
-														<a href="#" onclick="toggle('dateextradiv');return false;">
-															<img src="../../images/editplus.png" style="width:15px;" />
-														</a>
+													<div id="dateToggleDiv">
+														<a href="#" onclick="toggle('dateextradiv');return false;"><img src="../../images/editplus.png" style="width:15px;" /></a>
 														<?php
 														if(isset($activateExsiccati) && $activateExsiccati){ 
 															?>
@@ -579,34 +577,28 @@ if($symbUid){
 														<?php 
 													}
 													?>
-													<div id="dupediv" style="display:none;float:right;width:150px;border:2px outset blue;background-color:#FFFFFF;padding:3px;font-weight:bold;">
+													<div id="dupediv">
 														<span id="dupesearch">Searching for Dupes...</span>
 														<span id="dupenone" style="display:none;color:red;">No Dupes Found</span>
 														<span id="dupedisplay" style="display:none;color:green;">Displaying Dupes</span>
 													</div>
 												</div>
-												<div id="dateextradiv" style="clear:both;padding:10px;margin:5px;border:1px solid gray;display:none;height:20px;">
+												<div id="dateextradiv">
 													<div id="verbatimEventDateDiv">
 														Verbatim Date:
-														<a href="#" onclick="return openDoc('verbatimEventDate')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('verbatimEventDate')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="verbatimeventdate" tabindex="19" maxlength="255" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
 													</div>
 													<div id="ymdDiv">
 														YYYY-MM-DD:
-														<a href="#" onclick="return openDoc('year')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('year')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="year" tabindex="20" value="<?php echo array_key_exists('year',$occArr)?$occArr['year']:''; ?>" onchange="inputIsNumeric(this, 'Year');fieldChanged('year');" title="Numeric Year" />-
 														<input type="text" name="month" tabindex="21" value="<?php echo array_key_exists('month',$occArr)?$occArr['month']:''; ?>" onchange="inputIsNumeric(this, 'Month');fieldChanged('month');" title="Numeric Month" />-
 														<input type="text" name="day" tabindex="22" value="<?php echo array_key_exists('day',$occArr)?$occArr['day']:''; ?>" onchange="inputIsNumeric(this, 'Day');fieldChanged('day');" title="Numeric Day" />
 													</div>
 													<div id="dayOfYearDiv">
 														Day of Year:
-														<a href="#" onclick="return openDoc('startDayOfYear')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('startDayOfYear')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="startdayofyear" tabindex="24" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
 														<input type="text" name="enddayofyear" tabindex="26" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
 													</div>
@@ -626,18 +618,14 @@ if($symbUid){
 												<div style="clear:both;">
 													<div id="scinameDiv">
 														Scientific Name:
-														<a href="#" onclick="return openDoc('scientificName')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo ($isEditor?'':'disabled '); ?> />
 														<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 													</div>
 													<div id="scientificNameAuthorshipDiv">
 														Author:
-														<a href="#" onclick="return openDoc('scientificNameAuthorship')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('scientificNameAuthorship')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 													</div>
@@ -650,51 +638,39 @@ if($symbUid){
 												<div style="clear:both;padding:3px 0px 0px 10px;">
 													<div id="identificationQualifierDiv">
 														ID Qualifier:
-														<a href="#" onclick="return openDoc('identificationQualifier')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('identificationQualifier')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 													</div>
 													<div  id="familyDiv">
 														Family:
-														<a href="#" onclick="return openDoc('family')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('family')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="family" maxlength="50" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
 													</div>
 												</div>
 												<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;">
 													<div id="identifiedByDiv">
 														Identified By:
-														<a href="#" onclick="return openDoc('identifiedBy')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('identifiedBy')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="identifiedby" maxlength="255" tabindex="32" value="<?php echo array_key_exists('identifiedby',$occArr)?$occArr['identifiedby']:''; ?>" onchange="fieldChanged('identifiedby');" />
 													</div>
 													<div id="dateIdentifiedDiv">
 														Date Identified:
-														<a href="#" onclick="return openDoc('dateIdentified')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('dateIdentified')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="dateidentified" maxlength="45" tabindex="34" value="<?php echo array_key_exists('dateidentified',$occArr)?$occArr['dateidentified']:''; ?>" onchange="fieldChanged('dateidentified');" />
 													</div>
-													<div style="float:left;margin-left:15px;cursor:pointer;" onclick="toggle('idrefdiv');">
+													<div id="idrefToggleDiv" onclick="toggle('idrefdiv');">
 														<img src="../../images/editplus.png" style="width:15px;" />
 													</div>
 												</div>
-												<div  id="idrefdiv" style="display:none;clear:both;">
+												<div  id="idrefdiv">
 													<div id="identificationReferencesDiv">
 														ID References:
-														<a href="#" onclick="return openDoc('identificationReferences')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('identificationReferences')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="identificationreferences" tabindex="36" value="<?php echo array_key_exists('identificationreferences',$occArr)?$occArr['identificationreferences']:''; ?>" onchange="fieldChanged('identificationreferences');" />
 													</div>
 													<div id="identificationRemarksDiv">
 														ID Remarks:
-														<a href="#" onclick="return openDoc('identificationRemarks')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('identificationRemarks')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<input type="text" name="identificationremarks" tabindex="38" value="<?php echo array_key_exists('identificationremarks',$occArr)?$occArr['identificationremarks']:''; ?>" onchange="fieldChanged('identificationremarks');" />
 													</div>
 												</div>
@@ -723,14 +699,14 @@ if($symbUid){
 														<input type="text" id="ffmunicipality" name="municipality" tabindex="45" value="<?php echo array_key_exists('municipality',$occArr)?$occArr['municipality']:''; ?>" onchange="fieldChanged('municipality');" />
 													</div>
 												</div>
-												<div style="clear:both;margin:4px 0px 2px 0px;">
+												<div id="localityDiv">
 													Locality:
 													<br />
-													<input type="text" name="locality" tabindex="46" style="width:99%;background-color:lightyellow;" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+													<input type="text" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 												</div>
-												<div style="clear:both;margin-bottom:5px;">
+												<div id="localSecurityDiv">
 													<?php $hasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; ?>
-													<input type="checkbox" name="localitysecurity" tabindex="0" style="" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
+													<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $hasValue?"CHECKED":""; ?> onchange="fieldChanged('localitysecurity');toggleLocSecReason(this.form);" title="Hide Locality Data from General Public" />
 													Locality Security
 													<span id="locsecreason" style="margin-left:40px;display:<?php echo ($hasValue?'inline':'none') ?>">
 														<?php $lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:''; ?>
@@ -738,7 +714,7 @@ if($symbUid){
 													</span>
 												</div>
 												<div style="clear:both;">
-													<div style="float:left;margin-top:2px;">
+													<div id="decimalLatitudeDiv">
 														Latitude
 														<br/>
 														<?php
@@ -747,9 +723,9 @@ if($symbUid){
 															$latValue = $occArr["decimallatitude"];
 														}
 														?>
-														<input type="text" id="decimallatitude" name="decimallatitude" tabindex="50" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $latValue; ?>" onchange="decimalLatitudeChanged(this.form)" />
+														<input type="text" id="decimallatitude" name="decimallatitude" tabindex="50" maxlength="15" value="<?php echo $latValue; ?>" onchange="decimalLatitudeChanged(this.form)" />
 													</div>
-													<div style="float:left;margin-top:2px;">
+													<div id="decimalLongitudeDiv">
 														Longitude
 														<br/>
 														<?php
@@ -758,15 +734,13 @@ if($symbUid){
 															$longValue = $occArr["decimallongitude"];
 														}
 														?>
-														<input type="text" id="decimallongitude" name="decimallongitude" tabindex="52" maxlength="15" style="width:88px;background-color:lightyellow" value="<?php echo $longValue; ?>" onchange="decimalLongitudeChanged(this.form);" />
+														<input type="text" id="decimallongitude" name="decimallongitude" tabindex="52" maxlength="15" value="<?php echo $longValue; ?>" onchange="decimalLongitudeChanged(this.form);" />
 													</div>
-													<div style="float:left;">
+													<div id="coordinateUncertaintyInMetersDiv">
 														Uncertainty (meters)
-														<a href="#" onclick="return openDoc('coordinateUncertaintyInMeters')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('coordinateUncertaintyInMeters')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
-														<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" style="width:70px;" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="coordinateUncertaintyInMetersChanged(this.form);" title="Uncertainty in Meters" />
+														<input type="text" id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" tabindex="54" maxlength="10" value="<?php echo array_key_exists('coordinateuncertaintyinmeters',$occArr)?$occArr['coordinateuncertaintyinmeters']:''; ?>" onchange="coordinateUncertaintyInMetersChanged(this.form);" title="Uncertainty in Meters" />
 														<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();" title="Google Maps">
 															<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
 														</span>
@@ -775,27 +749,25 @@ if($symbUid){
 														</a>
 														<input type="button" value="Tools" onclick="toggleCoordDiv();" title="Other Coordinate Formats" />
 													</div>
-													<div style="float:left;">
+													<div id="geodeticDatumDiv">
 														Datum
-														<a href="#" onclick="return openDoc('geodeticDatum')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a>
+														<a href="#" onclick="return openDoc('geodeticDatum')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
-														<input type="text" id="geodeticdatum" name="geodeticdatum" tabindex="56" maxlength="255" style="width:80px;" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchange="fieldChanged('geodeticdatum');" />
+														<input type="text" id="geodeticdatum" name="geodeticdatum" tabindex="56" maxlength="255" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchange="fieldChanged('geodeticdatum');" />
 													</div>
-													<div style="float:left;margin-top:2px;">
+													<div id="elevationDiv">
 														Elevation in Meters
 														<br/>
-														<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" /> - 
-														<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" style="width:55px;" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
+														<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" /> - 
+														<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
 													</div>
 													<div style="float:left;margin:20px 2px 0px 2px">
 														<a href="#" onclick="parseVerbatimElevation(document.fullform);return false">&lt;&lt;</a>
 													</div>
-													<div style="float:left;margin-top:2px;">
+													<div id="verbatimElevationDiv">
 														Verbatim Elevation
 														<br/>
-														<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" style="width:100px;" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
+														<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
 													</div>
 													<div style="float:left;margin:15px 5px;cursor:pointer;" onclick="toggle('locextradiv');">
 														<img src="../../images/editplus.png" style="width:15px;" />
@@ -831,138 +803,116 @@ if($symbUid){
 														<div style="float:left;margin:20px 2px 0px 2px">
 															<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
 														</div>
-														<div style="float:left;margin-top:2px;">
+														<div id="verbatimCoordinatesDiv">
 															Verbatim Coordinates
 															<br/>
-															<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" style="width:300px;" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
+															<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
 														</div>
-														<div style="float:left;margin-top:2px;">
+														<div id="georeferencedByDiv">
 															Georeferenced By
 															<br/>
-															<input type="text" name="georeferencedby" tabindex="66" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
+															<input type="text" name="georeferencedby" tabindex="66" maxlength="255" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
 														</div>
-														<div style="float:left;margin-top:2px;">
+														<div id="footprintWktDiv">
 															footprint (polygon)
 															<br/>
-															<textarea name="footprintwkt" style="width:250px;height:15px;" onchange="fieldChanged('footprintwkt');"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+															<textarea name="footprintwkt" onchange="fieldChanged('footprintwkt');"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 														</div>
 													</div>
 													<div style="clear:both;">
-														<div style="float:left;">
+														<div id="georeferenceProtocolDiv">
 															Georeference Protocol
-															<a href="#" onclick="return openDoc('georeferenceProtocol')">
-																<img class="docimg" src="../../images/qmark.png" />
-															</a>
+															<a href="#" onclick="return openDoc('georeferenceProtocol')"><img class="docimg" src="../../images/qmark.png" /></a>
 															<br/>
-															<input type="text" name="georeferenceprotocol" tabindex="68" maxlength="255" style="width:130px;" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
+															<input type="text" name="georeferenceprotocol" tabindex="68" maxlength="255" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
 														</div>
-														<div style="float:left;">
+														<div id="georeferenceSourcesDiv">
 															Georeference Sources
-															<a href="#" onclick="return openDoc('georeferenceSources')">
-																<img class="docimg" src="../../images/qmark.png" />
-															</a>
+															<a href="#" onclick="return openDoc('georeferenceSources')"><img class="docimg" src="../../images/qmark.png" /></a>
 															<br/>
-															<input type="text" name="georeferencesources" tabindex="70" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
+															<input type="text" name="georeferencesources" tabindex="70" maxlength="255" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
 														</div>
-														<div style="float:left;">
+														<div id="georeferenceVerificationStatusDiv">
 															Georef Verification Status
-															<a href="#" onclick="return openDoc('georeferenceVerificationStatus')">
-																<img class="docimg" src="../../images/qmark.png" />
-															</a>
+															<a href="#" onclick="return openDoc('georeferenceVerificationStatus')"><img class="docimg" src="../../images/qmark.png" /></a>
 															<br/>
-															<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" style="width:170px;" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
+															<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
 														</div>
-														<div style="float:left;margin-top:2px;">
+														<div id="georeferenceRemarksDiv">
 															Georeference Remarks
 															<br/>
-															<input type="text" name="georeferenceremarks" tabindex="74" maxlength="255" style="width:250px;" value="<?php echo array_key_exists('georeferenceremarks',$occArr)?$occArr['georeferenceremarks']:''; ?>" onchange="fieldChanged('georeferenceremarks');" />
+															<input type="text" name="georeferenceremarks" tabindex="74" maxlength="255" value="<?php echo array_key_exists('georeferenceremarks',$occArr)?$occArr['georeferenceremarks']:''; ?>" onchange="fieldChanged('georeferenceremarks');" />
 														</div>
 													</div>
 												</div>
 											</fieldset>
 											<fieldset>
 												<legend><b>Misc</b></legend>
-												<div style="padding:3px;">
+												<div id="habitatDiv">
 													Habitat: 
-													<input type="text" name="habitat" tabindex="82" style="width:700px;" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
+													<input type="text" name="habitat" tabindex="82" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 												</div>
-												<div style="padding:3px;">
+												<div id="substrateDiv">
 													Substrate: 
-													<input type="text" name="substrate" tabindex="82" maxlength="500" style="width:688px;" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
+													<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 												</div>
-												<div>
-													<div style="float:left;margin:5px 3px;">Associated Taxa: </div>
-													<div style="float:left;">
-														<textarea name="associatedtaxa" tabindex="84" style="height:15px;width:620px;" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea> 
-														<a href="#" onclick="openAssocSppAid();return false;">
-															<img src="../../images/list.png" style="width:15px;border:0px;" />
-														</a>
-													</div>
+												<div id="associatedTaxaDiv">
+													Associated Taxa: 
+													<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea> 
+													<a href="#" onclick="openAssocSppAid();return false;">
+														<img src="../../images/list.png" />
+													</a>
 												</div>
-												<div style="padding:3px;clear:both;">
+												<div id="verbatimAttributesDiv">
 													Description: 
-													<input type="text" name="verbatimattributes" tabindex="86" style="width:680px;" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
+													<input type="text" name="verbatimattributes" tabindex="86" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 												</div>
-												<div style="padding:3px;">
+												<div id="occurrenceRemarksDiv">
 													Notes: 
-													<input type="text" name="occurrenceremarks" tabindex="88" style="width:680px;" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
-													<span style="margin-left:5px;cursor:pointer;" onclick="toggle('miscextradiv');">
-														<img src="../../images/editplus.png" style="width:15px;" />
+													<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
+													<span onclick="toggle('dynamicPropertiesDiv');">
+														<img src="../../images/editplus.png" />
 													</span>
 												</div>
-												<div id="miscextradiv" style="padding:3px;display:none;clear:both;">
+												<div id="dynamicPropertiesDiv">
 													Dynamic Properties: 
-													<a href="#" onclick="return openDoc('dynamicProperties')">
-														<img class="docimg" src="../../images/qmark.png" />
-													</a>
-													<input type="text" name="dynamicproperties" tabindex="89" style="width:550px;" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
+													<a href="#" onclick="return openDoc('dynamicProperties')"><img class="docimg" src="../../images/qmark.png" /></a>
+													<input type="text" name="dynamicproperties" tabindex="89" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
 												</div>
-												<div style="padding:3px;">
-													<div style="float:left;margin:3px;">
+												<div style="padding:2px;">
+													<div id="lifeStageDiv">
 														Life Stage
-														<a href="#" onclick="return openDoc('lifeStage')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="lifestage" tabindex="90" maxlength="45" style="width:130px;" value="<?php echo array_key_exists('lifestage',$occArr)?$occArr['lifestage']:''; ?>" onchange="fieldChanged('lifestage');" />
+														<a href="#" onclick="return openDoc('lifeStage')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="lifestage" tabindex="90" maxlength="45" value="<?php echo array_key_exists('lifestage',$occArr)?$occArr['lifestage']:''; ?>" onchange="fieldChanged('lifestage');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="sexDiv">
 														Sex
-														<a href="#" onclick="return openDoc('sex')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="sex" tabindex="92" maxlength="45" style="width:130px;" value="<?php echo array_key_exists('sex',$occArr)?$occArr['sex']:''; ?>" onchange="fieldChanged('sex');" />
+														<a href="#" onclick="return openDoc('sex')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="sex" tabindex="92" maxlength="45" value="<?php echo array_key_exists('sex',$occArr)?$occArr['sex']:''; ?>" onchange="fieldChanged('sex');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="individualCountDiv">
 														Individual Count
-														<a href="#" onclick="return openDoc('individualCount')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="individualcount" tabindex="94" maxlength="45" style="width:120px;" value="<?php echo array_key_exists('individualcount',$occArr)?$occArr['individualcount']:''; ?>" onchange="fieldChanged('individualcount');" />
+														<a href="#" onclick="return openDoc('individualCount')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="individualcount" tabindex="94" maxlength="45" value="<?php echo array_key_exists('individualcount',$occArr)?$occArr['individualcount']:''; ?>" onchange="fieldChanged('individualcount');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="samplingProtocolDiv">
 														Sampling Protocol
-														<a href="#" onclick="return openDoc('samplingProtocol')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="samplingprotocol" tabindex="95" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('samplingprotocol',$occArr)?$occArr['samplingprotocol']:''; ?>" onchange="fieldChanged('samplingprotocol');" />
+														<a href="#" onclick="return openDoc('samplingProtocol')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="samplingprotocol" tabindex="95" maxlength="100" value="<?php echo array_key_exists('samplingprotocol',$occArr)?$occArr['samplingprotocol']:''; ?>" onchange="fieldChanged('samplingprotocol');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="preparationsDiv">
 														Preparations
-														<a href="#" onclick="return openDoc('preparations')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="preparations" tabindex="97" maxlength="100" style="width:130px;" value="<?php echo array_key_exists('preparations',$occArr)?$occArr['preparations']:''; ?>" onchange="fieldChanged('preparations');" />
+														<a href="#" onclick="return openDoc('preparations')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="preparations" tabindex="97" maxlength="100" value="<?php echo array_key_exists('preparations',$occArr)?$occArr['preparations']:''; ?>" onchange="fieldChanged('preparations');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="reproductiveConditionDiv">
 														Phenology
-														<a href="#" onclick="return openDoc('reproductiveCondition')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
+														<a href="#" onclick="return openDoc('reproductiveCondition')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 														<?php
 														if(isset($reproductiveConditionTerms)){
 															if($reproductiveConditionTerms){
 																?>
-																<select name="reproductivecondition" style="width:140px;" onchange="fieldChanged('reproductivecondition');" tabindex="99" />
+																<select name="reproductivecondition" onchange="fieldChanged('reproductivecondition');" tabindex="99" />
 																	<option value="">-----------------</option>
 																	<?php
 																	foreach($reproductiveConditionTerms as $term){
@@ -975,22 +925,20 @@ if($symbUid){
 														}
 														else{
 														?>
-															<input type="text" name="reproductivecondition" tabindex="99" maxlength="255" style="width:140px;" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
+															<input type="text" name="reproductivecondition" tabindex="99" maxlength="255" value="<?php echo array_key_exists('reproductivecondition',$occArr)?$occArr['reproductivecondition']:''; ?>" onchange="fieldChanged('reproductivecondition');" />
 														<?php
 														}
 														?>
 														
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="establishmentMeansDiv">
 														Establishment Means
-														<a href="#" onclick="return openDoc('establishmentMeans')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
+														<a href="#" onclick="return openDoc('establishmentMeans')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" value="<?php echo array_key_exists('establishmentmeans',$occArr)?$occArr['establishmentmeans']:''; ?>" onchange="fieldChanged('establishmentmeans');" />
 													</div>
-													<div style="float:left;margin:15px 3px 3px 3px;">
+													<div id="cultivationStatusDiv">
 														<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]?1:0; ?>
-														<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
+														<input type="checkbox" name="cultivationstatus" tabindex="102" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
 														Cultivated
 													</div>
 												</div>
@@ -998,61 +946,49 @@ if($symbUid){
 											<fieldset>
 												<legend><b>Curation</b></legend>
 												<div style="padding:3px;">
-													<div style="float:left;margin:3px;">
+													<div id="typeStatusDiv">
 														Type Status
-														<a href="#" onclick="return openDoc('typeStatus')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="typestatus" tabindex="103" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
+														<a href="#" onclick="return openDoc('typeStatus')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="typestatus" tabindex="103" maxlength="255" value="<?php echo array_key_exists('typestatus',$occArr)?$occArr['typestatus']:''; ?>" onchange="fieldChanged('typestatus');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="dispositionDiv">
 														Disposition
-														<a href="#" onclick="return openDoc('disposition')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="disposition" tabindex="104" maxlength="32" style="width:200px;" value="<?php echo array_key_exists('disposition',$occArr)?$occArr['disposition']:''; ?>" onchange="fieldChanged('disposition');" />
+														<a href="#" onclick="return openDoc('disposition')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="disposition" tabindex="104" maxlength="32" value="<?php echo array_key_exists('disposition',$occArr)?$occArr['disposition']:''; ?>" onchange="fieldChanged('disposition');" />
 													</div>
-													<div style="float:left;margin:3px;" title="If different than institution code">
+													<div id="occurrenceIdDiv" title="If different than institution code">
 														Occurrence ID
-														<a href="#" onclick="return openDoc('occurrenceid')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="occurrenceid" tabindex="105" maxlength="255" style="width:150px;" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="fieldChanged('occurrenceid');" />
+														<a href="#" onclick="return openDoc('occurrenceid')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="occurrenceid" tabindex="105" maxlength="255" value="<?php echo array_key_exists('occurrenceid',$occArr)?$occArr['occurrenceid']:''; ?>" onchange="fieldChanged('occurrenceid');" />
 													</div>
-													<div style="float:left;margin:3px;" title="If different than institution code">
+													<div id="fieldNumberDiv" title="If different than institution code">
 														Field Number
-														<a href="#" onclick="return openDoc('fieldnumber')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="fieldnumber" tabindex="107" maxlength="45" style="width:150px;" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
+														<a href="#" onclick="return openDoc('fieldnumber')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="fieldnumber" tabindex="107" maxlength="45" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
 													</div>
-													<div style="float:left;margin:3px;" title="If different than institution code">
+													<div id="ownerInstitutionCodeDiv" title="If different than institution code">
 														Owner Code
-														<a href="#" onclick="return openDoc('ownerInstitutionCode')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="ownerinstitutioncode" tabindex="108" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
+														<a href="#" onclick="return openDoc('ownerInstitutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="ownerinstitutioncode" tabindex="108" maxlength="32" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="basisOfRecordDiv">
 														Basis of Record
-														<a href="#" onclick="return openDoc('basisOfRecord')">
-															<img class="docimg" src="../../images/qmark.png" />
-														</a><br/>
-														<input type="text" name="basisofrecord" tabindex="109" maxlength="32" style="width:150px;" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
+														<a href="#" onclick="return openDoc('basisOfRecord')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+														<input type="text" name="basisofrecord" tabindex="109" maxlength="32" value="<?php echo array_key_exists('basisofrecord',$occArr)?$occArr['basisofrecord']:($collMap['colltype']=='Preserved Specimens'?'PreservedSpecimen':'Observation'); ?>" onchange="fieldChanged('basisofrecord');" />
 													</div>
-													<div style="float:left;margin:4px 3px;">
+													<div id="languageDiv">
 														Language<br/>
-														<input type="text" name="language" tabindex="111" maxlength="20" style="width:150px;" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
+														<input type="text" name="language" tabindex="111" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 													</div>
-													<div style="float:left;margin:5px 3px;">
+													<div id="labelProjectDiv">
 														Label Project<br/>
 														<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" onchange="fieldChanged('labelproject');" />
 													</div>
-													<div style="float:left;margin:15px 3px 3px 3px;" title="aka label quantity">
+													<div id="duplicateQuantityDiv" title="aka label quantity">
 														Dupe Count: 
-														<input type="text" name="duplicatequantity" tabindex="116" style="width:35px;" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
+														<input type="text" name="duplicatequantity" tabindex="116" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
 													</div>
-													<div style="float:left;margin:3px;">
+													<div id="processingStatusDiv">
 														Processing Status<br/>
 														<?php 
 															$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:'';
@@ -1103,7 +1039,7 @@ if($symbUid){
 														</select>
 													</div>
 												</div>
-												<div style="padding:3px;clear:both;">
+												<div id="pkDiv">
 													<hr/>
 													<div style="float:left;" title="Internal occurrence record Primary Key">
 														<?php if($occId) echo 'Primary Key: '.$occId; ?>
@@ -1231,7 +1167,7 @@ if($symbUid){
 									<?php
 									if($occId && $isEditor){
 										?>
-										<div id="admindiv" style="width:795px;">
+										<div id="admindiv">
 											<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
 												<fieldset>
 													<legend>Delete Occurrence Record</legend>

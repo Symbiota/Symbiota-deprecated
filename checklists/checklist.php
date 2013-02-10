@@ -509,12 +509,15 @@
 								$prevfam = $family;
 							}
 							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
-							echo "<div id='tid-$tid' style='margin-left:10px;'>";
+							echo "<div id='tid-$tid' style='margin:0px 0px 4px 10px;'>";
 							echo "<div>";
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "<a href='".$spUrl."' target='_blank'>";
 							echo "<b><i>".$sppArr["sciname"]."</b></i> ";
 							if(array_key_exists("author",$sppArr)) echo $sppArr["author"];
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"])) echo "</a>";
+							if(array_key_exists('vern',$sppArr)){
+								echo " - <span style='font-weight:bold;'>".$sppArr["vern"]."</span>";
+							}
 							if($isEditor){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
@@ -529,9 +532,6 @@
 								} 
 							}
 							echo "</div>\n";
-							if(array_key_exists('vern',$sppArr)){
-								echo "<div style='margin-left:10px;font-weight:bold;'>".$sppArr["vern"]."</div>";
-							}
 							if($showVouchers){
 								$voucStr = '';
 								if(array_key_exists('vouchers',$sppArr)){
@@ -546,7 +546,7 @@
 									$noteStr = $sppArr['notes'];
 								}
 								if($noteStr || $voucStr){
-									echo "<div style='margin-left:10px;'>".$noteStr.($noteStr && $voucStr?'; ':'').$voucStr."</div>";
+									echo "<div style='margin-left:15px;'>".$noteStr.($noteStr && $voucStr?'; ':'').$voucStr."</div>";
 								}
 							}
 							echo "</div>\n";

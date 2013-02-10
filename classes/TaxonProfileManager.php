@@ -518,20 +518,20 @@ class TaxonProfileManager {
 			while($rowHier = $resultHier->fetch_object()){
 				$hierStr = $rowHier->hierarchystr;
 			}
-			$resultHier->close();
+			$resultHier->free();
 	
 			//Get links
 			if($hierStr){
-				$sql = 'SELECT tl.tlid, tl.url, tl.title, tl.owner, tl.notes, tl.sortsequence '.
+				$sql = 'SELECT tl.tlid, tl.url, tl.icon, tl.title, tl.owner, tl.notes, tl.sortsequence '.
 					'FROM taxalinks tl '.
 					'WHERE (tl.tid IN('.$this->tid.','.$hierStr.')) '.
 					'ORDER BY tl.sortsequence, tl.title';
 				//echo $sql;
 				$result = $this->con->query($sql);
-				while($row = $result->fetch_object()){
-					$links[] = array('title'=>$row->title,'url'=>$row->url,'notes'=>$row->notes,'sortseq'=>$row->sortsequence);
+				while($r = $result->fetch_object()){
+					$links[] = array('title'=>$r->title,'url'=>$r->url,'icon'=>$r->icon,'notes'=>$r->notes,'sortseq'=>$r->sortsequence);
 				}
-				$result->close();
+				$result->free();
 			}
 		}
 		return $links;

@@ -161,7 +161,11 @@ class OccurrenceEditorManager {
 						}
 					}
 					else{
-						$iInFrag[] = trim($v);
+						$vStr = trim($v);
+						$iInFrag[] = $vStr;
+						if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
+							$iInFrag[] = ltrim($vStr,0);
+						}
 					}
 				}
 				$iWhere = '';
@@ -170,7 +174,7 @@ class OccurrenceEditorManager {
 				}
 				if($iInFrag){
 					if($isOccid){
-						$iWhere .= 'OR (o.occid IN("'.implode('","',$iInFrag).'")) ';
+						$iWhere .= 'OR (o.occid IN('.implode(',',$iInFrag).')) ';
 					}
 					else{
 						$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'")) ';
