@@ -1,9 +1,4 @@
 <?php
-/*
- * Created on 26 Feb 2009
- * By E.E. Gilbert
- */
-//error_reporting(E_ALL);
 include_once($serverRoot.'/config/dbconnection.php');
 include_once("Person.php");
 
@@ -108,7 +103,7 @@ class ProfileManager{
 	        	"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
 	        	"u.url, u.biography, u.ispublic, u.notes, ul.username ".
 	            "FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
-	            "WHERE (u.uid = ".$this->con->real_escape_string($userId).")";
+	            "WHERE (u.uid = ".$userId.")";
 	        return $this->getPersonBySql($sqlStr);
     	}
     	return;
@@ -124,7 +119,7 @@ class ProfileManager{
     }
         
     private function getPersonBySql($sqlStr){
-		$person;
+		$person = null;
 		//echo $sqlStr;
     	$result = $this->con->query($sqlStr);
         if($row = $result->fetch_object()){
@@ -151,32 +146,7 @@ class ProfileManager{
             }
         }
         $result->close();
-        //if($person) $this->setPersonProps();
         return $person;
-    }
-
-    private function setPersonProps(){
-		$this->person->setUserDirectoryPath($userDirectoryRoot.$this->person->getUserName()."/");
-        $this->visitId = $this->person->getUserName()."_".microtime();
-        $this->logVisit();
-    }
-    
-    private function logVisit(){
-        /*try{
-            File uDir = new File(person.getUserDirectoryPath());
-            if(!uDir.exists()) uDir.mkdir();
-            Date d = new Date();
-            DateFormat df = DateFormat.getDateInstance(DateFormat.LONG);
-
-            //open the visit file and add a new visit
-            File uVisitLog = new File(person.getUserDirectoryPath() + "user.log");
-            FileWriter fileWriter = new FileWriter(uVisitLog);
-            fileWriter.write($this->visitId + " " + df);
-            fileWriter.close();
-            
-        }catch(Exception e){
-            e.printStackTrace();
-        }*/
     }
 
     public function updateProfile($person){

@@ -115,6 +115,9 @@ if($taxonManager->getSciName() != "unknown"){
 				$uStr = str_replace('--SCINAME--',urlencode($taxonManager->getSciName()),$links[0]['url']);
 				?>
 				<div style="margin-left:25px;clear:both;">
+					<?php 
+
+					?>
 					Go to <a href="<?php echo $uStr; ?>" target="_blank"><?php echo $links[0]['title']; ?></a>...
 				</div>
 				<?php 

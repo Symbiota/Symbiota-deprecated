@@ -184,7 +184,8 @@ $collManager->reset();
 				<h1>Collector Criteria:</h1>
 			</div>
 			<div>
-				Collector's Last Name: <input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Separate multiple terms w/ commas" />
+				Collector's Last Name: 
+				<input type="text" id="collector" size="32" name="collector" value="<?php if(array_key_exists("collector",$collArray)) echo $collArray["collector"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div>
 				Collector's Number: 
@@ -192,7 +193,12 @@ $collManager->reset();
 			</div>
 			<div>
 				Collection Date: 
-				<input type="text" id="eventdate" size="32" name="eventdate" value="<?php if(array_key_exists("eventdate",$collArray)) echo $collArray["eventdate"]; ?>" title="Enter ranges separated by ' to ' or ' - ', e.g.: 5 May 1984 to 1 June 1984" />
+				<input type="text" id="eventdate1" size="32" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$collArray)) echo $collArray["eventdate1"]; ?>" title="Single date or start date of range" /> - 
+				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
+			</div>
+			<div>
+				Catalog Number:
+				<input type="text" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div><hr></div>
 			<div>

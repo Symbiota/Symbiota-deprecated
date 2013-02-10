@@ -1,4 +1,77 @@
+#innertext{
+	padding:	10px;
+	font-size:	12px;
+	background-color: #ffffff;;
+}
 
+#titleDiv{
+	font-weight: bold;
+	font-size: 16px;
+	width: 820px;
+}
+
+#querySymbolDiv{
+	float:right;
+}
+
+#navDiv{
+	width: 820px;
+	clear: both;	
+}
+
+#navDiv.navpath{
+}
+
+#occdiv{
+	position: relative;
+	width: 795px;
+}
+
+#admindiv{
+	width: 795px;
+}
+
+#dupesDiv{
+	float:left;
+	margin:5px 5px;
+}
+
+#dateToggleDiv{
+	float:left;
+	margin:15px 5px;
+}
+
+#dupediv{
+	display:none;
+	float:right;
+	width:150px;
+	border:2px outset blue;
+	background-color:#FFFFFF;
+	padding:3px;
+	font-weight:bold;
+}
+
+#dateextradiv{
+	clear: both;
+	padding:10px;
+	margin:5px;
+	border:1px solid gray;
+	display:none;
+	height:20px;
+}
+
+#idrefToggleDiv{
+	float:left;
+	margin-left:15px;
+	cursor:pointer;
+}
+
+#idrefdiv{
+	display:none;
+	clear:both;
+}
+
+/* Field entry divs and input objects */
 #catalogNumberDiv {
 	float:	left;
 }
@@ -52,7 +125,7 @@
 }
 
 #verbatimEventDateDiv input{
-	width:	200px;
+	width:	180px;
 }
 
 #ymdDiv {
@@ -61,7 +134,7 @@
 }
 
 #ymdDiv input{
-	width:	40px;
+	width:	35px;
 }
 
 #dayOfYearDiv {
@@ -160,7 +233,7 @@
 	width:	150px;
 }
 
-#municipalityRemarksDiv{
+#municipalityDiv{
 	float:	left;
 }
 
@@ -168,6 +241,359 @@
 	width:	150px;
 }
 
+#localityDiv{
+	clear:	both;
+	margin:	4px 0px 2px 0px;
+}
+
+#localityDiv input{
+	width:				99%;
+	background-color:	lightyellow;
+}
+
+#localSecurityDiv{
+	clear:	both;
+	margin-bottom:5px;
+}
+
+#decimalLatitudeDiv{
+	float:		left;
+	margin-top:	2px;
+}
+
+#decimalLatitudeDiv input{
+	width:	88px;
+	background-color:lightyellow;
+}
+
+#decimalLongitudeDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#decimalLongitudeDiv input{
+	width:	88px;
+	background-color:lightyellow;
+}
+
+#coordinateUncertaintyInMetersDiv{
+	float:left;
+}
+
+#coordinateuncertaintyinmeters{
+	width:	70px;
+}
+
+#geodeticDatumDiv{
+	float:	left;
+}
+
+#geodeticDatumDiv input{
+	width:	80px;
+}
+
+#elevationDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#elevationDiv input{
+	width:55px;
+}
+
+#verbatimElevationDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#verbatimElevationDiv input{
+	width:	100px;
+}
+
+#verbatimCoordinatesDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#verbatimCoordinatesDiv input{
+	width:	300px;
+}
+
+#georeferencedByDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#georeferencedByDiv input{
+	width:	150px;
+}
+
+#footprintWktDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#footprintWktDiv textarea{
+	width:	250px;
+	height:	15px;
+}
+
+#georeferenceProtocolDiv{
+	float:	left;
+}
+
+#georeferenceProtocolDiv input{
+	width:	130px;
+}
+
+#georeferenceSourcesDiv{
+	float:	left;
+}
+
+#georeferenceSourcesDiv input{
+	width:	150px;
+}
+
+#georeferenceVerificationStatusDiv{
+	float:	left;
+}
+
+#georeferenceVerificationStatusDiv input{
+	width:	170px;
+}
+
+#georeferenceRemarksDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#georeferenceRemarksDiv input{
+	width:	250px;
+}
+
+#habitatDiv{
+	padding: 2px;
+}
+
+#habitatDiv input{
+	width: 700px;
+}
+
+#substrateDiv{
+	padding: 2px;
+}
+
+#substrateDiv input{
+	width: 688px;
+}
+
+#associatedTaxaDiv{
+	padding: 2px;
+}
+
+#associatedTaxaDiv textarea{
+	height:	15px;
+	width:	620px;
+}
+
+#associatedTaxaDiv img{
+	width:	15px;
+	border:	0px;
+}
+
+#verbatimAttributesDiv{
+	padding: 2px;
+	clear: both;
+}
+
+#verbatimAttributesDiv input{
+	width: 680px;
+}
+
+#occurrenceRemarksDiv{
+	padding: 2px;
+}
+
+#occurrenceRemarksDiv input{
+	width: 680px;
+}
+
+#occurrenceRemarksDiv span{
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+#occurrenceRemarksDiv img{
+	width:15px;
+}
+
+#dynamicPropertiesDiv{
+	padding: 2px;
+	display: none;
+	clear: both;
+}
+
+#dynamicPropertiesDiv input{
+	width: 550px;
+}
+
+#lifeStageDiv{
+	float: left;
+	margin:2px;
+}
+
+#lifeStageDiv input{
+	width: 130px;
+}
+
+#sexDiv{
+	float: left;
+	margin:2px;
+}
+
+#sexDiv input{
+	width: 130px;
+}
+
+#individualCountDiv{
+	float: left;
+	margin: 2px;
+}
+
+#individualCountDiv input{
+	width:120px;
+}
+
+#samplingProtocolDiv{
+	float: left;
+	margin: 2px;
+}
+
+#samplingProtocolDiv input{
+	width: 130px;
+}
+
+#preparationsDiv{
+	float:left;
+	margin:2px;
+}
+
+#preparationsDiv input{
+	width:130px;
+}
+
+#reproductiveConditionDiv{
+	float:left;
+	margin:2px;
+}
+
+#reproductiveConditionDiv select{
+	width:140px;
+}
+
+#reproductiveConditionDiv input{
+	width:140px;
+}
+
+#establishmentMeansDiv{
+	float: left;
+	margin: 2px;
+}
+
+#establishmentMeansDiv input{
+	width: 140px;
+}
+
+#cultivationStatusDiv{
+	float:left;
+	margin:15px 3px 3px 3px;
+}
+
+#typeStatusDiv{
+	float:left;
+	margin:3px;
+}
+
+#typeStatusDiv input{
+	width:150px;
+}
+
+#dispositionDiv{
+	float:left;
+	margin:3px;
+}
+
+#dispositionDiv input{
+	width:200px;
+}
+
+#occurrenceIdDiv{
+	float:left;
+	margin:3px;
+}
+
+#occurrenceIdDiv input{
+	width:150px;
+}
+
+#fieldNumberDiv{
+	float:left;
+	margin:3px;
+}
+
+#fieldNumberDiv input{
+	width:150px;
+}
+
+#ownerInstitutionCodeDiv{
+	float:left;
+	margin:3px;
+}
+
+#ownerInstitutionCodeDiv input{
+	width:150px;
+}
+
+#basisOfRecordDiv{
+	float:left;
+	margin:3px;	
+}
+
+#basisOfRecordDiv input{
+	width:150px;
+}
+
+#languageDiv{
+	float:left;
+	margin:4px 3px;	
+}
+
+#languageDiv input{
+	width:150px;
+}
+
+#labelProjectDiv{
+	float:left;
+	margin:5px 3px;
+}
+
+#duplicateQuantityDiv{
+	float:left;margin:15px 3px 3px 3px;
+}
+
+#duplicateQuantityDiv input{
+	width:35px;
+}
+
+#processingStatusDiv{
+	float:left;
+	margin:3px;
+}
+
+#pkDiv{
+	padding:3px;
+	clear:both;
+}
 
 /*Misc styling*/
 img.docimg { 

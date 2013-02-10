@@ -128,7 +128,7 @@ if($qryArr){
 				'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status','associatedCollectors'=>'Associated Collectors',
 				'verbatimEventDate'=>'Verbatim Event Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
 				'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
-				'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','individualCount'=>'Individual Count',
+				'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol',
 				'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
 				'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
 				'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates','georeferencedBy'=>'Georeferenced By',
