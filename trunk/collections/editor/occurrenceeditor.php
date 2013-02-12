@@ -744,9 +744,7 @@ if($symbUid){
 														<span style="cursor:pointer;padding:3px;" onclick="openMappingAid();" title="Google Maps">
 															<img src="../../images/world40.gif" style="border:0px;width:13px;"  />
 														</span>
-														<a href="#" onclick="geoLocateLocality();">
-															<img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" />
-														</a>
+														<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
 														<input type="button" value="Tools" onclick="toggleCoordDiv();" title="Other Coordinate Formats" />
 													</div>
 													<div id="geodeticDatumDiv">
