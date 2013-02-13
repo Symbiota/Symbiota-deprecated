@@ -455,12 +455,12 @@ if($symbUid){
 											$person = $pHandler->getPersonByUid($symbUid);
 											$userEmail = ($person?$person->getEmail():'');
 											
-											$detVars = 'identby='.$occArr['identifiedby'].'&dateident='.$occArr['dateidentified'].'&sciname='.$occArr['sciname'].
-												'&annotatorname='.$userDisplayName.'&annotatoremail='.$userEmail.
-												($collMap['collectioncode']?'&collectioncode='.$collMap['collectioncode']:'').
-												'&institutioncode='.$collMap['institutioncode'].'&catalognumber='.$occArr['catalognumber'];
+											$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).'&sciname='.urlencode($occArr['sciname']).
+												'&annotatorname='.urlencode($userDisplayName).'&annotatoremail='.urlencode($userEmail).
+												($collMap['collectioncode']?'&collectioncode='.urlencode($collMap['collectioncode']):'').
+												'&institutioncode='.urlencode($collMap['institutioncode']).'&catalognumber='.urlencode($occArr['catalognumber']);
 											
-											$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.$collMap['institutioncode'];
+											$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.urlencode($collMap['institutioncode']);
 											?>
 											<li id="detTab">
 												<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&'.$detVars; ?>" 
