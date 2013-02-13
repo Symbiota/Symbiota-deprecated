@@ -52,12 +52,27 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 	<?php 	
 	$displayLeftMenu = false;
 	include($serverRoot.'/header.php');
+	if(isset($collections_editor_occurrencecleanerCrumbs)){
+		if($collections_editor_occurrencecleanerCrumbs){
+			?>
+			<div class="navpath">
+				<a href='../../index.php'>Home</a> &gt;&gt; 
+				<?php echo $collections_editor_occurrencecleanerCrumbs; ?>
+				<b>Data Cleaning Module</b>
+			</div>
+			<?php 
+		}
+	}
+	else{
+		?>
+		<div class='navpath'>
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+			<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Data Cleaning Module</a>
+		</div>
+	<?php
+	}
 	?>
-	<div class='navpath'>
-		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Data Cleaning Module</a>
-	</div>
 	<!-- inner text -->
 	<div id="innertext">
 		<?php 
