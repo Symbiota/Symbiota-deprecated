@@ -278,9 +278,9 @@ class TaxonomyCleaner{
 			$sqlVerns = "UPDATE taxavernaculars SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
 			$this->conn->query($sqlVerns);
 			
-			$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.$tidNew.')) lj ON tb.caption = lj.caption '.
-				'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
-			$this->conn->query($sqltd);
+			//$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.$tidNew.')) lj ON tb.caption = lj.caption '.
+			//	'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
+			//$this->conn->query($sqltd);
 	
 			$sqltl = "UPDATE taxalinks SET tid = ".$tidNew." WHERE (tid = ".$tid.')';
 			$this->conn->query($sqltl);

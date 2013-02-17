@@ -539,7 +539,7 @@ if($symbUid){
 														?>
 														<div id="dupesDiv">
 															<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
-															<input type="checkbox" name="autodupe" value="<?php echo $autoDupeSearch; ?>" checked />
+															<input type="checkbox" name="autodupe" value="1" <?php echo ($autoDupeSearch?'checked':''); ?> />
 															Auto search
 														</div>
 														<?php
