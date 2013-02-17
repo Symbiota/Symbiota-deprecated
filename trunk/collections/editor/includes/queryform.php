@@ -223,6 +223,7 @@ if($qryArr){
 				<input type="hidden" name="occid" value="" />
 				<input type="hidden" name="occindex" value="0" />
 				<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
+				<input type="hidden" name="autodupe" value="<?php echo (isset($autoDupeSearch)?$autoDupeSearch:0); ?>" />
 				<input type="button" name="submitaction" value="Display Editor" onclick="submitQueryEditor(this.form)" />
 				<input type="button" name="submitaction" value="Display Table" onclick="submitQueryTable(this.form)" />
 				<span style="margin-left:10px;">
