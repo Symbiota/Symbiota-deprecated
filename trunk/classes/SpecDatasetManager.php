@@ -86,7 +86,7 @@ class SpecDatasetManager {
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
 			if($_POST['recordedby']){
-				$sqlWhere .= 'AND (recordedby LIKE "'.trim($_POST['recordedby']).'%") ';
+				$sqlWhere .= 'AND (recordedby LIKE "%'.trim($_POST['recordedby']).'%") ';
 				$sqlOrderBy .= ',(recordnumber'.($rnIsNum?'+1':'').')';
 			}
 			if($_POST['identifier']){
