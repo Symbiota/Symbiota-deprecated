@@ -15,6 +15,10 @@ $isEditor = 0;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 	$isEditor = 1;
 }
+
+if($action == 'listdups'){
+	$dupArr = $cleanManager->getDuplicateRecords();
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -48,10 +52,12 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 		}
 	</script>
 </head>
-<body>
+<body <?php echo (($dupArr)?'style="margin-left: 0px; margin-right: 0px;"':'');?>>
 	<?php 	
 	$displayLeftMenu = false;
-	include($serverRoot.'/header.php');
+	if(!$dupArr){
+		include($serverRoot.'/header.php');
+	}
 	if(isset($collections_editor_occurrencecleanerCrumbs)){
 		if($collections_editor_occurrencecleanerCrumbs){
 			?>
@@ -78,17 +84,17 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 		<?php 
 		if($symbUid && $collId && $isEditor){
 			if(!$action || $action == 'listdups' || $action == 'Merge Duplicate Records'){
+				if(!$dupArr){
+					?>
+					<fieldset style="padding:20px;">
+						<legend><b>Duplicate Catalog Numbers</b></legend>
+						<?php
+				}
 				?>
-				<fieldset style="padding:20px;">
-					<legend><b>Duplicate Catalog Numbers</b></legend>
 					<?php 
 					//Look for duplicate catalognumbers 
 					if($action == 'listdups'){
-						$dupArr = $cleanManager->getDuplicateRecords();
 						if($dupArr){
-							//Get fields and remove unactivated fields
-							$fieldArr = $dupArr['fields'];
-							unset($dupArr['fields']);
 							$recCnt = count($dupArr);
 							//Build table
 							?>
@@ -96,40 +102,39 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 								<div><b>Duplicate Record Count: <?php echo ($recCnt>500?'> 500':$recCnt); ?></b></div>
 								<table class="styledtable">
 									<tr>
-										<th>PK</th>
-										<th><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
-										<th>Catalog Number</th>
-										<?php 
-										foreach($fieldArr as $v){
-											echo '<th>'.$v.'</th>';
-										}
-										?>
+										<th style="width:40px;">ID</th>
+										<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
+										<th style="width:40px;">Catalog Number</th>
+										<th>Scientific Name</th>
+										<th>Collector</th>
+										<th>Collection Number</th>
+										<th>Associated Collectors</th>
+										<th>Collection Date</th>
+										<th>Verbatim Date</th>
+										<th>Country</th>
+										<th>State</th>
+										<th>County</th>
+										<th>Locality</th>
 									</tr>
 									<?php 
 									$setCnt = 0;
-									foreach($dupArr as $catNum => $setArr){
+									foreach($dupArr as $k => $occArr){
 										$setCnt++;
-										foreach($setArr as $occid => $occArr){
-											echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
-											echo '<td><a href="occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a></td>'."\n";
-											echo '<td><input name="dupid[]" type="checkbox" value="'.$catNum.':'.$occid.'" /></td>';
-											echo '<td>'.$catNum.'</td>'."\n";
-											foreach($fieldArr as $v){
-												if(array_key_exists($v,$occArr)){
-													$outStr = $occArr[$v];
-													$titleStr = '';
-													if(strlen($outStr) > 150){
-														$titleStr = $outStr;
-														$outStr = substr($outStr,150).'...';
-													} 
-													echo '<td'.($titleStr?' title="'.$occArr[$v].'"':'').'>'.$outStr.'</td>'."\n";
-												}
-												else{
-													echo '<td>&nbsp;</td>';
-												}
-											}
-											echo '</tr>';
-										}
+										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
+										echo '<td><a href="occurrenceeditor.php?occid='.$occArr['occid'].'" target="_blank">'.$occArr['occid'].'</a></td>'."\n";
+										echo '<td><input name="dupid[]" type="checkbox" value="'.$occArr['catalognumber'].':'.$occArr['occid'].'" /></td>'."\n";
+										echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
+										echo '<td>'.$occArr['sciname'].'</td>'."\n";
+										echo '<td>'.$occArr['recordedBy'].'</td>'."\n";
+										echo '<td>'.$occArr['recordNumber'].'</td>'."\n";
+										echo '<td>'.$occArr['associatedCollectors'].'</td>'."\n";
+										echo '<td>'.$occArr['eventDate'].'</td>'."\n";
+										echo '<td>'.$occArr['verbatimEventDate'].'</td>'."\n";
+										echo '<td>'.$occArr['country'].'</td>'."\n";
+										echo '<td>'.$occArr['stateProvince'].'</td>'."\n";
+										echo '<td>'.$occArr['county'].'</td>'."\n";
+										echo '<td>'.$occArr['locality'].'</td>'."\n";
+										echo '</tr>';
 									}
 									?>
 								
@@ -173,8 +178,12 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 						</div>
 						<?php 
 					}
+				if(!$dupArr){
 					?>
-				</fieldset>
+					</fieldset>
+				<?php
+				}
+				?>
 				<hr style="margin:15px 0px;"/>
 				<?php
 			} 
@@ -217,7 +226,9 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 		?>
 	</div>
 <?php 	
-include($serverRoot.'/footer.php');
+if(!$dupArr){
+	include($serverRoot.'/footer.php');
+}
 ?>
 
 </body>
