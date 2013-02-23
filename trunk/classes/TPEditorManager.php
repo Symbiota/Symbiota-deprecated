@@ -9,7 +9,7 @@ class TPEditorManager {
 	protected $parentTid;
 	protected $family;
 	protected $rankId;
-	protected $language;
+	protected $language = 'English';
  	protected $submittedTid;
  	protected $submittedSciName;
 	protected $taxonCon;
@@ -277,4 +277,3 @@ class TPEditorManager {
 	}
 }
 ?>
-

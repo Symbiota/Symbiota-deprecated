@@ -1,147 +1,34 @@
 <?php
-error_reporting(0);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
-$category = array_key_exists("category",$_REQUEST)?$_REQUEST["category"]:""; 
+$tid = $_REQUEST["tid"];
+$category = array_key_exists("cat",$_REQUEST)?$_REQUEST["cat"]:""; 
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
 $imageEditor = new TPImageEditorManager();
 $editable = false;
+
 if($tid){
 	$imageEditor->setTid($tid);
 	$imageEditor->setLanguage($lang);
-	 
+
 	if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 		$editable = true;
 	}
 	 
-	$status = "";
-	if($editable){
-		if($action == "Submit Image Sort Edits"){
-			$imgSortArr = Array();
-			foreach($_REQUEST as $sortKey => $sortValue){
-				if($sortValue && substr($sortKey,0,6) == "imgid-"){
-					$imgSortArr[substr($sortKey,6)]  = $sortValue;
-				}
-			}
-			$status = $imageEditor->editImageSort($imgSortArr);
-		} 
-		elseif($action == "Upload Image"){
-			$status = $imageEditor->loadImageData();
-		}
-	}
-}
-else{
-	header('Location: tpeditor.php?category='.$category.'&lang='.$lang.'&action='.$action);
-}
-?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
-<html>
-<head>
-	<title><?php echo $defaultTitle." Taxon Editor: ".$imageEditor->getSciName(); ?></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
-	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/speciesprofile.css" rel="stylesheet" />
-	<script type="text/javascript" src="../../js/symb/taxa.tpimageeditor.js"></script>
-</head>
-<body>
-<?php
-$displayLeftMenu = (isset($taxa_admin_tpimageeditorMenu)?$taxa_admin_tpimageeditorMenu:false);
-include($serverRoot.'/header.php');
-if(isset($taxa_admin_tpimageeditorCrumbs)){
-	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
-	echo $taxa_admin_tpimageeditorCrumbs;
-	echo " <b>Taxon Profile Image Editor</b>";
-	echo "</div>";
 }
 ?>
 <!-- This is inner text! --> 
 <div class="innertext">
 	<?php 
 	if($editable && $tid){
-		?>
-		<fieldset style="float:right;">
-			<legend>
-				<b>Menu</b>
-			</legend>
-			<div class="mdiv" style="float:right;cursor:pointer;color:blue;" onclick="toggle('mdiv')">
-				Display Full Menu
-			</div>
-			<div class="mdiv" style="display:none;">
-				<ul style="margin:0px">
-					<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=images">Edit Images</a></li>
-					<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=imagequicksort">Edit Image Sorting Order</a></li>
-					<li><a href="tpimageeditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=imageadd">Add a New Image</a></li>
-					<li><a href="tpdesceditor.php?tid=<?php echo $imageEditor->getTid(); ?>&category=textdescr">Text Descriptions</a></li>
-					<?php if($isAdmin || array_key_exists("Taxonomy",$userRights)){ ?>
-						<li><a href="taxonomydisplay.php?target=<?php echo $imageEditor->getSciName(); ?>">View Taxonomic Tree</a></li>
-						<li><a href="taxonomyeditor.php?target=<?php echo $imageEditor->getTid(); ?>">Edit Taxonomic Placement</a></li>
-						<li><a href="taxonomyloader.php">Add New Taxonomic Name</a></li>
-					<?php } ?>
-					<li><a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>">Return to Taxon Profile Page</a></li>
-				</ul>
-			</div>
-		</fieldset>
-		<?php 
-	 	if($imageEditor->getSubmittedTid()){
-	 		?>
-	 		<div style='font-size:16px;margin-top:5px;margin-left:10px;font-weight:bold;'>
-	 			Redirected from: <i><?php echo $imageEditor->getSubmittedSciName(); ?></i>
-	 		</div>
-	 		<?php  
-	 	}
-	 	?>
-		<div>
-			<span style='font-size:16px;margin-top:15px;margin-left:10px;'>
-				<a href="../index.php?taxon=<?php echo $imageEditor->getTid(); ?>" style="color:#990000;text-decoration:none;">
-					<b><i><?php echo $imageEditor->getSciName(); ?></i></b>
-				</a> 
-				<?php echo $imageEditor->getAuthor(); ?>
-			</span>
-			<?php 
-			if($imageEditor->getRankId() > 140){
-				?>
-				<a href='tpeditor.php?tid=<?php echo $imageEditor->getParentTid(); ?>'><img border='0' height='10px' src='../../images/toparent.jpg' title='Go to Parent' /></a> 
-				<?php 
-			}
-			if($imageEditor->getRankId() == 220 && $childArr = $imageEditor->getChildrenArr()){
-				?>
-				<a href="#" onclick="toggle('childrendiv')"><img border='0' height='10px' src='../../images/tochild.png' title='Go to a child taxon' /></a>
-				<div id="childrendiv" style="width:300px;margin-left:325px;padding:10px;border:2px solid green;display:none;">
-					<b>Go To:</b><br/>
-					<?php 
-					foreach($childArr as $id => $sn){
-						?>
-						<a href='tpeditor.php?tid=<?php echo $id; ?>'>
-							<?php echo $sn; ?>
-						</a>
-						<br/>
-						<?php 
-					}
-					?>
-				</div>
-				<?php 
-			}
-			?>
-		</div>
-		<div id='family' style='margin-left:20px;margin-top:0.25em;'>
-			<b>Family:</b> <?php echo $imageEditor->getFamily();?>
-		</div>
-		<?php 
-		if($status){
-			echo "<h3 style='color:red;'>Error: $status<h3>";
-		}
-
 		if($category == "imagequicksort"){
 			$images = $imageEditor->getImages();
 			?>
 			<div style='clear:both;'>
-				<form action='tpimageeditor.php' method='post' target='_self'>
+				<form action='tpeditor.php' method='post' target='_self'>
 					<table border='0' cellspacing='0'>
 						<tr>
 							<?php 
@@ -190,7 +77,7 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 						</tr>
 					</table>
 					<input name='tid' type='hidden' value='<?php echo $imageEditor->getTid(); ?>'>
-					<input name='category' type='hidden' value='<?php echo $category; ?>'>
+					<input type="hidden" name="tabindex" value="2" />
 					<?php 
 					if($imgCnt%5 != 0) echo "<div style='margin-top:2px;'><input type='submit' name='action' id='imgsortsubmit' value='Submit Image Sort Edits'/></div>\n";
 					?>
@@ -201,7 +88,7 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 		elseif($category == "imageadd"){
 			?>
 			<div style='clear:both;'>
-				<form enctype='multipart/form-data' action='tpimageeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddForm(this);'>
+				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddForm(this);'>
 					<fieldset style='margin:15px;width:90%;'>
 				    	<legend>Add a New Image</legend>
 						<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
@@ -293,7 +180,7 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 							</div>
 						</div>
 						<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
-						<input name='category' type='hidden' value='images'>
+						<input type="hidden" name="tabindex" value="1" />
 						<div style='margin-top:2px;'>
 							<input type='submit' name='action' id='imgaddsubmit' value='Upload Image'/>
 						</div>
@@ -307,7 +194,6 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 			<div style='clear:both;'>
 				<table>
 					<?php 
-					//catagory == images or is null => just list images 
 					$images = $imageEditor->getImages();
 					foreach($images as $imgArr){
 						?>
@@ -437,22 +323,5 @@ if(isset($taxa_admin_tpimageeditorCrumbs)){
 			<?php 
 		}
 	}
-	else{
-		?>
-		<div style="margin:30px;">
-			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				Please 
-				<a href="<?php echo $clientRoot; ?>/profile/index.php?tid=<?php echo $tid; ?>&refurl=<?php echo $clientRoot?>/taxa/admin/tpimageeditor.php">
-					login
-				</a>
-			</div>
-		</div>
-		<?php 
-	}
 	?>
 </div>
-<?php  
-include($serverRoot.'/footer.php');
- ?>
-</body>
-</html>

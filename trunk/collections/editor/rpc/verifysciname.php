@@ -6,7 +6,7 @@ $retArr = Array();
 $sciName = $con->real_escape_string($_REQUEST['sciname']);
 // Is the string length greater than 0?
 if($sciName){
-	$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, ts.family '.
+	$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, ts.family, securitystatus '.
 		'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 		'WHERE t.sciname = "'.$sciName.'" AND ts.taxauthid = 1 ';
 	//echo $sql;
@@ -15,6 +15,7 @@ if($sciName){
 		$retArr['tid'] = $row->tid;
 		$retArr['author'] = utf8_encode($row->author);
 		$retArr['family'] = $row->family;
+		$retArr['sstatus'] = $row->securitystatus;
 	}
 }
 $con->close();

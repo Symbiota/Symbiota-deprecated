@@ -13,38 +13,52 @@ class TPDescEditorManager extends TPEditorManager{
 
 	public function getDescriptions(){
 		$descrArr = Array();
-		$sql = "SELECT tdb.tdbid, tdb.displaylevel, tdb.language, tdb.notes, tdb.caption, tdb.source, tdb.sourceurl, ".
-			"tds.tdsid, tds.heading, tds.statement, tds.notes as stmtnotes, tds.displayheader, tds.sortsequence ".
-			"FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) ".
-			"LEFT JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid ".
-			"WHERE (tdb.tid = ".$this->tid.") AND (ts.taxauthid = 1) ";
-		if($this->language) $sql .=	"AND (tdb.Language = '".$this->language."') ";
-		$sql .=	"ORDER BY tdb.Language, tdb.DisplayLevel, tds.SortSequence";
+		$sql = 'SELECT t.tid, t.sciname, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, tdb.displaylevel, tdb.notes, tdb.language '.
+			'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
+			'INNER JOIN taxa t ON ts.tid = t.tid '.
+			'WHERE (ts.TidAccepted = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
+			'ORDER BY tdb.DisplayLevel';
 		//echo $sql;
-		$result = $this->taxonCon->query($sql);
-		$prevTdbid = 0;
-		while($row = $result->fetch_object()){
-			$tdbid = $row->tdbid;
-			if($tdbid != $prevTdbid){
-				$descrArr[$row->language][$row->displaylevel]["tdbid"] = $tdbid;
-				$descrArr[$row->language][$row->displaylevel]["notes"] = $row->notes;
-				$descrArr[$row->language][$row->displaylevel]["caption"] = $row->caption;
-				$descrArr[$row->language][$row->displaylevel]["source"] = $row->source;
-				$descrArr[$row->language][$row->displaylevel]["sourceurl"] = $row->sourceurl;
+		if($rs = $this->taxonCon->query($sql)){
+			while($r = $rs->fetch_object()){
+				//Load description block info
+				$descrArr[$r->tdbid]['caption'] = $r->caption;
+				$descrArr[$r->tdbid]['source'] = $r->source;
+				$descrArr[$r->tdbid]['sourceurl'] = $r->sourceurl;
+				$descrArr[$r->tdbid]['displaylevel'] = $r->displaylevel;
+				$descrArr[$r->tdbid]['notes'] = $r->notes;
+				$descrArr[$r->tdbid]['language'] = $r->language;
+				$descrArr[$r->tdbid]['tid'] = $r->tid;
+				$descrArr[$r->tdbid]['sciname'] = $r->sciname;
 			}
-			if($tdsid = $row->tdsid){
-				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["heading"] = $row->heading;
-				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["statement"] = $row->statement;
-				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["notes"] = $row->stmtnotes;
-				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["displayheader"] = $row->displayheader;
-				$descrArr[$row->language][$row->displaylevel]["stmts"][$tdsid]["sortsequence"] = $row->sortsequence;
-			}
-			$prevTdbid = $tdbid;
+			$rs->free();
 		}
-		$result->close();
+		else{
+			trigger_error('Unable to get descriptions; '.$this->conn->error);
+		}
+		if($descrArr){
+			//Grab statements
+			$sql2 = 'SELECT tdbid, tdsid, heading, statement, notes, displayheader, sortsequence '.
+				'FROM taxadescrstmts '.
+				'WHERE (tdbid IN('.implode(',',array_keys($descrArr)).')) '.
+				'ORDER BY sortsequence'; 
+			if($rs2 = $this->taxonCon->query($sql2)){
+				while($r2 = $rs2->fetch_object()){
+					$descrArr[$r2->tdbid]["stmts"][$r2->tdsid]["heading"] = $r2->heading;
+					$descrArr[$r2->tdbid]["stmts"][$r2->tdsid]["statement"] = $r2->statement;
+					$descrArr[$r2->tdbid]["stmts"][$r2->tdsid]["notes"] = $r2->notes;
+					$descrArr[$r2->tdbid]["stmts"][$r2->tdsid]["displayheader"] = $r2->displayheader;
+					$descrArr[$r2->tdbid]["stmts"][$r2->tdsid]["sortsequence"] = $r2->sortsequence;
+				}
+				$rs2->free();
+			}
+			else{
+				trigger_error('Unable to get statements; '.$this->conn->error);
+			}
+		}
 		return $descrArr;
 	}
-	
+
 	public function editDescriptionBlock(){
 		$sql = "UPDATE taxadescrblock ".
 			"SET language = ".($_REQUEST["language"]?"\"".$this->cleanInStr($_REQUEST["language"])."\"":"NULL").
@@ -76,62 +90,93 @@ class TPDescEditorManager extends TPEditorManager{
 
 	public function addDescriptionBlock(){
 		global $symbUid;
-		$sql = "INSERT INTO taxadescrblock(tid,uid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"").
-			"notes,caption,source,sourceurl) ".
-			"VALUES(".$this->taxonCon->real_escape_string($_REQUEST["tid"]).",".$this->taxonCon->real_escape_string($symbUid).
-			",".($_REQUEST["language"]?"\"".$this->cleanInStr($_REQUEST["language"])."\",":"").
-			($_REQUEST["displaylevel"]?$this->taxonCon->real_escape_string($_REQUEST["displaylevel"]).",":"").
-			($_REQUEST["notes"]?"\"".$this->cleanInStr($_REQUEST["notes"])."\",":"NULL,").
-			($_REQUEST["caption"]?"\"".$this->cleanInStr($_REQUEST["caption"])."\",":"NULL,").
-			($_REQUEST["source"]?"\"".$this->cleanInStr($_REQUEST["source"])."\",":"NULL,").
-			($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").")";
+		if(is_numeric($_REQUEST["tid"])){
+			$sql = "INSERT INTO taxadescrblock(tid,uid,".($_REQUEST["language"]?"language,":"").($_REQUEST["displaylevel"]?"displaylevel,":"").
+				"notes,caption,source,sourceurl) ".
+				"VALUES(".$_REQUEST["tid"].",".$symbUid.
+				",".($_REQUEST["language"]?"\"".$this->cleanInStr($_REQUEST["language"])."\",":"").
+				($_REQUEST["displaylevel"]?$this->taxonCon->real_escape_string($_REQUEST["displaylevel"]).",":"").
+				($_REQUEST["notes"]?"\"".$this->cleanInStr($_REQUEST["notes"])."\",":"NULL,").
+				($_REQUEST["caption"]?"\"".$this->cleanInStr($_REQUEST["caption"])."\",":"NULL,").
+				($_REQUEST["source"]?"\"".$this->cleanInStr($_REQUEST["source"])."\",":"NULL,").
+				($_REQUEST["sourceurl"]?"\"".$_REQUEST["sourceurl"]."\"":"NULL").")";
 			//echo $sql;
-		$status = "";
+			$status = "";
+			if(!$this->taxonCon->query($sql)){
+				$status = "ERROR adding description block: ".$this->taxonCon->error;
+				//$status .= "\nSQL: ".$sql;
+			}
+		}
+		return $status;
+	}
+	
+	public function remapDescriptionBlock($tdbid){
+		$statusStr = '';
+		$displayLevel = 1;
+		$sql = 'SELECT max(displaylevel) as maxdl FROM taxadescrblock WHERE tid = '.$this->tid; 
+		if($rs = $this->taxonCon->query($sql)){
+			if($r = $rs->fetch_object()){
+				$displayLevel = $r->maxdl + 1;
+			}
+			$rs->free();
+		}
+		
+		$sql = 'UPDATE taxadescrblock SET tid = '.$this->tid.',displaylevel = '.$displayLevel.' WHERE tdbid = '.$tdbid;
+		//echo $sql;
 		if(!$this->taxonCon->query($sql)){
-			$status = "ERROR adding description block: ".$this->taxonCon->error;
-			//$status .= "\nSQL: ".$sql;
+			$statusStr = 'ERROR remapping description block: '.$this->taxonCon->error;
+		}
+		return $statusStr;
+	}
+
+	public function addStatement($stArr){
+		$status = '';
+		$stmtStr = $this->cleanInStr($stArr['statement']);
+		if(substr($stmtStr,0,3) == '<p>' && substr($stmtStr,-4) == '</p>'){
+			$stmtStr = trim(substr($stmtStr,3,strlen($stmtStr)-7));
+		}
+		if($stmtStr && $stArr['tdbid'] && is_numeric($stArr['tdbid'])){
+			$sql = 'INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader'.($stArr['sortsequence']?',sortsequence':'').') '.
+				'VALUES('.$stArr['tdbid'].',"'.$this->cleanInStr($stArr['heading']).
+				'","'.$stmtStr.'",'.(array_key_exists('displayheader',$stArr)?'1':'0').
+				($stArr['sortsequence']?','.$this->cleanInStr($stArr['sortsequence']):'').')';
+			//echo $sql;
+			if(!$this->taxonCon->query($sql)){
+				$status = 'ERROR adding description statement: '.$this->taxonCon->error;
+			}
+		}
+		return $status;
+	}
+	
+	public function editStatement($stArr){
+		$status = "";
+		$stmtStr = $this->cleanInStr($stArr['statement']);
+		if(substr($stmtStr,0,3) == '<p>' && substr($stmtStr,-4) == '</p>'){
+			$stmtStr = trim(substr($stmtStr,3,strlen($stmtStr)-7));
+		}
+		if($stmtStr && $stArr['tdsid'] && is_numeric($stArr["tdsid"])){
+			$sql = 'UPDATE taxadescrstmts '.
+				'SET heading = "'.$this->cleanInStr($stArr['heading']).'",'.
+				'statement = "'.$stmtStr.'"'.
+				(array_key_exists('displayheader',$stArr)?',displayheader = 1':',displayheader = 0').
+				($stArr['sortsequence']?',sortsequence = '.$this->cleanInStr($stArr['sortsequence']):'').
+				' WHERE (tdsid = '.$stArr['tdsid'].')';
+			//echo $sql;
+			if(!$this->taxonCon->query($sql)){
+				$status = "ERROR editing description statement: ".$this->taxonCon->error;
+			}
 		}
 		return $status;
 	}
 
-	public function editStatement(){
-		$sql = "UPDATE taxadescrstmts ".
-			"SET heading = \"".$this->cleanInStr($_REQUEST["heading"])."\",".
-			"statement = \"".$this->cleanInStr($_REQUEST["statement"])."\"".
-			(array_key_exists("displayheader",$_REQUEST)?",displayheader = 1":",displayheader = 0").
-			($_REQUEST["sortsequence"]?",sortsequence = ".$this->taxonCon->real_escape_string($_REQUEST["sortsequence"]):"").
-			" WHERE (tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]).')';
-		//echo $sql;
+	public function deleteStatement($tdsid){
 		$status = "";
-		if(!$this->taxonCon->query($sql)){
-			$status = "ERROR editing description statement: ".$this->taxonCon->error;
-			//$status .= "\nSQL: ".$sql;
-		}
-		return $status;
-	}
-
-	public function deleteStatement(){
-		$sql = "DELETE FROM taxadescrstmts WHERE (tdsid = ".$this->taxonCon->real_escape_string($_REQUEST["tdsid"]).')';
-		//echo $sql;
-		$status = "";
-		if(!$this->taxonCon->query($sql)){
-			$status = "ERROR deleting description statement: ".$this->taxonCon->error;
-			//$status .= "\nSQL: ".$sql;
-		}
-		return $status;
-	}
-
-	public function addStatement(){
-		$sql = "INSERT INTO taxadescrstmts(tdbid,heading,statement,displayheader".($_REQUEST["sortsequence"]?",sortsequence":"").") ".
-			"VALUES(".$this->taxonCon->real_escape_string($_REQUEST["tdbid"]).",\"".$this->cleanInStr($_REQUEST["heading"]).
-			"\",\"".$this->cleanInStr($_REQUEST["statement"])."\",".
-			(array_key_exists("displayheader",$_REQUEST)?"1":"0").
-			($_REQUEST["sortsequence"]?",".$this->taxonCon->real_escape_string($_REQUEST["sortsequence"]):"").")";
-		//echo $sql;
-		$status = "";
-		if(!$this->taxonCon->query($sql)){
-			$status = "ERROR adding description statement: ".$this->taxonCon->error;
-			//$status .= "\nSQL: ".$sql;
+		if(is_numeric($tdsid)){
+			$sql = "DELETE FROM taxadescrstmts WHERE (tdsid = ".$tdsid.')';
+			//echo $sql;
+			if(!$this->taxonCon->query($sql)){
+				$status = "ERROR deleting description statement: ".$this->taxonCon->error;
+			}
 		}
 		return $status;
 	}

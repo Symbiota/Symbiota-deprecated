@@ -14,7 +14,7 @@ class TPImageEditorManager extends TPEditorManager{
 
 	private $sourceGdImg;
 	private $exif;
-		
+
  	public function __construct(){
  		parent::__construct();
 		set_time_limit(120);
