@@ -649,9 +649,9 @@ class TaxonProfileManager {
 			$descriptions = Array();
 			$sql = 'SELECT DISTINCT tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
 				'tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
-				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.TidAccepted = tdb.tid) '.
+				'FROM (taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid) '.
 				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
-				'WHERE (tdb.tid = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
+				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) AND (tdb.Language = "'.$this->language.'") '.
 				'ORDER BY tdb.displaylevel,tds.sortsequence';
 			//echo $sql;
 			$result = $this->con->query($sql);

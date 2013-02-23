@@ -451,8 +451,18 @@ function verifyFullformSciName(){
 				f.tidtoadd.value = retObj.tid;
 				f.scientificnameauthorship.value = retObj.author;
 				f.family.value = retObj.family;
+				if(retObj.sstatus == "1"){
+					f.localitysecurity.checked = true;
+					fieldChanged('localitysecurity');
+					document.getElementById("locsecreason").style.display = "inline";
+				}
+				else if(f.localitysecurity.checked == true){
+					f.localitysecurity.checked = false;
+					fieldChanged('localitysecurity');
+				}
 			}
 			else{
+				f.tidtoadd.value = "";
 				f.scientificnameauthorship.value = "";
 				f.family.value = "";
 				alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");

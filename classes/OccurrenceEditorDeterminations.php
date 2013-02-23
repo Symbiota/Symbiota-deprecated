@@ -56,10 +56,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$sortSeq = 2100-$matches[1];
 		}
 		//Load new determination into omoccurdeterminations
+		$sciname = $this->cleanInStr($detArr['sciname']);
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 			'VALUES ('.$detArr['occid'].',"'.$this->cleanInStr($detArr['identifiedby']).'","'.$this->cleanInStr($detArr['dateidentified']).'","'.
-			$this->cleanInStr($detArr['sciname']).'",'.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
+			$sciname.'",'.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
 			($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
 			($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 			($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
@@ -75,17 +76,26 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'FROM omoccurrences WHERE (occid = '.$detArr['occid'].')';
 				$this->conn->query($sqlInsert);
 				//echo "<div>".$sqlInsert."</div>";
+				//Check to see if taxon has a locality security protection (rare, threatened, or sensitive species)
+				$sStatus = 0;
+				$sqlSs = 'SELECT securitystatus FROM taxa WHERE (sciname = "'.$sciname.'")';
+				$rsSs = $this->conn->query($sqlSs);
+				if($rSs = $rsSs->fetch_object()){
+					if($rSs->securitystatus == 1) $sStatus = 1;
+				}
+				$rsSs->free();
+				
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
 					'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
 					'family = '.($detArr['family']?'"'.$this->cleanInStr($detArr['family']).'"':'NULL').','.
-					'sciname = "'.$this->cleanInStr($detArr['sciname']).'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
+					'sciname = "'.$sciname.'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
 					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
 					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
 					'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').', '.
-					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' '.
-					'WHERE (occid = '.$detArr['occid'].')';
+					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').', localitysecurity = '.$sStatus.
+					' WHERE (occid = '.$detArr['occid'].')';
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
 			}
@@ -129,9 +139,12 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 	public function editDetermination($detArr){
 		$status = "Determination editted successfully!";
+		//Update determination table
 		$sql = 'UPDATE omoccurdeterminations '.
-			'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'", sciname = "'.$this->cleanInStr($detArr['sciname']).
-			'", scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
+			'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", '.
+			'dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'", '.
+			'sciname = "'.$this->cleanInStr($detArr['sciname']).'", '.
+			'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
 			'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
 			'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 			'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.
@@ -165,29 +178,30 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//echo "<div>".$sqlInsert."</div>";
 		//Update omoccurrences to reflect this determination
 		$tid = 0;
-		$sqlTid = 'SELECT t.tid FROM omoccurdeterminations d INNER JOIN taxa t ON d.sciname = t.sciname WHERE (d.detid = '.$detId.')';
+		$sStatus = 0;
+		$family = '';
+		$sqlTid = 'SELECT t.tid, t.securitystatus, ts.family '.
+			'FROM omoccurdeterminations d INNER JOIN taxa t ON d.sciname = t.sciname '.
+			'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (d.detid = '.$detId.') AND (taxauthid = 1)';
 		$rs = $this->conn->query($sqlTid);
 		if($r = $rs->fetch_object()){
 			$tid = $r->tid;
+			$family = $r->family;
+			if($r->securitystatus == 1) $sStatus = 1;
 		}
-		$rs->close();
-		$family = '';
-		if($tid){
-			$sqlFam = 'SELECT family FROM taxstatus WHERE taxauthid = 1 AND (tid = '.$tid.')';
-			$rs = $this->conn->query($sqlFam);
-			if($r = $rs->fetch_object()){
-				$family = $r->family;
-			}
-		}
+		$rs->free();
+
 		$sqlNewDet = 'UPDATE omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
 			'SET o.identifiedBy = d.identifiedBy, o.dateIdentified = d.dateIdentified,o.family = '.($family?'"'.$family.'"':'NULL').','.
 			'o.sciname = d.sciname,o.genus = NULL,o.specificEpithet = NULL,o.taxonRank = NULL,o.infraspecificepithet = NULL,o.scientificname = NULL,'.
 			'o.scientificNameAuthorship = d.scientificnameauthorship,o.identificationQualifier = d.identificationqualifier,'.
 			'o.identificationReferences = d.identificationreferences,o.identificationRemarks = d.identificationremarks,'.
-			'o.tidinterpreted = '.($tid?$tid:'NULL').' WHERE (detid = '.$detId.')';
+			'o.tidinterpreted = '.($tid?$tid:'NULL').', o.localitysecurity = '.$sStatus.
+			' WHERE (detid = '.$detId.')';
 		//echo "<div>".$sqlNewDet."</div>";
 		$this->conn->query($sqlNewDet);
-		
+
 		if($remapImages){
 			if($tid){
 				$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occid.')';
