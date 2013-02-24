@@ -1,9 +1,4 @@
 <?php
-/*
- * Created on Jun 11, 2006
- * By E.E. Gilbert
-*/
-//error_reporting(0);
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ImageDetailManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -23,18 +18,18 @@ $status = "";
 if($isEditor){
 	if($action == "Submit Image Edits"){
 		$status = $imgManager->editImage();
-		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
+		if(is_numeric($status)) header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
 	}
 	elseif($action == "Transfer Image"){
 		$imgManager->changeTaxon($_REQUEST["targettid"],$_REQUEST["sourcetid"]);
-		header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$_REQUEST["targettid"].'&category=images' );
+		header( 'Location: ../taxa/admin/tpeditor.php?tid='.$_REQUEST["targettid"].'&tabindex=1' );
 	}
 	elseif($action == "Delete Image"){
 		$imgDel = $_REQUEST["imgid"];
 		$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
 		$status = $imgManager->deleteImage($imgDel, $removeImg);
 		if(is_numeric($status)){
-			header( 'Location: ../taxa/admin/tpimageeditor.php?tid='.$status.'&category=images' );
+			header( 'Location: ../taxa/admin/tpeditor.php?tid='.$status.'&tabindex=1' );
 		}
 	}
 }
