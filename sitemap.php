@@ -150,7 +150,7 @@ $smManager = new SiteMapManager();
 						</div>
 						<ul>
 							<li>
-								<a href="taxa/admin/tpimageeditor.php?category=images" target="_blank">
+								<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
 									Basic Field Image Submission 
 								</a>
 							</li>
@@ -183,7 +183,7 @@ $smManager = new SiteMapManager();
 										echo '<div style="margin:10px;"><b>'.$clArr[$_REQUEST['clid']].':</b> '.count($tArr).' taxa without images</div>';
 										echo "<ul style='margin:10px'>\n";
 										foreach($tArr as $tid => $sn){
-											echo "<li><a href='taxa/admin/tpimageeditor.php?tid=".$tid."&category=imageadd' target='_blank'>".$sn."</a></li>\n";
+											echo "<li><a href='taxa/admin/tpeditor.php?tid=".$tid."&category=imageadd&tabindex=3' target='_blank'>".$sn."</a></li>\n";
 										}
 										echo "</ul>\n";
 										echo '</fieldset>';
@@ -213,7 +213,7 @@ $smManager = new SiteMapManager();
 										echo "<ul>";
 										foreach($tArr as $tid => $sn){
 											echo '<li>';
-											echo '<a href="taxa/admin/tpimageeditor.php?tid='.$tid.'&category=imageadd" target="_blank">'.$sn.'</a>';
+											echo '<a href="taxa/admin/tpeditor.php?tid='.$tid.'&category=imageadd&tabindex=3" target="_blank">'.$sn.'</a>';
 											echo "</li>";
 										}
 										echo "</ul>";
@@ -257,11 +257,11 @@ $smManager = new SiteMapManager();
 							</div>
 	            			<ul>
 	            				<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
-								<li><a href="taxa/admin/tpdesceditor.php?taxon=&category=textdescr">Text Descriptions</a></li>
-								<li><a href="taxa/admin/tpimageeditor.php?taxon=&category=images">Edit Images</a></li>
+								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4">Text Descriptions</a></li>
+								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1">Edit Images</a></li>
 								<ul>
-									<li><a href="taxa/admin/tpimageeditor.php?taxon=&category=imagequicksort">Edit Image Sorting Order</a></li>
-									<li><a href="taxa/admin/tpimageeditor.php?taxon=&category=imageadd">Add a New Image</a></li>
+									<li><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2">Edit Image Sorting Order</a></li>
+									<li><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3">Add a New Image</a></li>
 								</ul>
 	            			</ul>
 			            	<?php 

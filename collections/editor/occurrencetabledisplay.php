@@ -54,7 +54,7 @@ if($symbUid){
 	if($collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
 		if($isGenObs){ 
-			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+			if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 				//Approved General Observation editors can add records
 				$isEditor = 2;
 			}

@@ -217,7 +217,7 @@ class ImageDetailManager{
 						if(!unlink($imgDelPath)){
 							$status = 'ERROR: Deleted records from database successfully but FAILED to delete image from server. The Image will have to be deleted manually. ';
 							$status .= '<br/>PATH: '.$imgDelPath;
-							$status .= '<br/>Return to <a href="../taxa/admin/tpimageeditor.php?tid='.$tid.'&category=images">Taxon Editor</a>';
+							$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
 						}
 					}
 					$imgTnDelPath = str_replace($imageRootUrl,$imageRootPath,$imgThumbnailUrl);
