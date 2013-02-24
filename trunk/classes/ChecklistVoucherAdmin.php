@@ -170,7 +170,7 @@ class ChecklistVoucherAdmin {
 
 	public function getConflictVouchers(){
 		$retArr = Array();
-		$sql = 'SELECT t.tid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
+		$sql = 'SELECT DISTINCT t.tid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
 			'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '. 
 			'INNER JOIN fmvouchers v ON o.occid = v.occid '. 
 			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '. 

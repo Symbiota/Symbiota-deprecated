@@ -92,7 +92,7 @@ if($symbUid){
 			<ul>
 				<?php 
 				foreach($cArr as $collId => $cName){
-					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'">'.$cName.'</a></li>';
+					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
@@ -110,7 +110,7 @@ if($symbUid){
 			<ul>
 				<?php 
 				foreach($cArr as $collId => $cName){
-					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'">'.$cName.'</a></li>';
+					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
@@ -123,4 +123,3 @@ else{
 }
 ?>	
 </div>
-
