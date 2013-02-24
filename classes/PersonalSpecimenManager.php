@@ -4,9 +4,6 @@ include_once($serverRoot.'/config/dbconnection.php');
 class PersonalSpecimenManager {
 
 	private $conn;
-	private $collId;
-	private $collName;
-	private $collType;
 	private $uid;
 
 	function __construct() {
@@ -17,41 +14,30 @@ class PersonalSpecimenManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function getObservationArr(){
+	public function getOccurrenceArr(){
 		global $userRights;
 		$retArr = array();
 		if($this->uid){
-			$isAdmin = (array_key_exists('SuperAdmin',$userRights)?1:0);
-			$collIdStr = '';
-			if(!$isAdmin){
-				foreach($userRights as $k => $v){
-					if($k == 'CollAdmin'){
-						$collIdStr .= ','.implode(',',$v);
+			$cArr = array();
+			if(array_key_exists('CollAdmin',$userRights)) $cArr = $userRights['CollAdmin'];
+			if(array_key_exists('CollEditor',$userRights)) $cArr = array_merge($cArr,$userRights['CollEditor']);
+			if($cArr){
+				$sql = 'SELECT collid, collectionname, colltype, CONCAT_WS(" ",institutioncode,collectioncode) AS instcode '.
+					'FROM omcollections WHERE collid IN('.implode(',',$cArr).') ORDER BY collectionname';
+				//echo $sql;
+				if($rs = $this->conn->query($sql)){
+					while($r = $rs->fetch_object()){
+						$retArr[strtolower($r->colltype)][$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
 					}
-					if($k == 'CollEditor'){
-						$collIdStr .= ','.implode(',',$v);
-					}
+					$rs->free();
 				}
-			}
-			$sql = 'SELECT collid, collectionname, CONCAT_WS(" ",institutioncode,collectioncode) AS instcode '.
-				'FROM omcollections WHERE colltype = "general observations" '; 
-			if($collIdStr){
-				$sql .= 'AND collid IN('.substr($collIdStr,1).') ';
-			}
-			$sql .= 'ORDER BY collectionname';
-			//echo $sql;
-			if($rs = $this->conn->query($sql)){
-				while($r = $rs->fetch_object()){
-					$retArr[$r->collid] = $r->collectionname.($r->instcode?' ('.$r->instcode.')':'');
-				}
-				$rs->close();
 			}
 		}
 		return $retArr;
 	}
 
-    public function dlSpecBackup($characterSet, $zipFile = 1){
-    	global $charset, $paramsArr;
+	public function dlSpecBackup($collId, $characterSet, $zipFile = 1){
+		global $charset, $paramsArr;
 
 		$tempPath = $this->getTempPath();
     	$buFileName = $paramsArr['un'].'_'.time();
@@ -90,7 +76,7 @@ class PersonalSpecimenManager {
 		//Query and output values
     	$sql = 'SELECT '.$headerStr.
     		' FROM omoccurrences '.
-    		'WHERE collid = '.$this->collId.' AND observeruid = '.$this->uid;
+    		'WHERE collid = '.$collId.' AND observeruid = '.$this->uid;
     	if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_row()){
 				if($characterSet && $characterSet != $cSet){
@@ -144,10 +130,10 @@ class PersonalSpecimenManager {
 		return $fileUrl;
 	}
 	
-	public function getRecordCount(){
+	public function getRecordCount($collId){
 		$retCnt = 0;
 		if($this->uid){
-			$sql = 'SELECT count(*) AS reccnt FROM omoccurrences WHERE observeruid = '.$this->uid.' AND collid = '.$this->collId;
+			$sql = 'SELECT count(*) AS reccnt FROM omoccurrences WHERE observeruid = '.$this->uid.' AND collid = '.$collId;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					$retCnt = $r->reccnt;
@@ -160,31 +146,6 @@ class PersonalSpecimenManager {
 
 	public function setUid($id){
 		$this->uid = $id;
-	}
-
-	public function setCollId($collId){
-		$this->collId = $collId;
-	}
-	
-	public function setCollectionMetadata(){
-		if($this->collId){
-			$sql = 'SELECT collectionname, colltype FROM omcollections WHERE collid = '.$this->collId;
-			if($rs = $this->conn->query($sql)){
-				while($r = $rs->fetch_object()){
-					$this->collName = $r->collectionname;
-					$this->collType = $r->colltype;
-				}
-				$rs->close();
-			}
-		}
-	}
-
-	public function getCollName(){
-		return $this->collName;
-	}
-
-	public function getCollType(){
-		return $this->collType;
 	}
 
 	private function getTempPath(){

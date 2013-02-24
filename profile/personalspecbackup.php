@@ -9,7 +9,6 @@ $cSet = array_key_exists("cset",$_REQUEST)?$_REQUEST["cset"]:'utf8';
 $zipFile = array_key_exists("zipfile",$_REQUEST)?$_REQUEST["zipfile"]:0;
 
 $dlManager = new PersonalSpecimenManager();
-$dlManager->setCollId($collId);
 $dlManager->setUid($symbUid);
 
 $editable = 0;
@@ -34,7 +33,7 @@ if($isAdmin
 	if($editable){
 		if($action == 'Perform Backup'){
 			echo '<ul>';
-			$dlFile = $dlManager->dlSpecBackup($cSet,$zipFile);
+			$dlFile = $dlManager->dlSpecBackup($collId,$cSet,$zipFile);
 			if($dlFile){
 				echo '<li style="font-weight:bold;">Backup Complete!</li>';
 				echo '<li style="font-weight:bold;">Click on file to download: <a href="'.$dlFile.'">'.$dlFile.'</a></li>';

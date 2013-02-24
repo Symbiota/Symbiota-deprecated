@@ -51,7 +51,7 @@ if($isAdmin){
 	}
 	?> 
         <!-- This is inner text! --> 
-        <div class="innertext">
+        <div id="innertext">
             <div style="float:right;">
 				<div style="margin:10px 0px 15px 0px;">
 					<fieldset style="background-color:#FFFFCC;padding:0px 10px 10px 10px;">

@@ -37,7 +37,7 @@ $smManager = new SiteMapManager();
 	    
 	?> 
         <!-- This is inner text! --> 
-        <div class="innertext">
+        <div id="innertext">
             <h1>Site Map</h1>
             <div style="margin:10px;">
 	            <h2>Collections</h2>

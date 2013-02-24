@@ -8,38 +8,15 @@ $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"
 
 $specHandler = new PersonalSpecimenManager();
 
-$collArr = array();
-$isEditor = 0;
+$occArr = array();
 if($symbUid){
 	$specHandler->setUid($symbUid);
-	$collArr = $specHandler->getObservationArr();
-	if(!$collId && $collArr) $collId = current(array_keys($collArr));
-	if($collId){
-		$specHandler->setCollId($collId);
-		$specHandler->setCollectionMetadata();
-		if($isAdmin	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
-			|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
-			$isEditor = 1;
-		}
-	}
+	$occArr = $specHandler->getOccurrenceArr();
 }
 
 $statusStr = '';
-if($isEditor){
-	if($formSubmit){
-		if($formSubmit == ''){
-
-		}
-		elseif($formSubmit == ''){
-			
-		}
-		
-	}
-}
-
 ?>
 <div style="margin:10px;">
-
 <?php 
 if($symbUid){
 	//Collection is defined and User is logged-in and have permissions
@@ -52,31 +29,14 @@ if($symbUid){
 		<hr/>
 		<?php 
 	}
-	if($collArr){
-		if(count($collArr) > 1){
+	if(array_key_exists('general observations',$occArr)){
+		$genArr = $occArr['general observations'];
+		foreach($genArr as $collId => $cName){
 			?>
-			<div style="float:right;">
-				<form name="obtionsform" action="viewprofile.php" method="post">
-					<fieldset>
-						<legend><b>Project:</b></legend> 
-						<select name="collid" onchange="this.form.submit()">
-							<?php 
-							foreach($collArr as $k => $v){
-								echo '<option value="'.$k.'" '.($collId==$k?'SELECTED':'').'>'.$v.'</option>'."<br/>";
-							}
-							?>
-						</select>
-					</fieldset>
-				</form>
-			</div>
-			<?php
-		}
-		?>
-		<div style="clear:both;">
-			<fieldset style="margin:15px;">
-				<legend style="font-weight:bold;"><b><?php echo $collArr[$collId]; ?></b></legend>
+			<fieldset style="margin:15px;padding:15px;">
+				<legend style="font-weight:bold;"><b><?php echo $cName; ?></b></legend>
 				<div style="margin-left:10px">
-					Total Record Count: <?php echo $specHandler->getRecordCount(); ?>
+					Total Record Count: <?php echo $specHandler->getRecordCount($collId); ?>
 				</div>
 				<ul>
 					<li>
@@ -99,18 +59,11 @@ if($symbUid){
 							Print Labels
 						</a>
 					</li>
-					
-					<?php
-					if(stripos($specHandler->getCollType(),'observations') !== 'false'){
-						?>
-						<li>
-							<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
-								Submit image vouchered observation
-							</a>
-						</li>
-						<?php
-					}
-					?>
+					<li>
+						<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
+							Submit image vouchered observation
+						</a>
+					</li>
 					<!-- 
 					<li>Import csv file</li>
 					 -->
@@ -121,11 +74,48 @@ if($symbUid){
 					</li>
 				</ul>
 			</fieldset>
-		</div>	
-		<?php
+			<?php
+		}
 	}
 	else{
 		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to active this feature.</div>';
+	}
+	if(array_key_exists('preserved specimens',$occArr)){
+		$cArr = $occArr['preserved specimens'];
+		?>
+		<fieldset style="margin:15px;padding:15px;">
+			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
+			<div>
+				List of collections to which you have explicit editing rights. 
+				Click a collection to be taken to the managment menu for that collection.   
+			</div>
+			<ul>
+				<?php 
+				foreach($cArr as $collId => $cName){
+					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'">'.$cName.'</a></li>';
+				}
+				?>
+			</ul>
+		</fieldset>
+		<?php 
+	}
+	if(array_key_exists('observations',$occArr)){
+		$cArr = $occArr['observations'];
+		?>
+		<fieldset style="margin:15px;padding:15px;">
+			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
+			<div>
+				List of observation projects to which you have explicit editing rights. 
+			</div>
+			<ul>
+				<?php 
+				foreach($cArr as $collId => $cName){
+					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'">'.$cName.'</a></li>';
+				}
+				?>
+			</ul>
+		</fieldset>
+		<?php 
 	}
 }
 else{
