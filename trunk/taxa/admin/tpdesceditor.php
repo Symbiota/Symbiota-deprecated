@@ -214,5 +214,8 @@ if($editable){
 			<?php 
 		}
 	}
+	else{
+		echo '<h2>No descriptions available.</h2>';
+	}
 }
 ?>
