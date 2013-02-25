@@ -46,7 +46,7 @@ class CollectionProfileManager {
 		if($this->collId){
 			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
-				"c.collid, c.CollectionCode, c.CollectionName, c.briefdescription, ".
+				"c.collid, c.CollectionCode, c.CollectionName, c.BriefDescription, ".
 				"c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
 				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
 				"c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
