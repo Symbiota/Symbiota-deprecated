@@ -81,8 +81,9 @@ class OccurrenceEditorDupes {
 			}
 		}
 		if($lastName){
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") ';
+			$sql = 'SELECT occid '.
+				'FROM omoccurrences '.
+				'WHERE (sciname IS NOT NULL) AND (recordedby LIKE "%'.$lastName.'%") ';
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
 			$runQry = true;
 			if($collNum){
