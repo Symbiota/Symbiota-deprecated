@@ -46,7 +46,7 @@ class CollectionProfileManager {
 		if($this->collId){
 			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
-				"c.collid, c.CollectionCode, c.CollectionName, ".
+				"c.collid, c.CollectionCode, c.CollectionName, c.briefdescription, ".
 				"c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
 				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
 				"c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
@@ -70,6 +70,7 @@ class CollectionProfileManager {
 				$returnArr['phone'] = $row->Phone;
 				$returnArr['collectioncode'] = $row->CollectionCode;
 				$returnArr['collectionname'] = $this->cleanOutStr($row->CollectionName);
+				$returnArr['briefdescription'] = $this->cleanOutStr($row->BriefDescription);
 				$returnArr['fulldescription'] = $this->cleanOutStr($row->FullDescription);
 				$returnArr['homepage'] = $row->Homepage;
 				$returnArr['individualurl'] = $row->individualurl;
