@@ -152,6 +152,19 @@ if($tid){
 							<b>Manager:</b> 
 							<input name='owner' type='text' value='' size='35' maxlength='100'>
 						</div>
+						<div style='margin-top:2px;' title="URL to source project. Use when linking to an external image.">
+							<b>Source URL:</b> 
+							<input name='sourceurl' type='text' value='' size='70' maxlength='250'>
+						</div>
+						<div style='margin-top:2px;'>
+							<b>Copyright:</b> 
+							<input name='copyright' type='text' value='' size='70' maxlength='250'>
+						</div>
+						<div style='margin-top:2px;'>
+							<b>Occurrence Record #:</b> 
+							<input id="occidadd" name="occid" type="text" value=""/>
+							<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
+						</div>
 						<div style='margin-top:2px;'>
 							<b>Locality:</b> 
 							<input name='locality' type='text' value='' size='70' maxlength='250'>
@@ -163,25 +176,6 @@ if($tid){
 						<div style='margin-top:2px;'>
 							<b>Sort sequence:</b> 
 							<input name='sortsequence' type='text' value='' size='5' maxlength='5'>
-							<span style="cursor:pointer;" onclick="toggle('adoptiondiv');" title="Additional Options">
-								<img style="border:0px;" src="../../images/add.png" />
-							</span>
-						</div>
-						<div id="adoptiondiv" style="border:1px dotted blue;margin:10px;padding:10px;display:none;">
-							<div style="font-size:120%;font-weight:bold;margin-left:-5px;">Additional Options:</div>
-							<div style='margin-top:2px;' title="URL to source project. Use when linking to an external image.">
-								<b>Source URL:</b> 
-								<input name='sourceurl' type='text' value='' size='70' maxlength='250'>
-							</div>
-							<div style='margin-top:2px;'>
-								<b>Copyright:</b> 
-								<input name='copyright' type='text' value='' size='70' maxlength='250'>
-							</div>
-							<div style='margin-top:2px;'>
-								<b>Occurrence Record #:</b> 
-								<input id="occidadd" name="occid" type="text" value="" READONLY/>
-								<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
-							</div>
 						</div>
 						<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
 						<input type="hidden" name="tabindex" value="1" />
@@ -226,7 +220,7 @@ if($tid){
 								if($imgArr['occid']){
 									?>
 									<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
-										<a href="../../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=imagediv" target="_blank">
+										<a href="../../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=2" target="_blank">
 											<img src="../../images/edit.png" style="border:0px;"/>
 										</a>
 									</div>

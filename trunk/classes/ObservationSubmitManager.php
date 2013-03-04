@@ -1,6 +1,5 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
-include_once('PelJpeg.php');
 
 class ObservationSubmitManager {
 
@@ -383,11 +382,6 @@ class ObservationSubmitManager {
 
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourceImg);
-			if(class_exists('PelJpeg')){
-				$inputJpg = new PelJpeg($sourceImg);
-				$this->exif = $inputJpg->getExif();
-			}
-
 	   	}
 		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
 		imagecopyresampled($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth, $newHeight,$sourceWidth,$sourceHeight);
@@ -397,11 +391,6 @@ class ObservationSubmitManager {
 		}
 		else{
 			$successStatus = imagejpeg($tmpImg, $targetPath);
-		}
-		if($successStatus && $this->exif && class_exists('PelJpeg')){
-			$outputJpg = new PelJpeg($targetPath);
-			$outputJpg->setExif($this->exif);
-			$outputJpg->saveFile($targetPath);
 		}
 
 		imagedestroy($tmpImg);

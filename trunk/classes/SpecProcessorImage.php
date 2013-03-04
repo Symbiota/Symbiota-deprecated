@@ -335,11 +335,6 @@ class SpecProcessorImage extends SpecProcessorManager{
 		
 	   	if(!$this->sourceGdImg){
 	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
-			if(class_exists('PelJpeg')){
-				$inputJpg = new PelJpeg($sourcePath);
-				$this->exif = $inputJpg->getExif();
-			}
-
 	   	}
 		
 		ini_set('memory_limit','512M');
@@ -349,21 +344,9 @@ class SpecProcessorImage extends SpecProcessorManager{
 
 		if($c){
 			$status = imagejpeg($tmpImg, $targetPath, $c);
-			if($this->exif && class_exists('PelJpeg')){
-				$outputJpg = new PelJpeg($targetPath);
-				$outputJpg->setExif($this->exif);
-				$outputJpg->saveFile($targetPath);
-			}
 		}
 		else{
-			if($this->exif && class_exists('PelJpeg')){
-				$outputJpg = new PelJpeg($tmpImg);
-				$outputJpg->setExif($this->exif);
-				$status = $outputJpg->saveFile($targetPath);
-			}
-			else{
-				$status = imagejpeg($tmpImg, $targetPath);
-			}
+			$status = imagejpeg($tmpImg, $targetPath);
 		}
 		
 		if(!$status){

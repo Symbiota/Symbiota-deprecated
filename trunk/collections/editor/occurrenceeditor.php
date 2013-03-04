@@ -914,7 +914,7 @@ if($symbUid){
 																	<option value="">-----------------</option>
 																	<?php
 																	foreach($reproductiveConditionTerms as $term){
-																		echo '<option value="'.$term.'" '.($term==$occArr['reproductivecondition']?'SELECTED':'').'>'.$term.'</option>';
+																		echo '<option value="'.$term.'" '.(isset($occArr['reproductivecondition']) && $term==$occArr['reproductivecondition']?'SELECTED':'').'>'.$term.'</option>';
 																	}
 																	?>
 																</select>
@@ -1065,7 +1065,7 @@ if($symbUid){
 												if($occId){ 
 													?>
 													<div style="margin:15px 30px;float:left;">
-														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" />
+														<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
 														<br/>
 														<?php 
 														if($isEditor){
@@ -1144,7 +1144,8 @@ if($symbUid){
 												else{ 
 													?>
 													<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
-														<input type="submit" name="submitaction" value="Add Record" style="width:150px;font-weight:bold;margin:10px;" />
+														<input type="button" name="submitaddbutton" value="Add Record" onclick="this.disabled=true;this.form.submit();" style="width:150px;font-weight:bold;margin:10px;" />
+														<input type="hidden" name="submitaction" value="Add Record" />
 														<input type="hidden" name="qrycnt" value="<?php echo $qryCnt?$qryCnt:''; ?>" />
 														<div style="margin-left:15px;font-weight:bold;">
 															Follow-up Action:

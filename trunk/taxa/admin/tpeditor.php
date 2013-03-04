@@ -139,6 +139,11 @@ if($editable && $action){
 			}
 			return true;
 		}
+
+		function openOccurrenceSearch(target) {
+			occWindow=open("../../imagelib/occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=1,width=530,height=500,left=20,top=20");
+			if (occWindow.opener == null) occWindow.opener = self;
+		}
 	</script>
 	<style type="text/css">
 		input{margin:3px;}
