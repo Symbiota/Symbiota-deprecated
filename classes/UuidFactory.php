@@ -12,18 +12,15 @@ class UuidFactory {
 		$this->echoStr("Starting batch GUID processing (".date('Y-m-d h:i:s A').")\n");
 
 		//Populate Collection GUIDs
-		/*
-		$sql = 'SELECT c.collid '.
-			'FROM omcollections c '.
-			'WHERE c.collid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omcollections") ';
+		$sql = 'SELECT collid '.
+			'FROM omcollections '.
+			'WHERE collectionguid IS NULL ';
 		$rs = $conn->query($sql);
-		if($rs->num_rows) $this->echoStr("Populating collection GUIDs\n");
+		if($rs->num_rows) $this->echoStr("Populating collection GUIDs");
 		$recCnt = 0;
 		while($r = $rs->fetch_object()){
-			$id = $r->collid;
 			$guid = UuidFactory::getUuidV4();
-			$insSql = 'INSERT INTO guids(guid,tablename,tablepk) '.
-				'VALUES("'.$guid.'","omcollections",'.$id.')';
+			$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" WHERE collid = '.$r->collid;
 			if(!$conn->query($insSql)){
 				$this->echoStr('ERROR: '.$conn->error);
 			}
@@ -31,7 +28,6 @@ class UuidFactory {
 		}
 		$rs->free();
 		if($recCnt) $this->echoStr("Finished: $recCnt collection records processed\n");
-		*/
 		
 		//Populate occurrence GUIDs
 		$sql = 'SELECT o.occid '.

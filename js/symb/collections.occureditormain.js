@@ -2,7 +2,6 @@ var pauseSubmit = false;
 var imgAssocCleared = false;
 var voucherAssocCleared = false;
 var surveyAssocCleared = false;
-var pendingDataEdits = false;
 var catalogNumberIsDupe = false;
 var abortFormVerification = false;
 
@@ -21,7 +20,7 @@ $(document).ready(function() {
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
 			if(verifyLeaveForm()){
-				pendingDataEdits = false;
+				document.fullform.submitaction.disabled = true;
 			}
 			else{
 				return false;
@@ -95,9 +94,7 @@ $(document).ready(function() {
 window.onbeforeunload = verifyClose;
 
 function verifyClose(){
-	if(pendingDataEdits){
-		return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
-	}
+	return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
 }
 
 function initDetAddAutocomplete(){
@@ -139,7 +136,7 @@ function fieldChanged(fieldName){
 	}
 	catch(ex){
 	}
-	pendingDataEdits = true;
+	document.fullform.submitaction.disabled = false;
 }
 
 function catalogNumberChanged(f){
@@ -411,7 +408,6 @@ function verifyFullForm(f){
 		alert("Duplicate Quantity field must be numeric only");
 		return false;
 	}
-	pendingDataEdits = false;
 	return true;
 }
 
@@ -941,7 +937,6 @@ function verifyDetAddForm(f){
 			curDate = new Date(); 
 		}while(curDate - date < 5000 && pauseSubmit);
 	}
-	pendingDataEdits = false;
 	return true;
 }
 
@@ -970,7 +965,6 @@ function verifyDetEditForm(f){
 			curDate = new Date(); 
 		}while(curDate - date < 5000 && pauseSubmit);
 	}
-	pendingDataEdits = false;
 	return true;
 }
 
@@ -983,7 +977,6 @@ function verifyImgAddForm(f){
 			return false;
         }
     }
-	pendingDataEdits = false;
     return true;
 }
 
@@ -992,7 +985,6 @@ function verifyImgEditForm(f){
 		alert("Web URL field must have a value");
 		return false;
 	}
-	pendingDataEdits = false;
 	return true;
 }
 
@@ -1006,12 +998,6 @@ function verifyImgDelForm(f){
 //Misc
 function dwcDoc(dcTag){
     dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
-    if(dwcWindow.opener == null) dwcWindow.opener = self;
-    return false;
-}
-
-function openDoc(dcTag){
-    docWindow=open("http://symbiota.org/tiki/tiki-index.php?page=Occurrence+Fields#"+dcTag,"docpopup","width=900,height=550,left=20,top=20,scrollbars=1");
     if(dwcWindow.opener == null) dwcWindow.opener = self;
     return false;
 }

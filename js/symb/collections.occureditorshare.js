@@ -9,7 +9,7 @@ function submitQueryForm(qryIndex){
 }
 
 function verifyLeaveForm(){
-	if(typeof pendingDataEdits != 'undefined' && pendingDataEdits){
+	if(document.fullform.submitaction.disabled == false){
 		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
 	}
 	return true;

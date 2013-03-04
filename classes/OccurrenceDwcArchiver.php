@@ -99,7 +99,7 @@ class OccurrenceDwcArchiver{
 	 		'rightsHolder' => 'http://rs.tdwg.org/dwc/terms/rightsHolder',
 	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights',
 	 		'modified' => 'http://purl.org/dc/terms/modified',
-	 		'symbiotaGuid' => '',
+	 		'recordId' => '',
 			'references' => 'http://purl.org/dc/terms/references'
  		);
 		$this->determinationFieldArr = array(
@@ -115,18 +115,23 @@ class OccurrenceDwcArchiver{
 			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
 			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
-	 		'symbiotaGuid' => ''
+	 		'recordId' => ''
 		);
 		$this->imageFieldArr = array(
 			'coreid' => '',
-			'identifier' => 'http://purl.org/dc/terms/identifier',
-	 		'title' => 'http://purl.org/dc/terms/title',
-	 		'description' => 'http://purl.org/dc/terms/description',
-			'publisher' => 'http://purl.org/dc/terms/publisher',
-			'license' => 'http://purl.org/dc/terms/license',
-			'created' => 'http://purl.org/dc/terms/created',
-	 		'symbiotaGuid' => '',
-			'references' => 'http://purl.org/dc/terms/references'
+			'dcterms:identifier' => 'http://purl.org/dc/terms/identifier',		//url 
+			'ac:providerManagedID' => 'http://rs.tdwg.org/ac/terms/providerManagedID',	//GUID
+	 		'dcterms:title' => 'http://purl.org/dc/terms/title',	//scientific name
+	 		'ac:comments' => 'http://rs.tdwg.org/ac/terms/comments',	//General notes	
+			'xmpRights:Owner' => 'http://ns.adobe.com/xap/1.0/rights/Owner',	//Institution name
+			'dcterms:rights' => 'http://purl.org/dc/terms/rights',		//Copyright unknown
+			'xmpRights:UsageTerms' => 'http://ns.adobe.com/xap/1.0/rights/UsageTerms',	//Creative Commons BY-SA 3.0 license
+			'xmpRights:WebStatement' => 'http://ns.adobe.com/xap/1.0/rights/WebStatement',	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
+			'xmp:MetadataDate' => 'http://ns.adobe.com/xap/1.0/MetadataDate',	//timestamp
+			'ac:accessURI' => 'http://rs.tdwg.org/ac/terms/accessURI',	//reference url in portal
+			'dcterms:type' => 'http://purl.org/dc/terms/type',		//StillImage
+			'ac:subtype' => 'http://rs.tdwg.org/ac/terms/subtype',		//Photograph
+			'dcterms:format' => 'http://purl.org/dc/terms/format',		//jpg
 		);
 
 		$this->securityArr = array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
@@ -227,7 +232,7 @@ class OccurrenceDwcArchiver{
 				<id index="0" />';
 		$fieldCnt = 0;
 		foreach($this->occurrenceFieldArr as $k => $v){
-			$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			$fieldCnt++;
 		}
 		$outStr .= '</core>
@@ -238,7 +243,7 @@ class OccurrenceDwcArchiver{
 				<coreid index="0" />';
 		$fieldCnt = 0;
 		foreach($this->determinationFieldArr as $k => $v){
-			$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			$fieldCnt++;
 		}
 		$outStr .= '</extension>
@@ -249,7 +254,7 @@ class OccurrenceDwcArchiver{
 				<coreid index="0" />';
 		$fieldCnt = 0;
 		foreach($this->imageFieldArr as $k => $v){
-			$outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
+			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
 			$fieldCnt++;
 		}
 		$outStr .= '</extension>
@@ -286,7 +291,7 @@ class OccurrenceDwcArchiver{
 			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
 			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-			'g.guid AS symbiotaGuid, o.localitySecurity '.
+			'g.guid AS recordId, o.localitySecurity '.
 			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 			'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid'; 
@@ -315,6 +320,7 @@ class OccurrenceDwcArchiver{
 				}
 				unset($r['localitySecurity']);
 				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 				fputcsv($fh, $r);
 			}
 			$rs->free();
@@ -342,7 +348,7 @@ class OccurrenceDwcArchiver{
 		$sql = 'SELECT d.occid, d.identifiedBy, d.dateIdentified, d.identificationQualifier, d.sciName AS scientificName, '.
 			'd.scientificNameAuthorship, CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus, '. 
 			'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, '. 
-			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid '.
+			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid AS recordId '.
 			'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
 			'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
 			'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
@@ -350,6 +356,7 @@ class OccurrenceDwcArchiver{
 		//echo $sql;
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
+				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 				fputcsv($fh, $r);
 			}
 			$rs->free();
@@ -376,13 +383,15 @@ class OccurrenceDwcArchiver{
 		fputcsv($fh, array_keys($this->imageFieldArr));
 
 		//Output records
-		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as identifier, o.sciname, IFNULL(i.caption,i.notes) as description, '.
-			'CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")") AS publisher, '.
-			'c.rights, c.initialtimestamp, g.guid '.
+		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as identifier, g.guid AS providermanagedid, '. 
+			'o.sciname AS title, IFNULL(i.caption,i.notes) as comments, '.
+			'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
+			'c.rights, "" AS usageterms, c.accessrights AS webstatement, c.initialtimestamp AS metadatadate '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN guidimages g ON i.imgid = g.imgid '.
 			'WHERE c.collid = '.$this->collId.' ';
+
 		if($redactLocalities && !$this->canReadRareSpp){
 			$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
 		}
@@ -393,7 +402,34 @@ class OccurrenceDwcArchiver{
 			if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
 			while($r = $rs->fetch_assoc()){
 				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $referencePrefix.$r['identifier'];
-				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+				if(stripos($r['rights'],'http://creativecommons.org') === 0){
+					$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+					$r['webstatement'] = $r['rights'];
+					$r['rights'] = '';
+					if(!$r['usageterms']){
+						if($r['webstatement'] == 'http://creativecommons.org/publicdomain/zero/1.0/'){
+							$r['usageterms'] = 'CC0 1.0 (Public-domain)';
+						}
+						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by/3.0/'){
+							$r['usageterms'] = 'CC BY (Attribution)';
+						}
+						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-sa/3.0/'){
+							$r['usageterms'] = 'CC BY-SA (Attribution-ShareAlike)';
+						}
+						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc/3.0/'){
+							$r['usageterms'] = 'CC BY-NC (Attribution-Non-Commercial)';
+						}
+						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc-sa/3.0/'){
+							$r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
+						}
+					}
+				}
+				$r['accessURI'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+				$r['type'] = 'StillImage';
+				$r['subtype'] = 'Photograph';
+				$extStr = substr($r['identifier'],strrpos($r['identifier'],'.')+1);
+				if($extStr == 'jpg' || $extStr == 'jpeg') $r['format'] = 'image/jpeg';
+				//Load record array into output file
 				fputcsv($fh, $r);
 			}
 			$rs->free();
@@ -444,20 +480,27 @@ class OccurrenceDwcArchiver{
 		$itemAttr = $newDoc->createAttribute('collid');
 		$itemAttr->value = $this->collId;
 		$itemElem->appendChild($itemAttr);
-		//Add title, description, type, recordType, link, pubDate
+		//Add title
 		$title = $this->collCode.' DwC-Archive';
 		$itemTitleElem = $newDoc->createElement('title',$title);
 		$itemElem->appendChild($itemTitleElem);
+		//description
 		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.htmlspecialchars($this->collectionName));
 		$itemElem->appendChild($descTitleElem);
+		//GUID
+		$guidElem = $newDoc->createElement('guid','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/misc/collprofiles.php?collid='.$this->collId);
+		$itemElem->appendChild($guidElem);
+		//type
 		$typeTitleElem = $newDoc->createElement('type','DWCA');
 		$itemElem->appendChild($typeTitleElem);
+		//recordType
 		$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
 		$itemElem->appendChild($recTypeTitleElem);
+		//link
 		$linkTitleElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$this->collCode.'_DwC-A.zip');
 		$itemElem->appendChild($linkTitleElem);
+		//pubDate
 		$dsStat = stat($this->targetPath.$this->collCode.'_DwC-A.zip');
-echo $this->targetPath.$this->collCode.'_DwC-A.zip';
 		$pubDateTitleElem = $newDoc->createElement('pubDate',date("D, d M Y H:i:s O", $dsStat["mtime"]));
 		$itemElem->appendChild($pubDateTitleElem);
 		$itemArr = array();
