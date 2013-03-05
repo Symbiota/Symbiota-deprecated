@@ -9,7 +9,7 @@ function submitQueryForm(qryIndex){
 }
 
 function verifyLeaveForm(){
-	if(document.fullform.submitaction.disabled == false){
+	if(document.fullform && document.fullform.submitaction.disabled == false){
 		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
 	}
 	return true;
@@ -36,6 +36,8 @@ function verifyQueryForm(f){
 	//	alert("Query form is empty! Please enter a value to query by.");
 	//	return false;
 	//}
+
+	if(!verifyLeaveForm()) return false;
 
 	var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
 	var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd

@@ -91,12 +91,6 @@ $(document).ready(function() {
 
 });
 
-window.onbeforeunload = verifyClose;
-
-function verifyClose(){
-	return "It appears that you didn't save your changes. Are you sure you want to leave without saving?"; 
-}
-
 function initDetAddAutocomplete(){
 	$("#dafsciname").autocomplete({
 		source: "rpc/getspeciessuggest.php",

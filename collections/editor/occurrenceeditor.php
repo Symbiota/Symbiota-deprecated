@@ -242,7 +242,7 @@ if($symbUid){
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
 			if(!$crowdSourceMode){
 				$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-				$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" title="New Record">&gt;*</a>';
+				$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" onclick="return verifyLeaveForm()" title="New Record">&gt;*</a>';
 			}
 			$navStr .= '</b>';
 		}
@@ -369,7 +369,7 @@ if($symbUid){
 					else{
 						?>
 						<div class='navpath'>
-							<a href="../../index.php">Home</a> &gt;&gt;
+							<a href="../../index.php" onclick="return verifyLeaveForm()">Home</a> &gt;&gt;
 							<?php
 							if($crowdSourceMode){
 								?>
@@ -379,12 +379,12 @@ if($symbUid){
 							else{
 								if(!$isGenObs || $isAdmin){ 
 									?>
-									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
 									<?php
 								}
 								if($isGenObs){ 
 									?>
-									<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+									<a href="../../profile/viewprofile.php?tabindex=1" onclick="return verifyLeaveForm()">Personal Management</a> &gt;&gt;
 									<?php
 								}
 							}
