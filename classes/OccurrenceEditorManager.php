@@ -560,7 +560,7 @@ class OccurrenceEditorManager {
 			"verbatimEventDate, habitat, substrate, fieldnumber, occurrenceRemarks, associatedTaxa, verbatimattributes, ".
 			"dynamicProperties, reproductiveCondition, cultivationStatus, establishmentMeans, ".
 			"lifestage, sex, individualcount, samplingprotocol, preparations, ".
-			"country, stateProvince, county, locality, localitySecurity, localitysecurityreason, decimalLatitude, decimalLongitude, ".
+			"country, stateProvince, county, municipality, locality, localitySecurity, localitysecurityreason, decimalLatitude, decimalLongitude, ".
 			"geodeticDatum, coordinateUncertaintyInMeters, verbatimCoordinates, footprintwkt, ".
 			"georeferencedBy, georeferenceProtocol, georeferenceSources, ".
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
@@ -609,6 +609,7 @@ class OccurrenceEditorManager {
 			($occArr['country']?'"'.$this->cleanInStr($occArr['country']).'"':'NULL').','.
 			($occArr["stateprovince"]?'"'.$this->cleanInStr($occArr["stateprovince"]).'"':"NULL").",".
 			($occArr["county"]?'"'.$this->cleanInStr($occArr["county"]).'"':"NULL").",".
+			($occArr["municipality"]?'"'.$this->cleanInStr($occArr["municipality"]).'"':"NULL").",".
 			($occArr["locality"]?'"'.$this->cleanInStr($occArr["locality"]).'"':"NULL").",".
 			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
 			($occArr["localitysecurityreason"]?$this->cleanInStr($occArr["localitysecurityreason"]):"NULL").",".
