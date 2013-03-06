@@ -20,7 +20,8 @@ elseif($tabIndex == 4){
 else{
 	$tEditor = new TPEditorManager();
 }
-if($tid) $tEditor->setTid($tid);
+
+$tid = $tEditor->setTid($tid?$tid:$taxon);
 if($lang) $tEditor->setLanguage($lang);
 
 $statusStr = "";
@@ -382,6 +383,7 @@ if($editable && $action){
 				<form name="gettidform" action="tpeditor.php" method="post" onsubmit="return checkGetTidForm(this);">
 					<input id="sninput" name="taxon" value="<?php echo $taxon; ?>" size="40" />
 					<input type="hidden" name="lang" value="<?php echo $lang; ?>" />
+					<input type="hidden" name="tabindex" value="<?php echo $tabIndex; ?>" />
 					<input type="submit" name="action" value="Edit Taxon" />
 				</form>
 			</div>

@@ -23,48 +23,52 @@ class TPEditorManager {
 	}
  	
  	public function setTid($t){
-		if(is_numeric($t)){
-			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
-				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND (t.TID = ".$this->taxonCon->real_escape_string($t).')';
+		$sql = '';
+ 		if(is_numeric($t)){
+			$sql = 'SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted '. 
+				'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID '.
+				'WHERE (ts.taxauthid = 1) AND (t.TID = '.$t.')';
 		}
 		else{
-			$sql = "SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
-				"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-				"WHERE (ts.taxauthid = 1) AND (t.sciname = \"".$this->taxonCon->real_escape_string($t)."\")";
+			$sql = 'SELECT t.tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted '. 
+				'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID '.
+				'WHERE (ts.taxauthid = 1) AND (t.sciname = "'.$this->taxonCon->real_escape_string($t).'")';
 		}
-		$result = $this->taxonCon->query($sql);
-		if($row = $result->fetch_object()){
-			if($row->tid == $row->TidAccepted){
-				$this->tid = $row->tid;
-				$this->sciName = $row->SciName;
-				$this->family = $row->family;
-				$this->author = $row->Author;
-				$this->rankId = $row->RankId;
-				$this->parentTid = $row->ParentTID;
-			}
-			else{
-				$this->submittedTid = $row->tid;
-				$this->submittedSciName = $row->SciName;
-				$this->tid = $row->TidAccepted;
-				$sqlNew = "SELECT ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
-					"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
-					"WHERE (ts.taxauthid = 1) AND (t.TID = ".$this->tid.")";
-				$resultNew = $this->taxonCon->query($sqlNew);
-				if($rowNew = $resultNew->fetch_object()){
-					$this->sciName = $rowNew->SciName;
-					$this->family = $rowNew->family;
-					$this->author = $rowNew->Author;
-					$this->rankId = $rowNew->RankId;
-					$this->parentTid = $rowNew->ParentTID;
+		if($sql){
+			$result = $this->taxonCon->query($sql);
+			if($row = $result->fetch_object()){
+				if($row->tid == $row->TidAccepted){
+					$this->tid = $row->tid;
+					$this->sciName = $row->SciName;
+					$this->family = $row->family;
+					$this->author = $row->Author;
+					$this->rankId = $row->RankId;
+					$this->parentTid = $row->ParentTID;
 				}
-				$resultNew->close();
+				else{
+					$this->submittedTid = $row->tid;
+					$this->submittedSciName = $row->SciName;
+					$this->tid = $row->TidAccepted;
+					$sqlNew = "SELECT ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted ". 
+						"FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.TID ".
+						"WHERE (ts.taxauthid = 1) AND (t.TID = ".$this->tid.")";
+					$resultNew = $this->taxonCon->query($sqlNew);
+					if($rowNew = $resultNew->fetch_object()){
+						$this->sciName = $rowNew->SciName;
+						$this->family = $rowNew->family;
+						$this->author = $rowNew->Author;
+						$this->rankId = $rowNew->RankId;
+						$this->parentTid = $rowNew->ParentTID;
+					}
+					$resultNew->close();
+				}
 			}
+		    else{
+		    	$this->sciName = "unknown";
+		    }
+		    $result->free();
 		}
-	    else{
-	    	$this->sciName = "unknown";
-	    }
-	    $result->close();
+		return $this->tid;
  	}
  	
  	public function getTid(){
