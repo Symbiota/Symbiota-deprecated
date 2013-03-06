@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -24,7 +23,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 	<div style="text-align:right;width:100%;">
 		<img style="border:0px;width:12px;cursor:pointer;" src="../../images/add.png" onclick="toggle('newdetdiv');" title="Add New Determination" />
 	</div>
-	<div id="newdetdiv" style="display:none;">
+	<div id="newdetdiv" style="display:<?php echo ($detArr?'none':''); ?>;">
 		<form name="detaddform" action="occurrenceeditor.php" method="get" onsubmit="return verifyDetAddForm(this)">
 			<fieldset>
 				<legend><b>Add a New Determination</b></legend>
@@ -87,8 +86,8 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 			</fieldset>
 		</form>
 	</div>
-	<div class="fieldset">
-		<div class="legend"><b>Determination History</b></div>
+	<fieldset style="margin:15px 0px;">
+		<legend><b>Determination History</b></legend>
 		<?php
 		if($detArr){
 			foreach($detArr as $detId => $detRec){
@@ -213,5 +212,5 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 			<?php 
 		}
 		?>
-	</div>
+	</fieldset>
 </div>

@@ -300,10 +300,10 @@ if($symbUid){
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=1302"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=1302"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=1302"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=1302"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=1303"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=1303"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=1303"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=1303"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -1141,7 +1141,7 @@ if($symbUid){
 														<?php
 													} 
 												}
-												else{ 
+												else{
 													?>
 													<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
 														<input type="button" name="submitaddbutton" value="Add Record" onclick="this.disabled=true;this.form.submit();" style="width:150px;font-weight:bold;margin:10px;" />
