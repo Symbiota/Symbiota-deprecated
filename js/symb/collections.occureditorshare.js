@@ -9,7 +9,7 @@ function submitQueryForm(qryIndex){
 }
 
 function verifyLeaveForm(){
-	if(document.fullform && document.fullform.submitaction.disabled == false){
+	if(document.fullform && document.fullform.submitaction.disabled == false && document.fullform.submitaction.type == "submit"){
 		return confirm("It appears that you didn't save your changes. Are you sure you want to leave without saving?"); 
 	}
 	return true;

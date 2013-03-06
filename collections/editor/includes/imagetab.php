@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -19,7 +18,7 @@ $imageArr = $occManager->getImageMap();
 	<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
 		<img style="border:0px;width:12px;" src="../../images/add.png" />
 	</div>
-	<div id="addimgdiv" style="display:none;">
+	<div id="addimgdiv" style="display:<?php echo ($imageArr?'none':''); ?>;">
 		<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
 			<fieldset>
 				<legend><b>Add a New Image</b></legend>
@@ -115,8 +114,9 @@ $imageArr = $occManager->getImageMap();
 				</div>
 			</fieldset>
 		</form>
+		<hr style="margin:30px 0px;" />
 	</div>
-	<div style="clear:both;">
+	<div style="clear:both;margin:15px;">
 		<?php
 		if($imageArr){
 			?>
