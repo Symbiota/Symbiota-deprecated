@@ -145,7 +145,7 @@ function recordNumberChanged(){
 
 function otherCatalogNumbersChanged(f){
 	fieldChanged('othercatalognumbers');
-	searchDupesOtherCatalogNumbers(f);
+	//searchDupesOtherCatalogNumbers(f);
 }
 
 function decimalLatitudeChanged(f){
