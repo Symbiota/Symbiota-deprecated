@@ -1250,11 +1250,16 @@ class SpecUploadManager{
 		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
 			$t = $match[0];
 		}
-		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
+		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})/',$dateStr,$match)){
 			//Format: yyyy-m-d or yyyy-mm-dd
 			$y = $match[1];
 			$m = $match[2];
 			$d = $match[3];
+		}
+		elseif(preg_match('/^(\d{4})-(\d{1,2})/',$dateStr,$match)){
+			//Format: yyyy-m or yyyy-mm
+			$y = $match[1];
+			$m = $match[2];
 		}
 		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
 			//Format: dd mmm yyyy, d mmm yy, dd-mmm-yyyy, dd-mmm-yy
@@ -1286,7 +1291,7 @@ class SpecUploadManager{
 			$d = $match[2];
 			$y = $match[3];
 			$mStr = strtolower(substr($mStr,0,3));
-			$m = $this->monthNames[$mStr];
+			if(array_key_exists($mStr,$this->monthNames)) $m = $this->monthNames[$mStr];
 		}
 		elseif(preg_match('/^(\d{1,2})-(\d{1,2})-(\d{2,4})/',$dateStr,$match)){
 			//Format: mm-dd-yyyy, mm-dd-yy
@@ -1652,10 +1657,10 @@ class SpecUploadManager{
 	
 	protected function encodeString($inStr){
  		global $charset;
- 		$retStr = $inStr;
- 		if($inStr){
+ 		$retStr = trim($inStr);
+ 		if($retStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
