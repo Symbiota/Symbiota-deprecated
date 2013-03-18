@@ -106,12 +106,10 @@ class ExsiccatiManager {
 		$retArr = array();
 		if($ometid){
 			//Grab all numbers for that exsiccati title; only show number that have occid links
-			$sql = 'SELECT DISTINCT en.omenid, en.exsnumber, en.notes, CONCAT_WS("-",c.institutioncode,c.collectioncode) AS collcode, '.
-				'IFNULL(o.occurrenceid,o.catalognumber) AS catnum, '.
+			$sql = 'SELECT DISTINCT en.omenid, en.exsnumber, en.notes, o.sciname, '.
 				'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),") ",IFNULL(o.eventDate,"date unknown")) as collector '.
 				'FROM omexsiccatinumbers en '.($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omoccurrences o ON ol.occid = o.occid '.
-				($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omcollections c ON o.collid = c.collid ';
+				($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omoccurrences o ON ol.occid = o.occid ';
 			if($imagesOnly) $sql .= 'INNER JOIN images i ON o.occid = i.occid '; 
 			$sql .= 'WHERE en.ometid = '.$ometid.' ';
 			if($collId) $sql .= 'AND o.collid = '.$collId.' ';
@@ -121,10 +119,9 @@ class ExsiccatiManager {
 				while($r = $rs->fetch_object()){
 					if(!array_key_exists($r->omenid,$retArr)){
 						$retArr[$r->omenid]['number'] = $this->cleanOutStr($r->exsnumber);
-						$retArr[$r->omenid]['notes'] = $this->cleanOutStr($r->notes);
-						$retArr[$r->omenid]['catnum'] = $r->catnum;
-						if(stripos($r->catnum,$r->collcode) === false) $retArr[$r->omenid]['collcode'] = $r->collcode;
 						$retArr[$r->omenid]['collector'] = $r->collector;
+						$retArr[$r->omenid]['sciname'] = $r->sciname;
+						$retArr[$r->omenid]['notes'] = $this->cleanOutStr($r->notes);
 					}
 				}
 				$rs->close();
