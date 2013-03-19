@@ -425,6 +425,7 @@ class OccurrenceDwcArchiver{
 						}
 					}
 				}
+				if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
 				$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				$r['type'] = 'StillImage';
 				$r['subtype'] = 'Photograph';
