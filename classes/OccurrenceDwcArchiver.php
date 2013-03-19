@@ -119,19 +119,20 @@ class OccurrenceDwcArchiver{
 		);
 		$this->imageFieldArr = array(
 			'coreid' => '',
-			'dcterms:identifier' => 'http://purl.org/dc/terms/identifier',		//url 
-			'ac:providerManagedID' => 'http://rs.tdwg.org/ac/terms/providerManagedID',	//GUID
-	 		'dcterms:title' => 'http://purl.org/dc/terms/title',	//scientific name
-	 		'ac:comments' => 'http://rs.tdwg.org/ac/terms/comments',	//General notes	
-			'xmpRights:Owner' => 'http://ns.adobe.com/xap/1.0/rights/Owner',	//Institution name
-			'dcterms:rights' => 'http://purl.org/dc/terms/rights',		//Copyright unknown
-			'xmpRights:UsageTerms' => 'http://ns.adobe.com/xap/1.0/rights/UsageTerms',	//Creative Commons BY-SA 3.0 license
-			'xmpRights:WebStatement' => 'http://ns.adobe.com/xap/1.0/rights/WebStatement',	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
-			'xmp:MetadataDate' => 'http://ns.adobe.com/xap/1.0/MetadataDate',	//timestamp
-			'ac:accessURI' => 'http://rs.tdwg.org/ac/terms/accessURI',	//reference url in portal
-			'dcterms:type' => 'http://purl.org/dc/terms/type',		//StillImage
-			'ac:subtype' => 'http://rs.tdwg.org/ac/terms/subtype',		//Photograph
-			'dcterms:format' => 'http://purl.org/dc/terms/format',		//jpg
+			'accessURI' => 'http://rs.tdwg.org/ac/terms/accessURI',		//url 
+			'providerManagedID' => 'http://rs.tdwg.org/ac/terms/providerManagedID',	//GUID
+	 		'title' => 'http://purl.org/dc/terms/title',	//scientific name
+	 		'comments' => 'http://rs.tdwg.org/ac/terms/comments',	//General notes	
+			'Owner' => 'http://ns.adobe.com/xap/1.0/rights/Owner',	//Institution name
+			'rights' => 'http://purl.org/dc/terms/rights',		//Copyright unknown
+			'UsageTerms' => 'http://ns.adobe.com/xap/1.0/rights/UsageTerms',	//Creative Commons BY-SA 3.0 license
+			'WebStatement' => 'http://ns.adobe.com/xap/1.0/rights/WebStatement',	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
+			'MetadataDate' => 'http://ns.adobe.com/xap/1.0/MetadataDate',	//timestamp
+			'associatedSpecimenReference' => 'http://rs.tdwg.org/ac/terms/associatedSpecimenReference',	//reference url in portal
+			'type' => 'http://purl.org/dc/terms/type',		//StillImage
+			'subtype' => 'http://rs.tdwg.org/ac/terms/subtype',		//Photograph
+			'format' => 'http://purl.org/dc/terms/format',		//jpg
+			'metadataLanguage' => 'http://rs.tdwg.org/ac/terms/metadataLanguage'	//en
 		);
 
 		$this->securityArr = array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
@@ -383,7 +384,7 @@ class OccurrenceDwcArchiver{
 		fputcsv($fh, array_keys($this->imageFieldArr));
 
 		//Output records
-		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as identifier, g.guid AS providermanagedid, '. 
+		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as accessURI, g.guid AS providermanagedid, '. 
 			'o.sciname AS title, IFNULL(i.caption,i.notes) as comments, '.
 			'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
 			'c.rights, "" AS usageterms, c.accessrights AS webstatement, c.initialtimestamp AS metadatadate '.
@@ -401,7 +402,7 @@ class OccurrenceDwcArchiver{
 			$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
 			if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
 			while($r = $rs->fetch_assoc()){
-				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $referencePrefix.$r['identifier'];
+				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
 				if(stripos($r['rights'],'http://creativecommons.org') === 0){
 					$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
 					$r['webstatement'] = $r['rights'];
@@ -424,11 +425,12 @@ class OccurrenceDwcArchiver{
 						}
 					}
 				}
-				$r['accessURI'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+				$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				$r['type'] = 'StillImage';
 				$r['subtype'] = 'Photograph';
-				$extStr = substr($r['identifier'],strrpos($r['identifier'],'.')+1);
+				$extStr = substr($r['accessURI'],strrpos($r['accessURI'],'.')+1);
 				if($extStr == 'jpg' || $extStr == 'jpeg') $r['format'] = 'image/jpeg';
+				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
 				fputcsv($fh, $r);
 			}
@@ -631,7 +633,7 @@ class OccurrenceDwcArchiver{
 		}
 		if($portalCharset){
 			if($targetCharset == 'utf8' && $portalCharset == 'iso-8859-1'){
-				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
@@ -643,7 +645,6 @@ class OccurrenceDwcArchiver{
 				}
 			}
 		}
-		
 		return $retStr;
 	}
 
