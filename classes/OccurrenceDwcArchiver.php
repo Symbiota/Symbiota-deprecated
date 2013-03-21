@@ -322,7 +322,7 @@ class OccurrenceDwcArchiver{
 				unset($r['localitySecurity']);
 				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $r);
+				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
 			}
 			$rs->free();
 		}
@@ -358,7 +358,7 @@ class OccurrenceDwcArchiver{
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
 				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $r);
+				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
 			}
 			$rs->free();
 		}
@@ -433,7 +433,7 @@ class OccurrenceDwcArchiver{
 				if($extStr == 'jpg' || $extStr == 'jpeg') $r['format'] = 'image/jpeg';
 				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
-				fputcsv($fh, $r);
+				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
 			}
 			$rs->free();
 		}
@@ -473,7 +473,7 @@ class OccurrenceDwcArchiver{
 		$channelElem->appendChild($titleElem);
 		$linkElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"]);
 		$channelElem->appendChild($linkElem);
-		$descriptionElem = $newDoc->createElement('description',$defaultTitle.' Darwin Core Archive rss feed</description>');
+		$descriptionElem = $newDoc->createElement('description',$defaultTitle.' Darwin Core Archive rss feed');
 		$channelElem->appendChild($descriptionElem);
 		$languageElem = $newDoc->createElement('language','en-us');
 		$channelElem->appendChild($languageElem);
@@ -536,14 +536,21 @@ class OccurrenceDwcArchiver{
 	
 	public function deleteArchive($collId){
 		global $serverRoot;
-		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
+		$sr = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/');
+		$rssFile = $sr.'webservices/dwc/rss.xml';
 		if(!file_exists($rssFile)) return false;
 		$doc = new DOMDocument();
 		$doc->load($rssFile);
 		$cElem = $doc->getElementsByTagName("channel")->item(0);
 		$items = $cElem->getElementsByTagName("item");
 		foreach($items as $i){
-			if($i->getAttribute('collid') == $collId) $cElem->removeChild($i);
+			if($i->getAttribute('collid') == $collId){
+				$link = $i->getElementsByTagName("link");
+				$nodeValue = $link->item(0)->nodeValue;
+				$fileUrl = $sr.'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
+				unlink($fileUrl);
+				$cElem->removeChild($i);
+			}
 		}
 		$doc->save($rssFile);
 		return true;
@@ -647,6 +654,14 @@ class OccurrenceDwcArchiver{
 			}
 		}
 		return $retStr;
+	}
+	
+	private function addcslashesArr($arr,$charlist){
+		$retArr = array();
+		foreach($arr as $k => $v){
+			$retArr[$k] = addcslashes($v,$charlist);
+		}
+		return $retArr;
 	}
 
 	public function humanFilesize($filePath) {
