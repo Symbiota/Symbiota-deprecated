@@ -99,7 +99,7 @@ class OccurrenceDwcArchiver{
 	 		'rightsHolder' => 'http://rs.tdwg.org/dwc/terms/rightsHolder',
 	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights',
 	 		'modified' => 'http://purl.org/dc/terms/modified',
-	 		'recordId' => '',
+	 		'recordId' => 'http://portal.idigbio.org/terms/recordId',
 			'references' => 'http://purl.org/dc/terms/references'
  		);
 		$this->determinationFieldArr = array(
@@ -115,7 +115,7 @@ class OccurrenceDwcArchiver{
 			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
 			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
-	 		'recordId' => ''
+	 		'recordId' => 'http://portal.idigbio.org/terms/recordId'
 		);
 		$this->imageFieldArr = array(
 			'coreid' => '',
@@ -239,7 +239,7 @@ class OccurrenceDwcArchiver{
 		$outStr .= '</core>
 			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Identification">
 				<files>
-					<location>indentifications.csv</location>
+					<location>identifications.csv</location>
 				</files>
 				<coreid index="0" />';
 		$fieldCnt = 0;
