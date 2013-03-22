@@ -85,7 +85,7 @@ $statusStr = '';
 					echo '<td>'.((array_key_exists(5,$cArr)?$cArr[5]:0)+(array_key_exists(10,$cArr)?$cArr[10]:0)).'</td>';
 					echo '<td>'.(array_key_exists(10,$pArr)?$pArr[10]:0).'</td>';
 					echo '<td>'.(array_key_exists(5,$pArr)?$pArr[5]:0).'</td>';
-					echo '<td><a href="occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&collid='.$collId.'">'.(array_key_exists(0,$cArr)?$cArr[0]:0).'</a></td>';
+					echo '<td><a href="occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&collid='.$collId.'" target="_blank">'.(array_key_exists(0,$cArr)?$cArr[0]:0).'</a></td>';
 					echo '</tr>';
 				}
 				?>
