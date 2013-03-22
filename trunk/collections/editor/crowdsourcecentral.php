@@ -57,12 +57,26 @@ $statusStr = '';
 			?>
 			<fieldset style="margin-bottom:30px;width:250px;padding:15px;">
 				<legend><b>Current Standing</b></legend>
-				<b>Specimens processed:</b> <?php echo $userStats['totalcnt']; ?><br/>
-				<b>Approved points:</b> <?php echo $userStats['apoints']; ?><br/>
-				<b>Pending points:</b> <a href="crowdsourcestatus.php"><?php echo $userStats['ppoints']; ?></a><br/>
-				<b>Approved and pending:</b> <?php echo $userStats['ppoints']+$userStats['apoints']; ?><br/>
+				<?php 
+				if($symbUid){
+					?>
+					<b>Specimens processed:</b> <?php echo $userStats['totalcnt']; ?><br/>
+					<b>Approved points:</b> <?php echo $userStats['apoints']; ?><br/>
+					<b>Pending points:</b> <a href="crowdsourcestatus.php"><?php echo $userStats['ppoints']; ?></a><br/>
+					<b>Approved and pending:</b> <?php echo $userStats['ppoints']+$userStats['apoints']; ?><br/>
+					<?php
+				}
+				else{
+					?>
+					<div>
+						<a href="../../profile/index.php?refurl=../collections/editor/crowdsourcecentral.php">Login</a> to View Current Stats
+					</div>
+					<?php 
+				}
+				?>
 			</fieldset>
 		</div>
+		
 		<div style="margin:20px;clear:both;">
 			<h2>Collections</h2>
 			<table class="styledtable">
