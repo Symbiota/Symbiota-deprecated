@@ -1,6 +1,6 @@
 function toggleImageTd(){
-	toggle("imgprocondiv");
-	toggle("imgprocoffdiv");
+	toggle("imgProcOnSpan");
+	toggle("imgProcOffSpan");
 	var imgTdObj = document.getElementById("imgtd");
 	if(imgTdObj){
 		if(document.getElementById("imgtd").style.display == "none"){

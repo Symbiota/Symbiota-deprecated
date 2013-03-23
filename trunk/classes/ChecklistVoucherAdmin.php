@@ -65,10 +65,17 @@ class ChecklistVoucherAdmin {
 		}
 		if(array_key_exists('latlngor',$sqlFragArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
+		if($sqlFragArr['excludecult']){
+			$sqlFrag .= 'AND (o.cultivationStatus = 0) ';
+		}
 		if($sqlFrag){
-			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".trim(substr($sqlFrag,3))."' WHERE (c.clid = ".$this->clid.')';
+			$sqlFrag = trim(substr($sqlFrag,3));
+			$sql = "UPDATE fmchecklists c SET c.dynamicsql = '".$sqlFrag."' WHERE (c.clid = ".$this->clid.')';
 			//echo $sql;
-			if(!$this->conn->query($sql)){
+			if($this->conn->query($sql)){
+				$this->sqlFrag = $sqlFrag;
+			}
+			else{
 				$statusStr = 'ERROR: unable to create or modify search statement ('.$this->error.')';
 			}
 		}
@@ -77,7 +84,10 @@ class ChecklistVoucherAdmin {
 
 	public function deleteSql(){
 		$statusStr = '';
-		if(!$this->conn->query('UPDATE fmchecklists c SET c.dynamicsql = NULL WHERE (c.clid = '.$this->clid.')')){
+		if($this->conn->query('UPDATE fmchecklists c SET c.dynamicsql = NULL WHERE (c.clid = '.$this->clid.')')){
+			$this->sqlFrag = '';
+		}
+		else{
 			$statusStr = 'ERROR: '.$this->conn->query->error;
 		}
 		return $statusStr;
@@ -128,33 +138,32 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
-	public function getNonVoucheredSpecimens($startLimit){
+	public function getNewVouchers($startLimit = 500,$includeAll = 0){
 		$retArr = Array();
-		$taxaArr = $this->getNonVoucheredTaxa($startLimit,50);
-		$tidArr = array();
-		foreach($taxaArr as $vArr){
-			foreach($vArr as $tid => $sciName){
-				$tidArr[$tid] = $sciName;
-			}
-		}
-		flush();
-		ob_flush();
-		if($tidArr){
-			$sql = 'SELECT ts2.tid AS cltid, o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,o.catalognumber) AS collcode, '. 
+		if($this->sqlFrag){
+			$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, '. 
+				'CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number")) AS collcode, '. 
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-				'WHERE ('.$this->sqlFrag.') AND (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid = '.$this->clid.')) '.
-				'AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND ts2.tid IN ('.implode(',',array_keys($tidArr)).') '.
-				'ORDER BY ts.family, o.sciname ';
+				'INNER JOIN fmchklsttaxalink cl ON ts2.tidaccepted = cl.tid '.
+				'INNER JOIN taxa t ON cl.tid = t.tid '.
+				'WHERE ('.$this->sqlFrag.') AND (cl.clid = '.$this->clid.') AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) ';
+			if(!$includeAll){
+				$sql .= 'AND cl.tid NOT IN(SELECT tid FROM fmvouchers WHERE clid = '.$this->clid.') ';
+			}
+			else{
+				$sql .= 'AND o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = 2) '; 
+			}
+			$sql .= 'ORDER BY ts.family, o.sciname LIMIT '.$startLimit.', 500';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->cltid][$r->occid]['tid'] = $r->tidinterpreted;
-				$sciName = '<b>'.$tidArr[$r->cltid].'</b>';
-				if($tidArr[$r->cltid] <> $r->sciname) $sciName .= '<br/>spec id: '.$r->sciname;
+				$sciName = $r->clsciname;
+				if($r->clsciname <> $r->sciname) $sciName .= '<br/>spec id: '.$r->sciname;
 				$retArr[$r->cltid][$r->occid]['sciname'] = $sciName;
 				$retArr[$r->cltid][$r->occid]['collcode'] = $r->collcode;
 				$retArr[$r->cltid][$r->occid]['recordedby'] = $r->recordedby;
@@ -164,7 +173,6 @@ class ChecklistVoucherAdmin {
 			}
 			$rs->free();
 		}
-		
 		return $retArr;
 	}
 
@@ -202,7 +210,7 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
-	public function getMissingTaxa($startLimit){
+	public function getMissingTaxa(){
 		$retArr = Array();
 		if($this->sqlFrag){
 			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname FROM omoccurrences o LEFT JOIN '.
@@ -210,10 +218,8 @@ class ChecklistVoucherAdmin {
 				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
 				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
 				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'WHERE t.rankid >= 220 AND intab.tid IS NULL AND '.
-				'('.$this->sqlFrag.') '.
-				'ORDER BY o.sciname '.
-				'LIMIT '.($startLimit?$startLimit.',':'').'105';
+				'WHERE t.rankid >= 220 AND intab.tid IS NULL AND ('.$this->sqlFrag.') '.
+				'ORDER BY o.sciname ';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -224,6 +230,65 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
+	public function getMissingTaxaSpecimens(){
+		$retArr = Array();
+		if($this->sqlFrag){
+			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number>")) AS collcode, '.
+				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
+				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
+				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'WHERE t.rankid >= 220 AND ('.$this->sqlFrag.') '.
+				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tid = ts2.tidaccepted '.
+				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
+				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) '.
+				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
+				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) ';
+			//echo '<div>'.$sql.'</div>';
+			$rs = $this->conn->query($sql);
+			$spTidArr = array();
+			while($r = $rs->fetch_object()){
+				$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
+				$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
+				$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
+				$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
+				$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
+				$retArr[$r->sciname][$r->occid]['locality'] = $r->locality;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getMissingProblemTaxa(){
+		$retArr = Array();
+		if($this->sqlFrag){
+			//Make sure tidinterpreted are valid 
+			//$this->conn->query('UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.tidinterpreted = t.tid WHERE o.tidinterpreted IS NULL');
+			//Grab records
+			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number>")) AS collcode, '.
+				'o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
+				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
+				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+				'WHERE ('.$this->sqlFrag.') AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
+			//echo '<div>'.$sql.'</div>';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$sciname = $r->sciname;
+				if($sciname){
+					$retArr[$sciname][$r->occid]['collcode'] = $r->collcode;
+					$retArr[$sciname][$r->occid]['recordedby'] = $r->recordedby;
+					$retArr[$sciname][$r->occid]['recordnumber'] = $r->recordnumber;
+					$retArr[$sciname][$r->occid]['eventdate'] = $r->eventdate;
+					$retArr[$sciname][$r->occid]['locality'] = $r->locality;
+				}
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	public function hasChildrenChecklists(){
 		$hasChildren = false;
 		$sql = 'SELECT count(*) AS clcnt FROM fmchecklists WHERE (parentclid = '.$this->clid.')';
@@ -350,38 +415,79 @@ class ChecklistVoucherAdmin {
 			if(count($vArr) == 2 && $vArr[0] && $vArr[1]) $sqlFrag .= ',('.$this->clid.','.$vArr[0].','.$vArr[1].')';
 		}
 		$sql = 'INSERT INTO fmvouchers(clid,occid,tid) VALUES '.substr($sqlFrag,1);
+		//echo $sql;
 		if(!$this->conn->query($sql)){
-			//Error
 			trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
 		}
 		return $retStatus;
 	}
     
-	public function linkVoucher($tid,$occid,$addNewNameToCl = 1){
+	public function linkVoucher($taxa,$occid){
+		$status = 0;
+		if(!is_numeric($taxa)){
+			$rs = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$this->conn->real_escape_string($taxa).'")');
+			if($r = $rs->fetch_object()){
+				$taxa = $r->tid;
+			}
+		}
 		$sql = 'INSERT INTO fmvouchers(clid,tid,occid,collector) '.
-			'VALUES ('.$this->clid.','.$tid.','.$occid.',"")';
+			'VALUES ('.$this->clid.','.$taxa.','.$occid.',"")';
 		if($this->conn->query($sql)){
-			return true;
+			return 1;
 		}
 		else{
 			if($this->conn->errno == 1062){
-				echo 'Specimen already a voucher for checklist ';
+				trigger_error('Specimen already a voucher for checklist ');
+				return 2;
 			}
 			else{
 				//trigger_error('Attempting to resolve by adding species to checklist; '.$this->conn->error,E_USER_WARNING);
-				$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid) VALUES('.$tid.','.$this->clid.')';
+				$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid) VALUES('.$taxa.','.$this->clid.')';
 				if($this->conn->query($sql2)){
 					if($this->conn->query($sql)){
-						return true;
+						return 1;
 					}
 					else{
 						//echo 'Name added to list, though still unable to link voucher';
 						trigger_error('Name added to checklist, though still unable to link voucher": '.$this->conn->error,E_USER_WARNING);
+						return 0;
 					}
 				}
 				else{
 					//echo 'Unable to link voucher; unknown error';
 					trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
+					return 0;
+				}
+			}
+		}
+	}
+
+	public function linkTaxaVouchers($occidArr,$useCurrentTaxon = 1){
+		foreach($occidArr as $v){
+			$vArr = explode('-',$v);
+			$tid = $vArr[1];
+			$occid = $vArr[0];
+			if(count($vArr) == 2 && is_numeric($occid) && is_numeric($tid)){
+				if($useCurrentTaxon){
+					$sql = 'SELECT tidaccepted FROM taxstatus WHERE taxauthid = 1 AND tid = '.$tid;
+					$rs = $this->conn->query($sql);
+					if($r = $rs->fetch_object()){
+						$tid = $r->tidaccepted;
+					}
+					$rs->free();
+				}
+				//Add name to checklist
+				$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) VALUES('.$this->clid.','.$tid.')';
+				//echo $sql;
+				if($this->conn->query($sql)){
+					//Link Vouchers
+					$sql = 'INSERT INTO fmvouchers(clid,occid,tid,collector) VALUES ('.$this->clid.','.$occid.','.$tid.',"")';
+					if(!$this->conn->query($sql)){
+						trigger_error('Unable to link taxon voucher; '.$this->conn->error,E_USER_WARNING);
+					}
+				}
+				else{
+					trigger_error('Unable to add taxon; '.$this->conn->error,E_USER_WARNING);
 				}
 			}
 		}

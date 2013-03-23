@@ -115,11 +115,11 @@ function initDetEditAutocomplete(inputName){
 
 function toggleStyle(){
 	var cssObj = document.getElementById('editorCssLink');
-	if(cssObj.href == "../../css/occureditorcrowdsource.css"){
-		cssObj.href = "../../css/occureditor.css";
+	if(cssObj.href == "../../css/occureditorcrowdsource.css?ver=1303"){
+		cssObj.href = "../../css/occureditor.css?ver=1303";
 	}
 	else{
-		cssObj.href = "../../css/occureditorcrowdsource.css";
+		cssObj.href = "../../css/occureditorcrowdsource.css?ver=1303";
 	}
 }
 
@@ -223,33 +223,44 @@ function parseVerbatimCoordinates(f){
 		var lngDec = null;
 		var verbCoordStr = f.verbatimcoordinates.value;
 		
-		var utmEx1 = /(\d{1,2})\D{0,1}\s+(\d{6})\D{0,1}\s+(\d{7})/i; 
-		var utmEx2 = /(\d{6})\D{0,1}\s+(\d{7})\s+(\d{1,2})\D{0,1}/i; 
-		var utmEx3 = /(\d{1,2})\D{0,1}\s+(\d{7})\D{0,1}\s+(\d{6})/i; 
-		var utmEx4 = /(\d{7})\D{0,1}\s+(\d{6})\s+(\d{1,2})\D{0,1}/i; 
+		var tokenArr = verbCoordStr.split(" ");
+		
 		var z = null;
 		var e = null;
 		var n = null;
-		if(extractArr = utmEx1.exec(verbCoordStr)){
-			var z = extractArr[1];
-			var e = extractArr[2];
-			var n = extractArr[3];
+		var zoneEx = /^\D{0,1}(\d{1,2})\D*$/;
+		var eEx1 = /^(\d{6,7})E/i;
+		var nEx1 = /^(\d{7})N/i;
+		var eEx2 = /^E(\d{6,7})\D*$/i;
+		var nEx2 = /^N(\d{4,7})\D*$/i;
+		var eEx3 = /^0{0,1}(\d{6})\D*$/i;
+		var nEx3 = /^(\d{7})\D*$/i;
+		for(var i = 0; i < tokenArr.length; i++) {
+			if(extractArr = zoneEx.exec(tokenArr[i])){
+				z = extractArr[1];
+			}
+			else if(extractArr = eEx1.exec(tokenArr[i])){
+				e = extractArr[1];
+			}
+			else if(extractArr = nEx1.exec(tokenArr[i])){
+				n = extractArr[1];
+			}
+			else if(extractArr = eEx2.exec(tokenArr[i])){
+				e = extractArr[1];
+			}
+			else if(extractArr = nEx2.exec(tokenArr[i])){
+				n = extractArr[1];
+			}
+			else if(extractArr = eEx3.exec(tokenArr[i])){
+				e = extractArr[1];
+			}
+			else if(extractArr = nEx3.exec(tokenArr[i])){
+				n = extractArr[1];
+			}
 		}
-		else if(extractArr = utmEx2.exec(verbCoordStr)){
-			var e = extractArr[1];
-			var n = extractArr[2];
-			var z = extractArr[3];
-		}
-		else if(extractArr = utmEx3.exec(verbCoordStr)){
-			var z = extractArr[1];
-			var n = extractArr[2];
-			var e = extractArr[3];
-		}
-		else if(extractArr = utmEx4.exec(verbCoordStr)){
-			var n = extractArr[1];
-			var e = extractArr[2];
-			var z = extractArr[3];
-		}
+		
+		alert(z+" "+e+" "+n);
+		
 		if(z && e && n){
 			var datum = f.geodeticdatum.value
 			var llStr = utm2LatLng(z, e, n, datum);

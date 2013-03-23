@@ -161,11 +161,11 @@ function toggleCustomDiv3(){
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
-		if(ele.style.display=="none"){
-			ele.style.display="block";
+		if(ele.style.display=="block"){
+			ele.style.display="none";
   		}
 	 	else {
-	 		ele.style.display="none";
+	 		ele.style.display="block";
 	 	}
 	}
 	else{

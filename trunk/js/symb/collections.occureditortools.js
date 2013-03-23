@@ -12,11 +12,24 @@ function openAssocSppAid(){
 function toggleCoordDiv(){
 	coordObj = document.getElementById("coordaiddiv");
 	if(coordObj.style.display == "none"){
-		document.getElementById("locextradiv").style.display = "block";
+		document.getElementById("locExtraDiv").style.display = "block";
 		coordObj.style.display = "block";
 	}
 	else{
 		coordObj.style.display = "none";
+	}
+}
+
+function toggleCsMode(modeId){
+	if(modeId == 1){
+		document.getElementById("editorCssLink").href = "../../css/occureditorcrowdsource.css";
+		document.getElementById("longtagspan").style.display = "block";
+		document.getElementById("shorttagspan").style.display = "none";
+	}
+	else{
+		document.getElementById("editorCssLink").href = "../../css/occureditor.css";
+		document.getElementById("longtagspan").style.display = "none";
+		document.getElementById("shorttagspan").style.display = "block";
 	}
 }
 
@@ -58,7 +71,7 @@ function geoLocateLocality(){
 }
 
 function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
-	document.getElementById("locextradiv").style.display = "block";
+	document.getElementById("locExtraDiv").style.display = "block";
 
 	var f = document.fullform;
 	f.decimallatitude.value = latValue;

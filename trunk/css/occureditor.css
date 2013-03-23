@@ -82,7 +82,7 @@ body{
 }
 
 #catalogNumberDiv input{
-	width:	110px;
+	width:	120px;
 }
 
 #otherCatalogNumbersDiv {
@@ -98,7 +98,7 @@ body{
 }
 
 #recordedByDiv input{
-	width:	220px;
+	width:	200px;
 }
 
 #recordNumberDiv {
@@ -285,8 +285,34 @@ body{
 	float:left;
 }
 
-#coordinateuncertaintyinmeters{
+#coordinateUncertaintyInMetersDiv input{
 	width:	70px;
+}
+
+#googleDiv{
+	float:	left;
+	margin-top:20px;
+	cursor:	pointer;
+	padding:3px;
+}
+
+#googleDiv img{
+	border:	0px;
+	width:	13px;
+}
+
+#geoLocateDiv{
+	float:	left;
+	margin-top:20px;
+}
+
+#geoLocateDiv img{
+	width:	18px;	
+}
+
+#geoToolsDiv{
+	float:	left;
+	margin-top:17px;
 }
 
 #geodeticDatumDiv{
@@ -306,6 +332,11 @@ body{
 	width:55px;
 }
 
+#verbElevParseDiv{
+	float:left;
+	margin:20px 2px 0px 2px;
+}
+
 #verbatimElevationDiv{
 	float:	left;
 	margin-top:2px;
@@ -313,6 +344,18 @@ body{
 
 #verbatimElevationDiv input{
 	width:	100px;
+}
+
+#locExtraToggleDiv{
+	float:left;
+	margin:15px 5px;
+	cursor:pointer;
+}
+
+#locExtraDiv{
+	display:none;
+	position:relative;
+	clear:both;
 }
 
 #verbatimCoordinatesDiv{

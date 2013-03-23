@@ -167,7 +167,7 @@ class PersonalSpecimenManager {
 	private function encodeString($inStr,$cSet){
  		$retStr = $inStr;
 		if($cSet == "utf8"){
-			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 				//$value = utf8_encode($value);
 				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 			}

@@ -44,6 +44,43 @@ function toggle(target){
 	return false;
 }
 
+function initAutoComplete(formElem){
+	$("#"+formElem).autocomplete({
+		source: function( request, response ){
+			$.ajax({
+				url: "rpc/checklistspeciessuggest.php",
+				dataType: "json",
+				data: {
+					term : request.term,
+					cl : $('#clvalue').val() 
+				},
+				success: function(data) {
+					response(data);
+				}
+			});
+        },
+		minLength: 3 
+	});
+}
+
+function linkVoucher(occidIn, clidIn){
+	$.ajax({
+		type: "POST",
+		url: "rpc/linkvoucher.php",
+		data: { clid: clidIn, occid: occidIn, sciname: document.getElementById("tid-"+occidIn).value }
+	}).done(function( msg ) {
+		if(msg == 1){
+			alert("Voucher linked successfully!");
+		}
+		else if(msg == 2){
+			alert("Specimen already a voucher for checklist");
+		}
+		else{
+			alert("Voucher link failed: "+msg);
+		}
+	});
+}
+
 //Validate form functions
 function validateSqlFragForm(f){
 	if(!isNumeric(f.latnorth.value) || !isNumeric(f.latsouth.value) || !isNumeric(f.lngwest.value) || !isNumeric(f.lngeast.value)){
