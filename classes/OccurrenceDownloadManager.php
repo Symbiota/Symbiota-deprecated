@@ -601,7 +601,7 @@ xmlwriter_end_attribute($xml_resource);
 		}
 		if($portalCharset){
 			if($targetCharset == 'utf8' && $portalCharset == 'iso-8859-1'){
-				if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
@@ -613,7 +613,6 @@ xmlwriter_end_attribute($xml_resource);
 				}
 			}
 		}
-		
 		return $retStr;
 	}
 }

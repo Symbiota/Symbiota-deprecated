@@ -246,9 +246,35 @@ body{
 	float:left;
 }
 
-#coordinateuncertaintyinmeters{
+#coordinateUncertaintyInMetersDiv input{
 	width:	70px;
 }
+
+#googleDiv{
+	float:	left;
+	margin-top:20px;
+	cursor:	pointer;
+	padding:3px;
+}
+
+#googleDiv img{
+	border:	0px;
+	width:	13px;
+}
+
+#geoLocateDiv{
+	float:	left;
+	margin-top:20px;
+}
+
+#geoLocateDiv img{
+	width:	18px;	
+}
+
+#geoToolsDiv{
+	display:none;
+}
+
 
 #geodeticDatumDiv{
 	display:none;
@@ -258,13 +284,27 @@ body{
 	display:none;
 }
 
+#verbElevParseDiv{
+	display:none;
+}
+
 #verbatimElevationDiv{
 	float:	left;
-	margin-top:2px;
+	margin:2px 10px;
 }
 
 #verbatimElevationDiv input{
 	width:	100px;
+}
+
+#locExtraToggleDiv{
+	display:none;
+}
+
+#locExtraDiv{
+	display:block;
+	position:relative;
+	clear:both;
 }
 
 #verbatimCoordinatesDiv{
@@ -339,6 +379,10 @@ body{
 
 #occurrenceRemarksDiv img{
 	width:15px;
+}
+
+#dynPropToggleSpan{
+	display:none;
 }
 
 #dynamicPropertiesDiv{

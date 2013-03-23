@@ -11,8 +11,7 @@ class OccurrenceIndividualManager {
 	private $occArr = array();
 	private $metadataArr = array();
 
- 	public function __construct($occid){
- 		$this->occId = $occid;
+ 	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon("readonly");
  	}
  	
@@ -20,13 +19,17 @@ class OccurrenceIndividualManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
    
- 	public function setOccId($o){
- 		if(is_numeric($o)){
-			$this->occId = $o;
- 		}
+	public function setOccid($occid){
+		if(is_numeric($occid)){
+			$this->occId = $occid;
+		}
 	}
-	
-	public function setCollId($id){
+
+	public function getOccid(){
+		return $this->occId;
+	}
+
+	public function getCollId($id){
  		if(is_numeric($o)){
 			$this->collId = $id;
  		}
@@ -76,7 +79,7 @@ class OccurrenceIndividualManager {
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, duplicateid, modified, observeruid '.
 			'FROM omoccurrences ';
 		if($this->occId){
 			$sql .= 'WHERE (occid = '.$this->occId.')';
@@ -91,12 +94,8 @@ class OccurrenceIndividualManager {
 		$result = $this->conn->query($sql);
 		if($result){
 			$this->occArr = $result->fetch_assoc();
-			if(!$this->occId){ 
-				$this->occId = $this->occArr['occid'];
-			}
-			if(!$this->collId){
-				$this->collId = $this->occArr['collid'];
-			}
+			if(!$this->occId) $this->occId = $this->occArr['occid'];
+			if(!$this->collId) $this->collId = $this->occArr['collid'];
 			$this->setMetadata();
 			
 			if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
@@ -117,7 +116,6 @@ class OccurrenceIndividualManager {
 			$this->setImages();
 			$this->setDeterminations();
 			$this->setLoan();
-			//$this->setComments();
 			$result->free();
 		}
 		else{
@@ -195,48 +193,119 @@ class OccurrenceIndividualManager {
 		}
 	}
 
-	private function setComments(){
-        $sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
+	public function getDuplicateArr($dupeId){
+		$retArr = array();
+		if($dupeId){
+			$sql = 'SELECT duplicateid, projidentifier, projname '.
+				'FROM omoccurduplicates '.
+				'WHERE duplicateid = '.$dupeId;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr[$duplicateid] = $r->projname.' ('.$r->projidentifier.')';
+				}
+			}
+			else{
+				trigger_error('anable to get duplicate records'.$this->conn->error);
+			}
+		}
+		return $retArr;
+	}
+
+	public function getCommentArr($isEditor){
+		$retArr = array();
+		//return $retArr;
+		$sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
 			'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
-			'WHERE (c.occid = '.$this->occId.') AND c.reviewstatus = 1 '.
-			'ORDER BY  c.initialtimestamp, u.lastlogin';
+			'WHERE (c.occid = '.$this->occId.') ';
+		if(!$isEditor) $sql .= 'AND c.reviewstatus = 1 ';
+		$sql .= 'ORDER BY c.initialtimestamp';
+		//echo $sql.'<br/><br/>';
         $result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
 				$comId = $row->comid;
-				$this->occArr['comments'][$comId]['comment'] = $row->comment;
-				$this->occArr['comments'][$comId]['username'] = $row->username;
-				$this->occArr['comments'][$comId]['initialtimestamp'] = $row->initialtimestamp;
+				$retArr[$comId]['comment'] = $row->comment;
+				$retArr[$comId]['reviewstatus'] = $row->reviewstatus;
+				$retArr[$comId]['username'] = $row->username;
+				$retArr[$comId]['initialtimestamp'] = $row->initialtimestamp;
 			}
 			$result->free();
 		}
         else{
         	trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
         }
+		return $retArr;
 	}
 
-	public function addComment($commentStr,$autoApprove){
+	public function addComment($commentStr){
 		global $symbUid;
 		$statusStr = '';
-		$sql = 'INSERT INTO omoccurcomments(comment,uid,reviewstatus) '.
-			'VALUES("'.$commentStr.'",'.$symbUid.','.($autoApprove?'1':'0').')';
+		$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
+			'VALUES('.$this->occId.',"'.$this->cleanInStr($commentStr).'",'.$symbUid.',1)';
+		//echo 'sql: '.$sql;
 		$statudStr = $this->conn->query($sql);
 		return $statudStr;
 	}
+	
+	public function deleteComment($comId){
+		$statusStr = '';
+		if(is_numeric($comId)){
+			$sql = 'DELETE FROM omoccurcomments WHERE comid = '.$comId;
+			$statudStr = $this->conn->query($sql);
+		}
+		return $statudStr;
+	}
+	
+	public function reportComment($repComId){
+		if(array_key_exists('adminEmail',$GLOBALS)){
+			//Get comment 
+			$sql = 'SELECT c.comment, u.username, c.initialtimestamp '.
+				'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
+				'WHERE c.comid = '.$repComId;
+	        $result = $this->conn->query($sql);
+			if($result){
+				if($row = $result->fetch_object()){
+					$retArr['comment'] = $row->comment;
+					$retArr['username'] = $row->username;
+					$retArr['initialtimestamp'] = $row->initialtimestamp;
+				}
+				$result->free();
+			}
+	        else{
+	        	trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
+	        }
+			//Set Review status to supress
+			$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId);
+			
+			//Email to portal admin
+			$emailAddr = $GLOBALS['adminEmail'];
+			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'];
+			$subject = $GLOBALS['defaultTitle'].' inappropriate comment reported<br/>';
+			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
+			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
+			$headerStr = "MIME-Version: 1.0 \r\n".
+				"Content-type: text/html \r\n".
+				"To: ".$emailAddr." \r\n";
+				$headerStr .= "From: Admin <".$emailAddr."> \r\n";
+		}
+		mail($emailAddr,$subject,$bodyStr,$headerStr);
+	}
+	
+	public function makeCommentPublic($comId){
+		$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId);
+	}
+	
+	public function getGeneticArr(){
+		$retArr = array();
 
-	public function getChecklists($uRights){
+		return $retArr;
+	}
+
+	public function getVoucherChecklists(){
 		$returnArr = Array();
-		//Get all public checklist names
-		$sqlWhere = '';
-		if(array_key_exists('SuperAdmin',$uRights)){
-			$sqlWhere .= "OR Access = 'public' ";
-		}
-		if(array_key_exists("ClAdmin",$uRights)){
-			$sqlWhere .= "OR clid IN(".implode(",",$uRights["ClAdmin"]).") ";
-		}
-		if(!$sqlWhere) return $returnArr;
-		$sql = 'SELECT name, clid '.
-			'FROM fmchecklists WHERE '.substr($sqlWhere,2).' ORDER BY Name';
+		$sql = 'SELECT c.name, c.clid, v.notes '.
+			'FROM fmchecklists c INNER JOIN fmvouchers v ON c.clid = v.clid '.
+			'WHERE v.occid = '.$this->occId.' ORDER BY c.name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
@@ -249,6 +318,33 @@ class OccurrenceIndividualManager {
         	trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
         }
 		return $returnArr;
+	}
+
+	public function getChecklists($clidExcludeArr){
+		global $userRights;
+		if(!array_key_exists("ClAdmin",$userRights)) return null;
+		$returnArr = Array();
+		$sql = 'SELECT name, clid '.
+			'FROM fmchecklists WHERE clid IN('.implode(",",array_diff($userRights["ClAdmin"],$clidExcludeArr)).') '.
+			'ORDER BY Name';
+		//echo $sql;
+		if($result = $this->conn->query($sql)){
+			while($row = $result->fetch_object()){
+				$returnArr[$row->clid] = $row->name;
+			}
+			$result->free();
+        }
+        else{
+        	trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+        }
+		return $returnArr;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

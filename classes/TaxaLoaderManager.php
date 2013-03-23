@@ -798,15 +798,15 @@ class TaxaLoaderManager{
  		$retStr = trim($inStr);
 		$retStr = str_replace("\"","'",$retStr);
  		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-			if(mb_detect_encoding($inStr,'ISO-8859-1,UTF-8') == "ISO-8859-1"){
-				//$value = utf8_encode($value);
-				$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+				$retStr = utf8_encode($retStr);
+				//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 			}
 		}
 		elseif(strtolower($charset) == "iso-8859-1"){
 			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				//$value = utf8_decode($value);
-				$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				$retStr = utf8_decode($retStr);
+				//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 			}
 		}
 		return $retStr;

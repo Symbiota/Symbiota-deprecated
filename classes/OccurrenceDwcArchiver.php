@@ -7,6 +7,7 @@ class OccurrenceDwcArchiver{
 	private $collId;
 	private $collectionName;
 	private $collCode;
+	private $collArr = array();
 	private $nameTemplate;
 	private $targetPath;
 	private $zipArchive;
@@ -153,14 +154,31 @@ class OccurrenceDwcArchiver{
 	public function setCollId($id){
 		if(is_numeric($id)){
 			$this->collId = $id;
-			$sql = 'SELECT institutioncode, collectioncode, collectionname '.
-				'FROM omcollections WHERE collid = '.$id;
+			$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
+				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
+				'c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
+				'i.postalcode, i.country, i.phone '.
+				'FROM omcollections c INNER JOIN institutions i ON c.iid = i.iid '.
+				'WHERE c.collid = '.$id;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$inst = $r->institutioncode;
 				if($r->collectioncode) $inst .= '-'.$r->collectioncode;
 				$this->collCode = $inst;
-				$this->collectionName = $r->collectionname;
+				$this->collectionName = htmlspecialchars($r->collectionname);
+				$this->collArr['description'] = htmlspecialchars($r->fulldescription);
+				$this->collArr['url'] = $r->url;
+				$this->collArr['contact'] = htmlspecialchars($r->contact);
+				$this->collArr['email'] = $r->email;
+				$this->collArr['lat'] = $r->latitudedecimal;
+				$this->collArr['lng'] = $r->longitudedecimal;
+				$this->collArr['address1'] = htmlspecialchars($r->address1);
+				$this->collArr['address2'] = htmlspecialchars($r->address2);
+				$this->collArr['city'] = $r->city;
+				$this->collArr['state'] = $r->stateprovince;
+				$this->collArr['postalcode'] = $r->postalcode;
+				$this->collArr['country'] = $r->country;
+				$this->collArr['phone'] = $r->phone;
 			}
 			$rs->close();
 		}
@@ -200,6 +218,7 @@ class OccurrenceDwcArchiver{
 		//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 		
 		$this->writeMetaFile();
+		$this->writeEmlFile();
 		$this->writeOccurrenceFile($redactLocalities);
 		if($includeDets) $this->writeDeterminationFile();
 		if($includeImgs) $this->writeImageFile($redactLocalities);
@@ -209,6 +228,7 @@ class OccurrenceDwcArchiver{
 
 		//Clean up
 		unlink($this->targetPath.$this->collCode.'-meta.xml');
+		unlink($this->targetPath.$this->collCode.'-eml.xml');
 		unlink($this->targetPath.$this->collCode.'-occur.csv');
 		unlink($this->targetPath.$this->collCode.'-images.csv');
 		unlink($this->targetPath.$this->collCode.'-det.csv');
@@ -223,7 +243,7 @@ class OccurrenceDwcArchiver{
 		$fh = fopen($this->targetPath.$this->collCode.'-meta.xml', 'w');
 
 		//Output header 
-		$outStr = '<archive xmlns="http://rs.tdwg.org/dwc/text/" 
+		$outStr = '<archive metadata="eml.xml" xmlns="http://rs.tdwg.org/dwc/text/" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 			xsi:schemaLocation="http://rs.tdwg.org/dwc/text/   http://rs.tdwg.org/dwc/text/tdwg_dwc_text.xsd">
 			<core encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Occurrence">
@@ -266,6 +286,66 @@ class OccurrenceDwcArchiver{
 		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-meta.xml');
     	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-meta.xml','meta.xml');
 		
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
+	}
+
+	private function writeEmlFile(){
+		global $clientRoot, $defaultTitle, $adminEmail;
+
+		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
+		$fh = fopen($this->targetPath.$this->collCode.'-eml.xml', 'w');
+
+		//Output header 
+		$outStr = '<eml xmlns="eml://ecoinformatics.org/eml-2.1.1" 
+			xmlns:dc="http://purl.org/dc/terms/" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.0.1/eml.xsd" 
+			packageId="http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'ipt/resource.do?id='.$this->collCode.'/v1">';
+		$outStr .= '<dataset>';
+		$outStr .= '<title xml:lang="eng">'.$this->collectionName.'</title>';
+
+		$outStr .= '<creator>';
+		$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
+		$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
+		$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
+		$outStr .= '</creator>';
+
+		$outStr .= '<metadataProvider>';
+		$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
+		$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
+		$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
+		$outStr .= '</metadataProvider>';
+
+		$outStr .= '<pubDate>'.date("Y-m-d").'</pubDate>';
+		$outStr .= '<language>eng</language>';
+		$outStr .= '<abstract><para>'.$this->collArr['description'].'</para></abstract>';
+		
+		$outStr .= '<contact>';
+		$outStr .= '<individualName>'.$this->collArr['contact'].'</individualName>';
+		$outStr .= '<organizationName>'.$this->collectionName.'</organizationName>';
+		$outStr .= '<address>';
+		$outStr .= '<deliveryPoint>';
+		$outStr .= $this->collArr['address1'];
+		$outStr .= ($this->collArr['address2']?', ':'').$this->collArr['address2'];
+		$outStr .= '</deliveryPoint>';
+		$outStr .= '<city>'.$this->collArr['city'].'</city>';
+		$outStr .= '<administrativeArea>'.$this->collArr['state'].'</administrativeArea>';
+		$outStr .= '<postalCode>'.$this->collArr['postalcode'].'</postalCode>';
+		$outStr .= '<country>'.$this->collArr['country'].'</country>';
+		$outStr .= '</address>';
+		$outStr .= '<phone>'.$this->collArr['phone'].'</phone>';
+		$outStr .= '<electronicMailAddress>'.$this->collArr['email'].'</electronicMailAddress>';
+		$outStr .= '<onlineUrl>'.$this->collArr['url'].'</onlineUrl>';
+		$outStr .= '</contact>';
+
+		$outStr .= '</dataset>';
+		$outStr .= '</eml>';
+
+		fwrite($fh,$outStr);
+   		fclose($fh);
+		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-eml.xml');
+    	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-eml.xml','eml.xml');
+
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
@@ -488,7 +568,7 @@ class OccurrenceDwcArchiver{
 		$itemTitleElem = $newDoc->createElement('title',$title);
 		$itemElem->appendChild($itemTitleElem);
 		//description
-		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.htmlspecialchars($this->collectionName));
+		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$this->collectionName);
 		$itemElem->appendChild($descTitleElem);
 		//GUID
 		$guidElem = $newDoc->createElement('guid','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/misc/collprofiles.php?collid='.$this->collId);

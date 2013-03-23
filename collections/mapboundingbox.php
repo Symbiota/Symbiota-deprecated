@@ -98,8 +98,8 @@
 
         //]]>
     </script>
-    <div style="width:500px;">Double click to pan and zoom, click once to start drawing and again to finish rectangle, and 
-    click on the Submit button to transfer Coordinates.</div>
+    <div style="width:500px;">Click once to start drawing and again to finish rectangle. 
+    Click on the Submit button to transfer Coordinates.</div>
     <div id='map' style='width:100%; height: 520px'></div>
 	<form id="mapForm" onsubmit="return updateParentForm();">
 		<table>
@@ -107,12 +107,12 @@
 				Northern Lat: <input type="text" id="nlat" size="13" name="nlat" value="" />
 			</td><td>
 				Eastern Long: <input type="text" id="elon" size="13" name="elon" value="" />
+				<input type="submit" name="addcoords" value="Submit" />	
 			</td></tr>
 			<tr><td>
 				Southern Lat: <input type="text" id="slat" size="13" name="slat" value="" />
 			</td><td>
 				Western Long: <input type="text" id="wlon" size="13" name="wlon" value="" />
-				<input type="submit" name="addcoords" value="Submit" onclick="addCoordinates()" />	
 			</td></tr>
 		</table>
 	</form>

@@ -17,7 +17,7 @@ $collManager->reset();
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/collections.harvestparams.js"></script>
+	<script type="text/javascript" src="../js/symb/collections.harvestparams.js?var=1303"></script>
 </head>
 <body>
 
