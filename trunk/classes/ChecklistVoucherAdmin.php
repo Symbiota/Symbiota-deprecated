@@ -383,11 +383,7 @@ class ChecklistVoucherAdmin {
 	} 
 
 	public function exportProblemTaxaCsv(){
-    	global $defaultTitle, $userRights, $isAdmin;
-		$canReadRareSpp = false;
-		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
-			$canReadRareSpp = true;
-		}
+    	global $defaultTitle;
     	$fileName = $defaultTitle;
 		if($fileName){
 			if(strlen($fileName) > 10){
@@ -399,43 +395,23 @@ class ChecklistVoucherAdmin {
 		else{
 			$fileName = "symbiota";
 		}
-		$fileName .= "_voucher_".time().".csv";
+		$fileName .= "ProblemTaxa_".time().".csv";
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 
-		$sql = 'SELECT o.family, o.sciname, c.institutioncode, o.catalognumber, o.identifiedby, o.dateidentified, '.
-			'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
-			'o.decimallatitude, o.decimallongitude, o.minimumelevationinmeters, o.habitat, o.occurrenceremarks, o.occid, '.
-			'o.localitysecurity, o.collid '.
-			'FROM omoccurrences o LEFT JOIN '.
-			'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-			'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
-			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE intab.tid IS NULL AND ('.$this->sqlFrag.') '.
-			'ORDER BY o.family, o.sciname, c.institutioncode ';
+		$sql = 'SELECT DISTINCT o.occid, c.institutioncode, c.collectioncode, o.catalognumber, '.
+			'o.sciname, o.recordedby, o.recordnumber, o.eventdate, ,o.country, o.stateprovince, o.county, o.locality '.
+			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+			'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid = '.$this->clid.')) AND ('.$this->sqlFrag.') '.
+			'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
-			echo '"family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",'.
- 			'"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",'.
- 			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
-			
+			echo 'occid, institutionCode, collectionCode, catalogNumber, scientificName, recordedBy, recordNumber,eventDate,
+				country, stateProvince,county,locality,'."\n";
 			while($row = $rs->fetch_assoc()){
-				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
-					$row["catalognumber"].'","'.$row["identifiedby"].'","'.
-					$row["dateidentified"].'","'.$row["recordedby"].'","'.
-					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
-					$row["county"].'","'.$row["municipality"].'",';
-				
-				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
-				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo '"'.$row["locality"].'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
-					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
-				}
-				else{
-					echo '"Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden",';
-				}
-				echo '"'.$row["occid"]."\"\n";
+				echo $row['occid'].',"'.$row['cinstitutioncode'].'","'.$row['collectioncode'].'","'.$row['catalognumber'].'","'.
+					$row['sciname'].'","'.$row['recordedby'].'","'.$row['recordnumber'].'","'.$row['eventdate'].'","'.
+					$row['country'].'","'.$row['stateprovince'].'","'.$row['county'].'","'.$row['locality'].'",';
 			}
         	$rs->free();
 		}
