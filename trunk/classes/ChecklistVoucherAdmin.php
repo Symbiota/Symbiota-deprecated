@@ -271,7 +271,8 @@ class ChecklistVoucherAdmin {
 				'o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-				'WHERE ('.$this->sqlFrag.') AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
+				'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid = '.$this->clid.')) AND ('.$this->sqlFrag.') '.
+				'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -318,7 +319,7 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 	
-	//Export functions
+	//Export functions used within voucherreporthandler.php
 	public function exportMissingOccurCsv(){
     	global $defaultTitle, $userRights, $isAdmin;
 		$canReadRareSpp = false;
@@ -381,22 +382,92 @@ class ChecklistVoucherAdmin {
 		}
 	} 
 
-	public function downloadDatasetCsv(){
+	public function exportProblemTaxaCsv(){
+    	global $defaultTitle, $userRights, $isAdmin;
+		$canReadRareSpp = false;
+		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$canReadRareSpp = true;
+		}
+    	$fileName = $defaultTitle;
+		if($fileName){
+			if(strlen($fileName) > 10){
+				$nameArr = explode(" ",$fileName);
+				$fileName = $nameArr[0];
+			}
+			$fileName = str_replace(Array("."," ",":"),"",$fileName);
+		}
+		else{
+			$fileName = "symbiota";
+		}
+		$fileName .= "_voucher_".time().".csv";
+		header ('Content-Type: text/csv');
+		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+
+		$sql = 'SELECT o.family, o.sciname, c.institutioncode, o.catalognumber, o.identifiedby, o.dateidentified, '.
+			'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
+			'o.decimallatitude, o.decimallongitude, o.minimumelevationinmeters, o.habitat, o.occurrenceremarks, o.occid, '.
+			'o.localitysecurity, o.collid '.
+			'FROM omoccurrences o LEFT JOIN '.
+			'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
+			'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE intab.tid IS NULL AND ('.$this->sqlFrag.') '.
+			'ORDER BY o.family, o.sciname, c.institutioncode ';
+		//echo '<div>'.$sql.'</div>';
+		if($rs = $this->conn->query($sql)){
+			echo '"family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",'.
+ 			'"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",'.
+ 			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
+			
+			while($row = $rs->fetch_assoc()){
+				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
+					$row["catalognumber"].'","'.$row["identifiedby"].'","'.
+					$row["dateidentified"].'","'.$row["recordedby"].'","'.
+					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
+					$row["county"].'","'.$row["municipality"].'",';
+				
+				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
+				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
+					echo '"'.$row["locality"].'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
+					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
+				}
+				else{
+					echo '"Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden",';
+				}
+				echo '"'.$row["occid"]."\"\n";
+			}
+        	$rs->free();
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+	} 
+
+	public function downloadDatasetCsv($includeDetails = 0){
 		if($this->clid){
-			$sql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '.
-				't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-				'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
-				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
-	      		'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.')';
+			$sql = 'SELECT DISTINCT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ';
+			if($includeDetails){
+				$sql .= 'ctl.habitat, ctl.abundance, ctl.notes, ctl.source, v.editornotes, o.occid, o.catalognumber, '.
+					'o.recordedby, o.recordnumber, o.eventdate, o.sciname AS specsciname, o.country, o.stateprovince, o.county, o.locality ';
+			}
+			$sql .= 'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
+				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ';
+			if($includeDetails) $sql .= 'LEFT JOIN fmvouchers v ON ctl.clid = v.clid LEFT JOIN omoccurrences o ON v.occid = o.occid ';
+			$sql .= 'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.')';
 	    	$fileName = $this->clName."_".time().".csv";
 	    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header ('Content-Type: text/csv');
 			header ("Content-Disposition: attachment; filename=\"$fileName\"");
-			if($taxaArr = $this->getTaxaList(1,0)){
-				echo "Family,ScientificName,ScientificNameAuthorship,";
-				echo "TaxonId\n";
-				foreach($taxaArr as $tid => $tArr){
-					echo '"'.$this->cleanOutStr($tArr['family']).'","'.$this->cleanOutStr($tArr['sciname']).'","'.$this->cleanOutStr($tArr['author']).'"';
+			if($rs = $this->conn->query($sql)){
+				echo "family,scientificName,scientificNameAuthorship";
+				if($includeDetails) echo ',habitat, abundance, notes, source, editornotes, occid, catalognumber, '.
+					'specimenSciname, collector, collectorNumber, collectionDate, country, stateProvince, county, locality '; 
+				echo ",tid\n";
+				while($r = $rs->fetch_object()){
+					echo $r['family'].','.$r['sciname'].','.$r['author'];
+					if($includeDetails) echo ','.$r['habitat'].','.$r['abundance'].','.$r['notes'].','.$r['source'].','.$r['editornotes'].','.$r['occid'].','.$r['catalognumber'].
+						','.$r['specsciname'].','.$r['recordedby'].','.$r['recordnumber'].','.$r['eventdate'].','.$r['country'].','.$r['stateprovince'].','.$r['county'].','.$r['locality']; 
 					echo ',"'.$tid.'"'."\n";
 				}
 			}
@@ -437,7 +508,7 @@ class ChecklistVoucherAdmin {
 		}
 		else{
 			if($this->conn->errno == 1062){
-				trigger_error('Specimen already a voucher for checklist ');
+				//trigger_error('Specimen already a voucher for checklist ');
 				return 2;
 			}
 			else{
@@ -449,13 +520,13 @@ class ChecklistVoucherAdmin {
 					}
 					else{
 						//echo 'Name added to list, though still unable to link voucher';
-						trigger_error('Name added to checklist, though still unable to link voucher": '.$this->conn->error,E_USER_WARNING);
+						//trigger_error('Name added to checklist, though still unable to link voucher": '.$this->conn->error,E_USER_WARNING);
 						return 0;
 					}
 				}
 				else{
 					//echo 'Unable to link voucher; unknown error';
-					trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
+					//trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
 					return 0;
 				}
 			}

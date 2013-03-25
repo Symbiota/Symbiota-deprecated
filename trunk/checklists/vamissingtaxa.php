@@ -29,13 +29,22 @@ else{
 
 <div id="innertext">
 	<div style='float:left;font-weight:bold;margin-left:5px'>
-		Possible Missing Taxa: <?php echo count($missingArr); ?>
+		 
+		<?php
+		if($displayMode == 2){
+			echo 'Problem Taxa: ';
+		}
+		else{
+			echo 'Possible Missing Taxa: ';
+		}
+		echo count($missingArr); 
+		?>
 	</div>
 	<div style="float:left;margin-left:5px">
-		<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>&tabindex=1"><img src="../images/refresh.jpg" style="border:0px;" title="Refresh List" /></a>
+		<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid.'&displaymode='.$displayMode; ?>&tabindex=1"><img src="../images/refresh.jpg" style="border:0px;" title="Refresh List" /></a>
 	</div>
 	<div style="float:left;margin-left:5px;">
-		<a href="voucherreporthandler.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>" target="_blank" title="Download list of possible vouchers">
+		<a href="voucherreporthandler.php?rtype=<?php echo ($displayMode==2?'problemtaxacsv':'missingoccurcsv').'&clid='.$clid; ?>" target="_blank" title="Download Specimen Records">
 			<img src="<?php echo $clientRoot; ?>/images/dl.png" style="border:0px;" />
 		</a>
 	</div>
@@ -58,8 +67,9 @@ else{
 			$recCnt = 0;
 			if($displayMode==1){
 				?>
-				<div style="clear:both;margin-left:5px;">
-					Below are specimens matching search term for taxa that are not in checklist. 
+				<div style="clear:both;margin:10px;">
+					Listed below are specimens identified to a species not found in the checklist. Use the form to add the
+					names and link the vouchers as a batch action.
 				</div>
 				<form name="batchmissingform" method="post" action="voucheradmin.php" onsubmit="return validateBatchMissingForm(this)">
 					<table class="styledtable">
@@ -105,8 +115,11 @@ else{
 			}
 			elseif($displayMode==2){
 				?>
-				<div style="clear:both;margin-left:5px;">
-					Below are taxa with specimens that match the search term but are not in checklist. 
+				<div style="clear:both;margin:10px;">
+					Listed below are species name obtained from specimens matching the above search term but 
+					are not found within the taxonomic thesaurus (possibly misspelled?). To add as a voucher, 
+					type the correct name from the checklist, and then click the Link Voucher button. 
+					The correct name must already be added to the checklist before voucher can be linked. 
 				</div>
 				<table class="styledtable">
 					<tr>
@@ -148,6 +161,10 @@ else{
 			else{
 				?>
 				<div style="margin:20px;clear:both;">
+					<div style="clear:both;margin:10px;">
+						Listed below are species name not found in the checklist but are represented by one or more specimens 
+						that have a locality matching the above search term. 
+					</div>
 					<?php 
 					foreach($missingArr as $tid => $sn){
 						?>

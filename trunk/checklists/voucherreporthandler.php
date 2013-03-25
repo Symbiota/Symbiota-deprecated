@@ -14,4 +14,7 @@ $vManager->setClid($clid);
 if($rType == 'missingoccurcsv'){
 	$vManager->exportMissingOccurCsv();
 }
+elseif($rType == 'problemtaxacsv'){
+	$vManager->exportProblemTaxaCsv();
+}
 ?>

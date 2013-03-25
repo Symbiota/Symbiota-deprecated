@@ -231,9 +231,8 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 							if($displayMode){
 								?>
 								<div style="clear:both;">
-									<div style="margin:20px;">
-										
-						
+									<div style="margin:10px;">
+										Listed below are possible specimen vouchers that can be batch linked to species within the checklist.
 									</div>
 									<div>
 										<?php 
@@ -291,9 +290,10 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 							else{
 								?>
 								<div style="clear:both;">
-									<div style="margin:20px;">
-										Taxa are listed 100 at a time. Use navigation controls located at the bottom of the list to advance to the next group of taxa. 
-										Clicking on a taxon name will use the search statemtn to dynamically query the system for possible voucher specimens.
+									<div style="margin:10px;">
+										Listed below are species from the checklist that do not have linked specimen vouchers.    
+										Click on name to use the search statement above to dynamically query the occurrence dataset for 
+										possible voucher specimens. Use the pulldown to the right to display the specimens in a table format.
 									</div>
 									<div style="margin:20px;">
 										<?php 
@@ -338,7 +338,9 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 						</div>
 					</div>
 				    <div id="reportDiv">
-				    	Soon to be a activated!
+						<ul>
+							<li><a href=""></a></li>
+						</ul>
 				    </div>
 				</div>
 				<?php
