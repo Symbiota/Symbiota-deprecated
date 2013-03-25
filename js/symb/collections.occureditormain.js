@@ -259,8 +259,6 @@ function parseVerbatimCoordinates(f){
 			}
 		}
 		
-		alert(z+" "+e+" "+n);
-		
 		if(z && e && n){
 			var datum = f.geodeticdatum.value
 			var llStr = utm2LatLng(z, e, n, datum);

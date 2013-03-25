@@ -338,9 +338,13 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 						</div>
 					</div>
 				    <div id="reportDiv">
-						<ul>
-							<li><a href=""></a></li>
-						</ul>
+				    	<div style="margin:25px;height:400px;">
+							<ul>
+								<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>" target="_blank">Full species list with vouchers (CSV)</a></li>
+								<li><a href="voucherreporthandler.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>" target="_blank">Specimens of taxa missing from checklist (CSV)</a></li>
+								<li><a href="voucherreporthandler.php?rtype=problemtaxacsv&clid=<?php echo $clid; ?>" target="_blank">Specimens with misspelled, illegal, and problematic scientific names</a></li>
+							</ul>
+						</div>
 				    </div>
 				</div>
 				<?php
