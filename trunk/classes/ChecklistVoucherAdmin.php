@@ -354,26 +354,23 @@ class ChecklistVoucherAdmin {
 			'ORDER BY o.family, o.sciname, c.institutioncode ';
 		//echo '<div>'.$sql.'</div>';
 		if($rs = $this->conn->query($sql)){
-			echo '"family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",'.
- 			'"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",'.
- 			'"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"'."\n";
+			echo $this->arrayToCsv(array("family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",
+ 			"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",
+ 			"decimalLatitude","decimalLongitude","minimumElevationInMeters","habitat","occurrenceRemarks","occid"));
 			
 			while($row = $rs->fetch_assoc()){
-				echo '"'.$row["family"].'","'.$row["sciname"].'","'.$row["institutioncode"].'","'.
-					$row["catalognumber"].'","'.$row["identifiedby"].'","'.
-					$row["dateidentified"].'","'.$row["recordedby"].'","'.
-					$row["recordnumber"].'","'.$row["eventdate"].'","'.$row["country"].'","'.$row["stateprovince"].'","'.
-					$row["county"].'","'.$row["municipality"].'",';
-				
 				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
-				if($canReadRareSpp || $localSecurity != 1 || (array_key_exists("RareSppReader", $userRights) && in_array($row["collid"],$userRights["RareSppReader"]))){
-					echo '"'.$row["locality"].'",'.$row["decimallatitude"].','.$row["decimallongitude"].','.
-					$row["minimumelevationinmeters"].',"'.$row["habitat"].'","'.$row["occurrenceremarks"].'",';
+				if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
+					$row["locality"] = "Redacted";
+					$row["decimallatitude"] = "Redacted";
+					$row["decimallongitude"] = "Redacted";
+					$row["minimumelevationinmeters"] = "Redacted";
+					$row["habitat"] = "Redacted";
+					$row["occurrenceremarks"] = "Redacted";
 				}
-				else{
-					echo '"Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden","Value Hidden",';
-				}
-				echo '"'.$row["occid"]."\"\n";
+				unset($row['localitysecurity']);
+				unset($row['collid']);
+				echo $this->arrayToCsv($row);
 			}
         	$rs->free();
 		}
@@ -400,18 +397,22 @@ class ChecklistVoucherAdmin {
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 
 		$sql = 'SELECT DISTINCT o.occid, c.institutioncode, c.collectioncode, o.catalognumber, '.
-			'o.sciname, o.recordedby, o.recordnumber, o.eventdate, ,o.country, o.stateprovince, o.county, o.locality '.
+			'o.sciname, o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.locality, o.localitysecurity, o.collid '.
 			'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 			'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid = '.$this->clid.')) AND ('.$this->sqlFrag.') '.
 			'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
-		//echo '<div>'.$sql.'</div>';
+		//echo '<div>'.$sql.'</div>';return;
 		if($rs = $this->conn->query($sql)){
-			echo 'occid, institutionCode, collectionCode, catalogNumber, scientificName, recordedBy, recordNumber,eventDate,
-				country, stateProvince,county,locality,'."\n";
-			while($row = $rs->fetch_assoc()){
-				echo $row['occid'].',"'.$row['cinstitutioncode'].'","'.$row['collectioncode'].'","'.$row['catalognumber'].'","'.
-					$row['sciname'].'","'.$row['recordedby'].'","'.$row['recordnumber'].'","'.$row['eventdate'].'","'.
-					$row['country'].'","'.$row['stateprovince'].'","'.$row['county'].'","'.$row['locality'].'",';
+			echo $this->arrayToCsv(array('occid','institutionCode','collectionCode','catalogNumber','scientificName',
+				'recordedBy','recordNumber','eventDate','country','stateProvince','county','locality'));
+			while($r = $rs->fetch_assoc()){
+				$localSecurity = ($r["localitysecurity"]?$r["localitysecurity"]:0); 
+				if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($r["collid"],$userRights["RareSppReader"]))){
+					$r["locality"] = "Locality Redacted";
+				}
+				unset($r['localitysecurity']);
+				unset($r['collid']);
+				echo $this->arrayToCsv($r);
 			}
         	$rs->free();
 		}
@@ -421,31 +422,51 @@ class ChecklistVoucherAdmin {
 	} 
 
 	public function downloadDatasetCsv($includeDetails = 0){
+    	global $defaultTitle, $userRights, $isAdmin;
+		$canReadRareSpp = false;
+		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+			$canReadRareSpp = true;
+		}
 		if($this->clid){
+			//Set SQL
 			$sql = 'SELECT DISTINCT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ';
 			if($includeDetails){
-				$sql .= 'ctl.habitat, ctl.abundance, ctl.notes, ctl.source, v.editornotes, o.occid, o.catalognumber, '.
-					'o.recordedby, o.recordnumber, o.eventdate, o.sciname AS specsciname, o.country, o.stateprovince, o.county, o.locality ';
+				$sql .= 'ctl.habitat, ctl.abundance, ctl.notes, ctl.source, v.editornotes, o.occid, o.catalognumber, o.sciname AS specsciname, '.
+					'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.locality, o.localitysecurity, o.collid ';
 			}
 			$sql .= 'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ';
-			if($includeDetails) $sql .= 'LEFT JOIN fmvouchers v ON ctl.clid = v.clid LEFT JOIN omoccurrences o ON v.occid = o.occid ';
-			$sql .= 'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.')';
-	    	$fileName = $this->clName."_".time().".csv";
+			if($includeDetails) $sql .= 'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid LEFT JOIN omoccurrences o ON v.occid = o.occid ';
+			$sql .= 'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.') ';
+			//Set header
+			$headerArr = array('tid','family','scientificName','scientificNameAuthorship');
+			if($includeDetails){
+				$headerArr = array_merge($headerArr, array('habitat','abundance','notes','source','editornotes','occid','catalognumber','specimenSciname','collector','collectorNumber','collectionDate','country','stateProvince','county','locality')); 
+			}
+			//Output file
+			$fileName = $this->clName."_".time().".csv";
 	    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header ('Content-Type: text/csv');
 			header ("Content-Disposition: attachment; filename=\"$fileName\"");
 			if($rs = $this->conn->query($sql)){
-				echo "family,scientificName,scientificNameAuthorship";
-				if($includeDetails) echo ',habitat, abundance, notes, source, editornotes, occid, catalognumber, '.
-					'specimenSciname, collector, collectorNumber, collectionDate, country, stateProvince, county, locality '; 
-				echo ",tid\n";
-				while($r = $rs->fetch_object()){
-					echo $r['family'].','.$r['sciname'].','.$r['author'];
-					if($includeDetails) echo ','.$r['habitat'].','.$r['abundance'].','.$r['notes'].','.$r['source'].','.$r['editornotes'].','.$r['occid'].','.$r['catalognumber'].
-						','.$r['specsciname'].','.$r['recordedby'].','.$r['recordnumber'].','.$r['eventdate'].','.$r['country'].','.$r['stateprovince'].','.$r['county'].','.$r['locality']; 
-					echo ',"'.$tid.'"'."\n";
+				echo $this->arrayToCsv($headerArr);
+				while($r = $rs->fetch_assoc()){
+					if($includeDetails){
+						$localSecurity = ($r["localitysecurity"]?$r["localitysecurity"]:0); 
+						if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($r["collid"],$userRights["RareSppReader"]))){
+							$r["locality"] = "Redacted";
+							$r["decimallatitude"] = "Redacted";
+							$r["decimallongitude"] = "Redacted";
+							$r["minimumelevationinmeters"] = "Redacted";
+							$r["habitat"] = "Redacted";
+							$r["occurrenceremarks"] = "Redacted";
+						}
+						unset($r['localitysecurity']);
+						unset($r['collid']);
+					}
+					echo $this->arrayToCsv($r);
 				}
+				$rs->free();
 			}
 			else{
 				echo "Recordset is empty.\n";
@@ -541,12 +562,29 @@ class ChecklistVoucherAdmin {
 	}
 
 	//Misc fucntions
+	private function arrayToCsv( $arrIn, $delimiter = ',', $enclosure = '"', $encloseAll = false) {
+		$delimiterEsc = preg_quote($delimiter, '/');
+		$enclosureEsc = preg_quote($enclosure, '/');
+		$output = array();
+		foreach ( $arrIn as $field ) {
+			$field = str_replace(array("\r", "\r\n", "\n"),'',$field);
+			if ( $encloseAll || preg_match( "/(?:${delimiterEsc}|${enclosureEsc}|\s)/", $field ) ) {
+				//$field = str_replace($delimiter,'\\'.$delimiter,$field);
+				$output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
+			}
+			else {
+				$output[] = $field;
+			}
+		}
+		return implode( $delimiter, $output )."\n";
+	}
+
 	private function cleanOutStr($str){
 		$str = str_replace('"',"&quot;",$str);
 		$str = str_replace("'","&apos;",$str);
 		return $str;
 	}
-	
+
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
