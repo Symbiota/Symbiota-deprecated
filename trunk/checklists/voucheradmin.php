@@ -138,7 +138,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 										<input type="text" name="locality" onchange="" />
 									</div>
 									<div style="margin:3px;">
-										<input name="excludecult" value="1" type="checkbox" checked /> 
+										<input name="excludecult" value="1" type="checkbox" /> 
 										Exclude cultivated species
 									</div>
 									<div style="margin:20px;">
@@ -342,7 +342,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 							<ul>
 								<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>" target="_blank">Full species list with vouchers (CSV)</a></li>
 								<li><a href="voucherreporthandler.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>" target="_blank">Specimens of taxa missing from checklist (CSV)</a></li>
-								<li><a href="voucherreporthandler.php?rtype=problemtaxacsv&clid=<?php echo $clid; ?>" target="_blank">Specimens with misspelled, illegal, and problematic scientific names</a></li>
+								<li><a href="voucherreporthandler.php?rtype=problemtaxacsv&clid=<?php echo $clid; ?>" target="_blank">Specimens with misspelled, illegal, and problematic scientific names (CSV)</a></li>
 							</ul>
 						</div>
 				    </div>

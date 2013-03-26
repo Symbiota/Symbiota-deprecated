@@ -66,7 +66,7 @@ class ChecklistVoucherAdmin {
 		if(array_key_exists('latlngor',$sqlFragArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
 		if($sqlFragArr['excludecult']){
-			$sqlFrag .= 'AND (o.cultivationStatus = 0) ';
+			$sqlFrag .= 'AND (o.cultivationStatus = 0 OR o.cultivationStatus IS NULL) ';
 		}
 		if($sqlFrag){
 			$sqlFrag = trim(substr($sqlFrag,3));

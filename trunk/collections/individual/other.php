@@ -25,21 +25,21 @@ if($symbUid){
 ?>
 <div id='innertext' style='width:95%; height:95%; clear:both;'>
 	<?php 
+    if($vClArr){
+    	echo '<div style="font-weight:bold;margin:5px;font-size:110%;">Specimen serves as voucher of the following checklists</div>';
+    	echo '<ul>';
+    	foreach($vClArr as $id => $clName){
+    		echo '<li><a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a></li>';
+    	}
+    	echo '</ul>';
+    }
+    else{
+    	echo '<div style="font-weight:bold;font-size:120%;">Specimen does not serve as a voucher for any checklists</div>';
+    }
 	if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 		?>
-    	<div style='margin-top:15px;height:400px;'>
+		<div style='margin-top:15px;height:400px;'>
     		<?php 
-    		if($vClArr){
-    			echo '<div style="font-weight:bold;margin:5px;font-size:110%;">Specimen serves as voucher of the following checklists</div>';
-    			echo '<ul>';
-    			foreach($vClArr as $id => $clName){
-    				echo '<li><a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a></li>';
-    			}
-    			echo '</ul>';
-    		}
-    		else{
-    			echo '<div style="font-weight:bold;font-size:120%;">Specimen does not serve as a voucher for any checklists</div>';
-    		}
 			if($clArr = $indManager->getChecklists(array_keys($vClArr))){
 	    		?>
 				<fieldset style='margin:40px 0px;'>

@@ -402,7 +402,7 @@ class OccurrenceDwcArchiver{
 				unset($r['localitySecurity']);
 				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
+				fputcsv($fh, $this->addcslashesArr($r));
 			}
 			$rs->free();
 		}
@@ -438,7 +438,7 @@ class OccurrenceDwcArchiver{
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
 				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
+				fputcsv($fh, $this->addcslashesArr($r));
 			}
 			$rs->free();
 		}
@@ -513,7 +513,7 @@ class OccurrenceDwcArchiver{
 				if($extStr == 'jpg' || $extStr == 'jpeg') $r['format'] = 'image/jpeg';
 				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
-				fputcsv($fh, $this->addcslashesArr($r,"\n\r\""));
+				fputcsv($fh, $this->addcslashesArr($r));
 			}
 			$rs->free();
 		}
@@ -667,9 +667,24 @@ class OccurrenceDwcArchiver{
 				}
 			}
 		}
-		return $retArr;
+		$this->aasort($retArr, 'title');
+		return ;
 	}
-	
+
+	private function aasort(&$array, $key){
+		$sorter = array();
+		$ret = array();
+		reset($array);
+		foreach ($array as $ii => $va) {
+			$sorter[$ii] = $va[$key];
+		}
+		asort($sorter);
+		foreach ($sorter as $ii => $va) {
+			$ret[$ii] = $array[$ii];
+		}
+		$array = $ret;
+	}
+
 	public function getCollectionArr(){
 		$retArr = array();
 		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
@@ -736,10 +751,10 @@ class OccurrenceDwcArchiver{
 		return $retStr;
 	}
 	
-	private function addcslashesArr($arr,$charlist){
+	private function addcslashesArr($arr){
 		$retArr = array();
 		foreach($arr as $k => $v){
-			$retArr[$k] = addcslashes($v,$charlist);
+			$retArr[$k] = addcslashes($v,"\n\r\"");
 		}
 		return $retArr;
 	}
