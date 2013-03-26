@@ -74,7 +74,6 @@ $displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
 include($serverRoot.'/header.php');
 if(isset($taxa_indexCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_indexCrumbs;
 	echo " <b>$spDisplay</b>";
 	echo "</div>";

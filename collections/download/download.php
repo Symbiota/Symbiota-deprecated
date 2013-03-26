@@ -19,7 +19,6 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 		if($collections_download_downloadCrumbs){
 			?>
 			<div class='navpath'>
-				<a href='../../index.php'>Home</a> &gt; 
 				<?php echo $collections_download_downloadCrumbs; ?>
 				<b>Specimen Download</b>
 			</div>

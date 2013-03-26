@@ -136,7 +136,6 @@ if(isset($ident_tools_massupdateCrumbs)){
 	if($ident_tools_massupdateCrumbs){
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
 			<?php echo $ident_tools_massupdateCrumbs; ?>
 			<a href='massupdate.php'>
 				<b>Character Mass-update Editor</b>

@@ -123,50 +123,45 @@
 
 <body>
 <?php
-	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:true);
+	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:false);
 	include($serverRoot.'/header.php');
+	echo '<div class="navpath">';
 	if($pid){
-		echo '<div class="navpath">';
 		echo '<a href="../index.php">Home</a> &gt; ';
 		echo '<a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'">';
 		echo $clManager->getProjName();
 		echo '</a> &gt; ';
 		echo '<b>'.$clManager->getClName().'</b>';
-		echo '</div>';
 	}
 	else{
 		if(isset($checklists_checklistCrumbs)){
 			if($checklists_checklistCrumbs){
-				echo "<div class='navpath'>";
-				echo "<a href='../index.php'>Home</a> &gt; ";
 				if($dynClid){
 					if($clArray["type"] == "Specimen Checklist"){
 						echo "<a href='".$clientRoot."/collections/list.php'>";
 						echo "Occurrence Checklist";
-						echo "</a> &gt; ";
+						echo "</a> &gt;&gt; ";
 					}
 				}
 				else{
 					echo $checklists_checklistCrumbs;
 				}
 				echo " <b>".$clManager->getClName()."</b>";
-				echo "</div>";
 			}
 		}
 		else{
-			echo '<div class="navpath">';
-			echo '<a href="../index.php">Home</a> &gt; ';
+			echo '<a href="../index.php">Home</a> &gt;&gt; ';
 			if($dynClid){
 				if($clArray['type'] == 'Specimen Checklist'){
 					echo '<a href="'.$clientRoot.'/collections/list.php">';
 					echo 'Occurrence Checklist';
-					echo '</a> &gt; ';
+					echo '</a> &gt;&gt; ';
 				}
 			}
 			echo ' <b>'.$clManager->getClName().'</b>';
-			echo '</div>';
 		}
 	}
+	echo '</div>';
 	?>
 	<!-- This is inner text! -->
 	<div id='innertext'>

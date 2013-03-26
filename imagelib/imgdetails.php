@@ -52,7 +52,6 @@ if($isEditor){
 	include($serverRoot.'/header.php');
 	if(isset($taxa_imgdetailsCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $taxa_imgdetailsCrumbs;
 		echo " <b>Image #$imgId</b>";
 		echo "</div>";

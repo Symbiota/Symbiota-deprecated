@@ -83,7 +83,6 @@ $status = "";
 		if(isset($taxa_admin_taxonomycleanerCrumbs)){
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt; 
 				<?php echo $taxa_admin_taxonomycleanerCrumbs; ?>
 				<b>Taxonomic Name Cleaner</b>
 			</div>

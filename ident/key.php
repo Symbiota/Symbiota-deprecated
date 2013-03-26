@@ -81,7 +81,6 @@ if($chars){
 	if(isset($ident_keyCrumbs)){
 		if($ident_keyCrumbs){
 			echo '<div class="navpath">';
-			echo '<a href="../index.php">Home</a> &gt;&gt; ';
 			if($dynClid){
 				if($dataManager->getClType() == 'Specimen Checklist'){
 					echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';

@@ -108,7 +108,6 @@ $displayLeftMenu = (isset($taxa_admin_taxonomyeditorMenu)?$taxa_admin_taxonomyed
 include($serverRoot.'/header.php');
 if(isset($taxa_admin_taxonomyeditorCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_admin_taxonomyeditorCrumbs;
 	echo " <b>Taxonomy Editor</b>";
 	echo "</div>";

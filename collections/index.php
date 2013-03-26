@@ -118,7 +118,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	if(isset($collections_indexCrumbs)){
 		if($collections_indexCrumbs){
 			echo "<div class='navpath'>";
-			echo "<a href='../index.php'>Home</a> &gt; ";
 			echo $collections_indexCrumbs;
 			echo " <b>Collections</b>";
 			echo "</div>";

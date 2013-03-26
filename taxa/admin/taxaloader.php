@@ -111,7 +111,6 @@ $displayLeftMenu = (isset($taxa_admin_taxaloaderMenu)?$taxa_admin_taxaloaderMenu
 include($serverRoot.'/header.php');
 if(isset($taxa_admin_taxaloaderCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_admin_taxaloaderCrumbs;
 	echo " <b>Taxa Loader</b>"; 
 	echo "</div>";
