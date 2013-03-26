@@ -300,10 +300,10 @@ if($symbUid){
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=1303"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=1303"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=1303"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=1303"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130326"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130326"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130326"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130326"></script>
 </head>
 <body>
 	<!-- inner text -->
