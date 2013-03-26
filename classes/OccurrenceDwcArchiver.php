@@ -7,7 +7,7 @@ class OccurrenceDwcArchiver{
 	private $collId;
 	private $collectionName;
 	private $collCode;
-	private $collArr = array();
+	private $collArr;
 	private $nameTemplate;
 	private $targetPath;
 	private $zipArchive;
@@ -153,14 +153,17 @@ class OccurrenceDwcArchiver{
 
 	public function setCollId($id){
 		if(is_numeric($id)){
+			unset($this->collArr);
+			$this->collArr = array();
 			$this->collId = $id;
 			$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
 				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
 				'c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
 				'i.postalcode, i.country, i.phone '.
-				'FROM omcollections c INNER JOIN institutions i ON c.iid = i.iid '.
+				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid '.
 				'WHERE c.collid = '.$id;
 			$rs = $this->conn->query($sql);
+			//echo $sql.'<br/>';
 			if($r = $rs->fetch_object()){
 				$inst = $r->institutioncode;
 				if($r->collectioncode) $inst .= '-'.$r->collectioncode;
@@ -180,7 +183,7 @@ class OccurrenceDwcArchiver{
 				$this->collArr['country'] = $r->country;
 				$this->collArr['phone'] = $r->phone;
 			}
-			$rs->close();
+			$rs->free();
 		}
 	}
 
@@ -201,39 +204,44 @@ class OccurrenceDwcArchiver{
 	
 	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
 		global $serverRoot;
-		if(!$this->logFH){
-			$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-			$this->logFH = fopen($logFile, 'a');
+		if($this->collArr){
+			if(!$this->logFH){
+				$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+				$this->logFH = fopen($logFile, 'a');
+			}
+			$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName."\n");
+			
+			if(!class_exists('ZipArchive')){
+				exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
+			}
+	
+			$archiveFile = $this->targetPath.$this->collCode.'_DwC-A.zip';
+			if(file_exists($archiveFile)) unlink($archiveFile);
+			$this->zipArchive = new ZipArchive;
+			$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
+			//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
+			
+			$this->writeMetaFile();
+			$this->writeEmlFile();
+			$this->writeOccurrenceFile($redactLocalities);
+			if($includeDets) $this->writeDeterminationFile();
+			if($includeImgs) $this->writeImageFile($redactLocalities);
+			$this->zipArchive->close();
+			
+			$this->writeRssFile();
+	
+			//Clean up
+			unlink($this->targetPath.$this->collCode.'-meta.xml');
+			unlink($this->targetPath.$this->collCode.'-eml.xml');
+			unlink($this->targetPath.$this->collCode.'-occur.csv');
+			unlink($this->targetPath.$this->collCode.'-images.csv');
+			unlink($this->targetPath.$this->collCode.'-det.csv');
+	
+			$this->logOrEcho("\n-----------------------------------------------------\n");
 		}
-		$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName."\n");
-		
-		if(!class_exists('ZipArchive')){
-			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
+		else{
+			echo 'ERROR: unable to create DwC-A for collection #'.$this->collId;
 		}
-
-		$archiveFile = $this->targetPath.$this->collCode.'_DwC-A.zip';
-		if(file_exists($archiveFile)) unlink($archiveFile);
-		$this->zipArchive = new ZipArchive;
-		$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
-		//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
-		
-		$this->writeMetaFile();
-		//$this->writeEmlFile();
-		$this->writeOccurrenceFile($redactLocalities);
-		if($includeDets) $this->writeDeterminationFile();
-		if($includeImgs) $this->writeImageFile($redactLocalities);
-		$this->zipArchive->close();
-		
-		$this->writeRssFile();
-
-		//Clean up
-		unlink($this->targetPath.$this->collCode.'-meta.xml');
-		//unlink($this->targetPath.$this->collCode.'-eml.xml');
-		unlink($this->targetPath.$this->collCode.'-occur.csv');
-		unlink($this->targetPath.$this->collCode.'-images.csv');
-		unlink($this->targetPath.$this->collCode.'-det.csv');
-
-		$this->logOrEcho("\n-----------------------------------------------------\n");
 	}
 	
 	private function writeMetaFile(){
