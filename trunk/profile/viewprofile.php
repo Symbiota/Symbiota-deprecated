@@ -125,7 +125,6 @@ $displayLeftMenu = (isset($profile_viewprofileMenu)?$profile_viewprofileMenu:"tr
 include($serverRoot.'/header.php');
 if(isset($profile_viewprofileCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $profile_viewprofileCrumbs;
 	echo " <b>User Profile</b>"; 
 	echo "</div>";

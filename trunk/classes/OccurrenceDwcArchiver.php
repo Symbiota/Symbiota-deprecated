@@ -218,7 +218,7 @@ class OccurrenceDwcArchiver{
 		//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 		
 		$this->writeMetaFile();
-		$this->writeEmlFile();
+		//$this->writeEmlFile();
 		$this->writeOccurrenceFile($redactLocalities);
 		if($includeDets) $this->writeDeterminationFile();
 		if($includeImgs) $this->writeImageFile($redactLocalities);
@@ -228,7 +228,7 @@ class OccurrenceDwcArchiver{
 
 		//Clean up
 		unlink($this->targetPath.$this->collCode.'-meta.xml');
-		unlink($this->targetPath.$this->collCode.'-eml.xml');
+		//unlink($this->targetPath.$this->collCode.'-eml.xml');
 		unlink($this->targetPath.$this->collCode.'-occur.csv');
 		unlink($this->targetPath.$this->collCode.'-images.csv');
 		unlink($this->targetPath.$this->collCode.'-det.csv');

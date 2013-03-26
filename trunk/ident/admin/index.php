@@ -61,7 +61,6 @@ if(isset($collections_loans_indexCrumbs)){
 	if($collections_loans_indexCrumbs){
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
 			<?php echo $ident_admin_indexCrumbs; ?>
 			<a href='index.php'> <b>Character Management</b></a>
 		</div>

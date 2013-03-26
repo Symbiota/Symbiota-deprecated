@@ -48,7 +48,6 @@ if($collMap){
 	include($serverRoot.'/header.php');
 	if(isset($collections_editor_observationsubmitCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../../index.php'>Home</a> &gt; ";
 		echo $collections_editor_observationsubmitCrumbs;
 		echo "<b>Observation Submission</b>";
 		echo "</div>";

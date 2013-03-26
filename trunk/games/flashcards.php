@@ -141,7 +141,6 @@ $sciArr = array();
 	include($serverRoot.'/header.php');
 	if(isset($checklists_flashcardsCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $checklists_flashcardsCrumbs;
 		echo " <b>".$defaultTitle." Flashcard</b>";
 		echo "</div>";

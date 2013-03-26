@@ -42,7 +42,6 @@ $displayLeftMenu = (isset($taxa_admin_taxonomyloaderMenu)?$taxa_admin_taxonomylo
 include($serverRoot.'/header.php');
 if(isset($taxa_admin_taxonomyloaderCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $taxa_admin_taxonomyloaderCrumbs;
 	echo " <b>Taxonomy Loader</b>";
 	echo "</div>";

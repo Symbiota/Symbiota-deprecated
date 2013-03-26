@@ -689,7 +689,6 @@ $imgloc = "../images/games/namegame/";
 	if(isset($games_namegameCrumbs)){
 		?>
 		<div class="navpath">
-			<a href="../index.php">Home</a> &gt; 
 			<?php echo $games_namegameCrumbs;?>
 			<b>Name Game</b> 
 		</div>

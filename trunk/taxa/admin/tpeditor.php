@@ -156,7 +156,6 @@ if($editable && $action){
 	include($serverRoot.'/header.php');
 	if(isset($taxa_admin_tpeditorCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $taxa_admin_tpeditorCrumbs;
 		echo " <b>Taxon Profile Editor</b>"; 
 		echo "</div>";

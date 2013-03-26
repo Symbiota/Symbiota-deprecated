@@ -24,7 +24,6 @@ $imgLibManager = new ImageLibraryManager();
 	include($serverRoot.'/header.php');
 	if(isset($imagelib_indexCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $imagelib_indexCrumbs;
 		echo " <b>Image Library</b>";
 		echo "</div>";

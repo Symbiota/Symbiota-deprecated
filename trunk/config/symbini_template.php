@@ -52,12 +52,16 @@ $rightsTerms = array(
 //$reproductiveConditionTerms = array("term1", "term2", "term3", "term4", "term5", "etc..");
 
 //Individual page menu and navigation crumbs
+//Menu variables turn on and off the display of left menu 
+//Crumb variables allow the customization of the bread crumbs. A crumb variable with an empty value will cause crumbs to disappear
+//Variable name should include path to file separated by underscores and then the file name ending with "Menu" or "Crumbs"
 //checklists/
 	$checklists_checklistMenu = false;
-
+	//$checklists_checklistCrumbs = "<a href='../index.php'>Home</a> &gt;&gt; <a href='index.php'>Checklists</a> &gt;&gt; ";	
 //collections/
 	$collections_indexMenu = false;
 	$collections_harvestparamsMenu = false;
+	//$collections_harvestparamsCrumbs = "<a href='index.php'>Collections</a> &gt;&gt; ";
 	$collections_listMenu = false;
 	$collections_checklistMenu = false;
 	$collections_download_downloadMenu = false;

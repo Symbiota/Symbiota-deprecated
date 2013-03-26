@@ -177,7 +177,6 @@ if($isEditable && $projSubmit){
 	if(isset($projects_indexCrumbs)){
 		?>
 		<div class="navpath">
-			<a href="../index.php">Home</a> &gt; 
 			<?php echo $projects_indexCrumbs;?>
 			<b><?php echo $defaultTitle; ?> Project</b> 
 		</div>

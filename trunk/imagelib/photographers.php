@@ -25,7 +25,6 @@ if($phUid) $pManager->setUid($phUid);
 	include($serverRoot.'/header.php');
 	if(isset($imagelib_photographersCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $imagelib_photographersCrumbs;
 		echo " <b>Photographer List</b>"; 
 		echo "</div>";

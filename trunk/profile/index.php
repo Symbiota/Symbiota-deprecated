@@ -101,7 +101,6 @@ $displayLeftMenu = (isset($profile_indexMenu)?$profile_indexMenu:"true");
 include($serverRoot.'/header.php');
 if(isset($profile_indexCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt; ";
 	echo $profile_indexCrumbs;
 	echo " <b>Create New Profile</b>";
 	echo "</div>";

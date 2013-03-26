@@ -111,7 +111,6 @@ if($action == "Submit Profile"){
 	include($serverRoot.'/header.php');
 	if(isset($profile_newprofileCrumbs)){
 		echo "<div class='navpath'>";
-		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $profile_newprofileCrumbs;
 		echo " <b>Create New Profile</b>";
 		echo "</div>";
