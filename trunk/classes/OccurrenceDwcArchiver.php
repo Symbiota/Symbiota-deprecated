@@ -754,7 +754,7 @@ class OccurrenceDwcArchiver{
 	private function addcslashesArr($arr){
 		$retArr = array();
 		foreach($arr as $k => $v){
-			$retArr[$k] = addcslashes($v,"\n\r\"");
+			$retArr[$k] = addcslashes($v,"\n\r\"\\");
 		}
 		return $retArr;
 	}
