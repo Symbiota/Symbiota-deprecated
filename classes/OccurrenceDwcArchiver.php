@@ -667,8 +667,8 @@ class OccurrenceDwcArchiver{
 				}
 			}
 		}
-		$this->aasort($retArr, 'title');
-		return ;
+		$this->aasort($retArr, 'description');
+		return $retArr;
 	}
 
 	private function aasort(&$array, $key){
