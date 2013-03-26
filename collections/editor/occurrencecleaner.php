@@ -146,6 +146,12 @@ if($action == 'listdups'){
 							</form>
 							<?php 
 						}
+						else{
+							?>
+							<div style="font-weight:bold;font-size:120%;margin:25px;">There are no duplicate catalog numbers!</div>
+							<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Return to Data Cleaning Menu</a>
+							<?php 
+						}
 					}
 					elseif($action == 'Merge Duplicate Records'){
 						?>
