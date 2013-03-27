@@ -159,8 +159,8 @@ $genticArr = $indManager->getGeneticArr();
 
 <body>
 	<?php 
-	$displayLeftMenu = (isset($collections_individual_individualMenu)?$collections_individual_individualMenu:false);
-	include($serverRoot."/header.php");
+	//$displayLeftMenu = (isset($collections_individual_individualMenu)?$collections_individual_individualMenu:false);
+	//include($serverRoot."/header.php");
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
@@ -743,7 +743,7 @@ $genticArr = $indManager->getGeneticArr();
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	//include($serverRoot."/footer.php");
 	?>
 </body>
 </html> 
