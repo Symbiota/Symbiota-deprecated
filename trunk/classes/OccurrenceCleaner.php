@@ -43,7 +43,7 @@ class OccurrenceCleaner {
 	}
 
 	public function getDuplicateRecords(){
-		$retArr = array();
+		$returnArr = array();
 		$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
 			'o.eventDate, o.verbatimEventDate, o.country, o.stateProvince, o.county, o.municipality, o.locality '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '. 
@@ -67,7 +67,7 @@ class OccurrenceCleaner {
 			$returnArr[$row->occid]['municipality'] = $row->municipality;
 			$returnArr[$row->occid]['locality'] = $row->locality;
 		}
-		$rs->close();
+		$rs->free();
 		return $returnArr;
 	}
 	
