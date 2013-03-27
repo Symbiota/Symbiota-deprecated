@@ -648,7 +648,7 @@ $genticArr = $indManager->getGeneticArr();
 		        if($displayMap){
 		        	?>
 						<div id="maptab">
-							<div id='map_canvas' style='width:100%;height:400px;'></div>
+							<div id='map_canvas' style='width:100%;height:600px;'></div>
 						</div>
 		        	<?php 
 		        }
