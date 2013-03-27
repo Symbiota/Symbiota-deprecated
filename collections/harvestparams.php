@@ -196,8 +196,15 @@ $collManager->reset();
 				<input type="text" id="eventdate2" size="32" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$collArray)) echo $collArray["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
 			</div>
 			<div>
+				<h1>Collection Object Criteria:</h1>
+			</div>
+			<div>
 				Catalog Number:
-				<input type="text" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
+                <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
+			</div>
+			<div>
+				Type Status:
+                <input type="text" size="32" id="typestatus" name="typestatus" value="<?php if(array_key_exists("typestatus",$collArray)) echo $collArray["typestatus"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
 			<div><hr></div>
 			<div>
