@@ -16,6 +16,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 	$isEditor = 1;
 }
 
+$dupArr = array();
 if($action == 'listdups'){
 	$dupArr = $cleanManager->getDuplicateRecords();
 }
@@ -148,8 +149,14 @@ if($action == 'listdups'){
 						}
 						else{
 							?>
-							<div style="font-weight:bold;font-size:120%;margin:25px;">There are no duplicate catalog numbers!</div>
-							<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Return to Data Cleaning Menu</a>
+							<div style="margin:25px;">
+								<div style="font-weight:bold;font-size:120%;">
+									There are no duplicate catalog numbers!
+								</div>
+								<div style="margin:10px;">
+									<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Return to Data Cleaning Menu</a>
+								</div>
+							</div>
 							<?php 
 						}
 					}
