@@ -284,6 +284,15 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(", ",$collectorArr);
 		}
+		if(array_key_exists("typestatus",$this->searchTermsArr)){
+			$typestatusArr = explode(";",$this->searchTermsArr["typestatus"]);
+			$tempArr = Array();
+			foreach($typestatusArr as $value){
+				$tempArr[] = "(o.typestatus LIKE '%".trim($value)."%')";
+			}
+			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
+			$this->localSearchArr[] = implode(", ",$typestatusArr);
+		}
 		if(array_key_exists("collnum",$this->searchTermsArr)){
 			$collNumArr = explode(";",$this->searchTermsArr["collnum"]);
 			$rnWhere = '';
@@ -819,6 +828,18 @@ class OccurrenceManager{
 			}
 			else{
 				unset($this->searchTermsArr["collector"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("typestatus",$_REQUEST)){
+			$typestatus = $this->conn->real_escape_string(trim($_REQUEST["typestatus"]));
+			if($typestatus){
+				$str = str_replace(",",";",$typestatus);
+				$searchArr[] = "typestatus:".$str;
+				$this->searchTermsArr["typestatus"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["typestatus"]);
 			}
 			$searchFieldsActivated = true;
 		}
