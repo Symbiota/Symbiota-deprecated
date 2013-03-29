@@ -51,7 +51,7 @@ if($symbUid){
 		$isEditor = 1;
 	}
 
-	if($collMap['colltype']=='General Observations') $isGenObs = 1;
+	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
 		if($isGenObs){ 
 			if(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
@@ -118,6 +118,9 @@ if($symbUid){
 	}
 	$navStr .= '</div>';
 }
+else{
+	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencetabledisplay.php?'.$_SERVER['QUERY_STRING']);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -138,210 +141,198 @@ if($symbUid){
 	<!-- inner text -->
 	<div id="">
 		<?php 
-		if(!$symbUid){
-			?>
-			<div style="font-weight:bold;font-size:120%;margin:30px;">
-				Please 
-				<a href="../../profile/index.php?refurl=<?php echo $clientRoot.'/collections/editor/occurrencetabledisplay.php&collid='.$collId; ?>">
-					LOGIN
-				</a> 
-			</div>
-			<?php 
+		if($collMap){
+			echo '<div>';
+			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
+			echo '</div>';
 		}
-		else{
-			if($collMap){
-				echo '<div>';
-				echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
-				echo '</div>';
-			}
-			if(($isEditor || $crowdSourceMode) && $collId){
-				?>
-				<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
-					<a href="#" title="Search / Filter" onclick="toggleSearch();return false;"><img src="../../images/find.png" style="width:14px;" /></a>
-					<?php
-					if($isEditor == 1 || $isGenObs){
-						?>
-						<a href="#" title="Batch Update Tool" onclick="toggleBatchUpdate();return false;"><img src="../../images/editplus.png" style="width:14px;" /></a>
-						<?php
-					} 
-					?>
-				</div>
-				<?php 
-				if(!$recArr) $displayQuery = 1;
-				if($crowdSourceMode){
-					include 'includes/queryformcrowdsource.php';
-				}
-				else{
-					include 'includes/queryform.php';
-				}
-				//Setup header map
-				if($recArr){
-					$headerArr = array();
-					foreach($recArr as $id => $occArr){
-						foreach($occArr as $k => $v){
-							if(trim($v) && !array_key_exists($k,$headerArr)){
-								$headerArr[$k] = $k;
-							}
-						}
-					}
-					if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
-						$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
-					}
-					if(isset($qCustomField2) && !array_key_exists(strtolower($qCustomField2),$headerArr)){
-						$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
-					}
-					if(isset($qCustomField3) && !array_key_exists(strtolower($qCustomField3),$headerArr)){
-						$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
-					}
-					$headerMap = array_intersect_key($headerMapBase, $headerArr);
-				}
+		if(($isEditor || $crowdSourceMode)){
+			?>
+			<div style="text-align:right;width:790px;margin:-30px 15px 5px 0px;">
+				<a href="#" title="Search / Filter" onclick="toggleSearch();return false;"><img src="../../images/find.png" style="width:14px;" /></a>
+				<?php
 				if($isEditor == 1 || $isGenObs){
 					?>
-					<div id="batchupdatediv" style="width:600px;clear:both;display:none;">
-						<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">
-							<fieldset>
-								<legend><b>Batch Update</b></legend>
-								<div style="float:left;">
-									<div style="margin:2px;">
-										Field name: 
-										<select name="bufieldname">
-											<option value="">Select Field Name</option>
-											<option value="">----------------------</option>
-											<?php 
-											$buFieldName = (array_key_exists('bufieldname',$_POST)?$_POST['bufieldname']:'');
-											foreach($headerMapBase as $k => $v){
-												echo '<option value="'.$k.'">'.$v.'</option>';
-											}
-											?>
-										</select>
-									</div>
-									<div style="margin:2px;">
-										Current Value: 
-										<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_POST)?$_POST['buoldvalue']:''); ?>" /> 
-									</div>
-									<div style="margin:2px;">
-										New Value:
-										<input name="bunewvalue" type="text" value="<?php echo (array_key_exists('bunewvalue',$_POST)?$_POST['bunewvalue']:''); ?>" /> 
-									</div>
-								</div>
-								<div style="float:left;margin-left:30px;">
-									<div style="margin:2px;">
-										<input name="bumatch" type="radio" value="0" checked />
-										Match Whole Field<br/> 
-										<input name="bumatch" type="radio" value="1" />
-										Match Any Part of Field
-									</div>
-									<div style="margin:2px;">
-										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<input name="ouid" type="hidden" value="<?php echo $ouid; ?>" />
-										<input name="occid" type="hidden" value="" />
-										<input name="occindex" type="hidden" value="0" />
-										<input name="submitaction" type="submit" value="Batch Update Field" onclick="submitBatchUpdate(this.form); return false;" />
-									</div>
-								</div>
-							</fieldset>
-						</form>
-					</div>
-					<?php 
-				}					
+					<a href="#" title="Batch Update Tool" onclick="toggleBatchUpdate();return false;"><img src="../../images/editplus.png" style="width:14px;" /></a>
+					<?php
+				} 
 				?>
-				<div style="width:790px;clear:both;">
-					<?php
-					if(isset($collections_editor_occurrencetableviewCrumbs)){
-						if($collections_editor_occurrencetableviewCrumbs){
-							?>
-							<div class='navpath'>
-								<a href='../../index.php'>Home</a> &gt;&gt; 
-								<?php echo $collections_editor_occurrencetableviewCrumbs; ?>
-								<b>Occurrence Record Table View</b>
-							</div>
-							<?php 
-						}
-					}
-					else{
-					?>
-						<span class='navpath'>
-							<a href="../../index.php">Home</a> &gt;&gt;
-							<?php
-							if($crowdSourceMode){
-								?>
-								<a href="crowdsourcecentral.php?">Crowd Sourcing Central</a> &gt;&gt;
-								<?php
-							}
-							else{
-								if(!$isGenObs || $isAdmin){ 
-									?>
-									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-									<?php
-								}
-								if($isGenObs){ 
-									?>
-									<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
-									<?php
-								}
-							}
-							?>
-							<b>Occurrence Record Table View</b>
-						</span>
-					<?php
-					}
-					echo $navStr; ?>
-				</div>
-				<?php 
-				if($recArr){
-					?>
-					<table class="styledtable">
-						<tr>
-							<th>Symbiota ID</th>
-							<?php 
-							foreach($headerMap as $k => $v){
-								echo '<th>'.$v.'</th>';
-							}
-							?>
-						</tr>
-						<?php 
-						$recCnt = 0;
-						foreach($recArr as $id => $occArr){
-							if($occArr['sciname']){
-								$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-							}							
-							echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
-							echo '<td>';
-							echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
-							echo $id;
-							echo '</a>';
-							echo '</td>'."\n";
-							foreach($headerMap as $k => $v){
-								$displayStr = $occArr[$k];
-								if(strlen($displayStr) > 60){
-									$displayStr = substr($displayStr,0,60).'...';
-								}
-								if(!$displayStr) $displayStr = '&nbsp;';
-								echo '<td>'.$displayStr.'</td>'."\n";
-							}
-							echo "</tr>\n";
-							$recCnt++;
-						}
-						?>
-					</table>
-					<div style="width:790px;">
-						<?php echo $navStr; ?>
-					</div>
-					*Click on the Symbiota identifier in the first column to open the editor.    
-					<?php 
-				}
-				else{
-					?>
-					<div style="font-weight:bold;font-size:120%;">
-						No records found matching the query
-					</div>
-					<?php 
-				}
+			</div>
+			<?php 
+			if(!$recArr) $displayQuery = 1;
+			if($crowdSourceMode){
+				include 'includes/queryformcrowdsource.php';
 			}
 			else{
-				if(!$isEditor){
-					echo '<h2>You are not authorized to access this page</h2>';
+				include 'includes/queryform.php';
+			}
+			//Setup header map
+			if($recArr){
+				$headerArr = array();
+				foreach($recArr as $id => $occArr){
+					foreach($occArr as $k => $v){
+						if(trim($v) && !array_key_exists($k,$headerArr)){
+							$headerArr[$k] = $k;
+						}
+					}
 				}
+				if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
+					$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
+				}
+				if(isset($qCustomField2) && !array_key_exists(strtolower($qCustomField2),$headerArr)){
+					$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
+				}
+				if(isset($qCustomField3) && !array_key_exists(strtolower($qCustomField3),$headerArr)){
+					$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
+				}
+				$headerMap = array_intersect_key($headerMapBase, $headerArr);
+			}
+			if($isEditor == 1 || $isGenObs){
+				?>
+				<div id="batchupdatediv" style="width:600px;clear:both;display:none;">
+					<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">
+						<fieldset>
+							<legend><b>Batch Update</b></legend>
+							<div style="float:left;">
+								<div style="margin:2px;">
+									Field name: 
+									<select name="bufieldname">
+										<option value="">Select Field Name</option>
+										<option value="">----------------------</option>
+										<?php 
+										$buFieldName = (array_key_exists('bufieldname',$_POST)?$_POST['bufieldname']:'');
+										foreach($headerMapBase as $k => $v){
+											echo '<option value="'.$k.'">'.$v.'</option>';
+										}
+										?>
+									</select>
+								</div>
+								<div style="margin:2px;">
+									Current Value: 
+									<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_POST)?$_POST['buoldvalue']:''); ?>" /> 
+								</div>
+								<div style="margin:2px;">
+									New Value:
+									<input name="bunewvalue" type="text" value="<?php echo (array_key_exists('bunewvalue',$_POST)?$_POST['bunewvalue']:''); ?>" /> 
+								</div>
+							</div>
+							<div style="float:left;margin-left:30px;">
+								<div style="margin:2px;">
+									<input name="bumatch" type="radio" value="0" checked />
+									Match Whole Field<br/> 
+									<input name="bumatch" type="radio" value="1" />
+									Match Any Part of Field
+								</div>
+								<div style="margin:2px;">
+									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+									<input name="ouid" type="hidden" value="<?php echo $ouid; ?>" />
+									<input name="occid" type="hidden" value="" />
+									<input name="occindex" type="hidden" value="0" />
+									<input name="submitaction" type="submit" value="Batch Update Field" onclick="submitBatchUpdate(this.form); return false;" />
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<?php 
+			}					
+			?>
+			<div style="width:790px;clear:both;">
+				<?php
+				if(isset($collections_editor_occurrencetableviewCrumbs)){
+					if($collections_editor_occurrencetableviewCrumbs){
+						?>
+						<div class='navpath'>
+							<a href='../../index.php'>Home</a> &gt;&gt; 
+							<?php echo $collections_editor_occurrencetableviewCrumbs; ?>
+							<b>Occurrence Record Table View</b>
+						</div>
+						<?php 
+					}
+				}
+				else{
+				?>
+					<span class='navpath'>
+						<a href="../../index.php">Home</a> &gt;&gt;
+						<?php
+						if($crowdSourceMode){
+							?>
+							<a href="crowdsourcecentral.php?">Crowd Sourcing Central</a> &gt;&gt;
+							<?php
+						}
+						else{
+							if(!$isGenObs || $isAdmin){ 
+								?>
+								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+								<?php
+							}
+							if($isGenObs){ 
+								?>
+								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
+								<?php
+							}
+						}
+						?>
+						<b>Occurrence Record Table View</b>
+					</span>
+				<?php
+				}
+				echo $navStr; ?>
+			</div>
+			<?php 
+			if($recArr){
+				?>
+				<table class="styledtable">
+					<tr>
+						<th>Symbiota ID</th>
+						<?php 
+						foreach($headerMap as $k => $v){
+							echo '<th>'.$v.'</th>';
+						}
+						?>
+					</tr>
+					<?php 
+					$recCnt = 0;
+					foreach($recArr as $id => $occArr){
+						if($occArr['sciname']){
+							$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
+						}							
+						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
+						echo '<td>';
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
+						echo $id;
+						echo '</a>';
+						echo '</td>'."\n";
+						foreach($headerMap as $k => $v){
+							$displayStr = $occArr[$k];
+							if(strlen($displayStr) > 60){
+								$displayStr = substr($displayStr,0,60).'...';
+							}
+							if(!$displayStr) $displayStr = '&nbsp;';
+							echo '<td>'.$displayStr.'</td>'."\n";
+						}
+						echo "</tr>\n";
+						$recCnt++;
+					}
+					?>
+				</table>
+				<div style="width:790px;">
+					<?php echo $navStr; ?>
+				</div>
+				*Click on the Symbiota identifier in the first column to open the editor.    
+				<?php 
+			}
+			else{
+				?>
+				<div style="font-weight:bold;font-size:120%;">
+					No records found matching the query
+				</div>
+				<?php 
+			}
+		}
+		else{
+			if(!$isEditor){
+				echo '<h2>You are not authorized to access this page</h2>';
 			}
 		}
 		?>

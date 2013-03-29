@@ -51,7 +51,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 
 		<h2>Current User's Status</h2>
 		<table>
-			<tr><td>Record</td><td>Status</td><td>Points</td><td>Notes<td>Edit Date</td></tr>
+			<tr><td>Record</td><td>Status</td><td>Points</td><td>Notes</td><td>Edit Date</td></tr>
 			<?php 
 			$topScoreArr = $csManager->getTopScores();
 			foreach($topScoreArr as $s => $u){
