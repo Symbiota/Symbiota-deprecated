@@ -97,20 +97,20 @@ class OccurrenceEditorManager {
 		}
 		elseif(array_key_exists('q_identifier',$_REQUEST)){
 			if($_REQUEST['q_identifier']) $this->qryArr['id'] = trim($_REQUEST['q_identifier']);
-			if(array_key_exists('q_othercatalognumbers',$_POST) && $_POST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_POST['q_othercatalognumbers']);
-			if(array_key_exists('q_recordedby',$_POST) && $_POST['q_recordedby']) $this->qryArr['rb'] = trim($_POST['q_recordedby']);
-			if(array_key_exists('q_recordnumber',$_POST) && $_POST['q_recordnumber']) $this->qryArr['rn'] = trim($_POST['q_recordnumber']);
-			if(array_key_exists('q_eventdate',$_POST) && $_POST['q_eventdate']) $this->qryArr['ed'] = trim($_POST['q_eventdate']);
-			if(array_key_exists('q_enteredby',$_POST) && $_POST['q_enteredby']) $this->qryArr['eb'] = trim($_POST['q_enteredby']);
-			if(array_key_exists('q_observeruid',$_POST) && $_POST['q_observeruid']) $this->qryArr['ouid'] = $_POST['q_observeruid'];
-			if(array_key_exists('q_processingstatus',$_POST) && $_POST['q_processingstatus']) $this->qryArr['ps'] = trim($_POST['q_processingstatus']); 
-			if(array_key_exists('q_datelastmodified',$_POST) && $_POST['q_datelastmodified']) $this->qryArr['dm'] = trim($_POST['q_datelastmodified']);
-			if(array_key_exists('q_ocrfrag',$_POST) && $_POST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_POST['q_ocrfrag']); 
-			if(array_key_exists('q_imgonly',$_POST) && $_POST['q_imgonly']) $this->qryArr['io'] = 1;
+			if(array_key_exists('q_othercatalognumbers',$_REQUEST) && $_REQUEST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_REQUEST['q_othercatalognumbers']);
+			if(array_key_exists('q_recordedby',$_REQUEST) && $_REQUEST['q_recordedby']) $this->qryArr['rb'] = trim($_REQUEST['q_recordedby']);
+			if(array_key_exists('q_recordnumber',$_REQUEST) && $_REQUEST['q_recordnumber']) $this->qryArr['rn'] = trim($_REQUEST['q_recordnumber']);
+			if(array_key_exists('q_eventdate',$_REQUEST) && $_REQUEST['q_eventdate']) $this->qryArr['ed'] = trim($_REQUEST['q_eventdate']);
+			if(array_key_exists('q_enteredby',$_REQUEST) && $_REQUEST['q_enteredby']) $this->qryArr['eb'] = trim($_REQUEST['q_enteredby']);
+			if(array_key_exists('q_observeruid',$_REQUEST) && $_REQUEST['q_observeruid']) $this->qryArr['ouid'] = $_REQUEST['q_observeruid'];
+			if(array_key_exists('q_processingstatus',$_REQUEST) && $_REQUEST['q_processingstatus']) $this->qryArr['ps'] = trim($_REQUEST['q_processingstatus']); 
+			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
+			if(array_key_exists('q_ocrfrag',$_REQUEST) && $_REQUEST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_REQUEST['q_ocrfrag']); 
+			if(array_key_exists('q_imgonly',$_REQUEST) && $_REQUEST['q_imgonly']) $this->qryArr['io'] = 1;
 			for($x=1;$x<4;$x++){
-				if(array_key_exists('q_customfield'.$x,$_POST) && $_POST['q_customfield'.$x]) $this->qryArr['cf'.$x] = $_POST['q_customfield'.$x];
-				if(array_key_exists('q_customtype'.$x,$_POST) && $_POST['q_customtype'.$x]) $this->qryArr['ct'.$x] = $_POST['q_customtype'.$x];
-				if(array_key_exists('q_customvalue'.$x,$_POST) && $_POST['q_customvalue'.$x]) $this->qryArr['cv'.$x] = trim($_POST['q_customvalue'.$x]);
+				if(array_key_exists('q_customfield'.$x,$_REQUEST) && $_REQUEST['q_customfield'.$x]) $this->qryArr['cf'.$x] = $_REQUEST['q_customfield'.$x];
+				if(array_key_exists('q_customtype'.$x,$_REQUEST) && $_REQUEST['q_customtype'.$x]) $this->qryArr['ct'.$x] = $_REQUEST['q_customtype'.$x];
+				if(array_key_exists('q_customvalue'.$x,$_REQUEST) && $_REQUEST['q_customvalue'.$x]) $this->qryArr['cv'.$x] = trim($_REQUEST['q_customvalue'.$x]);
 			}
 			setCookie('editorquery','',time()-3600,($clientRoot?$clientRoot:'/'));
 		}
@@ -362,7 +362,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($this->crowdSourceMode) $sqlWhere .= 'AND q.reviewstatus = 0 ';
-		$sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
+		if($this->collId) $sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
 		if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 		$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
 		//echo $sqlWhere;

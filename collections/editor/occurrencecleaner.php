@@ -6,6 +6,10 @@ header("Content-Type: text/html; charset=".$charset);
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
+if(!$symbUid){
+	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
+}
+
 $cleanManager = new OccurrenceCleaner();
 if($collId) $cleanManager->setCollId($collId);
 $collMap = $cleanManager->getCollMap();
@@ -83,7 +87,7 @@ if($action == 'listdups'){
 	<!-- inner text -->
 	<div id="innertext">
 		<?php 
-		if($symbUid && $collId && $isEditor){
+		if($collId && $isEditor){
 			if(!$action || $action == 'listdups' || $action == 'Merge Duplicate Records'){
 				if(!$dupArr){
 					?>
@@ -218,17 +222,7 @@ if($action == 'listdups'){
 			} 
 		}
 		else{
-			if(!$symbUid){
-				?>
-				<div style="font-weight:bold;font-size:120%;margin:30px;">
-					Please 
-					<a href="../../profile/index.php?refurl=<?php echo $clientRoot.'/collections/editor/occurrenceeditor.php&collid='.$collId; ?>">
-						LOGIN
-					</a> 
-				</div>
-				<?php 
-			}
-			elseif(!$collId){
+			if(!$collId){
 				
 			}
 			elseif(!$isEditor){
