@@ -1,92 +1,92 @@
 <?php
-	include_once('../config/symbini.php');
-	include_once($serverRoot.'/classes/ChecklistManager.php');
-	include_once($serverRoot.'/classes/ChecklistAdmin.php');
-	header("Content-Type: text/html; charset=".$charset);
-	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
-	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+include_once('../config/symbini.php');
+include_once($serverRoot.'/classes/ChecklistManager.php');
+include_once($serverRoot.'/classes/ChecklistAdmin.php');
+header("Content-Type: text/html; charset=".$charset);
+header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
-	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
-	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-	$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:1;
-	$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
-	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
-	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
-	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
-	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
-	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
-	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
-	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
-	$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
-	$printMode = array_key_exists("printmode",$_REQUEST)?$_REQUEST["printmode"]:0; 
-	
-	$statusStr='';
-	
-	//Search Synonyms is default
-	if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
+$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
+$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
+$pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:1;
+$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
+$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
+$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
+$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
+$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
+$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
+$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
+$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
+$editMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0; 
+$printMode = array_key_exists("printmode",$_REQUEST)?$_REQUEST["printmode"]:0; 
 
-	$clManager = new ChecklistManager();
-	if($clValue){
-		$statusStr = $clManager->setClValue($clValue);
-	}
-	elseif($dynClid){
-		$clManager->setDynClid($dynClid);
-	}
-	if($pid) $clManager->setProj($pid);
-	elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
-	if($thesFilter) $clManager->setThesFilter($thesFilter);
-	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
-	if($searchCommon){
-		$showCommon = 1;
-		$clManager->setSearchCommon();
-	}
-	if($searchSynonyms) $clManager->setSearchSynonyms();
-	if($showAuthors) $clManager->setShowAuthors();
-	if($showCommon) $clManager->setShowCommon();
-	if($showImages) $clManager->setShowImages();
-	if($showVouchers) $clManager->setShowVouchers();
-	$clid = $clManager->getClid();
-	$pid = $clManager->getPid();
-	
-	if(array_key_exists('dllist_x',$_POST)){
-		$clManager->downloadChecklistCsv();
-		exit();
-	}
-	elseif(array_key_exists('printlist',$_POST)){
-		$printMode = 1;
-	}
+$statusStr='';
 
-	$dynSqlExists = false;
-	$isEditor = false;
-	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
-		$isEditor = true;
-		
-		//Add species to checklist
-		if(array_key_exists("tidtoadd",$_POST)){
-			$dataArr = array();
-			$dataArr["tid"] = $_POST["tidtoadd"];
-			if($_POST["familyoverride"]) $dataArr["familyoverride"] = $_POST["familyoverride"];
-			if($_POST["habitat"]) $dataArr["habitat"] = $_POST["habitat"];
-			if($_POST["abundance"]) $dataArr["abundance"] = $_POST["abundance"];
-			if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
-			if($_POST["source"]) $dataArr["source"] = $_POST["source"];
-			if($_POST["internalnotes"]) $dataArr["internalnotes"] = $_POST["internalnotes"];
-			$clAdmin = new ChecklistAdmin();
-			$clAdmin->setClid($clid);
-			$statusStr = $clAdmin->addNewSpecies($dataArr);
-		}
+//Search Synonyms is default
+if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
+
+$clManager = new ChecklistManager();
+if($clValue){
+	$statusStr = $clManager->setClValue($clValue);
+}
+elseif($dynClid){
+	$clManager->setDynClid($dynClid);
+}
+if($pid) $clManager->setProj($pid);
+elseif(array_key_exists("proj",$_REQUEST)) $pid = $clManager->setProj($_REQUEST['proj']);
+if($thesFilter) $clManager->setThesFilter($thesFilter);
+if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
+if($searchCommon){
+	$showCommon = 1;
+	$clManager->setSearchCommon();
+}
+if($searchSynonyms) $clManager->setSearchSynonyms();
+if($showAuthors) $clManager->setShowAuthors();
+if($showCommon) $clManager->setShowCommon();
+if($showImages) $clManager->setShowImages();
+if($showVouchers) $clManager->setShowVouchers();
+$clid = $clManager->getClid();
+$pid = $clManager->getPid();
+
+if(array_key_exists('dllist_x',$_POST)){
+	$clManager->downloadChecklistCsv();
+	exit();
+}
+elseif(array_key_exists('printlist_x',$_POST)){
+	$printMode = 1;
+}
+
+$dynSqlExists = false;
+$isEditor = false;
+if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+	$isEditor = true;
+	
+	//Add species to checklist
+	if(array_key_exists("tidtoadd",$_POST)){
+		$dataArr = array();
+		$dataArr["tid"] = $_POST["tidtoadd"];
+		if($_POST["familyoverride"]) $dataArr["familyoverride"] = $_POST["familyoverride"];
+		if($_POST["habitat"]) $dataArr["habitat"] = $_POST["habitat"];
+		if($_POST["abundance"]) $dataArr["abundance"] = $_POST["abundance"];
+		if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
+		if($_POST["source"]) $dataArr["source"] = $_POST["source"];
+		if($_POST["internalnotes"]) $dataArr["internalnotes"] = $_POST["internalnotes"];
+		$clAdmin = new ChecklistAdmin();
+		$clAdmin->setClid($clid);
+		$statusStr = $clAdmin->addNewSpecies($dataArr);
 	}
-	$clArray = Array();
-	$taxaArray = Array();
-	if($clValue || $dynClid){
-		$clArray = $clManager->getClMetaData();
-		$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
-	}
-	if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
-		$dynSqlExists = true;
-	}
+}
+$clArray = Array();
+$taxaArray = Array();
+if($clValue || $dynClid){
+	$clArray = $clManager->getClMetaData();
+	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
+}
+if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
+	$dynSqlExists = true;
+}
 ?>
 
 <!DOCTYPE html >
@@ -110,7 +110,7 @@
 		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
 		var clid = <?php echo $clid; ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=130330"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -306,7 +306,7 @@
 							    <!-- Thesaurus Filter -->
 							    <div>
 							    	<b>Filter:</b><br/>
-							    	<select id='thesfilter' name='thesfilter'>
+							    	<select name='thesfilter'>
 										<option value='0'>Original Checklist</option>
 										<?php 
 											$taxonAuthList = Array();
@@ -325,19 +325,19 @@
 								</div>
 								<div>
 									<!-- Display as Images: 0 = false, 1 = true  --> 
-								    <input id='showimages' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this);" /> 
+								    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" /> 
 								    Display as Images
 								</div>
 								<?php if($clValue){ ?>
 									<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
 										<!-- Display as Vouchers: 0 = false, 1 = true  --> 
-									    <input id='showvouchers' name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
+									    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/> 
 									    Notes &amp; Vouchers
 									</div>
 								<?php } ?>
-								<div>
+								<div style='display:<?php echo ($showImages?"none":"block");?>' id="showauthorsdiv">
 									<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
-								    <input id='showauthors' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
+								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/> 
 								    Taxon Authors
 								</div>
 								<div style="margin:5px 0px 0px 5px;">
@@ -509,6 +509,9 @@
 									if(!$printMode) echo '<a href="'.$spUrl.'">'; 
 									echo '<b>'.$sppArr['sciname'].'</b>';
 									if(!$printMode) echo '</a>';
+									if(array_key_exists('vern',$sppArr)){
+										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
+									}
 									if($family != $prevfam){
 										?>
 										<div class="familydiv" id="<?php echo $family; ?>">
@@ -516,9 +519,6 @@
 										</div>
 										<?php
 										$prevfam = $family;
-									}
-									if(array_key_exists('vern',$sppArr)){
-										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
 									}
 									?>
 								</div>
