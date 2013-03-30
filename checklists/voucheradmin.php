@@ -341,6 +341,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 				    	<div style="margin:25px;height:400px;">
 							<ul>
 								<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>" target="_blank">Full species list with vouchers (CSV)</a></li>
+								<li><a href="checklist.php?printmode=1&showvouchers=1&cl=<?php echo $clid; ?>" target="_blank">Full species list with vouchers (Print Friendly)</a></li>
 								<li><a href="voucherreporthandler.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>" target="_blank">Specimens of taxa missing from checklist (CSV)</a></li>
 								<li><a href="voucherreporthandler.php?rtype=problemtaxacsv&clid=<?php echo $clid; ?>" target="_blank">Specimens with misspelled, illegal, and problematic scientific names (CSV)</a></li>
 							</ul>

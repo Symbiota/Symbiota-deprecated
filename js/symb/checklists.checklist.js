@@ -65,13 +65,16 @@ function openPopup(urlStr,windowName){
 	return false;
 }
 
-function showImagesChecked(cbObj){
-	if(cbObj.checked){
-		document.getElementById("showvouchers").checked = false;
+function showImagesChecked(f){
+	if(f.showimages.checked){
+		f.showvouchers.checked = false;
 		document.getElementById("showvouchersdiv").style.display = "none"; 
+		f.showauthors.checked = false;
+		document.getElementById("showauthorsdiv").style.display = "none"; 
 	}
 	else{
 		document.getElementById("showvouchersdiv").style.display = "block"; 
+		document.getElementById("showauthorsdiv").style.display = "block"; 
 	}
 }
 

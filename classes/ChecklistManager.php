@@ -147,7 +147,7 @@ class ChecklistManager {
 		//Get species list
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
 		$tidReturn = Array();
-		if($this->showImages) $retLimit = $this->imageLimit;
+		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
 		while($row = $result->fetch_object()){
