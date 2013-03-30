@@ -54,6 +54,9 @@
 		$clManager->downloadChecklistCsv();
 		exit();
 	}
+	elseif(array_key_exists('printlist',$_POST)){
+		$printMode = 1;
+	}
 
 	$dynSqlExists = false;
 	$isEditor = false;
@@ -95,7 +98,7 @@
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
 		if(array_key_exists("authors",$clArray) && $clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
-		echo"<meta name=\"keywords\" content=\"".$keywordStr."\" />";
+		echo'<meta name="keywords" content="'.$keywordStr.'" />';
 	?>
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
@@ -346,6 +349,9 @@
 									<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Download Checklist">
 										<input type="image" name="dllist" value="Download List" src="../images/dl.png" />
 									</div>
+									<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Print Checklist">
+										<input type="image" name="printlist" value="Print List" src="../images/print.png" formtarget="_blank" />
+									</div>
 								</div>
 							</fieldset>
 						</form>
@@ -472,34 +478,52 @@
 					}
 					$prevfam = ''; 
 					if($showImages){
+						echo '<div style="clear:both;">&nbsp;</div>';
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
-							if($family != $prevfam){
-								?>
-								<div class="familydiv" id="<?php echo $family; ?>" style="clear:both;margin-top:10px;">
-									<h3><?php echo $family; ?></h3>
-								</div>
-								<?php
-								$prevfam = $family;
-							}
-							echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
 							$tu = (array_key_exists('tnurl',$sppArr)?$sppArr['tnurl']:'');
 							$u = (array_key_exists('url',$sppArr)?$sppArr['url']:'');
 							$imgSrc = ($tu?$tu:$u);
-							echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
-							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
-							if($imgSrc){
-								$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
-								echo "<a href='".$spUrl."' target='_blank'>";
-								echo "<img src='".$imgSrc."' />";
-								echo "</a>";
-							}
-							else{
-								echo "<div style='margin-top:50px;'><b>Image<br/>not yet<br/>available</b></div>";
-							}
-							echo "</div>";
-							echo "<div><a href='".$spUrl."'><b>".$sppArr["sciname"]."</b></a></div>";
-							echo "</div>\n";
+							?>
+							<div style="float:left;text-align:center;width:210px;height:<?php echo 240+($showCommon?20:0);?>px;">
+								<div class="tnimg" style="<?php echo ($imgSrc?"":"border:1px solid black;"); ?>">
+									<?php 
+									$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
+									if($imgSrc){
+										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
+										if(!$printMode) echo "<a href='".$spUrl."' target='_blank'>";
+										echo "<img src='".$imgSrc."' />";
+										if(!$printMode) echo "</a>";
+									}
+									else{
+										?>
+										<div style="margin-top:50px;">
+											<b>Image<br/>not yet<br/>available</b>
+										</div>
+										<?php 
+									}
+									?>
+								</div>
+								<div>
+									<?php 
+									if(!$printMode) echo '<a href="'.$spUrl.'">'; 
+									echo '<b>'.$sppArr['sciname'].'</b>';
+									if(!$printMode) echo '</a>';
+									if($family != $prevfam){
+										?>
+										<div class="familydiv" id="<?php echo $family; ?>">
+											[<?php echo $family; ?>]
+										</div>
+										<?php
+										$prevfam = $family;
+									}
+									if(array_key_exists('vern',$sppArr)){
+										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
+									}
+									?>
+								</div>
+							</div>
+							<?php 
 						}
 					}
 					else{
@@ -542,7 +566,10 @@
 								if(array_key_exists('vouchers',$sppArr)){
 									$vArr = $sppArr['vouchers'];
 									foreach($vArr as $occid => $collName){
-										$voucStr .= ", <a style='cursor:pointer' onclick=\"return openPopup('../collections/individual/index.php?occid=".$occid."','individwindow')\">".$collName."</a>\n";
+										$voucStr .= ', ';
+										if(!$printMode) $voucStr .= '<a style="cursor:pointer" onclick="return openPopup(\'../collections/individual/index.php?occid='.$occid.'\',\'individwindow\')">';
+										$voucStr .= $collName;
+										if(!$printMode) $voucStr .= "</a>\n";
 									}
 									$voucStr = substr($voucStr,2);
 								}
