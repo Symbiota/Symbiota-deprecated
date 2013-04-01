@@ -440,6 +440,7 @@ class OccurrenceDwcArchiver{
 			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid AS recordId '.
 			'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
 			'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
+			'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 			'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
 			'WHERE o.collid = '.$this->collId.' ORDER BY o.occid';
 		//echo $sql;
@@ -479,6 +480,7 @@ class OccurrenceDwcArchiver{
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN guidimages g ON i.imgid = g.imgid '.
+			'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 			'WHERE c.collid = '.$this->collId.' ';
 
 		if($redactLocalities && !$this->canReadRareSpp){
@@ -517,8 +519,22 @@ class OccurrenceDwcArchiver{
 				$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 				$r['type'] = 'StillImage';
 				$r['subtype'] = 'Photograph';
-				$extStr = substr($r['accessURI'],strrpos($r['accessURI'],'.')+1);
-				if($extStr == 'jpg' || $extStr == 'jpeg') $r['format'] = 'image/jpeg';
+				$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
+				if($extStr == 'jpg' || $extStr == 'jpeg'){
+					$r['format'] = 'image/jpeg';
+				}
+				elseif($extStr == 'gif'){
+					$r['format'] = 'image/gif';
+				}
+				elseif($extStr == 'png'){
+					$r['format'] = 'image/png';
+				}
+				elseif($extStr == 'tiff' || $extStr == 'tif'){
+					$r['format'] = 'image/tiff';
+				}
+				else{
+					$r['format'] = '';
+				}
 				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
 				fputcsv($fh, $this->addcslashesArr($r));
