@@ -43,7 +43,24 @@ if($tid){
 											<a href="<?php echo $webUrl; ?>">
 												<img width="150" src="<?php echo $tnUrl;?>" />
 											</a>
+											
 										</div>
+										<?php 
+										if($imgArr["photographerdisplay"]){ 
+											?>
+											<div>
+												<?php echo $imgArr["photographerdisplay"];?>
+											</div>
+											<?php 
+										}
+										if($imgArr["tid"] != $tid){ 
+											?>
+											<div>
+												<a href="tpeditor.php?tid=<?php echo $imgArr["tid"];?>" target="" title="Linked from"><?php echo $imgArr["sciname"];?></a>
+											</div>
+											<?php 
+										}
+										?>
 										<div style='margin-top:2px;'>
 											Sort sequence: 
 											<b><?php echo $imgArr["sortsequence"];?></b>
@@ -237,7 +254,14 @@ if($tid){
 								} 
 								?>
 								<div style='margin:60px 0px 10px 10px;clear:both;'>
-									<?php if($imgArr["caption"]){ ?>
+									<?php if($imgArr["tid"] != $tid){ ?>
+									<div>
+										<b>Image linked from:</b> 
+										<a href="tpeditor.php?tid=<?php echo $imgArr["tid"];?>" target=""><?php echo $imgArr["sciname"];?></a>
+									</div>
+									<?php 
+									}
+									if($imgArr["caption"]){ ?>
 									<div>
 										<b>Caption:</b> 
 										<?php echo $imgArr["caption"];?>

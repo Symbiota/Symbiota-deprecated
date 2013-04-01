@@ -428,10 +428,11 @@ class TaxonProfileManager {
 		$rs1->close();
 
 		$tidStr = implode(",",$tidArr);
-		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ti.occid, '.
+		$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.caption, ti.occid, '.
 			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
+			'INNER JOIN taxa t ON ti.tid = t.tid '.
 			'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 ';
 		if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
 		$sql .= 'ORDER BY ti.sortsequence ';
@@ -443,6 +444,7 @@ class TaxonProfileManager {
 			$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
 			$this->imageArr[$row->imgid]["caption"] = $row->caption;
 			$this->imageArr[$row->imgid]["occid"] = $row->occid;
+			$this->imageArr[$row->imgid]["sciname"] = $row->sciname;
 		}
 		$result->close();
  	}
@@ -480,7 +482,9 @@ class TaxonProfileManager {
 				}
 			}
 			echo '<a href="'.$imgAnchor.'">';
-			echo '<img src="'.$imgUrl.'" title="'.$imgObj['caption'].'" alt="'.$spDisplay.' image" />';
+			$titleStr = $imgObj['caption'];
+			if($imgObj['sciname'] != $this->sciName) $titleStr .= ' (linked from '.$imgObj['sciname'].')';
+			echo '<img src="'.$imgUrl.'" title="'.$titleStr.'" alt="'.$spDisplay.' image" />';
 			/*
 			if($length){
 				echo '<img src="'.$imgUrl.'" title="'.$imgObj['caption'].'" alt="'.$spDisplay.' image" />';

@@ -37,9 +37,10 @@ class TPImageEditorManager extends TPEditorManager{
 		$this->imageArr = Array();
 		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.photographer, ti.photographeruid, '.
 			'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographerdisplay, ti.owner, '.
-			'ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright '.
+			'ti.locality, ti.occid, ti.notes, ti.sortsequence, ti.sourceurl, ti.copyright, t.tid, t.sciname '.
 			'FROM (images ti LEFT JOIN users u ON ti.photographeruid = u.uid) '.
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
+			'INNER JOIN taxa t ON ti.tid = t.tid '.
 			'WHERE ts.taxauthid = 1 AND (ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
 			'ORDER BY ti.sortsequence'; 
 		//echo $sql;
@@ -60,6 +61,8 @@ class TPImageEditorManager extends TPEditorManager{
 			$imageArr[$imgCnt]["copyright"] = $row->copyright;
 			$imageArr[$imgCnt]["occid"] = $row->occid;
 			$imageArr[$imgCnt]["notes"] = $row->notes;
+			$imageArr[$imgCnt]["tid"] = $row->tid;
+			$imageArr[$imgCnt]["sciname"] = $row->sciname;
 			$imageArr[$imgCnt]["sortsequence"] = $row->sortsequence;
 			$imgCnt++;
 		}
