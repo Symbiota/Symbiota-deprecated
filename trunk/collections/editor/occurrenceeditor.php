@@ -273,19 +273,19 @@ else{
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
+	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="../../css/occureditorcrowdsource.css?ver=1303" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="../../css/occureditorcrowdsource.css?ver=130402" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=1303" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=130402" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
     }
     ?>
-	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
