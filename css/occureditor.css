@@ -36,6 +36,11 @@ body{
 	width: 795px;
 }
 
+#occedittabs{
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 12px;
+}
+
 #dupesDiv{
 	float:left;
 	margin:5px 5px;
