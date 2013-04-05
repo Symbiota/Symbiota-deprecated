@@ -188,58 +188,54 @@ class OccurrenceAnnotationManager extends OccurrenceManager {
 	public static function fillAnnotationTemplate($uuid, $timestamp, $annotator, $emailsha1hash, $institutioncode, $collectioncode, $catalognumber, $occurrenceid, $kvpList)  { 
 		$id = "\$Id$";  // obtain svn:keyword properties? 
 		$rev = "\$Rev$";
-$result = "         <rdf:Description rdf:about=\"urn:uuid:$uuid#Annotation\">
+$result = "         <oa:Annotation rdf:about=\"urn:uuid:$uuid#Annotation\">
 		  <oa:motivatedBy rdf:resource=\"http://www.w3.org/ns/oa#editing\"/>
-		  <rdf:type rdf:resource=\"http://www.w3.org/ns/oa#Annotation\"/>
 		  <oa:annotatedAt>$timestamp</oa:annotatedAt>
-		  <oad:hasExpectation rdf:resource=\"urn:uuid:$uuid#Expectation_0\"/>
-		  <oa:hasBody rdf:resource=\"urn:uuid:$uuid#Body_0\"/>
-		  <oa:hasTarget rdf:resource=\"urn:uuid:$uuid#Target_0\"/>
-		  <oa:annotatedBy rdf:resource=\"urn:uuid:$uuid#Annotator_0\"/>
 		  <oa:serializedBy rdf:resource=\"urn:uuid:$uuid#Serializer_0\"/>
-		  <oad:hasEvidence rdf:resource=\"urn:uuid:$uuid#Evidence_0\"/>
-		</rdf:Description>
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#Annotator_0\">
-		  <foaf:name>$annotator</foaf:name>
-		  <foaf:mbox_sha1sum>$emailsha1hash</foaf:mbox_sha1sum>
-		  <rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Agent\"/>
-		</rdf:Description>
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#Expectation_0\">
-		  <rdf:type rdf:resource=\"http://filteredpush.org/ontologies/oa/oad.rdf#Expectation_Update\"/>
-		</rdf:Description>
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#erroneousRecords\">
-		  <dwc:instututionCode>$institutioncode</dwc:institutionCode>
-		  <dwc:collectionCode>$collectioncode</dwc:collectionCode>
-		  <dwc:catalogNumber>$catalognumber</dwc:catalogNumber>
-		  <dwcFP:hasOccurrenceID>$occurrenceid</dwcFP:hasOccurrenceID>
-		  <dc:references>$occurrenceid</dc:references>
-		  <rdf:type rdf:resource=\"oad:#KVPairQuerySelector\"/>
-		  <rdf:type rdf:resource=\"http://filteredpush.org/ontologies/oa/dwcFP.owl#Occurrence\"/>
-		</rdf:Description>
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#Target_0\">
-		  <oa:hasSelector rdf:resource=\"urn:uuid:$uuid#erroneousRecords\"/>
-		  <oa:hasSource rdf:resource=\"dwcFP:AnySuchResource\"/>
-		  <rdf:type rdf:resource=\"http://www.w3.org/ns/oa#SpecificResource\"/>
-		</rdf:Description>
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#Evidence_0\">
-		  <cnt:chars xml:lang=\"en\">Approved Edit in Symbiota.</cnt:chars>
-		  <rdf:type rdf:resource=\"http://www.w3.org/2011/content#ContentAsText\"/>
-		  <rdf:type rdf:resource=\"http://filteredpush.org/ontologies/oa/oad.rdf#Evidence\"/>
-		</rdf:Description>
-        <rdf:Description rdf:about=\"urn:uuid:$uuid#Serializer_0\">
+		  <oa:annotatedBy>
+		     <foaf:Agent rdf:about=\"urn:uuid:$uuid#Annotator_0\">
+		        <foaf:name>$annotator</foaf:name>
+		        <foaf:mbox_sha1sum>$emailsha1hash</foaf:mbox_sha1sum>
+		      </foaf:Agent>
+		  </oa:annotatedBy>
+		  <oad:hasExpectation>
+		     <oad:Expectation_Update />
+		  </oad:hasExpectation>
+		  <oa:hasTarget>
+		     <oa:SpecificResource rdf:about=\"urn:uuid:$uuid#Target_0\">
+		        <oa:hasSelector/>
+		           <oad:KVPairQuerySelector rdf:about=\"urn:uuid:$uuid#Selector_0\>
+		              <dwc:instututionCode>$institutioncode</dwc:institutionCode>
+		              <dwc:collectionCode>$collectioncode</dwc:collectionCode>
+		              <dwc:catalogNumber>$catalognumber</dwc:catalogNumber>
+		              <dwcFP:hasOccurrenceID>$occurrenceid</dwcFP:hasOccurrenceID>
+		              <rdf:type rdf:resource=\"http://filteredpush.org/ontologies/oa/dwcFP.owl#Occurrence\"/>
+		           </oad:KVPairQuerySelector>
+		        <oa:hasSource rdf:resource=\"dwcFP:AnySuchResource\"/>
+		     </oa:SpecificResource>
+		  </oa:hasTarget>
+		  <oad:hasEvidence>
+		     <oad:Evidence rdf:about=\"urn:uuid:$uuid#Evidence_0\">
+		        <cnt:chars xml:lang=\"en\">Approved Edit in Symbiota.</cnt:chars>
+		        <rdf:type rdf:resource=\"http://www.w3.org/2011/content#ContentAsText\"/>
+		     </oad:Evidence>
+		  </oad:hasEvidence>
+		  <oa:serializedBy> 
             <foaf:Agent rdf:about=\"http://sourceforge.net/p/symbiota/svn/$rev/tree/trunk/classes/OccurrenceAnnotationManager\">
                 <foaf:name>$id</foaf:name>
             </foaf:Agent>
-		</rdf:Description>
-
-		<rdf:Description rdf:about=\"urn:uuid:$uuid#Body_0\">\n";
+		  </oa:serialziedBy>
+          <oa:hasBody>
+              <oa:Body rdf:about=\"urn:uuid:$uuid#Body_0\">\n";
 		foreach ($kvpList as $key => $value) { 
-		    $result .= "		  <dwc:$key>$value</dwc:$key>\n";
+		    $result .= "     		  <dwc:$key>$value</dwc:$key>\n";
 		}  
-		$result .= "</rdf:Description>\n";
+		$result .= "             </oa:Body>\n";
+		$result .= "         </oa:hasBody>\n";
+		$result .= "   </oa:Annotation>";
 
 		return $result;
 	}
 }
 
-?>
+?> 
