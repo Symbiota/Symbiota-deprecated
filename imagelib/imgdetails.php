@@ -219,7 +219,7 @@ if($isEditor){
 							</form>
 							
 							<?php 
-							if($symbUid == $imgArr["photographeruid"] || $isAdmin){
+							if($isAdmin || $imgArr["username"] == $paramsArr['un'] || !$imgArr["photographeruid"] || $symbUid == $imgArr["photographeruid"]){
 								?>
 								<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
 									<fieldset style="margin:5px 0px 5px 5px;">
