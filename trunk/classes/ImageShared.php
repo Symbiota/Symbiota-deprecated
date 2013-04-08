@@ -140,6 +140,7 @@ class ImageShared{
 	}
 	
 	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
+		global $paramsArr;
 		$caption = $this->cleanInStr($_REQUEST["caption"]);
 		$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):"");
 		$photographerUid = $_REQUEST["photographeruid"];
@@ -155,15 +156,15 @@ class ImageShared{
 			//$addToTid = $_REQUEST["addtotid"];
 		//}
 		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-			'owner, sourceurl, copyright, locality, occid, notes, sortsequence) '.
+			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
 			'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
 			($photographer?'"'.$this->cleanInStr($photographer).'"':'NULL').','.
 			($photographerUid?$photographerUid:'NULL').',"'.
-			$this->cleanInStr($caption).'","'.$this->cleanInStr($owner).
-			'","'.$sourceUrl.'","'.$this->cleanInStr($copyRight).
-			'","'.$this->cleanInStr($locality).'",'.
-			($occId?$occId:'NULL').',"'.$this->cleanInStr($notes).'",'.
-			($sortSequence?$this->cleanInStr($sortSequence):'50').')';
+			$this->cleanInStr($caption).'","'.$this->cleanInStr($owner).'","'.
+			$sourceUrl.'","'.$this->cleanInStr($copyRight).'","'.
+			$this->cleanInStr($locality).'",'.
+			($occId?$occId:'NULL').',"'.$this->cleanInStr($notes).'","'.
+			$paramsArr['un'].'",'.($sortSequence?$this->cleanInStr($sortSequence):'50').')';
 		//echo $sql;
 		$status = "";
 		if(!$this->conn->query($sql)){
