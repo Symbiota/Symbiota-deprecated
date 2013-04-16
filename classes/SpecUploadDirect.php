@@ -20,7 +20,7 @@ class SpecUploadDirect extends SpecUploadManager {
 			}
 			$rs = $sourceConn->query($sql);
 			if(!$rs){
-				echo "<li style='font-weight:bold;'>ERROR: Possible syntax error in source SQL</li>";
+				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$this->error.'</div>';
 				return;
 			}
 			$sourceArr = Array();
