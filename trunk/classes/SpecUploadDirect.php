@@ -11,27 +11,26 @@ class SpecUploadDirect extends SpecUploadManager {
 	
  	public function analyzeFile(){
 	 	$this->readUploadParameters();
-		$sourceConn = $this->getSourceConnection();
-		if($sourceConn){
+		if($sourceConn = $this->getSourceConnection()){
 			$sql = trim($this->queryStr);
 			if(substr($sql,-1) == ";") $sql = substr($sql,0,strlen($sql)-1); 
-			if(strlen($sql) > 20 && stripos(substr($sql,-20)," limit ") === false){
-				$sql .= " LIMIT 10";
-			}
+			if(strlen($sql) > 20 && stripos(substr($sql,-20)," limit ") === false) $sql .= " LIMIT 10";
 			$rs = $sourceConn->query($sql);
-			if(!$rs){
-				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$this->conn->error.'</div>';
+			if($rs){
+				$sourceArr = Array();
+				if($row = $rs->fetch_assoc()){
+					foreach($row as $k => $v){
+						$sourceArr[] = strtolower($k);
+					}
+				}
+				$rs->close();
+				$this->sourceArr = $sourceArr;
+				//$this->echoFieldMapTable($sourceArr);
+			}
+			else{
+				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$sourceConn->error.'</div>';
 				return;
 			}
-			$sourceArr = Array();
-			if($row = $rs->fetch_assoc()){
-				foreach($row as $k => $v){
-					$sourceArr[] = strtolower($k);
-				}
-			}
-			$rs->close();
-			$this->sourceArr = $sourceArr;
-			//$this->echoFieldMapTable($sourceArr);
 		}
 	}
 
