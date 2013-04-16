@@ -20,7 +20,7 @@ class SpecUploadDirect extends SpecUploadManager {
 			}
 			$rs = $sourceConn->query($sql);
 			if(!$rs){
-				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$this->error.'</div>';
+				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$this->conn->error.'</div>';
 				return;
 			}
 			$sourceArr = Array();
