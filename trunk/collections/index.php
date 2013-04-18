@@ -309,7 +309,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 								<?php 
 					    	} 
 					    	?>
-							<input type="hidden" name="catid" value="<?php echo $catId; ?>" /> 
 					    </div>
 					    <?php
 					    $collCnt++; 

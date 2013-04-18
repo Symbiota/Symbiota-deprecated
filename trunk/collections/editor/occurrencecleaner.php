@@ -22,7 +22,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 
 $dupArr = array();
 if($action == 'listdups'){
-	$dupArr = $cleanManager->getDuplicateRecords();
+	$dupArr = $cleanManager->getDuplicateCatalogNumber();
 }
 ?>
 <!DOCTYPE html>

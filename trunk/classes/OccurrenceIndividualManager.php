@@ -301,6 +301,33 @@ class OccurrenceIndividualManager {
 		return $retArr;
 	}
 
+	public function getEditArr(){
+		$retArr = array();
+		return $retArr;
+		$sql = 'SELECT e.ocedid, e.fieldname, e.fieldvalueold, e.fieldvaluenew, e.reviewstatus, e.appliedstatus, '.
+			'CONCAT_WS(", ",u.lastname,u.firstname) as editor, e.initialtimestamp '.
+			'FROM omoccuredits e INNER JOIN users u ON e.uid = u.uid '.
+			'WHERE e.occid = '.$this->occId.' ORDER BY e.initialtimestamp DESC ';
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		if($result){
+			while($r = $result->fetch_object()){
+				$retArr[$r->ocedid]['fieldname'] = $r->fieldname;
+				$retArr[$r->ocedid]['fieldvalueold'] = $r->fieldvalueold;
+				$retArr[$r->ocedid]['fieldvaluenew'] = $r->fieldvaluenew;
+				$retArr[$r->ocedid]['reviewstatus'] = $r->reviewstatus;
+				$retArr[$r->ocedid]['appliedstatus'] = $r->appliedstatus;
+				$retArr[$r->ocedid]['editor'] = $r->editor;
+				$retArr[$r->ocedid]['initialtimestamp'] = $r->initialtimestamp;
+			}
+			$result->free();
+        }
+        else{
+        	trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
+        }
+		return $retArr;
+	}
+	
 	public function getVoucherChecklists(){
 		$returnArr = Array();
 		$sql = 'SELECT c.name, c.clid, v.notes '.

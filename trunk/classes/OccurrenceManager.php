@@ -831,18 +831,6 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
-		if(array_key_exists("typestatus",$_REQUEST)){
-			$typestatus = $this->conn->real_escape_string(trim($_REQUEST["typestatus"]));
-			if($typestatus){
-				$str = str_replace(",",";",$typestatus);
-				$searchArr[] = "typestatus:".$str;
-				$this->searchTermsArr["typestatus"] = $str;
-			}
-			else{
-				unset($this->searchTermsArr["typestatus"]);
-			}
-			$searchFieldsActivated = true;
-		}
 		if(array_key_exists("collnum",$_REQUEST)){
 			$collNum = $this->conn->real_escape_string(trim($_REQUEST["collnum"]));
 			if($collNum){
@@ -885,6 +873,18 @@ class OccurrenceManager{
 			}
 			else{
 				unset($this->searchTermsArr["catnum"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("typestatus",$_REQUEST)){
+			$typestatus = $this->conn->real_escape_string(trim($_REQUEST["typestatus"]));
+			if($typestatus){
+				$str = str_replace(",",";",$typestatus);
+				$searchArr[] = "typestatus:".$str;
+				$this->searchTermsArr["typestatus"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["typestatus"]);
 			}
 			$searchFieldsActivated = true;
 		}
