@@ -662,11 +662,11 @@ class SpecUploadManager{
 			'WHERE DecimalLatitude = 0 AND DecimalLongitude = 0 AND collid = '.$this->collId;
 		$this->conn->query($sql);
 
+		//Move illegal coordinates to verbatim
 		$sql = 'UPDATE uploadspectemp '.
 			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
 			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180 AND collid = '.$this->collId;
 		$this->conn->query($sql);
-
 		echo 'Done!</li> ';
 	}
 	
@@ -977,6 +977,15 @@ class SpecUploadManager{
 				$dateStr = $this->formatDate($recMap['verbatimeventdate']);
 				if($dateStr) $recMap['eventdate'] = $dateStr;
 			}
+			if((isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) || (isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix'])){
+				$recNumber = $recMap['recordnumber'];
+				if(isset($recMap['recordnumberprefix']) && $recMap['recordnumberprefix']) $recNumber = $recMap['recordnumberprefix'].'-'.$recNumber;
+				if(isset($recMap['recordnumbersuffix']) && $recMap['recordnumbersuffix']){
+					if(is_numeric($recMap['recordnumbersuffix']) && $recMap['recordnumber']) $recNumber .= '-';
+					$recNumber .= $recMap['recordnumbersuffix'];
+				}
+				$recMap['recordnumber'] = $recNumber;
+			}
 			//If lat or long are not numeric, try to make them so
 			if(array_key_exists('decimallatitude',$recMap) || array_key_exists('decimallongitude',$recMap)){
 				$latValue = (array_key_exists('decimallatitude',$recMap)?$recMap['decimallatitude']:'');
@@ -999,7 +1008,7 @@ class SpecUploadManager{
 					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
-			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && !isset($recMap['decimallatitude'])){
+			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude'])){
 				$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 				if($coordArr){
 					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
@@ -1037,6 +1046,60 @@ class SpecUploadManager{
 				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if(!strpos($vCoord,$no)) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
 			}
+			//Transfer verbatim Lat/Long to verbatim coords
+			if((isset($recMap['verbatimlatitude']) && $recMap['verbatimlatitude']) || (isset($recMap['verbatimlongitude']) && $recMap['verbatimlongitude'])){
+				//Attempt to extract decimal lat/long
+				if(!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']){
+					$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude']);
+					if($coordArr){
+						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
+						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
+					}
+				}
+				//Place into verbatim coord field
+				$vCoord = $recMap['verbatimcoordinates'];
+				if($vCoord) $vCoord .= '; ';
+				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'];
+			}
+			//Transfer DMS to verbatim coords
+			if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
+				//Attempt to create decimal lat/long
+				if(is_numeric($recMap['latdeg']) && is_numeric($recMap['lngdeg']) && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude']) && (!isset($recMap['decimallongitude']) || !$recMap['decimallongitude'])){
+					$latDec = $recMap['latdeg'];
+					if(isset($recMap['latmin']) && $recMap['latmin'] && is_numeric($recMap['latmin'])) $latDec += $recMap['latmin']/60;
+					if(isset($recMap['latsec']) && $recMap['latsec'] && is_numeric($recMap['latsec'])) $latDec += $recMap['latsec']/3600;
+					if(stripos($recMap['latns'],'s') !== false) $latDec *= -1;
+					$lngDec = $recMap['lngdeg'];
+					if(isset($recMap['lngmin']) && $recMap['lngmin'] && is_numeric($recMap['lngmin'])) $lngDec += $recMap['lngmin']/60;
+					if(isset($recMap['lngsec']) && $recMap['lngsec'] && is_numeric($recMap['lngsec'])) $lngDec += $recMap['lngsec']/3600;
+					if(stripos($recMap['lngew'],'e') === false) $lngDec *= -1;
+					$recMap['decimallatitude'] = round($latDec,6);
+					$recMap['decimallongitude'] = round($lngDec,6);
+				}
+				//Place into verbatim coord field
+				$vCoord = $recMap['verbatimcoordinates'];
+				if($vCoord) $vCoord .= '; ';
+				$vCoord .= $recMap['latdeg'].'d ';
+				if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m '; 
+				if(isset($recMap['latsec']) && $recMap['latsec']) $vCoord .= $recMap['latsec'].'s ';
+				$vCoord .= $recMap['latns'].'; ';
+				$vCoord .= $recMap['lngdeg'].'d ';
+				if(isset($recMap['lngmin']) && $recMap['lngmin']) $vCoord .= $recMap['lngmin'].'m '; 
+				if(isset($recMap['lngsec']) && $recMap['lngsec']) $vCoord .= $recMap['lngsec'].'s ';
+				$vCoord .= $recMap['lngew'];
+				$recMap['verbatimcoordinates'] = $vCoord;
+			}
+			//Transfer TRS to verbatim coords
+			if(isset($recMap['trstownship']) && $recMap['trstownship'] && isset($recMap['trsrange']) && $recMap['trsrange']){
+				$vCoord = $recMap['verbatimcoordinates'];
+				if($vCoord) $vCoord .= '; ';
+				$vCoord .= (stripos($recMap['trstownship'],'t') === false?'T':'').$recMap['trstownship'].' ';
+				$vCoord .= (stripos($recMap['trsrange'],'r') === false?'R':'').$recMap['trsrange'].' ';
+				$vCoord .= (stripos($recMap['trssection'],'s') === false?'sec':'').$recMap['trssection'].' ';
+				$vCoord .= $recMap['trssectiondetails'];
+				$recMap['verbatimcoordinates'] = trim($vCoord);
+			}
+			
 			//Verbatim elevation
 			if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
 				$eArr = $this->parseVerbatimElevation($recMap['verbatimelevation']);
@@ -1045,6 +1108,23 @@ class SpecUploadManager{
 						$recMap['minimumelevationinmeters'] = $eArr['minelev'];
 						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
 					}
+				}
+			}
+			//Deal with elevation when in two fields (number and units)
+			if(isset($recMap['elevationnumber']) && $recMap['elevationnumber']){
+				$elevStr = $recMap['elevationnumber'].$recMap['elevationunits'];
+				//Try to extract meters
+				$eArr = $this->parseVerbatimElevation($elevStr);
+				if($eArr){
+					if(array_key_exists('minelev',$eArr)){
+						$recMap['minimumelevationinmeters'] = $eArr['minelev'];
+						if(array_key_exists('maxelev',$eArr)) $recMap['maximumelevationinmeters'] = $eArr['maxelev'];
+					}
+				}
+				if(!$eArr || !stripos($elevStr,'m')){
+					$vElev = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
+					if($vElev) $vElev .= '; ';
+					$recMap['verbatimelevation'] = $vElev.$elevStr;
 				}
 			}
 			

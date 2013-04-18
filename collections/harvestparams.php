@@ -202,10 +202,12 @@ $collManager->reset();
 				Catalog Number:
                 <input type="text" id="catnum" size="32" name="catnum" value="<?php if(array_key_exists("catnum",$collArray)) echo $collArray["catnum"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
+			<!-- 
 			<div>
 				Type Status:
                 <input type="text" size="32" id="typestatus" name="typestatus" value="<?php if(array_key_exists("typestatus",$collArray)) echo $collArray["typestatus"]; ?>" title="Separate multiple terms w/ commas" />
 			</div>
+			 -->
 			<div><hr></div>
 			<div>
 				<!--  <a href="javascript:var popupReference=window.open('support/help.html','technical','toolbar=1,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=800,height=700,left=20,top=20');" class="bodylink">

@@ -42,13 +42,42 @@ class OccurrenceCleaner {
 		return $returnArr;
 	}
 
-	public function getDuplicateRecords(){
+	public function getDuplicateCatalogNumber(){
 		$returnArr = array();
 		$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
 			'o.eventDate, o.verbatimEventDate, o.country, o.stateProvince, o.county, o.municipality, o.locality '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '. 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
-			'WHERE o.collid = '.$this->collId.' ORDER BY o.catalognumber LIMIT 100';
+			'WHERE o.collid = '.$this->collId.' ORDER BY o.catalognumber LIMIT 505';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->occid]['occid'] = $row->occid;
+			$returnArr[$row->occid]['catalognumber'] = $row->catalognumber;
+			$returnArr[$row->occid]['family'] = $row->family;
+			$returnArr[$row->occid]['sciname'] = $row->sciname;
+			$returnArr[$row->occid]['recordedBy'] = $row->recordedBy;
+			$returnArr[$row->occid]['recordNumber'] = $row->recordNumber;
+			$returnArr[$row->occid]['associatedCollectors'] = $row->associatedCollectors;
+			$returnArr[$row->occid]['eventDate'] = $row->eventDate;
+			$returnArr[$row->occid]['verbatimEventDate'] = $row->verbatimEventDate;
+			$returnArr[$row->occid]['country'] = $row->country;
+			$returnArr[$row->occid]['stateProvince'] = $row->stateProvince;
+			$returnArr[$row->occid]['county'] = $row->county;
+			$returnArr[$row->occid]['municipality'] = $row->municipality;
+			$returnArr[$row->occid]['locality'] = $row->locality;
+		}
+		$rs->free();
+		return $returnArr;
+	}
+	
+	public function getDuplicateCollectorNumber($lastName = ''){
+		$returnArr = array();
+		$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
+			'o.eventDate, o.verbatimEventDate, o.country, o.stateProvince, o.county, o.municipality, o.locality '.
+			'FROM omoccurrences o INNER JOIN (SELECT occid, recordedby, recordnumber FROM omoccurrences GROUP BY recordedby, recordnumber, collid '. 
+			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND recordedby  IS NOT NULL AND recordnumber IS NOT NULL AND recordnumber != "s.n." AND recordnumber != "sn") rt ON o.occid = rt.occid '.
+			'WHERE o.collid = '.$this->collId.' ORDER BY o.recordnumber LIMIT 505';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){

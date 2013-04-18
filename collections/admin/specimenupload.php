@@ -40,7 +40,7 @@ if($uspid) $duManager->setUspid($uspid);
 $isEditor = 0;
 if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 	$isEditor = 1;
- 	if($action == "Save Primary Key"){
+ 	if($action == "Set Primary Key"){
  		$duManager->savePrimaryKey($dbpk);
  	}
 	elseif($action == "Submit Parameter Edits"){
@@ -315,127 +315,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 				<hr />
 			<?php 
 		 	}
-		 	elseif(stripos($action,"initialize") !== false || stripos($action,"analyze") !== false || stripos($action,"map") !== false || stripos($action,"save") !== false){
-			 	$ulList = $duManager->getUploadList($uspid);
-			 	$uploadType = $ulList[$uspid]["uploadtype"];
-			 	$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
-			 	$ulArr = array_pop($ulList);
-			 	if($ulFileName || array_key_exists("uploadfile",$_FILES) || $uploadType == $DIRECTUPLOAD){
-					$duManager->analyzeFile();
-					if(array_key_exists("uploadfile",$_FILES) || $ulfnOverride) $ulFileName = $duManager->getUploadFileName();
-			 	} 
-			 	?>
-				<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return verifyInitForm(this)">
-					<fieldset style="width:95%;">
-						<legend style="font-weight:bold;font-size:120%;"><?php echo $ulArr["title"];?></legend>
-						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-						<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-						<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
-						<?php if($uploadType == $FILEUPLOAD && stripos($action,"initialize") !== false){ ?>
-							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
-							<div>
-								<div style="margin:10px;">
-									<div class="ulfnoptions">
-										<b>Upload File:</b> 
-										<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
-									</div>
-									<div class="ulfnoptions" style="display:none;">
-										Full File Path: 
-										<input name="ulfnoverride" type="text" size="50" /><br/>
-										* This option is for manual upload of a data file. 
-										Enter full path to data file located on working server.   
-									</div>
-								</div>
-								
-								<div style="margin:10px;">
-									<input type="submit" name="action" value="Analyze Upload File" />
-								</div>
-								<a style="float:right;" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
-							</div>
-						<?php 
-						}
-						if($isSnapshot && ($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES))){ 
-							?>
-							<div style="margin:20px;">
-								<b>Source Unique Identifier / Primary Key (required): </b>
-								<?php
-								$fm = $duManager->getFieldMap();
-								$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
-								$sFields = $duManager->getSourceArr();
-								?>
-								<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
-									<option value=''>Select Source Primary Key</option>
-									<option value=''>Delete Primary Key</option>
-									<option value=''>----------------------------------</option>
-									<?php 
-									sort($sFields);
-									foreach($sFields as $f){
-										echo "<option ".($dbpk==$f?"SELECTED":"").">".$f."</option>\n";
-									}
-									?>
-								</select>
-								<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
-									<input type="submit" name="action" value="Save Primary Key" />
-								</div>
-							</div>
-							<?php 
-						} 
-						if((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))){ 
-							?>
-							<div id="mdiv">
-								<table border="1" cellpadding="2" style="border:1px solid black">
-									<tr>
-										<th>
-											Source Field
-										</th>
-										<th>
-											Target Field
-										</th>
-									</tr>
-									<?php 
-										$autoMap = (stripos($action,"auto")!==false?1:0);
-										$duManager->echoFieldMapTable($autoMap); 
-									?>
-								</table>
-								<div>
-									* Mappings that are not yet saved are displayed in Yellow
-								</div>
-								<div style="margin:10px;">
-									<input type="submit" name="action" value="Delete Field Mapping" />
-									<input type="submit" name="action" value="Automap Fields" />
-									<input type="submit" name="action" value="Save Mapping" />
-								</div>
-								<hr />
-							</div>
-						<?php } ?>
-						<?php if(((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))) 
-							|| ($uploadType == $DIGIRUPLOAD) || ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
-							<div id="uldiv">
-								<?php 
-								if($uploadType == $DIGIRUPLOAD){
-									?>
-									<div>
-										Record Start: 
-										<input type="text" name="recstart" size="5" value="<?php echo $duManager->getSearchStart(); ?>" />
-									</div>
-									<div>
-										Record Limit: 
-										<input type="text" name="reclimit" size="5" value="<?php echo $duManager->getSearchLimit(); ?>" />
-									</div>
-									<?php 
-								}
-								?>
-								<div style="margin:10px;">
-									<input type="submit" name="action" value="Start Upload" />
-								</div>
-							</div>
-						<?php } ?>
-					</fieldset>
-				</form>
-				<?php 
-		 	}
-		 	elseif(stripos($action,"parameter") !== false){
+			elseif(stripos($action,"parameter") !== false){
 			 	$actionList = $duManager->getUploadList($uspid);
 			 	$uploadType = $actionList[$uspid]["uploadtype"];
 			 	$duManager->readUploadParameters();
@@ -740,6 +620,126 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 					</fieldset>
 				</form>
 				
+				<?php 
+			}
+		 	else{
+			 	$ulList = $duManager->getUploadList($uspid);
+			 	$uploadType = $ulList[$uspid]["uploadtype"];
+			 	$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
+			 	$ulArr = array_pop($ulList);
+			 	if($ulFileName || array_key_exists("uploadfile",$_FILES) || $uploadType == $DIRECTUPLOAD){
+					$duManager->analyzeFile();
+					if(array_key_exists("uploadfile",$_FILES) || $ulfnOverride) $ulFileName = $duManager->getUploadFileName();
+			 	} 
+			 	?>
+				<form name="initform" action="specimenupload.php" method="post" <?php echo ($uploadType==$FILEUPLOAD?"enctype='multipart/form-data'":"")?> onsubmit="return verifyInitForm(this)">
+					<fieldset style="width:95%;">
+						<legend style="font-weight:bold;font-size:120%;"><?php echo $ulArr["title"];?></legend>
+						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+						<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+						<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
+						<?php if($uploadType == $FILEUPLOAD && stripos($action,"initialize") !== false){ ?>
+							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
+							<div>
+								<div style="margin:10px;">
+									<div class="ulfnoptions">
+										<b>Upload File:</b> 
+										<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
+									</div>
+									<div class="ulfnoptions" style="display:none;">
+										Full File Path: 
+										<input name="ulfnoverride" type="text" size="50" /><br/>
+										* This option is for manual upload of a data file. 
+										Enter full path to data file located on working server.   
+									</div>
+								</div>
+								
+								<div style="margin:10px;">
+									<input type="submit" name="action" value="Analyze Upload File" />
+								</div>
+								<a style="float:right;" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
+							</div>
+						<?php 
+						}
+						if($isSnapshot && ($uploadType == $DIRECTUPLOAD || $ulFileName || array_key_exists("uploadfile",$_FILES))){ 
+							?>
+							<div style="margin:20px;">
+								<b>Source Unique Identifier / Primary Key (required): </b>
+								<?php
+								$fm = $duManager->getFieldMap();
+								$dbpk = (array_key_exists("dbpk",$fm)?$fm["dbpk"]["field"]:"");
+								$sFields = $duManager->getSourceArr();
+								?>
+								<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
+									<option value=''>Select Source Primary Key</option>
+									<option value=''>Delete Primary Key</option>
+									<option value=''>----------------------------------</option>
+									<?php 
+									sort($sFields);
+									foreach($sFields as $f){
+										echo "<option ".($dbpk==$f?"SELECTED":"").">".$f."</option>\n";
+									}
+									?>
+								</select>
+								<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
+									<input type="submit" name="action" value="Set Primary Key" />
+								</div>
+							</div>
+							<?php 
+						}
+						if((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))){ 
+							?>
+							<div id="mdiv">
+								<table border="1" cellpadding="2" style="border:1px solid black">
+									<tr>
+										<th>
+											Source Field
+										</th>
+										<th>
+											Target Field
+										</th>
+									</tr>
+									<?php 
+										$autoMap = (stripos($action,"auto")!==false?1:0);
+										$duManager->echoFieldMapTable($autoMap); 
+									?>
+								</table>
+								<div>
+									* Mappings that are not yet saved are displayed in Yellow
+								</div>
+								<div style="margin:10px;">
+									<input type="submit" name="action" value="Delete Field Mapping" />
+									<input type="submit" name="action" value="Automap Fields" />
+									<input type="submit" name="action" value="Save Mapping" />
+								</div>
+								<hr />
+							</div>
+						<?php } ?>
+						<?php if(((!$isSnapshot || $dbpk) && (($uploadType == $DIRECTUPLOAD) || ($uploadType == $FILEUPLOAD && $ulFileName))) 
+							|| ($uploadType == $DIGIRUPLOAD) || ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){ ?>
+							<div id="uldiv">
+								<?php 
+								if($uploadType == $DIGIRUPLOAD){
+									?>
+									<div>
+										Record Start: 
+										<input type="text" name="recstart" size="5" value="<?php echo $duManager->getSearchStart(); ?>" />
+									</div>
+									<div>
+										Record Limit: 
+										<input type="text" name="reclimit" size="5" value="<?php echo $duManager->getSearchLimit(); ?>" />
+									</div>
+									<?php 
+								}
+								?>
+								<div style="margin:10px;">
+									<input type="submit" name="action" value="Start Upload" />
+								</div>
+							</div>
+						<?php } ?>
+					</fieldset>
+				</form>
 				<?php 
 			}
 		}
