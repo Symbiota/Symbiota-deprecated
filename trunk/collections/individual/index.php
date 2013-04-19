@@ -58,7 +58,8 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 
 $displayMap = false;
 if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
-$dupeArr = $indManager->getDuplicateArr($occArr['duplicateid']);
+$dupeArr = array();
+//$dupeArr = $indManager->getDuplicateArr($occArr['duplicateid']);
 $commentArr = $indManager->getCommentArr($isEditor);
 $genticArr = $indManager->getGeneticArr();
 $editArr = array();
