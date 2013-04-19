@@ -79,7 +79,7 @@ class OccurrenceIndividualManager {
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, duplicateid, modified, observeruid '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid '.
 			'FROM omoccurrences ';
 		if($this->occId){
 			$sql .= 'WHERE (occid = '.$this->occId.')';
@@ -195,6 +195,9 @@ class OccurrenceIndividualManager {
 
 	public function getDuplicateArr($dupeId){
 		$retArr = array();
+		return $retArr;
+		
+		
 		if($dupeId){
 			$sql = 'SELECT duplicateid, projidentifier, projname '.
 				'FROM omoccurduplicates '.
