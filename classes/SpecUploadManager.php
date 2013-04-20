@@ -1057,7 +1057,7 @@ class SpecUploadManager{
 					}
 				}
 				//Place into verbatim coord field
-				$vCoord = $recMap['verbatimcoordinates'];
+				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
 				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'];
 			}
@@ -1077,7 +1077,7 @@ class SpecUploadManager{
 					$recMap['decimallongitude'] = round($lngDec,6);
 				}
 				//Place into verbatim coord field
-				$vCoord = $recMap['verbatimcoordinates'];
+				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
 				$vCoord .= $recMap['latdeg'].'d ';
 				if(isset($recMap['latmin']) && $recMap['latmin']) $vCoord .= $recMap['latmin'].'m '; 
@@ -1091,7 +1091,7 @@ class SpecUploadManager{
 			}
 			//Transfer TRS to verbatim coords
 			if(isset($recMap['trstownship']) && $recMap['trstownship'] && isset($recMap['trsrange']) && $recMap['trsrange']){
-				$vCoord = $recMap['verbatimcoordinates'];
+				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
 				$vCoord .= (stripos($recMap['trstownship'],'t') === false?'T':'').$recMap['trstownship'].' ';
 				$vCoord .= (stripos($recMap['trsrange'],'r') === false?'R':'').$recMap['trsrange'].' ';
