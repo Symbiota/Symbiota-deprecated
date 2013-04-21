@@ -6,8 +6,20 @@ class SpecProcessorImage extends SpecProcessorManager{
 	private $exif;
 	private $errArr = array();
 
-	function __construct($logPath){
-		parent::__construct($logPath);
+	function __construct(){
+		parent::__construct();
+		if(array_key_exists('imgTnWidth',$GLOBALS)){
+			$this->tnPixWidth = $GLOBALS['imgTnWidth'];
+		}
+		if(array_key_exists('imgWebWidth',$GLOBALS)){
+			$this->webPixWidth = $GLOBALS['imgWebWidth'];
+		}
+		if(array_key_exists('imgLgWidth',$GLOBALS)){
+			$this->lgPixWidth = $GLOBALS['imgLgWidth'];
+		}
+		if(array_key_exists('imgFileSizeLimit',$GLOBALS)){
+			$this->webMaxFileSize = $GLOBALS['imgFileSizeLimit'];
+		}
 	}
 
  	public function __destruct(){
@@ -300,7 +312,7 @@ class SpecProcessorImage extends SpecProcessorManager{
 		
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
-			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$c);
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$c);
 		} 
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 

@@ -25,7 +25,7 @@ class SpecProcessorManager {
 	protected $lgPixWidth = 2400;
 	protected $jpgCompression= 80;
 	protected $webMaxFileSize = 400000;
-	protected $lgMaxFileSize = 4500000;
+	protected $lgMaxFileSize = 3000000;
 	protected $createWebImg = 1;
 	protected $createTnImg = 1;
 	protected $createLgImg = 1;
@@ -40,9 +40,8 @@ class SpecProcessorManager {
 	protected $logErrFH;
 	protected $mdOutputFH;
 	
-	function __construct($logPath) {
+	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->logPath = $logPath;
 		if(!$this->logPath){
 			if(array_key_exists('logPath',$GLOBALS)){
 				$this->logPath = $GLOBALS['logPath'];
@@ -90,6 +89,7 @@ class SpecProcessorManager {
 	protected function getPrimaryKey($str){
 		$specPk = '';
 		$pkPattern = $this->specKeyPattern;
+		if(substr($pkPattern,0,1) != '/' && substr($pkPattern,-1) != '/') $pkPattern = '/'.$pkPattern.'/';
 		if(preg_match($pkPattern,$str,$matchArr)){
 			if(array_key_exists(1,$matchArr) && $matchArr[1]){
 				$specPk = $matchArr[1];
@@ -238,9 +238,11 @@ class SpecProcessorManager {
 	public function editProject($editArr){
 		if($editArr['spprid']){
 			$sql = 'UPDATE specprocessorprojects '.
-				'SET title = "'.$this->cleanInStr($editArr['title']).'", speckeypattern = "'.str_replace('\\','\\\\',$editArr['speckeypattern']).
+				'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
+				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).
 				'", speckeyretrieval = "'.(array_key_exists('speckeyretrieval',$editArr)?$editArr['speckeyretrieval']:'filename').
-				'", sourcepath = "'.$editArr['sourcepath'].'", targetpath = "'.$editArr['targetpath'].'", imgurl = "'.$editArr['imgurl'].
+				'", sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).
+				'", targetpath = "'.$this->cleanInStr($editArr['targetpath']).'", imgurl = "'.$editArr['imgurl'].
 				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
 				', jpgcompression = '.$editArr['jpgcompression'].
 				', createtnimg = '.(array_key_exists('createtnimg',$editArr)?'1':'0').
@@ -254,8 +256,10 @@ class SpecProcessorManager {
 	public function addProject($addArr){
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
-			'VALUES('.$this->collId.',"'.$this->cleanInStr($addArr['title']).'","'.$addArr['speckeypattern'].'","'.$addArr['speckeyretrieval'].'","'.
-			$addArr['sourcepath'].'","'.$addArr['targetpath'].'","'.$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
+			'VALUES('.$this->collId.',"'.$this->cleanInStr($addArr['title']).'","'.
+			$this->cleanInStr($addArr['speckeypattern']).'","'.$addArr['speckeyretrieval'].'","'.
+			$this->cleanInStr($addArr['sourcepath']).'","'.$this->cleanInStr($addArr['targetpath']).'","'.
+			$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
 			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgcompression'].','.
 			(array_key_exists('createtnimg',$addArr)?'1':'0').','.(array_key_exists('createlgimg',$addArr)?'1':'0').')';
 		$this->conn->query($sql);
@@ -283,15 +287,15 @@ class SpecProcessorManager {
 				$this->coordY1 = $row->coordy1;
 				$this->coordY2 = $row->coordy2;
 				$this->sourcePath = $row->sourcepath;
-				if(substr($this->sourcePath,-1) != '/') $this->sourcePath .= '/'; 
+				if(substr($this->sourcePath,-1) != '/' && substr($this->sourcePath,-1) != '\\') $this->sourcePath .= '/'; 
 				$this->targetPath = $row->targetpath;
-				if(substr($this->targetPath,-1) != '/') $this->targetPath .= '/'; 
+				if(substr($this->targetPath,-1) != '/' && substr($this->targetPath,-1) != '\\') $this->targetPath .= '/'; 
 				$this->imgUrlBase = $row->imgurl;
 				if(substr($this->imgUrlBase,-1) != '/') $this->imgUrlBase .= '/'; 
-				$this->webPixWidth = $row->webpixwidth;
-				$this->tnPixWidth = $row->tnpixwidth;
-				$this->lgPixWidth = $row->lgpixwidth;
-				$this->jpgCompression = $row->jpgcompression;
+				if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
+				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
+				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
+				if($row->jpgcompression) $this->jpgCompression = $row->jpgcompression;
 				$this->createTnImg = $row->createtnimg;
 				$this->createLgImg = $row->createlgimg;
 			}
@@ -509,7 +513,7 @@ class SpecProcessorManager {
 	//Misc functions
 	protected function cleanInStr($str){
 		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		//$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
