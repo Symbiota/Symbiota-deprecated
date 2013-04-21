@@ -234,7 +234,7 @@ class ImageShared{
 		
         if($useImageMagick) {
 			// Use ImageMagick to resize images 
-			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight,$qualityRating);
+			$status = $this->createNewImageImagick($sourcePath,$targetPath,$newWidth,$qualityRating);
 		} 
 		elseif(extension_loaded('gd') && function_exists('gd_info')) {
 			// GD is installed and working 
@@ -247,7 +247,7 @@ class ImageShared{
 		return $status;
 	}
 	
-	private function createNewImageImagick($sourceImg,$targetPath,$newWidth, $qualityRating = 0){
+	private function createNewImageImagick($sourceImg,$targetPath,$newWidth,$qualityRating = 0){
 		$status = false;
 		$ct;
 		if($newWidth < 300){

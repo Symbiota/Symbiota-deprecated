@@ -10,13 +10,13 @@ $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 
 $specManager;
 if($action == 'Upload ABBYY File'){
-	$specManager = new SpecProcessorAbbyy($logPath);
+	$specManager = new SpecProcessorAbbyy();
 }
 elseif($action == 'Process Images'){
-	$specManager = new SpecProcessorImage($logPath);
+	$specManager = new SpecProcessorImage();
 }
 else{
-	$specManager = new SpecProcessorManager($logPath);
+	$specManager = new SpecProcessorManager();
 }
 
 $specManager->setCollId($collId);
@@ -310,7 +310,7 @@ if($spprId){
 											<b>Central pixel width:</b>
 										</td>
 										<td> 
-											<input name="webpixwidth" type="text" style="width:50px;" />
+											<input name="webpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getWebPixWidth(); ?>" /> 
 										</td>
 									</tr>
 									<tr>
@@ -318,7 +318,7 @@ if($spprId){
 											<b>Thumbnail pixel width:</b> 
 										</td>
 										<td> 
-											<input name="tnpixwidth" type="text" style="width:50px;" />
+											<input name="tnpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getTnPixWidth(); ?>" /> 
 										</td>
 									</tr>
 									<tr>
@@ -326,7 +326,7 @@ if($spprId){
 											<b>Large pixel width:</b>
 										</td>
 										<td> 
-											<input name="lgpixwidth" type="text" style="width:50px;" />
+											<input name="lgpixwidth" type="text" style="width:50px;" value="<?php echo $specManager->getLgPixWidth(); ?>" /> 
 										</td>
 									</tr>
 									<tr>
@@ -334,7 +334,7 @@ if($spprId){
 											<b>JPG compression:</b>
 										</td>
 										<td> 
-											<input name="jpgcompression" type="text" style="width:50px;" />
+											<input name="jpgcompression" type="text" style="width:50px;" value="<?php echo $specManager->getJpgCompression(); ?>" />
 										</td>
 									</tr>
 									<tr>
@@ -427,7 +427,7 @@ if($spprId){
 													<b>Central pixel width:</b>
 												</td>
 												<td> 
-													<input name="webpixwidth" type="text" value="<?php echo $specManager->getWebPixWidth(); ?>" style="width:50px;" />
+													<input name="webpixwidth" type="text" value="<?php echo $specManager->getWebPixWidth(); ?>" style="width:50px;" /> 
 												</td>
 											</tr>
 											<tr>

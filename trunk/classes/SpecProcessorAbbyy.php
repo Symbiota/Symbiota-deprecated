@@ -4,8 +4,8 @@ class SpecProcessorAbbyy extends SpecProcessorManager{
 	private $recDelimiter = '/--END--/';
 	private $pkPattern = '/(ASU\d{7})/';
 	
-	function __construct($logPath){
- 		parent::__construct($logPath);
+	function __construct(){
+ 		parent::__construct();
 	}
 
 	public function loadLabelFile(){
