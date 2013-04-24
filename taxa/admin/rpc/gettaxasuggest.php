@@ -37,7 +37,7 @@
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
 		//$returnArr[] = '{ "value": "'.$row->sciname.'", "tid": "'.$row->tid.'" }';
-		$returnArr[] = htmlentities($row->sciname);
+		$returnArr[] = utf8_encode($row->sciname);
 	}
 	$con->close();
 	//echo '[ '.implode(',',$returnArr).' ]';

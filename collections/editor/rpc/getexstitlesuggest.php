@@ -1,4 +1,5 @@
 <?php
+	//include_once('../../../config/symbini.php');
 	include_once('../../../config/dbconnection.php');
 	$con = MySQLiConnectionFactory::getCon("readonly");
 	$retArr = Array();
@@ -14,10 +15,10 @@
 		$title = $row->title;
 		$abbr = $row->abbreviation;
 		if(stripos($title,$queryString) !== false){
-			$retArr[] = htmlentities($title);
+			$retArr[] = utf8_encode($title);
 		}
 		if($title != $abbr && stripos($abbr,$queryString) !== false){
-			$retArr[] = htmlentities($abbr);
+			$retArr[] = utf8_encode($abbr);
 		}
 	}
 	$con->close();
