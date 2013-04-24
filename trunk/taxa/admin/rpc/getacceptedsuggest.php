@@ -14,7 +14,7 @@ $sql = 'SELECT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = t
 	'WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.tid = ts.tidaccepted) AND (t.sciname LIKE "'.$q.'%") ORDER BY t.sciname LIMIT 10';
 $result = $con->query($sql);
 while($row = $result->fetch_object()){
-	$retArr[] = htmlentities($row->sciname);
+	$retArr[] = utf8_encode($row->sciname);
 }
 $result->close();
 if(!($con === false)) $con->close();
