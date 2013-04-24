@@ -38,7 +38,7 @@
 		$sql .= 'LIMIT 10';
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {
-			$returnArr[] = $row->sciname;
+			$returnArr[] = htmlentities($row->sciname);
          }
 	}
 	$con->close();

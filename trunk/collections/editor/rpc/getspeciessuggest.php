@@ -11,7 +11,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = $row->sciname;
+		$retArr[] = htmlentities($row->sciname);
 	}
 	$con->close();
 	echo json_encode($retArr);
