@@ -266,42 +266,40 @@ class SpecUploadManager{
 		$dbpk = (array_key_exists("dbpk",$this->fieldMap)?$this->fieldMap["dbpk"]["field"]:"");
 		$autoMapArr = Array();
 		foreach($this->sourceArr as $fieldName){
-			if($dbpk != $fieldName){
-				$isAutoMapped = false;
-				if($autoMap && in_array($fieldName,$this->symbFields)){
-					$isAutoMapped = true;
-					$autoMapArr[] = $fieldName;
-				}
-				echo "<tr>\n";
-				echo "<td style='padding:2px;'>";
-				echo $fieldName;
-				echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
-				echo "</td>\n";
-				echo "<td>\n";
-				echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
-				echo "<option value=''>Select Target Field</option>\n";
-				echo "<option value=''>Leave Field Unmapped</option>\n";
-				echo "<option value=''>-------------------------</option>\n";
-				if($isAutoMapped){
-					//Source Field = Symbiota Field
-					foreach($this->symbFields as $sField){
-						echo "<option ".(strtolower($fieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
-					}
-				}
-				elseif(array_key_exists($fieldName,$sourceSymbArr)){
-					//Source Field is mapped to Symbiota Field
-					foreach($this->symbFields as $sField){
-						echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
-					}
-				}
-				else{
-					foreach($this->symbFields as $sField){
-						echo "<option>".$sField."</option>\n";
-					}
-				}
-				echo "</select></td>\n";
-				echo "</tr>\n";
+			$isAutoMapped = false;
+			if($autoMap && in_array($fieldName,$this->symbFields)){
+				$isAutoMapped = true;
+				$autoMapArr[] = $fieldName;
 			}
+			echo "<tr>\n";
+			echo "<td style='padding:2px;'>";
+			echo $fieldName;
+			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
+			echo "</td>\n";
+			echo "<td>\n";
+			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+			echo "<option value=''>Select Target Field</option>\n";
+			echo "<option value=''>Leave Field Unmapped</option>\n";
+			echo "<option value=''>-------------------------</option>\n";
+			if($isAutoMapped){
+				//Source Field = Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".(strtolower($fieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			elseif(array_key_exists($fieldName,$sourceSymbArr)){
+				//Source Field is mapped to Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			else{
+				foreach($this->symbFields as $sField){
+					echo "<option>".$sField."</option>\n";
+				}
+			}
+			echo "</select></td>\n";
+			echo "</tr>\n";
 		}
 		
 		if($autoMapArr){
