@@ -234,7 +234,6 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 <div id="innertext">
 	<div style="float:right;">
 		<?php if($collId){ ?>
-		<a href="specimenupload.php"><img src="<?php echo $clientRoot;?>/images/toparent.jpg" style="width:15px;border:0px;" title="Return to upload listing" /></a>
 		<a href="specimenupload.php?collid=<?php echo ($collId);?>&action=addprofile"><img src="<?php echo $clientRoot;?>/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>
 		<?php } ?>
 	</div>
