@@ -258,12 +258,11 @@ class SpecUploadManager{
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
 		foreach($this->fieldMap as $symbField => $fArr){
-			$sourceSymbArr[$fArr["field"]] = $symbField;
+			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
 		}
 
 		//Output table rows for source data
 		sort($this->symbFields);
-		$dbpk = (array_key_exists("dbpk",$this->fieldMap)?$this->fieldMap["dbpk"]["field"]:"");
 		$autoMapArr = Array();
 		foreach($this->sourceArr as $fieldName){
 			$isAutoMapped = false;
