@@ -1124,7 +1124,15 @@ class SpecUploadManager{
 					$recMap['verbatimelevation'] = $vElev.$elevStr;
 				}
 			}
-			
+			//Concatinate collectorfamilyname and collectorinitials into recordedby
+			if(isset($recMap['collectorfamilyname']) && $recMap['collectorfamilyname'] && (!isset($recMap['recordedby']) || !$recMap['recordedby'])){
+				$recordedBy = $recMap['collectorfamilyname'];
+				if(isset($recMap['collectorinitials']) && $recMap['collectorinitials']) $recordedBy .= ', '.$recMap['collectorinitials'];
+				$recMap['recordedby'] = $recordedBy;
+				//Need to add code that maps to collector table
+				
+			}
+
 			//Populate sciname if null
 			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
 				if(array_key_exists("genus",$recMap)){
