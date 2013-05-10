@@ -130,7 +130,7 @@ class TaxaLoaderManager{
 					$sql .= 'VALUES ('.substr($valueSql,1).')';
 					//echo "<div>".$sql."</div>";
 					if(!$this->conn->query($sql)){
-						echo '<li>ERROR loading taxon: '.$conn->error.'</li>';
+						echo '<li>ERROR loading taxon: '.$this->conn->error.'</li>';
 					}
 				}
 				$recordCnt++;
@@ -140,7 +140,7 @@ class TaxaLoaderManager{
 				$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
 					'VALUES ("'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
 				if(!$this->conn->query($sql)){
-					echo '<li>ERROR loading taxonunit: '.$conn->error.'</li>';
+					echo '<li>ERROR loading taxonunit: '.$this->conn->error.'</li>';
 				}
 			}
 			
