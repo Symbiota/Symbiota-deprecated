@@ -6,6 +6,7 @@ class TaxonomyDisplayManager{
 
 	private $conn;
 	private $indentValue = 0;
+	private $indentMap = array();
 	private $taxaArr = Array();
 	private $targetStr = "";
 	private $searchTaxonRank = 0;
@@ -49,6 +50,7 @@ class TaxonomyDisplayManager{
 					$this->taxaArr[$tid]["author"] = $row->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 					$this->taxaArr[$tid]["rankid"] = $row->rankid;
+					$this->indentMap[$row->rankid] = 0;
 					$this->searchTaxonRank = $row->rankid;
 					if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 					if($row->hierarchystr) $hArray = array_merge($hArray,explode(",",$row->hierarchystr));
@@ -81,6 +83,7 @@ class TaxonomyDisplayManager{
 				$this->taxaArr[$tid]["sciname"] = $row->sciname;
 				$this->taxaArr[$tid]["author"] = $row->author; 
 				$this->taxaArr[$tid]["rankid"] = $row->rankid;
+				$this->indentMap[$row->rankid] = 0;
 				$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 				if($parentTid) $taxaParentIndex[$tid] = $parentTid;
 			}
@@ -112,8 +115,17 @@ class TaxonomyDisplayManager{
 					$this->taxaArr[$tid]["author"] = $row->author;
 					$this->taxaArr[$tid]["parenttid"] = $row->parenttid; 
 					$this->taxaArr[$tid]["rankid"] = $row->rankid;
+					$this->indentMap[$row->rankid] = 0;
 				}
 				$rsOrphan->close();
+			}
+			
+			//Set $indentMap to correct values
+			ksort($this->indentMap);
+			$indentCnt = 0;
+			foreach($this->indentMap as $rid => $v){
+				$this->indentMap[$rid] = $indentCnt*10;
+				$indentCnt++;
 			}
 			
 			//Build Hierarchy Array: grab leaf nodes and attach to parent until none are left
