@@ -5,9 +5,6 @@ include_once($serverRoot.'/classes/TaxaLoaderItisManager.php');
 class TaxaLoaderManager{
 	
 	protected $conn;
-	protected $sourceArr = Array();
-	protected $targetArr = Array();
-	protected $fieldMap = Array();	//target field => source field
 	protected $uploadFileName;
 	protected $uploadTargetPath;
 
@@ -57,48 +54,97 @@ class TaxaLoaderManager{
         }
 	}
 
-	public function loadFile(){
+	public function loadFile($fieldMap){
+		//fieldMap = array(source field => target field)
 		echo "<li>Starting Upload</li>";
 		ob_flush();
 		flush();
 		$this->conn->query("DELETE FROM uploadtaxa");
 		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
-		//convert all values to lowercase
-		foreach($headerArr as $k => $v){
-			$headerArr[$k] = strtolower($v);
-		}
-		$recordCnt = 0;
-		if(in_array("scinameinput",$this->fieldMap)){
-			$keys = array_keys($this->fieldMap);
-			while($recordArr = fgetcsv($fh)){
-				//Load into uploadtaxa
-				$sql = "INSERT INTO uploadtaxa(".implode(",",$this->fieldMap).") ";
-				$valueSql = "";
-				foreach($keys as $sourceName){
-					$valIn = $this->encodeString($recordArr[array_search($sourceName,$headerArr)]);
-					$targetField = $this->fieldMap[$sourceName];
-					if($targetField == 'acceptance' && !is_numeric($valIn)){
-						if(strtolower($valIn) == 'accepted'){
-							$valIn = 1;
-						}
-						elseif(strtolower($valIn) == 'not accepted'){
-							$valIn = 1;
-						}
-						else{
-							$valIn = '';
-						}
-					}
-					$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
+		$uploadTaxaArr = $this->getUploadTaxaArr();
+		$taxonUnitArr = $this->getTaxonUnitArr();
+		$uploadTaxaIndexArr = array();		//Array of index values associated with uploadtaxa table; array(index => targetName)
+		$taxonUnitIndexArr = array();		//Array of index values associated with taxonunits table;
+		foreach($headerArr as $k => $sourceName){
+			$sourceName = strtolower($sourceName);
+			if(array_key_exists($sourceName,$fieldMap)){
+				$targetName = $fieldMap[$sourceName];
+				if(in_array($targetName,$uploadTaxaArr)) $uploadTaxaIndexArr[$k] = $targetName;
+				if($targetName == 'unitname1') $targetName = 'genus';
+				if(in_array($targetName,$taxonUnitArr)){
+					$taxonUnitIndexArr[$k] = array_search($targetName,$taxonUnitArr);  //array(recIndex => rankid)
+					asort($taxonUnitIndexArr);
 				}
-				$sql .= 'VALUES ('.substr($valueSql,1).')';
-				//echo "<div>".$sql."</div>";
-				if(!$this->conn->query($sql)){
-					echo '<li>ERROR loading taxon, SQL: '.$sql.'</li>';
+			}
+		}
+		$familyIndex = 0; 
+		if(in_array('family',$fieldMap)) $familyIndex = array_search(array_search('family',$fieldMap),$headerArr);
+		$recordCnt = 0;
+		//scinameinput field is required
+		if(in_array("scinameinput",$fieldMap) || count($taxonUnitIndexArr) > 2){
+			$childParentArr = array();		//array(taxon => array('p'=>parentStr,'r'=>rankid)
+			$sqlBase = "INSERT INTO uploadtaxa(".implode(",",$uploadTaxaIndexArr).") ";
+			while($recordArr = fgetcsv($fh)){
+				//Load taxonunits fields into Array which will be loaded into taxon table at the end
+				$parentStr = '';
+				foreach($taxonUnitIndexArr as $index => $rankId){
+					$taxonStr = $recordArr[$index];
+					if($taxonStr && !array_key_exists($taxonStr,$childParentArr)){
+						if($rankId == 10){
+							//For kingdom taxa, parents are themselves
+							$childParentArr[$taxonStr]['p'] = $taxonStr;
+							$childParentArr[$taxonStr]['r'] = $rankId;
+						}
+						elseif($parentStr){
+							$childParentArr[$taxonStr]['p'] = $parentStr;
+							$childParentArr[$taxonStr]['r'] = $rankId;
+							if($rankId > 140 && $familyIndex && $recordArr[$familyIndex]){
+								$childParentArr[$taxonStr]['f'] = $recordArr[$familyIndex];
+							}
+						}
+						$parentStr = $taxonStr;
+					}
+				}
+				
+				if(in_array("scinameinput",$fieldMap)){
+					//Load relavent fields into uploadtaxa table
+					$sql = $sqlBase;
+					$valueSql = "";
+					foreach($uploadTaxaIndexArr as $recIndex => $targetField){
+						$valIn = $this->encodeString($recordArr[$recIndex]);
+						if($targetField == 'acceptance' && !is_numeric($valIn)){
+							$valInTest = strtolower($valIn);
+							if($valInTest == 'accepted' || $valInTest == 'valid'){
+								$valIn = 1;
+							}
+							elseif($valInTest == 'not accepted' || $valInTest == 'synonym'){
+								$valIn = 0;
+							}
+							else{
+								$valIn = '';
+							}
+						}
+						$valueSql .= ','.($valIn?'"'.$valIn.'"':'NULL');
+					}
+					$sql .= 'VALUES ('.substr($valueSql,1).')';
+					//echo "<div>".$sql."</div>";
+					if(!$this->conn->query($sql)){
+						echo '<li>ERROR loading taxon: '.$conn->error.'</li>';
+					}
 				}
 				$recordCnt++;
 			}
-			echo '<li>'.$recordCnt.' taxon records uploaded</li>';
+			//Process and load taxon units data ($childParentArr)
+			foreach($childParentArr as $taxon => $tArr){
+				$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
+					'VALUES ("'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
+				if(!$this->conn->query($sql)){
+					echo '<li>ERROR loading taxonunit: '.$conn->error.'</li>';
+				}
+			}
+			
+			echo '<li>'.$recordCnt.' taxon records pre-processed</li>';
 			ob_flush();
 			flush();
 		}
@@ -716,31 +762,54 @@ class TaxaLoaderManager{
 		$this->uploadTargetPath = $tPath."/"; 
     }
 
-	public function setFieldMap($fm){
-		$this->fieldMap = $fm;
-	}
-	
-	public function getFieldMap(){
-		return $this->fieldMap;
-	}
-
-	private function setTargetArr(){
+    public function getTargetArr(){
+		$retArr = $this->getUploadTaxaArr();
+		unset($retArr['unitind1']);
+		unset($retArr['unitind2']);
+		$retArr['unitname1'] = 'genus';
+		unset($retArr['genus']);
+		$retArr['unitname2'] = 'specificepithet';
+		$retArr['unitind3'] = 'taxonrank';
+		$retArr['unitname3'] = 'infraspecificepithet';
+		$tUnitArr = $this->getTaxonUnitArr();
+		foreach($tUnitArr as $k => $v){
+			$retArr[$v] = $v;
+		}
+		return $retArr;
+    }
+    
+	private function getUploadTaxaArr(){
 		//Get metadata
+		$targetArr = array();
 		$sql = "SHOW COLUMNS FROM uploadtaxa";
 		$rs = $this->conn->query($sql);
     	while($row = $rs->fetch_object()){
     		$field = strtolower($row->Field);
     		if(strtolower($field) != 'tid' && strtolower($field) != 'tidaccepted' && strtolower($field) != 'parenttid'){
-				$this->targetArr[] = $field;
+				$targetArr[$field] = $field;
     		}
     	}
     	$rs->close();
+		
+		return $targetArr;
 	}
-	
-	private function setSourceArr(){
+
+	private function getTaxonUnitArr(){
+		//Get metadata
+		$retArr = array();
+		$sql = "SELECT rankid, rankname FROM taxonunits WHERE rankid < 220";
+		$rs = $this->conn->query($sql);
+    	while($r = $rs->fetch_object()){
+			$retArr[$r->rankid] = strtolower($r->rankname);
+    	}
+    	$rs->close();
+		return $retArr;
+	}
+
+	public function getSourceArr(){
+		$sourceArr = array();
 		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
 		$headerArr = fgetcsv($fh);
-		$sourceArr = Array();
 		foreach($headerArr as $field){
 			$fieldStr = strtolower(trim($field));
 			if($fieldStr){
@@ -750,21 +819,7 @@ class TaxaLoaderManager{
 				break;
 			}
 		}
-		$this->sourceArr = $sourceArr;
-	}
-    
-	public function getTargetArr(){
-		if(!$this->targetArr){
-			$this->setTargetArr();
-		}
-		return $this->targetArr;
-	}
-
-	public function getSourceArr(){
-		if(!$this->sourceArr){
-			$this->setSourceArr();
-		}
-		return $this->sourceArr;
+		return $sourceArr;
 	}
 	
 	public function getTaxAuthorityArr(){

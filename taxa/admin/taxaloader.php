@@ -23,6 +23,7 @@ else{
 }
 
 $status = "";
+$fieldMap = Array();
 if($editable){
 	if($ulFileName){
 		$loaderManager->setFileName($ulFileName);
@@ -35,15 +36,13 @@ if($editable){
 		//Grab field mapping, if mapping form was submitted
  		$targetFields = $_REQUEST["tf"];
  		$sourceFields = $_REQUEST["sf"];
- 		$fieldMap = Array();
 		for($x = 0;$x<count($targetFields);$x++){
 			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
 		}
-		$loaderManager->setFieldMap($fieldMap);
 	}
 }
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Taxa Loader</title>
@@ -130,7 +129,7 @@ if($editable){
 		$taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 		if($action == "Upload ITIS File" || $action == 'Upload Taxa'){
 			echo '<hr /><ul>';
-			$loaderManager->loadFile();
+			$loaderManager->loadFile($fieldMap);
 			echo '</ul><hr />';
 		}
 		elseif($action == "Activate Taxa"){
@@ -236,8 +235,7 @@ if($editable){
 								<?php
 								$sArr = $loaderManager->getSourceArr();
 								$tArr = $loaderManager->getTargetArr();
-								sort($tArr);
-								$fMap = $loaderManager->getFieldMap();
+								asort($tArr);
 								foreach($sArr as $sField){
 									?>
 									<tr>
@@ -246,18 +244,18 @@ if($editable){
 											<input type="hidden" name="sf[]" value="<?php echo $sField; ?>" />
 										</td>
 										<td>
-											<select name="tf[]" style="background:<?php echo (array_key_exists($sField,$fMap)?"":"yellow");?>">
+											<select name="tf[]" style="background:<?php echo (array_key_exists($sField,$fieldMap)?"":"yellow");?>">
 												<option value="">Field Unmapped</option>
 												<option value="">-------------------------</option>
 												<?php 
-												$mappedTarget = (array_key_exists($sField,$fMap)?$fMap[$sField]:"");
+												$mappedTarget = (array_key_exists($sField,$fieldMap)?$fieldMap[$sField]:"");
 												$selStr = "";
 												if($mappedTarget=="unmapped") $selStr = "SELECTED";
 												echo "<option value='unmapped' ".$selStr.">Leave Field Unmapped</option>";
 												if($selStr){
 													$selStr = 0;
 												}
-												foreach($tArr as $tField){
+												foreach($tArr as $k => $tField){
 													if($selStr !== 0 && $tField == "scinameinput" && (strtolower($sField == "sciname") || strtolower($sField) == "scientific name")){
 														$selStr = "SELECTED";
 													}
@@ -267,7 +265,7 @@ if($editable){
 													elseif($selStr !== 0 && $tField==$sField && $tField != "sciname"){
 														$selStr = "SELECTED";
 													}
-													echo '<option '.($selStr?$selStr:'').'>'.$tField."</option>\n";
+													echo '<option value="'.$k.'" '.($selStr?$selStr:'').'>'.$tField."</option>\n";
 													if($selStr){
 														$selStr = 0;
 													}
