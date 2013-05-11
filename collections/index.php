@@ -123,6 +123,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						formVerified = true;
 						break;
 					}
+					if(f.elements[h].name == "cat[]" && f.elements[h].checked){
+						formVerified = true;
+						break;
+					}
 				}
 				if(!formVerified){
 					alert("Please choose at least one collection!");
