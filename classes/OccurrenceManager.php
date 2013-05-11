@@ -9,7 +9,6 @@ class OccurrenceManager{
 	private $taxaSearchType;
 	protected $searchTermsArr = Array();
 	protected $localSearchArr = Array();
-	protected $collectionArr = Array();
 	protected $useCookies = 1;
 	protected $reset = 0;
 	protected $dynamicClid;
@@ -31,7 +30,7 @@ class OccurrenceManager{
 		elseif(array_key_exists("collsurveyid",$_COOKIE)){
 			$this->searchTermsArr["surveyid"] = $_COOKIE["collsurveyid"];
 		}
- 		$this->readRequestVariables();
+		$this->readRequestVariables();
  	}
 
 	public function __destruct(){
@@ -105,19 +104,31 @@ class OccurrenceManager{
 
 	protected function getSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists("db",$this->searchTermsArr)){
-			if(strpos($this->searchTermsArr["db"],"all") === false){
-				$dbStr = preg_replace('/;catid:\d*/','',$this->searchTermsArr["db"]);
-				$sqlWhere .= "AND (o.CollID IN(".str_replace(";",",",trim($dbStr,';')).")) ";
-			}
-			elseif(preg_match('/;catid:(\d+)/',$this->searchTermsArr["db"],$matches)){
-				$catId = $matches[1];
-				if($catId) $sqlWhere .= "AND (o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk = ".$catId."))) ";
-			}
-		}
-		elseif(array_key_exists("surveyid",$this->searchTermsArr)){
+		if(array_key_exists("surveyid",$this->searchTermsArr)){
 			//$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
-			$sqlWhere .= "AND (sol.clid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
+			$sqlWhere .= "AND (sol.clid IN('".$this->searchTermsArr["surveyid"]."')) ";
+		}
+		elseif(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
+			//Do nothing if db = all
+			if($this->searchTermsArr['db'] != 'all'){
+				if($this->searchTermsArr['db'] == 'allspec'){
+					$sqlWhere .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype = "Preserved Specimens")) ';
+				}
+				elseif($this->searchTermsArr['db'] == 'allobs'){
+					$sqlWhere .= 'AND (o.collid IN(SELECT collid FROM omcollections WHERE colltype IN("General Observations","Observations"))) ';
+				}
+				else{
+					$dbArr = explode(';',$this->searchTermsArr["db"]);
+					$dbStr = '';
+					if(isset($dbArr[0]) && $dbArr[0]){
+						$dbStr = "(o.collid IN(".trim($dbArr[0]).")) ";
+					}
+					if(isset($dbArr[1]) && $dbArr[1]){
+						$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk = '.$dbArr[1].'))) ';
+					}
+					$sqlWhere .= 'AND ('.$dbStr.') ';
+				}
+			}
 		}
 		
 		if(array_key_exists("taxa",$this->searchTermsArr)){
@@ -561,39 +572,183 @@ class OccurrenceManager{
     	}
     }
 	
-	public function getCollectionArr($catId = ""){
-		if(!$this->collectionArr) {
-			$tempCollArr = Array();
-			if(array_key_exists("db",$this->searchTermsArr)) $tempCollArr = explode(";",$this->searchTermsArr["db"]);
-			$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.CollectionName, c.Homepage, ".
-				"c.IndividualUrl, c.icon, c.colltype, c.Contact, c.email, c.SortSeq ".
-				"FROM omcollections c ";
-			if($catId){
-				$sql .= 'INNER JOIN omcollcatlink ccl ON c.collid = ccl.collid ';
-			}
-			$sql .= 'WHERE c.colltype <> "off" ';
-			if($catId){
-				 $sql .= 'AND (ccl.ccpk = '.$catId.') ';
-			}
-			$sql .= "ORDER BY c.SortSeq, c.CollectionName ";
-			//echo "<div>SQL: ".$sql."</div>";
-			$result = $this->conn->query($sql);
-			while($row = $result->fetch_object()){
-				$collId = $row->collid;
-				$this->collectionArr[$collId]["institutioncode"] = $row->institutioncode;
-				$this->collectionArr[$collId]["collectioncode"] = $row->collectioncode;
-				$this->collectionArr[$collId]["collectionname"] = $row->CollectionName;
-				$this->collectionArr[$collId]["homepage"] = $row->Homepage;
-				$this->collectionArr[$collId]["icon"] = $row->icon;
-				$this->collectionArr[$collId]["displayorder"] = $row->SortSeq;
-				$this->collectionArr[$collId]["colltype"] = $row->colltype;
-				if(in_array($collId,$tempCollArr) || in_array("all",$tempCollArr)) $this->collectionArr[$collId]["isselected"] = 1;
-			}
-			$result->close();
+	public function getFullCollectionList($catId = ""){
+		$retArr = array();
+		//Set collection array
+		$collIdArr = array();
+		$catIdArr = array();
+		if(isset($this->searchTermsArr['db']) && array_key_exists('db',$this->searchTermsArr)){
+			$cArr = explode(';',$this->searchTermsArr['db']);
+			$collIdArr = explode(',',$cArr[0]);
+			if(isset($cArr[1])) $catIdStr = $cArr[1];
 		}
-		return $this->collectionArr;
+		//Set collections
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.catagory '.
+			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
+			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
+			'ORDER BY ccl.sortsequence, c.sortseq, c.CollectionName ';
+		//echo "<div>SQL: ".$sql."</div>";
+		$result = $this->conn->query($sql);
+		while($r = $result->fetch_object()){
+			$collType = (stripos($r->colltype, "observation") !== false?'obs':'spec');
+			if($r->ccpk && $r->ccpk != $catId){
+				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
+					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
+					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
+					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['icon'] = $r->icon;
+				}
+				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["instcode"] = $r->institutioncode;
+				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collcode"] = $r->collectioncode;
+				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["collname"] = $r->collectionname;
+				$retArr[$collType]['cat'][$r->ccpk][$r->collid]["icon"] = $r->icon;
+			}
+			else{
+				$retArr[$collType]['coll'][$r->collid]["instcode"] = $r->institutioncode;
+				$retArr[$collType]['coll'][$r->collid]["collcode"] = $r->collectioncode;
+				$retArr[$collType]['coll'][$r->collid]["collname"] = $r->collectionname;
+				$retArr[$collType]['coll'][$r->collid]["icon"] = $r->icon;
+			}
+		}
+		$result->close();
+		return $retArr;
 	}
+	
+	public function outputFullCollArr($occArr){
+		$collCnt = 1;
+		if(isset($occArr['coll'])){
+			$collArr = $occArr['coll'];
+			foreach($collArr as $collid => $cArr){
+				?>
+				<div style="clear:both;padding:5px;height:30px;">
+					<div style="float:left;width:50px;">
+						<?php 
+						if($cArr["icon"]){
+							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+							?>
+							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+								<img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" />
+							</a>
+					    	<?php
+						}
+					    ?>
+					    &nbsp;
+					</div>
+					<div style="float:left;width:30px;padding-top:5px;">
+			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" /> 
+					</div>
+					<div style="float:left;padding-top:6px;">
+			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+			    		</a>
+			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+			    			more info
+			    		</a>
+				    </div>
+			    	<?php 
+			    	if($collCnt%8 == 4 || (count($collArr) < 4 && $collCnt == 1)){ 
+			    		?>
+					    <div style="float:right;width:60px;height:35px;margin-right:20px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
+			    		<?php 
+			    	} 
+			    	?>
+			    </div>
+			    <?php
+			    $collCnt++; 
+			}
+		}
+		if(isset($occArr['cat'])){
+			$catArr = $occArr['cat'];
+			foreach($catArr as $catid => $catArr){
+				$name = $catArr["name"];
+				unset($catArr["name"]);
+				?>
+				<div style="clear:both;padding:5px;">
+					<div style="float:left;width:50px;height:40px;">
+						<?php 
+						if(isset($catArr["icon"]) && $catArr["icon"]){
+							$cIcon = (substr($catArr["icon"],0,6)=='images'?'../':'').$catArr["icon"]; 
+							?>
+							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" /></a>
+					    	<?php
+						}
+					    ?>
+					    &nbsp;
+					</div>
+					<div style="float:left;width:30px;padding-top:5px;">
+						<input id="cat<?php echo $catid; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $catid; ?>')" /> 
+					</div>
+					<div style="padding-top:6px;">
+			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
+				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>'><?php echo $name; ?></a>
+				    	</span>
+				    	<span style="font-size:75%;">
+				    		<a href = '#' onclick="toggle('cat-<?php echo $catid; ?>');return false;">show all collections</a>
+				    	</span>
+				    </div>
+					<div id="cat-<?php echo $catid; ?>" style="display:none;clear:both;margin:10px 40px;border:1px double black;padding:5px;">
+				    	<?php 
+						foreach($catArr as $collid => $collName2){
+				    		?>
+							<div style="clear:both;padding:5px;height:30px;">
+								<div style="float:left;width:50px;">
+									<?php 
+									if($collName2["icon"]){
+										$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
+										?>
+										<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+											<img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" />
+										</a>
+								    	<?php
+									}
+								    ?>
+								    &nbsp;
+								</div>
+								<div style="float:left;width:30px;padding-top:5px;">
+						    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
+								</div>
+								<div style="float:left;padding-top:6px;">
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+						    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+						    		</a>
+						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+						    			more info
+						    		</a>
+							    </div>
+							</div>
+				    		<?php 
+			    			$collCnt++; 
+				    	}
+				    	?>
+				    </div>
+			    </div>
+				<?php 
+			}
+		}
+	} 
 
+	public function getCollectionList($collIdArr){
+		$retArr = array();
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, cat.catagory '.
+			'FROM omcollections c LEFT JOIN omcollcatlink l ON c.collid = l.collid '.
+			'LEFT JOIN omcollcatagories cat ON l.ccpk = cat.ccpk '.
+			'WHERE c.collid IN('.implode(',',$collIdArr).') ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->collid]['instcode'] = $r->institutioncode;
+			$retArr[$r->collid]['collcode'] = $r->collectioncode;
+			$retArr[$r->collid]['name'] = $r->collectionname;
+			$retArr[$r->collid]['icon'] = $r->icon;
+			$retArr[$r->collid]['catagory'] = $r->catagory;
+		}
+		$rs->free();
+		return $retArr;
+	}
+	
 	public function getOccurVoucherProjects(){
 		$returnArr = Array();
 		$sql = 'SELECT p.projname, cl.clid, cl.name '.
@@ -628,25 +783,43 @@ class OccurrenceManager{
 	}
 	
 	public function getDatasetSearchStr(){
-		$returnStr ="";
+		$retStr ="";
 		if(array_key_exists("surveyid",$this->searchTermsArr)){
-			$returnStr = $this->getSurveyStr();
+			$retStr = $this->getSurveyStr();
 		}
 		else{
-			if(!$this->collectionArr) $this->getCollectionArr();
-			$tempArr = Array();
-			foreach($this->collectionArr as $collId => $fieldArr){
-				if(array_key_exists("isselected",$fieldArr)) $tempArr[] = $fieldArr["institutioncode"];
+			if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
+				$retStr = "All Collections";
 			}
-			sort($tempArr);
-			if(count($this->collectionArr) == count($tempArr)){
-				$returnStr = "All Collections";
+			elseif($this->searchTermsArr['db'] == 'allspec'){
+				$retStr = "All Specimen Collections";
+			}
+			elseif($this->searchTermsArr['db'] == 'allobs'){
+				$retStr = "All Observation Projects";
 			}
 			else{
-				$returnStr = implode("; ",$tempArr);
+				$cArr = explode(';',$this->searchTermsArr['db']);
+				if($cArr[0]){
+					$sql = 'SELECT collid, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
+						'FROM omcollections WHERE collid IN('.$cArr[0].') ORDER BY institutioncode,collectioncode';
+					$rs = $this->conn->query($sql);
+					while($r = $rs->fetch_object()){
+						$retStr .= '; '.$r->instcode;
+					}
+					$rs->free();
+				}
+				if(isset($cArr[1]) && $cArr[1]){
+					$sql = 'SELECT ccpk, catagory FROM omcollcatagories WHERE ccpk IN('.$cArr[1].') ORDER BY catagory';
+					$rs = $this->conn->query($sql);
+					while($r = $rs->fetch_object()){
+						$retStr .= '; '.$r->catagory;
+					}
+					$rs->free();
+				}
+				$retStr = substr($retStr,2);
 			}
 		}
-		return $returnStr;
+		return $retStr;
 	}
 	
 	private function getSurveyStr(){
@@ -690,30 +863,57 @@ class OccurrenceManager{
 
 	private function readRequestVariables(){
 		global $clientRoot;
-		if(array_key_exists("db",$_REQUEST)){
-			$dbs = $_REQUEST["db"];
-			if(is_string($dbs)) $dbs = Array($dbs); 
-		 	$dbStr = "";
-		 	if(in_array("all",$dbs)){
-		 		$dbStr = "all";
-		 		if(array_key_exists('catid',$_REQUEST) && $_REQUEST['catid']){
-		 			$dbStr .= ";catid:".$this->conn->real_escape_string($_REQUEST['catid']);
-		 		}
-		 	}
-		 	else{
-		 		$dbStr = implode(";",$dbs);
-		 	}
-		 	if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
-			setCookie("collsurveyid","",time()-3600,($clientRoot?$clientRoot:'/'));
-			$this->searchTermsArr["db"] = $dbStr;
-		}
-		elseif(array_key_exists("surveyid",$_REQUEST)){
+		//Search will be confinded to a surveyid, collid, catid, or will remain open to all collection
+		if(array_key_exists("surveyid",$_REQUEST)){
+			//Limit by servey id 
 			$surveyidArr = $_REQUEST["surveyid"];
 			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
-		 	$surveyidStr = implode(";",$surveyidArr);
+		 	$surveyidStr = implode(",",$surveyidArr);
 		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,($clientRoot?$clientRoot:'/'));
-			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'));
 			$this->searchTermsArr["surveyid"] = $surveyidStr;
+			//Since survey ID is being searched, clear colldbs
+			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'));
+		}
+		else{
+			//Limit collids and/or catids
+			$dbStr = '';
+			if(array_key_exists("db",$_REQUEST)){
+				$dbs = $_REQUEST["db"];
+				if(is_string($dbs)){
+					$dbStr = $dbs.';';
+				}
+				else{
+					$dbStr = $this->conn->real_escape_string(implode(',',$dbs)).';';
+				}
+				if(strpos($dbStr,'allspec') !== false){
+					$dbStr = 'allspec';
+				}
+				elseif(strpos($dbStr,'allobs') !== false){
+					$dbStr = 'allobs';
+				}
+				elseif(strpos($dbStr,'all') !== false){
+					$dbStr = 'all';
+				}
+			}
+			if(strpos($dbStr,'all') === 'false' && array_key_exists('cat',$_REQUEST)){
+				$catArr = array();
+				$catid = $_REQUEST['cat'];
+				if(is_string($catid)){
+					$catArr = Array($catid);
+				}
+				else{
+					$catArr = $catid;
+				}
+				if(!$dbStr) $dbStr = ';';
+				$dbStr .= $this->conn->real_escape_string(implode(",",$catArr));
+			}
+			
+			if($dbStr){
+				if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
+				$this->searchTermsArr["db"] = $dbStr;
+			}
+			//Since coll IDs are being searched, clear survey ids
+			setCookie("collsurveyid","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);

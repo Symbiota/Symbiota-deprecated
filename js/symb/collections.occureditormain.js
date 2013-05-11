@@ -133,19 +133,9 @@ function fieldChanged(fieldName){
 	document.fullform.submitaction.disabled = false;
 }
 
-function catalogNumberChanged(f){
-	fieldChanged('catalognumber');
-	searchDupesCatalogNumber(f);
-}
-
 function recordNumberChanged(){
 	fieldChanged('recordnumber');
 	autoDupeSearch();
-}
-
-function otherCatalogNumbersChanged(f){
-	fieldChanged('othercatalognumbers');
-	//searchDupesOtherCatalogNumbers(f);
 }
 
 function decimalLatitudeChanged(f){

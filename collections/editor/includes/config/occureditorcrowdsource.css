@@ -350,7 +350,7 @@ body{
 }
 
 #habitatDiv input{
-	width: 400px;
+	width: 95%;
 }
 
 #substrateDiv{
@@ -358,7 +358,7 @@ body{
 }
 
 #substrateDiv input{
-	width: 488px;
+	width: 95%;
 }
 
 #associatedTaxaDiv{
@@ -374,7 +374,7 @@ body{
 }
 
 #occurrenceRemarksDiv input{
-	width: 480px;
+	width: 95%;
 }
 
 #occurrenceRemarksDiv span{

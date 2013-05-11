@@ -689,7 +689,7 @@ class OccurrenceEditorManager {
 		$sql = 'SELECT countryname FROM lkupcountry ORDER BY countryname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[] = $this->cleanOutStr($r->countryname);
+			$retArr[] = $r->countryname;
 		}
 		$rs->free();
 		echo '"'.implode('","',$retArr).'"';

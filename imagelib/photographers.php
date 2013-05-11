@@ -4,12 +4,12 @@ include_once($serverRoot.'/classes/PhotographerManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $phUid = array_key_exists("phuid",$_REQUEST)?$_REQUEST["phuid"]:0;
+$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $limitStart = array_key_exists("lstart",$_REQUEST)?$_REQUEST["lstart"]:0;
 $limitNum = array_key_exists("lnum",$_REQUEST)?$_REQUEST["lnum"]:100;
 $imgCnt = array_key_exists("imgcnt",$_REQUEST)?$_REQUEST["imgcnt"]:0;
 
 $pManager = new PhotographerManager();
-if($phUid) $pManager->setUid($phUid);  
 ?>
 <html>
 <head>
@@ -32,55 +32,59 @@ if($phUid) $pManager->setUid($phUid);
 	?> 
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h1><?php echo $defaultTitle; ?> Photographers</h1>
-		<?php
-		if($phUid){
-			$pArr = $pManager->getPhotographerInfo()
-			?>
-			<div style="margin:20px;font-size:14px;">
-				<div style="font-weight:bold;"><?php echo $pArr['name']; ?> </div>
-				<?php 
-				if($pArr['ispublic']){
-					if($pArr['title']) echo '<div>'.$pArr['title'].'</div>';
-					if($pArr['institution']) echo '<div>'.$pArr['institution'].'</div>';
-					if($pArr['department']) echo '<div>'.$pArr['department'].'</div>';
-					if($pArr['city'] || $pArr['state']){
-						echo '<div>'.$pArr['city'].($pArr['city']?', ':'').$pArr['state'].'&nbsp;&nbsp;'.$pArr['zip'].'</div>';
-					}
-					if($pArr['country']) echo '<div>'.$pArr['country'].'</div>';
-					if($pArr['email']) echo '<div>'.$pArr['email'].'</div>';
-					if($pArr['notes']) echo '<div>'.$pArr['notes'].'</div>';
-					if($pArr['biography']) echo '<div>'.$pArr['biography'].'</div>';
-					if($pArr['url']) echo '<div><a href="'.$pArr['url'].'">'.$pArr['url'].'</a></div>';
-				}
-				else{
-					echo '<div style="margin:10px;font-size:12px;">Photographers details not public</div>';
-				}
+		<?php 
+		if($phUid || $collId){
+			if($phUid){
+				$pArr = $pManager->getPhotographerInfo($phUid)
 				?>
-			</div>
+				<div style="margin:20px;font-size:14px;">
+					<div style="font-weight:bold;"><?php echo $pArr['name']; ?> </div>
+					<?php 
+					if($pArr['ispublic']){
+						if($pArr['title']) echo '<div>'.$pArr['title'].'</div>';
+						if($pArr['institution']) echo '<div>'.$pArr['institution'].'</div>';
+						if($pArr['department']) echo '<div>'.$pArr['department'].'</div>';
+						if($pArr['city'] || $pArr['state']){
+							echo '<div>'.$pArr['city'].($pArr['city']?', ':'').$pArr['state'].'&nbsp;&nbsp;'.$pArr['zip'].'</div>';
+						}
+						if($pArr['country']) echo '<div>'.$pArr['country'].'</div>';
+						if($pArr['email']) echo '<div>'.$pArr['email'].'</div>';
+						if($pArr['notes']) echo '<div>'.$pArr['notes'].'</div>';
+						if($pArr['biography']) echo '<div>'.$pArr['biography'].'</div>';
+						if($pArr['url']) echo '<div><a href="'.$pArr['url'].'">'.$pArr['url'].'</a></div>';
+					}
+					else{
+						echo '<div style="margin:10px;font-size:12px;">Photographers details not public</div>';
+					}
+					?>
+				</div>
+			<?php 
+			}
+			else{
+				echo '<h2>'.$pManager->getCollectionName($collId).'</h2>';
+			}
+			?>
 			<div style="float:right;">
 				<a href="photographers.php">Return to Photographer List</a>
 			</div>
-			<?php 
+			<?php
 			if($imgCnt < 51){
-				echo "<div>Total Image: $imgCnt</div>";
+				echo "<div>Total Images: $imgCnt</div>";
 			}
 			else{
 				echo "<div style='font-weight:bold;'>Images: $limitStart - ".(($limitStart+$limitNum)<$imgCnt?($limitStart+$limitNum):$imgCnt)." of $imgCnt</div>";
 			}
 			echo "<hr />";
-			
-			$imgArr = $pManager->getPhotographerImages($limitStart,$limitNum);
-			if($imgArr){
+			if($imgArr = $pManager->getPhotographerImages($phUid,$collId,$limitStart,$limitNum)){
 				$paginationStr = '<div style="clear:both;">';
 				if($limitStart){
 					$paginationStr .= '<div style="float:left;">';
-					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart - $limitNum).'&lnum='.$limitNum.'">&lt;&lt; Previous Images</a>';
+					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&collid='.$collId.'&imgcnt='.$imgCnt.'&lstart='.($limitStart - $limitNum).'&lnum='.$limitNum.'">&lt;&lt; Previous Images</a>';
 					$paginationStr .= '</div>';
 				}
 				if($imgCnt >= ($limitStart+$limitNum)){
 					$paginationStr .= '<div style="float:right;">';
-					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&imgcnt='.$imgCnt.'&lstart='.($limitStart + $limitNum).'&lnum='.$limitNum.'">';
+					$paginationStr .= '<a href="photographers.php?phuid='.$phUid.'&collid='.$collId.'&imgcnt='.$imgCnt.'&lstart='.($limitStart + $limitNum).'&lnum='.$limitNum.'">';
 					$paginationStr .= 'Next Images &gt;&gt;';
 					$paginationStr .= '</a>';
 					$paginationStr .= '</div>';
@@ -117,12 +121,34 @@ if($phUid) $pManager->setUid($phUid);
 			}			
 		}
 		else{
-			$pList = $pManager->getPhotographerList();
-			foreach($pList as $uid => $pArr){
-				echo '<div>';
-				echo '<a href="photographers.php?phuid='.$uid.'&imgcnt='.$pArr['imgcnt'].'">';
-				echo $pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
-			}
+			?>
+			<div style="float:left;;margin-right:40px;">
+				<h2>Field Image Photographers</h2>
+				<div style="margin-left:15px">
+					<?php 
+					$pList = $pManager->getPhotographerList();
+					foreach($pList as $uid => $pArr){
+						echo '<div>';
+						echo '<a href="photographers.php?phuid='.$uid.'&imgcnt='.$pArr['imgcnt'].'">';
+						echo $pArr['name'].'</a> ('.$pArr['imgcnt'].')</div>';
+					}
+					?>
+				</div>
+			</div>
+			<div style="float:left">
+				<h2>Specimen Images</h2>
+				<div style="margin-left:15px">
+					<?php 
+					$pList = $pManager->getCollectionImageList();
+					foreach($pList as $k => $cArr){
+						echo '<div>';
+						echo '<a href="photographers.php?collid='.$k.'&imgcnt='.$cArr['imgcnt'].'">';
+						echo $cArr['name'].'</a> ('.$cArr['imgcnt'].')</div>';
+					}
+					?>
+				</div>
+			</div>
+			<?php 
 		}
 		?>
 	</div>

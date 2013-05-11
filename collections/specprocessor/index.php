@@ -13,13 +13,13 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
 $specManager;
 if($action == 'Upload ABBYY File'){
-	$specManager = new SpecProcessorAbbyy($logPath);
+	$specManager = new SpecProcessorAbbyy();
 }
 elseif($action == 'Process Images'){
-	$specManager = new SpecProcessorImage($logPath);
+	$specManager = new SpecProcessorImage();
 }
 else{
-	$specManager = new SpecProcessorManager($logPath);
+	$specManager = new SpecProcessorManager();
 }
 
 $specManager->setCollId($collId);
