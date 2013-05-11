@@ -121,25 +121,25 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 						<table style="margin:15px;">
 							<tr>
 								<td>
-									<div style="margin:3px;">
+									<div style="margin:2px;">
 										<b>Country:</b>
 										<input type="text" name="country" onchange="" />
 									</div>
-									<div style="margin:3px;">
+									<div style="margin:2px;">
 										<b>State:</b>
 										<input type="text" name="state" onchange="" />
 									</div>
-									<div style="margin:3px;">
+									<div style="margin:2px;">
 										<b>County:</b>
 										<input type="text" name="county" onchange="" />
 									</div>
-									<div style="margin:3px;">
+									<div style="margin:2px;">
 										<b>Locality:</b>
 										<input type="text" name="locality" onchange="" />
 									</div>
-									<div style="margin:3px;">
-										<input name="excludecult" value="1" type="checkbox" /> 
-										Exclude cultivated species
+									<div style="margin:2px;">
+										<b>Family or Genus:</b>
+										<input type="text" name="taxon" onchange="" />
 									</div>
 									<div style="margin:20px;">
 										<input type="submit" name="submitaction" value="Create SQL Fragment" />
@@ -169,6 +169,10 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 										<div>
 											<input type="checkbox" name="latlngor" value="1" />
 											Include Lat/Long as an "OR" condition
+										</div>
+										<div style="margin:3px;">
+											<input name="excludecult" value="1" type="checkbox" /> 
+											Exclude cultivated species
 										</div>
 									</div>
 								</td>
@@ -273,7 +277,7 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 												<input name="clid" value="<?php echo $clid; ?>" type="hidden" /> 
 												<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
 												<input name="displaymode" value="1" type="hidden" />
-												<input name="usecurrent" value="1" type="checkbox" checked />
+												<input name="usecurrent" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
 												<input name="submitaction" value="Add Vouchers" type="submit" />
 											</form>
 											<?php 

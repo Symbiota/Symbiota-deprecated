@@ -208,7 +208,7 @@ body{
 }
 
 #identificationReferencesDiv input{
-	width:	450px;
+	width: 95%;
 }
 
 #identificationRemarksDiv{
@@ -216,7 +216,7 @@ body{
 }
 
 #identificationRemarksDiv input{
-	width:	500px;
+	width:	95%;
 }
 
 #countryDiv{
@@ -429,7 +429,7 @@ body{
 }
 
 #habitatDiv input{
-	width: 700px;
+	width: 95%;
 }
 
 #substrateDiv{
@@ -437,7 +437,7 @@ body{
 }
 
 #substrateDiv input{
-	width: 688px;
+	width: 95%;
 }
 
 #associatedTaxaDiv{
@@ -446,7 +446,7 @@ body{
 
 #associatedTaxaDiv textarea{
 	height:	15px;
-	width:	620px;
+	width:	95%;
 }
 
 #associatedTaxaDiv img{
@@ -460,7 +460,7 @@ body{
 }
 
 #verbatimAttributesDiv input{
-	width: 680px;
+	width: 95%;
 }
 
 #occurrenceRemarksDiv{
@@ -468,7 +468,7 @@ body{
 }
 
 #occurrenceRemarksDiv input{
-	width: 680px;
+	width: 95%;
 }
 
 #occurrenceRemarksDiv span{
@@ -487,7 +487,7 @@ body{
 }
 
 #dynamicPropertiesDiv input{
-	width: 550px;
+	width: 95%;
 }
 
 #lifeStageDiv{
@@ -631,7 +631,8 @@ body{
 }
 
 #duplicateQuantityDiv{
-	float:left;margin:15px 3px 3px 3px;
+	float:left;
+	margin:3px;
 }
 
 #duplicateQuantityDiv input{

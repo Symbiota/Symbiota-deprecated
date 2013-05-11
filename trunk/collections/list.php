@@ -192,7 +192,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 				$collManager->reset();
 			}
 			elseif($specimenArray){
-			    $collectionArr = $collManager->getCollectionArr();
+			    $collectionArr = $collManager->getCollectionList(array_keys($specimenArray));
 			    ?>
 				<table id="omlisttable" cellspacing="4">
 				<?php 
@@ -203,18 +203,16 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor'])))){
 						$isEditor = true;
 					}
-					$collectionData = $collectionArr[$collId];
-					$instCode1 = $collectionData["institutioncode"];
-					if($collectionData["collectioncode"]) $instCode1 .= ":".$collectionData["collectioncode"];
+					$instCode1 = $collectionArr[$collId]['instcode'];
+					if($collectionArr[$collId]['collcode']) $instCode1 .= ":".$collectionArr[$collId]['collcode'];
 		
-			    	$dispName = $collectionData["collectionname"];
-					$icon = (substr($collectionData["icon"],0,6)=='images'?'../':'').$collectionData["icon"]; 
+					$icon = (substr($collectionArr[$collId]['icon'],0,6)=='images'?'../':'').$collectionArr[$collId]['icon']; 
 			        ?>
 					<tr>
 						<td colspan='4'>
 							<h2>
 								<a href="misc/collprofiles.php?collid=<?php echo $collId; ?>">
-									<?php echo $dispName;?>
+									<?php echo $collectionArr[$collId]['name'];?>
 					        	</a>
 				        	</h2>
 							<hr />
@@ -223,7 +221,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 					<?php 
 			        foreach($specData as $occId => $fieldArr){
 						$instCode2 = "";
-						if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionData["institutioncode"]){
+						if($fieldArr["institutioncode"] && $fieldArr["institutioncode"] != $collectionArr[$collId]['instcode']){
 							$instCode2 = $fieldArr["institutioncode"];
 							if($fieldArr["collectioncode"]) $instCode2 .= ":".$fieldArr["collectioncode"];
 						}

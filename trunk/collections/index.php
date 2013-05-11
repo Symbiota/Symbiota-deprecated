@@ -8,29 +8,17 @@ $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 $collManager = new OccurrenceManager();
 $collManager->reset();
 
-$specArr = Array();
-$obsArr = Array();
-$collList = $collManager->getCollectionArr($catId);
-foreach($collList as $collId => $collObj){
-	$collType = $collObj["colltype"];
-	if(stripos($collType, "specimen") !== false){
-	 	$specArr[$collId]["institutioncode"] = $collObj["institutioncode"];
-	 	$specArr[$collId]["collectionname"] = $collObj["collectionname"];
-	 	$specArr[$collId]["icon"] = $collObj["icon"];
-	}
-	elseif(stripos($collType, "observation") !== false){
-	 	$obsArr[$collId]["institutioncode"] = $collObj["institutioncode"];
-		$obsArr[$collId]["collectionname"] = $collObj["collectionname"];
-	 	$obsArr[$collId]["icon"] = $collObj["icon"];
-	}
-} 
+$collList = $collManager->getFullCollectionList($catId);
+$specArr = (isset($collList['spec'])?$collList['spec']:null);
+$obsArr = (isset($collList['obs'])?$collList['obs']:null);
+
 //$otherCatArr = $collManager->getSurveys();
 $otherCatArr = $collManager->getOccurVoucherProjects();
 //$ownerInstArr = $collManager->getOwnerInstitutions();
 //$specProjArr = $collManager->getSpecProjects();
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!doctype html>
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
@@ -55,37 +43,115 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					document.getElementById("dballcb").checked = true;
 				}
 
-		        document.collections.onkeydown = checkKey;
+				//document.collections.onkeydown = checkKey;
 			});
 		
+			function toggle(target){
+				var ele = document.getElementById(target);
+				if(ele){
+					if(ele.style.display=="none"){
+						ele.style.display="block";
+			  		}
+				 	else {
+				 		ele.style.display="none";
+				 	}
+				}
+				else{
+					var divObjs = document.getElementsByTagName("div");
+				  	for (i = 0; i < divObjs.length; i++) {
+				  		var divObj = divObjs[i];
+				  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
+							if(divObj.style.display=="none"){
+								divObj.style.display="block";
+							}
+						 	else {
+						 		divObj.style.display="none";
+						 	}
+						}
+					}
+				}
+			}
+
 			function selectAll(cb){
 				var boxesChecked = true;
 				if(!cb.checked){
 					boxesChecked = false;
 				}
-				var cName = cb.className;
-				var dbElements = document.getElementsByName("db[]");
-				for(i = 0; i < dbElements.length; i++){
-					var dbElement = dbElements[i];
-					if(dbElement.className == cName){
-						dbElement.checked = boxesChecked;
-					}
-					else{
-						dbElement.checked = false;
+				var f = cb.form;
+				for(var i=0;i<f.length;i++){
+					if(f.elements[i].name == "db[]" || f.elements[i].name == "cat[]") f.elements[i].checked = boxesChecked;
+				}
+			}
+
+			function uncheckAll(f){
+				document.getElementById('dballcb').checked = false;
+				document.getElementById('dballspeccb').checked = false;
+				document.getElementById('dballobscb').checked = false;
+			}
+
+			function selectAllCat(cb,target){
+				var boxesChecked = true;
+				if(!cb.checked){
+					boxesChecked = false;
+				}
+				var childrenEle = document.getElementById(target).children;
+				for(var i=0;i<childrenEle.length;i++){
+					if(childrenEle[i].tagName == "DIV"){
+						var divChildren = childrenEle[i].children;
+						for(var j=0;j<divChildren.length;j++){
+							var divChildren2 = divChildren[j].children;
+							for(var k=0;k<divChildren2.length;k++){
+								if(divChildren2[k].tagName == "INPUT"){
+									divChildren2[k].checked = boxesChecked;
+								}
+							}
+						}
 					}
 				}
 			}
 
-		    function verifyCollForm(f){
-				var dbElements = document.getElementsByName("db[]");
-				for(i = 0; i < dbElements.length; i++){
-					var dbElement = dbElements[i];
-					if(dbElement.checked) return true;
+			function unselectCat(catTarget){
+				var catObj = document.getElementById(catTarget);
+				catObj.checked = false;
+				uncheckAll();
+			}
+
+			function verifyCollForm(f){
+				var formVerified = false;
+				for(var h=0;h<f.length;h++){
+					if(f.elements[h].name == "db[]" && f.elements[h].checked){
+						formVerified = true;
+						break;
+					}
 				}
-			   	alert("Please choose at least one collection!");
-		      	return false;
+				if(!formVerified){
+					alert("Please choose at least one collection!");
+					return false;
+				}
+				else{
+					for(var i=0;i<f.length;i++){
+						if(f.elements[i].name == "cat[]" && f.elements[i].checked){
+							//Uncheck all db input elements within cat div 
+							var childrenEle = document.getElementById('cat-'+f.elements[i].value).children;
+							for(var j=0;j<childrenEle.length;j++){
+								if(childrenEle[j].tagName == "DIV"){
+									var divChildren = childrenEle[j].children;
+									for(var k=0;k<divChildren.length;k++){
+										var divChildren2 = divChildren[k].children;
+										for(var l=0;l<divChildren2.length;l++){
+											if(divChildren2[l].tagName == "INPUT"){
+												divChildren2[l].checked = false;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+		      	return formVerified;
 		    }
-		    
+
 		    function verifyOtherCatForm(f){
 				var dbElements = document.getElementsByName("surveyid[]");
 				for(i = 0; i < dbElements.length; i++){
@@ -107,7 +173,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		            document.collections.submit();
 		        }
 		    }
-		    
 		</script>
 	</head>
 	<body>
@@ -132,195 +197,66 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<h1>Select Collections to be Searched</h1>
+		<h1>Collections to be Searched</h1>
 		<div id="tabs" style="margin:0px;">
 		    <ul>
-		        <?php if($specArr && $obsArr){?>
-		        <li><a href="#specobsdiv">Specimens &amp; Observations</a></li>
-		        <?php }if($specArr){?>
-		        <li><a href="#specimendiv">Specimens</a></li>
-		        <?php }if($obsArr){?>
-		        <li><a href="#observationdiv">Observations</a></li>
-		        <?php }if($otherCatArr){?>
-		        <li><a href="#otherdiv">Federal Units</a></li>
-		        <?php } ?>
+		        <?php 
+				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">Specimens &amp; Observations</a></li>';
+				if($specArr) echo '<li><a href="#specimendiv">Specimens</a></li>';
+				if($obsArr) echo '<li><a href="#observationdiv">Observations</a></li>';
+				if($otherCatArr) echo '<li><a href="#otherdiv">Federal Units</a></li>';
+				?>
 		    </ul>
-			<form name="collections" id="collform" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
 	        <?php 
 	        if($specArr && $obsArr){
 				?>
 				<div id="specobsdiv">
-		        	<div style="margin:0px 0px 10px 30px;">
-		         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this,'specobs');" />
-		         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-		        	</div>
-					<?php
-					$collCnt = 1;
-					foreach($collList as $collId => $collArr){
+					<form name="collform1" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+			        	<div style="margin:0px 0px 10px 30px;">
+			         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
+			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+			        	</div>
+						<?php
+						$collManager->outputFullCollArr($specArr);
+						$collManager->outputFullCollArr($obsArr);
 						?>
-						<div style="clear:both;padding:5px;height:30px;">
-							<div style="float:left;width:50px;">
-								<?php 
-								if($collArr["icon"]){
-									$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"]; 
-									?>
-									<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-										<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
-									</a>
-							    	<?php
-								}
-							    ?>
-							    &nbsp;
-							</div>
-							<div style="float:left;width:30px;padding-top:5px;">
-					    		<input name="db[]" class="specobs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							</div>
-							<div style="float:left;padding-top:6px;">
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
-					    		</a>
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
-					    			more info
-					    		</a>
-						    </div>
-					    	<?php 
-					    	if($collCnt%8 == 4 || (count($collList) < 4 && $collCnt == 1)){ 
-					    		?>
-							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
-						        	<input type="image" src='../images/next.jpg'
-						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-						                onmouseout="javascript:this.src = '../images/next.jpg';"
-						                title="Click button to advance to the next step" />
-						    	</div>
-					    		<?php 
-					    	} 
-					    	?>
-					    </div>
-					    <?php
-					    $collCnt++; 
-					}
-					?>
-					<div style="clear:both;">&nbsp;</div>
+						<div style="clear:both;">&nbsp;</div>
+					</form>
 				</div>
 	        <?php 
 	        }
 	        if($specArr){
 	        	?>
 				<div id="specimendiv">
-		        	<div style="margin:0px 0px 10px 30px;">
-		         		<input name="db[]" class="spec" value='' type="checkbox" onclick="selectAll(this,'spec');" />
-		         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-		        	</div>
-					<?php
-					$collCnt = 1;
-					foreach($specArr as $collId => $collArr){
-						$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
-						?>
-						<div style="clear:both;padding:5px;height:30px;">
-							<div style="float:left;width:50px;">
-								<?php 
-								if($collArr["icon"]){
-									?>
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
-							    	</a>
-							    	<?php
-								} 
-							    ?>
-							    &nbsp;
-							</div>
-							<div style="float:left;width:30px;padding-top:5px;">
-					    		<input name="db[]" class="spec" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							</div>
-							<div style="float:left;padding-top:6px;">
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
-					    		</a>
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
-					    			more info
-					    		</a>
-							</div>
-							<?php 
-							if($collCnt%8 == 4 || (count($specArr) < 4 && $collCnt == 1)){ 
-								?>
-							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
-									<input type="image" src='../images/next.jpg'
-										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-										onmouseout="javascript:this.src = '../images/next.jpg';"
-										title="Click button to advance to the next step" />
-								</div>
-								<?php 
-							} 
-							?>
-				    	</div>
+					<form name="collform2" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+			        	<div style="margin:0px 0px 10px 30px;">
+			         		<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" />
+			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+			        	</div>
 						<?php
-						$collCnt++; 
-					}
-					?>
-					<div style="clear:both;">&nbsp;</div>
+						$collManager->outputFullCollArr($specArr);
+						?>
+						<div style="clear:both;">&nbsp;</div>
+					</form>
 				</div>
 	        	<?php 
 	        }
 	        if($obsArr){
 	        	?>
 				<div id="observationdiv">
-		        	<div style="margin:0px 0px 10px 30px;">
-						<input name="db[]" class="obs" value='' type="checkbox" onclick="selectAll(this,'obs');" />
-						Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-					</div>
-					<?php
-					$collCnt = 1;
-					foreach($obsArr as $collId => $collArr){
-						$collIcon = (substr($collArr["icon"],0,6)=='images'?'../':'').$collArr["icon"];
+					<form name="collform3" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
+			        	<div style="margin:0px 0px 10px 30px;">
+							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" />
+							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+						</div>
+						<?php
+						$collManager->outputFullCollArr($obsArr);
 						?>
-						<div style="clear:both;padding:5px;height:30px;">
-							<div style="float:left;width:50px;">
-								<?php 
-								if($collArr["icon"]){
-									?>
-							    	<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>'>
-							    		<img border="1" width="30" src="<?php echo $collIcon; ?>" style="border:0px;" />
-							    	</a>
-							    	<?php
-								} 
-							    ?>
-							    &nbsp;
-							</div>
-							<div style="float:left;width:30px;padding-top:5px;">
-					    		<input name="db[]" class="obs" value='<?php echo $collId; ?>' type='checkbox' <?php echo (array_key_exists("isselected",$collArr)?"CHECKED":""); ?> /> 
-							</div>
-							<div style="float:left;padding-top:6px;">
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-					    			<?php echo $collArr["collectionname"]." (".$collArr["institutioncode"].")"; ?>
-					    		</a>
-					    		<a href = 'misc/collprofiles.php?collid=<?php echo $collId; ?>' style='font-size:75%;'>
-					    			more info
-					    		</a>
-							</div>
-					    	<?php 
-					    	if($collCnt%8 == 4 || (count($obsArr) < 4 && $collCnt == 1)){ 
-					    		?>
-							    <div style="float:right;width:60px;height:35px;margin-right:20px;">
-						        	<input type="image" src='../images/next.jpg'
-						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-						                onmouseout="javascript:this.src = '../images/next.jpg';"
-						                title="Click button to advance to the next step" />
-								</div>
-								<?php 
-					    	} 
-					    	?>
-					    </div>
-					    <?php
-					    $collCnt++; 
-					}
-					?>
-					<div style="clear:both;">&nbsp;</div>
+						<div style="clear:both;">&nbsp;</div>
+					</form>
 				</div>
 				<?php 
 	        } 
-	        ?>
-			</form>
-			<?php 
 			if($otherCatArr){ 
 				?>
 				<div id="otherdiv">

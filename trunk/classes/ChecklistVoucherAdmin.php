@@ -55,6 +55,16 @@ class ChecklistVoucherAdmin {
 		if($sqlFragArr['locality']){
 			$sqlFrag .= 'AND (o.locality LIKE "%'.$this->cleanInStr($sqlFragArr['locality']).'%") ';
 		}
+		if($sqlFragArr['taxon']){
+			$tStr = $this->cleanInStr($sqlFragArr['taxon']);
+			if(strpos($tStr,'aceae') || strpos($tStr,'idae')){
+				$sqlFrag .= 'AND (o.family LIKE "'.$tStr.'") '; 
+			}
+			else{
+				$sqlFrag .= 'AND (o.sciname LIKE "'.$tStr.'%") ';
+			}
+			
+		}
 		$llStr = '';
 		if($sqlFragArr['latnorth'] && $sqlFragArr['latsouth'] && is_numeric($sqlFragArr['latnorth']) && is_numeric($sqlFragArr['latsouth'])){
 			$llStr .= 'AND (o.decimallatitude BETWEEN '.$sqlFragArr['latsouth'].' AND '.$sqlFragArr['latnorth'].') ';
@@ -65,7 +75,7 @@ class ChecklistVoucherAdmin {
 		}
 		if(array_key_exists('latlngor',$sqlFragArr)) $llStr = 'OR ('.trim(substr($llStr,3)).')';
 		$sqlFrag .= $llStr;
-		if($sqlFragArr['excludecult']){
+		if(isset($sqlFragArr['excludecult']) && $sqlFragArr['excludecult']){
 			$sqlFrag .= 'AND (o.cultivationStatus = 0 OR o.cultivationStatus IS NULL) ';
 		}
 		if($sqlFrag){
