@@ -895,7 +895,7 @@ class OccurrenceManager{
 					$dbStr = 'all';
 				}
 			}
-			if(strpos($dbStr,'all') === 'false' && array_key_exists('cat',$_REQUEST)){
+			if(substr($dbStr,3) != 'all' && array_key_exists('cat',$_REQUEST)){
 				$catArr = array();
 				$catid = $_REQUEST['cat'];
 				if(is_string($catid)){
