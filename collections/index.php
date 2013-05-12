@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
+if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 
 $collManager = new OccurrenceManager();
 $collManager->reset();

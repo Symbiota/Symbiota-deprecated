@@ -895,7 +895,7 @@ class OccurrenceManager{
 					$dbStr = 'all';
 				}
 			}
-			if(substr($dbStr,3) != 'all' && array_key_exists('cat',$_REQUEST)){
+			if(substr($dbStr,0,3) != 'all' && array_key_exists('cat',$_REQUEST)){
 				$catArr = array();
 				$catid = $_REQUEST['cat'];
 				if(is_string($catid)){
@@ -907,7 +907,7 @@ class OccurrenceManager{
 				if(!$dbStr) $dbStr = ';';
 				$dbStr .= $this->conn->real_escape_string(implode(",",$catArr));
 			}
-			
+
 			if($dbStr){
 				if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
 				$this->searchTermsArr["db"] = $dbStr;
