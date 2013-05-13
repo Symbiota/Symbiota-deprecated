@@ -73,6 +73,12 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				}
 			}
 
+			function toggleCat(catid){
+				toggle("minus-"+catid);
+				toggle("plus-"+catid);
+				toggle("cat-"+catid);
+			}
+
 			function selectAll(cb){
 				var boxesChecked = true;
 				if(!cb.checked){
@@ -217,12 +223,27 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				?>
 				<div id="specobsdiv">
 					<form name="collform1" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 30px;">
+			        	<div style="margin:0px 0px 10px 38px;">
 			         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
-						<?php
-						$collManager->outputFullCollArr($specArr);
+					    <div style="float:right;margin:80px 20px 0px 0px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
+				    	<div style="float:left;">
+							<?php $collManager->outputFullCollArr($specArr); ?>	
+						</div>
+						<?php if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; ?>
+					    <div style="float:right;margin:80px 20px 0px 0px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
+						<?php 
 						$collManager->outputFullCollArr($obsArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
@@ -234,10 +255,16 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	        	?>
 				<div id="specimendiv">
 					<form name="collform2" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 30px;">
+			        	<div style="margin:0px 0px 10px 38px;">
 			         		<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
+					    <div style="float:right;margin:80px 20px 0px 0px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
 						<?php
 						$collManager->outputFullCollArr($specArr);
 						?>
@@ -250,10 +277,16 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	        	?>
 				<div id="observationdiv">
 					<form name="collform3" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 30px;">
+			        	<div style="margin:0px 0px 10px 38px;">
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" />
 							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						</div>
+					    <div style="float:right;margin:80px 20px 0px 0px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
 						<?php
 						$collManager->outputFullCollArr($obsArr);
 						?>
