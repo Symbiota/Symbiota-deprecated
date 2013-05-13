@@ -13,6 +13,7 @@ class OccurrenceManager{
 	protected $reset = 0;
 	protected $dynamicClid;
 	private $clName;
+	private $collArrIndex = 0;
 	
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -591,7 +592,7 @@ class OccurrenceManager{
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$collType = (stripos($r->colltype, "observation") !== false?'obs':'spec');
-			if($r->ccpk && $r->ccpk != $catId){
+			if($r->ccpk){
 				if(!isset($retArr[$collType]['cat'][$r->ccpk]['name'])){
 					$retArr[$collType]['cat'][$r->ccpk]['name'] = $r->catagory;
 					//if(in_array($r->ccpk,$catIdArr)) $retArr[$collType]['cat'][$catId]['isselected'] = 1;
@@ -610,23 +611,34 @@ class OccurrenceManager{
 			}
 		}
 		$result->close();
+		//Modify sort so that default catid is first
+		if(isset($retArr['spec']['cat'][$catId])){
+			$targetArr = $retArr['spec']['cat'][$catId];
+			unset($retArr['spec']['cat'][$catId]);
+			array_unshift($retArr['spec']['cat'],$targetArr);
+		} 
+		elseif(isset($retArr['obs']['cat'][$catId])){
+			$targetArr = $retArr['obs']['cat'][$catId];
+			unset($retArr['obs']['cat'][$catId]);
+			array_unshift($retArr['obs']['cat'],$targetArr);
+		}
 		return $retArr;
 	}
-	
-	public function outputFullCollArr($occArr){
+
+	public function outputFullCollArr($occArr,$defaultCatid = 0){
 		$collCnt = 1;
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			foreach($collArr as $collid => $cArr){
 				?>
-				<div style="clear:both;padding:5px;height:30px;">
+				<div style="padding:5px;height:30px;">
 					<div style="float:left;width:50px;">
 						<?php 
 						if($cArr["icon"]){
 							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
 							?>
 							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-								<img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" />
+								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 							</a>
 					    	<?php
 						}
@@ -644,18 +656,6 @@ class OccurrenceManager{
 			    			more info
 			    		</a>
 				    </div>
-			    	<?php 
-			    	if($collCnt%8 == 4 || (count($collArr) < 4 && $collCnt == 1)){ 
-			    		?>
-					    <div style="float:right;width:60px;height:35px;margin-right:20px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
-			    		<?php 
-			    	} 
-			    	?>
 			    </div>
 			    <?php
 			    $collCnt++; 
@@ -666,31 +666,23 @@ class OccurrenceManager{
 			foreach($catArr as $catid => $catArr){
 				$name = $catArr["name"];
 				unset($catArr["name"]);
+				$idStr = $this->collArrIndex.'-'.$catid;
 				?>
-				<div style="clear:both;padding:5px;">
-					<div style="float:left;width:50px;height:40px;">
-						<?php 
-						if(isset($catArr["icon"]) && $catArr["icon"]){
-							$cIcon = (substr($catArr["icon"],0,6)=='images'?'../':'').$catArr["icon"]; 
-							?>
-							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'><img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" /></a>
-					    	<?php
-						}
-					    ?>
-					    &nbsp;
+				<div style="padding:5px;">
+					<div style="float:left;margin:7px;">
+						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
+							<img id="plus-<?php echo $idStr; ?>" src="../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
+						</a>
 					</div>
-					<div style="float:left;width:30px;padding-top:5px;">
-						<input id="cat<?php echo $catid; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $catid; ?>')" /> 
+					<div style="float:left;margin:5px 10px;">
+						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" /> 
 					</div>
 					<div style="padding-top:6px;">
 			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
 				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>'><?php echo $name; ?></a>
 				    	</span>
-				    	<span style="font-size:75%;">
-				    		<a href = '#' onclick="toggle('cat-<?php echo $catid; ?>');return false;">show all collections</a>
-				    	</span>
 				    </div>
-					<div id="cat-<?php echo $catid; ?>" style="display:none;clear:both;margin:10px 40px;border:1px double black;padding:5px;">
+					<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
 				    	<?php 
 						foreach($catArr as $collid => $collName2){
 				    		?>
@@ -701,7 +693,7 @@ class OccurrenceManager{
 										$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
 										?>
 										<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-											<img border="1" width="30" src="<?php echo $cIcon; ?>" style="border:0px;" />
+											<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
 										</a>
 								    	<?php
 									}
@@ -729,6 +721,7 @@ class OccurrenceManager{
 				<?php 
 			}
 		}
+		$this->collArrIndex++;
 	} 
 
 	public function getCollectionList($collIdArr){
