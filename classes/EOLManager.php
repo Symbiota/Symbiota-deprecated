@@ -58,6 +58,7 @@ class EOLManager {
 		while($r = $rs->fetch_object()){
 			$tid = $r->tid;
 			$sciName = $this->cleanOutStr($r->sciname);
+			$sciName = str_replace(array(' subsp. ',' ssp. ',' var. ',' f. '),' ',$sciName);
 			if($this->queryEolIdentifier($tid, $sciName, $makePrimaryLink)){
 				$successCnt++;
 			}
