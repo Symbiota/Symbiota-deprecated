@@ -90,17 +90,19 @@ class TaxaLoaderManager{
 				$parentStr = '';
 				foreach($taxonUnitIndexArr as $index => $rankId){
 					$taxonStr = $recordArr[$index];
-					if($taxonStr && !array_key_exists($taxonStr,$childParentArr)){
-						if($rankId == 10){
-							//For kingdom taxa, parents are themselves
-							$childParentArr[$taxonStr]['p'] = $taxonStr;
-							$childParentArr[$taxonStr]['r'] = $rankId;
-						}
-						elseif($parentStr){
-							$childParentArr[$taxonStr]['p'] = $parentStr;
-							$childParentArr[$taxonStr]['r'] = $rankId;
-							if($rankId > 140 && $familyIndex && $recordArr[$familyIndex]){
-								$childParentArr[$taxonStr]['f'] = $recordArr[$familyIndex];
+					if($taxonStr){
+						if(!array_key_exists($taxonStr,$childParentArr)){
+							if($rankId == 10){
+								//For kingdom taxa, parents are themselves
+								$childParentArr[$taxonStr]['p'] = $taxonStr;
+								$childParentArr[$taxonStr]['r'] = $rankId;
+							}
+							elseif($parentStr){
+								$childParentArr[$taxonStr]['p'] = $parentStr;
+								$childParentArr[$taxonStr]['r'] = $rankId;
+								if($rankId > 140 && $familyIndex && $recordArr[$familyIndex]){
+									$childParentArr[$taxonStr]['f'] = $recordArr[$familyIndex];
+								}
 							}
 						}
 						$parentStr = $taxonStr;
@@ -537,7 +539,7 @@ class TaxaLoaderManager{
 			'WHERE (ut.TID Is Null AND ut.rankid = 10)';
 		$this->conn->query($sql);
 		
-		
+		//Loop through and transfer taxa to taxa table
 		WHILE(($endLoadCnt > 0 || $startLoadCnt <> $endLoadCnt) && $loopCnt < 30){
 			$sql = 'SELECT COUNT(*) AS cnt FROM uploadtaxa';
 			$rs = $this->conn->query($sql);
