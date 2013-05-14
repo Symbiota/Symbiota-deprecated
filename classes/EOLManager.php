@@ -38,7 +38,7 @@ class EOLManager {
 			'ORDER BY initialtimestamp DESC LIMIT 1';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
-			$startingTid = $r->tid;
+			//$startingTid = $r->tid;
 		}
 		$rs->free();
 		//Start mapping taxa
