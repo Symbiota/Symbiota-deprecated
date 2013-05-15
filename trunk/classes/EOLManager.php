@@ -165,7 +165,7 @@ class EOLManager {
 	private function mapEolImages($tid, $identifier){
 		global $eolKey;
 		$retStatus = 0;
-		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=10&vetted=2&details=1 ';
+		$url = 'http://eol.org/api/pages/1.0/'.$identifier.'.json?images=15&vetted=2&details=1 ';
 		//echo $url;
 		if(isset($eolKey) && $eolKey) $url .= '&key='.$eolKey;
 		if($fh = fopen($url, 'r')){

@@ -651,8 +651,6 @@ class TaxaLoaderManager{
 		$sqlHier = 'SELECT ts.tid FROM taxstatus ts WHERE (ts.taxauthid = '.$taxAuthId.') AND (ts.hierarchystr IS NULL)';
 		//echo $sqlHier;
 		$resultHier = $this->conn->query($sqlHier);
-		
-		
 		while($rowHier = $resultHier->fetch_object()){
 			$tid = $rowHier->tid;
 			$parentArr = Array();
@@ -685,8 +683,6 @@ class TaxaLoaderManager{
 			}
 			unset($parentArr);
 		}
-		
-		
 		$resultHier->close();
 	}
 	

@@ -13,7 +13,7 @@ class BuildHierarchy{
 	
 	public function buildNulls(){
 		$conn = $this->getCollection();
-		$sqlHier = "SELECT ts.tid FROM taxstatus ts WHERE ts.hierarchystr IS NULL LIMIT 10000";
+		$sqlHier = "SELECT ts.tid FROM taxstatus ts WHERE ts.hierarchystr IS NULL AND taxauthid = 1 LIMIT 10000";
 		//echo $sqlHier;
 		$resultHier = $conn->query($sqlHier);
 		while($rowHier = $resultHier->fetch_object()){
@@ -22,7 +22,7 @@ class BuildHierarchy{
 			$targetTid = $tid;
 			$parCnt = 0;
 			do{
-				$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE ts.tid = ". $targetTid;
+				$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE  taxauthid = 1 AND ts.tid = ". $targetTid;
 				$targetTid = 0;
 				//echo "<div>".$sqlParents."</div>";
 				$resultParent = $conn->query($sqlParents);
@@ -40,7 +40,7 @@ class BuildHierarchy{
 			
 			//Add hierarchy string to taxa table
 			if($parentArr){
-				$sqlInsert = "UPDATE taxstatus ts SET ts.hierarchystr = '".implode(",",array_reverse($parentArr))."' WHERE ts.tid = ".$tid;
+				$sqlInsert = "UPDATE taxstatus ts SET ts.hierarchystr = '".implode(",",array_reverse($parentArr))."' WHERE taxauthid = 1 AND ts.tid = ".$tid;
 				echo "<div>".$sqlInsert."</div>";
 				$conn->query($sqlInsert);
 			}
