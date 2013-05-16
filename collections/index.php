@@ -233,10 +233,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				                onmouseout="javascript:this.src = '../images/next.jpg';"
 				                title="Click button to advance to the next step" />
 				    	</div>
-				    	<div style="float:left;">
-							<?php $collManager->outputFullCollArr($specArr); ?>	
-						</div>
-						<?php if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; ?>
+						<?php 
+						$collManager->outputFullCollArr($specArr); 
+						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
+						?>
 					    <div style="float:right;margin:80px 20px 0px 0px;">
 				        	<input type="image" src='../images/next.jpg'
 				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
