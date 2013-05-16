@@ -17,7 +17,8 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 }
 
 $dwcaManager = new OccurrenceDwcArchiver();
-if($collId) $dwcaManager->setCollId($collId);
+$dwcaManager->setTargetPath($serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/');
+if($collId) $dwcaManager->setCollArr($collId);
 
 ?>
 <!DOCTYPE html>
@@ -140,7 +141,10 @@ include($serverRoot."/header.php");
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
+			$collArr = $dwcaManager->getCollArr();
+			$dwcaManager->setFileName($collArr[$id]['collcode']);
 			$dwcaManager->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
+			$dwcaManager->writeRssFile();
 			echo '</ul>';
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems($collId)){
@@ -255,7 +259,7 @@ include($serverRoot."/header.php");
 							&nbsp;&nbsp;&nbsp;&nbsp;
 							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/> 
 							<?php 
-							$collArr = $dwcaManager->getCollectionArr();
+							$collArr = $dwcaManager->getCollectionList();
 							foreach($collArr as $k => $v){
 								echo '<input name="coll[]" type="checkbox" value="'.$k.'" />'.$v.'<br/>';
 							}
