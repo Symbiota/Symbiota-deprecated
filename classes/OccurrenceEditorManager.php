@@ -494,6 +494,7 @@ class OccurrenceEditorManager {
 				if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']){
 					$occArr['recordenteredby'] = $paramsArr['un'];
 				}
+				//Apply autoprocessing status if set
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
 				}

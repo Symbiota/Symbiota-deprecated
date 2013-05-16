@@ -1086,9 +1086,9 @@ else{
 															<option value=''>-------------------</option>
 															<?php 
 															foreach($processingStatusArr as $v){
-																//Don't display these options is editor is crowd sourced 
+																//Don't display all options is editor is crowd sourced 
 																if($isEditor || ($v != 'reviewed' && $v != 'closed')){
-																	echo '<option value="'.$v.'" '.($pStatus==$v?'SELECTED':'').'>'.ucwords($v).'</option>';
+																	echo '<option value="'.$v.'" '.($autoPStatus==$v?'SELECTED':'').'>'.ucwords($v).'</option>';
 																}
 															}
 															?>

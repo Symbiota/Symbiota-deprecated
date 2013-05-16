@@ -65,6 +65,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 					<input type="hidden" name="annotatoremail" value="<?php echo $annotatoremail; ?>" />
 					<input type="hidden" name="catalognumber" value="<?php echo $catalognumber; ?>" />
 					<input type="hidden" name="institutioncode" value="<?php echo $institutioncode; ?>" />
+					<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 					<?php 
 					if (isset($_GET['collectioncode']))
 						echo '<input type="hidden" name="collectioncode" value="'.$_GET['collectioncode'].'" />'; 
@@ -174,6 +175,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 								<input type="submit" name="submitaction" value="Submit Determination Edits" />
 							</div>
 						</form>
@@ -182,14 +184,16 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 								<input type="submit" name="submitaction" value="Delete Determination" />
 							</div>
 						</form>
-						<form name="detdelform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to make this the most current determination?');">
+						<form name="detremapform" action="occurrenceeditor.php" method="post" onsubmit="return window.confirm('Are you sure you want to make this the most current determination?');">
 							<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 								<input type="submit" name="submitaction" value="Make Determination Current" /><br/>
 								<input type="checkbox" name="remapimages" value="1" CHECKED /> Remap images to this taxonomic name
 							</div>

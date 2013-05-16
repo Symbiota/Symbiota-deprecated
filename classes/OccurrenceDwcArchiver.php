@@ -4,13 +4,16 @@ include_once($serverRoot.'/config/dbconnection.php');
 class OccurrenceDwcArchiver{
 
 	private $conn;
-	private $collId;
-	private $collectionName;
+
+	private $ts;
+	
 	private $collCode;
 	private $collArr;
-	private $nameTemplate;
+
 	private $targetPath;
+	private $fileName;
 	private $zipArchive;
+	
 	private $logFH;
 	private $silent = 0;
 
@@ -27,7 +30,7 @@ class OccurrenceDwcArchiver{
 
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 
-		$tsStr = time();
+		$this->ts = time();
 
 		$this->occurrenceFieldArr = array(
 			'id' => '',
@@ -140,8 +143,6 @@ class OccurrenceDwcArchiver{
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','coordinatePrecision',
 			'verbatimCoordinates','verbatimCoordinateSystem','georeferenceRemarks',
 			'verbatimLatitude','verbatimLongitude','habitat');
-
-		$this->targetPath = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/';
 	}
 
 	public function __destruct(){
@@ -151,57 +152,64 @@ class OccurrenceDwcArchiver{
 		}
 	}
 
-	public function setCollId($id){
-		if(is_numeric($id)){
-			unset($this->collArr);
-			$this->collArr = array();
-			$this->collId = $id;
-			$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
-				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-				'c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
-				'i.postalcode, i.country, i.phone '.
-				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid '.
-				'WHERE c.collid = '.$id;
-			$rs = $this->conn->query($sql);
-			//echo $sql.'<br/>';
-			if($r = $rs->fetch_object()){
-				$inst = $r->institutioncode;
-				if($r->collectioncode) $inst .= '-'.$r->collectioncode;
-				$this->collCode = $inst;
-				$this->collectionName = htmlspecialchars($r->collectionname);
-				$this->collArr['description'] = htmlspecialchars($r->fulldescription);
-				$this->collArr['url'] = $r->url;
-				$this->collArr['contact'] = htmlspecialchars($r->contact);
-				$this->collArr['email'] = $r->email;
-				$this->collArr['lat'] = $r->latitudedecimal;
-				$this->collArr['lng'] = $r->longitudedecimal;
-				$this->collArr['address1'] = htmlspecialchars($r->address1);
-				$this->collArr['address2'] = htmlspecialchars($r->address2);
-				$this->collArr['city'] = $r->city;
-				$this->collArr['state'] = $r->stateprovince;
-				$this->collArr['postalcode'] = $r->postalcode;
-				$this->collArr['country'] = $r->country;
-				$this->collArr['phone'] = $r->phone;
-			}
-			$rs->free();
-		}
+	public function setTargetPath($tp){
+		$this->targetPath = $tp;
 	}
 
-	public function batchCreateDwca($collIdArr, $includeDets, $includeImgs, $redactLocalities){
-		global $serverRoot;
-		//Create log File
-		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-		$this->logFH = fopen($logFile, 'a');
-		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
-		$this->logOrEcho("\n-----------------------------------------------------\n\n");
-		
-		foreach($collIdArr as $id){
-			$this->setCollId($id);
-			$this->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
-		}
-		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
+	public function setFileName($seed){
+		$this->fileName = $this->conn->real_escape_string($seed).'_DwC-A.zip';
 	}
-	
+
+	public function setCollArr($collTarget){
+		$collTarget = $this->conn->real_escape_string($collTarget);
+		unset($this->collArr);
+		$this->collArr = array();
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
+			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
+			'c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
+			'i.postalcode, i.country, i.phone '.
+			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid ';
+		if($collTarget == 'allspecimens'){
+			$sql .= 'WHERE c.colltype = "Preserved Specimens" ';
+		}
+		elseif($collTarget == 'allobservations'){
+			$sql .= 'WHERE (c.colltype = "Observations" OR c.colltype = "General Observations") ';
+		}
+		elseif($collTarget){
+			$sql .= 'WHERE c.collid IN('.$collTarget.') ';
+		}
+		else{
+			//Don't limit by collection id 
+		}
+		
+		$rs = $this->conn->query($sql);
+		//echo $sql.'<br/>';
+		if($r = $rs->fetch_object()){
+			$inst = $r->institutioncode;
+			if($r->collectioncode) $inst .= '-'.$r->collectioncode;
+			$this->collArr[$r->collid]['collcode'] = $inst;
+			$this->collArr[$r->collid]['collname'] = htmlspecialchars($r->collectionname);
+			$this->collArr[$r->collid]['description'] = htmlspecialchars($r->fulldescription);
+			$this->collArr[$r->collid]['url'] = $r->url;
+			$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
+			$this->collArr[$r->collid]['email'] = $r->email;
+			$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
+			$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
+			$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
+			$this->collArr[$r->collid]['address2'] = htmlspecialchars($r->address2);
+			$this->collArr[$r->collid]['city'] = $r->city;
+			$this->collArr[$r->collid]['state'] = $r->stateprovince;
+			$this->collArr[$r->collid]['postalcode'] = $r->postalcode;
+			$this->collArr[$r->collid]['country'] = $r->country;
+			$this->collArr[$r->collid]['phone'] = $r->phone;
+		}
+		$rs->free();
+	}
+
+	public function getCollArr(){
+		return $this->collArr;
+	}
+
 	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
 		global $serverRoot;
 		if($this->collArr){
@@ -209,16 +217,19 @@ class OccurrenceDwcArchiver{
 				$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
 				$this->logFH = fopen($logFile, 'a');
 			}
-			$this->logOrEcho('Starting to process DwC-A for '.$this->collectionName."\n");
+			$this->logOrEcho('Creating DwC-A file...'."\n");
 			
 			if(!class_exists('ZipArchive')){
 				exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
 			}
 	
-			$archiveFile = $this->targetPath.$this->collCode.'_DwC-A.zip';
+			$archiveFile = $this->targetPath.$this->fileName;
 			if(file_exists($archiveFile)) unlink($archiveFile);
 			$this->zipArchive = new ZipArchive;
-			$this->zipArchive->open($archiveFile, ZipArchive::CREATE);
+			$status = $this->zipArchive->open($archiveFile, ZipArchive::CREATE);
+			if($status !== true){
+				exit('FATAL ERROR: unable to create archive file: '.$status);
+			}
 			//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 			
 			$this->writeMetaFile();
@@ -228,19 +239,17 @@ class OccurrenceDwcArchiver{
 			if($includeImgs) $this->writeImageFile($redactLocalities);
 			$this->zipArchive->close();
 			
-			$this->writeRssFile();
-	
 			//Clean up
-			unlink($this->targetPath.$this->collCode.'-meta.xml');
-			unlink($this->targetPath.$this->collCode.'-eml.xml');
-			unlink($this->targetPath.$this->collCode.'-occur.csv');
-			unlink($this->targetPath.$this->collCode.'-images.csv');
-			unlink($this->targetPath.$this->collCode.'-det.csv');
+			unlink($this->targetPath.$this->ts.'-meta.xml');
+			unlink($this->targetPath.$this->ts.'-eml.xml');
+			unlink($this->targetPath.$this->ts.'-occur.csv');
+			unlink($this->targetPath.$this->ts.'-images.csv');
+			unlink($this->targetPath.$this->ts.'-det.csv');
 	
 			$this->logOrEcho("\n-----------------------------------------------------\n");
 		}
 		else{
-			echo 'ERROR: unable to create DwC-A for collection #'.$this->collId;
+			echo 'ERROR: unable to create DwC-A for collection #'.implode(',',array_keys($this->collArr));
 		}
 	}
 	
@@ -248,7 +257,7 @@ class OccurrenceDwcArchiver{
 		global $charset;
 
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->collCode.'-meta.xml', 'w');
+		$fh = fopen($this->targetPath.$this->ts.'-meta.xml', 'w');
 
 		//Output header 
 		$outStr = '<archive metadata="eml.xml" xmlns="http://rs.tdwg.org/dwc/text/" 
@@ -291,8 +300,8 @@ class OccurrenceDwcArchiver{
 		
 		fwrite($fh,$outStr);
    		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-meta.xml');
-    	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-meta.xml','meta.xml');
+		$this->zipArchive->addFile($this->targetPath.$this->ts.'-meta.xml');
+    	$this->zipArchive->renameName($this->targetPath.$this->ts.'-meta.xml','meta.xml');
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -301,58 +310,59 @@ class OccurrenceDwcArchiver{
 		global $clientRoot, $defaultTitle, $adminEmail;
 
 		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->collCode.'-eml.xml', 'w');
+		$fh = fopen($this->targetPath.$this->ts.'-eml.xml', 'w');
 
 		//Output header 
 		$outStr = '<eml xmlns="eml://ecoinformatics.org/eml-2.1.1" 
 			xmlns:dc="http://purl.org/dc/terms/" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-			xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.0.1/eml.xsd" 
-			packageId="http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'ipt/resource.do?id='.$this->collCode.'/v1">';
-		$outStr .= '<dataset>';
-		$outStr .= '<title xml:lang="eng">'.$this->collectionName.'</title>';
-
-		$outStr .= '<creator>';
-		$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
-		$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
-		$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
-		$outStr .= '</creator>';
-
-		$outStr .= '<metadataProvider>';
-		$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
-		$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
-		$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
-		$outStr .= '</metadataProvider>';
-
-		$outStr .= '<pubDate>'.date("Y-m-d").'</pubDate>';
-		$outStr .= '<language>eng</language>';
-		$outStr .= '<abstract><para>'.$this->collArr['description'].'</para></abstract>';
-		
-		$outStr .= '<contact>';
-		$outStr .= '<individualName>'.$this->collArr['contact'].'</individualName>';
-		$outStr .= '<organizationName>'.$this->collectionName.'</organizationName>';
-		$outStr .= '<address>';
-		$outStr .= '<deliveryPoint>';
-		$outStr .= $this->collArr['address1'];
-		$outStr .= ($this->collArr['address2']?', ':'').$this->collArr['address2'];
-		$outStr .= '</deliveryPoint>';
-		$outStr .= '<city>'.$this->collArr['city'].'</city>';
-		$outStr .= '<administrativeArea>'.$this->collArr['state'].'</administrativeArea>';
-		$outStr .= '<postalCode>'.$this->collArr['postalcode'].'</postalCode>';
-		$outStr .= '<country>'.$this->collArr['country'].'</country>';
-		$outStr .= '</address>';
-		$outStr .= '<phone>'.$this->collArr['phone'].'</phone>';
-		$outStr .= '<electronicMailAddress>'.$this->collArr['email'].'</electronicMailAddress>';
-		$outStr .= '<onlineUrl>'.$this->collArr['url'].'</onlineUrl>';
-		$outStr .= '</contact>';
-
-		$outStr .= '</dataset>';
+			xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.0.1/eml.xsd">';
+		foreach($this->collArr as $collId => $cArr){
+			$outStr .= '<dataset>';
+			$outStr .= '<title xml:lang="eng">'.$cArr['collname'].'</title>';
+	
+			$outStr .= '<creator>';
+			$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
+			$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
+			$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
+			$outStr .= '</creator>';
+	
+			$outStr .= '<metadataProvider>';
+			$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
+			$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
+			$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
+			$outStr .= '</metadataProvider>';
+	
+			$outStr .= '<pubDate>'.date("Y-m-d").'</pubDate>';
+			$outStr .= '<language>eng</language>';
+			$outStr .= '<abstract><para>'.$cArr['description'].'</para></abstract>';
+			
+			$outStr .= '<contact>';
+			$outStr .= '<individualName>'.$cArr['contact'].'</individualName>';
+			$outStr .= '<organizationName>'.$cArr['collname'].'</organizationName>';
+			$outStr .= '<address>';
+			$outStr .= '<deliveryPoint>';
+			$outStr .= $cArr['address1'];
+			$outStr .= ($cArr['address2']?', ':'').$cArr['address2'];
+			$outStr .= '</deliveryPoint>';
+			$outStr .= '<city>'.$cArr['city'].'</city>';
+			$outStr .= '<administrativeArea>'.$cArr['state'].'</administrativeArea>';
+			$outStr .= '<postalCode>'.$cArr['postalcode'].'</postalCode>';
+			$outStr .= '<country>'.$cArr['country'].'</country>';
+			$outStr .= '</address>';
+			$outStr .= '<phone>'.$cArr['phone'].'</phone>';
+			$outStr .= '<electronicMailAddress>'.$cArr['email'].'</electronicMailAddress>';
+			$outStr .= '<onlineUrl>'.$cArr['url'].'</onlineUrl>';
+			$outStr .= '</contact>';
+	
+			$outStr .= '</dataset>';
+		}
 		$outStr .= '</eml>';
 
 		fwrite($fh,$outStr);
    		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-eml.xml');
-    	$this->zipArchive->renameName($this->targetPath.$this->collCode.'-eml.xml','eml.xml');
+		$this->zipArchive->addFile($this->targetPath.$this->ts.'-eml.xml');
+    	$this->zipArchive->renameName($this->targetPath.$this->ts.'-eml.xml','eml.xml');
 
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -360,106 +370,114 @@ class OccurrenceDwcArchiver{
 	private function writeOccurrenceFile($redactLocalities){
 		global $clientRoot;
 		$this->logOrEcho("Creating occurrences.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->collCode.'-occur.csv', 'w');
-		
-		//Output header
-		fputcsv($fh, array_keys($this->occurrenceFieldArr));
-		
-		//Output records
-		$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-			'o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
-			'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
-			'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
-			'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-			'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, '.
-			'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.
-			'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
-			'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
-			'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-			'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
-			'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-			'g.guid AS recordId, o.localitySecurity '.
-			'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
-			'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-			'WHERE c.collid = '.$this->collId.' ORDER BY o.occid'; 
-		//echo $sql;
-		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			while($r = $rs->fetch_assoc()){
-				if($redactLocalities && $r["localitySecurity"] > 0 && !$this->canReadRareSpp){
-					$r["habitat"] = '[Redacted]';
-					$r["locality"] = '[Redacted]';
-					$r["decimalLatitude"] = '[Redacted]';
-					$r["decimalLongitude"] = '[Redacted]';
-					$r["geodeticDatum"] = '[Redacted]';
-					$r["coordinateUncertaintyInMeters"] = '[Redacted]';
-					$r["footprintWKT"] = '[Redacted]';
-					$r["verbatimCoordinates"] = '[Redacted]';
-					$r["verbatimCoordinateSystem"] = '[Redacted]';
-					$r["georeferencedBy"] = '[Redacted]';
-					$r["georeferenceProtocol"] = '[Redacted]';
-					$r["georeferenceSources"] = '[Redacted]';
-					$r["georeferenceVerificationStatus"] = '[Redacted]';
-					$r["georeferenceRemarks"] = '[Redacted]';
-					$r["minimumElevationInMeters"] = '[Redacted]';
-					$r["maximumElevationInMeters"] = '[Redacted]';
-					$r["verbatimElevation"] = '[Redacted]';
-					$r["informationWithheld"] = 'Locality Redacted';
+		if($this->collArr){
+			$fh = fopen($this->targetPath.$this->ts.'-occur.csv', 'w');
+			
+			//Output header
+			fputcsv($fh, array_keys($this->occurrenceFieldArr));
+			
+			//Output records
+			$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
+				'o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
+				'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
+				'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
+				'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
+				'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, '.
+				'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.
+				'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
+				'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
+				'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
+				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
+				'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
+				'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
+				'g.guid AS recordId, o.localitySecurity '.
+				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
+				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ORDER BY o.collid,o.occid'; 
+			//echo $sql;
+			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+				while($r = $rs->fetch_assoc()){
+					if($redactLocalities && $r["localitySecurity"] > 0 && !$this->canReadRareSpp){
+						$r["habitat"] = '[Redacted]';
+						$r["locality"] = '[Redacted]';
+						$r["decimalLatitude"] = '[Redacted]';
+						$r["decimalLongitude"] = '[Redacted]';
+						$r["geodeticDatum"] = '[Redacted]';
+						$r["coordinateUncertaintyInMeters"] = '[Redacted]';
+						$r["footprintWKT"] = '[Redacted]';
+						$r["verbatimCoordinates"] = '[Redacted]';
+						$r["verbatimCoordinateSystem"] = '[Redacted]';
+						$r["georeferencedBy"] = '[Redacted]';
+						$r["georeferenceProtocol"] = '[Redacted]';
+						$r["georeferenceSources"] = '[Redacted]';
+						$r["georeferenceVerificationStatus"] = '[Redacted]';
+						$r["georeferenceRemarks"] = '[Redacted]';
+						$r["minimumElevationInMeters"] = '[Redacted]';
+						$r["maximumElevationInMeters"] = '[Redacted]';
+						$r["verbatimElevation"] = '[Redacted]';
+						$r["informationWithheld"] = 'Locality Redacted';
+					}
+					unset($r['localitySecurity']);
+					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					fputcsv($fh, $this->addcslashesArr($r));
 				}
-				unset($r['localitySecurity']);
-				$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
-				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $this->addcslashesArr($r));
+				$rs->free();
 			}
-			$rs->free();
+			else{
+				$this->logOrEcho("ERROR creating occurrence.csv file: ".$this->conn->error."\n");
+				$this->logOrEcho("\tSQL: ".$sql."\n");
+			}
+	
+			fclose($fh);
+			$this->zipArchive->addFile($this->targetPath.$this->ts.'-occur.csv');
+			$this->zipArchive->renameName($this->targetPath.$this->ts.'-occur.csv','occurrences.csv');
 		}
 		else{
-			$this->logOrEcho("ERROR creating occurrence.csv file: ".$this->conn->error."\n");
-			$this->logOrEcho("\tSQL: ".$sql."\n");
+			$this->logOrEcho("ERROR: collections not defined; occurrences.csv not created\n");
 		}
-
-		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-occur.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-occur.csv','occurrences.csv');
-
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 	
 	private function writeDeterminationFile(){
 		$this->logOrEcho("Creating identifications.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->collCode.'-det.csv', 'w');
-		
-		//Output header
-		fputcsv($fh, array_keys($this->determinationFieldArr));
-		
-		//Output records
-		$sql = 'SELECT d.occid, d.identifiedBy, d.dateIdentified, d.identificationQualifier, d.sciName AS scientificName, '.
-			'd.scientificNameAuthorship, CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus, '. 
-			'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, '. 
-			't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid AS recordId '.
-			'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
-			'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
-			'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
-			'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
-			'WHERE o.collid = '.$this->collId.' ORDER BY o.occid';
-		//echo $sql;
-		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			while($r = $rs->fetch_assoc()){
-				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-				fputcsv($fh, $this->addcslashesArr($r));
+		if($this->collArr){
+			$fh = fopen($this->targetPath.$this->ts.'-det.csv', 'w');
+			
+			//Output header
+			fputcsv($fh, array_keys($this->determinationFieldArr));
+			
+			//Output records
+			$sql = 'SELECT d.occid, d.identifiedBy, d.dateIdentified, d.identificationQualifier, d.sciName AS scientificName, '.
+				'd.scientificNameAuthorship, CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus, '. 
+				'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, '. 
+				't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid AS recordId '.
+				'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
+				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
+				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
+				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
+				'WHERE o.collid IN('.implode(',',array_keys($this->collArr)).') ORDER BY o.collid,o.occid';
+			//echo $sql;
+			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+				while($r = $rs->fetch_assoc()){
+					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					fputcsv($fh, $this->addcslashesArr($r));
+				}
+				$rs->free();
 			}
-			$rs->free();
+			else{
+				$this->logOrEcho("ERROR creating identifications.csv file: ".$this->conn->error."\n");
+				$this->logOrEcho("\tSQL: ".$sql."\n");
+			}
+				
+			fclose($fh);
+			$this->zipArchive->addFile($this->targetPath.$this->ts.'-det.csv');
+			$this->zipArchive->renameName($this->targetPath.$this->ts.'-det.csv','identifications.csv');
 		}
 		else{
-			$this->logOrEcho("ERROR creating identifications.csv file: ".$this->conn->error."\n");
-			$this->logOrEcho("\tSQL: ".$sql."\n");
+			$this->logOrEcho("ERROR: collections not defined; identifications.csv not created\n");
 		}
-			
-		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-det.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-det.csv','identifications.csv');
-
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
@@ -467,93 +485,117 @@ class OccurrenceDwcArchiver{
 		global $clientRoot,$imageDomain;
 
 		$this->logOrEcho("Creating images.csv (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->collCode.'-images.csv', 'w');
-		
-		//Output header
-		fputcsv($fh, array_keys($this->imageFieldArr));
-
-		//Output records
-		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as accessURI, g.guid AS providermanagedid, '. 
-			'o.sciname AS title, IFNULL(i.caption,i.notes) as comments, '.
-			'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
-			'c.rights, "" AS usageterms, c.accessrights AS webstatement, c.initialtimestamp AS metadatadate '.
-			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'INNER JOIN guidimages g ON i.imgid = g.imgid '.
-			'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
-			'WHERE c.collid = '.$this->collId.' ';
-
-		if($redactLocalities && !$this->canReadRareSpp){
-			$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
-		}
-		$sql .= 'ORDER BY o.occid';
-		//echo $sql;
-		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-			$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
-			if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
-			while($r = $rs->fetch_assoc()){
-				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
-				if(stripos($r['rights'],'http://creativecommons.org') === 0){
-					$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
-					$r['webstatement'] = $r['rights'];
-					$r['rights'] = '';
-					if(!$r['usageterms']){
-						if($r['webstatement'] == 'http://creativecommons.org/publicdomain/zero/1.0/'){
-							$r['usageterms'] = 'CC0 1.0 (Public-domain)';
-						}
-						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by/3.0/'){
-							$r['usageterms'] = 'CC BY (Attribution)';
-						}
-						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-sa/3.0/'){
-							$r['usageterms'] = 'CC BY-SA (Attribution-ShareAlike)';
-						}
-						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc/3.0/'){
-							$r['usageterms'] = 'CC BY-NC (Attribution-Non-Commercial)';
-						}
-						elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc-sa/3.0/'){
-							$r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
+		if($this->collArr){
+			$fh = fopen($this->targetPath.$this->ts.'-images.csv', 'w');
+			
+			//Output header
+			fputcsv($fh, array_keys($this->imageFieldArr));
+	
+			//Output records
+			$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as accessURI, g.guid AS providermanagedid, '. 
+				'o.sciname AS title, IFNULL(i.caption,i.notes) as comments, '.
+				'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
+				'c.rights, "" AS usageterms, c.accessrights AS webstatement, c.initialtimestamp AS metadatadate '.
+				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+				'INNER JOIN omcollections c ON o.collid = c.collid '.
+				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
+				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
+				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
+	
+			if($redactLocalities && !$this->canReadRareSpp){
+				$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
+			}
+			$sql .= 'ORDER BY o.occid';
+			//echo $sql;
+			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+				$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
+				if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
+				while($r = $rs->fetch_assoc()){
+					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
+					if(stripos($r['rights'],'http://creativecommons.org') === 0){
+						$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+						$r['webstatement'] = $r['rights'];
+						$r['rights'] = '';
+						if(!$r['usageterms']){
+							if($r['webstatement'] == 'http://creativecommons.org/publicdomain/zero/1.0/'){
+								$r['usageterms'] = 'CC0 1.0 (Public-domain)';
+							}
+							elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by/3.0/'){
+								$r['usageterms'] = 'CC BY (Attribution)';
+							}
+							elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-sa/3.0/'){
+								$r['usageterms'] = 'CC BY-SA (Attribution-ShareAlike)';
+							}
+							elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc/3.0/'){
+								$r['usageterms'] = 'CC BY-NC (Attribution-Non-Commercial)';
+							}
+							elseif($r['webstatement'] == 'http://creativecommons.org/licenses/by-nc-sa/3.0/'){
+								$r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
+							}
 						}
 					}
+					if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
+					$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+					$r['type'] = 'StillImage';
+					$r['subtype'] = 'Photograph';
+					$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
+					if($extStr == 'jpg' || $extStr == 'jpeg'){
+						$r['format'] = 'image/jpeg';
+					}
+					elseif($extStr == 'gif'){
+						$r['format'] = 'image/gif';
+					}
+					elseif($extStr == 'png'){
+						$r['format'] = 'image/png';
+					}
+					elseif($extStr == 'tiff' || $extStr == 'tif'){
+						$r['format'] = 'image/tiff';
+					}
+					else{
+						$r['format'] = '';
+					}
+					$r['metadataLanguage'] = 'en';
+					//Load record array into output file
+					fputcsv($fh, $this->addcslashesArr($r));
 				}
-				if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
-				$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
-				$r['type'] = 'StillImage';
-				$r['subtype'] = 'Photograph';
-				$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
-				if($extStr == 'jpg' || $extStr == 'jpeg'){
-					$r['format'] = 'image/jpeg';
-				}
-				elseif($extStr == 'gif'){
-					$r['format'] = 'image/gif';
-				}
-				elseif($extStr == 'png'){
-					$r['format'] = 'image/png';
-				}
-				elseif($extStr == 'tiff' || $extStr == 'tif'){
-					$r['format'] = 'image/tiff';
-				}
-				else{
-					$r['format'] = '';
-				}
-				$r['metadataLanguage'] = 'en';
-				//Load record array into output file
-				fputcsv($fh, $this->addcslashesArr($r));
+				$rs->free();
 			}
-			$rs->free();
+			else{
+				$this->logOrEcho("ERROR creating images.csv file: ".$this->conn->error."\n");
+				$this->logOrEcho("\tSQL: ".$sql."\n");
+			}
+			
+			fclose($fh);
+			$this->zipArchive->addFile($this->targetPath.$this->ts.'-images.csv');
+			$this->zipArchive->renameName($this->targetPath.$this->ts.'-images.csv','images.csv');
 		}
 		else{
-			$this->logOrEcho("ERROR creating images.csv file: ".$this->conn->error."\n");
-			$this->logOrEcho("\tSQL: ".$sql."\n");
+			$this->logOrEcho("ERROR: collections not defined; images.csv not created\n");
 		}
 		
-		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->collCode.'-images.csv');
-		$this->zipArchive->renameName($this->targetPath.$this->collCode.'-images.csv','images.csv');
-
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
+
+	//DWCA publishing and RSS related functions 
+	public function batchCreateDwca($collIdArr, $includeDets, $includeImgs, $redactLocalities){
+		global $serverRoot;
+		//Create log File
+		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+		$this->logFH = fopen($logFile, 'a');
+		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
+		$this->logOrEcho("\n-----------------------------------------------------\n\n");
+		
+		foreach($collIdArr as $id){
+			$this->setCollArr($id);
+			$this->logOrEcho('Starting DwC-A process for '.$this->collArr[$id]['collcode']."\n");
+			$this->setFileName($this->collArr[$id]['collcode']);
+			$this->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
+		}
+		$this->writeRssFile();
+		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
+	}
 	
-	private function writeRssFile(){
+	public function writeRssFile(){
 		global $defaultTitle, $serverRoot, $clientRoot;
 
 		$this->logOrEcho("Mapping data to RSS feed... \n");
@@ -582,37 +624,39 @@ class OccurrenceDwcArchiver{
 		$languageElem = $newDoc->createElement('language','en-us');
 		$channelElem->appendChild($languageElem);
 
-		//Create new item for target archive and load into array
-		$itemElem = $newDoc->createElement('item');
-		$itemAttr = $newDoc->createAttribute('collid');
-		$itemAttr->value = $this->collId;
-		$itemElem->appendChild($itemAttr);
-		//Add title
-		$title = $this->collCode.' DwC-Archive';
-		$itemTitleElem = $newDoc->createElement('title',$title);
-		$itemElem->appendChild($itemTitleElem);
-		//description
-		$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$this->collectionName);
-		$itemElem->appendChild($descTitleElem);
-		//GUID
-		$guidElem = $newDoc->createElement('guid','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/misc/collprofiles.php?collid='.$this->collId);
-		$itemElem->appendChild($guidElem);
-		//type
-		$typeTitleElem = $newDoc->createElement('type','DWCA');
-		$itemElem->appendChild($typeTitleElem);
-		//recordType
-		$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
-		$itemElem->appendChild($recTypeTitleElem);
-		//link
-		$linkTitleElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$this->collCode.'_DwC-A.zip');
-		$itemElem->appendChild($linkTitleElem);
-		//pubDate
-		$dsStat = stat($this->targetPath.$this->collCode.'_DwC-A.zip');
-		$pubDateTitleElem = $newDoc->createElement('pubDate',date("D, d M Y H:i:s O", $dsStat["mtime"]));
-		$itemElem->appendChild($pubDateTitleElem);
+		//Create new item for target archives and load into array
 		$itemArr = array();
-		$itemArr[$title] = $itemElem;
-		
+		foreach($this->collArr as $collId => $cArr){
+			$itemElem = $newDoc->createElement('item');
+			$itemAttr = $newDoc->createAttribute('collid');
+			$itemAttr->value = $collId;
+			$itemElem->appendChild($itemAttr);
+			//Add title
+			$title = $cArr['collcode'].' DwC-Archive';
+			$itemTitleElem = $newDoc->createElement('title',$title);
+			$itemElem->appendChild($itemTitleElem);
+			//description
+			$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$cArr['collname']);
+			$itemElem->appendChild($descTitleElem);
+			//GUID
+			$guidElem = $newDoc->createElement('guid','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/misc/collprofiles.php?collid='.$collId);
+			$itemElem->appendChild($guidElem);
+			//type
+			$typeTitleElem = $newDoc->createElement('type','DWCA');
+			$itemElem->appendChild($typeTitleElem);
+			//recordType
+			$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
+			$itemElem->appendChild($recTypeTitleElem);
+			//link
+			$linkTitleElem = $newDoc->createElement('link','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.$cArr['collcode'].'_DwC-A.zip');
+			$itemElem->appendChild($linkTitleElem);
+			//pubDate
+			$dsStat = stat($this->targetPath.$cArr['collcode'].'_DwC-A.zip');
+			$pubDateTitleElem = $newDoc->createElement('pubDate',date("D, d M Y H:i:s O", $dsStat["mtime"]));
+			$itemElem->appendChild($pubDateTitleElem);
+			$itemArr[$title] = $itemElem;
+		}
+
 		//Add existing items
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(file_exists($rssFile)){
@@ -623,7 +667,7 @@ class OccurrenceDwcArchiver{
 			foreach($items as $i){
 				//Filter out item for active collection
 				$t = $i->getElementsByTagName("title")->item(0)->nodeValue;
-				if($i->getAttribute('collid') != $this->collId) $itemArr[$t] = $newDoc->importNode($i,true);
+				if(!array_key_exists($i->getAttribute('collid'),$this->collArr)) $itemArr[$t] = $newDoc->importNode($i,true);
 			}
 		}
 
@@ -667,6 +711,9 @@ class OccurrenceDwcArchiver{
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(file_exists($rssFile)){
 			//Get other existing DWCAs by reading and parsing current rss.xml feed and load into array
+			if(!class_exists('DOMDocument')){
+				exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
+			}
 			$xmlDoc = new DOMDocument();
 			$xmlDoc->load($rssFile);
 			$items = $xmlDoc->getElementsByTagName("item");
@@ -709,7 +756,7 @@ class OccurrenceDwcArchiver{
 		$array = $ret;
 	}
 
-	public function getCollectionArr(){
+	public function getCollectionList(){
 		$retArr = array();
 		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode '.
 			'FROM omcollections '.

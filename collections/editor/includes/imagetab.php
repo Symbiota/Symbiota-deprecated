@@ -110,6 +110,7 @@ $imageArr = $occManager->getImageMap();
 					<input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 					<input type="hidden" name="institutioncode" value="<?php echo $instCode; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+					<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 					<input type="submit" name="submitaction" value="Submit New Image" />
 				</div>
 			</fieldset>
@@ -294,6 +295,7 @@ $imageArr = $occManager->getImageMap();
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="submit" name="submitaction" value="Submit Image Edits" />
+										<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 									</div>
 								</fieldset>
 							</form>
@@ -306,6 +308,7 @@ $imageArr = $occManager->getImageMap();
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+										<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 										<div style="margin-left:20px;">
 											(Note: leaving unchecked removes image from database w/o removing from server)
@@ -327,6 +330,7 @@ $imageArr = $occManager->getImageMap();
 											* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
 											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 											<input type="submit" name="submitaction" value="Remap Image" />
 										</div>
 									</fieldset>
