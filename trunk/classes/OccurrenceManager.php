@@ -686,7 +686,7 @@ class OccurrenceManager{
 				    	<?php 
 						foreach($catArr as $collid => $collName2){
 				    		?>
-							<div style="clear:both;padding:5px;height:30px;">
+							<div style="padding:5px;height:30px;">
 								<div style="float:left;width:50px;">
 									<?php 
 									if($collName2["icon"]){
