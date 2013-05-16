@@ -70,7 +70,7 @@ $descr = Array();
 </head>
 <body>
 <?php
-$displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:"true");
+$displayLeftMenu = (isset($taxa_indexMenu)?$taxa_indexMenu:false);
 include($serverRoot.'/header.php');
 if(isset($taxa_indexCrumbs)){
 	echo "<div class='navpath'>";

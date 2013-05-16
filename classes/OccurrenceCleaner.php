@@ -202,6 +202,26 @@ class OccurrenceCleaner {
 		return $status;
 	}
 
+	//Parse, index, and link collector's to Collector table 
+	private function parseCollectorName($inStr){
+		$lastName = "";
+		//Parse last name from collector's name 
+		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
+		$lastNameArr = explode(';',$lastNameArr[0]);
+		$lastNameArr = explode('&',$lastNameArr[0]);
+		$lastNameArr = explode(' and ',$lastNameArr[0]);
+		$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
+		if($match){
+			if(count($match[0]) == 1){
+				$lastName = $match[0][0];
+			}
+			elseif(count($match[0]) > 1){
+				$lastName = $match[0][1];
+			}
+		}
+		
+	}
+
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
