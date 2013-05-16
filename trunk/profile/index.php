@@ -115,10 +115,11 @@ if(isset($profile_indexCrumbs)){
 		<div style='color:#FF0000;margin: 1em 1em 0em 1em;'>
 			<?php 
 			if($statusStr == "badUserId"){
-			   	echo "We do not have a record of your User ID in the database.";
+				echo "Your username or password was incorrect. Please try again.<br />";
+				//echo "We do not have a record of your User ID in the database.";
 			}
 			elseif($statusStr == "badPassword"){
-				echo "Your password was incorrect. Please try again.<br />";
+				echo "Your username or password was incorrect. Please try again.<br />";
 			    echo "Click <a href='index.php?resetpwd=1&login=".$login."'><b>here</b></a> to reset your password.";
 			}
 			else{

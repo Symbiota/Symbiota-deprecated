@@ -97,7 +97,7 @@ function validateAddSpecies(f){
 			if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
 				testTid = cseXmlHttp.responseText;
 				if(testTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data adminitrator to add this species to the Taxonomic Thesaurus.");
+					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data administrator to add this species to the Taxonomic Thesaurus.");
 				}
 				else{
 					f.tidtoadd.value = testTid;

@@ -84,16 +84,16 @@ class ProfileManager{
         	return "success";
         }
         else{
-                //Check and see why authentication failed
-        	$sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.email, ul.password '.
+			//Check and see why authentication failed
+			$sqlStr = 'SELECT u.uid, u.firstname, u.lastname, u.email, ul.password '.
             	'FROM userlogin ul INNER JOIN users u ON ul.uid = u.uid '.
 				'WHERE (ul.username = "'.$this->con->real_escape_string($userNameStr).'")';
-            //echo $sqlStr;
-	        $result = $this->con->query($sqlStr);
+			//echo $sqlStr;
+			$result = $this->con->query($sqlStr);
 			if($row = $result->fetch_object()){
-                    return 'badPassword';
-	        }
-                return 'badUserId';
+				return 'badPassword';
+			}
+			return 'badUserId';
         }
     }
     
