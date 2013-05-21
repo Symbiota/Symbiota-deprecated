@@ -35,7 +35,7 @@ if($qryArr){
 			//sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
-				Custom Field 1: 
+				Custom Field: 
 				<select name="q_customfield1">
 					<option value="">Select Field Name</option>
 					<option value="">---------------------------------</option>
@@ -47,8 +47,10 @@ if($qryArr){
 				</select>
 				<select name="q_customtype1">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType1=='LIKE'?'SELECTED':''); ?>>LIKE</option>
-					<option <?php echo ($qCustomType1=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
+					<option <?php echo ($qCustomType1=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+					<option <?php echo ($qCustomType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+					<option <?php echo ($qCustomType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
 				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
 			</div>

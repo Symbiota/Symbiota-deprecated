@@ -305,12 +305,12 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=130402" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=130521" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=130402" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=130521" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($cssArr)){
 			foreach($cssArr as $cssVal){
@@ -341,10 +341,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130423"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130423"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130423"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130423"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130521"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130521"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130521"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130521"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -531,8 +531,8 @@ else{
 												if($crowdSourceMode){
 													?>
 													<div style="float:right;margin:-7px 10px 0px 0px;font-weight:bold;">
-														<span id="longtagspan" style="cursor:pointer;" onclick="toggleCsMode(0);return false;">Long</span>
-														<span id="shorttagspan" style="cursor:pointer;display:none;" onclick="toggleCsMode(1);return false;">Short</span>
+														<span id="longtagspan" style="cursor:pointer;" onclick="toggleCsMode(0);return false;">Long Form</span>
+														<span id="shorttagspan" style="cursor:pointer;display:none;" onclick="toggleCsMode(1);return false;">Short Form</span>
 													</div>
 													<?php
 												} 
@@ -1064,10 +1064,10 @@ else{
 										</fieldset>
 										<?php 
 										if($navStr){
-											echo '<div style="float:right;margin-right:20px;">'.$navStr.'</div>'."\n";
+											//echo '<div style="float:right;margin-right:20px;">'.$navStr.'</div>'."\n";
 										}
 										?>
-										<div style="padding:10px;clear:both;">
+										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 											<input type="hidden" name="userid" value="<?php echo $paramsArr['un']; ?>" />
@@ -1075,8 +1075,19 @@ else{
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<?php 
 											if($occId){ 
+												if($isEditor && !$crowdSourceMode){ 
+													?>
+													<div style="float:right;">
+														<fieldset style="padding:15px;background-color:lightyellow;">
+															<legend><b>Additional Options</b></legend>
+															<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+															<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
+														</fieldset>
+													</div>
+													<?php
+												} 
 												?>
-												<div style="margin:15px 30px;float:left;">
+												<div style="margin:15px 30px;">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
 													<br/>
 													<?php 
@@ -1095,31 +1106,17 @@ else{
 															}
 															?>
 														</select>
-														<br/>
 														<?php
 													}
-													?>
-													<input type="hidden" name="editedfields" value="" />
-													<?php 
 													if($occIndex !== false){
 														?>
 														<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 														<?php 
 													}
 													?>
+													<input type="hidden" name="editedfields" value="" />
 												</div>
 												<?php
-												if($isEditor && !$crowdSourceMode){ 
-													?>
-													<div style="float:left;margin-left:200px;">
-														<fieldset style="padding:15px;background-color:lightyellow;">
-															<legend><b>Options</b></legend>
-															<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
-															<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
-														</fieldset>
-													</div>
-													<?php
-												} 
 											}
 											else{
 												?>

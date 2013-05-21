@@ -335,8 +335,8 @@ class OccurrenceEditorManager {
 			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
 			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
 			$cv = (array_key_exists('cv'.$x,$this->qryArr)?$this->qryArr['cv'.$x]:'');
-			if($cf && ($cv || $ct == 'IS NULL')){
-				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr')){
+			if($cf){
+				if($cf == 'ocrFragment' && !strpos($sqlWhere,'rawstr') && $cv){
 					//Used when OCR frag comes from custom field search within basic query form 
 					if(strpos($cv,'%') !== false){
 						$sqlWhere .= 'AND (ocr.rawstr LIKE "'.$cv.'") ';
@@ -345,10 +345,13 @@ class OccurrenceEditorManager {
 						$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$cv.'%") ';
 					}
 				}
-				elseif($ct=='IS NULL'){
+				elseif($ct=='NULL'){
 					$sqlWhere .= 'AND (o.'.$cf.' IS NULL) ';
 				}
-				elseif($ct=='LIKE'){
+				elseif($ct=='NOTNULL'){
+					$sqlWhere .= 'AND (o.'.$cf.' IS NOT NULL) ';
+				}
+				elseif($ct=='LIKE' && $cv){
 					if(strpos($cv,'%') !== false){
 						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'") ';
 					}
@@ -356,7 +359,15 @@ class OccurrenceEditorManager {
 						$sqlWhere .= 'AND (o.'.$cf.' LIKE "%'.$cv.'%") ';
 					}
 				}
-				else{
+				elseif($ct=='STARTS' && $cv){
+					if(strpos($cv,'%') !== false){
+						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'") ';
+					}
+					else{
+						$sqlWhere .= 'AND (o.'.$cf.' LIKE "'.$cv.'%") ';
+					}
+				}
+				elseif($cv){
 					$sqlWhere .= 'AND (o.'.$cf.' = "'.$cv.'") ';
 				}
 			}
@@ -369,7 +380,7 @@ class OccurrenceEditorManager {
 		//echo $sqlWhere;
 		$this->sqlWhere = $sqlWhere;
 	}
-	
+
 	public function getQueryRecordCount($reset = 0){
 		global $clientRoot;
 		if(!$reset && array_key_exists('rc',$this->qryArr)) return $this->qryArr['rc'];
