@@ -22,7 +22,7 @@ function toggleCoordDiv(){
 
 function toggleCsMode(modeId){
 	if(modeId == 1){
-		document.getElementById("editorCssLink").href = "../../css/occureditorcrowdsource.css";
+		document.getElementById("editorCssLink").href = "includes/config/occureditorcrowdsource.css";
 		document.getElementById("longtagspan").style.display = "block";
 		document.getElementById("shorttagspan").style.display = "none";
 	}

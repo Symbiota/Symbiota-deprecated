@@ -151,8 +151,10 @@ if($qryArr){
 				</select>
 				<select name="q_customtype1">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType1=='LIKE'?'SELECTED':''); ?>>LIKE</option>
-					<option <?php echo ($qCustomType1=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
+					<option <?php echo ($qCustomType1=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+					<option <?php echo ($qCustomType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+					<option <?php echo ($qCustomType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
 				<input name="q_customvalue1" type="text" value="<?php echo $qCustomValue1; ?>" style="width:200px;" />
 				<a href="#" onclick="toggleCustomDiv2();return false;">
@@ -172,8 +174,10 @@ if($qryArr){
 				</select>
 				<select name="q_customtype2">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType2=='LIKE'?'SELECTED':''); ?>>LIKE</option>
-					<option <?php echo ($qCustomType2=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
+					<option <?php echo ($qCustomType2=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+					<option <?php echo ($qCustomType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+					<option <?php echo ($qCustomType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
 				<input name="q_customvalue2" type="text" value="<?php echo $qCustomValue2; ?>" style="width:200px;" />
 				<a href="#" onclick="toggleCustomDiv3();return false;">
@@ -193,8 +197,10 @@ if($qryArr){
 				</select>
 				<select name="q_customtype3">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType3=='LIKE'?'SELECTED':''); ?>>LIKE</option>
-					<option <?php echo ($qCustomType3=='IS NULL'?'SELECTED':''); ?>>IS NULL</option>
+					<option <?php echo ($qCustomType3=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType3=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+					<option <?php echo ($qCustomType3=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+					<option <?php echo ($qCustomType3=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 				</select>
 				<input name="q_customvalue3" type="text" value="<?php echo $qCustomValue3; ?>" style="width:200px;" />
 			</div>
