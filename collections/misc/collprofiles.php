@@ -176,12 +176,12 @@ if($collId) $collData = $collManager->getCollectionData();
 						?>
 						<li>
 							<a href="../editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
-								Add a New Occurrence Record
+								Add New Occurrence Record
 							</a>
 						</li>
 						<li>
 							<a href="../editor/occurrenceeditor.php?collid=<?php echo $collId; ?>">
-								Edit an Existing Occurrence Record
+								Edit Existing Occurrence Records
 							</a>
 						</li>
 						<li>

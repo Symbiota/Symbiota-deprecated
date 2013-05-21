@@ -108,7 +108,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 	</script>
 	<script type="text/javascript">
 		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
-		var clid = <?php echo $clid; ?>;
+		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=130330"></script>
 	<style type="text/css">

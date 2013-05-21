@@ -55,20 +55,20 @@ class OccurrenceEditorManager {
 
 	public function getCollMap(){
 		if(!$this->collMap){
-			if($this->collId || $this->occid){
+			$sqlWhere = '';
+			if($this->collId){
+				$sqlWhere .= 'WHERE (c.collid = '.$this->collId.')';
+			}
+			elseif($this->occid){
+				$sqlWhere .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
+					'WHERE (o.occid = '.$this->occid.')';
+			}
+			if($sqlWhere){
 				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.colltype, c.managementtype '.
-					'FROM omcollections c ';
-				if($this->collId){
-					$sql .= 'WHERE (c.collid = '.$this->collId.')';
-				}
-				elseif($this->occid){
-					$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
-						'WHERE (o.occid = '.$this->occid.')';
-				}
+					'FROM omcollections c '.$sqlWhere;
 				$rs = $this->conn->query($sql);
 				if($row = $rs->fetch_object()){
 					$this->collMap['collid'] = $row->collid;
-					!$this->collId = $row->collid;
 					$this->collMap['collectionname'] = $this->cleanOutStr($row->collectionname);
 					$this->collMap['institutioncode'] = $row->institutioncode;
 					$this->collMap['collectioncode'] = $row->collectioncode;
@@ -362,7 +362,8 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($this->crowdSourceMode) $sqlWhere .= 'AND q.reviewstatus = 0 ';
-		if($this->collId) $sqlWhere = 'WHERE (o.collid = '.$this->collId.') '.$sqlWhere;
+		if($this->collId) $sqlWhere .= 'AND (o.collid = '.$this->collId.') ';
+		if($sqlWhere) $sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		if($sqlOrderBy) $sqlWhere .= 'ORDER BY '.substr($sqlOrderBy,1).' ';
 		$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
 		//echo $sqlWhere;
@@ -413,7 +414,7 @@ class OccurrenceEditorManager {
 
 	private function setOccurArr(){
 		$retArr = Array();
-		$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
+		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
 		if($this->occid){
 			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
