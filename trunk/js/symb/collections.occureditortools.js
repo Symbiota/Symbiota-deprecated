@@ -201,9 +201,9 @@ function insertLatLng(f) {
 				if(vcStr != ""){
 					vcStr = vcStr + "; ";
 				}
-				var dmsStr = latDeg + "° " + latMin + "' ";
+				var dmsStr = latDeg + "&deg; " + latMin + "' ";
 				if(latSec > 0) dmsStr += latSec + "'' ";
-				dmsStr += latNS + "  " + lngDeg + "° " + lngMin + "' ";
+				dmsStr += latNS + "  " + lngDeg + "&deg; " + lngMin + "' ";
 				if(lngSec) dmsStr += lngSec + "'' ";
 				dmsStr += lngEW;
 				f.verbatimcoordinates.value = vcStr + dmsStr;

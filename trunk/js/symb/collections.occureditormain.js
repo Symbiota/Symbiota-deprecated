@@ -261,9 +261,9 @@ function parseVerbatimCoordinates(f){
 			}
 		}
 		//Check to see if there are embedded lat/lng
-		if(latDec || lngDec){
-			var llEx1 = /(\d{1,2})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([NS]{1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([EW]{1})/i 
-			var llEx2 = /(\d{1,2})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([NS]{1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([EW]{1})/i 
+		if(!latDec || !lngDec){
+			var llEx1 = /(\d{1,2})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([NS]{0,1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([EW]{0,1})/i 
+			var llEx2 = /(\d{1,2})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([NS]{0,1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([EW]{0,1})/i 
 			if(extractArr = llEx1.exec(verbCoordStr)){
 				var latDeg = parseInt(extractArr[1]);
 				var latMin = parseInt(extractArr[2]);
@@ -297,9 +297,9 @@ function parseVerbatimCoordinates(f){
 				}
 				//Convert to decimal format
 				latDec = latDeg+(latMin/60)+(latSec/3600);
-				lngDec = lngDeg+(lngMin/60)+(lngSec/3600);
+				lngDec = -1*(lngDeg+(lngMin/60)+(lngSec/3600));
 				if(extractArr[4] == "S" || extractArr[4] == "s") latDec = latDec*-1;
-				if(extractArr[8] == "W" || extractArr[8] == "w") lngDec = lngDec*-1;
+				if(extractArr[8] == "E" || extractArr[8] == "e") lngDec = lngDec*-1;
 			}
 			else if(extractArr = llEx2.exec(verbCoordStr)){
 				var latDeg = parseInt(extractArr[1]);
@@ -324,7 +324,7 @@ function parseVerbatimCoordinates(f){
 				}
 				//Convert to decimal format
 				latDec = latDeg+(latMin/60);
-				lngDec = lngDeg+(lngMin/60);
+				lngDec = -1*(lngDeg+(lngMin/60));
 				if(extractArr[3] == "S" || extractArr[3] == "s") latDec = latDec*-1;
 				if(extractArr[6] == "W" || extractArr[6] == "w") lngDec = lngDec*-1;
 			}
@@ -335,6 +335,9 @@ function parseVerbatimCoordinates(f){
 			f.decimallongitude.value = Math.round(lngDec*1000000)/1000000;
 			decimalLatitudeChanged(f);
 			decimalLongitudeChanged(f);
+		}
+		else{
+			alert("Unable to parse coordinates");
 		}
 	}
 }
@@ -518,7 +521,7 @@ function verifyDecimalLongitude(f){
 						if(currentState){
 							sValue = sValue.toLowerCase();
 							currentState = currentState.toLowerCase();
-							if(currentState.indexOf(sValue) == -1) alert("Is State accurate? Coordiantes map to: "+cValue+", "+sValue+" Click globe symbol to display coordinates in map.");
+							if(currentState.indexOf(sValue) == -1) alert("Are coordinates accurate? They currently map to: "+cValue+", "+sValue+" Click globe symbol to display coordinates in map.");
 						}
 						else{
 							f.stateprovince.value = sValue;

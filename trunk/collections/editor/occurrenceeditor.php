@@ -60,15 +60,15 @@ if($symbUid){
 	if($occId) $occManager->setOccId($occId); 
 	if($collId) $occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
-	if($occId && !$collId) $collId = $collMap['collid'];
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+	if($occId && !$collId && !$crowdSourceMode) $collId = $collMap['collid'];
+	if($isAdmin || ($collId && array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
-	if($collMap['colltype']=='General Observations') $isGenObs = 1;
+	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 
 	//Bring in config variables
 	if($isGenObs){
-	if(file_exists('includes/config/occurVarGenObs'.$symbUid.'.php')){
+		if(file_exists('includes/config/occurVarGenObs'.$symbUid.'.php')){
 			//Specific to particular collection
 			include('includes/config/occurVarGenObs'.$symbUid.'.php');
 		}
@@ -78,7 +78,7 @@ if($symbUid){
 		}
 	}
 	else{
-		if(file_exists('includes/config/occurVarColl'.$collId.'.php')){
+		if($collId && file_exists('includes/config/occurVarColl'.$collId.'.php')){
 			//Specific to particular collection
 			include('includes/config/occurVarColl'.$collId.'.php');
 		}
@@ -86,7 +86,7 @@ if($symbUid){
 			//Specific to Default values for portal
 			include('includes/config/occurVarDefault.php');
 		}
-		if($crowdSourceMode){
+		if($crowdSourceMode && file_exists('includes/config/crowdSourceVar.php')){
 			//Specific to Crowdsourcing
 			include('includes/config/crowdSourceVar.php');
 		}
@@ -235,6 +235,7 @@ if($symbUid){
 		if($oArr){
 			if(!$occId) $occId = $occManager->getOccId(); 
 			$occArr = $oArr[$occId];
+			if(!$collMap) $collMap = $occManager->getCollMap();
 		}
 	}
 	elseif($goToMode == 2){
@@ -485,10 +486,11 @@ else{
 										
 										$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).'&sciname='.urlencode($occArr['sciname']).
 											'&annotatorname='.urlencode($userDisplayName).'&annotatoremail='.urlencode($userEmail).
-											($collMap['collectioncode']?'&collectioncode='.urlencode($collMap['collectioncode']):'').
-											'&institutioncode='.urlencode($collMap['institutioncode']).'&catalognumber='.urlencode($occArr['catalognumber']);
+											(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
+											(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'').
+											'&catalognumber='.urlencode($occArr['catalognumber']);
 										
-										$imgVars = '&tid='.$occArr['tidinterpreted'].'&instcode='.urlencode($collMap['institutioncode']);
+										$imgVars = '&tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
 										?>
 										<li id="detTab">
 											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&'.$detVars; ?>" 

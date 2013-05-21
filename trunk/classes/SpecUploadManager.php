@@ -1092,8 +1092,8 @@ class SpecUploadManager{
 				if($vCoord) $vCoord .= '; ';
 				$vCoord .= (stripos($recMap['trstownship'],'t') === false?'T':'').$recMap['trstownship'].' ';
 				$vCoord .= (stripos($recMap['trsrange'],'r') === false?'R':'').$recMap['trsrange'].' ';
-				$vCoord .= (stripos($recMap['trssection'],'s') === false?'sec':'').$recMap['trssection'].' ';
-				$vCoord .= $recMap['trssectiondetails'];
+				if(isset($recMap['trssection'])) $vCoord .= (stripos($recMap['trssection'],'s') === false?'sec':'').$recMap['trssection'].' ';
+				if(isset($recMap['trssectiondetails'])) $vCoord .= $recMap['trssectiondetails'];
 				$recMap['verbatimcoordinates'] = trim($vCoord);
 			}
 			
