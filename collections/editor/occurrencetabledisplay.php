@@ -160,12 +160,7 @@ else{
 			</div>
 			<?php 
 			if(!$recArr) $displayQuery = 1;
-			if($crowdSourceMode){
-				include 'includes/queryformcrowdsource.php';
-			}
-			else{
-				include 'includes/queryform.php';
-			}
+			include 'includes/queryform.php';
 			//Setup header map
 			if($recArr){
 				$headerArr = array();

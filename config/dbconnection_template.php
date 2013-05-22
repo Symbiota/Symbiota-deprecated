@@ -27,7 +27,7 @@ class MySQLiConnectionFactory {
                 if(mysqli_connect_errno()){
 					throw new Exception('Could not connect to any databases! Please try again later.');
                 }
-				if (isset($charset) && $charset == 'UTF-8') {
+				if(isset($charset) && $charset == 'UTF-8') {
 					if(!$connection->set_charset($server['charset'])){
 						throw new Exception('Error loading character set utf8: '.$mysqli->error);
 					}

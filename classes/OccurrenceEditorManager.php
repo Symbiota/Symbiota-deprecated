@@ -393,7 +393,7 @@ class OccurrenceEditorManager {
 			if($obPos = strpos($sqlWhere,' LIMIT ')){
 				$sqlWhere = substr($sqlWhere,0,$obPos);
 			}
-			$sql = 'SELECT COUNT(o.occid) AS reccnt FROM omoccurrences o ';
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS reccnt FROM omoccurrences o ';
 			if(strpos($sqlWhere,'ocr.rawstr') !== false){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid INNER JOIN specprocessorrawlabels ocr ON i.imgid = ocr.imgid ';
 			}
