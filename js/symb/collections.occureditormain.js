@@ -298,8 +298,8 @@ function parseVerbatimCoordinates(f){
 				//Convert to decimal format
 				latDec = latDeg+(latMin/60)+(latSec/3600);
 				lngDec = lngDeg+(lngMin/60)+(lngSec/3600);
-				if(extractArr[4] == "S" || extractArr[4] == "s") latDec = latDec*-1;
-				if(extractArr[8] == "E" || extractArr[8] == "e" || lngDec > 0) lngDec = lngDec*-1;
+				if((extractArr[4] == "S" || extractArr[4] == "s") && latDec > 0) latDec = latDec*-1;
+				if(lngDec > 0 && extractArr[8] != "E" && extractArr[8] != "e") lngDec = lngDec*-1;
 			}
 			else if(extractArr = llEx2.exec(verbCoordStr)){
 				var latDeg = parseInt(extractArr[1]);
@@ -324,9 +324,9 @@ function parseVerbatimCoordinates(f){
 				}
 				//Convert to decimal format
 				latDec = latDeg+(latMin/60);
-				lngDec = -1*(lngDeg+(lngMin/60));
-				if(extractArr[3] == "S" || extractArr[3] == "s") latDec = latDec*-1;
-				if(extractArr[6] == "W" || extractArr[6] == "w") lngDec = lngDec*-1;
+				lngDec = lngDeg+(lngMin/60);
+				if((extractArr[3] == "S" || extractArr[3] == "s") && latDec > 0) latDec = latDec*-1;
+				if(lngDec > 0 && extractArr[6] != "E" && extractArr[6] != "e") lngDec = lngDec*-1;
 			}
 		}
 
