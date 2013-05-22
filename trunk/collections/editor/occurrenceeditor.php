@@ -368,12 +368,7 @@ else{
 		}
 		if($occId || $crowdSourceMode || ($isEditor && $collId)){
 			if(!$occArr && !$goToMode) $displayQuery = 1;
-			if($crowdSourceMode){
-				include 'includes/queryformcrowdsource.php';
-			}
-			else{
-				include 'includes/queryform.php';
-			}
+			include 'includes/queryform.php';
 			?>
 			<div id="navDiv">
 				<?php

@@ -29,113 +29,146 @@ if($qryArr){
 	$qCustomField3 = (array_key_exists('cf3',$qryArr)?$qryArr['cf3']:'');
 	$qCustomType3 = (array_key_exists('ct3',$qryArr)?$qryArr['ct3']:'');
 	$qCustomValue3 = (array_key_exists('cv3',$qryArr)?$qryArr['cv3']:'');
+	$qOcrFrag = (array_key_exists('ocr',$qryArr)?$qryArr['ocr']:'');
 }
 ?>
 <div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
 	<form name="queryform" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return verifyQueryForm(this)">
 		<fieldset style="padding:5px;">
 			<legend><b>Record Search Form</b></legend>
-			<div style="margin:2px;">
-				<span title="Full name of collector as entered in database. To search just on last name, place the wildcard character (%) before name (%Gentry).">
-					Collector: 
-					<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
-				</span>
-				<span style="margin-left:25px;">Number:</span>
-				<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-					<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
-				</span>
-				<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
-					Date: 
-					<input type="text" name="q_eventdate" value="<?php echo $qEventDate; ?>" style="width:160px" />
-				</span>
-			</div>
+			<?php 
+			if(!$crowdSourceMode){
+				?>
+				<div style="margin:2px;">
+					<span title="Full name of collector as entered in database. To search just on last name, place the wildcard character (%) before name (%Gentry).">
+						Collector: 
+						<input type="text" name="q_recordedby" value="<?php echo $qRecordedBy; ?>" />
+					</span>
+					<span style="margin-left:25px;">Number:</span>
+					<span title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
+						<input type="text" name="q_recordnumber" value="<?php echo $qRecordNumber; ?>" style="width:120px;" />
+					</span>
+					<span style="margin-left:15px;" title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
+						Date: 
+						<input type="text" name="q_eventdate" value="<?php echo $qEventDate; ?>" style="width:160px" />
+					</span>
+				</div>
+				<?php 
+			}
+			?>
 			<div style="margin:2px;">
 				Catalog Number: 
 				<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
 					<input type="text" name="q_identifier" value="<?php echo $qIdentifier; ?>" />
 				</span>
-				<span style="margin-left:25px;">Other Catalog Numbers:</span> 
-				<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-					<input type="text" name="q_othercatalognumbers" value="<?php echo $qOtherCatalogNumbers; ?>" />
-				</span>
-			</div>
-			<div style="margin:2px;">
-				<?php
-				if($isGenObs && $isAdmin){
+				<?php 
+				if($crowdSourceMode){
 					?>
-					<span style="margin-right:25px;">
-						<input type="checkbox" name="q_observeruid" value="<?php echo $symbUid; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
-						Only My Records
+					<span style="margin-left:25px;">OCR Fragment:</span> 
+					<span title="Search for term embedded within OCR block of text">
+						<input type="text" name="q_ocrfrag" value="<?php echo $qOcrFrag; ?>" style="width:200px;" />
 					</span>
 					<?php 
 				}
 				else{
 					?>
-					<input type="hidden" name="q_observeruid" value="<?php echo $isGenObs?$symbUid:''; ?>" />
-					<?php 
+					<span style="margin-left:25px;">Other Catalog Numbers:</span> 
+					<span title="Separate multiples by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
+						<input type="text" name="q_othercatalognumbers" value="<?php echo $qOtherCatalogNumbers; ?>" />
+					</span>
+					<?php
 				}
 				?>
-				<span style="margin-right:15px;<?php echo ($isGenObs?'display:none':''); ?>">
-					Entered by: 
-					<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
-				</span>
-				<span title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
-					Date entered: 
-					<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
-				</span>
-				<span style="margin-left:15px;">Status:</span> 
-				<select name="q_processingstatus">
-					<option value=''>All Records</option>
-					<option>-------------------</option>
-					<option value="unprocessed" <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
-						Unprocessed
-					</option>
-					<option value="unprocessed/OCR" <?php echo ($qProcessingStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
-						Unprocessed/OCR 
-					</option>
-					<option  value="unprocessed/NLP" <?php echo ($qProcessingStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
-						Unprocessed/NLP
-					</option>
-					<option value="stage 1" <?php echo ($qProcessingStatus=='stage 1'?'SELECTED':''); ?>>
-						Stage 1
-					</option>
-					<option value="stage 2" <?php echo ($qProcessingStatus=='stage 2'?'SELECTED':''); ?>>
-						Stage 2
-					</option>
-					<option value="stage 3" <?php echo ($qProcessingStatus=='stage 3'?'SELECTED':''); ?>>
-						Stage 3
-					</option>
-					<option value="pending duplicate" <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
-						Pending Duplicate
-					</option>
-					<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
-						Pending Review
-					</option>
-					<option value="expert required" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
-						Expert Required
-					</option>
-					<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
-						Reviewed
-					</option>
-					<option value="closed" <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
-						Closed
-					</option>
-				</select>
 			</div>
 			<?php 
-			$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By',
-				'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks',
-				'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status','associatedCollectors'=>'Associated Collectors',
-				'verbatimEventDate'=>'Verbatim Event Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
-				'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
-				'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol',
-				'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
-				'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
-				'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates','georeferencedBy'=>'Georeferenced By',
-				'georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
-				'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
-				'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-				'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment');
+			if(!$crowdSourceMode){
+				?>
+				<div style="margin:2px;">
+					<?php
+					if($isGenObs && $isAdmin){
+						?>
+						<span style="margin-right:25px;">
+							<input type="checkbox" name="q_observeruid" value="<?php echo $symbUid; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
+							Only My Records
+						</span>
+						<?php 
+					}
+					else{
+						?>
+						<input type="hidden" name="q_observeruid" value="<?php echo $isGenObs?$symbUid:''; ?>" />
+						<?php 
+					}
+					?>
+					<span style="margin-right:15px;<?php echo ($isGenObs?'display:none':''); ?>">
+						Entered by: 
+						<input type="text" name="q_enteredby" value="<?php echo $qEnteredBy; ?>" />
+					</span>
+					<span title="Enter ranges separated by ' - ' (space before and after dash required), e.g.: 2002-01-01 - 2003-01-01">
+						Date entered: 
+						<input type="text" name="q_datelastmodified" value="<?php echo $qDateLastModified; ?>" style="width:160px" />
+					</span>
+					<span style="margin-left:15px;">Status:</span> 
+					<select name="q_processingstatus">
+						<option value=''>All Records</option>
+						<option>-------------------</option>
+						<option value="unprocessed" <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
+							Unprocessed
+						</option>
+						<option value="unprocessed/OCR" <?php echo ($qProcessingStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
+							Unprocessed/OCR 
+						</option>
+						<option  value="unprocessed/NLP" <?php echo ($qProcessingStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
+							Unprocessed/NLP
+						</option>
+						<option value="stage 1" <?php echo ($qProcessingStatus=='stage 1'?'SELECTED':''); ?>>
+							Stage 1
+						</option>
+						<option value="stage 2" <?php echo ($qProcessingStatus=='stage 2'?'SELECTED':''); ?>>
+							Stage 2
+						</option>
+						<option value="stage 3" <?php echo ($qProcessingStatus=='stage 3'?'SELECTED':''); ?>>
+							Stage 3
+						</option>
+						<option value="pending duplicate" <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
+							Pending Duplicate
+						</option>
+						<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
+							Pending Review
+						</option>
+						<option value="expert required" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
+							Expert Required
+						</option>
+						<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
+							Reviewed
+						</option>
+						<option value="closed" <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
+							Closed
+						</option>
+					</select>
+				</div>
+				<?php
+			}
+			$advFieldArr = array();
+			if($crowdSourceMode){
+				$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','othercatalognumbers'=>'Other Catalog Numbers',
+					'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality',
+					'recordedby'=>'Collector','recordnumber'=>'Collector Number','eventdate'=>'Collection Date');
+			}
+			else{
+				$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By',
+					'identificationReferences'=>'Identification References','identificationRemarks'=>'Identification Remarks',
+					'identificationQualifier'=>'Identification Qualifier','typeStatus'=>'Type Status','associatedCollectors'=>'Associated Collectors',
+					'verbatimEventDate'=>'Verbatim Event Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
+					'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
+					'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex','individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol',
+					'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
+					'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
+					'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates','georeferencedBy'=>'Georeferenced By',
+					'georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
+					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
+					'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
+					'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition','ocrFragment'=>'OCR Fragment');
+			}
 			//sort($advFieldArr);
 			?>
 			<div style="margin:2px 0px;">
@@ -151,7 +184,7 @@ if($qryArr){
 				</select>
 				<select name="q_customtype1">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType1=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
 					<option <?php echo ($qCustomType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
 					<option <?php echo ($qCustomType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
@@ -174,7 +207,7 @@ if($qryArr){
 				</select>
 				<select name="q_customtype2">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType2=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
 					<option <?php echo ($qCustomType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
 					<option <?php echo ($qCustomType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
@@ -197,7 +230,7 @@ if($qryArr){
 				</select>
 				<select name="q_customtype3">
 					<option>EQUALS</option>
-					<option <?php echo ($qCustomType3=='STARTS'?'STARTS':''); ?> value="STARTS">STARTS WITH</option>
+					<option <?php echo ($qCustomType3=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
 					<option <?php echo ($qCustomType3=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
 					<option <?php echo ($qCustomType3=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
 					<option <?php echo ($qCustomType3=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
@@ -205,27 +238,30 @@ if($qryArr){
 				<input name="q_customvalue3" type="text" value="<?php echo $qCustomValue3; ?>" style="width:200px;" />
 			</div>
 			<?php 
-			$qryStr = '';
-			if($qRecordedBy) $qryStr .= '&recordedby='.$qRecordedBy;
-			if($qRecordNumber) $qryStr .= '&recordnumber='.$qRecordNumber;
-			if($qEventDate) $qryStr .= '&eventdate='.$qEventDate;
-			if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
-			if($qOtherCatalogNumbers) $qryStr .= '&othercatalognumbers='.$qOtherCatalogNumbers;
-			if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
-			if($qObserverUid) $qryStr .= '&observeruid='.$qObserverUid;
-			if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
-			if($qryStr){
-				?>
-				<div style="float:right;margin-top:10px;" title="Go to Label Printing Module">
-					<a href="../datasets/index.php?collid=<?php echo $collId.$qryStr; ?>">
-						<img src="../../images/list.png" style="width:15px;" />
-					</a>
-				</div>
-				<?php 
+			if(!$crowdSourceMode){
+				$qryStr = '';
+				if($qRecordedBy) $qryStr .= '&recordedby='.$qRecordedBy;
+				if($qRecordNumber) $qryStr .= '&recordnumber='.$qRecordNumber;
+				if($qEventDate) $qryStr .= '&eventdate='.$qEventDate;
+				if($qIdentifier) $qryStr .= '&identifier='.$qIdentifier;
+				if($qOtherCatalogNumbers) $qryStr .= '&othercatalognumbers='.$qOtherCatalogNumbers;
+				if($qEnteredBy) $qryStr .= '&recordenteredby='.$qEnteredBy;
+				if($qObserverUid) $qryStr .= '&observeruid='.$qObserverUid;
+				if($qDateLastModified) $qryStr .= '&datelastmodified='.$qDateLastModified;
+				if($qryStr){
+					?>
+					<div style="float:right;margin-top:10px;" title="Go to Label Printing Module">
+						<a href="../datasets/index.php?collid=<?php echo $collId.$qryStr; ?>">
+							<img src="../../images/list.png" style="width:15px;" />
+						</a>
+					</div>
+					<?php 
+				}
 			}
 			?>
 			<div style="margin:5px 120px 5px 0px;float:right;">
 				<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+				<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 				<input type="hidden" name="occid" value="" />
 				<input type="hidden" name="occindex" value="0" />
 				<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />

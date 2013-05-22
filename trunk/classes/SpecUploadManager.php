@@ -1041,13 +1041,13 @@ class SpecUploadManager{
 					}
 				}
 				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
-				if(!strpos($vCoord,$no)) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
+				if(!($no && strpos($vCoord,$no))) $recMap['verbatimcoordinates'] = ($vCoord?$vCoord.'; ':'').$zo.' '.$ea.'E '.$no.'N';
 			}
 			//Transfer verbatim Lat/Long to verbatim coords
 			if((isset($recMap['verbatimlatitude']) && $recMap['verbatimlatitude']) || (isset($recMap['verbatimlongitude']) && $recMap['verbatimlongitude'])){
 				//Attempt to extract decimal lat/long
 				if(!array_key_exists('decimallatitude',$recMap) || !$recMap['decimallatitude']){
-					$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude']);
+					$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'],'LL');
 					if($coordArr){
 						if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
 						if(array_key_exists('lng',$coordArr)) $recMap['decimallongitude'] = $coordArr['lng'];
@@ -1056,7 +1056,7 @@ class SpecUploadManager{
 				//Place into verbatim coord field
 				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
-				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].' '.$recMap['verbatimlongitude'];
+				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
 			}
 			//Transfer DMS to verbatim coords
 			if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
@@ -1538,7 +1538,7 @@ class SpecUploadManager{
 		$latDeg = 'null';$latMin = 0;$latSec = 0;$latNS = 'N';
 		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
-		if($target != 'UTM'){
+		if(!$target || $target == 'LL'){
 			if(preg_match('/(-*\d+\.+\d+)([NSns]{0,1})\s*(-*\d+\.+\d+)([EWew]{0,1})/i',$inStr,$m)){
 				//Decimal degree format
 				$retArr['lat'] = $m[1];
@@ -1596,7 +1596,7 @@ class SpecUploadManager{
 				}
 			}
 		}
-		if($target != 'LL' && !$retArr){
+		if((!$target && !$retArr) || $target == 'UTM'){
 			//UTM parsing 
 			if(preg_match('/\D*(\d{1,2}\D{0,1})\s*(\d{6,7})E\s*(\d{7})N/i',$inStr,$m)){
 				$z = $m[1];
