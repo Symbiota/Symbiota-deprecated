@@ -189,13 +189,13 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa SET AcceptedStr = replace(AcceptedStr,"  "," ") WHERE AcceptedStr LIKE "%  %"';
 		$this->conn->query($sql);
-		echo 'Done!</li>';
 		
 		//Value if only a Source Id was supplied
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceAcceptedId = u2.sourceId '.
 			'SET u.AcceptedStr = u2.scinameinput '.
 			'WHERE u.sourceAcceptedId IS NOT NULL AND u2.sourceId IS NOT NULL AND u.AcceptedStr IS NULL';
 		$this->conn->query($sql);
+		echo 'Done!</li>';
 		
 		//Insert into uploadtaxa table all accepted taxa not already present in scinameinput. If they turn out to be in taxa table, they will be deleted later 
 		echo '<li style="margin-left:10px;">Appending accepted taxa not present in scinameinput... ';
@@ -337,7 +337,7 @@ class TaxaLoaderManager{
 		flush();
 		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceParentId = u2.sourceId '.
 			'SET u1.family = u2.sciname '.
-			'WHERE u2.rankid = 140 AND u1.family is null ';
+			'WHERE u2.sourceId IS NOT NULL AND u1.sourceParentId IS NOT NULL AND u2.rankid = 140 AND u1.family is null ';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname '.
 			'SET u1.family = u2.family '.
@@ -345,7 +345,7 @@ class TaxaLoaderManager{
 		$this->conn->query($sql);
 		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.sourceAcceptedId = u2.sourceId) '.
 			'SET u1.family = u2.family '.
-			'WHERE u1.family IS NULL AND u2.family IS NOT NULL ';
+			'WHERE u1.sourceAcceptedId IS NOT NULL AND  u2.sourceId IS NOT NULL AND u1.family IS NULL AND u2.family IS NOT NULL ';
 		$this->conn->query($sql);
 		$sql = 'UPDATE (uploadtaxa u1 INNER JOIN uploadtaxa u2 ON u1.unitname1 = u2.sciname) '.
 			'INNER JOIN uploadtaxa u3 ON u2.sourceParentId = u3.sourceId '.

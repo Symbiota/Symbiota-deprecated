@@ -6,14 +6,16 @@ class MySQLiConnectionFactory {
             'host' => 'localhost',
             'username' => '',
             'password' => '',
-            'database' => ''
+            'database' => '',
+			'charset' => ''		//utf8, latin1, latin2, etc
         ),
         array(
             'type' => 'write',
             'host' => 'localhost',
             'username' => '',
             'password' => '',
-            'database' => ''
+            'database' => '',
+        	'charset' => ''
         )
     );
 
@@ -27,15 +29,14 @@ class MySQLiConnectionFactory {
                 if(mysqli_connect_errno()){
 					throw new Exception('Could not connect to any databases! Please try again later.');
                 }
-				if(isset($charset) && $charset == 'UTF-8') {
+				if(isset($server['charset']) && $server['charset']) {
 					if(!$connection->set_charset($server['charset'])){
-						throw new Exception('Error loading character set utf8: '.$mysqli->error);
+						throw new Exception('Error loading character set '.$server['charset'].': '.$mysqli->error);
 					}
-				}    
+				}
                 return $connection;
             }
         }
     }
 }
-	
 ?>
