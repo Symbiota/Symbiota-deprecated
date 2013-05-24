@@ -1097,6 +1097,15 @@ class SpecUploadManager{
 				$recMap['verbatimcoordinates'] = trim($vCoord);
 			}
 			
+			//Check to see if evelation are valid numeric values
+			if((isset($recMap['minimumelevationinmeters']) && !is_numeric($recMap['minimumelevationinmeters'])) || (isset($recMap['maximumelevationinmeters']) && !is_numeric($recMap['maximumelevationinmeters']))){
+				$vStr = $recMap['verbatimelevation'];
+				if(isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters']) $vStr .= ($vStr?'; ':'').$recMap['minimumelevationinmeters'];
+				if(isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters']) $vStr .= '-'.$recMap['maximumelevationinmeters'];
+				$recMap['verbatimelevation'] = $vStr;
+				$recMap['minimumelevationinmeters'] = '';
+				$recMap['maximumelevationinmeters'] = '';
+			}
 			//Verbatim elevation
 			if(array_key_exists('verbatimelevation',$recMap) && $recMap['verbatimelevation'] && (!array_key_exists('minimumelevationinmeters',$recMap) || !$recMap['minimumelevationinmeters'])){
 				$eArr = $this->parseVerbatimElevation($recMap['verbatimelevation']);
@@ -1704,6 +1713,10 @@ class SpecUploadManager{
 			$retArr['minelev'] = (round($m[1]*.3048));
 			$retArr['maxelev'] = (round($m[2]*.3048));
 		}
+		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*f$/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+			$retArr['maxelev'] = (round($m[2]*.3048));
+		}
 		elseif(preg_match("/(\d+)\s*-\s*(\d+)\s*\'$/",$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 			$retArr['maxelev'] = (round($m[2]*.3048));
@@ -1715,6 +1728,9 @@ class SpecUploadManager{
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
 		elseif(preg_match('/(\d+)\s*ft/i',$inStr,$m)){
+			$retArr['minelev'] = (round($m[1]*.3048));
+		}
+		elseif(preg_match('/(\d+)\s*f/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
 		elseif(preg_match("/(\d+)\s*\'/",$inStr,$m)){
