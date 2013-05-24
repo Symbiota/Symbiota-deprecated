@@ -1,6 +1,8 @@
 <?php 
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecUploadManager.php');
+header("Content-Type: text/html; charset=".$charset);
+
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $uploadType = array_key_exists("uploadtype",$_REQUEST)?$_REQUEST["uploadtype"]:0;

@@ -1552,7 +1552,7 @@ class SpecUploadManager{
 				//DMS format
 				$latDeg = $m[1];
 				$latMin = $m[2];
-				$leftOver = trim($m[3]);
+				$leftOver = str_replace("''",'"',trim($m[3]));
 				//Grab lat NS and lng EW
 				if(stripos($inStr,'N') === false && strpos($inStr,'S') !== false){
 					$latNS = 'S';
