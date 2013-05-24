@@ -1561,7 +1561,7 @@ class SpecUploadManager{
 					$lngEW = 'E';
 				}
 				//Grab lat sec
-				if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
+				if(preg_match('/^(\d{1,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
 					$latSec = $m[1];
 					if(count($m)>2){
 						$leftOver = trim($m[2]);
@@ -1573,7 +1573,7 @@ class SpecUploadManager{
 					$lngMin = $m[2];
 					$leftOver = trim($m[3]);
 					//Grab lng sec
-					if(preg_match('/(\d{0,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
+					if(preg_match('/^(\d{1,2}\.{0,1}\d*)["s]{1}(.*)/i',$leftOver,$m)){
 						$lngSec = $m[1];
 						if(count($m)>2){
 							$leftOver = trim($m[2]);
