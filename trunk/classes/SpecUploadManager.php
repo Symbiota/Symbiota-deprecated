@@ -1098,8 +1098,9 @@ class SpecUploadManager{
 			}
 			
 			//Check to see if evelation are valid numeric values
-			if((isset($recMap['minimumelevationinmeters']) && !is_numeric($recMap['minimumelevationinmeters'])) || (isset($recMap['maximumelevationinmeters']) && !is_numeric($recMap['maximumelevationinmeters']))){
-				$vStr = $recMap['verbatimelevation'];
+			if((isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters'] && !is_numeric($recMap['minimumelevationinmeters'])) 
+				|| (isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters'] && !is_numeric($recMap['maximumelevationinmeters']))){
+				$vStr = (isset($recMap['verbatimelevation'])?$recMap['verbatimelevation']:'');
 				if(isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters']) $vStr .= ($vStr?'; ':'').$recMap['minimumelevationinmeters'];
 				if(isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters']) $vStr .= '-'.$recMap['maximumelevationinmeters'];
 				$recMap['verbatimelevation'] = $vStr;
@@ -1701,39 +1702,11 @@ class SpecUploadManager{
 		elseif(preg_match('/(\d+)\s*m$/i',$inStr,$m)){
 			$retArr['minelev'] = $m[1];
 		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*feet/i',$inStr,$m)){
+		elseif(preg_match('/(\d+)[fet\']{,4}\s*-\s*(\d+)\s{,1}[f\']{1}/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 			$retArr['maxelev'] = (round($m[2]*.3048));
 		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*ft./i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-			$retArr['maxelev'] = (round($m[2]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*ft$/i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-			$retArr['maxelev'] = (round($m[2]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*-\s*(\d+)\s*f$/i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-			$retArr['maxelev'] = (round($m[2]*.3048));
-		}
-		elseif(preg_match("/(\d+)\s*-\s*(\d+)\s*\'$/",$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-			$retArr['maxelev'] = (round($m[2]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*feet/i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*ft./i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*ft/i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-		}
-		elseif(preg_match('/(\d+)\s*f/i',$inStr,$m)){
-			$retArr['minelev'] = (round($m[1]*.3048));
-		}
-		elseif(preg_match("/(\d+)\s*\'/",$inStr,$m)){
+		elseif(preg_match('/(\d+)\s*[f\']{1}/i',$inStr,$m)){
 			$retArr['minelev'] = (round($m[1]*.3048));
 		}
 		//Clean
