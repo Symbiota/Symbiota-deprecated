@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v2004 rel. 4 U (http://www.xmlspy.com) by Mark Jackson (Royal Botanic Gardens) -->
+<!--3 February 2005-->
+<!-- NB: This is the second version of the Aluka specimen schema, produced as aresult of feedback at the January 2005 Capetown meeting -->
+<!--/xml-->
+<xs:schema elementFormDefault="qualified" attributeFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="DataSet">
+		<xs:annotation>
+			<xs:documentation>A batch of data consisting of metadata about the batch and then a series of unit (specimen) records</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="InstitutionCode" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Code, preferably from the Index Herbariorum, to identify the data source. Mandatory.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="InstitutionName" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Name of the data source. Mandatory.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="DateSupplied" type="xs:date">
+					<xs:annotation>
+						<xs:documentation>Date that the file was created, in ISO 8601 yyyy-mm-dd format. Must be complete date. Mandatory.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="PersonName" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Name or identifier which would be useful in tracing the datafile back to source. Mandatory.</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Unit" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>One or more specimens.</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="UnitID" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>A unique identifier for the specimen within the dataset. Preferably the barcode. Mandatory.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="DateLastModified" type="xs:date">
+								<xs:annotation>
+									<xs:documentation>The date which the unit was last modified, in ISO 8601 yyyy-mm-dd format. Must be complete date. Mandatory.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Identification" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>One or more identifications that have been applied to the unit. The attribute  StoredUnderName is provided to identify the name the specimen is stored under. </xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Family" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>Family name. Mandatory.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="GenusQualifier" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Qualifier expressing e.g. doubt, applied before the genus. For example, cf. Optional.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Genus" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>Genus name, preferably in lowercasewith initial capital, e.g. Quercus. Mandatory.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="SpeciesQualifier" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Qualifier expressing e.g. doubt, applied before the species. For example, cf. Optional.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Species" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>Species epithet,preferably in lowercase. Mandatory - enter "Not on sheet" if unknown. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Author" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>Author string including parentheses, 'ex' designations etc. and  - where relevant - year of publication. Preferably standardised according to IPNI. Mandatory - enter "Not on sheet" if unknown. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Infra-specificRank" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The infra-specific rank, e.g. 'var. or subsp. Mandatory if applicable.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Infra-specificEpithet" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>The infra-specific epithet, preferably in lowercase. Mandatory if applicable. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Infra-specificAuthor" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Author string including parentheses, 'ex' designations etc. and  - where relevant - year of publication. Preferably standardised according to IPNI. Mandatory if applicable.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="PlantNameCode" type="xs:string" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Code for plant name specified in identification which is meaningful to supplier of dataset. Potentially useful should Aluka be able to provide feedback, e.g. based on comparison to G-PRE checklist. Optional.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Identifier" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>The Person who made the identification. Mandatory - enter "Not on sheet" if unknown. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="IdentificationDate" type="Date">
+											<xs:annotation>
+												<xs:documentation>Mandatory. </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="TypeStatus">
+											<xs:annotation>
+												<xs:documentation>Type status of specimen for given name. Mandatory. Where the specimen is not a type for the given name, or there is no evidence to say this, record a dash '-'. Where the specimen is known to be a type, but the typified name is not known, the type status should be recorded under UnitTypeStatus at a higher level within the Unit. </xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="Holotype"/>
+													<xs:enumeration value="Epitype"/>
+													<xs:enumeration value="Isoepitype"/>
+													<xs:enumeration value="Lectotype"/>
+													<xs:enumeration value="Isolectotype"/>
+													<xs:enumeration value="Neotype"/>
+													<xs:enumeration value="Isoneotype"/>
+													<xs:enumeration value="Paratype"/>
+													<xs:enumeration value="Isoparatype"/>
+													<xs:enumeration value="Syntype"/>
+													<xs:enumeration value="Isosyntype"/>
+													<xs:enumeration value="Isotype"/>
+													<xs:enumeration value="Type"/>
+													<xs:enumeration value="Type ?"/>
+													<xs:enumeration value="Original material"/>
+													<xs:enumeration value="Original material ?"/>
+													<xs:enumeration value="-"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="StoredUnderName" type="xs:boolean" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Collectors" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>The person, or people who collected the unit. Preferably formatted surname,initials; surname,initials; etc. Mandatory - enter "Not on sheet" if unknown. </xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="CollectorNumber" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>The 'number' or identifier given to the collection by the collector. Mandatory - enter "s.n." if unknown. </xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="CollectionDate" type="Date">
+								<xs:annotation>
+									<xs:documentation>Mandatory.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="UnitTypeStatus" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Type status of the specimen, but not linked with the typified name. Omit unless  a type status has not been recorded in a TypeStatus element (see under Identification). </xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Holotype"/>
+										<xs:enumeration value="Epitype"/>
+										<xs:enumeration value="Isoepitype"/>
+										<xs:enumeration value="Lectotype"/>
+										<xs:enumeration value="Isolectotype"/>
+										<xs:enumeration value="Neotype"/>
+										<xs:enumeration value="Isoneotype"/>
+										<xs:enumeration value="Paratype"/>
+										<xs:enumeration value="Isoparatype"/>
+										<xs:enumeration value="Syntype"/>
+										<xs:enumeration value="Isosyntype"/>
+										<xs:enumeration value="Isotype"/>
+										<xs:enumeration value="Type"/>
+										<xs:enumeration value="Type ?"/>
+										<xs:enumeration value="Original material"/>
+										<xs:enumeration value="Original material ?"/>
+										<xs:enumeration value="-"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="CountryName" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Country of origin. Mandatory if known and ISO2Letter set to ZZ.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="ISO2Letter">
+								<xs:annotation>
+									<xs:documentation>2-letter ISO code for the country or origin. Mandatory - enter "ZZ" if unknown. </xs:documentation>
+								</xs:annotation>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:maxLength value="2"/>
+										<xs:minLength value="2"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="Locality" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Original locality data as apearing on a label. Optional.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="RelatedUnitID" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>UnitIDs of related Units, one per element. For example, multi-sheet specimens, or supplementary images. Aluka will use these propose 'See also' links to browsers.  Optional.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Altitude" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Distance above (positive) or below sea level of the collecting locality. Assumed metres unless otherwise specified. Optional.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="Notes" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Free-text field for recording additional information. Optional.</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="Date">
+		<xs:annotation>
+			<xs:documentation>A date. To express a single date, enter values in StartDay, StartMonth and StartYear. To express a date range, also enter values in EndDay, EndMonth and EndYear. Day and Month can be left blank for partial dates; where the start or end of the range is unknown, leave all 3 start or end elements unfilled. Use OtherText to record date information which does not fit into the preceding elements. Mandatory if known.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="StartDay" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Day (permitted value of 1-31).</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:byte">
+						<xs:minInclusive value="1"/>
+						<xs:maxInclusive value="31"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="StartMonth" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Month (permitted value of 1-12). Must be present if StartDay is filled.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:byte">
+						<xs:minInclusive value="1"/>
+						<xs:maxInclusive value="12"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="StartYear" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Year (permitted value of 1000-9999). Must be present if StartMonth is filled.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:integer">
+						<xs:minInclusive value="1000"/>
+						<xs:maxInclusive value="9999"/>
+						<xs:totalDigits value="4"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="EndDay" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Day (permitted value of 1-31).</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:byte">
+						<xs:minInclusive value="1"/>
+						<xs:maxInclusive value="31"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="EndMonth" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Month (permitted value of 1-12). Must be present if EndDay is filled.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:byte">
+						<xs:minInclusive value="1"/>
+						<xs:maxInclusive value="12"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="EndYear" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Year (permitted value of 1000-9999). Must be present if EndMonth is filled.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:integer">
+						<xs:minInclusive value="1000"/>
+						<xs:maxInclusive value="9999"/>
+						<xs:totalDigits value="4"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="OtherText" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Any other means of expressing or amplifying the date. If date not known, enter "Not on sheet". </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
