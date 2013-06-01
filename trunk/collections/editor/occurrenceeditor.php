@@ -182,6 +182,15 @@ if($symbUid){
 			$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
 			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
 		}
+		elseif($action == 'editgeneticsubmit'){
+			$statusStr = $occManager->editGeneticResource($_POST);
+		}
+		elseif($action == 'deletegeneticsubmit'){
+			$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
+		}
+		elseif($action == 'addgeneticsubmit'){
+			$statusStr = $occManager->addGeneticResource($_POST);
+		}
 	}
 
 	if($goToMode){
@@ -502,6 +511,10 @@ else{
 										<li id="imgTab">
 											<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
 												style="margin:0px 20px 0px 20px;">Images</a>
+										</li>
+										<li id="genTab">
+											<a href="includes/genetictab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
+												style="margin:0px 20px 0px 20px;">Genetic Links</a>
 										</li>
 										<li id="adminTab">
 											<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
@@ -1139,9 +1152,42 @@ else{
 								if($occId && $isEditor){
 									?>
 									<div id="admindiv">
-										<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
-											<fieldset>
-												<legend>Delete Occurrence Record</legend>
+										<fieldset style="padding:15px;margin:10px 0px;">
+											<legend><b>Edit History</b></legend>
+											<?php 
+											$editArr = $occManager->getEditArr();
+											foreach($editArr as $k => $eArr){
+												?>
+												<div>
+													<b>Editor:</b> <?php echo $eArr['editor']; ?>
+													<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
+												</div>
+												<?php 
+												unset($eArr['editor']);
+												unset($eArr['ts']);
+												foreach($eArr as $vArr){
+													echo '<div style="margin:10px 15px;">';
+													echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+													echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+													echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+													$reviewStr = 'OPEN';
+													if($vArr['reviewstatus'] == 2){
+														$reviewStr = 'PENDING';
+													}
+													elseif($vArr['reviewstatus'] == 3){
+														$reviewStr = 'CLOSED';
+													}
+													echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
+													echo '</div>';
+												}
+												echo '<div style="margin:5px 0px;">&nbsp;</div>';
+											}
+											if(!$editArr) echo '<div style="margin:10px">No previous edits recorded</div>';
+											?>
+										</fieldset>
+										<fieldset style="padding:15px;margin:10px 0px;">
+											<legend><b>Delete Occurrence Record</b></legend>
+											<form name="deleteform" method="post" action="occurrenceeditor.php" onsubmit="return confirm('Are you sure you want to delete this record?')">
 												<div style="margin:15px">
 													Record first needs to be evaluated before it can be deleted from the system. 
 													The evaluation ensures that the deletion of this record will not interfer with 
@@ -1205,8 +1251,8 @@ else{
 														<input name="submitaction" type="submit" value="Delete Occurrence" />
 													</div>
 												</div>
-											</fieldset>
-										</form>
+											</form>
+										</fieldset>
 									</div>
 									<?php
 								}
