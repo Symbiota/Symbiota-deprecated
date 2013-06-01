@@ -796,6 +796,66 @@ class OccurrenceEditorManager {
 		return array_intersect_key($fArr,array_flip($locArr)); 
 	}
 
+	//Genetic links
+	public function getGeneticArr(){
+		$retArr = array();
+		if($this->occid){
+			$sql = 'SELECT idoccurgenetic, identifier, resourcename, locus, resourceurl, notes '.
+				'FROM omoccurgenetic '.
+				'WHERE occid = '.$this->occid;
+			$result = $this->conn->query($sql);
+			if($result){
+				while($r = $result->fetch_object()){
+					$retArr[$r->idoccurgenetic]['id'] = $r->identifier;
+					$retArr[$r->idoccurgenetic]['name'] = $r->resourcename;
+					$retArr[$r->idoccurgenetic]['locus'] = $r->locus;
+					$retArr[$r->idoccurgenetic]['resourceurl'] = $r->resourceurl;
+					$retArr[$r->idoccurgenetic]['notes'] = $r->notes;
+				}
+				$result->free();
+	        }
+	        else{
+	        	trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
+	        }
+		}
+		return $retArr;
+	}
+	
+	public function editGeneticResource($genArr){
+		$sql = 'UPDATE omoccurgenetic SET '.
+			'identifier = "'.$this->cleanInStr($genArr['identifier']).'", '.
+			'resourcename = "'.$this->cleanInStr($genArr['resourcename']).'", '.
+			'locus = '.($genArr['locus']?'"'.$this->cleanInStr($genArr['locus']).'"':'NULL').', '.
+			'resourceurl = '.($genArr['resourceurl']?'"'.$genArr['resourceurl'].'"':'').', '.
+			'notes = '.($genArr['notes']?'"'.$this->cleanInStr($genArr['notes']).'"':'NULL').' '.
+			'WHERE idoccurgenetic = '.$genArr['genid'];
+		if(!$this->conn->query($sql)){
+			return 'ERROR editing genetic resource #'.$id.': '.$this->conn->error;
+		}
+		return 'Genetic resource editted successfully';
+	}
+	
+	public function deleteGeneticResource($id){
+		$sql = 'DELETE FROM omoccurgenetic WHERE idoccurgenetic = '.$id;
+		if(!$this->conn->query($sql)){
+			return 'ERROR deleting genetic resource #'.$id.': '.$this->conn->error;
+		}
+		return 'Genetic resource deleted successfully!';
+	}
+	
+	public function addGeneticResource($genArr){
+		$sql = 'INSERT INTO omoccurgenetic(occid, identifier, resourcename, locus, resourceurl, notes) '.
+			'VALUES('.$this->cleanInStr($genArr['occid']).',"'.$this->cleanInStr($genArr['identifier']).'","'.
+			$this->cleanInStr($genArr['resourcename']).'",'.
+			($genArr['locus']?'"'.$this->cleanInStr($genArr['locus']).'"':'NULL').','.
+			($genArr['resourceurl']?'"'.$this->cleanInStr($genArr['resourceurl']).'"':'NULL').','.
+			($genArr['notes']?'"'.$this->cleanInStr($genArr['notes']).'"':'NULL').')';
+		if(!$this->conn->query($sql)){
+			return 'ERROR Adding new genetic resource: '.$this->conn->error;
+		}
+		return 'Genetic resource added successfully!';
+	}
+
 	//Label OCR processing methods
 	public function getRawTextFragments(){
 		$retArr = array();
@@ -885,6 +945,37 @@ class OccurrenceEditorManager {
 		return $imageMap;
 	}
 
+	public function getEditArr(){
+		$retArr = array();
+		$sql = 'SELECT e.ocedid, e.fieldname, e.fieldvalueold, e.fieldvaluenew, e.reviewstatus, e.appliedstatus, '.
+			'CONCAT_WS(", ",u.lastname,u.firstname) as editor, e.initialtimestamp '.
+			'FROM omoccuredits e INNER JOIN users u ON e.uid = u.uid '.
+			'WHERE e.occid = '.$this->occid.' ORDER BY e.initialtimestamp DESC ';
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		if($result){
+			$cnt = 0;
+			while($r = $result->fetch_object()){
+				$k = substr($r->initialtimestamp,0,16);
+				if(!isset($retArr[$k]['editor'])){
+					$retArr[$k]['editor'] = $r->editor;
+					$retArr[$k]['ts'] = $r->initialtimestamp;
+				}
+				$retArr[$k][$cnt]['fieldname'] = $r->fieldname;
+				$retArr[$k][$cnt]['old'] = $r->fieldvalueold;
+				$retArr[$k][$cnt]['new'] = $r->fieldvaluenew;
+				$retArr[$k][$cnt]['reviewstatus'] = $r->reviewstatus;
+				$retArr[$k][$cnt]['appliedstatus'] = $r->appliedstatus;
+				$cnt++;
+			}
+			$result->free();
+        }
+        else{
+        	trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
+        }
+		return $retArr;
+	}
+	
 	//Edit locking functions (seesion variables)
 	public function getLock(){
 		$isLocked = false;

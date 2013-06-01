@@ -297,16 +297,33 @@ class OccurrenceIndividualManager {
 	public function makeCommentPublic($comId){
 		$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId);
 	}
-	
+
 	public function getGeneticArr(){
 		$retArr = array();
-
+		if($this->occId){
+			$sql = 'SELECT idoccurgenetic, identifier, resourcename, locus, resourceurl, notes '.
+				'FROM omoccurgenetic '.
+				'WHERE occid = '.$this->occId;
+			$result = $this->conn->query($sql);
+			if($result){
+				while($r = $result->fetch_object()){
+					$retArr[$r->idoccurgenetic]['id'] = $r->identifier;
+					$retArr[$r->idoccurgenetic]['name'] = $r->resourcename;
+					$retArr[$r->idoccurgenetic]['locus'] = $r->locus;
+					$retArr[$r->idoccurgenetic]['resourceurl'] = $r->resourceurl;
+					$retArr[$r->idoccurgenetic]['notes'] = $r->notes;
+				}
+				$result->free();
+	        }
+	        else{
+	        	trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
+	        }
+		}
 		return $retArr;
 	}
-
+	
 	public function getEditArr(){
 		$retArr = array();
-		return $retArr;
 		$sql = 'SELECT e.ocedid, e.fieldname, e.fieldvalueold, e.fieldvaluenew, e.reviewstatus, e.appliedstatus, '.
 			'CONCAT_WS(", ",u.lastname,u.firstname) as editor, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN users u ON e.uid = u.uid '.
@@ -314,14 +331,19 @@ class OccurrenceIndividualManager {
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
+			$cnt = 0;
 			while($r = $result->fetch_object()){
-				$retArr[$r->ocedid]['fieldname'] = $r->fieldname;
-				$retArr[$r->ocedid]['fieldvalueold'] = $r->fieldvalueold;
-				$retArr[$r->ocedid]['fieldvaluenew'] = $r->fieldvaluenew;
-				$retArr[$r->ocedid]['reviewstatus'] = $r->reviewstatus;
-				$retArr[$r->ocedid]['appliedstatus'] = $r->appliedstatus;
-				$retArr[$r->ocedid]['editor'] = $r->editor;
-				$retArr[$r->ocedid]['initialtimestamp'] = $r->initialtimestamp;
+				$k = substr($r->initialtimestamp,0,16);
+				if(!isset($retArr[$k]['editor'])){
+					$retArr[$k]['editor'] = $r->editor;
+					$retArr[$k]['ts'] = $r->initialtimestamp;
+				}
+				$retArr[$k][$cnt]['fieldname'] = $r->fieldname;
+				$retArr[$k][$cnt]['old'] = $r->fieldvalueold;
+				$retArr[$k][$cnt]['new'] = $r->fieldvaluenew;
+				$retArr[$k][$cnt]['reviewstatus'] = $r->reviewstatus;
+				$retArr[$k][$cnt]['appliedstatus'] = $r->appliedstatus;
+				$cnt++;
 			}
 			$result->free();
         }

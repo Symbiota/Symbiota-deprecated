@@ -61,9 +61,7 @@ if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occ
 $dupeArr = array();
 //$dupeArr = $indManager->getDuplicateArr($occArr['duplicateid']);
 $commentArr = $indManager->getCommentArr($isEditor);
-$genticArr = $indManager->getGeneticArr();
-$editArr = array();
-if($isEditor) $editArr = $indManager->getEditArr();
+$editArr = ($isEditor?$indManager->getEditArr():null);
 ?>
 <html>
 <head>
@@ -201,14 +199,7 @@ if($isEditor) $editArr = $indManager->getEditArr();
 			        }
 					?> 
 					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
-		        	<?php 
-			        if($genticArr){
-				        ?>
-						<li><a href="#genetictab"><span>Genetic Resources</span></a></li> 
-			        	<?php 
-			        }
-			        ?>
-					<li><a href="other.php?occid=<?php echo $occId.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Other Relationships</span></a></li>
+					<li><a href="other.php?occid=<?php echo $occId.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Related Resources</span></a></li>
 					<?php 
 					if($editArr){
 				        ?>
@@ -218,11 +209,7 @@ if($isEditor) $editArr = $indManager->getEditArr();
 					?> 
 			    </ul>
 				<div id="occurtab" style="padding:30px;">
-					<div style="
-					
-					
-					
-					float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
+					<div style="float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
 						<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
 						<?php 
 						echo $collMetadata['institutioncode'];
@@ -745,99 +732,40 @@ if($isEditor) $editArr = $indManager->getEditArr();
 					</fieldset>
 				
 				</div>
-				<div id="genetictab">
-				
-				</div>
 				<?php 
 				if($editArr){
 					?>
 					<div id="edittab">
-						<table class="styledtable">
-							<tr>
-								<th></th>
-								<th>Record #</th>
-								<th>Field Name</th>
-								<th>Old Value</th>
-								<th>New Value</th>
-								<th>Review Status</th>
-								<th>Applied Status</th>
-								<th>Editor</th>
-								<th>Timestamp</th>
-							</tr>
+						<div style="padding:15px;">
 							<?php 
-							$recCnt = 0;
-							foreach($edits as $ocedid => $eArr){
+							foreach($editArr as $k => $eArr){
 								?>
-								<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
-									<td>
-										<input name="ocedid[]" type="checkbox" value="<?php echo $ocedid; ?>" />
-									</td>
-									<td>
-										<?php echo $occid; ?>
-									</td>
-									<td>
-										<div title="Field Name">
-											<?php echo $edObj['fname']; ?>
-										</div>
-									</td>
-									<td>
-										<div title="Old Value">
-											<?php echo $edObj['fvalueold']; ?>
-										</div>
-									</td>
-									<td>
-										<div title="New Status">
-											<?php echo $edObj['fvaluenew']; ?>
-										</div>
-									</td>
-									<td>
-										<div title="Review Status">
-											<?php
-											$rStatus = $edObj['rstatus'];
-											if($rStatus == 1){
-												echo 'OPEN';
-											}
-											elseif($rStatus == 2){
-												echo 'PENDING';
-											}
-											elseif($rStatus == 3){
-												echo 'CLOSED';
-											}
-											else{
-												echo 'UNKNOWN';
-											}
-											?>
-										</div>
-									</td>
-									<td>
-										<div title="Applied Status">
-											<?php 
-											$aStatus = $edObj['astatus'];
-											if($aStatus == 1){
-												echo 'APPLIED';
-											}
-											else{
-												echo 'NOT APPLIED';
-											}
-											?>
-										</div>
-									</td>
-									<td>
-										<div title="Editor">
-											<?php echo $edObj['uname']; ?>
-										</div>
-									</td>
-									<td>
-										<div title="Timestamp">
-											<?php echo $edObj['tstamp']; ?>
-										</div>
-									</td>
-								</tr>
+								<div>
+									<b>Editor:</b> <?php echo $eArr['editor']; ?>
+									<span style="margin-left:30px;"><b>Date:</b> <?php echo $eArr['ts']; ?></span>
+								</div>
 								<?php 
+								unset($eArr['editor']);
+								unset($eArr['ts']);
+								foreach($eArr as $vArr){
+									echo '<div style="margin:15px;">';
+									echo '<b>Field:</b> '.$vArr['fieldname'].'<br/>';
+									echo '<b>Old Value:</b> '.$vArr['old'].'<br/>';
+									echo '<b>New Value:</b> '.$vArr['new'].'<br/>';
+									$reviewStr = 'OPEN';
+									if($vArr['reviewstatus'] == 2){
+										$reviewStr = 'PENDING';
+									}
+									elseif($vArr['reviewstatus'] == 3){
+										$reviewStr = 'CLOSED';
+									}
+									echo 'Edit '.($vArr['appliedstatus']?'applied':'not applied').'; status '.$reviewStr;
+									echo '</div>';
+								}
+								echo '<div style="margin:15px 0px;"><hr/></div>';
 							}
-							$recCnt++;
-						?>
-						</table>
+							?>
+						</div>
 					</div>
 					<?php 
 				}
