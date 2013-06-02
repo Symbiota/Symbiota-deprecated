@@ -896,26 +896,28 @@ else{
 										<fieldset>
 											<legend><b>Misc</b></legend>
 											<div id="habitatDiv">
-												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?> 
+												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?><br/> 
 												<input type="text" name="habitat" tabindex="82" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 											</div>
 											<div id="substrateDiv">
-												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?>
+												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?><br/>
 												<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 											</div>
 											<div id="associatedTaxaDiv">
-												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?>
+												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea> 
-												<a href="#" onclick="openAssocSppAid();return false;">
-													<img src="../../images/list.png" />
-												</a>
+												<?php 
+												if(!isset($activateAssocTaxaAid) || $activateAssocTaxaAid){
+													echo '<a href="#" onclick="openAssocSppAid();return false;"><img src="../../images/list.png" /></a>';
+												}
+												?>
 											</div>
 											<div id="verbatimAttributesDiv">
-												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?> 
+												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?><br/> 
 												<input type="text" name="verbatimattributes" tabindex="86" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 											</div>
 											<div id="occurrenceRemarksDiv">
-												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes'); ?> 
+												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes'); ?><br/> 
 												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
 												<span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
@@ -923,7 +925,7 @@ else{
 											</div>
 											<div id="dynamicPropertiesDiv">
 												<?php echo (defined('DYNAMICPROPERTIESLABEL')?DYNAMICPROPERTIESLABEL:'Dynamic Properties'); ?> 
-												<a href="#" onclick="return dwcDoc('dynamicProperties')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<a href="#" onclick="return dwcDoc('dynamicProperties')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 												<input type="text" name="dynamicproperties" tabindex="89" value="<?php echo array_key_exists('dynamicproperties',$occArr)?$occArr['dynamicproperties']:''; ?>" onchange="fieldChanged('dynamicproperties');" />
 											</div>
 											<div style="padding:2px;">
