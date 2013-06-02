@@ -904,7 +904,7 @@ else{
 												<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 											</div>
 											<div id="associatedTaxaDiv">
-												<?php echo (defined('ASSOCIATEDSPECIESLABEL')?ASSOCIATEDSPECIESLABEL:'Associated Taxa'); ?>
+												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea> 
 												<a href="#" onclick="openAssocSppAid();return false;">
 													<img src="../../images/list.png" />
