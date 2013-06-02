@@ -25,7 +25,7 @@
 //define('RECORDEDBYLABEL','');
 //define('RECORDNUMBERLABEL','');
 //define('EVENTDATELABEL','');
-//define('ASSOCIATEDSPECIESLABEL','');
+//define('ASSOCIATEDCOLLECTORSLABEL','');
 //define('VERBATIMEVENTDATELABEL','');
 //define('YYYYMMDDLABEL','');
 //define('DAYOFYEARLABEL','');

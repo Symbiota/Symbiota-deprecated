@@ -25,7 +25,7 @@
 //define('RECORDEDBYLABEL','');
 //define('RECORDNUMBERLABEL','');
 //define('EVENTDATELABEL','');
-//define('ASSOCIATEDSPECIESLABEL','');
+//define('ASSOCIATEDCOLLECTORSLABEL','');
 //define('VERBATIMEVENTDATELABEL','');
 //define('YYYYMMDDLABEL','');
 //define('DAYOFYEARLABEL','');
@@ -59,7 +59,7 @@
 //define('GEOREFERENCEREMARKSLABEL','');
 //define('HABITATLABEL','');
 //define('SUBSTRATELABEL','');
-//define('ASSOCIATEDSPECIESLABEL','');
+//define('ASSOCIATEDTAXALABEL','');
 //define('VERBATIMATTRIBUTESLABEL','');
 //define('OCCURRENCEREMARKSLABEL','');
 //define('DYNAMICPROPERTIESLABEL','');
