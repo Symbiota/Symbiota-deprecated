@@ -9,7 +9,7 @@
 //$processingStatusArr = array('unprocessed','Unprocessed/NLP','Stage 1','Stage 2','Stage 3','Pending Duplicate','Pending Review','Expert Required','Reviewed','Closed');
 
 //Uncomment to turns catalogNumber duplicate search check on/off (on by default)
-//define('CATNUMDUPECHECK',FALSE); 
+//define('CATNUMDUPECHECK',false); 
 
 //Uncomment to turns otherCatalogNumbers duplicate search check on/off (off by default)
 //define('OTHERCATNUMDUPECHECK',true);
@@ -17,7 +17,8 @@
 //Uncomment to turn duplicate specimen search function on/off (on by default)
 //define('DUPESEARCH',false);
 
-//$activateExsiccati = 1;
+//$activateExsiccati = false;
+//$activateAssocTaxaAid = false;
 
 //FieldLabel text: uncomment variables and value to modify field labels 
 //define('CATALOGNUMBERLABEL','');
