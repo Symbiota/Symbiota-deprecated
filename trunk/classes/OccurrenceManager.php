@@ -627,40 +627,6 @@ class OccurrenceManager{
 
 	public function outputFullCollArr($occArr,$defaultCatid = 0){
 		$collCnt = 1;
-		if(isset($occArr['coll'])){
-			$collArr = $occArr['coll'];
-			foreach($collArr as $collid => $cArr){
-				?>
-				<div style="padding:5px;height:30px;">
-					<div style="float:left;width:50px;">
-						<?php 
-						if($cArr["icon"]){
-							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
-							?>
-							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-							</a>
-					    	<?php
-						}
-					    ?>
-					    &nbsp;
-					</div>
-					<div style="float:left;width:30px;padding-top:5px;">
-			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" /> 
-					</div>
-					<div style="float:left;padding-top:6px;">
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
-			    		</a>
-			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-			    			more info
-			    		</a>
-				    </div>
-			    </div>
-			    <?php
-			    $collCnt++; 
-			}
-		}
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
 			foreach($catArr as $catid => $catArr){
@@ -721,8 +687,42 @@ class OccurrenceManager{
 				<?php 
 			}
 		}
+		if(isset($occArr['coll'])){
+			$collArr = $occArr['coll'];
+			foreach($collArr as $collid => $cArr){
+				?>
+				<div style="padding:5px;height:30px;">
+					<div style="float:left;width:50px;">
+						<?php 
+						if($cArr["icon"]){
+							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
+							?>
+							<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+								<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
+							</a>
+					    	<?php
+						}
+					    ?>
+					    &nbsp;
+					</div>
+					<div style="float:left;width:30px;padding-top:5px;">
+			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" /> 
+					</div>
+					<div style="float:left;padding-top:6px;width:70%;">
+			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
+			    		</a>
+			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+			    			more info
+			    		</a>
+				    </div>
+			    </div>
+			    <?php
+			    $collCnt++; 
+			}
+		}
 		$this->collArrIndex++;
-	} 
+	}
 
 	public function getCollectionList($collIdArr){
 		$retArr = array();

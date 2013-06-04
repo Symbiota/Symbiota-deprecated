@@ -1,6 +1,7 @@
 <?php
 $defaultLang = 'English';		//Default language
 $defaultProjId = 1;
+$DEFAULTCATID = 2;
 $defaultTitle = '';
 $adminEmail = '';
 $charset = '';					//ISO-8859-1 or UTF-8
