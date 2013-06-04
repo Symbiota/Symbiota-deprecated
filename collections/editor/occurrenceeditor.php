@@ -86,13 +86,6 @@ if($symbUid){
 			include('includes/config/crowdSourceVar.php');
 		}
 	}
-	$processingStatusArr = array();
-	if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
-		$processingStatusArr = $PROCESSINGSTATUS;
-	}
-	else{
-		$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed');
-	}
 	
 	if(!$isEditor){
 		if($isGenObs){ 
@@ -316,12 +309,12 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=130521" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=130604" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=130521" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=130604" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -352,10 +345,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130521"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130521"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130521"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130521"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130604"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130604"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130604"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130604"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -1043,6 +1036,7 @@ else{
 													<?php echo (defined('PROCESSINGSTATUSLABEL')?PROCESSINGSTATUSLABEL:'Processing Status'); ?><br/>
 													<?php 
 														$pStatus = array_key_exists('processingstatus',$occArr)?strtolower($occArr['processingstatus']):'';
+														if(!$pStatus && !$occId) $pStatus = 'pending review';
 													?>
 													<select name="processingstatus" tabindex="120" onchange="fieldChanged('processingstatus');">
 														<option value=''>No Set Status</option>
