@@ -424,6 +424,8 @@ function verifyFullFormEdits(f){
 
 function verifyGotoNew(f){
 	abortFormVerification = true;
+	f.gotomode.value = 1;
+	f.submit();
 }
 
 function verifyFullformSciName(){

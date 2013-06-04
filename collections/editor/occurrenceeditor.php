@@ -17,13 +17,8 @@ $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
-if(!$action && array_key_exists('gotonew',$_REQUEST)){
-	if(array_key_exists('carryloc',$_REQUEST)){
-		$goToMode = 2;
-	}
-	else{
-		$goToMode = 1;
-	}
+if(!$action && array_key_exists('carryloc',$_REQUEST)){
+	$goToMode = 2;
 }
 
 //Create Occurrence Manager
@@ -90,6 +85,13 @@ if($symbUid){
 			//Specific to Crowdsourcing
 			include('includes/config/crowdSourceVar.php');
 		}
+	}
+	$processingStatusArr = array();
+	if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
+		$processingStatusArr = $PROCESSINGSTATUS;
+	}
+	else{
+		$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed');
 	}
 	
 	if(!$isEditor){
@@ -321,13 +323,13 @@ else{
 		?>
 		<link href="../../css/occureditor.css?ver=130521" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
-		if(isset($cssArr)){
-			foreach($cssArr as $cssVal){
+		if(isset($CSSARR)){
+			foreach($CSSARR as $cssVal){
 				echo '<link href="includes/config/'.$cssVal.'?ver='.date('ymd').'" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
-		if(isset($jsArr)){
-			foreach($jsArr as $jsVal){
+		if(isset($JSARR)){
+			foreach($JSARR as $jsVal){
 				echo '<script src="includes/config/'.$jsVal.'?ver='.date('ymd').'" type="text/javascript"></script>';
 			}
 		}
@@ -600,7 +602,7 @@ else{
 												<div id="dateToggleDiv">
 													<a href="#" onclick="toggle('dateextradiv');return false;"><img src="../../images/editplus.png" style="width:15px;" /></a>
 													<?php
-													if(isset($activateExsiccati) && $activateExsiccati){ 
+													if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){ 
 														?>
 														<a href="#" style="margin:20px 0px 0px 5px;" onclick="toggle('exsdiv');return false;">
 															<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
@@ -648,7 +650,7 @@ else{
 												</div>
 											</div>
 											<?php
-											if(isset($activateExsiccati) && $activateExsiccati){ 
+											if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){ 
 												?>
 												<div id="exsdiv" style="display:none;">
 													<iframe id="exsiframe" src="includes/exsiccatiframe.php?occid=<?php echo $occId; ?>" style="width:95%;height:100px;"></iframe>
@@ -907,7 +909,7 @@ else{
 												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea> 
 												<?php 
-												if(!isset($activateAssocTaxaAid) || $activateAssocTaxaAid){
+												if(!isset($ACTIVATEASSOCTAXAAID) || $ACTIVATEASSOCTAXAAID){
 													echo '<a href="#" onclick="openAssocSppAid();return false;"><img src="../../images/list.png" /></a>';
 												}
 												?>
@@ -1040,19 +1042,17 @@ else{
 												<div id="processingStatusDiv">
 													<?php echo (defined('PROCESSINGSTATUSLABEL')?PROCESSINGSTATUSLABEL:'Processing Status'); ?><br/>
 													<?php 
-														$pStatus = array_key_exists('processingstatus',$occArr)?$occArr['processingstatus']:'';
+														$pStatus = array_key_exists('processingstatus',$occArr)?strtolower($occArr['processingstatus']):'';
 													?>
 													<select name="processingstatus" tabindex="120" onchange="fieldChanged('processingstatus');">
 														<option value=''>No Set Status</option>
 														<option value=''>-------------------</option>
 														<?php 
-														if(!isset($processingStatusArr) || !$processingStatusArr){
-															$processingStatusArr = array('unprocessed','Unprocessed/NLP','Stage 1','Stage 2','Stage 3','Pending Duplicate','Pending Review','Expert Required','Reviewed','Closed');
-														}
 														foreach($processingStatusArr as $v){
 															//Don't display these options is editor is crowd sourced 
-															if($isEditor || ($v != 'reviewed' && $v != 'closed')){
-																echo '<option value="'.$v.'" '.($pStatus==$v?'SELECTED':'').'>'.ucwords($v).'</option>';
+															$keyOut = strtolower($v);
+															if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+																echo '<option value="'.$keyOut.'" '.($pStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
 														}
 														?>
@@ -1090,7 +1090,8 @@ else{
 													<div style="float:right;">
 														<fieldset style="padding:15px;background-color:lightyellow;">
 															<legend><b>Additional Options</b></legend>
-															<input type="submit" name="gotonew" value="Go to New Occurrence Record" onclick="return verifyGotoNew(this.form);" /><br/>
+															<input type="button" value="Go to New Occurrence Record" onclick="verifyGotoNew(this.form);" /><br/>
+															<input type="hidden" name="gotomode" value="" />
 															<input type="checkbox" name="carryloc" value="1" /> Carry over locality values
 														</fieldset>
 													</div>
@@ -1110,8 +1111,9 @@ else{
 															<?php 
 															foreach($processingStatusArr as $v){
 																//Don't display all options is editor is crowd sourced 
-																if($isEditor || ($v != 'reviewed' && $v != 'closed')){
-																	echo '<option value="'.$v.'" '.($autoPStatus==$v?'SELECTED':'').'>'.ucwords($v).'</option>';
+																$keyOut = strtolower($v);
+																if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+																	echo '<option value="'.$keyOut.'" '.($autoPStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 																}
 															}
 															?>

@@ -111,39 +111,13 @@ if($qryArr){
 					<select name="q_processingstatus">
 						<option value=''>All Records</option>
 						<option>-------------------</option>
-						<option value="unprocessed" <?php echo ($qProcessingStatus=='unprocessed'?'SELECTED':''); ?>>
-							Unprocessed
-						</option>
-						<option value="unprocessed/OCR" <?php echo ($qProcessingStatus=='unprocessed/OCR'?'SELECTED':''); ?>>
-							Unprocessed/OCR 
-						</option>
-						<option  value="unprocessed/NLP" <?php echo ($qProcessingStatus=='unprocessed/NLP'?'SELECTED':''); ?>>
-							Unprocessed/NLP
-						</option>
-						<option value="stage 1" <?php echo ($qProcessingStatus=='stage 1'?'SELECTED':''); ?>>
-							Stage 1
-						</option>
-						<option value="stage 2" <?php echo ($qProcessingStatus=='stage 2'?'SELECTED':''); ?>>
-							Stage 2
-						</option>
-						<option value="stage 3" <?php echo ($qProcessingStatus=='stage 3'?'SELECTED':''); ?>>
-							Stage 3
-						</option>
-						<option value="pending duplicate" <?php echo ($qProcessingStatus=='pending duplicate'?'SELECTED':''); ?>>
-							Pending Duplicate
-						</option>
-						<option value="pending review" <?php echo ($qProcessingStatus=='pending review'?'SELECTED':''); ?>>
-							Pending Review
-						</option>
-						<option value="expert required" <?php echo ($qProcessingStatus=='expert required'?'SELECTED':''); ?>>
-							Expert Required
-						</option>
-						<option value="reviewed" <?php echo ($qProcessingStatus=='reviewed'?'SELECTED':''); ?>>
-							Reviewed
-						</option>
-						<option value="closed" <?php echo ($qProcessingStatus=='closed'?'SELECTED':''); ?>>
-							Closed
-						</option>
+						<?php 
+						foreach($processingStatusArr as $v){
+							//Don't display these options is editor is crowd sourced 
+							$keyOut = strtolower($v);
+							echo '<option value="'.$keyOut.'" '.($qProcessingStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
+						}
+						?>
 					</select>
 				</div>
 				<?php
