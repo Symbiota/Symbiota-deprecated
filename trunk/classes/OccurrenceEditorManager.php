@@ -48,7 +48,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function setCollId($id){
-		if(is_numeric($id)){
+		if($id && is_numeric($id)){
 			$this->collId = $this->conn->real_escape_string($id);
 		}
 	}
@@ -88,8 +88,8 @@ class OccurrenceEditorManager {
 	public function setCrowdSourceMode($m){
 		$this->crowdSourceMode = $m;
 	}
-
-	public function setQueryVariables($overrideQry = ''){
+	
+	public function setQueryVariables($overrideQry = false){
 		global $clientRoot;
 		if($overrideQry){
 			$this->qryArr = $overrideQry;
@@ -529,7 +529,7 @@ class OccurrenceEditorManager {
 					}
 				}
 */
-				if(in_array('sciname',$editArr)){
+				if(in_array('sciname',$editArr) && in_array('sciname',$occArr) && $occArr['sciname']){
 					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
 					$rsTid = $this->conn->query($sqlTid);
 					$newTid = '';

@@ -148,9 +148,7 @@ body{
 }
 
 #scinameDiv {
-	position: absolute;
-	top: 70px;
-	left: 25px;
+	float:left;
 }
 
 #scinameDiv input{
