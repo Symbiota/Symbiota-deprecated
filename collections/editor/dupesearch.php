@@ -80,7 +80,7 @@ $firstOcc = reset($occArr);
 				for(var k in tArr){
 					try{
 						var elem = openerForm.elements[k];
-						if(appendMode == false || elem.value == ""){
+						if(elem.disabled == false && (appendMode == false || elem.value == "")){
 							elem.value = tArr[k];
 							if(k != "tidtoadd") opener.fieldChanged(k);
 						}

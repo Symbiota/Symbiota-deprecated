@@ -106,8 +106,6 @@ if($symbUid){
 			$isEditor = 2;
 		}
 	}
-	$retainCurrentRec = 0;
-	$resetCnt = 0;
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
 	}
@@ -155,7 +153,6 @@ if($symbUid){
 		}
 		elseif($action == "Submit New Image"){
 			$statusStr = $occManager->addImage($_REQUEST);
-			$retainCurrentRec = 1;
 		}
 		elseif($action == "Delete Image"){
 			$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
@@ -659,8 +656,13 @@ else{
 													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>:
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo ($isEditor?'':'disabled '); ?> />
+													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo (!$isEditor && $occArr['sciname'] != ''?'disabled ':''); ?> />
 													<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
+													<?php 
+													if(!$isEditor && isset($occArr['sciname']) && $occArr['sciname'] != ''){
+														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
+													}
+													?>
 												</div>
 												<div id="scientificNameAuthorshipDiv">
 													<?php echo (defined('SCIENTIFICNAMEAUTHORSHIPLABEL')?SCIENTIFICNAMEAUTHORSHIPLABEL:'Author'); ?>:
@@ -668,11 +670,6 @@ else{
 													<br/>
 													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
 												</div>
-												<?php 
-												if(!$isEditor && $occArr){
-													echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
-												}
-												?>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
 												<div id="identificationQualifierDiv">
@@ -686,7 +683,7 @@ else{
 													<input type="text" name="family" maxlength="50" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
 												</div>
 											</div>
-											<div style="clear:both;padding:3px 0px 0px 10px;margin-bottom:20px;">
+											<div style="clear:both;padding:3px 0px 0px 10px;">
 												<div id="identifiedByDiv">
 													<?php echo (defined('IDENTIFIEDBYLABEL')?IDENTIFIEDBYLABEL:'Identified By'); ?>:
 													<a href="#" onclick="return dwcDoc('identifiedBy')"><img class="docimg" src="../../images/qmark.png" /></a>

@@ -8,6 +8,7 @@ $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:100;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
+$reset = array_key_exists('reset',$_REQUEST)?$_REQUEST['reset']:false;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 
 $occManager = new OccurrenceEditorManager();
@@ -90,9 +91,9 @@ if($symbUid){
 	}
 	elseif($occIndex !== false){
 		//Query Form has been activated 
-		$occManager->setQueryVariables();
+		if(!$reset) $occManager->setQueryVariables();
 		$occManager->setSqlWhere($occIndex,$recLimit);
-		$qryCnt = $occManager->getQueryRecordCount();
+		$qryCnt = $occManager->getQueryRecordCount(1);
 	}
 	elseif(isset($_COOKIE["editorquery"])){
 		//Make sure query is null
@@ -294,7 +295,7 @@ else{
 						}							
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td>';
-						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'" target="_blank">';
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" target="_blank">';
 						echo $id;
 						echo '</a>';
 						echo '</td>'."\n";
