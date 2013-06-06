@@ -172,8 +172,8 @@ $collManager->reset();
 				<div>
 					Radius: <input type="text" id="radiustemp" name="radiustemp" size="5" value="<?php echo $radius; ?>" style="margin-left:15px;" onchange="updateRadius();"> 
 					<select id="radiusunits" name="radiusunits" onchange="updateRadius();">
-						<option value="mi">Miles</option>
 						<option value="km">Kilometers</option>
+						<option value="mi">Miles</option>
 					</select>
 					<input type="hidden" id="radius" name="radius" value="" />
 				</div>

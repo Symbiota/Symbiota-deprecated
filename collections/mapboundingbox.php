@@ -1,9 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
- include_once('../config/symbini.php');
- header("Content-Type: text/html; charset=".$charset);
+include_once('../config/symbini.php');
+header("Content-Type: text/html; charset=".$charset);
+
+$boundaryArr = explode(";",$mappingBoundaries);
+$latCenter = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
+$lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+
+<!DOCTYPE html >
+<html>
   <head>
     <title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>
   </head> 
@@ -23,7 +28,7 @@
         function initialize(){
             if (GBrowserIsCompatible()) {
 	            map = new GMap2(document.getElementById("map"));
-	            map.setCenter(new GLatLng(36.97, -109.05), zoomLevel);
+	            map.setCenter(new GLatLng(<?php echo $latCenter.','.$lngCenter; ?>), zoomLevel);
                 //map.addControl(new GScaleControl());
                 map.enableScrollWheelZoom();
 	            map.setUIToDefault();

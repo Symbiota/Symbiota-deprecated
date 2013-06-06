@@ -158,8 +158,8 @@ elseif($coordRange > 40){
 				<div style="display:none;">
 					Radius: <input type="text" id="radiustemp"  name="radiustemp" size="5" onchange="updateRadius();" /> 
 					<select id="radiusunits" name="radiusunits" onchange="updateRadius();">
-						<option value="mi">Miles</option>
 						<option value="km">Kilometers</option>
+						<option value="mi">Miles</option>
 					</select>
 				</div>
 			</form>

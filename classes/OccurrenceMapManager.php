@@ -28,8 +28,9 @@ class OccurrenceMapManager extends OccurrenceManager{
 
     public function getGeoCoords($limit = 1000, $includeDescr= false){
 		global $userRights;
-        $querySql = "";
-        $sql = "SELECT o.occid, o.catalognumber, o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid ";
+        $querySql = '';
+        $sql = 'SELECT o.occid, IFNULL(IFNULL(IFNULL(o.occurrenceid,o.catalognumber),CONCAT(o.recordedby," ",o.recordnumber)),o.occid) AS identifier, '.
+        	'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid ';
         if($includeDescr){
         	$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
         }
@@ -91,7 +92,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 			}
 			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
 			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
-			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["catalognumber"] = $row->catalognumber;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["identifier"] = $row->identifier;
 			if($includeDescr){
 				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
 			}
@@ -139,7 +140,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 			foreach($contentArr as $latLong => $llArr){
 				foreach($llArr as $occId => $pointArr){
 					echo "<Placemark>\n";
-					echo "<name>".$pointArr["catalognumber"]."</name>\n";
+					echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
 					echo "<description><![CDATA[<p>".$pointArr["descr"]."</p>";
 					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
 					echo "<p><b>More Information:</b> <a href='".$url."'>".$url."</a></p>";
