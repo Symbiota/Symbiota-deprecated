@@ -73,7 +73,7 @@ $mapManager = new OccurrenceMapManager();
 							$functionStr = $occId.",".$clid;
 						}
 						else{
-							$id = "occurrence #".$occId;
+							$id = $occId;
 							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".(array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"0").")'>".$id."</a><br/>";
 						}
 					}
@@ -236,7 +236,7 @@ $mapManager = new OccurrenceMapManager();
         <?php 
     }
     ?>
-    <div id='map_canvas' style='width: 800px; height: 600px'></div>
+    <div id='map_canvas' style='width: 100%; height: 600px'></div>
     <table title='Add Point of Reference'>
     	<tr>
     		<td style="width:200px" valign='top'>
