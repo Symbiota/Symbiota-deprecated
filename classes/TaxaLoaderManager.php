@@ -367,9 +367,8 @@ class TaxaLoaderManager{
 		echo '<li style="margin-left:10px;">Loading vernaculars... ';
 		ob_flush();
 		flush();
-		$sql = 'INSERT IGNORE INTO taxavernaculars (tid, VernacularName, Language, Source) '.
-			'SELECT tid, vernacular, vernlang, source FROM uploadtaxa WHERE tid IS NOT NULL AND Vernacular IS NOT NULL';
-		$this->conn->query($sql);
+		//This is first pass for all taxa that have non-null tids just before they are removed
+		$this->transferVernaculars();
 		echo 'Done!</li>';
 		
 		$sql = 'DELETE * FROM uploadtaxa WHERE tid IS NOT NULL';
@@ -524,7 +523,6 @@ class TaxaLoaderManager{
 		echo '<li>Starting data transfer</li>';
 		ob_flush();
 		flush();
-
 		
 		//Prime table with kingdoms that are not yet in table
 		$sql = 'INSERT IGNORE INTO taxa ( SciName, KingdomID, RankId, UnitInd1, UnitName1, UnitInd2, UnitName2, UnitInd3, UnitName3, Author, Source, Notes ) '.
@@ -538,7 +536,7 @@ class TaxaLoaderManager{
 			'FROM uploadtaxa AS ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
 			'WHERE (ut.TID Is Null AND ut.rankid = 10)';
 		$this->conn->query($sql);
-		
+
 		//Loop through and transfer taxa to taxa table
 		WHILE(($endLoadCnt > 0 || $startLoadCnt <> $endLoadCnt) && $loopCnt < 30){
 			$sql = 'SELECT COUNT(*) AS cnt FROM uploadtaxa';
@@ -590,11 +588,10 @@ class TaxaLoaderManager{
 			echo '<li>Transferring vernaculars for new taxa... ';
 			ob_flush();
 			flush();
-			$sql = 'INSERT IGNORE INTO taxavernaculars (tid, VernacularName, Language, Source) '.
-				'SELECT tid, vernacular, vernlang, source FROM uploadtaxa WHERE tid IS NOT NULL AND Vernacular IS NOT NULL';
-			$this->conn->query($sql);
+			//Covers taxa with newly assigned tids just before they are removed
+			$this->transferVernaculars(1);
 			echo 'Done!</li>';
-
+			
 			echo '<li>Preparing for next round... ';
 			ob_flush();
 			flush();
@@ -644,7 +641,32 @@ class TaxaLoaderManager{
 			'WHERE g.tid IS NULL AND o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL';
 		$this->conn->query($sql);
 		echo 'Done!</li>';
-		
+	}
+
+	protected function transferVernaculars($secondRound = 0){
+		$sql = 'SELECT tid, vernacular, vernlang, source FROM uploadtaxa WHERE tid IS NOT NULL AND Vernacular IS NOT NULL ';
+		if($secondRound) $sql .= 'AND tidaccepted IS NOT NULL';
+		$rs = $this->conn->query($sql);
+		while ($r = $rs->fetch_object()){
+			$vernArr = array();
+			$vernStr = $r->vernacular;
+			if(strpos($vernStr,"\t")) {
+				$vernArr = explode("\t",$vernStr); 
+			}
+			elseif(strpos($vernStr,"|")){
+				$vernArr = explode("|",$vernStr); 
+			}
+			elseif(strpos($vernStr,";")){
+				$vernArr = explode(";",$vernStr); 
+			}
+			elseif(strpos($vernStr,",")){
+				$vernArr = explode(",",$vernStr); 
+			}
+			$sqlInsert = 'INSERT INTO taxavernaculars (tid, VernacularName, Language, Source) '.
+				'VALUES('.$r->tid.',"'.$this->cleanInStr($r->vernacular).'","'.($r->vernlang?$this->cleanInStr($r->vernlang):'en').
+					'",'.($r->source?'"'.$this->cleanInStr($r->source).'"':'NULL').')';
+			$this->conn->query($sqlInsert);
+		}
 	}
 
 	protected function buildHierarchy($taxAuthId){
