@@ -42,7 +42,7 @@ $genticArr = $occManager->getGeneticArr();
 	<div style="float:right;">
 		<a href="#" onclick="toggle('genadddiv');return false;" title="Add a new genetic resource" ><img src="../../images/add.png" /></a>
 	</div>
-	<div id="genadddiv" style="display:none;">
+	<div id="genadddiv" style="display:<?php echo ($genticArr?'none':'block'); ?>;">
 		<fieldset>
 			<legend><b>Add Genetic Resource</b></legend>
 			<form name="addgeneticform" method="post" action="occurrenceeditor.php">
@@ -82,13 +82,13 @@ $genticArr = $occManager->getGeneticArr();
 				<a href="#" onclick="toggle('genedit-<?php echo $genId; ?>');return false;"><img src="../../images/edit.png" /></a>
 			</div>
 			<div style="margin:15px;">
-				<div style="font-weight:bold;"><b>Name:</b> <?php echo $gArr['name']; ?></div>
-				<div style="margin-left:10px;"><b>Identifier:</b> <?php echo $gArr['id']; ?></div>
-				<div style="margin-left:10px;"><b>Locus:</b> <?php echo $gArr['locus']; ?></div>
-				<div style="margin-left:10px;">
-					<b>URL:</b> <a href="<?php echo $gArr['resourceurl']; ?>"><?php echo $gArr['resourceurl']; ?></a>
+				<div style="font-weight:bold;margin-bottom:5px;"><?php echo $gArr['name']; ?></div>
+				<div style="margin-left:15px;"><b>Identifier:</b> <?php echo $gArr['id']; ?></div>
+				<div style="margin-left:15px;"><b>Locus:</b> <?php echo $gArr['locus']; ?></div>
+				<div style="margin-left:15px;">
+					<b>URL:</b> <a href="<?php echo $gArr['resourceurl']; ?>" target="_blank"><?php echo $gArr['resourceurl']; ?></a>
 				</div>
-				<div style="margin-left:10px;"><b>Notes:</b> <?php echo $gArr['notes']; ?></div>
+				<div style="margin-left:15px;"><b>Notes:</b> <?php echo $gArr['notes']; ?></div>
 			</div>
 			<div id="genedit-<?php echo $genId; ?>" style="display:none;margin-left:25px;">
 				<fieldset>

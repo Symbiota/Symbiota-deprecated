@@ -668,9 +668,12 @@ class TaxaLoaderManager{
 			$langStr = $this->cleanInStr($r->vernlang);
 			if(!$langStr) $langStr = 'en';
 			foreach($vernArr as $vStr){
-				$sqlInsert = 'INSERT INTO taxavernaculars (tid, VernacularName, Language, Source) '.
-					'VALUES('.$r->tid.',"'.$this->cleanInStr($vStr).'","'.$langStr.'",'.($r->source?'"'.$this->cleanInStr($r->source).'"':'NULL').')';
-				$this->conn->query($sqlInsert);
+				$vStr = $this->cleanInStr($vStr);
+				if($vStr){
+					$sqlInsert = 'INSERT INTO taxavernaculars (tid, VernacularName, Language, Source) '.
+						'VALUES('.$r->tid.',"'.$vStr.'","'.$langStr.'",'.($r->source?'"'.$this->cleanInStr($r->source).'"':'NULL').')';
+					$this->conn->query($sqlInsert);
+				}
 			}
 		}
 	}

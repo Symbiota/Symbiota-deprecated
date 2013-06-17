@@ -262,7 +262,13 @@ class OccurrenceEditorManager {
 						}
 					}
 					else{
-						$rnInFrag[] = trim($v);
+						$v = trim($v);
+						if(is_numeric($v)){
+							$rnInFrag[] = $v;
+						}
+						else{
+							$rnInFrag[] = '"'.$v.'"';
+						}
 					}
 				}
 				$rnWhere = '';
@@ -270,7 +276,7 @@ class OccurrenceEditorManager {
 					$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
 				}
 				if($rnInFrag){
-					$rnWhere .= 'OR (o.recordnumber IN("'.implode('","',$rnInFrag).'")) ';
+					$rnWhere .= 'OR (o.recordnumber IN('.implode(',',$rnInFrag).')) ';
 				}
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}

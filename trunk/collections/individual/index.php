@@ -24,6 +24,8 @@ if(!$occId) $occId = $indManager->getOccid();
 $collMetadata = $indManager->getMetadata();
 if(!$collId) $collId = $occArr['collid'];
 
+$genticArr = $indManager->getGeneticArr();
+
 $statusStr = '';
 $displayLocality = false;
 $isEditor = false;
@@ -59,7 +61,7 @@ if(!$occArr['localitysecurity']) $displayLocality = true;
 $displayMap = false;
 if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
 $dupeArr = array();
-//$dupeArr = $indManager->getDuplicateArr($occArr['duplicateid']);
+$dupeArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 $editArr = ($isEditor?$indManager->getEditArr():null);
 ?>
@@ -133,6 +135,11 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
             return false;
 	    }
 
+		function openIndividual(target) {
+			occWindow=open("index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+			if (occWindow.opener == null) occWindow.opener = self;
+		}
+
 		<?php 
 		if($displayMap){
 			?>
@@ -192,9 +199,10 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 				        <li><a href="#mapTab"><span>Map</span></a></li>
 			        	<?php 
 			        }
+					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>'; 
 			        if($dupeArr){
 				        ?>
-						<li><a href="#dupestab"><span>Duplicate Links</span></a></li>
+						<li><a href="#dupestab"><span>Duplicates</span></a></li>
 						<?php
 			        }
 					?> 
@@ -653,10 +661,53 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						</div>
 		        	<?php 
 		        }
-		        ?>
-				<div id="dupestab">
-				
-				</div>
+				if($genticArr){
+					?>
+					<div id="genetictab" style="height:300px">
+						<?php 
+						foreach($genticArr as $genId => $gArr){
+							?>
+							<div style="margin:15px;">
+								<div style="font-weight:bold;margin-bottom:5px;"><?php echo $gArr['name']; ?></div>
+								<div style="margin-left:15px;"><b>Identifier:</b> <?php echo $gArr['id']; ?></div>
+								<div style="margin-left:15px;"><b>Locus:</b> <?php echo $gArr['locus']; ?></div>
+								<div style="margin-left:15px;">
+									<b>URL:</b> 
+									<a href="<?php echo $gArr['resourceurl']; ?>" target="_blank"><?php echo $gArr['resourceurl']; ?></a>
+								</div>
+								<div style="margin-left:15px;"><b>Notes:</b> <?php echo $gArr['notes']; ?></div>
+							</div>
+							<?php 
+						}
+						?>
+					</div>
+					<?php 
+				}
+				if($dupeArr){
+					?>
+					<div id="dupestab" style="padding:15px;height:500px;">
+						<div style="margin:20px;">
+							<?php 
+							foreach($dupeArr as $dupOccid => $dupArr){
+								echo '<div style="font-weight:bold;margin-top:15px;:">';
+								echo $dupArr['collname'].' ('.$dupArr['instcode'].($dupArr['collcode']?':'.$dupArr['collcode']:'').')';
+								echo '</div>';
+								echo '<div style="margin-left:15px">';
+								if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
+								if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
+								if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
+								if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'</div>';
+								if($dupArr['dateidentified']) echo '<div><b>Date Identified:</b> '.$dupArr['dateidentified'].'</div>';
+								if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
+								echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
+								echo '</div>';
+							}
+							?>
+						</div>
+					</div>
+					<?php
+				} 
+				?>
 				<div id="commenttab">
 					<?php 
 					if($commentArr){
