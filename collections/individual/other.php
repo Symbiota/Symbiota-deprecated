@@ -11,7 +11,6 @@ $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 
 $indManager = new OccurrenceIndividualManager();
 $indManager->setOccid($occid);
-$genticArr = $indManager->getGeneticArr();
 $vClArr = $indManager->getVoucherChecklists();
 
 $isEditor = false;
@@ -25,32 +24,7 @@ if($symbUid){
 }
 ?>
 <div id='innertext' style='width:95%; height:95%; clear:both;'>
-	<div style="font-weight:bold;font-size:120%;margin-bottom:15px;">Genetic Resources</div>
 	<div>
-		<?php 
-		if($genticArr){
-			foreach($genticArr as $genId => $gArr){
-				?>
-				<div style="margin:15px;">
-					<div style="font-weight:bold;"><b>Name:</b> <?php echo $gArr['name']; ?></div>
-					<div style="margin-left:10px;"><b>Identifier:</b> <?php echo $gArr['id']; ?></div>
-					<div style="margin-left:10px;"><b>Locus:</b> <?php echo $gArr['locus']; ?></div>
-					<div style="margin-left:10px;">
-						<b>URL:</b> 
-						<a href="<?php echo $gArr['resourceurl']; ?>"><?php echo $gArr['resourceurl']; ?></a>
-					</div>
-					<div style="margin-left:10px;"><b>Notes:</b> <?php echo $gArr['notes']; ?></div>
-				</div>
-				<?php 
-			}
-		}
-		else{
-			echo '<div style="margin:10px 0px 100px 10px">No genetic resources linked to this specimen</div>';
-		}
-		?>
-	</div>
-	<div>
-		<div style="font-weight:bold;font-size:120%;margin-bottom:15px;">Voucher Relationships</div>
 		<?php 	
 		if($vClArr){
 	    	echo '<div style="font-weight:bold;font-size:120%;">Specimen serves as voucher of the following checklists</div>';

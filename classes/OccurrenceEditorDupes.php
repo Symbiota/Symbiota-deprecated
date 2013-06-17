@@ -47,8 +47,13 @@ class OccurrenceEditorDupes {
 		if($lastName && $collNum){
 			$sql = 'SELECT occid FROM omoccurrences ';
 
-			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") '.
-				'AND (recordnumber = "'.$collNum.'") ';
+			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = ';
+			if(is_numeric($collNum)){
+				$sql .= $collNum.') ';
+			}
+			else{
+				$sql .= '"'.$collNum.'") ';
+			}
 			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
 
 			//echo $sql;
@@ -91,7 +96,7 @@ class OccurrenceEditorDupes {
 					$nStart = $collNum - 4;
 					if($nStart < 1) $nStart = 1;
 					$nEnd = $collNum + 4;
-					$sql .= 'AND (CAST(recordnumber AS SIGNED) BETWEEN '.$nStart.' AND '.$nEnd.') ';
+					$sql .= 'AND (recordnumber BETWEEN '.$nStart.' AND '.$nEnd.') ';
 				}
 				elseif(preg_match('/^(\d+)-{0,1}[a-zA-Z]{1,2}$/',$collNum,$m)){
 					//ex: 123a, 123b, 123-a
@@ -245,6 +250,14 @@ class OccurrenceEditorDupes {
 
 		//Remap comments
 		$sql = 'UPDATE omoccurcomments SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$connWrite->query($sql);
+
+		//Remap genetic resources
+		$sql = 'UPDATE omoccurgenetic SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
+		$connWrite->query($sql);
+		
+		//Remap identifiers 
+		$sql = 'UPDATE omoccuridentifiers SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$connWrite->query($sql);
 
 		//Remap exsiccati

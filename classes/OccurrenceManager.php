@@ -296,15 +296,6 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(", ",$collectorArr);
 		}
-		if(array_key_exists("typestatus",$this->searchTermsArr)){
-			$typestatusArr = explode(";",$this->searchTermsArr["typestatus"]);
-			$tempArr = Array();
-			foreach($typestatusArr as $value){
-				$tempArr[] = "(o.typestatus LIKE '%".trim($value)."%')";
-			}
-			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
-			$this->localSearchArr[] = implode(", ",$typestatusArr);
-		}
 		if(array_key_exists("collnum",$this->searchTermsArr)){
 			$collNumArr = explode(";",$this->searchTermsArr["collnum"]);
 			$rnWhere = '';
@@ -418,6 +409,15 @@ class OccurrenceManager{
 			}
 			$sqlWhere .= 'AND ('.substr($catWhere,3).') ';
 			$this->localSearchArr[] = $this->searchTermsArr['catnum'];
+		}
+		if(array_key_exists("typestatus",$this->searchTermsArr)){
+			$typestatusArr = explode(";",$this->searchTermsArr["typestatus"]);
+			$tempArr = Array();
+			foreach($typestatusArr as $value){
+				$tempArr[] = "(o.typestatus LIKE '%".trim($value)."%')";
+			}
+			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
+			$this->localSearchArr[] = implode(", ",$typestatusArr);
 		}
 		if(array_key_exists("clid",$this->searchTermsArr)){
 			$clid = $this->searchTermsArr["clid"];

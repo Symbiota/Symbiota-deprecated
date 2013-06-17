@@ -193,23 +193,29 @@ class OccurrenceIndividualManager {
 		}
 	}
 
-	public function getDuplicateArr($dupeId){
+	public function getDuplicateArr(){
 		$retArr = array();
-		return $retArr;
-		
-		
-		if($dupeId){
-			$sql = 'SELECT duplicateid, projidentifier, projname '.
-				'FROM omoccurduplicates '.
-				'WHERE duplicateid = '.$dupeId;
-			if($rs = $this->conn->query($sql)){
-				while($r = $rs->fetch_object()){
-					$retArr[$duplicateid] = $r->projname.' ('.$r->projidentifier.')';
-				}
+		$sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, o.occurrenceid, o.sciname, '.
+			'o.identifiedby, o.dateidentified, d.notes '.
+			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE d.duplicateid IN(SELECT duplicateid FROM omoccurduplicatelink WHERE occid = '.$this->occId.') '.
+			'AND (o.occid <> '.$this->occId.')';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid]['instcode'] = $r->institutioncode;
+				$retArr[$r->occid]['collcode'] = $r->collectioncode;
+				$retArr[$r->occid]['collname'] = $r->collectionname;
+				$retArr[$r->occid]['catnum'] = $r->catalognumber;
+				$retArr[$r->occid]['occurrenceid'] = $r->occurrenceid;
+				$retArr[$r->occid]['sciname'] = $r->sciname;
+				$retArr[$r->occid]['identifiedby'] = $r->identifiedby;
+				$retArr[$r->occid]['dateidentified'] = $r->dateidentified;
+				$retArr[$r->occid]['notes'] = $r->notes;
 			}
-			else{
-				trigger_error('anable to get duplicate records'.$this->conn->error);
-			}
+		}
+		else{
+			trigger_error('Unable to get duplicate records'.$this->conn->error);
 		}
 		return $retArr;
 	}
