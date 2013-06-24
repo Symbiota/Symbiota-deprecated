@@ -92,6 +92,9 @@
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input name="submitaction" type="submit" value="Save OCR Edits" />
+											<?php 
+											if(isset($salixPath)) echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="salixText(this.form)" />'; 
+											?>
 										</div>
 									</form>
 									<div style="float:right;font-weight:bold;margin-right:20px;">

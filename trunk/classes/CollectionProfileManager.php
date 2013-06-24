@@ -57,7 +57,7 @@ class CollectionProfileManager {
 				"WHERE (c.collid = ".$this->collId.") ";
 			//echo $sql;
 			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
+			if($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['iid'] = $row->iid;
 				$returnArr['institutionname'] = $this->cleanOutStr($row->InstitutionName);
@@ -95,10 +95,46 @@ class CollectionProfileManager {
 				}
 				$returnArr['uploaddate'] = $uDate;
 				$returnArr['recordcnt'] = $row->recordcnt;
-				$returnArr['georefcnt'] = $row->georefcnt;
+				$returnArr['georefpercent'] = round(($row->georefcnt/$returnArr['recordcnt'])*100);
 				$returnArr['familycnt'] = $row->familycnt;
 				$returnArr['genuscnt'] = $row->genuscnt;
 				$returnArr['speciescnt'] = $row->speciescnt;
+			}
+			$rs->close();
+			//Get additional statistics
+			$sql = 'SELECT count(DISTINCT i.imgid) as imgcnt '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'WHERE (o.collid = '.$this->collId.') ';
+			$rs = $this->conn->query($sql);
+			if($row = $rs->fetch_object()){
+				$returnArr['imgpercent'] = round(($row->imgcnt/$returnArr['recordcnt'])*100);
+			}
+			$rs->close();
+			//BOLD count
+			$sql = 'SELECT count(g.occid) as boldcnt '.
+				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
+				'WHERE (o.collid = '.$this->collId.') AND (g.resourceurl LIKE "http://www.boldsystems%") ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$returnArr['boldcnt'] = $r->boldcnt;
+			}
+			$rs->close();
+			//GenBank count
+			$sql = 'SELECT count(g.occid) as gencnt '.
+				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
+				'WHERE (o.collid = '.$this->collId.') AND (g.resourceurl LIKE "http://www.ncbi%") ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$returnArr['gencnt'] = $r->gencnt;
+			}
+			$rs->close();
+			//Reference count
+			$sql = 'SELECT count(r.occid) as refcnt '.
+				'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
+				'WHERE (o.collid = '.$this->collId.') ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$returnArr['refcnt'] = $r->refcnt;
 			}
 			$rs->close();
 		}

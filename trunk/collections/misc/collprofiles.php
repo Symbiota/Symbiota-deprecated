@@ -593,7 +593,13 @@ if($collId) $collData = $collManager->getCollectionData();
 						<div style="font-weight:bold;">Collection Statistics</div>
 						<ul>
 							<li><?php echo $collData["recordcnt"];?> specimens in database</li>
-							<li><?php echo $collData["georefcnt"]." (".(round(100*$collData["georefcnt"]/($collData["recordcnt"]?$collData["recordcnt"]:1)));?>%) georeferenced</li>
+							<li><?php echo $collData["georefpercent"];?>% georeferenced</li>
+							<?php 
+							if($collData['imgpercent']) echo '<li>'.$collData['imgpercent'].'% imaged</li>';
+							if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank References</li>'; 
+							if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD References</li>'; 
+							if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' Publication References</li>'; 
+							?>
 							<li><?php echo $collData["familycnt"];?> families</li>
 							<li><?php echo $collData["genuscnt"];?> genera</li>
 							<li><?php echo $collData["speciescnt"];?> species</li>
