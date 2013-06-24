@@ -36,7 +36,7 @@ $taxaMap = $mapManager->getTaxaMap();
 			};
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-
+			var markers = [];
             <?php
 			if($coordArr){
 				$latMin = $coordArr['latmin'];
@@ -73,6 +73,7 @@ $taxaMap = $mapManager->getTaxaMap();
 					}
 					?>
 					var m<?php echo $mId; ?> = getMarker(<?php echo $llStr.',"'.$titleStr.'","'.$iconUrl.'"'; ?> );
+					//markers.push(m<?php echo $mId; ?>);
 					<?php
 					if(count($occidArr) == 1){
 						?>
@@ -102,6 +103,7 @@ $taxaMap = $mapManager->getTaxaMap();
 	            <?php
             }
             ?>
+			//var mc = new MarkerClusterer(map, markers);
         }
 
 		function openIndPU(occId,clid){
