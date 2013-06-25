@@ -1,6 +1,21 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
  
+/**
+ * Data structure to hold attributes of a specimen that needs identification. 
+ * 
+ * @see getSpecimensPendingIdent
+ * @author mole
+ *
+ */
+class NeedsIDResult { 
+	public $occid;
+	public $sciname;
+	public $collectionCode;
+	public $institutionCode;
+	public $stateProvince;
+}
+
 class PersonalSpecimenManager {
 
 	private $conn;
@@ -35,6 +50,57 @@ class PersonalSpecimenManager {
 		}
 		return $retArr;
 	}
+	
+	/**
+	 * 
+	 * Obtain the list of specimens that aren't identified to at least the species level from 
+	 * within the list of taxa for which this user is listed as a specialist.
+	 * 
+	 * @returns array of NeedsIDResult 
+	 */
+	public function getSpecimensPendingIdent(){
+		global $userRights;
+		$retArr = array();
+		if($this->uid){
+			$cArr = array();
+			if(array_key_exists('CollAdmin',$userRights)) $cArr = $userRights['CollAdmin'];
+			if(array_key_exists('CollEditor',$userRights)) $cArr = array_merge($cArr,$userRights['CollEditor']);
+			if($cArr){
+				// TODO: Query on arbtirary lower taxa, not just parent + child.  
+				// Current query works as expected if usertaxonomy record is a genus or a family.
+				$sql = 'select * from ( '.
+				       '  select occid, sciname, o.collectioncode, o.institutioncode, o.stateprovince ' . 
+				       '     from omoccurrences o ' . 
+				       '     left join usertaxonomy ut on o.tidinterpreted = ut.tid ' . 
+				       '    where ut.uid = ? ' . 
+				       '  union ' . 
+				       '  select occid, o.sciname, o.collectioncode, o.institutioncode, o.stateprovince ' .
+				       '     from omoccurrences o ' . 
+				       '     left join taxstatus t on o.tidinterpreted = t.tidaccepted ' .
+				       '     left join usertaxonomy ut on t.parenttid = ut.tid ' . 
+				       '     left join taxa on t.tidaccepted = taxa.tid ' .
+				       '    where ut.uid = ? and taxa.rankid < 220 ' . 
+				       ') a order by sciname';
+				$statement = $this->conn->prepare($sql);
+				$statement->bind_param('ii', $this->uid, $this->uid);
+				$statement->execute();
+				$statement->bind_result($occid, $sciname, $collectioncode, $institutioncode, $stateprovince);
+				while($statement->fetch()){
+					$o = new NeedsIDResult();
+					$o->occid = $occid;
+					$o->sciname = $sciname;
+					$o->collectionCode = $collectioncode;
+					$o->institutionCode = $institutioncode;
+					$o->stateProvince= $stateprovince;
+					$retArr[$occid] = $o;
+				}
+				$statement->close();
+			}
+		}
+		return $retArr;
+	}	
+	
+
 
 	public function dlSpecBackup($collId, $characterSet, $zipFile = 1){
 		global $charset, $paramsArr;

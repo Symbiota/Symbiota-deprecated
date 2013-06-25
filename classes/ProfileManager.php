@@ -477,5 +477,29 @@ class ProfileManager{
 		$newStr = $this->con->real_escape_string($newStr);
 		return $newStr;
 	}
+	
+	/**
+	* Test whether or not a user has any registered expertiese in a taxon.
+	*
+	* @return true if the user has any records in the usertaxonomy table, otherwise false.
+	*/
+	public function hasUserTaxonInterest($aUid){
+		$result = FALSE;
+		if($aUid){
+			$cArr = array();
+			$sql = 'select count(*) from usertaxonomy ut where ut.uid = ? ';
+			$statement = $this->con->prepare($sql);
+			$statement->bind_param('i', $aUid);
+			$statement->execute();
+			$statement->bind_result($count);
+			while($statement->fetch()){
+				if ($count>0) {
+					$result = TRUE;
+				}
+			}
+			$statement->close();
+		}
+		return $result;
+	}	
 } 
 ?>

@@ -149,6 +149,11 @@ if(isset($profile_viewprofileCrumbs)){
 			    } 
 			    ?>
 		        <li><a href="personalspecmenu.php">Specimen Management</a></li>
+		        <?php
+		        if ($pHandler->hasUserTaxonInterest($userId)===TRUE) { 
+		            echo "<li><a href='specimenstoid.php'>IDs Needed</a></li>";
+		        }
+		        ?>
 		        <li><a href="#profilediv">Edit Profile</a></li>
 		    </ul>
 		    <?php
