@@ -1731,6 +1731,7 @@ class SpecUploadManager{
 	
 	protected function encodeString($inStr){
  		global $charset;
+ 		$retStr = $inStr;
  		if($inStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
