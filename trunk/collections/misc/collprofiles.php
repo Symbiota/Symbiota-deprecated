@@ -592,13 +592,13 @@ if($collId) $collData = $collManager->getCollectionData();
 					<div style="clear:both;">
 						<div style="font-weight:bold;">Collection Statistics</div>
 						<ul>
-							<li><?php echo $collData["recordcnt"];?> specimens in database</li>
+							<li><?php echo $collData["recordcnt"];?> specimens</li>
 							<li><?php echo $collData["georefpercent"];?>% georeferenced</li>
 							<?php 
-							if($collData['imgpercent']) echo '<li>'.$collData['imgpercent'].'% imaged</li>';
-							if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank References</li>'; 
-							if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD References</li>'; 
-							if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' Publication References</li>'; 
+							if($collData['imgpercent']) echo '<li>'.$collData['imgpercent'].'% with images</li>';
+							if($collData['gencnt']) echo '<li>'.$collData['gencnt'].' GenBank references</li>'; 
+							if($collData['boldcnt']) echo '<li>'.$collData['boldcnt'].' BOLD references</li>'; 
+							if($collData['refcnt']) echo '<li>'.$collData['refcnt'].' publication references</li>'; 
 							?>
 							<li><?php echo $collData["familycnt"];?> families</li>
 							<li><?php echo $collData["genuscnt"];?> genera</li>
