@@ -102,7 +102,7 @@ class CollectionProfileManager {
 			}
 			$rs->close();
 			//Get additional statistics
-			$sql = 'SELECT count(DISTINCT i.imgid) as imgcnt '.
+			$sql = 'SELECT count(DISTINCT o.occid) as ingcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'WHERE (o.collid = '.$this->collId.') ';
 			$rs = $this->conn->query($sql);
