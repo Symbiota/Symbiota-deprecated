@@ -322,10 +322,14 @@ class OccurrenceCleaner {
 		$retArr = array();
 		if($this->collId){
 			//Grab clusters
-			$sql = 'SELECT d.duplicateid, d.title, d.description, d.notes '.
+			$sql = 'SELECT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes '.
 				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
 				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
 				'WHERE o.collid = '.$this->collId.' ORDER BY d.title';
+			/*$sql = 'SELECT d.duplicateid, d.title, d.description, d.notes '.
+				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
+				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
+				'WHERE o.collid = '.$this->collId.' ORDER BY d.title';*/
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->duplicateid]['title'] = $r->title;
@@ -341,6 +345,13 @@ class OccurrenceCleaner {
 				'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
 				'INNER JOIN omcollections c ON o2.collid = c.collid '.
 				'WHERE o.collid = '.$this->collId;
+			/*$sql = 'SELECT dl.duplicateid, o2.occid, IFNULL(o2.occurrenceid,o2.catalognumber) AS identifier, '.
+				'o2.sciname, o2.recordedby, o2.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code '.
+				'FROM omoccurrences o INNER JOIN omoccurduplicatelink dl ON o.occid = dl.occid '.
+				'INNER JOIN omoccurduplicatelink dl2 ON dl.duplicateid = dl2.duplicateid '.
+				'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
+				'INNER JOIN omcollections c ON o2.collid = c.collid '.
+				'WHERE o.collid = '.$this->collId;*/
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$idStr = $r->identifier;
@@ -419,7 +430,8 @@ class OccurrenceCleaner {
 							if($mArr) $dupId = key($mArr);
 							if(!$dupId){
 								//Create a new dupliate project
-								$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$dupIdStr.'",1)';
+								$sqlI1 = 'INSERT INTO omoccurduplicates(title,exactdupe) VALUES("'.$dupIdStr.'",1)';
+								//$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$dupIdStr.'",1)';
 								if($this->conn->query($sqlI1)){
 									$dupId = $this->conn->insert_id;
 									if($verbose) echo '<li style="margin-left:10px;">New duplicate project created: #'.$dupId.'</li>';
