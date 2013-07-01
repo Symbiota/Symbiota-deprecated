@@ -325,7 +325,7 @@ class OccurrenceCleaner {
 			$sql = 'SELECT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes '.
 				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
 				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
-				'WHERE o.collid = '.$this->collId.' ORDER BY d.title';
+				'WHERE o.collid = '.$this->collId.' ORDER BY d.projIdentifier';
 			/*$sql = 'SELECT d.duplicateid, d.title, d.description, d.notes '.
 				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
 				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
