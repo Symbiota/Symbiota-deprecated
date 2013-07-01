@@ -462,6 +462,13 @@ $smManager = new SiteMapManager();
 					}
 	            ?>
 	            </fieldset>
+	            
+				<h2>About Symbiota</h2>
+				<ul>
+					<li>
+						Schema Version <?php echo $smManager->getSchemaVersion(); ?>
+					</li>
+				</ul>
 			</div>
 		</div>
 	<?php

@@ -36,7 +36,7 @@ if($symbUid){
 	} else { 
 		echo "<h2>Specimens needing identification in your area of expertise.</h2>";
 	foreach ($pendingIdents as $key => $value) {
-		echo "<a href='../collections/editor/occurrenceeditor.php?occid=$key'>$value->sciname</a> $value->collectionCode $value->institutionCode $value->stateProvince<BR>";
+		echo "<a href='../collections/editor/occurrenceeditor.php?occid=$key'>$value->sciname</a> $value->collectionCode $value->institutionCode $value->stateProvince " . $value->getImageLink() . "<BR>";
 	}	
 	}
 	

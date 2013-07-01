@@ -14,6 +14,15 @@ class NeedsIDResult {
 	public $collectionCode;
 	public $institutionCode;
 	public $stateProvince;
+	public $imgid; 
+	
+	public function getImageLink() {
+		$retval = "";
+		if (strlen($this->imgid)>0) { 
+			$retval = "<img src='../images/link.png' height='16' width='16'> ";
+		} 
+		return $retval;
+	}
 }
 
 class PersonalSpecimenManager {
@@ -69,22 +78,24 @@ class PersonalSpecimenManager {
 				// TODO: Query on arbtirary lower taxa, not just parent + child.  
 				// Current query works as expected if usertaxonomy record is a genus or a family.
 				$sql = 'select * from ( '.
-				       '  select occid, sciname, o.collectioncode, o.institutioncode, o.stateprovince ' . 
+				       '  select distinct o.occid, sciname, o.collectioncode, o.institutioncode, o.stateprovince, i.imgid ' . 
 				       '     from omoccurrences o ' . 
 				       '     left join usertaxonomy ut on o.tidinterpreted = ut.tid ' . 
+				       '     left join images i on o.occid = i.occid ' .
 				       '    where ut.uid = ? ' . 
 				       '  union ' . 
-				       '  select occid, o.sciname, o.collectioncode, o.institutioncode, o.stateprovince ' .
+				       '  select distinct o.occid, o.sciname, o.collectioncode, o.institutioncode, o.stateprovince, i.imgid ' .
 				       '     from omoccurrences o ' . 
 				       '     left join taxstatus t on o.tidinterpreted = t.tidaccepted ' .
 				       '     left join usertaxonomy ut on t.parenttid = ut.tid ' . 
 				       '     left join taxa on t.tidaccepted = taxa.tid ' .
+				       '     left join images i on o.occid = i.occid ' .
 				       '    where ut.uid = ? and taxa.rankid < 220 ' . 
-				       ') a order by sciname';
+				       ') a order by imgid is null, sciname';
 				$statement = $this->conn->prepare($sql);
 				$statement->bind_param('ii', $this->uid, $this->uid);
 				$statement->execute();
-				$statement->bind_result($occid, $sciname, $collectioncode, $institutioncode, $stateprovince);
+				$statement->bind_result($occid, $sciname, $collectioncode, $institutioncode, $stateprovince, $imgid);
 				while($statement->fetch()){
 					$o = new NeedsIDResult();
 					$o->occid = $occid;
@@ -92,6 +103,7 @@ class PersonalSpecimenManager {
 					$o->collectionCode = $collectioncode;
 					$o->institutionCode = $institutioncode;
 					$o->stateProvince= $stateprovince;
+					$o->imgid = $imgid;
 					$retArr[$occid] = $o;
 				}
 				$statement->close();
