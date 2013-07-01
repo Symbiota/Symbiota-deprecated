@@ -131,5 +131,25 @@ class SiteMapManager{
 		}
 		return $retArr;
 	}
+	
+	/**
+	 * 
+	 * Determine the version number of the underlying schema.
+	 * 
+	 * @return string representation of the most recently applied schema version
+	 */
+	public function getSchemaVersion() {
+		$result = "No Schema Version Found"; 
+		$sql = "select versionnumber, dateapplied from schemaversion order by dateapplied desc limit 1 ";
+		$statement = $this->conn->prepare($sql);
+		$statement->execute();
+		$statement->bind_result($version,$dateapplied);
+		while ($statement->fetch())  { 
+			$result = $version;
+		}
+		$statement->close();
+		return $result;		
+	}
+	
 }
 ?>

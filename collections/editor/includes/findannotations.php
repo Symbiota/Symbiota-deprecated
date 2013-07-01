@@ -1,5 +1,5 @@
 <?php
-/* Copyright © 2012 President and Fellows of Harvard College
+/* Copyright ï¿½ 2012 President and Fellows of Harvard College
  *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -22,17 +22,25 @@
 */
 
 include_once('../../../config/symbini.php');
-include_once('fp/FPNetworkFactory.php');
+@include_once('fp/FPNetworkFactory.php');
+if (!file_exists("$serverRoot/fp/FPNetworkFactory.php")) { 
+   echo "FilteredPush Support has been enabled in this Symbiota installation, but FilteredPush helper code is not installed.<BR>";
+   echo "<strong>fp/FPNetworkFactory.php not found.</strong>";
+} else { 
 
 // Check for required query params
-if (array_key_exists('catalognumber', $_GET) &&
-		(array_key_exists('collectioncode', $_GET) || (array_key_exists('institutioncode', $_GET)))) {
-	$endpoint = FPNetworkFactory::getSparqlEndpoint();
+     if (array_key_exists('catalognumber', $_GET) &&
+		    (array_key_exists('collectioncode', $_GET) || (array_key_exists('institutioncode', $_GET)))
+        ) 
+     {
+ 	    $endpoint = FPNetworkFactory::getSparqlEndpoint();
 	
-	// returns query result formatted as html
-	echo $endpoint->getAnnotations($_GET);
-} else {
-	throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
+  	    // returns query result formatted as html
+	    echo $endpoint->getAnnotations($_GET);
+     } else {
+	    throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
+     }
+
 }
 
 ?>
