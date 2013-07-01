@@ -67,9 +67,7 @@ $specList = $loanManager->getSpecList($loanId);
 							<select name="iidowner" style="width:400px;" disabled >
 								<?php 
 								$instArr = $loanManager->getInstitutionArr();
-								foreach($instArr as $k => $v){
-									echo '<option value="'.$k.'" '.($k==$loanArr['iidowner']?'SELECTED':'').'>'.$v.'</option>';
-								}
+								echo '<option value="'.$loanArr['iidowner'].'" >'.$instArr[$loanArr['iidowner']].'</option>';
 								?>
 							</select>
 						</span>
