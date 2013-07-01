@@ -60,12 +60,21 @@ $specList = $loanManager->getSpecList($loanId);
 						<select name="iidborrower" style="width:400px;" disabled >
 							<?php 
 							$instArr = $loanManager->getInstitutionArr();
-							foreach($instArr as $k => $v){
-								echo '<option value="'.$k.'" '.($k==$loanArr['iidborrower']?'SELECTED':'').'>'.$v.'</option>';
-							}
+							echo '<option value="'.$loanArr['iidborrower'].'" >'.$instArr[$loanArr['iidborrower']].'</option>';
 							?>
 						</select>
 					</span>
+					<?php
+					if($isAdmin){
+						?>
+						<span>
+							<a href="../admin/institutioneditor.php?iid=<?php echo $loanArr['iidborrower']; ?>" target="_blank" title="Edit institution details (option available only to Super Admin)">
+								<img src="../../images/edit.png" style="width:15px;" />
+							</a>
+						</span>
+						<?php 
+					}
+					?>
 				</div>
 				<div style="padding-top:8px;float:left;">
 					<div style="float:left;">

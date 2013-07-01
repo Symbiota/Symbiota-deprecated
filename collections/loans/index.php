@@ -200,6 +200,11 @@ header("Content-Type: text/html; charset=".$charset);
 												?>
 											</select>
 										</span>
+										<span>
+											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
+												<img src="../../images/add.png" style="width:15px;" />
+											</a>
+										</span>
 									</div>
 									<div style="padding-top:8px;float:left;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
@@ -290,6 +295,11 @@ header("Content-Type: text/html; charset=".$charset);
 												}
 												?>
 											</select>
+										</span>
+										<span>
+											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
+												<img src="../../images/add.png" style="width:15px;" />
+											</a>
 										</span>
 									</div>
 									<div style="padding-top:8px;float:left;">
