@@ -430,7 +430,7 @@ class OccurrenceCleaner {
 							if($mArr) $dupId = key($mArr);
 							if(!$dupId){
 								//Create a new dupliate project
-								$sqlI1 = 'INSERT INTO omoccurduplicates(title,exactdupe) VALUES("'.$dupIdStr.'",1)';
+								$sqlI1 = 'INSERT INTO omoccurduplicates(projIdentifier,exactdupe) VALUES("'.$dupIdStr.'",1)';
 								//$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$dupIdStr.'",1)';
 								if($this->conn->query($sqlI1)){
 									$dupId = $this->conn->insert_id;
