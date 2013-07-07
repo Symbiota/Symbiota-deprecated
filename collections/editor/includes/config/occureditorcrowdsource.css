@@ -38,24 +38,9 @@ body{
 	font-size: 12px;
 }
 
-#dupesDiv{
-	float:left;
-	margin:5px 5px;
-}
-
 #dateToggleDiv{
 	float:left;
 	margin:15px 5px;
-}
-
-#dupediv{
-	display:none;
-	float:right;
-	width:150px;
-	border:2px outset blue;
-	background-color:#FFFFFF;
-	padding:3px;
-	font-weight:bold;
 }
 
 #dateextradiv{
@@ -124,6 +109,18 @@ body{
 	position: absolute;
 	top: 25px;
 	left: 450px;
+}
+
+#dupediv{
+	position: absolute;
+	top: 75px;
+	left: 450px;
+	display:none;
+	width:150px;
+	border:2px outset blue;
+	background-color:#FFFFFF;
+	padding:3px;
+	font-weight:bold;
 }
 
 #dateToggleDiv{
@@ -275,7 +272,6 @@ body{
 }
 
 #geoToolsDiv{
-	display:none;
 }
 
 
@@ -284,11 +280,13 @@ body{
 }
 
 #elevationDiv{
-	display:none;
+	width:	350px;
+	float:	left;
+	margin:	2px 10px;
 }
 
-#verbElevParseDiv{
-	display:none;
+#elevationDiv input{
+	width:55px;
 }
 
 #verbatimElevationDiv{
@@ -311,12 +309,13 @@ body{
 }
 
 #verbatimCoordinatesDiv{
-	float:	left;
-	margin-top:2px;
+	position: relative;
+	top: -83px;
+	left: 300px;
 }
 
 #verbatimCoordinatesDiv input{
-	width:	300px;
+	width:	270px;
 }
 
 #georeferencedByDiv{
@@ -478,6 +477,10 @@ body{
 	display: none;
 }
 
+#genTab{
+	display: none;
+}
+
 #adminTab{
 	display: none;
 }
@@ -501,4 +504,3 @@ table {
 	font-family: 	Arial, Helvetica, sans-serif; 
 	font-size: 		12px;
 }
-

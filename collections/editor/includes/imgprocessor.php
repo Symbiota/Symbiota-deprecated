@@ -51,6 +51,7 @@
 								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+								<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 								<input name="submitaction" type="submit" value="Save OCR" />
 							</div>
 						</form>
@@ -91,6 +92,7 @@
 											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input name="submitaction" type="submit" value="Save OCR Edits" />
 											<?php 
 											if(isset($salixPath)) echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="salixText(this.form)" />'; 
@@ -112,6 +114,7 @@
 											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input name="submitaction" type="submit" value="Delete OCR" />
 										</form>
 									</div>

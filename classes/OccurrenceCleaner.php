@@ -32,7 +32,7 @@ class OccurrenceCleaner {
 			while($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['collectioncode'] = $row->collectioncode;
-				$returnArr['collectionname'] = $this->cleanOutStr($row->collectionname);
+				$returnArr['collectionname'] = $row->collectionname;
 				$returnArr['icon'] = $row->icon;
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
@@ -73,7 +73,17 @@ class OccurrenceCleaner {
 	
 	public function getDuplicateCollectorNumber($lastName = ''){
 		$returnArr = array();
-		$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
+		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
+			'o.eventDate, o.verbatimEventDate, o.country, o.stateProvince, o.county, o.municipality, o.locality '. 
+			'FROM omoccurrences o INNER JOIN '. 
+			'(SELECT count(occid) as cnt, eventdate, recordnumber '.
+			'FROM omoccurrences '.
+			'WHERE collid = '.$this->collId.' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
+			'AND recordnumber NOT LIKE "s%n%" '. 
+			'GROUP BY eventdate, recordnumber) intab ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
+			'WHERE intab.cnt > 2 AND collid = '.$this->collId.' '.
+			'ORDER BY o.recordedBy, o.recordNumber LIMIT 505';
+		/*$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedBy, o.recordNumber, o.associatedCollectors, '.
 			'o.eventDate, o.verbatimEventDate, o.country, o.stateProvince, o.county, o.municipality, o.locality '.
 			'FROM omoccurrences o INNER JOIN '. 
 			'(SELECT recordedby, recordnumber, count(*) as reccnt '. 
@@ -82,12 +92,13 @@ class OccurrenceCleaner {
 			'AND recordnumber IS NOT NULL AND recordnumber != "s.n." AND recordnumber != "sn" '.
 			'GROUP BY recordedby, recordnumber) intab ON o.recordedby = intab.recordedby AND o.recordnumber = intab.recordnumber '.
 			'WHERE collid = collid = '.$this->collId.' AND intab.reccnt > 1 '.
-			'ORDER BY o.recordedBy, o.recordNumber LIMIT 505';
+			'ORDER BY o.recordedBy, o.recordNumber LIMIT 505';*/
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->occid]['occid'] = $row->occid;
 			$returnArr[$row->occid]['catalognumber'] = $row->catalognumber;
+			$returnArr[$row->occid]['othercatalognumbers'] = $row->othercatalognumbers;
 			$returnArr[$row->occid]['family'] = $row->family;
 			$returnArr[$row->occid]['sciname'] = $row->sciname;
 			$returnArr[$row->occid]['recordedBy'] = $row->recordedBy;
@@ -318,18 +329,38 @@ class OccurrenceCleaner {
 		return $name;
 	}
 
-	public function getDuplicateClusters(){
+	public function getDuplicateClusters($limitToConflicts = 0){
 		$retArr = array();
 		if($this->collId){
 			//Grab clusters
-			$sql = 'SELECT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes '.
-				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
-				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
-				'WHERE o.collid = '.$this->collId.' ORDER BY d.projIdentifier';
-			/*$sql = 'SELECT d.duplicateid, d.title, d.description, d.notes '.
-				'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
-				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
-				'WHERE o.collid = '.$this->collId.' ORDER BY d.title';*/
+			$sql = '';
+			if($limitToConflicts){
+				$sql = 'SELECT DISTINCT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes '.
+					'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
+					'INNER JOIN omoccurrences o1 ON dl1.occid = o1.occid '.
+					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
+					'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
+					'WHERE o1.collid = '.$this->collId.' AND o1.tidinterpreted <> o2.tidinterpreted '.
+					'ORDER BY d.projIdentifier';
+				/*$sql = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes '.
+					'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
+					'INNER JOIN omoccurrences o1 ON dl1.occid = o1.occid '.
+					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
+					'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
+					'WHERE o1.collid = '.$this->collId.' AND o1.tidinterpreted <> o2.tidinterpreted '.
+					'ORDER BY d.title';*/
+			}
+			else{
+				$sql = 'SELECT d.duplicateid, d.projIdentifier AS title, d.projDescription AS description, d.notes '.
+					'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
+					'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
+					'WHERE o.collid = '.$this->collId.' ORDER BY d.projIdentifier';
+				/*$sql = 'SELECT d.duplicateid, d.title, d.description, d.notes '.
+					'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl ON d.duplicateid = dl.duplicateid '.
+					'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
+					'WHERE o.collid = '.$this->collId.' ORDER BY d.title';*/
+			}
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->duplicateid]['title'] = $r->title;
@@ -339,14 +370,14 @@ class OccurrenceCleaner {
 			$rs->free();
 			//Grab occurrences for each cluster
 			$sql = 'SELECT dl.duplicateid, o2.occid, IFNULL(o2.occurrenceid,o2.catalognumber) AS identifier, '.
-				'o2.sciname, o2.recordedby, o2.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code '.
+				'o2.sciname, o2.tidinterpreted, o2.recordedby, o2.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code '.
 				'FROM omoccurrences o INNER JOIN omoccurduplicatelink dl ON o.occid = dl.occid '.
 				'INNER JOIN omoccurduplicatelink dl2 ON dl.duplicateid = dl2.duplicateid '.
 				'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
 				'INNER JOIN omcollections c ON o2.collid = c.collid '.
 				'WHERE o.collid = '.$this->collId;
 			/*$sql = 'SELECT dl.duplicateid, o2.occid, IFNULL(o2.occurrenceid,o2.catalognumber) AS identifier, '.
-				'o2.sciname, o2.recordedby, o2.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code '.
+				'o2.sciname, o2.tidinterpreted, o2.recordedby, o2.recordnumber, CONCAT_WS(":",c.institutioncode ,c.collectioncode) as code '.
 				'FROM omoccurrences o INNER JOIN omoccurduplicatelink dl ON o.occid = dl.occid '.
 				'INNER JOIN omoccurduplicatelink dl2 ON dl.duplicateid = dl2.duplicateid '.
 				'INNER JOIN omoccurrences o2 ON dl2.occid = o2.occid '.
@@ -357,7 +388,10 @@ class OccurrenceCleaner {
 				$idStr = $r->identifier;
 				if(is_numeric($idStr)) $idStr = $r->code.':'.$idStr;
 				if(!$idStr) $idStr = $r->code.':'.'undefined';
-				$retArr[$r->duplicateid][$r->occid] = $idStr.' => <b>'.$r->sciname.'</b>: '.$r->recordedby.' '.$r->recordnumber;
+				$retArr[$r->duplicateid][$r->occid]['id'] = $idStr;
+				$retArr[$r->duplicateid][$r->occid]['sciname'] = $r->sciname;
+				$retArr[$r->duplicateid][$r->occid]['tid'] = $r->tidinterpreted;
+				$retArr[$r->duplicateid][$r->occid]['recby'] = $r->recordedby.' '.$r->recordnumber;
 			}
 			$rs->free();
 		}
@@ -395,9 +429,11 @@ class OccurrenceCleaner {
 					$recNum = str_replace(array(' ','-',':'),'',$r2->recordnumber);
 					if(preg_match('#\d#',$recNum)){
 						$nameArr = $this->parseCollectorName($r2->recordedby);
-						if(isset($nameArr['last']) && $nameArr['last'] && !preg_match('#\d#',$nameArr['last'])){
-							$rArr[$recNum][$nameArr['last']][$r2->dupid][] = $r2->occid;
-							if($r2->collid == $collid) $keepArr[$recNum][$nameArr['last']] = 1;
+						$lastName = $nameArr['last'];
+						if(strpos($lastName,'.')) $lastName = $r2->recordedby;
+						if(isset($lastName) && $lastName && !preg_match('#\d#',$lastName)){
+							$rArr[$recNum][$lastName][$r2->dupid][] = $r2->occid;
+							if($r2->collid == $collid) $keepArr[$recNum][$lastName] = 1;
 						}
 					}
 				}
@@ -430,7 +466,7 @@ class OccurrenceCleaner {
 							if($mArr) $dupId = key($mArr);
 							if(!$dupId){
 								//Create a new dupliate project
-								$sqlI1 = 'INSERT INTO omoccurduplicates(projIdentifier,exactdupe) VALUES("'.$dupIdStr.'",1)';
+								$sqlI1 = 'INSERT INTO omoccurduplicates(projIdentifier,exactdupe) VALUES("'.$this->cleanInStr($dupIdStr).'",1)';
 								//$sqlI1 = 'INSERT INTO omoccurduplicates(title,dupetype) VALUES("'.$dupIdStr.'",1)';
 								if($this->conn->query($sqlI1)){
 									$dupId = $this->conn->insert_id;
@@ -445,12 +481,14 @@ class OccurrenceCleaner {
 							}
 							if($dupId){
 								//Add unlinked to duplicate project
+								$outLink = '';
 								$sqlI2 = 'INSERT INTO omoccurduplicatelink(duplicateid,occid) VALUES ';
 								foreach($unlinkedArr as $v){
 									$sqlI2 .= '('.$dupId.','.$v.'),';
+									$outLink .= ' <a href="../individual.php?occid='.$v.'" target="_blank">'.$v.'</a>,';
 								}
 								if($this->conn->query(trim($sqlI2,','))){
-									if($verbose) echo '<li style="margin-left:10px;">'.count($unlinkedArr).' duplicates linked</li>';
+									if($verbose) echo '<li style="margin-left:10px;">'.count($unlinkedArr).' duplicates linked ('.trim($outLink,' ,').')</li>';
 								}
 								else{
 									if($verbose) echo '<li style="margin-left:10px;">ERROR linking dupes: '.$this->conn->error.'</li>';
@@ -474,11 +512,49 @@ class OccurrenceCleaner {
 		if($verbose) echo '<li>Finished linking duplicates '.date('Y-m-d H:i:s').'</li>';
 	}
 	
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
+	public function editDuplicateCluster($dupId, $title, $description, $notes){
+		$statusStr = 'SUCCESS: duplicate cluster edited';
+		$sql = 'UPDATE omoccurduplicates SET projIdentifier = '.($title?'"'.$this->cleanInStr($title).'"':'NULL').', '.
+			'projdescription = '.($description?'"'.$this->cleanInStr($description).'"':'NULL').', '.
+			'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').' '.
+			'WHERE (duplicateid = '.$dupId.')';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR editing duplicate cluster: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+	
+	public function deleteDuplicateCluster($dupId){
+		$statusStr = 'SUCCESS: duplicate cluster deleted';
+		$sql = 'DELETE FROM omoccurduplicates WHERE duplicateid = '.$dupId;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR deleting duplicate cluster: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+	
+	public function deleteOccurFromCluster($dupId, $occid){
+		$statusStr = 'SUCCESS: occurrence removed from duplicate cluster';
+		//If duplicate cluster only consists of two occurrences, remove whole cluster
+		$rs = $this->conn->query('SELECT duplicateid FROM omoccurduplicates WHERE duplicateid = '.$dupId);
+		if($rs->num_rows == 2){
+			$sql = 'DELETE FROM omoccurduplicates WHERE (duplicateid = '.$dupId.')';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR deleting duplicate cluster: '.$this->conn->error;
+			}
+		}
+		else{
+			$sql = 'DELETE FROM omoccurduplicatelink WHERE (duplicateid = '.$dupId.') AND (occid = '.$occid.')';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR deleting occurrence from duplicate cluster: '.$this->conn->error;
+			}
+		}
+		return $statusStr;
+	}
+	
+	private function cleanInStr($str){
+		return $this->conn->real_escape_string(trim($str));
 	}
 }
 ?>

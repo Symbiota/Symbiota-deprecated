@@ -333,6 +333,10 @@ else{
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
 		<?php
+		if(isset($salixPath) && $salixPath){
+			echo 'var salixPath = '.$salixPath.";\n";
+			echo 'var csDefault = '.$charset.";\n";
+		}
 		if($imgArr){
 			?>
 			var activeImageArr = new Array("<?php echo implode('","',$imgArr); ?>");
@@ -480,32 +484,33 @@ else{
 										$person = $pHandler->getPersonByUid($symbUid);
 										$userEmail = ($person?$person->getEmail():'');
 										
+										$anchorVars = 'occid='.$occId.'&occindex='.$occIndex.'&em='.$isEditor.'&csmode='.$crowdSourceMode;
 										$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).'&sciname='.urlencode($occArr['sciname']).
 											'&annotatorname='.urlencode($userDisplayName).'&annotatoremail='.urlencode($userEmail).
 											(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 											(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'').
 											'&catalognumber='.urlencode($occArr['catalognumber']);
 										
-										$imgVars = '&tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
+										$imgVars = 'tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
 										?>
 										<li id="detTab">
-											<a href="includes/determinationtab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&'.$detVars; ?>" 
+											<a href="includes/determinationtab.php?<?php echo $anchorVars.'&'.$detVars; ?>" 
 												style="margin:0px 20px 0px 20px;">Determination History</a>
 										</li>
 										<?php 
 										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
 											echo '<li>';
-											echo '<a href="includes/findannotations.php?'.$detVars.'"';
+											echo '<a href="includes/findannotations.php?'.$anchorVars.'&'.$detVars.'"';
 											echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
 											echo '</li>';
 										} 
 										?>
 										<li id="imgTab">
-											<a href="includes/imagetab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
+											<a href="includes/imagetab.php?<?php echo $anchorVars.'&'.$imgVars; ?>" 
 												style="margin:0px 20px 0px 20px;">Images</a>
 										</li>
 										<li id="genTab">
-											<a href="includes/genetictab.php?occid=<?php echo $occId.'&occindex='.$occIndex.'&em='.$isEditor.$imgVars; ?>" 
+											<a href="includes/genetictab.php?<?php echo $anchorVars; ?>" 
 												style="margin:0px 20px 0px 20px;">Genetic Links</a>
 										</li>
 										<li id="adminTab">
@@ -800,13 +805,15 @@ else{
 													<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" /> - 
 													<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
 												</div>
-												<div id="verbElevParseDiv">
-													<a href="#" onclick="parseVerbatimElevation(document.fullform);return false">&lt;&lt;</a>
-												</div>
 												<div id="verbatimElevationDiv">
-													<?php echo (defined('VERBATIMELEVATION')?VERBATIMELEVATION:'Verbatim Elevation'); ?>
-													<br/>
-													<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
+													<div style="float:left;margin:18px 2px 0px 2px" title="Recalculate Elevation in Meters">
+														<a href="#" onclick="parseVerbatimElevation(document.fullform);return false">&lt;&lt;</a>
+													</div>
+													<div style="float:left;">
+														<?php echo (defined('VERBATIMELEVATION')?VERBATIMELEVATION:'Verbatim Elevation'); ?>
+														<br/>
+														<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
+													</div>
 												</div>
 												<div id="locExtraToggleDiv" onclick="toggle('locExtraDiv');">
 													<img src="../../images/editplus.png" style="width:15px;" />
@@ -839,13 +846,15 @@ else{
 											?>
 											<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
 												<div>
-													<div style="float:left;margin:20px 2px 0px 2px">
-														<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
-													</div>
 													<div id="verbatimCoordinatesDiv">
-														<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
-														<br/>
-														<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
+														<div style="float:left;margin:18px 2px 0px 2px" title="Recalculate Decimal Coordinates">
+															<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
+														</div>
+														<div style="float:left;">
+															<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
+															<br/>
+															<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
+														</div>
 													</div>
 													<div id="georeferencedByDiv">
 														<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>
@@ -1243,6 +1252,7 @@ else{
 														<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
 														<input name="occindex" type="hidden" value="<?php echo $occIndex; ?>" />
 														<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+														<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 														<input name="submitaction" type="submit" value="Delete Occurrence" />
 													</div>
 												</div>

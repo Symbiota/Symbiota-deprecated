@@ -2,6 +2,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/OccurrenceEditorDeterminations.php');
 include_once($serverRoot.'/classes/OccurrenceEditorImages.php');
+include_once($serverRoot.'/classes/UuidFactory.php');
 
 class OccurrenceEditorManager {
 
@@ -655,6 +656,11 @@ class OccurrenceEditorManager {
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
 				$this->occid = $this->conn->insert_id;
+				//Create and insert Symbiota GUID (UUID)
+				$guid = UuidFactory::getUuidV4();
+				if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$this->occid.')')){
+					$status .= ' (Warning: Symbiota GUID mapping failed)';
+				}
 			}
 			else{
 				$status = "ERROR - failed to add occurrence record: ".$this->conn->error;
@@ -666,15 +672,65 @@ class OccurrenceEditorManager {
 	public function deleteOccurrence($delOccid){
 		$status = '';
 		if(is_numeric($delOccid)){
-			$sql = 'DELETE FROM omoccurrences WHERE (occid = '.$delOccid.')';
-			if($this->conn->query($sql)){
+			//Archive data, first grab occurrence data
+			$archiveArr = array();
+			$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$delOccid;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_assoc()){
+				foreach($r as $k => $v){
+					if($v) $archiveArr[$k] = $this->encodeStr($v);
+				}
+			}
+			$rs->close();
+			if($archiveArr){
+				//Then determinations history
+				$detArr = array();
+				$sql = 'SELECT * FROM omoccurdeterminations WHERE occid = '.$delOccid;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_assoc()){
+					$detId = $r['detid'];
+					foreach($r as $k => $v){
+						if($v) $detArr[$detId][$k] = $this->encodeStr($v);
+					}
+					//Archive determinations
+					$detObj = json_encode($detArr[$detId]);
+					$sqlArchive = 'UPDATE guidoccurdeterminations '.
+					'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($detObj).'" '.
+					'WHERE (detid = '.$detId.')';
+					$this->conn->query($sqlArchive);
+				}
+				$rs->close();
+				$archiveArr['dets'] = $detArr;
+
+				$archiveObj = json_encode($archiveArr);
+				$sqlArchive = 'UPDATE guidoccurrences '.
+				'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($archiveObj).'" '.
+				'WHERE (occid = '.$delOccid.')';
+				//echo $sqlArchive;
+				$this->conn->query($sqlArchive);
+			}
+
+			//Go ahead and delete 
+			$sqlDel = 'DELETE FROM omoccurrences WHERE (occid = '.$delOccid.')';
+			if($this->conn->query($sqlDel)){
 				$status = 'SUCCESS: Occurrence Record Deleted!';
 			}
 			else{
-				$status = 'FAILED: unable to delete occurrence record';
+				$status = 'ERROR trying to delete occurrence record: '.$this->conn->error;
 			}
 		}
 		return $status;
+	}
+	
+	protected function encodeStr($inStr){
+		global $charset;
+		$retStr = $inStr;
+		if(strtolower($charset) == "iso-8859-1"){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+				$retStr = utf8_encode($retStr);
+			}
+		}
+		return $retStr;
 	}
 	
 	public function setLoanData(){

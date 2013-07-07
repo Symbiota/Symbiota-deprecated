@@ -5,6 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $occid = $_GET['occid'];
 $occIndex = $_GET['occindex'];
+$crowdSourceMode = $_GET['csmode'];
 
 $occManager = new OccurrenceEditorManager();
 
@@ -68,6 +69,7 @@ $genticArr = $occManager->getGeneticArr();
 				</div>
 				<div style="margin:2px;">
 					<input name="submitaction" type="hidden" value="addgeneticsubmit" />
+					<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 					<input name="subbut" type="button" value="Add New Genetic Resource" onclick="submitAddGeneticResource(this.form)" />
 					<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 				</div>
@@ -119,6 +121,7 @@ $genticArr = $occManager->getGeneticArr();
 							<input name="subbut" type="button" value="Save Edits" onclick="submitEditGeneticResource(this.form)" />
 							<input name="genid" type="hidden" value="<?php echo $genId; ?>" />
 							<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
+							<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 						</div>								
 					</form>
 				</fieldset>
@@ -130,6 +133,7 @@ $genticArr = $occManager->getGeneticArr();
 							<input name="subbut" type="button" value="Delete Resource" onclick="submitDeleteGeneticResource(this.form)" />
 							<input name="genid" type="hidden" value="<?php echo $genId; ?>" />
 							<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
+							<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 						</div>								
 					</form>
 				</fieldset>

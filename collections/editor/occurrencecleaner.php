@@ -5,6 +5,7 @@ header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
+$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
@@ -29,6 +30,19 @@ elseif($action == 'listdupsrecordedby'){
 	$dupArr = $cleanManager->getDuplicateCollectorNumber();
 	$action == 'listdups';
 }
+
+if($isEditor && $formSubmit){
+	if($formSubmit == 'clusteredit'){
+		$statusStr = $cleanManager->editDuplicateCluster($_POST['dupid'],$_POST['title'],$_POST['description'],$_POST['notes']);
+	}
+	elseif($formSubmit == 'clusterdelete'){
+		$statusStr = $cleanManager->deleteDuplicateCluster($_POST['deldupid']);
+	}
+	elseif($formSubmit == 'occdelete'){
+		$statusStr = $cleanManager->deleteOccurFromCluster($_POST['dupid'],$_POST['occid']);
+	}
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -58,6 +72,46 @@ elseif($action == 'listdupsrecordedby'){
 			var dbElements = document.getElementsByName("dupid[]");
 			for(i = 0; i < dbElements.length; i++){
 				dbElements[i].checked = boxesChecked;
+			}
+
+		}
+
+		function verifyEditForm(f){
+			if(f.title == ""){
+				alert("Title field must have a value");
+				return false;
+			}
+			return true;
+		}
+
+		function openOccurPopup(occid) {
+			occWindow=open("../individual/index.php?occid="+occid,"occwin"+occid,"resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+			if(occWindow.opener == null) occWindow.opener = self;
+		}
+
+		function toggle(target){
+			var ele = document.getElementById(target);
+			if(ele){
+				if(ele.style.display=="block"){
+					ele.style.display="none";
+		  		}
+			 	else {
+			 		ele.style.display="block";
+			 	}
+			}
+			else{
+				var divObjs = document.getElementsByTagName("div");
+			  	for (i = 0; i < divObjs.length; i++) {
+			  		var divObj = divObjs[i];
+			  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="inline";
+						}
+					 	else {
+					 		divObj.style.display="none";
+					 	}
+					}
+				}
 			}
 		}
 	</script>
@@ -91,8 +145,17 @@ elseif($action == 'listdupsrecordedby'){
 	?>
 	<!-- inner text -->
 	<div id="innertext">
-		<?php 
-		if($collId && $isEditor){
+		<?php
+		if($statusStr){
+			?>
+			<hr/>
+			<div style="margin:20px;color:<?php echo (substr($statusStr,0,5)=='ERROR'?'red':'green');?>">
+				<?php echo $statusStr; ?>
+			</div>
+			<hr/>
+			<?php 
+		} 
+		if($isEditor){
 			if(!$action){
 				?>
 				<fieldset style="padding:20px;">
@@ -117,7 +180,7 @@ elseif($action == 'listdupsrecordedby'){
 						</a>
 					</div>
 				</fieldset>
-
+<!-- 
 				<fieldset style="padding:20px;">
 					<legend><b>Taxonomic Names</b></legend>
 						<div>
@@ -138,7 +201,7 @@ elseif($action == 'listdupsrecordedby'){
 							In development
 						</div>
 				</fieldset>
-
+ -->
 				<fieldset style="padding:20px;">
 					<legend><b>Duplicate Linkages</b></legend>
 						<div>
@@ -149,6 +212,11 @@ elseif($action == 'listdupsrecordedby'){
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupes">
 							List linked duplicate clusters 
+						</a>
+					</div>
+					<div style="margin:25px;font-weight:bold;font-size:120%;">
+						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupeconflicts">
+							List linked duplicate clusters with conflicted identifications 
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
@@ -244,34 +312,83 @@ elseif($action == 'listdupsrecordedby'){
 					</ul>
 					<?php 
 				}
-				elseif($action == 'listdupes'){
-					$clusterArr = $cleanManager->getDuplicateClusters();
+				elseif($action == 'listdupes' || $action == 'listdupeconflicts'){
+					$clusterArr = $cleanManager->getDuplicateClusters($action == 'listdupes'?0:1);
 					if($clusterArr){
 						?>
-						<div>Listing Duplicate Clusters</div>
-						<ol>
+						<div style="font-weight:bold;font-size:115%;"><?php echo count($clusterArr).' Duplicate Clusters '.($action == 'listdupeconflicts'?'with Identification Differences':''); ?></div>
+						<div style="margin:10px 0px;clear:both;">
 							<?php 
 							foreach($clusterArr as $dupId => $dupArr){
-								echo '<div><b>'.$dupArr['title'].'</b></div>';
-								if(isset($dupArr['desc'])) echo '<div style="margin-left:10px;">'.$dupArr['desc'].'</div>';
-								if(isset($dupArr['notes'])) echo '<div style="margin-left:10px;">'.$dupArr['notes'].'</div>';
-								unset($dupArr['title']);
-								unset($dupArr['desc']);
-								unset($dupArr['notes']);
-								echo '<div style="margin:7px 10px;">';
-								foreach($dupArr as $occid => $idStr){
-									echo '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$idStr.'</a><br/>';
-								}
-								echo '</div>';
+								?>
+								<div style="clear:both;margin:10px 0px;">
+									<div>
+										<b><?php echo $dupArr['title']; ?></b> 
+										<span onclick="toggle('editdiv-<?php echo $dupId; ?>')"><img src="../../images/edit.png" style="width:13px;" /></span> 
+									</div>
+									<?php 
+									if(isset($dupArr['desc'])) echo '<div style="margin-left:10px;">'.$dupArr['desc'].'</div>';
+									if(isset($dupArr['notes'])) echo '<div style="margin-left:10px;">'.$dupArr['notes'].'</div>';
+									?>
+									<div class="editdiv-<?php echo $dupId; ?>" style="display:none;">
+										<fieldset style="margin:20px;padding:15px;">
+											<legend><b>Edit Cluster</b></legend>
+											<form name="dupeditform-<?php echo $dupId; ?>" method="post" action="occurrencecleaner.php" onsubmit="return verifyEditForm(this);">
+												<b>Title:</b> <input name="title" type="text" value="<?php echo $dupArr['title']; ?>" style="width:300px;" /><br/>
+												<b>Description:</b> <input name="description" type="text" value="<?php echo $dupArr['desc']; ?>" style="width:400px;" /><br/>
+												<b>Notes:</b> <input name="notes" type="text" value="<?php echo $dupArr['notes']; ?>" style="width:400px;" /><br/>
+												<input name="dupid" type="hidden" value="<?php echo $dupId; ?>" />
+												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+												<input name="action" type="hidden" value="<?php echo $action; ?>" />
+												<input name="formsubmit" type="hidden" value="clusteredit" />
+												<input name="submit" type="submit" value="Save Edits" />
+											</form>
+											<form name="dupdelform-<?php echo $dupId; ?>" method="post" action="occurrencecleaner.php" onsubmit="return confirm('Are you sure you want to delete this duplicate cluster?');">
+												<input name="deldupid" type="hidden" value="<?php echo $dupId; ?>" />
+												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+												<input name="action" type="hidden" value="<?php echo $action; ?>" />
+												<input name="formsubmit" type="hidden" value="clusterdelete" />
+												<input name="submit" type="submit" value="Delete Cluster" />
+											</form>
+										</fieldset>
+									</div>
+									<div style="margin:7px 10px;">
+										<?php 
+										unset($dupArr['title']);
+										unset($dupArr['desc']);
+										unset($dupArr['notes']);
+										foreach($dupArr as $occid => $oArr){
+											?>
+											<div>
+												<a href="#" onclick="openOccurPopup(<?php echo $occid; ?>); return false;"><b><?php echo $oArr['id']; ?></b></a> => 
+												<?php echo '<b>'.$oArr['sciname'].'</b>: '.$oArr['recby'].' '; ?>
+												<div class="editdiv-<?php echo $dupId; ?>" style="display:none;">
+													<form name="dupdelform-<?php echo $dupId.'-'.$occid; ?>" method="post" action="occurrencecleaner.php" onsubmit="return confirm('Are you sure you want to remove this occurrence record from this cluster?');" style="display:inline;">
+														<input name="dupid" type="hidden" value="<?php echo $dupId; ?>" />
+														<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
+														<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+														<input name="action" type="hidden" value="<?php echo $action; ?>" />
+														<input name="formsubmit" type="hidden" value="occdelete" />
+														<input name="submit" type="image" src="../../images/del.gif" style="width:15px;" />
+													</form>
+												</div>
+											</div>
+											<?php 
+										}
+										?>
+									</div>
+								</div>
+								<?php 
 							}
 							?>
-						</ol>
+						</div>
 						<?php
 					}
 					else{
 						 echo '<div><b>No Duplicate Clusters Exist</b></div>';
 					}
 				}
+				
 				?>
 				<div>
 					<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Return to main menu</a>
@@ -280,17 +397,7 @@ elseif($action == 'listdupsrecordedby'){
 			}
 		}
 		else{
-			if(!$collId){
-				?>
-				<div style="margin:25px;font-weight:bold;font-size:120%;">
-					ERROR: collid not defined
-				</div>
-				<?php 
-			}
-			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add occurrence records</h2>';
-				
-			}
+			echo '<h2>You are not authorized to add occurrence records</h2>';
 		}
 		?>
 	</div>

@@ -66,6 +66,12 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
 		//echo "<div>".$sql."</div>";
 		if($this->conn->query($sql)){
+			//Create and insert Symbiota GUID for determination(UUID)
+			$guid = UuidFactory::getUuidV4();
+			$detId = $this->conn->insert_id;
+			if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$detId.')')){
+				$status .= ' (Warning: Symbiota GUID mapping #1 failed)';
+			}
 			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
 			if($isCurrent){
 				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
@@ -74,8 +80,16 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, IFNULL(dateidentified,"assumed to be collection date") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 					'FROM omoccurrences WHERE (occid = '.$detArr['occid'].')';
-				$this->conn->query($sqlInsert);
 				//echo "<div>".$sqlInsert."</div>";
+				if($this->conn->query($sqlInsert)){
+					//Create and insert Symbiota GUID for determination(UUID)
+					$guid = UuidFactory::getUuidV4();
+					$detId = $this->conn->insert_id;
+					if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$detId.')')){
+						$status .= ' (Warning: Symbiota GUID mapping #2 failed)';
+					}
+				}
+
 				//Check to see if taxon has a locality security protection (rare, threatened, or sensitive species)
 				$sStatus = 0;
 				$sqlSs = 'SELECT securitystatus FROM taxa WHERE (sciname = "'.$sciname.'")';
@@ -158,10 +172,27 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 	public function deleteDetermination($detId){
 		$status = 'Determination deleted successfully!';
+
+		$sql = 'SELECT * FROM omoccurdeterminations WHERE detid = '.$detId;
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_assoc()){
+			$detArr = array();
+			foreach($r as $k => $v){
+				if($v) $detArr[$k] = $this->encodeStr($v);
+			}
+			//Archive determinations
+			$detObj = json_encode($detArr);
+			$sqlArchive = 'UPDATE guidoccurdeterminations '.
+			'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($detObj).'" '.
+			'WHERE (detid = '.$detId.')';
+			$this->conn->query($sqlArchive);
+		}
+		
 		$sql = 'DELETE FROM omoccurdeterminations WHERE (detid = '.$detId.')';
 		if(!$this->conn->query($sql)){
 			$status = "ERROR - failed to delete determination: ".$this->conn->error;
 		}
+
 		return $status;
 	}
 
@@ -174,7 +205,14 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'IFNULL(dateidentified,"assumed to be collection date") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 			'FROM omoccurrences WHERE (occid = '.$this->occid.')';
-		$this->conn->query($sqlInsert);
+		if($this->conn->query($sqlInsert)){
+			//Create and insert Symbiota GUID for determination(UUID)
+			$guid = UuidFactory::getUuidV4();
+			$detId = $this->conn->insert_id;
+			if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$detId.')')){
+				$status .= ' (Warning: Symbiota GUID mapping #1 failed)';
+			}
+		}
 		//echo "<div>".$sqlInsert."</div>";
 		//Update omoccurrences to reflect this determination
 		$tid = 0;
