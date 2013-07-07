@@ -7,6 +7,7 @@ $occId = $_GET['occid'];
 $occIndex = $_GET['occindex'];
 $tid = $_GET['tid'];
 $instCode = $_GET['instcode'];
+$crowdSourceMode = $_GET['csmode'];
 
 $occManager = new OccurrenceEditorImages();
 
@@ -111,6 +112,7 @@ $imageArr = $occManager->getImageMap();
 					<input type="hidden" name="institutioncode" value="<?php echo $instCode; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
+					<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 					<input type="submit" name="submitaction" value="Submit New Image" />
 				</div>
 			</fieldset>
@@ -294,8 +296,9 @@ $imageArr = $occManager->getImageMap();
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-										<input type="submit" name="submitaction" value="Submit Image Edits" />
 										<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
+										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+										<input type="submit" name="submitaction" value="Submit Image Edits" />
 									</div>
 								</fieldset>
 							</form>
@@ -309,6 +312,7 @@ $imageArr = $occManager->getImageMap();
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
+										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
 										<div style="margin-left:20px;">
 											(Note: leaving unchecked removes image from database w/o removing from server)
@@ -331,6 +335,7 @@ $imageArr = $occManager->getImageMap();
 											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
+											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input type="submit" name="submitaction" value="Remap Image" />
 										</div>
 									</fieldset>

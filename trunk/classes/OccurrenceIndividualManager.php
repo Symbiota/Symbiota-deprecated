@@ -1,5 +1,4 @@
 <?php
-
 include_once($serverRoot.'/config/dbconnection.php');
 
 class OccurrenceIndividualManager {
@@ -41,7 +40,7 @@ class OccurrenceIndividualManager {
 	
 	private function setMetadata(){
     	$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
-    		'publicedits, rights, rightsholder, accessrights '.
+    		'publicedits, rights, rightsholder, accessrights, guidtarget '.
 			'FROM omcollections WHERE collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
     	if($rs){
@@ -69,8 +68,8 @@ class OccurrenceIndividualManager {
     }
 
 	private function setOccArr(){
-    	$sql = 'SELECT occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
-    		'catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
+    	$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
+    		'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
     		'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
 			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
@@ -79,13 +78,13 @@ class OccurrenceIndividualManager {
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid '.
-			'FROM omoccurrences ';
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid '.
+			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
 		if($this->occId){
-			$sql .= 'WHERE (occid = '.$this->occId.')';
+			$sql .= 'WHERE (o.occid = '.$this->occId.')';
 		}
 		elseif($this->collId && $this->dbpk){
-			$sql .= 'WHERE (collid = '.$this->collId.') AND (dbpk = "'.$this->dbpk.'")';
+			$sql .= 'WHERE (o.collid = '.$this->collId.') AND (o.dbpk = "'.$this->dbpk.'")';
 		}
 		else{
 			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
@@ -97,7 +96,14 @@ class OccurrenceIndividualManager {
 			if(!$this->occId) $this->occId = $this->occArr['occid'];
 			if(!$this->collId) $this->collId = $this->occArr['collid'];
 			$this->setMetadata();
-			
+			//Set occurrenceId according to guidsource \
+			if($this->metadataArr['guidtarget'] == 'catalogNumber'){
+				$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
+			}
+			elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
+				$this->occArr['occurrenceid'] = $this->occArr['guid'];
+			}
+
 			if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
 				$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
 				'FROM omcollsecondary '.

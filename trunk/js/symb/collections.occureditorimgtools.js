@@ -103,6 +103,22 @@ function nlpText(imgCnt){
 	xmlHttp.send(null);
 }
 
+function salixText(f){
+	f.salixocr.disabled = true;
+	
+	$.ajax({
+		type: "POST",
+		url: salixPath,
+		data: { textinput: f.rawtext.value, charset: csDefault },
+		dataType: json
+	}).done(function( msg ) {
+		var dwcArr = $.parseJSON(msg);
+		var ff = document.fullform;
+		if(dwcArr['recordedBy'] && !ff.recordedBy.value) ff.recordedBy.value = dwcArr['recordedBy'];
+		
+	});
+}
+
 function nextLabelProcessingImage(imgCnt){
 	document.getElementById("labeldiv-"+(imgCnt-1)).style.display = "none";
 	var imgObj = document.getElementById("labeldiv-"+imgCnt);

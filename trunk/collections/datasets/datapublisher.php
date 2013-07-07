@@ -142,7 +142,7 @@ include($serverRoot."/header.php");
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
 			$collArr = $dwcaManager->getCollArr();
-			$dwcaManager->setFileName($collArr[$id]['collcode']);
+			$dwcaManager->setFileName($collArr[$collId]['collcode']);
 			$dwcaManager->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
 			$dwcaManager->writeRssFile();
 			echo '</ul>';

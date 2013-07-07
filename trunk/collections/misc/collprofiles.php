@@ -13,6 +13,7 @@ $countryDist = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
 $stateDist = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 $newCollRec = array_key_exists("newcoll",$_REQUEST)?1:0;
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
+$statusStr = '';
 
 $collManager = new CollectionProfileManager();
 if($collId) $collManager->setCollectionId($collId);
@@ -43,12 +44,17 @@ if($editCode > 1){
 if($editCode == 3){
 	if($action == "Add New Profile"){
 		$collId = $collManager->submitCollAdd();
-		$collManager->setCollectionId($collId);
+		if(is_numeric($collId)){
+			$collManager->setCollectionId($collId);
+		}
+		else{
+			$statusStr = $collId;
+			$newCollRec = 1;
+		}
 	}
 }
 $collData = Array();
 if($collId) $collData = $collManager->getCollectionData();
-
 ?>
 <html>
 <head>
@@ -138,6 +144,15 @@ if($collId) $collData = $collManager->getCollectionData();
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
+		if($statusStr){ 
+			?>
+			<hr />
+			<div style="margin:20px;font-weight:bold;color:red;">
+				<?php echo $statusStr; ?>
+			</div>
+			<hr />
+			<?php 
+		} 
 		if($editCode > 1){
 			if($action == 'UpdateStatistics'){
 				echo '<h2>Updating statisitcs related to this collection...</h2>';
@@ -240,6 +255,11 @@ if($collId) $collData = $collManager->getCollectionData();
 							<li>
 								<a href="../editor/editreviewer.php?collid=<?php echo $collId; ?>">
 									Review/Verify General Specimen Edits 
+								</a>
+							</li>
+							<li>
+								<a href="../datasets/datapublisher.php?collid=<?php echo $collId; ?>">
+									Update Darwin Core Archive 
 								</a>
 							</li>
 							<li>
@@ -458,6 +478,20 @@ if($collId) $collData = $collManager->getCollectionData();
 										<a href="#" onclick="return dwcDoc('dcterms:accessRights')">
 											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
 										</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<scan title="Source of Global Unique Identifier">GUID source:</scan> 
+									</td>
+									<td>
+										<select name="guidtarget">
+											<option value="">Not defined</option>
+											<option value="">-------------------</option>
+											<option value="occurrenceId" <?php echo ($collId && $collData["guidtarget"]=='occurrenceId'?'SELECTED':''); ?>>Occurrence Id</option>
+											<option value="catalogNumber" <?php echo ($collId && $collData["guidtarget"]=='catalogNumber'?'SELECTED':''); ?>>Catalog Number</option>
+											<option value="symbiotaUUID" <?php echo ($collId && $collData["guidtarget"]=='symbiotaUUID'?'SELECTED':''); ?>>Symbiota Generated GUID (UUID)</option>
+										</select>
 									</td>
 								</tr>
 								<?php 

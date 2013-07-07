@@ -118,15 +118,25 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$imgUrl = ""; $imgThumbnailUrl = ""; $imgOriginalUrl = "";
 		$status = "Image deleted successfully";
 		$occid = 0;
-		$sqlQuery = 'SELECT url, thumbnailurl, originalurl, occid FROM images WHERE (imgid = '.$imgIdDel.')';
+		$sqlQuery = 'SELECT * FROM images WHERE (imgid = '.$imgIdDel.')';
 		$result = $this->conn->query($sqlQuery);
-		if($row = $result->fetch_object()){
-			$imgUrl = $row->url;
-			$imgThumbnailUrl = $row->thumbnailurl;
-			$imgOriginalUrl = $row->originalurl;
+		if($r = $result->fetch_assoc()){
+			$imgUrl = $r['url'];
+			$imgThumbnailUrl = $r['thumbnailurl'];
+			$imgOriginalUrl = $r['originalurl'];
+			//Archive image 
+			$imgArr = array();
+			foreach($r as $k => $v){
+				if($v) $imgArr[$k] = $this->encodeStr($v);
+			}
+			$imgObj = json_encode($imgArr);
+			$sqlArchive = 'UPDATE guidimages '.
+			'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($imgObj).'" '.
+			'WHERE (imgid = '.$imgIdDel.')';
+			$this->conn->query($sqlArchive);
 		}
 		$result->close();
-				
+		
 		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
 		//echo $sql;
 		if($this->conn->query($sql)){
@@ -299,7 +309,15 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			(isset($paramsArr['un'])?'"'.$paramsArr['un'].'"':'NULL').','.
 			($notes?'"'.$notes.'"':'NULL').')';
 		//echo $sql;
-		if(!$this->conn->query($sql)){
+		if($this->conn->query($sql)){
+			//Create and insert Symbiota GUID for image(UUID)
+			$guid = UuidFactory::getUuidV4();
+			$imgId = $this->conn->insert_id;
+			if(!$this->conn->query('INSERT INTO guidimages(guid,imgid) VALUES("'.$guid.'",'.$imgId.')')){
+				$status .= ' (Warning: Symbiota GUID mapping failed)';
+			}
+		}
+		else{
 			$status = "ERROR Loading Image Data: ".$this->conn->error."<br/>SQL: ".$sql;
 		}
 		return $status;

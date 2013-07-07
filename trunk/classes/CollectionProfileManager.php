@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/UuidFactory.php');
 
 //Used by /collections/misc/collprofiles.php page
 class CollectionProfileManager {
@@ -49,7 +50,7 @@ class CollectionProfileManager {
 				"c.collid, c.CollectionCode, c.CollectionName, ".
 				"c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, ".
 				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
-				"c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
+				"c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
 				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
@@ -81,6 +82,7 @@ class CollectionProfileManager {
 				$returnArr['colltype'] = $row->colltype;
 				$returnArr['managementtype'] = $row->managementtype;
 				$returnArr['publicedits'] = $row->publicedits;
+				$returnArr['guidtarget'] = $row->guidtarget;
 				$returnArr['rights'] = $this->cleanOutStr($row->rights);
 				$returnArr['rightsholder'] = $this->cleanOutStr($row->rightsholder);
 				$returnArr['accessrights'] = $this->cleanOutStr($row->accessrights);
@@ -95,7 +97,7 @@ class CollectionProfileManager {
 				}
 				$returnArr['uploaddate'] = $uDate;
 				$returnArr['recordcnt'] = $row->recordcnt;
-				$returnArr['georefpercent'] = round(($row->georefcnt/$returnArr['recordcnt'])*100);
+				$returnArr['georefpercent'] = ($returnArr['recordcnt']?round(($row->georefcnt/$returnArr['recordcnt'])*100):0);
 				$returnArr['familycnt'] = $row->familycnt;
 				$returnArr['genuscnt'] = $row->genuscnt;
 				$returnArr['speciescnt'] = $row->speciescnt;
@@ -107,7 +109,7 @@ class CollectionProfileManager {
 				'WHERE (o.collid = '.$this->collId.') ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
-				$returnArr['imgpercent'] = round(($row->imgcnt/$returnArr['recordcnt'])*100);
+				$returnArr['imgpercent'] = ($returnArr['recordcnt']?round(($row->imgcnt/$returnArr['recordcnt'])*100):0);
 			}
 			$rs->close();
 			//BOLD count
@@ -151,10 +153,11 @@ class CollectionProfileManager {
 			$homepage = $this->cleanInStr($_POST['homepage']);
 			$contact = $this->cleanInStr($_POST['contact']);
 			$email = $this->cleanInStr($_POST['email']);
+			$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
+			$guidTarget = (array_key_exists('guidtarget',$_POST)?$_POST['guidtarget']:'');
 			$rights = $this->cleanInStr($_POST['rights']);
 			$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
 			$accessRights = $this->cleanInStr($_POST['accessrights']);
-			$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
@@ -169,6 +172,7 @@ class CollectionProfileManager {
 				'latitudedecimal = '.($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
 				'longitudedecimal = '.($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
 				'publicedits = '.$publicEdits.','.
+				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
@@ -202,6 +206,7 @@ class CollectionProfileManager {
 		$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
 		$accessRights = $this->cleanInStr($_POST['accessrights']);
 		$publicEdits = (array_key_exists('publicedits',$_POST)?$_POST['publicedits']:0);
+		$guidTarget = (array_key_exists('guidtarget',$_POST)?$_POST['guidtarget']:'');
 		$icon = array_key_exists('icon',$_POST)?$this->cleanInStr($_POST['icon']):'';
 		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanInStr($_POST['managementtype']):'';
 		$collType = array_key_exists('colltype',$_POST)?$this->cleanInStr($_POST['colltype']):'';
@@ -209,9 +214,10 @@ class CollectionProfileManager {
 		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
+		$guid = UuidFactory::getUuidV4();
 		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,fulldescription,homepage,'.
-			'contact,email,latitudedecimal,longitudedecimal,publicedits,rights,rightsholder,accessrights,icon,'.
-			'managementtype,colltype,individualurl,sortseq) '.
+			'contact,email,latitudedecimal,longitudedecimal,publicedits,guidtarget,rights,rightsholder,accessrights,icon,'.
+			'managementtype,colltype,collectionguid,individualurl,sortseq) '.
 			'VALUES ("'.$instCode.'",'.
 			($collCode?'"'.$collCode.'"':'NULL').',"'.
 			$coleName.'",'.($iid?$iid:'NULL').','.
@@ -221,22 +227,27 @@ class CollectionProfileManager {
 			($email?'"'.$email.'"':'NULL').','.
 			($_POST['latitudedecimal']?$_POST['latitudedecimal']:'NULL').','.
 			($_POST['longitudedecimal']?$_POST['longitudedecimal']:'NULL').','.
-			$publicEdits.','.
+			$publicEdits.','.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 			($rights?'"'.$rights.'"':'NULL').','.
 			($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
 			($accessRights?'"'.$accessRights.'"':'NULL').','.
 			($icon?'"'.$icon.'"':'NULL').','.
 			($managementType?'"'.$managementType.'"':'snapshot').','.
-			($collType?'"'.$collType.'"':'Preserved Specimens').','.
-			($indUrl?'"'.$indUrl.'"':'NULL').','.
+			($collType?'"'.$collType.'"':'Preserved Specimens').',"'.
+			$guid.'",'.($indUrl?'"'.$indUrl.'"':'NULL').','.
 			($sortSeq?$sortSeq:'NULL').') ';
 		//echo "<div>$sql</div>";
-		$conn->query($sql);
-		$cid = $conn->insert_id;
-		$sql = 'INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) '.
-			'VALUES('.$cid.',0,"'.$symbUid.'")';
-		$conn->query($sql);
-		$conn->close();
+		$cid = 0;
+		if($conn->query($sql)){
+			$cid = $conn->insert_id;
+			$sql = 'INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) '.
+				'VALUES('.$cid.',0,"'.$symbUid.'")';
+			$conn->query($sql);
+			$conn->close();
+		}
+		else{
+			$cid = 'ERROR inserting new collection: '.$conn->error;
+		}
 		return $cid;
 	}
 	

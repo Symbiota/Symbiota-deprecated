@@ -920,11 +920,11 @@ function verifyDetAddForm(f){
 		return false;
 	}
 	if(f.identifiedby.value == ""){
-		alert("Determiner field must have a value");
+		alert("Determiner field must have a value (enter 'unknown' if not defined)");
 		return false;
 	}
 	if(f.dateidentified.value == ""){
-		alert("Determination Date field must have a value");
+		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
 		return false;
 	}
 	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
@@ -944,11 +944,11 @@ function verifyDetEditForm(f){
 		return false;
 	}
 	if(f.identifiedby.value == ""){
-		alert("Determiner field must have a value");
+		alert("Determiner field must have a value (enter 'unknown' if not defined)");
 		return false;
 	}
 	if(f.dateidentified.value == ""){
-		alert("Determination Date field must have a value");
+		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
 		return false;
 	}
 	if(!isNumeric(f.sortsequence.value)){

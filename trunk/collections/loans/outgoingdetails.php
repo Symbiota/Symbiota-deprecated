@@ -57,10 +57,12 @@ $specList = $loanManager->getSpecList($loanId);
 						Sent To:
 					</span><br />
 					<span>
-						<select name="iidborrower" style="width:400px;" disabled >
+						<select name="iidborrower" style="width:400px;">
 							<?php 
 							$instArr = $loanManager->getInstitutionArr();
-							echo '<option value="'.$loanArr['iidborrower'].'" >'.$instArr[$loanArr['iidborrower']].'</option>';
+							foreach($instArr as $k => $v){
+								echo '<option value="'.$k.'" '.($loanArr['iidborrower']==$k?'SELECTED':'').'>'.$v.'</option>';
+							}
 							?>
 						</select>
 					</span>

@@ -166,7 +166,7 @@ class OccurrenceDwcArchiver{
 		$this->collArr = array();
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
 			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-			'c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
+			'c.guidtarget, c.collectionguid, c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
 			'i.postalcode, i.country, i.phone '.
 			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid ';
 		if($collTarget == 'allspecimens'){
@@ -193,6 +193,8 @@ class OccurrenceDwcArchiver{
 			$this->collArr[$r->collid]['url'] = $r->url;
 			$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
 			$this->collArr[$r->collid]['email'] = $r->email;
+			$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
+			$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
 			$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
 			$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
 			$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
@@ -391,7 +393,7 @@ class OccurrenceDwcArchiver{
 				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 				'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
 				'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-				'g.guid AS recordId, o.localitySecurity '.
+				'g.guid AS recordId, o.localitySecurity, c.collid '.
 				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ORDER BY o.collid,o.occid'; 
@@ -421,6 +423,14 @@ class OccurrenceDwcArchiver{
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
 					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+					unset($r['collid']);
+					if($guidTarget == 'catalogNumber'){
+						$r['occurrenceID'] = $r['catalogNumber'];
+					}
+					elseif($guidTarget == 'symbiotaUUID'){
+						$r['occurrenceID'] = $r['recordId'];
+					}
 					fputcsv($fh, $this->addcslashesArr($r));
 				}
 				$rs->free();

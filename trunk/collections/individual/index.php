@@ -68,7 +68,10 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>
+	<meta charset="<?php echo $charset; ?>">
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
+	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
     <link href="../../css/main.css" type="text/css" rel="stylesheet">
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
@@ -271,6 +274,14 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 								</div>
 								<?php 
 							}
+							if($occArr['occurrenceid']){ 
+								?>
+								<div>
+									<b>Occurrence ID (GUID):</b> 
+									<?php echo $occArr['occurrenceid']; ?>
+								</div>
+								<?php 
+							}
 							if($occArr['othercatalognumbers']){
 								?>
 								<div title="Other Catalog Numbers">
@@ -284,7 +295,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						<div>
 							<b>Taxon:</b> 
 							<?php echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); ?>
-							<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?><br/>
+							<a href="../../taxa/index.php?taxon=<?php echo $occArr['tidinterpreted']; ?>"><i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?></a><br/>
 							<b>Family:</b> <?php echo $occArr['family']; ?>
 						</div>
 						<div>
@@ -599,6 +610,9 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 								echo '</a></div>';
 							}
 						}
+						//GUID
+						echo '<div style="margin:3px 0px;"><b>Portal GUID:</b> '.$occArr['guid'].'</div>';
+						//Rights
 						$rightsStr = $collMetadata['rights'];
 						if($collMetadata['rights']){
 							$rightsHeading = '';
