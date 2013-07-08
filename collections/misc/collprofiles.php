@@ -263,7 +263,7 @@ if($collId) $collData = $collManager->getCollectionData();
 								</a>
 							</li>
 							<li>
-								<a href="../editor/occurrencecleaner.php?collid=<?php echo $collId; ?>">
+								<a href="../editor/occurrencecleaner.php?obsuid=0&collid=<?php echo $collId; ?>">
 									Data Cleaning Tools 
 								</a>
 							</li>

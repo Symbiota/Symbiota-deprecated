@@ -4,6 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
@@ -21,14 +22,20 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$u
 	$isEditor = 1;
 }
 
+//If collection is a general observation project, limit to User
+if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
+	$obsUid = $symbUid;
+	$cleanManager->setObsUid($obsUid);
+}
+
 $dupArr = array();
 if($action == 'listdupscatalog'){
 	$dupArr = $cleanManager->getDuplicateCatalogNumber();
-	$action == 'listdups';
+	$action = 'listdups';
 }
 elseif($action == 'listdupsrecordedby'){
 	$dupArr = $cleanManager->getDuplicateCollectorNumber();
-	$action == 'listdups';
+	$action = 'listdups';
 }
 
 if($isEditor && $formSubmit){
@@ -42,7 +49,6 @@ if($isEditor && $formSubmit){
 		$statusStr = $cleanManager->deleteOccurFromCluster($_POST['dupid'],$_POST['occid']);
 	}
 }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -140,7 +146,7 @@ if($isEditor && $formSubmit){
 			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
 			<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Data Cleaning Module</a>
 		</div>
-	<?php
+		<?php
 	}
 	?>
 	<!-- inner text -->
@@ -170,12 +176,12 @@ if($isEditor && $formSubmit){
 						be returned at a time.
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupscatalog">
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupscatalog">
 							Search for duplicates based on <b>Catalog Numbers</b>
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupsrecordedby">
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupsrecordedby">
 							Search for duplicates based on <b>Collector/Observer and numbers</b>
 						</a>
 					</div>
@@ -210,18 +216,18 @@ if($isEditor && $formSubmit){
 						the collector, collector number, and collection date.       
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupes">
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupes">
 							List linked duplicate clusters 
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdupeconflicts">
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupeconflicts">
 							List linked duplicate clusters with conflicted identifications 
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=batchlinkdupes">
-							Start batch linking Duplicates
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=batchlinkdupes">
+							Start batch linking duplicates
 						</a>
 					</div>
 				</fieldset>
@@ -276,6 +282,7 @@ if($isEditor && $formSubmit){
 							</table>
 							<div style="margin:15px;">
 								<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+								<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" />
 								<input name="action" type="submit" value="Merge Duplicate Records" />
 							</div>
 						</form>
@@ -299,7 +306,7 @@ if($isEditor && $formSubmit){
 						<li>Done!</li>
 					</ul>
 					<div>
-						<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>&action=listdups">Return to duplicate list</a><br/>
+						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsuid; ?>&action=listdups">Return to duplicate list</a><br/>
 					</div> 
 					<?php 
 				}
@@ -316,7 +323,8 @@ if($isEditor && $formSubmit){
 					$clusterArr = $cleanManager->getDuplicateClusters($action == 'listdupes'?0:1);
 					if($clusterArr){
 						?>
-						<div style="font-weight:bold;font-size:115%;"><?php echo count($clusterArr).' Duplicate Clusters '.($action == 'listdupeconflicts'?'with Identification Differences':''); ?></div>
+						<div style="font-weight:bold;font-size:120%;"><?php echo $collMap['collectionname']; ?></div>
+						<div style="font-weight:bold;font-size:110%;"><?php echo count($clusterArr).' Duplicate Clusters '.($action == 'listdupeconflicts'?'with Identification Differences':''); ?></div>
 						<div style="margin:10px 0px;clear:both;">
 							<?php 
 							foreach($clusterArr as $dupId => $dupArr){
@@ -346,6 +354,7 @@ if($isEditor && $formSubmit){
 											<form name="dupdelform-<?php echo $dupId; ?>" method="post" action="occurrencecleaner.php" onsubmit="return confirm('Are you sure you want to delete this duplicate cluster?');">
 												<input name="deldupid" type="hidden" value="<?php echo $dupId; ?>" />
 												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+												<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" />
 												<input name="action" type="hidden" value="<?php echo $action; ?>" />
 												<input name="formsubmit" type="hidden" value="clusterdelete" />
 												<input name="submit" type="submit" value="Delete Cluster" />
@@ -360,13 +369,14 @@ if($isEditor && $formSubmit){
 										foreach($dupArr as $occid => $oArr){
 											?>
 											<div>
-												<a href="#" onclick="openOccurPopup(<?php echo $occid; ?>); return false;"><b><?php echo $oArr['id']; ?></b></a> => 
+												<a href="#" onclick="openOccurPopup(<?php echo $occid; ?>); return false;"><b><?php echo $oArr['id']; ?></b></a> =&gt; 
 												<?php echo '<b>'.$oArr['sciname'].'</b>: '.$oArr['recby'].' '; ?>
 												<div class="editdiv-<?php echo $dupId; ?>" style="display:none;">
 													<form name="dupdelform-<?php echo $dupId.'-'.$occid; ?>" method="post" action="occurrencecleaner.php" onsubmit="return confirm('Are you sure you want to remove this occurrence record from this cluster?');" style="display:inline;">
 														<input name="dupid" type="hidden" value="<?php echo $dupId; ?>" />
 														<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 														<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+														<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" />
 														<input name="action" type="hidden" value="<?php echo $action; ?>" />
 														<input name="formsubmit" type="hidden" value="occdelete" />
 														<input name="submit" type="image" src="../../images/del.gif" style="width:15px;" />
@@ -391,7 +401,7 @@ if($isEditor && $formSubmit){
 				
 				?>
 				<div>
-					<a href="occurrencecleaner.php?collid=<?php echo $collId; ?>">Return to main menu</a>
+					<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>">Return to main menu</a>
 				</div> 
 				<?php 
 			}
