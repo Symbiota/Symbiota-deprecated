@@ -18,7 +18,8 @@ $collMap = $cleanManager->getCollMap();
 
 $statusStr = '';
 $isEditor = 0; 
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
+	|| ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
 }
 
@@ -407,7 +408,7 @@ if($isEditor && $formSubmit){
 			}
 		}
 		else{
-			echo '<h2>You are not authorized to add occurrence records</h2>';
+			echo '<h2>You are not authorized to access this page</h2>';
 		}
 		?>
 	</div>
