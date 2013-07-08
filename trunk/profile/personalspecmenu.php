@@ -72,6 +72,11 @@ if($symbUid){
 							Backup file download (CSV extract)
 						</a>
 					</li>
+					<li>
+						<a href="../collections/editor/occurrencecleaner.php?collid=<?php echo $collId; ?>">
+							Data Cleaning Module
+						</a>
+					</li>
 				</ul>
 			</fieldset>
 			<?php
