@@ -159,17 +159,11 @@ class OccurrenceManager{
 					if($r1 = $rs1->fetch_object()){
 						//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(SELECT tid FROM taxstatus WHERE taxauthid = 1 AND hierarchystr LIKE '%,".$r1->tid.",%')) ";
 						
-						$fStr = "";
-						$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
-							"WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE '%,".$r1->tid.",%') AND ts.family IS NOT NULL AND ts.family <> '' ";
-						$rs2 = $this->conn->query($sql2);
-						while($r2 = $rs2->fetch_object()){
-							$fStr .= "','".$r2->family;
-						}
-						$rs2->close();
-						if($fStr){
-							$sqlWhereTaxa .= "OR (o.family IN('".substr($fStr,3)."')) ";
-						}
+						//$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
+						//	"WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE '%,".$r1->tid.",%') AND ts.family IS NOT NULL AND ts.family <> '' ";
+						$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
+							'WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%") AND t.rankid = 140';
+						$sqlWhereTaxa .= "OR (o.family IN(".$sql2.")) ";
 					}
 				}
 				else{
