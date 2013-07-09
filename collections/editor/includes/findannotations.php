@@ -22,10 +22,24 @@
 */
 
 include_once('../../../config/symbini.php');
-@include_once('fp/FPNetworkFactory.php');
-if (!file_exists("$serverRoot/fp/FPNetworkFactory.php")) { 
+include_once('fp/FPNetworkFactory.php');
+
+// check that the client helper has been installed
+$file = 'fp/FPNetworkFactory.php';
+$includePaths = explode(PATH_SEPARATOR, get_include_path());
+$fileExists = false;
+
+foreach($includePaths as $p) {
+  $fullname = $p.DIRECTORY_SEPARATOR.$file;
+  if(is_file($fullname)) {
+    $fileExists = true;
+    break;
+  }
+}
+
+if (!$fileExists) { 
    echo "FilteredPush Support has been enabled in this Symbiota installation, but FilteredPush helper code is not installed.<BR>";
-   echo "<strong>fp/FPNetworkFactory.php not found.</strong>";
+   echo "<strong>$file not found.</strong>";
 } else { 
 
 // Check for required query params
