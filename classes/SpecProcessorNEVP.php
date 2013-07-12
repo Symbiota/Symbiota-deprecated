@@ -14,13 +14,13 @@
  * Example invocation: 
  *
  * $xml = XMLReader::open($file);
- * if ($xml->read) {
+ * if ($xml->read()) {
  *    $hasAnnotation = $xml->lookupNamespace("oa");
  *    $hasDataAnnotation = $xml->lookupNamespace("oad");
  *    $hasdwcFP = $xml->lookupNamespace("dwcFP");
  *    // Note: contra the PHP xmlreader documentation, lookupNamespace
  *    // returns the namespace string not a boolean.
- *    if ($xml->node=="rdf:XML" && $hasAnnotation && $hasDataAnnotation && $hasdwcFP) {
+ *    if ($xml->name=="rdf:XML" && $hasAnnotation && $hasDataAnnotation && $hasdwcFP) {
  *       $processor = new NEVPProcessor();
  *       $result = $processor->process($file);
  *    }
