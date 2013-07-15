@@ -19,142 +19,147 @@ class OccurrenceGeorefTools {
 
 	public function getLocalityArr(){
 		$retArr = array();
-		$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
-			'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
-		if($this->qryVars){
-			if(array_key_exists('qsciname',$this->qryVars) && $this->qryVars['qsciname']){
-				$sql .= 'AND (family = "'.$this->qryVars['qsciname'].'" OR sciname LIKE "'.$this->qryVars['qsciname'].'%") ';
-			}
-			if(array_key_exists('qvstatus',$this->qryVars)){
-				$vs = $this->qryVars['qvstatus'];
-				if(strtolower($vs) == 'is null'){
-					$sql .= 'AND (georeferenceVerificationStatus IS NULL) ';
+		if($this->collId){
+			$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
+				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
+			if($this->qryVars){
+				if(array_key_exists('qsciname',$this->qryVars) && $this->qryVars['qsciname']){
+					$sql .= 'AND (family = "'.$this->qryVars['qsciname'].'" OR sciname LIKE "'.$this->qryVars['qsciname'].'%") ';
+				}
+				if(array_key_exists('qvstatus',$this->qryVars)){
+					$vs = $this->qryVars['qvstatus'];
+					if(strtolower($vs) == 'is null'){
+						$sql .= 'AND (georeferenceVerificationStatus IS NULL) ';
+					}
+					else{
+						$sql .= 'AND (georeferenceVerificationStatus = "'.$vs.'") ';
+					}
+				}
+				if(array_key_exists('qdisplayall',$this->qryVars) && $this->qryVars['qdisplayall']){
+					//Do nothing
 				}
 				else{
-					$sql .= 'AND (georeferenceVerificationStatus = "'.$vs.'") ';
+					$sql .= 'AND (decimalLatitude IS NULL) ';
+				}
+				$orderBy = '';
+				if(array_key_exists('qcountry',$this->qryVars) && $this->qryVars['qcountry']){
+					$sql .= 'AND (country = "'.$this->qryVars['qcountry'].'") ';
+				}
+				else{
+					$orderBy .= 'country,';
+				}
+				if(array_key_exists('qstate',$this->qryVars) && $this->qryVars['qstate']){
+					$sql .= 'AND (stateProvince = "'.$this->qryVars['qstate'].'") ';
+				}
+				else{
+					$orderBy .= 'stateprovince,';
+				}
+				if(array_key_exists('qcounty',$this->qryVars) && $this->qryVars['qcounty']){
+					$sql .= 'AND (county LIKE "'.$this->qryVars['qcounty'].'%") ';
+				}
+				else{
+					$orderBy .= 'county,';
+				}
+				if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
+					$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
 				}
 			}
-			if(array_key_exists('qdisplayall',$this->qryVars) && $this->qryVars['qdisplayall']){
-				//Do nothing
+			$sql .= 'ORDER BY '.$orderBy.'locality,verbatimcoordinates ';
+			//echo $sql;
+			$totalCnt = 0;
+			$locCnt = 1;
+			$countryStr='';$stateStr='';$countyStr='';$localityStr='';$verbCoordStr = '';$decLatStr='';$decLngStr='';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				if($countryStr != trim($r->country) || $stateStr != trim($r->stateprovince) || $countyStr != trim($r->county)  
+					|| $localityStr != trim($r->locality," .,;") || $verbCoordStr != trim($r->verbatimcoordinates)
+					|| $decLatStr != $r->decimallatitude || $decLngStr != $r->decimallongitude){
+					$countryStr = trim($r->country);
+					$stateStr = trim($r->stateprovince);
+					$countyStr = trim($r->county);
+					$localityStr = trim($r->locality," .,;");
+					$verbCoordStr = trim($r->verbatimcoordinates);
+					$decLatStr = $r->decimallatitude;
+					$decLngStr = $r->decimallongitude;
+					$totalCnt++;
+					$retArr[$totalCnt]['occid'] = $r->occid;
+					$retArr[$totalCnt]['country'] = $countryStr;
+					$retArr[$totalCnt]['stateprovince'] = $stateStr;
+					$retArr[$totalCnt]['county'] = $countyStr;
+					$retArr[$totalCnt]['locality'] = $localityStr;
+					$retArr[$totalCnt]['verbatimcoordinates'] = $verbCoordStr;
+					$retArr[$totalCnt]['decimallatitude'] = $decLatStr;
+					$retArr[$totalCnt]['decimallongitude'] = $decLngStr;
+					$retArr[$totalCnt]['cnt'] = 1;
+					$locCnt = 1;
+				}
+				else{
+					$locCnt++;
+					$newOccidStr = $retArr[$totalCnt]['occid'].','.$r->occid;
+					$retArr[$totalCnt]['occid'] = $newOccidStr;
+					$retArr[$totalCnt]['cnt'] = $locCnt;
+				}
+				if($totalCnt > 999) break;
 			}
-			else{
-				$sql .= 'AND (decimalLatitude IS NULL) ';
-			}
-			$orderBy = '';
-			if(array_key_exists('qcountry',$this->qryVars) && $this->qryVars['qcountry']){
-				$sql .= 'AND (country = "'.$this->qryVars['qcountry'].'") ';
-			}
-			else{
-				$orderBy .= 'country,';
-			}
-			if(array_key_exists('qstate',$this->qryVars) && $this->qryVars['qstate']){
-				$sql .= 'AND (stateProvince = "'.$this->qryVars['qstate'].'") ';
-			}
-			else{
-				$orderBy .= 'stateprovince,';
-			}
-			if(array_key_exists('qcounty',$this->qryVars) && $this->qryVars['qcounty']){
-				$sql .= 'AND (county LIKE "'.$this->qryVars['qcounty'].'%") ';
-			}
-			else{
-				$orderBy .= 'county,';
-			}
-			if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
-				$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
-			}
+			$rs->close();
 		}
-		$sql .= 'ORDER BY '.$orderBy.'locality,verbatimcoordinates ';
-		//echo $sql;
-		$totalCnt = 0;
-		$locCnt = 1;
-		$countryStr='';$stateStr='';$countyStr='';$localityStr='';$verbCoordStr = '';$decLatStr='';$decLngStr='';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			if($countryStr != trim($r->country) || $stateStr != trim($r->stateprovince) || $countyStr != trim($r->county)  
-				|| $localityStr != trim($r->locality," .,;") || $verbCoordStr != trim($r->verbatimcoordinates)
-				|| $decLatStr != $r->decimallatitude || $decLngStr != $r->decimallongitude){
-				$countryStr = trim($r->country);
-				$stateStr = trim($r->stateprovince);
-				$countyStr = trim($r->county);
-				$localityStr = trim($r->locality," .,;");
-				$verbCoordStr = trim($r->verbatimcoordinates);
-				$decLatStr = $r->decimallatitude;
-				$decLngStr = $r->decimallongitude;
-				$totalCnt++;
-				$retArr[$totalCnt]['occid'] = $r->occid;
-				$retArr[$totalCnt]['country'] = $countryStr;
-				$retArr[$totalCnt]['stateprovince'] = $stateStr;
-				$retArr[$totalCnt]['county'] = $countyStr;
-				$retArr[$totalCnt]['locality'] = $localityStr;
-				$retArr[$totalCnt]['verbatimcoordinates'] = $verbCoordStr;
-				$retArr[$totalCnt]['decimallatitude'] = $decLatStr;
-				$retArr[$totalCnt]['decimallongitude'] = $decLngStr;
-				$retArr[$totalCnt]['cnt'] = 1;
-				$locCnt = 1;
-			}
-			else{
-				$locCnt++;
-				$newOccidStr = $retArr[$totalCnt]['occid'].','.$r->occid;
-				$retArr[$totalCnt]['occid'] = $newOccidStr;
-				$retArr[$totalCnt]['cnt'] = $locCnt;
-			}
-			if($totalCnt > 999) break;
-		}
-		$rs->close();
 		//usort($retArr,array('OccurrenceGeorefTools', '_cmpLocCnt'));
 		return $retArr;
 	}
 
 	public function updateCoordinates($geoRefArr){
 		global $paramsArr;
-		if($geoRefArr['decimallatitude'] && $geoRefArr['decimallongitude']){
-			set_time_limit(1000);
-			$localList = $geoRefArr['locallist'];
-			$localStr = implode(',',$localList);
-			if($this->managementType == 'Snapshot'){
-				//Presevre coordinate data in omoccuredits; if collection refreshes their data, coordinates will ntoe be lost 
-				$newValueArr = array($geoRefArr['decimallatitude'],$geoRefArr['decimallongitude'],$geoRefArr['coordinateuncertaintyinmeters'],
-					$geoRefArr['geodeticdatum'],$geoRefArr['georeferencesources'],$geoRefArr['georeferenceremarks'],
-					$geoRefArr['georeferenceverificationstatus'],$geoRefArr['minimumelevationinmeters'],$geoRefArr['maximumelevationinmeters']);
-				$newValueStr = $this->cleanInStr(json_encode($newValueArr));
-				$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
-					"SELECT occid, 'georefbatchstr', '".$newValueStr."', CONCAT_WS(',',decimallatitude, decimallongitude, coordinateUncertaintyInMeters, ".
-					'geodeticdatum, georeferencesources, georeferenceRemarks, georeferenceVerificationStatus, '. 
-					'minimumElevationInMeters, maximumElevationInMeters) AS oldvalue, 1, '.$paramsArr['uid'].' '.
-					'FROM omoccurrences WHERE occid IN('.$localStr.')';
-				//echo 'sql: '.$sql.'<br/>';
-				$this->conn->query($sql);
+		if($this->collId){
+			if($geoRefArr['decimallatitude'] && is_numeric($geoRefArr['decimallatitude']) && $geoRefArr['decimallongitude'] && is_numeric($geoRefArr['decimallongitude'])){
+				set_time_limit(1000);
+				$localList = $geoRefArr['locallist'];
+				$localStr = $this->cleanInStr(implode(',',$localList));
+				if($localStr){
+					if($this->managementType == 'Snapshot'){
+						//Presevre coordinate data in omoccuredits; if collection refreshes their data, coordinates will ntoe be lost 
+						$newValueArr = array($geoRefArr['decimallatitude'],$geoRefArr['decimallongitude'],$geoRefArr['coordinateuncertaintyinmeters'],
+							$geoRefArr['geodeticdatum'],$geoRefArr['georeferencesources'],$geoRefArr['georeferenceremarks'],
+							$geoRefArr['georeferenceverificationstatus'],$geoRefArr['minimumelevationinmeters'],$geoRefArr['maximumelevationinmeters']);
+						$newValueStr = $this->cleanInStr(json_encode($newValueArr));
+						$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid) '.
+							"SELECT occid, 'georefbatchstr', '".$newValueStr."', CONCAT_WS(',',decimallatitude, decimallongitude, coordinateUncertaintyInMeters, ".
+							'geodeticdatum, georeferencesources, georeferenceRemarks, georeferenceVerificationStatus, '. 
+							'minimumElevationInMeters, maximumElevationInMeters) AS oldvalue, 1, '.$paramsArr['uid'].' '.
+							'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
+						//echo 'sql: '.$sql.'<br/>';
+						$this->conn->query($sql);
+					}
+					
+					//Update coordinates
+					$sql = 'UPDATE omoccurrences '.
+						'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
+						',georeferencedBy = "'.$this->cleanInStr($geoRefArr['georefby']).'"';
+					if($geoRefArr['georeferenceverificationstatus']){
+						$sql .= ',georeferenceverificationstatus = "'.$this->cleanInStr($geoRefArr['georeferenceverificationstatus']).'"';
+					}
+					if($geoRefArr['georeferencesources']){
+						$sql .= ',georeferencesources = "'.$this->cleanInStr($geoRefArr['georeferencesources']).'"';
+					}
+					if($geoRefArr['georeferenceremarks']){
+						$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$this->cleanInStr($geoRefArr['georeferenceremarks']).'")';
+					}
+					if($geoRefArr['coordinateuncertaintyinmeters']){
+						$sql .= ',coordinateuncertaintyinmeters = '.$this->cleanInStr($geoRefArr['coordinateuncertaintyinmeters']);
+					}
+					if($geoRefArr['geodeticdatum']){
+						$sql .= ', geodeticdatum = "'.$this->cleanInStr($geoRefArr['geodeticdatum']).'"';
+					}
+					if($geoRefArr['maximumelevationinmeters']){
+						$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$this->cleanInStr($geoRefArr['maximumelevationinmeters']).',maximumelevationinmeters)';
+					}
+					if($geoRefArr['minimumelevationinmeters']){
+						$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$this->cleanInStr($geoRefArr['minimumelevationinmeters']).',minimumelevationinmeters)';
+					}
+					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
+					//echo $sql;
+					$this->conn->query($sql);
+				}
 			}
-			
-			//Update coordinates
-			$sql = 'UPDATE omoccurrences '.
-				'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
-				',georeferencedBy = "'.$geoRefArr['georefby'].'"';
-			if($geoRefArr['georeferenceverificationstatus']){
-				$sql .= ',georeferenceverificationstatus = "'.$this->cleanInStr($geoRefArr['georeferenceverificationstatus']).'"';
-			}
-			if($geoRefArr['georeferencesources']){
-				$sql .= ',georeferencesources = "'.$this->cleanInStr($geoRefArr['georeferencesources']).'"';
-			}
-			if($geoRefArr['georeferenceremarks']){
-				$sql .= ',georeferenceremarks = CONCAT_WS("; ",georeferenceremarks,"'.$this->cleanInStr($geoRefArr['georeferenceremarks']).'")';
-			}
-			if($geoRefArr['coordinateuncertaintyinmeters']){
-				$sql .= ',coordinateuncertaintyinmeters = '.$geoRefArr['coordinateuncertaintyinmeters'];
-			}
-			if($geoRefArr['geodeticdatum']){
-				$sql .= ', geodeticdatum = "'.$this->cleanInStr($geoRefArr['geodeticdatum']).'"';
-			}
-			if($geoRefArr['maximumelevationinmeters']){
-				$sql .= ',maximumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['maximumelevationinmeters'].',maximumelevationinmeters)';
-			}
-			if($geoRefArr['minimumelevationinmeters']){
-				$sql .= ',minimumelevationinmeters = IF(minimumelevationinmeters IS NULL,'.$geoRefArr['minimumelevationinmeters'].',minimumelevationinmeters)';
-			}
-
-			$sql .= ' WHERE occid IN('.$localStr.')';
-			//echo $sql;
-			$this->conn->query($sql);
 		}
 	}
 
@@ -211,19 +216,21 @@ class OccurrenceGeorefTools {
 	} 
 
 	public function setCollId($cid){
-		$this->collId = $cid;
-		$sql = 'SELECT collectionname, managementtype '.
-			'FROM omcollections WHERE collid = '.$cid;
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$this->collName = $r->collectionname;
-			$this->managementType = $r->managementtype;
+		if(is_numeric($cid)){
+			$this->collId = $cid;
+			$sql = 'SELECT collectionname, managementtype '.
+				'FROM omcollections WHERE collid = '.$cid;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->collName = $r->collectionname;
+				$this->managementType = $r->managementtype;
+			}
+			$rs->close();
 		}
-		$rs->close();
 	}
 
 	public function setQueryVariables($k,$v){
-		$this->qryVars[$k] = $v;
+		$this->qryVars[$k] = $this->cleanInStr($v);
 	}
 
 	public function getCollName(){
