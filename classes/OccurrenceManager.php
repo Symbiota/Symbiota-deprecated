@@ -620,7 +620,7 @@ class OccurrenceManager{
 	}
 
 	public function outputFullCollArr($occArr,$defaultCatid = 0){
-		$collCnt = 1;
+		$collCnt = 0;
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
 			foreach($catArr as $catid => $catArr){
@@ -641,12 +641,24 @@ class OccurrenceManager{
 			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
 				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>'><?php echo $name; ?></a>
 				    	</span>
-				    </div>
+					</div>
 					<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
 				    	<?php 
 						foreach($catArr as $collid => $collName2){
 				    		?>
 							<div style="padding:5px;height:30px;">
+								<?php
+								if($collCnt%10 == 0){ 
+									?>
+								    <div style="float:right;margin:80px 20px 0px 0px;">
+							        	<input type="image" src='../images/next.jpg'
+							                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+							                onmouseout="javascript:this.src = '../images/next.jpg';"
+							                title="Click button to advance to the next step" />
+							    	</div>
+							    	<?php
+								} 
+							    ?>
 								<div style="float:left;width:50px;">
 									<?php 
 									if($collName2["icon"]){
@@ -677,7 +689,7 @@ class OccurrenceManager{
 				    	}
 				    	?>
 				    </div>
-			    </div>
+				</div>
 				<?php 
 			}
 		}
@@ -686,6 +698,18 @@ class OccurrenceManager{
 			foreach($collArr as $collid => $cArr){
 				?>
 				<div style="padding:5px;height:30px;">
+					<?php
+					if($collCnt%10 == 0){ 
+						?>
+					    <div style="float:right;margin:80px 20px 0px 0px;">
+				        	<input type="image" src='../images/next.jpg'
+				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+				                onmouseout="javascript:this.src = '../images/next.jpg';"
+				                title="Click button to advance to the next step" />
+				    	</div>
+				    	<?php
+					} 
+				    ?>
 					<div style="float:left;width:50px;">
 						<?php 
 						if($cArr["icon"]){
@@ -710,7 +734,7 @@ class OccurrenceManager{
 			    			more info
 			    		</a>
 				    </div>
-			    </div>
+				</div>
 			    <?php
 			    $collCnt++; 
 			}

@@ -77,11 +77,11 @@ if($editable){
 	}
 	elseif($submitAction == 'Remap Taxon'){
 		$statusStr = $taxonEditorObj->transferResources($_REQUEST['remaptid']);
-		header('Location: taxonomydisplay.php?target='.$_REQUEST["genusstr"]);
+		header('Location: taxonomydisplay.php?target='.$_REQUEST["genusstr"].'&statusstr='.$statusStr);
 	}
 	elseif($submitAction == 'Delete Taxon'){
 		$statusStr = $taxonEditorObj->deleteTaxon();
-		header('Location: taxonomydisplay.php');
+		header('Location: taxonomydisplay.php?statusstr='.$statusStr);
 	}
 
 	$taxonEditorObj->setTaxon();

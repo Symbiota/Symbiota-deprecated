@@ -227,23 +227,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
-					    <div style="float:right;margin:80px 20px 0px 0px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
 						<?php 
 						$collManager->outputFullCollArr($specArr); 
 						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
-						?>
-					    <div style="float:right;margin:80px 20px 0px 0px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
-						<?php 
 						$collManager->outputFullCollArr($obsArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
@@ -259,12 +245,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			         		<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
-					    <div style="float:right;margin:80px 20px 0px 0px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
 						<?php
 						$collManager->outputFullCollArr($specArr);
 						?>
@@ -281,12 +261,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" />
 							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						</div>
-					    <div style="float:right;margin:80px 20px 0px 0px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
 						<?php
 						$collManager->outputFullCollArr($obsArr);
 						?>
