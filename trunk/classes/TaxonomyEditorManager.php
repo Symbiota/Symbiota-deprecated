@@ -657,10 +657,14 @@ class TaxonomyEditorManager{
 			$sql ='UPDATE IGNORE taxadescrblock SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
 			$this->conn->query($sql);
 			
-			//Checklists and Vouchers
+			//Vouchers and checklists
+			$sql ='UPDATE IGNORE fmvouchers SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
+			$sql ='DELETE FROM fmvouchers WHERE tid = '.$this->tid;
+			$this->conn->query($sql);
 			$sql ='UPDATE IGNORE fmchklsttaxalink SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
 			$this->conn->query($sql);
-			
+
 			//Key descriptions
 			$sql ='UPDATE IGNORE kmdescr SET tid = '.$targetTid.' WHERE inherited IS NULL AND tid = '.$this->tid;
 			$this->conn->query($sql);
@@ -701,23 +705,28 @@ class TaxonomyEditorManager{
 		$this->conn->query($sql);
 		
 		//Key descriptions
-		$sql ='DELETE FROM kmdescr WHERE inherited IS NULL AND tid = '.$this->tid;
+		$sql ='DELETE FROM kmdescr WHERE tid = '.$this->tid;
 		$this->conn->query($sql);
 		
 		//Taxon links
 		$sql ='DELETE FROM taxalinks WHERE tid = '.$this->tid;
 		$this->conn->query($sql);
 
+		$statusStr = 'SUCCESS: taxon deleted!<br/><a href="taxonomydisplay.php">Return to taxonomy display page</a>';
 		//Taxon status
 		$sql ='DELETE FROM taxstatus WHERE tid = '.$this->tid;
-		$this->conn->query($sql);
-		
-		//Delete taxon
-		$sql ='DELETE FROM taxa WHERE tid = '.$this->tid;
 		if($this->conn->query($sql)){
-			return 'SUCCESS: taxon deleted!<br/><a href="taxonomydisplay.php">Return to taxonomy display page</a>';
+			//Delete taxon
+			$sql ='DELETE FROM taxa WHERE tid = '.$this->tid;
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR attempting to delete taxon: '.$this->error;
+			}
 		}
-		return 0;
+		else{
+			$statusStr = 'ERROR attempting to delete taxon: '.$this->error;
+		}
+
+		return $statusStr;
 	}
 	
 	//Regular getter functions for this class

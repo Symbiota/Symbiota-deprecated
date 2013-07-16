@@ -8,6 +8,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
   
 $target = array_key_exists("target",$_REQUEST)?$_REQUEST["target"]:"";
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
+$statusStr = array_key_exists('statusstr',$_REQUEST)?$_REQUEST['statusstr']:'';
 
 $taxonDisplayObj = new TaxonomyDisplayManager($target);
  
@@ -55,7 +56,16 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 ?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
+		if($statusStr){
+			?>
+			<hr/>
+			<div style="color:<?php echo (strpos($statusStr,'SUCCESS') !== false?'green':'red'); ?>;margin:15px;">
+				<?php echo $statusStr; ?>
+			</div>
+			<hr/>
+			<?php 
+		}
 		if($editable){
 			?>
 			<div style="float:right;" title="Add a New Taxon">
