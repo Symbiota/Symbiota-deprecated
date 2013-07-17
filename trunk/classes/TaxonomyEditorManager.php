@@ -672,11 +672,11 @@ class TaxonomyEditorManager{
 			//Taxon links
 			$sql ='UPDATE IGNORE taxalinks SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
 			$this->conn->query($sql);
-			
+
 			return $this->deleteTaxon();
 		}
 	}
-	
+
 	public function deleteTaxon(){
 		//Field images
 		$sql ='UPDATE images SET tid = NULL WHERE occid IS NOT NULL AND tid = '.$this->tid;

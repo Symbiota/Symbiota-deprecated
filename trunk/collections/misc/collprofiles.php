@@ -59,9 +59,30 @@ if($collId) $collData = $collManager->getCollectionData();
 <html>
 <head>
 	<title><?php echo $defaultTitle." ".($collId?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
-	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
+	<link href="../../css/main.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<script src="../../js/jquery.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<meta name="keywords" content="Natural history collections,<?php echo ($collId?$collData["collectionname"]:""); ?>" />
 	<script language=javascript>
+
+		$(function() {
+			var dialogArr = new Array("instcode","collcode","pedits","rights","rightsholder","accessrights","guid","colltype","management","icon","sourceurl","sort");
+			var dialogStr = "";
+			for(i=0;i<dialogArr.length;i++){
+				dialogStr = dialogArr[i]+"info";
+				$( "#"+dialogStr+"dialog" ).dialog({
+					autoOpen: false,
+					modal: true
+				});
+
+				$( "#"+dialogStr ).click(function() {
+					$( "#"+this.id+"dialog" ).dialog( "open" );
+				});
+			}
+
+		});
+	
 		function toggleById(target){
 			if(target != null){
 			  	var obj = document.getElementById(target);
@@ -300,9 +321,13 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="institutioncode" value="<?php echo ($collId?$collData["institutioncode"]:'');?>" style="width:75px;" />
-										<a href="#" onclick="return dwcDoc('institutionCode')">
-											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										<a id="instcodeinfo" href="#" onclick="return false" title="More information about Institution Code">
+											<img src="../../images/info.png" style="width:15px;" />
 										</a>
+										<div id="instcodeinfodialog">
+											The name (or acronym) in use by the institution having custody of the occurrence records. This field is required. 
+											For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -311,9 +336,13 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="collectioncode" value="<?php echo ($collId?$collData["collectioncode"]:'');?>" style="width:75px;" />
-										<a href="#" onclick="return dwcDoc('collectionCode')">
-											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										<a id="collcodeinfo" href="#" onclick="return false" title="More information about Collection Code">
+											<img src="../../images/info.png" style="width:15px;" />
 										</a>
+										<div id="collcodeinfodialog">
+											The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional. 
+											For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -321,7 +350,7 @@ if($collId) $collData = $collManager->getCollectionData();
 										Collection Name: 
 									</td>
 									<td>
-										<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:95%;" />
+										<input type="text" name="collectionname" value="<?php echo ($collId?$collData["collectionname"]:'');?>" style="width:95%;" title="Required field" />
 									</td>
 								</tr>
 								<tr>
@@ -417,6 +446,14 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="checkbox" name="publicedits" value="1" <?php echo ($collData && $collData['publicedits']?'CHECKED':''); ?> />
+										<a id="peditsinfo" href="#" onclick="return false" title="More information about Public Edits">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="peditsinfodialog">
+											Checking public edits will allow any logged in user to edit a errors. 
+											However, if the user does not have explicit authorizaation to edit the collection, 
+											edits will not be appied until they are reveiwed and approved by collection administrator.
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -453,9 +490,14 @@ if($collId) $collData = $collManager->getCollectionData();
 											<?php 
 										}
 										?>
-										<a href="#" onclick="return dwcDoc('dcterms:rights')">
-											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										<a id="rightsinfo" href="#" onclick="return false" title="More information about Rights">
+											<img src="../../images/info.png" style="width:15px;" />
 										</a>
+										<div id="rightsinfodialog">
+											Information about rights held in and over the resource. 
+											This field can be limited to a set of values by modifying the portal's central configuration file.
+											For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:rights" target="_blank">Darwin Core definition</a>.
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -464,9 +506,13 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="rightsholder" value="<?php echo ($collId?$collData["rightsholder"]:'');?>" style="width:350px;" />
-										<a href="#" onclick="return dwcDoc('dcterms:rightsHolder')">
-											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										<a id="rightsholderinfo" href="#" onclick="return false" title="More information about Rights Holder">
+											<img src="../../images/info.png" style="width:15px;" />
 										</a>
+										<div id="rightsholderinfodialog">
+											The organization or person managing or owning the rights of the resource.
+											For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:rightsHolder" target="_blank">Darwin Core definition</a>.
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -475,14 +521,18 @@ if($collId) $collData = $collManager->getCollectionData();
 									</td>
 									<td>
 										<input type="text" name="accessrights" value="<?php echo ($collId?$collData["accessrights"]:'');?>" style="width:350px;" />
-										<a href="#" onclick="return dwcDoc('dcterms:accessRights')">
-											<img class="dwcimg" src="../../images/qmark.png" style="width:12px;" />
+										<a id="accessrightsinfo" href="#" onclick="return false" title="More information about Access Rights">
+											<img src="../../images/info.png" style="width:15px;" />
 										</a>
+										<div id="accessrightsinfodialog">
+											Informations or a URL link to page with details explaining how one can use the data.   
+											See <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
+										</div>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<scan title="Source of Global Unique Identifier">GUID source:</scan> 
+										<span title="Source of Global Unique Identifier">GUID source:</span> 
 									</td>
 									<td>
 										<select name="guidtarget">
@@ -492,6 +542,17 @@ if($collId) $collData = $collManager->getCollectionData();
 											<option value="catalogNumber" <?php echo ($collId && $collData["guidtarget"]=='catalogNumber'?'SELECTED':''); ?>>Catalog Number</option>
 											<option value="symbiotaUUID" <?php echo ($collId && $collData["guidtarget"]=='symbiotaUUID'?'SELECTED':''); ?>>Symbiota Generated GUID (UUID)</option>
 										</select>
+										<a id="guidinfo" href="#" onclick="return false" title="More information about Global Unique Identifier">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="guidinfodialog">
+											Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) is field  
+											is supplied by the source database and the GUID is mapped to the occurrenceId field.
+											The use of the Occurrence Id as the GUID is not recommended for live datasets. 
+											Catalog Number can be used when the value within the catalog number field is globally unique.
+											The Symbiota Generated GUID (UUID) option will inform the Symbiota instance to automatically 
+											generate UUID GUIDs for each records. This option is particularly recommended for many for Live Datasets.  
+										</div>
 									</td>
 								</tr>
 								<?php 
@@ -507,6 +568,19 @@ if($collId) $collData = $collManager->getCollectionData();
 												<option <?php echo ($collId && $collData["colltype"]=='Observations'?'SELECTED':''); ?>>Observations</option>
 												<option <?php echo ($collId && $collData["colltype"]=='General Observations'?'SELECTED':''); ?>>General Observations</option>
 											</select>
+											<a id="colltypeinfo" href="#" onclick="return false" title="More information about Collection Type">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="colltypeinfodialog">
+												Preserve Specimens mean that physical samples exist and can be inspected by researchers. 
+												Use Observations when the record is not based on a physical specimen. 
+												General Observations are used for setting up group projects where registered users
+												can independently manage their own dataset directly within the single project. General Observation 
+												projects are typically used by field researchers to manage their collection data and print labels 
+												prior to depositing the physIcal material within a collection. Even though personal collections 
+												are represented by a physical sample, they are classified as &quot;observations&quot; until the 
+												physical material is deposited within a publicly available collection with active curation.     
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -518,6 +592,14 @@ if($collId) $collData = $collManager->getCollectionData();
 												<option>Snapshot</option>
 												<option <?php echo ($collId && $collData["managementtype"]=='Live Data'?'SELECTED':''); ?>>Live Data</option>
 											</select>
+											<a id="managementinfo" href="#" onclick="return false" title="More information about Management Type">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="managementinfodialog">
+												Use Snapshot when there is a separate in-house database maintained in the collection and the dataset 
+												within the Symbiota portal is only a periotically updated snapshot of the central database. 
+												A Live dataset is when the data is managed directly within the portal and the central database is the portal data. 
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -526,6 +608,15 @@ if($collId) $collData = $collManager->getCollectionData();
 										</td>
 										<td>
 											<input type="text" name="icon" style="width:350px;" value="<?php echo ($collId?$collData["icon"]:'');?>" title="Small url representing the collection" />
+											<a id="iconinfo" href="#" onclick="return false" title="What is an Icon?">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="iconinfodialog">
+												URL to an image icon that represents the collection. Icons are usually place in the 
+												/images/collicon/ folder. Path can be absolute, relative, or of the format 
+												&quot;images/collicon/acro.jpg&quot; 
+												The use of icons are optional.
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -534,6 +625,16 @@ if($collId) $collData = $collManager->getCollectionData();
 										</td>
 										<td>
 											<input type="text" name="individualurl" style="width:350px;" value="<?php echo ($collId?$collData["individualurl"]:'');?>" title="Dynamic link to source database individual record page" />
+											<a id="sourceurlinfo" href="#" onclick="return false" title="More information about Source Records URL">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="sourceurlinfodialog">
+												Adding a URL template here will dynamically generate and add the specimen details page a link to the 
+												source record. For example, &quot;http://sweetgum.nybg.org/vh/specimen.php?irn=--DBPK--&quot;
+												will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the 
+												NYBG's Primary Key (dbpk data field within the ommoccurrence table). 
+												Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK-- 
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -542,6 +643,12 @@ if($collId) $collData = $collManager->getCollectionData();
 										</td>
 										<td>
 											<input type="text" name="sortseq" value="<?php echo ($collId?$collData["sortseq"]:'');?>" />
+											<a id="sortinfo" href="#" onclick="return false" title="More information about Sorting">
+												<img src="../../images/info.png" style="width:15px;" />
+											</a>
+											<div id="sortinfodialog">
+												Leave this field empty if you want the collections to sort alphabetically (default) 
+											</div>
 										</td>
 									</tr>
 									<?php 
