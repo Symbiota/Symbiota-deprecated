@@ -7,8 +7,9 @@ class OccurrenceDwcArchiver{
 
 	private $ts;
 	
-	private $collCode;
 	private $collArr;
+	private $conditionSql;
+	private $condAllowArr;
 
 	private $targetPath;
 	private $fileName;
@@ -31,6 +32,8 @@ class OccurrenceDwcArchiver{
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 
 		$this->ts = time();
+		
+		$this->condAllowArr = array('country','stateProvince','county','recordedBy');
 
 		$this->occurrenceFieldArr = array(
 			'id' => '',
@@ -152,39 +155,59 @@ class OccurrenceDwcArchiver{
 		}
 	}
 
-	public function setTargetPath($tp){
-		$this->targetPath = $tp;
+	public function setTargetPath($tp = ''){
+		if($tp){
+			$this->targetPath = $tp;
+		}
+		else{
+			//Set to temp download path
+			$tPath = $GLOBALS["tempDirRoot"];
+			if(!$tPath){
+				$tPath = ini_get('upload_tmp_dir');
+			}
+			if(!$tPath){
+				$tPath = $GLOBALS["serverRoot"]."/temp";
+			}
+			if(file_exists($tPath."/downloads")){
+				$tPath .= "/downloads";
+			}
+			if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
+				$tPath .= '/';
+			}
+			$this->targetPath = $tPath;
+		}
 	}
 
 	public function setFileName($seed){
 		$this->fileName = $this->conn->real_escape_string($seed).'_DwC-A.zip';
 	}
 
-	public function setCollArr($collTarget){
-		$collTarget = $this->conn->real_escape_string($collTarget);
+	public function setCollArr($collTarget, $collType = ''){
+		$collTarget = $this->cleanInStr($collTarget);
+		$collType = $this->cleanInStr($collType);
 		unset($this->collArr);
 		$this->collArr = array();
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
-			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-			'c.guidtarget, c.collectionguid, c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
-			'i.postalcode, i.country, i.phone '.
-			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid ';
-		if($collTarget == 'allspecimens'){
-			$sql .= 'WHERE c.colltype = "Preserved Specimens" ';
+		$sqlWhere = '';
+		if($collType == 'specimens'){
+			$sqlWhere = '(c.colltype = "Preserved Specimens") ';
 		}
-		elseif($collTarget == 'allobservations'){
-			$sql .= 'WHERE (c.colltype = "Observations" OR c.colltype = "General Observations") ';
+		elseif($collType == 'observations'){
+			$sqlWhere = '(c.colltype = "Observations" OR c.colltype = "General Observations") ';
 		}
-		elseif($collTarget){
-			$sql .= 'WHERE c.collid IN('.$collTarget.') ';
+		if($collTarget){
+			$sqlWhere .= ($sqlWhere?'AND ':'').'(c.collid IN('.$collTarget.')) ';
 		}
 		else{
 			//Don't limit by collection id 
 		}
-		
-		$rs = $this->conn->query($sql);
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
+			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
+			'c.guidtarget, c.collectionguid, c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
+			'i.postalcode, i.country, i.phone '.
+			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
 		//echo $sql.'<br/>';
-		if($r = $rs->fetch_object()){
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
 			$inst = $r->institutioncode;
 			if($r->collectioncode) $inst .= '-'.$r->collectioncode;
 			$this->collArr[$r->collid]['collcode'] = $inst;
@@ -212,16 +235,31 @@ class OccurrenceDwcArchiver{
 		return $this->collArr;
 	}
 
+	public function setConditionStr($condStr){
+		$condArr = explode(';',$condStr);
+		foreach($condArr as $rawV){
+			$tok = explode(':',$rawV);
+			if(count($tok) == 2){
+				if(in_array($tok[0],$this->condAllowArr)){
+					$this->conditionSql .= 'AND (o.'.$tok[0].' IN("'.str_replace(',','","',$this->cleanInStr($tok[1])).'")) ';
+				}
+			}
+		}
+	}
+
 	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
 		global $serverRoot;
+		if(!$this->targetPath) $this->setTargetPath();
+		$archiveFile = '';
 		if($this->collArr){
-			if(!$this->logFH){
+			if(!$this->logFH && !$this->silent){
 				$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
 				$this->logFH = fopen($logFile, 'a');
 			}
 			$this->logOrEcho('Creating DwC-A file...'."\n");
 			
 			if(!class_exists('ZipArchive')){
+				$this->logOrEcho("FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin\n");
 				exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
 			}
 	
@@ -253,6 +291,7 @@ class OccurrenceDwcArchiver{
 		else{
 			echo 'ERROR: unable to create DwC-A for collection #'.implode(',',array_keys($this->collArr));
 		}
+		return $archiveFile;
 	}
 	
 	private function writeMetaFile(){
@@ -396,7 +435,11 @@ class OccurrenceDwcArchiver{
 				'g.guid AS recordId, o.localitySecurity, c.collid '.
 				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ORDER BY o.collid,o.occid'; 
+				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
+			if($this->conditionSql) {
+				$sql .= $this->conditionSql;
+			}
+			$sql .= 'ORDER BY o.collid,o.occid'; 
 			//echo $sql;
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 				while($r = $rs->fetch_assoc()){
@@ -422,7 +465,7 @@ class OccurrenceDwcArchiver{
 					}
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
-					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					//$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 					unset($r['collid']);
 					if($guidTarget == 'catalogNumber'){
@@ -467,11 +510,15 @@ class OccurrenceDwcArchiver{
 				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
-				'WHERE o.collid IN('.implode(',',array_keys($this->collArr)).') ORDER BY o.collid,o.occid';
+				'WHERE o.collid IN('.implode(',',array_keys($this->collArr)).') ';
+			if($this->conditionSql) {
+				$sql .= $this->conditionSql;
+			}
+			$sql .= 'ORDER BY o.collid,o.occid';
 			//echo $sql;
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 				while($r = $rs->fetch_assoc()){
-					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					//$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 					fputcsv($fh, $this->addcslashesArr($r));
 				}
 				$rs->free();
@@ -511,9 +558,11 @@ class OccurrenceDwcArchiver{
 				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
-	
 			if($redactLocalities && !$this->canReadRareSpp){
 				$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
+			}
+			if($this->conditionSql) {
+				$sql .= $this->conditionSql;
 			}
 			$sql .= 'ORDER BY o.occid';
 			//echo $sql;
@@ -523,7 +572,7 @@ class OccurrenceDwcArchiver{
 				while($r = $rs->fetch_assoc()){
 					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
-						$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+						//$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
 						$r['webstatement'] = $r['rights'];
 						$r['rights'] = '';
 						if(!$r['usageterms']){
@@ -783,10 +832,6 @@ class OccurrenceDwcArchiver{
 		$this->silent = $c;
 	}
 
-	public function getSilent(){
-		return $this->silent;
-	}
-
 	private function logOrEcho($str){
 		if(!$this->silent){
 			if($this->logFH){
@@ -847,6 +892,13 @@ class OccurrenceDwcArchiver{
 		$sz = 'BKMGTP';
 		$factor = floor((strlen($bytes) - 1) / 3);
 		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+	}
+
+	private function cleanInStr($inStr){
+		$retStr = trim($inStr);
+		$retStr = preg_replace('/\s\s+/', ' ',$retStr);
+		$retStr = $this->conn->real_escape_string($retStr);
+		return $retStr;
 	}
 }
 ?>

@@ -32,7 +32,7 @@ class UuidFactory {
 		//Populate occurrence GUIDs
 		$sql = 'SELECT o.occid '.
 			'FROM omoccurrences o '.
-			'WHERE o.occid NOT IN(SELECT occid FROM guidoccurrences) ';
+			'WHERE o.occid NOT IN(SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		$rs = $conn->query($sql);
 		if($rs->num_rows) $this->echoStr("Populating occurrence GUIDs\n");
@@ -54,7 +54,7 @@ class UuidFactory {
 		$sql = 'SELECT d.detid '.
 			'FROM omoccurdeterminations d ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE d.detid NOT IN(SELECT detid FROM guidoccurdeterminations) ';
+		$sql .= 'WHERE d.detid NOT IN(SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		$rs = $conn->query($sql);
 		if($rs->num_rows) $this->echoStr("Populating determination GUIDs\n");
@@ -76,7 +76,7 @@ class UuidFactory {
 		$sql = 'SELECT i.imgid '.
 			'FROM images i ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages) ';
+		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -103,8 +103,8 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT count(c.collid) as reccnt '.
-			'FROM omcollections c '.
-			'WHERE c.collid NOT IN(SELECT tablepk FROM guids WHERE tablename = "omcollections") ';
+			'FROM omcollections '.
+			'WHERE collectionguid IS NULL ';
 		//echo $sql;
 		$rs = $conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -120,7 +120,7 @@ class UuidFactory {
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(o.occid) as reccnt '.
 			'FROM omoccurrences o '.
-			'WHERE o.occid NOT IN (SELECT occid FROM guidoccurrences) ';
+			'WHERE o.occid NOT IN (SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -138,7 +138,7 @@ class UuidFactory {
 		$sql = 'SELECT COUNT(d.detid) as reccnt '.
 			'FROM omoccurdeterminations d ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE d.detid NOT IN (SELECT detid FROM guidoccurdeterminations) ';
+		$sql .= 'WHERE d.detid NOT IN (SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -156,7 +156,7 @@ class UuidFactory {
 		$sql = 'SELECT COUNT(i.imgid) as reccnt '.
 			'FROM images i ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages) ';
+		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
