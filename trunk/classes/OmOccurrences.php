@@ -811,6 +811,7 @@ CREATE TABLE `omoccurrences` (
                    $statement->bind_param("ss", $institutionCode, $collectionCode);
                    $statement->execute();
                    $statement->bind_result($returnvalue);
+                   $statement->fetch();
                    $statement->close();
                }
            }
@@ -3055,7 +3056,6 @@ CREATE TABLE `omoccurrences` (
             $sql .=  " ,  ? ";
             $sql .=  " ,  ? ";
             $sql .=  " ,  ? ";
-            $sql .=  " ,  ? ";
             $sql .= ')';
 
         }   
@@ -3073,6 +3073,9 @@ CREATE TABLE `omoccurrences` (
            $statement->close();
         } else { 
             $this->error = mysqli_error($connection); 
+            // Likely case for error conditions if schema changes affect field names
+            // or if updates to field list produce incorrect sql.
+            echo mysqli_error($connection);
         }
         if ($this->error=='') { 
             $returnvalue = true;
