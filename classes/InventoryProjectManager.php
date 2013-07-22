@@ -126,14 +126,14 @@ class InventoryProjectManager {
 		}
 		$sql .= "ORDER BY c.SortSequence, c.name";
 		$rs = $this->con->query($sql);
-		echo "<ul>";
+		$cnt = 0;
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->clid] = $this->cleanOutStr($row->name).($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
-			if($row->latcentroid){
+			if($cnt < 50 && $row->latcentroid){
 				$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
 			}
+			$cnt++;
 		}
-		echo "</ul>";
 		$rs->close();
 		return $returnArr;
 	}
@@ -145,14 +145,14 @@ class InventoryProjectManager {
 			"WHERE (spl.pid = ".$this->projId.") ".
 			"ORDER BY s.SortSequence, s.projectname";
 		$rs = $this->con->query($sql);
-		echo "<ul>";
+		$cnt = 0;
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->surveyid] = $this->cleanOutStr($row->projectname);
-			if($row->latcentroid){
+			if($cnt < 50 && $row->latcentroid){
 				$this->surveyCoord[] = $row->latcentroid.','.$row->longcentroid;
 			}
+			$cnt++;
 		}
-		echo "</ul>";
 		$rs->close();
 		return $returnArr;
 	}
