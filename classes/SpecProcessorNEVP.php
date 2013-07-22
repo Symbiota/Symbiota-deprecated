@@ -42,7 +42,7 @@ if (!$testOcc->checkSchema()) {
    echo "[Warning: Ingest of data may fail.  Contact a Symbiota developer.]\n";
 }
 
-if (!class_exists(Result)) {
+if (!class_exists('Result')) {
     class Result {
         public $couldparse = false; // document compliant with expectations
 	    public $success = false; // completed without errors
@@ -77,6 +77,7 @@ class EVENT {
 }
 
 class IDENTIFICATION { 
+   public $occid;
    public $family;
    public $taxonrank;
    public $scientificname;
@@ -168,12 +169,10 @@ class OCCURRENCE {
 
    public function write() { 
        global $createNewRec, $result; 
-       for ($i=0; $i<count($this->identifications); $i++) { 
-           $this->identifications[$i]->write();
-       }
        $occ = new OmOccurrences();
        $det = new OmOccurDeterminations();
        $collid = $occ->lookupCollId($this->institutioncode, $this->collectioncode);
+echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
        // Record exists if there is a matching DarwinCore triplet.  
        $exists = $occ->loadByDWCTriplet($this->institutioncode, $this->collectioncode, $this->catalognumber);
        if (!$exists) {
@@ -206,19 +205,26 @@ class OCCURRENCE {
        }
        if ($this->recordnumber!=null) { $occ->setrecordNumber($this->recordnumber); }
        $occ->settypeStatus($this->getTypeStatusList());
-       if ($this->countryname!=null) { $occ->setcountry($this->countryname); } 
+       if ($this->country!=null) { $occ->setcountry($this->country); } 
        if ($this->stateprovince!=null) { $occ->setstateProvince($this->stateprovince); }
        if ($this->county!=null) { $occ->setcounty($this->county); }
        $occ->setmunicipality($this->municipality);
        if ($this->locality!=null) { $occ->setlocality($this->locality); } 
        if ($this->collectingevent != null) { 
-          $occ->seteventDate($this->collectingevent->eventdate);
+          // Symbiota event date is a mysql date field, thus less 
+          // expressive than an ISO date field.
+          if (strlen($this->collectingevent->eventdate)>10) { 
+              // TODO: Handle more cases of ISO date ranges.
+              $occ->seteventDate(substr($this->collectingevent->eventdate,0,10));
+          } else { 
+              $occ->seteventDate($this->collectingevent->eventdate);
+          }
           $occ->setyear($this->collectingevent->startyear);
           $occ->setmonth($this->collectingevent->startmonth);
           $occ->setday($this->collectingevent->startday);
           $occ->setverbatimEventDate($this->collectingevent->verbatimeventdate);
        }
-       if (class_exists(Gazeteer)) {
+       if (class_exists('Gazeteer')) {
           $gazeteer = new Gazeteer();
           // For NEVP, lookup georeference from state+municipality
           $georef = $gazeteer->lookup($this->stateprovince, $this->municipality,$occ->getyear());
@@ -232,8 +238,8 @@ class OCCURRENCE {
              $occ->setgeoreferenceSources($georef->georeferenceSources);
           }
        }
-       if ($this-minimumelevationinmeters!=null) { $occ->setminimumElevationInMeters($this->minimumelevationinmeters); }
-       if ($this-maximumelevationinmeters!=null) { $occ->setmaximumElevationInMeters($this->maximumelevationinmeters); }
+       if ($this->minimumelevationinmeters!=null) { $occ->setminimumElevationInMeters($this->minimumelevationinmeters); }
+       if ($this->maximumelevationinmeters!=null) { $occ->setmaximumElevationInMeters($this->maximumelevationinmeters); }
        $filedUnder = $this->getFiledUnderID();
        if ($filedUnder!=null) { 
            $occ->setsciname($filedUnder->scientificname);
@@ -254,13 +260,13 @@ class OCCURRENCE {
            if (strlen($filedUnder->infraspecificepithet)>0 && strlen($filedUnder->infraspecificrank)==0) {
                 $occ->settaxonRank("subspecies");
            }
-           if (strlen($filedUnder->infraspecificepithet)==0 && strlen($filedUnder->species)>0) {
+           if (strlen($filedUnder->infraspecificepithet)==0 && strlen($filedUnder->specificepithet)>0) {
                 $occ->settaxonRank("species");
            }
-           if (strlen($filedUnder->infraspecificepithet)==0 && strlen($filedUnder->species)==0 && strlen($filedUnder->genus)>0) {
+           if (strlen($filedUnder->infraspecificepithet)==0 && strlen($filedUnder->specificepithet)==0 && strlen($filedUnder->genus)>0) {
                 $occ->settaxonRank("genus");
            }
-           if ($filedUnder->identificationdate!=NULL) {
+           if ($filedUnder->dateidentified!=NULL) {
                $occ->setdateIdentified($filedUnder->identificationdate->writeAll());
            }
        }
@@ -284,7 +290,7 @@ class OCCURRENCE {
 
                $result->successcount++;
            } else {
-               $result->errors .= "Error: [".$occ->errorMessage()."]\n";
+               $result->errors .= "Error: [" . $occ->errorMessage() . "]\n";
            }
        } else {
            echo "Skipping, record exists and specified policy is to not update. [".$occ->getoccid()."]\n";
@@ -345,7 +351,7 @@ class NEVPProcessor {
               $currentAnnotation->motivations[] = $name;
               break;
            case "OA:MOTIVATEDBY":
-              if (strlen($attrs['RDF:RESOURCE'])>0) { 
+              if (@strlen($attrs['RDF:RESOURCE'])>0) { 
                   $currentAnnotation->motivations[] = $attrs['RDF:RESOURCE'];
               }
               break;
@@ -562,7 +568,7 @@ class NEVPProcessor {
 
         if ($this->countfound!=$this->acount) { 
            // TODO: Report discrepancy.
-           echo "ERROR: Expected $this->acount annotations, found $this->countfound";
+           echo "ERROR: Expected $this->acount annotations, found $this->countfound \n";
         }
     
         xml_parser_free($parser);
