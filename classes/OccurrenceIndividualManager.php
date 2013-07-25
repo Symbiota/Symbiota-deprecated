@@ -201,12 +201,20 @@ class OccurrenceIndividualManager {
 
 	public function getDuplicateArr(){
 		$retArr = array();
+		 $sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, '.
+			'o.occurrenceid, o.sciname, o.identifiedby, o.dateidentified, d.notes '.
+			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'INNER JOIN omoccurduplicatelink d2 ON d.duplicateid = d2.duplicateid '.
+			'WHERE (d2.occid = '.$this->occId.') AND (o.occid <> '.$this->occId.') ';
+		/*
 		$sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, o.occurrenceid, o.sciname, '.
 			'o.identifiedby, o.dateidentified, d.notes '.
 			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'WHERE d.duplicateid IN(SELECT duplicateid FROM omoccurduplicatelink WHERE occid = '.$this->occId.') '.
 			'AND (o.occid <> '.$this->occId.')';
+		*/
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['instcode'] = $r->institutioncode;
