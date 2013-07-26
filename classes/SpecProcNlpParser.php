@@ -253,6 +253,7 @@ class SpecProcNlpParser extends SpecProcNlp{
 			$this->tokenArr = array_merge($tokens,preg_split('/[\s,;]+/',$l));
 		}
 	}
+
 }
 ?>
  

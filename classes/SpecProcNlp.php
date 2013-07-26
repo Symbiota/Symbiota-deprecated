@@ -2,241 +2,243 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
 include_once($serverRoot.'/classes/SpecProcNlpParser.php');
+include_once($serverRoot.'/classes/SpecProcNlpParserLBCC.php');
 
 class SpecProcNlp{
 
 	protected $conn;
 	protected $collId;
-	protected $rawText;
-	protected $errArr = array();
-	
+	protected $occid;
+	protected $prlid;
+	protected $catalogNumber;
+	protected $url;
+	protected $ocrSource;
+	private $printMode = 0;		//0 = database, 1 = report, 2 = csv
+	private $logErrors = 0; 
+	private $totalStats = array();
+	private $csvHeaderArr = array();
+
+	private $outFH;
+	private $logFH;
+	private $outFilePath;
+
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		$this->outFilePath = $GLOBALS['serverRoot'].(substr($GLOBALS['serverRoot'],-1)=='/'?'':'/')."temp/logs/LbccParser_".date('Y-m-d_his');
+		set_time_limit(7200);
 	}
 	
 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
-	}
-	
-	public function setCollId($collId){
-		if(is_numeric($collId)){
-			$this->collId = $collId;
+		echo '<div>Processing finished</div>';
+		echo '<div style="margin-left:10px;">'.$this->totalStats['collmeta']['totalcnt'].' records processed</div>';
+		if($this->printMode == 1){
+			$this->printSummary();
+			$this->outToReport('Processing finished: '.date('Y-m-d h:i:s A')."\n\n");
+			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.txt">'.$this->outFilePath.'.txt</a></div>';
+			echo '<div style="margin-left:10px;">Log file: <a href="'.$this->outFilePath.'.log">'.$this->outFilePath.'.log</a></div>';
+			if($this->outFH) fclose($this->outFH);
 		}
+		elseif($this->printMode == 2){
+			//Create new final file and prime with header
+			fclose($this->outFH);
+			$outFinalFH = fopen($this->outFilePath.'.csv', 'w');
+			fputcsv($outFinalFH,array_keys($this->csvHeaderArr));
+			//Append data from temp file to final file
+			$outTempFH = fopen($this->outFilePath.'_temp.csv', 'r');
+			while (!feof($outTempFH)) {
+				$contents = fread($outTempFH,8192);
+				fwrite($outFinalFH,$contents);
+			}
+			fclose($outTempFH);
+			unlink($this->outFilePath.'_temp.csv');
+			fclose($outFinalFH);
+			
+			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.csv">'.$this->outFilePath.'.csv</a></div>';
+		}
+		else{
+			
+		}
+		if($this->logFH){
+			fclose($this->logFH);
+		}
+		if(!($this->conn === false)) $this->conn->close();
 	}
-	
-	/*
-	 * @param 	$limit: SQL limit (optional)
-	 * 			$limitStart: SQL limit start (optional)
-	 * 			$innerTerm: inner wildcard preformed on rawstr
-	 * 			$processingStatus: processing status set in omoccurrence table
-	 * 			$source: source of OCR text string 
-	 * @return 	Array of raw OCR text blocks 
-	 */
-	public function getOcrRawArr($limit = 1000, $limitStart = 0, $innerTerm = '', $processingStatus = 'unprocessed', $source = ''){
-		$retArr = array();
-		foreach($collArr as $cid){
-			$sql = 'SELECT r.prlid, r.rawstr, IFNULL(i.occid,r.occid) as occid '. 
+
+	public function batchProcess($collTarget, $source = 'abbyy'){
+		$this->setCollectionMetadata($collTarget);
+		$collArr = explode(',',$collTarget);
+		$totalCnt = 0;
+		foreach($collArr as $collId){
+			$this->setCollId($collId);
+			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '. 
 				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid '.
 				'INNER JOIN omoccurrences o ON IFNULL(i.occid,r.occid) = o.occid '.
-				'WHERE length(r.rawstr) > 20 ';
+				'WHERE length(r.rawstr) > 20 AND (o.processingstatus = "unprocessed") ';
 			if($this->collId) $sql .= 'AND (o.collid = '.$this->collId.') ';
-			if($processingStatus) 'AND (o.processingstatus = "'.$processingStatus.'") ';
-			if($source) 'AND r.source LIKE "%'.$source.'%" ';
-			if($innerTerm) 'AND rawstr LIKE "%'.$innerTerm.'%" ';
-			if($limit) $sql .= 'LIMIT '.($limitStart?','.$limitStart:'').$limit;
-			if($rs = $this->conn->query($sql)){
-				$recCnt = 0;
-				while($r = $rs->fetch_object()){
-					$retArr[$r->occid][$r->prlid]['rawstr'] = $r->rawstr;
-					$retArr[$r->occid][$r->prlid]['source'] = $r->source;
+			if($source) $sql .= 'AND r.source LIKE "%'.$source.'%" ';
+			$sql .= 'LIMIT 100';
+			//echo $sql;
+			$cnt = 0;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$rawStr = $r->rawstr;
+				$this->ocrSource = $r->source;
+				$this->url = $r->url;
+				$this->prlid = $r->prlid;
+				$this->occid = $r->occid;
+				$this->catalogNumber = $r->catalognumber;
+
+				//Process string and load results into $dwcArr
+				//Exceptions must be caught in try/catch blocks
+				$dwcArr = array();
+				try{
+					$dwcArr = $this->parse($rawStr);
 				}
-			}
-		}
-		return $retArr;
-	}
-	
-	/*
-	 * @param 	Array of parsed term/values. 
-	 * 			Key: DwC term; Value: Output text 
-	 * @return 	TRUE on success; Array of warning returned on minor error; ERROR thrown on failure;  
-	 */
-	public function loadParsedData($inArr){
-		$warningArr = array();
-		if(!is_array($inArr)){
-			throw new Exception('input is not an array');
-			return false;
-		}
-		$dwcArr = array_change_key_case($inArr);
+				catch(Exception $e){
+					$eStr = 'ERROR: '.$e->getMessage();
+					//echo $eStr;
+					$this->logError($eStr);
+					if($this->printMode == 1) $this->outToReport($eStr);
+				}
 		
-		//Obtain occid and prlid variables (both required)
-		$occid = 0;
-		if(!isset($dwcArr['prlid'])){
-			throw new Exception('prlid is needed to load parsed data');
-			return false;
-		}
-		$prlid = $dwcArr['prlid'];
-		unset($dwcArr['prlid']);
-		if(isset($dwcArr['occid'])){
-			$occid = $dwcArr['occid'];
-			unset($dwcArr['occid']);
-		}
-		elseif($prlid){
-			//Grab occid using the prlid identifier
-			$sql = 'SELECT IFNULL(i.occid,r.occid) as occid '.
-				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid'. 
-				'WHERE r.prlid = '.$prlid;
-			if($rs = $this->conn->query($sql)){
-				if($r = $r->fetch_object()){
-					$occid = $r->occid;
+				if($this->printMode == 1){
+					//Output to report file
+					$this->printResult($rawStr,$dwcArr);
+				}
+				elseif($this->printMode == 2){
+					$dwcArr['occid'] = $this->occid;
+					$dwcArr['prlid'] = $this->prlid;
+					$dwcArr['ocrsource'] = $this->ocrSource;
+					$dwcArr['imageurl'] = $this->url;
+					if(!array_key_exists('catalogNumber', $dwcArr)) $dwcArr['catalogNumber'] = $this->catalogNumber;
+					//Output to csv file
+					$this->printCsv($dwcArr,$totalCnt);
 				}
 				else{
-					throw new Exception('unable to grab occid using prlid ');
-					return false;
+					//Output to database
+					//$this->loadParsedData($dwcArr);
+				}
+				$cnt++;
+			}
+			$this->totalStats['collmeta'][$collId]['cnt'] = $cnt;
+			$totalCnt += $cnt;
+		}
+		$this->totalStats['collmeta']['totalcnt'] = $totalCnt;
+	}
+		
+	//Misc functions
+	protected function getPoliticalUnits($countrySeed = '', $stateSeed = '', $countySeed = '', $wildStr = ''){
+		$retArr = array();
+		$cnt = 0;
+		$bestMatch = 0;
+		$sqlBase = 'SELECT cr.countryname, sp.statename, c.countyname '.
+			'FROM lkupcountry cr INNER JOIN lkupstateprovince sp ON cr.countryid = sp.countryid '.
+			'LEFT JOIN lkupcounty c ON sp.stateid = c.stateid WHERE ';
+		if($countrySeed || $stateSeed || $countySeed){
+			//First look for exact match
+			$sqlWhere = '';
+			if($countrySeed){
+				$sqlWhere .= 'AND (cr.countryName = "'.$countrySeed.'") ';
+			}
+			if($stateSeed){
+				$sqlWhere .= 'AND (sp.stateName = "'.$stateSeed.'") ';
+			}
+			if($countySeed){
+				$sqlWhere .= 'AND ((c.countyname = "'.$stateSeed.'") OR (c.countyname LIKE "'.$stateSeed.'%")) ';
+			}
+			$rs = $this->conn->query($sqlBase.substr($sqlWhere,4));
+			while($r = $rs->fetch_object()){
+				$retArr[$cnt]['country'] = $r->countryname;
+				$retArr[$cnt]['state'] = $r->statename;
+				$retArr[$cnt]['county'] = $r->countyname;
+				$cnt++;
+			}
+			$rs->free();
+			if(!$retArr){
+				$sqlWhere = '';
+				//Nothing returns so lets go deeper
+				if($countrySeed){
+					$sqlWhere .= 'AND (SOUNDEX(cr.countryName) = SOUNDEX("'.$countrySeed.'")) ';
+				}
+				if($stateSeed){
+					$sqlWhere .= 'AND (SOUNDEX(sp.stateName) = SOUNDEX("'.$stateSeed.'")) ';
+				}
+				if($countySeed){
+					$sqlWhere .= 'AND (SOUNDEX(c.countyname) = SOUNDEX("'.$stateSeed.'")) ';
+				}
+				$rs = $this->conn->query($sqlBase.substr($sqlWhere,4));
+				while($r = $rs->fetch_object()){
+					$retArr[$cnt]['country'] = $r->countryname;
+					$retArr[$cnt]['state'] = $r->statename;
+					$retArr[$cnt]['county'] = $r->countyname;
+					$cnt++;
 				}
 				$rs->free();
 			}
-			else{
-				throw new Exception('unable to grab occid using prlid ');
-				return false;
-			}
-		}
-		else{
-			throw new Exception('Missing occurrence identifier (occid) ');
-			return false;
-		}
-		
-		//Grab target fields
-		$targetFields = array();
-		$rsMD = $this->conn->query('SHOW COLUMNS FROM omoccurrences');
-		while($r = $rsMD->fetch_object()){
-			$targetFields[strtolower($r->Field)] = $r->Type;
-		}
-		$rsMD->free();
-		//Remove some internal system fields
-		unset($targetFields['occid']);
-		unset($targetFields['collid']);
-		unset($targetFields['dbpk']);
-		unset($targetFields['tidinterpreted']);
-		unset($targetFields['instititioncode']);
-		unset($targetFields['collectioncode']);
-		unset($targetFields['recordedbyid']);
-		unset($targetFields['modified']);
-		unset($targetFields['observeruid']);
-		unset($targetFields['processingstatus']);
-		unset($targetFields['recordenteredby']);
-		unset($targetFields['dateLastModified']);
-		
-		//Get existing data
-		$curOccArr = array();
-		if($rs = $this->conn->query('SELECT * FROM omoccurrences WHERE occid = '.$occid)){
-			$curOccArr = array_change_key_case($rs->fetch_assoc());
-		}
-		else{ 
-			throw new Exception('CRITICAL ERROR: unable to populate $curOccArr');
-			return false;
-		}
 
-		//Load data
-		$occData = array_intersect_key($dwcArr,$targetFields);
-		$leftOverData = array_diff_key($dwcArr,$targetFields);
-		$sqlFrag = '';
-		$finalFields = array();
-		//int, double, varchar, text, date 
-		foreach($occData as $fieldTerm => $value){
-			$valueStr = $this->encodeString($value);
-			$valueStr = $this->cleanInStr($valueStr);
-			if($valueStr && !$curOccArr[$fieldTerm]){
-				//A value does not already exist in existing record, thus OK to populate field 
-				$valueIn = '';
-				if(strpos($targetFields[$fieldTerm],'int') === 0 || strpos($targetFields[$fieldTerm],'double') === 0 || strpos($targetFields[$fieldTerm],'decimal') === 0){
-					//Target field is a numeric data type
-					if(is_numeric($valueStr)){
-						$valueIn = $valueStr;
-					}
-					else{
-						$warningArr[] = 'WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not numeric)';
-						//throw new Exception('');
-					}
-				}
-				elseif(strpos($targetFields[$fieldTerm],'date') === 0){
-					//Target field is a date data type
-					$dateValue = $this->formatDate($valueStr);
-					if($dateValue){
-						$valueIn = '"'.$dateValue.'"';
-					}
-					else{
-						$warningArr[] = 'WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not a valid date)';
-					}
-				}
-				else{
-					//Target field is a text data type
-					$valueIn = '"'.$valueStr.'"';
-				}
-				//Add to SQL if has value
-				if($valueIn){
-					$finalFields[] = $fieldTerm;
-					$sqlFrag .= ','.$fieldTerm.'='.$valueIn;
+			//Check to see if we have more than one possible matches
+			if(count($retArr) > 1){
+				//Locate the best match
+				$rateArr = array();
+				foreach($retArr as $k => $vArr){
+					$rating = 0;
+					if($countrySeed) $rating += levenshtein($countrySeed,$vArr['country']);
+					if($stateSeed) $rating += levenshtein($stateSeed,$vArr['state']);
+					if($countySeed) $rating += levenshtein($countySeed,$vArr['county']);
+					$rateArr[$k] = $rating;
+					asort($rateArr,SORT_NUMERIC);
+					$bestMatch = key($rateArr);
 				}
 			}
 		}
-
-		if($sqlFrag){
-			//Load data into existing record
-			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$occid;
-			
-			//Code that modifies the processing status
-			//processingStatus = unprocessed-NLP
-			
-			
-
-			if($this->conn->query($sql)){
-				//Version field that were modified along with the time stamp
-				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
-					'VALUES('.$prlid.',"'.implode(',',$finalFields).'")';
-				$this->conn->query($sql);
+		elseif($wildStr){
+			//Look for possible matches
+			$sqlWhere = '';
+			//Split string into words separated by commas, semi-colons, or white spaces 
+			$wildArr = preg_split("/[\s,;]+/",$wildStr);
+			foreach($wildArr as $k => $v){
+				//Clean values
+				$wildArr[$k] = trim($v);
+				$sqlWhere .= 'OR (SOUNDEX(cr.countryName) = SOUNDEX("'.$wildArr[$k].'")) '.
+					'OR (SOUNDEX(sp.stateName) = SOUNDEX("'.$wildArr[$k].'")) '.
+					'OR (SOUNDEX(c.countyName) = SOUNDEX("'.$wildArr[$k].'")) ';
 			}
-			else{
-				throw new Exception('CRITICAL ERROR: unable to load data; '.$this->conn->error);
-				return false;
+			if($sqlWhere){
+				$rs = $this->conn->query($sqlBase.substr($sqlWhere,3));
+				while($r = $rs->fetch_object()){
+					$retArr[$cnt]['country'] = $r->countryname;
+					$retArr[$cnt]['state'] = $r->statename;
+					$retArr[$cnt]['county'] = $r->countyname;
+					$cnt++;
+				}
+				$rs->free();
+			}
+			//Now let's see if we can figure out the best match
+			if(count($retArr) > 1){
+				$rateArr = array();
+				$unitArr = array('country','state','county');
+				foreach($retArr as $mk => $mArr){
+					$rating = 0;
+					foreach($wildArr as $wk => $wv){
+						foreach($unitArr as $uv){
+							$r = levenshtein($mArr[$uv],$wv);
+							if($r == 0) $rating += 3;
+							if($r == 1) $rating += 1;
+						}
+					}
+					$rateArr[$mk] = $rating;
+				}
+				asort($rateArr,SORT_NUMERIC);
+				end($rateArr);
+				$bestMatch = key($rateArr);
 			}
 		}
-
-		if(count($leftOverData)) $warningArr[] = 'Unmatched data fields: '.implode(', ',array_keys($leftOverData)); 
-		
-		return ($warningArr?$warningArr:true);
-	}
-
-	//Setters, getters
-	public function setRawText($rawText){
-		$this->rawText = $rawText;
+		return (isset($retArr[$bestMatch])?$retArr[$bestMatch]:null);
 	}
 	
-	public function setRawTextById($prlid){
-		$textBlock = '';
-		if(is_numeric($prlid)){
-			$conn = MySQLiConnectionFactory::getCon("readonly");
-			$sql = 'SELECT rawstr '.
-				'FROM specprocessorrawlabels '.
-				'WHERE (prlid = '.$prlid.')';
-			$rs = $conn->query($sql);
-			if($rs){
-				if($r = $rs->fetch_object()){
-					$this->rawText = $r->rawstr;
-				}
-				$rs->close();
-				$conn->free();
-			}
-			else{
-				trigger_error('Unable to setRawTextById'.$this->conn->error,E_USER_ERROR);
-			}
-		}
-		$this->tokenizeRawString();
-	}
-	
-	//Misc functions
 	private function formatDate($inStr){
 		$retDate = '';
 		$dateStr = trim($inStr);
@@ -346,6 +348,283 @@ class SpecProcNlp{
 		}
 		return $retDate;
 	}
+
+	//Setters, getters
+	public function setCollId($collId){
+		if(is_numeric($collId)){
+			$this->collId = $collId;
+		}
+	}
+	
+	public function setRawText($rawText){
+		$this->rawText = $rawText;
+	}
+	
+	public function setRawTextById($prlid){
+		$textBlock = '';
+		if(is_numeric($prlid)){
+			$conn = MySQLiConnectionFactory::getCon("readonly");
+			$sql = 'SELECT rawstr '.
+				'FROM specprocessorrawlabels '.
+				'WHERE (prlid = '.$prlid.')';
+			$rs = $conn->query($sql);
+			if($rs){
+				if($r = $rs->fetch_object()){
+					$this->rawText = $r->rawstr;
+				}
+				$rs->close();
+				$conn->free();
+			}
+			else{
+				trigger_error('Unable to setRawTextById'.$this->conn->error,E_USER_ERROR);
+			}
+		}
+		$this->tokenizeRawString();
+	}
+	
+	private function setCollectionMetadata($collTarget){
+		$sql = 'SELECT collid, collectionname FROM omcollections ';
+		if(preg_match('/^[\d,]+$/',$collTarget)) $sql .= 'WHERE collid IN('.$collTarget.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$this->totalStats['collmeta'][$r->collid]['name'] = $r->collectionname;
+		}
+	}
+
+	public function setPrintMode($m){
+		if(is_numeric($m)) $this->printMode = $m;
+		if($this->printMode && !$this->outFH){
+			//$outFilePath = '';
+			if($this->printMode == 1){
+				$this->outFH = fopen($this->outFilePath.'.txt', 'w');
+			}
+			elseif($this->printMode == 2){
+				$this->outFH = fopen($this->outFilePath.'_temp.csv', 'w');
+			}
+			if($this->printMode == 1){
+				$this->outToReport('Start time: '.date('Y-m-d h:i:s A')."\n\n");
+			}
+		}
+	}
+	
+	public function setLogErrors($l){
+		$this->logErrors = $l;
+	}
+
+	//Ouput functions
+	private function printCsv($dwcArr){
+		//Add new header names to header array 
+		$newHeadArr = array_diff_key($dwcArr, $this->csvHeaderArr);
+		foreach($newHeadArr as $newK => $nV){
+			$this->csvHeaderArr[$newK] = '';
+		}
+		//Output values in exact order as header array
+		$outputArr = $this->csvHeaderArr;
+		foreach($dwcArr as $k => $v){
+			$outputArr[$k] = $v;
+		}
+		if($this->outFH) fputcsv($this->outFH,$outputArr);
+	}
+
+	private function printResult($rawStr,$dwcArr){
+		$this->outToReport("collid: ".$this->collId.", occid: ".$this->occid);
+		$this->outToReport($this->url."\n");
+		//If string is UTF-8, convert to latin1
+		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+			$rawStr = utf8_decode($rawStr);
+		} 
+		$this->outToReport("OCR string:\n".$rawStr."\n");
+		$this->outToReport("Results:");
+		foreach($dwcArr as $fieldName => $fieldValue) {
+			$this->outToReport("\t".$fieldName.": ".$fieldValue);
+			//Collect field stats for final report
+			if(isset($this->totalStats[$fieldName][$this->collId])) {
+				$num = ++$this->totalStats[$fieldName][$this->collId];
+				$this->totalStats[$fieldName][$this->collId] = $num;
+			} 
+			else{
+				$this->totalStats[$fieldName][$this->collId] = 1;
+			}
+		}
+	}
+	
+	private function printSummary(){
+		$collArr = $this->totalStats['collmeta'];
+		$this->outToReport("------------------------------------------------------------------------------------------");
+		$this->outToReport("\n\nSummary of ".$collArr['totalcnt']." labels:");
+		unset($this->totalStats['collmeta']);
+		//Show stats for all collections
+		foreach($this->totalStats as $fieldName => $fieldArr){
+			$tCnt = 0;
+			foreach($fieldArr as $collId => $fCnt){
+				$tCnt += $fCnt;
+			}
+			$perc = ($collArr['totalcnt']?round(100*$tCnt/$collArr['totalcnt']):0);
+			$this->outToReport("\t".$fieldName." ".$tCnt." times (".$perc."%)");
+		}
+
+		//Show stats for each collection processed
+		foreach($collArr as $collId => $collArr){
+			if($collId){
+				$this->outToReport("\nCollection: ".$collArr['name']." (#".$collId."), total labels: ".$collArr['cnt']);
+				foreach($this->totalStats as $fieldName => $fieldArr){
+					if(isset($fieldArr[$collId])){
+						$perc = ($collArr['cnt']?round(100*$fieldArr[$collId]/$collArr['cnt']):0);
+						$this->outToReport("\t".$fieldName.": ".$fieldArr[$collId].' times ('.$perc.'%)' );
+					}
+				}
+			}
+		}
+	}
+	
+	private function outToReport($str){
+		if($this->outFH){
+			fwrite($this->outFH,$str."\n");
+		}
+		else{
+			echo $str."\n";
+		}
+	}
+	
+	/*
+	 * @param 	Array of parsed term/values. 
+	 * 			Key: DwC term; Value: Output text 
+	 * @return 	TRUE on success  
+	 */
+	private function loadParsedData($inArr){
+		if(!is_array($inArr)){
+			$this->logError('CRITICAL ERROR: input is not an array');
+			return false;
+		}
+		$dwcArr = array_change_key_case($inArr);
+
+		//Check to make sure occid and prlid variables are available (both required)
+		if(!$this->prlid){
+			$this->logError('CRITICAL ERROR: prlid is needed to load parsed data');
+			return false;
+		}
+		if(!$this->occid){
+			$this->logError('CRITICAL ERROR: occid is needed to load parsed data');
+			return false;
+		}
+
+		//Grab target fields
+		$targetFields = array();
+		$rsMD = $this->conn->query('SHOW COLUMNS FROM omoccurrences');
+		while($r = $rsMD->fetch_object()){
+			$targetFields[strtolower($r->Field)] = $r->Type;
+		}
+		$rsMD->free();
+		//Remove some internal system fields
+		unset($targetFields['occid']);
+		unset($targetFields['collid']);
+		unset($targetFields['dbpk']);
+		unset($targetFields['tidinterpreted']);
+		unset($targetFields['instititioncode']);
+		unset($targetFields['collectioncode']);
+		unset($targetFields['recordedbyid']);
+		unset($targetFields['modified']);
+		unset($targetFields['observeruid']);
+		unset($targetFields['processingstatus']);
+		unset($targetFields['recordenteredby']);
+		unset($targetFields['dateLastModified']);
+
+		//Get existing data
+		$curOccArr = array();
+		if($rs = $this->conn->query('SELECT * FROM omoccurrences WHERE occid = '.$this->occid)){
+			$curOccArr = array_change_key_case($rs->fetch_assoc());
+		}
+		else{ 
+			$this->logError('CRITICAL ERROR: unable to populate $curOccArr');
+			return false;
+		}
+
+		//Load data
+		$dataToLoad = array_intersect_key($dwcArr,$targetFields);
+		$leftOverData = array_diff_key($dwcArr,$targetFields);
+		$sqlFrag = '';
+		$finalFields = array();
+		//int, double, varchar, text, date 
+		foreach($dataToLoad as $fieldTerm => $value){
+			$valueStr = $this->encodeString($value);
+			$valueStr = $this->cleanInStr($valueStr);
+			if($valueStr){
+				if(!$curOccArr[$fieldTerm]){
+					//A value does not already exist in existing record, thus OK to populate field 
+					$valueIn = '';
+					if(strpos($targetFields[$fieldTerm],'int') === 0 || strpos($targetFields[$fieldTerm],'double') === 0 || strpos($targetFields[$fieldTerm],'decimal') === 0){
+						//Target field is a numeric data type
+						if(is_numeric($valueStr)){
+							$valueIn = $valueStr;
+						}
+						else{
+							$this->logError('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not numeric)');
+						}
+					}
+					elseif(strpos($targetFields[$fieldTerm],'date') === 0){
+						//Target field is a date data type
+						$dateValue = $this->formatDate($valueStr);
+						if($dateValue){
+							$valueIn = '"'.$dateValue.'"';
+						}
+						else{
+							$this->logError('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not a valid date)');
+						}
+					}
+					else{
+						//Target field is a text data type
+						$valueIn = '"'.$valueStr.'"';
+					}
+					//Add to SQL if has value
+					if($valueIn){
+						$finalFields[] = $fieldTerm;
+						$sqlFrag .= ','.$fieldTerm.'='.$valueIn;
+					}
+				}
+				else{
+					$this->logError('WARNING: '.$fieldTerm.' skipped because value already existed in DB ("'.$valueStr.'")');
+				}
+			}
+		}
+
+		if($sqlFrag){
+			//Code that modifies the processing status
+			//processingStatus = unprocessed-NLP
+			$sqlFrag .= ', processingstatus = "unprocessed-NLP"';
+			
+			//Load data into existing record
+			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$this->occid;
+			
+			if($this->conn->query($sql)){
+				//Version field that were added along with the time stamp
+				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
+					'VALUES('.$prlid.',"'.implode(',',$finalFields).'")';
+				$this->conn->query($sql);
+			}
+			else{
+				$this->logError('CRITICAL ERROR: unable to load data; '.$this->conn->error);
+				return false;
+			}
+		}
+
+		if(count($leftOverData)) $this->logError('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData))); 
+		
+		return true;
+	}
+
+	private function logError($str){
+		if($this->logErrors){
+			if(!$this->logFH){
+				$this->logFH = fopen($this->outFilePath.'.log', 'w');
+			}
+			if($this->logFH){
+				fwrite($this->logFH,$str."\n");
+			}
+			else{
+				echo $str."\n";
+			}
+		}
+	}
 	
 	protected function encodeString($inStr){
  		global $charset;
@@ -367,13 +646,6 @@ class SpecProcNlp{
 		return $retStr;
 	}
 	
-	protected function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
 	protected function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
@@ -381,5 +653,4 @@ class SpecProcNlp{
 		return $newStr;
 	}
 }
-?>
- 
+?> 
