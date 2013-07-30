@@ -142,10 +142,9 @@ class OccurrenceDwcArchiver{
 			'metadataLanguage' => 'http://rs.tdwg.org/ac/terms/metadataLanguage'	//en
 		);
 
-		$this->securityArr = array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','coordinatePrecision',
-			'verbatimCoordinates','verbatimCoordinateSystem','georeferenceRemarks',
-			'verbatimLatitude','verbatimLongitude','habitat');
+			'verbatimCoordinates','georeferenceRemarks','habitat');
 	}
 
 	public function __destruct(){
@@ -452,7 +451,6 @@ class OccurrenceDwcArchiver{
 						$r["coordinateUncertaintyInMeters"] = '[Redacted]';
 						$r["footprintWKT"] = '[Redacted]';
 						$r["verbatimCoordinates"] = '[Redacted]';
-						$r["verbatimCoordinateSystem"] = '[Redacted]';
 						$r["georeferencedBy"] = '[Redacted]';
 						$r["georeferenceProtocol"] = '[Redacted]';
 						$r["georeferenceSources"] = '[Redacted]';
