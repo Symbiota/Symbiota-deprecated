@@ -11,7 +11,7 @@ $faStatus = array_key_exists('fastatus',$_REQUEST)?$_REQUEST['fastatus']:'';
 $frStatus = array_key_exists('frstatus',$_REQUEST)?$_REQUEST['frstatus']:'1';
 $editorUid = array_key_exists('editor',$_REQUEST)?$_REQUEST['editor']:'';
 $pageNum = array_key_exists('pagenum',$_REQUEST)?$_REQUEST['pagenum']:'0';
-$limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'100';
+$limitCnt = array_key_exists('limitcnt',$_REQUEST)?$_REQUEST['limitcnt']:'1000';
 
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);

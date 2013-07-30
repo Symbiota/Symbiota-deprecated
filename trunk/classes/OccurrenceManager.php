@@ -581,7 +581,7 @@ class OccurrenceManager{
 		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, c.colltype, ccl.ccpk, cat.catagory '.
 			'FROM omcollections c LEFT JOIN omcollcatlink ccl ON c.collid = ccl.collid '.
 			'LEFT JOIN omcollcatagories cat ON ccl.ccpk = cat.ccpk '.
-			'ORDER BY ccl.sortsequence, c.sortseq, c.CollectionName ';
+			'ORDER BY ccl.sortsequence, cat.catagory, c.sortseq, c.CollectionName ';
 		//echo "<div>SQL: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){

@@ -5,11 +5,12 @@ header("Content-Type: text/html; charset=".$charset);
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1; 
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$cntPerPage = array_key_exists("cntperpage",$_REQUEST)?$_REQUEST["cntperpage"]:100;
 
 $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1; 
 $collManager = new OccurrenceListManager();
 
-$specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(fieldName,value))
+$specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
 ?>
 
 <html>
@@ -156,7 +157,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			</div>
 			<?php 
 			$paginationStr = "<div><div style='clear:both;'><hr/></div><div style='float:left;margin:5px;'>\n";
-			$lastPage = (int) ($collManager->getRecordCnt() / $collManager->getCntPerPage()) + 1;
+			$lastPage = (int) ($collManager->getRecordCnt() / $cntPerPage) + 1;
 			$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 			$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 			$hrefPrefix = 'list.php?'.(array_key_exists('targettid',$_REQUEST)?'&targettid='.$_REQUEST["targettid"]:'').'&page=';
@@ -178,8 +179,8 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber);			//Array(IID,Array(
 			    $pageBar .= "<span class='pagination' style='margin-left:5px;'><a href='".$hrefPrefix.$lastPage."'>Last</a></span>";
 			}
 			$pageBar .= "</div><div style='float:right;margin:5px;'>";
-			$beginNum = ($pageNumber - 1)*$collManager->getCntPerPage() + 1;
-			$endNum = $beginNum + $collManager->getCntPerPage() - 1;
+			$beginNum = ($pageNumber - 1)*$cntPerPage + 1;
+			$endNum = $beginNum + $cntPerPage - 1;
 			if($endNum > $collManager->getRecordCnt()) $endNum = $collManager->getRecordCnt();
 			$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$collManager->getRecordCnt();
 			$paginationStr .= $pageBar;
