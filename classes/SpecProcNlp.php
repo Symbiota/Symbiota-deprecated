@@ -39,6 +39,7 @@ class SpecProcNlp{
 			$this->outToReport('Processing finished: '.date('Y-m-d h:i:s A')."\n\n");
 			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.txt">'.$this->outFilePath.'.txt</a></div>';
 			echo '<div style="margin-left:10px;">Log file: <a href="'.$this->outFilePath.'.log">'.$this->outFilePath.'.log</a></div>';
+			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records output to report file');
 			if($this->outFH) fclose($this->outFH);
 		}
 		elseif($this->printMode == 2){
@@ -56,12 +57,14 @@ class SpecProcNlp{
 			unlink($this->outFilePath.'_temp.csv');
 			fclose($outFinalFH);
 			
+			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records output to CSV');
 			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.csv">'.$this->outFilePath.'.csv</a></div>';
 		}
 		else{
-			
+			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records processed and databased');
 		}
 		if($this->logFH){
+			$this->logMsg('Processing finished: '.date('Y-m-d h:i:s A')."\n");
 			fclose($this->logFH);
 		}
 		if(!($this->conn === false)) $this->conn->close();
@@ -79,7 +82,7 @@ class SpecProcNlp{
 				'WHERE length(r.rawstr) > 20 AND (o.processingstatus = "unprocessed") ';
 			if($this->collId) $sql .= 'AND (o.collid = '.$this->collId.') ';
 			if($source) $sql .= 'AND r.source LIKE "%'.$source.'%" ';
-			$sql .= 'LIMIT 100';
+			$sql .= 'LIMIT 10';
 			//echo $sql;
 			$cnt = 0;
 			$rs = $this->conn->query($sql);
@@ -100,7 +103,7 @@ class SpecProcNlp{
 				catch(Exception $e){
 					$eStr = 'ERROR: '.$e->getMessage();
 					//echo $eStr;
-					$this->logError($eStr);
+					$this->logMsg($eStr);
 					if($this->printMode == 1) $this->outToReport($eStr);
 				}
 		
@@ -119,7 +122,7 @@ class SpecProcNlp{
 				}
 				else{
 					//Output to database
-					//$this->loadParsedData($dwcArr);
+					$this->loadParsedData($dwcArr);
 				}
 				$cnt++;
 			}
@@ -485,26 +488,30 @@ class SpecProcNlp{
 			echo $str."\n";
 		}
 	}
-	
+
 	/*
 	 * @param 	Array of parsed term/values. 
 	 * 			Key: DwC term; Value: Output text 
 	 * @return 	TRUE on success  
 	 */
 	private function loadParsedData($inArr){
+		if(!$inArr){
+			$this->logMsg('ERROR: input empty');
+			return false;
+		}
 		if(!is_array($inArr)){
-			$this->logError('CRITICAL ERROR: input is not an array');
+			$this->logMsg('ERROR: input is not an array');
 			return false;
 		}
 		$dwcArr = array_change_key_case($inArr);
 
 		//Check to make sure occid and prlid variables are available (both required)
 		if(!$this->prlid){
-			$this->logError('CRITICAL ERROR: prlid is needed to load parsed data');
+			$this->logMsg('ERROR: prlid is needed to load parsed data');
 			return false;
 		}
 		if(!$this->occid){
-			$this->logError('CRITICAL ERROR: occid is needed to load parsed data');
+			$this->logMsg('ERROR: occid is needed to load parsed data');
 			return false;
 		}
 
@@ -535,16 +542,31 @@ class SpecProcNlp{
 			$curOccArr = array_change_key_case($rs->fetch_assoc());
 		}
 		else{ 
-			$this->logError('CRITICAL ERROR: unable to populate $curOccArr');
+			$this->logMsg('ERROR: unable to populate $curOccArr');
 			return false;
 		}
-
+		
+		//Do some cleaning
+		if(isset($dwcArr['month']) && !is_numeric($dwcArr['month'])){
+			$mStr = strtolower(substr($dwcArr['month'],0,3));
+			if(array_key_exists($mStr,$this->monthNames)){
+				$dwcArr['month'] = $this->monthNames[$mStr];
+			}
+		}
+		if(!isset($dwcArr['eventdate']) && isset($dwcArr['year']) && isset($dwcArr['month'])){
+			if(!isset($dwcArr['day'])) $dwcArr['day'] = "00";
+			$dwcArr['eventdate'] = $dwcArr['year'].'-'.$dwcArr['month'].'-'.$dwcArr['day'];
+		}
+		if(!isset($dwcArr['eventdate']) && isset($dwcArr['verbatimeventdate'])){
+			$dwcArr['eventdate'] = $this->formatDate($dwcArr['verbatimeventdate']);
+		}
+		
 		//Load data
 		$dataToLoad = array_intersect_key($dwcArr,$targetFields);
 		$leftOverData = array_diff_key($dwcArr,$targetFields);
 		$sqlFrag = '';
 		$finalFields = array();
-		//int, double, varchar, text, date 
+		//int, double, varchar, text, date
 		foreach($dataToLoad as $fieldTerm => $value){
 			$valueStr = $this->encodeString($value);
 			$valueStr = $this->cleanInStr($valueStr);
@@ -558,7 +580,7 @@ class SpecProcNlp{
 							$valueIn = $valueStr;
 						}
 						else{
-							$this->logError('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not numeric)');
+							$this->logMsg('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not numeric)');
 						}
 					}
 					elseif(strpos($targetFields[$fieldTerm],'date') === 0){
@@ -568,7 +590,7 @@ class SpecProcNlp{
 							$valueIn = '"'.$dateValue.'"';
 						}
 						else{
-							$this->logError('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not a valid date)');
+							$this->logMsg('WARNING: '.$fieldTerm.' skipped ("'.$valueStr.'" not a valid date)');
 						}
 					}
 					else{
@@ -582,7 +604,7 @@ class SpecProcNlp{
 					}
 				}
 				else{
-					$this->logError('WARNING: '.$fieldTerm.' skipped because value already existed in DB ("'.$valueStr.'")');
+					$this->logMsg('WARNING: '.$fieldTerm.' skipped because value already existed in DB ("'.$valueStr.'")');
 				}
 			}
 		}
@@ -594,28 +616,33 @@ class SpecProcNlp{
 			
 			//Load data into existing record
 			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$this->occid;
-			
-			if($this->conn->query($sql)){
+			echo $sql.'<br/>';
+//			if($this->conn->query($sql)){
 				//Version field that were added along with the time stamp
 				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
-					'VALUES('.$prlid.',"'.implode(',',$finalFields).'")';
-				$this->conn->query($sql);
-			}
-			else{
-				$this->logError('CRITICAL ERROR: unable to load data; '.$this->conn->error);
-				return false;
-			}
+					'VALUES('.$this->prlid.',"'.implode(',',$finalFields).'")';
+				echo $sql.'<br/>';
+//				if(!$this->conn->query($sql)){
+//					$this->logMsg('WARNING: unable to version edit: ; '.$this->conn->error);
+//					$this->logMsg('Error details: ; '.$this->conn->error);
+//				}
+//			}
+//			else{
+//				$this->logMsg('ERROR: unable to load data; '.$this->conn->error);
+//				return false;
+//			}
 		}
 
-		if(count($leftOverData)) $this->logError('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData))); 
+		if(count($leftOverData)) $this->logMsg('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData))); 
 		
 		return true;
 	}
 
-	private function logError($str){
+	private function logMsg($str){
 		if($this->logErrors){
 			if(!$this->logFH){
-				$this->logFH = fopen($this->outFilePath.'.log', 'w');
+				$this->logFH = fopen($this->outFilePath.'.log', 'a');
+				$this->logMsg('Starting batch processing ('.date('Y-m-d h:i:s A').')');
 			}
 			if($this->logFH){
 				fwrite($this->logFH,$str."\n");
