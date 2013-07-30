@@ -3,7 +3,6 @@ include_once("OccurrenceManager.php");
 
 class OccurrenceListManager extends OccurrenceManager{
 
-	private $cntPerPage = 50;	  //default is 50 - this can be set in the jsp page
 	protected $recordCount = 0;
 	protected $dynamicClid = 0;
 	
@@ -15,7 +14,7 @@ class OccurrenceListManager extends OccurrenceManager{
  		parent::__destruct();
 	}
 
-	public function getSpecimenMap($pageRequest){
+	public function getSpecimenMap($pageRequest,$cntPerPage){
 		global $userRights;
 		$returnArr = Array();
 		$sqlWhere = $this->getSqlWhere();
@@ -32,13 +31,13 @@ class OccurrenceListManager extends OccurrenceManager{
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 		$sql .= $sqlWhere;
-		$bottomLimit = ($pageRequest - 1)*$this->cntPerPage;
+		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY c.sortseq, c.collectionname ";
 		if(strpos($sqlWhere,"(o.sciname") || strpos($sqlWhere,"o.family")){
 			$sql .= ",o.sciname ";
 		}
 		$sql .= ",o.recordedBy,o.recordNumber+1 ";
-		$sql .= "LIMIT ".$bottomLimit.",".$this->cntPerPage;
+		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
@@ -104,11 +103,7 @@ class OccurrenceListManager extends OccurrenceManager{
 	public function getRecordCnt(){
 		return $this->recordCount;
 	}
-	
-	public function getCntPerPage(){
-		return $this->cntPerPage;
-	}
-	
+
 	public function getCloseTaxaMatch($name){
 		$retArr = array();
 		$searchName = trim($name); 

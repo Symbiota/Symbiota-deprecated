@@ -4,7 +4,7 @@ include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:100;
+$recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
 $occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:0;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
