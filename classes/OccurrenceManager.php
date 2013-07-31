@@ -623,94 +623,96 @@ class OccurrenceManager{
 		$collCnt = 0;
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
+			?>
+		    <div style="float:right;margin-top:50px;">
+	        	<input type="image" src='../images/next.jpg'
+	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+	                onmouseout="javascript:this.src = '../images/next.jpg';"
+	                title="Click button to advance to the next step" />
+	    	</div>
+			<table>
+			<?php 
 			foreach($catArr as $catid => $catArr){
 				$name = $catArr["name"];
 				unset($catArr["name"]);
 				$idStr = $this->collArrIndex.'-'.$catid;
 				?>
-				<div style="padding:5px;">
-					<div style="float:left;margin:7px;">
+				<tr>
+					<td>
 						<a href="#" onclick="toggleCat('<?php echo $idStr; ?>');return false;">
 							<img id="plus-<?php echo $idStr; ?>" src="../images/plus.gif" style="<?php echo ($defaultCatid==$catid?'display:none;':'') ?>" /><img id="minus-<?php echo $idStr; ?>" src="../images/minus.gif" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>" />
 						</a>
-					</div>
-					<div style="float:left;margin:5px 10px;">
+					</td>
+					<td>
 						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" /> 
-					</div>
-					<div style="padding-top:6px;">
+					</td>
+					<td>
 			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
 				    		<a href = 'misc/collprofiles.php?catid=<?php echo $catid; ?>'><?php echo $name; ?></a>
 				    	</span>
-					</div>
-					<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
-				    	<?php 
-						foreach($catArr as $collid => $collName2){
-				    		?>
-							<div style="padding:5px;height:30px;">
-								<?php
-								if($collCnt%10 == 0){ 
-									?>
-								    <div style="float:right;margin:80px 20px 0px 0px;">
-							        	<input type="image" src='../images/next.jpg'
-							                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-							                onmouseout="javascript:this.src = '../images/next.jpg';"
-							                title="Click button to advance to the next step" />
-							    	</div>
-							    	<?php
-								} 
-							    ?>
-								<div style="float:left;width:50px;">
-									<?php 
-									if($collName2["icon"]){
-										$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
-										?>
-										<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
-											<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
-										</a>
-								    	<?php
-									}
-								    ?>
-								    &nbsp;
-								</div>
-								<div style="float:left;width:30px;padding-top:5px;">
-						    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
-								</div>
-								<div style="float:left;padding-top:6px;">
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
-						    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
-						    		</a>
-						    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-						    			more info
-						    		</a>
-							    </div>
-							</div>
-				    		<?php 
-			    			$collCnt++; 
-				    	}
-				    	?>
-				    </div>
-				</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<div id="cat-<?php echo $idStr; ?>" style="<?php echo ($defaultCatid==$catid?'':'display:none;') ?>margin:10px 0px;">
+							<table style="margin-left:15px;">
+						    	<?php 
+								foreach($catArr as $collid => $collName2){
+						    		?>
+						    		<tr>
+										<td>
+											<?php 
+											if($collName2["icon"]){
+												$cIcon = (substr($collName2["icon"],0,6)=='images'?'../':'').$collName2["icon"]; 
+												?>
+												<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>'>
+													<img src="<?php echo $cIcon; ?>" style="border:0px;width:30px;height:30px;" />
+												</a>
+										    	<?php
+											}
+										    ?>
+										</td>
+										<td style="padding:6px">
+								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
+										</td>
+										<td style="padding:6px">
+								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
+								    			<?php echo $collName2["collname"]." (".$collName2["instcode"].")"; ?>
+								    		</a>
+								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
+								    			more info
+								    		</a>
+										</td>
+									</tr>
+						    		<?php 
+					    			$collCnt++; 
+						    	}
+						    	?>
+						    </table>
+						</div>
+					</td>
+				</tr>
 				<?php 
 			}
+			?>
+			</table>
+			<?php 
 		}
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
+			?>
+		    <div style="float:right;margin-top:50px;">
+	        	<input type="image" src='../images/next.jpg'
+	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+	                onmouseout="javascript:this.src = '../images/next.jpg';"
+	                title="Click button to advance to the next step" />
+	    	</div>
+			<table>
+			<?php 
 			foreach($collArr as $collid => $cArr){
 				?>
-				<div style="padding:5px;height:30px;">
-					<?php
-					if($collCnt%10 == 0){ 
-						?>
-					    <div style="float:right;margin:80px 20px 0px 0px;">
-				        	<input type="image" src='../images/next.jpg'
-				                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-				                onmouseout="javascript:this.src = '../images/next.jpg';"
-				                title="Click button to advance to the next step" />
-				    	</div>
-				    	<?php
-					} 
-				    ?>
-					<div style="float:left;width:50px;">
+				<tr>
+					<td>
 						<?php 
 						if($cArr["icon"]){
 							$cIcon = (substr($cArr["icon"],0,6)=='images'?'../':'').$cArr["icon"]; 
@@ -722,22 +724,25 @@ class OccurrenceManager{
 						}
 					    ?>
 					    &nbsp;
-					</div>
-					<div style="float:left;width:30px;padding-top:5px;">
+					</td>
+					<td style="padding:6px;">
 			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" /> 
-					</div>
-					<div style="float:left;padding-top:6px;width:70%;">
+					</td>
+					<td style="padding:6px">
 			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
 			    			<?php echo $cArr["collname"]." (".$cArr["instcode"].")"; ?>
 			    		</a>
 			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
 			    			more info
 			    		</a>
-				    </div>
-				</div>
-			    <?php
-			    $collCnt++; 
+				    </td>
+				</tr>
+				<?php
+				$collCnt++; 
 			}
+			?>
+			</table>
+			<?php 
 		}
 		$this->collArrIndex++;
 	}
