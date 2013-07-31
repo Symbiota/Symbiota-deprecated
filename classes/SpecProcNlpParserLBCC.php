@@ -6663,10 +6663,10 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			else if($this->isMontanaStateUniversityHerbariumLabel($str)) return $this->doMontanaStateUniversityHerbariumLabel($str);
 			else if($this->isBorealiAmericaniLabel($str)) return $this->doBorealiAmericaniLabel($str);
 			else if($this->isLichensAndMossesOfYellowstoneLabel($str)) return $this->doLichensAndMossesOfYellowstoneLabel($str);
-			else if($this->isKienerMemorialLabel($str)) return $this->doKienerMemorialLabel($str);
 			else if($this->isLichensOfWesternNorthAmericaLabel($str)) return $this->doLichensOfWesternNorthAmericaLabel($str);
-			else if($this->collId = 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
-			else if($this->collId = 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
+			else if($this->isKienerMemorialLabel($str)) return $this->doKienerMemorialLabel($str);
+			else if($this->collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
+			else if($this->collId == 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
 			else {
 				$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 				$possibleNumbers = "[OQSZl|I!0-9]";
