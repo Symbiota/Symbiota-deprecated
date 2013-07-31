@@ -5596,14 +5596,6 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 				$habitat = "";
 			}
 		}
-		if(is_numeric($exsnumber)) {
-			if($exsnumber <= 25) $ometid = "242";
-			else if($exsnumber <= 51) $ometid = "243";
-			else if($exsnumber <= 75) $ometid = "244";
-			else if($exsnumber <= 100) $ometid = "245";
-			else if($exsnumber < 126) $ometid = "246";
-			else if($exsnumber <= 150) $ometid = "354";
-		}//echo "\nline 5682, recordNumber: ".$recordNumber."\n";
 		return array
 		(
 			'scientificName' => $this->formatSciName($scientificName),
@@ -5627,7 +5619,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			'recordedById' => $recordedById,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'verbatimCoordinates' => $verbatimCoordinates,
-			'ometid' => $ometid,
+			'ometid' => "242",
 			'exsnumber' => $exsnumber
 		);
 	}
