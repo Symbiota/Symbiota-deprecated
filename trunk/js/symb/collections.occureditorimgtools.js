@@ -1,19 +1,23 @@
-function toggleImageTd(){
-	toggle("imgProcOnSpan");
-	toggle("imgProcOffSpan");
+function toggleImageTdOn(){
+	document.getElementById("imgProcOnSpan").style.display = "none";
+	document.getElementById("imgProcOffSpan").style.display = "block";
 	var imgTdObj = document.getElementById("imgtd");
 	if(imgTdObj){
-		if(document.getElementById("imgtd").style.display == "none"){
-			document.getElementById("imgtd").style.display = "block";
-			initImageTool("activeimg-1");
-			//Set cookie to tag td as open
-	        document.cookie = "symbimgtd=open";
-		}
-		else{
-			document.getElementById("imgtd").style.display = "none";
-			//Set cookie to tag td closed
-	        document.cookie = "symbimgtd=close";
-		}
+		document.getElementById("imgtd").style.display = "block";
+		initImageTool("activeimg-1");
+		//Set cookie to tag td as open
+        document.cookie = "symbimgtd=open";
+	}
+}
+
+function toggleImageTdOff(){
+	document.getElementById("imgProcOnSpan").style.display = "block";
+	document.getElementById("imgProcOffSpan").style.display = "none";
+	var imgTdObj = document.getElementById("imgtd");
+	if(imgTdObj){
+		document.getElementById("imgtd").style.display = "none";
+		//Set cookie to tag td closed
+        document.cookie = "symbimgtd=close";
 	}
 }
 

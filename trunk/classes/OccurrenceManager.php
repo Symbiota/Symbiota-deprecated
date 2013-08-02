@@ -624,7 +624,7 @@ class OccurrenceManager{
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
 			?>
-		    <div style="float:right;margin-top:50px;">
+		    <div style="float:right;margin-top:80px;">
 	        	<input type="image" src='../images/next.jpg'
 	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
 	                onmouseout="javascript:this.src = '../images/next.jpg';"
@@ -701,7 +701,7 @@ class OccurrenceManager{
 		if(isset($occArr['coll'])){
 			$collArr = $occArr['coll'];
 			?>
-		    <div style="float:right;margin-top:50px;">
+		    <div style="float:right;margin-top:80px;">
 	        	<input type="image" src='../images/next.jpg'
 	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
 	                onmouseout="javascript:this.src = '../images/next.jpg';"

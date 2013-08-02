@@ -10,13 +10,13 @@ function openAssocSppAid(){
 }
 
 function toggleCoordDiv(){
-	coordObj = document.getElementById("coordaiddiv");
-	if(coordObj.style.display == "none"){
-		document.getElementById("locExtraDiv").style.display = "block";
-		coordObj.style.display = "block";
+	coordObj = document.getElementById("coordAidDiv");
+	if(coordObj.style.display == "block"){
+		coordObj.style.display = "none";
 	}
 	else{
-		coordObj.style.display = "none";
+		document.getElementById("locExtraDiv").style.display = "block";
+		coordObj.style.display = "block";
 	}
 }
 
@@ -278,7 +278,7 @@ function searchDupesCatalogNumber(f){
 	var occid = f.occid.value;
 	var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + collId + "&occid=" + occid;
 	
-	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupeMsgDiv").style.display = "block";
 	document.getElementById("dupesearch").style.display = "block";
 	document.getElementById("dupenone").style.display = "none";
 
@@ -297,14 +297,14 @@ function searchDupesCatalogNumber(f){
 					}
 				}						
 				document.getElementById("dupesearch").style.display = "none";
-				document.getElementById("dupediv").style.display = "none";
+				document.getElementById("dupeMsgDiv").style.display = "none";
 			}
 			else{
 				document.getElementById("dupesearch").style.display = "none";
 				document.getElementById("dupenone").style.display = "block";
 				setTimeout(function () { 
 					document.getElementById("dupenone").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
 					}, 3000);
 				catalogNumberIsDupe = false;
 			}
@@ -359,7 +359,7 @@ function searchDupesOtherCatalogNumbers(f){
 	var occid = f.occid.value;
 	var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + occid;
 
-	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupeMsgDiv").style.display = "block";
 	document.getElementById("dupesearch").style.display = "block";
 	document.getElementById("dupenone").style.display = "none";
 
@@ -377,14 +377,14 @@ function searchDupesOtherCatalogNumbers(f){
 					}
 				}						
 				document.getElementById("dupesearch").style.display = "none";
-				document.getElementById("dupediv").style.display = "none";
+				document.getElementById("dupeMsgDiv").style.display = "none";
 			}
 			else{
 				document.getElementById("dupesearch").style.display = "none";
 				document.getElementById("dupenone").style.display = "block";
 				setTimeout(function () { 
 					document.getElementById("dupenone").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
 					}, 3000);
 			}
 		}
@@ -412,7 +412,7 @@ function searchDupesCollector(f,silent){
 	}
 	
 	var url = "rpc/querydupescollector.php?cname=" + cName + "&cnum=" + cNum + "&cdate=" + cDate + "&curoccid=" + occid;
-	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupeMsgDiv").style.display = "block";
 	document.getElementById("dupesearch").style.display = "block";
 	document.getElementById("dupenone").style.display = "none";
 	
@@ -425,7 +425,7 @@ function searchDupesCollector(f,silent){
 					if(dupOccWindow.opener == null) dupOccWindow.opener = self;
 					if(window.focus) {dupOccWindow.focus()}
 					document.getElementById("dupesearch").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
 				}
 				else{
 					alert("Duplicate found but unable to display. This is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -458,7 +458,7 @@ function searchDupesCollectorEvent(f,silent){
 	}
 	
 	var url = "rpc/querydupescollectorevent.php?cname=" + cName + "&cnum=" + cNum + "&cdate=" + cDate + "&curoccid=" + occid;
-	document.getElementById("dupediv").style.display = "block";
+	document.getElementById("dupeMsgDiv").style.display = "block";
 	document.getElementById("dupesearch").style.display = "block";
 	document.getElementById("dupenone").style.display = "none";
 	
@@ -471,7 +471,7 @@ function searchDupesCollectorEvent(f,silent){
 					if(dupOccWindow.opener == null) dupOccWindow.opener = self;
 					if(window.focus) {dupOccWindow.focus()}
 					document.getElementById("dupesearch").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
 				}
 				else{
 					alert("Duplicate found but unable to display. This is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -482,7 +482,7 @@ function searchDupesCollectorEvent(f,silent){
 				document.getElementById("dupenone").style.display = "block";
 				setTimeout(function () { 
 					document.getElementById("dupenone").style.display = "none";
-					document.getElementById("dupediv").style.display = "none";
+					document.getElementById("dupeMsgDiv").style.display = "none";
 					}, 5000);
 			}
 		}

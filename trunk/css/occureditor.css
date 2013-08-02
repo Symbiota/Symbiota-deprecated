@@ -51,7 +51,7 @@ body{
 	margin:15px 5px;
 }
 
-#dupediv{
+#dupeMsgDiv{
 	display:none;
 	float:right;
 	width:150px;
@@ -318,6 +318,34 @@ body{
 #geoToolsDiv{
 	float:	left;
 	margin-top:17px;
+}
+
+#coordAidDiv{
+	display:	none;
+}
+
+#dmsAidDiv{
+	 float:	left;
+	 padding:	15px 10px;
+	 background-color: lightyellow;
+	 border: 1px solid yellow;
+	 width:	260px;
+}
+
+#utmAidDiv{
+	 float:	left;
+	 padding:	15px 10px;
+	 background-color:	lightyellow;
+	 border:1px solid yellow;
+	 width:150px;
+	 margin-bottom:10px;
+}
+
+#trsAidDiv{
+	float:	left;
+	padding:15px 10px;
+	background-color:lightyellow;
+	border:	1px solid yellow;
 }
 
 #geodeticDatumDiv{
@@ -642,6 +670,19 @@ body{
 #pkDiv{
 	padding:3px;
 	clear:both;
+}
+
+/* Button Controls */
+#addButtonDiv{
+	width:		450px;
+	border:		1px solid black;
+	background-color:	lightyellow;
+	padding:	10px;
+	margin:		20px;
+}
+
+#editButtonDiv{
+	margin:	15px 30px;
 }
 
 /*Misc styling*/

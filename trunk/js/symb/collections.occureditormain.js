@@ -87,7 +87,7 @@ $(document).ready(function() {
 	});
 	
 	var imgTd = getCookie("symbimgtd");
-	if(imgTd == "open") toggleImageTd(); 
+	if(imgTd == "open" || csMode == 1) toggleImageTdOn(); 
 
 });
 
@@ -262,8 +262,8 @@ function parseVerbatimCoordinates(f){
 		}
 		//Check to see if there are embedded lat/lng
 		if(!latDec || !lngDec){
-			var llEx1 = /(\d{1,2})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([NS]{0,1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2})['m]{1}\s+(\d{0,2}\.{0,1}\d*)["s]{1}\s*([EW]{0,1})/i 
-			var llEx2 = /(\d{1,2})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([NS]{0,1})\D*\s*(\d{1,3})\D{0,1}\s+(\d{1,2}\.{0,1}\d*)['m]{1}\s*([EW]{0,1})/i 
+			var llEx1 = /(\d{1,2})[\D\s]{1,2}(\d{1,2}\.{0,1}\d*)['m]{1}\s*(\d{1,2}\.{0,1}\d*)["s]{1}\s*([NS]{0,1})[\D\s]*(\d{1,3})[\D\s]{1,2}(\d{1,2}\.{0,1}\d*)['m]{1}\s*(\d{1,2}\.{0,1}\d*)["s]{1}\s*([EW]{0,1})/i 
+			var llEx2 = /(\d{1,2})[\D\s]{1,2}(\d{1,2}\.{0,1}\d*)['m]{1}\s*([NS]{0,1})\D*\s*(\d{1,3})[\D\s]{1,2}(\d{1,2}\.{0,1}\d*)['m]{1}\s*([EW]{0,1})/i 
 			if(extractArr = llEx1.exec(verbCoordStr)){
 				var latDeg = parseInt(extractArr[1]);
 				var latMin = parseInt(extractArr[2]);
