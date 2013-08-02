@@ -850,7 +850,7 @@ class SpecUploadManager{
 		if($rs->num_rows){
 			echo '<span style="color:red;">Duplicate Catalog Numbers exist</span></li>';
 			echo '<li style="margin-left:10px;">';
-			echo 'Open <a href="../editor/occurrencecleaner.php?collid='.$this->collId.'&action=listdups" target="_blank">Occurrence Cleaner</a> to resolve this issue';
+			echo 'Open <a href="../editor/occurrencecleaner.php?collid='.$this->collId.'&action=listdupscatalog" target="_blank">Occurrence Cleaner</a> to resolve this issue';
 			echo '</li>';
 		}
 		else{

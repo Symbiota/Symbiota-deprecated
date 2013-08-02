@@ -330,6 +330,7 @@ else{
 	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
+		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
 		<?php
@@ -529,7 +530,12 @@ else{
 												if($fragArr || $specImgArr){
 													?>
 													<div style="float:right;margin:-7px -4px 0px 0px;font-weight:bold;">
-														<a href="#" onclick="toggleImageTd();return false;"><span id="imgProcOnSpan" style="display:block;">&gt;&gt;</span><span id="imgProcOffSpan" style="display:none;">&lt;&lt;</span></a>
+														<span id="imgProcOnSpan" style="display:block;">
+															<a href="#" onclick="toggleImageTdOn();return false;">&gt;&gt;</a>
+														</span>
+														<span id="imgProcOffSpan" style="display:none;">
+															<a href="#" onclick="toggleImageTdOff();return false;">&lt;&lt;</a>
+														</span>
 													</div>
 													<?php
 												}
@@ -618,10 +624,10 @@ else{
 													<?php 
 												}
 												?>
-												<div id="dupediv">
-													<span id="dupesearch">Searching for Dupes...</span>
-													<span id="dupenone" style="display:none;color:red;">No Dupes Found</span>
-													<span id="dupedisplay" style="display:none;color:green;">Displaying Dupes</span>
+												<div id="dupeMsgDiv">
+													<div id="dupesearch">Searching for Dupes...</div>
+													<div id="dupenone" style="display:none;color:red;">No Dupes Found</div>
+													<div id="dupedisplay" style="display:none;color:green;">Displaying Dupes</div>
 												</div>
 											</div>
 											<div id="dateextradiv">
@@ -1098,7 +1104,7 @@ else{
 													<?php
 												} 
 												?>
-												<div style="margin:15px 30px;">
+												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
 													<br/>
 													<?php 
@@ -1132,7 +1138,7 @@ else{
 											}
 											else{
 												?>
-												<div style="width:450px;border:1px solid black;background-color:lightyellow;padding:10px;margin:20px;">
+												<div id="addButtonDiv">
 													<input type="button" name="submitaddbutton" value="Add Record" onclick="this.disabled=true;this.form.submit();" style="width:150px;font-weight:bold;margin:10px;" />
 													<input type="hidden" name="submitaction" value="Add Record" />
 													<input type="hidden" name="qrycnt" value="<?php echo $qryCnt?$qryCnt:''; ?>" />
