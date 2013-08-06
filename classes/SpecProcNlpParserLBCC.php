@@ -1995,10 +1995,10 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		$merrillPat = "/.*M[CE]rr[1Il!|]{2,3}.*/is";
 		if(preg_match($merrillPat, $s)) return true;
 		else {
-			$merrillPat = "/.*R[0o]ckp[0o]rt, Main[CE].*/is";
+			$merrillPat = "/.*R[0o]ckp[0o]rt,\\sMain[CE].*/is";
 			if(preg_match($merrillPat, $s)) return true;
 			else {
-				$merrillPat = "/.*Pr[CE]par[CE]d by G.*/is";
+				$merrillPat = "/.*Pr[CE]par[CE]d\\sby\\sG.*/is";
 				if(preg_match($merrillPat, $s)) return true;
 				else return false;
 			}
@@ -2006,13 +2006,13 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	}
 
 	private function isWeberLichenesExsiccatiLabel($s) {
-		$weberPat = "/.*[OD][1Il!|][-s5°][a-zA-Z10!|\'\"\/ -]{12,42}ado [MW]us[CE]u[mn].*/is";
+		$weberPat = "/.*[OD][1Il!|][-s5°][a-zA-Z10!|\'\"\/ -]{12,42}ado\\s[MW]us[CE]u[mn].*/is";
 		if(preg_match($weberPat, $s)) return true;
 		else {
 			$weberPat = "/.*[OD[1Il!|].{2,3}tributed\\sby\\sthe\\sUniversity\\sof\\sColorado\\s[MW]us[CE]u[mn].*/is";
 			if(preg_match($weberPat, $s)) return true;
 			else {
-				$weberPat = "/.*Colorado Museum, B.*/is";
+				$weberPat = "/.*Colorado\\sMuseum,\\sB.*/is";
 				if(preg_match($weberPat, $s)) return true;
 				else return false;
 			}
@@ -2020,7 +2020,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	}
 
 	private function isASULichenesExsiccatiLabel($s) {
-		$asuPat = "/.*[OD][1Il!|][-s5][a-zA-Z10!|\'\"\/ -]{6,42}ona [S5]t.t[CE] Un.vers[1Il!|]t.*/is";
+		$asuPat = "/.*[OD][1Il!|][-s5][a-zA-Z10!|\'\"\/ -]{6,42}ona\\s[S5]t.t[CE]\\sUn.vers[1Il!|]t.*/is";
 		if(preg_match($asuPat, $s)) return true;
 		else {
 			$asuPat = "/.*A\\.?S\\.?U\\.?\\s[a-zA-Z10!|.]{2,4}\\s[0-9lO]{2,3}.*/is";
@@ -2075,8 +2075,8 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		else return false;
 	}
 
-	private function isLichenesExsiccatiLabel($s) {
-		$exsiccatiPat = "/.*(?:L[1Il!|]|IZ)(?:[CE]H|QI)[CE]N[CE]S\\s[CE]XS[1Il!|][CE]{2}AT[1Il!|].*/is";
+	public function isLichenesExsiccatiLabel($s) {
+		$exsiccatiPat = "/.*(?:L[1Il!|]|IZ|U)(?:[CE]H|QI)[CE]N[CE]S\\s[CE]XS[1Il!|][CE]{2}AT[1Il!|].*/is";
 		if(preg_match($exsiccatiPat, $s)) return true;
 		else return false;
 	}
