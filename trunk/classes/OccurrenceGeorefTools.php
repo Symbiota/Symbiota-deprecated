@@ -22,6 +22,10 @@ class OccurrenceGeorefTools {
 		if($this->collId){
 			$sql = 'SELECT occid, country, stateprovince, county, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
 				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL) AND (locality <> "") ';
+			if(!$this->qryVars || !array_key_exists('qdisplayall',$this->qryVars) || !$this->qryVars['qdisplayall']){
+				$sql .= 'AND (decimalLatitude IS NULL) ';
+			}
+			$orderBy = '';
 			if($this->qryVars){
 				if(array_key_exists('qsciname',$this->qryVars) && $this->qryVars['qsciname']){
 					$sql .= 'AND (family = "'.$this->qryVars['qsciname'].'" OR sciname LIKE "'.$this->qryVars['qsciname'].'%") ';
@@ -35,13 +39,6 @@ class OccurrenceGeorefTools {
 						$sql .= 'AND (georeferenceVerificationStatus = "'.$vs.'") ';
 					}
 				}
-				if(array_key_exists('qdisplayall',$this->qryVars) && $this->qryVars['qdisplayall']){
-					//Do nothing
-				}
-				else{
-					$sql .= 'AND (decimalLatitude IS NULL) ';
-				}
-				$orderBy = '';
 				if(array_key_exists('qcountry',$this->qryVars) && $this->qryVars['qcountry']){
 					$sql .= 'AND (country = "'.$this->qryVars['qcountry'].'") ';
 				}
