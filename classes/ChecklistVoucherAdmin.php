@@ -541,6 +541,7 @@ class ChecklistVoucherAdmin {
 	}
 
 	public function linkTaxaVouchers($occidArr,$useCurrentTaxon = 1){
+		$tidsUsed = array();
 		foreach($occidArr as $v){
 			$vArr = explode('-',$v);
 			$tid = $vArr[1];
@@ -554,18 +555,19 @@ class ChecklistVoucherAdmin {
 					}
 					$rs->free();
 				}
-				//Add name to checklist
-				$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) VALUES('.$this->clid.','.$tid.')';
-				//echo $sql;
-				if($this->conn->query($sql)){
-					//Link Vouchers
-					$sql = 'INSERT INTO fmvouchers(clid,occid,tid,collector) VALUES ('.$this->clid.','.$occid.','.$tid.',"")';
+				if(!in_array($tid,$tidsUsed)){
+					//Add name to checklist
+					$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) VALUES('.$this->clid.','.$tid.')';
+					$tidsUsed[] = $tid;
+					//echo $sql;
 					if(!$this->conn->query($sql)){
-						trigger_error('Unable to link taxon voucher; '.$this->conn->error,E_USER_WARNING);
+						trigger_error('Unable to add taxon; '.$this->conn->error,E_USER_WARNING);
 					}
 				}
-				else{
-					trigger_error('Unable to add taxon; '.$this->conn->error,E_USER_WARNING);
+				//Link Vouchers
+				$sql = 'INSERT INTO fmvouchers(clid,occid,tid,collector) VALUES ('.$this->clid.','.$occid.','.$tid.',"")';
+				if(!$this->conn->query($sql)){
+					trigger_error('Unable to link taxon voucher; '.$this->conn->error,E_USER_WARNING);
 				}
 			}
 		}
