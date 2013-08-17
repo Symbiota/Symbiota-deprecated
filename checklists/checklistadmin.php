@@ -12,6 +12,7 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 
 $clManager = new ChecklistAdmin();
+if(!$clid && isset($_POST['delclid'])) $clid = $_POST['delclid'];
 $clManager->setClid($clid);
 
 $statusStr = "";
@@ -33,8 +34,6 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	elseif($action == 'Delete Checklist'){
 		$statusStr = $clManager->deleteChecklist($_POST['delclid']);
 		if($statusStr === true) header('Location: ../index.php');
-		$clid = $_POST['delclid'];
-		$clManager->setClid($clid);
 	}
 	elseif($action == 'Add Editor'){
 		$statusStr = $clManager->addEditor($_POST['editoruid']);
