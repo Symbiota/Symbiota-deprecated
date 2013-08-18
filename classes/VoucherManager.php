@@ -84,68 +84,70 @@ class VoucherManager {
 
 	public function renameTaxon($newTaxon){
 		$nTaxon = $this->conn->real_escape_string($newTaxon);
-		$sql = 'UPDATE fmchklsttaxalink SET TID = '.$nTaxon.' '.
-			"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
-		if($this->conn->query($sql)){
-			$this->tid = $nTaxon;
-			$this->taxonName = "";
-		}
-		else{
-			$sqlTarget = "SELECT cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.Nativity ".
-				"FROM fmchklsttaxalink cllink WHERE (TID = ".$nTaxon.") AND (CLID = ".$this->clid.')';
-			$rsTarget = $this->conn->query($sqlTarget);
-			if($row = $rsTarget->fetch_object()){
-				$habitatTarget = $this->cleanInStr($row->Habitat);
-				$abundTarget = $this->cleanInStr($row->Abundance);
-				$notesTarget = $this->cleanInStr($row->Notes);
-				$internalNotesTarget = $this->cleanInStr($row->internalnotes);
-				$sourceTarget = $this->cleanInStr($row->source);
-				$nativeTarget = $this->cleanInStr($row->Nativity);
-			
-				//Move all vouchers to new name
-				$sqlVouch = "UPDATE fmvouchers SET TID = ".$nTaxon." ".
-					"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
-				$this->conn->query($sqlVouch);
-				//Delete all Vouchers that didn't transfer because they were already linked to target name
-				$sqlVouchDel = 'DELETE FROM fmvouchers v '.
-					'WHERE (v.CLID = '.$this->clid.") AND (v.TID = ".$this->tid.')';
-				$this->conn->query($sqlVouchDel);
-				
-				//Merge chklsttaxalink data
-				//Harvest source (unwanted) chklsttaxalink data
-				$sqlSourceCl = "SELECT ctl.Habitat, ctl.Abundance, ctl.Notes, ctl.internalnotes, ctl.source, ctl.Nativity ".
-					"FROM fmchklsttaxalink ctl WHERE (ctl.TID = ".$this->tid.") AND (ctl.CLID = ".$this->clid.')';
-				$rsSourceCl =  $this->conn->query($sqlSourceCl);
-				if($row = $rsSourceCl->fetch_object()){
-					$habitatSource = $this->cleanInStr($row->Habitat);
-					$abundSource = $this->cleanInStr($row->Abundance);
-					$notesSource = $this->cleanInStr($row->Notes);
-					$internalNotesSource = $this->cleanInStr($row->internalnotes);
-					$sourceSource = $this->cleanInStr($row->source);
-					$nativeSource = $this->cleanInStr($row->Nativity);
-				}
-				$rsSourceCl->close();
-				//Transfer source chklsttaxalink data to target record
-				$habitatStr = $habitatTarget.(($habitatTarget && $habitatSource)?"; ":"").$habitatSource;
-				$abundStr = $abundTarget.(($abundTarget && $abundSource)?"; ":"").$abundSource;
-				$notesStr = $notesTarget.(($notesTarget && $notesSource)?"; ":"").$notesSource;
-				$internalNotesStr = $internalNotesTarget.(($internalNotesTarget && $internalNotesSource)?"; ":"").$internalNotesSource;
-				$sourceStr = $sourceTarget.(($sourceTarget && $sourceSource)?"; ":"").$sourceSource;
-				$nativeStr = $nativeTarget.(($nativeTarget && $nativeSource)?"; ":"").$nativeSource;
-				$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanInStr($habitatStr).'", '. 
-					'Abundance = "'.$this->cleanInStr($abundStr).'", Notes = "'.$this->cleanInStr($notesStr).
-					'", internalnotes = "'.$this->cleanInStr($internalNotesStr).'", source = "'.
-					$this->cleanInStr($sourceStr).'", Nativity = "'.$this->cleanInStr($nativeStr).'" '.
-					'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
-				$this->conn->query($sqlCl);
-				//Delete unwanted taxon
-				$sqlDel = 'DELETE FROM fmchklsttaxalink ctl WHERE (ctl.CLID = '.$this->clid.') AND (ctl.TID = '.$this->tid.')';
-				if($this->conn->query($sqlDel)){
-					$this->tid = $nTaxon;
-					$this->taxonName = '';
-				}
+		if(is_numeric($nTaxon)){
+			$sql = 'UPDATE fmchklsttaxalink SET TID = '.$nTaxon.' '.
+				"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
+			if($this->conn->query($sql)){
+				$this->tid = $nTaxon;
+				$this->taxonName = "";
 			}
-			$rsTarget->close();
+			else{
+				$sqlTarget = "SELECT cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.Nativity ".
+					"FROM fmchklsttaxalink cllink WHERE (TID = ".$nTaxon.") AND (CLID = ".$this->clid.')';
+				$rsTarget = $this->conn->query($sqlTarget);
+				if($row = $rsTarget->fetch_object()){
+					$habitatTarget = $this->cleanInStr($row->Habitat);
+					$abundTarget = $this->cleanInStr($row->Abundance);
+					$notesTarget = $this->cleanInStr($row->Notes);
+					$internalNotesTarget = $this->cleanInStr($row->internalnotes);
+					$sourceTarget = $this->cleanInStr($row->source);
+					$nativeTarget = $this->cleanInStr($row->Nativity);
+				
+					//Move all vouchers to new name
+					$sqlVouch = "UPDATE fmvouchers SET TID = ".$nTaxon." ".
+						"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
+					$this->conn->query($sqlVouch);
+					//Delete all Vouchers that didn't transfer because they were already linked to target name
+					$sqlVouchDel = 'DELETE FROM fmvouchers v '.
+						'WHERE (v.CLID = '.$this->clid.") AND (v.TID = ".$this->tid.')';
+					$this->conn->query($sqlVouchDel);
+					
+					//Merge chklsttaxalink data
+					//Harvest source (unwanted) chklsttaxalink data
+					$sqlSourceCl = "SELECT ctl.Habitat, ctl.Abundance, ctl.Notes, ctl.internalnotes, ctl.source, ctl.Nativity ".
+						"FROM fmchklsttaxalink ctl WHERE (ctl.TID = ".$this->tid.") AND (ctl.CLID = ".$this->clid.')';
+					$rsSourceCl =  $this->conn->query($sqlSourceCl);
+					if($row = $rsSourceCl->fetch_object()){
+						$habitatSource = $this->cleanInStr($row->Habitat);
+						$abundSource = $this->cleanInStr($row->Abundance);
+						$notesSource = $this->cleanInStr($row->Notes);
+						$internalNotesSource = $this->cleanInStr($row->internalnotes);
+						$sourceSource = $this->cleanInStr($row->source);
+						$nativeSource = $this->cleanInStr($row->Nativity);
+					}
+					$rsSourceCl->close();
+					//Transfer source chklsttaxalink data to target record
+					$habitatStr = $habitatTarget.(($habitatTarget && $habitatSource)?"; ":"").$habitatSource;
+					$abundStr = $abundTarget.(($abundTarget && $abundSource)?"; ":"").$abundSource;
+					$notesStr = $notesTarget.(($notesTarget && $notesSource)?"; ":"").$notesSource;
+					$internalNotesStr = $internalNotesTarget.(($internalNotesTarget && $internalNotesSource)?"; ":"").$internalNotesSource;
+					$sourceStr = $sourceTarget.(($sourceTarget && $sourceSource)?"; ":"").$sourceSource;
+					$nativeStr = $nativeTarget.(($nativeTarget && $nativeSource)?"; ":"").$nativeSource;
+					$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanInStr($habitatStr).'", '. 
+						'Abundance = "'.$this->cleanInStr($abundStr).'", Notes = "'.$this->cleanInStr($notesStr).
+						'", internalnotes = "'.$this->cleanInStr($internalNotesStr).'", source = "'.
+						$this->cleanInStr($sourceStr).'", Nativity = "'.$this->cleanInStr($nativeStr).'" '.
+						'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
+					$this->conn->query($sqlCl);
+					//Delete unwanted taxon
+					$sqlDel = 'DELETE FROM fmchklsttaxalink ctl WHERE (ctl.CLID = '.$this->clid.') AND (ctl.TID = '.$this->tid.')';
+					if($this->conn->query($sqlDel)){
+						$this->tid = $nTaxon;
+						$this->taxonName = '';
+					}
+				}
+				$rsTarget->close();
+			}
 		}
 	}
 	

@@ -19,7 +19,7 @@ $vManager->setTid($tid);
 $vManager->setClid($clid);
 
 if($action == "Rename Taxon"){
-	$vManager->renameTaxon($_REQUEST["renametid"]);
+	$vManager->renameTaxon(trim($_REQUEST["renametid"]));
 	$action = "close";
 }
 elseif($action == "Submit Checklist Edits"){
@@ -107,6 +107,7 @@ $clArray = $vManager->getChecklistData();
 							alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
 						}
 						else{
+							alert(renameTid);
 							document.getElementById("renametid").value = renameTid;
 							document.forms["renametaxonform"].submit();
 						}
