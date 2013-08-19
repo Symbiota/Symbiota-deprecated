@@ -400,7 +400,7 @@ $duManager->loadFieldMap();
 									<option value="">Delete Primary Key</option>
 									<option value="">----------------------------------</option>
 									<?php 
-									foreach($pkOptions as $f){
+									foreach($dbpkOptions as $f){
 										echo '<option '.($dbpk==$f?'SELECTED':'').'>'.$f.'</option>';
 									}
 									?>
@@ -440,10 +440,6 @@ $duManager->loadFieldMap();
 								<div id="uldiv">
 									<div style="margin:10px;">
 										<input type="submit" name="action" value="Start Upload" />
-										<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-										<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-										<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-										<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
 									</div>
 								</div>
 							</div>
@@ -451,6 +447,10 @@ $duManager->loadFieldMap();
 						} 
 						?>
 					</fieldset>
+					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+					<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
 				</form>
 				<?php
 			} 
