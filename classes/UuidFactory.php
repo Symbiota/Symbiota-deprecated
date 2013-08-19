@@ -5,98 +5,118 @@ class UuidFactory {
 
 	private $silent = 0;
 
+	private $conn;
+
+	public function __construct(){
+		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+	}
+
+	public function __destruct(){
+		if(!($this->conn === null)) $this->conn->close();
+	}
+
 	public function populateGuids($collId = 0){
 		set_time_limit(1000);
 		
-		$conn = MySQLiConnectionFactory::getCon("write");
 		$this->echoStr("Starting batch GUID processing (".date('Y-m-d h:i:s A').")\n");
 
 		//Populate Collection GUIDs
-		$sql = 'SELECT collid '.
-			'FROM omcollections '.
-			'WHERE collectionguid IS NULL ';
-		$rs = $conn->query($sql);
-		if($rs->num_rows) $this->echoStr("Populating collection GUIDs (all collections by default)");
+		$this->echoStr("Populating collection GUIDs (all collections by default)");
+		$sql = 'SELECT collid FROM omcollections WHERE collectionguid IS NULL ';
+		$rs = $this->conn->query($sql);
 		$recCnt = 0;
-		while($r = $rs->fetch_object()){
-			$guid = UuidFactory::getUuidV4();
-			$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" WHERE collid = '.$r->collid;
-			if(!$conn->query($insSql)){
-				$this->echoStr('ERROR: '.$conn->error);
+		if($rs->num_rows){
+			$conn = MySQLiConnectionFactory::getCon("write");
+			while($r = $rs->fetch_object()){
+				$guid = UuidFactory::getUuidV4();
+				$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" WHERE collid = '.$r->collid;
+				if(!$conn->query($insSql)){
+					$this->echoStr('ERROR: '.$conn->error);
+				}
+				$recCnt++;
 			}
-			$recCnt++;
+			$rs->free();
+			if($conn !== false) $conn->close();
 		}
-		$rs->free();
-		if($recCnt) $this->echoStr("Finished: $recCnt collection records processed\n");
+		$this->echoStr("Finished: $recCnt collection records processed\n");
 		
 		//Populate occurrence GUIDs
+		$this->echoStr("Populating occurrence GUIDs\n");
 		$sql = 'SELECT o.occid '.
 			'FROM omoccurrences o '.
 			'WHERE o.occid NOT IN(SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
-		$rs = $conn->query($sql);
-		if($rs->num_rows) $this->echoStr("Populating occurrence GUIDs\n");
+		$rs = $this->conn->query($sql);
 		$recCnt = 0;
-		while($r = $rs->fetch_object()){
-			$guid = UuidFactory::getUuidV4();
-			$insSql = 'INSERT INTO guidoccurrences(guid,occid) '.
-				'VALUES("'.$guid.'",'.$r->occid.')';
-			if(!$conn->query($insSql)){
-				$this->echoStr('ERROR: occur guids'.$conn->error);
+		if($rs->num_rows){
+			$conn = MySQLiConnectionFactory::getCon("write");
+			while($r = $rs->fetch_object()){
+				$guid = UuidFactory::getUuidV4();
+				$insSql = 'INSERT INTO guidoccurrences(guid,occid) '.
+					'VALUES("'.$guid.'",'.$r->occid.')';
+				if(!$conn->query($insSql)){
+					$this->echoStr('ERROR: occur guids'.$conn->error);
+				}
+				$recCnt++;
+				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
-			$recCnt++;
-			if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
+			$rs->free();
+			if(!($conn === false)) $conn->close();
 		}
-		$rs->free();
-		if($recCnt) $this->echoStr("Finished: $recCnt occurrence records processed\n");
+		$this->echoStr("Finished: $recCnt occurrence records processed\n");
 		
 		//Populate determination GUIDs
-		$sql = 'SELECT d.detid '.
-			'FROM omoccurdeterminations d ';
+		$this->echoStr("Populating determination GUIDs\n");
+		$sql = 'SELECT d.detid FROM omoccurdeterminations d ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
 		$sql .= 'WHERE d.detid NOT IN(SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
-		$rs = $conn->query($sql);
-		if($rs->num_rows) $this->echoStr("Populating determination GUIDs\n");
+		$rs = $this->conn->query($sql);
 		$recCnt = 0;
-		while($r = $rs->fetch_object()){
-			$guid = UuidFactory::getUuidV4();
-			$insSql = 'INSERT INTO guidoccurdeterminations(guid,detid) '.
-				'VALUES("'.$guid.'",'.$r->detid.')';
-			if(!$conn->query($insSql)){
-				$this->echoStr('ERROR: det guids '.$conn->error);
+		if($rs->num_rows){
+			$conn = MySQLiConnectionFactory::getCon("write");
+			while($r = $rs->fetch_object()){
+				$guid = UuidFactory::getUuidV4();
+				$insSql = 'INSERT INTO guidoccurdeterminations(guid,detid) '.
+					'VALUES("'.$guid.'",'.$r->detid.')';
+				if(!$conn->query($insSql)){
+					$this->echoStr('ERROR: det guids '.$conn->error);
+				}
+				$recCnt++;
+				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
-			$recCnt++;
-			if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
+			$rs->free();
+			if(!($conn === false)) $conn->close();
 		}
-		$rs->free();
-		if($recCnt) $this->echoStr("Finished: $recCnt determination records processed\n");
+		$this->echoStr("Finished: $recCnt determination records processed\n");
 		
 		//Populate image GUIDs
-		$sql = 'SELECT i.imgid '.
-			'FROM images i ';
+		$this->echoStr("Populating image GUIDs\n");
+		$sql = 'SELECT i.imgid FROM images i ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
-		$rs = $conn->query($sql);
-		if($rs->num_rows) $this->echoStr("Populating image GUIDs\n");
+		$rs = $this->conn->query($sql);
 		$recCnt = 0;
-		while($r = $rs->fetch_object()){
-			$guid = UuidFactory::getUuidV4();
-			$insSql = 'INSERT INTO guidimages(guid,imgid) '.
-				'VALUES("'.$guid.'",'.$r->imgid.')';
-			if(!$conn->query($insSql)){
-				$this->echoStr('ERROR: image guids; '.$conn->error);
+		if($rs->num_rows){
+			$conn = MySQLiConnectionFactory::getCon("write");
+			while($r = $rs->fetch_object()){
+				$guid = UuidFactory::getUuidV4();
+				$insSql = 'INSERT INTO guidimages(guid,imgid) '.
+					'VALUES("'.$guid.'",'.$r->imgid.')';
+				if(!$conn->query($insSql)){
+					$this->echoStr('ERROR: image guids; '.$conn->error);
+				}
+				$recCnt++;
+				if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
 			}
-			$recCnt++;
-			if($recCnt%1000 === 0) $this->echoStr($recCnt.' records processed');
+			$rs->free();
+			if(!($conn === false)) $conn->close();
 		}
-		$rs->free();
-		if($recCnt) $this->echoStr("Finished: $recCnt image records processed\n");
+		$this->echoStr("Finished: $recCnt image records processed\n");
 		
 		$this->echoStr("GUID batch processing complete (".date('Y-m-d h:i:s A').")\n");
-		if(!($conn === false)) $conn->close();
 	}
 	
 	public function getCollectionCount(){

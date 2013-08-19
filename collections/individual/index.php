@@ -611,7 +611,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							}
 						}
 						//GUID
-						echo '<div style="margin:3px 0px;"><b>Portal GUID:</b> '.$occArr['guid'].'</div>';
+						echo '<div style="margin:3px 0px;"><b>Record Id:</b> '.$occArr['guid'].'</div>';
 						//Rights
 						$rightsStr = $collMetadata['rights'];
 						if($collMetadata['rights']){
@@ -848,8 +848,60 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 			<?php 
         }
         else{
-        	echo "<h2>There is a problem retrieving data.</h2><h3>Please try again later.</h3>";
-        }
+        	?>
+        	<h2>Unable to locate occurrence record</h2>
+        	<div style="margin:20px">Checking archive...</div>
+        	<?php
+			ob_flush();
+			flush();
+			$archArr = $indManager->checkArchive();
+			if($archArr){
+				$dets = array();
+				$imgs = array();
+				if(isset($archArr['dets'])){
+					$dets = $archArr['dets'];
+					unset($archArr['dets']);
+				}
+				if(isset($archArr['imgs'])){
+					$imgs = $archArr['imgs'];
+					unset($archArr['imgs']);
+				}
+				echo '<table border="0">';
+				foreach($archArr as $f => $v){
+					echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+				}
+				echo '<table>';
+				if($dets){
+					echo '<fieldset style="margin:20px;">';
+					echo '<legend>Determination History</legend>';
+					foreach($dets as $id => $dArr){
+						echo '<div><b>Determination #'.$id.'</b></div>';
+						echo '<table border="0">';
+						foreach($dArr as $f => $v){
+							echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+						}
+						echo '<table>';
+					}
+					echo '</fieldset>';
+				}
+				if($imgs){
+					echo '<fieldset style="margin:20px;">';
+					echo '<legend>Images</legend>';
+					foreach($imgs as $id => $iArr){
+						echo '<div><b>Image #'.$id.'</b></div>';
+						echo '<table border="0">';
+						foreach($iArr as $f => $v){
+							echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+						}
+						echo '<table>';
+					}
+					echo '</fieldset>';
+				}
+			}
+			else{
+				echo '<div>Unable to located record within archive</div>';
+			}
+		}
 		?>
 	</div>
 	<?php

@@ -1,13 +1,13 @@
 <?php
-class SpecUploadFile extends SpecUploadManager{
+class SpecUploadFile extends SpecUploadBase{
 	
 	private $ulFileName;
-	private $uploadTargetPath;
 	private $delimiter = ",";
 	private $isCsv = false;
 
 	function __construct() {
  		parent::__construct();
+		$this->setUploadTargetPath();
   		ini_set('auto_detect_line_endings', true);
 	}
 
@@ -15,55 +15,46 @@ class SpecUploadFile extends SpecUploadManager{
  		parent::__destruct();
 	}
 	
-	public function analyzeFile(){
-	 	$this->readUploadParameters();
-		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
-	 	$targetPath = $this->getUploadTargetPath();
-	 	$fullPath = '';
+	public function uploadFile(){
 		if(!$this->ulFileName){
 		 	$this->ulFileName = $_FILES['uploadfile']['name'];
-			$fullPath = $targetPath.$this->ulFileName;
+			$fullPath = $this->uploadTargetPath.$this->ulFileName;
 		 	move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath);
-		}
-		elseif(strpos($this->ulFileName,'/') !== false || strpos($this->ulFileName,'\\') !== false){
-			if(file_exists($this->ulFileName)){
-				$extStr = substr($this->ulFileName,-4);
-				$tempFileName = 'transCollId'.$this->collId.$extStr;
-				$fullPath = $targetPath.$tempFileName;
-				if(copy($this->ulFileName,$fullPath)){
-					unlink($this->ulFileName);
-					$this->ulFileName = $tempFileName;
-				}
-				else{
-					echo '<li>ERROR: Unable to copy file to temp locality</li>';
-					echo '<li style="margin-left:10px;">Source File: '.$this->ulFileName.'</li>';
-					echo '<li style="margin-left:10px;">Target Path: '.$fullPath.'</li>';
-				}
-			}
-			else{
-				echo '<li>ERROR: File not found or folder where file resides can\'t be read due to permission settings ('.$this->ulFileName.')</li>';
-			}
-		}
-		else{
-			$fullPath = $targetPath.$this->ulFileName;
-		}
-		if($fullPath){
+			$fullPath = $this->uploadTargetPath.$this->ulFileName;
+			//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
 	        if(substr($fullPath,-4) == ".zip"){
 	        	$zipFilePath = $fullPath;
 				$zip = new ZipArchive;
 				$zip->open($fullPath);
 				$this->ulFileName = $zip->getNameIndex(0);
-				$fullPath = $targetPath.$this->ulFileName; 
-				$zip->extractTo($targetPath);
+				$fullPath = $this->uploadTargetPath.$this->ulFileName; 
+				$zip->extractTo($this->uploadTargetPath);
 				$zip->close();
 				unlink($zipFilePath);
 	        }
+		}
+		return $this->ulFileName;
+	}
+ 	
+	public function analyzeUpload(){
+		//Just read first line of file to report what fields will be loaded, ignored, and required fulfilled
+	 	$fullPath = '';
+		if(strpos($this->ulFileName,'/') !== false || strpos($this->ulFileName,'\\') !== false){
+			//File was placed on server by hand (typically done by portal if file is too large for upload)
+			$fullPath = $this->ulFileName;
+		}
+		else{
+			//File was already uploaded to tempory folder
+			$fullPath = $this->uploadTargetPath.$this->ulFileName;
+		}
+		if($fullPath){
+	        //Open and grab header fields
 			$fh = fopen($fullPath,'rb') or die("Can't open file");
 			$this->sourceArr = $this->getHeaderArr($fh);
 		}
 	}
- 	
-	public function uploadData($finalTransfer,$delimiter="\t"){
+
+	public function uploadData($finalTransfer){
 		if($this->ulFileName){
 		 	$this->readUploadParameters();
 			set_time_limit(7200);
@@ -73,7 +64,7 @@ class SpecUploadFile extends SpecUploadManager{
 			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$this->conn->query($sqlDel);
 			
-			$fullPath = $this->getUploadTargetPath().$this->ulFileName;
+			$fullPath = $this->uploadTargetPath.$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
 			
 			$headerArr = $this->getHeaderArr($fh);
@@ -155,36 +146,14 @@ class SpecUploadFile extends SpecUploadManager{
     	return $recordArr;
     }
 
-    private function getUploadTargetPath(){
-    	if($this->uploadTargetPath) return $this->uploadTargetPath;
-		$tPath = $GLOBALS["tempDirRoot"];
-		if(!$tPath){
-			$tPath = ini_get('upload_tmp_dir');
-		}
-		if(!$tPath){
-			$tPath = $GLOBALS["serverRoot"]."/temp";
-		}
-		if(file_exists($tPath."/downloads")){
-			$tPath .= "/downloads";
-		}
-		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
-			$tPath .= '/';
-		}
-		$this->uploadTargetPath = $tPath;
-    	return $tPath;
-    }
-    
     public function setUploadFileName($ulFile){
-    	$this->ulFileName = $ulFile;
-    }
-    
-    public function getUploadFileName(){
-    	return $this->ulFileName;
-    }
-    
-    public function setDelimiter($dlimit){
-		$this->delimiter = $dlimit;
-    }
+		$this->ulFileName = $ulFile;
+	}
+
+	public function getDbpkOptions(){
+		$sFields = $this->sourceArr;
+		sort($sFields);
+		return $sFields;
+	}
 }
-	
 ?>

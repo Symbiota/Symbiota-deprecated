@@ -672,6 +672,7 @@ class OccurrenceEditorManager {
 	}
 	
 	public function deleteOccurrence($delOccid){
+		global $charset;
 		$status = '';
 		if(is_numeric($delOccid)){
 			//Archive data, first grab occurrence data
@@ -680,33 +681,53 @@ class OccurrenceEditorManager {
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_assoc()){
 				foreach($r as $k => $v){
-					if($v) $archiveArr[$k] = $this->encodeStr($v);
+					if($v) $archiveArr[$k] = $this->encodeStrTargeted($v,$charset,'utf8');
 				}
 			}
 			$rs->close();
 			if($archiveArr){
-				//Then determinations history
+				//Archive determinations history
 				$detArr = array();
 				$sql = 'SELECT * FROM omoccurdeterminations WHERE occid = '.$delOccid;
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_assoc()){
 					$detId = $r['detid'];
 					foreach($r as $k => $v){
-						if($v) $detArr[$detId][$k] = $this->encodeStr($v);
+						if($v) $detArr[$detId][$k] = $this->encodeStrTargeted($v,$charset,'utf8');
 					}
 					//Archive determinations
 					$detObj = json_encode($detArr[$detId]);
 					$sqlArchive = 'UPDATE guidoccurdeterminations '.
-					'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($detObj).'" '.
+					'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($this->encodeStrTargeted($detObj,'utf8',$charset)).'" '.
 					'WHERE (detid = '.$detId.')';
 					$this->conn->query($sqlArchive);
 				}
 				$rs->close();
 				$archiveArr['dets'] = $detArr;
+				
+				//Archive image history
+				$imgArr = array();
+				$sql = 'SELECT * FROM images WHERE occid = '.$delOccid;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_assoc()){
+					$imgId = $r['imgid'];
+					foreach($r as $k => $v){
+						if($v) $imgArr[$imgId][$k] = $this->encodeStrTargeted($v,$charset,'utf8');
+					}
+					//Archive determinations
+					$imgObj = json_encode($imgArr[$imgId]);
+					$sqlArchive = 'UPDATE guidimages '.
+					'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($this->encodeStrTargeted($imgObj,'utf8',$charset)).'" '.
+					'WHERE (imgid = '.$imgId.')';
+					$this->conn->query($sqlArchive);
+				}
+				$rs->close();
+				$archiveArr['imgs'] = $imgArr;
 
+				//Archive complete occurrence record
 				$archiveObj = json_encode($archiveArr);
 				$sqlArchive = 'UPDATE guidoccurrences '.
-				'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($archiveObj).'" '.
+				'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($this->encodeStrTargeted($archiveObj,'utf8',$charset)).'" '.
 				'WHERE (occid = '.$delOccid.')';
 				//echo $sqlArchive;
 				$this->conn->query($sqlArchive);
@@ -722,17 +743,6 @@ class OccurrenceEditorManager {
 			}
 		}
 		return $status;
-	}
-	
-	protected function encodeStr($inStr){
-		global $charset;
-		$retStr = $inStr;
-		if(strtolower($charset) == "iso-8859-1"){
-			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-				$retStr = utf8_encode($retStr);
-			}
-		}
-		return $retStr;
 	}
 	
 	public function setLoanData(){
@@ -1056,6 +1066,47 @@ class OccurrenceEditorManager {
 	}
 	
 	//Misc functions
+	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
+		if($inCharset == $outCharset) return $inStr;
+		$retStr = $inStr;
+		if($inCharset == "latin" && $outCharset == 'utf8'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+				$retStr = utf8_encode($retStr);
+			}
+		}
+		elseif($inCharset == "utf8" && $outCharset == 'latin'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+				$retStr = utf8_decode($retStr);
+			}
+		}
+		return $retStr;
+	}
+	
+	protected function encodeStr($inStr){
+		global $charset;
+		$retStr = $inStr;
+		//Get rid of curly quotes
+		$search = array("’", "‘", "`", "”", "“"); 
+		$replace = array("'", "'", "'", '"', '"'); 
+		$inStr= str_replace($search, $replace, $inStr);
+		
+		if($inStr){
+			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+			}
+			elseif(strtolower($charset) == "iso-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
+			}
+ 		}
+		return $retStr;
+	}
+	
 	protected function cleanOutArr($inArr){
 		$outArr = array();
 		foreach($inArr as $k => $v){

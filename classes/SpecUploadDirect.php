@@ -1,5 +1,5 @@
 <?php
-class SpecUploadDirect extends SpecUploadManager {
+class SpecUploadDirect extends SpecUploadBase {
 
  	public function __construct(){
 		parent::__construct();
@@ -9,8 +9,7 @@ class SpecUploadDirect extends SpecUploadManager {
  		parent::__destruct();
 	}
 	
- 	public function analyzeFile(){
-	 	$this->readUploadParameters();
+ 	public function analyzeUpload(){
 		if($sourceConn = $this->getSourceConnection()){
 			$sql = trim($this->queryStr);
 			if(substr($sql,-1) == ";") $sql = substr($sql,0,strlen($sql)-1); 

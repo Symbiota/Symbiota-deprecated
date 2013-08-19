@@ -412,6 +412,41 @@ class OccurrenceIndividualManager {
 		return $returnArr;
 	}
 
+	private function checkArchive(){
+		$retArr = array();
+		$sql = 'SELECT archiveobj, notes '.
+			'FROM guidoccurrences '.
+			'WHERE occid = '.$this->occId.' AND archiveobj IS NOT NULL ';
+		//echo $sql;
+		if($rs = $this->conn->query($sql)){
+			if($r = $rs->fetch_object()){
+				$retArr['obj'] = json_decode($r->archiveobj); 
+				$retArr['notes'] = $r->notes;
+			}
+			$rs->free();
+        }
+        else{
+        	trigger_error('ERROR checking archive: '.$this->conn->error,E_USER_WARNING);
+        }
+		return $retArr;
+	}
+
+	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
+		if($inCharset == $outCharset) return $inStr;
+		$retStr = $inStr;
+		if($inCharset == "latin" && $outCharset == 'utf8'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+				$retStr = utf8_encode($retStr);
+			}
+		}
+		elseif($inCharset == "utf8" && $outCharset == 'latin'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+				$retStr = utf8_decode($retStr);
+			}
+		}
+		return $retStr;
+	}
+	
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
