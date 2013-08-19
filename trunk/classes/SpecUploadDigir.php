@@ -1,5 +1,5 @@
 <?php
-class SpecUploadDigir extends SpecUploadManager {
+class SpecUploadDigir extends SpecUploadBase {
 
 	//Search variables
 	private $searchStart = 0;

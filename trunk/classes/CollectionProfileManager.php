@@ -17,7 +17,7 @@ class CollectionProfileManager {
 	}
 
 	public function setCollectionId($collId){
-		if(is_numeric($collId)){
+		if($collId && is_numeric($collId)){
 			$this->collId = $collId;
 		}
 	}
@@ -25,7 +25,7 @@ class CollectionProfileManager {
 	public function getCollectionList(){
 		$returnArr = Array();
 		$sql = "SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, ".
-			"c.fulldescription, c.homepage, c.contact, c.email, c.icon ".
+			"c.fulldescription, c.homepage, c.contact, c.email, c.icon, c.collectionguid ".
 			"FROM omcollections c ORDER BY c.SortSeq,c.CollectionName";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
@@ -37,6 +37,7 @@ class CollectionProfileManager {
 			$returnArr[$row->collid]['contact'] = $this->cleanOutStr($row->contact);
 			$returnArr[$row->collid]['email'] = $row->email;
 			$returnArr[$row->collid]['icon'] = $row->icon;
+			$returnArr[$row->collid]['guid'] = $row->collectionguid;
 		}
 		$rs->close();
 		return $returnArr;
@@ -52,7 +53,8 @@ class CollectionProfileManager {
 				"c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, ".
 				"c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.sortseq, cs.uploaddate, ".
 				"IFNULL(cs.recordcnt,0) AS recordcnt, IFNULL(cs.georefcnt,0) AS georefcnt, ".
-				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt ".
+				"IFNULL(cs.familycnt,0) AS familycnt, IFNULL(cs.genuscnt,0) AS genuscnt, IFNULL(cs.speciescnt,0) AS speciescnt, ".
+				"c.securitykey, c.collectionguid ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 				"LEFT JOIN institutions i ON c.iid = i.iid ".
 				"WHERE (c.collid = ".$this->collId.") ";
@@ -87,6 +89,8 @@ class CollectionProfileManager {
 				$returnArr['rightsholder'] = $this->cleanOutStr($row->rightsholder);
 				$returnArr['accessrights'] = $this->cleanOutStr($row->accessrights);
 				$returnArr['sortseq'] = $row->sortseq;
+				$returnArr['skey'] = $row->securitykey;
+				$returnArr['guid'] = $row->collectionguid;
 				$uDate = "";
 				if($row->uploaddate){
 					$uDate = $row->uploaddate;
@@ -101,6 +105,15 @@ class CollectionProfileManager {
 				$returnArr['familycnt'] = $row->familycnt;
 				$returnArr['genuscnt'] = $row->genuscnt;
 				$returnArr['speciescnt'] = $row->speciescnt;
+			}
+			$rs->close();
+			//Get catagories
+			$sql = 'SELECT ccpk '.
+				'FROM omcollcatlink '.
+				'WHERE (collid = '.$this->collId.') ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$returnArr['ccpk'] = $r->ccpk;
 			}
 			$rs->close();
 			//Get additional statistics
@@ -139,11 +152,25 @@ class CollectionProfileManager {
 				$returnArr['refcnt'] = $r->refcnt;
 			}
 			$rs->close();
+			//Check to make sure Security Key and collection GUIDs exist
+			if(!$returnArr['guid']){
+				$returnArr['guid'] = UuidFactory::getUuidV4();
+				$conn = MySQLiConnectionFactory::getCon('write');
+				$sql = 'UPDATE omcollections SET collectionguid = "'.$returnArr['guid'].'" WHERE collid = '.$this->collId;
+				$conn->query($sql);
+			}
+			if(!$returnArr['skey']){
+				$returnArr['skey'] = UuidFactory::getUuidV4();
+				$conn = MySQLiConnectionFactory::getCon('write');
+				$sql = 'UPDATE omcollections SET securitykey = "'.$returnArr['skey'].'" WHERE collid = '.$this->collId;
+				$conn->query($sql);
+			}  
 		}
 		return $returnArr;
 	}
 
 	public function submitCollEdits(){
+		$status = '';
 		if($this->collId){
 			$instCode = $this->cleanInStr($_POST['institutioncode']);
 			$collCode = $this->cleanInStr($_POST['collectioncode']);
@@ -187,9 +214,32 @@ class CollectionProfileManager {
 			}
 			$sql .= 'WHERE (collid = '.$this->collId.')';
 			//echo $sql;
-			$conn->query($sql);
+			if(!$conn->query($sql)){
+				$status = 'ERROR updating collection: '.$conn->error;
+				return $status;
+			}
+			
+			//Modify collection catagory, if needed
+			if(isset($_POST['ccpk'])){
+				$rs = $conn->query('SELECT ccpk FROM omcollcatlink WHERE collid = '.$this->collId);
+				if($r = $rs->fetch_object()){
+					if($r->ccpk <> $_POST['ccpk']){
+						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$_POST['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collId)){
+							$status = 'ERROR updating collection catagory: '.$conn->error;
+							return $status;
+						}
+					}
+				}
+				else{
+					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collId.')')){
+						$status = 'ERROR inserting collection catagory: '.$conn->error;
+						return $status;
+					}
+				}
+			}			
 			$conn->close();
 		}
+		return $status;
 	}
 
 	public function submitCollAdd(){
@@ -244,6 +294,13 @@ class CollectionProfileManager {
 				'VALUES('.$cid.',0,"'.$symbUid.'")';
 			$conn->query($sql);
 			$conn->close();
+			//Add collection to catagory
+			if(isset($_POST['ccpk'])){
+				if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collId.')')){
+					$status = 'ERROR inserting collection catagory: '.$conn->error;
+					return $status;
+				}
+			}
 		}
 		else{
 			$cid = 'ERROR inserting new collection: '.$conn->error;
@@ -440,6 +497,63 @@ class CollectionProfileManager {
 			$retArr[$r->iid] = $r->institutioncode.' - '.$r->institutionname;
 		}
 		return $retArr;
+	}
+	
+	public function getCatagoryArr(){
+		$retArr = array();
+		$sql = 'SELECT ccpk, catagory '.
+			'FROM omcollcatagories '.
+			'ORDER BY catagory ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->ccpk] = $r->catagory;
+		}
+		return $retArr;
+	}
+
+	//Used to index specimen records for particular collection
+	public function echoOccurrenceListing($start, $limit){
+		global $clientRoot;
+		if(!substr($clientRoot,-1) != '/') $clientRoot .= '/';
+		if($this->collId){
+			//Get count
+			$occCnt = 0;
+			if(!is_numeric($start)){
+				$sql = 'SELECT count(*) AS cnt FROM omoccurrences WHERE collid = '.$this->collId.' ';
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_object()){
+					$occCnt = $r->cnt;
+				}
+				$rs->free();
+				if($occCnt < $limit) $start = 0;
+			}
+			
+			if(is_numeric($start)){
+				$sql = 'SELECT o.occid, o.catalognumber, o.occurrenceid, o.sciname, o.recordedby, o.recordnumber, g.guid '.
+					'FROM omoccurrences o INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+					'WHERE collid = '.$this->collId.' '.
+					'ORDER BY o.catalognumber,o.occid '.
+					'LIMIT '.$start.','.$limit;
+				//echo $sql;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					echo '<div style="margin:5px;">';
+					echo '<div><b>Collector:</b> '.$r->recordedby.' '.$r->recordnumber.'</div>';
+					echo '<div style="margin-left:10px;"><b>Scientific Name:</b> '.$r->sciname.'</div>';
+					echo '<div style="margin-left:10px;"><b>Identifiers:</b> '.$r->catalognumber.' '.$r->occurrenceid.'</div>';
+					echo '<div style="margin-left:10px;"><b>GUID:</b> '.$r->guid.'</div>';
+					echo '<div style="margin-left:10px;"><a href="'.$clientRoot.'/collections/individual/index.php?occid='.$r->occid.'" target="_blank"><b>Full Details</b></a></div>';
+					echo '</div>';
+				}
+				$rs->free();
+			}
+			else{
+				for($j = 0;$j < $occCnt;$j += $limit){
+					$endCnt = (($j+$limit)<$occCnt?($j+$limit):$occCnt);
+					echo '<div><a href="collectionindex.php?collid='.$this->collId.'&start='.$j.'&limit='.$limit.'">Records '.($j+1).' - '.$endCnt.'</a></div>';
+				}
+			}
+		}
 	}
 
 	private function cleanOutStr($str){

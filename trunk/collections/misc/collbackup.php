@@ -8,10 +8,16 @@ $cSet = array_key_exists("cset",$_REQUEST)?$_REQUEST["cset"]:'';
 
 $dlManager = new OccurrenceDownloadManager();
 
-$editable = 0;
+$statusStr = '';
+$isEditor = 0;
 
 if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
-	$editable = 1;
+	$isEditor = 1;
+}
+if($isEditor && $action == 'Perform Backup'){
+	if(!$dlManager->dlCollectionBackup($collId,$cSet)){
+		$statusStr = implode('<br/>',$dlManager->getErrorArr());
+	}
 }
 ?>
 
@@ -26,40 +32,28 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 <!-- This is inner text! -->
 <div id="innertext">
 	<?php 
-	if($editable){
-		if($action == 'Perform Backup'){
-			echo '<ul>';
-			$dlFile = $dlManager->dlCollectionBackup($collId,$cSet);
-			if($dlFile){
-				echo '<li style="font-weight:bold;">Backup Complete!</li>';
-				echo '<li style="font-weight:bold;">Click on file to download: <a href="'.$dlFile.'">'.$dlFile.'</a></li>';
-				echo '</ul>';
-			}
-			echo '</ul>';
-		}
-		else{
-			?>
-			<form name="buform" action="collbackup.php" method="post">
-				<fieldset style="padding:15px;">
-					<legend>Download Module</legend>
-					<div style="float:left;">
-						Data Set: 
-					</div>
-					<div style="float:left;">
-						<?php 
-						$cSet = str_replace('-','',strtolower($charset));
-						?>
-						<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
-						<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
-					</div>
-					<div style="clear:both;">
-						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-						<input type="submit" name="formsubmit" value="Perform Backup" />
-					</div>
-				</fieldset>
-			</form>
-			<?php 
-		}
+	if($isEditor){
+		?>
+		<form name="buform" action="collbackup.php" method="post">
+			<fieldset style="padding:15px;">
+				<legend>Download Module</legend>
+				<div style="float:left;">
+					Data Set: 
+				</div>
+				<div style="float:left;">
+					<?php 
+					$cSet = str_replace('-','',strtolower($charset));
+					?>
+					<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
+					<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
+				</div>
+				<div style="clear:both;">
+					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+					<input type="submit" name="formsubmit" value="Perform Backup" />
+				</div>
+			</fieldset>
+		</form>
+		<?php 
 	}
 	?>
 </div>

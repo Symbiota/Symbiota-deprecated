@@ -11,7 +11,8 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	private $buFileName;
 	private $buFilePath;
 	private $uploadPath;
- 	private $zipArchive;
+	
+	private $errorArr = array();
 
  	public function __construct(){
 		global $userRights, $isAdmin;
@@ -20,11 +21,6 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 
 		//Create file pathName
 		$this->buFileName = 'symbdl_'.time();
-
-		if(class_exists('ZipArchive')){
-			$this->zipArchive = new ZipArchive;
-			$this->zipArchive->open($this->buFilePath.$this->buFileName.'.zip', ZipArchive::CREATE);
-		}
 
 		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision",
@@ -340,18 +336,24 @@ class OccurrenceDownloadManager extends OccurrenceManager{
         $result->close();
     }
 
-    public function dlCollectionBackup($collId, $characterSet = ''){
-    	global $charset;
-    	$cSet = str_replace('-','',strtolower($charset));
-		$fileUrl = '';
-    	if($collId){
+	public function dlCollectionBackup($collId, $characterSet = ''){
+		global $charset;
+		$status = true;
+		$cSet = str_replace('-','',strtolower($charset));
+		if($collId){
+			$contentType = 'application/zip';
+			$zipArchive = null;
+			if(class_exists('ZipArchive')){
+				$zipArchive = new ZipArchive;
+				$zipArchive->open($this->buFilePath.$this->buFileName.'.zip', ZipArchive::CREATE);
+			}
+			else{
+				$this->errorArr[] = 'ERROR: ZipArchive not supported. <br/>';
+				$contentType = 'text/html; charset='.$charset;
+			}
+
     		//If zip archive can be created, the occurrences, determinations, and image records will be added to single archive file
     		//If not, then a CSV file containing just occurrence records will be returned
-			echo '<li style="font-weight:bold;">Zip Archive created</li>';
-			echo '<li style="font-weight:bold;">Adding occurrence records to archive...';
-			ob_flush();
-			flush();
-    		//Adding occurrence records
     		$fileName = $this->buFilePath.$this->buFileName;
     		$specFH = fopen($fileName.'_spec.csv', "w");
 	    	//Output header 
@@ -383,16 +385,14 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     			$rs->close();
     		}
     		fclose($specFH);
-	    	if($this->zipArchive){
+    		$localFile = '';
+
+    		if($zipArchive){
 	    		//Add occurrence file and then rename to 
-				$this->zipArchive->addFile($fileName.'_spec.csv');
-				$this->zipArchive->renameName($fileName.'_spec.csv','occurrences.csv');
+				$zipArchive->addFile($fileName.'_spec.csv');
+				$zipArchive->renameName($fileName.'_spec.csv','occurrences.csv');
 
 				//Add determinations
-				echo 'Done!</li> ';
-				echo '<li style="font-weight:bold;">Adding determinations records to archive...';
-				ob_flush();
-				flush();
 				$detFH = fopen($fileName.'_det.csv', "w");
 				fputcsv($detFH, Array('detid','occid','sciname','scientificNameAuthorship','identifiedBy','d.dateIdentified','identificationQualifier','identificationReferences','identificationRemarks','sortsequence'));
 				//Add determination values
@@ -408,14 +408,10 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 	    			$rs->close();
 	    		}
     			fclose($detFH);
-				$this->zipArchive->addFile($fileName.'_det.csv');
-	    		$this->zipArchive->renameName($fileName.'_det.csv','determinations.csv');
+				$zipArchive->addFile($fileName.'_det.csv');
+	    		$zipArchive->renameName($fileName.'_det.csv','determinations.csv');
 	    		
 				//Add image urls
-				echo 'Done!</li> ';
-				echo '<li style="font-weight:bold;">Adding image records to archive...';
-				ob_flush();
-				flush();
 	    		$imgFH = fopen($fileName.'_img.csv', "w");
 				fputcsv($imgFH, Array('imgid','occid','url','thumbnailurl','originalurl','caption','notes'));
 				$sql = 'SELECT i.imgid,i.occid,i.url,i.thumbnailurl,i.originalurl,i.caption,i.notes '.
@@ -429,22 +425,38 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 					$rs->close();
 	    		}
     			fclose($imgFH);
-				$this->zipArchive->addFile($fileName.'_img.csv');
-	    		$this->zipArchive->renameName($fileName.'_img.csv','images.csv');
-				echo 'Done!</li> ';
-				ob_flush();
-				flush();
-				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'.zip');
-				$this->zipArchive->close();
+				$zipArchive->addFile($fileName.'_img.csv');
+	    		$zipArchive->renameName($fileName.'_img.csv','images.csv');
+				$localFile = $this->buFilePath.$this->buFileName.'.zip';
+				$zipArchive->close();
 				unlink($fileName.'_spec.csv');
 				unlink($fileName.'_det.csv');
 				unlink($fileName.'_img.csv');
-	    	}
-	    	else{
-				$fileUrl = str_replace($GLOBALS['serverRoot'],$GLOBALS['clientRoot'],$this->buFilePath.$this->buFileName.'_spec.csv');
-	    	}
+			}
+			else{
+				$this->errorArr[] = 'ERROR: Only the occurrence file will be exported. <br/>';
+				$contentType = 'text/html; charset='.$charset;
+				$localFile = $this->buFilePath.$this->buFileName.'_spec.csv';
+			}
+			if(file_exists($localFile)){
+				header('Content-Description: Collection Backup');
+				header('Content-Type: '.$contentType);
+				header('Content-Disposition: attachment; filename='.basename($localFile));
+				header('Content-Transfer-Encoding: binary');
+				header('Expires: 0');
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				header('Content-Length: '.filesize($localFile));
+				ob_clean();
+				flush();
+				readfile($localFile);
+				unlink($localFile);
+			}
+			else{
+				$status = false;
+			}
 		}
-		return $fileUrl;
+		return $status;
 	}
 
 /*
@@ -614,6 +626,10 @@ xmlwriter_end_attribute($xml_resource);
 			}
 		}
 		return $retStr;
+	}
+	
+	public function getErrorArr(){
+		return $this->errorArr;
 	}
 }
 ?>

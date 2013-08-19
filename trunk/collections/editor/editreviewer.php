@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecEditReviewManager.php');
 
@@ -103,16 +102,16 @@ header("Content-Type: text/html; charset=".$charset);
 		if($mode != 'printmode'){
 			$displayLeftMenu = (isset($collections_editor_editreviewerMenu)?$collections_individual_editreviewerMenu:false);
 			include($serverRoot.'/header.php');
-				echo "<div class='navpath'>";
-				echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
-				if(isset($collections_editor_editreviewerCrumbs)){
-					echo $collections_editor_editreviewerCrumbs;
-				}
-				else{
-					echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
-				}
-				echo " <b>Specimen Edits Reviewer</b>";
-				echo "</div>";
+			echo "<div class='navpath'>";
+			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
+			if(isset($collections_editor_editreviewerCrumbs)){
+				echo $collections_editor_editreviewerCrumbs;
+			}
+			else{
+				echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
+			}
+			echo " <b>Specimen Edits Reviewer</b>";
+			echo "</div>";
 		}
 		?>
 		<!-- This is inner text! -->

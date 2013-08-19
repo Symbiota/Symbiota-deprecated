@@ -106,7 +106,7 @@ class SpecProcNlp{
 					$this->logMsg($eStr);
 					if($this->printMode == 1) $this->outToReport($eStr);
 				}
-		
+
 				if($this->printMode == 1){
 					//Output to report file
 					$this->printResult($rawStr,$dwcArr);

@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/CollectionProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -220,19 +219,36 @@ if($collId) $collData = $collManager->getCollectionData();
 								Edit Existing Occurrence Records
 							</a>
 						</li>
-						<li>
-							<a href="../datasets/index.php?collid=<?php echo $collId; ?>">
-								Print Labels
-							</a>
-						</li>
+						<?php
+						if($collData['colltype'] == 'Preserved Specimens'){ 
+							?>
+							<li>
+								<a href="../datasets/index.php?collid=<?php echo $collId; ?>">
+									Print Labels
+								</a>
+							</li>
+							<?php
+						}
+						?>
 						<li>
 							<a href="../georef/batchgeoreftool.php?collid=<?php echo $collId; ?>">
 								Batch Georeference Specimens
 							</a>
 						</li>
+						<?php
+						if($collData['colltype'] == 'Preserved Specimens'){ 
+							?>
+							<li>
+								<a href="../loans/index.php?collid=<?php echo $collId; ?>">
+									Loan Management
+								</a>
+							</li>
+							<?php
+						}
+						?>
 						<li>
-							<a href="../loans/index.php?collid=<?php echo $collId; ?>">
-								Loan Management
+							<a href="../datasets/duplicatemanager.php?collid=<?php echo $collId; ?>">
+								Duplicate Clustering
 							</a>
 						</li>
 						<li>
@@ -246,7 +262,7 @@ if($collId) $collData = $collManager->getCollectionData();
 				if($editCode > 1){ 
 					?>
 					<fieldset>
-						<legend>Administration Control Panel</legend>
+						<legend><b>Administration Control Panel</b></legend>
 						<ul>
 							<li>
 								<a href="#" onclick="toggleById('colledit');" >
@@ -264,8 +280,13 @@ if($collId) $collData = $collManager->getCollectionData();
 								</a>
 							</li>
 							<li>
-								<a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">
+								<a href="../admin/specuploadmanagement.php?collid=<?php echo $collId; ?>">
 									Import/Update Specimen Records
+								</a>
+							</li>
+							<li style="margin-left:10px;">
+								<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collId; ?>">
+									Quick File Upload
 								</a>
 							</li>
 							<li>
@@ -440,6 +461,29 @@ if($collId) $collData = $collManager->getCollectionData();
 										<input id="lngdec" type="text" name="longitudedecimal" value="<?php echo ($collId?$collData["longitudedecimal"]:'');?>" />
 									</td>
 								</tr>
+								<?php 
+								$collCatArr = $collManager->getCatagoryArr();
+								if($collCatArr){
+									?>
+									<tr>
+										<td>
+											Catagory:
+										</td>
+										<td>
+											<select>
+												<option value="">No Catagory</option>
+												<option value="">-------------------------------------------</option>
+												<?php 
+												foreach($collCatArr as $ccpk => $catagory){
+													echo '<option value="'.$ccpk.'" '.($collId && $ccpk==$collData['ccpk']?'SELECTED':'').'>'.$catagory.'</option>';
+												}
+												?>
+											</select>
+										</td>
+									</tr>
+									<?php
+								}
+								?>
 								<tr>
 									<td>
 										Allow Public Edits:
@@ -651,6 +695,22 @@ if($collId) $collData = $collManager->getCollectionData();
 											</div>
 										</td>
 									</tr>
+									<tr>
+										<td>
+											Global Unique ID:
+										</td>
+										<td>
+											<?php echo ($collId?$collData['guid']:''); ?>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Security Key:
+										</td>
+										<td>
+											<?php echo ($collId?$collData['skey']:''); ?>
+										</td>
+									</tr>
 									<?php 
 								} 
 								?>
@@ -712,6 +772,10 @@ if($collId) $collData = $collManager->getCollectionData();
 						}
 						?>
 					</div>
+					<div style="margin-top:5px;">
+						<b>Global Unique Identifier: </b>
+						<?php echo ($collId?$collData['guid']:''); ?>
+					</div>
 	 				<?php 
 	 				if($collData["institutionname"]){ 
 	 					?>
@@ -760,6 +824,9 @@ if($collId) $collData = $collManager->getCollectionData();
 						</a>
 					</div>
 				</fieldset>
+				<div style="margin:25px;">
+					<a href="collectionindex.php?collid=<?php echo $collId;?>">Full Specimen List</a>
+				</div>
 				<?php
 				if($showFamilyList || $showGeographicList){
 					?>
@@ -899,6 +966,5 @@ if($collId) $collData = $collManager->getCollectionData();
 	<?php
 		include($serverRoot.'/footer.php');
 	?>
-
 </body>
 </html>

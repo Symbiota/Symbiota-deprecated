@@ -346,6 +346,11 @@ $smManager = new SiteMapManager();
 										Create a New Collection or Observation Profile
 									</a>
 								</li>
+								<li>
+									<a href="<?php echo $clientRoot; ?>/admin/guidmapper.php">
+										Collection GUID Mapper
+									</a>
+								</li>
 	            			</ul>
 	            			<?php
 						}
