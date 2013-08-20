@@ -12,7 +12,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	//Parsing functions
 	public function parse($rawStr) {
 		$results = array();
-		$rawStr = $this->fixString($rawStr, $collid);
+		$rawStr = $this->fixString($rawStr);
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
 		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 			$rawStr = utf8_decode($rawStr);
