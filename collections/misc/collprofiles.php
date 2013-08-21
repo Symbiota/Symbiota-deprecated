@@ -113,6 +113,10 @@ if($collId) $collData = $collManager->getCollectionData();
 				alert("Latitdue and longitude values must be in the decimal format (numeric only)");
 				return false;
 			}
+			else if(f.rights.value == ""){
+				alert("Rights field (e.g. Creative Commons license) must have a selection");
+				return false;
+			}
 			try{
 				if(!isNumeric(f.sortseq.value)){
 					alert("Sort sequence must be numeric only");
@@ -470,7 +474,7 @@ if($collId) $collData = $collManager->getCollectionData();
 											Catagory:
 										</td>
 										<td>
-											<select>
+											<select name="ccpk">
 												<option value="">No Catagory</option>
 												<option value="">-------------------------------------------</option>
 												<?php 
