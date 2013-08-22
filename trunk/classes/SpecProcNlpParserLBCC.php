@@ -10,13 +10,13 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	}
 
 	//Parsing functions
-	public function parse($rawStr) {
+	public function parse($rawStr, $catNo) {
 		$results = array();
-		$rawStr = $this->fixString($rawStr);
+		$rawStr = $this->fixString($rawStr, $catNo);
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
-		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-			$rawStr = utf8_decode($rawStr);
-		}
+		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+		//	$rawStr = utf8_decode($rawStr);
+		//}
 		$politicalConfigInfo = array();
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
 			$politicalConfigInfo = $this->getPoliticalConfigInfo($rawStr, "", $collid);
@@ -9711,7 +9711,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		return $str;
 	}
 
-	private function fixString($str) {
+	private function fixString($str, $catNo) {
 		if($str) {
 			//$str = str_replace("/^?/", "", $str);
 			$needles = array("(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
@@ -9720,18 +9720,16 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			$pat = "/\\A[^\w(]+(.*)/s";
 			if(preg_match($pat, $str, $patMatches)) $str = trim($patMatches[1]);
 			$str = str_replace($needles, $replacements, $str);
-			$pos = strpos($fName, ".");
-			if($pos !== FALSE) $fName = substr($fName, 0, $pos);
-			$pos = strpos($fName, "_");
-			if($pos !== FALSE) $fName = substr($fName, 0, $pos);
-			$str = str_replace($fName, "", $str);
-			$firstChar = substr($fName, 0, 1);
-			if(!is_numeric($firstChar)) {
-				while(strlen($fName) > 1 && !is_numeric($firstChar)) {
-					$fName = substr($fName, 1);
-					$firstChar = substr($fName, 0, 1);
+			if($catNo) {
+				$str = str_replace($catNo, "", $str);
+				$firstChar = substr($catNo, 0, 1);
+				if(!is_numeric($firstChar)) {
+					while(strlen($catNo) > 1 && !is_numeric($firstChar)) {
+						$catNo = substr($catNo, 1);
+						$firstChar = substr($catNo, 0, 1);
+					}
+					$str = str_replace($catNo, "", $str);
 				}
-				$str = str_replace($fName, "", $str);
 			}
 			$str = preg_replace
 			(
