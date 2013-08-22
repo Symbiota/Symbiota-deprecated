@@ -101,20 +101,13 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				if(!cb.checked){
 					boxesChecked = false;
 				}
-				var childrenEle = document.getElementById(target).children;
-				for(var i=0;i<childrenEle.length;i++){
-					if(childrenEle[i].tagName == "DIV"){
-						var divChildren = childrenEle[i].children;
-						for(var j=0;j<divChildren.length;j++){
-							var divChildren2 = divChildren[j].children;
-							for(var k=0;k<divChildren2.length;k++){
-								if(divChildren2[k].tagName == "INPUT"){
-									divChildren2[k].checked = boxesChecked;
-								}
-							}
-						}
-					}
-				}
+				var inputObjs = document.getElementsByTagName("input");
+			  	for (i = 0; i < inputObjs.length; i++) {
+			  		var inputObj = inputObjs[i];
+			  		if(inputObj.getAttribute("class") == target || inputObj.getAttribute("className") == target){
+			  			inputObj.checked = boxesChecked;
+			  		}
+			  	}
 			}
 
 			function unselectCat(catTarget){

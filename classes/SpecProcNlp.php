@@ -39,7 +39,6 @@ class SpecProcNlp{
 			$this->outToReport('Processing finished: '.date('Y-m-d h:i:s A')."\n\n");
 			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.txt">'.$this->outFilePath.'.txt</a></div>';
 			echo '<div style="margin-left:10px;">Log file: <a href="'.$this->outFilePath.'.log">'.$this->outFilePath.'.log</a></div>';
-			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records output to report file');
 			if($this->outFH) fclose($this->outFH);
 		}
 		elseif($this->printMode == 2){
@@ -242,7 +241,7 @@ class SpecProcNlp{
 		return (isset($retArr[$bestMatch])?$retArr[$bestMatch]:null);
 	}
 	
-	private function formatDate($inStr){
+	protected function formatDate($inStr){
 		$retDate = '';
 		$dateStr = trim($inStr);
 		if(!$dateStr) return;
@@ -548,12 +547,24 @@ class SpecProcNlp{
 		
 		//Do some cleaning
 		if(isset($dwcArr['month']) && !is_numeric($dwcArr['month'])){
+			//Month should be numeric, yet is a sting. Check to see if it is the month name or abbreviation 
 			$mStr = strtolower(substr($dwcArr['month'],0,3));
 			if(array_key_exists($mStr,$this->monthNames)){
 				$dwcArr['month'] = $this->monthNames[$mStr];
 			}
+			else{
+				if(!isset($dwcArr['verbatimeventdate']) || !$dwcArr['verbatimeventdate']){
+					$vDate = '';
+					if(isset($dwcArr['day'])) $vDate = $dwcArr['day'].' ';
+					$vDate .= $dwcArr['month'].' ';
+					if(isset($dwcArr['year'])) $vDate .= $dwcArr['year'];
+					$dwcArr['verbatimeventdate'] = trim($vDate);
+				} 
+				unset($dwcArr['month']);
+			}
 		}
 		if(!isset($dwcArr['eventdate']) && isset($dwcArr['year']) && isset($dwcArr['month'])){
+			//If not eventdate and year/month exists, build event date from year-month-day
 			if(!isset($dwcArr['day'])) $dwcArr['day'] = "00";
 			$dwcArr['eventdate'] = $dwcArr['year'].'-'.$dwcArr['month'].'-'.$dwcArr['day'];
 		}
@@ -617,20 +628,72 @@ class SpecProcNlp{
 			//Load data into existing record
 			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$this->occid;
 			echo $sql.'<br/>';
-//			if($this->conn->query($sql)){
+			if($this->conn->query($sql)){
 				//Version field that were added along with the time stamp
 				$sql = 'INSERT INTO specprocnlpversion(prlid, archivestr) '.
 					'VALUES('.$this->prlid.',"'.implode(',',$finalFields).'")';
 				echo $sql.'<br/>';
-//				if(!$this->conn->query($sql)){
-//					$this->logMsg('WARNING: unable to version edit: ; '.$this->conn->error);
-//					$this->logMsg('Error details: ; '.$this->conn->error);
-//				}
-//			}
-//			else{
-//				$this->logMsg('ERROR: unable to load data; '.$this->conn->error);
-//				return false;
-//			}
+				if(!$this->conn->query($sql)){
+					$this->logMsg('WARNING: unable to version edit: ; '.$this->conn->error);
+					$this->logMsg('Error details: ; '.$this->conn->error);
+				}
+
+				//Deal with Exsiccati data
+				if(isset($dwcArr['exsiccatinumber']) && $dwcArr['exsiccatinumber'] && !isset($dwcArr['exsnumber'])){
+					//exsiccatinumber variable submitted instead of exsnumber
+					$dwcArr['exsnumber'] = $dwcArr['exsiccatinumber'];
+				}
+				//Exsiccati number is required, if not there no need to progress
+				if((isset($dwcArr['exsnumber']) && $dwcArr['exsnumber']) || (isset($dwcArr['omenid']) && $dwcArr['omenid'])){
+					if(isset($dwcArr['exsiccatititle']) && $dwcArr['exsiccatititle'] && (!isset($dwcArr['ometid']) || !$dwcArr['ometid'])){
+						//Get ometid (title number) since only exsiccatiTitle exists
+						$sql = 'SELECT ometid FROM omexsiccatititles '.
+							'WHERE (title = "'.trim($dwcArr['exsiccatititle']).'") OR (abbreviation = "'.trim($dwcArr['exsiccatititle']).'")';
+						$rs = $this->conn->query($sql);
+						if($r = $rs->fetch_object()){
+							$dwcArr['ometid'] = $r->ometid;
+						}
+						$rs->free();
+					}
+					if($dwcArr['ometid']){
+						if(!isset($dwcArr['omenid']) && !$dwcArr['omenid'] && isset($dwcArr['exsnumber']) && $dwcArr['exsnumber']){
+							//Get exsiccati number id (omenid), since exsnumber was only supplied
+							$sql = 'SELECT omenid FROM omexsiccatinumbers '.
+								'WHERE ometid = ('.$dwcArr['ometid'].') AND (exsnumber = "'.trim($dwcArr['exsnumber']).'")';
+							$rs = $this->conn->query($sql);
+							if($r = $rs->fetch_object()){
+								$dwcArr['omenid'] = $r->omenid;
+							}
+							$rs->free();
+							if(!isset($dwcArr['omenid'])){
+								//Exsiccati number needs to be added
+								$sql = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber) '.
+									'VALUES('.$dwcArr['ometid'].',"'.trim($dwcArr['exsnumber']).'")';
+								if($this->conn->query($sql)) $dwcArr['omenid'] = $this->conn->insert_id;
+							}
+						}
+						if($dwcArr['omenid']){
+							//ometid and omenid both exists, thus load Exsiccati 
+							$sqlExs ='INSERT INTO omexsiccatiocclink(omenid,occid) VALUES('.$dwcArr['omenid'].','.$this->occid.')';
+							if($this->conn->query($sqlExs)){
+								//Remove exsiccati fields from $leftOverData
+								unset($leftOverData['ometid']);
+								unset($leftOverData['omenid']);
+								if(isset($leftOverData['exsnumber'])) unset($leftOverData['exsnumber']);
+								if(isset($leftOverData['exsiccatinumber'])) unset($leftOverData['exsiccatinumber']);
+								if(isset($leftOverData['exsiccatititle'])) unset($leftOverData['exsiccatititle']);
+							}
+							else{
+								$this->logMsg("ERROR linking exsiccati record (".$dwcArr['omenid'].'-'.$this->occid."): ".$this->conn->error);
+							}
+						}
+					}
+				}
+			}
+			else{
+				$this->logMsg('ERROR: unable to load data; '.$this->conn->error);
+				return false;
+			}
 		}
 
 		if(count($leftOverData)) $this->logMsg('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData))); 

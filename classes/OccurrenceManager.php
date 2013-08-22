@@ -673,7 +673,7 @@ class OccurrenceManager{
 										    ?>
 										</td>
 										<td style="padding:6px">
-								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
+								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
 										</td>
 										<td style="padding:6px">
 								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>

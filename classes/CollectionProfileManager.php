@@ -293,7 +293,6 @@ class CollectionProfileManager {
 			$sql = 'INSERT INTO omcollectionstats(collid,recordcnt,uploadedby) '.
 				'VALUES('.$cid.',0,"'.$symbUid.'")';
 			$conn->query($sql);
-			$conn->close();
 			//Add collection to catagory
 			if(isset($_POST['ccpk'])){
 				if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collId.')')){
@@ -305,6 +304,7 @@ class CollectionProfileManager {
 		else{
 			$cid = 'ERROR inserting new collection: '.$conn->error;
 		}
+		$conn->close();
 		return $cid;
 	}
 	
@@ -514,7 +514,7 @@ class CollectionProfileManager {
 	//Used to index specimen records for particular collection
 	public function echoOccurrenceListing($start, $limit){
 		global $clientRoot;
-		if(!substr($clientRoot,-1) != '/') $clientRoot .= '/';
+		if(substr($clientRoot,-1) != '/') $clientRoot .= '/';
 		if($this->collId){
 			//Get count
 			$occCnt = 0;
