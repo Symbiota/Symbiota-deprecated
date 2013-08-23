@@ -30,15 +30,14 @@ class OccurrenceCleaner {
 	public function getCollMap(){
 		$returnArr = Array();
 		if($this->collId){
-			$sql = 'SELECT c.institutioncode, c.collectioncode, c.collectionname, '.
+			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
 				'c.icon, c.colltype, c.managementtype '.
 				'FROM omcollections c '.
 				'WHERE (c.collid = '.$this->collId.') ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				$returnArr['institutioncode'] = $row->institutioncode;
-				$returnArr['collectioncode'] = $row->collectioncode;
+				$returnArr['code'] = $row->code;
 				$returnArr['collectionname'] = $row->collectionname;
 				$returnArr['icon'] = $row->icon;
 				$returnArr['colltype'] = $row->colltype;
@@ -50,43 +49,24 @@ class OccurrenceCleaner {
 	}
 
 	public function getDuplicateCatalogNumber(){
-		$returnArr = array();
-		$sql = 'SELECT o.occid, o.catalognumber, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
+		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 			'o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.($this->obsUid?', observeruid ':''). 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
 			'WHERE o.collid = '.$this->collId.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' '.
 			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT 505';
 		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->occid]['occid'] = $row->occid;
-			$returnArr[$row->occid]['catalognumber'] = $row->catalognumber;
-			$returnArr[$row->occid]['family'] = $row->family;
-			$returnArr[$row->occid]['sciname'] = $row->sciname;
-			$returnArr[$row->occid]['recordedby'] = $row->recordedby;
-			$returnArr[$row->occid]['recordnumber'] = $row->recordnumber;
-			$returnArr[$row->occid]['associatedcollectors'] = $row->associatedcollectors;
-			$returnArr[$row->occid]['eventdate'] = $row->eventdate;
-			$returnArr[$row->occid]['verbatimeventdate'] = $row->verbatimeventdate;
-			$returnArr[$row->occid]['country'] = $row->country;
-			$returnArr[$row->occid]['stateprovince'] = $row->stateprovince;
-			$returnArr[$row->occid]['county'] = $row->county;
-			$returnArr[$row->occid]['municipality'] = $row->municipality;
-			$returnArr[$row->occid]['locality'] = $row->locality;
-			$returnArr[$row->occid]['datelastmodified'] = $row->datelastmodified;
-		}
-		$rs->free();
-		return $returnArr;
+		$retArr = $this->getDuplicates($sql); 
+
+		return $retArr;
 	}
 	
 	public function getDuplicateCollectorNumber($lastName = ''){
-		$retArr = array();
-		$sql = 'SELECT o.occid '.
+		$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 			'FROM omoccurrences o INNER JOIN '. 
 			'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid '.
 			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
-			'AND recordnumber NOT LIKE "s%n%") intab ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
+			'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
 			'WHERE collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -114,35 +94,28 @@ class OccurrenceCleaner {
 			}
 		}
 					
-		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
-			'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality '. 
+		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
+			'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, datelastmodified '. 
 			'FROM omoccurrences o '.
 			'WHERE occid IN('.implode(',',$occidArr).') '.
 			'ORDER BY eventdate, recordnumber, recordedby LIMIT 505';
 		//echo $sql;
+		$retArr = $this->getDuplicates($sql); 
+		
+		return $retArr;
+	}
+
+	private function getDuplicates($sql){
+		$retArr = array();
+		//echo $sql;
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr[$row->occid]['occid'] = $row->occid;
-			$retArr[$row->occid]['catalognumber'] = $row->catalognumber;
-			$retArr[$row->occid]['othercatalognumbers'] = $row->othercatalognumbers;
-			$retArr[$row->occid]['family'] = $row->family;
-			$retArr[$row->occid]['sciname'] = $row->sciname;
-			$retArr[$row->occid]['recordedby'] = $row->recordedby;
-			$retArr[$row->occid]['recordnumber'] = $row->recordnumber;
-			$retArr[$row->occid]['associatedcollectors'] = $row->associatedcollectors;
-			$retArr[$row->occid]['eventdate'] = $row->eventdate;
-			$retArr[$row->occid]['verbatimeventdate'] = $row->verbatimeventdate;
-			$retArr[$row->occid]['country'] = $row->country;
-			$retArr[$row->occid]['stateprovince'] = $row->stateprovince;
-			$retArr[$row->occid]['county'] = $row->county;
-			$retArr[$row->occid]['municipality'] = $row->municipality;
-			$retArr[$row->occid]['locality'] = $row->locality;
-			$returnArr[$row->occid]['datelastmodified'] = $row->datelastmodified;
+		while($row = $rs->fetch_assoc()){
+			$retArr[$row['occid']] = array_change_key_case($row);
 		}
 		$rs->free();
 		return $retArr;
 	}
-
+	
 	public function mergeDupeArr($occidArr){
 		$dupArr = array();
 		foreach($occidArr as $v){

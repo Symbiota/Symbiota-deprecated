@@ -85,7 +85,8 @@ class OccurrenceCrowdSource {
 			$sql = 'SELECT o.processingstatus, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN omoccurrences o ON q.occid = o.occid '.
-				'WHERE c.collid = '.$this->collid.' GROUP BY o.processingstatus';
+				'WHERE c.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed" OR q.uidprocessor IS NOT NULL) '.
+				'GROUP BY o.processingstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr['rs'][$r->processingstatus] = $r->cnt;
@@ -166,6 +167,7 @@ class OccurrenceCrowdSource {
 			unset($headerArr['startDayOfYear']);
 			unset($headerArr['endDayOfYear']);
 			unset($headerArr['uidprocessor']);
+			unset($headerArr['dbpk']);
 			
 			//Limit record array to only fields in headerArr (fields with a value in at least one record)
 			foreach($recArr as $k => $occArr){
