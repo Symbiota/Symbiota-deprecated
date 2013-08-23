@@ -458,7 +458,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 				if(count($words) == 2 || (count($words) == 3 && strlen($words[2]) < 9)) {
 					$sql = "SELECT * FROM taxa t WHERE t.sciName = '".$word0."'";
 					if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
-					if(strcasecmp($word1, "florida") != 0 && strcasecmp($word1, "americani") != 0
+					if(strlen($word1) > 3 && strcasecmp($word1, "florida") != 0 && strcasecmp($word1, "americani") != 0
 						&& strcasecmp($word1, "clara") != 0 && strcasecmp($word1, "barbara") != 0) {
 						$sql = "SELECT * FROM taxa t WHERE t.unitName2 = '".$word1."'";
 						//echo "\nline 1065, sql: ".$sql."\n";
