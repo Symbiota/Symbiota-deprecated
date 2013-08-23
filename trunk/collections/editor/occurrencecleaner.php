@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$charset);
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
-$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
+$function = array_key_exists('fn',$_REQUEST)?$_REQUEST['fn']:'';
 
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
@@ -32,11 +32,11 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 $dupArr = array();
 if($action == 'listdupscatalog'){
 	$dupArr = $cleanManager->getDuplicateCatalogNumber();
-	$action = 'listdups';
+	$function = 'listdupscatalog';
 }
 elseif($action == 'listdupsrecordedby'){
 	$dupArr = $cleanManager->getDuplicateCollectorNumber();
-	$action = 'listdups';
+	$function = 'listdupsrecordedby';
 }
 
 ?>
@@ -125,7 +125,7 @@ elseif($action == 'listdupsrecordedby'){
 			echo '<a href="occurrencecleaner.php?collid='.$collId.'">';
 			echo 'Data Cleaning Module';
 			echo '</a> &gt;&gt; ';
-			if($action == 'listdups') echo '<b>Duplicate Occurrences</b>';
+			if($action == 'listdupscatalog' || $action == 'listdupsrecordedby') echo '<b>Duplicate Occurrences</b>';
 		}
 		else{
 			echo '<b>Data Cleaning Module</b>';
@@ -145,6 +145,7 @@ elseif($action == 'listdupsrecordedby'){
 			<hr/>
 			<?php 
 		} 
+		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			if(!$action){
 				?>
@@ -195,7 +196,7 @@ elseif($action == 'listdupsrecordedby'){
 				<?php
 			}
 			else{
-				if($action == 'listdups'){
+				if($action == 'listdupscatalog' || $action == 'listdupsrecordedby'){
 					//Look for duplicate catalognumbers 
 					if($dupArr){
 						$recCnt = count($dupArr);
@@ -208,6 +209,7 @@ elseif($action == 'listdupsrecordedby'){
 									<th style="width:40px;">ID</th>
 									<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
 									<th style="width:40px;">Catalog Number</th>
+									<th style="width:40px;">Other Catalog Numbers</th>
 									<th>Scientific Name</th>
 									<th>Collector</th>
 									<th>Collection Number</th>
@@ -228,6 +230,7 @@ elseif($action == 'listdupsrecordedby'){
 									echo '<td><a href="occurrenceeditor.php?occid='.$occArr['occid'].'" target="_blank">'.$occArr['occid'].'</a></td>'."\n";
 									echo '<td><input name="dupid[]" type="checkbox" value="'.$occArr['catalognumber'].':'.$occArr['occid'].'" /></td>'."\n";
 									echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
+									echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
 									echo '<td>'.$occArr['sciname'].'</td>'."\n";
 									echo '<td>'.$occArr['recordedby'].'</td>'."\n";
 									echo '<td>'.$occArr['recordnumber'].'</td>'."\n";
@@ -246,6 +249,7 @@ elseif($action == 'listdupsrecordedby'){
 							<div style="margin:15px;">
 								<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 								<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" />
+								<input name="fn" type="hidden" value="<?php echo $function; ?>" />
 								<input name="action" type="submit" value="Merge Duplicate Records" />
 							</div>
 						</form>
@@ -269,7 +273,7 @@ elseif($action == 'listdupsrecordedby'){
 						<li>Done!</li>
 					</ul>
 					<div>
-						<a href="occurrencecleaner.php?action=listdups&collid=<?php echo $collId.'&obsuid='.$obsUid; ?>">Return to duplicate list</a><br/>
+						<a href="occurrencecleaner.php?action=<?php echo $function.'&collid='.$collId.'&obsuid='.$obsUid; ?>">Return to duplicate list</a><br/>
 					</div> 
 					<?php 
 				}

@@ -148,6 +148,7 @@ if($action == 'addtoqueue'){
 							foreach($rsArr as $psStr => $cnt){
 								echo '<div>';
 								echo '<b>'.$psStr.':</b> '.$cnt;
+								echo ' (<a href="controlpanel.php?action=review&pstatus=other&collid='.$collid.'">Review</a>)';
 								echo '</div>';
 							}
 							?>
@@ -194,7 +195,7 @@ if($action == 'addtoqueue'){
 										//User
 										$uid = $statsArr['uid'];
 										unset($statsArr['uid']);
-										echo '<td>< a href="'.$uid.'">'.$username.'</a></td>';
+										echo '<td><a href="'.$uid.'">'.$username.'</a></td>';
 										//Score
 										echo '<td>'.$statsArr['score'].'</td>';
 										unset($statsArr['score']);
@@ -203,7 +204,7 @@ if($action == 'addtoqueue'){
 										unset($statsArr['pending review']);
 										echo '<td>';
 										echo $pendingCnt;
-										if($pendingCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=pending&collid='.$collid.'&uid='.$statsArr['uid'].'">Review</a>)';
+										if($pendingCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=pending&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										//Other
 										$closeCnt = (isset($statsArr['reviewed'])?$statsArr['reviewed']:0);
@@ -218,7 +219,7 @@ if($action == 'addtoqueue'){
 										//Closed
 										echo '<td>';
 										echo $closeCnt;
-										if($closeCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=reveiwed&collid='.$collid.'&uid='.$statsArr['uid'].'">Review</a>)';
+										if($closeCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=reveiwed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										echo '</tr>';
 									}
