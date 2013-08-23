@@ -12,14 +12,14 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	//Parsing functions
 	public function parse($rawStr, $catNo) {
 		$results = array();
-		$rawStr = $this->fixString($rawStr, $catNo);
+		$rawStr = $this->fixString(str_replace("\t", " ", $rawStr), $catNo);
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
 		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 		//	$rawStr = utf8_decode($rawStr);
 		//}
 		$politicalConfigInfo = array();
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
-			$politicalConfigInfo = $this->getPoliticalConfigInfo($rawStr, "", $collid);
+			$politicalConfigInfo = $this->getPoliticalConfigInfo($rawStr);
 			if($politicalConfigInfo) {
 				$event_date = "";
 				$det_date = "";
@@ -9711,7 +9711,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		return $str;
 	}
 
-	private function fixString($str, $catNo) {
+	private function fixString($str, $catNo="") {
 		if($str) {
 			//$str = str_replace("/^?/", "", $str);
 			$needles = array("(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
