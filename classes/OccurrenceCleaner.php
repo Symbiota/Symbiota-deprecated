@@ -49,7 +49,7 @@ class OccurrenceCleaner {
 	}
 
 	public function getDuplicateCatalogNumber(){
-		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
+		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 			'o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.($this->obsUid?', observeruid ':''). 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
@@ -62,6 +62,7 @@ class OccurrenceCleaner {
 	}
 	
 	public function getDuplicateCollectorNumber($lastName = ''){
+		$retArr = array();
 		$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 			'FROM omoccurrences o INNER JOIN '. 
 			'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid '.
@@ -82,25 +83,24 @@ class OccurrenceCleaner {
 		
 		//Collection duplicate clusters
 		$occidArr = array();
+		$cnt = 0;
 		foreach($collArr as $ed => $arr1){
 			foreach($arr1 as $rn => $arr2){
 				foreach($arr2 as $ln => $dupArr){
 					if(count($dupArr) > 1){
-						foreach($dupArr as $id){
-							$occidArr[] = $id;
-						}
+						$sql = 'SELECT '.$cnt.' AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
+							'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, datelastmodified '. 
+							'FROM omoccurrences o '.
+							'WHERE occid IN('.implode(',',$dupArr).') ';
+						//echo $sql;
+						$retArr = array_merge($retArr,$this->getDuplicates($sql)); 
+						$cnt++;
+						if($cnt > 200) break 3; 
 					}
 				}
 			}
 		}
 					
-		$sql = 'SELECT o.occid, o.catalognumber, o.othercatalognumbers, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
-			'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, datelastmodified '. 
-			'FROM omoccurrences o '.
-			'WHERE occid IN('.implode(',',$occidArr).') '.
-			'ORDER BY eventdate, recordnumber, recordedby LIMIT 505';
-		//echo $sql;
-		$retArr = $this->getDuplicates($sql); 
 		
 		return $retArr;
 	}
@@ -110,7 +110,7 @@ class OccurrenceCleaner {
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_assoc()){
-			$retArr[$row['occid']] = array_change_key_case($row);
+			$retArr[$row['dupid']][$row['occid']] = array_change_key_case($row);
 		}
 		$rs->free();
 		return $retArr;
