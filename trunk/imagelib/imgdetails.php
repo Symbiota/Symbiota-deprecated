@@ -10,6 +10,7 @@ $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
 $imgManager = new ImageDetailManager($imgId,($action?'write':'readonly'));
 
 $isEditor = false;
+if($isAdmin || $imgArr["username"] == $paramsArr['un'] || !$imgArr["photographeruid"] || $symbUid == $imgArr["photographeruid"]){
 if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 	$isEditor = true;
 }
@@ -219,7 +220,7 @@ if($isEditor){
 							</form>
 							
 							<?php 
-							if($isAdmin || $imgArr["username"] == $paramsArr['un'] || !$imgArr["photographeruid"] || $symbUid == $imgArr["photographeruid"]){
+							if($isAdmin || $imgArr["username"] == $paramsArr['un'] || (!$imgArr["photographeruid"] && $symbUid == $imgArr["photographeruid"])){
 								?>
 								<form name="deleteform" action="imgdetails.php" method="post" target="_self" onsubmit="return window.confirm('Are you sure you want to delete this image? Note that the physical image will be deleted from the server if checkbox is selected.');">
 									<fieldset style="margin:5px 0px 5px 5px;">
