@@ -447,6 +447,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		if($fPos !== FALSE && $fPos < 9) $name = trim(substr($name, $fPos+1));
 		//echo "\nInput to isPossibleSciName2: ".$name."\n";
 		if(strlen($name) > 2 && !preg_match("/\\b(?:on|var\\.?|strain|subsp\\.?|ssp\\.?|f\\.)\\b/i", $name)) {
+			$name = str_replace("'", "", $name);
 			$sql = "SELECT * FROM taxa t WHERE t.sciName = '".$name."'";
 			if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
 			$pos = strpos($name, " ");
@@ -9721,6 +9722,8 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			if(preg_match($pat, $str, $patMatches)) $str = trim($patMatches[1]);
 			$str = str_replace($needles, $replacements, $str);
 			if($catNo) {
+				$str = str_replace("0".$catNo, "", $str);
+				$str = str_replace("O".$catNo, "", $str);
 				$str = str_replace($catNo, "", $str);
 				$firstChar = substr($catNo, 0, 1);
 				if(!is_numeric($firstChar)) {
@@ -9728,6 +9731,8 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 						$catNo = substr($catNo, 1);
 						$firstChar = substr($catNo, 0, 1);
 					}
+					$str = str_replace("0".$catNo, "", $str);
+					$str = str_replace("O".$catNo, "", $str);
 					$str = str_replace($catNo, "", $str);
 				}
 			}
