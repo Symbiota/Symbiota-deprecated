@@ -10,7 +10,6 @@ $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
 $imgManager = new ImageDetailManager($imgId,($action?'write':'readonly'));
 
 $isEditor = false;
-if($isAdmin || $imgArr["username"] == $paramsArr['un'] || !$imgArr["photographeruid"] || $symbUid == $imgArr["photographeruid"]){
 if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 	$isEditor = true;
 }
@@ -350,4 +349,3 @@ include($serverRoot.'/footer.php');
 ?>
 </body>
 </html>
-
