@@ -224,25 +224,27 @@ elseif($action == 'listdupsrecordedby'){
 								</tr>
 								<?php 
 								$setCnt = 0;
-								foreach($dupArr as $k => $occArr){
-									$setCnt++;
-									echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
-									echo '<td><a href="occurrenceeditor.php?occid='.$occArr['occid'].'" target="_blank">'.$occArr['occid'].'</a></td>'."\n";
-									echo '<td><input name="dupid[]" type="checkbox" value="'.$occArr['catalognumber'].':'.$occArr['occid'].'" /></td>'."\n";
-									echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
-									echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
-									echo '<td>'.$occArr['sciname'].'</td>'."\n";
-									echo '<td>'.$occArr['recordedby'].'</td>'."\n";
-									echo '<td>'.$occArr['recordnumber'].'</td>'."\n";
-									echo '<td>'.$occArr['associatedcollectors'].'</td>'."\n";
-									echo '<td>'.$occArr['eventdate'].'</td>'."\n";
-									echo '<td>'.$occArr['verbatimeventdate'].'</td>'."\n";
-									echo '<td>'.$occArr['country'].'</td>'."\n";
-									echo '<td>'.$occArr['stateprovince'].'</td>'."\n";
-									echo '<td>'.$occArr['county'].'</td>'."\n";
-									echo '<td>'.$occArr['locality'].'</td>'."\n";
-									echo '<td>'.$occArr['datelastmodified'].'</td>'."\n";
-									echo '</tr>';
+								foreach($dupArr as $dupId => $occArr){
+									foreach($occArr as $occId => $occArr){
+										$setCnt++;
+										echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
+										echo '<td><a href="occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a></td>'."\n";
+										echo '<td><input name="dupid[]" type="checkbox" value="'.$dupId.':'.$occId.'" /></td>'."\n";
+										echo '<td>'.$occArr['catalognumber'].'</td>'."\n";
+										echo '<td>'.$occArr['othercatalognumbers'].'</td>'."\n";
+										echo '<td>'.$occArr['sciname'].'</td>'."\n";
+										echo '<td>'.$occArr['recordedby'].'</td>'."\n";
+										echo '<td>'.$occArr['recordnumber'].'</td>'."\n";
+										echo '<td>'.$occArr['associatedcollectors'].'</td>'."\n";
+										echo '<td>'.$occArr['eventdate'].'</td>'."\n";
+										echo '<td>'.$occArr['verbatimeventdate'].'</td>'."\n";
+										echo '<td>'.$occArr['country'].'</td>'."\n";
+										echo '<td>'.$occArr['stateprovince'].'</td>'."\n";
+										echo '<td>'.$occArr['county'].'</td>'."\n";
+										echo '<td>'.$occArr['locality'].'</td>'."\n";
+										echo '<td>'.$occArr['datelastmodified'].'</td>'."\n";
+										echo '</tr>';
+									}
 								}
 								?>
 							</table>
