@@ -15,7 +15,7 @@ class PhotographerManager{
 	
 	public function getCollectionImageList(){
 		$retArr = array();
- 		$sql = 'SELECT o.collid, CONCAT(c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode)) as collname, COUNT(i.imgid) AS imgcnt '.
+ 		$sql = 'SELECT o.collid, CONCAT(c.collectionname, " (", CONCAT_WS("-",c.institutioncode,c.collectioncode),")") as collname, COUNT(i.imgid) AS imgcnt '.
 			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
  			'INNER JOIN omcollections c ON o.collid = c.collid '.
  			'WHERE c.colltype = "Preserved Specimens" '.

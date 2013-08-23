@@ -23,8 +23,8 @@ class ImageDetailManager{
 			$sql = "SELECT i.imgid, i.tid, i.url, i.thumbnailurl, i.originalurl, i.photographeruid, i.photographer, ".
 				"IFNULL(i.photographer,CONCAT_WS(' ',u.firstname,u.lastname)) AS photographerdisplay, ".
 				"i.caption, i.owner, i.sourceurl, i.copyright, i.locality, i.notes, i.occid, i.sortsequence, ".
-				"t.sciname, t.author, t.rankid, i.username ".
-				"FROM images i INNER JOIN taxa t ON i.tid = t.tid ".
+				"t.sciname, t.author, t.rankid ".
+				"FROM images i LEFT JOIN taxa t ON i.tid = t.tid ".
 				"LEFT JOIN users u ON i.photographeruid = u.uid ".
 				'WHERE (i.imgid = '.$this->imgId.')';
 			//echo "<div>$sql</div>";
