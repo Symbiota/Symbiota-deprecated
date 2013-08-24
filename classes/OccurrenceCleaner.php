@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 
 class OccurrenceCleaner {
 
@@ -100,8 +101,6 @@ class OccurrenceCleaner {
 				}
 			}
 		}
-					
-		
 		return $retArr;
 	}
 
@@ -120,7 +119,8 @@ class OccurrenceCleaner {
 		$dupArr = array();
 		foreach($occidArr as $v){
 			$vArr = explode(':',$v);
-			$dupArr[strtoupper($vArr[0])][] = $vArr[1];
+			$k = strtoupper(trim($vArr[0]));
+			if($k !== '') $dupArr[$k][] = $vArr[1];
 		}
 		foreach($dupArr as $catNum => $occArr){
 			if(count($occArr) > 1){
@@ -139,6 +139,7 @@ class OccurrenceCleaner {
 	}
 	
 	public function mergeRecords($targetOccid,$sourceOccid){
+		global $charset;
 		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
 		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
 		$status = true;
@@ -209,12 +210,11 @@ class OccurrenceCleaner {
 		$sql = 'UPDATE omsurveyoccurlink SET occid = '.$targetOccid.' WHERE occid = '.$sourceOccid;
 		$this->conn->query($sql);
 
-		//Delete source
-		$sql = 'DELETE FROM omoccurrences WHERE occid = '.$sourceOccid;
-		if(!$this->conn->query($sql)){
-			$status .= '<li><span style="color:red">ERROR:</span> unable to delete occurrence record #'.$sourceOccid.
-			': '.$this->conn->error.'</li>';
-		}
+		//Delete source record data through the Editor class so that record is properly archived
+		$editorManager = new OccurrenceEditorManager();
+		$status = $editorManager->deleteOccurrence($sourceOccid);
+		if(strpos($status,'ERROR') === 0) $status = '';
+		
 		return $status;
 	}
 
@@ -312,6 +312,22 @@ class OccurrenceCleaner {
 			}
 		}
 		return $name;
+	}
+
+	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
+		if($inCharset == $outCharset) return $inStr;
+		$retStr = $inStr;
+		if($inCharset == "latin" && $outCharset == 'utf8'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+				$retStr = utf8_encode($retStr);
+			}
+		}
+		elseif($inCharset == "utf8" && $outCharset == 'latin'){
+			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+				$retStr = utf8_decode($retStr);
+			}
+		}
+		return $retStr;
 	}
 
 	private function cleanInStr($str){

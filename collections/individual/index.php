@@ -850,57 +850,59 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
         else{
         	?>
         	<h2>Unable to locate occurrence record</h2>
-        	<div style="margin:20px">Checking archive...</div>
-        	<?php
-			ob_flush();
-			flush();
-			$archArr = $indManager->checkArchive();
-			if($archArr){
-				$dets = array();
-				$imgs = array();
-				if(isset($archArr['dets'])){
-					$dets = $archArr['dets'];
-					unset($archArr['dets']);
-				}
-				if(isset($archArr['imgs'])){
-					$imgs = $archArr['imgs'];
-					unset($archArr['imgs']);
-				}
-				echo '<table border="0">';
-				foreach($archArr as $f => $v){
-					echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
-				}
-				echo '<table>';
-				if($dets){
-					echo '<fieldset style="margin:20px;">';
-					echo '<legend>Determination History</legend>';
-					foreach($dets as $id => $dArr){
-						echo '<div><b>Determination #'.$id.'</b></div>';
-						echo '<table border="0">';
-						foreach($dArr as $f => $v){
-							echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+        	<div style="margin:20px">
+        		<div>Checking archive...</div>
+        		<div style="margin:10px">
+		        	<?php
+					ob_flush();
+					flush();
+					$rawArchArr = $indManager->checkArchive();
+					//print_r($rawArchArr);
+					if($rawArchArr && $rawArchArr['obj']){
+						$archArr = $rawArchArr['obj'];
+						if(isset($archArr['dateDeleted'])) echo '<div><b>Record deleted:</b> '.$archArr['dateDeleted'].'</div>';
+						if($rawArchArr['notes']) echo '<div style="margin-left:15px"><b>Notes: </b>'.$rawArchArr['notes'].'</div>';
+						$dets = array();
+						$imgs = array();
+						if(isset($archArr['dets'])){
+							$dets = $archArr['dets'];
+							unset($archArr['dets']);
 						}
-						echo '<table>';
-					}
-					echo '</fieldset>';
-				}
-				if($imgs){
-					echo '<fieldset style="margin:20px;">';
-					echo '<legend>Images</legend>';
-					foreach($imgs as $id => $iArr){
-						echo '<div><b>Image #'.$id.'</b></div>';
-						echo '<table border="0">';
-						foreach($iArr as $f => $v){
-							echo '<tr><td><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+						if(isset($archArr['imgs'])){
+							$imgs = $archArr['imgs'];
+							unset($archArr['imgs']);
 						}
-						echo '<table>';
+						echo '<table class="styledtable"><tr><th>Field</th><th>Value</th></tr>';
+						foreach($archArr as $f => $v){
+							echo '<tr><td style="width:175px;"><b>'.$f.'</b></td><td>'.$v.'</td></tr>';
+						}
+						if($dets){
+							foreach($dets as $id => $dArr){
+								echo '<tr><td><b>Determination #'.$id.'</b></td><td>';
+								foreach($dArr as $f => $v){
+									echo '<b>'.$f.'</b>: '.$v.'<br/>';
+								}
+								echo '</td></tr>';
+							}
+						}
+						if($imgs){
+							foreach($imgs as $id => $iArr){
+								echo '<tr><td><b>Image #'.$id.'</b></td><td>';
+								foreach($iArr as $f => $v){
+									echo '<b>'.$f.'</b>: '.$v.'<br/>';
+								}
+								echo '</td></tr>';
+							}
+						}
+						echo '</table>';
 					}
-					echo '</fieldset>';
-				}
-			}
-			else{
-				echo '<div>Unable to located record within archive</div>';
-			}
+					else{
+						echo 'Unable to located record within archive';
+					}
+					?>
+				</div>
+			</div>
+			<?php 
 		}
 		?>
 	</div>

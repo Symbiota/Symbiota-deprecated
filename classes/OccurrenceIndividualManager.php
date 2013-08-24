@@ -5,8 +5,8 @@ class OccurrenceIndividualManager {
 
 	private $conn;
 	private $occId;
-    private $collId;
-    private $dbpk;
+	private $collId;
+	private $dbpk;
 	private $occArr = array();
 	private $metadataArr = array();
 
@@ -39,16 +39,18 @@ class OccurrenceIndividualManager {
 	}
 	
 	private function setMetadata(){
-    	$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
-    		'publicedits, rights, rightsholder, accessrights, guidtarget '.
-			'FROM omcollections WHERE collid = '.$this->collId;
-		$rs = $this->conn->query($sql);
-    	if($rs){
-			$this->metadataArr = $rs->fetch_assoc();
-			$rs->free();
-    	}
-		else{
-			trigger_error('Unable to set collection metadata; '.$this->conn->error,E_USER_ERROR);
+		if($this->collId){
+			$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
+				'publicedits, rights, rightsholder, accessrights, guidtarget '.
+				'FROM omcollections WHERE collid = '.$this->collId;
+			$rs = $this->conn->query($sql);
+			if($rs){
+				$this->metadataArr = $rs->fetch_assoc();
+				$rs->free();
+			}
+			else{
+				trigger_error('Unable to set collection metadata; '.$this->conn->error,E_USER_ERROR);
+			}
 		}
 	}
 	
@@ -56,7 +58,7 @@ class OccurrenceIndividualManager {
 		return $this->metadataArr;
 	}
 
-    public function getOccData($fieldKey = ""){
+	public function getOccData($fieldKey = ""){
 		if(!$this->occArr) $this->setOccArr();
 		if($fieldKey){
 			if(array_key_exists($fieldKey,$this->occArr)){
@@ -65,16 +67,16 @@ class OccurrenceIndividualManager {
 			return;
 		}
 		return $this->occArr;
-    }
+	}
 
 	private function setOccArr(){
-    	$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
-    		'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
-    		'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
+		$sql = 'SELECT o.occid, collid, institutioncode AS secondaryinstcode, collectioncode AS secondarycollcode, '.
+			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
+			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, '.
 			'DATE_FORMAT(eventDate,"%d %M %Y") AS eventdate, DATE_FORMAT(MAKEDATE(YEAR(eventDate),enddayofyear),"%d %M %Y") AS eventdateend, '.
-    		'verbatimeventdate, country, stateprovince, county, locality, '.
-    		'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
+			'verbatimeventdate, country, stateprovince, county, locality, '.
+			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
@@ -90,48 +92,48 @@ class OccurrenceIndividualManager {
 			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
 		}
 
-		$result = $this->conn->query($sql);
-		if($result){
-			$this->occArr = $result->fetch_assoc();
-			if(!$this->occId) $this->occId = $this->occArr['occid'];
-			if(!$this->collId) $this->collId = $this->occArr['collid'];
-			$this->setMetadata();
-			//Set occurrenceId according to guidsource \
-			if($this->metadataArr['guidtarget'] == 'catalogNumber'){
-				$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
-			}
-			elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
-				$this->occArr['occurrenceid'] = $this->occArr['guid'];
-			}
-
-			if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
-				$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
-				'FROM omcollsecondary '.
-				'WHERE (collid = '.$this->occArr['collid'].')';
-				$rsSec = $this->conn->query($sqlSec);
-				if($r = $rsSec->fetch_object()){
-					$this->metadataArr['collectionname'] = $r->collectionname;
-					$this->metadataArr['homepage'] = $r->homepage;
-					$this->metadataArr['individualurl'] = $r->individualurl;
-					$this->metadataArr['contact'] = $r->contact;
-					$this->metadataArr['email'] = $r->email;
-					$this->metadataArr['icon'] = $r->icon;
+		if($result = $this->conn->query($sql)){
+			if($this->occArr = $result->fetch_assoc()){
+				if(!$this->occId) $this->occId = $this->occArr['occid'];
+				if(!$this->collId) $this->collId = $this->occArr['collid'];
+				$this->setMetadata();
+				//Set occurrenceId according to guidsource \
+				if($this->metadataArr['guidtarget'] == 'catalogNumber'){
+					$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
 				}
-				$rsSec->close();
+				elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
+					$this->occArr['occurrenceid'] = $this->occArr['guid'];
+				}
+	
+				if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
+					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
+					'FROM omcollsecondary '.
+					'WHERE (collid = '.$this->occArr['collid'].')';
+					$rsSec = $this->conn->query($sqlSec);
+					if($r = $rsSec->fetch_object()){
+						$this->metadataArr['collectionname'] = $r->collectionname;
+						$this->metadataArr['homepage'] = $r->homepage;
+						$this->metadataArr['individualurl'] = $r->individualurl;
+						$this->metadataArr['contact'] = $r->contact;
+						$this->metadataArr['email'] = $r->email;
+						$this->metadataArr['icon'] = $r->icon;
+					}
+					$rsSec->close();
+				}
+				$this->setImages();
+				$this->setDeterminations();
+				$this->setLoan();
+				$result->free();
 			}
-			$this->setImages();
-			$this->setDeterminations();
-			$this->setLoan();
-			$result->free();
 		}
 		else{
 			trigger_error('Unable to set occurrence array; '.$this->conn->error,E_USER_ERROR);
 		}
-    }
+	}
 
-    private function setImages(){
-    	global $imageDomain;
-        $sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
+	private function setImages(){
+		global $imageDomain;
+		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
 			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		if($result){
@@ -151,11 +153,11 @@ class OccurrenceIndividualManager {
 				$this->occArr['imgs'][$imgId]['caption'] = $row->caption;
 			}
 			$result->free();
-        }
-        else{
-        	trigger_error('Unable to set images; '.$this->conn->error,E_USER_WARNING);
-        }
-    }
+		}
+		else{
+			trigger_error('Unable to set images; '.$this->conn->error,E_USER_WARNING);
+		}
+	}
 
 	private function setDeterminations(){
 		$sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
@@ -182,12 +184,12 @@ class OccurrenceIndividualManager {
 	}
 
 	private function setLoan(){
-        $sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
+		$sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
 			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
 			'WHERE (llink.occid = '.$this->occId.') AND llink.returndate IS NULL';
-        $result = $this->conn->query($sql);
-        if($result){
+		$result = $this->conn->query($sql);
+		if($result){
 			while($row = $result->fetch_object()){
 				$this->occArr['loan']['identifier'] = $row->loanIdentifierOwn;
 				$this->occArr['loan']['code'] = $row->institutioncode;
@@ -243,7 +245,7 @@ class OccurrenceIndividualManager {
 		if(!$isEditor) $sql .= 'AND c.reviewstatus = 1 ';
 		$sql .= 'ORDER BY c.initialtimestamp';
 		//echo $sql.'<br/><br/>';
-        $result = $this->conn->query($sql);
+		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
 				$comId = $row->comid;
@@ -254,9 +256,9 @@ class OccurrenceIndividualManager {
 			}
 			$result->free();
 		}
-        else{
-        	trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
-        }
+		else{
+			trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
+		}
 		return $retArr;
 	}
 
@@ -285,7 +287,7 @@ class OccurrenceIndividualManager {
 			$sql = 'SELECT c.comment, u.username, c.initialtimestamp '.
 				'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
 				'WHERE c.comid = '.$repComId;
-	        $result = $this->conn->query($sql);
+			$result = $this->conn->query($sql);
 			if($result){
 				if($row = $result->fetch_object()){
 					$retArr['comment'] = $row->comment;
@@ -294,9 +296,9 @@ class OccurrenceIndividualManager {
 				}
 				$result->free();
 			}
-	        else{
-	        	trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
-	        }
+			else{
+				trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
+			}
 			//Set Review status to supress
 			$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId);
 			
@@ -334,10 +336,10 @@ class OccurrenceIndividualManager {
 					$retArr[$r->idoccurgenetic]['notes'] = $r->notes;
 				}
 				$result->free();
-	        }
-	        else{
-	        	trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
-	        }
+			}
+			else{
+				trigger_error('Unable to get genetic data; '.$this->conn->error,E_USER_WARNING);
+			}
 		}
 		return $retArr;
 	}
@@ -366,10 +368,10 @@ class OccurrenceIndividualManager {
 				$cnt++;
 			}
 			$result->free();
-        }
-        else{
-        	trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
-        }
+		}
+		else{
+			trigger_error('Unable to get edits; '.$this->conn->error,E_USER_WARNING);
+		}
 		return $retArr;
 	}
 	
@@ -385,10 +387,10 @@ class OccurrenceIndividualManager {
 				$returnArr[$row->clid] = $row->name;
 			}
 			$result->free();
-        }
-        else{
-        	trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
-        }
+		}
+		else{
+			trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+		}
 		return $returnArr;
 	}
 
@@ -405,14 +407,14 @@ class OccurrenceIndividualManager {
 				$returnArr[$row->clid] = $row->name;
 			}
 			$result->free();
-        }
-        else{
-        	trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
-        }
+		}
+		else{
+			trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
+		}
 		return $returnArr;
 	}
 
-	private function checkArchive(){
+	public function checkArchive(){
 		$retArr = array();
 		$sql = 'SELECT archiveobj, notes '.
 			'FROM guidoccurrences '.
@@ -420,14 +422,30 @@ class OccurrenceIndividualManager {
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			if($r = $rs->fetch_object()){
-				$retArr['obj'] = json_decode($r->archiveobj); 
+				$retArr['obj'] = json_decode($r->archiveobj,true); 
 				$retArr['notes'] = $r->notes;
 			}
 			$rs->free();
-        }
-        else{
-        	trigger_error('ERROR checking archive: '.$this->conn->error,E_USER_WARNING);
-        }
+		}
+		else{
+			trigger_error('ERROR checking archive: '.$this->conn->error,E_USER_WARNING);
+		}
+		if(!$retArr){
+			$sql = 'SELECT archiveobj, notes '.
+				'FROM guidoccurrences '.
+				'WHERE occid IS NULL AND archiveobj LIKE \'%"occid":"'.$this->occId.'"%\'';
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				if($r = $rs->fetch_object()){
+					$retArr['obj'] = json_decode($r->archiveobj,true); 
+					$retArr['notes'] = $r->notes;
+				}
+				$rs->free();
+			}
+			else{
+				trigger_error('ERROR checking archive (step2): '.$this->conn->error,E_USER_WARNING);
+			}
+		}
 		return $retArr;
 	}
 
