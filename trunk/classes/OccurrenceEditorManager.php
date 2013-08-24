@@ -672,7 +672,7 @@ class OccurrenceEditorManager {
 	}
 	
 	public function deleteOccurrence($delOccid){
-		global $charset;
+		global $charset, $userDisplayName;
 		$status = '';
 		if(is_numeric($delOccid)){
 			//Archive data, first grab occurrence data
@@ -725,6 +725,7 @@ class OccurrenceEditorManager {
 				$archiveArr['imgs'] = $imgArr;
 
 				//Archive complete occurrence record
+				$archiveArr['dateDeleted'] = date('r').' by '.$userDisplayName;
 				$archiveObj = json_encode($archiveArr);
 				$sqlArchive = 'UPDATE guidoccurrences '.
 				'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($this->encodeStrTargeted($archiveObj,'utf8',$charset)).'" '.
