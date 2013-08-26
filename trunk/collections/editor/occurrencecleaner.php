@@ -7,6 +7,7 @@ $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $function = array_key_exists('fn',$_REQUEST)?$_REQUEST['fn']:'';
+$start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
 
 if(!$symbUid){
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrencecleaner.php?'.$_SERVER['QUERY_STRING']);
@@ -31,12 +32,12 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 
 $dupArr = array();
 if($action == 'listdupscatalog'){
-	$dupArr = $cleanManager->getDuplicateCatalogNumber();
-	$function = 'listdupscatalog';
+	$dupArr = $cleanManager->getDuplicateCatalogNumber($start);
+	$function = $action;
 }
 elseif($action == 'listdupsrecordedby'){
-	$dupArr = $cleanManager->getDuplicateCollectorNumber();
-	$function = 'listdupsrecordedby';
+	$dupArr = $cleanManager->getDuplicateCollectorNumber($start);
+	$function = $action;
 }
 
 ?>
@@ -199,11 +200,19 @@ elseif($action == 'listdupsrecordedby'){
 				if($action == 'listdupscatalog' || $action == 'listdupsrecordedby'){
 					//Look for duplicate catalognumbers 
 					if($dupArr){
+						$limitCnt = 200;
 						$recCnt = count($dupArr);
+						if($function == 'listdupscatalog') $limitCnt = 500;
 						//Build table
 						?>
 						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
-							<div><b>Duplicate Record Count: <?php echo ($recCnt>500?'> 500':$recCnt); ?></b></div>
+							<?php 
+							if($recCnt > $limitCnt){
+								$href = 'occurrencecleaner.php?collid='.$collId.'&obsuid='.$obsUid.'&action='.$action.'&start='.($start+$limitCnt); 
+								echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limitCnt.' RECORDS &gt;&gt;</b></a></div>';
+							}
+							echo '<div><b>'.($start+1).' - '.($recCnt > $limitCnt?($limitCnt+$start):($recCnt+$start)).' Duplicate Clusters</b></div>';
+							?>
 							<table class="styledtable">
 								<tr>
 									<th style="width:40px;">ID</th>

@@ -49,20 +49,20 @@ class OccurrenceCleaner {
 		return $returnArr;
 	}
 
-	public function getDuplicateCatalogNumber(){
+	public function getDuplicateCatalogNumber($start){
 		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 			'o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.($this->obsUid?', observeruid ':''). 
 			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
 			'WHERE o.collid = '.$this->collId.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' '.
-			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT 505';
+			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT '.$start.', 505';
 		//echo $sql;
 		$retArr = $this->getDuplicates($sql); 
 
 		return $retArr;
 	}
 	
-	public function getDuplicateCollectorNumber($lastName = ''){
+	public function getDuplicateCollectorNumber($start){
 		$retArr = array();
 		$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 			'FROM omoccurrences o INNER JOIN '. 
@@ -89,14 +89,17 @@ class OccurrenceCleaner {
 			foreach($arr1 as $rn => $arr2){
 				foreach($arr2 as $ln => $dupArr){
 					if(count($dupArr) > 1){
-						$sql = 'SELECT '.$cnt.' AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
-							'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, datelastmodified '. 
-							'FROM omoccurrences o '.
-							'WHERE occid IN('.implode(',',$dupArr).') ';
-						//echo $sql;
-						$retArr = array_merge($retArr,$this->getDuplicates($sql)); 
+						//Skip records until start is reached 
+						if($cnt >= $start){
+							$sql = 'SELECT '.$cnt.' AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, '.
+								'o.associatedcollectors, o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, datelastmodified '. 
+								'FROM omoccurrences o '.
+								'WHERE occid IN('.implode(',',$dupArr).') ';
+							//echo $sql;
+							$retArr = array_merge($retArr,$this->getDuplicates($sql)); 
+						}
+						if($cnt > ($start+200)) break 3;
 						$cnt++;
-						if($cnt > 200) break 3; 
 					}
 				}
 			}
