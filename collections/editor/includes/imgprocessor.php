@@ -76,7 +76,7 @@
 								}
 								?>
 								<div id="tfdiv-<?php echo $imgCnt.'-'.$fragCnt; ?>" style="display:<?php echo $displayBlock; ?>;border:1px solid orange;">
-									<form name="tfeditform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
+									<form id="tfeditform-<?php echo $prlid; ?>" name="tfeditform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
 										<div>
 											<textarea name="rawtext" rows="20" cols="48" style="width:97%"><?php echo $rArr['raw']; ?></textarea>
 										</div>
@@ -95,7 +95,12 @@
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input name="submitaction" type="submit" value="Save OCR Edits" />
 											<?php 
-											if(isset($salixPath)) echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="salixText(this.form)" />'; 
+											if(isset($salixPath)){
+												echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="salixText(this.form)" /><br/>';
+											} 
+											if(isset($NLP_LBCC_ACTIVATED) && $NLP_LBCC_ACTIVATED){
+												echo '<input id="nlplbccbutton" name="nlplbccbutton" type="button" value="Parse OCR (LBCC)" onclick="nlpLbcc(this)" />';
+											}
 											?>
 										</div>
 									</form>

@@ -258,7 +258,6 @@ body{
 
 #localityDiv input{
 	width:				99%;
-	background-color:	lightyellow;
 }
 
 #localSecurityDiv{
@@ -273,7 +272,6 @@ body{
 
 #decimalLatitudeDiv input{
 	width:	88px;
-	background-color:lightyellow;
 }
 
 #decimalLongitudeDiv{
@@ -283,7 +281,6 @@ body{
 
 #decimalLongitudeDiv input{
 	width:	88px;
-	background-color:lightyellow;
 }
 
 #coordinateUncertaintyInMetersDiv{

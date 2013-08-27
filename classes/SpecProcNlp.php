@@ -13,7 +13,7 @@ class SpecProcNlp{
 	protected $catalogNumber;
 	protected $url;
 	protected $ocrSource;
-	private $printMode = 0;		//0 = database, 1 = report, 2 = csv
+	private $printMode = null;		//0 = database, 1 = report, 2 = csv
 	private $logErrors = 0; 
 	private $totalStats = array();
 	private $csvHeaderArr = array();
@@ -32,8 +32,6 @@ class SpecProcNlp{
 	}
 	
 	function __destruct(){
-		echo '<div>Processing finished</div>';
-		echo '<div style="margin-left:10px;">'.$this->totalStats['collmeta']['totalcnt'].' records processed</div>';
 		if($this->printMode == 1){
 			$this->printSummary();
 			$this->outToReport('Processing finished: '.date('Y-m-d h:i:s A')."\n\n");
@@ -59,7 +57,7 @@ class SpecProcNlp{
 			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records output to CSV');
 			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.csv">'.$this->outFilePath.'.csv</a></div>';
 		}
-		else{
+		elseif($this->printMode === 0){
 			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records processed and databased');
 		}
 		if($this->logFH){
@@ -67,6 +65,69 @@ class SpecProcNlp{
 			fclose($this->logFH);
 		}
 		if(!($this->conn === false)) $this->conn->close();
+	}
+
+	public function parseTextBlock($rawStr){
+		//Parse and return
+		$dwcArr = array_change_key_case($this->parse($rawStr));
+		if(array_key_exists('scientificname',$dwcArr) && !array_key_exists('sciname',$dwcArr)){
+			$dwcArr['sciname'] = $dwcArr['scientificname'];
+			unset($dwcArr['scientificname']);
+		}
+		foreach($dwcArr as $k => $v){
+			if($v){
+				//If is a latin character set, convert to UTF-8
+				if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$dwcArr[$k] = utf8_encode($v);
+					//$dwcArr[$k] = iconv("ISO-8859-1//TRANSLIT","UTF-8",$v);
+				}
+			}
+			else{
+				unset($dwcArr[$k]);
+			}
+		}
+		
+		/*
+		if(is_numeric($prlid)){
+			$rawStr = '';
+			//Get raw OCR string
+			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '. 
+				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid '.
+				'INNER JOIN omoccurrences o ON IFNULL(i.occid,r.occid) = o.occid '.
+				'WHERE (r.prlid = '.$prlid.')';
+			//echo $sql;
+			$cnt = 0;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->ocrSource = $r->source;
+				$this->url = $r->url;
+				$this->prlid = $r->prlid;
+				$this->occid = $r->occid;
+				$this->catalogNumber = $r->catalognumber;
+				$rawStr = $r->rawstr;
+			}
+			$rs->free();
+			//Parse and return
+			$dwcArr = array_change_key_case($this->parse($rawStr));
+			if(array_key_exists('scientificname',$dwcArr) && !array_key_exists('sciname',$dwcArr)){
+				$dwcArr['sciname'] = $dwcArr['scientificname'];
+				unset($dwcArr['scientificname']);
+			}
+			foreach($dwcArr as $k => $v){
+				if($v){
+					//If is a latin character set, convert to UTF-8
+					if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+						$dwcArr[$k] = utf8_encode($v);
+						//$dwcArr[$k] = iconv("ISO-8859-1//TRANSLIT","UTF-8",$v);
+					}
+				}
+				else{
+					unset($dwcArr[$k]);
+				}
+			}
+		}
+		*/
+		return json_encode($dwcArr);
 	}
 
 	public function batchProcess($collTarget, $source = 'abbyy'){
@@ -130,7 +191,77 @@ class SpecProcNlp{
 		}
 		$this->totalStats['collmeta']['totalcnt'] = $totalCnt;
 	}
-		
+
+	protected function parseRecordedBy(){
+		$lineArr = explode("\n",$this->rawText);
+		//Locate matching lines
+		foreach($lineArr as $line){
+			//Test for exsiccati title
+			if(isset($indicatorTerms['recordedBy'])){
+				foreach($indicatorTerms['recordedBy'] as $term){
+					if(stripos($line,$term)) $this->fragMatches['recordedBy'] = trim($line);
+				}
+			}
+			if(isset($pregMatchTerms['recordedBy'])){
+				foreach($pregMatchTerms['recordedBy'] as $pattern){
+					if(preg_match($pattern,$line,$m)){
+						if(count($m) > 1) $this->fragMatches['recordedBy'] = trim($m[1]);
+						else $this->fragMatches['recordedBy'] = $m[0];
+					}
+				}
+			}
+		}
+		//If no match, try digging deeper
+		if(!isset($this->fragMatches['recordedBy'])){
+			foreach($lineArr as $line){
+				if($nameTokens = str_word_count($line,1)){
+					$sql = '';
+					foreach($nameTodkens as $v){
+						$sql .= 'OR familyname = "'.str_replace('"','',$v).'" ';
+					}
+					$sql = 'SELECT recordedbyid FROM omcollectors WHERE '.substr($sql,2);
+					if($rs = $this->conn->query($sql)){
+						if($r = $rs->fetch_object()){
+							$this->fragMatches['recordedBy'] = trim($line);
+						}
+						$rs->free();
+					}
+				}
+			}
+		}
+		//And again a little deeper
+		if(!isset($this->fragMatches['recordedBy'])){
+			foreach($lineArr as $line){
+				if($nameTokens = str_word_count($line,1)){
+					$sql = '';
+					foreach($nameTodkens as $v){
+						$sql .= 'OR familyname SOUNDS LIKE "'.str_replace('"','',$v).'" ';
+					}
+					$sql = 'SELECT recordedbyid FROM omcollectors WHERE '.substr($sql,2);
+					if($rs = $this->conn->query($sql)){
+						if($r = $rs->fetch_object()){
+							$this->fragMatches['recordedBy'] = trim($line);
+						}
+						$rs->free();
+					}
+				}
+			}
+		}
+
+		//Look for possible occurrence matches
+		if(isset($this->fragMatches['recordedby'])){
+			if(array_key_exists('exsiccatiNumber',$this->fragMatches)){
+				$sql = '';
+				if($rs = $this->conn->query($sql)){
+					while($r = $rs->fetch_object()){
+						$this->occDupes[] = $r->occid;
+					}
+					$rs->free();
+				}
+			}
+		}
+	}
+
 	//Misc functions
 	protected function getPoliticalUnits($countrySeed = '', $stateSeed = '', $countySeed = '', $wildStr = ''){
 		$retArr = array();
@@ -241,7 +372,7 @@ class SpecProcNlp{
 		return (isset($retArr[$bestMatch])?$retArr[$bestMatch]:null);
 	}
 	
-	protected function formatDate($inStr){
+	private function formatDate($inStr){
 		$retDate = '';
 		$dateStr = trim($inStr);
 		if(!$dateStr) return;
