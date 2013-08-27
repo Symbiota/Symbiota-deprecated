@@ -1,4 +1,6 @@
 <?php
+include_once($serverRoot.'/classes/SpecProcNlp.php');
+
 class SpecProcNlpParserLBCC extends SpecProcNlp{
 
 	function __construct() {
@@ -10,9 +12,9 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 	}
 
 	//Parsing functions
-	public function parse($rawStr, $catNo) {
+	public function parse($rawStr) {
 		$results = array();
-		$rawStr = $this->fixString(str_replace("\t", " ", $rawStr), $catNo);
+		$rawStr = $this->fixString(str_replace("\t", " ", $rawStr));
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
 		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 		//	$rawStr = utf8_decode($rawStr);
@@ -9712,9 +9714,10 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		return $str;
 	}
 
-	private function fixString($str, $catNo="") {
+	private function fixString($str) {
 		if($str) {
 			//$str = str_replace("/^?/", "", $str);
+			$catNo = $this->catalogNumber;
 			$needles = array("(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
 			$replacements = array("(Fée)", "(Fée)", "A.", "A", "A.", "A", "A", "AK", " ", " W ", "W", "Müll.", ">", "<", "-", "", "&", "'", "\"", "W", " W.", " W.", "W.", "W", "W", "W", "", "\"", "é", "Ach.", "A.", "A","W","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
 			//$pat = "/\\A[\W_]+(.*)/s";
@@ -9731,8 +9734,6 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 						$catNo = substr($catNo, 1);
 						$firstChar = substr($catNo, 0, 1);
 					}
-					$str = str_replace("0".$catNo, "", $str);
-					$str = str_replace("O".$catNo, "", $str);
 					$str = str_replace($catNo, "", $str);
 				}
 			}
