@@ -294,8 +294,15 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						</div>
 						<div>
 							<b>Taxon:</b> 
-							<?php echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); ?>
-							<a href="../../taxa/index.php?taxon=<?php echo $occArr['tidinterpreted']; ?>"><i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?></a><br/>
+							<?php 
+							echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":""); 
+							?>
+							<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?>
+							<?php 
+							if($occArr['tidinterpreted']){
+								//echo ' <a href="../../taxa/index.php?taxon='.$occArr['tidinterpreted'].'" title="Open Species Profile Page"><img src="" /></a>';
+							?>
+							<br/>
 							<b>Family:</b> <?php echo $occArr['family']; ?>
 						</div>
 						<div>

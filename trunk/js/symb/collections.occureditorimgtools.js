@@ -1,3 +1,6 @@
+var imageCnt = 1;
+var ocrFragCnt = 1;
+
 function toggleImageTdOn(){
 	document.getElementById("imgProcOnSpan").style.display = "none";
 	document.getElementById("imgProcOffSpan").style.display = "block";
@@ -84,27 +87,20 @@ function ocrImage(ocrButton,imgCnt){
 	ocrXmlHttp.send(null);
 }
 
-function nlpText(imgCnt){
+function nlpLbcc(nlpButton){
 	nlpButton.disabled = true;
-	document.getElementById("workingcircle-"+imgCnt).style.display = "inline";
-	
-	var rawStr = document.getElementById("activeimg-"+imgCnt);
+	var f = nlpButton.form;
+	var rawOcr = f.rawtext.innerText;
+	if(!rawOcr) rawOcr = f.rawtext.textContent;
 
-	var xmlHttp = GetXmlHttpObject();
-	if(xmlHttp == null){
-		alert ("Your browser does not support AJAX!");
-		return false;
-	}
-	var url="rpc/nlptext.php?rawstr="+rawStr;
-	xmlHttp.onreadystatechange=function(){
-		if(xmlHttp.readyState==4 && xmlHttp.status==200){
-			var dcArr = xmlHttp.responseText;
-
-
-		}
-	};
-	xmlHttp.open("POST",url,true);
-	xmlHttp.send(null);
+	$.ajax({
+		type: "POST",
+		url: "rpc/nlplbcc.php",
+		data: { rawocr: rawOcr }
+	}).done(function( msg ) {
+		pushDwcArrToForm(msg);
+	});
+	nlpButton.disabled = false;
 }
 
 function salixText(f){
@@ -116,11 +112,37 @@ function salixText(f){
 		data: { textinput: f.rawtext.value, charset: csDefault },
 		dataType: json
 	}).done(function( msg ) {
-		var dwcArr = $.parseJSON(msg);
-		var ff = document.fullform;
-		if(dwcArr['recordedBy'] && !ff.recordedBy.value) ff.recordedBy.value = dwcArr['recordedBy'];
-		
+		pushDwcArrToForm(msg);
 	});
+}
+
+function pushDwcArrToForm(msg){
+	var dwcArr = $.parseJSON(msg);
+	var f = document.fullform;
+	var fieldsTransfer = "";
+	var fieldsSkip = "";
+	for(var k in dwcArr){
+		try{
+			var elem = f.elements[k];
+			if(k != "tidtoadd"){
+				if(elem && elem.value == "" && elem.disabled == false){
+					elem.value = dwcArr[k];
+					elem.style.backgroundColor = "lightgreen";
+					fieldsTransfer = fieldsTransfer + ", " + k;
+					fieldChanged(k);
+				}
+				else{
+					fieldsSkip = fieldsSkip + ", " + k;
+				}
+			}
+		}
+		catch(err){
+			//alert(err);
+		}
+	}
+	if(fieldsTransfer == "") fieldsTransfer = "none";
+	if(fieldsSkip == "") fieldsSkip = "none";
+	//alert("Field parsed: " + fieldsTransfer + "\nFields skipped: " + fieldsSkip);
 }
 
 function nextLabelProcessingImage(imgCnt){
@@ -133,6 +155,7 @@ function nextLabelProcessingImage(imgCnt){
 	imgObj.style.display = "block";
 	
 	initImageTool("activeimg-"+imgCnt);
+	imageCnt = imgCnt;
 	
 	return false;
 }
@@ -142,6 +165,7 @@ function nextRawText(imgCnt,fragCnt){
 	var fragObj = document.getElementById("tfdiv-"+imgCnt+"-"+fragCnt);
 	if(!fragObj) fragObj = document.getElementById("tfdiv-"+imgCnt+"-1");
 	fragObj.style.display = "block";
+	ocrFragCnt = fragCnt;
 	return false;
 }
 
