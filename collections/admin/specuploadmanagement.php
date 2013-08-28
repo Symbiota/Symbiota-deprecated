@@ -65,63 +65,55 @@ $duManager->readUploadParameters();
 		}
 		
 		function adjustParameterForm(){
-			//Show all
-			document.getElementById("platformDiv").style.display='block';
-			document.getElementById("serverDiv").style.display='block';
-			document.getElementById("portDiv").style.display='block';
-			document.getElementById("codeDiv").style.display='block';
-			document.getElementById("pathDiv").style.display='block';
-			document.getElementById("pkfieldDiv").style.display='block';
-			document.getElementById("usernameDiv").style.display='block';
-			document.getElementById("passwordDiv").style.display='block';
-			document.getElementById("schemanameDiv").style.display='block';
-			document.getElementById("cleanupspDiv").style.display='block';
-			document.getElementById("querystrDiv").style.display='block';
-			//Then close according to upload type selection
+			//Hide all
+			document.getElementById("platformDiv").style.display='none';
+			document.getElementById("serverDiv").style.display='none';
+			document.getElementById("portDiv").style.display='none';
+			document.getElementById("codeDiv").style.display='none';
+			document.getElementById("pathDiv").style.display='none';
+			document.getElementById("pkfieldDiv").style.display='none';
+			document.getElementById("usernameDiv").style.display='none';
+			document.getElementById("passwordDiv").style.display='none';
+			document.getElementById("schemanameDiv").style.display='none';
+			document.getElementById("cleanupspDiv").style.display='none';
+			document.getElementById("querystrDiv").style.display='none';
+			//Then open according to upload type selection
 			selValue = document.parameterform.uploadtype.value;
 			if(selValue == 1){ //Direct Upload
-				document.getElementById("codeDiv").style.display='none';
-				document.getElementById("pathDiv").style.display='none';
-				document.getElementById("pkfieldDiv").style.display='none';
+				document.getElementById("platformDiv").style.display='block';
+				document.getElementById("serverDiv").style.display='block';
+				document.getElementById("portDiv").style.display='block';
+				document.getElementById("usernameDiv").style.display='block';
+				document.getElementById("passwordDiv").style.display='block';
+				document.getElementById("schemanameDiv").style.display='block';
+				document.getElementById("cleanupspDiv").style.display='block';
+				document.getElementById("querystrDiv").style.display='block';
 			}
-			if(selValue == 2){ //DiGIR
-				document.getElementById("platformDiv").style.display='none';
-				document.getElementById("usernameDiv").style.display='none';
-				document.getElementById("passwordDiv").style.display='none';
+			else if(selValue == 2){ //DiGIR
+				document.getElementById("serverDiv").style.display='block';
+				document.getElementById("portDiv").style.display='block';
+				document.getElementById("codeDiv").style.display='block';
+				document.getElementById("pathDiv").style.display='block';
+				document.getElementById("pkfieldDiv").style.display='block';
+				document.getElementById("schemanameDiv").style.display='block';
+				document.getElementById("cleanupspDiv").style.display='block';
+				document.getElementById("querystrDiv").style.display='block';
 			}
-			if(selValue == 3){ //File Upload
-				document.getElementById("platformDiv").style.display='none';
-				document.getElementById("serverDiv").style.display='none';
-				document.getElementById("portDiv").style.display='none';
-				document.getElementById("codeDiv").style.display='none';
-				document.getElementById("pathDiv").style.display='none';
-				document.getElementById("pkfieldDiv").style.display='none';
-				document.getElementById("usernameDiv").style.display='none';
-				document.getElementById("passwordDiv").style.display='none';
-				document.getElementById("schemanameDiv").style.display='none';
-				document.getElementById("querystrDiv").style.display='none';
+			else if(selValue == 3){ //File Upload
+				document.getElementById("cleanupspDiv").style.display='block';
 			}
-			if(selValue == 4){ //Stored Procedure
-				document.getElementById("platformDiv").style.display='none';
-				document.getElementById("serverDiv").style.display='none';
-				document.getElementById("portDiv").style.display='none';
-				document.getElementById("codeDiv").style.display='none';
-				document.getElementById("pathDiv").style.display='none';
-				document.getElementById("pkfieldDiv").style.display='none';
-				document.getElementById("usernameDiv").style.display='none';
-				document.getElementById("passwordDiv").style.display='none';
-				document.getElementById("schemanameDiv").style.display='none';
+			else if(selValue == 4){ //Stored Procedure
+				document.getElementById("cleanupspDiv").style.display='block';
+				document.getElementById("querystrDiv").style.display='block';
 			}
-			if(selValue == 5){ //Script Upload
-				document.getElementById("platformDiv").style.display='none';
-				document.getElementById("serverDiv").style.display='none';
-				document.getElementById("portDiv").style.display='none';
-				document.getElementById("codeDiv").style.display='none';
-				document.getElementById("pathDiv").style.display='none';
-				document.getElementById("pkfieldDiv").style.display='none';
-				document.getElementById("usernameDiv").style.display='none';
-				document.getElementById("passwordDiv").style.display='none';
-				document.getElementById("schemanameDiv").style.display='none';
+			else if(selValue == 5){ //Script Upload
+				document.getElementById("cleanupspDiv").style.display='block';
+				document.getElementById("querystrDiv").style.display='block';
+			}
+			else if(selValue == 6){ //Darwin Core Archive Upload
+				document.getElementById("pathDiv").style.display='block';
+				document.getElementById("cleanupspDiv").style.display='block';
+				//document.getElementById("querystrDiv").style.display='none';
 			}
 		}
 	</script>
@@ -244,47 +236,47 @@ $duManager->readUploadParameters();
 								<b>Title:</b> 
 								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" />
 							</div>
-							<div id="platformDiv" style="">
+							<div id="platformDiv" style="display:none">
 								<b>Database Platform:</b> 
 								<input name="platform" type="text" value="<?php echo $duManager->getPlatform(); ?>" />
 							</div>
-							<div id="serverDiv" style="">
+							<div id="serverDiv" style="display:none">
 								<b>Server:</b> 
 								<input name="server" type="text" size="50" value="<?php echo $duManager->getServer(); ?>" style="width:400px;" />
 							</div>
-							<div id="portDiv" style="">
+							<div id="portDiv" style="display:none">
 								<b>Port:</b> 
 								<input name="port" type="text" value="<?php echo $duManager->getPort(); ?>" />
 							</div>
-							<div id="codeDiv" style="">
+							<div id="pathDiv" style="display:none">
+								<b>Path:</b> 
+								<input name="path" type="text" size="50" value="<?php echo $duManager->getDigirPath(); ?>" style="width:400px;" />
+							</div>
+							<div id="codeDiv" style="display:none">
 								<b>DiGIR Code:</b> 
 								<input name="code" type="text" value="<?php echo $duManager->getDigirCode(); ?>" />
 							</div>
-							<div id="pathDiv" style="">
-								<b>DiGIR Path:</b> 
-								<input name="path" type="text" size="50" value="<?php echo $duManager->getDigirPath(); ?>" style="width:400px;" />
-							</div>
-							<div id="pkfieldDiv" style="">
+							<div id="pkfieldDiv" style="display:none">
 								<b>DiGIR Primary Key Field:</b> 
 								<input name="pkfield" type="text" value="<?php echo $duManager->getDigirPKField(); ?>" />
 							</div>
-							<div id="usernameDiv" style="">
+							<div id="usernameDiv" style="display:none">
 								<b>Username:</b> 
 								<input name="username" type="text" value="<?php echo $duManager->getUsername(); ?>" />
 							</div>
-							<div id="passwordDiv" style="">
+							<div id="passwordDiv" style="display:none">
 								<b>Password:</b> 
 								<input name="password" type="text" value="<?php echo $duManager->getPassword(); ?>" />
 							</div>
-							<div id="schemanameDiv" style="">
+							<div id="schemanameDiv" style="display:none">
 								<b>Schema Name:</b> 
 								<input name="schemaname" type="text" size="65" value="<?php echo $duManager->getSchemaName(); ?>" />
 							</div>
-							<div id="cleanupspDiv" style="">
+							<div id="cleanupspDiv" style="display:none">
 								<b>Stored Procedure (clean/transfer):</b> 
 								<input name="cleanupsp" type="text" size="40" value="<?php echo $duManager->getStoredProcedure(); ?>" style="width:400px;" />
 							</div>
-							<div id="querystrDiv" style="">
+							<div id="querystrDiv" style="display:none">
 								<b>Query/Command String: </b><br/>
 								<textarea name="querystr" cols="75" rows="6" ><?php echo $duManager->getQueryStr(); ?></textarea>
 							</div>

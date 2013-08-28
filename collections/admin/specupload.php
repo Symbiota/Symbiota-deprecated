@@ -12,6 +12,7 @@ $collId = $_REQUEST["collid"];
 $uploadType = $_REQUEST["uploadtype"];
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$autoMap = array_key_exists("automap",$_POST)?$_POST["automap"]:false;
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
 $ulfnOverride = array_key_exists("ulfnoverride",$_REQUEST)?$_REQUEST["ulfnoverride"]:"";
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
@@ -42,6 +43,10 @@ elseif($uploadType == $DWCAUPLOAD){
 
 $duManager->setCollId($collId);
 $duManager->setUspid($uspid);
+
+if($action == 'Automap Fields'){
+	$autoMap = true;
+}
 
 $statusStr = '';
 $isEditor = 0;
@@ -246,11 +251,14 @@ $duManager->loadFieldMap();
 								</div>
 							</div>
 							<div style="margin:10px;">
-								<input type="submit" name="action" value="Analyze File" />
-								<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-								<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-								<input type="hidden" name="uploadtype" value="<?php echo $FILEUPLOAD;?>" />
-								<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
+								<?php 
+								if(!$uspid) echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
+								?>
+								<input name="action" type="submit" value="Analyze File" />
+								<input name="uspid" type="hidden" value="<?php echo $uspid;?>" />
+								<input name="collid" type="hidden" value="<?php echo $collId;?>" />
+								<input name="uploadtype" type="hidden" value="<?php echo $FILEUPLOAD;?>" />
+								<input name="MAX_FILE_SIZE" type="hidden" value="100000000" />
 							</div>
 							<div style="float:right;">
 								<a href="#" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
@@ -286,13 +294,13 @@ $duManager->loadFieldMap();
 			elseif($uploadType == $DWCAUPLOAD){
 				$duManager->analyzeUpload();
 				$metaArr = $duManager->getMetaArr();
-				//print_r($metaArr);
+				print_r($metaArr);
 				if(isset($metaArr['occur'])){
 					?>
 					<form name="initform" action="specupload.php" method="post" onsubmit="">
 						<fieldset style="width:95%;">
 							<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
-							<div style="margin:20px;">
+							<div style="margin:10px;">
 								<b>Source Unique Identifier / Primary Key (required): </b>
 								<?php
 								$dbpk = $duManager->getDbpk();
@@ -302,74 +310,118 @@ $duManager->loadFieldMap();
 									<option value="catalognumber" <?php if($dbpk == 'catalognumber') echo 'SELECTED'; ?>>catalogNumber</option>
 									<option value="occurrenceid" <?php if($dbpk == 'occurrenceid') echo 'SELECTED'; ?>>occurrenceId</option>
 								</select>
-								*The CoreId is the default primary key. Change ONLY if you are sure catalog number of occurrence id will server better as the primary specimen identifier 
+								<div style="margin-left:10px;">
+									*The CoreId is the default primary key. Change ONLY if you are sure that another field will better serve as the primary specimen identifier
+								</div> 
 								<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none";>
 									<input type="submit" name="action" value="Save Primary Key" />
 								</div>
-							</div>
-							<div>
-								<div>
-									<input name="importspec" value="1" type="checkbox" checked /> 
-									Import Specimen Records (<a href="#" onclick="toggle('dwcaSpec');return false;">view mapping</a>)
-								</div>
-								<fieldset id="dwcaSpec" style="display:none;">
-									<table border="1" cellpadding="2" style="border:1px solid black">
-										<tr>
-											<th>
-												Source Field
-											</th>
-											<th>
-												Target Field
-											</th>
-										</tr>
-										<?php 
-										$autoMap = ($action == 'Automap Fields'?true:false);
-										$duManager->echoFieldMapTable($autoMap); 
-										?>
-									</table>
+								<div style="margin:10px;">
 									<div>
-										* Mappings that are not yet saved are displayed in Yellow
+										<input name="importspec" value="1" type="checkbox" checked /> 
+										Import Occurrence Records (<a href="#" onclick="toggle('dwcaOccurDiv');return false;">view mapping</a>)
 									</div>
-									<div style="margin:10px;">
-										<input type="submit" name="action" value="Save Mapping" />
+									<div id="dwcaOccurDiv" style="display:none;margin:20px;">
+										<table class="styledtable">
+											<tr>
+												<th>
+													Source Field
+												</th>
+												<th>
+													Target Field
+												</th>
+											</tr>
+											<?php 
+											$duManager->echoOccurMapTable($autoMap); 
+											?>
+										</table>
+										<div>
+											* Mappings that are not yet saved are displayed in Yellow
+										</div>
+										<div style="margin:10px;">
+											<input type="submit" name="action" value="Save Mapping" />
+										</div>
 									</div>
-								</fieldset>
-								<div>
-									<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
-									Import Identification History 
-									<?php 
-									if(isset($metaArr['ident'])){
-										echo '(<a href="#" onclick="toggle(\'dwcaIdent\');return false;">view mapping</a>)';
-									}
-									else{
-										echo '(not present in DwC-Archive)';
-									}
-									?>
-									
-								</div>
-								<?php 
-								if(isset($metaArr['ident'])){
-									?>
-									<div id="dwcaDetDiv" style="display:none;">
+									<div>
+										<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
+										Import Identification History 
+										<?php 
+										if(isset($metaArr['ident'])){
+											echo '(<a href="#" onclick="toggle(\'dwcaIdentDiv\');return false;">view mapping</a>)';
+											?>
+											<div id="dwcaIdentDiv" style="display:none;margin:20px;">
+												<table class="styledtable">
+													<tr>
+														<th>
+															Source Field
+														</th>
+														<th>
+															Target Field
+														</th>
+													</tr>
+													<?php 
+													$duManager->echoIdentMapTable($autoMap); 
+													?>
+												</table>
+												<div>
+													* Mappings that are not yet saved are displayed in Yellow
+												</div>
+												<div style="margin:10px;">
+													<input type="submit" name="action" value="Save Mapping" />
+												</div>
+											</div>
+											<?php 
+										}
+										else{
+											echo '(not present in DwC-Archive)';
+										}
+										?>
 										
 									</div>
-									<?php 
-								}
-								if(isset($metaArr['image'])){
-									?>
-									<div id="dwcaImgDiv" style="display:none;">
-										
+									<div>
+										<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])?'checked':'disabled') ?> /> 
+										Import Images 
+										<?php 
+										if(isset($metaArr['image'])){
+											echo '(<a href="#" onclick="toggle(\'dwcaImgDiv\');return false;">view mapping</a>)';
+											?>
+											<div id="dwcaImgDiv" style="display:none;margin:20px;">
+												<table class="styledtable">
+													<tr>
+														<th>
+															Source Field
+														</th>
+														<th>
+															Target Field
+														</th>
+													</tr>
+													<?php 
+													$duManager->echoImageMapTable($autoMap); 
+													?>
+												</table>
+												<div>
+													* Mappings that are not yet saved are displayed in Yellow
+												</div>
+												<div style="margin:10px;">
+													<input type="submit" name="action" value="Save Mapping" />
+												</div>
+												
+											</div>
+											<?php 
+										}
+										else{
+											echo '(not present in DwC-Archive)';
+										}
+										?>
 									</div>
-									<?php
-								}
-								?>
-								<div>
-									<div style="margin:10px;">
-										<input type="submit" name="action" value="Start Upload" />
-										<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-										<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-										<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-										<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
+									<div>
+										<div style="margin:10px;">
+											<input type="submit" name="action" value="Start Upload" />
+											<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+											<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+											<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+											<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
+										</div>
 									</div>
 								</div>
 							</div>
@@ -424,7 +476,6 @@ $duManager->loadFieldMap();
 										</th>
 									</tr>
 									<?php 
-									$autoMap = ($action == 'Automap Fields'?true:false);
 									$duManager->echoFieldMapTable($autoMap); 
 									?>
 								</table>
@@ -432,9 +483,15 @@ $duManager->loadFieldMap();
 									* Mappings that are not yet saved are displayed in Yellow
 								</div>
 								<div style="margin:10px;">
-									<input type="submit" name="action" value="Delete Field Mapping" />
+									<?php 
+									if($uspid){
+										?>
+										<input type="submit" name="action" value="Delete Field Mapping" />
+										<?php 
+									}
+									?>
+									<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
 									<input type="submit" name="action" value="Automap Fields" />
-									<input type="submit" name="action" value="Save Mapping" />
 								</div>
 								<hr />
 								<div id="uldiv">

@@ -288,11 +288,17 @@ if($collId) $collData = $collManager->getCollectionData();
 									Import/Update Specimen Records
 								</a>
 							</li>
-							<li style="margin-left:10px;">
-								<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collId; ?>">
-									Quick File Upload
-								</a>
-							</li>
+							<?php
+							if($collData['managementtype'] == 'Live Data'){ 
+								?>
+								<li style="margin-left:10px;">
+									<a href="../admin/specupload.php?uploadtype=3&collid=<?php echo $collId; ?>">
+										Quick File Upload
+									</a>
+								</li>
+								<?php 
+							}
+							?>
 							<li>
 								<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
 									Batch Load Specimen Images
