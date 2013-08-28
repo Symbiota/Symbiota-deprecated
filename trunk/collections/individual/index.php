@@ -65,10 +65,11 @@ $dupeArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 $editArr = ($isEditor?$indManager->getEditArr():null);
 ?>
+<!DOCTYPE html >
 <html>
 <head>
 	<title><?php echo $defaultTitle; ?> Detailed Collection Record Information</title>
-	<meta charset="<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
 	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
@@ -301,6 +302,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							<?php 
 							if($occArr['tidinterpreted']){
 								//echo ' <a href="../../taxa/index.php?taxon='.$occArr['tidinterpreted'].'" title="Open Species Profile Page"><img src="" /></a>';
+							}
 							?>
 							<br/>
 							<b>Family:</b> <?php echo $occArr['family']; ?>
@@ -736,7 +738,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						</div>
 					</div>
 					<?php
-				} 
+				}
 				?>
 				<div id="commenttab">
 					<?php 
@@ -918,4 +920,3 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 	?>
 </body>
 </html> 
-
