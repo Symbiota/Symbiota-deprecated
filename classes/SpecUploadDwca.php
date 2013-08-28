@@ -320,7 +320,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			}
 			echo "</select></td>\n";
 			echo "</tr>\n";
-		
+		}
 		
 	}
 
