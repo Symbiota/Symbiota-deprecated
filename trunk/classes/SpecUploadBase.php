@@ -33,56 +33,64 @@ class SpecUploadBase extends SpecUpload{
 		$this->fieldMap = $fm;
 	}
 
-	public function loadFieldMap(){
-		if($this->uspid){
-			//Get Field Map for $fieldMap
-			if(!$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
-				$sql = 'SELECT usm.sourcefield, usm.symbspecfield FROM uploadspecmap usm '.
-					'WHERE (usm.uspid = '.$this->uspid.')';
-				//echo $sql;
-				$rs = $this->conn->query($sql);
-				while($row = $rs->fetch_object()){
-					$sourceField = $row->sourcefield;
-					$symbField = $row->symbspecfield;
-					$this->fieldMap[$symbField]["field"] = $sourceField;
-				}
-				$rs->close();
-			}
+	public function getFieldMap(){
+		return $this->fieldMap;
+	}
 
-			//Get uploadspectemp metadata
-			$sql = "SHOW COLUMNS FROM uploadspectemp";
+	public function getDbpk(){
+		$dbpk = '';
+		if(array_key_exists('dbpk',$this->fieldMap)){
+			$dbpk = $this->fieldMap['dbpk']['field'];
+		}
+		return $dbpk;
+	}
+	
+	public function loadFieldMap(){
+		//Get Field Map for $fieldMap
+		if($this->uspid && !$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
+			$sql = 'SELECT usm.sourcefield, usm.symbspecfield FROM uploadspecmap usm '.
+				'WHERE (usm.uspid = '.$this->uspid.')';
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				$field = strtolower($row->Field);
-				if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
-					if($this->uploadType == $this->DIGIRUPLOAD){
-						$this->fieldMap[$field]["field"] = $field;
-					} 
-					$type = $row->Type;
-					$this->symbFields[] = $field;
-					if(array_key_exists($field,$this->fieldMap)){
-						if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
-							$this->fieldMap[$field]["type"] = "numeric";
-						}
-						elseif(strpos($type,"date") !== false){
-							$this->fieldMap[$field]["type"] = "date";
-						}
-						else{
-							$this->fieldMap[$field]["type"] = "string";
-							if(preg_match('/\(\d+\)$/', $type, $matches)){
-								$this->fieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
-							}
+				$sourceField = $row->sourcefield;
+				$symbField = $row->symbspecfield;
+				$this->fieldMap[$symbField]["field"] = $sourceField;
+			}
+			$rs->close();
+		}
+
+		//Get uploadspectemp metadata
+		$sql = "SHOW COLUMNS FROM uploadspectemp";
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$field = strtolower($row->Field);
+			if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
+				if($this->uploadType == $this->DIGIRUPLOAD){
+					$this->fieldMap[$field]["field"] = $field;
+				} 
+				$type = $row->Type;
+				$this->symbFields[] = $field;
+				if(array_key_exists($field,$this->fieldMap)){
+					if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+						$this->fieldMap[$field]["type"] = "numeric";
+					}
+					elseif(strpos($type,"date") !== false){
+						$this->fieldMap[$field]["type"] = "date";
+					}
+					else{
+						$this->fieldMap[$field]["type"] = "string";
+						if(preg_match('/\(\d+\)$/', $type, $matches)){
+							$this->fieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
 						}
 					}
 				}
 			}
-	
-			$rs->close();
 		}
+		$rs->close();
 	}
 
-	public function echoFieldMapTable($autoMap = false){
-		if(!$this->uspid) $autoMap = true;
+	public function echoFieldMapTable($autoMap){
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
 		foreach($this->fieldMap as $symbField => $fArr){
@@ -161,16 +169,18 @@ class SpecUploadBase extends SpecUpload{
 
 	public function saveFieldMap(){
 		$statusStr = '';
-		$this->deleteFieldMap();
-		$sqlInsert = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
-		$sqlValues = "VALUES (".$this->uspid;
-		foreach($this->fieldMap as $k => $v){
-			if($k != "dbpk"){
-				$sourceField = $v["field"];
-				$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
-				//echo "<div>".$sql."</div>";
-				if(!$this->conn->query($sql)){
-					$statusStr = 'ERROR saving field map: '.$this->conn->error;
+		if($this->uspid){
+			$this->deleteFieldMap();
+			$sqlInsert = "REPLACE INTO uploadspecmap(uspid,symbspecfield,sourcefield) ";
+			$sqlValues = "VALUES (".$this->uspid;
+			foreach($this->fieldMap as $k => $v){
+				if($k != "dbpk"){
+					$sourceField = $v["field"];
+					$sql = $sqlInsert.$sqlValues.",'".$k."','".$sourceField."')";
+					//echo "<div>".$sql."</div>";
+					if(!$this->conn->query($sql)){
+						$statusStr = 'ERROR saving field map: '.$this->conn->error;
+					}
 				}
 			}
 		}
@@ -179,10 +189,12 @@ class SpecUploadBase extends SpecUpload{
 
 	public function deleteFieldMap(){
 		$statusStr = '';
-		$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield <> 'dbpk' ";
-		//echo "<div>$sql</div>";
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR deleting field map: '.$this->conn->error;
+		if($this->uspid){
+			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") AND symbspecfield <> 'dbpk' ";
+			//echo "<div>$sql</div>";
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR deleting field map: '.$this->conn->error;
+			}
 		}
 		return $statusStr;
 	}
@@ -1163,18 +1175,6 @@ class SpecUploadBase extends SpecUpload{
 		}
 	}
 
-	public function getFieldMap(){
-		return $this->fieldMap;
-	}
-
-	public function getDbpk(){
-		$dbpk = '';
-		if(array_key_exists('dbpk',$this->fieldMap)){
-			$dbpk = $this->fieldMap['dbpk']['field'];
-		}
-		return $dbpk;
-	}
-	
 	public function getTransferCount(){
 		return $this->transferCount;
 	}

@@ -44,7 +44,8 @@ class SpecUploadDwca extends SpecUploadBase{
 	private function unpackArchive(){
 		//Extract archive
 		$zip = new ZipArchive;
-		$zip->open($this->uploadTargetPath.$this->baseFolderName.'/dwca.zip');
+		$targetPath = $this->uploadTargetPath.$this->baseFolderName;
+		$zip->open($targetPath.'/dwca.zip');
 		$zip->extractTo($targetPath);
 		$zip->close();
 	}
@@ -94,7 +95,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 			}
 			if($this->metaArr){
-				$extensionElements = $metaDoc->getElementsByTagName('extensions');
+				$extensionElements = $metaDoc->getElementsByTagName('extension');
 				foreach($extensionElements as $extensionElement){
 					$rowType = $extensionElement->getAttribute('rowType');
 					$extCoreId = '';
@@ -234,6 +235,103 @@ class SpecUploadDwca extends SpecUploadBase{
 			if($record) $recordArr = explode($this->delimiter,$record);
 		}
 		return $recordArr;
+	}
+	
+	public function echoOccurMapTable($autoMap){
+		$sourceArr = $this->metaArr['occur']['fields'];
+		foreach($sourceArr as $k => $fieldName){
+			echo "<tr>\n";
+			echo "<td style='padding:2px;'>";
+			echo $fieldName;
+			echo "<input type='hidden' name='sf[]' value='".$k."' />";
+			echo "</td>\n";
+			echo "<td>\n";
+			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+			echo "<option value=''>Select Target Field</option>\n";
+			echo "<option value=''>Leave Field Unmapped</option>\n";
+			echo "<option value=''>-------------------------</option>\n";
+			if($isAutoMapped){
+				//Source Field = Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".(strtolower($tranlatedFieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			elseif(array_key_exists($fieldName,$sourceSymbArr)){
+				//Source Field is mapped to Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			else{
+				foreach($this->symbFields as $sField){
+					echo "<option>".$sField."</option>\n";
+				}
+			}
+			echo "</select></td>\n";
+			echo "</tr>\n";
+			
+		}
+		
+		//Build a Source => Symbiota field Map
+		$sourceSymbArr = Array();
+		foreach($this->fieldMap as $symbField => $fArr){
+			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
+		}
+
+		//Output table rows for source data
+		sort($this->symbFields);
+		$autoMapArr = Array();
+		foreach($this->sourceArr as $fieldName){
+			$isAutoMapped = false;
+			$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
+			if($autoMap){
+				if(array_key_exists($tranlatedFieldName,$this->translationMap)) $tranlatedFieldName = $this->translationMap[$tranlatedFieldName];
+				if(in_array($tranlatedFieldName,$this->symbFields)){
+					$isAutoMapped = true;
+					$autoMapArr[$tranlatedFieldName] = $fieldName;
+				}
+			}
+			echo "<tr>\n";
+			echo "<td style='padding:2px;'>";
+			echo $fieldName;
+			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
+			echo "</td>\n";
+			echo "<td>\n";
+			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+			echo "<option value=''>Select Target Field</option>\n";
+			echo "<option value=''>Leave Field Unmapped</option>\n";
+			echo "<option value=''>-------------------------</option>\n";
+			if($isAutoMapped){
+				//Source Field = Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".(strtolower($tranlatedFieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			elseif(array_key_exists($fieldName,$sourceSymbArr)){
+				//Source Field is mapped to Symbiota Field
+				foreach($this->symbFields as $sField){
+					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
+			else{
+				foreach($this->symbFields as $sField){
+					echo "<option>".$sField."</option>\n";
+				}
+			}
+			echo "</select></td>\n";
+			echo "</tr>\n";
+		
+		
+	}
+
+	public function echoIdentMapTable($autoMap){
+		
+		
+	}
+
+	public function echoImageMapTable($autoMap){
+		
+		
 	}
 
 	public function setBaseFolderName($name){
