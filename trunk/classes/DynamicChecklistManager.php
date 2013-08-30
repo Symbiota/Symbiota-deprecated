@@ -1,8 +1,4 @@
 <?php
-/*
- * Built 20 Oct 2010
- * E.E. Gilbert
- */
 include_once($serverRoot.'/config/dbconnection.php');
 
 class DynamicChecklistManager {
@@ -17,16 +13,62 @@ class DynamicChecklistManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function createChecklist($lat, $lng, $radius, $tid){
-		global $uid;
-		//set_time_limit(120);
-		$sql = "Call DynamicChecklist(".$lat.",".$lng.",".$radius.",".$tid.",".($uid?$uid:"NULL").")";
+	public function createChecklist($lat, $lng, $radius, $radiusUnits, $tidFilter){
+		global $symbUid;
+		
+		if($radiusUnits == "mi") $radius = round($radius*1.6);
+		$dynPk = 0;
+		//Create checklist
+		$sql = 'INSERT INTO fmdynamicchecklists(name,details,expiration,uid) '.
+			'VALUES ("'.$lat.' '.$lng.' within '.$radius.' kilometers","'.$lat.' '.$lng.' within '.$radius.' kilometers","'.
+			date('Y-m-d',mktime(0, 0, 0, date('m'), date('d') + 7, date('Y'))).'",'.($symbUid?$symbUid:'NULL').')';
 		//echo $sql;
-		$result = $this->conn->query($sql);
-		if($row = $result->fetch_row()){
-			$dynPk = $row[0];
+		if($this->conn->query($sql)){
+			$dynPk = $this->conn->insert_id;
+			//Add species to checklist
+			$latRadius = $radius / 111;
+			$lngRadius = cos($lat / 57.3)*($radius / 111);
+			$lat1 = $lat - $latRadius;
+			$lat2 = $lat + $latRadius;
+			$lng1 = $lng - $lngRadius;
+			$lng2 = $lng + $lngRadius;
+
+			$sql = 'SELECT count(o.tid) AS speccnt FROM omoccurgeoindex o '.
+				'WHERE (o.DecimalLatitude BETWEEN lat1 AND lat2) AND (o.DecimalLongitude BETWEEN lng1 AND lng2)';
+			$this->conn->query($sql);
+			
+			$sql = 'INSERT INTO fmdyncltaxalink (dynclid, tid) '.
+				'SELECT DISTINCT '.$dynPk.' AS dynpk, IF(t.rankid=220,t.tid,ts2.parenttid) as tid '.
+				'FROM ((omoccurgeoindex o INNER JOIN taxstatus ts ON o.tid = ts.tid) '.
+				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid) '.
+				'INNER JOIN taxa t ON ts2.tid = t.tid '.
+				'WHERE (t.rankid >= 220) AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) '.
+				'AND (o.DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (o.DecimalLongitude BETWEEN '.$lng1.' AND '.$lng2.') ';
+			if($tidFilter){
+				$sql .= 'AND (ts2.hierarchystr LIKE CONCAT("%,",'.$tidFilter.',",%")) ';
+			}
+			$this->conn->query($sql);
 		}
-		$result->close();
+
+		return $dynPk;
+	}
+	
+	public function createDynamicChecklist($lat, $lng, $dynamicRadius, $tid){
+		global $symbUid;
+		$dynPk = 0;
+		//set_time_limit(120);
+		$sql = "Call DynamicChecklist(".$lat.",".$lng.",".$dynamicRadius.",".$tid.",".($symbUid?$symbUid:"NULL").")";
+		//echo $sql;
+		if($result = $this->conn->query($sql)){
+			if($row = $result->fetch_row()){
+				$dynPk = $row[0];
+			}
+			$result->close();
+		}
+		else{
+			echo 'ERROR building checklist: DynamicChecklist Stored Procedure is probablhy not defined ';
+			exit;
+		}
 		return $dynPk;
 	}
 	
@@ -39,6 +81,16 @@ class DynamicChecklistManager {
 		}
 		return $retArr;
 	}
+	
+	public function removeOldChecklists(){
+		//Remove any old checklists
+		$sql1 = 'DELETE dcl.* '.
+			'FROM fmdyncltaxalink dcl INNER JOIN fmdynamicchecklists dc ON dcl.dynclid = dc.dynclid '.
+			'WHERE dc.expiration < NOW()';
+		$this->conn->query($sql1);
+		$sql2 = 'DELETE FROM fmdynamicchecklists WHERE expiration < NOW()';
+		$this->conn->query($sql2);
+	} 
 
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
