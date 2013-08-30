@@ -25,8 +25,14 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			if($politicalConfigInfo) {
 				$event_date = "";
 				$det_date = "";
-				if(array_key_exists('event_date', $politicalConfigInfo)) $event_date = $this->formatDate($politicalConfigInfo['event_date']);
-				if(array_key_exists('date_identified', $politicalConfigInfo)) $det_date = $this->formatDate($politicalConfigInfo['date_identified']);
+				if(array_key_exists('event_date', $politicalConfigInfo)) {
+					$event_date = $this->formatDate($politicalConfigInfo['event_date']);
+					unset($politicalConfigInfo['event_date']);
+				}
+				if(array_key_exists('date_identified', $politicalConfigInfo)) {
+					$det_date = $this->formatDate($politicalConfigInfo['date_identified']);
+					unset($politicalConfigInfo['date_identified']);
+				}
 				if(strlen($event_date) == 0) {
 					$months = "Jan(?:\\.|(?:uary))?|Feb(?:\\.|(?:ruary))?|Mar(?:\\.|(?:ch))?|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]?|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 					$dates = $this->getDates($rawStr, $months);
