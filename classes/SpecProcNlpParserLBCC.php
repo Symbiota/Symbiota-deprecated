@@ -37,7 +37,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 					$months = "Jan(?:\\.|(?:uary))?|Feb(?:\\.|(?:ruary))?|Mar(?:\\.|(?:ch))?|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]?|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 					$dates = $this->getDates($rawStr, $months);
 					$event_date = $this->formatDate($this->min_date($dates));
-					if(strlen($det_date) == 0 && count($dates) > 1) $det_date = $this->max_date($dates);
+					if(strlen($det_date) == 0 && count($dates) > 1) $det_date = $this->formatDate($this->max_date($dates));
 				}
 				$results['eventDate'] = $event_date;
 				$results['dateIdentified'] = $det_date;
