@@ -41,7 +41,7 @@ $(document).ready(function() {
 			fieldChanged('sciname');
 		}
 	},
-	{ minLength: 3, autoFocus: true });
+	{ minLength: 3 });
 
 	$("#ffexstitle").autocomplete({ 
 		source: "rpc/getexstitlesuggest.php"
