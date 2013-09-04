@@ -295,7 +295,8 @@ class CollectionProfileManager {
 			$conn->query($sql);
 			//Add collection to catagory
 			if(isset($_POST['ccpk'])){
-				if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collId.')')){
+				$sql = 'INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$cid.')';
+				if(!$conn->query($sql)){
 					$status = 'ERROR inserting collection catagory: '.$conn->error;
 					return $status;
 				}
