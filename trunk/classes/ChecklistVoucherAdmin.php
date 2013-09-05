@@ -441,8 +441,10 @@ class ChecklistVoucherAdmin {
 			//Set SQL
 			$sql = 'SELECT DISTINCT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ';
 			if($includeDetails){
-				$sql .= 'ctl.habitat, ctl.abundance, ctl.notes, ctl.source, v.editornotes, o.occid, o.catalognumber, o.sciname AS specsciname, '.
-					'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.locality, o.localitysecurity, o.collid ';
+				$sql .= 'ctl.habitat, ctl.abundance, ctl.notes, ctl.source, v.editornotes, o.occid, o.catalognumber, o.othercatalognumbers, o.sciname AS specsciname, '.
+					'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.year, o.month, o.day, o.verbatimeventdate, o.country, o.stateprovince, o.county, '.
+					'o.locality, o.localitysecurity, o.collid, o.habitat AS spechabitat, o.occurrenceremarks, o.associatedtaxa, o.dynamicproperties, o.reproductivecondition, o.decimallatitude, '.
+					'o.decimallongitude, o.geodeticdatum, o.minimumelevationinmeters, o.maximumelevationinmeters, o.verbatimelevation, o.labelproject ';
 			}
 			$sql .= 'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid ';
@@ -451,7 +453,7 @@ class ChecklistVoucherAdmin {
 			//Set header
 			$headerArr = array('tid','family','scientificName','scientificNameAuthorship');
 			if($includeDetails){
-				$headerArr = array_merge($headerArr, array('habitat','abundance','notes','source','editornotes','occid','catalognumber','specimenSciname','collector','collectorNumber','collectionDate','country','stateProvince','county','locality')); 
+				$headerArr = array_merge($headerArr, array('habitat','abundance','notes','source','editornotes','occid','catalognumber','othercatalognumbers','specimenSciname','collector','collectorNumber','associatedCollectors','collectionDate','year','month','day','verbatimEventDate','country','stateProvince','county','locality','specHabitat','occurrenceRemarks','associatedTaxa','dynamicProperties','reproductiveCondition','decimalLatitude','decimalLongitude','geodeticDatum','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation','labelProject')); 
 			}
 			//Output file
 			$fileName = $this->clName."_".time().".csv";
