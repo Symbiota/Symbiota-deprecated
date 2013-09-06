@@ -61,6 +61,10 @@ $duManager->readUploadParameters();
 				alert("Profile title is required");
 				return false;
 			}
+			else if(f.uploadtype.value == ""){
+				alert("Select Upload Type");
+				return false;
+			}
 			return true;
 		}
 		
@@ -195,7 +199,7 @@ $duManager->readUploadParameters();
 					 		?>
 							<div style="padding:30px;">
 								There are no Upload Profiles associated with this collection. <br />
-								Click <a href="specupload.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
+								Click <a href="specuploadmanagement.php?collid=<?php echo ($collId);?>&action=addprofile">here</a> to add a new profile.
 							</div>
 							<?php 
 					 	}
@@ -217,7 +221,7 @@ $duManager->readUploadParameters();
 						</div>
 						<form name="parameterform" action="specuploadmanagement.php" method="post" onsubmit="return checkParameterForm(this)">
 							<div id="updatetypeDiv">
-								<b>Upload Type</b> 
+								<b>Upload Type:</b> 
 								<select name="uploadtype" onchange="adjustParameterForm()" <?php if($uspid) echo 'DISABLED'; ?>>
 									<option value="">Select an Upload Type</option>
 									<option value="">------------------------</option>
@@ -304,6 +308,7 @@ $duManager->readUploadParameters();
 								<input type="submit" name="action" value="Initialize Upload..." />
 								<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 								<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+								<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 							</form>
 							<?php
 						}
@@ -313,7 +318,7 @@ $duManager->readUploadParameters();
 				<?php 
 				if($uspid){
 					?>
-					<form action="specuploadmanagement.php" method="post">
+					<form action="specuploadmanagement.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this profile?')">
 						<fieldset>
 							<legend><b>Delete this Profile</b></legend>
 							<div>

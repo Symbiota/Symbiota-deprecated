@@ -7,20 +7,34 @@ include_once($serverRoot.'/classes/UuidFactory.php');
 class SpecUploadBase extends SpecUpload{
 
 	protected $transferCount = 0;
+	protected $identTransferCount = 0;
+	protected $imageTransferCount = 0;
+	protected $includeIdentificationHistory = false;
+	protected $includeImages = false;
 	protected $uploadTargetPath;
+	
 	protected $sourceArr = Array();
+	protected $identSourceArr = Array();
+	protected $imageSourceArr = Array();
 	protected $fieldMap = Array();
+	protected $identFieldMap = Array();
+	protected $imageFieldMap = Array();
 	protected $symbFields = Array();
-
+	protected $identSymbFields = Array();
+	protected $imageSymbFields = Array();
+	
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 	private $translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
 		'collector'=>'recordedby','primarycollector'=>'recordedby','collectornumber'=>'recordnumber',
-		'collectionnumber'=>'recordnumber','date'=>'eventdate','collectiondate'=>'eventdate',
+		'collectionnumber'=>'recordnumber','date'=>'eventdate','collectiondate'=>'eventdate','cf' => 'identificationqualifier',
 		'detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
 		'state'=>'stateprovince','latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude','specimennotes'=>'occurrenceremarks',
 		'notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks','plantdescription'=>'verbatimattributes');
-
+	private $identTranslationMap = array('scientificname'=>'sciname','detby'=>'identifiedby','determinor'=>'identifiedby',
+		'determinationdate'=>'dateidentified','notes'=>'identificationremarks','cf' => 'identificationqualifier');
+	private $imageTranslationMap = array('accessuri'=>'url');
+	
 	function __construct() {
  		parent::__construct();
 	}
@@ -55,7 +69,15 @@ class SpecUploadBase extends SpecUpload{
 			while($row = $rs->fetch_object()){
 				$sourceField = $row->sourcefield;
 				$symbField = $row->symbspecfield;
-				$this->fieldMap[$symbField]["field"] = $sourceField;
+				if(substr($symbField,0,3) == 'id_'){
+					$this->identFieldMap[substr($symbField,3)]["field"] = $sourceField;
+				}
+				elseif(substr($symbField,0,3) == 'im_'){
+					$this->imageFieldMap[substr($symbField,3)]["field"] = $sourceField;
+				}
+				else{
+					$this->fieldMap[$symbField]["field"] = $sourceField;
+				}
 			}
 			$rs->close();
 		}
@@ -65,10 +87,10 @@ class SpecUploadBase extends SpecUpload{
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$field = strtolower($row->Field);
-			if($field != "dbpk" && $field != "initialTimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
+			if($field != "dbpk" && $field != "initialtimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
 				if($this->uploadType == $this->DIGIRUPLOAD){
 					$this->fieldMap[$field]["field"] = $field;
-				} 
+				}
 				$type = $row->Type;
 				$this->symbFields[] = $field;
 				if(array_key_exists($field,$this->fieldMap)){
@@ -88,23 +110,115 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		$rs->close();
+
+		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
+			if($this->includeIdentificationHistory){
+				//Get identification metadata
+				$rs = $this->conn->query('SHOW COLUMNS FROM omoccurdeterminations');
+				while($r = $rs->fetch_object()){
+					$field = strtolower($r->Field);
+					if($field != "detid" && $field != "initialtimestamp" && $field != "occid" && $field != "tidinterpreted" && $field != "idbyid"){
+						$type = $r->Type;
+						$this->identSymbFields[] = $field;
+						if(array_key_exists($field,$this->identFieldMap)){
+							if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+								$this->identFieldMap[$field]["type"] = "numeric";
+							}
+							elseif(strpos($type,"date") !== false){
+								$this->identFieldMap[$field]["type"] = "date";
+							}
+							else{
+								$this->identFieldMap[$field]["type"] = "string";
+								if(preg_match('/\(\d+\)$/', $type, $matches)){
+									$this->identFieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+								}
+							}
+						}
+					}
+				}
+				$rs->close();
+				$this->identSymbFields[] = 'genus';
+				$this->identSymbFields[] = 'specificepithet';
+				$this->identSymbFields[] = 'taxonrank';
+				$this->identSymbFields[] = 'infraspecificepithet';
+				//$this->identFieldMap['genus']['type'] = 'string';
+				//$this->identFieldMap['specificepithet']['type'] = 'string';
+				//$this->identFieldMap['taxonrank']['type'] = 'string';
+				//$this->identFieldMap['infraspecificepithet']['type'] = 'string';
+			}
+
+			if($this->includeImages){
+				//Get image metadata
+				$rs = $this->conn->query('SHOW COLUMNS FROM images');
+				while($r = $rs->fetch_object()){
+					$field = strtolower($r->Field);
+					if($field != "imgid" && $field != "initialtimestamp" && $field != "occid" && $field != "tid" && $field != "photographeruid"){
+						$type = $r->Type;
+						$this->imageSymbFields[] = $field;
+						if(array_key_exists($field,$this->imageSymbFields)){
+							if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+								$this->identFieldMap[$field]["type"] = "numeric";
+							}
+							elseif(strpos($type,"date") !== false){
+								$this->imageSymbFields[$field]["type"] = "date";
+							}
+							else{
+								$this->imageSymbFields[$field]["type"] = "string";
+								if(preg_match('/\(\d+\)$/', $type, $matches)){
+									$this->imageSymbFields[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+								}
+							}
+						}
+					}
+				}
+				$rs->close();
+			}
+		}
 	}
 
-	public function echoFieldMapTable($autoMap){
+	public function echoFieldMapTable($autoMap, $mode){
+		$prefix = '';
+		$fieldMap = array();
+		$symbFields = array();
+		$sourceArr = array();
+		$translationMap = array();
+		if($mode == 'ident'){
+			$prefix = 'id';
+			$fieldMap = $this->identFieldMap;
+			$symbFields = $this->identSymbFields;
+			$sourceArr = $this->identSourceArr;
+			$translationMap = $this->identTranslationMap;
+		}
+		elseif($mode == 'image'){
+			$prefix = 'im';
+			$fieldMap = $this->imageFieldMap;
+			$symbFields = $this->imageSymbFields;
+			$sourceArr = $this->imageSourceArr;
+			$translationMap = $this->imageTranslationMap;
+		}
+		else{
+			$fieldMap = $this->fieldMap;
+			$symbFields = $this->symbFields;
+			$sourceArr = $this->sourceArr;
+			$translationMap = $this->translationMap;
+		}
+		
 		//Build a Source => Symbiota field Map
 		$sourceSymbArr = Array();
-		foreach($this->fieldMap as $symbField => $fArr){
+		foreach($fieldMap as $symbField => $fArr){
 			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
 		}
 
 		//Output table rows for source data
-		sort($this->symbFields);
+		echo '<table class="styledtable">';
+		echo '<tr><th>Source Field</th><th>Target Field</th></tr>'."\n";
+		sort($symbFields);
 		$autoMapArr = Array();
-		foreach($this->sourceArr as $fieldName){
+		foreach($sourceArr as $fieldName){
 			$isAutoMapped = false;
-			$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
+			$tranlatedFieldName = strtolower(str_replace(array('_',' ','.'),'',$fieldName));
 			if($autoMap){
-				if(array_key_exists($tranlatedFieldName,$this->translationMap)) $tranlatedFieldName = $this->translationMap[$tranlatedFieldName];
+				if(array_key_exists($tranlatedFieldName,$translationMap)) $tranlatedFieldName = strtolower($translationMap[$tranlatedFieldName]);
 				if(in_array($tranlatedFieldName,$this->symbFields)){
 					$isAutoMapped = true;
 					$autoMapArr[$tranlatedFieldName] = $fieldName;
@@ -113,33 +227,34 @@ class SpecUploadBase extends SpecUpload{
 			echo "<tr>\n";
 			echo "<td style='padding:2px;'>";
 			echo $fieldName;
-			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
+			echo "<input type='hidden' name='".$prefix."sf[]' value='".$fieldName."' />";
 			echo "</td>\n";
 			echo "<td>\n";
-			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists(strtolower($fieldName),$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
 			echo "<option value=''>Select Target Field</option>\n";
 			echo "<option value=''>Leave Field Unmapped</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
-			if($isAutoMapped){
-				//Source Field = Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".(strtolower($tranlatedFieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
-				}
-			}
-			elseif(array_key_exists($fieldName,$sourceSymbArr)){
+			if(array_key_exists($fieldName,$sourceSymbArr)){
 				//Source Field is mapped to Symbiota Field
-				foreach($this->symbFields as $sField){
+				foreach($symbFields as $sField){
 					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
 				}
 			}
+			elseif($isAutoMapped){
+				//Source Field = Symbiota Field
+				foreach($symbFields as $sField){
+					echo "<option ".($tranlatedFieldName==$sField?"SELECTED":"").">".$sField."</option>\n";
+				}
+			}
 			else{
-				foreach($this->symbFields as $sField){
+				foreach($symbFields as $sField){
 					echo "<option>".$sField."</option>\n";
 				}
 			}
 			echo "</select></td>\n";
 			echo "</tr>\n";
 		}
+		echo '</table>';
 		
 		if($autoMapArr && $this->uspid){
 			//Save mapped automap fields
@@ -205,7 +320,6 @@ class SpecUploadBase extends SpecUpload{
  	public function uploadData($finalTransfer){
  		//Stored Procedure upload; other upload types are controlled by their specific class functions
 		set_time_limit(7200);
- 		$this->readUploadParameters();
 
 	 	//First, delete all records in uploadspectemp table associated with this collection
 		$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
@@ -770,6 +884,14 @@ class SpecUploadBase extends SpecUpload{
 			foreach($recMap as $k => $v){
 				$recMap[$k] = trim($v);
 			}
+			//Remove institution and collection codes when they match what is in omcollections
+			if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
+				unset($recMap['institutioncode']);
+			}
+			if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
+				unset($recMap['collectioncode']);
+			}
+			//Date cleaning
 			if(array_key_exists('eventdate',$recMap) && $recMap['eventdate']){
 				if(is_numeric($recMap['eventdate'])){
 					if($recMap['eventdate'] > 2100 && $recMap['eventdate'] < 45000){
@@ -1581,15 +1703,23 @@ class SpecUploadBase extends SpecUpload{
 		if(!$tPath){
 			$tPath = $GLOBALS["serverRoot"]."/temp";
 		}
-		if(file_exists($tPath."/downloads")){
-			$tPath .= "/downloads";
-		}
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
 			$tPath .= '/';
+		}
+		if(file_exists($tPath."downloads")){
+			$tPath .= "downloads/";
 		}
 		$this->uploadTargetPath = $tPath;
 	}
 
+	public function setIncludeIdentificationHistory($boolIn){
+		$this->includeIdentificationHistory = $boolIn;
+	}
+
+	public function setIncludeImages($boolIn){
+		$this->includeImages = $boolIn;
+	}
+	
 	protected function encodeString($inStr){
 		global $charset;
 		$retStr = $inStr;

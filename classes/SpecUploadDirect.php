@@ -35,7 +35,6 @@ class SpecUploadDirect extends SpecUploadBase {
 
  	public function uploadData($finalTransfer){
  		global $charset;
-	 	$this->readUploadParameters();
 		
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){

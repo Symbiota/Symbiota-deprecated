@@ -17,21 +17,26 @@ class SpecUploadFile extends SpecUploadBase{
 	
 	public function uploadFile(){
 		if(!$this->ulFileName){
-		 	$this->ulFileName = $_FILES['uploadfile']['name'];
-			$fullPath = $this->uploadTargetPath.$this->ulFileName;
-		 	move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath);
-			$fullPath = $this->uploadTargetPath.$this->ulFileName;
-			//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
-	        if(substr($fullPath,-4) == ".zip"){
-	        	$zipFilePath = $fullPath;
-				$zip = new ZipArchive;
-				$zip->open($fullPath);
-				$this->ulFileName = $zip->getNameIndex(0);
-				$fullPath = $this->uploadTargetPath.$this->ulFileName; 
-				$zip->extractTo($this->uploadTargetPath);
-				$zip->close();
-				unlink($zipFilePath);
-	        }
+			if(array_key_exists("ulfnoverride",$_POST) && $_POST['ulfnoverride']){
+				$this->ulFileName = $_POST['ulfnoverride'];
+			}
+			elseif(array_key_exists("uploadfile",$_FILES)){
+				$this->ulFileName = $_FILES['uploadfile']['name'];
+				$fullPath = $this->uploadTargetPath.$this->ulFileName;
+			 	move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath);
+				$fullPath = $this->uploadTargetPath.$this->ulFileName;
+				//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
+		        if(substr($fullPath,-4) == ".zip"){
+		        	$zipFilePath = $fullPath;
+					$zip = new ZipArchive;
+					$zip->open($fullPath);
+					$this->ulFileName = $zip->getNameIndex(0);
+					$fullPath = $this->uploadTargetPath.$this->ulFileName; 
+					$zip->extractTo($this->uploadTargetPath);
+					$zip->close();
+					unlink($zipFilePath);
+		        }
+			}
 		}
 		return $this->ulFileName;
 	}
@@ -56,7 +61,6 @@ class SpecUploadFile extends SpecUploadBase{
 
 	public function uploadData($finalTransfer){
 		if($this->ulFileName){
-		 	$this->readUploadParameters();
 			set_time_limit(7200);
 		 	ini_set("max_input_time",240);
 	
