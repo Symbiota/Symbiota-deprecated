@@ -58,7 +58,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 				$taxaKeys = array_keys($this->taxArr);
 				$this->synMap = array_combine($taxaKeys,$taxaKeys);
 				//Add synonyms to $synMap
-				$this->setSynonyms($taxaKeys);
+				$this->setTaxaSynonyms($taxaKeys);
 			}
 		}
 	}
@@ -163,7 +163,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 		return $retArr;
 	}
 
-	private function setSynonyms($inArray){
+	private function setTaxaSynonyms($inArray){
 		if($inArray){
 			$sql = 'SELECT tid, tidaccepted FROM taxstatus '.
 				'WHERE taxauthid = 1 AND tidaccepted IN('.implode('',$inArray).') AND (tid <> tidaccepted)';
