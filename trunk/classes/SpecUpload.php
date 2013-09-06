@@ -25,8 +25,8 @@ class SpecUpload{
 
 	protected $errorArr = Array();
 
-	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5;
-
+	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
+	
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -71,6 +71,9 @@ class SpecUpload{
 				}
 				elseif($uploadType == $this->STOREDPROCEDURE){
 					$uploadStr = "Stored Procedure";
+				}
+				elseif($uploadType == $this->DWCAUPLOAD){
+					$uploadStr = "Darwin Core Archive Upload";
 				}
 				$returnArr[$row->uspid]["title"] = $row->title." (".$uploadStr.")";
 				$returnArr[$row->uspid]["uploadtype"] = $row->uploadtype;
@@ -128,7 +131,7 @@ class SpecUpload{
 	    		$this->password = $row->Password;
 	    		$this->schemaName = $row->SchemaName;
 	    		$this->digirCode = $row->digircode;
-	    		$this->digirPath = $row->digirpath;
+	    		if(!$this->digirPath) $this->digirPath = $row->digirpath;
 	    		$this->digirPKField = strtolower($row->digirpkfield);
 	    		$this->queryStr = $row->querystr;
 	    		$this->storedProcedure = $row->cleanupsp;

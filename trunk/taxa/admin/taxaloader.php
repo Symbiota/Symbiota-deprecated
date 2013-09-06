@@ -8,6 +8,7 @@ include_once($serverRoot.'/classes/TaxaLoaderManager.php');
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
 $ulOverride = array_key_exists("uloverride",$_REQUEST)?$_REQUEST["uloverride"]:"";
+$taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 
 $editable = false;
 if($isAdmin || array_key_exists("Taxonomy",$userRights)){
@@ -21,6 +22,8 @@ if($action == "Upload ITIS File"){
 else{
 	$loaderManager = new TaxaLoaderManager();
 }
+$loaderManager->setTaxaAuthId($taxAuthId);
+
 
 $status = "";
 $fieldMap = Array();
@@ -126,7 +129,6 @@ if($editable){
 	</div> 
 	<?php 
 	if($editable){
-		$taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
 		if($action == "Upload ITIS File" || $action == 'Upload Taxa'){
 			echo '<hr /><ul>';
 			$loaderManager->loadFile($fieldMap);
@@ -168,7 +170,7 @@ if($editable){
 							<?php 
 							$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
 							foreach($taxonAuthArr as $k => $v){
-								echo '<option value="'.$k.'">'.$v.'</option>'."\n";
+								echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
 							}
 							?>
 						</select>
@@ -342,7 +344,7 @@ if($editable){
 							<?php 
 							$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
 							foreach($taxonAuthArr as $k => $v){
-								echo '<option value="'.$k.'">'.$v.'</option>'."\n";
+								echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
 							}
 							?>
 						</select>

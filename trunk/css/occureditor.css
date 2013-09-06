@@ -52,13 +52,21 @@ body{
 }
 
 #dupeMsgDiv{
+	position: absolute;
+	top: 78px;
+	left: 617px;
 	display:none;
-	float:right;
+	background-color: lightgrey;
+	z-index: 10; 
+	padding:15px;
+	font-weight:bold;
+}
+
+#dupeMsgDiv div{
 	width:150px;
 	border:2px outset blue;
-	background-color:#FFFFFF;
+	background-color: white;
 	padding:3px;
-	font-weight:bold;
 }
 
 #dateextradiv{

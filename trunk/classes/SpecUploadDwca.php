@@ -3,7 +3,10 @@ class SpecUploadDwca extends SpecUploadBase{
 	
 	private $baseFolderName;
 	private $metaArr;
-	
+	private $delimiter = ",";
+	private $enclosure = '"';
+	private $encoding = 'utf-8';
+
 	function __construct() {
  		parent::__construct();
 		$this->setUploadTargetPath();
@@ -14,31 +17,61 @@ class SpecUploadDwca extends SpecUploadBase{
 	}
 
 	public function uploadFile(){
-		if(!$this->baseFolderName){
-			if($this->digirPath){
-				//import DwC-A file onto local server and set the base file name 
-				$this->baseFolderName = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
-				mkdir($this->uploadTargetPath.$this->baseFolderName,777);
-				$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/dwca.zip';
-				if(!copy($this->digirPath,$fullPath)){
-					echo '<li>ERROR: unable to upload file (path: '.$fullPath.') </li>';
-				}
+		//Create download location
+		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
+		mkdir($this->uploadTargetPath.$localFolder,777);
+		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
+		
+		if($this->digirPath){
+			//DWCA path is stored in the upload profile definition 
+			if(copy($this->digirPath,$fullPath)){
+				$this->baseFolderName = $localFolder;
 			}
 			else{
-				echo '<li>ERROR: Path to Darwin Core Archive not defined </li>';
+				echo '<li>ERROR: unable to upload file (path: '.$fullPath.') </li>';
 			}
 		}
+		elseif(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride']){
+			//File was physcially placed on server where Apache can read the file
+			if(copy($_POST["ulfnoverride"],$fullPath)){
+				$this->baseFolderName = $localFolder;
+			}
+			else{
+				echo '<li>ERROR moving file, are you sure that path is correct? (path: '.$_POST["ulfnoverride"].') </li>';
+			}
+		}
+		elseif(array_key_exists("uploadfile",$_FILES)){
+			//File is read for upload via the browser
+			if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
+				$this->baseFolderName = $localFolder;
+			}
+			else{
+				echo '<li>ERROR uploading file (target: '.$fullPath.') </li>';
+			}
+		}
+		
 		if($this->baseFolderName){
 			$this->unpackArchive();
-		}
-		else{
-			echo '<li>ERROR: base file name not set (path: '.$this->uploadTargetPath.$this->baseFolderName.')</li>';
 		}
 		return $this->baseFolderName;
 	}
 
 	public function analyzeUpload(){
-		$this->readMetaFile();
+		$status = false;
+		if($this->readMetaFile()){
+			if(isset($this->metaArr['occur']['fields'])){
+				$this->sourceArr = $this->metaArr['occur']['fields'];
+				//Set identification and image source fields 
+				if(isset($this->metaArr['ident']['fields'])){
+					$this->identSourceArr = $this->metaArr['ident']['fields'];
+				}
+				if(isset($this->metaArr['image']['fields'])){
+					$this->imageSourceArr = $this->metaArr['image']['fields'];
+				}
+			}
+			$status = true;
+		}
+		return $status;
 	}
 
 	private function unpackArchive(){
@@ -50,10 +83,10 @@ class SpecUploadDwca extends SpecUploadBase{
 		$zip->close();
 	}
 	
-	private function readMetaFile($full = 0){
+	private function readMetaFile(){
 		//Read meta.xml file
-		if($this->uploadTargetPath.$this->baseFolderName.'/meta.xml'){
-			$metaDoc = new DOMDocument('1.0', 'iso-8859-1');
+		if(file_exists($this->uploadTargetPath.$this->baseFolderName.'/meta.xml')){
+			$metaDoc = new DOMDocument();
 			$metaDoc->load($this->uploadTargetPath.$this->baseFolderName.'/meta.xml');
 			$coreId = '';
 			//Get core (occurrences) file name
@@ -76,23 +109,29 @@ class SpecUploadDwca extends SpecUploadBase{
 						else{
 							$this->errorArr[] = 'ERROR: Unable to obtain the occurrence file name from meta.xml';
 						}
-						if($full){
-							//Get the rest of the core attributes
-							$this->metaArr['occur']['encoding'] = $coreElement->getAttribute('encoding');
-							$this->metaArr['occur']['fieldsTerminatedBy'] = $coreElement->getAttribute('fieldsTerminatedBy');
-							$this->metaArr['occur']['linesTerminatedBy'] = $coreElement->getAttribute('linesTerminatedBy');
-							$this->metaArr['occur']['fieldsEnclosedBy'] = $coreElement->getAttribute('fieldsEnclosedBy');
-							$this->metaArr['occur']['ignoreHeaderLines'] = $coreElement->getAttribute('ignoreHeaderLines');
-							$this->metaArr['occur']['rowType'] = $rowType;
-							//Get the Core field names
-							if($fieldElements = $coreElement->getElementsByTagName('fields')){
-								foreach($fieldElements as $fieldElement){
-									$this->metaArr['occur']['fields'][$fieldElement->getAttribute('index')] = $fieldElement->getAttribute('term');
-								}
+						//Get the rest of the core attributes
+						$this->metaArr['occur']['encoding'] = $coreElement->getAttribute('encoding');
+						$this->metaArr['occur']['fieldsTerminatedBy'] = $coreElement->getAttribute('fieldsTerminatedBy');
+						$this->metaArr['occur']['linesTerminatedBy'] = $coreElement->getAttribute('linesTerminatedBy');
+						$this->metaArr['occur']['fieldsEnclosedBy'] = $coreElement->getAttribute('fieldsEnclosedBy');
+						$this->metaArr['occur']['ignoreHeaderLines'] = $coreElement->getAttribute('ignoreHeaderLines');
+						$this->metaArr['occur']['rowType'] = $rowType;
+						//Get the Core field names
+						if($fieldElements = $coreElement->getElementsByTagName('field')){
+							foreach($fieldElements as $fieldElement){
+								$term = $fieldElement->getAttribute('term');
+								if(strpos($term,'/')) $term = substr($term,strrpos($term,'/')+1);
+								$this->metaArr['occur']['fields'][$fieldElement->getAttribute('index')] = $term;
 							}
 						}
+						//Set id
+						$this->metaArr['occur']['fields'][0] = 'id';
 					}
 				}
+			}
+			else{
+				$this->errorArr[] = 'ERROR: Unable to core element in meta.xml';
+				return false;
 			}
 			if($this->metaArr){
 				$extensionElements = $metaDoc->getElementsByTagName('extension');
@@ -120,227 +159,152 @@ class SpecUploadDwca extends SpecUploadBase{
 							else{
 								$this->errorArr[] = 'ERROR: Unable to obtain the '.$tagName.' file name from meta.xml';
 							}
-							if($full){
-								//Get the rest of the core attributes
-								$this->metaArr[$tagName]['encoding'] = $extensionElement->getAttribute('encoding');
-								$this->metaArr[$tagName]['fieldsTerminatedBy'] = $extensionElement->getAttribute('fieldsTerminatedBy');
-								$this->metaArr[$tagName]['linesTerminatedBy'] = $extensionElement->getAttribute('linesTerminatedBy');
-								$this->metaArr[$tagName]['fieldsEnclosedBy'] = $extensionElement->getAttribute('fieldsEnclosedBy');
-								$this->metaArr[$tagName]['ignoreHeaderLines'] = $extensionElement->getAttribute('ignoreHeaderLines');
-								$this->metaArr[$tagName]['rowType'] = $rowType;
-								//Get the Core field names
-								if($fieldElements = $extensionElement->getElementsByTagName('fields')){
-									foreach($fieldElements as $fieldElement){
-										$this->metaArr[$tagName]['fields'][$fieldElement->getAttribute('index')] = $fieldElement->getAttribute('term');
-									}
+							//Get the rest of the core attributes
+							$this->metaArr[$tagName]['encoding'] = $extensionElement->getAttribute('encoding');
+							$this->metaArr[$tagName]['fieldsTerminatedBy'] = $extensionElement->getAttribute('fieldsTerminatedBy');
+							$this->metaArr[$tagName]['linesTerminatedBy'] = $extensionElement->getAttribute('linesTerminatedBy');
+							$this->metaArr[$tagName]['fieldsEnclosedBy'] = $extensionElement->getAttribute('fieldsEnclosedBy');
+							$this->metaArr[$tagName]['ignoreHeaderLines'] = $extensionElement->getAttribute('ignoreHeaderLines');
+							$this->metaArr[$tagName]['rowType'] = $rowType;
+							//Get the Core field names
+							if($fieldElements = $extensionElement->getElementsByTagName('field')){
+								foreach($fieldElements as $fieldElement){
+									$term = $fieldElement->getAttribute('term');
+									if(strpos($term,'/')) $term = substr($term,strrpos($term,'/')+1);
+									$this->metaArr[$tagName]['fields'][$fieldElement->getAttribute('index')] = $term;
 								}
 							}
+							$this->metaArr[$tagName]['fields'][0] = 'coreid';
 						}
 					}					
 				}				
 			}
 			else{
-				$this->errorArr[] = 'ERROR: Unable to obtain core element for occurrences from meta.xml';
+				$this->errorArr[] = 'ERROR: Unable to obtain core element from meta.xml';
+				return false;
 			}
 		}
+		else{
+			$this->errorArr[] = 'ERROR: Malformed DWCA, unable to locate meta.xml';
+			return false;
+		}
+		return true;
 	}
 
 	public function uploadData($finalTransfer){
-		if($this->ulFileName){
-		 	$this->readUploadParameters();
+		global $charset;
+		if($this->baseFolderName){
 			set_time_limit(7200);
 		 	ini_set("max_input_time",240);
-	
+
 			//First, delete all records in uploadspectemp table associated with this collection
 			$sqlDel = "DELETE FROM uploadspectemp WHERE (collid = ".$this->collId.')';
 			$this->conn->query($sqlDel);
 
-			$fullPath = $this->uploadTargetPath.$this->ulFileName;
-	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
-			
-			$headerArr = $this->getHeaderArr($fh);
-			
-			//Grab data 
-			$this->transferCount = 0;
-			while($recordArr = $this->getRecordArr($fh)){
-				$recMap = Array();
-				foreach($this->fieldMap as $symbField => $sMap){
-					$indexArr = array_keys($headerArr,$sMap['field']);
-					$index = array_shift($indexArr);
-					if(array_key_exists($index,$recordArr)){
-						$valueStr = $recordArr[$index];
-						//If value is enclosed by quotes, remove quotes
-						if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
-							$valueStr = substr($valueStr,1,strlen($valueStr)-2);
-						}
-						$recMap[$symbField] = $valueStr;
-					}
+			if($this->readMetaFile() && isset($this->metaArr['occur']['fields'])){
+				if(isset($this->metaArr['occur']['fieldsTerminatedBy']) && $this->metaArr['occur']['fieldsTerminatedBy']){
+					$this->delimiter = $this->metaArr['occur']['fieldsTerminatedBy'];
 				}
-				$this->loadRecord($recMap);
-				unset($recMap);
-			}
-			fclose($fh);
+				else{
+					$this->delimiter = '';
+				}
+				if(isset($this->metaArr['occur']['fieldsEnclosedBy']) && $this->metaArr['occur']['fieldsEnclosedBy']){
+					$this->enclosure = $this->metaArr['occur']['fieldsEnclosedBy'];
+				}
+				if(isset($this->metaArr['occur']['encloding']) && $this->metaArr['occur']['encloding']){
+					$this->encoding = strtolower(str_replace('-','',$this->metaArr['occur']['encloding']));
+				}
 
-			//Delete upload file 
-			if(file_exists($fullPath)) unlink($fullPath);
-			
-			$this->finalUploadSteps($finalTransfer);
+				$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
+		 		$fh = fopen($fullPath,'rb') or die("Can't open file");
+				
+		 		if($this->metaArr['occur']['ignoreHeaderLines'] == '1'){
+		 			//Advance one record to go past header
+		 			$this->getRecordArr($fh);
+		 		}
+				
+				//Grab data
+				$cset = strtolower(str_replace('-','',$charset)); 
+				$this->sourceArr = $this->metaArr['occur']['fields'];
+		 		$this->transferCount = 0;
+				while($recordArr = $this->getRecordArr($fh)){
+					$recMap = Array();
+					foreach($this->fieldMap as $symbField => $sMap){
+						$indexArr = array_keys($this->sourceArr,$sMap['field']);
+						$index = array_shift($indexArr);
+						if(array_key_exists($index,$recordArr)){
+							$valueStr = $recordArr[$index];
+							if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+							$recMap[$symbField] = $valueStr;
+						}
+					}
+					$this->loadRecord($recMap);
+					unset($recMap);
+				}
+				fclose($fh);
+	
+				//Delete upload file 
+				//if(file_exists($fullPath)) unlink($fullPath);
+				
+				$this->finalUploadSteps($finalTransfer);
+				
+				//Upload identification history
+				if($this->includeIdentificationHistory){
+					
+				}
+				
+				//Upload images
+				if($this->includeImages){
+					
+				}
+			}
 		}
 		else{
-			echo "<li>File Upload FAILED: unable to locate file</li>";
+			echo "<li>ERROR: unable to locate occurrence upload file</li>";
 		}
 	}
 	
-	private function getHeaderArr($fHandler){
-		$headerData = fgets($fHandler);
-		//Check to see if we can figure out the delimiter
-		if(strpos($headerData,",") === false){
-			if(strpos($headerData,"\t") !== false){
-				$this->delimiter = "\t";
-			}
-		}
-		//Check to see if file is csv\
-		if(substr($this->ulFileName,-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
-			$this->isCsv = true;
-		}
-		//Grab header terms
-		$headerArr = Array();
-		if($this->isCsv){
-			rewind($fHandler);
-			$headerArr = fgetcsv($fHandler,0,$this->delimiter);
-		}
-		else{
-			$headerArr = explode($this->delimiter,$headerData);
-		}
-		$retArr = array();
-		foreach($headerArr as $field){
-			$fieldStr = strtolower(trim($field));
-			if($fieldStr){
-				$retArr[] = $fieldStr;
-			}
-			else{
-				break;
-			}
-		}
-		return $retArr;
-	}
-
 	private function getRecordArr($fHandler){
 		$recordArr = Array();
-		if($this->isCsv){
-			$recordArr = fgetcsv($fHandler,0,$this->delimiter);
+		if($this->delimiter){
+			$recordArr = fgetcsv($fHandler,0,$this->delimiter,$this->enclosure);
 		}
 		else{
+			//Check to see if we can figure out the delimiter
 			$record = fgets($fHandler);
-			if($record) $recordArr = explode($this->delimiter,$record);
+			if(substr($this->metaArr['occur']['name'],-4) == ".csv"){
+				$this->delimiter = ',';
+			}
+			elseif(strpos($record,"\t") !== false){
+				$this->delimiter = "\t";
+			}
+			elseif(strpos($record,"|") !== false){
+				$this->delimiter = "|";
+			}
+			else{
+				$this->delimiter = ',';
+			}
+			//Get data 
+			$recordArr = explode($this->delimiter,$record);
+			//Remove enclosures
+			if($this->enclosure){
+				foreach($recordArr as $k => $v){
+					if(substr($v,0,1) == $this->enclosure && substr($v,-1) == $this->enclosure){
+						$recordArr[$k] = substr($v,1,strlen($v)-2);
+					}
+				}
+			}
 		}
 		return $recordArr;
 	}
 	
-	public function echoOccurMapTable($autoMap){
-		$sourceArr = $this->metaArr['occur']['fields'];
-		foreach($sourceArr as $k => $fieldName){
-			echo "<tr>\n";
-			echo "<td style='padding:2px;'>";
-			echo $fieldName;
-			echo "<input type='hidden' name='sf[]' value='".$k."' />";
-			echo "</td>\n";
-			echo "<td>\n";
-			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
-			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value=''>Leave Field Unmapped</option>\n";
-			echo "<option value=''>-------------------------</option>\n";
-			if($isAutoMapped){
-				//Source Field = Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".(strtolower($tranlatedFieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
-				}
-			}
-			elseif(array_key_exists($fieldName,$sourceSymbArr)){
-				//Source Field is mapped to Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
-				}
-			}
-			else{
-				foreach($this->symbFields as $sField){
-					echo "<option>".$sField."</option>\n";
-				}
-			}
-			echo "</select></td>\n";
-			echo "</tr>\n";
-			
-		}
-		
-		//Build a Source => Symbiota field Map
-		$sourceSymbArr = Array();
-		foreach($this->fieldMap as $symbField => $fArr){
-			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
-		}
-
-		//Output table rows for source data
-		sort($this->symbFields);
-		$autoMapArr = Array();
-		foreach($this->sourceArr as $fieldName){
-			$isAutoMapped = false;
-			$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
-			if($autoMap){
-				if(array_key_exists($tranlatedFieldName,$this->translationMap)) $tranlatedFieldName = $this->translationMap[$tranlatedFieldName];
-				if(in_array($tranlatedFieldName,$this->symbFields)){
-					$isAutoMapped = true;
-					$autoMapArr[$tranlatedFieldName] = $fieldName;
-				}
-			}
-			echo "<tr>\n";
-			echo "<td style='padding:2px;'>";
-			echo $fieldName;
-			echo "<input type='hidden' name='sf[]' value='".$fieldName."' />";
-			echo "</td>\n";
-			echo "<td>\n";
-			echo "<select name='tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
-			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value=''>Leave Field Unmapped</option>\n";
-			echo "<option value=''>-------------------------</option>\n";
-			if($isAutoMapped){
-				//Source Field = Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".(strtolower($tranlatedFieldName)==$sField?"SELECTED":"").">".$sField."</option>\n";
-				}
-			}
-			elseif(array_key_exists($fieldName,$sourceSymbArr)){
-				//Source Field is mapped to Symbiota Field
-				foreach($this->symbFields as $sField){
-					echo "<option ".($sourceSymbArr[$fieldName]==$sField?"SELECTED":"").">".$sField."</option>\n";
-				}
-			}
-			else{
-				foreach($this->symbFields as $sField){
-					echo "<option>".$sField."</option>\n";
-				}
-			}
-			echo "</select></td>\n";
-			echo "</tr>\n";
-		}
-		
-	}
-
-	public function echoIdentMapTable($autoMap){
-		
-		
-	}
-
-	public function echoImageMapTable($autoMap){
-		
-		
-	}
-
 	public function setBaseFolderName($name){
 		$this->baseFolderName = $name;
 	}
 
 	public function getDbpk(){
 		$dbpk = parent::getDbpk();
-		if(!$dbpk) $dbpk = 'coreid';
+		if(!$dbpk) $dbpk = 'id';
 		return $dbpk;
 	}
 

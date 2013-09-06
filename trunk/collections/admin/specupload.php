@@ -13,12 +13,14 @@ $uploadType = $_REQUEST["uploadtype"];
 $uspid = array_key_exists("uspid",$_REQUEST)?$_REQUEST["uspid"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $autoMap = array_key_exists("automap",$_POST)?$_POST["automap"]:false;
-$ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
-$ulfnOverride = array_key_exists("ulfnoverride",$_REQUEST)?$_REQUEST["ulfnoverride"]:"";
+$ulPath = array_key_exists("ulpath",$_REQUEST)?$_REQUEST["ulpath"]:"";
+$importIdent = array_key_exists("importident",$_REQUEST)?$_REQUEST['importident']:false;
+$importImage = array_key_exists("importimage",$_REQUEST)?$_REQUEST['importimage']:false;
 $finalTransfer = array_key_exists("finaltransfer",$_REQUEST)?$_REQUEST["finaltransfer"]:0;
 $dbpk = array_key_exists("dbpk",$_REQUEST)?$_REQUEST["dbpk"]:0;
 $recStart = array_key_exists("recstart",$_REQUEST)?$_REQUEST["recstart"]:0;
 $recLimit = array_key_exists("reclimit",$_REQUEST)?$_REQUEST["reclimit"]:1000;
+
 
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;$DWCAUPLOAD = 6;
 
@@ -33,16 +35,21 @@ elseif($uploadType == $DIGIRUPLOAD){
 }
 elseif($uploadType == $FILEUPLOAD){
 	$duManager = new SpecUploadFile();
-	if($ulfnOverride) $ulFileName = $ulfnOverride;
-	$duManager->setUploadFileName($ulFileName);
+	$duManager->setUploadFileName($ulPath);
 }
 elseif($uploadType == $DWCAUPLOAD){
 	$duManager = new SpecUploadDwca();
-	$duManager->setBaseFolderName($ulFileName);
+	$duManager->setBaseFolderName($ulPath);
+	$duManager->setIncludeIdentificationHistory(true);
+	$duManager->setIncludeImages(true);
 }
 
 $duManager->setCollId($collId);
 $duManager->setUspid($uspid);
+$duManager->setUspid($uspid);
+$duManager->setUspid($uspid);
+$duManager->setIncludeIdentificationHistory($importIdent);
+$duManager->setIncludeImages($importImage);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -200,9 +207,9 @@ $duManager->loadFieldMap();
 	 		echo "<li style='font-weight:bold;'>Starting Data Upload</li>";
 	 		$duManager->uploadData($finalTransfer);
 			echo "</ol>";
-	 		if($duManager->getTransferCount() && !$finalTransfer){
+			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
-	 			<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
+				<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
 	 				<fieldset>
 	 					<legend><b>Final transfer</b></legend>
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
@@ -228,47 +235,8 @@ $duManager->loadFieldMap();
 			echo '<li style="font-weight:bold;">Upload Procedure Complete';
 			echo '</ol>';
 		}
-	 	else{
-			if(($action == 'Analyze File' || $uploadType == $DWCAUPLOAD) && !$ulFileName) {
-				$ulFileName = $duManager->uploadFile();
-			}
-			if($uploadType == $FILEUPLOAD && !$ulFileName){
-				?>
-				<form name="fileuploadform" action="specupload.php" method="post" enctype="multipart/form-data" onsubmit="return verifyFileUploadForm(this)">
-					<fieldset style="width:95%;">
-						<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?> (Step 1)</legend>
-						<div>
-							<div style="margin:10px;">
-								<div class="ulfnoptions">
-									<b>Upload File:</b> 
-									<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
-								</div>
-								<div class="ulfnoptions" style="display:none;">
-									<b>Full File Path:</b> 
-									<input name="ulfnoverride" type="text" size="50" /><br/>
-									* This option is for manual upload of a data file. 
-									Enter full path to data file located on working server.   
-								</div>
-							</div>
-							<div style="margin:10px;">
-								<?php 
-								if(!$uspid) echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
-								?>
-								<input name="action" type="submit" value="Analyze File" />
-								<input name="uspid" type="hidden" value="<?php echo $uspid;?>" />
-								<input name="collid" type="hidden" value="<?php echo $collId;?>" />
-								<input name="uploadtype" type="hidden" value="<?php echo $FILEUPLOAD;?>" />
-								<input name="MAX_FILE_SIZE" type="hidden" value="100000000" />
-							</div>
-							<div style="float:right;">
-								<a href="#" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
-							</div>
-						</div>
-					</fieldset>
-				</form>
-				<?php 
-			}
-			elseif($uploadType == $DIGIRUPLOAD){
+		else{
+			if($uploadType == $DIGIRUPLOAD){
 				?>
 				<form name="initform" action="specupload.php" method="post" onsubmit="">
 					<fieldset style="width:95%;">
@@ -291,234 +259,245 @@ $duManager->loadFieldMap();
 				</form>
 				<?php
 			}
-			elseif($uploadType == $DWCAUPLOAD){
-				$duManager->analyzeUpload();
-				$metaArr = $duManager->getMetaArr();
-				print_r($metaArr);
-				if(isset($metaArr['occur'])){
+			else{
+				//Upload type is direct, file, or DWCA 
+				if(!$ulPath && ($uploadType == $FILEUPLOAD || $uploadType == $DWCAUPLOAD)){
+					//Need to upload data for file and DWCA uploads
+					$ulPath = $duManager->uploadFile();
+					if(!$ulPath){
+						//Still null, thus we have to upload file
+						?>
+						<form name="fileuploadform" action="specupload.php" method="post" enctype="multipart/form-data" onsubmit="return verifyFileUploadForm(this)">
+							<fieldset style="width:95%;">
+								<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?> (Step 1)</legend>
+								<div>
+									<div style="margin:10px;">
+										<div class="ulfnoptions">
+											<b>Upload File:</b> 
+											<input name="uploadfile" type="file" size="50" onchange="this.form.ulfnoverride.value = ''" />
+										</div>
+										<div class="ulfnoptions" style="display:none;">
+											<b>Full File Path:</b> 
+											<input name="ulfnoverride" type="text" size="50" /><br/>
+											* This option is for manual upload of a data file. 
+											Enter full path to data file located on working server.
+										</div>
+									</div>
+									<div style="margin:10px;">
+										<?php 
+										if(!$uspid) echo '<input name="automap" type="checkbox" value="1" CHECKED /> <b>Automap fields</b><br/>';
+										?>
+										<input name="action" type="submit" value="Analyze File" />
+										<input name="uspid" type="hidden" value="<?php echo $uspid;?>" />
+										<input name="collid" type="hidden" value="<?php echo $collId;?>" />
+										<input name="uploadtype" type="hidden" value="<?php echo $uploadType;?>" />
+										<input name="MAX_FILE_SIZE" type="hidden" value="100000000" />
+									</div>
+									<div style="float:right;">
+										<a href="#" onclick="toggle('ulfnoptions');return false;">Toggle Manual Upload Option</a>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+						<?php
+					}
+				}
+				if($ulPath && $uploadType == $DWCAUPLOAD){
+					//Data has been uploaded and it's a DWCA upload type
+					if($duManager->analyzeUpload()){
+						$metaArr = $duManager->getMetaArr();
+						if(isset($metaArr['occur'])){
+							?>
+							<form name="initform" action="specupload.php" method="post" onsubmit="">
+								<fieldset style="width:95%;">
+									<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
+									<div style="margin:10px;">
+										<b>Source Unique Identifier / Primary Key (required): </b>
+										<?php
+										$dbpk = $duManager->getDbpk();
+										?>
+										<select name="dbpk" onchange="pkChanged(this);">
+											<option value="id">core id</option>
+											<option value="catalognumber" <?php if($dbpk == 'catalognumber') echo 'SELECTED'; ?>>catalogNumber</option>
+											<option value="occurrenceid" <?php if($dbpk == 'occurrenceid') echo 'SELECTED'; ?>>occurrenceId</option>
+										</select>
+										<div style="margin-left:10px;">
+											*Change ONLY if you are sure that a field other than the Core Id will better serve as the primary specimen identifier
+										</div> 
+										<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none";>
+											<input type="submit" name="action" value="Save Primary Key" />
+										</div>
+										<div style="margin:10px;">
+											<div>
+												<input name="importspec" value="1" type="checkbox" checked /> 
+												Import Occurrence Records (<a href="#" onclick="toggle('dwcaOccurDiv');return false;">view mapping</a>)
+											</div>
+											<div id="dwcaOccurDiv" style="display:none;margin:20px;">
+												<?php $duManager->echoFieldMapTable(true,'occur'); ?>
+												<div>
+													* Mappings that are not yet saved are displayed in Yellow
+												</div>
+												<div style="margin:10px;">
+													<input type="submit" name="action" value="Save Mapping" />
+												</div>
+											</div>
+											<div>
+												<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
+												Import Identification History 
+												<?php 
+												if(isset($metaArr['ident'])){
+													echo '(<a href="#" onclick="toggle(\'dwcaIdentDiv\');return false;">view mapping</a>)';
+													?>
+													<div id="dwcaIdentDiv" style="display:none;margin:20px;">
+														<?php $duManager->echoFieldMapTable(true,'ident'); ?>
+														<div>
+															* Mappings that are not yet saved are displayed in Yellow
+														</div>
+														<div style="margin:10px;">
+															<input type="submit" name="action" value="Save Mapping" />
+														</div>
+													</div>
+													<?php 
+												}
+												else{
+													echo '(not present in DwC-Archive)';
+												}
+												?>
+												
+											</div>
+											<div>
+												<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])?'checked':'disabled') ?> /> 
+												Import Images 
+												<?php 
+												if(isset($metaArr['image'])){
+													echo '(<a href="#" onclick="toggle(\'dwcaImgDiv\');return false;">view mapping</a>)';
+													?>
+													<div id="dwcaImgDiv" style="display:none;margin:20px;">
+														<?php $duManager->echoFieldMapTable(true,'image'); ?>
+														<div>
+															* Mappings that are not yet saved are displayed in Yellow
+														</div>
+														<div style="margin:10px;">
+															<input type="submit" name="action" value="Save Mapping" />
+														</div>
+														
+													</div>
+													<?php 
+												}
+												else{
+													echo '(not present in DwC-Archive)';
+												}
+												?>
+											</div>
+											<div>
+												<div style="margin:10px;">
+													<input type="submit" name="action" value="Start Upload" />
+													<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+													<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+													<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+													<input type="hidden" name="ulpath" value="<?php echo $ulPath;?>" />
+												</div>
+											</div>
+										</div>
+									</div>
+								</fieldset>
+							</form>
+							<?php
+						}
+					}
+					else{
+						if($duManager->getErrorArr()){
+							echo '<div style="font-weight:bold;">'.implode('<br/>',$duManager->getErrorArr()).'</div>';
+						}
+						else{
+							echo '<div style="font-weight:bold;">Unknown error analyzing upload</div>';
+						}
+					}
+				}
+				elseif($uploadType == $DIRECTUPLOAD || ($uploadType == $FILEUPLOAD && $ulPath)){
+					$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
+					$duManager->analyzeUpload();
 					?>
 					<form name="initform" action="specupload.php" method="post" onsubmit="">
 						<fieldset style="width:95%;">
 							<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
-							<div style="margin:10px;">
-								<b>Source Unique Identifier / Primary Key (required): </b>
-								<?php
-								$dbpk = $duManager->getDbpk();
+							<?php 
+							if($isSnapshot){
+								//Primary key field is required and must be mapped 
 								?>
-								<select name="dbpk" onchange="pkChanged(this);">
-									<option value="coreid">coreId</option>
-									<option value="catalognumber" <?php if($dbpk == 'catalognumber') echo 'SELECTED'; ?>>catalogNumber</option>
-									<option value="occurrenceid" <?php if($dbpk == 'occurrenceid') echo 'SELECTED'; ?>>occurrenceId</option>
-								</select>
-								<div style="margin-left:10px;">
-									*The CoreId is the default primary key. Change ONLY if you are sure that another field will better serve as the primary specimen identifier
-								</div> 
-								<div id="pkdiv" style="margin:5px 0px 0px 20px;display:none";>
-									<input type="submit" name="action" value="Save Primary Key" />
+								<div style="margin:20px;">
+									<b>Source Unique Identifier / Primary Key (required): </b>
+									<?php
+									$dbpk = $duManager->getDbpk();
+									$dbpkOptions = $duManager->getDbpkOptions();
+									?>
+									<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
+										<option value="">Select Source Primary Key</option>
+										<option value="">Delete Primary Key</option>
+										<option value="">----------------------------------</option>
+										<?php 
+										foreach($dbpkOptions as $f){
+											echo '<option '.($dbpk==$f?'SELECTED':'').'>'.$f.'</option>';
+										}
+										?>
+									</select>
+									<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
+										<input type="submit" name="action" value="Save Primary Key" />
+									</div>
 								</div>
-								<div style="margin:10px;">
+								<?php 
+							}
+							if(($dbpk && in_array($dbpk,$dbpkOptions)) || !$isSnapshot){
+								?>
+								<div id="mdiv">
+									<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
 									<div>
-										<input name="importspec" value="1" type="checkbox" checked /> 
-										Import Occurrence Records (<a href="#" onclick="toggle('dwcaOccurDiv');return false;">view mapping</a>)
+										* Mappings that are not yet saved are displayed in Yellow
 									</div>
-									<div id="dwcaOccurDiv" style="display:none;margin:20px;">
-										<table class="styledtable">
-											<tr>
-												<th>
-													Source Field
-												</th>
-												<th>
-													Target Field
-												</th>
-											</tr>
-											<?php 
-											$duManager->echoOccurMapTable($autoMap); 
-											?>
-										</table>
-										<div>
-											* Mappings that are not yet saved are displayed in Yellow
-										</div>
-										<div style="margin:10px;">
-											<input type="submit" name="action" value="Save Mapping" />
-										</div>
-									</div>
-									<div>
-										<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
-										Import Identification History 
+									<div style="margin:10px;">
 										<?php 
-										if(isset($metaArr['ident'])){
-											echo '(<a href="#" onclick="toggle(\'dwcaIdentDiv\');return false;">view mapping</a>)';
+										if($uspid){
 											?>
-											<div id="dwcaIdentDiv" style="display:none;margin:20px;">
-												<table class="styledtable">
-													<tr>
-														<th>
-															Source Field
-														</th>
-														<th>
-															Target Field
-														</th>
-													</tr>
-													<?php 
-													$duManager->echoIdentMapTable($autoMap); 
-													?>
-												</table>
-												<div>
-													* Mappings that are not yet saved are displayed in Yellow
-												</div>
-												<div style="margin:10px;">
-													<input type="submit" name="action" value="Save Mapping" />
-												</div>
-											</div>
+											<input type="submit" name="action" value="Delete Field Mapping" />
 											<?php 
-										}
-										else{
-											echo '(not present in DwC-Archive)';
 										}
 										?>
-										
+										<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
+										<input type="submit" name="action" value="Automap Fields" />
 									</div>
-									<div>
-										<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])?'checked':'disabled') ?> /> 
-										Import Images 
-										<?php 
-										if(isset($metaArr['image'])){
-											echo '(<a href="#" onclick="toggle(\'dwcaImgDiv\');return false;">view mapping</a>)';
-											?>
-											<div id="dwcaImgDiv" style="display:none;margin:20px;">
-												<table class="styledtable">
-													<tr>
-														<th>
-															Source Field
-														</th>
-														<th>
-															Target Field
-														</th>
-													</tr>
-													<?php 
-													$duManager->echoImageMapTable($autoMap); 
-													?>
-												</table>
-												<div>
-													* Mappings that are not yet saved are displayed in Yellow
-												</div>
-												<div style="margin:10px;">
-													<input type="submit" name="action" value="Save Mapping" />
-												</div>
-												
-											</div>
-											<?php 
-										}
-										else{
-											echo '(not present in DwC-Archive)';
-										}
-										?>
-									</div>
-									<div>
+									<hr />
+									<div id="uldiv">
 										<div style="margin:10px;">
 											<input type="submit" name="action" value="Start Upload" />
-											<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-											<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-											<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-											<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
 										</div>
 									</div>
 								</div>
-							</div>
+								<?php 
+							} 
+							?>
 						</fieldset>
+						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
+						<input type="hidden" name="collid" value="<?php echo $collId;?>" />
+						<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
+						<input type="hidden" name="ulpath" value="<?php echo $ulPath;?>" />
 					</form>
 					<?php
 				}
 			}
-			elseif($uploadType == $DIRECTUPLOAD || $uploadType == $FILEUPLOAD){
-				$isSnapshot = ($duManager->getCollInfo("managementtype") == 'Snapshot'?true:false);
-				$duManager->analyzeUpload();
-				?>
-				<form name="initform" action="specupload.php" method="post" onsubmit="">
-					<fieldset style="width:95%;">
-						<legend style="font-weight:bold;font-size:120%;"><?php echo $duManager->getTitle();?></legend>
-						<?php 
-						if($isSnapshot){
-							//Primary key field is required and must be mapped 
-							?>
-							<div style="margin:20px;">
-								<b>Source Unique Identifier / Primary Key (required): </b>
-								<?php
-								$dbpk = $duManager->getDbpk();
-								$dbpkOptions = $duManager->getDbpkOptions();
-								?>
-								<select name="dbpk" style="background:<?php echo ($dbpk?"":"red");?>" onchange="pkChanged(this);">
-									<option value="">Select Source Primary Key</option>
-									<option value="">Delete Primary Key</option>
-									<option value="">----------------------------------</option>
-									<?php 
-									foreach($dbpkOptions as $f){
-										echo '<option '.($dbpk==$f?'SELECTED':'').'>'.$f.'</option>';
-									}
-									?>
-								</select>
-								<div id="pkdiv" style="margin:5px 0px 0px 20px;display:<?php echo ($dbpk?"none":"block");?>";>
-									<input type="submit" name="action" value="Save Primary Key" />
-								</div>
-							</div>
-							<?php 
-						}
-						if($dbpk || !$isSnapshot){
-							?>
-							<div id="mdiv">
-								<table border="1" cellpadding="2" style="border:1px solid black">
-									<tr>
-										<th>
-											Source Field
-										</th>
-										<th>
-											Target Field
-										</th>
-									</tr>
-									<?php 
-									$duManager->echoFieldMapTable($autoMap); 
-									?>
-								</table>
-								<div>
-									* Mappings that are not yet saved are displayed in Yellow
-								</div>
-								<div style="margin:10px;">
-									<?php 
-									if($uspid){
-										?>
-										<input type="submit" name="action" value="Delete Field Mapping" />
-										<?php 
-									}
-									?>
-									<input type="submit" name="action" value="<?php echo ($uspid?'Save':'Verify') ?> Mapping" />
-									<input type="submit" name="action" value="Automap Fields" />
-								</div>
-								<hr />
-								<div id="uldiv">
-									<div style="margin:10px;">
-										<input type="submit" name="action" value="Start Upload" />
-									</div>
-								</div>
-							</div>
-							<?php 
-						} 
-						?>
-					</fieldset>
-					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
-					<input type="hidden" name="collid" value="<?php echo $collId;?>" />
-					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
-					<input type="hidden" name="ulfilename" value="<?php echo $ulFileName;?>" />
-				</form>
-				<?php
-			} 
 		}
 	}
 	else{
-		if($collId){
-			echo '<div style="font-weight:bold;font-size:120%;">ERROR: collection identifier not set</div>';
+		if(!$isEditor){
+			echo '<div style="font-weight:bold;font-size:120%;">ERROR: you are not authorized to upload to this collection</div>';
 		}
 		else{
-			echo '<div style="font-weight:bold;font-size:120%;">ERROR: you are not authorized to upload to this collection</div>';
+			echo '<div style="font-weight:bold;font-size:120%;">';
+			echo 'ERROR: Either you have tried to reach this page without going through the collection managment menu ';
+			echo 'or you have tried to upload a file that is too large. ';
+			echo 'You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). ';
+			echo 'You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increaing PHP upload limits may help) '; 
+			echo 'Use the back arrows to get back to the file upload page.';
+			echo '</div>';
 		}
 	}
 	?>
