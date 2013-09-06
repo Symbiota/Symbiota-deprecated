@@ -31,7 +31,7 @@ $(document).ready(function() {
 			}
 			return true;
 		},
-		selected: tabTarget
+		active: tabTarget
 	});
 
 	$("#ffsciname").autocomplete({ 

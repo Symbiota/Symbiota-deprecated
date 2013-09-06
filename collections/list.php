@@ -33,7 +33,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 
 		$(document).ready(function() {
 			$('#tabs').tabs({
-				selected: <?php echo $tabIndex; ?>,
+				active: <?php echo $tabIndex; ?>,
 				//spinner: 'Loading...',
 				cache: false,
 				ajaxOptions: {cache: false}
@@ -359,7 +359,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 	        	<h2>Google Map</h2>
 	        </div>
 			<div style='margin:10 0 0 20;'>
-			    <a href='javascript:var popupReference=window.open("../map/googlemap.php?maptype=occquery","gmap","toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20");'>
+			    <a href='javascript:var popupReference=window.open("googlemap.php","gmap","toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=950,height=700,left=20,top=20");'>
 			        Display coordinates in Google Map
 			    </a>
 			</div>

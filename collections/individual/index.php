@@ -85,14 +85,14 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 
 		$(document).ready(function() {
 			$('#tabs').tabs({ 
-				select: function(event, ui) {
-					if(ui.panel.id == "maptab" && !mapInit){
-						initializeMap();
+				beforeActivate: function(event, ui) {
+					if(document.getElementById("map_canvas") && ui.newTab.index() == 1 && !mapInit){
 						mapInit = true;
+						initializeMap();
 					}
 					return true;
 				},
-				selected: tabIndex 
+				activate: tabIndex 
 			});
 		});
 
@@ -200,7 +200,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 			        <?php 
 			        if($displayMap){
 			        	?>
-				        <li><a href="#mapTab"><span>Map</span></a></li>
+				        <li><a href="#maptab"><span>Map</span></a></li>
 			        	<?php 
 			        }
 					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>'; 

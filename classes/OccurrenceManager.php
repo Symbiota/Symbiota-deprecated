@@ -1,5 +1,4 @@
 <?php
-
 include_once($serverRoot.'/config/dbconnection.php');
 
 class OccurrenceManager{

@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	$('#tabs').tabs(
-		{ selected: tabIndex }
+		{ active: tabIndex }
 	);
 });
 
