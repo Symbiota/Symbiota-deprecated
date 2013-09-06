@@ -65,7 +65,7 @@ if($spprId){
 		<script language=javascript>
 			$(document).ready(function() {
 				$('#tabs').tabs({
-					selected: <?php echo $tabIndex; ?>,
+					active: <?php echo $tabIndex; ?>,
 					//spinner: 'Loading...',
 					cache: false,
 					ajaxOptions: {cache: false}

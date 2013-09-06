@@ -37,7 +37,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 				}
 
-				$('#tabs').tabs();
+				$("#tabs").tabs();
 
 				c = document.cookie;
 				if(c.indexOf("colldbs=all") > -1){

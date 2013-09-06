@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceMapManager.php');
+include_once($serverRoot.'/classes/OccurrenceMapManager2.php');
+//include_once($serverRoot.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
