@@ -333,7 +333,7 @@ if($collId) $collData = $collManager->getCollectionData();
 				<hr />
 				<div style="font-weight:bold;margin:20px;">
 					New collection added successfully! <br/>
-					Click <a href="../admin/specimenupload.php?collid=<?php echo $collId; ?>">here</a> 
+					Click <a href="../admin/specupload.php?action=addprofile&collid=<?php echo $collId; ?>">here</a> 
 					to upload specimen records for this new collection.
 				</div>
 				<hr />

@@ -40,13 +40,11 @@ elseif($uploadType == $FILEUPLOAD){
 elseif($uploadType == $DWCAUPLOAD){
 	$duManager = new SpecUploadDwca();
 	$duManager->setBaseFolderName($ulPath);
-	$duManager->setIncludeIdentificationHistory(true);
-	$duManager->setIncludeImages(true);
+	$duManager->setIncludeIdentificationHistory($importIdent);
+	$duManager->setIncludeImages($importImage);
 }
 
 $duManager->setCollId($collId);
-$duManager->setUspid($uspid);
-$duManager->setUspid($uspid);
 $duManager->setUspid($uspid);
 $duManager->setIncludeIdentificationHistory($importIdent);
 $duManager->setIncludeImages($importImage);

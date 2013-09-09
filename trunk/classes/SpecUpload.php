@@ -22,17 +22,33 @@ class SpecUpload{
 	protected $storedProcedure;
 	protected $lastUploadDate;
 	protected $uploadType;
+	private $securityKey;
 
-	protected $errorArr = Array();
+	private $verboseMode = 1;	// 0 = silent, 1 = echo, 2 = log
+	private $logFH;
 
 	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
 	
 	function __construct() {
+		global $serverRoot;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
+		if($this->verboseMode == 2){
+			//Create log File
+			if($serverRoot){
+				$logPath = $serverRoot;
+				if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
+				$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
+				$this->logFH = fopen($logPath, 'a');
+				$this->outputMsg("\nDateTime: ".date('Y-m-d h:i:s A'));
+			}
+		}
 	}
 	
 	function __destruct(){
  		if($this->conn) $this->conn->close();
+		if($this->verboseMode == 2){
+			if($this->logFH) fclose($this->logFH);
+		}
 	}
 	
 	public function setCollId($id){
@@ -85,7 +101,7 @@ class SpecUpload{
 
 	private function setCollInfo(){
 		if($this->collId){
-			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate '.
+			$sql = 'SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.icon, c.managementtype, cs.uploaddate, c.securitykey '.
 				'FROM omcollections c LEFT JOIN omcollectionstats cs ON c.collid = cs.collid '.
 				'WHERE (c.collid = '.$this->collId.')';
 			//echo $sql;
@@ -98,6 +114,7 @@ class SpecUpload{
 				$dateStr = ($row->uploaddate?date("d F Y g:i:s", strtotime($row->uploaddate)):"");
 				$this->collMetadataArr["uploaddate"] = $dateStr;
 				$this->collMetadataArr["managementtype"] = $row->managementtype;
+				$this->collMetadataArr["securitykey"] = $row->securitykey;
 			}
 			$result->close();
 		}
@@ -112,6 +129,27 @@ class SpecUpload{
 			return '';			
 		}
 		return $this->collMetadataArr;
+	}
+	
+	public function validateSecurityKey($k){
+		if(!$this->collId){
+			$sql = 'SELECT collid '.
+			'FROM omcollections '.
+    		'WHERE securitykey';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+	    	if($r = $result->fetch_object()){
+	    		$this->setCollId($r->collid);
+	    	}
+			$rs->free();
+		}
+		elseif(!isset($this->collMetadataArr["securitykey"])){
+			$this->setCollInfo();
+		}
+		if($k == $this->collMetadataArr["securitykey"]){
+			return true;
+		}
+		return false;
 	}
 
     public function readUploadParameters(){
@@ -142,7 +180,7 @@ class SpecUpload{
 	    	$result->close();
     	}
     }
-    
+
     public function editUploadProfile(){
 		$sql = 'UPDATE uploadspecparameters SET title = "'.$this->cleanInStr($_REQUEST['title']).'"'.
 			', platform = '.($_REQUEST['platform']?'"'.$_REQUEST['platform'].'"':'NULL').
@@ -220,6 +258,10 @@ class SpecUpload{
 		return $this->digirPath;
 	}
 
+	public function setDigirPath($p){
+		$this->digirPath = $p;
+	}
+
 	public function getDigirPKField(){
 		return $this->digirPKField;
 	}
@@ -239,11 +281,22 @@ class SpecUpload{
 	public function getUploadType(){
 		return $this->uploadType;
 	}
-
-	public function getErrorArr(){
-		return $this->errorArr;
+	
+	public function setVerboseMode($vMode){
+		if(is_numeric($vMode)){
+			$this->verboseMode = $vMode;
+		}
 	}
 
+	protected function outputMsg($str){
+		if($this->verboseMode == 1){
+			echo $str;
+		}
+		elseif($this->verboseMode == 2){
+			if($this->logFH) fwrite($this->logFH,$str."\n");
+		}
+	}
+	
 	protected function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = str_replace(chr(10),' ',$retStr);
