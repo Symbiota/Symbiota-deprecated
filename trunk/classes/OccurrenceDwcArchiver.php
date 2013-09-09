@@ -463,6 +463,7 @@ class OccurrenceDwcArchiver{
 					}
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 					if($guidTarget == 'catalogNumber'){
 						$r['occurrenceID'] = $r['catalogNumber'];
 					}
@@ -470,7 +471,6 @@ class OccurrenceDwcArchiver{
 						$r['occurrenceID'] = $r['recordId'];
 					}
 					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 					unset($r['collid']);
 					fputcsv($fh, $this->addcslashesArr($r));
 				}
