@@ -74,9 +74,9 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
 	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
     <link href="../../css/main.css" type="text/css" rel="stylesheet">
-	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
-	<script src="../../js/jquery.js" type="text/javascript"></script>
-	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
+	<link href="../../css/jquery-ui.css?ver=20130906" type="text/css" rel="stylesheet" />
+	<script src="../../js/jquery.js?ver=20130906" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js?ver=20130906" type="text/javascript"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;

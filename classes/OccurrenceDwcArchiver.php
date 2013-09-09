@@ -463,7 +463,7 @@ class OccurrenceDwcArchiver{
 					}
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
-					//$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 					unset($r['collid']);
 					if($guidTarget == 'catalogNumber'){
@@ -516,7 +516,7 @@ class OccurrenceDwcArchiver{
 			//echo $sql;
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 				while($r = $rs->fetch_assoc()){
-					//$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 					fputcsv($fh, $this->addcslashesArr($r));
 				}
 				$rs->free();
@@ -570,7 +570,7 @@ class OccurrenceDwcArchiver{
 				while($r = $rs->fetch_assoc()){
 					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
-						//$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+						$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
 						$r['webstatement'] = $r['rights'];
 						$r['rights'] = '';
 						if(!$r['usageterms']){

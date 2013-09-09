@@ -320,8 +320,8 @@ class ChecklistAdmin {
 	}
 
 	private function cleanOutStr($str){
-		//$str = str_replace('"',"&quot;",$str);
-		//$str = str_replace("'","&apos;",$str);
+		$str = str_replace('"',"&quot;",$str);
+		$str = str_replace("'","&apos;",$str);
 		return $str;
 	}
 	

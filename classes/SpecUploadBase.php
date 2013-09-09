@@ -58,8 +58,9 @@ class SpecUploadBase extends SpecUpload{
 		}
 		return $dbpk;
 	}
-	
-	public function loadFieldMap(){
+
+	public function loadFieldMap($autoBuildFieldMap = false){
+		if($this->uploadType == $this->DIGIRUPLOAD) $autoBuildFieldMap = true;
 		//Get Field Map for $fieldMap
 		if($this->uspid && !$this->fieldMap && $this->uploadType != $this->DIGIRUPLOAD && $this->uploadType != $this->STOREDPROCEDURE){
 			$sql = 'SELECT usm.sourcefield, usm.symbspecfield FROM uploadspecmap usm '.
@@ -88,7 +89,7 @@ class SpecUploadBase extends SpecUpload{
 		while($row = $rs->fetch_object()){
 			$field = strtolower($row->Field);
 			if($field != "dbpk" && $field != "initialtimestamp" && $field != "occid" && $field != "collid" && $field != "tidinterpreted"){
-				if($this->uploadType == $this->DIGIRUPLOAD){
+				if($autoBuildFieldMap){
 					$this->fieldMap[$field]["field"] = $field;
 				}
 				$type = $row->Type;
@@ -330,45 +331,44 @@ class SpecUploadBase extends SpecUpload{
  		}
  		elseif($this->uploadType == $this->SCRIPTUPLOAD){
  			if(system($this->queryStr)){
-				echo '<li style="font-weight:bold;">Script Upload successful.</li>';
-				echo '<li style="font-weight:bold;">Initializing final transfer steps...</li>';
- 				$this->finalUploadSteps($finalTransfer);
- 			}
- 		}
+				$this->outputMsg('<li style="font-weight:bold;">Script Upload successful.</li>');
+				$this->outputMsg('<li style="font-weight:bold;">Initializing final transfer steps...</li>');
+				$this->finalUploadSteps($finalTransfer);
+			}
+		}
 		ob_flush();
 		flush();
- 	}
+	}
 
 	public function finalUploadSteps($finalTransfer){
- 		//Run custom cleaning Stored Procedure, if one exists
-		echo '<li style="font-weight:bold;">Records Upload Complete!</li>';
-		echo '<li style="font-weight:bold;">Starting custom cleaning scripts...</li>';
+		//Run custom cleaning Stored Procedure, if one exists
+		$this->outputMsg('<li style="font-weight:bold;">Records Upload Complete!</li>');
+		$this->outputMsg('<li style="font-weight:bold;">Starting custom cleaning scripts...</li>');
 		ob_flush();
 		flush();
 
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//If collection is a snapshot, map upload to existing records. These records will be updated rather than appended
-			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ';
+			$this->outputMsg('<li style="font-weight:bold;">Linking existing record in preparation for updating (matching DBPKs)... ');
 			ob_flush();
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.dbpk = o.dbpk) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid '.
 				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL';
 			$this->conn->query($sql);
-			echo 'Done!</li> ';
-			
+			$this->outputMsg('Done!</li> ');
 		}
 		
 		if($this->storedProcedure){
 			try{
 				if($this->conn->query('CALL '.$this->storedProcedure)){
-					echo '<li style="font-weight:bold;margin-left:10px;">';
-					echo 'Stored procedure executed: '.$this->storedProcedure;
-					echo '</li>';
+					$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">');
+					$this->outputMsg('Stored procedure executed: '.$this->storedProcedure);
+					$this->outputMsg('</li>');
 				}
 			}
 			catch(Exception $e){
-				echo '<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>';
+				$this->outputMsg('<li style="color:red;margin-left:10px;">ERROR: Record cleaning via custom stroed procedure failed ('.$this->storedProcedure.')</li>');
 			}
 			ob_flush();
 			flush();
@@ -380,14 +380,14 @@ class SpecUploadBase extends SpecUpload{
 		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//Match records that were processed via the portal, walked back to collection's central database, and come back to portal 
-			echo '<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ';
+			$this->outputMsg('<li style="font-weight:bold;">Linking existing record in preparation for updating (matching catalogNumbers on new records only)... ');
 			ob_flush();
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 				'SET u.occid = o.occid, o.dbpk = u.dbpk '.
 				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL AND o.dbpk IS NULL ';
 			$this->conn->query($sql);
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 		}
 
 		$sql = "SELECT count(*) AS cnt FROM uploadspectemp WHERE (collid = ".$this->collId.')';
@@ -399,64 +399,64 @@ class SpecUploadBase extends SpecUpload{
 
 		if($finalTransfer){
 			$this->performFinalTransfer();
-			echo '<li style="font-weight:bold;">Transfer process Complete! Click <a href="../misc/collprofile.php?collid='.$this->collId.'">here</a> to view stats page</li>';
+			$this->outputMsg('<li style="font-weight:bold;">Transfer process Complete! Click <a href="../misc/collprofile.php?collid='.$this->collId.'">here</a> to view stats page</li>');
 		}
 		else{
-			echo '<li style="font-weight:bold;">Upload Procedure Complete';
-			echo ': '.$this->transferCount.' records uploaded to temporary table';
-			echo '</li>';
+			$this->outputMsg('<li style="font-weight:bold;">Upload Procedure Complete');
+			$this->outputMsg(': '.$this->transferCount.' records uploaded to temporary table');
+			$this->outputMsg('</li>');
 			if($this->transferCount){
-				echo '<li style="font-weight:bold;">Use controls below to activate records and transfer to specimen table</li>';
+				$this->outputMsg('<li style="font-weight:bold;">Use controls below to activate records and transfer to specimen table</li>');
 			}
 		}
 	}
 	
 	private function recordCleaningStage1(){
-		echo '<li style="font-weight:bold;">Starting Stage 1 cleaning</li>';
+		$this->outputMsg('<li style="font-weight:bold;">Starting Stage 1 cleaning</li>');
 		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
-			echo '<li style="font-weight:bold;margin-left:10px;">Remove NULL dbpk values... ';
+			$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Remove NULL dbpk values... ');
 			ob_flush();
 			flush();
 			$sql = 'DELETE FROM uploadspectemp WHERE dbpk IS NULL AND collid = '.$this->collId;
 			$this->conn->query($sql);
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 			
-			echo '<li style="font-weight:bold;margin-left:10px;">Remove duplicate dbpk values... ';
+			$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Remove duplicate dbpk values... ');
 			ob_flush();
 			flush();
 			$sql = 'DELETE u.* '.
 				'FROM uploadspectemp u INNER JOIN (SELECT dbpk FROM uploadspectemp GROUP BY dbpk, collid HAVING Count(*)>1 AND collid = '.$this->collId.') t2 ON u.dbpk = t2.dbpk '.
 				'WHERE collid = '.$this->collId;
 			if($this->conn->query($sql)){
-				echo 'Done! ';
+				$this->outputMsg('Done! ');
 			}
 			else{
-				echo '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+				$this->outputMsg('<span style="color:red;">ERROR</span> ('.$this->conn->error.')');
 			}
-			echo '</li>';
+			$this->outputMsg('</li>');
 		}
 		
-		echo '<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ';
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Updating NULL eventDate with year-month-day... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE IGNORE uploadspectemp u '.
 			'SET u.eventDate = CONCAT_WS("-",LPAD(u.year,4,"19"),IFNULL(LPAD(u.month,2,"0"),"00"),IFNULL(LPAD(u.day,2,"0"),"00")) '.
 			'WHERE u.eventDate IS NULL AND u.year > 1300 AND u.year < 2020 AND collid = '.$this->collId;
 		if($this->conn->query($sql)){
-			echo 'Done! ';
+			$this->outputMsg('Done! ');
 		}
 		else{
-			echo '<span style="color:red;">ERROR</span> ('.$this->conn->error.')';
+			$this->outputMsg('<span style="color:red;">ERROR</span> ('.$this->conn->error.')');
 		}
-		echo '</li>';
+		$this->outputMsg('</li>');
 		ob_flush();
 		flush();
 	}
 
 	private function recordCleaningStage2(){
-		echo '<li style="font-weight:bold;">Starting Stage 2 cleaning!</li>';
-		echo '<li style="font-weight:bold;margin-left:10px;">Further updates on event date fields...';
+		$this->outputMsg('<li style="font-weight:bold;">Starting Stage 2 cleaning!</li>');
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Further updates on event date fields...');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u '.
@@ -483,9 +483,9 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.endDayOfYear = DAYOFYEAR(u.LatestDateCollected) '.
 			'WHERE u.collid = '.$this->collId.' AND u.endDayOfYear IS NULL AND u.LatestDateCollected IS NOT NULL';
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 
-		echo '<li style="font-weight:bold;margin-left:10px;">Cleaning taxonomy...';
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning taxonomy...');
 		ob_flush();
 		flush();
 
@@ -584,9 +584,9 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE uploadspectemp SET sciname = trim(CONCAT_WS(" ",Genus,SpecificEpithet,taxonrank,InfraSpecificEpithet)) '.
 			'WHERE sciname IS NULL AND Genus IS NOT NULL AND collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 		
-		echo '<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...';
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Linking to taxonomic thesaurus...');
 		ob_flush();
 		flush();
 
@@ -614,9 +614,9 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.scientificNameAuthorship = t.author '.
 			'WHERE (u.scientificNameAuthorship = "" OR u.scientificNameAuthorship IS NULL) AND t.author IS NOT NULL AND collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 
-		echo '<li style="font-weight:bold;margin-left:10px;">Cleaning illegal and errored coordinates...';
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning illegal and errored coordinates...');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude '.
@@ -633,13 +633,13 @@ class SpecUploadBase extends SpecUpload{
 			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
 			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180 AND collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 	}
 	
 	public function performFinalTransfer(){
 		//Clean and Transfer records from uploadspectemp to specimens
 		
-		echo '<li style="font-weight:bold;">Updating existing occurrence records... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating existing occurrence records... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
@@ -672,29 +672,29 @@ class SpecUploadBase extends SpecUpload{
 			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.duplicateQuantity = u.duplicateQuantity '.
 			'WHERE u.collid = '.$this->collId;
 		if($this->conn->query($sql)){
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 		}
 		else{
-			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 		
 		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
 			//Update DBPKs for records that were processed via the portal, walked back to collection's central database, and now come back to portal with assigned DBPKs 
-			echo '<li style="font-weight:bold;">Updating DBPKs for records originally processed in portal, walked back to central database, and now return to portal with assigned DBPKs... ';
+			$this->outputMsg('<li style="font-weight:bold;">Updating DBPKs for records originally processed in portal, walked back to central database, and now return to portal with assigned DBPKs... ');
 			ob_flush();
 			flush();
 			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
 				'SET o.dbpk = u.dbpk '.
 				'WHERE u.collid = '.$this->collId.' AND o.dbpk IS NULL AND u.dbpk IS NOT NULL';
 			if($this->conn->query($sql)){
-				echo 'Done!</li> ';
+				$this->outputMsg('Done!</li> ');
 			}
 			else{
-				echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+				$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 			}
 		}
 		
-		echo '<li style="font-weight:bold;">Inserting new records into active occurrence table... ';
+		$this->outputMsg('<li style="font-weight:bold;">Inserting new records into active occurrence table... ');
 		ob_flush();
 		flush();
 		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, '.
@@ -728,13 +728,13 @@ class SpecUploadBase extends SpecUpload{
 			'FROM uploadspectemp u '.
 			'WHERE u.occid IS NULL AND u.collid = '.$this->collId;
 		if($this->conn->query($sql)){
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 		}
 		else{
-			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 		
-		echo '<li style="font-weight:bold;">Updating georeference indexing... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating georeference indexing... ');
 		ob_flush();
 		flush();
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
@@ -743,10 +743,10 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE u.tidinterpreted IS NOT NULL AND u.decimallatitude IS NOT NULL '.
 			'AND u.decimallongitude IS NOT NULL';
 		if($this->conn->query($sql)){
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 		}
 		else{
-			echo 'FAILED! ERROR: '.$this->conn->error.'</li> ';
+			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 
 		//Process images, if they exist
@@ -754,7 +754,7 @@ class SpecUploadBase extends SpecUpload{
 		
 		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo '<li style="font-weight:bold;">Collection transfer process finished</li>';
+		$this->outputMsg('<li style="font-weight:bold;">Collection transfer process finished</li>');
 		ob_flush();
 		flush();
 		
@@ -762,14 +762,14 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
 
-		echo '<li style="font-weight:bold;">Updating total record count... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating total record count... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 		
 		echo '<li style="font-weight:bold;">Updating family count... ';
 		ob_flush();
@@ -1713,11 +1713,11 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	public function setIncludeIdentificationHistory($boolIn){
-		$this->includeIdentificationHistory = $boolIn;
+		if(is_numeric($boolIn)) $this->includeIdentificationHistory = $boolIn;
 	}
 
 	public function setIncludeImages($boolIn){
-		$this->includeImages = $boolIn;
+		if(is_numeric($boolIn)) $this->includeImages = $boolIn;
 	}
 	
 	protected function encodeString($inStr){
