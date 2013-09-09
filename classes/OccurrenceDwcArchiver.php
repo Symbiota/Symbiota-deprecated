@@ -643,11 +643,14 @@ class OccurrenceDwcArchiver{
 		$this->logOrEcho("\n-----------------------------------------------------\n\n");
 		
 		foreach($collIdArr as $id){
+			//Create a separate DWCA object for each collection
 			$this->setCollArr($id);
 			$this->logOrEcho('Starting DwC-A process for '.$this->collArr[$id]['collcode']."\n");
 			$this->setFileName($this->collArr[$id]['collcode']);
 			$this->createDwcArchive($includeDets, $includeImgs, $redactLocalities);
 		}
+		//Reset $this->collArr with all the collections and then rebuild the RSS feed 
+		$this->setCollArr(implode(',',$collIdArr));
 		$this->writeRssFile();
 		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
 	}
@@ -658,7 +661,7 @@ class OccurrenceDwcArchiver{
 		$this->logOrEcho("Mapping data to RSS feed... \n");
 		
 		//Create new document and write out to target
-		$newDoc = new DOMDocument('1.0', 'iso-8859-1');
+		$newDoc = new DOMDocument();
 
 		//Add root element 
 		$rootElem = $newDoc->createElement('rss');
