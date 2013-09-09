@@ -463,15 +463,15 @@ class OccurrenceDwcArchiver{
 					}
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
-					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
-					unset($r['collid']);
 					if($guidTarget == 'catalogNumber'){
 						$r['occurrenceID'] = $r['catalogNumber'];
 					}
 					elseif($guidTarget == 'symbiotaUUID'){
 						$r['occurrenceID'] = $r['recordId'];
 					}
+					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+					unset($r['collid']);
 					fputcsv($fh, $this->addcslashesArr($r));
 				}
 				$rs->free();
