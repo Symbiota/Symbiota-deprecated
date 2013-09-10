@@ -229,8 +229,7 @@ if($taxonManager->getSciName() != "unknown"){
 		if($mapSrc){
 			$gUrl = ""; $iUrl = ""; 
 			if($displayLocality){
-				//$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
-				$gUrl = "javascript:var popupReference=window.open('googlemap.php?taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
+				$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$taxonManager->getSciName()."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
 			}
 			$url = array_shift($mapSrc);
 			if(strpos($url,"maps.google.com")){
@@ -407,8 +406,7 @@ if($taxonManager->getSciName() != "unknown"){
 							if(array_key_exists("map",$subArr) && $mapUrl = $subArr["map"]){
 								$gUrl = ""; $iUrl = "";
 								if($taxonManager->getSecurityStatus() == 1 || $isAdmin){
-									//$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$subArr["tid"]."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
-									$gUrl = "javascript:var popupReference=window.open('googlemap.php?taxon=".$subArr["tid"]."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
+									$gUrl = "javascript:var popupReference=window.open('../map/googlemap.php?maptype=taxa&taxon=".$subArr["tid"]."&clid=".$taxonManager->getClid()."','gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20');";
 								}
 								$aUrl = "";
 								if(strpos($mapUrl,"maps.google.com")){
