@@ -1,7 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceMapManager2.php');
-//include_once($serverRoot.'/classes/OccurrenceMapManager.php');
+include_once($serverRoot.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
@@ -72,6 +71,9 @@ elseif($mapType == 'occquery'){
         	$maxLng = -180;
         	$maxLat = -90;
 			foreach($coordArr as $sciName => $valueArr){
+				?>
+				markers = [];
+				<?php
 				$iconColor = $valueArr["color"];
 				if($iconColor) {
 					$iconKey = '<div><svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:12px;margin-bottom:-2px;"><g><rect x="1" y="1" width="11" height="10" fill="#'.$iconColor.'" stroke="#000000" stroke-width="1px" /></g></svg>';
@@ -358,7 +360,7 @@ elseif($mapType == 'occquery'){
 							<div style="float:right;">
 								Marker Name: <input name='title' id='title' size='20' type='text' />
 							</div><br />
-							<div style="float:right;margin-top:20px;">
+							<div style="float:right;margin-top:10px;">
 								<input type='submit' value='Add Marker' onclick='addRefPoint();' />
 							</div>
 						</div>
