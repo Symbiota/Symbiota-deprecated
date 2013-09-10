@@ -8,6 +8,7 @@ class BatchImageConnectionFactory {
 			'username' => '',
 			'password' => '',
 			'database' => '',
+			'port' => '3306',
 			'charset' => ''		//utf8, latin1, latin2, etc
 		)
 	);
@@ -19,7 +20,7 @@ class BatchImageConnectionFactory {
 		for ($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
 			$server = MySQLiConnectionFactory::$SERVERS[$i];
 			if($server['type'] == $type){
-				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database']);
+				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database'], $server['port']);
 				if(mysqli_connect_errno()){
 					throw new Exception('Could not connect to any databases! Please try again later.');
 				}
