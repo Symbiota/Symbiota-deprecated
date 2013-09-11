@@ -30,28 +30,32 @@ class BatchImageProcessor {
 	private $dbMetadata = 1;
 	private $processUsingImageMagick = 0;
 
-	private $logPath;
 	private $silent = 0;
 	private $logFH;
 	private $mdOutputFH;
+	private $logPath;
 	
 	private $sourceGdImg;
 	private $sourceImagickImg;
 	
 	private $dataLoaded = 0;
 
-	function __construct(){
+	function __construct($logPath){
 		ini_set('memory_limit','512M');
 		ini_set('auto_detect_line_endings', true);
-		//Create log File
-		if(!$this->silent){
-			if($this->logPath && file_exists($this->logPath)){
-				$logFile = $this->logPath."log_".date('Ymd').".log";
-				$this->logFH = fopen($logFile, 'a');
-				$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
-			}
-			else{
-				echo 'ERROR creating Log file; path not found: '.$this->logPath;
+		if($logPath){
+			if(substr($logPath,-1) != '/' && substr($logPath,-1) != "\\") $logPath .= '/';
+			$this->logPath = $logPath;
+			if(!$this->silent ){
+				//Create log File
+				if(file_exists($logPath)){
+					$logFile = $logPath."log_".date('Ymd').".log";
+					$this->logFH = fopen($logFile, 'a');
+					$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
+				}
+				else{
+					echo 'ERROR creating Log file; path not found: '.$logPath."\n";
+				}
 			}
 		}
 		if($this->dbMetadata){
@@ -1311,11 +1315,6 @@ class BatchImageProcessor {
 		$this->processUsingImageMagick = $useIM;
 	}
 	 
-	public function setLogPath($p){
-		if(substr($p,-1) != '/' && substr($p,-1) != "\\") $p .= '/'; 
-		$this->logPath = $p;
-	}
-
 	public function setSilent($c){
 		$this->silent = $c;
 	}
