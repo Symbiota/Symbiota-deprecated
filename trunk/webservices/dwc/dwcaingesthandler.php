@@ -15,10 +15,10 @@
  */
 
 date_default_timezone_set('America/Phoenix');
-require_once('../../classes/OccurrenceDwcArchiver');
-require_once('../..//classes/SpecUploadBase.php');
-require_once('../..//classes/SpecUploadFile.php');
-require_once('../..//classes/SpecUploadDwca.php');
+include_once('../../config/symbini.php');
+require_once($serverRoot.'/classes/SpecUploadBase.php');
+require_once($serverRoot.'/classes/SpecUploadFile.php');
+require_once($serverRoot.'/classes/SpecUploadDwca.php');
 
 
 $uploadType = preg_replace("/[^0-9]/","",$_REQUEST["uploadtype"]);
@@ -35,12 +35,7 @@ if(!$uploadType){
 	exit("ERROR: uploadtype is required and is null ");
 }
 
-$duManager = new SpecUploadBase();
-if(!$duManager->validateSecurityKey($securityKey)){
-	exit('ERROR: security key validation failed!');
-}
-$duManager->setVerboseMode(2);
-
+$duManager;
 $FILEUPLOAD = 3; $DWCAUPLOAD = 6;
 if($uploadType == $FILEUPLOAD){
 	$duManager = new SpecUploadFile();
@@ -52,6 +47,13 @@ elseif($uploadType == $DWCAUPLOAD){
 	$duManager->setIncludeImages($importImage);
 	if($filePath) $duManager->setDigirPath($filePath); 
 }
+else{
+	exit('ERROR: illegal upload type = '.$uploadType.' (should be 3 = File Upload, 6 = DWCA upload)');
+}
+if(!$duManager->validateSecurityKey($securityKey)){
+	exit('ERROR: security key validation failed!');
+}
+$duManager->setVerboseMode(2);
 
 $duManager->loadFieldMap(true);
 $ulPath = $duManager->uploadFile();

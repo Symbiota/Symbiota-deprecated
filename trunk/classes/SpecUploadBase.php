@@ -36,7 +36,7 @@ class SpecUploadBase extends SpecUpload{
 	private $imageTranslationMap = array('accessuri'=>'url');
 	
 	function __construct() {
- 		parent::__construct();
+		parent::__construct();
 	}
 	
 	function __destruct(){
@@ -112,6 +112,15 @@ class SpecUploadBase extends SpecUpload{
 		}
 		$rs->close();
 
+//		if($autoBuildFieldMap){
+//			if($this->uploadType == $this->DWCAUPLOAD){
+//				$this->fieldMap['dbpk']['field'] = 'id';
+//			}
+//			elseif($this->uploadType == $this->DIGIRUPLOAD && $this->digirPKField){
+//				$this->fieldMap['dbpk']['field'] = $recMap[$this->digirPKField];
+//			}
+//		}
+		
 		if($this->uploadType == $this->FILEUPLOAD || $this->uploadType == $this->DWCAUPLOAD || $this->uploadType == $this->DIRECTUPLOAD){
 			if($this->includeIdentificationHistory){
 				//Get identification metadata
@@ -771,7 +780,7 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
 		
-		echo '<li style="font-weight:bold;">Updating family count... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating family count... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -779,9 +788,9 @@ class SpecUploadBase extends SpecUpload{
 			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li> ';
+		$this->outputMsg('Done!</li> ');
 		
-		echo '<li style="font-weight:bold;">Updating genus count... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating genus count... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -790,9 +799,9 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li>';
+		$this->outputMsg('Done!</li>');
 
-		echo '<li style="font-weight:bold;">Updating species count... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating species count... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -801,9 +810,9 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done</li>';
+		$this->outputMsg('Done</li>');
 		
-		echo '<li style="font-weight:bold;">Updating georeference count... ';
+		$this->outputMsg('<li style="font-weight:bold;">Updating georeference count... ');
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
@@ -811,31 +820,31 @@ class SpecUploadBase extends SpecUpload{
 			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
-		echo 'Done!</li>';
+		$this->outputMsg('Done!</li>');
 		
-		echo '<li style="font-weight:bold;">Searching for duplicate Catalog Numbers... ';
+		$this->outputMsg('<li style="font-weight:bold;">Searching for duplicate Catalog Numbers... ');
 		ob_flush();
 		flush();
 		$sql = 'SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.
 			'HAVING Count(*)>1 AND collid = '.$this->collId.' AND catalognumber IS NOT NULL';
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
-			echo '<span style="color:red;">Duplicate Catalog Numbers exist</span></li>';
-			echo '<li style="margin-left:10px;">';
-			echo 'Open <a href="../editor/occurrencecleaner.php?collid='.$this->collId.'&action=listdupscatalog" target="_blank">Occurrence Cleaner</a> to resolve this issue';
-			echo '</li>';
+			$this->outputMsg('<span style="color:red;">Duplicate Catalog Numbers exist</span></li>');
+			$this->outputMsg('<li style="margin-left:10px;">');
+			$this->outputMsg('Open <a href="../editor/occurrencecleaner.php?collid='.$this->collId.'&action=listdupscatalog" target="_blank">Occurrence Cleaner</a> to resolve this issue');
+			$this->outputMsg('</li>');
 		}
 		else{
-			echo 'All good!</li>';
+			$this->outputMsg('All good!</li>');
 		}
 		$rs->free();
 
-		echo '<li style="font-weight:bold;">Populating global unique identifiers (GUIDs) for all records... ';
+		$this->outputMsg('<li style="font-weight:bold;">Populating global unique identifiers (GUIDs) for all records... ');
 		ob_flush();
 		flush();
 		$uuidManager = new UuidFactory();
 		$uuidManager->populateGuids($this->collId);
-		echo 'Done!</li>';
+		$this->outputMsg('Done!</li>');
 		
 	}
 	
@@ -850,7 +859,7 @@ class SpecUploadBase extends SpecUpload{
 			$imgCnt = $r->cnt;
 		}
 		if($imgCnt){
-			echo '<li style="font-weight:bold;">Tranferring '.$imgCnt.' image URLs... ';
+			$this->outputMsg('<li style="font-weight:bold;">Tranferring '.$imgCnt.' image URLs... ');
 			ob_flush();
 			flush();
 			//Update occid by linking catalognumbers
@@ -867,7 +876,7 @@ class SpecUploadBase extends SpecUpload{
 			$imgManager = new ImageCleaner();
 			$imgManager->setVerbose(0);
 			$imgManager->buildThumbnailImages($this->collId);
-			echo 'Done!</li> ';
+			$this->outputMsg('Done!</li> ');
 		}
 	}
 
@@ -912,7 +921,7 @@ class SpecUploadBase extends SpecUpload{
 					//Make sure event date is a valid format or drop into verbatimEventDate
 					$dateStr = $this->formatDate($recMap['eventdate']);
 					if($dateStr){
-						if(strpos('-00',$dateStr)) echo $recMap['eventdate'].' => '.$dateStr."<br/>"; 
+						//if(strpos('-00',$dateStr)) $this->outputMsg($recMap['eventdate'].' => '.$dateStr."<br/>"); 
 						if(strpos('-00',$dateStr) && (!array_key_exists('verbatimeventdate',$recMap) || !$recMap['verbatimeventdate'])){
 							$recMap['verbatimeventdate'] = $recMap['eventdate'];
 						}
@@ -1282,17 +1291,17 @@ class SpecUploadBase extends SpecUpload{
 			
 			if($this->conn->query($sql)){
 				$this->transferCount++;
-				if($this->transferCount%1000 == 0) echo '<li style="font-weight:bold;">Upload count: '.$this->transferCount.'</li>';
+				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="font-weight:bold;">Upload count: '.$this->transferCount.'</li>');
 				ob_flush();
 				flush();
-				//echo "<li>";
-				//echo "Appending/Replacing observation #".$this->transferCount.": SUCCESS";
-				//echo "</li>";
+				//$this->outputMsg("<li>");
+				//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
+				//$this->outputMsg("</li>");
 			}
 			else{
-				echo "<li>FAILED adding record #".$this->transferCount."</li>";
-				echo "<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>";
-				echo "<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>";
+				$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
+				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
+				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
 			}
 		}
 	}

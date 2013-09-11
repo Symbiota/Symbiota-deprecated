@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+require_once($serverRoot.'/config/dbconnection.php');
 
 class SpecUpload{
 
@@ -30,18 +30,7 @@ class SpecUpload{
 	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
 	
 	function __construct() {
-		global $serverRoot;
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		if($this->verboseMode == 2){
-			//Create log File
-			if($serverRoot){
-				$logPath = $serverRoot;
-				if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
-				$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
-				$this->logFH = fopen($logPath, 'a');
-				$this->outputMsg("\nDateTime: ".date('Y-m-d h:i:s A'));
-			}
-		}
 	}
 	
 	function __destruct(){
@@ -130,16 +119,19 @@ class SpecUpload{
 		}
 		return $this->collMetadataArr;
 	}
-	
+
 	public function validateSecurityKey($k){
 		if(!$this->collId){
 			$sql = 'SELECT collid '.
 			'FROM omcollections '.
-    		'WHERE securitykey';
+    		'WHERE securitykey = "'.$k.'"';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
-	    	if($r = $result->fetch_object()){
+	    	if($r = $rs->fetch_object()){
 	    		$this->setCollId($r->collid);
+	    	}
+	    	else{
+	    		return false;
 	    	}
 			$rs->free();
 		}
@@ -283,8 +275,19 @@ class SpecUpload{
 	}
 	
 	public function setVerboseMode($vMode){
+		global $serverRoot;
 		if(is_numeric($vMode)){
 			$this->verboseMode = $vMode;
+			if($this->verboseMode == 2){
+				//Create log File
+				if($serverRoot){
+					$logPath = $serverRoot;
+					if(substr($serverRoot,-1) != '/' && substr($serverRoot,-1) != '\\') $logPath .= '/';
+					$logPath .= "temp/logs/dataupload_".date('Ymd').".log";
+					$this->logFH = fopen($logPath, 'a');
+					$this->outputMsg("\nDateTime: ".date('Y-m-d h:i:s A'));
+				}
+			}
 		}
 	}
 
