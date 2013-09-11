@@ -44,15 +44,22 @@ class BatchImageProcessor {
 		ini_set('memory_limit','512M');
 		ini_set('auto_detect_line_endings', true);
 		//Create log File
-		if($this->logPath && file_exists($this->logPath)){
-			$logFile = $this->logPath."log_".date('Ymd').".log";
-			$this->logFH = fopen($logFile, 'a');
-			$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
+		if(!$this->silent){
+			if($this->logPath && file_exists($this->logPath)){
+				$logFile = $this->logPath."log_".date('Ymd').".log";
+				$this->logFH = fopen($logFile, 'a');
+				$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
+			}
+			else{
+				echo 'ERROR creating Log file; path not found: '.$this->logPath;
+			}
 		}
 		if($this->dbMetadata){
 			//Set collection
-			$this->conn = BatchImageConnectionFactory::getCon('write');
-			if(!$this->conn){
+			if(class_exists('BatchImageConnectionFactory')){
+				$this->conn = BatchImageConnectionFactory::getCon('write');
+			}
+			if(!$this->conn && class_exists('MySQLiConnectionFactory')){
 				//Try getting connection through portals central connection factory
 				$this->conn = MySQLiConnectionFactory::getCon('write');
 			}
