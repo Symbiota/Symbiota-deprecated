@@ -40,10 +40,9 @@ $imageProcessor->setKeepOrig($keepOrig);
 $imageProcessor->setCreateNewRec($createNewRec);
 $imageProcessor->setCopyOverImg($copyOverImg);
 
-$imageProcessor->setLogPath($logPath);
 $imageProcessor->setSilent($silent);
 
 //Run process
-$imageProcessor->batchLoadImages();
+$imageProcessor->batchLoadImages($logPath);
 
 ?>
