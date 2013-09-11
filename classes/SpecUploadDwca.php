@@ -19,7 +19,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	public function uploadFile(){
 		//Create download location
 		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
-		mkdir($this->uploadTargetPath.$localFolder,777);
+		mkdir($this->uploadTargetPath.$localFolder);
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
 		
 		if($this->digirPath){
@@ -229,6 +229,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				$cset = strtolower(str_replace('-','',$charset)); 
 				$this->sourceArr = $this->metaArr['occur']['fields'];
 		 		$this->transferCount = 0;
+		 		if(!array_key_exists('',$this->fieldMap)) $this->fieldMap['dbpk']['field'] = 'id';
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();
 					foreach($this->fieldMap as $symbField => $sMap){
@@ -249,7 +250,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				//if(file_exists($fullPath)) unlink($fullPath);
 				
 				$this->finalUploadSteps($finalTransfer);
-				
+
 				//Upload identification history
 				if($this->includeIdentificationHistory){
 					
