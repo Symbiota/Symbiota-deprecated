@@ -1,12 +1,12 @@
 <?php 
 //Variables needing security
 //Base folder containing herbarium folder ; read access needed
-$sourcePathBase = 'C:\\temp\\BatchImageProc\\source';
+$sourcePathBase = '';
 //Folder where images are to be placed; write access needed
-$targetPathBase = 'C:\\temp\\BatchImageProc\\target';
+$targetPathBase = '';
 //Url base needed to build image URL that will be saved in DB
 //Only needed if scripts are run on an exteral server
-$imgUrlBase = 'http://storage.idigbio.org/';
+$imgUrlBase = '';
 //Path to where log files will be placed
 $logPath = $sourcePathBase.'/logs';
 //Full path to Symbiota project root folder

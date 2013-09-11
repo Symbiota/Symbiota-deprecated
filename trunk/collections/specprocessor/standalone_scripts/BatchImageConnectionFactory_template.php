@@ -14,11 +14,11 @@ class BatchImageConnectionFactory {
 	);
 
 	public static function getCon($type) {
-		if(!MySQLiConnectionFactory::$SERVERS[0]['database']) return null; 
+		if(!BatchImageConnectionFactory::$SERVERS[0]['database']) return null; 
 		// Figure out which connections are open, automatically opening any connections
 		// which are failed or not yet opened but can be (re)established.
-		for ($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
-			$server = MySQLiConnectionFactory::$SERVERS[$i];
+		for ($i = 0, $n = count(BatchImageConnectionFactory::$SERVERS); $i < $n; $i++) {
+			$server = BatchImageConnectionFactory::$SERVERS[$i];
 			if($server['type'] == $type){
 				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database'], $server['port']);
 				if(mysqli_connect_errno()){
