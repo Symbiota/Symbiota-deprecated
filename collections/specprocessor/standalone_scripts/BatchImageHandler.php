@@ -18,7 +18,7 @@ if (file_exists("$symbiotaClassPath/SpecProcessorNEVP.php")) {
 }
 
 //-------------------------------------------------------------------------------------------//
-$imageProcessor = new BatchImageProcessor();
+$imageProcessor = new BatchImageProcessor($logPath);
 
 //Set variables
 $imageProcessor->setCollArr($collArr);
@@ -43,6 +43,6 @@ $imageProcessor->setCopyOverImg($copyOverImg);
 $imageProcessor->setSilent($silent);
 
 //Run process
-$imageProcessor->batchLoadImages($logPath);
+$imageProcessor->batchLoadImages();
 
 ?>
