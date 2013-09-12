@@ -10,7 +10,7 @@ $imgUrlBase = '';
 //Path to where log files will be placed
 $logPath = $sourcePathBase.'/logs';
 //Full path to Symbiota project root folder
-$serverRoot = 'C:\\htdocs\\symbiota\\trunk';
+$serverRoot = '';
 // Path to Symbiota Class Files, set to null if class files are 
 // not available.  Correct path is required for the processing of 
 // xml batch files.
