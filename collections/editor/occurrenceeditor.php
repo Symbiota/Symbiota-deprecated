@@ -1285,7 +1285,14 @@ else{
 			}
 		}
 		else{
-			if(!$isEditor){
+			if($action == "Submit New Image"){
+				echo '<div style="font-weight:bold;font-size:130%;">';
+				echo 'ERROR: You may have tried to upload an image that was too large for the system. ';
+				echo 'There is a 10MB limit set within the application, though there may be tighter restrictions set on the server (PHP configurations). ';
+				echo 'Check with your server administrator to check on options for importing larger images. '; 
+				echo 'Use the back button to return to previous page and try to upload a smaller image </div>';
+			}
+			elseif(!$isEditor){
 				echo '<h2>You are not authorized to add occurrence records</h2>';
 			}
 		}
