@@ -24,7 +24,7 @@ class SpecUpload{
 	protected $uploadType;
 	private $securityKey;
 
-	private $verboseMode = 1;	// 0 = silent, 1 = echo, 2 = log
+	protected $verboseMode = 1;	// 0 = silent, 1 = echo, 2 = log
 	private $logFH;
 
 	protected $DIRECTUPLOAD = 1,$DIGIRUPLOAD = 2, $FILEUPLOAD = 3, $STOREDPROCEDURE = 4, $SCRIPTUPLOAD = 5, $DWCAUPLOAD = 6;
@@ -296,7 +296,7 @@ class SpecUpload{
 			echo $str;
 		}
 		elseif($this->verboseMode == 2){
-			if($this->logFH) fwrite($this->logFH,$str."\n");
+			if($this->logFH) fwrite($this->logFH,strip_tags($str)."\n");
 		}
 	}
 	

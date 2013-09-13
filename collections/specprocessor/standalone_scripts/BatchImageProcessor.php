@@ -40,8 +40,7 @@ class BatchImageProcessor {
 	
 	private $dataLoaded = 0;
 
-	function __construct($logPath){
-		global $defaultTitle;
+	function __construct($logPath,$logTitle){
 		ini_set('memory_limit','512M');
 		ini_set('auto_detect_line_endings', true);
 		if($logPath){
@@ -50,7 +49,7 @@ class BatchImageProcessor {
 			if(!$this->silent ){
 				//Create log File
 				if(file_exists($logPath)){
-					$titleStr = str_replace(' ','_',$defaultTitle);
+					$titleStr = str_replace(' ','_',$logTitle);
 					if(strlen($titleStr) > 50) $titleStr = substr($titleStr,0,50);
 					$logFile = $logPath.$titleStr."_".date('Ymd').".log";
 					$this->logFH = fopen($logFile, 'a');

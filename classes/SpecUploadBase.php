@@ -242,7 +242,7 @@ class SpecUploadBase extends SpecUpload{
 			echo "<td>\n";
 			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists(strtolower($fieldName),$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
 			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value=''>Leave Field Unmapped</option>\n";
+			echo "<option value='unmapped'>Leave Field Unmapped</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
 			if(array_key_exists($fieldName,$sourceSymbArr)){
 				//Source Field is mapped to Symbiota Field
@@ -843,6 +843,7 @@ class SpecUploadBase extends SpecUpload{
 		ob_flush();
 		flush();
 		$uuidManager = new UuidFactory();
+		if($this->verboseMode != 1) $uuidManager->setSilent(1);
 		$uuidManager->populateGuids($this->collId);
 		$this->outputMsg('Done!</li>');
 		

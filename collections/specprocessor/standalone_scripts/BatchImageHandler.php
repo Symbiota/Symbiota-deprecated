@@ -1,9 +1,9 @@
 <?php
 date_default_timezone_set('America/Phoenix');
+include_once('../../../config/dbconnection.php');
 require_once('BatchImageConf.php');
 require_once('BatchImageProcessor.php');
 include_once('BatchImageConnectionFactory.php');
-include_once('../../../config/dbconnection.php');
 
 // Check for the symbiota class files used herein for parsing 
 // batch files of xml formatted strucutured data.
@@ -18,7 +18,7 @@ if (file_exists("$symbiotaClassPath/SpecProcessorNEVP.php")) {
 }
 
 //-------------------------------------------------------------------------------------------//
-$imageProcessor = new BatchImageProcessor($logPath);
+$imageProcessor = new BatchImageProcessor($logPath,$logTitle);
 
 //Set variables
 $imageProcessor->setCollArr($collArr);
