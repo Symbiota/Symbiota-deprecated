@@ -66,7 +66,6 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 					<input type="hidden" name="annotatoremail" value="<?php echo $annotatoremail; ?>" />
 					<input type="hidden" name="catalognumber" value="<?php echo $catalognumber; ?>" />
 					<input type="hidden" name="institutioncode" value="<?php echo $institutioncode; ?>" />
-					<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 					<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 					<?php 
 					if (isset($_GET['collectioncode']))
@@ -177,7 +176,6 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 								<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 								<input type="submit" name="submitaction" value="Submit Determination Edits" />
 							</div>
@@ -187,8 +185,7 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
-								<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+								<input type="hidden" name=" <?php echo $crowdSourceMode; ?>" />
 								<input type="submit" name="submitaction" value="Delete Determination" />
 							</div>
 						</form>
@@ -197,7 +194,6 @@ $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 								<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-								<input type="hidden" name="autoprocessingstatus" value="<?php echo (isset($autoPStatus)?$autoPStatus:''); ?>" />
 								<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 								<input type="submit" name="submitaction" value="Make Determination Current" /><br/>
 								<input type="checkbox" name="remapimages" value="1" CHECKED /> Remap images to this taxonomic name

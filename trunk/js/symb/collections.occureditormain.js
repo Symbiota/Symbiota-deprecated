@@ -86,9 +86,14 @@ $(document).ready(function() {
 		if ((evt.keyCode == 13)) { return false; }
 	});
 	
+	//Remember image popout status 
 	var imgTd = getCookie("symbimgtd");
-	if(imgTd == "open" || csMode == 1) toggleImageTdOn(); 
-
+	if(imgTd == "open" || csMode == 1) toggleImageTdOn();
+	//Remember Auto Processing Status
+	var apstatus = getCookie("autopstatus");
+	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;
+	//Remember Auto Duplicate search status 
+	if(getCookie("autodupe") == 1) document.fullform.autodupe.checked = true; 
 });
 
 function initDetAddAutocomplete(){
@@ -1013,6 +1018,25 @@ function toggleLocSecReason(f){
 	}
 	else{
 		lsrObj.style.display = "none";
+	}
+}
+
+function autoProcessingStatusChanged(selectObj){
+	var selValue = selectObj.value;
+	if(selValue){
+		document.cookie = "autopstatus=" + selValue;
+	}
+	else{
+		document.cookie = "autopstatus=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+	}
+}
+
+function autoDupeChanged(dupeCbObj){
+	if(dupeCbObj.checked){
+		document.cookie = "autodupe=1";
+	}
+	else{
+		document.cookie = "autodupe=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	}
 }
 
