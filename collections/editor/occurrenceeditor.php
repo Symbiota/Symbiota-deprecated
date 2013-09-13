@@ -10,9 +10,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$autoDupeSearch = array_key_exists('autodupe',$_REQUEST)?$_REQUEST['autodupe']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
-$autoPStatus = array_key_exists('autoprocessingstatus',$_POST)?$_POST['autoprocessingstatus']:'';
 $occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
@@ -35,7 +33,6 @@ else{
 
 if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
-	if(!$autoPStatus) $autoPStatus = 'pending review';
 }
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
@@ -306,12 +303,12 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=130802" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=130913" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=130802" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=130913" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -347,10 +344,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130802"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130802"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130802"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130802"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130913"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130913"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130913"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130913"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -585,7 +582,7 @@ else{
 													?>
 													<div id="dupesDiv">
 														<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
-														<input type="checkbox" name="autodupe" value="1" <?php echo ($autoDupeSearch?'checked':''); ?> />
+														<input type="checkbox" name="autodupe" value="1" onchange="autoDupeChanged(this)" />
 														Auto search
 													</div>
 													<?php
@@ -1113,7 +1110,7 @@ else{
 													if($isEditor){
 														?>
 														Status Auto-Set:
-														<select name="autoprocessingstatus">
+														<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
 															<option value=''>Not Activated</option>
 															<option value=''>-------------------</option>
 															<?php 
@@ -1121,7 +1118,7 @@ else{
 																//Don't display all options is editor is crowd sourced 
 																$keyOut = strtolower($v);
 																if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
-																	echo '<option value="'.$keyOut.'" '.($autoPStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
+																	echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "'pending review'"?'SELECTED':'').'>'.ucwords($v).'</option>';
 																}
 															}
 															?>
