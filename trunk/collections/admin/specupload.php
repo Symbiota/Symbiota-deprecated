@@ -67,7 +67,7 @@ $duManager->readUploadParameters();
 
 //Grab field mapping, if mapping form was submitted
 if(array_key_exists("sf",$_POST)){
-	if($action == "Delete Field Mapping"){
+	if($action == "Delete Field Mapping" || $action == "Reset Field Mapping"){
 		$statusStr = $duManager->deleteFieldMap();
 	}
 	else{
@@ -75,7 +75,7 @@ if(array_key_exists("sf",$_POST)){
  		$sourceFields = $_POST["sf"];
  		$fieldMap = Array();
 		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
+			if($targetFields[$x] && $targetFields[$x] != 'unmapped') $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
 		}
 		//Set Source PK
 		if($dbpk) $fieldMap["dbpk"]["field"] = $dbpk;
@@ -336,6 +336,7 @@ $duManager->loadFieldMap();
 													* Mappings that are not yet saved are displayed in Yellow
 												</div>
 												<div style="margin:10px;">
+													<input type="submit" name="action" value="Reset Field Mapping" />
 													<input type="submit" name="action" value="Save Mapping" />
 												</div>
 											</div>

@@ -7,7 +7,8 @@ $targetPathBase = '';
 //Url base needed to build image URL that will be saved in DB
 //Only needed if scripts are run on an exteral server
 $imgUrlBase = '';
-//Path to where log files will be placed
+//Title (e.g. CNALH) and Path to where log files will be placed
+$logTitle = '';
 $logPath = $sourcePathBase.'/logs';
 //Full path to Symbiota project root folder
 $serverRoot = '';

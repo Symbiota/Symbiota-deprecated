@@ -63,4 +63,9 @@ $duManager->uploadData(false);
 $transferCnt = $duManager->getTransferCount();
 $duManager->performFinalTransfer();
 
-if($transferCnt > 0) return true;
+if($transferCnt > 0){
+	echo $transferCnt;
+}
+else{
+	echo 'FAILED: 0 records uploaded';
+}
