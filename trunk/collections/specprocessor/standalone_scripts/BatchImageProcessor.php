@@ -213,6 +213,7 @@ class BatchImageProcessor {
 					}
 					elseif(is_dir($this->sourcePathBase.$pathFrag.$fileName)){
 						if(strpos($fileName,'.')) $fileName = str_replace('.','\.',$fileName);
+						if(strpos($fileName,' ')) $fileName = str_replace(' ','\ ',$fileName);
 						$this->processFolder($pathFrag.$fileName."/");
 					}
 				}
