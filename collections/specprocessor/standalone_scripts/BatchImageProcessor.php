@@ -214,6 +214,7 @@ class BatchImageProcessor {
 						}
 					}
 				}
+				if($dirFH) closedir($dirFH);
 			}
 			else{
 				$this->logOrEcho("\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag);
@@ -223,7 +224,6 @@ class BatchImageProcessor {
 			$this->logOrEcho("\tSource path does not exist: ".$this->sourcePathBase.$pathFrag);
 			//exit("ABORT: Source path does not exist: ".$this->sourcePathBase.$pathFrag);
 		}
-		if($dirFH) closedir($dirFH);
 	}
 
 	/**
