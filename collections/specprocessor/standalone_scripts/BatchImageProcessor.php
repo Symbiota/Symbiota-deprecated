@@ -174,53 +174,54 @@ class BatchImageProcessor {
 		set_time_limit(2000);
 		//$this->logOrEcho("Processing: ".$this->sourcePathBase.$pathFrag);
 		//Read file and loop through images
-		if(!file_exists($this->sourcePathBase.$pathFrag)){
-			$this->logOrEcho("\tSource path does not exist: ".$this->sourcePathBase.$pathFrag);
-			exit("ABORT: Source path does not exist: ".$this->sourcePathBase.$pathFrag);
-		}
-		if($dirFH = opendir($this->sourcePathBase.$pathFrag)){
-			while($fileName = readdir($dirFH)){
-				if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
-					if(is_file($this->sourcePathBase.$pathFrag.$fileName)){
-						if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
-							$this->logOrEcho("Processing File: ".$fileName);
-							$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
-							if($fileExt == ".jpg"){
-								$this->processImageFile($fileName,$pathFrag);
-								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-							}
-							elseif($fileExt == ".tif"){
-								$this->logOrEcho("\tERROR: File skipped, TIFFs image files are not a supported: ".$fileName);
-								//Do something, like convert to jpg???
-								//but for now do nothing
-							}
-							elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat")){
-								//Is skeletal file exists. Append data to database records
-								$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
-								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-							}
-							elseif($fileExt==".xml") {
-								$this->processXMLFile($fileName,$pathFrag);
-								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
-							}
-							elseif($fileExt==".ds_store" || strtolower($fileName)=='thumbs.db'){
-								unlink($this->sourcePathBase.$pathFrag.$fileName);
-							}
-							else{
-								$this->logOrEcho("\tERROR: File skipped, not a supported image file: ".$fileName);
+		if(file_exists($this->sourcePathBase.$pathFrag)){
+			if($dirFH = opendir($this->sourcePathBase.$pathFrag)){
+				while($fileName = readdir($dirFH)){
+					if($fileName != "." && $fileName != ".." && $fileName != ".svn"){
+						if(is_file($this->sourcePathBase.$pathFrag.$fileName)){
+							if(!stripos($fileName,'_tn.jpg') && !stripos($fileName,'_lg.jpg')){
+								$this->logOrEcho("Processing File: ".$fileName);
+								$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
+								if($fileExt == ".jpg"){
+									$this->processImageFile($fileName,$pathFrag);
+									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
+								elseif($fileExt == ".tif"){
+									$this->logOrEcho("\tERROR: File skipped, TIFFs image files are not a supported: ".$fileName);
+									//Do something, like convert to jpg???
+									//but for now do nothing
+								}
+								elseif(($fileExt == ".csv" || $fileExt == ".txt" || $fileExt == ".tab" || $fileExt == ".dat")){
+									//Is skeletal file exists. Append data to database records
+									$this->processSkeletalFile($this->sourcePathBase.$pathFrag.$fileName); 
+									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
+								elseif($fileExt==".xml") {
+									$this->processXMLFile($fileName,$pathFrag);
+									if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
+								}
+								elseif($fileExt==".ds_store" || strtolower($fileName)=='thumbs.db'){
+									unlink($this->sourcePathBase.$pathFrag.$fileName);
+								}
+								else{
+									$this->logOrEcho("\tERROR: File skipped, not a supported image file: ".$fileName);
+								}
 							}
 						}
-					}
-					elseif(is_dir($this->sourcePathBase.$pathFrag.$fileName)){
-						if(strpos($fileName,'.')) $fileName = str_replace('.','\.',$fileName);
-						if(strpos($fileName,' ')) $fileName = str_replace(' ','\ ',$fileName);
-						$this->processFolder($pathFrag.$fileName."/");
+						elseif(is_dir($this->sourcePathBase.$pathFrag.$fileName)){
+							if(strpos($fileName,'.')) $fileName = str_replace('.','\.',$fileName);
+							$this->processFolder($pathFrag.$fileName."/");
+						}
 					}
 				}
 			}
+			else{
+				$this->logOrEcho("\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag);
+			}
 		}
 		else{
-			$this->logOrEcho("\tERROR: unable to access source directory: ".$this->sourcePathBase.$pathFrag);
+			$this->logOrEcho("\tSource path does not exist: ".$this->sourcePathBase.$pathFrag);
+			//exit("ABORT: Source path does not exist: ".$this->sourcePathBase.$pathFrag);
 		}
 		if($dirFH) closedir($dirFH);
 	}
