@@ -203,7 +203,7 @@ class BatchImageProcessor {
 								$this->processXMLFile($fileName,$pathFrag);
 								if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 							}
-							elseif($fileExt==".ds_store"){
+							elseif($fileExt==".ds_store" || strtolower($fileName)=='thumbs.db'){
 								unlink($this->sourcePathBase.$pathFrag.$fileName);
 							}
 							else{
@@ -212,6 +212,7 @@ class BatchImageProcessor {
 						}
 					}
 					elseif(is_dir($this->sourcePathBase.$pathFrag.$fileName)){
+						if(strpos($fileName,'.')) $fileName = str_replace('.','\.',$fileName);
 						$this->processFolder($pathFrag.$fileName."/");
 					}
 				}
