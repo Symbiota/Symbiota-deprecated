@@ -16,7 +16,11 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-       	$returnArr[] = $row->sciname;
+		$sn = $row->sciname;
+		if(strtolower($charset) == "iso-8859-1"){
+			if(mb_detect_encoding($sn,'UTF-8,ISO-8859-1',true) == "ISO-8859-1") $sn = utf8_encode($sn);
+		}
+       	$returnArr[] = $sn;
 	}
 	$con->close();
 	echo json_encode($returnArr);
