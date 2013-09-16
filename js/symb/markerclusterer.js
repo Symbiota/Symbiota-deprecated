@@ -592,21 +592,40 @@ ClusterIcon.prototype.useStyle = function (sums) {
 //Positions and shows the icon.
 ClusterIcon.prototype.show = function () {
 	if (this.sums_.text < 10) {
-		var text_x = 37;
-		var text_y = 65;
+		var circle_r = 9;
+		var div_size = 18;
+		var text_x = 35;
+		var text_y = 70;
 	}
 	else if (this.sums_.text > 9 && this.sums_.text < 100) {
-		var text_x = 29;
-		var text_y = 65;
+		var circle_r = 11.5;
+		var div_size = 23;
+		var text_x = 24;
+		var text_y = 67;
 	}
 	else if (this.sums_.text > 99 && this.sums_.text < 1000) {
+		var circle_r = 14;
+		var div_size = 28;
 		var text_x = 19;
 		var text_y = 65;
+	}
+	else if (this.sums_.text > 999 && this.sums_.text < 10000) {
+		var circle_r = 16.5;
+		var div_size = 33;
+		var text_x = 12;
+		var text_y = 65;
+	}
+	else if (this.sums_.text > 9999) {
+		this.sums_.text = '10000+';
+		var circle_r = 21;
+		var div_size = 42;
+		var text_x = 5;
+		var text_y = 62;
 	}
 	if (this.div_) {
 		var pos = this.getPosFromLatLng_(this.center_);
 		this.div_.style.cssText = this.createCss(pos);
-		this.div_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" style="height:28px;width:28px;" ><g><circle cx="14" cy="14" r="14" fill-opacity="0.8" fill="#'+this.color_+'"></circle><text x="'+text_x+'%" y="'+text_y+'%">'+this.sums_.text+'</text></g></svg>';
+		this.div_.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" style="height:'+div_size+'px;width:'+div_size+'px;" ><g><circle cx="'+circle_r+'" cy="'+circle_r+'" r="'+circle_r+'" fill-opacity="0.8" fill="#'+this.color_+'"></circle><text x="'+text_x+'%" y="'+text_y+'%">'+this.sums_.text+'</text></g></svg>';
 		this.div_.style.display = "";
 		//alert(this.div_.outerHTML);
 	}
