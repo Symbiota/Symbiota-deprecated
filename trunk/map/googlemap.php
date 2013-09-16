@@ -9,6 +9,8 @@ $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 
 $mapManager = new OccurrenceMapManager();
 
+$genObs = $mapManager->getGenObsInfo();
+
 if($mapType == 'taxa'){
 	$mapManager->setTaxon($taxonValue);
 	$synMap = $mapManager->getSynMap();
@@ -94,7 +96,7 @@ elseif($mapType == 'occquery'){
 					$functionStr = '';
 					$titleStr = $latLng;
 					foreach($dataArr as $occId => $spArr){
-						if($spArr['collid'] == 102){
+						if($spArr['collid'] == $genObs){
 							?>
 							var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
 							<?php
@@ -296,22 +298,28 @@ elseif($mapType == 'occquery'){
 						}
 						?>
 					</div>
-					<div style="float:right;">
-						<div>
-							<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
-								<g>
-									<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
-								</g>
-							</svg> = Collection
+					<?php
+					if($genObs){
+						?>
+						<div style="float:right;">
+							<div>
+								<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
+									<g>
+										<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
+									</g>
+								</svg> = Collection
+							</div>
+							<div>
+								<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
+									<g>
+										<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
+									</g>
+								</svg> = General Observation
+							</div>
 						</div>
-						<div>
-							<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
-								<g>
-									<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
-								</g>
-							</svg> = General Observation
-						</div>
-					</div>
+						<?php
+					}
+					?>
 				</fieldset>
 			</td>
 			<td style="width:375px;" valign='top'>
