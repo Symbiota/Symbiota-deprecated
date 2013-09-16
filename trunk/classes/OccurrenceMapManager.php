@@ -32,6 +32,20 @@ class OccurrenceMapManager extends OccurrenceManager{
  		parent::__destruct();
 	}
 	
+	public function getGenObsInfo(){
+		$retVar = '';
+		$sql = 'SELECT collid '.
+			'FROM omcollections '.
+			'WHERE collectionname = "General Observations"';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retVar = $r->collid;
+			}
+			$rs->close();
+		}
+		return $retVar;
+	}
+	
 	public function setTaxon($tValue){
 		if($tValue){
 			$taxonValue = $this->conn->real_escape_string($tValue);
@@ -88,7 +102,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
 		if($limit){
-			$sql .= " LIMIT 1000";
+			//$sql .= " LIMIT 1000";
 		}
 		$taxaMapper = Array();
 		$taxaMapper["undefined"] = "undefined";
@@ -117,7 +131,8 @@ class OccurrenceMapManager extends OccurrenceManager{
 			$occId = $row->occid;
 			$sciName = $row->sciname;
 			$family = $row->family;
-			$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+			//$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+			$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
 			if(!array_key_exists($sciName,$taxaMapper)){
 				foreach($taxaMapper as $keySciname => $v){
 					if(strpos($sciName,$keySciname) === 0){
