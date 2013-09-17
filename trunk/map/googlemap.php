@@ -8,6 +8,7 @@ $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 
 $mapManager = new OccurrenceMapManager();
+$mapManager->setMapType($mapType);
 
 $genObs = $mapManager->getGenObsInfo();
 
@@ -15,10 +16,6 @@ if($mapType == 'taxa'){
 	$mapManager->setTaxon($taxonValue);
 	$synMap = $mapManager->getSynMap();
 	$mapManager->getTaxaMap();
-	$mapManager->getTaxaSqlWhere();
-}
-elseif($mapType == 'occquery'){
-	$mapManager->getOccurSqlWhere();
 }
 
 ?>

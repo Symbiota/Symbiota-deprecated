@@ -1,8 +1,4 @@
 <?php
-/*
- * Created on 3 May 2009
- * @author  E. Gilbert: egbot@asu.edu
- */
 include_once("OccurrenceManager.php");
 
 class OccurrenceMapManager extends OccurrenceManager{
@@ -12,8 +8,8 @@ class OccurrenceMapManager extends OccurrenceManager{
 	private $sciName;
 	private $taxaMap = array();
 	private $synMap = array();
-	private $sqlWhere = 0;
 	private $childLoopCnt = 0;
+	private $mapType;
 
     public function __construct(){
     	global $clientRoot;
@@ -89,8 +85,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 		$sql .= "FROM omoccurrences o ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$sql .= $this->sqlWhere;
-		//$sql .= $this->getSqlWhere();
+		$sql .= $this->getMapWhere();
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -222,15 +217,14 @@ class OccurrenceMapManager extends OccurrenceManager{
 	public function getSynMap(){
 		return $this->synMap;
 	}
-	
-	public function getOccurSqlWhere(){
-		$this->sqlWhere = $this->getSqlWhere();
-		return $this->sqlWhere;
-	}
-	
-	public function getTaxaSqlWhere(){
-		$this->sqlWhere = $this->getTaxaWhere();
-		return $this->sqlWhere;
+
+	private function getMapWhere(){
+		if($this->mapType == 'taxa'){
+			return $this->getTaxaWhere();
+		}
+		else{
+			return $this->getSqlWhere();
+		}
 	}
 
     public function writeKMLFile(){
@@ -284,6 +278,11 @@ class OccurrenceMapManager extends OccurrenceManager{
 		echo "</Folder>\n";
 		echo "</Document>\n";
 		echo "</kml>\n";
+    }
+    
+    //Setters and getters
+    public function setMapType($type){
+    	$this->mapType = $type;
     }
 }
 ?>
