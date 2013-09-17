@@ -244,6 +244,9 @@ class OccurrenceMapManager extends OccurrenceManager{
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
 
 		$coordArr = $this->getGeoCoords(0,true);
+		//$sharedMap = new MappingShared();
+		//$sharedMap->setSqlWhere($this->getSqlWhere);
+		//$coordArr = $sharedMap->getGeoCoords(0,true);
 		
         echo "<?xml version='1.0' encoding='".$charset."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";

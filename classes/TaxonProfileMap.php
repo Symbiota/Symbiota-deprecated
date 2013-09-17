@@ -2,34 +2,37 @@
 include_once($serverRoot.'/config/dbconnection.php');
 
 class TaxonProfileMap {
-
-	private $sourceIcon = Array();
-	private $conn;
+	
+	private $iconColors = Array();
 	private $tid;
 	private $sciName;
-	private $taxaArr = array();
 	private $taxaMap = array();
 	private $synMap = array();
 	private $childLoopCnt = 0;
-	
-	public function __construct(){
-		global $clientRoot;
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_red.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_blue.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_yellow.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_green.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_purple.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_brown.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_gray.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_orange.png";
-		$this->sourceIcon[] = $clientRoot."/images/google/smpin_black.png";
+	private $mapType;
+
+    public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-	}
+    }
 
 	public function __destruct(){
-		if(!($this->conn === false)) $this->conn->close();
+ 		if(!($this->conn === false)) $this->conn->close();
 	}
-
+	
+	public function getGenObsInfo(){
+		$retVar = '';
+		$sql = 'SELECT collid '.
+			'FROM omcollections '.
+			'WHERE collectionname = "General Observations"';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retVar = $r->collid;
+			}
+			$rs->close();
+		}
+		return $retVar;
+	}
+	
 	public function setTaxon($tValue){
 		if($tValue){
 			$taxonValue = $this->conn->real_escape_string($tValue);
@@ -49,85 +52,99 @@ class TaxonProfileMap {
 			$result->close();
 			//Add subject
 			if($this->tid){
-				$this->taxaArr[$this->tid] = $this->sciName;
+				$this->taxArr[$this->tid] = $this->sciName;
 				//Get accepted children 
-				$this->taxaArr = $this->taxaArr + $this->getChildren(array($this->tid));
+				$this->taxArr = $this->taxArr + $this->getChildren(array($this->tid));
 				//Seed $synMap with accepted names
-				$taxaKeys = array_keys($this->taxaArr);
+				$taxaKeys = array_keys($this->taxArr);
 				$this->synMap = array_combine($taxaKeys,$taxaKeys);
 				//Add synonyms to $synMap
-				$this->setSynonyms($taxaKeys);
+				$this->setTaxaSynonyms($taxaKeys);
 			}
 		}
-	}
-	
-    public function getGeoCoords($limit = 1000){
-		global $userRights, $mappingBoundaries;
-		
-		$coordArr = Array();
-		if($this->synMap){
-			$useBoundingBox = false;
-			$boundArr = array();
-			if(isset($mappingBoundaries)){
-				$boundArr = explode(";",$mappingBoundaries);
-			}
-			
-	        $querySql = '';
-	        $sql = 'SELECT o.occid, o.tidinterpreted, o.decimallatitude, o.decimallongitude, o.collid, ';
-	       	$sql .= 'CONCAT_WS(" ", o.recordedBy, o.recordNumber, CONCAT(" [",c.institutioncode,"]")) AS descr ';
-	        $sql .= 'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
-	        $sql .= 'WHERE (o.tidinterpreted IN('.implode(',',array_keys($this->synMap)).')) '.
-	        	'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
-			if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-				//Is global rare species reader, thus do nothing to sql and grab all records
-			}
-			elseif(array_key_exists("RareSppReader",$userRights)){
-				$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
-			}
-			else{
-				$sql .= 'AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ';
-			}
-			if($limit && is_numeric($limit)){
-				$sql .= 'LIMIT '.$limit;
-			}
-			else{
-				$sql .= 'LIMIT 1000';
-			}
-			//echo "<div>SQL: ".$sql."</div>";
-			$latMin = 90; $latMax = -90; $lngMin = 180; $lngMax = -180; 
-	        $result = $this->conn->query($sql);
-	        while($row = $result->fetch_object()){
-	        	$lat = round($row->decimallatitude,5);
-	        	$lng = round($row->decimallongitude,5);
-	        	if(!$useBoundingBox && $boundArr && $lat < $boundArr[0] && $lat > $boundArr[2] && $lng < $boundArr[1] && $lng > $boundArr[3]){
-					$useBoundingBox = true;
-	        	}
-				if($lat < $latMin) $latMin = $lat;
-				if($lat > $latMax) $latMax = $lat;  
-				if($lng < $lngMin) $lngMin = $lng;
-				if($lng > $lngMax) $lngMax = $lng;
-	        	$llStr = $lat.','.$lng; 
-				$coordArr[$llStr][$row->occid]['d'] = $row->descr;
-				$coordArr[$llStr][$row->occid]['tid'] = $row->tidinterpreted;
-				//$this->taxaMap[$row->tidinterpreted] = '';
-			}
-			$result->close();
-	
-			//Add map boundaries
-			if(!$boundArr 
-				|| ($latMax < $boundArr[0] && $lngMax < $boundArr[1] && $latMin > $boundArr[2] && $lngMin > $boundArr[3])
-				|| ($latMin > $boundArr[0] || $latMax < $boundArr[2] || $lngMin > $boundArr[1] || $lngMax < $boundArr[3])){
-				$useBoundingBox = false;
-			}
-			
-			$coordArr['latmax'] = ($useBoundingBox?$boundArr[0]:$latMax);
-			$coordArr['lngmax'] = ($useBoundingBox?$boundArr[1]:$lngMax);
-			$coordArr['latmin'] = ($useBoundingBox?$boundArr[2]:$latMin);
-			$coordArr['lngmin'] = ($useBoundingBox?$boundArr[3]:$lngMin);
-		}
-		return $coordArr;
 	}
 
+    public function getGeoCoords($limit = 1000, $includeDescr= false){
+		global $userRights, $mappingBoundaries;
+		$coordArr = Array();
+		$querySql = '';
+		$sql = 'SELECT o.occid, IFNULL(IFNULL(IFNULL(o.occurrenceid,o.catalognumber),CONCAT(o.recordedby," ",o.recordnumber)),o.occid) AS identifier, '.
+			'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid ';
+		if($includeDescr){
+			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
+		}
+		$sql .= "FROM omoccurrences o ";
+		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		$sql .= $this->getMapWhere();
+		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
+		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			//Is global rare species reader, thus do nothing to sql and grab all records
+		}
+		elseif(array_key_exists("RareSppReader",$userRights)){
+			$sql .= " AND (o.CollId IN (".implode(",",$userRights["RareSppReader"]).") OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ";
+		}
+		else{
+			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
+		}
+		if($limit){
+			//$sql .= " LIMIT 1000";
+		}
+		$taxaMapper = Array();
+		$taxaMapper["undefined"] = "undefined";
+		$cnt = 0;
+		//echo json_encode($this->taxaArr);
+		foreach($this->taxaArr as $key => $valueArr){
+			$coordArr[$key] = Array("color" => $this->iconColors[$cnt%7]);
+			$cnt++;
+			$taxaMapper[$key] = $key;
+			if(array_key_exists("scinames",$valueArr)){
+				$scinames = $valueArr["scinames"];
+				foreach($scinames as $sciname){
+					$taxaMapper[$sciname] = $key;
+				}
+			}
+			if(array_key_exists("synonyms",$valueArr)){
+				$synonyms = $valueArr["synonyms"];
+				foreach($synonyms as $syn){
+					$taxaMapper[$syn] = $key;
+				}
+			}
+		}
+		//echo "<div>SQL: ".$sql."</div>";
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$occId = $row->occid;
+			$sciName = $row->sciname;
+			$family = $row->family;
+			//$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+			$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
+			if(!array_key_exists($sciName,$taxaMapper)){
+				foreach($taxaMapper as $keySciname => $v){
+					if(strpos($sciName,$keySciname) === 0){
+						$sciName = $keySciname;
+						break;
+					}
+				}
+				if(!array_key_exists($sciName,$taxaMapper) && array_key_exists($family,$taxaMapper)){
+					$sciName = $family;
+				}
+			}
+			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["identifier"] = $row->identifier;
+			if($includeDescr){
+				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
+			}
+		}
+		if(array_key_exists("undefined",$coordArr)){
+			$coordArr["undefined"]["color"] = $this->iconColors[7];
+		}
+		$result->close();
+		
+		return $coordArr;
+	}
+	
 	private function getChildren($inArr){
 		$retArr = array();
 		if($inArr){
@@ -147,7 +164,7 @@ class TaxonProfileMap {
 		return $retArr;
 	}
 
-	private function setSynonyms($inArray){
+	private function setTaxaSynonyms($inArray){
 		if($inArray){
 			$sql = 'SELECT tid, tidaccepted FROM taxstatus '.
 				'WHERE taxauthid = 1 AND tidaccepted IN('.implode('',$inArray).') AND (tid <> tidaccepted)';
@@ -160,19 +177,103 @@ class TaxonProfileMap {
 		}
 	}
 	
+	private function getTaxaWhere(){
+		global $userRights, $mappingBoundaries;
+		$sql = "";
+		$sql .= 'WHERE (o.tidinterpreted IN('.implode(',',array_keys($this->synMap)).')) '.
+			'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
+		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+			//Is global rare species reader, thus do nothing to sql and grab all records
+		}
+		elseif(array_key_exists("RareSppReader",$userRights)){
+			$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
+		}
+		return $sql;
+	}
+	
 	public function getTaxaMap(){
 		//Map scientific names and icons to $taxaMap
 		$cnt = 9;
-		foreach($this->taxaArr as $key => $taxonName){
-        	$this->taxaMap[$key]['sciname'] = $taxonName;
-        	$this->taxaMap[$key]['icon'] = $this->sourceIcon[$cnt%9];
+		foreach($this->taxArr as $key => $taxonName){
+        	$this->taxaArr[$taxonName] = Array();
+			//$this->taxaMap[$key]['sciname'] = $taxonName;
+        	//$this->taxaMap[$key]['color'] = $this->iconColors[$cnt%9];
+			//$this->taxaMap[$key]['icon'] = $this->iconColors[$cnt%9];
         	$cnt++;
         }
+		//echo json_encode($this->taxaArr);
 		return $this->taxaMap;
 	}
 
 	public function getSynMap(){
 		return $this->synMap;
 	}
+
+	private function getMapWhere(){
+		if($this->mapType == 'taxa'){
+			return $this->getTaxaWhere();
+		}
+		else{
+			return $this->getSqlWhere();
+		}
+	}
+
+    public function writeKMLFile(){
+    	global $defaultTitle, $userRights, $clientRoot, $charset;
+		$fileName = $defaultTitle;
+		if($fileName){
+			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
+			$fileName = str_replace(".","",$fileName);
+			$fileName = str_replace(" ","_",$fileName);
+		}
+		else{
+			$fileName = "symbiota";
+		}
+		$fileName .= time().".kml";
+    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header ('Content-type: application/vnd.google-earth.kml+xml');
+		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+
+		$coordArr = $this->getGeoCoords(0,true);
+		
+        echo "<?xml version='1.0' encoding='".$charset."'?>\n";
+        echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
+        echo "<Document>\n";
+		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
+        
+		foreach($coordArr as $sciName => $contentArr){
+			$iconStr = $clientRoot."/images/google/".$contentArr['color']."-dot.png";
+			unset($contentArr["color"]);
+			echo "<Style id='".str_replace(" ","_",$sciName)."'>\n";
+            echo "<IconStyle><Icon>";
+			echo "<href>http://".$_SERVER["SERVER_NAME"].$iconStr."</href>";
+			echo "</Icon></IconStyle>\n</Style>\n";
+
+			echo "<Folder><name>".$sciName."</name>\n";
+
+			foreach($contentArr as $latLong => $llArr){
+				foreach($llArr as $occId => $pointArr){
+					echo "<Placemark>\n";
+					echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
+					echo "<description><![CDATA[<p>".$pointArr["descr"]."</p>";
+					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
+					echo "<p><b>More Information:</b> <a href='".$url."'>".$url."</a></p>";
+					echo "<p><b>Data retrieved from <a href='http://".$_SERVER["SERVER_NAME"]."'>".$defaultTitle." Data Portal</a></b></p>]]></description>\n";
+					echo "<styleUrl>#".str_replace(" ","_",$sciName)."</styleUrl>\n";
+	                echo "<Point><coordinates>".implode(",",array_reverse(explode(",",$latLong))).",0</coordinates></Point>\n";
+					echo "</Placemark>\n";
+				}
+			}
+			echo "</Folder>\n";
+		}
+		echo "</Folder>\n";
+		echo "</Document>\n";
+		echo "</kml>\n";
+    }
+    
+    //Setters and getters
+    public function setMapType($type){
+    	$this->mapType = $type;
+    }
 }
 ?>

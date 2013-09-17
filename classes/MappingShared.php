@@ -1,20 +1,15 @@
 <?php
-include_once("OccurrenceManager.php");
+include_once($serverRoot.'/config/dbconnection.php');
 
-class OccurrenceMapManager extends OccurrenceManager{
+class MappingShared{
 	
 	private $iconColors = Array();
-	private $tid;
-	private $sciName;
-	private $taxaMap = array();
-	private $synMap = array();
-	private $sqlWhere = 0;
-	private $childLoopCnt = 0;
+	private $taxaArr = Array();
+	private $sqlWhere;
 
     public function __construct(){
-    	global $clientRoot;
- 		parent::__construct();
-        $this->iconColors[] = "fc6355";
+		$this->conn = MySQLiConnectionFactory::getCon('readonly');
+    	$this->iconColors[] = "fc6355";
 		$this->iconColors[] = "5781fc";
 		$this->iconColors[] = "fcf357";
 		$this->iconColors[] = "00e13c";
@@ -25,40 +20,9 @@ class OccurrenceMapManager extends OccurrenceManager{
     }
 
 	public function __destruct(){
- 		parent::__destruct();
+ 		if(!($this->conn === false)) $this->conn->close();
 	}
 	
-	public function setTaxon($tValue){
-		if($tValue){
-			$taxonValue = $this->conn->real_escape_string($tValue);
-			$sql = 'SELECT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted ';
-			if(is_numeric($taxonValue)){
-				$sql .= 'WHERE (ts.tid = '.$taxonValue.') AND (ts.taxauthid = 1)';
-			}
-			else{
-				$sql .= 'INNER JOIN taxa t2 ON ts.tid = t2.tid WHERE (t2.sciname = "'.$taxonValue.'") AND (ts.taxauthid = 1)';
-			}
-			//echo '<div>'.$sql.'</div>';
-			$result = $this->conn->query($sql);
-			while($r = $result->fetch_object()){
-				$this->tid = $r->tid;
-				$this->sciName = $r->sciname;
-			}
-			$result->close();
-			//Add subject
-			if($this->tid){
-				$this->taxArr[$this->tid] = $this->sciName;
-				//Get accepted children 
-				$this->taxArr = $this->taxArr + $this->getChildren(array($this->tid));
-				//Seed $synMap with accepted names
-				$taxaKeys = array_keys($this->taxArr);
-				$this->synMap = array_combine($taxaKeys,$taxaKeys);
-				//Add synonyms to $synMap
-				$this->setSynonyms($taxaKeys);
-			}
-		}
-	}
-
     public function getGeoCoords($limit = 1000, $includeDescr= false){
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
@@ -71,8 +35,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 		$sql .= "FROM omoccurrences o ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$sql .= $this->sqlWhere;
-		//$sql .= $this->getSqlWhere();
+		$sql .= $this->getMapWhere();
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -84,7 +47,7 @@ class OccurrenceMapManager extends OccurrenceManager{
 			$sql .= " AND (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL) ";
 		}
 		if($limit){
-			$sql .= " LIMIT 1000";
+			//$sql .= " LIMIT 1000";
 		}
 		$taxaMapper = Array();
 		$taxaMapper["undefined"] = "undefined";
@@ -113,7 +76,8 @@ class OccurrenceMapManager extends OccurrenceManager{
 			$occId = $row->occid;
 			$sciName = $row->sciname;
 			$family = $row->family;
-			$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+			//$latLngStr = round($row->DecimalLatitude,4).",".round($row->DecimalLongitude,4);
+			$latLngStr = $row->DecimalLatitude.",".$row->DecimalLongitude;
 			if(!array_key_exists($sciName,$taxaMapper)){
 				foreach($taxaMapper as $keySciname => $v){
 					if(strpos($sciName,$keySciname) === 0){
@@ -140,80 +104,6 @@ class OccurrenceMapManager extends OccurrenceManager{
 		return $coordArr;
 	}
 	
-	private function getChildren($inArr){
-		$retArr = array();
-		if($inArr){
-			$sql = 'SELECT t.tid, t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-				'WHERE ts.taxauthid = 1 AND ts.parenttid IN('.implode(',',$inArr).') AND (ts.tid = ts.tidaccepted)';
-			//echo '<div>SQL: '.$sql.'</div>';
-	        $rs = $this->conn->query($sql);
-	        while($r = $rs->fetch_object()){
-	        	$retArr[$r->tid] = $r->sciname;
-	        }
-			$rs->close();
-			if($retArr && count(array_intersect($retArr,$inArr)) < count($retArr) && $this->childLoopCnt < 5){
-				$retArr = $retArr + $this->getChildren(array_keys($retArr));
-			}
-			$this->childLoopCnt++;
-		}
-		return $retArr;
-	}
-
-	private function setSynonyms($inArray){
-		if($inArray){
-			$sql = 'SELECT tid, tidaccepted FROM taxstatus '.
-				'WHERE taxauthid = 1 AND tidaccepted IN('.implode('',$inArray).') AND (tid <> tidaccepted)';
-			//echo '<div>SQL: '.$sql.'</div>';
-	        $rs = $this->conn->query($sql);
-	        while($r = $rs->fetch_object()){
-	        	$this->synMap[$r->tid] = $r->tidaccepted;
-	        }
-			$rs->close();
-		}
-	}
-	
-	private function getTaxaWhere(){
-		global $userRights, $mappingBoundaries;
-		$sql = "";
-		$sql .= 'WHERE (o.tidinterpreted IN('.implode(',',array_keys($this->synMap)).')) '.
-			'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
-			//Is global rare species reader, thus do nothing to sql and grab all records
-		}
-		elseif(array_key_exists("RareSppReader",$userRights)){
-			$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
-		}
-		return $sql;
-	}
-	
-	public function getTaxaMap(){
-		//Map scientific names and icons to $taxaMap
-		$cnt = 9;
-		foreach($this->taxArr as $key => $taxonName){
-        	$this->taxaArr[$taxonName] = Array();
-			//$this->taxaMap[$key]['sciname'] = $taxonName;
-        	//$this->taxaMap[$key]['color'] = $this->iconColors[$cnt%9];
-			//$this->taxaMap[$key]['icon'] = $this->iconColors[$cnt%9];
-        	$cnt++;
-        }
-		//echo json_encode($this->taxaArr);
-		return $this->taxaMap;
-	}
-
-	public function getSynMap(){
-		return $this->synMap;
-	}
-	
-	public function getOccurSqlWhere(){
-		$this->sqlWhere = $this->getSqlWhere();
-		return $this->sqlWhere;
-	}
-	
-	public function getTaxaSqlWhere(){
-		$this->sqlWhere = $this->getTaxaWhere();
-		return $this->sqlWhere;
-	}
-
     public function writeKMLFile(){
     	global $defaultTitle, $userRights, $clientRoot, $charset;
 		$fileName = $defaultTitle;
@@ -265,6 +155,15 @@ class OccurrenceMapManager extends OccurrenceManager{
 		echo "</Folder>\n";
 		echo "</Document>\n";
 		echo "</kml>\n";
+    }
+    
+    //Setters and getters
+    public function setTaxaArr($tArr){
+    	$this->taxaArr = $tArr;
+    }
+    
+    public function setSqlWhere($sqlWhere){
+    	$this->sqlWhere = $sqlWhere;
     }
 }
 ?>
