@@ -24,8 +24,8 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
 	</style>
 	
-	<script type="text/javascript" src="../js/jquery.js?ver=20130906"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js?ver=20130906"></script>
+	<script type="text/javascript" src="../js/jquery.js?ver=20130917"></script>
+	<script type="text/javascript" src="../js/jquery-ui.js?ver=20130917"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
