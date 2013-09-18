@@ -39,11 +39,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 
 				$("#tabs").tabs();
 
-				c = document.cookie;
-				if(c.indexOf("colldbs=all") > -1){
-					document.getElementById("dballcb").checked = true;
-				}
-
 				//document.collections.onkeydown = checkKey;
 			});
 		
@@ -216,8 +211,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				?>
 				<div id="specobsdiv">
 					<form name="collform1" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 38px;">
-			         		<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
+			        	<div style="margin:0px 0px 10px 20px;">
+							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
 						<?php 
@@ -234,8 +229,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	        	?>
 				<div id="specimendiv">
 					<form name="collform2" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 38px;">
-			         		<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" />
+			        	<div style="margin:0px 0px 10px 20px;">
+							<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" checked />
 			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 			        	</div>
 						<?php
@@ -250,8 +245,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	        	?>
 				<div id="observationdiv">
 					<form name="collform3" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 38px;">
-							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" />
+			        	<div style="margin:0px 0px 10px 20px;">
+							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" checked />
 							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						</div>
 						<?php
