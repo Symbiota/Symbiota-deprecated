@@ -588,73 +588,73 @@ class OccurrenceEditorManager {
 			"georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, ".
 			"verbatimElevation, disposition, language, duplicateQuantity, labelProject, processingstatus, recordEnteredBy, observeruid) ".
 			"VALUES (".$occArr["collid"].",".
-			($occArr["basisofrecord"]?'"'.$this->cleanInStr($occArr["basisofrecord"]).'"':"NULL").",".
-			($occArr["catalognumber"]?'"'.$this->cleanInStr($occArr["catalognumber"]).'"':"NULL").",".
+			($occArr["basisofrecord"]?'"'.$this->cleanInStr($occArr["basisofrecord"]).'"':"NULL").','.
+			($occArr["catalognumber"]?'"'.$this->cleanInStr($occArr["catalognumber"]).'"':"NULL").','.
 			($occArr['othercatalognumbers']?'"'.$this->cleanInStr($occArr['othercatalognumbers']).'"':'NULL').','.
 			($occArr['occurrenceid']?'"'.$this->cleanInStr($occArr['occurrenceid']).'"':'NULL').','.
-			($occArr["ownerinstitutioncode"]?'"'.$this->cleanInStr($occArr["ownerinstitutioncode"]).'"':"NULL").",".
-			($occArr["family"]?'"'.$this->cleanInStr($occArr["family"]).'"':"NULL").",".
+			($occArr["ownerinstitutioncode"]?'"'.$this->cleanInStr($occArr["ownerinstitutioncode"]).'"':"NULL").','.
+			($occArr["family"]?'"'.$this->cleanInStr($occArr["family"]).'"':"NULL").','.
 			'"'.$this->cleanInStr($occArr["sciname"]).'",'.
-			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").",".
-			($occArr["scientificnameauthorship"]?'"'.$this->cleanInStr($occArr["scientificnameauthorship"]).'"':"NULL").",".
-			($occArr["identifiedby"]?'"'.$this->cleanInStr($occArr["identifiedby"]).'"':"NULL").",".
-			($occArr["dateidentified"]?'"'.$this->cleanInStr($occArr["dateidentified"]).'"':"NULL").",".
-			($occArr["identificationreferences"]?'"'.$this->cleanInStr($occArr["identificationreferences"]).'"':"NULL").",".
-			($occArr["identificationremarks"]?'"'.$this->cleanInStr($occArr["identificationremarks"]).'"':"NULL").",".
-			($occArr["identificationqualifier"]?'"'.$this->cleanInStr($occArr["identificationqualifier"]).'"':"NULL").",".
-			($occArr["typestatus"]?'"'.$this->cleanInStr($occArr["typestatus"]).'"':"NULL").",".
-			($occArr["recordedby"]?'"'.$this->cleanInStr($occArr["recordedby"]).'"':"NULL").",".
-			($occArr["recordnumber"]?'"'.$this->cleanInStr($occArr["recordnumber"]).'"':"NULL").",".
-			($occArr["associatedcollectors"]?'"'.$this->cleanInStr($occArr["associatedcollectors"]).'"':"NULL").",".
-			($occArr["eventdate"]?"'".$occArr["eventdate"]."'":"NULL").",".
-			($occArr["year"]?$occArr["year"]:"NULL").",".
-			($occArr["month"]?$occArr["month"]:"NULL").",".
-			($occArr["day"]?$occArr["day"]:"NULL").",".
-			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").",".
-			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").",".
-			($occArr["verbatimeventdate"]?'"'.$this->cleanInStr($occArr["verbatimeventdate"]).'"':"NULL").",".
-			($occArr["habitat"]?'"'.$this->cleanInStr($occArr["habitat"]).'"':"NULL").",".
-			($occArr["substrate"]?'"'.$this->cleanInStr($occArr["substrate"]).'"':"NULL").",".
+			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").','.
+			($occArr["scientificnameauthorship"]?'"'.$this->cleanInStr($occArr["scientificnameauthorship"]).'"':"NULL").','.
+			($occArr["identifiedby"]?'"'.$this->cleanInStr($occArr["identifiedby"]).'"':"NULL").','.
+			($occArr["dateidentified"]?'"'.$this->cleanInStr($occArr["dateidentified"]).'"':"NULL").','.
+			($occArr["identificationreferences"]?'"'.$this->cleanInStr($occArr["identificationreferences"]).'"':"NULL").','.
+			($occArr["identificationremarks"]?'"'.$this->cleanInStr($occArr["identificationremarks"]).'"':"NULL").','.
+			($occArr["identificationqualifier"]?'"'.$this->cleanInStr($occArr["identificationqualifier"]).'"':"NULL").','.
+			($occArr["typestatus"]?'"'.$this->cleanInStr($occArr["typestatus"]).'"':"NULL").','.
+			($occArr["recordedby"]?'"'.$this->cleanInStr($occArr["recordedby"]).'"':"NULL").','.
+			($occArr["recordnumber"]?'"'.$this->cleanInStr($occArr["recordnumber"]).'"':"NULL").','.
+			($occArr["associatedcollectors"]?'"'.$this->cleanInStr($occArr["associatedcollectors"]).'"':"NULL").','.
+			($occArr["eventdate"]?'"'.$occArr["eventdate"].'"':"NULL").','.
+			($occArr["year"]?$occArr["year"]:"NULL").','.
+			($occArr["month"] && is_numeric($occArr["month"])?$occArr["month"]:"NULL").','.
+			($occArr["day"]?$occArr["day"]:"NULL").','.
+			($occArr["startdayofyear"]?$occArr["startdayofyear"]:"NULL").','.
+			($occArr["enddayofyear"]?$occArr["enddayofyear"]:"NULL").','.
+			($occArr["verbatimeventdate"]?'"'.$this->cleanInStr($occArr["verbatimeventdate"]).'"':"NULL").','.
+			($occArr["habitat"]?'"'.$this->cleanInStr($occArr["habitat"]).'"':"NULL").','.
+			($occArr["substrate"]?'"'.$this->cleanInStr($occArr["substrate"]).'"':"NULL").','.
 			($occArr['fieldnumber']?'"'.$this->cleanInStr($occArr['fieldnumber']).'"':'NULL').','.
-			($occArr["occurrenceremarks"]?'"'.$this->cleanInStr($occArr["occurrenceremarks"]).'"':"NULL").",".
-			($occArr["associatedtaxa"]?'"'.$this->cleanInStr($occArr["associatedtaxa"]).'"':"NULL").",".
-			($occArr["verbatimattributes"]?'"'.$this->cleanInStr($occArr["verbatimattributes"]).'"':"NULL").",".
-			($occArr["dynamicproperties"]?'"'.$this->cleanInStr($occArr["dynamicproperties"]).'"':"NULL").",".
-			($occArr["reproductivecondition"]?'"'.$this->cleanInStr($occArr["reproductivecondition"]).'"':"NULL").",".
+			($occArr["occurrenceremarks"]?'"'.$this->cleanInStr($occArr["occurrenceremarks"]).'"':"NULL").','.
+			($occArr["associatedtaxa"]?'"'.$this->cleanInStr($occArr["associatedtaxa"]).'"':"NULL").','.
+			($occArr["verbatimattributes"]?'"'.$this->cleanInStr($occArr["verbatimattributes"]).'"':"NULL").','.
+			($occArr["dynamicproperties"]?'"'.$this->cleanInStr($occArr["dynamicproperties"]).'"':"NULL").','.
+			($occArr["reproductivecondition"]?'"'.$this->cleanInStr($occArr["reproductivecondition"]).'"':"NULL").','.
 			(array_key_exists("cultivationstatus",$occArr)?"1":"0").",".
-			($occArr["establishmentmeans"]?'"'.$this->cleanInStr($occArr["establishmentmeans"]).'"':"NULL").",".
+			($occArr["establishmentmeans"]?'"'.$this->cleanInStr($occArr["establishmentmeans"]).'"':"NULL").','.
 			($occArr['lifestage']?'"'.$this->cleanInStr($occArr['lifestage']).'"':'NULL').','.
 			($occArr['sex']?'"'.$this->cleanInStr($occArr['sex']).'"':'NULL').','.
 			($occArr['individualcount']?'"'.$this->cleanInStr($occArr['individualcount']).'"':'NULL').','.
 			($occArr['samplingprotocol']?'"'.$this->cleanInStr($occArr['samplingprotocol']).'"':'NULL').','.
 			($occArr['preparations']?'"'.$this->cleanInStr($occArr['preparations']).'"':'NULL').','.
 			($occArr['country']?'"'.$this->cleanInStr($occArr['country']).'"':'NULL').','.
-			($occArr["stateprovince"]?'"'.$this->cleanInStr($occArr["stateprovince"]).'"':"NULL").",".
-			($occArr["county"]?'"'.$this->cleanInStr($occArr["county"]).'"':"NULL").",".
-			($occArr["municipality"]?'"'.$this->cleanInStr($occArr["municipality"]).'"':"NULL").",".
-			($occArr["locality"]?'"'.$this->cleanInStr($occArr["locality"]).'"':"NULL").",".
-			(array_key_exists("localitysecurity",$occArr)?"1":"0").",".
-			($occArr["localitysecurityreason"]?$this->cleanInStr($occArr["localitysecurityreason"]):"NULL").",".
-			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").",".
-			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").",".
-			($occArr["geodeticdatum"]?'"'.$this->cleanInStr($occArr["geodeticdatum"]).'"':"NULL").",".
+			($occArr["stateprovince"]?'"'.$this->cleanInStr($occArr["stateprovince"]).'"':"NULL").','.
+			($occArr["county"]?'"'.$this->cleanInStr($occArr["county"]).'"':"NULL").','.
+			($occArr["municipality"]?'"'.$this->cleanInStr($occArr["municipality"]).'"':"NULL").','.
+			($occArr["locality"]?'"'.$this->cleanInStr($occArr["locality"]).'"':"NULL").','.
+			(array_key_exists("localitysecurity",$occArr)?"1":"0").','.
+			($occArr["localitysecurityreason"]?'"'.$this->cleanInStr($occArr["localitysecurityreason"]).'"':"NULL").','.
+			($occArr["decimallatitude"]?$occArr["decimallatitude"]:"NULL").','.
+			($occArr["decimallongitude"]?$occArr["decimallongitude"]:"NULL").','.
+			($occArr["geodeticdatum"]?'"'.$this->cleanInStr($occArr["geodeticdatum"]).'"':"NULL").','.
 			($occArr['coordinateuncertaintyinmeters']?$occArr['coordinateuncertaintyinmeters']:'NULL').','.
-			($occArr["verbatimcoordinates"]?'"'.$this->cleanInStr($occArr["verbatimcoordinates"]).'"':"NULL").",".
-			($occArr['footprintwkt']?'"'.$occArr['footprintwkt'].'"':'NULL').','.
-			($occArr["georeferencedby"]?'"'.$this->cleanInStr($occArr["georeferencedby"]).'"':"NULL").",".
-			($occArr["georeferenceprotocol"]?'"'.$this->cleanInStr($occArr["georeferenceprotocol"]).'"':"NULL").",".
-			($occArr["georeferencesources"]?'"'.$this->cleanInStr($occArr["georeferencesources"]).'"':"NULL").",".
-			($occArr["georeferenceverificationstatus"]?'"'.$this->cleanInStr($occArr["georeferenceverificationstatus"]).'"':"NULL").",".
-			($occArr["georeferenceremarks"]?'"'.$this->cleanInStr($occArr["georeferenceremarks"]).'"':"NULL").",".
-			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").",".
-			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").",".
-			($occArr["verbatimelevation"]?'"'.$this->cleanInStr($occArr["verbatimelevation"]).'"':"NULL").",".
+			($occArr["verbatimcoordinates"]?'"'.$this->cleanInStr($occArr["verbatimcoordinates"]).'"':"NULL").','.
+			($occArr['footprintwkt']?'"'.$this->cleanInStr($occArr['footprintwkt']).'"':'NULL').','.
+			($occArr["georeferencedby"]?'"'.$this->cleanInStr($occArr["georeferencedby"]).'"':"NULL").','.
+			($occArr["georeferenceprotocol"]?'"'.$this->cleanInStr($occArr["georeferenceprotocol"]).'"':"NULL").','.
+			($occArr["georeferencesources"]?'"'.$this->cleanInStr($occArr["georeferencesources"]).'"':"NULL").','.
+			($occArr["georeferenceverificationstatus"]?'"'.$this->cleanInStr($occArr["georeferenceverificationstatus"]).'"':"NULL").','.
+			($occArr["georeferenceremarks"]?'"'.$this->cleanInStr($occArr["georeferenceremarks"]).'"':"NULL").','.
+			($occArr["minimumelevationinmeters"]?$occArr["minimumelevationinmeters"]:"NULL").','.
+			($occArr["maximumelevationinmeters"]?$occArr["maximumelevationinmeters"]:"NULL").','.
+			($occArr["verbatimelevation"]?'"'.$this->cleanInStr($occArr["verbatimelevation"]).'"':"NULL").','.
 			($occArr['disposition']?'"'.$this->cleanInStr($occArr["disposition"]).'"':'NULL').','.
-			($occArr["language"]?'"'.$this->cleanInStr($occArr["language"]).'"':"NULL").",".
-			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").",".
-			($occArr["labelproject"]?'"'.$this->cleanInStr($occArr["labelproject"]).'"':"NULL").",".
+			($occArr["language"]?'"'.$this->cleanInStr($occArr["language"]).'"':"NULL").','.
+			($occArr["duplicatequantity"]?$occArr["duplicatequantity"]:"NULL").','.
+			($occArr["labelproject"]?'"'.$this->cleanInStr($occArr["labelproject"]).'"':"NULL").','.
 			($occArr["processingstatus"]?'"'.$occArr["processingstatus"].'"':"NULL").',"'.
-			$occArr["userid"].'",'.$occArr["observeruid"].") ";
+			$occArr["userid"].'",'.$occArr["observeruid"].') ';
 			//echo "<div>".$sql."</div>";
 			if($this->conn->query($sql)){
 				$this->occid = $this->conn->insert_id;
@@ -665,7 +665,7 @@ class OccurrenceEditorManager {
 				}
 			}
 			else{
-				$status = "ERROR - failed to add occurrence record: ".$this->conn->error;
+				$status = "ERROR - failed to add occurrence record: ".$this->conn->error.'<br/>SQL: '.$sql;
 			}
 		}
 		return $status;
