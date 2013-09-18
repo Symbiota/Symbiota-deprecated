@@ -148,10 +148,12 @@ class SpecUploadDwca extends SpecUploadBase{
 							if(stripos($rowType,'identification')){
 								//Is identification data related to core data
 								$tagName = 'ident';
+								$this->includeIdentificationHistory = true;
 							}
 							elseif(stripos($rowType,'image')){
 								//Is image data related to core data
 								$tagName = 'image';
+								$this->includeImages = true;
 							}
 							if($tagName){
 								if($locElements = $extensionElement->getElementsByTagName('location')){
@@ -218,7 +220,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 
 				$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['occur']['name'];
-		 		$fh = fopen($fullPath,'rb') or die("Can't open file");
+		 		$fh = fopen($fullPath,'rb') or die("Can't open occurrence file");
 				
 		 		if($this->metaArr['occur']['ignoreHeaderLines'] == '1'){
 		 			//Advance one record to go past header
@@ -229,16 +231,18 @@ class SpecUploadDwca extends SpecUploadBase{
 				$cset = strtolower(str_replace('-','',$charset)); 
 				$this->sourceArr = $this->metaArr['occur']['fields'];
 		 		$this->transferCount = 0;
-		 		if(!array_key_exists('',$this->fieldMap)) $this->fieldMap['dbpk']['field'] = 'id';
+		 		if(!array_key_exists('dbpk',$this->fieldMap)) $this->fieldMap['dbpk']['field'] = 'id';
 				while($recordArr = $this->getRecordArr($fh)){
 					$recMap = Array();
 					foreach($this->fieldMap as $symbField => $sMap){
-						$indexArr = array_keys($this->sourceArr,$sMap['field']);
-						$index = array_shift($indexArr);
-						if(array_key_exists($index,$recordArr)){
-							$valueStr = $recordArr[$index];
-							if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
-							$recMap[$symbField] = $valueStr;
+						if($symbField != 'unmapped'){
+							$indexArr = array_keys($this->sourceArr,$sMap['field']);
+							$index = array_shift($indexArr);
+							if(array_key_exists($index,$recordArr)){
+								$valueStr = $recordArr[$index];
+								if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+								$recMap[$symbField] = $valueStr;
+							}
 						}
 					}
 					$this->loadRecord($recMap);
@@ -253,12 +257,59 @@ class SpecUploadDwca extends SpecUploadBase{
 
 				//Upload identification history
 				if($this->includeIdentificationHistory){
+					//
+					if(isset($this->metaArr['ident']['fields'])){
+						if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
+							$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
+						}
+						else{
+							$this->delimiter = '';
+						}
+						if(isset($this->metaArr['ident']['fieldsEnclosedBy']) && $this->metaArr['ident']['fieldsEnclosedBy']){
+							$this->enclosure = $this->metaArr['ident']['fieldsEnclosedBy'];
+						}
+						if(isset($this->metaArr['ident']['encloding']) && $this->metaArr['ident']['encloding']){
+							$this->encoding = strtolower(str_replace('-','',$this->metaArr['ident']['encloding']));
+						}
+		
+						$fullPath = $this->uploadTargetPath.$this->baseFolderName.'/'.$this->metaArr['ident']['name'];
+				 		$fh = fopen($fullPath,'rb') or die("Can't open identification history file");
+						
+				 		if($this->metaArr['ident']['ignoreHeaderLines'] == '1'){
+				 			//Advance one record to go past header
+				 			$this->getRecordArr($fh);
+				 		}
+						
+						//Grab data
+						$cset = strtolower(str_replace('-','',$charset)); 
+						$this->identSourceArr = $this->metaArr['ident']['fields'];
+						while($recordArr = $this->getRecordArr($fh)){
+							$recMap = Array();
+							foreach($this->identFieldMap as $symbField => $iMap){
+								if($identSymbField != 'unmapped'){
+									$indexArr = array_keys($this->identSourceArr,$iMap['field']);
+									$index = array_shift($indexArr);
+									if(array_key_exists($index,$recordArr)){
+										$valueStr = $recordArr[$index];
+										if($cset != $this->encoding) $valueStr = $this->encodeString($valueStr);
+										$recMap[$symbField] = $valueStr;
+									}
+								}
+							}
+							$this->loadIdentificationRecord($recMap);
+							unset($recMap);
+						}
+						fclose($fh);
+					}
 					
+					$this->loadIdentificationRecord($identRecMap);
 				}
 				
 				//Upload images
 				if($this->includeImages){
 					
+					
+					$this->loadImageRecord($imgRecMap);
 				}
 			}
 		}

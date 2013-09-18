@@ -643,7 +643,7 @@ class OccurrenceManager{
 						</a>
 					</td>
 					<td>
-						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" /> 
+						<input id="cat<?php echo $idStr; ?>Input" name="cat[]" value="<?php echo $catid; ?>" type="checkbox" onclick="selectAllCat(this,'cat-<?php echo $idStr; ?>')" checked /> 
 					</td>
 					<td>
 			    		<span style='text-decoration:none;color:black;font-size:130%;font-weight:bold;'>
@@ -672,7 +672,7 @@ class OccurrenceManager{
 										    ?>
 										</td>
 										<td style="padding:6px">
-								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" /> 
+								    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" class="cat-<?php echo $idStr; ?>" onclick="unselectCat('cat<?php echo $catid; ?>Input')" checked /> 
 										</td>
 										<td style="padding:6px">
 								    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
@@ -725,7 +725,7 @@ class OccurrenceManager{
 					    &nbsp;
 					</td>
 					<td style="padding:6px;">
-			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" /> 
+			    		<input name="db[]" value="<?php echo $collid; ?>" type="checkbox" onclick="uncheckAll(this.form)" checked /> 
 					</td>
 					<td style="padding:6px">
 			    		<a href = 'misc/collprofiles.php?collid=<?php echo $collid; ?>' style='text-decoration:none;color:black;font-size:120%;'>
@@ -737,7 +737,7 @@ class OccurrenceManager{
 				    </td>
 				</tr>
 				<?php
-				$collCnt++; 
+				$collCnt++;
 			}
 			?>
 			</table>

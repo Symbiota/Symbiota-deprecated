@@ -9,8 +9,8 @@ class SpecUploadBase extends SpecUpload{
 	protected $transferCount = 0;
 	protected $identTransferCount = 0;
 	protected $imageTransferCount = 0;
-	protected $includeIdentificationHistory = false;
-	protected $includeImages = false;
+	protected $includeIdentificationHistory = true;
+	protected $includeImages = true;
 	protected $uploadTargetPath;
 	
 	protected $sourceArr = Array();
@@ -151,10 +151,12 @@ class SpecUploadBase extends SpecUpload{
 				$this->identSymbFields[] = 'specificepithet';
 				$this->identSymbFields[] = 'taxonrank';
 				$this->identSymbFields[] = 'infraspecificepithet';
+				$this->identSymbFields[] = 'coreid';
 				//$this->identFieldMap['genus']['type'] = 'string';
 				//$this->identFieldMap['specificepithet']['type'] = 'string';
 				//$this->identFieldMap['taxonrank']['type'] = 'string';
 				//$this->identFieldMap['infraspecificepithet']['type'] = 'string';
+				//$this->identFieldMap['coreid']['type'] = 'string';
 			}
 
 			if($this->includeImages){
@@ -165,17 +167,17 @@ class SpecUploadBase extends SpecUpload{
 					if($field != "imgid" && $field != "initialtimestamp" && $field != "occid" && $field != "tid" && $field != "photographeruid"){
 						$type = $r->Type;
 						$this->imageSymbFields[] = $field;
-						if(array_key_exists($field,$this->imageSymbFields)){
+						if(array_key_exists($field,$this->imageFieldMap)){
 							if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
-								$this->identFieldMap[$field]["type"] = "numeric";
+								$this->imageFieldMap[$field]["type"] = "numeric";
 							}
 							elseif(strpos($type,"date") !== false){
-								$this->imageSymbFields[$field]["type"] = "date";
+								$this->imageFieldMap[$field]["type"] = "date";
 							}
 							else{
-								$this->imageSymbFields[$field]["type"] = "string";
+								$this->imageFieldMap[$field]["type"] = "string";
 								if(preg_match('/\(\d+\)$/', $type, $matches)){
-									$this->imageSymbFields[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
+									$this->imageFieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
 								}
 							}
 						}
@@ -218,6 +220,7 @@ class SpecUploadBase extends SpecUpload{
 		foreach($fieldMap as $symbField => $fArr){
 			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
 		}
+		if($mode == 'ident') print_r($sourceSymbArr);
 
 		//Output table rows for source data
 		echo '<table class="styledtable">';
@@ -225,8 +228,10 @@ class SpecUploadBase extends SpecUpload{
 		sort($symbFields);
 		$autoMapArr = Array();
 		foreach($sourceArr as $fieldName){
+			$diplayFieldName = $fieldName;
+			$fieldName = strtolower($fieldName);
 			$isAutoMapped = false;
-			$tranlatedFieldName = strtolower(str_replace(array('_',' ','.'),'',$fieldName));
+			$tranlatedFieldName = str_replace(array('_',' ','.'),'',$fieldName);
 			if($autoMap){
 				if(array_key_exists($tranlatedFieldName,$translationMap)) $tranlatedFieldName = strtolower($translationMap[$tranlatedFieldName]);
 				if(in_array($tranlatedFieldName,$this->symbFields)){
@@ -236,13 +241,13 @@ class SpecUploadBase extends SpecUpload{
 			}
 			echo "<tr>\n";
 			echo "<td style='padding:2px;'>";
-			echo $fieldName;
+			echo $diplayFieldName;
 			echo "<input type='hidden' name='".$prefix."sf[]' value='".$fieldName."' />";
 			echo "</td>\n";
 			echo "<td>\n";
-			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists(strtolower($fieldName),$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
+			echo "<select name='".$prefix."tf[]' style='background:".(!array_key_exists($fieldName,$sourceSymbArr)&&!$isAutoMapped?"yellow":"")."'>";
 			echo "<option value=''>Select Target Field</option>\n";
-			echo "<option value='unmapped'>Leave Field Unmapped</option>\n";
+			echo "<option value='unmapped'".($sourceSymbArr[$fieldName]=='unmapped'?"SELECTED":"").">Leave Field Unmapped</option>\n";
 			echo "<option value=''>-------------------------</option>\n";
 			if(array_key_exists($fieldName,$sourceSymbArr)){
 				//Source Field is mapped to Symbiota Field
@@ -679,7 +684,7 @@ class SpecUploadBase extends SpecUpload{
 			'o.maximumElevationInMeters = u.maximumElevationInMeters, o.verbatimElevation = u.verbatimElevation, '.
 			'o.previousIdentifications = u.previousIdentifications, o.disposition = u.disposition, o.modified = u.modified, '.
 			'o.language = u.language, o.recordEnteredBy = u.recordEnteredBy, o.duplicateQuantity = u.duplicateQuantity '.
-			'WHERE u.collid = '.$this->collId;
+			'WHERE u.collid = '.$this->collId.' AND u.basisofrecord != "determinationHistory"';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -735,7 +740,7 @@ class SpecUploadBase extends SpecUpload{
 			'u.georeferenceSources, u.georeferenceVerificationStatus, u.georeferenceRemarks, u.minimumElevationInMeters, u.maximumElevationInMeters, '.
 			'u.verbatimElevation, u.previousIdentifications, u.disposition, u.modified, u.language, u.recordEnteredBy, u.duplicateQuantity '.
 			'FROM uploadspectemp u '.
-			'WHERE u.occid IS NULL AND u.collid = '.$this->collId;
+			'WHERE u.occid IS NULL AND u.collid = '.$this->collId.' AND u.basisofrecord != "determinationHistory"';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -758,9 +763,12 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 
+		//Process indentification history, if given
+		$this->transferIdentificationHistory();
 		//Process images, if they exist
-		$this->transferImages();
-		
+		$this->transferAssociatedMedia();
+
+		//Time to do some cleanup
 		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('<li style="font-weight:bold;">Collection transfer process finished</li>');
@@ -849,7 +857,39 @@ class SpecUploadBase extends SpecUpload{
 		
 	}
 	
+	private function transferIdentificationHistory(){
+		$this->outputMsg('<li style="font-weight:bold;">Tranferring and activating Determination History... ');
+		ob_flush();
+		flush();
+		$sql = 'INSERT IGNORE INTO omoccurdeterminations (occid, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, '.
+			'identificationQualifier, identificationReferences, identificationRemarks) '.
+			'SELECT u.occid, u.sciname, u.scientificNameAuthorship, u.identifiedBy, u.dateIdentified, '.
+			'u.identificationQualifier, u.identificationReferences, u.identificationRemarks '.
+			'FROM uploadspectemp u '.
+			'WHERE u.occid IS NOT NULL AND u.collid = '.$this->collId.' AND u.basisofrecord = "determinationHistory"';
+		if($this->conn->query($sql)){
+			$this->outputMsg('Done!</li> ');
+		}
+		else{
+			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+		}
+	}
+	
 	private function transferImages(){
+		$this->outputMsg('<li style="font-weight:bold;">Tranferring and activating images... ');
+		ob_flush();
+		flush();
+		$sql = 'INSERT IGNORE INTO images () '.
+			'WHERE u.occid IS NOT NULL AND u.collid = '.$this->collId.' AND u.basisofrecord = "determinationHistory"';
+		if($this->conn->query($sql)){
+			$this->outputMsg('Done!</li> ');
+		}
+		else{
+			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
+		}
+	}
+	
+	private function transferAssociatedMedia(){
 		//Check to see if we have any images to process
 		$imgCnt = 0;
 		$sql = 'SELECT count(*) AS cnt '.
@@ -1234,60 +1274,9 @@ class SpecUploadBase extends SpecUpload{
 				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
 			}
 			
-			//Create update str 
-			$sqlFields = '';
-			$sqlValues = '';
-			foreach($recMap as $symbField => $valueStr){
-				$sqlFields .= ','.$symbField;
-				$valueStr = $this->encodeString($valueStr);
-				$valueStr = $this->cleanInStr($valueStr);
-				//Load data
-				$type = '';
-				$size = 0;
-				if(array_key_exists($symbField,$this->fieldMap)){ 
-					if(array_key_exists('type',$this->fieldMap[$symbField])){
-						$type = $this->fieldMap[$symbField]["type"];
-					}
-					if(array_key_exists('size',$this->fieldMap[$symbField])){
-						$size = $this->fieldMap[$symbField]["size"];
-					}
-				}
-				switch($type){
-					case "numeric":
-						if(is_numeric($valueStr)){
-							$sqlValues .= ",".$valueStr;
-						}
-						elseif(is_numeric(str_replace(',',"",$valueStr))){
-							$sqlValues .= ",".str_replace(',',"",$valueStr);
-						}
-						else{
-							$sqlValues .= ",NULL";
-						}
-						break;
-					case "date":
-						$dateStr = $this->formatDate($valueStr);
-						if($dateStr){
-							$sqlValues .= ',"'.$dateStr.'"';
-						}
-						else{
-							$sqlValues .= ",NULL";
-						}
-						break;
-					default:	//string
-						if($size && strlen($valueStr) > $size){
-							$valueStr = substr($valueStr,0,$size);
-						}
-						if(trim($valueStr)){
-							$sqlValues .= ',"'.$valueStr.'"';
-						}
-						else{
-							$sqlValues .= ",NULL";
-						}
-				}
-			}
-			
-			$sql = "INSERT INTO uploadspectemp(collid".$sqlFields.") ".
-				"VALUES(".$this->collId.$sqlValues.")";
+			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
+			$sql = "INSERT INTO uploadspectemp(collid".$sqlFragments['fieldstr'].") ".
+				"VALUES(".$this->collId.$sqlFragments['valuestr'].")";
 			//echo "<div>SQL: ".$sql."</div>";
 			
 			if($this->conn->query($sql)){
@@ -1305,6 +1294,124 @@ class SpecUploadBase extends SpecUpload{
 				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
 			}
 		}
+	}
+
+	public function loadIdentificationRecord($recMap){
+		//Import record only if required fields have data 
+		if((array_key_exists('dbpk',$recMap) && $recMap['dbpk'])
+			&& (array_key_exists('sciname',$recMap) && $recMap['sciname'])){
+			//Trim all field values
+			foreach($recMap as $k => $v){
+				$recMap[$k] = trim($v);
+			}
+
+			//Do some cleaning 
+			//Populate sciname if null
+			if(!array_key_exists('sciname',$recMap) || !$recMap['sciname']){
+				if(array_key_exists("genus",$recMap)){
+					//Build sciname from individual units supplied by source
+					$sciName = $recMap["genus"];
+					if(array_key_exists("specificepithet",$recMap) && $recMap["specificepithet"]) $sciName .= " ".$recMap["specificepithet"];
+					if(array_key_exists("taxonrank",$recMap) && $recMap["taxonrank"]) $sciName .= " ".$recMap["taxonrank"];
+					if(array_key_exists("infraspecificepithet",$recMap) && $recMap["infraspecificepithet"]) $sciName .= " ".$recMap["infraspecificepithet"];
+					$recMap['sciname'] = trim($sciName);
+				}
+			}
+			//Try to get author, if it's not there 
+			if(!array_key_exists('scientificnameauthorship',$recMap) || !$recMap['scientificnameauthorship']){
+				//Parse scientific name to see if it has author imbedded
+				$parsedArr = $this->parseScientificName($recMap['sciname']);
+				if(array_key_exists('author',$parsedArr)){
+					$recMap['scientificnameauthorship'] = $parsedArr['author'];
+					//Load sciname from parsedArr since if appears that author was embedded
+					$recMap['sciname'] = trim($parsedArr['unitname1'].' '.$parsedArr['unitname2'].' '.$parsedArr['unitind3'].' '.$parsedArr['unitname3']);
+				}
+			}
+			
+			$sqlFragments = $this->getSqlFragments($recMap,$this->identFieldMap);
+			$sql = 'INSERT INTO uploadspectemp(collid,basisofrecord'.$sqlFragments['fieldstr'].') '.
+				'VALUES('.$this->collId.',"determinationHistory"'.$sqlFragments['valuestr'].')';
+			//echo "<div>SQL: ".$sql."</div>";
+			
+			if($this->conn->query($sql)){
+				$this->identTransferCount++;
+				if($this->identTransferCount%1000 == 0) $this->outputMsg('<li style="font-weight:bold;">Identification History upload count: '.$this->identTransferCount.'</li>');
+				ob_flush();
+				flush();
+			}
+			else{
+				$this->outputMsg("<li>FAILED adding indetification history record #".$this->identTransferCount."</li>");
+				$this->outputMsg("<div style='margin-left:10px;'>Error: ".$this->conn->error."</div>");
+				$this->outputMsg("<div style='margin:0px 0px 10px 10px;'>SQL: $sql</div>");
+			}
+		}
+	}
+	
+	public function loadImageRecord($recMap){
+		//Import record only if required fields have data 
+		if((array_key_exists('dbpk',$recMap) && $recMap['dbpk'])
+			&& (array_key_exists('sciname',$recMap) && $recMap['sciname'])){
+			//Trim all field values
+			foreach($recMap as $k => $v){
+				$recMap[$k] = trim($v);
+			}
+		
+			
+		}
+	}
+
+	private function getSqlFragments($recMap,$fieldMap){
+		$sqlFields = '';
+		$sqlValues = '';
+		foreach($recMap as $symbField => $valueStr){
+			$sqlFields .= ','.$symbField;
+			$valueStr = $this->encodeString($valueStr);
+			$valueStr = $this->cleanInStr($valueStr);
+			//Load data
+			$type = '';
+			$size = 0;
+			if(array_key_exists($symbField,$fieldMap)){ 
+				if(array_key_exists('type',$fieldMap[$symbField])){
+					$type = $fieldMap[$symbField]["type"];
+				}
+				if(array_key_exists('size',$fieldMap[$symbField])){
+					$size = $fieldMap[$symbField]["size"];
+				}
+			}
+			switch($type){
+				case "numeric":
+					if(is_numeric($valueStr)){
+						$sqlValues .= ",".$valueStr;
+					}
+					elseif(is_numeric(str_replace(',',"",$valueStr))){
+						$sqlValues .= ",".str_replace(',',"",$valueStr);
+					}
+					else{
+						$sqlValues .= ",NULL";
+					}
+					break;
+				case "date":
+					$dateStr = $this->formatDate($valueStr);
+					if($dateStr){
+						$sqlValues .= ',"'.$dateStr.'"';
+					}
+					else{
+						$sqlValues .= ",NULL";
+					}
+					break;
+				default:	//string
+					if($size && strlen($valueStr) > $size){
+						$valueStr = substr($valueStr,0,$size);
+					}
+					if(trim($valueStr)){
+						$sqlValues .= ',"'.$valueStr.'"';
+					}
+					else{
+						$sqlValues .= ",NULL";
+					}
+			}
+		}
+		return array('fieldstr' => $sqlFields,'fieldstr' => $sqlValues);
 	}
 
 	public function getTransferCount(){

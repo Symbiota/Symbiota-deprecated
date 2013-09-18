@@ -75,7 +75,7 @@ if(array_key_exists("sf",$_POST)){
  		$sourceFields = $_POST["sf"];
  		$fieldMap = Array();
 		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x] && $targetFields[$x] != 'unmapped') $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
+			if($targetFields[$x]) $fieldMap[$targetFields[$x]]["field"] = $sourceFields[$x];
 		}
 		//Set Source PK
 		if($dbpk) $fieldMap["dbpk"]["field"] = $dbpk;
@@ -341,7 +341,7 @@ $duManager->loadFieldMap();
 												</div>
 											</div>
 											<div>
-												<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
+												<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])&&false?'checked':'disabled') ?> /> 
 												Import Identification History 
 												<?php 
 												if(isset($metaArr['ident'])){
@@ -365,7 +365,7 @@ $duManager->loadFieldMap();
 												
 											</div>
 											<div>
-												<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])?'checked':'disabled') ?> /> 
+												<input name="importimage" value="1" type="checkbox" <?php echo (isset($metaArr['image'])&&false?'checked':'disabled') ?> /> 
 												Import Images 
 												<?php 
 												if(isset($metaArr['image'])){
