@@ -115,7 +115,7 @@ $sharedMapManager->setTaxaArr($tArr);
 							$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['othercatalognumbers'];
 						}
 						elseif((!$spArr['catalognumber']) && (!$spArr['othercatalognumbers'])){
-							$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'');
+							$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'').($spArr['identifier']?'-'.$spArr['identifier']:'');
 						}
 						else{
 							$displayStr = $spArr['catalognumber'];
