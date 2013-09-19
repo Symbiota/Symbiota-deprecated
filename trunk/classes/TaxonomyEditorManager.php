@@ -185,7 +185,7 @@ class TaxonomyEditorManager{
 				$sql .= $key.' = "'.$v.'",';
 			}
 		}
-		$sql .= 'sciname = "'.$this->conn->real_escape_string(($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
+		$sql .= 'sciname = "'.$this->cleanInStr(($taxonEditArr["unitind1"]?$taxonEditArr["unitind1"]." ":"").
 			$taxonEditArr["unitname1"].($taxonEditArr["unitind2"]?" ".$taxonEditArr["unitind2"]:"").
 			($taxonEditArr["unitname2"]?" ".$taxonEditArr["unitname2"]:"").
 			($taxonEditArr["unitind3"]?" ".$taxonEditArr["unitind3"]:"").
@@ -209,27 +209,26 @@ class TaxonomyEditorManager{
 		$status = '';
 		$this->setTaxon();
 		$sql = 'UPDATE taxstatus '.
-			'SET uppertaxonomy = "'.$this->conn->real_escape_string(trim($tsArr['uppertaxonomy'])).'",parenttid = '.
-			$this->conn->real_escape_string($tsArr["parenttid"]).' '.
+			'SET uppertaxonomy = "'.$this->cleanInStr($tsArr['uppertaxonomy']).'",parenttid = '.$tsArr["parenttid"].' '.
 			'WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tsArr['tid'].') AND (tidaccepted = '.$tsArr['tidaccepted'].')';
 		if($this->conn->query($sql)){
 			$this->rebuildHierarchy($tsArr["tid"]);
 		}
 		else{
-			$status = 'Unable to edit taxonomic placement'; 
+			$status = 'Unable to edit taxonomic placement. SQL: '.$sql; 
 		}
 		return $status;
 	}
 
 	public function submitSynEdits($synEditArr){
-		$tid = $this->conn->real_escape_string($synEditArr["tid"]);
+		$tid = $synEditArr["tid"];
 		unset($synEditArr["tid"]);
-		$tidAccepted = $this->conn->real_escape_string($synEditArr["tidaccepted"]);
+		$tidAccepted = $synEditArr["tidaccepted"];
 		unset($synEditArr["tidaccepted"]);
 		$sql = "UPDATE taxstatus SET ";
 		$sqlSet = "";
 		foreach($synEditArr as $key => $value){
-			$sqlSet .= ",".$this->conn->real_escape_string($key)." = '".$this->conn->real_escape_string(trim($value))."'";
+			$sqlSet .= ",".$key." = '".$this->cleanInStr($value)."'";
 		}
 		$sql .= substr($sqlSet,1);
 		$sql .= " WHERE (taxauthid = ".$this->taxAuthId.
@@ -242,7 +241,7 @@ class TaxonomyEditorManager{
 	public function submitAddAcceptedLink($tid, $tidAcc, $deleteOther = true){
 		$upperTax = "";$family = "";$parentTid = 0;$hierarchyStr = "";
 		$status = '';
-		$tid = $this->conn->real_escape_string($tid);
+		$tid = $tid;
 		if(is_numeric($tid)){
 			$sqlFam = 'SELECT ts.uppertaxonomy, ts.family, ts.parenttid, ts.hierarchystr '.
 				'FROM taxstatus ts WHERE (ts.tid = '.$tid.') AND (ts.taxauthid = '.$this->taxAuthId.')';
@@ -272,14 +271,13 @@ class TaxonomyEditorManager{
 	
 	public function submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance = true){
 		$status = '';
-		$tid = $this->conn->real_escape_string($tid);
 		if(is_numeric($tid)){
 			$sql = "UPDATE taxstatus SET tidaccepted = ".$tid.
 				" WHERE (tid = ".$tid.") AND (taxauthid = ".$this->taxAuthId.')';
 			$status = $this->conn->query($sql);
 	
 			if($switchAcceptance){
-				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$this->conn->real_escape_string($tid).
+				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.
 					' WHERE (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';
 				$status = $this->conn->query($sqlSwitch);
 				
@@ -291,7 +289,6 @@ class TaxonomyEditorManager{
 	
 	public function submitChangeToNotAccepted($tid,$tidAccepted,$reason,$notes){
 		$status = '';
-		$tid = $this->conn->real_escape_string($tid);
 		if(is_numeric($tid)){
 			//Change subject taxon to Not Accepted
 			$sql = 'UPDATE taxstatus '.
@@ -317,7 +314,6 @@ class TaxonomyEditorManager{
 	}
 	
 	private function updateDependentData($tid, $tidNew){
-		$tid = $this->conn->real_escape_string($tid);
 		if(is_numeric($tid) && is_numeric($tidNew)){
 			//method to update descr, vernaculars,
 			$this->conn->query('DELETE FROM kmdescr WHERE inherited IS NOT NULL AND (tid = '.$tid.')');
@@ -457,7 +453,7 @@ class TaxonomyEditorManager{
 			if($r2 = $rsFam2->fetch_object()){
 				if($newFam <> $r2->family){
 					//reset family of target and all it's children
-					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$this->conn->real_escape_string($newFam).'"':'Not assigned').' '.
+					$sql = 'UPDATE taxstatus SET family = '.($newFam?'"'.$this->cleanInStr($newFam).'"':'Not assigned').' '.
 						'WHERE (taxauthid = '.$this->taxAuthId.') AND '.
 						'((tid = '.$tid.') OR (hierarchystr LIKE "%,'.$tid.'") OR (hierarchystr LIKE "%,'.$tid.',%" ))';
 					//echo $sql;
@@ -563,7 +559,7 @@ class TaxonomyEditorManager{
 	private function buildHierarchy($tid){
 		$parentArr = Array($tid);
 		$parCnt = 0;
-		$targetTid = $this->conn->real_escape_string($tid);
+		$targetTid = $tid;
 		do{
 			$sqlParents = "SELECT IFNULL(ts.parenttid,0) AS parenttid FROM taxstatus ts WHERE (ts.tid = ".$targetTid.')';
 			//echo "<div>".$sqlParents."</div>";
@@ -744,7 +740,7 @@ class TaxonomyEditorManager{
 	
 	public function setTaxAuthId($taid){
 		if(is_numeric($taid)){
-			$this->taxAuthId = $this->conn->real_escape_string($taid);
+			$this->taxAuthId = $taid;
 		}
 	}
 	

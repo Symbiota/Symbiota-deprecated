@@ -1411,7 +1411,7 @@ class SpecUploadBase extends SpecUpload{
 					}
 			}
 		}
-		return array('fieldstr' => $sqlFields,'fieldstr' => $sqlValues);
+		return array('fieldstr' => $sqlFields,'valuestr' => $sqlValues);
 	}
 
 	public function getTransferCount(){
@@ -1465,7 +1465,7 @@ class SpecUploadBase extends SpecUpload{
 			$d = $match[2];
 			$y = $match[3];
 		}
-		elseif(preg_match('/^(\D{3,})\.*\s{1}(\d{1,2}),{0,1}\s{1}(\d{2,4})/',$dateStr,$match)){
+		elseif(preg_match('/^(\D{3,})\.*\s{0,1}(\d{1,2}),{0,1}\s{0,1}(\d{2,4})/',$dateStr,$match)){
 			//Format: mmm dd, yyyy
 			$mStr = $match[1];
 			$d = $match[2];
