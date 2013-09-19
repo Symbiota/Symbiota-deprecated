@@ -6,6 +6,7 @@ class MappingShared{
 	private $iconColors = Array();
 	private $taxaArr = Array();
 	private $sqlWhere;
+	private $searchTerms = 0;
 
     public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -23,19 +24,33 @@ class MappingShared{
  		if(!($this->conn === false)) $this->conn->close();
 	}
 	
-    public function getGeoCoords($limit = 1000, $includeDescr= false){
+    public function getGenObsInfo(){
+		$retVar = '';
+		$sql = 'SELECT collid '.
+			'FROM omcollections '.
+			'WHERE collectionname = "General Observations"';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retVar = $r->collid;
+			}
+			$rs->close();
+		}
+		return $retVar;
+	}
+	
+	public function getGeoCoords($limit=1000,$includeDescr=false,$mapWhere){
 		global $userRights, $mappingBoundaries;
 		$coordArr = Array();
-		$querySql = '';
+		$sql = '';
 		$sql = 'SELECT o.occid, IFNULL(IFNULL(IFNULL(o.occurrenceid,o.catalognumber),CONCAT(o.recordedby," ",o.recordnumber)),o.occid) AS identifier, '.
-			'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid ';
+			'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode ';
 		if($includeDescr){
 			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
 		}
-		$sql .= "FROM omoccurrences o ";
+		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$sql .= $this->getMapWhere();
+		if(($this->searchTerms == 1) && (array_key_exists("surveyid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
@@ -92,6 +107,10 @@ class MappingShared{
 			if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
 			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collid"] = $row->collid;
 			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["identifier"] = $row->identifier;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["institutioncode"] = $row->institutioncode;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["collectioncode"] = $row->collectioncode;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["catalognumber"] = $row->catalognumber;
+			$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["othercatalognumbers"] = $row->othercatalognumbers;
 			if($includeDescr){
 				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
 			}
@@ -102,9 +121,10 @@ class MappingShared{
 		$result->close();
 		
 		return $coordArr;
+		//return $sql;
 	}
 	
-    public function writeKMLFile(){
+    public function writeKMLFile($coordArr){
     	global $defaultTitle, $userRights, $clientRoot, $charset;
 		$fileName = $defaultTitle;
 		if($fileName){
@@ -119,10 +139,7 @@ class MappingShared{
     	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-type: application/vnd.google-earth.kml+xml');
 		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
-
-		$coordArr = $this->getGeoCoords(0,true);
-		
-        echo "<?xml version='1.0' encoding='".$charset."'?>\n";
+		echo "<?xml version='1.0' encoding='".$charset."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
         echo "<Document>\n";
 		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
@@ -161,9 +178,10 @@ class MappingShared{
     public function setTaxaArr($tArr){
     	$this->taxaArr = $tArr;
     }
-    
-    public function setSqlWhere($sqlWhere){
-    	$this->sqlWhere = $sqlWhere;
+	
+	public function setSearchTermsArr($stArr){
+    	$this->searchTermsArr = $stArr;
+		$this->searchTerms = 1;
     }
 }
 ?>
