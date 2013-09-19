@@ -1,22 +1,36 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceMapManager.php');
+include_once($serverRoot.'/classes/MappingShared.php');
+include_once($serverRoot.'/classes/TaxonProfileMap.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
 $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 
-$mapManager = new OccurrenceMapManager();
-$mapManager->setMapType($mapType);
+$sharedMapManager = new MappingShared();
 
-$genObs = $mapManager->getGenObsInfo();
+$mapWhere = '';
+$genObs = $sharedMapManager->getGenObsInfo();
 
 if($mapType == 'taxa'){
-	$mapManager->setTaxon($taxonValue);
-	$synMap = $mapManager->getSynMap();
-	$mapManager->getTaxaMap();
+	$taxaMapManager = new TaxonProfileMap();
+	$taxaMapManager->setTaxon($taxonValue);
+	$synMap = $taxaMapManager->getSynMap();
+	$taxaMapManager->getTaxaMap();
+	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
+	$tArr = $taxaMapManager->getTaxaArr();
 }
+elseif($mapType == 'occquery'){
+	$occurMapManager = new OccurrenceMapManager();
+	$mapWhere = $occurMapManager->getOccurSqlWhere();
+	$tArr = $occurMapManager->getTaxaArr();
+	$stArr = $occurMapManager->getSearchTermsArr();
+	$sharedMapManager->setSearchTermsArr($stArr);
+}
+
+$sharedMapManager->setTaxaArr($tArr);
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -62,7 +76,7 @@ if($mapType == 'taxa'){
            <?php 
 			$coordExist = false;
 			$iconKeys = Array(); 
-			$coordArr = $mapManager->getGeoCoords();
+			$coordArr = $sharedMapManager->getGeoCoords(0,false,$mapWhere);
 			$markerCnt = 0;
 			$spCnt = 1;
 			$minLng = 180;
@@ -93,7 +107,21 @@ if($mapType == 'taxa'){
 					$functionStr = '';
 					$titleStr = $latLng;
 					foreach($dataArr as $occId => $spArr){
+						$displayStr = '';      
+						if(is_numeric($spArr['catalognumber'])){
+							$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['catalognumber'];
+						}
+						elseif((!$spArr['catalognumber']) && ($spArr['othercatalognumbers'])){
+							$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['othercatalognumbers'];
+						}
+						elseif((!$spArr['catalognumber']) && (!$spArr['othercatalognumbers'])){
+							$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'');
+						}
+						else{
+							$displayStr = $spArr['catalognumber'];
+						}
 						if($spArr['collid'] == $genObs){
+							$displayStr = "General Observation";
 							?>
 							var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
 							<?php
@@ -107,11 +135,10 @@ if($mapType == 'taxa'){
 							$functionStr = $occId.",".($clid?$clid:'0');
 						}
 						else{
-							$id = $occId;
-							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".($clid?$clid:'0').")'>".$id."</a><br/>";
+							$spStr .= "<a href='#' onclick='openIndPU(".$occId.",".($clid?$clid:'0').")'>".$displayStr."</a><br/>";
 						}
 					}
-					echo 'var m'.$markerCnt.' = getMarker('.$latLng.',"'.$titleStr.'",markerIcon);',"\n";
+					echo 'var m'.$markerCnt.' = getMarker('.$latLng.',"'.$displayStr.'",markerIcon);',"\n";
 					if($functionStr){
 						?>
 						google.maps.event.addListener(
@@ -290,6 +317,7 @@ if($mapType == 'taxa'){
 					<legend>Legend</legend>
 					<div style="float:left;">
 						<?php 
+						//echo $coordArr;
 						foreach($iconKeys as $iconValue){
 							echo $iconValue;
 						}
