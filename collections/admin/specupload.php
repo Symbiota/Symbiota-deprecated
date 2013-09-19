@@ -24,6 +24,12 @@ $recLimit = array_key_exists("reclimit",$_REQUEST)?$_REQUEST["reclimit"]:1000;
 
 $DIRECTUPLOAD = 1;$DIGIRUPLOAD = 2; $FILEUPLOAD = 3; $STOREDPROCEDURE = 4; $SCRIPTUPLOAD = 5;$DWCAUPLOAD = 6;
 
+if(strpos($uspid,'-')){
+	$tok = explode('-',$uspid);
+	$uspid = $tok[0];
+	$uploadType = $tok[1];
+}
+
 $duManager = new SpecUploadBase();
 if($uploadType == $DIRECTUPLOAD){
 	$duManager = new SpecUploadDirect();

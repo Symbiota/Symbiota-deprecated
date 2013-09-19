@@ -181,7 +181,7 @@ $duManager->readUploadParameters();
 						 	foreach($profileList as $id => $v){
 						 		?>
 						 		<div style="margin:10px;">
-									<input type="radio" name="uspid" value="<?php echo $id;?>" />
+									<input type="radio" name="uspid" value="<?php echo $id.'-'.$v["uploadtype"];?>" />
 									<?php echo $v["title"]; ?> 
 									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collId.'&uspid='.$id; ?>" title="View/Edit Parameters"><img src="../../images/edit.png" /></a>
 									<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
