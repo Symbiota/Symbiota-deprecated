@@ -374,7 +374,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 			    <h2>Google Earth (KML)</h2>
 			</div>
 			<div style='margin:10 0 0 20;'>
-			    <a href="googlekml.php" target="_blank">
+			    <a href="../map/googlekml.php" target="_blank">
 			        Display coordinates in Google Earth 
 			    </a>
 			</div>
