@@ -83,4 +83,4 @@ $rightsTerms = array(
 		
 //Base code shared by all pages; leave as is
 include_once("symbbase.php");
-?>
+/* --DO NOT ADD ANY EXTRA SPACES BELOW THIS LINE-- */?>
