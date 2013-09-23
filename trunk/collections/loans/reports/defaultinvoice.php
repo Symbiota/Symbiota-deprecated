@@ -30,7 +30,6 @@ elseif($exchangeId){
 }
 
 ?>
-
 <!DOCTYPE HTML>
 <html <?php echo ($exportDoc?'xmlns:w="urn:schemas-microsoft-com:office:word"':'') ?>>
 	<head>
