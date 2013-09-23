@@ -2417,7 +2417,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 								$results['recordNumber'] = $recordNumber;
 								$results['verbatimAttributes'] = trim(substr($name, strpos($name, $potentialSciName)+strlen($potentialSciName)));
 							} else if($wordcount < 5) $results['verbatimAttributes'] = $name;
-						} else if(preg_match("/(.+)\\s(contain(?:s|ing)\\s(.+)/i", $name, $mats)) {
+						} else if(preg_match("/(.+)\\s(contain(?:s|ing))\\s(.+)/i", $name, $mats)) {
 							$potentialSciName = trim($mats[1]);
 							if($this->isPossibleSciName($potentialSciName)) {
 								$foundSciName = true;
