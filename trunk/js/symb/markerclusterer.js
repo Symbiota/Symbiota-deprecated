@@ -17,7 +17,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
 	this.ready_ = false;
 
 	this.gridSize_ = opt_options.gridSize || 60;
-	this.minClusterSize_ = opt_options.minimumClusterSize || 2;
+	this.minClusterSize_ = opt_options.minimumClusterSize || 5;
 	this.maxZoom_ = 14;
 	this.styles_ = opt_options.styles || [];
 	this.zoomOnClick_ = true;
