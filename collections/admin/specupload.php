@@ -52,8 +52,6 @@ elseif($uploadType == $DWCAUPLOAD){
 
 $duManager->setCollId($collId);
 $duManager->setUspid($uspid);
-$duManager->setIncludeIdentificationHistory($importIdent);
-$duManager->setIncludeImages($importImage);
 
 if($action == 'Automap Fields'){
 	$autoMap = true;
@@ -77,6 +75,7 @@ if(array_key_exists("sf",$_POST)){
 		$statusStr = $duManager->deleteFieldMap();
 	}
 	else{
+		//Set field map for occurrences using mapping form
  		$targetFields = $_POST["tf"];
  		$sourceFields = $_POST["sf"];
  		$fieldMap = Array();
@@ -86,6 +85,27 @@ if(array_key_exists("sf",$_POST)){
 		//Set Source PK
 		if($dbpk) $fieldMap["dbpk"]["field"] = $dbpk;
  		$duManager->setFieldMap($fieldMap);
+		
+ 		//Set field map for identification history
+		if(array_key_exists("ID-sf",$_POST)){
+	 		$targetIdFields = $_POST["ID-tf"];
+	 		$sourceIdFields = $_POST["ID-sf"];
+	 		$fieldIdMap = Array();
+			for($x = 0;$x<count($targetIdFields);$x++){
+				if($targetIdFields[$x]) $fieldIdMap[$targetIdFields[$x]]["field"] = $sourceIdFields[$x];
+			}
+ 			$duManager->setIdentFieldMap($fieldIdMap);
+		}
+ 		//Set field map for image history
+		if(array_key_exists("IM-sf",$_POST)){
+	 		$targetImFields = $_POST["IM-tf"];
+	 		$sourceImFields = $_POST["IM-sf"];
+	 		$fieldImMap = Array();
+			for($x = 0;$x<count($targetImFields);$x++){
+				if($targetImFields[$x]) $fieldImMap[$targetImFields[$x]]["field"] = $sourceImFields[$x];
+			}
+ 			$duManager->setImageFieldMap($fieldImMap);
+		}
 	}
 	if($action == "Save Mapping"){
 		$statusStr = $duManager->saveFieldMap();
@@ -207,10 +227,10 @@ $duManager->loadFieldMap();
 		if(($action == "Start Upload") || ($uploadType == $STOREDPROCEDURE) || ($uploadType == $SCRIPTUPLOAD)){
 			//Upload records
 	 		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
-	 		echo "<ol style='margin:10px;font-weight:bold;'>";
-	 		echo "<li style='font-weight:bold;'>Starting Data Upload</li>";
+	 		echo "<ul style='margin:10px;font-weight:bold;'>";
+	 		echo "<li style='font-weight:bold;'>Starting occurrence record upload</li>";
 	 		$duManager->uploadData($finalTransfer);
-			echo "</ol>";
+			echo "</ul>";
 			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
 				<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
@@ -220,7 +240,7 @@ $duManager->loadFieldMap();
 	 					<input type="hidden" name="uploadtype" value="<?php echo $uploadType;?>" />
 	 					<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 	 					<div style="font-weight:bold;margin:5px;"> 
-	 						Number of records uploaded to temporary table (uploadspectemp): <?php echo $duManager->getTransferCount();?>
+	 						Number of specimen records uploaded to temporary table (uploadspectemp): <?php echo $duManager->getTransferCount();?>
 						</div>
 	 					<div style="margin:5px;"> 
 	 						If upload number sounds correct, transfer to central specimen table using this form.  
@@ -234,10 +254,9 @@ $duManager->loadFieldMap();
 			}
 	 	}
 		elseif(stripos($action,"transfer") !== false || $finalTransfer){
-			echo '<ol>';
-			$duManager->performFinalTransfer();
-			echo '<li style="font-weight:bold;">Upload Procedure Complete';
-			echo '</ol>';
+			echo '<ul>';
+			$duManager->finalTransfer();
+			echo '</ul>';
 		}
 		else{
 			if($uploadType == $DIGIRUPLOAD){
@@ -347,7 +366,7 @@ $duManager->loadFieldMap();
 												</div>
 											</div>
 											<div>
-												<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])&&false?'checked':'disabled') ?> /> 
+												<input name="importident" value="1" type="checkbox" <?php echo (isset($metaArr['ident'])?'checked':'disabled') ?> /> 
 												Import Identification History 
 												<?php 
 												if(isset($metaArr['ident'])){

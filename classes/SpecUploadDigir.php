@@ -42,7 +42,14 @@ class SpecUploadDigir extends SpecUploadBase {
  		
 		echo "<li style='font-weight:bold;'>Starting record harvest</li>\n";
 		$this->submitReq();
-		$this->finalUploadSteps($finalTransfer);
+		$this->cleanUpload();
+		if($finalTransfer){
+			$this->transferOccurrences();
+			$this->finalCleanup();
+		}
+		else{
+			$this->finalizeUpload();
+		}
  	}
 
 	private function submitReq(){

@@ -361,13 +361,22 @@ body{
 	width:	80px;
 }
 
+#verbatimCoordinatesDiv{
+	float:	left;
+	margin-top:2px;
+}
+
+#verbatimCoordinatesDiv input{
+	width:	280px;
+}
+
 #elevationDiv{
 	float:	left;
 	margin-top:2px;
 }
 
 #elevationDiv input{
-	width:55px;
+	width:65px;
 }
 
 #verbatimElevationDiv{
@@ -376,7 +385,7 @@ body{
 }
 
 #verbatimElevationDiv input{
-	width:	100px;
+	width:	130px;
 }
 
 #locExtraToggleDiv{
@@ -389,15 +398,6 @@ body{
 	display:none;
 	position:relative;
 	clear:both;
-}
-
-#verbatimCoordinatesDiv{
-	float:	left;
-	margin-top:2px;
-}
-
-#verbatimCoordinatesDiv input{
-	width:	300px;
 }
 
 #georeferencedByDiv{
@@ -415,7 +415,7 @@ body{
 }
 
 #footprintWktDiv textarea{
-	width:	250px;
+	width:	400px;
 	height:	15px;
 }
 
