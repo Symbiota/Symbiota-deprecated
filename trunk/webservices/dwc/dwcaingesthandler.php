@@ -61,7 +61,7 @@ $ulPath = $duManager->uploadFile();
 $duManager->analyzeUpload();
 $duManager->uploadData(false);
 $transferCnt = $duManager->getTransferCount();
-$duManager->performFinalTransfer();
+$duManager->finalTransfer();
 
 if($transferCnt > 0){
 	echo $transferCnt;

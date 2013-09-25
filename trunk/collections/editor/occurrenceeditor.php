@@ -331,8 +331,8 @@ else{
 		var countryArr = new Array(<?php $occManager->echoCountryList();?>);
 		var tabTarget = <?php echo $tabTarget; ?>;
 		<?php
-		if(isset($salixPath) && $salixPath){
-			echo 'var salixPath = '.$salixPath.";\n";
+		if(isset($SALIX_PATH) && $SALIX_PATH){
+			echo 'var salixPath = "'.$SALIX_PATH.'";'."\n";
 			echo 'var csDefault = '.$charset.";\n";
 		}
 		if($imgArr){
@@ -804,6 +804,18 @@ else{
 													<br/>
 													<input type="text" id="geodeticdatum" name="geodeticdatum" tabindex="56" maxlength="255" value="<?php echo array_key_exists('geodeticdatum',$occArr)?$occArr['geodeticdatum']:''; ?>" onchange="fieldChanged('geodeticdatum');" />
 												</div>
+												<div id="verbatimCoordinatesDiv">
+													<div style="float:left;margin:18px 2px 0px 2px" title="Recalculate Decimal Coordinates">
+														<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
+													</div>
+													<div style="float:left;">
+														<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
+														<br/>
+														<input type="text" name="verbatimcoordinates" tabindex="57" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
+													</div>
+												</div>
+											</div>
+											<div style="clear:both;">
 												<div id="elevationDiv">
 													<?php echo (defined('ELEVATIONINMETERSLABEL')?ELEVATIONINMETERSLABEL:'Elevation in Meters'); ?>
 													<br/>
@@ -827,10 +839,7 @@ else{
 											<?php 
 											include_once('includes/geotools.php');
 											$locExtraDiv = 'display:';
-											if(array_key_exists("verbatimcoordinates",$occArr) && $occArr["verbatimcoordinates"]){
-												$locExtraDiv .= "block";
-											}
-											elseif(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
+											if(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
 												$locExtraDiv .= "block";
 											}
 											elseif(array_key_exists("footprintwkt",$occArr) && $occArr["footprintwkt"]){
@@ -850,34 +859,11 @@ else{
 											}
 											?>
 											<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
-												<div>
-													<div id="verbatimCoordinatesDiv">
-														<div style="float:left;margin:18px 2px 0px 2px" title="Recalculate Decimal Coordinates">
-															<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
-														</div>
-														<div style="float:left;">
-															<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
-															<br/>
-															<input type="text" name="verbatimcoordinates" tabindex="64" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
-														</div>
-													</div>
+												<div style="clear:both;">
 													<div id="georeferencedByDiv">
 														<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>
 														<br/>
 														<input type="text" name="georeferencedby" tabindex="66" maxlength="255" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
-													</div>
-													<div id="footprintWktDiv">
-														<?php echo (defined('FOOTPRINTWKTLABEL')?FOOTPRINTWKTLABEL:'footprint (polygon)'); ?>
-														<br/>
-														<textarea name="footprintwkt" onchange="fieldChanged('footprintwkt');"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
-													</div>
-												</div>
-												<div>
-													<div id="georeferenceProtocolDiv">
-														<?php echo (defined('GEOREFERENCEPROTOCOLLABEL')?GEOREFERENCEPROTOCOLLABEL:'Georeference Protocol'); ?>
-														<a href="#" onclick="return dwcDoc('georeferenceProtocol')"><img class="docimg" src="../../images/qmark.png" /></a>
-														<br/>
-														<input type="text" name="georeferenceprotocol" tabindex="68" maxlength="255" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
 													</div>
 													<div id="georeferenceSourcesDiv">
 														<?php echo (defined('GEOREFERENCESOURCESLABEL')?GEOREFERENCESOURCESLABEL:'Georeference Sources'); ?>
@@ -885,16 +871,29 @@ else{
 														<br/>
 														<input type="text" name="georeferencesources" tabindex="70" maxlength="255" value="<?php echo array_key_exists('georeferencesources',$occArr)?$occArr['georeferencesources']:''; ?>" onchange="fieldChanged('georeferencesources');" />
 													</div>
-													<div id="georeferenceVerificationStatusDiv">
-														<?php echo (defined('GEOREFERENCEVERIFICATIONSTATUSLABEL')?GEOREFERENCEVERIFICATIONSTATUSLABEL:'Georef Verification Status'); ?>
-														<a href="#" onclick="return dwcDoc('georeferenceVerificationStatus')"><img class="docimg" src="../../images/qmark.png" /></a>
-														<br/>
-														<input type="text" name="georeferenceverificationstatus" tabindex="72" maxlength="32" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
-													</div>
 													<div id="georeferenceRemarksDiv">
 														<?php echo (defined('GEOREFERENCEREMARKSLABEL')?GEOREFERENCEREMARKSLABEL:'Georeference Remarks'); ?>
 														<br/>
 														<input type="text" name="georeferenceremarks" tabindex="74" maxlength="255" value="<?php echo array_key_exists('georeferenceremarks',$occArr)?$occArr['georeferenceremarks']:''; ?>" onchange="fieldChanged('georeferenceremarks');" />
+													</div>
+												</div>
+												<div style="clear:both;">
+													<div id="georeferenceProtocolDiv">
+														<?php echo (defined('GEOREFERENCEPROTOCOLLABEL')?GEOREFERENCEPROTOCOLLABEL:'Georeference Protocol'); ?>
+														<a href="#" onclick="return dwcDoc('georeferenceProtocol')"><img class="docimg" src="../../images/qmark.png" /></a>
+														<br/>
+														<input type="text" name="georeferenceprotocol" tabindex="76" maxlength="255" value="<?php echo array_key_exists('georeferenceprotocol',$occArr)?$occArr['georeferenceprotocol']:''; ?>" onchange="fieldChanged('georeferenceprotocol');" />
+													</div>
+													<div id="georeferenceVerificationStatusDiv">
+														<?php echo (defined('GEOREFERENCEVERIFICATIONSTATUSLABEL')?GEOREFERENCEVERIFICATIONSTATUSLABEL:'Georef Verification Status'); ?>
+														<a href="#" onclick="return dwcDoc('georeferenceVerificationStatus')"><img class="docimg" src="../../images/qmark.png" /></a>
+														<br/>
+														<input type="text" name="georeferenceverificationstatus" tabindex="78" maxlength="32" value="<?php echo array_key_exists('georeferenceverificationstatus',$occArr)?$occArr['georeferenceverificationstatus']:''; ?>" onchange="fieldChanged('georeferenceverificationstatus');" />
+													</div>
+													<div id="footprintWktDiv">
+														<?php echo (defined('FOOTPRINTWKTLABEL')?FOOTPRINTWKTLABEL:'footprint (polygon)'); ?>
+														<br/>
+														<textarea name="footprintwkt" onchange="fieldChanged('footprintwkt');"><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>
@@ -903,7 +902,7 @@ else{
 											<legend><b>Misc</b></legend>
 											<div id="habitatDiv">
 												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?><br/> 
-												<input type="text" name="habitat" tabindex="82" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
+												<input type="text" name="habitat" tabindex="80" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 											</div>
 											<div id="substrateDiv">
 												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?><br/>

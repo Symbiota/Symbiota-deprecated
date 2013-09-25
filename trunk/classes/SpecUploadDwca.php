@@ -229,7 +229,11 @@ class SpecUploadDwca extends SpecUploadBase{
 				
 				//Grab data
 				$cset = strtolower(str_replace('-','',$charset)); 
-				$this->sourceArr = $this->metaArr['occur']['fields'];
+				//Set source array 
+				$this->sourceArr = array();
+				foreach($this->metaArr['occur']['fields'] as $k => $v){
+					$this->sourceArr[$k] = strtolower($v);
+				}
 		 		$this->transferCount = 0;
 		 		if(!array_key_exists('dbpk',$this->fieldMap)) $this->fieldMap['dbpk']['field'] = 'id';
 				while($recordArr = $this->getRecordArr($fh)){
@@ -249,16 +253,14 @@ class SpecUploadDwca extends SpecUploadBase{
 					unset($recMap);
 				}
 				fclose($fh);
-	
-				//Delete upload file 
-				//if(file_exists($fullPath)) unlink($fullPath);
-				
-				$this->finalUploadSteps($finalTransfer);
 
+				//Do some cleanup
+				$this->cleanUpload();
+				
 				//Upload identification history
 				if($this->includeIdentificationHistory){
-					//
 					if(isset($this->metaArr['ident']['fields'])){
+						$this->outputMsg('<li style="font-weight:bold;">Starting to upload identification history records</li>');
 						if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
 							$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
 						}
@@ -282,11 +284,15 @@ class SpecUploadDwca extends SpecUploadBase{
 						
 						//Grab data
 						$cset = strtolower(str_replace('-','',$charset)); 
-						$this->identSourceArr = $this->metaArr['ident']['fields'];
+						//Set identification source array
+						$this->identSourceArr = array();
+						foreach($this->metaArr['ident']['fields'] as $k => $v){
+							$this->identSourceArr[$k] = strtolower($v);
+						}
 						while($recordArr = $this->getRecordArr($fh)){
 							$recMap = Array();
 							foreach($this->identFieldMap as $symbField => $iMap){
-								if($identSymbField != 'unmapped'){
+								if($symbField != 'unmapped'){
 									$indexArr = array_keys($this->identSourceArr,$iMap['field']);
 									$index = array_shift($indexArr);
 									if(array_key_exists($index,$recordArr)){
@@ -300,16 +306,27 @@ class SpecUploadDwca extends SpecUploadBase{
 							unset($recMap);
 						}
 						fclose($fh);
+						
+						$this->outputMsg('<li style="font-weight:bold;">Identification history upload complete ('.$this->identTransferCount.' records)!</li>');
 					}
-					
-					$this->loadIdentificationRecord($identRecMap);
 				}
 				
 				//Upload images
 				if($this->includeImages){
 					
 					
-					$this->loadImageRecord($imgRecMap);
+
+				}
+
+				//Records transferred, thus finalize
+				$this->finalizeUpload();
+				if($finalTransfer){
+					$this->finalTransfer();
+				}
+				
+				//Delete upload file 
+				if(file_exists($this->uploadTargetPath.$this->baseFolderName)){
+					//unlink($this->uploadTargetPath.$this->baseFolderName);
 				}
 			}
 		}

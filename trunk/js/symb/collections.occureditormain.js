@@ -436,44 +436,46 @@ function verifyGotoNew(f){
 function verifyFullformSciName(){
 	var f = document.fullform;
 	var sciNameStr = f.sciname.value;
-	snXmlHttp = GetXmlHttpObject();
-	if(snXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/verifysciname.php";
-	url=url + "?sciname=" + sciNameStr;
-	snXmlHttp.onreadystatechange=function(){
-		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-			if(snXmlHttp.responseText){
-				var retObj = eval("("+snXmlHttp.responseText+")");
-				f.tidtoadd.value = retObj.tid;
-				f.scientificnameauthorship.value = retObj.author;
-				f.family.value = retObj.family;
-				if(retObj.sstatus == "1"){
-					f.localitysecurity.checked = true;
-					fieldChanged('localitysecurity');
-					document.getElementById("locsecreason").style.display = "inline";
+	if(sciNameStr != ""){
+		snXmlHttp = GetXmlHttpObject();
+		if(snXmlHttp==null){
+	  		alert ("Your browser does not support AJAX!");
+	  		return;
+	  	}
+		var url = "rpc/verifysciname.php";
+		url=url + "?sciname=" + sciNameStr;
+		snXmlHttp.onreadystatechange=function(){
+			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
+				if(snXmlHttp.responseText){
+					var retObj = eval("("+snXmlHttp.responseText+")");
+					f.tidtoadd.value = retObj.tid;
+					f.scientificnameauthorship.value = retObj.author;
+					f.family.value = retObj.family;
+					if(retObj.sstatus == "1"){
+						f.localitysecurity.checked = true;
+						fieldChanged('localitysecurity');
+						document.getElementById("locsecreason").style.display = "inline";
+					}
+					else if(f.localitysecurity.checked == true){
+						f.localitysecurity.checked = false;
+						fieldChanged('localitysecurity');
+					}
 				}
-				else if(f.localitysecurity.checked == true){
-					f.localitysecurity.checked = false;
-					fieldChanged('localitysecurity');
+				else{
+					f.tidtoadd.value = "";
+					//f.scientificnameauthorship.value = "";
+					//f.family.value = "";
+					alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
+					f.sciname.focus();
 				}
+				fieldChanged('scientificnameauthorship');
+				fieldChanged('family');
+				pauseSubmit = false;
 			}
-			else{
-				f.tidtoadd.value = "";
-				//f.scientificnameauthorship.value = "";
-				//f.family.value = "";
-				alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
-				f.sciname.focus();
-			}
-			fieldChanged('scientificnameauthorship');
-			fieldChanged('family');
-			pauseSubmit = false;
-		}
-	};
-	snXmlHttp.open("POST",url,true);
-	snXmlHttp.send(null);
+		};
+		snXmlHttp.open("POST",url,true);
+		snXmlHttp.send(null);
+	}
 } 
 
 function verifyDecimalLatitude(f){

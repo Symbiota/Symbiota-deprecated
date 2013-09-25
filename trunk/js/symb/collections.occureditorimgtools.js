@@ -87,7 +87,8 @@ function ocrImage(ocrButton,imgCnt){
 	ocrXmlHttp.send(null);
 }
 
-function nlpLbcc(nlpButton){
+function nlpLbcc(nlpButton,prlid){
+	document.getElementById("workingcircle_lbcc-"+prlid).style.display = "inline";
 	nlpButton.disabled = true;
 	var f = nlpButton.form;
 	var rawOcr = f.rawtext.innerText;
@@ -100,48 +101,72 @@ function nlpLbcc(nlpButton){
 	}).done(function( msg ) {
 		pushDwcArrToForm(msg);
 	});
+
 	nlpButton.disabled = false;
+	document.getElementById("workingcircle_lbcc-"+prlid).style.display = "none";
 }
 
-function salixText(f){
-	f.salixocr.disabled = true;
+function nlpSalix(nlpButton,prlid){
+	document.getElementById("workingcircle_salix-"+prlid).style.display = "inline";
+	nlpButton.disabled = true;
+	var f = nlpButton.form;
+	var rawOcr = f.rawtext.innerText;
+	if(!rawOcr) rawOcr = f.rawtext.textContent;
+	var targetDataset = '';
+	if(salixPath.indexOf("?t=") > 0){
+		targetDataset = salixPath.substring(salixPath.indexOf("?t=")+3);
+		if(targetDataset.indexOf("&") > 0) targetDataset = salixPath.substring(0,targetDataset.indexOf("&"));
+		salixPath = salixPath.substring(0,salixPath.indexOf("?t="));
+	}
 	
 	$.ajax({
 		type: "POST",
 		url: salixPath,
-		data: { textinput: f.rawtext.value, charset: csDefault },
-		dataType: json
+		crossDomain: true,
+		data: { textinput: rawOcr, t: targetDataset }
 	}).done(function( msg ) {
 		pushDwcArrToForm(msg);
+	}).error(function(  ) {
+		alert('Problem accessing SALIX webservices; notify an administrator');
 	});
+
+	nlpButton.disabled = false;
+	document.getElementById("workingcircle_salix-"+prlid).style.display = "none";
 }
 
 function pushDwcArrToForm(msg){
 	var dwcArr = $.parseJSON(msg);
 	var f = document.fullform;
-	var fieldsTransfer = "";
-	var fieldsSkip = "";
+	//var fieldsTransfer = "";
+	//var fieldsSkip = "";
+	var scinameTransferred = false;
+	var verbatimElevTransferred = false;
 	for(var k in dwcArr){
 		try{
-			var elem = f.elements[k];
-			if(k != "tidtoadd"){
-				if(elem && elem.value == "" && elem.disabled == false){
-					elem.value = dwcArr[k];
-					elem.style.backgroundColor = "lightgreen";
-					fieldsTransfer = fieldsTransfer + ", " + k;
-					fieldChanged(k);
-				}
-				else{
-					fieldsSkip = fieldsSkip + ", " + k;
-				}
+			var symbk = k.toLowerCase();
+			if(symbk == "scientificname") symbk = "sciname";
+			var elem = f.elements[symbk];
+			var inVal = dwcArr[k];
+			if(inVal && elem && elem.value == "" && elem.disabled == false && elem.type != "hidden"){
+				if(symbk == "sciname") scinameTransferred = true;
+				if(symbk == "verbatimelevation") verbatimElevTransferred = true;
+				elem.value = dwcArr[k];
+				elem.style.backgroundColor = "lightgreen";
+				//fieldsTransfer = fieldsTransfer + ", " + k;
+				fieldChanged(symbk);
+			}
+			else{
+				//fieldsSkip = fieldsSkip + ", " + k;
 			}
 		}
 		catch(err){
 			//alert(err);
 		}
 	}
-	if(fieldsTransfer == "") fieldsTransfer = "none";
-	if(fieldsSkip == "") fieldsSkip = "none";
+	if(scinameTransferred) verifyFullformSciName();
+	if(verbatimElevTransferred) parseVerbatimElevation(f);
+	//if(fieldsTransfer == "") fieldsTransfer = "none";
+	//if(fieldsSkip == "") fieldsSkip = "none";
 	//alert("Field parsed: " + fieldsTransfer + "\nFields skipped: " + fieldsSkip);
 }
 

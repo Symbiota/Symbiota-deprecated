@@ -94,12 +94,16 @@
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input name="submitaction" type="submit" value="Save OCR Edits" />
+										</div>
+										<div style="float:left;margin-left:20px;">
 											<?php 
-											if(isset($salixPath)){
-												echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="salixText(this.form)" /><br/>';
+											if(isset($SALIX_PATH)){
+												echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="nlpSalix(this,'.$prlid.')" />';
+												echo '<img id="workingcircle_salix-'.$prlid.'" src="../../images/workingcircle.gif" style="display:none;" /><br/>';
 											} 
 											if(isset($NLP_LBCC_ACTIVATED) && $NLP_LBCC_ACTIVATED){
-												echo '<input id="nlplbccbutton" name="nlplbccbutton" type="button" value="Parse OCR (LBCC)" onclick="nlpLbcc(this)" />';
+												echo '<input id="nlplbccbutton" name="nlplbccbutton" type="button" value="Parse OCR (LBCC)" onclick="nlpLbcc(this,'.$prlid.')" />';
+												echo '<img id="workingcircle_lbcc-'.$prlid.'" src="../../images/workingcircle.gif" style="display:none;" />';
 											}
 											?>
 										</div>
@@ -114,8 +118,8 @@
 										} 
 										?>
 									</div>
-									<div style="clear:both;margin-left:10px;">
-										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php">
+									<div style="clear:both;">
+										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php" style="margin-left:10px;position:relative;top:-30px;width:100px;" >
 											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />

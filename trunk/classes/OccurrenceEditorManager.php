@@ -952,6 +952,7 @@ class OccurrenceEditorManager {
 	public function insertTextFragment($imgId,$rawFrag,$notes){
 		if($imgId && $rawFrag){
 			$statusStr = '';
+			//$rawFrag = preg_replace('/[^(\x20-\x7F)]*/','', $rawFrag);
 			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes) '.
 				'VALUES ('.$imgId.',"'.$this->cleanRawFragment($rawFrag).'","'.$this->cleanInStr($notes).'")';
 			//echo $sql;
@@ -960,6 +961,7 @@ class OccurrenceEditorManager {
 			}
 			else{
 				$statusStr = 'ERROR: unable to INSERT text fragment; '.$this->conn->error;
+				$statusStr .= '; SQL = '.$sql;
 			}
 			return $statusStr;
 		}
@@ -968,11 +970,13 @@ class OccurrenceEditorManager {
 	public function saveTextFragment($prlId, $rawFrag,$notes){
 		if($prlId && $rawFrag){
 			$statusStr = '';
+			//$rawFrag = preg_replace('/[^(\x20-\x7F)]*/','', $rawFrag);
 			$sql = 'UPDATE specprocessorrawlabels SET rawstr = "'.$this->cleanRawFragment($rawFrag).'", notes = "'.$this->cleanInStr($notes).'" '.
 				'WHERE (prlid = '.$prlId.')';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR: unable to UPDATE text fragment; '.$this->conn->error;
+				$statusStr .= '; SQL = '.$sql;
 			}
 			return $statusStr;
 		}
@@ -1132,6 +1136,7 @@ class OccurrenceEditorManager {
 	
 	private function cleanRawFragment($str){
 		$newStr = trim($str);
+		$newStr = $this->encodeStr($newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}

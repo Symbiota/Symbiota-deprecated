@@ -97,7 +97,14 @@ class SpecUploadFile extends SpecUploadBase{
 			//Delete upload file 
 			if(file_exists($fullPath)) unlink($fullPath);
 			
-			$this->finalUploadSteps($finalTransfer);
+			$this->cleanUpload();
+			if($finalTransfer){
+				$this->transferOccurrences();
+				$this->finalCleanup();
+			}
+			else{
+				$this->finalizeUpload();
+			}
 		}
 		else{
 			echo "<li>File Upload FAILED: unable to locate file</li>";

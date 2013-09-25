@@ -59,9 +59,16 @@ class SpecUploadDirect extends SpecUploadBase {
 					$this->loadRecord($recMap);
 					unset($recMap);
 				}
-				
-				$this->finalUploadSteps($finalTransfer);
 				$result->close();
+				
+				$this->cleanUpload();
+
+				if($finalTransfer){
+					$this->finalTransfer();
+				}
+				else{
+					$this->finalizeUpload();
+				}
 			}
 			else{
 				echo "<hr /><div style='color:red;'>Unable to create a Resultset with the Source Connection. Check connection parameters, source sql statement, and firewall restriction</div>";
