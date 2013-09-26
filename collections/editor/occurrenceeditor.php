@@ -303,12 +303,12 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=130913" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=130926" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=130913" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=130926" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -344,10 +344,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130913"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130913"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130913"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130913"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130926"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130926"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130926"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130926"></script>
 </head>
 <body>
 	<!-- inner text -->

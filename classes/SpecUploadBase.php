@@ -1448,7 +1448,7 @@ class SpecUploadBase extends SpecUpload{
 					if($size && strlen($valueStr) > $size){
 						$valueStr = substr($valueStr,0,$size);
 					}
-					if(trim($valueStr)){
+					if($valueStr){
 						$sqlValues .= ',"'.$valueStr.'"';
 					}
 					else{
