@@ -41,7 +41,7 @@ $sharedMapManager->setTaxaArr($tArr);
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script src="http://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-	<script type="text/javascript" src="../js/symb/markerclusterer.js"></script>
+	<script type="text/javascript" src="../js/symb/markerclusterer.js?ver=260913"></script>
 	<script type="text/javascript">
 		var map = null;
 		var markerClusterer = null;
