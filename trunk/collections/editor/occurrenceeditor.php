@@ -322,9 +322,9 @@ else{
 		}
 	}
     ?>
-	<script src="../../js/jquery.js" type="text/javascript"></script>
-	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js" type="text/javascript"></script>
+	<script src="../../js/jquery.js?ver=130926" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js?ver=130926" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js?ver=130926" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
@@ -1114,10 +1114,10 @@ else{
 															<option value=''>-------------------</option>
 															<?php 
 															foreach($processingStatusArr as $v){
-																//Don't display all options is editor is crowd sourced 
 																$keyOut = strtolower($v);
+																//Don't display all options if editor is crowd sourced 
 																if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
-																	echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "'pending review'"?'SELECTED':'').'>'.ucwords($v).'</option>';
+																	echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
 																}
 															}
 															?>

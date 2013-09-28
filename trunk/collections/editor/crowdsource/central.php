@@ -58,16 +58,18 @@ $statusStr = '';
 		<div style="margin:20px;float:left;">
 			<h2>Current User's Status</h2>
 			<?php 
-			$userStats = $csManager->getUserStats($symbUid);
+			$userStats = $csManager->getUserStats($SYMB_UID);
 			?>
 			<fieldset style="margin-bottom:30px;width:250px;padding:15px;">
 				<legend><b>Current Standing</b></legend>
 				<?php 
-				if($symbUid){
+				if($SYMB_UID){
 					?>
 					<b>Specimens processed:</b> <?php echo $userStats['totalcnt']; ?><br/>
-					<b>Approved points:</b> <?php echo $userStats['apoints']; ?><br/>
-					<b>Pending points:</b> <a href="crowdsourcestatus.php"><?php echo $userStats['ppoints']; ?></a><br/>
+					<b>Approved points:</b> <?php echo $userStats['apoints']; ?> 
+					<?php if($userStats['apoints']) echo '(<a href="review.php?pstatus=reviewed">review records</a>)'; ?> <br/>
+					<b>Pending points:</b> <a href="reveiw.php"><?php echo $userStats['ppoints']; ?></a>
+					<?php if($userStats['ppoints']) echo '(<a href="review.php?pstatus=pending">review records</a>)'; ?> <br/>
 					<b>Approved and pending:</b> <?php echo $userStats['ppoints']+$userStats['apoints']; ?><br/>
 					<?php
 				}
@@ -102,7 +104,7 @@ $statusStr = '';
 					echo '<tr>';
 					echo '<td>';
 					echo '<b>'.$sArr['name'].'</b>';
-					if(in_array($collId, $pArr)) echo ' <a href="controlpanel.php?collid='.$collId.'"><img src="../../../images/edit.png" style="width:14px;" /></a>';
+					if($IS_ADMIN || in_array($collId, $pArr)) echo ' <a href="controlpanel.php?collid='.$collId.'"><img src="../../../images/edit.png" style="width:14px;" /></a>';
 					echo '</td>';
 					echo '<td>'.((array_key_exists(5,$cntArr)?$cntArr[5]:0)+(array_key_exists(10,$cntArr)?$cntArr[10]:0)).'</td>';
 					echo '<td>'.(array_key_exists(10,$pointArr)?$pointArr[10]:0).'</td>';

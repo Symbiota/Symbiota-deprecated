@@ -2,18 +2,15 @@
 include_once('../../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
 header("Content-Type: text/html; charset=".$charset);
-if(!$symbUid) header('Location: ../../profile/index.php?refurl=../collections/editor/crowdsourcing/controlpanel.php?'.$_SERVER['QUERY_STRING']);
+if(!$symbUid) header('Location: ../../../profile/index.php?refurl=../collections/editor/crowdsource/controlpanel.php?'.$_SERVER['QUERY_STRING']);
 
 $collid= array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
-$pStatus = array_key_exists('pstatus',$_REQUEST)?$_REQUEST['pstatus']:'unprocessed';
-$uid = array_key_exists('uid',$_REQUEST)?$_REQUEST['uid']:0;
-$start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
-$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
+$omcsid= array_key_exists('omcsid',$_REQUEST)?$_REQUEST['omcsid']:0;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
 $csManager = new OccurrenceCrowdSource();
 $csManager->setCollid($collid);
-$projArr = $csManager->getProjectDetails();
+if(!$omcsid) $omcsid = $csManager->getOmcsid();
 
 $isEditor = 0; 
 if($isAdmin){
@@ -30,6 +27,15 @@ if($action == 'addtoqueue'){
 	$statusStr = $csManager->addToQueue();
 	$action = '';
 }
+elseif($action == 'Edit Project'){
+	$statusStr = $csManager->editProject($omcsid,$_POST['instr'],$_POST['url']);
+}
+elseif($action == 'Create Project'){
+	$statusStr = $csManager->createProject($collid,$_POST['instr'],$_POST['url']);
+	$omcsid = $csManager->getOmcsid();
+}
+
+$projArr = $csManager->getProjectDetails();
 ?>
 <!DOCTYPE html>
 <html>
@@ -96,19 +102,41 @@ if($action == 'addtoqueue'){
 			<?php 
 		} 
 		if($collid){
-			if($projArr){
+			if($omcsid) echo '<div style="float:right;"><a href="#" onclick="toggle(\'projFormDiv\')"><img src="../../../images/edit.png" /></a></div>';
+			?>
+			<div style="font-weight:bold;font-size:130%;"><?php echo $projArr['name']; ?></div>
+			<div id="projFormDiv" style="display:<?php echo ($omcsid?'none':'block'); ?>">
+				<fieldset style="margin:15px;">
+					<legend><b><?php echo ($omcsid?'Edit Project':'Add New Project'); ?></b></legend>
+					<form name="projform.php" action="controlpanel.php" method="post">
+						<div style="margin:3px;">
+							<b>General Instructions:</b><br/> 
+							<textarea name="instr" style="width:500px;height:100px;"><?php echo ($omcsid?$projArr['instr']:''); ?></textarea>
+						</div>
+						<div style="margin:3px;">
+							<b>Training Url:</b><br/>
+							<input name="url" type="text" value="<?php echo ($omcsid?$projArr['url']:''); ?>" style="width:500px;" />
+						</div>
+						<div>
+							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							<input name="omcsid" type="hidden" value="<?php echo $omcsid; ?>" />
+							<input name="action" type="submit" value="<?php echo ($omcsid?'Edit Project':'Create Project'); ?>" />
+						</div>
+					</form>
+				</fieldset>
+			</div>
+			<?php 
+			if($omcsid){
 				?>
-				<div style="float:right;"><a href="#" onclick="toggle('projectformDiv')"><img src="../../../images/edit.png" /></a></div>
-				<div style="font-weight:bold;font-size:130%;"><?php echo $projArr['name']; ?></div>
 				<div style="margin-left:15px;"><b>Instructions: </b><?php echo $projArr['instr']; ?></div>
 				<?php if($projArr['url']) echo 'Training: <a href="'.$projArr['url'].'">'.$projArr['url'].'</a>'; ?>
 				<div style="margin:15px;">
 					<?php 
-					if(!$action){
+					if($statsArr = $csManager->getProjectStats()){
 						?>
 						<div style="font-weight:bold;text-decoration:underline">Total Counts:</div>
 						<?php 
-						$rsArr = $projArr['rs'];
+						$rsArr = $statsArr['rs'];
 						$unprocessedCnt = (isset($rsArr['unprocessed'])?$rsArr['unprocessed']:0);
 						unset($rsArr['unprocessed']);
 						$pendingCnt = (isset($rsArr['pending review'])?$rsArr['pending review']:0);
@@ -137,7 +165,7 @@ if($action == 'addtoqueue'){
 								<?php
 								if($pendingCnt){ 
 									echo $pendingCnt;
-									echo ' (<a href="controlpanel.php?action=review&pstatus=pending&collid='.$collid.'">Review</a>)';
+									echo ' (<a href="review.php?pstatus=pending&collid='.$collid.'">Review</a>)';
 								} 
 								else{
 									echo 0;
@@ -148,7 +176,7 @@ if($action == 'addtoqueue'){
 							foreach($rsArr as $psStr => $cnt){
 								echo '<div>';
 								echo '<b>'.$psStr.':</b> '.$cnt;
-								echo ' (<a href="controlpanel.php?action=review&pstatus=other&collid='.$collid.'">Review</a>)';
+								echo ' (<a href="review.php?pstatus=other&collid='.$collid.'">Review</a>)';
 								echo '</div>';
 							}
 							?>
@@ -157,7 +185,7 @@ if($action == 'addtoqueue'){
 								<?php
 								if($reviewedCnt){
 									echo $reviewedCnt;
-									echo ' (<a href="controlpanel.php?action=review&pstatus=reviewed&collid='.$collid.'">Review</a>)';
+									echo ' (<a href="review.php?pstatus=reviewed&collid='.$collid.'">Review</a>)';
 								}
 								else{
 									echo 0;
@@ -169,7 +197,7 @@ if($action == 'addtoqueue'){
 								<?php
 								if($toAddCnt){
 									echo $toAddCnt;
-									echo ' (<a href="controlpanel.php?action=addtoqueue&collid='.$collid.'">Add to Queue</a>)';
+									echo ' (<a href="controlpanel.php?action=addtoqueue&collid='.$collid.'&omcsid='.$omcsid.'">Add to Queue</a>)';
 								}
 								else{
 									echo 0;
@@ -188,8 +216,8 @@ if($action == 'addtoqueue'){
 									<th>Approved</th>
 								</tr>
 								<?php 
-								if(isset($projArr['ps'])){
-									$psArr = $projArr['ps'];
+								if(isset($statsArr['ps'])){
+									$psArr = $statsArr['ps'];
 									foreach($psArr as $username => $statsArr){
 										echo '<tr>';
 										//User
@@ -204,7 +232,7 @@ if($action == 'addtoqueue'){
 										unset($statsArr['pending review']);
 										echo '<td>';
 										echo $pendingCnt;
-										if($pendingCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=pending&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+										if($pendingCnt) echo ' (<a href="review.php?pstatus=pending&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										//Other
 										$closeCnt = (isset($statsArr['reviewed'])?$statsArr['reviewed']:0);
@@ -219,136 +247,23 @@ if($action == 'addtoqueue'){
 										//Closed
 										echo '<td>';
 										echo $closeCnt;
-										if($closeCnt) echo ' (<a href="controlpanel.php?action=review&pstatus=reveiwed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+										if($closeCnt) echo ' (<a href="review.php?pstatus=reveiwed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										echo '</tr>';
 									}
 								}
 								else{
-									echo '<tr><td colspan="4">No records processed</td></tr>';
+									echo '<tr><td colspan="5">No records processed</td></tr>';
 								}
 								?>
 							</table>
 						</div>
 						<?php 
 					}
-					elseif($action == 'editproject'){
-						?>
-						<form name="projeditform.php" action="controlpanel" method="post">
-							<div style="margin:3px;">
-								<b>Project Name:</b> 
-								<input name="name" type="text" value="<?php echo $projArr['name']; ?>" />
-							</div>
-							<div style="margin:3px;">
-								<b>General Instructions:</b> 
-								<textarea name="instr"><?php echo $projArr['instr']; ?></textarea>
-							</div>
-							<div style="margin:3px;">
-								<b>Training Url:</b> 
-								<input name="url" type="text" value="<?php echo $projArr['url']; ?>" />
-							</div>
-							<div>
-								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-								<input name="formsubmit" type="submit" value="Create Project" />
-							</div>
-						</form>
-						<?php 
-					}
-					elseif($action == 'review'){
-						if($recArr = $csManager->getReviewArr($start,$limit,$uid,$pStatus)){
-							$totalCnt = $recArr['totalcnt'];
-							unset($recArr['totalcnt']);
-							//Set up navigation string
-							$urlPrefix = 'controlpanel.php?collid='.$collid.'&uid='.$uid.'&pstatus='.$pStatus;
-							$navStr = '<b>';
-							if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.$start.'&limit='.$limit.'">';
-							$navStr .= '|&lt; ';
-							if($start > 0) $navStr .= '</a>';
-							$navStr .= '&nbsp;&nbsp;&nbsp;';
-							if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
-							$navStr .= '&lt;&lt;';
-							if($start > 0) $navStr .= '</a>';
-							$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($limit<$totalCnt?$limit:$totalCnt).'&nbsp;&nbsp;|&nbsp;&nbsp;';
-							if(count($recArr) > $limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
-							$navStr .= '&gt;&gt;';
-							if(count($recArr) > $limit) $navStr .= '</a>';
-							$navStr .= '&nbsp;&nbsp;&nbsp;';
-							if($start+(count($recArr)) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.($totalCnt-$limit).'&limit='.($limit+2).'">';
-							$navStr .= '&gt;|';
-							if($start+(count($recArr)) < $totalCnt) $navStr .= '</a> ';
-							$navStr .= '</b>';
-							?>
-							<div style="margin:20px;" style="width:90%;">
-								<div style="font-weight:bold;font-size:120%;">Record Review</div>
-								<div style="float:right;"><?php echo $navStr; ?></div>
-								<div><b>Total Record Count:</b> <?php echo $totalCnt; ?></div>
-								<table class="styledtable">
-									<tr>
-										<th><span title="Select All"><input name="selectall" type="checkbox" onselect="" /></span></th>
-										<th>Record ID</th>
-										<?php 
-										$hArr = $recArr['header'];
-										unset($recArr['header']);
-										foreach($hArr as $f => $v){
-											echo '<th>'.$f.'</th>';
-										}
-										?>
-									</tr>
-									<?php 
-									$cnt = 0;
-									foreach($recArr as $occid => $rArr){
-										?>
-										<tr class="alt">
-											<td>
-												<input name="occ[]" type="checkbox" value="<?php echo $occid; ?>" />
-											</td>
-											<td>
-												<a href="../occurrenceeditor.php?occid=<?php echo $occid; ?>" target="_blank"><?php echo $occid; ?></a>
-											</td>
-											<?php 
-											foreach($hArr as $f => $v){
-												echo '<td>'.$rArr[$f].'</td>';
-											}
-											?>
-										</tr>
-										<?php
-										$cnt++; 
-									}
-									?>
-								</table>
-								<div style="float:right;">
-									<?php echo $navStr; ?>
-								</div>
-							</div>
-							<?php 
-						}
-					}
 					?>
 				</div>
 				<?php 
 			}
-			?>
-			<div id="projectformDiv" style="display:<?php echo ($projArr?'none':'block'); ?>">
-				<form name="projform" action="controlpanel.php" method="post" onsubmit="return verifyProjForm(this)">
-					<div style="margin:3px;">
-						<b>Project Name:</b> 
-						<input name="name" type="text" value="" />
-					</div>
-					<div style="margin:3px;">
-						<b>General Instructions:</b> 
-						<textarea name="instr"></textarea>
-					</div>
-					<div style="margin:3px;">
-						<b>Training Url:</b> 
-						<input name="url" type="text" value="" />
-					</div>
-					<div>
-						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-						<input name="formsubmit" type="submit" value="Create Project" />
-					</div>
-				</form>
-			</div>
-			<?php 
 		}
 		else{
 			echo 'ERROR: collection id not supplied';

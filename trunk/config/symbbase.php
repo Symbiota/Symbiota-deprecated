@@ -10,15 +10,15 @@ if(substr($serverRoot,-1) == '/'){
 }
 
 //Check cookie to see if signed in
-$paramsArr = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
-$userRights = Array();
+$PARAMS_ARR = Array();				//params => fn, uid, un   cookie(SymbiotaBase) => 'un=egbot&dn=Edward+Gilbert&uid=301'
+$USER_RIGHTS = Array();
 if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))){
     $userValue = $_COOKIE["SymbiotaBase"];
     $userValues =	explode("&",$userValue);
     foreach($userValues as $val){
         $tok1 = strtok($val, "=");
         $tok2 = strtok("=");
-        $paramsArr[$tok1] = $tok2;
+        $PARAMS_ARR[$tok1] = $tok2;
     }
 	//Check user rights
 	if(isset($_COOKIE["SymbiotaRights"])){
@@ -27,16 +27,22 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 		foreach($uRights as $v){
 			$tArr = explode("-",$v);
 			if(count($tArr) > 1){
-				$userRights[$tArr[0]][] = $tArr[1];
+				$USER_RIGHTS[$tArr[0]][] = $tArr[1];
 			}
 			else{
-				$userRights[$tArr[0]] = "";
+				$USER_RIGHTS[$tArr[0]] = "";
 			}
 		}
 	}
 }
 
-$userDisplayName = (array_key_exists("dn",$paramsArr)?$paramsArr["dn"]:"");
-$symbUid = (array_key_exists("uid",$paramsArr)?$paramsArr["uid"]:0);
-$isAdmin = (array_key_exists("SuperAdmin",$userRights)?1:0);
+$USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
+$SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
+$IS_ADMIN = (array_key_exists("SuperAdmin",$USER_RIGHTS)?1:0);
+//Need to get rid of following once all parameters are remapped to constants
+$paramsArr = $PARAMS_ARR;
+$userRights = $USER_RIGHTS;
+$userDisplayName = $USER_DISPLAY_NAME;
+$symbUid = $SYMB_UID;
+$isAdmin = $IS_ADMIN;
 ?>
