@@ -555,7 +555,17 @@ class OccurrenceEditorManager {
 				}
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
 				//echo $sql;
-				if(!$this->conn->query($sql)){
+				if($this->conn->query($sql)){
+					if($this->crowdSourceMode){
+						//Add uid to omcrowdsourcequeue for given record
+						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 '.
+							'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';
+						if(!$this->conn->query($sql)){
+							$status = 'ERROR tagging user as the crowdsourcer (#'.$occArr['occid'].'): '.$this->conn->error.'; '.$sql;
+						}
+					}
+				}
+				else{
 					$status = 'ERROR: failed to edit occurrence record (#'.$occArr['occid'].'): '.$this->conn->error;
 				}
 			}
