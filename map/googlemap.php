@@ -11,6 +11,8 @@ $mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 
 $sharedMapManager = new MappingShared();
 
+$sharedMapManager->setFieldArr(0);
+
 $mapWhere = '';
 $genObs = $sharedMapManager->getGenObsInfo();
 
