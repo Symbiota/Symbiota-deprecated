@@ -4,20 +4,22 @@ include_once($serverRoot.'/config/dbconnection.php');
 class MappingShared{
 	
 	private $iconColors = Array();
+	private $googleIconArr = Array();
 	private $taxaArr = Array();
 	private $sqlWhere;
 	private $searchTerms = 0;
 
     public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-    	$this->iconColors[] = "fc6355";
-		$this->iconColors[] = "5781fc";
-		$this->iconColors[] = "fcf357";
-		$this->iconColors[] = "00e13c";
-		$this->iconColors[] = "e14f9e";
-		$this->iconColors[] = "55d7d7";
-		$this->iconColors[] = "ff9900";
-		$this->iconColors[] = "7e55fc";
+    	$this->iconColors = array('fc6355','5781fc','fcf357','00e13c','e14f9e','55d7d7','ff9900','7e55fc');
+		$this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
+			'pushpin/pink-pushpin','pushpin/purple-pushpin', 'pushpin/red-pushpin','pushpin/wht-pushpin','paddle/blu-blank',
+			'paddle/grn-blank','paddle/ltblu-blank','paddle/pink-blank','paddle/wht-blank','paddle/blu-diamond','paddle/grn-diamond',
+			'paddle/ltblu-diamond','paddle/pink-diamond','paddle/ylw-diamond','paddle/wht-diamond','paddle/red-diamond','paddle/purple-diamond',
+			'paddle/blu-circle','paddle/grn-circle','paddle/ltblu-circle','paddle/pink-circle','paddle/ylw-circle','paddle/wht-circle',
+			'paddle/red-circle','paddle/purple-circle','paddle/blu-square','paddle/grn-square','paddle/ltblu-square','paddle/pink-square',
+			'paddle/ylw-square','paddle/wht-square','paddle/red-square','paddle/purple-square','paddle/blu-stars','paddle/grn-stars',
+			'paddle/ltblu-stars','paddle/pink-stars','paddle/ylw-stars','paddle/wht-stars','paddle/red-stars','paddle/purple-stars');
     }
 
 	public function __destruct(){
@@ -46,6 +48,11 @@ class MappingShared{
 			'o.sciname, o.family, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode ';
 		if($includeDescr){
 			$sql .= ", CONCAT_WS('; ',CONCAT_WS(' ', o.recordedBy, o.recordNumber), o.eventDate, o.SciName) AS descr ";
+		}
+		if($this->fieldArr){
+			foreach($this->fieldArr as $k => $v){
+				$sql .= ", o.".$v." ";
+			}
 		}
 		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
 		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
@@ -114,6 +121,11 @@ class MappingShared{
 			if($includeDescr){
 				$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId]["descr"] = $row->descr;
 			}
+			if($this->fieldArr){
+				foreach($this->fieldArr as $k => $v){
+					$coordArr[$taxaMapper[$sciName]][$latLngStr][$occId][$v] = $this->xmlentities($row->$v);
+				}
+			}
 		}
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $this->iconColors[7];
@@ -144,24 +156,43 @@ class MappingShared{
         echo "<Document>\n";
 		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
         
+		$cnt = 0;
 		foreach($coordArr as $sciName => $contentArr){
-			$iconStr = $clientRoot."/images/google/".$contentArr['color']."-dot.png";
+			$iconStr = $this->googleIconArr[$cnt%44];
+			$cnt++;
 			unset($contentArr["color"]);
-			echo "<Style id='".str_replace(" ","_",$sciName)."'>\n";
-            echo "<IconStyle><Icon>";
-			echo "<href>http://".$_SERVER["SERVER_NAME"].$iconStr."</href>";
-			echo "</Icon></IconStyle>\n</Style>\n";
-
+			
+			echo "<Style id='sn_".$iconStr."'>\n";
+            echo "<IconStyle><scale>1.1</scale><Icon>";
+			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
+			echo "<Style id='sh_".$iconStr."'>\n";
+            echo "<IconStyle><scale>1.3</scale><Icon>";
+			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
+			echo "<StyleMap id='".str_replace(" ","_",$sciName)."'>\n";
+            echo "<Pair><key>normal</key><styleUrl>#sn_".$iconStr."</styleUrl></Pair>";
+			echo "<Pair><key>highlight</key><styleUrl>#sh_".$iconStr."</styleUrl></Pair>";
+			echo "</StyleMap>\n";
 			echo "<Folder><name>".$sciName."</name>\n";
-
 			foreach($contentArr as $latLong => $llArr){
 				foreach($llArr as $occId => $pointArr){
 					echo "<Placemark>\n";
 					echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
-					echo "<description><![CDATA[<p>".$pointArr["descr"]."</p>";
+					echo "<ExtendedData>\n";
+					echo "<Data name='institutioncode'>".$pointArr["institutioncode"]."</Data>\n";
+					echo "<Data name='collectioncode'>".$pointArr["collectioncode"]."</Data>\n";
+					echo "<Data name='catalognumber'>".$pointArr["catalognumber"]."</Data>\n";
+					echo "<Data name='othercatalognumbers'>".$pointArr["othercatalognumbers"]."</Data>\n";
+					if($this->fieldArr){
+						foreach($this->fieldArr as $k => $v){
+							echo "<Data name='".$v."'>".$pointArr[$v]."</Data>\n";
+						}
+					}
+					echo "<Data name='DataSource'>Data retrieved from ".$defaultTitle." Data Portal</Data>\n";
 					$url = "http://".$_SERVER["SERVER_NAME"].$clientRoot."/collections/individual/index.php?occid=".$occId;
-					echo "<p><b>More Information:</b> <a href='".$url."'>".$url."</a></p>";
-					echo "<p><b>Data retrieved from <a href='http://".$_SERVER["SERVER_NAME"]."'>".$defaultTitle." Data Portal</a></b></p>]]></description>\n";
+					echo "<Data name='RecordURL'>".$url."</Data>\n";
+					echo "</ExtendedData>\n";
 					echo "<styleUrl>#".str_replace(" ","_",$sciName)."</styleUrl>\n";
 	                echo "<Point><coordinates>".implode(",",array_reverse(explode(",",$latLong))).",0</coordinates></Point>\n";
 					echo "</Placemark>\n";
@@ -173,10 +204,18 @@ class MappingShared{
 		echo "</Document>\n";
 		echo "</kml>\n";
     }
-    
+	
+	private function xmlentities($string){
+		return str_replace(array ('&','"',"'",'<','>','?'),array ('&amp;','&quot;','&apos;','&lt;','&gt;','&apos;'),$string);
+	}
+	
     //Setters and getters
     public function setTaxaArr($tArr){
     	$this->taxaArr = $tArr;
+    }
+	
+	public function setFieldArr($fArr){
+    	$this->fieldArr = $fArr;
     }
 	
 	public function setSearchTermsArr($stArr){
