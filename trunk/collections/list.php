@@ -11,6 +11,20 @@ $pageNumber = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:1;
 $collManager = new OccurrenceListManager();
 
 $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Array(IID,Array(fieldName,value))
+
+$occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname', 
+	'tidinterpreted', 'scientificnameauthorship', 'taxonremarks', 'identifiedby', 'dateidentified', 'identificationreferences',
+	'identificationremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
+	'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
+	'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+	'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans', 
+	'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+	'country', 'stateprovince', 'county', 'municipality', 'locality',
+	'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters','coordinateprecision', 
+	'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 
+	'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
+	'verbatimelevation','language',
+	'labelproject','basisofrecord');
 ?>
 
 <html>
@@ -60,6 +74,32 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 			};
 			vXmlHttp.open("POST",url,true);
 			vXmlHttp.send(null);
+		}
+		
+		function toggle(target){
+			var objDiv = document.getElementById(target);
+			if(objDiv){
+				if(objDiv.style.display=="none"){
+					objDiv.style.display = "block";
+				}
+				else{
+					objDiv.style.display = "none";
+				}
+			}
+			else{
+				var divs = document.getElementsByTagName("div");
+				for (var h = 0; h < divs.length; h++) {
+				var divObj = divs[h];
+					if(divObj.className == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="block";
+						}
+						else {
+							divObj.style.display="none";
+						}
+					}
+				}
+			}
 		}
 
 		function GetXmlHttpObject(){
@@ -350,7 +390,7 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 			}
 			?>
 		</div>
-	    <div id="maps" style="height:400px;">
+	    <div id="maps" style="min-height:400px;margin-bottom:10px;">
 	
 		    <div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="Download Coordinate Data">
 				<a href="download/downloadhandler.php?dltype=georef"><img src="../images/dl.png"/></a>
@@ -373,17 +413,33 @@ $specimenArray = $collManager->getSpecimenMap($pageNumber, $cntPerPage);			//Arr
 			<div style='margin-top:10px;'>
 			    <h2>Google Earth (KML)</h2>
 			</div>
-			<div style='margin:10 0 0 20;'>
-			    <a href="../map/googlekml.php" target="_blank">
-			        Display coordinates in Google Earth 
-			    </a>
-			</div>
-			<div style='margin:10 0 0 20;'>
-			    This link creates an KML file that can be opened in the Google Earth mapping application.
-			    Note that you must have <a href='http://earth.google.com/' target="_blank">
-			    Google Earth</a> installed on your computer to make use of this option.
-			</div>
-	
+			<form name="kmlform" action="../map/googlekml.php" method="post" onsubmit="">
+				<div style='margin:10 0 0 20;'>
+					This creates an KML file that can be opened in the Google Earth mapping application.
+					Note that you must have <a href='http://earth.google.com/' target="_blank">
+					Google Earth</a> installed on your computer to make use of this option.
+				</div>
+				<div style='margin:10 0 0 20;'>
+					<a href="#" onclick="toggle('fieldBox');">
+						Add Extra Fields
+					</a>
+				</div>
+				<div id="fieldBox" style="display:none;">
+					<fieldset>
+						<div style="width:600px;">
+							<?php 
+							foreach($occFieldArr as $k => $v){
+								echo '<div style="float:left;margin-right:5px;">';
+								echo '<input type="checkbox" name="kmlFields[]" value="'.$v.'" />'.$v.'</div>';
+							}
+							?>
+						</div>
+					</fieldset>
+				</div>
+				<div style="margin-top:8px;float:right;">
+					<button name="formsubmit" type="submit" value="Create KML">Create KML</button>
+				</div>
+			</form>
 	    </div>
 	</div>
 </div>
