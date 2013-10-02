@@ -109,21 +109,17 @@ if(!$cid) header('Location: index.php');
 		}
 
 		function validateTaxonAddForm(f){
-			if(f.tid.value)){
+			if(f.tid.value){
 				alert("Please select a taxonomic name!");
 				return false;
 			}
-			if(f.relation.value)){
+			if(f.relation.value){
 				alert("Please select a toxonomic relevance!");
 				return false;
 			}
 			return true;
 		}
 	</script>
-	<script type="text/javascript" src="../../js/symb/ident.admin.js"></script>
-	<style type="text/css">
-		input{ autocomplete: off; } 
-	</style>
 </head>
 <body>
 	<?php
@@ -459,4 +455,3 @@ if(!$cid) header('Location: index.php');
 	?>
 </body>
 </html>
-
