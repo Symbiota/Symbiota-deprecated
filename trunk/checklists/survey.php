@@ -284,7 +284,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber);
 		<?php 
 			echo $clManager->getSurveyName()."&nbsp;&nbsp;";
 			if(1 == 2){
-				if($keyModIsActive){
+				if($keyModIsActive === true || $keyModIsActive === 1){
 					?>
 					<a href="../ident/key.php?surveyid=<?php echo $surveyId."&proj=".$clManager->getPid();?>&taxon=All+Species">
 						<img src='../images/key.jpg' style='width:15px;border:0px;' title='Open Symbiota Key' />
