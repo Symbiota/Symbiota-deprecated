@@ -1409,51 +1409,53 @@ class SpecUploadBase extends SpecUpload{
 		$sqlFields = '';
 		$sqlValues = '';
 		foreach($recMap as $symbField => $valueStr){
-			$sqlFields .= ','.$symbField;
-			$valueStr = $this->encodeString($valueStr);
-			$valueStr = $this->cleanInStr($valueStr);
-			//Load data
-			$type = '';
-			$size = 0;
-			if(array_key_exists($symbField,$fieldMap)){ 
-				if(array_key_exists('type',$fieldMap[$symbField])){
-					$type = $fieldMap[$symbField]["type"];
+			if($symbField != 'unmapped'){
+				$sqlFields .= ','.$symbField;
+				$valueStr = $this->encodeString($valueStr);
+				$valueStr = $this->cleanInStr($valueStr);
+				//Load data
+				$type = '';
+				$size = 0;
+				if(array_key_exists($symbField,$fieldMap)){ 
+					if(array_key_exists('type',$fieldMap[$symbField])){
+						$type = $fieldMap[$symbField]["type"];
+					}
+					if(array_key_exists('size',$fieldMap[$symbField])){
+						$size = $fieldMap[$symbField]["size"];
+					}
 				}
-				if(array_key_exists('size',$fieldMap[$symbField])){
-					$size = $fieldMap[$symbField]["size"];
+				switch($type){
+					case "numeric":
+						if(is_numeric($valueStr)){
+							$sqlValues .= ",".$valueStr;
+						}
+						elseif(is_numeric(str_replace(',',"",$valueStr))){
+							$sqlValues .= ",".str_replace(',',"",$valueStr);
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
+						break;
+					case "date":
+						$dateStr = $this->formatDate($valueStr);
+						if($dateStr){
+							$sqlValues .= ',"'.$dateStr.'"';
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
+						break;
+					default:	//string
+						if($size && strlen($valueStr) > $size){
+							$valueStr = substr($valueStr,0,$size);
+						}
+						if($valueStr){
+							$sqlValues .= ',"'.$valueStr.'"';
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
 				}
-			}
-			switch($type){
-				case "numeric":
-					if(is_numeric($valueStr)){
-						$sqlValues .= ",".$valueStr;
-					}
-					elseif(is_numeric(str_replace(',',"",$valueStr))){
-						$sqlValues .= ",".str_replace(',',"",$valueStr);
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
-					break;
-				case "date":
-					$dateStr = $this->formatDate($valueStr);
-					if($dateStr){
-						$sqlValues .= ',"'.$dateStr.'"';
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
-					break;
-				default:	//string
-					if($size && strlen($valueStr) > $size){
-						$valueStr = substr($valueStr,0,$size);
-					}
-					if($valueStr){
-						$sqlValues .= ',"'.$valueStr.'"';
-					}
-					else{
-						$sqlValues .= ",NULL";
-					}
 			}
 		}
 		return array('fieldstr' => $sqlFields,'valuestr' => $sqlValues);
