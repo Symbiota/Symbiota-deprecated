@@ -121,9 +121,10 @@ class IdentCharAdmin{
 	
 	public function getCharStateArr(){
 		$retArr = array();
-		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, language, enteredby '.
+		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, language, sortsequence, enteredby '.
 			'FROM kmcs '.
-			'WHERE cid = '.$this->cid;
+			'WHERE cid = '.$this->cid.' '.
+			'ORDER BY sortsequence';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
@@ -132,6 +133,7 @@ class IdentCharAdmin{
 				$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
 				$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
 				$retArr[$r->cs]['language'] = $this->cleanOutStr($r->language);
+				$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
 				$retArr[$r->cs]['enteredby'] = $r->enteredby;
 			}
 			$rs->free();
@@ -157,8 +159,8 @@ class IdentCharAdmin{
 				$rs->free();
 			}
 			//Load new character set
-			$sql = 'INSERT INTO kmcs(cid,cs,charstatename,implicit,sortsequence,enteredby) '.
-				'VALUES('.$this->cid.',"'.$csValue.'","'.$this->cleanInStr($csName).'",1,'.$csValue.',"'.$un.'") ';
+			$sql = 'INSERT INTO kmcs(cid,cs,charstatename,implicit,enteredby) '.
+				'VALUES('.$this->cid.',"'.$csValue.'","'.$this->cleanInStr($csName).'",1,"'.$un.'") ';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
 				trigger_error('ERROR: Creation of new character failed: '.$this->conn->error);
@@ -170,7 +172,7 @@ class IdentCharAdmin{
 	public function editCharState($pArr){
 		$statusStr = '';
 		$cs = $pArr['cs'];
-		$targetArr = array('charstatename','illustrationurl','description','notes');
+		$targetArr = array('charstatename','illustrationurl','description','notes','sortsequence');
 		$sql = '';
 		foreach($pArr as $k => $v){
 			if(in_array($k,$targetArr)){
