@@ -14,7 +14,7 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 			</a>
 		</div>
 		<?php 
-		if($keyModIsActive){
+		if($keyModIsActive === true || $keyModIsActive === 1){
 		?>
 			<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Open in Interactive Key Interface'>
 				<a href="checklistsymbiota.php?taxonfilter=<?php echo $taxonFilter; ?>&interface=key">

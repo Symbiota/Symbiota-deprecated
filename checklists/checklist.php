@@ -198,7 +198,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 				</a>
 			</div>
 			<?php 
-			if($keyModIsActive && !$printMode){
+			if(($keyModIsActive === true || $keyModIsActive === 1) && !$printMode){
 				?>
 				<div style="float:left;padding:5px;">
 					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">

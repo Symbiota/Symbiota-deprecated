@@ -376,7 +376,7 @@ if($isEditable && $projSubmit){
 			            can inspect these specimens for verification or annotate the identification when necessary.
 					</div>
 					<?php 
-					if($keyModIsActive){
+					if($keyModIsActive === true || $keyModIsActive === 1){
 						?>
 						<div style="margin-left:15px;font-size:90%">
 							The <img src="../images/key.jpg" style="width: 12px;" alt="Golden Key Symbol" /> 
@@ -407,7 +407,7 @@ if($isEditable && $projSubmit){
 									<?php echo $value; ?>
 								</a> 
 								<?php 
-								if($keyModIsActive){
+								if($keyModIsActive === true || $keyModIsActive === 1){
 									?>
 									<a href='../ident/key.php?cl=<?php echo $key; ?>&proj=<?php echo $projManager->getProjectId(); ?>&taxon=All+Species'>
 										<img style='width:12px;border:0px;' src='../images/key.jpg'/>

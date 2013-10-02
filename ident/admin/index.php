@@ -1,43 +1,23 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/KeyCharAdmin.php');
+include_once($serverRoot.'/classes/IdentCharAdmin.php');
 
-$keyManager = new KeyAdmin();
-//$keyManager->setCollId($collId);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
-$formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
-$cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
-$tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
+$charManager = new IdentCharAdmin();
 
-if($cid) $keyManager->setCid($cid);
-
-$statusStr = '';
-if($formSubmit){
-	if($formSubmit == 'Create'){
-		$statusStr = $keyManager->createCharacter($_POST,$paramsArr['un']);
-		$cid = $keyManager->getcId();
-	}
-	elseif($formSubmit == 'Save Char'){
-		$statusStr = $keyManager->editCharacter($_POST);
-	}
-	elseif($formSubmit == 'Add State'){
-		$keyManager->createState($_POST['charstatename'],$paramsArr['un']);
-		$tabIndex = 2;
-	}
-	elseif($formSubmit == 'Save State'){
-		$statusStr = $keyManager->editCharState($_POST);
-		$tabIndex = 2;
-	}
-	elseif($formSubmit == 'Delete Char'){
-		$status = $keyManager->deleteChar();
-		if($status) $cid = 0;
-	}
-	elseif($formSubmit == 'Delete State'){
-		$status = $keyManager->deleteCharState($_POST['cs']);
-		$tabIndex = 2;
-	}
+$charArr = $charManager->getCharacterArr();
+$headingArr = array();
+if(isset($charArr['head'])){
+	$headingArr = $charArr['head'];
+	unset($charArr['head']);
 }
- 
+
+$isEditor = false;
+if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
+	$isEditor = true;
+}
+
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
 <html>
@@ -45,13 +25,41 @@ if($formSubmit){
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 	<title>Character Admin</title>
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script type="text/javascript">
-		var tabIndex = <?php echo $tabIndex; ?>;
+		function validateNewCharForm(f){
+
+			return true;
+		}
+
+		function toggle(target){
+			var objDiv = document.getElementById(target);
+			if(objDiv){
+				if(objDiv.style.display=="none"){
+					objDiv.style.display = "block";
+				}
+				else{
+					objDiv.style.display = "none";
+				}
+			}
+			else{
+			  	var divs = document.getElementsByTagName("div");
+			  	for (var h = 0; h < divs.length; h++) {
+			  	var divObj = divs[h];
+					if(divObj.className == target){
+						if(divObj.style.display=="none"){
+							divObj.style.display="block";
+						}
+					 	else {
+					 		divObj.style.display="none";
+					 	}
+					}
+				}
+			}
+		}
 	</script>
-	<script type="text/javascript" src="../../js/symb/ident.admin.js"></script>
+	<style type="text/css">
+		input{ autocomplete: off; } 
+	</style>
 </head>
 <body>
 <?php
@@ -62,7 +70,7 @@ if(isset($collections_loans_indexCrumbs)){
 		?>
 		<div class='navpath'>
 			<?php echo $ident_admin_indexCrumbs; ?>
-			<a href='index.php'> <b>Character Management</b></a>
+			<b>Character Management</b>
 		</div>
 		<?php 
 	}
@@ -71,7 +79,7 @@ else{
 	?>
 	<div class='navpath'>
 		<a href='../../index.php'>Home</a> &gt;&gt; 
-		<a href='index.php'> <b>Character Management</b></a>
+		<b>Character Management</b>
 	</div>
 	<?php 
 }
@@ -79,33 +87,116 @@ else{
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid){
-			if($statusStr){
-				?>
-				<hr/>
-				<div style="margin:15px;color:red;">
-					<?php echo $statusStr; ?>
+		if($isEditor){
+			?>
+			<div id="addeditchar">
+				<div style="float:right;margin:10px;">
+					<a href="#" onclick="toggle('addchardiv');">
+						<img src="../../images/add.png" alt="Create New Character" />
+					</a>
 				</div>
-				<hr/>
-				<?php 
-			}
-			if(!$cid){
-				include_once('charadmin.php');
-			}
-			elseif($cid){
-				include_once('chardetails.php');
-			}
+				<div id="addchardiv" style="display:none;">
+					<form name="newcharform" action="chardetails.php" method="post" onsubmit="return validateNewCharForm(this)">
+						<fieldset>
+							<legend><b>New Character</b></legend>
+							<div>
+								<span>
+									Character Name:
+								</span><br />
+								<span>
+									<input type="text" name="charname" maxlength="255" style="width:400px;" value="" />
+								</span>
+							</div>
+							<div style="padding-top:6px;float:left;">
+								<div style="float:left;">
+									<span>
+										Type:
+									</span><br />
+									<span>
+										<select name="chartype" style="width:180px;">
+											<option value="">------------------------</option>
+											<option value="UM">Unordered Multi-state</option>
+											<option value="IN">Integer</option>
+											<option value="RN">Real Number</option>
+										</select>
+									</span>
+								</div>
+								<div style="margin-left:30px;float:left;">
+									<span>
+										Difficulty:
+									</span><br />
+									<span>
+										<select name="difficultyrank" style="width:100px;">
+											<option value="">---------------</option>
+											<option value="1">Easy</option>
+											<option value="2">Intermediate</option>
+											<option value="3">Advanced</option>
+											<option value="4">Hidden</option>
+										</select>
+									</span>
+								</div>
+								<div style="margin-left:30px;float:left;">
+									<span>
+										Heading:
+									</span><br />
+									<span>
+										<select name="hid" style="width:125px;">
+											<option value="">No Heading</option>
+											<option value="">---------------------</option>
+											<?php 
+											foreach($headingArr as $k => $v){
+												echo '<option value="'.$k.'">'.$v.'</option>';
+											}
+											?>
+										</select>
+									</span>
+								</div>
+							</div>
+							<div style="width:100%;padding-top:6px;float:left;">
+								<button name="formsubmit" type="submit" value="Create">Create</button>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div id="charlist">
+					<?php 
+					if($charArr){
+						?>
+						<h3>Characters by Heading</h3>
+						<ul>
+							<?php 
+							foreach($charArr as $k => $charList){
+								?>
+								<li>
+									<a href="#" onclick="toggle('char-<?php echo $k; ?>');"><?php echo $headingArr[$k]; ?></a>
+									<div id="char-<?php echo $k; ?>" style="display:block;">
+										<ul>
+											<?php 
+											foreach($charList as $cid => $charName){
+												echo '<li>';
+												echo '<a href="chardetails.php?cid='.$cid.'">'.$charName.'</a>';
+												echo '</li>';
+											}
+											?>
+										</ul>
+									</div>
+								</li>
+								<?php 
+							}
+							?>
+						</ul>
+					<?php 
+					}
+					else{
+						echo '<div style="font-weight:bold;font-size:120%;">There are no existing characters</div>';
+					}
+					?>
+				</div>
+			</div>
+			<?php 
 		}
 		else{
-			if(!$symbUid){
-				echo 'Please <a href="../../profile/index.php?refurl=../ident/admin/index.php">login</a>';
-			}
-			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add characters</h2>';
-			}
-			else{
-				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';
-			}
+			echo '<h2>You are not authorized to add characters</h2>';
 		}
 		?>
 	</div>
@@ -114,4 +205,3 @@ else{
 	?>
 </body>
 </html>
-
