@@ -31,6 +31,7 @@ $imageProcessor->setSymbiotaClassPath($symbiotaClassPath);
 $imageProcessor->setWebPixWidth($webPixWidth);
 $imageProcessor->setTnPixWidth($tnPixWidth);
 $imageProcessor->setLgPixWidth($lgPixWidth);
+$imageProcessor->setWebFileSizeLimit();
 $imageProcessor->setJpgCompression($jpgCompression);
 $imageProcessor->setUseImageMagick($useImageMagick);
 

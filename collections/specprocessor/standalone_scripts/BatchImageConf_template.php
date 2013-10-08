@@ -27,6 +27,7 @@ $copyOverImg = true;
 $webPixWidth = 800;
 $tnPixWidth = 130;
 $lgPixWidth = 2000;
+$webFileSizeLimit = 300000;
 
 //Whether to use ImageMagick for creating thumbnails and web images. ImageMagick must be installed on server.
 // 0 = use GD library (default), 1 = use ImageMagick

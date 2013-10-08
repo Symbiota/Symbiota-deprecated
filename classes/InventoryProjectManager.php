@@ -125,6 +125,7 @@ class InventoryProjectManager {
 			$sql .= ') ';
 		}
 		$sql .= "ORDER BY c.SortSequence, c.name";
+		//echo $sql;
 		$rs = $this->con->query($sql);
 		$cnt = 0;
 		while($row = $rs->fetch_object()){
@@ -173,14 +174,22 @@ class InventoryProjectManager {
 	}
 
 	public function getClAddArr(){
+		global $userRights;
 		$returnArr = Array();
-		$sql = 'SELECT c.clid, c.name '.
+		$sql = 'SELECT c.clid, c.name, c.access '.
 			'FROM fmchecklists c LEFT JOIN (SELECT clid FROM fmchklstprojlink WHERE (pid = '.$this->projId.')) pl ON c.clid = pl.clid '.
-			'WHERE pl.clid IS NULL AND c.access = "public" '.
-			'ORDER BY name';
+			'WHERE (pl.clid IS NULL) AND (c.access = "public" ';
+		if(array_key_exists('ClAdmin',$userRights)){
+			$sql .= ' OR (c.clid IN ('.implode(',',$userRights['ClAdmin']).'))) ';
+		}
+		else{
+			$sql .= ') ';
+		}
+		$sql .= 'ORDER BY name';
+
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
-			$returnArr[$row->clid] = $this->cleanOutStr($row->name);
+			$returnArr[$row->clid] = $this->cleanOutStr($row->name).($row->access == 'private'?' (private)':'');
 		}
 		$rs->close();
 		return $returnArr;
