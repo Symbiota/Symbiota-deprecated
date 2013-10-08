@@ -327,6 +327,7 @@ body{
 
 #coordAidDiv{
 	display:	none;
+	clear:		both;
 }
 
 #dmsAidDiv{

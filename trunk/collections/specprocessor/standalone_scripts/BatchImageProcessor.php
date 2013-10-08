@@ -19,6 +19,7 @@ class BatchImageProcessor {
 	private $webPixWidth = 1200;
 	private $tnPixWidth = 130;
 	private $lgPixWidth = 2400;
+	private $webFileSizeLimit = 300000;
 	private $jpgCompression= 80;
 	private $createWebImg = 1;
 	private $createTnImg = 1;
@@ -141,7 +142,10 @@ class BatchImageProcessor {
 				$this->targetPathFrag .= $this->collArr[$collid]['sourcePathFrag'];
 			}
 			else{
-				$this->targetPathFrag .= $collStr.'/';
+				$this->targetPathFrag .= $collStr;
+			}
+			if(substr($this->targetPathFrag,-1) != "/" && substr($this->targetPathFrag,-1) != "\\"){
+				$this->targetPathFrag .= '/';
 			}
 			if(!file_exists($this->targetPathBase.$this->targetPathFrag)){
 				if(!mkdir($this->targetPathBase.$this->targetPathFrag,0777,true)){
@@ -379,13 +383,14 @@ class BatchImageProcessor {
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePathBase.$pathFrag.$fileName);
+				$fileSize = filesize($this->sourcePathBase.$pathFrag.$fileName);
 				$this->logOrEcho("\tLoading image (".date('Y-m-d h:i:s A').")");
 				//ob_flush();
 				flush();
 				
 				//Create web image
 				$webImgCreated = false;
-				if($this->createWebImg && $width > $this->webPixWidth){
+				if($this->createWebImg && ($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
 					$webImgCreated = $this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
 				}
 				else{
@@ -467,7 +472,6 @@ class BatchImageProcessor {
 	private function createNewImage($sourcePathBase, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
 		global $useImageMagick;
 		$status = false;
-		
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
 			$status = $this->createNewImageImagick($sourcePathBase,$targetPath,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
@@ -487,6 +491,7 @@ class BatchImageProcessor {
 	private function createNewImageImagick($sourceImg,$targetPath,$newWidth){
 		$status = false;
 		$ct;
+		$retval;
 		if($newWidth < 300){
 			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
 		}
@@ -495,6 +500,10 @@ class BatchImageProcessor {
 		}
 		if(file_exists($targetPath)){
 			$status = true;
+		}
+		else{
+			echo $ct;
+			echo $retval;
 		}
 		return $status;
 	}
@@ -1219,7 +1228,7 @@ class BatchImageProcessor {
 	}
 
 	public function setImgUrlBase($u){
-		if(substr($u,-1) != '/') $u = '/';
+		if(substr($u,-1) != '/') $u .= '/';
 		$this->imgUrlBase = $u;
 	}
 
@@ -1257,6 +1266,14 @@ class BatchImageProcessor {
 
 	public function getLgPixWidth(){
 		return $this->lgPixWidth;
+	}
+
+	public function setWebFileSizeLimit($size){
+		$this->webFileSizeLimit = $size;
+	}
+
+	public function getWebFileSizeLimit(){
+		return $this->webFileSizeLimit;
 	}
 
 	public function setJpgCompression($jc){
