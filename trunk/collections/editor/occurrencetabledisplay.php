@@ -253,7 +253,7 @@ else{
 						<?php
 						if($crowdSourceMode){
 							?>
-							<a href="crowdsourcecentral.php?">Crowd Sourcing Central</a> &gt;&gt;
+							<a href="crowdsource/central.php">Crowd Sourcing Central</a> &gt;&gt;
 							<?php
 						}
 						else{
