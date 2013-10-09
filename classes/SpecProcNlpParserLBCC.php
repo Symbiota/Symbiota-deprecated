@@ -63,12 +63,12 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 				$det_date = "";
 				if(array_key_exists('eventDate', $labelInfo)) {
 					$t = $labelInfo['eventDate'];
-					if(is_array($t)) if(count($t) > 0) $event_date = $t;
+					if(is_array($t)) if(count($t) > 0) $event_date = $this->formatDate($t);
 					unset($labelInfo['eventDate']);
 				}
 				if(array_key_exists('dateIdentified', $labelInfo)) {
 					$t = $labelInfo['dateIdentified'];
-					if(is_array($t)) if(count($t) > 0) $det_date = $t;
+					if(is_array($t)) if(count($t) > 0) $det_date = $this->formatDate($t);
 					unset($labelInfo['dateIdentified']);
 				}
 				$possibleMonths = "Jan(?:\\.|(?:ua\\w{1,2}))?|Feb(?:\\.|(?:rua\\w{1,2}))?|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:i[l1|I!]))?|May|Jun[.e]?|Ju[l1|I!][.y]?|Aug(?:\\.|(?:ust))?|[S5]ep(?:\\.|(?:t\\.?)|(?:temb\\w{1,2}))?|[O0]ct(?:\\.|(?:[O0]b\\w{1,2}))?|N[O0]v(?:\\.|(?:emb\\w{1,2}))?|Dec(?:\\.|(?:emb\\w{1,2}))?";
