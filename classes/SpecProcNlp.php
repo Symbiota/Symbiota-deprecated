@@ -2,7 +2,7 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
 include_once($serverRoot.'/classes/SpecProcNlpParser.php');
-include_once($serverRoot.'/classes/SpecProcNlpParserLBCC.php');
+include_once($serverRoot.'/classes/SpecProcNlpParserLBCCCommon.php');
 
 class SpecProcNlp{
 
@@ -14,7 +14,7 @@ class SpecProcNlp{
 	protected $url;
 	protected $ocrSource;
 	private $printMode = null;		//0 = database, 1 = report, 2 = csv
-	private $logErrors = 0; 
+	private $logErrors = 0;
 	private $totalStats = array();
 	private $csvHeaderArr = array();
 
@@ -24,13 +24,13 @@ class SpecProcNlp{
 
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		$this->outFilePath = $GLOBALS['serverRoot'].(substr($GLOBALS['serverRoot'],-1)=='/'?'':'/')."temp/logs/LbccParser_".date('Y-m-d_his');
 		set_time_limit(7200);
 	}
-	
+
 	function __destruct(){
 		if($this->printMode == 1){
 			$this->printSummary();
@@ -53,7 +53,7 @@ class SpecProcNlp{
 			fclose($outTempFH);
 			unlink($this->outFilePath.'_temp.csv');
 			fclose($outFinalFH);
-			
+
 			$this->logMsg($this->totalStats['collmeta']['totalcnt'].' records output to CSV');
 			echo '<div style="margin-left:10px;">Output file: <a href="'.$this->outFilePath.'.csv">'.$this->outFilePath.'.csv</a></div>';
 		}
@@ -86,12 +86,12 @@ class SpecProcNlp{
 				unset($dwcArr[$k]);
 			}
 		}
-		
+
 		/*
 		if(is_numeric($prlid)){
 			$rawStr = '';
 			//Get raw OCR string
-			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '. 
+			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '.
 				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid '.
 				'INNER JOIN omoccurrences o ON IFNULL(i.occid,r.occid) = o.occid '.
 				'WHERE (r.prlid = '.$prlid.')';
@@ -136,7 +136,7 @@ class SpecProcNlp{
 		$totalCnt = 0;
 		foreach($collArr as $collId){
 			$this->setCollId($collId);
-			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '. 
+			$sql = 'SELECT r.prlid, r.rawstr, r.source, o.occid, o.catalognumber, IFNULL(i.originalurl,i.url) AS url '.
 				'FROM specprocessorrawlabels r LEFT JOIN images i ON r.imgid = i.imgid '.
 				'INNER JOIN omoccurrences o ON IFNULL(i.occid,r.occid) = o.occid '.
 				'WHERE length(r.rawstr) > 20 AND (o.processingstatus = "unprocessed") ';
@@ -330,7 +330,7 @@ class SpecProcNlp{
 		elseif($wildStr){
 			//Look for possible matches
 			$sqlWhere = '';
-			//Split string into words separated by commas, semi-colons, or white spaces 
+			//Split string into words separated by commas, semi-colons, or white spaces
 			$wildArr = preg_split("/[\s,;]+/",$wildStr);
 			foreach($wildArr as $k => $v){
 				//Clean values
@@ -371,7 +371,7 @@ class SpecProcNlp{
 		}
 		return (isset($retArr[$bestMatch])?$retArr[$bestMatch]:null);
 	}
-	
+
 	private function formatDate($inStr){
 		$retDate = '';
 		$dateStr = trim($inStr);
@@ -466,7 +466,7 @@ class SpecProcNlp{
 				$d = '00';
 			}
 			//Do some cleaning
-			if(strlen($y) == 2){ 
+			if(strlen($y) == 2){
 				if($y < 20) $y = '20'.$y;
 				else $y = '19'.$y;
 			}
@@ -488,11 +488,11 @@ class SpecProcNlp{
 			$this->collId = $collId;
 		}
 	}
-	
+
 	public function setRawText($rawText){
 		$this->rawText = $rawText;
 	}
-	
+
 	public function setRawTextById($prlid){
 		$textBlock = '';
 		if(is_numeric($prlid)){
@@ -514,7 +514,7 @@ class SpecProcNlp{
 		}
 		$this->tokenizeRawString();
 	}
-	
+
 	private function setCollectionMetadata($collTarget){
 		$sql = 'SELECT collid, collectionname FROM omcollections ';
 		if(preg_match('/^[\d,]+$/',$collTarget)) $sql .= 'WHERE collid IN('.$collTarget.')';
@@ -539,14 +539,14 @@ class SpecProcNlp{
 			}
 		}
 	}
-	
+
 	public function setLogErrors($l){
 		$this->logErrors = $l;
 	}
 
 	//Ouput functions
 	private function printCsv($dwcArr){
-		//Add new header names to header array 
+		//Add new header names to header array
 		$newHeadArr = array_diff_key($dwcArr, $this->csvHeaderArr);
 		foreach($newHeadArr as $newK => $nV){
 			$this->csvHeaderArr[$newK] = '';
@@ -565,7 +565,7 @@ class SpecProcNlp{
 		//If string is UTF-8, convert to latin1
 		if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 			$rawStr = utf8_decode($rawStr);
-		} 
+		}
 		$this->outToReport("OCR string:\n".$rawStr."\n");
 		$this->outToReport("Results:");
 		foreach($dwcArr as $fieldName => $fieldValue) {
@@ -574,13 +574,13 @@ class SpecProcNlp{
 			if(isset($this->totalStats[$fieldName][$this->collId])) {
 				$num = ++$this->totalStats[$fieldName][$this->collId];
 				$this->totalStats[$fieldName][$this->collId] = $num;
-			} 
+			}
 			else{
 				$this->totalStats[$fieldName][$this->collId] = 1;
 			}
 		}
 	}
-	
+
 	private function printSummary(){
 		$collArr = $this->totalStats['collmeta'];
 		$this->outToReport("------------------------------------------------------------------------------------------");
@@ -609,7 +609,7 @@ class SpecProcNlp{
 			}
 		}
 	}
-	
+
 	private function outToReport($str){
 		if($this->outFH){
 			fwrite($this->outFH,$str."\n");
@@ -620,9 +620,9 @@ class SpecProcNlp{
 	}
 
 	/*
-	 * @param 	Array of parsed term/values. 
-	 * 			Key: DwC term; Value: Output text 
-	 * @return 	TRUE on success  
+	 * @param 	Array of parsed term/values.
+	 * 			Key: DwC term; Value: Output text
+	 * @return 	TRUE on success
 	 */
 	private function loadParsedData($inArr){
 		if(!$inArr){
@@ -671,14 +671,14 @@ class SpecProcNlp{
 		if($rs = $this->conn->query('SELECT * FROM omoccurrences WHERE occid = '.$this->occid)){
 			$curOccArr = array_change_key_case($rs->fetch_assoc());
 		}
-		else{ 
+		else{
 			$this->logMsg('ERROR: unable to populate $curOccArr');
 			return false;
 		}
-		
+
 		//Do some cleaning
 		if(isset($dwcArr['month']) && !is_numeric($dwcArr['month'])){
-			//Month should be numeric, yet is a sting. Check to see if it is the month name or abbreviation 
+			//Month should be numeric, yet is a sting. Check to see if it is the month name or abbreviation
 			$mStr = strtolower(substr($dwcArr['month'],0,3));
 			if(array_key_exists($mStr,$this->monthNames)){
 				$dwcArr['month'] = $this->monthNames[$mStr];
@@ -690,7 +690,7 @@ class SpecProcNlp{
 					$vDate .= $dwcArr['month'].' ';
 					if(isset($dwcArr['year'])) $vDate .= $dwcArr['year'];
 					$dwcArr['verbatimeventdate'] = trim($vDate);
-				} 
+				}
 				unset($dwcArr['month']);
 			}
 		}
@@ -702,7 +702,7 @@ class SpecProcNlp{
 		if(!isset($dwcArr['eventdate']) && isset($dwcArr['verbatimeventdate'])){
 			$dwcArr['eventdate'] = $this->formatDate($dwcArr['verbatimeventdate']);
 		}
-		
+
 		//Load data
 		$dataToLoad = array_intersect_key($dwcArr,$targetFields);
 		$leftOverData = array_diff_key($dwcArr,$targetFields);
@@ -714,7 +714,7 @@ class SpecProcNlp{
 			$valueStr = $this->cleanInStr($valueStr);
 			if($valueStr){
 				if(!$curOccArr[$fieldTerm]){
-					//A value does not already exist in existing record, thus OK to populate field 
+					//A value does not already exist in existing record, thus OK to populate field
 					$valueIn = '';
 					if(strpos($targetFields[$fieldTerm],'int') === 0 || strpos($targetFields[$fieldTerm],'double') === 0 || strpos($targetFields[$fieldTerm],'decimal') === 0){
 						//Target field is a numeric data type
@@ -755,7 +755,7 @@ class SpecProcNlp{
 			//Code that modifies the processing status
 			//processingStatus = unprocessed-NLP
 			$sqlFrag .= ', processingstatus = "unprocessed-NLP"';
-			
+
 			//Load data into existing record
 			$sql = 'UPDATE omoccurrences SET '.substr($sqlFrag,1).' WHERE occid = '.$this->occid;
 			echo $sql.'<br/>';
@@ -804,7 +804,7 @@ class SpecProcNlp{
 							}
 						}
 						if($dwcArr['omenid']){
-							//ometid and omenid both exists, thus load Exsiccati 
+							//ometid and omenid both exists, thus load Exsiccati
 							$sqlExs ='INSERT INTO omexsiccatiocclink(omenid,occid) VALUES('.$dwcArr['omenid'].','.$this->occid.')';
 							if($this->conn->query($sqlExs)){
 								//Remove exsiccati fields from $leftOverData
@@ -827,8 +827,8 @@ class SpecProcNlp{
 			}
 		}
 
-		if(count($leftOverData)) $this->logMsg('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData))); 
-		
+		if(count($leftOverData)) $this->logMsg('WARNING: Unmatched data fields: '.implode(', ',array_keys($leftOverData)));
+
 		return true;
 	}
 
@@ -846,7 +846,7 @@ class SpecProcNlp{
 			}
 		}
 	}
-	
+
 	protected function encodeString($inStr){
  		global $charset;
  		$retStr = $inStr;
@@ -866,7 +866,7 @@ class SpecProcNlp{
  		}
 		return $retStr;
 	}
-	
+
 	protected function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
@@ -874,4 +874,4 @@ class SpecProcNlp{
 		return $newStr;
 	}
 }
-?> 
+?>
