@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/classes/'SpecProcNlpParserLBCCBryophyte.php');
-include_once($serverRoot.'/classes/'SpecProcNlpParserLBCCLichen.php');
+include_once($serverRoot.'/classes/SpecProcNlpParserLBCCBryophyte.php');
+include_once($serverRoot.'/classes/SpecProcNlpParserLBCCLichen.php');
 
 class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
