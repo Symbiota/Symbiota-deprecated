@@ -123,7 +123,7 @@ $pManager = new PhotographerManager();
 		else{
 			?>
 			<div style="float:left;;margin-right:40px;">
-				<h2>Field Image Photographers</h2>
+				<h2>Photographers</h2>
 				<div style="margin-left:15px">
 					<?php 
 					$pList = $pManager->getPhotographerList();

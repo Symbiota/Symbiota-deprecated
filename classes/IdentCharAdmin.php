@@ -6,6 +6,7 @@ class IdentCharAdmin{
 	private $conn;
 	private $cid = 0;
 	private $lang = 'english';
+	private $landId;
 	//private $langId;
 
 	function __construct() {
@@ -19,16 +20,21 @@ class IdentCharAdmin{
 	public function getCharacterArr(){
 		$retArr = array();
 		$headingArr = array();
+		if(!$this->langId) $this->setLangId();
 		$sql = 'SELECT c.hid, h.headingname, c.cid, IFNULL(cl.charname, c.charname) AS charname '.
 			'FROM kmcharacters c LEFT JOIN kmcharheading h ON c.hid = h.hid '.
-			'LEFT JOIN (SELECT cid, charname FROM kmcharacterlang WHERE language = "'.$this->lang.'") cl ON c.cid = cl.cid '.
-			'WHERE h.language =  "'.$this->lang.'" '.
+			'LEFT JOIN (SELECT cid, charname FROM kmcharacterlang WHERE langid = "'.$this->langId.'") cl ON c.cid = cl.cid '.
+			'WHERE (h.langid =  "'.$this->langId.'" OR h.langid IS NULL) '.
 			'ORDER BY h.sortsequence, h.headingname, c.sortsequence, cl.charname, c.charname';
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$headingArr[$r->hid] = $this->cleanOutStr($r->headingname);
-				$retArr[$r->hid][$r->cid] = $this->cleanOutStr($r->charname);
+				$hid = $r->hid;
+				$hName = $this->cleanOutStr($r->headingname);
+				if(!$hid) $hid = 0;
+				if(!$hName) $hName = 'Undefined Heading';
+				$headingArr[$hid] = $hName;
+				$retArr[$hid][$r->cid] = $this->cleanOutStr($r->charname);
 			}
 			$rs->free();
 		}
@@ -38,34 +44,40 @@ class IdentCharAdmin{
 
 	public function getCharDetails(){
 		$retArr = array();
-		$sql = 'SELECT cid, charname, chartype, defaultlang, difficultyrank, hid, units, '.
-			'description, notes, helpurl, enteredby '.
-			'FROM kmcharacters '.
-			'WHERE cid = '.$this->cid;
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr['charname'] = $this->cleanOutStr($r->charname);
-				$retArr['chartype'] = $r->chartype;
-				$retArr['defaultlang'] = $this->cleanOutStr($r->defaultlang);
-				$retArr['difficultyrank'] = $r->difficultyrank;
-				$retArr['hid'] = $r->hid;
-				$retArr['units'] = $this->cleanOutStr($r->units);
-				$retArr['description'] = $this->cleanOutStr($r->description);
-				$retArr['notes'] = $this->cleanOutStr($r->notes);
-				$retArr['helpurl'] = $r->helpurl;
-				$retArr['enteredby'] = $r->enteredby;
+		if($this->cid){
+			$sql = 'SELECT cid, charname, chartype, defaultlang, difficultyrank, hid, units, '.
+				'description, notes, helpurl, enteredby, sortsequence '.
+				'FROM kmcharacters '.
+				'WHERE cid = '.$this->cid;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr['charname'] = $this->cleanOutStr($r->charname);
+					$retArr['chartype'] = $r->chartype;
+					$retArr['defaultlang'] = $this->cleanOutStr($r->defaultlang);
+					$retArr['difficultyrank'] = $r->difficultyrank;
+					$retArr['hid'] = $r->hid;
+					$retArr['units'] = $this->cleanOutStr($r->units);
+					$retArr['description'] = $this->cleanOutStr($r->description);
+					$retArr['notes'] = $this->cleanOutStr($r->notes);
+					$retArr['helpurl'] = $r->helpurl;
+					$retArr['enteredby'] = $r->enteredby;
+					$retArr['sortsequence'] = $r->sortsequence;
+				}
+				$rs->free();
 			}
-			$rs->free();
 		}
 		return $retArr;
 	}
 
 	public function createCharacter($pArr,$un){
-		$statusStr = '';
-		$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby) '.
+		$statusStr = 'SUCCESS: character added to database';
+		$dRank = $this->cleanInStr($pArr['difficultyrank']);
+		if(!$dRank) $dRank = 1;
+		$hid = $this->cleanInStr($pArr['hid']);
+		if(!$hid) $hid = 'NULL';
+		$sql = 'INSERT INTO kmcharacters(charname,chartype,difficultyrank,hid,enteredby,sortsequence) '.
 			'VALUES("'.$this->cleanInStr($pArr['charname']).'","'.$this->cleanInStr($pArr['chartype']).'",'.
-			$this->cleanInStr($pArr['difficultyrank']).','.$this->cleanInStr($pArr['hid']).','.
-			'"'.$un.'") ';
+			$dRank.','.$hid.',"'.$un.'",'.(is_numeric($pArr['sortsequence'])?$pArr['sortsequence']:1000).') ';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			$this->cid = $this->conn->insert_id;
@@ -85,14 +97,14 @@ class IdentCharAdmin{
 		}
 		else{
 			trigger_error('Creation of new character failed; '.$this->conn->error);
-			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>';
+			$statusStr = 'ERROR: Creation of new character failed: '.$this->conn->error.'<br/>SQL: '.$sql;
 		}
 		return $statusStr;
 	}
-	
+
 	public function editCharacter($pArr){
 		$statusStr = '';
-		$targetArr = array('charname','chartype','units','difficultyrank','hid','description','notes','helpurl');
+		$targetArr = array('charname','chartype','units','difficultyrank','hid','description','notes','helpurl','sortsequence');
 		$sql = '';
 		foreach($pArr as $k => $v){
 			if(in_array($k,$targetArr)){
@@ -112,16 +124,40 @@ class IdentCharAdmin{
 	
 	public function deleteChar(){
 		$status = 0;
-		$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$this->cid.')';
-		if($this->conn->query($sql)){
-			$status = 1;
+
+		//Delete character taxa links
+		$sql = 'DELETE FROM kmchartaxalink WHERE (cid = '.$this->cid.')';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$status = 'ERROR deleting character taxa links: '.$this->conn->error.', '.$sql;
 		}
+
+		//Delete character dependance links
+		$sql = 'DELETE FROM kmchardependance WHERE (cid = '.$this->cid.') OR (ciddependance = '.$this->cid.')';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$status = 'ERROR deleting character dependance links: '.$this->conn->error.', '.$sql;
+		}
+
+		//Delete language links
+		$sql = 'DELETE FROM kmcharacterlang WHERE (cid = '.$this->cid.')';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$status = 'ERROR deleting character languages: '.$this->conn->error.', '.$sql;
+		}
+
+		//Delete characters
+		$sql = 'DELETE FROM kmcharacters WHERE (cid = '.$this->cid.')';
+		if(!$this->conn->query($sql)){
+			$status = 'ERROR deleting descriptions linked to character: '.$this->conn->error.', '.$sql;
+		}
+
 		return $status;
 	}
-	
+
 	public function getCharStateArr(){
 		$retArr = array();
-		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, language, sortsequence, enteredby '.
+		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, sortsequence, enteredby '.
 			'FROM kmcs '.
 			'WHERE cid = '.$this->cid.' '.
 			'ORDER BY sortsequence';
@@ -132,7 +168,6 @@ class IdentCharAdmin{
 				$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
 				$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
 				$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
-				$retArr[$r->cs]['language'] = $this->cleanOutStr($r->language);
 				$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
 				$retArr[$r->cs]['enteredby'] = $r->enteredby;
 			}
@@ -145,7 +180,7 @@ class IdentCharAdmin{
 		
 	}
 
-	public function createCharState($csName,$un){
+	public function createCharState($csName,$illUrl,$desc,$n,$sort,$un){
 		$csValue = 1;
 		if($this->cid){
 			//Get highest character set ID value (CS) and increase by 1
@@ -159,8 +194,16 @@ class IdentCharAdmin{
 				$rs->free();
 			}
 			//Load new character set
-			$sql = 'INSERT INTO kmcs(cid,cs,charstatename,implicit,enteredby) '.
-				'VALUES('.$this->cid.',"'.$csValue.'","'.$this->cleanInStr($csName).'",1,"'.$un.'") ';
+			$illustrationUrl = $this->cleanInStr($illUrl);
+			$description = $this->cleanInStr($desc);
+			$notes = $this->cleanInStr($n);
+			$sortSequence = $this->cleanInStr($sort);
+			$sql = 'INSERT INTO kmcs(cid,cs,charstatename,implicit,illustrationurl,description,notes,sortsequence,enteredby) '.
+				'VALUES('.$this->cid.',"'.$csValue.'","'.$this->cleanInStr($csName).'",1,'.
+				($illustrationUrl?'"'.$illustrationUrl.'"':'NULL').','.
+				($description?'"'.$description.'"':'NULL').','.
+				($notes?'"'.$notes.'"':'NULL').','.
+				($sortSequence?$sortSequence:100).',"'.$un.'") ';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
 				trigger_error('ERROR: Creation of new character failed: '.$this->conn->error);
@@ -192,10 +235,42 @@ class IdentCharAdmin{
 	}
 	
 	public function deleteCharState($cs){
-		$status = 0;
-		$sql = 'DELETE FROM kmcs WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
-		if($this->conn->query($sql)){
-			$status = 1;
+		$status = '';
+		if(is_numeric($cs)){
+			//Delete images links
+			$sql = 'DELETE FROM kmcsimages WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR deleting character state images: '.$this->conn->error.', '.$sql;
+			}
+	
+			//Delete language links
+			$sql = 'DELETE FROM kmcslang WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR deleting character state languages: '.$this->conn->error.', '.$sql;
+			}
+	
+			//Delete character dependance links
+			$sql = 'DELETE FROM kmchardependance WHERE (ciddependance = '.$this->cid.') AND (csdependance = '.$cs.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR deleting character dependance linked to character state: '.$this->conn->error.', '.$sql;
+			}
+	
+			//Delete description links
+			$sql = 'DELETE FROM kmdescr WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR deleting descriptions linked to character state: '.$this->conn->error.', '.$sql;
+			}
+	
+			//Delete character states
+			$sql = 'DELETE FROM kmcs WHERE (cid = '.$this->cid.') AND (cs = '.$cs.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$status = 'ERROR deleting character state: '.$this->conn->error.', '.$sql;
+			}
 		}
 		return $status;
 	}
@@ -234,7 +309,7 @@ class IdentCharAdmin{
 	}
 	
 	public function deleteTaxonRelevance($tid){
-		$statusStr = '';
+		$statusStr = 'SUCCESS: taxon linkage removed';
 		if($this->cid && is_numeric($tid)){
 			$sql = 'DELETE FROM kmchartaxalink '.
 				'WHERE cid = '.$this->cid.' AND tid = '.$tid;
@@ -248,15 +323,19 @@ class IdentCharAdmin{
 	}
 
 	//Get and set functions 
-	public function getHeadingArr(){
+	public function getHeadingArr($hid=0){
 		$retArr = array();
-		$sql = 'SELECT hid, headingname '. 
-			'FROM kmcharheading '.
-			'WHERE language = "English" '.
-			'ORDER BY hid';
+		if(!$this->langId) $this->setLangId();
+		$sqlWhere = '';
+		if($hid) $sqlWhere .= 'AND (h.hid = '.$hid.') ';
+		if($this->langId) $sqlWhere = 'AND (langid = '.$this->langId.') ';
+		$sql = 'SELECT hid, headingname '.
+			'FROM kmcharheading h ';
+		if($sqlWhere) $sql .= ' WHERE '.substr($sqlWhere,3);
+		$sql .= 'ORDER BY sortsequence,headingname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[$r->hid] = $this->cleanOutStr($r->headingname);
+			$retArr[$r->hid]['name'] = $this->cleanOutStr($r->headingname);
 		}
 		$rs->free();
 		return $retArr;
@@ -286,6 +365,29 @@ class IdentCharAdmin{
 	
 	public function setLanguage($l){
 		$this->lang = $l;
+	}
+
+	public function setLangId($lang=''){
+		if(!$lang){
+			if($GLOBALS['defaultLang']){
+				$lang = $GLOBALS['defaultLang'];
+			}
+			else{
+				$lang = 'English';
+			}
+		}
+		if(is_numeric($lang)){
+			$this->langId = $lang;
+		}
+		else{
+			$sql = 'SELECT langid FROM adminlanguages '.
+				'WHERE langname = "'.$lang.'" OR iso639_1 = "'.$lang.'" OR iso639_2 = "'.$lang.'" ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$this->langId = $r->langid;
+			}
+			$rs->free;
+		}
 	}
 
 	//General functions

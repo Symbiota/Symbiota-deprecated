@@ -2,16 +2,16 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/IdentCharAdmin.php');
 
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/headingadmin.php?'.$_SERVER['QUERY_STRING']);
+
+$action = array_key_exists('action',$_GET)?$_GET['action']:'';
+$hid = array_key_exists('hid',$_REQUEST)?$_REQUEST['hid']:0;
+$lang = array_key_exists('lang',$_REQUEST)?$_REQUEST['lang']:'';
 
 $charManager = new IdentCharAdmin();
 
-$charArr = $charManager->getCharacterArr();
 $headingArr = array();
-if(isset($charArr['head'])){
-	$headingArr = $charArr['head'];
-	unset($charArr['head']);
-}
+if(!$hid) $headingArr = $charManager->getHeadingList();
 
 $isEditor = false;
 if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
