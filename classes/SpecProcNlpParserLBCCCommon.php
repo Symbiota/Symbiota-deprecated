@@ -17,7 +17,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function parse($rawStr) {
 		$handler;
 		$url = $this->url;
-		$pos = stripos($url, "/bryophytes/");
 		if(stripos($url, "/bryophytes/") !== FALSE) $handler = new SpecProcNlpParserLBCCBryophyte();
 		else if(stripos($url, "/lichens/") !== FALSE) $handler = new SpecProcNlpParserLBCCLichen();
 		else return array();
