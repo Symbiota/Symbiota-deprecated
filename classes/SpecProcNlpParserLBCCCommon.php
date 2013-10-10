@@ -1358,7 +1358,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return null;
 	}
 
-	private function terminateField($f, $regExp) {
+	protected function terminateField($f, $regExp) {
 		if(preg_match($regExp, $f, $ms)) {
 			$temp = str_replace
 			(
