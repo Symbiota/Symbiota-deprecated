@@ -4,12 +4,12 @@ include_once($serverRoot.'/classes/IdentCharAdmin.php');
 
 if(!$symbUid) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php');
 
-$keyManager = new IdentCharAdmin();
-//$keyManager->setCollId($collId);
-
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
+
+$keyManager = new IdentCharAdmin();
+//$keyManager->setCollId($collId);
 
 $keyManager->setCid($cid);
 
@@ -23,7 +23,7 @@ if($formSubmit){
 		$statusStr = $keyManager->editCharacter($_POST);
 	}
 	elseif($formSubmit == 'Add State'){
-		$keyManager->createCharState($_POST['charstatename'],$paramsArr['un']);
+		$keyManager->createCharState($_POST['charstatename'],$_POST['illustrationurl'],$_POST['description'],$_POST['notes'],$_POST['sortsequence'],$paramsArr['un']);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Save State'){
@@ -89,6 +89,10 @@ if(!$cid) header('Location: index.php');
 				alert("Character type must not be null");
 				return false;
 			} 
+			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
+				alert("Sort Sequence can only be a numeric value");
+				return false;
+			} 
 			return true;
 		}
 
@@ -97,11 +101,15 @@ if(!$cid) header('Location: index.php');
 				alert("Character state must not be null");
 				return false;
 			} 
+			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
+				alert("Sort sequence can only be a numeric value");
+				return false;
+			} 
 			return true;
 		}
 		
 		function validateStateEditForm(f){
-			if(!isNumeric(f.sortsequence.value)){
+			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
 				alert("Sort Sequence field must be numeric");
 				return false;
 			}
@@ -109,15 +117,78 @@ if(!$cid) header('Location: index.php');
 		}
 
 		function validateTaxonAddForm(f){
-			if(f.tid.value){
+			if(f.tid.value == ''){
 				alert("Please select a taxonomic name!");
 				return false;
 			}
-			if(f.relation.value){
-				alert("Please select a toxonomic relevance!");
-				return false;
-			}
 			return true;
+		}
+
+		function verifyCharStateDeletion(f){
+			var cid = f.cid.value;
+			var cs = f.cs.value;
+
+			//Restriction when images are linked
+			document.getElementById("delvercsimgspan-"+cs).style.display = "block";
+			verifyCharStateImages(cid,cs);
+
+			//Restriction when language definitions are linked
+			document.getElementById("delvercslangspan-"+cs).style.display = "block";
+			verifyCharStateLang(cid,cs);
+
+			//Restriction when descriptions are linked
+			document.getElementById("delverdescrspan-"+cs).style.display = "block";
+			verifyDescr(cid,cs);
+
+			f.formsubmit.disabled = false;
+		}
+
+		function verifyCharStateImages(cid,cs){
+			$.ajax({
+				type: "POST",
+				url: 'rpc/getcharstateimgcnt.php',
+				data: { cidinput: cid, csinput: cs }
+			}).done(function( msg ) {
+				document.getElementById("delvercsimgspan-"+cs).style.display = "none";
+				if(msg > 0){
+					document.getElementById("delcsimgfaildiv-"+cs).style.display = "block";
+				}
+				else{
+					document.getElementById("delcsimgappdiv-"+cs).style.display = "block";
+				}
+			});
+		}
+
+		function verifyCharStateLang(cid,cs){
+			$.ajax({
+				type: "POST",
+				url: 'rpc/getcharstatelangcnt.php',
+				data: { cidinput: cid, csinput: cs }
+			}).done(function( msg ) {
+				document.getElementById("delvercslangspan-"+cs).style.display = "none";
+				if(msg > 0){
+					document.getElementById("delcslangfaildiv-"+cs).style.display = "block";
+				}
+				else{
+					document.getElementById("delcslangappdiv-"+cs).style.display = "block";
+				}
+			});
+		}
+
+		function verifyDescr(cid,cs){
+			$.ajax({
+				type: "POST",
+				url: 'rpc/getdescrcnt.php',
+				data: { cidinput: cid, csinput: cs }
+			}).done(function( msg ) {
+				document.getElementById("delverdescrspan-"+cs).style.display = "none";
+				if(msg > 0){
+					document.getElementById("deldescrfaildiv-"+cs).style.display = "block";
+				}
+				else{
+					document.getElementById("deldescrappdiv-"+cs).style.display = "block";
+				}
+			});
 		}
 	</script>
 </head>
@@ -163,7 +234,7 @@ if(!$cid) header('Location: index.php');
 			    <ul>
 					<li><a href="#chardetaildiv"><span>Details</span></a></li>
 					<li><a href="#charstatediv"><span>Character States</span></a></li>
-					<li><a href="#tlinkdiv"><span>Taxonomic Linkages</span></a></li>
+					<li><a href="taxonomylinkage.php?cid=<?php echo $cid; ?>"><span>Taxonomic Linkages</span></a></li>
 					<li><a href="#chardeldiv"><span>Admin</span></a></li>
 				</ul>
 				<div id="chardetaildiv">
@@ -216,17 +287,21 @@ if(!$cid) header('Location: index.php');
 							</div>
 							<div style="padding-top:8px;clear:both;">
 								<b>Help URL</b><br />
-								<input type="text" name="helpurl" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['helpurl']; ?>" onchange=" " />
+								<input type="text" name="helpurl" maxlength="500" style="width:500px;" value="<?php echo $charArr['helpurl']; ?>" />
 							</div>
-							<div style="padding-top:8px;clear:both;">
+							<div style="padding-top:8px;">
 								<b>Description</b><br />
-								<input type="text" name="description" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['description']; ?>" onchange=" " />
+								<input type="text" name="description" maxlength="255" style="width:500px;" value="<?php echo $charArr['description']; ?>" />
 							</div>
-							<div style="padding-top:8px;float:left;">
+							<div style="padding-top:8px;">
 								<b>Notes</b><br />
-								<input type="text" name="notes" tabindex="100" maxlength="32" style="width:500px;" value="<?php echo $charArr['notes']; ?>" onchange=" " />
+								<input type="text" name="notes" maxlength="255" style="width:500px;" value="<?php echo $charArr['notes']; ?>" />
 							</div>
-							<div style="width:100%;padding-top:6px;float:left;">
+							<div style="padding-top:8px;">
+								<b>Sort Sequence</b><br />
+								<input type="text" name="sortsequence" style="" value="<?php echo $charArr['sortsequence']; ?>" />
+							</div>
+							<div style="width:100%;padding-top:6px;">
 								<div style="float:left;">
 									<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
 									<button name="formsubmit" type="submit" value="Save Char">Save</button>
@@ -247,13 +322,29 @@ if(!$cid) header('Location: index.php');
 					</div>
 					<div id="newstatediv" style="display:<?php echo ($charStateArr?'none':'block');?>;">
 						<form name="stateaddform" action="chardetails.php" method="post" onsubmit="return validateStateAddForm(this)">
-							<fieldset style="margin:15px;padding:15px;">
+							<fieldset style="margin:15px;padding:20px;">
 								<legend><b>Add Character State</b></legend>
 								<div style="padding-top:4px;">
 									<b>Character State Name</b><br />
-									<input type="text" name="charstatename" maxlength="255" style="width:400px;" value="" />
+									<input type="text" name="charstatename" maxlength="255" style="width:400px;" />
 								</div>
-								<div style="width:100%;padding-top:6px;float:left;">
+								<div style="padding-top:4px;">
+									<b>Illustration URL</b><br />
+									<input type="text" name="illustrationurl" maxlength="250" style="width:500px;" />
+								</div>
+								<div style="padding-top:4px;">
+									<b>Description</b><br />
+									<input type="text" name="description" maxlength="255" style="width:500px;" />
+								</div>
+								<div style="padding-top:4px;">
+									<b>Notes</b><br />
+									<input type="text" name="notes" style="width:500px;" />
+								</div>
+								<div style="padding-top:4px;">
+									<b>Sort Sequence</b><br />
+									<input type="text" name="sortsequence" />
+								</div>
+								<div style="width:100%;padding-top:6px;">
 									<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
 									<button name="formsubmit" type="submit" value="Add State">Add Character State</button>
 								</div>
@@ -270,7 +361,7 @@ if(!$cid) header('Location: index.php');
 							?>
 							<div id="<?php echo 'cs-'.$cs.'Div'; ?>" style="display:none;">
 								<form name="stateeditform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return validateStateEditForm(this)">
-									<fieldset  style="margin:15px;padding:15px;">
+									<fieldset style="margin:15px;padding:15px;">
 										<legend><b>Character State Details</b></legend>
 										<div>
 											<b>Character State Name</b><br />
@@ -280,31 +371,83 @@ if(!$cid) header('Location: index.php');
 											<b>Illustration URL</b><br />
 											<input type="text" name="illustrationurl" maxlength="250" style="width:500px;" value="<?php echo $stateArr['illustrationurl']; ?>" />
 										</div>
-										<div style="padding-top:2px;clear:both;">
+										<div style="padding-top:2px;">
 											<b>Description</b><br />
 											<input type="text" name="description" maxlength="255" style="width:500px;" value="<?php echo $stateArr['description']; ?>"/>
 										</div>
-										<div style="padding-top:2px;clear:both;">
+										<div style="padding-top:2px;">
 											<b>Notes</b><br />
-											<input type="text" name="notes" style="width:500px;" value="<?php echo $stateArr['notes']; ?>" onchange=" " />
+											<input type="text" name="notes" style="width:500px;" value="<?php echo $stateArr['notes']; ?>" />
 										</div>
-										<div style="padding-top:2px;clear:both;">
+										<div style="padding-top:2px;">
 											<b>Sort Sequence</b><br />
 											<input type="text" name="sortsequence" value="<?php echo $stateArr['sortsequence']; ?>" />
 										</div>
-										<div style="width:100%;padding-top:4px;float:left;">
+										<div style="width:100%;padding-top:4px;">
 											<div style="float:left;">
 												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
 												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
 												<button name="formsubmit" type="submit" value="Save State">Save</button>
 											</div>
-											<div style="margin-left:5px;float:left;">
-												<button name="formsubmit" type="submit" value="Delete State">Delete</button>
-											</div>
 											<div style="float:right;">
 												Entered By:
-												<input type="text" name="enteredby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $stateArr['enteredby']; ?>" onchange=" " disabled />
+												<input type="text" name="enteredby" value="<?php echo $stateArr['enteredby']; ?>" disabled />
 											</div>
+										</div>
+									</fieldset>
+								</form>
+								<form name="statedelform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character state?')">
+									<fieldset style="margin:15px;padding:15px;">
+										<legend><b>Delete Character State</b></legend>
+										Record first needs to be evaluated before it can be deleted from the system. 
+										The evaluation ensures that the deletion will not interfer with 
+										the integrity of linked data.      
+										<div style="margin:15px;">
+											<input name="verifycsdelete" type="button" value="Evaluate record for deletion" onclick="verifyCharStateDeletion(this.form);return false;" />
+										</div>
+										<div id="delverimgdiv" style="margin:15px;">
+											<b>Image Links: </b>
+											<span id="delvercsimgspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking image links...</span>
+											<div id="delcsimgfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+												<span style="color:red;">Warning:</span> 
+												One or more images are linked to this charcter state. 
+												Deleting this character state will also permanently remove these images.  
+											</div>
+											<div id="delcsimgappdiv-<?php echo $cs; ?>" style="display:none;">
+												<span style="color:green;">Approved for deletion.</span>
+												No images are directly associated with this character state.  
+											</div>
+										</div>
+										<div id="delverlangdiv" style="margin:15px;">
+											<b>Language Links: </b>
+											<span id="delvercslangspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking language links...</span>
+											<div id="delcslangfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+												<span style="color:red;">Warning:</span> 
+												Charcter state has links to langauge records. 
+												Deleting this character state will also permanently remove this data.  
+											</div>
+											<div id="delcslangappdiv-<?php echo $cs; ?>" style="display:none;">
+												<span style="color:green;">Approved for deletion.</span>
+												No langage mappings are directly associated with this character state.  
+											</div>
+										</div>
+										<div id="delverdescrdiv" style="margin:15px;">
+											<b>Description Links: </b>
+											<span id="delverdescrspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking description links...</span>
+											<div id="deldescrfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+												<span style="color:red;">Warning:</span> 
+												One or more descriptions are linked to this charcter state. 
+												Delete this character state will also permanently remove these descriptions.  
+											</div>
+											<div id="deldescrappdiv-<?php echo $cs; ?>" style="display:none;">
+												<span style="color:green;">Approved for deletion.</span>
+												No descriptions are directly associated with this character state.  
+											</div>
+										</div>
+										<div style="margin:15px;">
+											<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+											<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+											<input name="formsubmit" type="submit" value="Delete State" disabled />
 										</div>
 									</fieldset>
 								</form>
@@ -315,111 +458,6 @@ if(!$cid) header('Location: index.php');
 						echo '</ul>';
 					}
 					?>
-				</div>
-				<div id="tlinkdiv">
-					<div style="margin:15px;">
-						<div style="float:right;margin:10px;">
-							<a href="#" onclick="toggle('taxonAddDiv');">
-								<img src="../../images/add.png" alt="Create New Character State" />
-							</a>
-						</div>
-						<div style="margin:10px;">
-							<b>Taxonomic relevance of character</b> - 
-							Tag taxonomic nodes where character is most relevant. 
-							Taxonomic branches can also be excluded. 
-							For example, left type is typically relevant to most flowering plants, though typically not used to identify Cactaceae.   
-						</div>
-						<?php 
-						$tLinks = $keyManager->getTaxonRelevance();
-						?>
-						<div id="taxonAddDiv" style="display:<?php echo ($tLinks?'none':'block'); ?>;margin:15px;">
-							<form name="taxonAddForm" action="chardetails.php" method="post" onsubmit="return validateTaxonAddForm(this)">
-								<fieldset style="padding:20px;">
-									<legend><b>Add Taxonomic Relevance Definition</b></legend>
-									<div style="height:15px;">
-										<div style="float:left;margin:3px;">
-											<select name="tid">
-												<option value="0">Select Taxon</option>
-												<option value="0">--------------------</option>
-												<?php 
-												$taxonArr = $keyManager->getTaxonArr();
-												foreach($taxonArr as $tid => $sciname){
-													echo '<option value="'.$tid.'">'.$sciname.'</option>';
-												}
-												?>
-											</select>
-										</div>
-										<div style="float:left;margin:3px;">
-											<select name="relation">
-												<option value="include">Relevant</option>
-												<option value="exclude">Exclude</option>
-											</select>
-										</div>
-									</div>
-									<div style="margin:3px;clear:both;">
-										<b>Notes</b><br/> 
-										<input name="notes" type="text" value="" style="width:90%" />
-									</div>
-									<div style="margin:15px;">
-										<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-										<button name="formsubmit" type="submit" value="Save Taxonomic Relevance">Save Taxonomic Relevance</button>
-									</div>
-								</fieldset>
-							</form>
-						</div>
-						<?php 
-						if($tLinks){
-							if(isset($tLinks['include'])){
-								?>
-								<fieldset style="padding:20px;">
-									<legend><b>Relevant Taxa</b></legend>
-									<?php 
-									foreach($tLinks['include'] as $tid => $tArr){
-										?>
-										<div style="margin:3px;clear:both;">
-											<?php 
-											echo '<div style="float:left;"><b>'.$tArr['sciname'].'</b>'.($tArr['notes']?' - '.$tArr['notes']:'').'</div> ';
-											?>
-											<form name="delTaxonForm" action="chardetails.php" method="post" style="float:left;margin-left:5px;" onsubmit="return comfirm('Are you sure you want to delete this relationship?')">
-												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-												<input name="tid" type="hidden" value="<?php echo $tid; ?>" />
-												<input name="formsubmit" type="hidden" value="deltaxon" />
-												<input type="image" src="../../images/del.gif" style="width:15px;" />
-											</form>
-										</div>
-										<?php 
-									}
-									?>
-								</fieldset>
-								<?php 
-							}
-							if(isset($tLinks['exclude'])){
-								?>
-								<fieldset style="padding:20px;">
-									<legend><b>Exclude Taxa</b></legend>
-									<?php 
-									foreach($tLinks['exclude'] as $tid => $tArr){
-										?>
-										<div style="margin:3px;">
-											<?php 
-											echo '<div style="float:left;"><b>'.$tArr['sciname'].'</b>'.($tArr['notes']?' - '.$tArr['notes']:'').'</div> ';
-											?>
-											<form name="delTaxonForm" action="chardetails.php" method="post" style="float:left;margin-left:5px;" onsubmit="return comfirm('Are you sure you want to delete this relationship?')">
-												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-												<input name="tid" type="hidden" value="<?php echo $tid; ?>" />
-												<input name="formsubmit" type="hidden" value="deltaxon" />
-												<input type="image" src="../../images/del.gif" style="width:15px;" />
-											</form>
-										</div>
-										<?php 
-									}
-									?>
-								</fieldset>
-								<?php 
-							}
-						}
-						?>
-					</div>
 				</div>
 				<div id="chardeldiv">
 					<form name="delcharform" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character?')">
