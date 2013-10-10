@@ -1001,7 +1001,7 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 		}
 	}
 
-	private function getCountyMatches($c, $state_province="") {//echo "\nLine 1149, Input to getCountyMatches: ".$c."\n";
+	private function getCountyMatches($c, $state_province="") {//echo "\nLine 1183, Input to getCountyMatches: ".$c."\n";
 	//this function has the side-effect of removing double quotes
 		$countyPatStr = "/(?:(?(?=(?:.*+)(?:(?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
 			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\b(?:C[o0q]un[tf]y|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b[,:]?(?:.*)))".
@@ -1021,13 +1021,13 @@ class SpecProcNlpParserLBCC extends SpecProcNlp{
 			"(.*+)((?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
 			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\bCo,(.*)|".
 
-			"(?:(?(?=(?:.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b[,:]?+(?:.*)))".
+			"(?:(?(?=(?:.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?[,:]?+(?:.*)))".
 
-			"(.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b[,:]?+(.*)|".
+			"(.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?[,:]?+(.*)|".
 
-			"(?:(?(?=(?:.*)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b:?+(?:.*)))".
+			"(?:(?(?=(?:.*)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?:?+(?:.*)))".
 
-			"(.*?)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))[,:]?\\b:?+(.*)|".
+			"(.*?)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))[,:]?\\s?:?+(.*)|".
 
 			"(.*?)(?:\\n\\r|\\r\\n|\\n|\\r|\\s)(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))[,:]?+(.*))))))/is";
 
