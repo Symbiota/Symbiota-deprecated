@@ -207,7 +207,12 @@ class SpecUploadDwca extends SpecUploadBase{
 
 			if($this->readMetaFile() && isset($this->metaArr['occur']['fields'])){
 				if(isset($this->metaArr['occur']['fieldsTerminatedBy']) && $this->metaArr['occur']['fieldsTerminatedBy']){
-					$this->delimiter = $this->metaArr['occur']['fieldsTerminatedBy'];
+					if($this->metaArr['occur']['fieldsTerminatedBy'] == '\t'){
+						$this->delimiter = "\t";
+					}
+					else{
+						$this->delimiter = $this->metaArr['occur']['fieldsTerminatedBy'];
+					}
 				}
 				else{
 					$this->delimiter = '';
@@ -262,7 +267,12 @@ class SpecUploadDwca extends SpecUploadBase{
 					if(isset($this->metaArr['ident']['fields'])){
 						$this->outputMsg('<li style="font-weight:bold;">Starting to upload identification history records</li>');
 						if(isset($this->metaArr['ident']['fieldsTerminatedBy']) && $this->metaArr['ident']['fieldsTerminatedBy']){
-							$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
+							if($this->metaArr['ident']['fieldsTerminatedBy'] == '\t'){
+								$this->delimiter = "\t";
+							}
+							else{
+								$this->delimiter = $this->metaArr['ident']['fieldsTerminatedBy'];
+							}
 						}
 						else{
 							$this->delimiter = '';
@@ -366,6 +376,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				}
 			}
 		}
+		
 		return $recordArr;
 	}
 	
