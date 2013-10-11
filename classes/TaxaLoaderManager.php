@@ -653,14 +653,16 @@ class TaxaLoaderManager{
 			'ut.UnitName3, ut.Author, ut.Source, ut.Notes '.
 			'FROM uploadtaxa AS ut '.
 			'WHERE (ut.TID Is Null AND rankid = 10)';
-		if(!$this->conn->query($sql)){
-			echo 'ERROR: '.$this->conn->error.'... ';
+		if($this->conn->query($sql)){
+			$sql = 'INSERT IGNORE INTO taxstatus (tid, tidaccepted, taxauthid, parenttid) '.
+				'SELECT DISTINCT t.tid, t.tid, '.$this->taxAuthId.' AS taxauthid, t.tid '.
+				'FROM uploadtaxa AS ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
+				'WHERE (ut.TID Is Null AND ut.rankid = 10)';
+			if(!$this->conn->query($sql)){
+				echo 'ERROR: '.$this->conn->error.'... ';
+			}
 		}
-		$sql = 'INSERT IGNORE INTO taxstatus (tid, tidaccepted, taxauthid, parenttid) '.
-			'SELECT DISTINCT t.tid, t.tid, '.$this->taxAuthId.' AS taxauthid, t.tid '.
-			'FROM uploadtaxa AS ut INNER JOIN taxa t ON ut.sciname = t.sciname '.
-			'WHERE (ut.TID Is Null AND ut.rankid = 10)';
-		if(!$this->conn->query($sql)){
+		else{
 			echo 'ERROR: '.$this->conn->error.'... ';
 		}
 		
@@ -715,7 +717,7 @@ class TaxaLoaderManager{
 			echo '<li>Creating taxonomic hierarchy... ';
 			ob_flush();
 			flush();
-			$sql = 'INSERT INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
+			$sql = 'INSERT IGNORE INTO taxstatus ( TID, TidAccepted, taxauthid, ParentTid, Family, UpperTaxonomy, UnacceptabilityReason ) '.
 				'SELECT DISTINCT ut.TID, ut.TidAccepted, '.$this->taxAuthId.' AS taxauthid, ut.ParentTid, ut.Family, ut.UpperTaxonomy, ut.UnacceptabilityReason '.
 				'FROM uploadtaxa AS ut '.
 				'WHERE (ut.TID IS NOT NULL AND ut.TidAccepted IS NOT NULL AND ut.parenttid IS NOT NULL)';
