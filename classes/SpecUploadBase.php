@@ -103,15 +103,21 @@ class SpecUploadBase extends SpecUpload{
 				$type = $row->Type;
 				$this->symbFields[] = $field;
 				if(array_key_exists($field,$this->fieldMap)){
-					if(strpos($type,"double") !== false || strpos($type,"int") !== false || strpos($type,"decimal") !== false){
+					if(strpos($type,"double") !== false || strpos($type,"int") !== false){
 						$this->fieldMap[$field]["type"] = "numeric";
+					}
+					elseif(strpos($type,"decimal") !== false){
+						$this->fieldMap[$field]["type"] = "decimal";
+						if(preg_match('/\((.*)\)$/', $type, $matches)){
+							$this->fieldMap[$field]["size"] = $matches[1];
+						}
 					}
 					elseif(strpos($type,"date") !== false){
 						$this->fieldMap[$field]["type"] = "date";
 					}
 					else{
 						$this->fieldMap[$field]["type"] = "string";
-						if(preg_match('/\(\d+\)$/', $type, $matches)){
+						if(preg_match('/\((\d+)\)$/', $type, $matches)){
 							$this->fieldMap[$field]["size"] = substr($matches[0],1,strlen($matches[0])-2);
 						}
 					}
@@ -1431,6 +1437,25 @@ class SpecUploadBase extends SpecUpload{
 						}
 						elseif(is_numeric(str_replace(',',"",$valueStr))){
 							$sqlValues .= ",".str_replace(',',"",$valueStr);
+						}
+						else{
+							$sqlValues .= ",NULL";
+						}
+						break;
+					case "decimal":
+						if(strpos($valueStr,',')){
+							$sqlValues = str_replace(',','',$valueStr);
+						}
+						if($valueStr && $size && strpos($size,',') !== false){
+							$tok = explode(',',$size);
+							$m = $tok[0];
+							$d = $tok[1];
+							$vTok = explode('.',$valueStr);
+							if(isset($vTok[0]) && strlen($vTok[0]) > ($m-$d)) $valueStr = '';
+							if(isset($vTok[1]) && strlen($vTok[1]) > $d) $valueStr = '';
+						}
+						if(is_numeric($valueStr)){
+							$sqlValues .= ",".$valueStr;
 						}
 						else{
 							$sqlValues .= ",NULL";
