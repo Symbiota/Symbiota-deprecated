@@ -119,7 +119,7 @@
 										?>
 									</div>
 									<div style="clear:both;">
-										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php" style="margin-left:10px;position:relative;top:-30px;width:100px;" >
+										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php" style="margin-left:10px;width:100px;" >
 											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />

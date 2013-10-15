@@ -279,7 +279,7 @@ if(!$cid) header('Location: index.php');
 										<?php 
 										$headingArr = $keyManager->getHeadingArr();
 										foreach($headingArr as $k => $v){
-											echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v.'</option>';
+											echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v['name'].'</option>';
 										}
 										?>
 									</select>
