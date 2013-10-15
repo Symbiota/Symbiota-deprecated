@@ -182,6 +182,7 @@ function parseVerbatimElevation(f){
 		var ftMin = "";
 		var ftMax = "";
 		var verbElevStr = f.verbatimelevation.value;
+		verbElevStr = verbElevStr.replace(/,/g ,"");
 		
 		var regEx1 = /(\d+)\s*-\s*(\d+)\s*[ft|feet|']/i; 
 		var regEx2 = /(\d+)\s*[ft|feet|']/i; 
