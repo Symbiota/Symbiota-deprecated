@@ -124,7 +124,7 @@ class OccurrenceManager{
 						$dbStr = "(o.collid IN(".trim($dbArr[0]).")) ";
 					}
 					if(isset($dbArr[1]) && $dbArr[1]){
-						$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk = '.$dbArr[1].'))) ';
+						$dbStr .= ($dbStr?'OR ':'').'(o.CollID IN(SELECT collid FROM omcollcatlink WHERE (ccpk IN('.$dbArr[1].')))) ';
 					}
 					$sqlWhere .= 'AND ('.$dbStr.') ';
 				}
@@ -898,7 +898,7 @@ class OccurrenceManager{
 					$dbStr = $dbs.';';
 				}
 				else{
-					$dbStr = $this->conn->real_escape_string(implode(',',$dbs)).';';
+					$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
 				}
 				if(strpos($dbStr,'allspec') !== false){
 					$dbStr = 'allspec';

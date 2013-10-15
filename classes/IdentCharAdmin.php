@@ -6,7 +6,7 @@ class IdentCharAdmin{
 	private $conn;
 	private $cid = 0;
 	private $lang = 'english';
-	private $landId;
+	private $langId;
 	//private $langId;
 
 	function __construct() {
@@ -322,25 +322,62 @@ class IdentCharAdmin{
 		return $statusStr;
 	}
 
-	//Get and set functions 
 	public function getHeadingArr($hid=0){
 		$retArr = array();
 		if(!$this->langId) $this->setLangId();
 		$sqlWhere = '';
 		if($hid) $sqlWhere .= 'AND (h.hid = '.$hid.') ';
 		if($this->langId) $sqlWhere = 'AND (langid = '.$this->langId.') ';
-		$sql = 'SELECT hid, headingname '.
-			'FROM kmcharheading h ';
+		$sql = 'SELECT hid, headingname, notes, sortsequence '.
+			'FROM kmcharheading ';
 		if($sqlWhere) $sql .= ' WHERE '.substr($sqlWhere,3);
 		$sql .= 'ORDER BY sortsequence,headingname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->hid]['name'] = $this->cleanOutStr($r->headingname);
+			$retArr[$r->hid]['notes'] = $this->cleanOutStr($r->notes);
+			$retArr[$r->hid]['sortsequence'] = $r->sortsequence;
 		}
 		$rs->free();
 		return $retArr;
 	}
-	
+
+	public function addHeading($name,$langId,$notes,$sortSeq){
+		$statusStr = true;
+		$sql = 'INSERT INTO kmcharheading(headingname,notes,langid,sortsequence) '.
+			'VALUES ("'.$name.'",'.($notes?'"'.$notes.'"':'NULL').','.
+			(is_numeric($langId)?$langId:'NULL').','.
+			(is_numeric($sortSeq)?$sortSeq:'NULL').')';
+		if(!$this->conn->query($sql)){
+			$statusStr = 'Error adding heading: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+
+	public function editHeading($hid,$name,$langId,$notes,$sortSeq){
+		$statusStr = true;
+		$sql = 'UPDATE kmcharheading '.
+			'SET headingname = "'.$name.'", '.
+			'notes = '.($notes?'"'.$notes.'"':'NULL').', '.
+			'langid = '.(is_numeric($langId)?$langId:'NULL').', '.
+			'sortsequence = '.(is_numeric($sortSeq)?$sortSeq:'NULL').
+			' WHERE hid = '.$hid;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'Error editing heading: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+
+	public function deleteHeading($hid){
+		$statusStr = true;
+		$sql = 'DELETE FROM kmcharheading WHERE hid = '.$hid;
+		if(!$this->conn->query($sql)){ 
+			$statusStr = 'Error deleting heading: '.$this->conn->error;
+		}
+		return $statusStr;
+	}
+
+	//Get and set functions 
 	public function getTaxonArr(){
 		$retArr = array();
 		$sql = 'SELECT tid, sciname '. 
@@ -386,7 +423,7 @@ class IdentCharAdmin{
 			if($r = $rs->fetch_object()){
 				$this->langId = $r->langid;
 			}
-			$rs->free;
+			$rs->free();
 		}
 	}
 
