@@ -344,7 +344,7 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=130926"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=131014"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130926"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130926"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130926"></script>

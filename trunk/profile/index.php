@@ -41,7 +41,7 @@ if($submit == "logout"){
 	header("Location: ../index.php");
 }
 elseif($action == "Login"){
-	$password = trim($_POST["password"]);
+	$password = trim($_REQUEST["password"]);
 	if(!$password) $password = "emptypwd"; 
 	$statusStr = $pHandler->authenticate($login, $password);
     if($statusStr == "success"){
