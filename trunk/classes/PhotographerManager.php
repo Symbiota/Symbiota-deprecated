@@ -108,7 +108,7 @@ class PhotographerManager{
 			$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, o.sciname, o.tidinterpreted AS tid '. 
 				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 				'WHERE o.collid = '.$collId.' '.
-				'ORDER BY o.sciname '.
+				'ORDER BY o.sciname,o.occid '.
 				'LIMIT '.$limitStart.', '.$lNum;
 		}
 		//echo "<div>".$sql."</div>";

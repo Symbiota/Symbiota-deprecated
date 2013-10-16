@@ -94,7 +94,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css"/>
+	<link rel="stylesheet" href="../css/main.css?ver=131016" type="text/css"/>
 	<?php
 		$keywordStr = "virtual flora,species list,".$clManager->getClName();
 		if(array_key_exists("authors",$clArray) && $clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
@@ -485,7 +485,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 							$u = (array_key_exists('url',$sppArr)?$sppArr['url']:'');
 							$imgSrc = ($tu?$tu:$u);
 							?>
-							<div style="float:left;text-align:center;width:210px;height:<?php echo 240+($showCommon?20:0);?>px;">
+							<div class="tndiv">
 								<div class="tnimg" style="<?php echo ($imgSrc?"":"border:1px solid black;"); ?>">
 									<?php 
 									$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
