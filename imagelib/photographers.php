@@ -13,22 +13,35 @@ $pManager = new PhotographerManager();
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Photographer List</title>
-	<link rel="stylesheet" href="../css/main.css" type="text/css" />
+	<title><?php echo $defaultTitle; ?> Photographer List</title>
+	<link rel="stylesheet" href="../css/main.css?ver=131016" type="text/css" />
 	<meta name='keywords' content='' />
 </head>
 
 <body>
 
 	<?php
-	$displayLeftMenu = (isset($imagelib_photographersMenu)?$imagelib_photographersMenu:"true");
+	$displayLeftMenu = (isset($imagelib_photographersMenu)?$imagelib_photographersMenu:false);
 	include($serverRoot.'/header.php');
+	echo '<div class="navpath">';
 	if(isset($imagelib_photographersCrumbs)){
-		echo "<div class='navpath'>";
-		echo $imagelib_photographersCrumbs;
-		echo " <b>Photographer List</b>"; 
-		echo "</div>";
+		if($imagelib_photographersCrumbs){
+			echo $imagelib_photographersCrumbs;
+			echo '<b>Photographer List</b>'; 
+		}
 	}
+	else{
+		echo '<a href="../index.php">Home</a> &gt;&gt; ';
+		echo '<a href="index.php">Image Library</a> &gt;&gt; ';
+		if($phUid){
+			echo '<a href="photographers.php">Photographer List</a> &gt;&gt; ';
+			echo '<b>Image Listing</b>'; 
+		}
+		else{
+			echo '<b>Photographer List</b>'; 
+		}
+	}
+	echo "</div>";
 	?> 
 	<!-- This is inner text! -->
 	<div id="innertext">
@@ -106,10 +119,12 @@ $pManager = new PhotographerManager();
 						$imgUrl = $imageDomain.$imgUrl;
 					}
 					?>
-					<div style="float:left;width:155px;height:165px;overflow:hidden;text-align:center;padding:3px;">
-						<a href="imgdetails.php?imgid=<?php echo $imgId; ?>">
-							<img src="<?php echo $imgUrl; ?>" style="height:130px;" />
-						</a>
+					<div class="tndiv">
+						<div class="tnimg">
+							<a href="imgdetails.php?imgid=<?php echo $imgId; ?>">
+								<img src="<?php echo $imgUrl; ?>" />
+							</a>
+						</div>
 						<div>
 							<a href="../taxa/index.php?taxon=<?php echo $imgArr['tid']; ?>"><i><?php echo $imgArr['sciname']; ?></i></a>
 						</div>
