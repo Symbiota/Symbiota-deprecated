@@ -160,78 +160,93 @@ $projArr = $csManager->getProjectDetails();
 				?>
 				<div>
 					<div style="float:left;"><b>Total Record Count:</b> <?php echo $totalCnt; ?></div>
-					<div style="float:left;margin-left:500px;"><?php echo $navStr; ?></div>
-					<div style="clear:both;">
-						<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
-							<table class="styledtable">
-								<tr>
-									<?php 
-									if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
-									?>
-									<th>Points</th>
-									<th>Comments</th>
-									<th>Record ID</th>
-									<?php 
-									$hArr = $recArr['header'];
-									unset($recArr['header']);
-									foreach($hArr as $f => $v){
-										echo '<th>'.$f.'</th>';
-									}
-									?>
-								</tr>
-								<?php 
-								$cnt = 0;
-								foreach($recArr as $occid => $rArr){
-								?>
-									<tr class="alt">
+					<?php
+					if($totalCnt > 0){
+					?>
+						<div style="float:left;margin-left:500px;"><?php echo $navStr; ?></div>
+						<div style="clear:both;">
+							<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
+								<table class="styledtable">
+									<tr>
 										<?php 
-										$notes = '';
-										if(isset($rArr['notes'])) $notes = $rArr['notes'];
-										$points = 2;
-										if(isset($rArr['points'])) $points = $rArr['points'];
-										if($collid){
-											echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
-											echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" /></td>';
-											echo '<td><input name="comment[]" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)"/></td>';
-										}
-										else{
-											echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
-											echo '<td>'.$notes.'</td>';
-										}
+										if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
 										?>
-										<td>
-											<?php 
-											$activeLink = false;
-											if(in_array($rArr['collid'],$USER_RIGHTS['CollAdmin']) || $rArr['processingstatus'] == 'pending review') $activeLink = true;
-											if($activeLink) echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
-											echo $occid;
-											if($activeLink) echo '</a>';
-											?>
-										</td>
+										<th>Points</th>
+										<th>Comments</th>
+										<th>Record ID</th>
 										<?php 
+										$hArr = $recArr['header'];
+										unset($recArr['header']);
 										foreach($hArr as $f => $v){
-											echo '<td>'.$rArr[$f].'</td>';
+											echo '<th>'.$f.'</th>';
 										}
 										?>
 									</tr>
-									<?php
-									$cnt++; 
+									<?php 
+									$cnt = 0;
+									foreach($recArr as $occid => $rArr){
+									?>
+										<tr class="alt">
+											<?php 
+											$notes = '';
+											if(isset($rArr['notes'])) $notes = $rArr['notes'];
+											$points = 2;
+											if(isset($rArr['points'])) $points = $rArr['points'];
+											if($collid){
+												echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
+												//echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" /></td>';
+												echo '<td><select name="points[]" style="width:35px;">';
+												echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
+												echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
+												echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
+												echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
+												echo '</select></td>';
+												echo '<td><input name="comment[]" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)"/></td>';
+											}
+											else{
+												echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
+												echo '<td>'.$notes.'</td>';
+											}
+											?>
+											<td>
+												<?php 
+												$activeLink = false;
+												if(in_array($rArr['collid'],$USER_RIGHTS["ClAdmin"]) || $rArr['processingstatus'] == 'pending review') $activeLink = true;
+												if($activeLink) echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
+												echo $occid;
+												if($activeLink) echo '</a>';
+												?>
+											</td>
+											<?php 
+											foreach($hArr as $f => $v){
+												echo '<td>'.$rArr[$f].'</td>';
+											}
+											?>
+										</tr>
+										<?php
+										$cnt++; 
+									}
+									?>
+								</table>
+								<?php
+								if($collid){
+									echo '<input name="collid" type="hidden" value="'.$collid.'" />';
+									echo '<input name="pstatus" type="hidden" value="'.$pStatus.'" />';
+									echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+									echo '<input name="action" type="submit" value="Submit Reveiws" />';
 								}
 								?>
-							</table>
-							<?php
-							if($collid){
-								echo '<input name="collid" type="hidden" value="'.$collid.'" />';
-								echo '<input name="pstatus" type="hidden" value="'.$pStatus.'" />';
-								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
-								echo '<input name="action" type="submit" value="Submit Reveiws" />';
-							}
-							?>
-						</form>
-					</div>
-					<div style="margin-left:500px;">
-						<?php echo $navStr; ?>
-					</div>
+							</form>
+						</div>
+						<div style="margin-left:500px;">
+							<?php echo $navStr; ?>
+						</div>
+						<?php
+					}
+					else{
+						echo '<div style="clear:both;font-weight:bold;font-size:120%;padding-top:30px;">There are no records that are '.$pStatus.' for '.$eName.'</div>';
+					}
+					?>
 				</div>
 				<?php 
 			}

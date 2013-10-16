@@ -76,7 +76,7 @@ $statusStr = '';
 				else{
 					?>
 					<div>
-						<a href="../../../profile/index.php?refurl=../collections/editor/crowdsourcecentral.php">Login</a> to View Current Stats
+						<a href="../../../profile/index.php?refurl=../collections/editor/crowdsource/central.php">Login</a> to View Current Stats
 					</div>
 					<?php 
 				}

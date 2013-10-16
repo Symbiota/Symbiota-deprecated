@@ -102,20 +102,27 @@ $projArr = $csManager->getProjectDetails();
 			<?php 
 		} 
 		if($collid){
+			if(!$projArr || !$omcsid){
+				?>
+				<div style="clear:both;font-weight:bold;">
+					There are currently no crowdsourcing projects for this collection. To begin crowdsourcing, please create a project in the box below.
+				</div>
+				<?php
+			}
 			if($omcsid) echo '<div style="float:right;"><a href="#" onclick="toggle(\'projFormDiv\')"><img src="../../../images/edit.png" /></a></div>';
 			?>
-			<div style="font-weight:bold;font-size:130%;"><?php echo $projArr['name']; ?></div>
+			<div style="font-weight:bold;font-size:130%;"><?php echo (($omcsid && $projArr)?$projArr['name']:''); ?></div>
 			<div id="projFormDiv" style="display:<?php echo ($omcsid?'none':'block'); ?>">
 				<fieldset style="margin:15px;">
 					<legend><b><?php echo ($omcsid?'Edit Project':'Add New Project'); ?></b></legend>
 					<form name="projform.php" action="controlpanel.php" method="post">
 						<div style="margin:3px;">
 							<b>General Instructions:</b><br/> 
-							<textarea name="instr" style="width:500px;height:100px;"><?php echo ($omcsid?$projArr['instr']:''); ?></textarea>
+							<textarea name="instr" style="width:500px;height:100px;"><?php echo (($omcsid && $projArr)?$projArr['instr']:''); ?></textarea>
 						</div>
 						<div style="margin:3px;">
 							<b>Training Url:</b><br/>
-							<input name="url" type="text" value="<?php echo ($omcsid?$projArr['url']:''); ?>" style="width:500px;" />
+							<input name="url" type="text" value="<?php echo (($omcsid && $projArr)?$projArr['url']:''); ?>" style="width:500px;" />
 						</div>
 						<div>
 							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -223,7 +230,7 @@ $projArr = $csManager->getProjectDetails();
 										//User
 										$uid = $statsArr['uid'];
 										unset($statsArr['uid']);
-										echo '<td><a href="'.$uid.'">'.$username.'</a></td>';
+										echo '<td>'.$username.'</td>';
 										//Score
 										echo '<td>'.$statsArr['score'].'</td>';
 										unset($statsArr['score']);
@@ -247,7 +254,7 @@ $projArr = $csManager->getProjectDetails();
 										//Closed
 										echo '<td>';
 										echo $closeCnt;
-										if($closeCnt) echo ' (<a href="review.php?pstatus=reveiwed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+										if($closeCnt) echo ' (<a href="review.php?pstatus=reviewed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										echo '</tr>';
 									}
@@ -264,6 +271,8 @@ $projArr = $csManager->getProjectDetails();
 				</div>
 				<?php 
 			}
+			
+			
 		}
 		else{
 			echo 'ERROR: collection id not supplied';
