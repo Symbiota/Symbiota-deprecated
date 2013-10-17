@@ -1199,7 +1199,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return true;
 	}
 
-	private function countPotentialLocalityWords($pLoc) {//echo "\ninput to countPotentialLocalityWords: ".$pLoc."\n";
+	protected function countPotentialLocalityWords($pLoc) {//echo "\ninput to countPotentialLocalityWords: ".$pLoc."\n";
 		$pLoc = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pLoc), '/');
 		$lWords = array("road", "Highway", "hwa?y", "area", "path", "route", "range", "city",
 			"trail", "wilderness", "state", "loop", "mount", "pass", "drive", "picnic",
@@ -1218,7 +1218,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		//return $result/count($lWords);
 	}
 
-	private function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
+	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
 		$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
 		$hWords = array("field", "rocks?", "quercus", "woods?", "hardwoods?", "bottom", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "plants?",
 			"understory", "grass", "meadow", "forest", "ground", "mixed", "(?<!Jessie\\s)salix", "acer ", "alder ", "tundra ", "abies", "calcareous",
@@ -1235,7 +1235,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		//return $result/count($hWords);
 	}
 
-	private function containsVerbatimAttribute($word) {
+	protected function containsVerbatimAttribute($word) {
 		$vaWords = array("atranorin", "fatty acid", "cortex", "areolate", "medulla", "podetia", "apothecia", "thallus", "strain", "squamul",
 			"soredia", "fruticose", "fruiticose", "crustose", "corticolous", "saxicolous", "terricolous", "evernic acid",
 			"isidia", "TLC", "crystal", "stictic acid", "usnic acid", "salazinic acid", "parietin", "anthraquinone", "pigment");
