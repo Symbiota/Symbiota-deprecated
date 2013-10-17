@@ -120,7 +120,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 
 	private function isAKFWSLabel($s) {//there are 2 kinds of AKFWS labels: the older ones with AKFWS herbarium above the Flora of Alaska
 		//and the newer ones with AKFWS HERBARIUM ** FLORA of ALASKA on the same line
-		//this function is called on lables that already match isFloraOfAlaska
+		//this function is called on labels that already match isFloraOfAlaska
 		$akfwsPat = "/[AL]\\w{3,6}\\sHE[RSEK]\\s?B[A-Za-z0-9!| ]{4,10}.+/is";
 		if(preg_match($akfwsPat, $s)) return true;
 		else {
