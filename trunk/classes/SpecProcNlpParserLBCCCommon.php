@@ -1245,6 +1245,19 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return false;
 	}
 
+	private function convertSlashedDates($string) {//echo "\nInput to convertSlashedDates: ".$string."\n";
+		$tokens = explode("/", $string);
+		$c = count($tokens);
+		if($c > 0) {
+			$year = $tokens[$c-1];
+			if(strlen($year) == 2) $year = "19".$year;
+			if($c == 3) return $year."-".str_pad($tokens[0], 2, "0", STR_PAD_LEFT)."-".str_pad($tokens[1], 2, "0", STR_PAD_LEFT);
+			if($c == 2) return $year."-".str_pad($tokens[0], 2, "0", STR_PAD_LEFT);
+			return $year;
+		}
+		return "";
+	}
+
 	protected function isStateOrProvince($sp) {
 		if($sp) {
 			$sql = "SELECT * FROM lkupstateprovince lusp WHERE lusp.stateName = '".str_replace(array("\"", "'"), "", $sp)."'";
