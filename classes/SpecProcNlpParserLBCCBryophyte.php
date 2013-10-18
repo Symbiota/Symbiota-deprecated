@@ -9,7 +9,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		parent::__destruct();
 	}
 
-	protected function getLabelInfo($str) {
+	protected function getLabelInfo($str, $collId=null) {
 		if($str) {
 			if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
