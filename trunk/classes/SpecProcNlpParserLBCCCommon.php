@@ -4,8 +4,6 @@ include_once($serverRoot.'/classes/SpecProcNlpParserLBCCLichen.php');
 
 class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
-	protected $conn;
-
 	function __construct() {
 		parent::__construct();
 	}
@@ -28,7 +26,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		//}
 		$labelInfo = array();
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
-			$labelInfo = $handler->getLabelInfo($rawStr);
+			$labelInfo = $handler->getLabelInfo($rawStr, $this->collId);
 			if($labelInfo) {
 				$recordedBy = "";
 				$recordedById = "";

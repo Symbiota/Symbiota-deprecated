@@ -9,7 +9,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		parent::__destruct();
 	}
 
-	protected function getLabelInfo($str) {
+	protected function getLabelInfo($str, $collId=null) {
 		if($str) {
 			$pat = "/(.*)HERBAR[1Il!|]UM\\s?[O0Q]F\\s?THE UN[1Il!|]VER[S5][1Il!|]TY\\s?[O0Q]F\\s?M[1Il!|]CH[1Il!|]GAN?+(.*)/is";
 			if(preg_match($pat, $str, $matches)) {
@@ -37,8 +37,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			else if($this->isLewisAndClarkCavernsLabel($str)) return $this->doMTLichensOfLabel($str);
 			else if($this->isPlantsOfWisconsinLabel($str)) return $this->doPlantsOfWisconsinLabel($str);
 			else if($this->isLichenesCanadensesLabel($str)) return $this->doLichenesCanadensesLabel($str);
-			else if($this->collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
-			else if($this->collId == 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
+			else if($collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
+			else if($collId == 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
 			else return $this->doGenericLabel($str);
 		}
 		return array();
