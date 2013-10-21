@@ -37,6 +37,7 @@ $projArr = $csManager->getProjectDetails();
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Crowdsourcing Reviewer</title>
     <link type="text/css" href="../../../css/main.css" rel="stylesheet" />
+	<link type="text/css" href="../../../css/base.css" rel="stylesheet" />
 	<script type="text/javascript">
 		function selectAll(cbObj){
 			var cbStatus = cbObj.checked;
@@ -173,7 +174,7 @@ $projArr = $csManager->getProjectDetails();
 										?>
 										<th>Points</th>
 										<th>Comments</th>
-										<th>Record ID</th>
+										<th>Edit</th>
 										<?php 
 										$hArr = $recArr['header'];
 										unset($recArr['header']);
@@ -186,7 +187,7 @@ $projArr = $csManager->getProjectDetails();
 									$cnt = 0;
 									foreach($recArr as $occid => $rArr){
 									?>
-										<tr class="alt">
+										<tr <?php echo ($cnt%2?'class="alt"':'') ?>>
 											<?php 
 											$notes = '';
 											if(isset($rArr['notes'])) $notes = $rArr['notes'];
@@ -213,13 +214,19 @@ $projArr = $csManager->getProjectDetails();
 												$activeLink = false;
 												if(in_array($rArr['collid'],$USER_RIGHTS["ClAdmin"]) || $rArr['processingstatus'] == 'pending review') $activeLink = true;
 												if($activeLink) echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
-												echo $occid;
+												if($activeLink) echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />';
+												if(!$activeLink) echo '<img src="../../../images/cross-out.png" style="border:solid 1px gray;height:13px;" />';
 												if($activeLink) echo '</a>';
 												?>
 											</td>
 											<?php 
 											foreach($hArr as $f => $v){
-												echo '<td>'.$rArr[$f].'</td>';
+												$displayStr = $rArr[$f];
+												if(strlen($displayStr) > 30){
+													$displayStr = substr($displayStr,0,30).'...';
+												}
+												if(!$displayStr) $displayStr = '&nbsp;';
+												echo '<td>'.$displayStr.'</td>'."\n";
 											}
 											?>
 										</tr>
