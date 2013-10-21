@@ -243,6 +243,7 @@ class OccurrenceCrowdSource {
 			unset($headerArr['observeruid']);
 			unset($headerArr['recordEnteredBy']);
 			unset($headerArr['points']);
+			unset($headerArr['username']);
 
 			//Limit record array to only fields in headerArr (fields with a value in at least one record)
 			$limitArr = $headerArr;
