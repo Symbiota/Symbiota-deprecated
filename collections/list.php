@@ -403,11 +403,11 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			        Display coordinates in Google Map
 			    </a>
 			</div>
-			<div style='margin:10 0 0 20;'>Google Maps is a free web mapping service application and technology provided by Google that features a 
+			<div style='margin:10 0 0 20;'>Google Maps is a web mapping service provided by Google that features a 
 			    map that users can pan (by dragging the mouse) and zoom (by using the mouse wheel). Collection points are 
-			    displayed as colored markers that when clicked on, displays the full imformation for that collection. When 
-			    multiple species are queried (separated by semi-colons in the Taxon Criteria search box), 
-			    different colored markers denote each individual species. Note that the Google Map has a limit to the first 1000 georeferenced specimens for each taxon.
+			    displayed as colored markers that when clicked on, displays the full information for that collection. When 
+			    multiple species are queried (separated by semi-colons), 
+			    different colored markers denote each individual species.
 			</div>
 	
 			<div style='margin-top:10px;'>
