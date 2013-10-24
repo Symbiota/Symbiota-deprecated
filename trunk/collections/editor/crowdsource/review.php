@@ -137,10 +137,20 @@ $projArr = $csManager->getProjectDetails();
 		<div style="clear:both;">
 			<?php 
 			if($recArr = $csManager->getReviewArr($start,$limit,$uid,$pStatus)){
+				$header = $csManager->getHeaderArr();
 				$totalCnt = $recArr['totalcnt'];
 				unset($recArr['totalcnt']);
+				$hArr = $recArr['header'];
+				unset($recArr['header']);
+				foreach($header as $v){
+					if(!array_key_exists($v, $hArr)){
+						unset($header[$v]);
+					}
+				}
 				//Set up navigation string
-				$urlPrefix = 'controlpanel.php?collid='.$collid.'&uid='.$uid.'&pstatus='.$pStatus;
+				$pageCnt = count($recArr);
+				$end = ($start + $pageCnt) - 1;
+				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&pstatus='.$pStatus;
 				$navStr = '<b>';
 				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.$start.'&limit='.$limit.'">';
 				$navStr .= '|&lt; ';
@@ -149,7 +159,7 @@ $projArr = $csManager->getProjectDetails();
 				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
 				$navStr .= '&lt;&lt;';
 				if($start > 0) $navStr .= '</a>';
-				$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($limit<$totalCnt?$limit:$totalCnt).'&nbsp;&nbsp;|&nbsp;&nbsp;';
+				$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
 				if(count($recArr) > $limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
 				$navStr .= '&gt;&gt;';
 				if(count($recArr) > $limit) $navStr .= '</a>';
@@ -176,15 +186,17 @@ $projArr = $csManager->getProjectDetails();
 										<th>Comments</th>
 										<th>Edit</th>
 										<?php 
-										$hArr = $recArr['header'];
-										unset($recArr['header']);
-										foreach($hArr as $f => $v){
-											echo '<th>'.$f.'</th>';
+										//Display table header
+										foreach($header as $v){
+											if(array_key_exists($v, $hArr)){
+												echo '<th>'.$v.'</th>';
+											}
 										}
 										?>
 									</tr>
 									<?php 
 									$cnt = 0;
+									//echo json_encode($recArr);
 									foreach($recArr as $occid => $rArr){
 									?>
 										<tr <?php echo ($cnt%2?'class="alt"':'') ?>>
@@ -212,21 +224,26 @@ $projArr = $csManager->getProjectDetails();
 											<td>
 												<?php 
 												$activeLink = false;
-												if(in_array($rArr['collid'],$USER_RIGHTS["ClAdmin"]) || $rArr['processingstatus'] == 'pending review') $activeLink = true;
-												if($activeLink) echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
-												if($activeLink) echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />';
-												if(!$activeLink) echo '<img src="../../../images/cross-out.png" style="border:solid 1px gray;height:13px;" />';
-												if($activeLink) echo '</a>';
+												if($isEditor || $rArr['processingstatus'] == 'pending review') $activeLink = true;
+												if($activeLink){ 
+													echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
+													echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />'; 
+													echo '</a>';
+												}
+												else{
+													echo '<img src="../../../images/cross-out.png" style="border:solid 1px gray;height:13px;" />';
+												}
 												?>
 											</td>
 											<?php 
-											foreach($hArr as $f => $v){
-												$displayStr = $rArr[$f];
-												if(strlen($displayStr) > 30){
-													$displayStr = substr($displayStr,0,30).'...';
+											foreach($header as $v){
+												if(array_key_exists($v, $rArr)){
+													$displayStr = $rArr[$v];
+													if(strlen($displayStr) > 30){
+														$displayStr = substr($displayStr,0,30).'...';
+													}
+													echo '<td>'.$displayStr.'</td>'."\n";
 												}
-												if(!$displayStr) $displayStr = '&nbsp;';
-												echo '<td>'.$displayStr.'</td>'."\n";
 											}
 											?>
 										</tr>
