@@ -7,9 +7,14 @@ class OccurrenceCrowdSource {
 	private $collid;
 	private $symbUid;
 	private $omcsid;
+	private $headArr = Array();
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		$this->headArr = array('catalogNumber','family','sciname','identifiedBy','dateIdentified','recordedBy','recordNumber',
+		'eventDate','county','stateProvince','locality','decimalLatitude','decimalLongitude','verbatimCoordinates',
+		'minimumElevationInMeters','verbatimElevation','habitat','reproductiveCondition','substrate','processingstatus',
+		'dateLastModified');
 	}
 
 	function __destruct(){
@@ -193,8 +198,9 @@ class OccurrenceCrowdSource {
 	public function getReviewArr($startIndex,$limit,$uid,$pStatus){
 		$retArr = array();
 		if($this->collid || $this->symbUid){
-			$sql = 'SELECT o.*, u.username, q.uidprocessor, q.points, q.notes '.
-				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
+			$sqlRec = 'SELECT o.*, u.username, q.uidprocessor, q.points, q.notes ';
+			$sqlCnt = 'SELECT o.occid, COUNT(o.occid) AS cnt ';
+			$sql = 'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 				'INNER JOIN userlogin u ON q.uidprocessor = u.uid '.
 				'INNER JOIN omoccurrences o ON q.occid = o.occid ';
 			if($this->collid){
@@ -208,9 +214,12 @@ class OccurrenceCrowdSource {
 			if($pStatus == "pending") $pStatusStr = '"pending review"';
 			if($pStatus) $sql .= 'AND (o.processingstatus IN('.$pStatusStr.')) ';
 			if($uid) $sql .= 'AND (q.uidprocessor = '.$uid.') ';
-			$sql .= 'ORDER BY o.datelastmodified DESC LIMIT '.$startIndex.','.$limit;
-			//echo $sql;
-			$rs = $this->conn->query($sql);
+			$sql .= 'ORDER BY o.datelastmodified DESC ';
+			$sqlCnt .= $sql;
+			$sql .= 'LIMIT '.$startIndex.','.$limit;
+			$sqlRec .= $sql;
+			//echo $sqlCnt;
+			$rs = $this->conn->query($sqlRec);
 			$recArr = array();
 			$headerArr = array();
 			while($r = $rs->fetch_assoc()){
@@ -221,44 +230,17 @@ class OccurrenceCrowdSource {
 				}
 			}
 			$rs->free();
-			//Remove fields that are not relavent to Crowd Source review
-			unset($headerArr['occid']);
-			unset($headerArr['collid']);
-			unset($headerArr['basisOfRecord']);
-			unset($headerArr['scientificName']);
-			unset($headerArr['genus']);
-			unset($headerArr['specificEpithet']);
-			unset($headerArr['taxonRank']);
-			unset($headerArr['infraSpecificEpithet']);
-			unset($headerArr['tidinterpreted']);
-			unset($headerArr['scientificNameAuthorship']);
-			unset($headerArr['year']);
-			unset($headerArr['month']);
-			unset($headerArr['day']);
-			unset($headerArr['startDayOfYear']);
-			unset($headerArr['endDayOfYear']);
-			unset($headerArr['uidprocessor']);
-			unset($headerArr['dbpk']);
-			unset($headerArr['recordedById']);
-			unset($headerArr['observeruid']);
-			unset($headerArr['recordEnteredBy']);
-			unset($headerArr['points']);
-			unset($headerArr['username']);
-
+			
 			//Limit record array to only fields in headerArr (fields with a value in at least one record)
 			$limitArr = $headerArr;
 			$limitArr['collid'] = '';
 			foreach($recArr as $k => $occArr){
 				$retArr[$k] = array_intersect_key($occArr,$limitArr);
 			}
-			//Get count if array size is equal to limit
-			if(count($retArr) <= $limit){
-				$retArr['totalcnt'] = count($retArr);
-			}
-			else{
-				$sql = 'SELECT count(q.occid) AS cnt '.$sqlFrag;
-				$rs = $this->conn->query($sql);
-				$retArr['totalcnt'] = $rs->cnt;
+			//Get count
+			$rs = $this->conn->query($sqlCnt);
+			if($row = $rs->fetch_object()){
+				$retArr['totalcnt'] = $row->cnt;
 			}
 			$retArr['header'] = $headerArr;
 		}
@@ -364,5 +346,9 @@ class OccurrenceCrowdSource {
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
+	
+	public function getHeaderArr(){
+    	return $this->headArr;
+    }
 }
 ?>
