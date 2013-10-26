@@ -142,31 +142,28 @@ $projArr = $csManager->getProjectDetails();
 				unset($recArr['totalcnt']);
 				$hArr = $recArr['header'];
 				unset($recArr['header']);
-				foreach($header as $v){
-					if(!array_key_exists($v, $hArr)){
-						unset($header[$v]);
-					}
-				}
 				//Set up navigation string
 				$pageCnt = count($recArr);
-				$end = ($start + $pageCnt) - 1;
+				$lastStart = ((number_format($totalCnt/100)) * $limit);
+				//echo json_encode($recArr);
+				$end = ($start + $pageCnt);
 				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&pstatus='.$pStatus;
 				$navStr = '<b>';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.$start.'&limit='.$limit.'">';
+				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit=100">';
 				$navStr .= '|&lt; ';
 				if($start > 0) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
+				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit=100">';
 				$navStr .= '&lt;&lt;';
 				if($start > 0) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
-				if(count($recArr) > $limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
+				if($totalCnt > $limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit=100">';
 				$navStr .= '&gt;&gt;';
-				if(count($recArr) > $limit) $navStr .= '</a>';
+				if($totalCnt > $limit) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if($start+(count($recArr)) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.($totalCnt-$limit).'&limit='.($limit+2).'">';
+				if(($start+$pageCnt) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.$lastStart.'&limit=100">';
 				$navStr .= '&gt;|';
-				if($start+(count($recArr)) < $totalCnt) $navStr .= '</a> ';
+				if(($start+$pageCnt) < $totalCnt) $navStr .= '</a> ';
 				$navStr .= '</b>';
 				?>
 				<div>
@@ -208,7 +205,7 @@ $projArr = $csManager->getProjectDetails();
 											if($collid){
 												echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
 												//echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" /></td>';
-												echo '<td><select name="points[]" style="width:35px;">';
+												echo '<td><select name="points[]" style="width:45px;">';
 												echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
 												echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
 												echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';

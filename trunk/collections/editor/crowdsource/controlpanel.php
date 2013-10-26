@@ -86,7 +86,7 @@ $projArr = $csManager->getProjectDetails();
 	?>
 	<div class='navpath'>
 		<a href="../../../index.php">Home</a> &gt;&gt;
-		<a href="central.php">Crowdsourcing Source Board</a> &gt;&gt;
+		<a href="central.php">Crowdsourcing Score Board</a> &gt;&gt;
 		<b>Crowdsourcing Control Panel</b>
 	</div>
 	<!-- inner text -->
