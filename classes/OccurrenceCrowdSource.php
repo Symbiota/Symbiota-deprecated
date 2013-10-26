@@ -198,27 +198,24 @@ class OccurrenceCrowdSource {
 	public function getReviewArr($startIndex,$limit,$uid,$pStatus){
 		$retArr = array();
 		if($this->collid || $this->symbUid){
-			$sqlRec = 'SELECT o.*, u.username, q.uidprocessor, q.points, q.notes ';
+			$sqlRec = 'SELECT o.*, q.uidprocessor, q.points, q.notes ';
 			$sqlCnt = 'SELECT o.occid, COUNT(o.occid) AS cnt ';
 			$sql = 'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
-				'INNER JOIN userlogin u ON q.uidprocessor = u.uid '.
-				'INNER JOIN omoccurrences o ON q.occid = o.occid ';
+				'INNER JOIN omoccurrences o ON q.occid = o.occid WHERE ';
 			if($this->collid){
-				$sql .= 'WHERE csc.collid = '.$this->collid.' ';
-			}
-			else{
-				$sql .= 'WHERE (q.uidprocessor = '.$this->symbUid.') ';
+				$sql .= 'csc.collid = '.$this->collid.' AND ';
 			}
 			$pStatusStr = '"'.$pStatus.'"';
 			if($pStatus == "reviewed") $pStatusStr = '"reviewed","closed"';
 			if($pStatus == "pending") $pStatusStr = '"pending review"';
-			if($pStatus) $sql .= 'AND (o.processingstatus IN('.$pStatusStr.')) ';
+			if($pStatus) $sql .= '(o.processingstatus IN('.$pStatusStr.')) ';
 			if($uid) $sql .= 'AND (q.uidprocessor = '.$uid.') ';
 			$sql .= 'ORDER BY o.datelastmodified DESC ';
 			$sqlCnt .= $sql;
 			$sql .= 'LIMIT '.$startIndex.','.$limit;
 			$sqlRec .= $sql;
 			//echo $sqlCnt;
+			//echo $sqlRec;
 			$rs = $this->conn->query($sqlRec);
 			$recArr = array();
 			$headerArr = array();
@@ -232,6 +229,7 @@ class OccurrenceCrowdSource {
 			$rs->free();
 			
 			//Limit record array to only fields in headerArr (fields with a value in at least one record)
+			//echo count($recArr);
 			$limitArr = $headerArr;
 			$limitArr['collid'] = '';
 			foreach($recArr as $k => $occArr){
