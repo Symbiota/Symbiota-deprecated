@@ -2498,7 +2498,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 //this function returns the collector name if it is preceded by a collector label.
 //If not found tries to find a collector name from the database in a likely place on many labels
-	protected function getCollector($str) {//echo "\nInput to getCollector: ".$str."\n";
+	private function getCollector($str) {//echo "\nInput to getCollector: ".$str."\n";
 		if($str) {
 			$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 			$collector = "";
@@ -2574,6 +2574,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 								$collectorNum = $nextLine;
 							}
 						}
+						if(strcasecmp($collector, "Date") === 0) $collector = "";
 						return array
 						(
 							'collectorName' => trim($collector, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
@@ -2762,6 +2763,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							if(strcmp(substr(strrev($collectorNum), 0, 1), "(") == 0) $collectorNum = trim($collectorNum, " ()");
 						}
 					}
+					if(strcasecmp($collector, "Date") === 0) $collector = "";
 					return array
 					(
 						'collectorName' => trim($collector, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
