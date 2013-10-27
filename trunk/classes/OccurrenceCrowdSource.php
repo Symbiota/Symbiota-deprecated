@@ -81,7 +81,7 @@ class OccurrenceCrowdSource {
 			$sql = 'SELECT o.processingstatus, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN omoccurrences o ON q.occid = o.occid '.
-				'WHERE c.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed" OR q.uidprocessor IS NOT NULL) '.
+				'WHERE c.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed") '.
 				'GROUP BY o.processingstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -142,11 +142,11 @@ class OccurrenceCrowdSource {
 	public function getUserStats($symbUid){
 		$retArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
-			'q.reviewstatus, IFNULL(COUNT(q.occid),0) AS cnt, IFNULL(SUM(q.points),0) AS points '.
+			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,0)) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 			'INNER JOIN omcollections c ON csc.collid = c.collid '.
 			'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
-			'HAVING (q.uidprocessor = '.$symbUid.' OR q.uidprocessor IS NULL) '.
+			'HAVING (q.uidprocessor = '.$symbUid.') '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
