@@ -65,8 +65,8 @@ $projArr = $csManager->getProjectDetails();
 </head>
 <body>
 	<?php 	
-	$displayLeftMenu = false;
-	include($serverRoot.'/header.php');
+	//$displayLeftMenu = false;
+	//include($serverRoot.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../../index.php">Home</a> &gt;&gt;
@@ -76,8 +76,7 @@ $projArr = $csManager->getProjectDetails();
 		?>
 		<b>Crowdsourcing Review</b>
 	</div>
-	<!-- inner text -->
-	<div id="innertext">
+	<div style="margin:10px;">
 		<?php
 		if($statusStr){
 			?>
@@ -88,184 +87,186 @@ $projArr = $csManager->getProjectDetails();
 			<hr/>
 			<?php 
 		} 
-		?>
-		<div style="font-weight:bold;font-size:130%;float:left;width:465px;"><?php echo ($collid?$projArr['name']:$USER_DISPLAY_NAME); ?></div>
-		<div style="float:left;">
-			<form name="filter" action="review.php" method="get">
-				<fieldset style="width:300px;text-align:left;">
-					<legend><b>Filter</b></legend>
-					<div style="margin:3px;">
-						Review Status: 
-						<select name="rstatus">
-							<option value="5,10">All Records</option>
-							<option value="5,10">----------------------</option>
-							<option value="5" <?php echo ($rStatus=='5'?'SELECTED':''); ?>>Pending Review</option>
-							<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Closed (Approved)</option>
-						</select>
-					</div>
-					<?php 
-					if($collid){
-						?>
-						<div style="margin:3px;">
-							Editor: 
-							<select name="uid">
-								<option value="">All Editors</option>
-								<option value="">----------------------</option>
-								<?php 
-								$editorArr = $csManager->getEditorList();
-								foreach($editorArr as $eUid => $eName){
-									echo '<option value="'.$eUid.'" '.($eUid==$uid?'SELECTED':'').'>'.$eName.'</option>'."\n";
-								}
+		if($recArr = $csManager->getReviewArr($start,$limit,$uid,$rStatus)){
+			$totalCnt = $recArr['totalcnt'];
+			unset($recArr['totalcnt']);
+			//Set up navigation string
+			$pageCnt = count($recArr);
+			//echo json_encode($recArr);
+			$end = ($start + $pageCnt);
+			$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&rstatus='.$rStatus;
+			$navStr = '<b>';
+			if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit='.$limit.'">';
+			$navStr .= '|&lt; ';
+			if($start > 0) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;&nbsp;';
+			if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
+			$navStr .= '&lt;&lt;';
+			if($start > 0) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
+			if($totalCnt > ($start+$limit)) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
+			$navStr .= '&gt;&gt;';
+			if($totalCnt > ($start+$limit)) $navStr .= '</a>';
+			$navStr .= '&nbsp;&nbsp;&nbsp;';
+			if(($start+$pageCnt) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.(floor($totalCnt/$limit)*$limit).'&limit='.$limit.'">';
+			$navStr .= '&gt;|';
+			if(($start+$pageCnt) < $totalCnt) $navStr .= '</a> ';
+			$navStr .= '</b>';
+			?>
+			<div style="width:850px;">
+				<div style="float:right;">
+					<form name="filter" action="review.php" method="get">
+						<fieldset style="width:300px;text-align:left;">
+							<legend><b>Filter</b></legend>
+							<div style="margin:3px;">
+								<b>Review Status:</b>
+								<select name="rstatus">
+									<option value="5,10">All Records</option>
+									<option value="5,10">----------------------</option>
+									<option value="5" <?php echo ($rStatus=='5'?'SELECTED':''); ?>>Pending Review</option>
+									<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Closed (Approved)</option>
+								</select>
+							</div>
+							<?php 
+							if($collid){
 								?>
-							</select>
-						</div>
-						<?php 
-					}
-					else{
-						echo '<input name="uid" type="hidden" value="'.$uid.'" />';
-					}
-					?>
-					<div style="margin:3px;">
-						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-						<input name="action" type="submit" value="Filter Records" />
-					</div>
-				</fieldset>
-			</form>
-		</div>
-		<div style="clear:both;">
-			<?php 
-			if($recArr = $csManager->getReviewArr($start,$limit,$uid,$rStatus)){
-				$totalCnt = number_format($recArr['totalcnt']);
-				unset($recArr['totalcnt']);
-				//Set up navigation string
-				$pageCnt = count($recArr);
-				//echo json_encode($recArr);
-				$end = ($start + $pageCnt);
-				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&rstatus='.$rStatus;
-				$navStr = '<b>';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit='.$limit.'">';
-				$navStr .= '|&lt; ';
-				if($start > 0) $navStr .= '</a>';
-				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
-				$navStr .= '&lt;&lt;';
-				if($start > 0) $navStr .= '</a>';
-				$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
-				if($totalCnt > $start+$limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
-				$navStr .= '&gt;&gt;';
-				if($totalCnt > $start+$limit) $navStr .= '</a>';
-				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if(($start+$pageCnt) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.(floor($totalCnt/$limit)*$limit).'&limit='.$limit.'">';
-				$navStr .= '&gt;|';
-				if(($start+$pageCnt) < $totalCnt) $navStr .= '</a> ';
-				$navStr .= '</b>';
-				?>
-				<div>
-					<div style="float:left;"><b>Total Record Count:</b> <?php echo $totalCnt; ?></div>
-					<?php
-					if($totalCnt){
-						?>
-						<div style="float:left;margin-left:500px;"><?php echo $navStr; ?></div>
-						<div style="clear:both;">
-							<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
-								<table class="styledtable">
-									<tr>
+								<div style="margin:3px;">
+									<b>Editor:</b> 
+									<select name="uid">
+										<option value="">All Editors</option>
+										<option value="">----------------------</option>
 										<?php 
-										if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
+										$editorArr = $csManager->getEditorList();
+										foreach($editorArr as $eUid => $eName){
+											echo '<option value="'.$eUid.'" '.($eUid==$uid?'SELECTED':'').'>'.$eName.'</option>'."\n";
+										}
 										?>
-										<th>Points</th>
-										<th>Comments</th>
-										<th>Edit</th>
+									</select>
+								</div>
+								<?php 
+							}
+							else{
+								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+							}
+							?>
+							<div style="margin:3px;">
+								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+								<input name="action" type="submit" value="Filter Records" />
+							</div>
+						</fieldset>
+					</form>
+				</div>
+				<div style="font-weight:bold;font-size:130%;">
+					<?php echo ($collid?$projArr['name']:$USER_DISPLAY_NAME); ?>
+				</div>
+				<div style="clear:both;">
+					<div style="float:right;"><?php echo $navStr; ?></div>
+					<div><b>Total Record Count:</b> <?php echo number_format($totalCnt); ?></div>
+				</div>
+			</div>
+			<div style="clear:both;">
+				<?php
+				if($totalCnt){
+					?>
+					<div style="clear:both;">
+						<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
+							<table class="styledtable">
+								<tr>
+									<?php 
+									if($collid) echo '<th><span title="Select All"><input name="selectall" type="checkbox" onclick="selectAll(this)" /></span></th>';
+									?>
+									<th>Points</th>
+									<th>Comments</th>
+									<th>Edit</th>
+									<?php 
+									//Display table header
+									$header = $csManager->getHeaderArr();
+									foreach($header as $v){
+										echo '<th>'.$v.'</th>';
+									}
+									?>
+								</tr>
+								<?php 
+								$cnt = 0;
+								//echo json_encode($recArr);
+								foreach($recArr as $occid => $rArr){
+								?>
+									<tr <?php echo ($cnt%2?'class="alt"':'') ?>>
 										<?php 
-										//Display table header
-										$header = $csManager->getHeaderArr();
+										$notes = '';
+										if(isset($rArr['notes'])) $notes = $rArr['notes'];
+										$points = 2;
+										if(isset($rArr['points'])) $points = $rArr['points'];
+										if($collid){
+											echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
+											//echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" /></td>';
+											echo '<td><select name="points[]" style="width:45px;">';
+											echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
+											echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
+											echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
+											echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
+											echo '</select></td>';
+											echo '<td><input name="comment[]" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)"/></td>';
+										}
+										else{
+											echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
+											echo '<td>'.$notes.'</td>';
+										}
+										?>
+										<td>
+											<?php 
+											if($isEditor || $rArr['reviewstatus'] == 5){ 
+												echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
+												echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />'; 
+												echo '</a>';
+											}
+											else{
+												echo '<img src="../../../images/cross-out.png" style="border:solid 1px gray;height:13px;" />';
+											}
+											?>
+										</td>
+										<?php 
 										foreach($header as $v){
-											echo '<th>'.$v.'</th>';
+											$displayStr = $rArr[$v];
+											if(strlen($displayStr) > 40){
+												$displayStr = substr($displayStr,0,40).'...';
+											}
+											echo '<td>'.$displayStr.'</td>'."\n";
 										}
 										?>
 									</tr>
-									<?php 
-									$cnt = 0;
-									//echo json_encode($recArr);
-									foreach($recArr as $occid => $rArr){
-									?>
-										<tr <?php echo ($cnt%2?'class="alt"':'') ?>>
-											<?php 
-											$notes = '';
-											if(isset($rArr['notes'])) $notes = $rArr['notes'];
-											$points = 2;
-											if(isset($rArr['points'])) $points = $rArr['points'];
-											if($collid){
-												echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
-												//echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" /></td>';
-												echo '<td><select name="points[]" style="width:45px;">';
-												echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
-												echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
-												echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
-												echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
-												echo '</select></td>';
-												echo '<td><input name="comment[]" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)"/></td>';
-											}
-											else{
-												echo '<td><input name="points[]" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
-												echo '<td>'.$notes.'</td>';
-											}
-											?>
-											<td>
-												<?php 
-												if($isEditor || $rArr['reviewstatus'] == 5){ 
-													echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
-													echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />'; 
-													echo '</a>';
-												}
-												else{
-													echo '<img src="../../../images/cross-out.png" style="border:solid 1px gray;height:13px;" />';
-												}
-												?>
-											</td>
-											<?php 
-											foreach($header as $v){
-												$displayStr = $rArr[$v];
-												if(strlen($displayStr) > 40){
-													$displayStr = substr($displayStr,0,40).'...';
-												}
-												echo '<td>'.$displayStr.'</td>'."\n";
-											}
-											?>
-										</tr>
-										<?php
-										$cnt++; 
-									}
-									?>
-								</table>
-								<?php
-								if($collid){
-									echo '<input name="collid" type="hidden" value="'.$collid.'" />';
-									echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
-									echo '<input name="uid" type="hidden" value="'.$uid.'" />';
-									echo '<input name="action" type="submit" value="Submit Reveiws" />';
+									<?php
+									$cnt++; 
 								}
 								?>
-							</form>
-						</div>
-						<div style="margin-left:500px;">
-							<?php echo $navStr; ?>
-						</div>
-						<?php
-					}
-					else{
-						echo '<div style="clear:both;font-size:120%;padding-top:30px;">';
-						echo 'There are no records matching search criteria</div>';
-					}
-					?>
-				</div>
-				<?php 
-			}
-			?>
-		</div>
+							</table>
+							<?php
+							if($collid){
+								echo '<input name="collid" type="hidden" value="'.$collid.'" />';
+								echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
+								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+								echo '<input name="action" type="submit" value="Submit Reveiws" />';
+							}
+							?>
+						</form>
+					</div>
+					<div style="margin-left:725px;">
+						<?php echo $navStr; ?>
+					</div>
+					<?php
+				}
+				else{
+					echo '<div style="clear:both;font-size:120%;padding-top:30px;">';
+					echo 'There are no records matching search criteria</div>';
+				}
+				?>
+			</div>
+			<?php 				
+		}
+		?>
 	</div>
 	<?php
-	include($serverRoot.'/footer.php');
+	//include($serverRoot.'/footer.php');
 	?>
 </body>
 </html>
