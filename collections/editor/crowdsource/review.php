@@ -164,7 +164,7 @@ $projArr = $csManager->getProjectDetails();
 				<div>
 					<div style="float:left;"><b>Total Record Count:</b> <?php echo $totalCnt; ?></div>
 					<?php
-					if($totalCnt > 0){
+					if($totalCnt){
 						?>
 						<div style="float:left;margin-left:500px;"><?php echo $navStr; ?></div>
 						<div style="clear:both;">

@@ -216,10 +216,9 @@ class OccurrenceCrowdSource {
 			if($uid){
 				$sql .= 'AND (q.uidprocessor = '.$uid.') ';
 			}
-			$sql .= 'ORDER BY o.datelastmodified DESC '.
-				'LIMIT '.$startIndex.','.$limit;
 			//Get occurrence records
-			$sqlRec = 'SELECT o.occid, '.implode(', ',$this->headArr).', q.uidprocessor, q.reviewstatus, q.points, q.notes '.$sql;
+			$sqlRec = 'SELECT o.occid, '.implode(', ',$this->headArr).', q.uidprocessor, q.reviewstatus, q.points, q.notes '.
+				$sql.'ORDER BY o.datelastmodified DESC LIMIT '.$startIndex.','.$limit;
 			//echo $sqlRec;
 			$rs = $this->conn->query($sqlRec);
 			$headerArr = array();
