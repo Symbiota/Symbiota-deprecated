@@ -6,7 +6,7 @@ if(!$symbUid) header('Location: ../../../profile/index.php?refurl=../collections
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $uid = array_key_exists('uid',$_REQUEST)?$_REQUEST['uid']:0;
-$pStatus = array_key_exists('pstatus',$_REQUEST)?$_REQUEST['pstatus']:'';
+$rStatus = array_key_exists('rstatus',$_REQUEST)?$_REQUEST['rstatus']:'5,10';
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
 $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
@@ -14,10 +14,9 @@ $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $csManager = new OccurrenceCrowdSource();
 //If collid is null, it will be assumed that current user wants to review their own specimens (they can still edit pending, closed specimen can't be editted)
 $csManager->setCollid($collid);
-$csManager->setSymbUid($SYMB_UID);
 
 $isEditor = 0; 
-if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']))){
+if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
 	$isEditor = 1;
 }
 
@@ -96,16 +95,12 @@ $projArr = $csManager->getProjectDetails();
 				<fieldset style="width:300px;text-align:left;">
 					<legend><b>Filter</b></legend>
 					<div style="margin:3px;">
-						Processing Status: 
-						<select name="pstatus">
-							<option value="">All Records</option>
-							<option value="">----------------------</option>
-							<?php 
-							$pStatusArr = $csManager->getProcessingStatusList();
-							foreach($pStatusArr as $pStatusValue){
-								echo '<option '.($pStatus==$pStatusValue?'SELECTED':'').'>'.$pStatusValue.'</option>'."\n";
-							}
-							?>
+						Review Status: 
+						<select name="rstatus">
+							<option value="5,10">All Records</option>
+							<option value="5,10">----------------------</option>
+							<option value="5" <?php echo ($rStatus==5?'SELECTED':''); ?>>Pending Review</option>
+							<option value="10" <?php echo ($rStatus==10?'SELECTED':''); ?>>Closed (Approved)</option>
 						</select>
 					</div>
 					<?php 
@@ -126,6 +121,9 @@ $projArr = $csManager->getProjectDetails();
 						</div>
 						<?php 
 					}
+					else{
+						echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+					}
 					?>
 					<div style="margin:3px;">
 						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -136,18 +134,15 @@ $projArr = $csManager->getProjectDetails();
 		</div>
 		<div style="clear:both;">
 			<?php 
-			if($recArr = $csManager->getReviewArr($start,$limit,$uid,$pStatus)){
-				$header = $csManager->getHeaderArr();
+			if($recArr = $csManager->getReviewArr($start,$limit,$uid,$rStatus)){
 				$totalCnt = $recArr['totalcnt'];
 				unset($recArr['totalcnt']);
-				$hArr = $recArr['header'];
-				unset($recArr['header']);
 				//Set up navigation string
 				$pageCnt = count($recArr);
 				$lastStart = ((number_format($totalCnt/100)) * $limit);
 				//echo json_encode($recArr);
 				$end = ($start + $pageCnt);
-				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&pstatus='.$pStatus;
+				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&rstatus='.$rStatus;
 				$navStr = '<b>';
 				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit=100">';
 				$navStr .= '|&lt; ';
@@ -170,7 +165,7 @@ $projArr = $csManager->getProjectDetails();
 					<div style="float:left;"><b>Total Record Count:</b> <?php echo $totalCnt; ?></div>
 					<?php
 					if($totalCnt > 0){
-					?>
+						?>
 						<div style="float:left;margin-left:500px;"><?php echo $navStr; ?></div>
 						<div style="clear:both;">
 							<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
@@ -184,10 +179,9 @@ $projArr = $csManager->getProjectDetails();
 										<th>Edit</th>
 										<?php 
 										//Display table header
+										$header = $csManager->getHeaderArr();
 										foreach($header as $v){
-											if(array_key_exists($v, $hArr)){
-												echo '<th>'.$v.'</th>';
-											}
+											echo '<th>'.$v.'</th>';
 										}
 										?>
 									</tr>
@@ -220,9 +214,7 @@ $projArr = $csManager->getProjectDetails();
 											?>
 											<td>
 												<?php 
-												$activeLink = false;
-												if($isEditor || $rArr['processingstatus'] == 'pending review') $activeLink = true;
-												if($activeLink){ 
+												if($isEditor || $rArr['reviewstatus'] == 5){ 
 													echo '<a href="../occurrenceeditor.php?csmode=1&occid='.$occid.'" target="_blank">';
 													echo '<img src="../../../images/edit.png" style="border:solid 1px gray;height:13px;" />'; 
 													echo '</a>';
@@ -234,13 +226,11 @@ $projArr = $csManager->getProjectDetails();
 											</td>
 											<?php 
 											foreach($header as $v){
-												if(array_key_exists($v, $rArr)){
-													$displayStr = $rArr[$v];
-													if(strlen($displayStr) > 30){
-														$displayStr = substr($displayStr,0,30).'...';
-													}
-													echo '<td>'.$displayStr.'</td>'."\n";
+												$displayStr = $rArr[$v];
+												if(strlen($displayStr) > 40){
+													$displayStr = substr($displayStr,0,40).'...';
 												}
+												echo '<td>'.$displayStr.'</td>'."\n";
 											}
 											?>
 										</tr>
@@ -252,7 +242,7 @@ $projArr = $csManager->getProjectDetails();
 								<?php
 								if($collid){
 									echo '<input name="collid" type="hidden" value="'.$collid.'" />';
-									echo '<input name="pstatus" type="hidden" value="'.$pStatus.'" />';
+									echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
 									echo '<input name="uid" type="hidden" value="'.$uid.'" />';
 									echo '<input name="action" type="submit" value="Submit Reveiws" />';
 								}
@@ -265,7 +255,7 @@ $projArr = $csManager->getProjectDetails();
 						<?php
 					}
 					else{
-						echo '<div style="clear:both;font-weight:bold;font-size:120%;padding-top:30px;">There are no records that are '.$pStatus.' for '.$eName.'</div>';
+						echo '<div style="clear:both;font-weight:bold;font-size:120%;padding-top:30px;">There are no records for '.$eName.' with given processing status</div>';
 					}
 					?>
 				</div>

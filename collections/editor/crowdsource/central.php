@@ -67,9 +67,9 @@ $statusStr = '';
 					?>
 					<b>Specimens processed:</b> <?php echo $userStats['totalcnt']; ?><br/>
 					<b>Approved points:</b> <?php echo $userStats['apoints']; ?> 
-					<?php if($userStats['apoints']) echo '(<a href="review.php?pstatus=reviewed&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
+					<?php if($userStats['apoints']) echo '(<a href="review.php?rstatus=10&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
 					<b>Pending points:</b> <?php echo $userStats['ppoints']; ?>
-					<?php if($userStats['ppoints']) echo '(<a href="review.php?pstatus=pending&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
+					<?php if($userStats['ppoints']) echo '(<a href="review.php?rstatus=5&uid='.$SYMB_UID.'">review records</a>)'; ?> <br/>
 					<b>Approved and pending:</b> <?php echo $userStats['ppoints']+$userStats['apoints']; ?><br/>
 					<?php
 				}
