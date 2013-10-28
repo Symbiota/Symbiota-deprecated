@@ -48,12 +48,14 @@ class OccurrenceCrowdSource {
 	public function editProject($omcsid,$instr,$url){
 		$statusStr = '';
 		if(is_numeric($omcsid)){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcrowdsourcecentral '.
 				'SET instructions = '.($instr?'"'.$this->cleanInStr($instr).'"':'NULL').',trainingurl = '.($url?'"'.$this->cleanInStr($url).'"':'NULL').
 				' WHERE omcsid = '.$omcsid;
-			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR editing project: '.$this->conn->error;
+			if(!$con->query($sql)){
+				$statusStr = 'ERROR editing project: '.$con->error;
 			}
+			$con->close();
 		}
 		return $statusStr;
 	}
@@ -61,15 +63,17 @@ class OccurrenceCrowdSource {
 	public function createProject($cid,$instr,$url){
 		$statusStr = '';
 		if(is_numeric($cid)){
+			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'INSERT INTO omcrowdsourcecentral(collid,instructions,trainingurl) '.
 				'VALUES('.$cid.','.($instr?'"'.$this->cleanInStr($instr).'"':'NULL').','.($url?'"'.$this->cleanInStr($url).'"':'NULL').')';
 			//echo $sql;
-			if($this->conn->query($sql)){
-				$this->omcsid = $this->conn->insert_id;
+			if($con->query($sql)){
+				$this->omcsid = $con->insert_id;
 			}
 			else{
-				$statusStr = 'ERROR editing project: '.$this->conn->error;
+				$statusStr = 'ERROR editing project: '.$con->error;
 			}
+			$con->close();
 		}
 		return $statusStr;
 	}
@@ -179,6 +183,7 @@ class OccurrenceCrowdSource {
 		$statusStr = 'SUCCESS: specimens added to queue';
 		if(!$this->omcsid) return 'ERROR adding to queue, omcsid is null';
 		if(!$this->collid) return 'ERROR adding to queue, collid is null';
+		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omcrowdsourcequeue(occid, omcsid) '.
 			'SELECT o.occid, '.$this->omcsid.' AS csid '.
 			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
@@ -190,10 +195,11 @@ class OccurrenceCrowdSource {
 			}
 			$sql .= $sqlVar;
 		}
-		if(!$this->conn->query($sql)){
-			$statusStr = 'ERROR adding to queue: '.$this->conn->error;
+		if(!$con->query($sql)){
+			$statusStr = 'ERROR adding to queue: '.$con->error;
 			$statusStr .= '; SQL: '.$sql;
 		}
+		$con->close;
 		return $statusStr;
 	}
 
@@ -249,14 +255,16 @@ class OccurrenceCrowdSource {
 				',notes = '.($commentsArr[$k]?'"'.$this->cleanInStr($commentsArr[$k]).'"':'NULL').
 				',reviewstatus = 10 '.
 				'WHERE occid = '.$v;
-			if($this->conn->query($sql)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			if($con->query($sql)){
 				//Change status to reviewed
 				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid = '.$v;
-				$this->conn->query($sql2);
+				$con->query($sql2);
 			}
 			else{
-				$statusStr = 'ERROR submitting reviews; '.$this->conn->error.'<br/>SQL = '.$sql;
+				$statusStr = 'ERROR submitting reviews; '.$con->error.'<br/>SQL = '.$sql;
 			}
+			$con->close();
 		}
 		return $statusStr;
 	}
@@ -305,29 +313,6 @@ class OccurrenceCrowdSource {
 		}
 		return $retArr;
 	}
-
-/*
-	public function getProcessingStatusList(){
-		$retArr = array();
-		$sql = 'SELECT DISTINCT o.processingstatus '.
-			'FROM omcrowdsourcequeue q INNER JOIN omoccurrences o ON q.occid = o.occid '.
-			'INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
-			'WHERE (o.processingstatus IS NOT NULL) ';
-		if($this->collid){
-			$sql .= 'AND (c.collid = '.$this->collid.') ';
-		}
-		else{
-			$sql .= 'AND (q.uidprocessor = '.$this->symbUid.') ';
-		}
-		$sql .= 'ORDER BY o.processingstatus';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[] = $r->processingstatus;
-		}
-		$rs->free();
-		return $retArr;
-	}
-*/
 
 	private function cleanInStr($str){
 		$newStr = trim($str);
