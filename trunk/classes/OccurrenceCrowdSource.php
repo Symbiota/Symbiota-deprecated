@@ -105,7 +105,7 @@ class OccurrenceCrowdSource {
 			$retArr['rs']['toadd'] = $toAddCnt;
 			
 			//Processing scores by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,2)) as usersum '.
+			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
 				'WHERE c.collid = '.$this->collid.' GROUP BY username ORDER BY usersum DESC ';
