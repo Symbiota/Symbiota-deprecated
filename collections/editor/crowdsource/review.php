@@ -8,7 +8,7 @@ $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $uid = array_key_exists('uid',$_REQUEST)?$_REQUEST['uid']:0;
 $rStatus = array_key_exists('rstatus',$_REQUEST)?$_REQUEST['rstatus']:'5,10';
 $start = array_key_exists('start',$_REQUEST)?$_REQUEST['start']:0;
-$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
+$limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:500;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
 $csManager = new OccurrenceCrowdSource();
@@ -91,7 +91,7 @@ $projArr = $csManager->getProjectDetails();
 		?>
 		<div style="font-weight:bold;font-size:130%;float:left;width:465px;"><?php echo ($collid?$projArr['name']:$USER_DISPLAY_NAME); ?></div>
 		<div style="float:left;">
-			<form name="filter" action="review.php" method="post">
+			<form name="filter" action="review.php" method="get">
 				<fieldset style="width:300px;text-align:left;">
 					<legend><b>Filter</b></legend>
 					<div style="margin:3px;">
@@ -99,8 +99,8 @@ $projArr = $csManager->getProjectDetails();
 						<select name="rstatus">
 							<option value="5,10">All Records</option>
 							<option value="5,10">----------------------</option>
-							<option value="5" <?php echo ($rStatus==5?'SELECTED':''); ?>>Pending Review</option>
-							<option value="10" <?php echo ($rStatus==10?'SELECTED':''); ?>>Closed (Approved)</option>
+							<option value="5" <?php echo ($rStatus=='5'?'SELECTED':''); ?>>Pending Review</option>
+							<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Closed (Approved)</option>
 						</select>
 					</div>
 					<?php 
@@ -135,28 +135,27 @@ $projArr = $csManager->getProjectDetails();
 		<div style="clear:both;">
 			<?php 
 			if($recArr = $csManager->getReviewArr($start,$limit,$uid,$rStatus)){
-				$totalCnt = $recArr['totalcnt'];
+				$totalCnt = number_format($recArr['totalcnt']);
 				unset($recArr['totalcnt']);
 				//Set up navigation string
 				$pageCnt = count($recArr);
-				$lastStart = ((number_format($totalCnt/100)) * $limit);
 				//echo json_encode($recArr);
 				$end = ($start + $pageCnt);
 				$urlPrefix = 'review.php?collid='.$collid.'&uid='.$uid.'&rstatus='.$rStatus;
 				$navStr = '<b>';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit=100">';
+				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start=0&limit='.$limit.'">';
 				$navStr .= '|&lt; ';
 				if($start > 0) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit=100">';
+				if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
 				$navStr .= '&lt;&lt;';
 				if($start > 0) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
-				if($totalCnt > $limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit=100">';
+				if($totalCnt > $start+$limit) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
 				$navStr .= '&gt;&gt;';
-				if($totalCnt > $limit) $navStr .= '</a>';
+				if($totalCnt > $start+$limit) $navStr .= '</a>';
 				$navStr .= '&nbsp;&nbsp;&nbsp;';
-				if(($start+$pageCnt) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.$lastStart.'&limit=100">';
+				if(($start+$pageCnt) < $totalCnt) $navStr .= '<a href="'.$urlPrefix.'&start='.(floor($totalCnt/$limit)*$limit).'&limit='.$limit.'">';
 				$navStr .= '&gt;|';
 				if(($start+$pageCnt) < $totalCnt) $navStr .= '</a> ';
 				$navStr .= '</b>';
@@ -255,7 +254,8 @@ $projArr = $csManager->getProjectDetails();
 						<?php
 					}
 					else{
-						echo '<div style="clear:both;font-weight:bold;font-size:120%;padding-top:30px;">There are no records for '.$eName.' with given processing status</div>';
+						echo '<div style="clear:both;font-size:120%;padding-top:30px;">';
+						echo 'There are no records matching search criteria</div>';
 					}
 					?>
 				</div>
