@@ -142,72 +142,45 @@ $projArr = $csManager->getProjectDetails();
 					if($statsArr = $csManager->getProjectStats()){
 						?>
 						<div style="font-weight:bold;text-decoration:underline">Total Counts:</div>
-						<?php 
-						$rsArr = $statsArr['rs'];
-						$unprocessedCnt = (isset($rsArr['unprocessed'])?$rsArr['unprocessed']:0);
-						unset($rsArr['unprocessed']);
-						$pendingCnt = (isset($rsArr['pending review'])?$rsArr['pending review']:0);
-						unset($rsArr['pending review']);
-						$reviewedCnt = (isset($rsArr['reviewed'])?$rsArr['reviewed']:0);
-						unset($rsArr['reviewed']);
-						if(isset($rsArr['closed'])) $reviewedCnt += $rsArr['closed'];
-						unset($rsArr['closed']);
-						$toAddCnt = (isset($rsArr['toadd'])?$rsArr['toadd']:0);
-						unset($rsArr['toadd']); 
-						?>
 						<div style="margin:15px 0px 25px 15px;">
 							<div>
 								<b>Records in Queue:</b> 
 								<?php
+								$unprocessedCnt = 0;
+								if(isset($statsArr['rs'][0])) $unprocessedCnt = $statsArr['rs'][0];
 								if($unprocessedCnt){
 									echo '<a href="../occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&reset=1&collid='.$collid.'" target="_blank">'.$unprocessedCnt.'</a>';
-								}
-								else{
-									echo 0;
 								}
 								?>
 							</div>
 							<div>
 								<b>Pending Approval:</b> 
 								<?php
+								$pendingCnt = 0;
+								if(isset($statsArr['rs'][5])) $pendingCnt = $statsArr['rs'][5];
+								echo $pendingCnt;
 								if($pendingCnt){ 
-									echo $pendingCnt;
-									echo ' (<a href="review.php?pstatus=pending&collid='.$collid.'">Review</a>)';
+									echo ' (<a href="review.php?rstatus=5&collid='.$collid.'">Review</a>)';
 								} 
-								else{
-									echo 0;
-								}
 								?> 
 							</div>
-							<?php 
-							foreach($rsArr as $psStr => $cnt){
-								echo '<div>';
-								echo '<b>'.$psStr.':</b> '.$cnt;
-								echo ' (<a href="review.php?pstatus=other&collid='.$collid.'">Review</a>)';
-								echo '</div>';
-							}
-							?>
 							<div>
 								<b>Closed (Approved):</b> 
 								<?php
+								$reviewedCnt = 0;
+								if(isset($statsArr['rs'][10])) $reviewedCnt = $statsArr['rs'][10];
+								echo $reviewedCnt;
 								if($reviewedCnt){
-									echo $reviewedCnt;
-									echo ' (<a href="review.php?pstatus=reviewed&collid='.$collid.'">Review</a>)';
-								}
-								else{
-									echo 0;
+									echo ' (<a href="review.php?rstatus=10&collid='.$collid.'">Review</a>)';
 								}
 								?> 
 							</div>
 							<div>
 								<b>Available to Add:</b> 
 								<?php
-								if($toAddCnt){
-									echo $toAddCnt;
+								echo $statsArr['rs']['toadd'];
+								if($statsArr['rs']['toadd']){
 									echo ' (<a href="controlpanel.php?action=addtoqueue&collid='.$collid.'&omcsid='.$omcsid.'">Add to Queue</a>)';
-								}
-								else{
-									echo 0;
 								}
 								?>
 							</div>
@@ -219,42 +192,25 @@ $projArr = $csManager->getProjectDetails();
 									<th>User</th>
 									<th>Score</th>
 									<th>Pending Review</th>
-									<th>Other</th>
 									<th>Approved</th>
 								</tr>
 								<?php 
 								if(isset($statsArr['ps'])){
 									$psArr = $statsArr['ps'];
-									foreach($psArr as $username => $statsArr){
+									foreach($psArr as $uid => $uArr){
 										echo '<tr>';
-										//User
-										$uid = $statsArr['uid'];
-										unset($statsArr['uid']);
-										echo '<td>'.$username.'</td>';
-										//Score
-										echo '<td>'.$statsArr['score'].'</td>';
-										unset($statsArr['score']);
-										//Pending records
-										$pendingCnt = (isset($statsArr['pending review'])?$statsArr['pending review']:0);
-										unset($statsArr['pending review']);
+										echo '<td>'.$uArr['name'].'</td>';
+										echo '<td>'.$uArr['score'].'</td>';
+										$pendingCnt = (isset($uArr[5])?$uArr[5]:0);
 										echo '<td>';
 										echo $pendingCnt;
-										if($pendingCnt) echo ' (<a href="review.php?pstatus=pending&collid='.$collid.'&uid='.$uid.'">Review</a>)';
-										echo '</td>';
-										//Other
-										$closeCnt = (isset($statsArr['reviewed'])?$statsArr['reviewed']:0);
-										unset($statsArr['reviewed']);
-										$otherCnt = 0;
-										foreach($statsArr as $rsStr => $cnt){
-											if(is_numeric($cnt)) $otherCnt += $cnt;
-										}
-										echo '<td>';
-										echo $otherCnt;
+										if($pendingCnt) echo ' (<a href="review.php?rstatus=5&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										//Closed
+										$closeCnt = (isset($uArr[10])?$uArr[10]:0);
 										echo '<td>';
 										echo $closeCnt;
-										if($closeCnt) echo ' (<a href="review.php?pstatus=reviewed&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+										if($closeCnt) echo ' (<a href="review.php?rstatus=10&collid='.$collid.'&uid='.$uid.'">Review</a>)';
 										echo '</td>';
 										echo '</tr>';
 									}

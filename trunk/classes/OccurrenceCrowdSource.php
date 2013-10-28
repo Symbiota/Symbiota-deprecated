@@ -5,16 +5,16 @@ class OccurrenceCrowdSource {
 
 	private $conn;
 	private $collid;
-	private $symbUid;
 	private $omcsid;
 	private $headArr = Array();
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 		$this->headArr = array('catalogNumber','family','sciname','identifiedBy','dateIdentified','recordedBy','recordNumber',
-		'eventDate','county','stateProvince','locality','decimalLatitude','decimalLongitude','verbatimCoordinates',
-		'minimumElevationInMeters','verbatimElevation','habitat','reproductiveCondition','substrate','processingstatus',
-		'dateLastModified');
+			'associatedCollectors','eventDate','verbatimEventDate','country','stateProvince','county','locality',
+			'decimalLatitude','decimalLongitude','coordinateUncertaintyInMeters','verbatimCoordinates','minimumElevationInMeters',
+			'maximumElevationInMeters','verbatimElevation','habitat','reproductiveCondition','substrate','occurrenceRemarks',
+			'processingstatus','dateLastModified');
 	}
 
 	function __destruct(){
@@ -78,46 +78,49 @@ class OccurrenceCrowdSource {
 		$retArr = array();
 		if($this->collid){
 			//Get review status total counts
-			$sql = 'SELECT o.processingstatus, count(q.occid) as cnt '.
+			$sql = 'SELECT q.reviewstatus, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
-				'INNER JOIN omoccurrences o ON q.occid = o.occid '.
-				'WHERE c.collid = '.$this->collid.' AND (o.processingstatus = "unprocessed") '.
-				'GROUP BY o.processingstatus';
+				'WHERE c.collid = '.$this->collid.' '.
+				'GROUP BY q.reviewstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['rs'][$r->processingstatus] = $r->cnt;
+				$retArr['rs'][$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
+			
 			//Get record count for those available for adding to queue
 			$sql = 'SELECT count(o.occid) as cnt '.
 				'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
+			$toAddCnt = 0;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$retArr['rs']['toadd'] = $r->cnt;
+				$toAddCnt = $r->cnt;
 			}
 			$rs->free();
+			$retArr['rs']['toadd'] = $toAddCnt;
+			
 			//Processing scores by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(q.points) as usersum '.
+			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
 				'WHERE c.collid = '.$this->collid.' GROUP BY username ORDER BY usersum DESC ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['ps'][$r->username]['score'] = $r->usersum;
-				$retArr['ps'][$r->username]['uid'] = $r->uid;
+				$retArr['ps'][$r->uid]['score'] = $r->usersum;
+				$retArr['ps'][$r->uid]['name'] = $r->username;
 			}
 			$rs->free();
+
 			//Processing counts by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, o.processingstatus, count(q.occid) as cnt '.
+			$sql = 'SELECT q.uidprocessor, q.reviewstatus, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
-				'INNER JOIN users u ON q.uidprocessor = u.uid '.
-				'INNER JOIN omoccurrences o ON q.occid = o.occid '.
-				'WHERE c.collid = '.$this->collid.' GROUP BY username, o.processingstatus';
+				'WHERE c.collid = '.$this->collid.' AND q.uidprocessor IS NOT NULL '.
+				'GROUP BY q.uidprocessor, q.reviewstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['ps'][$r->username][$r->processingstatus] = $r->cnt;
+				$retArr['ps'][$r->uidprocessor][$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
 		}
@@ -195,55 +198,46 @@ class OccurrenceCrowdSource {
 	}
 
 	//Reveiw functions
-	public function getReviewArr($startIndex,$limit,$uid,$pStatus){
+	public function getReviewArr($startIndex,$limit,$uid,$rStatus){
 		$retArr = array();
-		if($this->collid || $this->symbUid){
-			$sqlRec = 'SELECT o.*, q.uidprocessor, q.points, q.notes ';
-			$sqlCnt = 'SELECT o.occid, COUNT(o.occid) AS cnt ';
+		if($this->collid || $uid){
 			$sql = 'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
-				'INNER JOIN omoccurrences o ON q.occid = o.occid WHERE ';
+				'INNER JOIN omoccurrences o ON q.occid = o.occid '.
+				'WHERE q.reviewstatus IN('.$rStatus.') ';
 			if($this->collid){
-				$sql .= 'csc.collid = '.$this->collid.' AND ';
+				$sql .= 'AND csc.collid = '.$this->collid.' ';
 			}
-			$pStatusStr = '"'.$pStatus.'"';
-			if($pStatus == "reviewed") $pStatusStr = '"reviewed","closed"';
-			if($pStatus == "pending") $pStatusStr = '"pending review"';
-			if($pStatus) $sql .= '(o.processingstatus IN('.$pStatusStr.')) ';
-			if($uid) $sql .= 'AND (q.uidprocessor = '.$uid.') ';
-			$sql .= 'ORDER BY o.datelastmodified DESC ';
-			$sqlCnt .= $sql;
-			$sql .= 'LIMIT '.$startIndex.','.$limit;
-			$sqlRec .= $sql;
-			//echo $sqlCnt;
+			if($uid){
+				$sql .= 'AND (q.uidprocessor = '.$uid.') ';
+			}
+			$sql .= 'ORDER BY o.datelastmodified DESC '.
+				'LIMIT '.$startIndex.','.$limit;
+			//Get occurrence records
+			$sqlRec = 'SELECT o.occid, '.implode(', ',$this->headArr).', q.uidprocessor, q.reviewstatus, q.points, q.notes '.$sql;
 			//echo $sqlRec;
 			$rs = $this->conn->query($sqlRec);
-			$recArr = array();
 			$headerArr = array();
 			while($r = $rs->fetch_assoc()){
-				$recArr[$r['occid']] = $r;
+				$retArr[$r['occid']] = $r;
 				//Collection fields that have a value in at least on record
 				foreach($r as $field => $value){
-					if($value && !array_key_exists($field, $headerArr)) $headerArr[$field] = '';
+					if($value && !in_array($field, $headerArr)) $headerArr[] = $field;
 				}
 			}
 			$rs->free();
+			//Remove fields from $this->headArr that are not in $headerArr
+			$this->headArr = array_intersect($this->headArr,$headerArr); 
 			
-			//Limit record array to only fields in headerArr (fields with a value in at least one record)
-			//echo count($recArr);
-			$limitArr = $headerArr;
-			$limitArr['collid'] = '';
-			foreach($recArr as $k => $occArr){
-				$retArr[$k] = array_intersect_key($occArr,$limitArr);
-			}
 			//Get count
+			$sqlCnt = 'SELECT COUNT(o.occid) AS cnt '.$sql;
+			//echo $sqlCnt;
 			$rs = $this->conn->query($sqlCnt);
 			if($row = $rs->fetch_object()){
 				$retArr['totalcnt'] = $row->cnt;
 			}
-			$retArr['header'] = $headerArr;
 		}
 		else{
-			echo "ERROR: both collid and symbUid is null";
+			echo "ERROR: both collid and user id are null";
 		}
 		return $retArr;
 	}
@@ -256,6 +250,7 @@ class OccurrenceCrowdSource {
 				',reviewstatus = 10 '.
 				'WHERE occid = '.$v;
 			if($this->conn->query($sql)){
+				//Change status to reviewed
 				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid = '.$v;
 				$this->conn->query($sql2);
 			}
@@ -282,12 +277,6 @@ class OccurrenceCrowdSource {
 			}
 		}
 	}
-
-	public function setSymbUid($uid){
-		if($uid && is_numeric($uid)){
-			$this->symbUid = $uid;
-		}
-	} 
 
 	public function setOmcsid($id){
 		if($id && is_numeric($id)){
@@ -317,6 +306,7 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 
+/*
 	public function getProcessingStatusList(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT o.processingstatus '.
@@ -337,6 +327,7 @@ class OccurrenceCrowdSource {
 		$rs->free();
 		return $retArr;
 	}
+*/
 
 	private function cleanInStr($str){
 		$newStr = trim($str);
