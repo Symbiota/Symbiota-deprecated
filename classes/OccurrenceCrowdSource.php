@@ -101,7 +101,7 @@ class OccurrenceCrowdSource {
 			$retArr['rs']['toadd'] = $toAddCnt;
 			
 			//Processing scores by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
+			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,2)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
 				'WHERE c.collid = '.$this->collid.' GROUP BY username ORDER BY usersum DESC ';
@@ -145,11 +145,11 @@ class OccurrenceCrowdSource {
 	public function getUserStats($symbUid){
 		$retArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
-			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,0)) AS points '.
+			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 			'INNER JOIN omcollections c ON csc.collid = c.collid '.
 			'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
-			'HAVING (q.uidprocessor = '.$symbUid.') '.
+			'HAVING (q.uidprocessor = '.$symbUid.' OR q.uidprocessor IS NULL) '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
