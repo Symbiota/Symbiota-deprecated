@@ -85,7 +85,7 @@ $statusStr = '';
 		</div>
 		
 		<div style="margin:20px;clear:both;">
-			<h2>Collections</h2>
+			<h2>User Stats by Collections</h2>
 			<table class="styledtable">
 				<tr>
 					<th><b>Collection</b></th>
