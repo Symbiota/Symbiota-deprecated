@@ -240,18 +240,22 @@ $projArr = $csManager->getProjectDetails();
 								}
 								?>
 							</table>
-							<?php
-							if($collid){
-								echo '<input name="collid" type="hidden" value="'.$collid.'" />';
-								echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
-								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
-								echo '<input name="action" type="submit" value="Submit Reveiws" />';
-							}
-							?>
+							<div style="width:850px;">
+								<div style="float:right;">
+									<?php echo $navStr; ?>
+								</div>
+								<div>
+									<?php
+									if($collid){
+										echo '<input name="collid" type="hidden" value="'.$collid.'" />';
+										echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
+										echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+										echo '<input name="action" type="submit" value="Submit Reveiws" />';
+									}
+									?>
+								</div>
+							</div>
 						</form>
-					</div>
-					<div style="margin-left:725px;">
-						<?php echo $navStr; ?>
 					</div>
 					<?php
 				}

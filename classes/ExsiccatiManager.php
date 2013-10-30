@@ -40,15 +40,13 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 
-	public function getTitleArr($searchTerm, $specimenOnly, $imagesOnly, $collId){
+	public function getTitleArr($searchTerm = '', $specimenOnly = 0, $imagesOnly = 0, $collId = 0){
 		$retArr = array();
-		$sql = '';
+		$sql = 'SELECT DISTINCT et.ometid, et.title, et.editor, et.exsrange ';
 		$sqlWhere = '';
 		if($specimenOnly){
 			if($imagesOnly){
-				$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
-					'et.source, et.notes, et.lasteditedby '.
-					'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+				$sql .= 'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
 					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
 					'INNER JOIN images i ON ol.occid = i.occid ';
 				if($collId){
@@ -58,9 +56,7 @@ class ExsiccatiManager {
 			}
 			else{
 				//Display only exsiccati that have linked specimens
-				$sql = 'SELECT DISTINCT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
-					'et.source, et.notes, et.lasteditedby '.
-					'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+				$sql .= 'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
 					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
 				if($collId){
 					$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
@@ -70,9 +66,7 @@ class ExsiccatiManager {
 		}
 		else{
 			//Display full list
-			$sql = 'SELECT et.ometid, et.title, et.abbreviation, et.editor, et.exsrange, et.startdate, et.enddate, '.
-				'et.source, et.notes, et.lasteditedby '.
-				'FROM omexsiccatititles et ';
+			$sql .= 'FROM omexsiccatititles et ';
 		}
 		if($searchTerm){
 			if($sqlWhere){
@@ -83,19 +77,14 @@ class ExsiccatiManager {
 			}
 			$sqlWhere .= 'et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%"';
 		}
-		$sql = $sql.$sqlWhere.'ORDER BY et.title';
+		$sql = $sql.$sqlWhere.'ORDER BY et.title, et.startdate';
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->ometid]['title'] = $this->cleanOutStr($r->title);
-				$retArr[$r->ometid]['abbreviation'] = $this->cleanOutStr($r->abbreviation);
-				$retArr[$r->ometid]['editor'] = $this->cleanOutStr($r->editor);
-				$retArr[$r->ometid]['exsrange'] = $this->cleanOutStr($r->exsrange);
-				$retArr[$r->ometid]['startdate'] = $this->cleanOutStr($r->startdate);
-				$retArr[$r->ometid]['enddate'] = $this->cleanOutStr($r->enddate);
-				$retArr[$r->ometid]['source'] = $this->cleanOutStr($r->source);
-				$retArr[$r->ometid]['notes'] = $this->cleanOutStr($r->notes);
-				$retArr[$r->ometid]['lasteditedby'] = $r->lasteditedby;
+				$titleStr = $r->title;
+				if($r->editor) $titleStr .= ', '.$r->editor;
+				if($r->exsrange) $titleStr .= ' ['.$r->exsrange.']';
+				$retArr[$r->ometid] = $this->cleanOutStr($titleStr);
 			}
 			$rs->close();
 		}
@@ -108,8 +97,8 @@ class ExsiccatiManager {
 			//Grab all numbers for that exsiccati title; only show number that have occid links
 			$sql = 'SELECT DISTINCT en.omenid, en.exsnumber, en.notes, o.sciname, '.
 				'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),") ",IFNULL(o.eventDate,"date unknown")) as collector '.
-				'FROM omexsiccatinumbers en '.($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-				($specimenOnly&&$imagesOnly?'INNER':'LEFT').' JOIN omoccurrences o ON ol.occid = o.occid ';
+				'FROM omexsiccatinumbers en '.($specimenOnly || $imagesOnly?'INNER':'LEFT').' JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+				($specimenOnly || $imagesOnly?'INNER':'LEFT').' JOIN omoccurrences o ON ol.occid = o.occid ';
 			if($imagesOnly) $sql .= 'INNER JOIN images i ON o.occid = i.occid '; 
 			$sql .= 'WHERE en.ometid = '.$ometid.' ';
 			if($collId) $sql .= 'AND o.collid = '.$collId.' ';
@@ -231,67 +220,197 @@ class ExsiccatiManager {
 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM omexsiccatititles WHERE (ometid = '.$ometid.')';
 			//echo $sql;
-			if(!$con->query($sql)) $retStr = 'DELETE Failed: possibly due to existing exsiccati numbers, which first have to be deleted.';
+			if(!$con->query($sql)){
+				$retStr = 'DELETE Failed: possibly due to existing exsiccati numbers, which first have to be deleted.';
+			}
+			$con->close();
+		}
+		return $retStr;
+	}
+
+	public function mergeTitles($ometid,$targetOmetid){
+		$retStr = '';
+		if($ometid && is_numeric($ometid) && $targetOmetid && is_numeric($targetOmetid)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			//Transfer omexsiccatinumbers that can be transferred (e.g. exsnumbers not yet existing for target exsiccati titles)
+			$sql = 'UPDATE IGNORE omexsiccatinumbers '.
+				'SET ometid = '.$targetOmetid.' '.
+				'WHERE ometid = '.$ometid;
+			//echo $sql;
+			$con->query($sql);
+			
+			//Remap omexsiccatiocclink that are still linked to old exsiccati title 
+			$sql = 'UPDATE IGNORE omexsiccatiocclink o INNER JOIN omexsiccatinumbers n1 ON o.omenid = n1.omenid '.
+				'INNER JOIN omexsiccatinumbers n2 ON n1.exsnumber = n2.exsnumber '.
+				'SET o.omenid = n2.omenid '.
+				'WHERE n1.ometid = '.$ometid.' AND n2.ometid = '.$targetOmetid;
+			//echo $sql;
+			$con->query($sql);
+
+			//DELETE omexsiccatinumbers for old ometids with no linked occurrences 
+			$sql = 'DELETE n.* FROM omexsiccatinumbers n LEFT JOIN omexsiccatiocclink o ON n.omenid = o.omenid '.
+				'WHERE o.omenid IS NULL AND n.ometid = '.$ometid;
+			//echo $sql;
+			if(!$con->query($sql)){
+				$retStr = 'ERROR deleting omexsiccatinumbers: '.$con->error;
+			}
+			
+			//DELETE omexsiccatinumbers for old ometids with no linked occurrences 
+			$sql = 'DELETE FROM omexsiccatititles '.
+				'WHERE ometid = '.$ometid;
+			//echo $sql;
+			if(!$con->query($sql)){
+				$retStr = 'ERROR deleting omexsiccatititles: '.$con->error;
+			}
+			
 			$con->close();
 		}
 		return $retStr;
 	}
 
 	public function addNumber($pArr){
+		$retStr = '';
 		$con = MySQLiConnectionFactory::getCon("write");
 		$sql = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber,notes) '.
 			'VALUES('.$pArr['ometid'].',"'.$this->cleanInStr($pArr['exsnumber']).'",'.
 			($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').')';
 		//echo $sql;
-		$con->query($sql);
+		if(!$con->query($sql)){
+			$retStr = 'ERROR adding exsiccati number: '.$con->error;
+		}
 		$con->close();
+		return $retStr;
 	}
 
 	public function editNumber($pArr){
+		$retStr = '';
 		if($pArr['omenid'] && is_numeric($pArr['omenid'])){
 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omexsiccatinumbers '.
 				'SET exsnumber = "'.$this->cleanInStr($pArr['exsnumber']).'",'.
 				'notes = '.($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').' '.
 				'WHERE (omenid = '.$pArr['omenid'].')';
-			$con->query($sql);
+			if(!$con->query($sql)){
+				$retStr = 'ERROR editing exsiccati number: '.$con->error;
+			}
 			$con->close();
 		}
+		return $retStr;
 	}
 
 	public function deleteNumber($omenid){
+		$retStr = '';
 		if($omenid && is_numeric($omenid)){
 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'DELETE FROM omexsiccatinumbers WHERE (omenid = '.$omenid.')';
-			$con->query($sql);
+			if(!$con->query($sql)){
+				$retStr = 'ERROR deleting exsiccati number: possibly due to linked occurrences reocrds. Delete all occurrence records and then you should be able to delete this number.';
+			}
 			$con->close();
 		}
+		return $retStr;
 	}
 
+	public function transferNumber($omenid,$targetOmetid){
+		$retStr = '';
+		if($omenid && is_numeric($omenid) && $targetOmetid && is_numeric($targetOmetid)){
+			$con = MySQLiConnectionFactory::getCon("write");
+			
+			//Check to see if a matching omexsiccatinumbers exists 
+			$sql = 'SELECT n1.omenid '.
+				'FROM omexsiccatinumbers n1 INNER JOIN omexsiccatinumbers n2 ON n1.exsnumber = n2.exsnumber '.
+				'WHERE n1.ometid = '.$targetOmetid.' AND n2.omenid = '.$omenid;
+			//echo $sql;
+			$rs = $con->query($sql);
+			if($r = $rs->fetch_object()){
+				//Remap omexsiccatiocclink to existing omexsiccatinumbers 
+				$sql1 = 'UPDATE IGNORE omexsiccatiocclink '.
+					'SET omenid = '.$r->omenid.' '.
+					'WHERE omenid = '.$omenid;
+				//echo $sql;
+				$con->query($sql1);
+
+				//DELETE omexsiccatinumbers for old omenid, given that there are no linked occurrences 
+				$sql2 = 'DELETE n.* FROM omexsiccatinumbers n LEFT JOIN omexsiccatiocclink o ON n.omenid = o.omenid '.
+					'WHERE o.omenid IS NULL AND n.omenid = '.$omenid;
+				//echo $sql;
+				if(!$con->query($sql2)){
+					$retStr = 'ERROR deleting omexsiccatinumber: '.$con->error;
+				}
+			}
+			else{
+				//Transfer omexsiccatinumber
+				$sql1 = 'UPDATE omexsiccatinumbers '.
+					'SET ometid = '.$targetOmetid.' '.
+					'WHERE omenid = '.$omenid;
+				//echo $sql;
+				if(!$con->query($sql1)){
+					$retStr = 'ERROR transferring omexsiccatinumber: '.$con->error;
+				}
+			}
+
+			$con->close();
+		}
+		return $retStr;
+	}
+	
 	public function addOccLink($pArr){
+		$retStr = '';
 		$collId = $pArr['occaddcollid'];
 		if($collId && $pArr['omenid'] && is_numeric($pArr['omenid'])){
 			$con = MySQLiConnectionFactory::getCon("write");
 			$ranking = 10;
 			if($pArr['ranking'] && is_numeric($pArr['ranking'])) $ranking = $pArr['ranking'];
 			$identifier = $pArr['identifier'];
-			$sql = '';
 			if($collId == 'occid' && $identifier && is_numeric($identifier)){
+				//occid being supplied within identifier field (catalog number field)
 				$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
 					'VALUES ('.$pArr['omenid'].','.$identifier.','.$ranking.','.
 					($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').')';
+				if(!$con->query($sql)){
+					$retStr = 'ERROR linking occurrence to exsiccati number, SQL: '.$sql;
+				}
 			}
-			else{
-				$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
-					'SELECT '.$pArr['omenid'].' AS omenid,o.occid,'.$ranking.' AS ranking,'.
-					($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').' AS notes '.
-					'FROM omoccurrences o '.
-					'WHERE o.collid = '.$collId.' AND o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"');
+			elseif($collId && is_numeric($collId) && ($identifier || ($pArr['recordedby'] && $pArr['recordnumber']))){
+				//Grab matching occid(s)
+				$sql1 = 'SELECT o.occid '.
+					'FROM omoccurrences o LEFT JOIN omexsiccatiocclink l ON o.occid = l.occid '.
+					'WHERE o.collid = '.$collId.' AND l.occid IS NULL ';
+				if($identifier){
+					$sql1 .= 'AND o.catalogNumber = '.(is_numeric($identifier)?$identifier:'"'.$identifier.'"').' ';
+				}
+				else{
+					$sql1 .= 'AND o.recordedby LIKE "%'.$pArr['recordedby'].'%" '.
+						'AND o.recordnumber = '.(is_numeric($pArr['recordnumber'])?$pArr['recordnumber']:'"'.$pArr['recordnumber'].'"').' ';
+				}
+				$sql1 .= 'LIMIT 5';
+				//echo $sql1;
+				$rs = $con->query($sql1);
+				$cnt = 0;
+				while($r = $rs->fetch_object()){
+					$sql = 'INSERT INTO omexsiccatiocclink(omenid,occid,ranking,notes) '.
+						'VALUES('.$pArr['omenid'].', '.$r->occid.', '.$ranking.','.
+						($pArr['notes']?'"'.$this->cleanInStr($pArr['notes']).'"':'NULL').')';
+					//echo $sql;
+					if(!$con->query($sql)){
+						$retStr = 'ERROR linking occurrence to exsiccati number, SQL: '.$sql;
+					}
+					$cnt++;
+				}
+				$rs->free();
+				if($cnt){
+					$retStr = 'SUCCESS: '.$cnt.' recorded loaded successfully';
+				}
+				else{
+					$retStr = 'FAILED: no records located matching criteria';
+				}
 			}
-			//echo $sql;
-			$con->query($sql);
 			$con->close();
 		}
+		else{
+			$retStr = 'FAILED: criteria may have not been complete';
+		}
+		return $retStr;
 	}
 
 	public function editOccLink($pArr){
@@ -313,6 +432,46 @@ class ExsiccatiManager {
 			$con->close();
 		}
 	}
+	
+	public function transferOccurrence($omenid, $occid, $targetOmetid, $targetExsNumber){
+		$statusStr = '';
+		if($omenid && is_numeric($omenid) && $targetOmetid && is_numeric($targetOmetid) && $targetExsNumber){
+			$con = MySQLiConnectionFactory::getCon("write");
+			//Lookup omenid
+			$targetOmenid = 0;
+			$sql = 'SELECT omenid FROM omexsiccatinumbers '.
+				'WHERE ometid = '.$targetOmetid.' AND exsnumber = "'.$this->cleanInStr($targetExsNumber).'"';
+			$rs = $con->query($sql);
+			if($r = $rs->fetch_object()){
+				$targetOmenid = $r->omenid;
+			}
+			else{
+				//Create new omexsiccatinumber record and the transfer
+				$sql1 = 'INSERT INTO omexsiccatinumbers(ometid, exsnumber) '.
+					'VALUES('.$targetOmetid.',"'.$this->cleanInStr($targetExsNumber).'") ';
+				if($con->query($sql1)){
+					$targetOmenid = $con->insert_id;
+				}
+				else{
+					$statusStr = 'ERROR inserting new omexsiccatinumbers record, SQL: '.$sql1;
+				}
+			} 
+			$rs->free();
+			if($targetOmenid){
+				//Transfer record
+				$sql2 = 'UPDATE omexsiccatiocclink SET omenid = '.$targetOmenid.' WHERE occid = '.$occid.' AND omenid = '.$omenid;
+				if(!$con->query($sql2)){
+					$statusStr = 'ERROR tranferring occurrence: '.$con->error;
+				}
+			}
+			else{
+				$statusStr = 'ERROR looking up omenid while trying to transfer occurrence';
+			}
+			
+			$con->close();
+		}
+		return $statusStr;
+	} 
 
 	public function getCollArr($exsOnly){
 		$retArr = array();

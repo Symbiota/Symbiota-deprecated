@@ -614,10 +614,21 @@ class BatchImageProcessor {
 			$rs->free();
 			$sql = '';
 			if($imgId && $exTnUrl <> $tnUrl && $exLgUrl <> $oUrl){
-				$sql = 'UPDATE images SET url = "'.$this->imgUrlBase.$this->targetPathFrag.$webUrl.'",'.
-					'thumbnailurl = "'.$this->imgUrlBase.$this->targetPathFrag.$tnUrl.'",'.
-					'originalurl = "'.$this->imgUrlBase.$this->targetPathFrag.$oUrl.'" '.
-					'WHERE imgid = '.$imgId;
+				
+				$sql = 'UPDATE images SET url = "'.$this->imgUrlBase.$this->targetPathFrag.$webUrl.'", ';
+				if($tnUrl){
+					$sql .= 'thumbnailurl = "'.$this->imgUrlBase.$this->targetPathFrag.$tnUrl.'",';
+				}
+				else{
+					$sql .= 'thumbnailurl = NULL,';
+				}
+				if($oUrl){
+					$sql .= 'originalurl = "'.$this->imgUrlBase.$this->targetPathFrag.$oUrl.'" ';
+				}
+				else{
+					$sql .= 'originalurl = NULL ';
+				}
+				$sql .= 'WHERE imgid = '.$imgId;
 			}
 			else{
 				$sql1 = 'INSERT images(occid,url';

@@ -160,7 +160,7 @@ class ChecklistLoaderManager {
 								}
 							}
 						}
-						$sciName = trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3));
+						$sciName = $this->encodeString(trim(trim($unitInd1." ".$unitName1)." ".trim($unitInd2." ".$unitName2)." ".trim($unitInd3." ".$unitName3)));
 						$sql = '';
 						if($thesId){
 							$sql = "SELECT t2.tid, ts.family, t2.rankid ".
@@ -260,6 +260,31 @@ class ChecklistLoaderManager {
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
+	}
+
+	private function encodeString($inStr){
+		global $charset;
+		$retStr = $inStr;
+		//Get rid of curly quotes
+		$search = array("’", "‘", "`", "”", "“"); 
+		$replace = array("'", "'", "'", '"', '"'); 
+		$inStr= str_replace($search, $replace, $inStr);
+		
+		if($inStr){
+			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+			}
+			elseif(strtolower($charset) == "iso-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
+			}
+ 		}
+		return $retStr;
 	}
 }
 ?>
