@@ -24,6 +24,25 @@ class OccurrenceEditorDupes {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
+	public function getDupes($collName, $collNum, $collDate, $currentOccid, $ometid, $exsNumber){
+		$retStr = '';
+		//Check exsiccati, exact dupes, and then duplicate events, in that order
+		//Check exsiccati dupes
+		if($ometid && $exsNumber){
+			
+		}
+		
+		//Check for exact dupes
+		
+		//Check for duplicate events
+		
+		
+		//Create consensus record?
+		 
+
+		return $retStr;
+	}
+	
 	//Used in dupesearch.php
 	public function getDupesCollector($collName, $collNum, $collDate, $currentOccid){
 		$collNum = $this->conn->real_escape_string($collNum);
@@ -65,7 +84,7 @@ class OccurrenceEditorDupes {
 		}
 		return $retArr;
 	}
-	
+
 	public function getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid){
 		$collNum = $this->conn->real_escape_string($collNum);
 		$collDate = $this->conn->real_escape_string($collDate);
@@ -153,21 +172,19 @@ class OccurrenceEditorDupes {
 		return $retArr;
 	}
 	
-	public function getDupesExsiccati($exsTitle, $exsNumber, $oid){
+	public function getDupesExsiccati($ometid, $exsNumber, $oid){
 		$retArr = array();
-		if($exsTitle && $exsNumber){
+		if($ometid && $exsNumber){
 			$this->sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '. 
 				'INNER JOIN omexsiccatiocclink el ON o.occid = el.occid '.
 				'INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
-				'INNER JOIN omexsiccatititles et ON en.ometid = et.ometid '.
-				'WHERE (et.title = "'.$exsTitle.'" OR et.abbreviation = "'.$exsTitle.'") AND en.exsnumber = "'.$exsNumber.'" ';
-			if($oid) $this->sql .= 'AND (o.occid != '.$oid.') ';
+				'WHERE (en.title = "'.$ometid.'") AND (en.exsnumber = "'.$exsNumber.'") AND (o.occid != '.$oid.') ';
 			//First run
 
 			//echo $this->sql;
 			$rs = $this->conn->query($this->sql);
-			while($row = $rs->fetch_assoc()){
-				$retArr[$row['occid']] = array_change_key_case($row);
+			while($r = $rs->fetch_assoc()){
+				$retArr[] = $r['occid'];
 			}
 			$rs->free();
 		}
