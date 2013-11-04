@@ -15,7 +15,9 @@ class OccurrenceEditorManager {
 	private $sqlWhere;
 	private $qryArr = array();
 	private $crowdSourceMode = 0;
+	private $exsiccatiMode = 0;
 	private $symbUid;
+	
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -88,6 +90,10 @@ class OccurrenceEditorManager {
 
 	public function setCrowdSourceMode($m){
 		$this->crowdSourceMode = $m;
+	}
+	
+	public function setExsiccatiMode($exsMode){
+		$this->exsiccatiMode = $exsMode;
 	}
 	
 	public function setQueryVariables($overrideQry = false){
@@ -462,9 +468,14 @@ class OccurrenceEditorManager {
 				$retArr[$occid] = array_change_key_case($row);
 			}
 			$rs->free();
-			if(!$this->occid && $retArr && count($retArr) == 1) $this->occid = $occid; 
+			if(!$this->occid && $retArr && count($retArr) == 1){
+				$this->occid = $occid;
+			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
-			if($this->occid) $this->setLoanData();
+			if($this->occid){
+				$this->setLoanData();
+				if($this->exsiccatiMode) $this->setExsiccati();
+			}
 		}
 	}
 
@@ -472,39 +483,67 @@ class OccurrenceEditorManager {
 		global $paramsArr;
 		$status = '';
 		if(!$autoCommit && $this->getObserverUid() == $paramsArr['uid']) $autoCommit = 1;
+		
 		$editedFields = trim($occArr['editedfields']);
 		$editArr = array_unique(explode(';',$editedFields));
-		foreach($editArr as $k => $v){
-			if(!trim($v)) unset($editArr[$k]);
+		foreach($editArr as $k => $fName){
+			if(!trim($fName)){
+				unset($editArr[$k]);
+			}
 		}
 		if($editArr){
 			//Add edits to omoccuredits
 			//Get old values before they are changed
-			$sql = 'SELECT '.implode(',',$editArr).(in_array('processingstatus',$editArr)?'':',processingstatus').
+			$sql = '';
+			if(in_array('ometid',$editArr) || in_array('exsnumber',$editArr)){
+				//Exsiccati edit has been submitted
+				$sql = 'SELECT '.str_replace('ometid','et.ometid',($editArr?implode(',',$editArr):'')).',et.title'.
+				(in_array('processingstatus',$editArr)?'':',processingstatus').(in_array('recordenteredby',$editArr)?'':',recordenteredby').
+				' FROM omoccurrences o LEFT JOIN omexsiccatiocclink el ON o.occid = el.occid '.
+				'LEFT JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
+				'LEFT JOIN omexsiccatititles et ON en.ometid = et.ometid '.
+				'WHERE o.occid = '.$occArr['occid'];
+			}
+			else{
+				$sql = 'SELECT '.($editArr?implode(',',$editArr):'').(in_array('processingstatus',$editArr)?'':',processingstatus').
 				(in_array('recordenteredby',$editArr)?'':',recordenteredby').
-				',recordenteredby FROM omoccurrences WHERE occid = '.$occArr['occid'];
+				' FROM omoccurrences WHERE occid = '.$occArr['occid'];
+			}
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			$oldValues = $rs->fetch_assoc();
 			$rs->free();
+
 			//Version edits 
-			if($oldValues['processingstatus'] != 'unprocessed' || $oldValues['recordenteredby']){ 
-				//Don't version auto-submitted records (old processing status = "unprocessed" and editor Is Null)
-				$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
-					'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
-				foreach($editArr as $v){
-					$v = trim($v);
-					if(!array_key_exists($v,$occArr)){
-						//Field is a checkbox that is unchecked
-						$occArr[$v] = 0;
+			$isSkeletal = false;
+			if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']) $isSkeletal = true; 
+			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
+				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
+			foreach($editArr as $fieldName){
+				if(!array_key_exists($fieldName,$occArr)){
+					//Field is a checkbox that is unchecked
+					$occArr[$fieldName] = 0;
+				}
+				$newValue = $this->cleanInStr($occArr[$fieldName]);
+				$oldValue = $this->cleanInStr($oldValues[$fieldName]);
+				//Version edits only if value has changed and is not a skeletal record with previously null values 
+				if($oldValue != $newValue && (!$isSkeletal || $oldValue)){
+					if($fieldName == 'ometid'){
+						//Exsiccati title has been changed, thus grab title string
+						$exsTitleStr = '';
+						$sql = 'SELECT title FROM omexsiccatititles WHERE ometid = '.$occArr['ometid'];
+						$rs = $this->conn->query($sql);
+						if($r = $rs->fetch_object()){
+							$exsTitleStr = $r->title;
+						}
+						$rs->free();
+						//Setup old and new strings
+						if($newValue) $newValue = $exsTitleStr.' (ometid: '.$occArr['ometid'].')';
+						if($oldValue) $oldValue = $oldValues['title'].' (ometid: '.$oldValues['ometid'].')';
 					}
-					$newValue = $this->cleanInStr($occArr[$v]);
-					$oldValue = $this->cleanInStr($oldValues[$v]);
-					//Version edits only if value has changed and old value was not null 
-					if($v && $oldValue != $newValue){
-						$sqlEdit = $sqlEditsBase.'"'.$v.'","'.$newValue.'","'.$oldValue.'")';
-						//echo '<div>'.$sqlEdit.'</div>';
-						$this->conn->query($sqlEdit);
-					}
+					$sqlEdit = $sqlEditsBase.'"'.$fieldName.'","'.$newValue.'","'.$oldValue.'")';
+					//echo '<div>'.$sqlEdit.'</div>';
+					$this->conn->query($sqlEdit);
 				}
 			}
 			//Edit record only if user is authorized to autoCommit 
@@ -519,25 +558,16 @@ class OccurrenceEditorManager {
 				if(array_key_exists('autoprocessingstatus',$occArr) && $occArr['autoprocessingstatus']){
 					$occArr['processingstatus'] = $occArr['autoprocessingstatus'];
 				}
-				foreach($occArr as $ok => $ov){
-					if(in_array($ok,$this->occFieldArr) && $ok != 'observeruid'){
+				foreach($occArr as $oField => $ov){
+					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
-						$sql .= ','.$ok.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
-						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($ok,$this->occurrenceMap[$this->occid])){
-							$this->occurrenceMap[$this->occid][$ok] = $vStr;
+						$sql .= ','.$oField.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
+						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($oField,$this->occurrenceMap[$this->occid])){
+							$this->occurrenceMap[$this->occid][$oField] = $vStr;
 						}
 					}
 				}
-/*				foreach($editArr as $v){
-					if($v && array_key_exists($v,$occArr)){
-						$vStr = $this->cleanStr($occArr[$v]);
-						$sql .= ','.$v.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
-						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($v,$this->occurrenceMap[$this->occid])){
-							$this->occurrenceMap[$this->occid][$v] = $vStr;
-						}
-					}
-				}
-*/
+				//Add tidinterpreted
 				if(in_array('sciname',$editArr) && in_array('sciname',$occArr) && $occArr['sciname']){
 					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
 					$rsTid = $this->conn->query($sqlTid);
@@ -557,11 +587,53 @@ class OccurrenceEditorManager {
 				//echo $sql;
 				if($this->conn->query($sql)){
 					if($this->crowdSourceMode){
-						//Add uid to omcrowdsourcequeue for given record
+						//UPDATE uid within omcrowdsourcequeue, only if not yet processed
 						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 '.
 							'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';
 						if(!$this->conn->query($sql)){
 							$status = 'ERROR tagging user as the crowdsourcer (#'.$occArr['occid'].'): '.$this->conn->error.'; '.$sql;
+						}
+					}
+					//Deal with exsiccati
+					if(in_array('ometid',$editArr) || in_array('exsnumber',$editArr)){
+						$ometid = $this->cleanInStr($occArr['ometid']);
+						$exsNumber = $this->cleanInStr($occArr['exsnumber']);
+						if($ometid && $exsNumber){
+							//Values have been submitted, thus try to add ometid and omenid
+							//Get exsiccati number id 
+							$exsNumberId = '';
+							$sql = 'SELECT omenid FROM omexsiccatinumbers WHERE ometid = '.$ometid.' AND exsnumber = "'.$exsNumber.'"';
+							$rs = $this->conn->query($sql);
+							if($r = $rs->fetch_object()){
+								$exsNumberId = $r->omenid;
+							}
+							$rs->free();
+							if(!$exsNumberId){
+								//There is no exsnumber for that title, thus lets add it and grab new omenid
+								$sqlNum = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber) '.
+									'VALUES('.$ometid.',"'.$exsNumber.'")';
+								if($this->conn->query($sqlNum)){
+									$exsNumberId = $this->conn->insert_id;
+								}
+								else{
+									$status = 'ERROR adding exsiccati number: '.$this->conn->error.'; '.$sqlNum;
+								}
+							}
+							//Exsiccati was editted
+							if($exsNumberId){
+								//Use REPLACE rather than INSERT so that if record with occid already exists, it will be removed before insert
+								$sql1 = 'REPLACE INTO omexsiccatiocclink(omenid, occid) '.
+									'VALUES('.$exsNumberId.','.$occArr['occid'].')';
+								echo $sql1;
+								if(!$this->conn->query($sql1)){
+									$status = 'ERROR adding exsiccati: '.$this->conn->error.'; '.$sql1;
+								}
+							}
+						}
+						else{
+							//No exsiccati title or number values, thus need to remove
+							$sql = 'DELETE FROM omexsiccatiocclink WHERE occid = '.$occArr['occid'];
+							$this->conn->query($sql);
 						}
 					}
 				}
@@ -673,6 +745,40 @@ class OccurrenceEditorManager {
 				if(!$this->conn->query('INSERT INTO guidoccurrences(guid,occid) VALUES("'.$guid.'",'.$this->occid.')')){
 					$status .= ' (Warning: Symbiota GUID mapping failed)';
 				}
+				//deal with Exsiccati, if applicable
+				if(isset($occArr['ometid']) && isset($occArr['exsnumber'])){
+					//If exsiccati titie is submitted, trim off first character that was used to force Google Chrom to sort correctly
+					$ometid = $this->cleanInStr($occArr['ometid']);
+					$exsNumber = $this->cleanInStr($occArr['exsnumber']);
+					if($ometid && $exsNumber){
+						$exsNumberId = '';
+						$sql = 'SELECT omenid FROM omexsiccatinumbers WHERE ometid = '.$ometid.' AND exsnumber = "'.$exsNumber.'"';
+						$rs = $this->conn->query($sql);
+						if($r = $rs->fetch_object()){
+							$exsNumberId = $r->omenid;
+						}
+						$rs->free();
+						if(!$exsNumberId){
+							//There is no exsnumber for that title, thus lets add it and record exsomenid
+							$sqlNum = 'INSERT INTO omexsiccatinumbers(ometid,exsnumber) '.
+								'VALUES('.$ometid.',"'.$exsNumber.'")';
+							if($this->conn->query($sqlNum)){
+								$exsNumberId = $this->conn->insert_id;
+							}
+							else{
+								$status = 'ERROR adding exsiccati number: '.$this->conn->error.'; '.$sqlNum;
+							}
+						}
+						if($exsNumberId){
+							//Add exsiccati
+							$sql1 = 'INSERT INTO omexsiccatiocclink(omenid, occid) '.
+								'VALUES('.$exsNumberId.','.$this->occid.')';
+							if(!$this->conn->query($sql1)){
+								$status = 'ERROR adding exsiccati: '.$this->conn->error.'; '.$sql1;
+							}
+						}
+					}
+				}
 			}
 			else{
 				$status = "ERROR - failed to add occurrence record: ".$this->conn->error.'<br/>SQL: '.$sql;
@@ -733,7 +839,23 @@ class OccurrenceEditorManager {
 				}
 				$rs->close();
 				$archiveArr['imgs'] = $imgArr;
-
+				
+				//Archive Exsiccati info
+				$exsArr = array();
+				$sql = 'SELECT t.ometid, t.title, t.abbreviation, t.editor, t.exsrange, t.startdate, t.enddate, t.source, t.notes as titlenotes, '. 
+					'n.omenid, n.exsnumber, n.notes AS numnotes, l.notes, l.ranking '.
+					'FROM omexsiccatiocclink l INNER JOIN omexsiccatinumbers n ON l.omenid = n.omenid '.
+					'INNER JOIN omexsiccatititles t ON n.ometid = t.ometid '.
+					'WHERE l.occid = '.$delOccid;
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_assoc()){
+					foreach($r as $k => $v){
+						if($v) $exsArr[$k] = $this->encodeStrTargeted($v,$charset,'utf8');
+					}
+				}
+				$rs->close();
+				$archiveArr['exsiccati'] = $exsArr;
+				
 				//Archive complete occurrence record
 				$archiveArr['dateDeleted'] = date('r').' by '.$userDisplayName;
 				$archiveObj = json_encode($archiveArr);
@@ -744,7 +866,8 @@ class OccurrenceEditorManager {
 				$this->conn->query($sqlArchive);
 			}
 
-			//Go ahead and delete 
+			//Go ahead and delete
+			//Associated records will be deleted from: omexsiccatiocclink, omoccurdeterminations, fmvouchers 
 			$sqlDel = 'DELETE FROM omoccurrences WHERE (occid = '.$delOccid.')';
 			if($this->conn->query($sqlDel)){
 				$status = 'SUCCESS: Occurrence Record Deleted!';
@@ -756,7 +879,7 @@ class OccurrenceEditorManager {
 		return $status;
 	}
 	
-	public function setLoanData(){
+	private function setLoanData(){
 		$sql = 'SELECT l.loanid, l.datedue, i.institutioncode '.
 			'FROM omoccurloanslink ll INNER JOIN omoccurloans l ON ll.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
@@ -769,7 +892,32 @@ class OccurrenceEditorManager {
 		}
 		$rs->free();
 	}
+
+	private function setExsiccati(){
+		$sql = 'SELECT l.notes, l.ranking, l.omenid, n.exsnumber, t.ometid, t.title, t.abbreviation, t.editor '.
+			'FROM omexsiccatiocclink l INNER JOIN omexsiccatinumbers n ON l.omenid = n.omenid '.
+			'INNER JOIN omexsiccatititles t ON n.ometid = t.ometid '.
+			'WHERE l.occid = '.$this->occid;
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->occurrenceMap[$this->occid]['ometid'] = $r->ometid;
+			$this->occurrenceMap[$this->occid]['exsnumber'] = $r->exsnumber;
+		}
+		$rs->free();
+	}
 	
+	public function getExsiccatiTitleArr(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT ometid, title, abbreviation FROM omexsiccatititles ORDER BY title ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while ($r = $rs->fetch_object()) {
+			$retArr[$r->ometid] = $this->cleanOutStr($r->title.($r->abbreviation?' ['.$r->abbreviation.']':''));
+		}
+		return $retArr;
+	}
+
 	public function getObserverUid(){
 		$obsId = 0;
 		if($this->occurrenceMap && array_key_exists('observeruid',$this->occurrenceMap[$this->occid])){

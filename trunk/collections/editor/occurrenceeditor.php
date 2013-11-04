@@ -83,6 +83,7 @@ if($symbUid){
 			include('includes/config/crowdSourceVar.php');
 		}
 	}
+	if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI) $occManager->setExsiccatiMode(true);
 	
 	if(!$isEditor){
 		if($isGenObs){ 
@@ -299,7 +300,7 @@ else{
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
-	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css?ver=130926" type="text/css" rel="stylesheet" />
     <?php 
     if($crowdSourceMode == 1){
 		?>
@@ -332,8 +333,8 @@ else{
 		var tabTarget = <?php echo $tabTarget; ?>;
 		<?php
 		if(isset($SALIX_PATH) && $SALIX_PATH){
-			echo 'var salixPath = "'.$SALIX_PATH.'";'."\n";
-			echo 'var csDefault = '.$charset.";\n";
+			echo 'var salixPath = "'.$SALIX_PATH.'";';
+			echo 'var csDefault = "'.$charset.'";';
 		}
 		if($imgArr){
 			?>
@@ -589,7 +590,7 @@ else{
 												}
 												?>
 											</div>
-											<div style="clear:both;height:40px;">
+											<div style="clear:both;">
 												<div id="associatedCollectorsDiv">
 													<div class="flabel">
 														<?php echo (defined('ASSOCIATEDCOLLECTORSLABEL')?ASSOCIATEDCOLLECTORSLABEL:'Associated Collectors'); ?>
@@ -599,22 +600,13 @@ else{
 												</div>
 												<div id="verbatimEventDateDiv">
 													<div class="flabel">
-														<?php echo (defined('VERBATIMEVENTDATELABEL')?VERBATIMEVENTDATELABEL:'Verbatim Date'); ?>:
+														<?php echo (defined('VERBATIMEVENTDATELABEL')?VERBATIMEVENTDATELABEL:'Verbatim Date'); ?>
 														<a href="#" onclick="return dwcDoc('verbatimEventDate')"><img class="docimg" src="../../images/qmark.png" /></a>
 													</div>
 													<input type="text" name="verbatimeventdate" tabindex="19" maxlength="255" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
 												</div>
 												<div id="dateToggleDiv">
 													<a href="#" onclick="toggle('dateextradiv');return false;"><img src="../../images/editplus.png" style="width:15px;" /></a>
-													<?php
-													if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){ 
-														?>
-														<a href="#" style="margin:20px 0px 0px 5px;" onclick="toggle('exsdiv');return false;">
-															<img src="../../images/exsiccatiadd.jpg" style="width:23px;" />
-														</a>
-														<?php
-													}
-													?>
 												</div>
 												<?php
 												if(array_key_exists('loan',$occArr)){ 
@@ -652,8 +644,24 @@ else{
 											<?php
 											if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){ 
 												?>
-												<div id="exsdiv" style="display:none;">
-													<iframe id="exsiframe" src="includes/exsiccatiframe.php?occid=<?php echo $occId; ?>" style="width:95%;height:100px;"></iframe>
+												<div id="exsdiv" style="clear:both;">
+													<div style="float:left;">
+														Exsiccati Title<br/>
+														<select name="ometid" style="width:600px;" onchange="fieldChanged('ometid')">
+															<option value="">----------------------------------------------</option>
+															<?php 
+															$exsArr = $occManager->getExsiccatiTitleArr();
+															$selectedOmetid = (isset($occArr['ometid'])?$occArr['ometid']:'');
+															foreach($exsArr as $ometid => $esxTitle){
+																echo '<option value="'.$ometid.'" '.($selectedOmetid==$ometid?'SELECTED':'').'>'.$esxTitle.'</option>';
+															}
+															?>
+														</select> 
+													</div>
+													<div style="float:left;margin-left:5px;">
+														Number<br/>
+														<input name="exsnumber" type="text" value="<?php echo isset($occArr['exsnumber'])?$occArr['exsnumber']:''; ?>" style="width:50px;" onchange="fieldChanged('exsnumber')" />
+													</div> 
 												</div>
 												<?php 
 											}
@@ -663,7 +671,7 @@ else{
 											<legend><b>Latest Identification</b></legend>
 											<div style="clear:both;">
 												<div id="scinameDiv">
-													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>:
+													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo (!$isEditor && $occArr['sciname'] != ''?'disabled ':''); ?> />
@@ -675,7 +683,7 @@ else{
 													?>
 												</div>
 												<div id="scientificNameAuthorshipDiv">
-													<?php echo (defined('SCIENTIFICNAMEAUTHORSHIPLABEL')?SCIENTIFICNAMEAUTHORSHIPLABEL:'Author'); ?>:
+													<?php echo (defined('SCIENTIFICNAMEAUTHORSHIPLABEL')?SCIENTIFICNAMEAUTHORSHIPLABEL:'Author'); ?>
 													<a href="#" onclick="return dwcDoc('scientificNameAuthorship')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
@@ -683,24 +691,24 @@ else{
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
 												<div id="identificationQualifierDiv">
-													<?php echo (defined('IDENTIFICATIONQUALIFIERLABEL')?IDENTIFICATIONQUALIFIERLABEL:'ID Qualifier'); ?>:
+													<?php echo (defined('IDENTIFICATIONQUALIFIERLABEL')?IDENTIFICATIONQUALIFIERLABEL:'ID Qualifier'); ?>
 													<a href="#" onclick="return dwcDoc('identificationQualifier')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
 												</div>
 												<div  id="familyDiv">
-													<?php echo (defined('FAMILYLABEL')?FAMILYLABEL:'Family'); ?>:
+													<?php echo (defined('FAMILYLABEL')?FAMILYLABEL:'Family'); ?>
 													<a href="#" onclick="return dwcDoc('family')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<input type="text" name="family" maxlength="50" tabindex="0" value="<?php echo array_key_exists('family',$occArr)?$occArr['family']:''; ?>" onchange="fieldChanged('family');" />
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
 												<div id="identifiedByDiv">
-													<?php echo (defined('IDENTIFIEDBYLABEL')?IDENTIFIEDBYLABEL:'Identified By'); ?>:
+													<?php echo (defined('IDENTIFIEDBYLABEL')?IDENTIFIEDBYLABEL:'Identified By'); ?>
 													<a href="#" onclick="return dwcDoc('identifiedBy')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<input type="text" name="identifiedby" maxlength="255" tabindex="32" value="<?php echo array_key_exists('identifiedby',$occArr)?$occArr['identifiedby']:''; ?>" onchange="fieldChanged('identifiedby');" />
 												</div>
 												<div id="dateIdentifiedDiv">
-													<?php echo (defined('DATEIDENTIFIEDLABEL')?DATEIDENTIFIEDLABEL:'Date Identified'); ?>:
+													<?php echo (defined('DATEIDENTIFIEDLABEL')?DATEIDENTIFIEDLABEL:'Date Identified'); ?>
 													<a href="#" onclick="return dwcDoc('dateIdentified')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<input type="text" name="dateidentified" maxlength="45" tabindex="34" value="<?php echo array_key_exists('dateidentified',$occArr)?$occArr['dateidentified']:''; ?>" onchange="fieldChanged('dateidentified');" />
 												</div>
@@ -746,7 +754,7 @@ else{
 												</div>
 											</div>
 											<div id="localityDiv">
-												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>:
+												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>
 												<br />
 												<input type="text" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
 											</div>

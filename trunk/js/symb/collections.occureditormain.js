@@ -16,7 +16,7 @@ $(document).ready(function() {
 			if(ffversion < 7 ) alert("You are using an older version of Firefox. For best results, we recommend that you update your browser.");
 		}
 	}
-	
+
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
 			if(verifyLeaveForm()){
@@ -42,12 +42,6 @@ $(document).ready(function() {
 		}
 	},
 	{ minLength: 3 });
-
-	$("#ffexstitle").autocomplete({ 
-		source: "rpc/getexstitlesuggest.php"
-	},
-	{ minLength: 3 });
-
 
 	//Misc fields with lookups
 	$("#ffcountry").autocomplete({ 
@@ -378,6 +372,10 @@ function verifyFullForm(f){
 	}
 	if(!isNumeric(f.enddayofyear.value)){
 		alert("End day of year field must be numeric only");
+		return false;
+	}
+	if(f.ometid && ((f.ometid.value != "" && f.exsnumber.value == "") || (f.ometid.value == "" && f.exsnumber.value != ""))){
+		alert("If an Exsiccati title is entered, the exsiccati number must also be entered");
 		return false;
 	}
 	if(!verifyDecimalLatitude(f)){
