@@ -161,11 +161,17 @@ elseif($action == 'listdupsrecordedby'){
 						query database for possible duplicate records. Note that a maximun of 500 records will 
 						be returned at a time.
 					</div>
-					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupscatalog">
-							Search for duplicates based on <b>Catalog Numbers</b>
-						</a>
-					</div>
+					<?php 
+					if($collMap['colltype'] != 'General Observations'){
+						?>
+						<div style="margin:25px;font-weight:bold;font-size:120%;">
+							<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupscatalog">
+								Search for duplicates based on <b>Catalog Numbers</b>
+							</a>
+						</div>
+						<?php
+					}
+					?>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						<a href="occurrencecleaner.php?collid=<?php echo $collId.'&obsuid='.$obsUid; ?>&action=listdupsrecordedby">
 							Search for duplicates based on <b>Collector/Observer and numbers</b>
