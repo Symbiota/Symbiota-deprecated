@@ -66,7 +66,7 @@ class OccurrenceCleaner {
 		$retArr = array();
 		$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
 			'FROM omoccurrences o INNER JOIN '. 
-			'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid '.
+			'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid, observeruid '.
 			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
 			'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
 			'WHERE collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' ';
