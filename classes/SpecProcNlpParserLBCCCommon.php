@@ -928,7 +928,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN(?:[5S]|(?:FL[O0D]R\\w)))|(?:CRYPT[O0DQU]GAM[5S])|".
 			"(?:BRY[O0DQU](?:(?:FL[O0D]R\\w)|(?:PHYT(?:A|[EC][5S]))))|(?:M[O0][5S]{2}E[5S])|".
 			"(?:MU[5S][CG][l1|I!])|(?:HEPAT[L1!|]CA.)|(?:P[L1!|]ANT[5S])|(?:[5S]PHAGNA))".
-			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][REFPKI1][RFPN]?)(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
+			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][EFPKI1][RFPN]?)(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
 		if(preg_match($statePatStr, $str, $matches)) {
 			if(preg_match($statePatStr, $matches[1], $matches2)) {
 				return array($matches2[1], $matches2[3], $matches2[4].$matches[2].$matches[3].$matches[4]);
