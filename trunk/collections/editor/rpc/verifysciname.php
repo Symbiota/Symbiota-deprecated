@@ -13,7 +13,7 @@ if($sciName){
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
 		$retArr['tid'] = $row->tid;
-		$retArr['author'] = utf8_encode($row->author);
+		$retArr['author'] = $row->author;
 		$retArr['family'] = $row->family;
 		$retArr['sstatus'] = $row->securitystatus;
 	}
