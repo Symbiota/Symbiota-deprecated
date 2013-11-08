@@ -1,4 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorDupes.php');
@@ -8,23 +7,23 @@ $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'
 $curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:0);
 $cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
-$isExactMatch = (array_key_exists('exact',$_GET)?$_GET['exact']:1);
 
 $occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
 $dupeManager = new OccurrenceEditorDupes();
 
+$dupeType = substr($occidQuery,0,5);
 $occArr = array();
 if(!$submitAction && $occidQuery){
-	$occArr = $dupeManager->getDupesOccid($occidQuery);
+	$occArr = $dupeManager->getDupesOccid(substr($occidQuery,6));
 }
 
 $onLoadStr = '';
 $statusStr = '';
 if($submitAction){
 	$isEditor = 0;
-	if($isAdmin 
+	if($IS_ADMIN 
 		|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) 
 		|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 		$isEditor = 1;
@@ -36,26 +35,40 @@ if($submitAction){
 		}
 	}
 }
-
-$firstOcc = reset($occArr);
+//Get list of collections user can edit 
+$collRightsArr = array();
+if(!$IS_ADMIN){
+	if(array_key_exists('CollAdmin',$userRights)){
+		$collRightsArr = $userRights['CollAdmin'];
+	}
+	if(array_key_exists('CollEditor',$userRights)){
+		$collRightsArr = array_merge($collRightsArr,$userRights['CollEditor']);
+	}
+}
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 	<head>
 		<title><?php echo $defaultTitle; ?> - Duplicate Record Search</title>
+	    <link type="text/css" href="../../css/main.css" rel="stylesheet" />
+	    <style type="text/css">
+			table.styledtable td { white-space: nowrap; }
+	    </style>
 		<script type="text/javascript">
 			var occArr = new Array();
 			<?php 
 			if($occArr){
 				foreach($occArr as $occId => $oArr){
 					echo 'var oArr = new Array();'."\n";
-					$tempOcc = $oArr;
+					$tempOcc = array_change_key_case($oArr);
 					unset($tempOcc['occid']);
 					unset($tempOcc['catalognumber']);
 					unset($tempOcc['othercatalognumbers']);
-					if(!$isExactMatch){
+					if($dupeType == 'event'){
+						//Matching event, thus limit output
 						unset($tempOcc['family']);
 						unset($tempOcc['sciname']);
-						unset($tempOcc['tidtoadd']);
+						unset($tempOcc['tid']);
 						unset($tempOcc['scientificnameauthorship']);
 						unset($tempOcc['taxonremarks']);
 						unset($tempOcc['identifiedby']);
@@ -67,7 +80,7 @@ $firstOcc = reset($occArr);
 						unset($tempOcc['recordnumber']);
 					}
 					foreach($tempOcc as $k => $v){
-						if($v) echo 'oArr["'.$k.'"] = "'.str_replace(array('"',"\n"),"",$v).'";'."\n";
+						if($v) echo 'oArr["'.$k.'"] = "'.$v.'";'."\n";
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
@@ -82,7 +95,8 @@ $firstOcc = reset($occArr);
 						var elem = openerForm.elements[k];
 						if(elem.disabled == false && (appendMode == false || elem.value == "")){
 							elem.value = tArr[k];
-							if(k != "tidtoadd") opener.fieldChanged(k);
+							elem.style.backgroundColor = "lightblue";
+							if(k != "tid") opener.fieldChanged(k);
 						}
 					}
 					catch(err){
@@ -124,171 +138,221 @@ $firstOcc = reset($occArr);
 			}
 			if($occArr){
 				echo '<div style="font-weight:bold;font-size:130%;">';
-				if($isExactMatch){
-					echo 'Possible EXACT duplicates';
+				if($dupeType == 'exsic'){
+					echo '<span style="color:blue;">Exsiccati Duplicates</span>';
+				}
+				elseif($dupeType == 'exact'){
+					echo '<span style="color:green;">Possible EXACT Duplicates</span>';
 				}
 				else{
-					echo 'Possible matching duplicate events';
+					echo '<span style="color:orange;">Possible Matching Duplicate EVENTS</span>';
 				}
 				echo '</div><hr/>';
-				$collArr = array();
-				if(!$isAdmin){
-					if(array_key_exists('CollAdmin',$userRights)){
-						$collArr = $userRights['CollAdmin'];
-					}
-					if(array_key_exists('CollEditor',$userRights)){
-						$collArr = array_merge($collArr,$userRights['CollEditor']);
-					}
-				}
-				foreach($occArr as $occId => $occObj){
-					if($isAdmin || in_array($occObj['colliddup'],$collArr)){
-						?>
-						<div style="float:right;margin:10px;">
-							<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
-								<img src="../../images/edit.png" />
-							</a>
-						</div>
-						<?php
-					}
-					?> 
-					<div style="font-weight:bold;font-size:120%;">
-						<?php echo $occObj['institutioncode'].($occObj['collectioncode']?':'.$occObj['collectioncode']:''); ?>
-					</div>
-					<?php if($collId == $occObj['colliddup'] && $isExactMatch){ ?>
-						<div style="color:red;">
-							NOTICE: Possible exact matches within collection. Record may already exist.
-						</div>
-						<div style="font-weight:bold;">
+				?>
+				<div id="tableview" style="display:none;">
+					<table class="styledtable">
+						<tr>
+							<th>&nbsp;</th>
+							<th>&nbsp;</th>
+							<th>&nbsp;</th>
+							<th>&nbsp;</th>
 							<?php 
-							if($occObj['catalognumber']) echo $occObj['catalognumber'];
-							if($occObj['othercatalognumbers']) echo ' ('.$occObj['othercatalognumbers'].')';
-							?>
-						</div>
-					<?php } ?>
-					<div>
-						<?php 
-						echo '<span title="recordedby">'.($occObj['recordedby']?$occObj['recordedby']:'Collector field empty').'</span>';
-						if($occObj['recordnumber']) echo '<span style="margin-left:20px;" title="recordnumber">'.$occObj['recordnumber'].'</span>';
-						if($occObj['eventdate']){
-							echo '<span style="margin-left:20px;" title="eventdate">'.$occObj['eventdate'].'</span>';
-						}
-						elseif($occObj['verbatimeventdate']){
-							echo '<span style="margin-left:20px;" title="verbatimeventdate">'.$occObj['verbatimeventdate'].'</span>';
-						}
-						else{
-							echo '<span style="margin-left:20px;" title="eventdate">Date field empty</span>';
-						}
-						if($occObj['associatedcollectors']) echo '<div style="margin-left:10px;" title="associatedcollectors">Assoc. Collectors: '.$occObj['associatedcollectors'].'</div>';
-						?> 
-					</div>
-					<div>
-						<?php
-						if($occObj['sciname']){
-							if($occObj['identificationqualifier']) echo '<span title="identificationqualifier">'.$occObj['identificationqualifier'].'</span> '; 
-							echo '<span title="sciname"><i>'.$occObj['sciname'].'</i></span> ';
-							echo '<span title="scientificnameauthorship">'.$occObj['scientificnameauthorship'].'</span>';
-							echo '<span style="margin-left:25px;color:red;" title="typestatus">'.$occObj['typestatus'].'</span>';
-						}
-						else{
-							echo '<span title="sciname">Scientific Name empty</span> ';
-						}
-						?>
-					</div>
-					<div style='margin-left:10px;'>
-						<?php 
-						if($occObj['identificationremarks'] || $occObj['identificationreferences']){
-							echo '<span title="identificationremarks">'.$occObj['identificationremarks'].'</span>';
-							if($occObj['identificationremarks'] && $occObj['identificationreferences']) echo '<br/>';
-							echo '<span title="identificationreferences">'.$occObj['identificationreferences'].'</span>';
-						} 
-						?>
-					</div>
-					<div>
-						<?php
-						if($occObj['country']) echo '<span title="country">'.$occObj['country'].'</span>; ';
-						if($occObj['stateprovince']) echo '<span title="stateprovince">'.$occObj['stateprovince'].'</span>; ';
-						if($occObj['county']) echo '<span title="county">'.$occObj['county'].'</span>; ';
-						echo '<span title="locality">'.($occObj['locality']?$occObj['locality']:'Locality data empty').'</span>';
-						?>
-					</div>
-					<?php 
-					if($occObj['habitat']) echo '<div title="habitat">'.$occObj['habitat'].'</div>';
-					if($occObj['substrate']) echo '<div title="substrate">'.$occObj['substrate'].'</div>';
-					if($occObj['decimallatitude'] || $occObj['verbatimcoordinates']){
-						?>
-						<div>
-							<?php 
-							echo '<span title="decimallatitude">'.$occObj['decimallatitude'].'</span>; ';
-							echo '<span title="decimallongitude">'.$occObj['decimallongitude'].'</span>';
-							if($occObj['coordinateuncertaintyinmeters']) echo ' +-<span title="coordinateuncertaintyinmeters">'.$occObj['coordinateuncertaintyinmeters'].'</span>m. ';
-							if($occObj['geodeticdatum']) echo ' (<span title="geodeticdatum">'.$occObj['geodeticdatum'].'</span>)';
-							if($occObj['verbatimcoordinates']) echo '<div style="margin-left:10px;" title="verbatimcoordinates">'.$occObj['verbatimcoordinates'].'</div>';
-							$geoDetails = ''; 
-							if($occObj['georeferenceprotocol']) $geoDetails = '; <span title="georeferenceprotocol">'.$occObj['georeferenceprotocol']."</span>";
-							if($occObj['georeferencesources']) $geoDetails = '; <span title="georeferencesources">'.$occObj['georeferencesources']."</span>";
-							if($occObj['georeferenceremarks']) $geoDetails = '; <span title="georeferenceremarks">'.$occObj['georeferenceremarks']."</span>";
-							$geoDetails = trim($geoDetails,';');
-							if($geoDetails) echo '<div style="margin-left:10px;">'.$geoDetails.'</div>';
-							?>
-						</div>
-						<?php
-					}
-					if($occObj['minimumelevationinmeters'] || $occObj['verbatimelevation']){
-						?>
-						<div>
-							<?php 
-							if($occObj['minimumelevationinmeters']){
-								echo '<span title="minimumelevationinmeters">'.$occObj['minimumelevationinmeters'].'</span>';
-								if($occObj['maximumelevationinmeters']) echo '-<span title="maximumelevationinmeters">'.$occObj['maximumelevationinmeters'].'</span>';
-								echo ' meters ';
+							$relFields = $dupeManager->getRelevantFields();
+							foreach($relFields as $fieldName){
+								echo '<th>'.$fieldName.'</th>';
 							}
-							if($occObj['verbatimelevation']) echo 'Verbatim elev: <span title="verbatimelevation">'.$occObj['verbatimelevation'].'</span>';
+							?>
+						</tr>
+						<?php 
+						foreach($occArr as $id => $oArr){
+							?>
+							<tr>
+								<td title="Transfer only to empty fields">
+									<a href="" onclick="transferRecord(<?php echo $id; ?>,true);return false;">T-empty</a>
+								</td>
+								<td title="Transfer only to all fields that are open to editing">
+									<a href="#" onclick="transferRecord(<?php echo $id; ?>,false);return false;">T-all</a>
+								</td>
+								<td>
+									<?php 
+									if($curOccid){
+										echo '<a href="dupesearch.php?submitaction=mergerecs&curoccid='.$curOccid.'&occidmerge='.$id.'&collid='.$collId.'" onclick="return confirm(\'Are you sure you want to merge these two records?\')">Merge</a>';
+									}
+									?>
+								</td>
+								<td>
+									<?php 
+									if($collId == $oArr['collid']){
+										echo '<a href="occurrenceeditor.php?occid='.$occId.'"><img src="../../images/edit.png" /></a>';
+									}
+									?>
+								</td>
+								<?php 
+								foreach($relFields as $fieldName){
+									echo '<td>'.$oArr[$fieldName].'</td>';
+								}
+								?>
+							</tr>
+							<?php 
+						}
+						?>
+					</table>
+				</div>
+				<div id="paragraphview" style="display:block;">
+					<?php 
+					foreach($occArr as $occId => $occObj){
+						if($IS_ADMIN || in_array($occObj['collid'],$collRightsArr)){
+							//User can edit this specimen
+							?>
+							<div style="float:right;margin:10px;">
+								<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
+									<img src="../../images/edit.png" />
+								</a>
+							</div>
+							<?php
+						}
+						?> 
+						<div style="font-weight:bold;font-size:120%;">
+							<?php echo $occObj['institutionCode'].($occObj['collectionCode']?':'.$occObj['collectionCode']:''); ?>
+						</div>
+						<?php if($collId == $occObj['collid'] && ($dupeType == 'exact' || $dupeType == 'exsic')){ ?>
+							<div style="color:red;">
+								NOTICE: Possible exact matches within collection. Record may already exist.
+							</div>
+							<div style="font-weight:bold;">
+								<?php 
+								if($occObj['catalogNumber']) echo $occObj['catalogNumber'];
+								if($occObj['otherCatalogNumbers']) echo ' ('.$occObj['otherCatalogNumbers'].')';
+								?>
+							</div>
+						<?php } ?>
+						<div>
+							<?php 
+							echo '<span title="recordedby">'.($occObj['recordedBy']?$occObj['recordedBy']:'Collector field empty').'</span>';
+							if($occObj['recordNumber']) echo '<span style="margin-left:20px;" title="recordnumber">'.$occObj['recordNumber'].'</span>';
+							if($occObj['eventDate']){
+								echo '<span style="margin-left:20px;" title="eventdate">'.$occObj['eventDate'].'</span>';
+							}
+							elseif($occObj['verbatimEventDate']){
+								echo '<span style="margin-left:20px;" title="verbatimeventdate">'.$occObj['verbatimEventDate'].'</span>';
+							}
+							else{
+								echo '<span style="margin-left:20px;" title="eventdate">Date field empty</span>';
+							}
+							if($occObj['associatedCollectors']) echo '<div style="margin-left:10px;" title="associatedCollectors">Assoc. Collectors: '.$occObj['associatedCollectors'].'</div>';
+							?> 
+						</div>
+						<div>
+							<?php
+							if($occObj['sciname']){
+								if($occObj['identificationQualifier']) echo '<span title="identificationQualifier">'.$occObj['identificationQualifier'].'</span> '; 
+								echo '<span title="sciname"><i>'.$occObj['sciname'].'</i></span> ';
+								echo '<span title="scientificNameAuthorship">'.$occObj['scientificNameAuthorship'].'</span>';
+								echo '<span style="margin-left:25px;color:red;" title="typeStatus">'.$occObj['typeStatus'].'</span>';
+							}
+							else{
+								echo '<span title="sciname">Scientific Name empty</span> ';
+							}
 							?>
 						</div>
-						<?php
-					} 
-					if($occObj['occurrenceremarks']) echo '<div title="occurrenceremarks">Notes: '.$occObj['occurrenceremarks'].'</div>';
-					if($occObj['associatedtaxa']) echo '<div title="associatedtaxa">Associated Taxa: '.$occObj['associatedtaxa'].'</div>';
-					if($occObj['dynamicproperties']) echo '<div title="dynamicproperties">Description: '.$occObj['dynamicproperties'].'</div>';
-					if($occObj['reproductivecondition'] || $occObj['establishmentmeans']){
-						echo '<div>Misc: '.trim($occObj['reproductivecondition'].'; '.$occObj['establishmentmeans'],'; ').'</div>';
-					}
-					?>
-					<div style="margin:10px;">
-						<span>
-							<a href="" onclick="transferRecord(<?php echo $occId; ?>,false);">
-								Transfer All Fields
-							</a>
-						</span>
-						<span style="margin-left:30px;">
-							<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
-								Transfer to Empty Fields Only 
-							</a>
-						</span>
-					<?php 
-					if($collId == $occObj['colliddup']){ 
-						?>
-						<span style="margin-left:30px;">
-							<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
-								Go To Record
-							</a>
-						</span>
-						<?php 
-						if($curOccid){ 
+						<div style='margin-left:10px;'>
+							<?php 
+							if($occObj['identificationRemarks'] || $occObj['identificationReferences']){
+								echo '<span title="identificationRemarks">'.$occObj['identificationRemarks'].'</span>';
+								if($occObj['identificationRemarks'] && $occObj['identificationReferences']) echo '<br/>';
+								echo '<span title="identificationReferences">'.$occObj['identificationReferences'].'</span>';
+							} 
 							?>
+						</div>
+						<div>
+							<?php
+							if($occObj['country']) echo '<span title="country">'.$occObj['country'].'</span>; ';
+							if($occObj['stateProvince']) echo '<span title="stateProvince">'.$occObj['stateProvince'].'</span>; ';
+							if($occObj['county']) echo '<span title="county">'.$occObj['county'].'</span>; ';
+							echo '<span title="locality">'.($occObj['locality']?$occObj['locality']:'Locality data empty').'</span>';
+							?>
+						</div>
+						<?php 
+						if($occObj['habitat']) echo '<div title="habitat">'.$occObj['habitat'].'</div>';
+						if($occObj['substrate']) echo '<div title="substrate">'.$occObj['substrate'].'</div>';
+						if($occObj['decimalLatitude'] || $occObj['verbatimCoordinates']){
+							?>
+							<div>
+								<?php 
+								echo '<span title="decimalLatitude">'.$occObj['decimalLatitude'].'</span>; ';
+								echo '<span title="decimalLongitude">'.$occObj['decimalLongitude'].'</span>';
+								if($occObj['coordinateUncertaintyInMeters']) echo ' +-<span title="coordinateUncertaintyInMeters">'.$occObj['coordinateUncertaintyInMeters'].'</span>m. ';
+								if($occObj['geodeticDatum']) echo ' (<span title="geodeticDatum">'.$occObj['geodeticDatum'].'</span>)';
+								if($occObj['verbatimCoordinates']) echo '<div style="margin-left:10px;" title="verbatimCoordinates">'.$occObj['verbatimCoordinates'].'</div>';
+								$geoDetails = ''; 
+								if($occObj['georeferenceProtocol']) $geoDetails = '; <span title="georeferenceProtocol">'.$occObj['georeferenceProtocol']."</span>";
+								if($occObj['georeferenceSources']) $geoDetails = '; <span title="georeferenceSources">'.$occObj['georeferenceSources']."</span>";
+								if($occObj['georeferenceRemarks']) $geoDetails = '; <span title="georeferenceRemarks">'.$occObj['georeferenceRemarks']."</span>";
+								$geoDetails = trim($geoDetails,';');
+								if($geoDetails) echo '<div style="margin-left:10px;">'.$geoDetails.'</div>';
+								?>
+							</div>
+							<?php
+						}
+						if($occObj['minimumElevationInMeters'] || $occObj['verbatimElevation']){
+							?>
+							<div>
+								<?php 
+								if($occObj['minimumElevationInMeters']){
+									echo '<span title="minimumElevationInMeters">'.$occObj['minimumElevationInMeters'].'</span>';
+									if($occObj['maximumElevationInMeters']) echo '-<span title="maximumElevationInMeters">'.$occObj['maximumElevationInMeters'].'</span>';
+									echo ' meters ';
+								}
+								if($occObj['verbatimElevation']) echo 'Verbatim elev: <span title="verbatimElevation">'.$occObj['verbatimElevation'].'</span>';
+								?>
+							</div>
+							<?php
+						} 
+						if($occObj['occurrenceRemarks']) echo '<div title="occurrenceRemarks">Notes: '.$occObj['occurrenceRemarks'].'</div>';
+						if($occObj['associatedTaxa']) echo '<div title="associatedTaxa">Associated Taxa: '.$occObj['associatedTaxa'].'</div>';
+						if($occObj['dynamicProperties']) echo '<div title="dynamicProperties">Description: '.$occObj['dynamicProperties'].'</div>';
+						if($occObj['reproductiveCondition'] || $occObj['establishmentMeans']){
+							echo '<div>Misc: '.trim($occObj['reproductiveCondition'].'; '.$occObj['establishmentMeans'],'; ').'</div>';
+						}
+						?>
+						<div style="margin:10px;">
+							<span>
+								<a href="" onclick="transferRecord(<?php echo $occId; ?>,false);">
+									Transfer All Fields
+								</a>
+							</span>
 							<span style="margin-left:30px;">
-								<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId.'&collid='.$collId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
-									Merge Records
+								<a href="" onclick="transferRecord(<?php echo $occId; ?>,true);">
+									Transfer to Empty Fields Only 
 								</a>
 							</span>
 							<?php 
-						}
-					} 
+							if($collId == $occObj['collid']){ 
+								?>
+								<span style="margin-left:30px;">
+									<a href="occurrenceeditor.php?occid=<?php echo $occId; ?>">
+										Go To Record
+									</a>
+								</span>
+								<?php 
+								if($curOccid){ 
+									?>
+									<span style="margin-left:30px;">
+										<a href="dupesearch.php?submitaction=mergerecs&curoccid=<?php echo $curOccid.'&occidmerge='.$occId.'&collid='.$collId; ?>" onclick="return confirm('Are you sure you want to merge these two records?')">
+											Merge Records
+										</a>
+									</span>
+									<?php 
+								}
+							} 
+							?>
+						</div>
+						<hr/>
+						<?php 
+					}
 					?>
-					</div>
-					<hr/>
-					<?php 
-				}
+				</div>
+				<?php 
 			}
 			else{
 				echo '<h2>No duplicate records have been located</h2>';
