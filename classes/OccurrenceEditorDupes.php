@@ -4,111 +4,112 @@ include_once($serverRoot.'/config/dbconnection.php');
 class OccurrenceEditorDupes {
 
 	private $conn;
-	private $sql = '';
+	private $targetFields;
+	private $relevantFields = array();
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
-		$this->sql = 'SELECT c.CollectionName, c.institutioncode, c.collectioncode, '.
-			'o.occid, o.collid AS colliddup, o.catalognumber, o.othercatalognumbers, '.
-			'o.family, o.sciname, o.tidinterpreted AS tidtoadd, o.scientificNameAuthorship, o.taxonRemarks, o.identifiedBy, o.dateIdentified, '.
-			'o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.recordNumber, '.
-			'o.associatedCollectors, o.eventdate, o.verbatimEventDate, o.habitat, o.substrate, o.occurrenceRemarks, o.associatedTaxa, '.
-			'o.dynamicProperties, o.verbatimAttributes, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-			'o.country, o.stateProvince, o.county, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-			'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.coordinatePrecision, o.locationRemarks, o.verbatimCoordinates, '.
-			'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, o.georeferenceRemarks, '.
-			'o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation ';
+		$this->targetFields = array('family', 'sciname', 'scientificNameAuthorship', 'taxonRemarks', 
+			'identifiedBy', 'dateIdentified', 'identificationReferences', 'identificationRemarks', 'identificationQualifier', 
+			'recordedBy', 'recordNumber', 'associatedCollectors', 'eventDate', 'verbatimEventDate',
+			'country', 'stateProvince', 'county', 'locality', 'decimalLatitude', 'decimalLongitude', 'geodeticDatum',
+			'coordinateUncertaintyInMeters', 'verbatimCoordinates', 'georeferencedBy', 'georeferenceProtocol', 
+			'georeferenceSources', 'georeferenceVerificationStatus', 'georeferenceRemarks', 
+			'minimumElevationInMeters', 'maximumElevationInMeters', 'verbatimElevation',
+			'habitat', 'substrate', 'occurrenceRemarks', 'associatedTaxa', 'dynamicProperties', 
+			'verbatimAttributes','reproductiveCondition', 'cultivationStatus', 'establishmentMeans', 'typeStatus');
 	}
 
 	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function getDupes($collName, $collNum, $collDate, $currentOccid, $ometid, $exsNumber){
+	//Used in dupesearch.php
+	public function getDupes($collName, $collNum, $collDate, $ometid, $exsNumber, $currentOccid){
 		$retStr = '';
 		//Check exsiccati, exact dupes, and then duplicate events, in that order
+		$collName = $this->cleanInStr($collName);
+		$collNum = $this->cleanInStr($collNum);
+		$collDate = $this->cleanInStr($collDate);
+		$exsNumber = $this->cleanInStr($exsNumber);
 		//Check exsiccati dupes
 		if($ometid && $exsNumber){
-			
+			$occArr = $this->getDupesExsiccati($ometid, $exsNumber);
+			//Remove current occid
+			unset($occArr[$currentOccid]);
+			if($occArr){
+				$retStr = 'exsic:'.implode(',',$occArr);
+			}
 		}
-		
+
 		//Check for exact dupes
+		if(!$retStr){
+			$occArr = $this->getDupesCollector($collName, $collNum, $collDate);
+			//Remove current occid
+			unset($occArr[$currentOccid]);
+			if($occArr){
+				$retStr = 'exact:'.implode(',',$occArr);
+			}
+		}
 		
 		//Check for duplicate events
-		
-		
-		//Create consensus record?
-		 
-
-		return $retStr;
-	}
-	
-	//Used in dupesearch.php
-	public function getDupesCollector($collName, $collNum, $collDate, $currentOccid){
-		$collNum = $this->conn->real_escape_string($collNum);
-		$collDate = $this->conn->real_escape_string($collDate);
-		$retArr = array();
-		$lastName = "";
-		//Parse last name from collector's name 
-		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
-		$lastNameArr = explode(';',$lastNameArr[0]);
-		$lastNameArr = explode('&',$lastNameArr[0]);
-		$lastNameArr = explode(' and ',$lastNameArr[0]);
-		$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
-		if($match){
-			if(count($match[0]) == 1){
-				$lastName = $match[0][0];
-			}
-			elseif(count($match[0]) > 1){
-				$lastName = $match[0][1];
+		if(!$retStr){
+			$occArr = $this->getDupesCollectorEvent($collName, $collNum, $collDate);
+			//Remove current occid
+			unset($occArr[$currentOccid]);
+			if($occArr){
+				$retStr = 'event:'.implode(',',$occArr);
 			}
 		}
-		if($lastName && $collNum){
-			$sql = 'SELECT occid FROM omoccurrences ';
+		return $retStr;
+	}
 
-			$sql .= 'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = ';
-			if(is_numeric($collNum)){
-				$sql .= $collNum.') ';
-			}
-			else{
-				$sql .= '"'.$collNum.'") ';
-			}
-			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
-
+	private function getDupesExsiccati($ometid, $exsNumber){
+		$retArr = array();
+		if($ometid && is_numeric($ometid) && $exsNumber){
+			$sql = 'SELECT el.occid '.
+				'FROM omexsiccatiocclink el INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
+				'WHERE (en.ometid = '.$ometid.') AND (en.exsnumber = "'.$exsNumber.'") ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$retArr[] = $row->occid;
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid] = $r->occid;
 			}
 			$rs->free();
 		}
 		return $retArr;
 	}
 
-	public function getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid){
-		$collNum = $this->conn->real_escape_string($collNum);
-		$collDate = $this->conn->real_escape_string($collDate);
+	private function getDupesCollector($collName, $collNum, $collDate){
 		$retArr = array();
-		$lastName = "";
-		//Parse last name from collector's name 
-		$lastNameArr = explode(',',$this->conn->real_escape_string($collName));
-		$lastNameArr = explode(';',$lastNameArr[0]);
-		$lastNameArr = explode('&',$lastNameArr[0]);
-		$lastNameArr = explode(' and ',$lastNameArr[0]);
-		$lastNameArr = preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
-		if($match){
-			if(count($match[0]) == 1){
-				$lastName = $match[0][0];
+		$lastName = $this->parseLastName($collName);
+		if($lastName && $collNum){
+			$sql = 'SELECT occid FROM omoccurrences '.
+				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") '.
+				'AND (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = ';
+			if(is_numeric($collNum)){
+				$sql .= $collNum.') ';
 			}
-			elseif(count($match[0]) > 1){
-				$lastName = $match[0][1];
+			else{
+				$sql .= '"'.$collNum.'") ';
 			}
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid] = $r->occid;
+			}
+			$rs->free();
 		}
+		return $retArr;
+	}
+
+	private function getDupesCollectorEvent($collName, $collNum, $collDate){
+		$retArr = array();
+		$lastName = $this->parseLastName($collName);
 		if($lastName){
 			$sql = 'SELECT occid '.
 				'FROM omoccurrences '.
-				'WHERE (sciname IS NOT NULL) AND (recordedby LIKE "%'.$lastName.'%") ';
-			if($currentOccid) $sql .= 'AND (occid != '.$currentOccid.') ';
+				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") AND (recordedby LIKE "%'.$lastName.'%") ';
 			$runQry = true;
 			if($collNum){
 				if(is_numeric($collNum)){
@@ -163,55 +164,69 @@ class OccurrenceEditorDupes {
 			if($runQry){
 				//echo $sql;
 				$result = $this->conn->query($sql);
-				while ($row = $result->fetch_object()) {
-					$retArr[] = $row->occid;
+				while ($r = $result->fetch_object()) {
+					$retArr[$r->occid] = $r->occid;
 				}
 				$result->free();
 			}
 		}
 		return $retArr;
 	}
-	
-	public function getDupesExsiccati($ometid, $exsNumber, $oid){
-		$retArr = array();
-		if($ometid && $exsNumber){
-			$this->sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '. 
-				'INNER JOIN omexsiccatiocclink el ON o.occid = el.occid '.
-				'INNER JOIN omexsiccatinumbers en ON el.omenid = en.omenid '.
-				'WHERE (en.title = "'.$ometid.'") AND (en.exsnumber = "'.$exsNumber.'") AND (o.occid != '.$oid.') ';
-			//First run
 
-			//echo $this->sql;
-			$rs = $this->conn->query($this->sql);
-			while($r = $rs->fetch_assoc()){
-				$retArr[] = $r['occid'];
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-	
 	public function getDupesOccid($occidQuery){
 		$retArr = array();
 		if($occidQuery){
-			$this->sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid ';
-			if(strpos($occidQuery,',')){
-				$this->sql .= 'WHERE (o.occid IN('.$occidQuery.')) ';
-			}
-			else{
-				$this->sql .= 'WHERE (o.occid = '.$occidQuery.') ';
-			}
-			$this->sql .= 'ORDER BY recordnumber';
-			//echo $this->sql;
-			$result = $this->conn->query($this->sql);
-			while ($row = $result->fetch_assoc()) {
-				$retArr[$row['occid']] = array_change_key_case($row);
+			$relArr = array();
+			$sql = 'SELECT c.collectionName, c.institutionCode, c.collectionCode, o.occid, o.collid, o.tidinterpreted, '.
+				'o.catalogNumber, o.otherCatalogNumbers, '.implode(',',$this->targetFields).
+				' FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+				'WHERE (o.occid IN('.$occidQuery.')) '.
+				'ORDER BY recordnumber';
+			//echo $sql;
+			$result = $this->conn->query($sql);
+			while($row = $result->fetch_assoc()) {
+				foreach($row as $k => $v){
+					$vStr = trim($v);
+					$retArr[$row['occid']][$k] = $vStr;
+					//Identify relevant fields
+					if($vStr) $relArr[$k] = '';
+				}
 			}
 			$result->free();
+			//Adjust sort of relevant fields according to 
+			foreach($this->targetFields as $tfVal){
+				if(array_key_exists($tfVal,$relArr)) $this->relevantFields[] = $tfVal;
+			}
 		}
 		return $retArr;
 	}
+
+	//Ranking functions
+	private function addConsensusRecord($occArr){
+		
+		return $occArr;
+	}
+
+	private function rankGeneric($occArr){
+		//
+		
+		return $occArr;
+	}
+
+	private function rankOcr($occArr){
+		//Number of fields with match 
+		//recordNumber, verbatimEventDate, associatedCollectors, 
+		//stateProvince, county, locality, verbatimCoordiantes, verbatimElevation, 
+		//habitat, substrate, verbatimAttributes, occurrenceRemarks
+		
+		return $occArr;
+	}
+
+	//Smith-Waterman code... 
 	
+	
+	
+	//Action functions
 	public function mergeRecords($targetOccid,$sourceOccid){
 		if(!$targetOccid || !$sourceOccid) return 'ERROR: target or source is null';
 		if($targetOccid == $sourceOccid) return 'ERROR: target and source are equal';
@@ -303,6 +318,53 @@ class OccurrenceEditorDupes {
 			$status .= 'ERROR: unable to delete source occurrence (yet may have merged records): '.$connWrite->error;
 		}
 		return $status;
+	}
+
+	//Setter and getters
+	public function getRelevantFields(){
+		return $this->relevantFields;
+	}
+
+	//Misc functions
+	private function parseLastName($collName){
+		//Parse last name from collector's full name 
+		$lastNameArr = explode(',',$collName);
+		$lastNameArr = explode(';',$lastNameArr[0]);
+		$lastNameArr = explode('&',$lastNameArr[0]);
+		$lastNameArr = explode(' and ',$lastNameArr[0]);
+		preg_match_all('/[A-Za-z]{3,}/',$lastNameArr[0],$match);
+		$lastName = '';
+		if($match){
+			if(count($match[0]) == 1){
+				$lastName = $match[0][0];
+			}
+			elseif(count($match[0]) > 1){
+				$lastName = $match[0][1];
+			}
+		}
+		return $lastName;
+	}
+
+	private function cleanOutArr($inArr){
+		$outArr = array();
+		foreach($inArr as $k => $v){
+			$outArr[$k] = $this->cleanOutStr($v);
+		}
+		return $outArr;
+	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		$newStr = str_replace(array("\t","\n","\r"),"",$newStr);
+		return $newStr;
+	}
+
+	private function cleanInStr($str){
+		$newStr = trim($str);
+		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
+		$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 }
 ?>

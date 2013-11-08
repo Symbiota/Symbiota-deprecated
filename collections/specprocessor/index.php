@@ -1,10 +1,13 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
+include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
 header("Content-Type: text/html; charset=".$charset);
 
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
+$saction = 'test';
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
-$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
 //NLP variables
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
@@ -22,38 +25,38 @@ else{
 	$specManager = new SpecProcessorManager();
 }
 
-$specManager->setCollId($collId);
+$specManager->setCollId($collid);
 $specManager->setSpprId($spprId);
 
-$editable = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
- 	$editable = true;
+$isEditor = false;
+if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+ 	$isEditor = true;
 }
 
 $status = "";
-if($editable){
-	if($action == 'Add New Project'){
+if($isEditor){
+	if($action == 'Add New Image Project'){
 		$specManager->addProject($_REQUEST);
 	}
-	elseif($action == 'Edit Project'){
+	elseif($action == 'Edit Image Project'){
 		$specManager->editProject($_REQUEST);
 	}
-	elseif($action == 'Delete Project'){
+	elseif($action == 'Delete Image Project'){
 		$specManager->deleteProject($_REQUEST['sppriddel']);
 	}
-}
-$specProjects = Array();
-if(!$spprId){
-	$specProjects = $specManager->getProjects();
-	if(count($specProjects) == 1){
-		$spprId = array_shift(array_keys($specProjects));
-		$specManager->setSpprId($spprId);
+	elseif($action == 'addtoqueue'){
+		$csManager = new OccurrenceCrowdSource();
+		$csManager->setCollid($collid);
+		$statusStr = $csManager->addToQueue();
+		$action = '';
+	}
+	elseif($action == 'Edit Crowdsource Project'){
+		$omcsid = $_POST['omcsid'];
+		$csManager = new OccurrenceCrowdSource();
+		$csManager->setCollid($collid);
+		$statusStr = $csManager->editProject($omcsid,$_POST['instr'],$_POST['url']);
 	}
 }
-if($spprId){
-	$specManager->setProjVariables();
-}
-
 ?>
 <html>
 	<head>
@@ -62,13 +65,15 @@ if($spprId){
 		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+		<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=131106"></script>
 		<script language=javascript>
 			$(document).ready(function() {
 				$('#tabs').tabs({
-					active: <?php echo $tabIndex; ?>,
-					//spinner: 'Loading...',
-					cache: false,
-					ajaxOptions: {cache: false}
+					select: function(event, ui) {
+						return true;
+					},
+					active: <?php echo $tabIndex; ?>
+					//,spinner: 'Loading...'
 				});
 
 			});
@@ -90,7 +95,7 @@ if($spprId){
 		else{
 			echo '<div class="navpath">';
 			echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-			echo '<a href="../misc/collprofiles.php?collid='.$collId.'&emode=1">Collection Control Panel</a> &gt;&gt; ';
+			echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Control Panel</a> &gt;&gt; ';
 			echo '<b>Specimen Processor Control Panel</b>';
 			echo '</div>';
 		}
@@ -126,39 +131,53 @@ if($spprId){
 				</div>
 				<?php 
 			}
-			if($symbUid && $collId){
+			if($collid){
 				?>
 				<div id="tabs" class="taxondisplaydiv">
 				    <ul>
 				        <li><a href="#introdiv">Introduction</a></li>
-				        <li><a href="imageprocessor.php?collid=<?php echo $collId; ?>">Image Loading</a></li>
-				        <li><a href="ocrprocessor.php?collid=<?php echo $collId.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
-				        <li><a href="nlpprocessor.php?collid=<?php echo $collId.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
+				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action; ?>">Image Loading</a></li>
+				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing Module</a></li>
+				        <!-- 
+				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
+				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
+				         -->
 				    </ul>
-					<div id="introdiv" style="height:400px;">
+					<div id="introdiv">
 						<h1>Specimen Processor Control Panel</h1>
 						<div style="margin:10px">
-							This an management module designed to aid in establishing advanced processing workflows 
-							for specimen images. The three central functions available within this module are
-							1) Batch loading images, 2) Optical Character Resolution (OCR), and 3) Natural Language Processing (NLP). 
-							Click on the tabs above to access these tools or read below for more information covering these procedures.    
+							This management module is designed to aid in establishing advanced processing workflows 
+							for unprocessed specimens using images. The central functions addressed in this page are:
+							Batch loading images, Optical Character Resolution (OCR), Natural Language Processing (NLP), 
+							and crowdsourcing data entry. 
+							Use tabs above for access to relevant tools.     
 						</div>
 						<div style="margin:10px">
 							<h2>Image Loading</h2>
 							<div style="margin:15px">
-								The batch image loading module will create web-ready images for a group of specimen images and 
-								map the new image derivative within the database. 
-								Note that in order to use this built-in module, the web server will need to have 
-								writable access to the target folders. If images are to be stored on a separate server, than
-								a folder mount can be established to given the web server access to storage. 
-								Another option would be to trigger image processing scripts on the image server. These scripts 
-								can map the image urls within the portal database remotely, or the image URLs can be written to a log 
-								file and loaded to the database separately.
+								The batch image loading module is designed to batch process specimen images that are deposited in a 
+								drop folder. This module will produce web-ready images for a group of specimen images and 
+								map the new image derivative to records in the the database. Images can be loaded for already existing 
+								specimen records, or loaded to create a skeletal specimen record for further digitization within the portal.  
+								For more information, see the
+								<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Batch+Loading+Specimen+Images">Batch Image Loading</a></b> section 
+								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
+
+							<h2>Crowdsourcing Module</h2>
+							<div style="margin:15px">
+								The crowdsourcing module can be used to make unprocessed records accessible for data entry by 
+								general users who do not have explicit editing writes for a particular collection. 
+								For more information, see the
+								<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Crowdsourcing">Crowdsource</a></b> section 
+								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
+							</div>
+
 							<h2>Optical Character Resolution (OCR)</h2>
 							<div style="margin:15px">Description to be added </div>
+
 							<h2>Natural Language Processing (NLP)</h2>
-							<div style="margin:15px">Description to be added </div>
+							<div style="margin:15px 0px 40px 15px">Description to be added </div>
 						</div>
 					</div>
 				</div>
@@ -167,14 +186,7 @@ if($spprId){
 			else{
 				?>
 				<div style='font-weight:bold;'>
-					<?php 
-					if(!$symbUid){
-						echo "Please <a href='../../profile/index.php?refurl=".$clientRoot."/collections/specprocessor/index.php'>login</a>!";
-					} 
-					else{
-						echo 'Collection project has not been identified';						
-					}
-					?>
+					Collection project has not been identified
 				</div>
 				<?php
 			}

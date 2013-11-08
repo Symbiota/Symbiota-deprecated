@@ -59,25 +59,20 @@ class OccurrenceCrowdSource {
 		}
 		return $statusStr;
 	}
-	
-	public function createProject($cid,$instr,$url){
-		$statusStr = '';
-		if(is_numeric($cid)){
+
+	private function createNewProject(){
+		if($this->collid){
 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'INSERT INTO omcrowdsourcecentral(collid,instructions,trainingurl) '.
-				'VALUES('.$cid.','.($instr?'"'.$this->cleanInStr($instr).'"':'NULL').','.($url?'"'.$this->cleanInStr($url).'"':'NULL').')';
+				'VALUES('.$this->collid.',NULL,NULL)';
 			//echo $sql;
 			if($con->query($sql)){
 				$this->omcsid = $con->insert_id;
 			}
-			else{
-				$statusStr = 'ERROR editing project: '.$con->error;
-			}
 			$con->close();
 		}
-		return $statusStr;
 	}
-	
+
 	public function getProjectStats(){
 		$retArr = array();
 		if($this->collid){
@@ -95,7 +90,7 @@ class OccurrenceCrowdSource {
 			//Get record count for those available for adding to queue
 			$sql = 'SELECT count(o.occid) as cnt '.
 				'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
+				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL AND o.locality IS NULL ';
 			$toAddCnt = 0;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -199,7 +194,7 @@ class OccurrenceCrowdSource {
 			$statusStr = 'ERROR adding to queue: '.$con->error;
 			$statusStr .= '; SQL: '.$sql;
 		}
-		$con->close;
+		$con->close();
 		return $statusStr;
 	}
 
@@ -247,17 +242,19 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 	
-	public function submitReviews($occidArr, $pointsArr, $commentsArr){
+	public function submitReviews(){
 		$statusStr = '';
-		foreach($occidArr as $k => $v){
-			$sql = 'UPDATE omcrowdsourcequeue SET points = '.($pointsArr[$k]?$pointsArr[$k]:'NULL').
-				',notes = '.($commentsArr[$k]?'"'.$this->cleanInStr($commentsArr[$k]).'"':'NULL').
-				',reviewstatus = 10 '.
-				'WHERE occid = '.$v;
+		$occidArr = $_POST['occid'];
+		foreach($occidArr as $occid){
+			$points = $_POST['p-'.$occid];
+			$comments = $this->cleanInStr($_POST['c-'.$occid]);
+			$sql = 'UPDATE omcrowdsourcequeue '.
+				'SET points = '.$points.',notes = '.($comments?'"'.$comments.'"':'NULL').',reviewstatus = 10 '.
+				'WHERE occid = '.$occid;
 			$con = MySQLiConnectionFactory::getCon("write");
 			if($con->query($sql)){
 				//Change status to reviewed
-				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid = '.$v;
+				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid = '.$occid;
 				$con->query($sql2);
 			}
 			else{
@@ -281,6 +278,10 @@ class OccurrenceCrowdSource {
 					$this->omcsid = $r->omcsid;
 				}
 				$rs->free();
+			}
+			if(!$this->omcsid){
+				//If omcsid project doesn't exist yet, create one!
+				$this->createNewProject();
 			}
 		}
 	}
