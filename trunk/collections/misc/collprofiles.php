@@ -301,7 +301,7 @@ if($collId) $collData = $collManager->getCollectionData();
 							?>
 							<li>
 								<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
-									Batch Load Specimen Images
+									Specimen Batch Processing
 								</a>
 							</li>
 							<li>

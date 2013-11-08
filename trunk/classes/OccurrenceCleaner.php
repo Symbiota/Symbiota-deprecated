@@ -50,26 +50,44 @@ class OccurrenceCleaner {
 	}
 
 	public function getDuplicateCatalogNumber($start){
-		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, o.recordedby, o.recordnumber, o.associatedcollectors, '.
-			'o.eventdate, o.verbatimeventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
-			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences GROUP BY catalognumber, collid '.($this->obsUid?', observeruid ':''). 
-			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
-			'WHERE o.collid = '.$this->collId.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' '.
+		//Search is not available for personal specimen management 
+		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
+			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
+			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
+			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences '.
+			'GROUP BY catalognumber, collid '. 
+			'HAVING Count(*)>1 AND collid = '.$this->collId.
+			' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
+			'WHERE o.collid = '.$this->collId.' '.
 			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT '.$start.', 505';
 		//echo $sql;
 		$retArr = $this->getDuplicates($sql); 
-
 		return $retArr;
 	}
 	
 	public function getDuplicateCollectorNumber($start){
 		$retArr = array();
-		$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
-			'FROM omoccurrences o INNER JOIN '. 
-			'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid, observeruid '.
-			'HAVING Count(*)>1 AND collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
-			'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
-			'WHERE collid = '.$this->collId.($this->obsUid?' AND observeruid = '.$this->obsUid:'').' ';
+		$sql = '';
+		if($this->obsUid){
+			$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
+				'FROM omoccurrences o INNER JOIN '. 
+				'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid, observeruid '.
+				'HAVING Count(*)>1 AND collid = '.$this->collId.' AND observeruid = '.$this->obsUid.
+				' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
+				'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab '.
+				'ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
+				'WHERE collid = '.$this->collId.' AND observeruid = '.$this->obsUid.' ';
+		}
+		else{
+			$sql = 'SELECT o.occid, o.eventdate, recordedby, o.recordnumber '.
+				'FROM omoccurrences o INNER JOIN '. 
+				'(SELECT eventdate, recordnumber FROM omoccurrences GROUP BY eventdate, recordnumber, collid '.
+				'HAVING Count(*)>1 AND collid = '.$this->collId.
+				' AND eventdate IS NOT NULL AND recordnumber IS NOT NULL '.
+				'AND recordnumber NOT IN("sn","s.n.","Not Provided","unknown")) intab '.
+				'ON o.eventdate = intab.eventdate AND o.recordnumber = intab.recordnumber '.
+				'WHERE collid = '.$this->collId.' ';
+		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$collArr = array();
