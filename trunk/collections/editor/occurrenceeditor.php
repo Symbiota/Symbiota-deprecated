@@ -300,16 +300,16 @@ else{
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title><?php echo $defaultTitle; ?> Occurrence Editor</title>
-	<link href="../../css/jquery-ui.css?ver=130926" type="text/css" rel="stylesheet" />
+	<link href="../../css/jquery-ui.css?ver=131106" type="text/css" rel="stylesheet" />
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=130926" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=131106" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=130926" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=131106" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -323,9 +323,9 @@ else{
 		}
 	}
     ?>
-	<script src="../../js/jquery.js?ver=130926" type="text/javascript"></script>
-	<script src="../../js/jquery-ui.js?ver=130926" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js?ver=130926" type="text/javascript"></script>
+	<script src="../../js/jquery.js?ver=131106" type="text/javascript"></script>
+	<script src="../../js/jquery-ui.js?ver=131106" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js?ver=131106" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
@@ -345,10 +345,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=131014"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=130926"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=130926"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=130926"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=131106"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=131106"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=131106"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=131106"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -401,7 +401,7 @@ else{
 						<?php
 						if($crowdSourceMode){
 							?>
-							<a href="crowdsource/central.php">Crowd Sourcing Central</a> &gt;&gt;
+							<a href="../specprocessor/crowdsource/central.php">Crowd Sourcing Central</a> &gt;&gt;
 							<?php
 						}
 						else{
@@ -582,7 +582,7 @@ else{
 												if(!defined('DUPESEARCH') || DUPESEARCH){ 
 													?>
 													<div id="dupesDiv">
-														<input type="button" value="Dupes?" tabindex="12" onclick="searchDupesCollector(this.form);" /><br/>
+														<input type="button" value="Dupes?" tabindex="12" onclick="searchDupes(this.form);" /><br/>
 														<input type="checkbox" name="autodupe" value="1" onchange="autoDupeChanged(this)" />
 														Auto search
 													</div>
