@@ -172,10 +172,6 @@ $duManager->loadFieldMap();
 			return true;
 		}
 
-		function checkFinalTransferForm(){
-			return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');
-		}
-
 		function pkChanged(selObj){
 			document.getElementById('pkdiv').style.display='block';
 			document.getElementById('mdiv').style.display='none';
@@ -233,7 +229,7 @@ $duManager->loadFieldMap();
 			echo "</ul>";
 			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
-				<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return checkFinalTransferForm();">
+				<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
 	 				<fieldset>
 	 					<legend><b>Final transfer</b></legend>
 	 					<input type="hidden" name="collid" value="<?php echo $collId;?>" /> 
@@ -253,7 +249,7 @@ $duManager->loadFieldMap();
 				<?php
 			}
 	 	}
-		elseif(stripos(strtolower($action),"transfer") !== false || $finalTransfer){
+		elseif(stripos($action,"transfer") !== false || $finalTransfer){
 			echo '<ul>';
 			$duManager->finalTransfer();
 			echo '</ul>';
