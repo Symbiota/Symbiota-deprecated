@@ -22,6 +22,10 @@ class SpecUploadDirect extends SpecUploadBase {
 						$sourceArr[] = strtolower($k);
 					}
 				}
+				else{
+					echo '<div style="font-weight:bold;color:red;margin:25px;font-size:120%;">Query did not return any records</div>';
+					return;
+				}
 				$rs->close();
 				$this->sourceArr = $sourceArr;
 				//$this->echoFieldMapTable($sourceArr);
@@ -92,5 +96,11 @@ class SpecUploadDirect extends SpecUploadBase {
 		}
 		return $connection;
     }
+
+    public function getDbpkOptions(){
+		$sFields = $this->sourceArr;
+		sort($sFields);
+		return $sFields;
+	}
 }
 ?>

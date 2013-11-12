@@ -253,7 +253,7 @@ $duManager->loadFieldMap();
 				<?php
 			}
 	 	}
-		elseif(stripos($action,"transfer") !== false || $finalTransfer){
+		elseif(stripos(strtolower($action),"transfer") !== false || $finalTransfer){
 			echo '<ul>';
 			$duManager->finalTransfer();
 			echo '</ul>';
