@@ -255,6 +255,7 @@ CREATE TABLE `omoccurrences` (
    const RECORDENTEREDBY_SIZE = 250; //250
    const DUPLICATEQUANTITY_SIZE = 11; //INTEGER
    const LABELPROJECT_SIZE    = 20; //YEAR
+   const DATEENTERED_SIZE= 21; //TIMESTAMP
    const DATELASTMODIFIED_SIZE = 21; //TIMESTAMP
     // These constants hold the field names of the table in the database. 
    const OCCID             = 'occid';
