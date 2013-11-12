@@ -35,6 +35,8 @@ if (file_exists("$serverRoot/classes/Gazeteer.php")) {
    include_once("$serverRoot/classes/Gazeteer.php");
 }
 
+define ("DEFAULT_NEVP_COUNTRY","United States of America");
+
 // Check to see if OmOccurrences matches current schema version.
 $testOcc = new OmOccurrences();
 if (!$testOcc->checkSchema()) { 
@@ -118,7 +120,29 @@ class IDENTIFICATION {
 
      $id->save();
    }
- 
+
+   public function getNameWithoutAuthor() { 
+      $result = "";
+      if (strpos($this->scientificname,$this->scientificnameauthorship)===FALSE) { 
+           // scientificName doesn't contain authorship
+     	   $result = $this->scientificname;
+      } else { 
+           // scientificName does contain authorship, remove
+           $result = trim(substr($this->scientificname,0,strpos($this->scientificname,$this->scientificnameauthorship)-1));
+      }       
+      return $result;
+   }
+
+   public function getNameWithAuthor() { 
+      $result = "";
+      if (strpos($this->scientificname,$this->scientificnameauthorship)===FALSE) { 
+           // scientificName doesn't contain authorship, add
+     	   $result = trim($this->scientificname . " " . $this->scientificnameauthorship);
+      } else { 
+           $result = $this->scientificname;
+      }       
+      return $result;
+   }
 
 }
 
@@ -127,7 +151,13 @@ class ANNOTATION {
    public $expectation;
    public $annotatedat;
    public $motivations = array();
+   public $annotator;
+}
 
+class ANNOTATOR { 
+  public $mbox_sha1sum;
+  public $name;
+  public $workplacehomepage;
 }
 
 class OCCURRENCE { 
@@ -141,7 +171,7 @@ class OCCURRENCE {
    public $identifications = array();
    public $recordedby;
    public $recordnumber; // collectornumber
-   public $country = "United States of America";  // default NEVP TCN value
+   public $country = null;
    public $stateprovince;
    public $county;
    public $municipality;
@@ -153,6 +183,7 @@ class OCCURRENCE {
    public $datemodified;
    public $storagelocation;
    public $associatedmedia = array();
+   public $recordenteredby;
 
    public function getFiledUnderID() { 
         $result = null;
@@ -172,7 +203,7 @@ class OCCURRENCE {
        $occ = new OmOccurrences();
        $det = new OmOccurDeterminations();
        $collid = $occ->lookupCollId($this->institutioncode, $this->collectioncode);
-echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
+       $collreportmatch = "collid=[$collid], institutionCode=[$this->institutioncode], collectionCode=[$this->collectioncode]\n";
        // Record exists if there is a matching DarwinCore triplet.  
        $exists = $occ->loadByDWCTriplet($this->institutioncode, $this->collectioncode, $this->catalognumber);
        if (!$exists) {
@@ -189,6 +220,11 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
           $occ->setinstitutionCode($this->institutioncode);
           $occ->setcatalogNumber($this->catalognumber);
           $occ->setprocessingStatus("unprocessed");
+          // Provide for link to authoritative database record (which doesn't yet exist).
+          $occ->setdbpk($this->collectioncode . $this->catalognumber);
+          // if creating a new occurrence record, assume it was created by the annotator on the dc:created date.
+          $occ->setrecordenteredby($this->recordenteredby);
+          $occ->setdateentered($this->datemodified);
        }
        $occ->setoccurrenceId($this->occurrenceid);
        $occ->setbasisOfRecord($this->basisofrecord);
@@ -205,7 +241,11 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
        }
        if ($this->recordnumber!=null) { $occ->setrecordNumber($this->recordnumber); }
        $occ->settypeStatus($this->getTypeStatusList());
-       if ($this->country!=null) { $occ->setcountry($this->country); } 
+       if ($this->country==null) { 
+          $occ->setcountry(DEFAULT_NEVP_COUNTRY);
+       } else {
+          $occ->setcountry($this->country);
+       } 
        if ($this->stateprovince!=null) { $occ->setstateProvince($this->stateprovince); }
        if ($this->county!=null) { $occ->setcounty($this->county); }
        $occ->setmunicipality($this->municipality);
@@ -242,7 +282,8 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
        if ($this->maximumelevationinmeters!=null) { $occ->setmaximumElevationInMeters($this->maximumelevationinmeters); }
        $filedUnder = $this->getFiledUnderID();
        if ($filedUnder!=null) { 
-           $occ->setsciname($filedUnder->scientificname);
+           $occ->setsciname($filedUnder->getNameWithoutAuthor());  // without author
+           $occ->setscientificName($filedUnder->getNameWithAuthor());  // with author
            if ($det->lookupAcceptedTID($filedUnder->scientificname)>0) {
                $occ->settidinterpreted($det->lookupAcceptedTID($filedUnder->scientificname));
            }
@@ -274,7 +315,8 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
        
        if (!$exists || $createNewRec==1) {
            // if record exists, then TcnImageConf variable createNewRec specifies policy for update.
-           if ($occ->save()) {
+           $saveresult = $occ->save();
+           if ($saveresult===TRUE) {
                if ($exists) {
                    // echo "Updated occid: [".$occ->getoccid()."]\n";
                    $result->updatecount++;
@@ -291,6 +333,11 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
                $result->successcount++;
            } else {
                $result->errors .= "Error: [" . $occ->errorMessage() . "]\n";
+               if ($occ->errorMessage()=="Cannot add or update a child row: a foreign key constraint fails (`symbiota`.`omoccurrences`, CONSTRAINT `FK_omoccurrences_collid` FOREIGN KEY (`collid`) REFERENCES `omcollections` (`CollID`) ON DELETE CASCADE ON UPDATE CASCADE)") { 
+                   $result->errors .= "Interpretation: Record contains a collectionCode and institutionCode combination which was not found in omcollections (or only a collectionCode that was not found in omcollections or omoccurrences). \n";
+                   $result->errors .= $collreportmatch;
+               } 
+               $result->failurecount++;
            }
        } else {
            echo "Skipping, record exists and specified policy is to not update. [".$occ->getoccid()."]\n";
@@ -325,6 +372,7 @@ echo "[$collid][$this->institutioncode][$this->collectioncode]\n";
 class NEVPProcessor { 
     
     public $currentAnnotation = null;
+    public $currentAnnotator = null;
     public $currentOcc = null;
     public $currentId = null;
     public $currentDate = null;
@@ -333,8 +381,9 @@ class NEVPProcessor {
     public $countfound = 0;  // number of annotations found  
     
     function startElement($parser, $name, $attrs) {
-        global $depth, $currentOcc, $currentTag, $currentId, $currentDate;
+        global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation;
         $currentTag = $name;
+        
         switch ($name) { 
            case "OA:ANNOTATION":
               $currentAnnotation = new ANNOTATION();
@@ -355,7 +404,11 @@ class NEVPProcessor {
                   $currentAnnotation->motivations[] = $attrs['RDF:RESOURCE'];
               }
               break;
+           case "OA:ANNOTATEDBY":
+              $currentAnnotator = new ANNOTATOR();
+              break;
            case "DWCFP:OCCURRENCE":
+           case "DWCFP:OCCURENCE":
               $currentOcc = new OCCURRENCE();
               $currentOcc->occurrenceid = $attrs['RDF:ABOUT'];
               break;
@@ -388,11 +441,12 @@ class NEVPProcessor {
     }
     
     function endElement($parser, $name) {
-        global $depth, $currentOcc, $currentId, $currentDate, $result;
+        global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation;
         $depth[$parser]--;
         
         switch ($name) { 
            case "DWCFP:OCCURRENCE":
+           case "DWCFP:OCCURENCE":
               // Nothing to do, assuming one occurrence per annotation.
               $result->recordcount++;
               break;
@@ -406,19 +460,24 @@ class NEVPProcessor {
               break;
            case "OA:ANNOTATION":
               $this->countfound++;
+              $currentOcc->recordenteredby=$currentAnnotation->annotator->name;
               $currentOcc->write();
               $currentOcc = null;
+              break;
+           case "OA:ANNOTATEDBY":
+              $currentAnnotation->annotator = $currentAnnotator;
+              $currentAnnotator = null;
               break;
         }
     }
     
     function value($parser, $data) { 
-       global $depth, $currentOcc, $currentTag, $currentId, $currentDate;
+       global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation;
     
 // Top level of document: [RDF:RDF][RDF:DESCRIPTION][RDFS:COMMENT][RDFS:COMMENT][CO:COUNT]
 // Annotation: [OA:ANNOTATION][OA:HASTARGET][OA:SPECIFICRESOURCE][OA:HASSELECTOR][OAD:KVPAIRQUERYSELECTOR][DWC:COLLECTIONCODE][DWC:INSTITUTIONCODE][OA:HASSOURCE][OA:HASBODY]
 // New Occurrence: [DWCFP:OCCURRENCE][DC:TYPE][DWCFP:HASBASISOFRECORD][DWC:CATALOGNUMBER][DWCFP:HASCOLLECTIONBYID][DWC:COLLECTIONCODE][DWCFP:HASIDENTIFICATION][DWCFP:IDENTIFICATION][DWCFP:ISFILEDUNDERNAMEINCOLLECTION][DWC:SCIENTIFICNAME][DWC:GENUS][DWC:SPECIFICEPITHET][DWCFP:INFRASPECIFICRANK][DWC:INFRASPECIFICEPITHET][DWC:SCIENTIFICNAMEAUTHORSHIP][DWC:IDENTIFICATIONQUALIFIER][DWCFP:USESTAXON][DWCFP:TAXON][DWCFP:HASTAXONID][DWC:RECORDEDBY][DWC:RECORDNUMBER][DWCFP:HASCOLLECTINGEVENT][DWCFP:EVENT][DWC:EVENTDATE][DWC:VERBATIMEVENTDATE][DWC:COUNTRY][DWC:STATEPROVINCE][DWC:COUNTY][DWC:MUNICIPALITY][DC:CREATED][DWC:MODIFIED][OBO:OBI_0000967][DWCFP:HASASSOCIATEDMEDIA]
-// Annotation, following occurrence in body: [OAD:HASEVIDENCE][OAD:HASEXPECTATION][OAD:EXPECTATION_INSERT][OA:MOTIVATEDBY][OAD:TRANSCRIBING][OA:MOTIVATEDBY][OA:ANNOTATEDBY][FOAF:PERSON][FOAF:MBOX_SHA1SUM][FOAF:NAME][FOAF:WORKPLACEHOMEPAGE][OA:ANNOTATEDAT][OA:SERIALIZEDBY][FOAF:AGENT][FOAF:NAME][OA:SERIALIZEDAT]
+// Annotation, following occurrence in body: [OAD:HASEVIDENCE][OAD:HASEXPECTATION][OAD:EXPECTATION_INSERT][OA:MOTIVATEDBY][OAD:TRANSCRIBING][OA:MOTIVATEDBY][OA:ANNOTATEDBY][FOAF:PERSON][OA:ANNOTATEDAT][OA:SERIALIZEDBY][FOAF:AGENT][FOAF:NAME][OA:SERIALIZEDAT]
 // [DC:TYPE] -- nowhere to put in symbiota
 // [DWCFP:HASIDENTIFICATION] -- nowhere to put in symbiota
 // TODO: Extract annotator and serializer
@@ -449,7 +508,11 @@ class NEVPProcessor {
              $currentOcc->recordnumber .= $data;
              break;
          case "DWC:COUNTRY":
-             $currentOcc->country .= $data;
+             if ($data=="United States") { 
+                 $currentOcc->country .= DEFAULT_NEVP_COUNTRY;
+             } else { 
+                 $currentOcc->country .= $data;
+             }
              break;
          case "DWC:STATEPROVINCE":
              $currentOcc->stateprovince .= $data;
@@ -458,7 +521,7 @@ class NEVPProcessor {
              $currentOcc->county .= $data;
              break;
          case "DWC:MUNICIPALITY":
-             $currentOcc->muncipality .= $data;
+             $currentOcc->municipality .= $data;
              break;
          case "DWC:LOCALITY":
              $currentOcc->locality .= $data;
@@ -538,6 +601,24 @@ class NEVPProcessor {
              break;
          case "DWC:MONTH":
              $currentDate->startmonth .= $data;
+             break;
+         case "FOAF:NAME":
+             if ($currentAnnotator!=null) { 
+                // we are inside the annotated by, not serialized by
+                $currentAnnotator->name .= $data;
+             } 
+             break;
+         case "FOAF:WORLPLACEHOMEPAGE":
+             if ($currentAnnotator!=null) { 
+                // we are inside the annotated by, not serialized by
+                $currentAnnotator->workplacehomepage .= $data;
+             } 
+             break;
+         case "FOAF:MBOX_SHA1SUM":
+             if ($currentAnnotator!=null) { 
+                // we are inside the annotated by, not serialized by
+                $currentAnnotator->mbox_sha1sum .= $data;
+             } 
              break;
        }
     
