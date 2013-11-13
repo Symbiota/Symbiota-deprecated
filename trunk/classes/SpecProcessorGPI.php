@@ -372,7 +372,7 @@ class GPI_Unit {
                     $id->write();
                }
            } else {
-           	   $result->error .= "Error: [".$occ->errorMessage()."]\n";   
+           	   $result->errors .= "Error: [".$occ->errorMessage()."]\n";   
                $result->failurecount++;
            }
        } else { 
