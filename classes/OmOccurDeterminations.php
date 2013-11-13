@@ -561,6 +561,8 @@ class OmOccurDeterminations
            $statement->execute();
            if ($statement->num_rows()!=1) {
                $this->error = $statement->error; 
+           } else { 
+              if ($this->detid==NULL) { $this->detid = $statement->insert_id; } 
            }
            $statement->close();
         } else { 
