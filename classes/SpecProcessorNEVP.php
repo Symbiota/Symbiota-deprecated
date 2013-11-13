@@ -101,23 +101,23 @@ class IDENTIFICATION {
 
    public function write() { 
      $date = "";
-     if ($this->identificationdate != null) { $date = $this->identificationdate->writeAll(); }
+     if ($this->dateidentified!= null) { $date = $this->dateidentified->writeAll(); }
      $id = new OmOccurDeterminations();
      $id->keyvalueset('occid',$this->occid);
      $id->keyvalueset('sciname',$this->scientificname);
      if (strlen($this->infraspecificauthor)>0) {
          $id->keyvalueset('scientificNameAuthorship',$this->infraspecificauthor);
      } else {
-         $id->keyvalueset('scientificNameAuthorship',$this->author);
+         $id->keyvalueset('scientificNameAuthorship',$this->scientificnameauthorship);
      }
      $code ="";
-     if ($this->plantnamecode!=null && strlen($this->plantnamecode)>0) {
-        $code = "[" + $this->plantnamecode + "]";
+     if ($this->nomenclaturalcode!=null && strlen($this->nomeclaturalcode)>0) {
+        $code = "[" + $this->nomenclaturalcode + "]";
      }
      $id->keyvalueset('identificationRemarks',$this->typestatus + $code);
-     $id->keyvalueset('identifiedBy',$this->identifier);
+     $id->keyvalueset('identifiedBy',$this->identifiedby);
      $id->keyvalueset('dateIdentified',$date);
-     $id->keyvalueset('identificationQualifier',trim($this->genusqualifier . " " . $this->speciesqualifier));
+     $id->keyvalueset('identificationQualifier',trim($this->identificationqualifier));
      // TODO: Handle taxonid in authorityfile
 
      $id->save();

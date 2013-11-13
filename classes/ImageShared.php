@@ -194,10 +194,10 @@ class ImageShared{
            }
            $statement->close();
         } else {
-            $this->error = mysqli_error($connection);
+            $this->error = mysqli_error($this->conn);
             // Likely case for error conditions if schema changes affect field names
             // or if updates to field list produce incorrect sql.
-            $status = mysqli_error($connection);
+            $status = $this->error;
             echo $status;
         }
 		if($status!=""){
@@ -215,7 +215,7 @@ class ImageShared{
     public function updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy){
         $status = "";
         $sql = 'update images set tid=?, url=?, thumbnailurl=?, originalurl=?, photographer=?, photographeruid=?, caption=?, '.
-            'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=?) '.
+            'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=? '.
             'where imgid = ? ';
         if ($statement = $this->conn->prepare($sql)) {
            $statement->bind_param("issssisssssississi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy,$imgid);
@@ -227,10 +227,10 @@ class ImageShared{
            }
            $statement->close();
         } else {
-            $this->error = mysqli_error($connection);
+            $this->error = mysqli_error($this->conn);
             // Likely case for error conditions if schema changes affect field names
             // or if updates to field list produce incorrect sql.
-            $status = mysqli_error($connection);
+            $status = $this->error;
             echo $status;
         }
         if($status!=""){
