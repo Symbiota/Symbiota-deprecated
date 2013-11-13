@@ -173,6 +173,94 @@ class ImageShared{
 		return $status;
 	} 
 
+    /**
+     * Insert a record into the image table.
+     * @author Paul J. Morris
+     *
+     * @return an empty string on success, otherwise a string containing an error message.
+     */
+	public function databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy){
+		$status = "";
+		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
+			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, imagetype, anatomy) '.
+			'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        if ($statement = $this->conn->prepare($sql)) {
+           $statement->bind_param("issssisssssississ",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy);
+
+           $statement->execute();
+           $rows = $statement->affected_rows;
+           if ($rows!==1) {
+               $status = $statement->error;
+           }
+           $statement->close();
+        } else {
+            $this->error = mysqli_error($connection);
+            // Likely case for error conditions if schema changes affect field names
+            // or if updates to field list produce incorrect sql.
+            $status = mysqli_error($connection);
+            echo $status;
+        }
+		if($status!=""){
+			$status = "loadImageData: $status<br/>SQL: ".$sql;
+		}
+		return $status;
+	} 
+
+    /**
+     * Update an existing record into the image table.
+     * @author Paul J. Morris
+     *
+     * @return an empty string on success, otherwise a string containing an error message.
+     */
+    public function updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$phototrapher,$photographerUid,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortSequence,$imagetype,$anatomy){
+        $status = "";
+        $sql = 'update images set tid=?, url=?, thumbnailurl=?, originalurl=?, photographer=?, photographeruid=?, caption=?, '.
+            'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=?) '.
+            'where imgid = ? ';
+        if ($statement = $this->conn->prepare($sql)) {
+           $statement->bind_param("issssisssssississi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy,$imgid);
+
+           $statement->execute();
+           $rows = $statement->affected_rows;
+           if ($rows!==1) {
+               $status = $statement->error;
+           }
+           $statement->close();
+        } else {
+            $this->error = mysqli_error($connection);
+            // Likely case for error conditions if schema changes affect field names
+            // or if updates to field list produce incorrect sql.
+            $status = mysqli_error($connection);
+            echo $status;
+        }
+        if($status!=""){
+            $status = "loadImageData: $status<br/>SQL: ".$sql;
+        }
+        return $status;
+    }
+
+
+    /**
+     * Given a sourceURI, return the first imgid if at least one images record exists with
+     * that sourceURI.  
+     * @author Paul J. Morris
+     * @param sourceUrl the images.sourceurl to query for.
+     * @returns an empty string if no images records have the provided sourceURL, otherwise, 
+     * the images.imgid for the first encountered images record with that sourceURL.
+     */
+    public function getImgIDForSourceURL($sourceUrl) { 
+        $result = "";
+        $sql = "select imgid from images where sourceurl = ? order by imgid limit 1 ";
+        if ($statement = $this->conn->prepare($sql)) {
+           $statement->bind_param("s",$sourceUrl);
+           $statement->execute();
+           $statement->bind_result($result);
+           $statement->fetch();
+           $statement->close();
+        }
+        return $result;
+    }
+
 	public function createImageThumbnail($imgUrl){
 		$newThumbnailUrl = "";
 		if($imgUrl){

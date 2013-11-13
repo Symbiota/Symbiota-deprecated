@@ -34,6 +34,8 @@ include_once("$serverRoot/classes/OmOccurDeterminations.php");
 if (file_exists("$serverRoot/classes/Gazeteer.php")) { 
    include_once("$serverRoot/classes/Gazeteer.php");
 }
+include_once("$serverRoot/classes/iPlantUtility.php");
+include_once("$serverRoot/classes/ImageShared.php");
 
 define ("DEFAULT_NEVP_COUNTRY","United States of America");
 
@@ -202,6 +204,7 @@ class OCCURRENCE {
        global $createNewRec, $result; 
        $occ = new OmOccurrences();
        $det = new OmOccurDeterminations();
+       $imageHandler = new ImageShared();
        $collid = $occ->lookupCollId($this->institutioncode, $this->collectioncode);
        $collreportmatch = "collid=[$collid], institutionCode=[$this->institutioncode], collectionCode=[$this->collectioncode]\n";
        // Record exists if there is a matching DarwinCore triplet.  
@@ -312,10 +315,12 @@ class OCCURRENCE {
            }
        }
        // TODO: Handle motivations (transcribing and NSF abstract numbers).
+
        
        if (!$exists || $createNewRec==1) {
            // if record exists, then TcnImageConf variable createNewRec specifies policy for update.
            $saveresult = $occ->save();
+           $occid = $occ->getoccid();
            if ($saveresult===TRUE) {
                if ($exists) {
                    // echo "Updated occid: [".$occ->getoccid()."]\n";
@@ -328,7 +333,45 @@ class OCCURRENCE {
                     $id->occid = $occ->getoccid();
                     $id->write();
                }
-               // TODO: Create image records from associatedmedia array.
+               // Create image records from associatedmedia array.
+               foreach($this->associatedmedia as $media) {
+                  $mediaguid = $media->guid;
+                  foreach($media->accesspoints as $accesspoint) {  
+                     $imageresult = getiPlantIDForNEVP($accesspoint->accessURI);
+                     if ($imageresult->statusok===FALSE) { 
+                        echo "Error: " . $imageresult->error . "\n";
+                     } else { 
+echo "[$accesspoint->format]";
+                        $iPlantID = $imageresult->resource_uniq;
+                        if ($accesspoint->format=="dng") { 
+                           // Original dng file
+                           $sourceUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID";
+                        } 
+                        if ($accesspoint->format=="jpg") { 
+                           // Preconstructed derivative JPG file
+                           $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&resize=1250&format=jpeg,quality,100";
+                           $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&resize=150&format=jpeg,quality,75";
+                           $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&format=jpeg,quality,100";
+                        } 
+                     }
+                  }
+                  $tid = $det->lookupTID($filedUnder->scientificname);
+                  $caption = "$this->collectioncode $this->catalognumber $filedUnder->scientificname";
+                  $locality = $occ->getcountry() ." $this->stateprovince $this->county $this->municipality $this->locality";
+                  $sortsequence = 50;  // default number
+                  $copyright = $media->rights;  
+                  $owner = $media->owner;        
+                  $notes = $media->usageterms;    
+echo "[$imgWebUrl][$occid]";
+                  $imgid = $imageHandler->getImgIDForSourceURL($sourceUrl); 
+                  if ($imgid=="") { 
+                     // add this image record
+	                 $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+                  } else { 
+	                 $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+                  } 
+echo "[$isaveresult]";
+               }
 
                $result->successcount++;
            } else {
@@ -369,10 +412,28 @@ class OCCURRENCE {
 
 }
 
+class ASSOCIATEDMEDIA { 
+   public $guid;
+   public $accesspoints;
+   public $rights;
+   public $owner;
+   public $usageterms;
+}
+
+class ACCESSPOINT { 
+   public $variant;
+   public $accessURI;
+   public $format;
+   public $hashFunction;
+   public $hashValue;
+}
+
 class NEVPProcessor { 
     
     public $currentAnnotation = null;
     public $currentAnnotator = null;
+    public $cureentMedia = null;
+    public $cureentAP = null;
     public $currentOcc = null;
     public $currentId = null;
     public $currentDate = null;
@@ -381,9 +442,10 @@ class NEVPProcessor {
     public $countfound = 0;  // number of annotations found  
     
     function startElement($parser, $name, $attrs) {
-        global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation;
+        global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP;
         $currentTag = $name;
         
+// echo "[$name]";
         switch ($name) { 
            case "OA:ANNOTATION":
               $currentAnnotation = new ANNOTATION();
@@ -422,7 +484,13 @@ class NEVPProcessor {
               $currentOcc->collectionid = $attrs['RDF:RESOURCE'];
               break;
            case "DWCFP:HASASSOCIATEDMEDIA":
-              $currentOcc->associatedmedia[] = $attrs['RDF:RESOURCE'];
+              $currentMedia = new ASSOCIATEDMEDIA();
+              break;
+           case "DCMITYPE:IMAGE":
+              $currentMedia->guid = $attrs['RDF:ABOUT'];
+              break;
+           case "AC:HASACCESSPOINT":
+              $currentAP = new ACCESSPOINT();
               break;
            case "DWCFP:HASBASISOFRECORD": 
               $basis = $attrs['RDF:RESOURCE'];
@@ -441,7 +509,7 @@ class NEVPProcessor {
     }
     
     function endElement($parser, $name) {
-        global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation;
+        global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP;
         $depth[$parser]--;
         
         switch ($name) { 
@@ -468,11 +536,19 @@ class NEVPProcessor {
               $currentAnnotation->annotator = $currentAnnotator;
               $currentAnnotator = null;
               break;
+           case "DWCFP:HASASSOCIATEDMEDIA":
+              $currentOcc->associatedmedia[] = clone $currentMedia;
+              $currentMedia = null;
+              break;
+           case "AC:HASACCESSPOINT":
+              $currentMedia->accesspoints[] = clone $currentAP;
+              $currentAP = null;
+              break;
         }
     }
     
     function value($parser, $data) { 
-       global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation;
+       global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia,$currentAP;
     
 // Top level of document: [RDF:RDF][RDF:DESCRIPTION][RDFS:COMMENT][RDFS:COMMENT][CO:COUNT]
 // Annotation: [OA:ANNOTATION][OA:HASTARGET][OA:SPECIFICRESOURCE][OA:HASSELECTOR][OAD:KVPAIRQUERYSELECTOR][DWC:COLLECTIONCODE][DWC:INSTITUTIONCODE][OA:HASSOURCE][OA:HASBODY]
@@ -585,6 +661,7 @@ class NEVPProcessor {
              $currentId->typestatus .= $data;
              break;
     
+         // [Collecting] Event
          case "DWC:EVENTDATE":
              if (strlen(trim($data))>0) { 
                 $currentDate->setEventDate($data);
@@ -602,6 +679,8 @@ class NEVPProcessor {
          case "DWC:MONTH":
              $currentDate->startmonth .= $data;
              break;
+
+         // Annotator
          case "FOAF:NAME":
              if ($currentAnnotator!=null) { 
                 // we are inside the annotated by, not serialized by
@@ -619,6 +698,34 @@ class NEVPProcessor {
                 // we are inside the annotated by, not serialized by
                 $currentAnnotator->mbox_sha1sum .= $data;
              } 
+             break;
+
+         // AssociatedMedia Image
+         case "DC:RIGHTS":
+             $currentMedia->rights .= $data;
+             break;
+         case "XMPRIGHTS:OWNER":
+             $currentMedia->owner .= $data;
+             break;
+         case "XMPRIGHTS:USAGETERMS":
+             $currentMedia->usageterms .= $data;
+             break;
+          
+         // AssociatedMedia Image AccessPoint
+         case "AC:VARIANT":
+             $currentAP->variant .= $data;
+             break;
+         case "AC:ACCESSURI":
+             $currentAP->accessURI .= $data;
+             break;
+         case "DC:FORMAT":
+             $currentAP->format .= $data;
+             break;
+         case "AC:HASHFUNCTION":
+             $currentAP->hashFunction .= $data;
+             break;
+         case "AC:HASHVALUE":
+             $currentAP->hashValue .= $data;
              break;
        }
     

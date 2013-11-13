@@ -3105,6 +3105,8 @@ CREATE TABLE `omoccurrences` (
            $rows = $statement->affected_rows;
            if ($rows!==1) {
                $this->error = $statement->error; 
+           } else { 
+              if ($this->occid==NULL) { $this->occid = $statement->insert_id; } 
            }
            $statement->close();
         } else { 
