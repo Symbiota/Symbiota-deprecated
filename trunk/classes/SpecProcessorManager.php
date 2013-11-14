@@ -6,8 +6,8 @@ include_once($serverRoot.'/classes/SpecProcessorImage.php');
 class SpecProcessorManager {
 
 	protected $conn;
-	protected $collId = 0;
-	protected $spprId = 0;
+	protected $collid = 0;
+	protected $spprid = 0;
 	protected $title;
 	protected $collectionName;
 	protected $managementType;
@@ -23,7 +23,7 @@ class SpecProcessorManager {
 	protected $webPixWidth = 1200;
 	protected $tnPixWidth = 130;
 	protected $lgPixWidth = 2400;
-	protected $jpgCompression= 80;
+	protected $jpgQuality = 80;
 	protected $webMaxFileSize = 400000;
 	protected $lgMaxFileSize = 3000000;
 	protected $createWebImg = 1;
@@ -67,9 +67,9 @@ class SpecProcessorManager {
 	}
 
 	public function setCollId($id){
-		$this->collId = $id;
-		if($this->collId && is_numeric($this->collId) && !$this->collectionName){
-			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collId.')';
+		$this->collid = $id;
+		if($this->collid && is_numeric($this->collid) && !$this->collectionName){
+			$sql = 'SELECT collid, collectionname, managementtype FROM omcollections WHERE (collid = '.$this->collid.')';
 			if($rs = $this->conn->query($sql)){
 				if($row = $rs->fetch_object()){
 					$this->collectionName = $row->collectionname;
@@ -104,7 +104,7 @@ class SpecProcessorManager {
 	protected function getOccId($specPk){
 		$occId = 0;
 		//Check to see if record with pk already exists
-		$sql = 'SELECT occid FROM omoccurrences WHERE (catalognumber = "'.$specPk.'") AND (collid = '.$this->collId.')';
+		$sql = 'SELECT occid FROM omoccurrences WHERE (catalognumber = "'.$specPk.'") AND (collid = '.$this->collid.')';
 		$rs = $this->conn->query($sql);
 		if($row = $rs->fetch_object()){
 			$occId = $row->occid;
@@ -113,7 +113,7 @@ class SpecProcessorManager {
 		if(!$occId && $this->createNewRec){
 			//Records does not exist, create a new one to which image will be linked
 			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
-				'VALUES('.$this->collId.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
+				'VALUES('.$this->collid.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
 			if($this->conn->query($sql2)){
 				$occId = $this->conn->insert_id;
 				if($this->logFH) fwrite($this->logFH, "\tSpecimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") \n");
@@ -195,7 +195,7 @@ class SpecProcessorManager {
 	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
 		$status = true;
 		if($this->mdOutputFH){
-			$status = fwrite($this->mdOutputFH, $this->collId.',"'.$specPk.'","'.$this->imgUrlBase.$webUrl.'","'.$this->imgUrlBase.$tnUrl.'","'.$this->imgUrlBase.$oUrl.'"'."\n");
+			$status = fwrite($this->mdOutputFH, $this->collid.',"'.$specPk.'","'.$this->imgUrlBase.$webUrl.'","'.$this->imgUrlBase.$tnUrl.'","'.$this->imgUrlBase.$oUrl.'"'."\n");
 		}
 		return $status;
 	}
@@ -244,7 +244,7 @@ class SpecProcessorManager {
 				'", sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).
 				'", targetpath = "'.$this->cleanInStr($editArr['targetpath']).'", imgurl = "'.$editArr['imgurl'].
 				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
-				', jpgcompression = '.$editArr['jpgcompression'].
+				', jpgcompression = '.$editArr['jpgquality'].
 				', createtnimg = '.(array_key_exists('createtnimg',$editArr)?'1':'0').
 				', createlgimg = '.(array_key_exists('createlgimg',$editArr)?'1':'0').' '.
 				'WHERE (spprid = '.$editArr['spprid'].')';
@@ -256,17 +256,17 @@ class SpecProcessorManager {
 	public function addProject($addArr){
 		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
-			'VALUES('.$this->collId.',"'.$this->cleanInStr($addArr['title']).'","'.
+			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 			$this->cleanInStr($addArr['speckeypattern']).'","'.$addArr['speckeyretrieval'].'","'.
 			$this->cleanInStr($addArr['sourcepath']).'","'.$this->cleanInStr($addArr['targetpath']).'","'.
 			$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
-			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgcompression'].','.
+			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgquality'].','.
 			(array_key_exists('createtnimg',$addArr)?'1':'0').','.(array_key_exists('createlgimg',$addArr)?'1':'0').')';
 		$this->conn->query($sql);
 	}
 
-	public function deleteProject($spprId){
-		$sql = 'DELETE FROM specprocessorprojects WHERE (spprid = '.$spprId.')';
+	public function deleteProject($spprid){
+		$sql = 'DELETE FROM specprocessorprojects WHERE (spprid = '.$spprid.')';
 		$this->conn->query($sql);
 	}
 
@@ -275,10 +275,11 @@ class SpecProcessorManager {
 			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
 				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
 				'FROM specprocessorprojects p '.
-				'WHERE (p.spprid = '.$this->spprid.')'; 
+				'WHERE (p.spprid = '.$this->spprid.')';
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
-				if(!$this->collId) $this->setCollId($row->collid); 
+				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
 				$this->specKeyRetrieval = $row->speckeyretrieval;
@@ -295,7 +296,7 @@ class SpecProcessorManager {
 				if($row->webpixwidth) $this->webPixWidth = $row->webpixwidth;
 				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
 				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
-				if($row->jpgcompression) $this->jpgCompression = $row->jpgcompression;
+				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
 				$this->createTnImg = $row->createtnimg;
 				$this->createLgImg = $row->createlgimg;
 			}
@@ -305,10 +306,10 @@ class SpecProcessorManager {
 	
 	public function getProjects(){
 		$projArr = array();
-		if($this->collId){
+		if($this->collid){
 			$sql = 'SELECT spprid, title '.
 				'FROM specprocessorprojects '.
-				'WHERE (collid = '.$this->collId.')';
+				'WHERE (collid = '.$this->collid.')';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$projArr[$row->spprid] = $row->title;
@@ -446,20 +447,28 @@ class SpecProcessorManager {
 		return $this->lgPixWidth;
 	}
 
-	public function setJpgCompression($jc){
-		$this->jpgCompression = $jc;
+	public function setJpgQuality($jc){
+		$this->jpgQuality = $jc;
 	}
 
-	public function getJpgCompression(){
-		return $this->jpgCompression;
+	public function getJpgQuality(){
+		return $this->jpgQuality;
 	}
 
 	public function setWebMaxFileSize($s){
 		$this->webMaxFileSize = $s;
 	}
 
+	public function getWebMaxFileSize(){
+		return $this->webMaxFileSize;
+	}
+
 	public function setLgMaxFileSize($s){
 		$this->lgMaxFileSize = $s;
+	}
+	
+	public function getLgMaxFileSize(){
+		return $this->lgMaxFileSize;
 	}
 	
 	public function setCreateWebImg($c){
@@ -510,7 +519,11 @@ class SpecProcessorManager {
  		$this->processUsingImageMagick = $useIM;
  	}
 
-	//Misc functions
+ 	public function getUseImageMagick(){
+ 		return $this->processUsingImageMagick;
+ 	}
+
+ 	//Misc functions
 	protected function cleanInStr($str){
 		$newStr = trim($str);
 		//$newStr = preg_replace('/\s\s+/', ' ',$newStr);

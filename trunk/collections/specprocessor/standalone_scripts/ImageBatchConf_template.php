@@ -9,32 +9,29 @@ $targetPathBase = '';
 $imgUrlBase = '';
 //Title (e.g. CNALH) and Path to where log files will be placed
 $logTitle = '';
-$logPath = $sourcePathBase.'/logs';
-//Full path to Symbiota project root folder
-$serverRoot = '';
-// Path to Symbiota Class Files, set to null if class files are 
-// not available.  Correct path is required for the processing of 
-// xml batch files.
-$symbiotaClassPath = $serverRoot."/classes/";
+$logProcessorPath = $sourcePathBase.'/logs';
 
-//If silent is set to true, script will not produce a log file.
-$silent = false;
+//0 = silent, 1 = html, 2 = log file
+$logMode = 2;
 //If record matching PK is not found, should a new blank record be created?
 $createNewRec = true;
 //Weather to copyover images with matching names (includes path) or rename new image and keep both
 $copyOverImg = true;
 
-$webPixWidth = 800;
-$tnPixWidth = 130;
-$lgPixWidth = 2000;
+$webPixWidth = 1400;
+$tnPixWidth = 200;
+$lgPixWidth = 3600;
 $webFileSizeLimit = 300000;
+$lgFileSizeLimit = 3000000;
 
 //Whether to use ImageMagick for creating thumbnails and web images. ImageMagick must be installed on server.
 // 0 = use GD library (default), 1 = use ImageMagick
 $useImageMagick = 0;
 //Value between 0 and 100
-$jpgCompression = 80;
+$jpgQuality = 80;
 
+//Create web image
+$createWebImg = 1;
 //Create thumbnail versions of image
 $createTnImg = 1;
 //Create large version of image, given source image is large enough

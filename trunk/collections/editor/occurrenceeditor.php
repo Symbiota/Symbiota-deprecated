@@ -45,6 +45,7 @@ $specImgArr = array();
 $fragArr = array();
 $qryCnt = false;
 $statusStr = '';
+$navStr = '';
 
 if($symbUid){
 	//Set variables
@@ -241,7 +242,6 @@ if($symbUid){
 		$occArr = $occManager->carryOverValues($_REQUEST);
 	}
 
-	$navStr = '';
 	if($qryCnt !== false){
 		if($qryCnt == 0){
 			if(!$goToMode){

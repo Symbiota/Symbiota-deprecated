@@ -19,6 +19,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$
 
 $specProjects = Array();
 if(!$spprId && $action != 'addmode'){
+	//If there is one image loading profile, and only one, linked to the collection, pull that up as the default project 
 	$specProjects = $specManager->getProjects();
 	if(count($specProjects) == 1){
 		$spprId = array_shift(array_keys($specProjects));
@@ -99,8 +100,8 @@ if($spprId) $specManager->setProjVariables();
 					alert("Title cannot be empty");
 					return false;
 				}
-				else if(!isNumeric(f.jpgcompression.value) || f.jpgcompression.value < 20 || f.jpgcompression.value > 100){
-					alert("JPG compression needs to be a numeric value between 20 and 100");
+				else if(!isNumeric(f.jpgcompression.value) || f.jpgcompression.value < 30 || f.jpgcompression.value > 100){
+					alert("JPG compression needs to be a numeric value between 30 and 100");
 					return false;
 				}
 				return true;
@@ -138,6 +139,9 @@ if($spprId) $specManager->setProjVariables();
 						<form name="editproj" action="index.php" method="post" onsubmit="return validateProjectForm(this);">
 							<fieldset>
 								<legend><b><?php echo ($spprId?'Edit':'New'); ?> Project</b></legend>
+								<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
+									<img src="../../images/edit.png" style="border:0px" />
+								</div>
 								<table>
 									<tr>
 										<td>
@@ -276,15 +280,18 @@ if($spprId) $specManager->setProjVariables();
 									</tr>
 									<tr>
 										<td>
-											<b>JPG compression:</b>
+											<b>JPG quality:</b>
 										</td>
 										<td> 
-											<input name="jpgcompression" type="text" style="width:50px;" value="<?php echo $specManager->getJpgCompression(); ?>" />
+											<input name="jpgquality" type="text" style="width:50px;" value="<?php echo $specManager->getJpgQuality(); ?>" />
 											<a id="jpgcompressioninfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
 											<div id="jpgcompressioninfodialog">
-												
+												JPG quality refers to amount of compression applied. 
+												Value should be numeric and range from 0 (worst quality, smaller file) to 
+												100 (best quality, biggest file). 
+												If null, 75 is used as the default. 
 											</div>
 										</td>
 									</tr>
@@ -311,7 +318,7 @@ if($spprId) $specManager->setProjVariables();
 											<input name="tabindex" type="hidden" value="1" />
 											<?php 
 											if($spprId){
-												echo '<input name="submitaction" type="submit" value="Edit Image Project" />';
+												echo '<input name="submitaction" type="submit" value="Save Image Project" />';
 											}
 											else{
 												echo '<input name="submitaction" type="submit" value="Add New Image Project" />';
@@ -343,11 +350,11 @@ if($spprId) $specManager->setProjVariables();
 					<?php 
 					if($spprId){
 						?>
-						<div style="">
+						<div id="imgprocessdiv">
 							<form name="imgprocessform" action="index.php" method="post">
 								<fieldset>
 									<legend><b>Image Processor</b></legend>
-									<div style="float:right;margin:10px;" onclick="toggle('editdiv');">
+									<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Open Editor">
 										<img src="../../images/edit.png" style="border:0px" />
 									</div>
 									<div style="font-size:120%;font-weight:bold;">
@@ -449,10 +456,10 @@ if($spprId) $specManager->setProjVariables();
 											</tr>
 											<tr>
 												<td>
-													<b>JPG compression:</b> 
+													<b>JPG quality (1-100): </b> 
 												</td>
 												<td> 
-													<?php echo $specManager->getJpgCompression();?><br/>
+													<?php echo $specManager->getJpgQuality();?><br/>
 												</td>
 											</tr>
 											<tr>
