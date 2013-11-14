@@ -24,7 +24,7 @@ class SpecUploadDirect extends SpecUploadBase {
 				}
 				else{
 					echo '<div style="font-weight:bold;color:red;margin:25px;font-size:120%;">Query did not return any records</div>';
-					return;
+					return false;
 				}
 				$rs->close();
 				$this->sourceArr = $sourceArr;
@@ -32,9 +32,10 @@ class SpecUploadDirect extends SpecUploadBase {
 			}
 			else{
 				echo '<div style="font-weight:bold;margin:15px;">ERROR: '.$sourceConn->error.'</div>';
-				return;
+				return false;
 			}
 		}
+		return false;
 	}
 
  	public function uploadData($finalTransfer){
@@ -86,18 +87,18 @@ class SpecUploadDirect extends SpecUploadBase {
 	private function getSourceConnection() {
 		if(!$this->server || !$this->username || !$this->password || !$this->schemaName){
 			echo "<div style='color:red;'>One of the required connection variables are null. Please resolve.</div>";
-			return null;
+			return false;
 		}
 		$connection = new mysqli($this->server, $this->username, $this->password, $this->schemaName);
-		if(mysqli_connect_errno()){
+		if($connection->connect_error){
 			echo "<div style='color:red;'>Could not connect to Source database!</div>";
 			echo "<div style='color:red;'>ERROR: ".mysqli_connect_error()."</div>";
-			return null;
+			return false;
 		}
 		return $connection;
     }
 
-    public function getDbpkOptions(){
+	public function getDbpkOptions(){
 		$sFields = $this->sourceArr;
 		sort($sFields);
 		return $sFields;
