@@ -220,7 +220,7 @@ $duManager->readUploadParameters();
 							?>
 						</div>
 						<form name="parameterform" action="specuploadmanagement.php" method="post" onsubmit="return checkParameterForm(this)">
-							<div id="updatetypeDiv">
+							<div id="updatetypeDiv" style="">
 								<b>Upload Type:</b> 
 								<select name="uploadtype" onchange="adjustParameterForm()" <?php if($uspid) echo 'DISABLED'; ?>>
 									<option value="">Select an Upload Type</option>
@@ -241,8 +241,12 @@ $duManager->readUploadParameters();
 								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" />
 							</div>
 							<div id="platformDiv" style="display:none">
-								<b>Database Platform:</b> 
-								<input name="platform" type="text" value="<?php echo $duManager->getPlatform(); ?>" />
+								<b>Database Platform:</b>
+								<select name="platform">
+									<option value="">None Selected</option>
+									<option value="">--------------------------------------------</option>
+									<option value="mysql" <?php echo ($duManager->getPlatform()=='mysql'?'SELECTED':''); ?>>MySQL Database</option>
+								</select> 
 							</div>
 							<div id="serverDiv" style="display:none">
 								<b>Server:</b> 
