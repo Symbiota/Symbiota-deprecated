@@ -2,6 +2,8 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecProcessorManager.php');
 include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
+include_once($serverRoot.'/classes/ImageBatchProcessor.php');
+
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
@@ -14,16 +16,7 @@ $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
-$specManager;
-if($action == 'Upload ABBYY File'){
-	$specManager = new SpecProcessorAbbyy();
-}
-elseif($action == 'Process Images'){
-	$specManager = new SpecProcessorImage();
-}
-else{
-	$specManager = new SpecProcessorManager();
-}
+$specManager= new SpecProcessorManager();
 
 $specManager->setCollId($collid);
 $specManager->setSpprId($spprId);
@@ -38,7 +31,7 @@ if($isEditor){
 	if($action == 'Add New Image Project'){
 		$specManager->addProject($_REQUEST);
 	}
-	elseif($action == 'Edit Image Project'){
+	elseif($action == 'Save Image Project'){
 		$specManager->editProject($_REQUEST);
 	}
 	elseif($action == 'Delete Image Project'){
@@ -103,7 +96,8 @@ if($isEditor){
 		<!-- This is inner text! -->
 		<div id="innertext">
 			<h2><?php echo $specManager->getCollectionName(); ?></h2>
-			<?php 
+			<?php
+			$specManager->setProjVariables(); 
 			if($action == 'Upload ABBYY File'){
 				$statusArr = $specManager->loadLabelFile();
 				if($statusArr){
@@ -112,15 +106,33 @@ if($isEditor){
 			}
 			elseif($action == 'Process Images'){
 				echo '<div style="padding:15px;">'."\n";
-				echo '<ul>'."\n";
-				$specManager->setCreateWebImg(array_key_exists('mapweb',$_REQUEST)?$_REQUEST['mapweb']:1);
-				$specManager->setCreateTnImg(array_key_exists('maptn',$_REQUEST)?$_REQUEST['maptn']:1);
-				$specManager->setCreateLgImg(array_key_exists('maplarge',$_REQUEST)?$_REQUEST['maplarge']:1);
-				$specManager->setCreateNewRec($_REQUEST['createnewrec']);
-				$specManager->setCopyOverImg($_REQUEST['copyoverimg']);
-				if(isset($useImageMagick) && $useImageMagick) $specManager->setUseImageMagick(1);
-				$specManager->batchLoadImages();
-				echo '</ul></div>'."\n";
+				$imageProcessor = new ImageBatchProcessor();
+
+				$imageProcessor->setLogMode(1);
+				$imageProcessor->initProcessor();
+				$imageProcessor->setCollArr(array($collid => array('pmterm' => $specManager->getSpecKeyPattern())));
+				$imageProcessor->setDbMetadata(1);
+				$imageProcessor->setSourcePathBase($specManager->getSourcePath());
+				$imageProcessor->setTargetPathBase($specManager->getTargetPath());
+				$imageProcessor->setImgUrlBase($specManager->getImgUrlBase());
+				$imageProcessor->setServerRoot($serverRoot);
+				$imageProcessor->setWebPixWidth($specManager->getWebPixWidth());
+				$imageProcessor->setTnPixWidth($specManager->getTnPixWidth());
+				$imageProcessor->setLgPixWidth($specManager->getLgPixWidth());
+				$imageProcessor->setWebFileSizeLimit($specManager->getWebMaxFileSize());
+				$imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
+				$imageProcessor->setJpgQuality($specManager->getJpgQuality());
+				$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
+				$imageProcessor->setCreateWebImg($_REQUEST['mapweb']);
+				$imageProcessor->setCreateTnImg($_REQUEST['maptn']);
+				$imageProcessor->setCreateLgImg($_REQUEST['maplarge']);
+				$imageProcessor->setCreateNewRec($_REQUEST['createnewrec']);
+				$imageProcessor->setCopyOverImg($_REQUEST['copyoverimg']);
+				$imageProcessor->setKeepOrig(0);
+				
+				//Run process
+				$imageProcessor->batchLoadImages();
+				echo '</div>'."\n";
 			}
 			if($status){ 
 				?>
@@ -147,10 +159,10 @@ if($isEditor){
 						<h1>Specimen Processor Control Panel</h1>
 						<div style="margin:10px">
 							This management module is designed to aid in establishing advanced processing workflows 
-							for unprocessed specimens using images. The central functions addressed in this page are:
+							for unprocessed specimens using images of the specimen label. The central functions addressed in this page are:
 							Batch loading images, Optical Character Resolution (OCR), Natural Language Processing (NLP), 
 							and crowdsourcing data entry. 
-							Use tabs above for access to relevant tools.     
+							Use tabs above for access tools.     
 						</div>
 						<div style="margin:10px">
 							<h2>Image Loading</h2>
@@ -167,7 +179,7 @@ if($isEditor){
 							<h2>Crowdsourcing Module</h2>
 							<div style="margin:15px">
 								The crowdsourcing module can be used to make unprocessed records accessible for data entry by 
-								general users who do not have explicit editing writes for a particular collection. 
+								general users who typically do not have explicit editing writes for a particular collection. 
 								For more information, see the
 								<b><a href="http://symbiota.org/tiki/tiki-index.php?page=Crowdsourcing">Crowdsource</a></b> section 
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   

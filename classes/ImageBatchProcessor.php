@@ -1,6 +1,38 @@
 <?php
+// Used by /trunk/collections/specprocessor/standalone_scripts/ImageBatchHandler.php
+// Used by /trunk/collections/specprocessor/imageprocessor.php
 
-class BatchImageProcessor {
+if(isset($serverRoot)){
+	//Use Symbiota connection factory
+	if(file_exists($serverRoot.'/config/dbconnection.php')){ 
+		include_once($serverRoot.'/config/dbconnection.php');
+	}
+}
+// Check for the symbiota class files used herein for parsing 
+// batch files of xml formatted strucutured data.
+// Fail gracefully if they aren't available.
+// Note also that class_exists() is checked for before
+// invocation of these parsers in processFolder().
+if(isset($serverRoot)){
+	//Files reside within Symbiota file structure
+	if (file_exists($serverRoot.'/classes/SpecProcessorGPI.php')) { 
+		@require_once($serverRoot.'/classes/SpecProcessorGPI.php');
+	}
+	if (file_exists($serverRoot.'/classes/SpecProcessorNEVP.php')) {  
+		@require_once($serverRoot.'/classes/SpecProcessorNEVP.php');
+	}
+}
+else{
+	//Files reside in same folder
+	if(file_exists('SpecProcessorGPI.php')) { 
+		@require_once('SpecProcessorGPI.php');
+	}
+	if (file_exists('SpecProcessorNEVP.php')) {  
+		@require_once('SpecProcessorNEVP.php');
+	}
+}
+
+class ImageBatchProcessor {
 
 	private $conn;
 
@@ -20,18 +52,19 @@ class BatchImageProcessor {
 	private $tnPixWidth = 130;
 	private $lgPixWidth = 2400;
 	private $webFileSizeLimit = 300000;
-	private $jpgCompression= 80;
+	private $lgFileSizeLimit = 3000000;
+	private $jpgQuality= 80;
 	private $createWebImg = 1;
 	private $createTnImg = 1;
 	private $createLgImg = 1;
-	private $keepOrig = 1;
-	
+	private $keepOrig = 0;
+
 	private $createNewRec = true;
 	private $copyOverImg = true;
 	private $dbMetadata = 1;
 	private $processUsingImageMagick = 0;
 
-	private $silent = 0;
+	private $logMode = 0;			//0 = silent, 1 = html, 2 = log file
 	private $logFH;
 	private $mdOutputFH;
 	private $logPath;
@@ -44,32 +77,15 @@ class BatchImageProcessor {
 	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
-	function __construct($logPath,$logTitle){
+	function __construct(){
 		ini_set('memory_limit','512M');
 		ini_set('auto_detect_line_endings', true);
-		if($logPath){
-			if(substr($logPath,-1) != '/' && substr($logPath,-1) != "\\") $logPath .= '/';
-			$this->logPath = $logPath;
-			if(!$this->silent ){
-				//Create log File
-				if(file_exists($logPath)){
-					$titleStr = str_replace(' ','_',$logTitle);
-					if(strlen($titleStr) > 50) $titleStr = substr($titleStr,0,50);
-					$logFile = $logPath.$titleStr."_".date('Ymd').".log";
-					$this->logFH = fopen($logFile, 'a');
-					$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
-				}
-				else{
-					echo 'ERROR creating Log file; path not found: '.$logPath."\n";
-				}
-			}
-		}
 		if($this->dbMetadata){
 			//Set collection
-			if(class_exists('BatchImageConnectionFactory')){
-				$this->conn = BatchImageConnectionFactory::getCon('write');
+			if(class_exists('ImageBatchConnectionFactory')){
+				$this->conn = ImageBatchConnectionFactory::getCon('write');
 			}
-			if(!$this->conn && class_exists('MySQLiConnectionFactory')){
+			elseif(class_exists('MySQLiConnectionFactory')){
 				//Try getting connection through portals central connection factory
 				$this->conn = MySQLiConnectionFactory::getCon('write');
 			}
@@ -78,14 +94,21 @@ class BatchImageProcessor {
 				exit("ABORT: Image upload aborted: Unable to establish connection to ".$collName." database");
 			}
 		}
+		//Use deaults located within symbini, if they are available
+		//Will be replaced by values within configuration file, if they are set 
+		if(isset($GLOBALS['imgWebWidth']) && $GLOBALS['imgWebWidth']) $this->imgWebWidth = $GLOBALS['imgWebWidth'];
+		if(isset($GLOBALS['imgTnWidth']) && $GLOBALS['imgTnWidth']) $this->tnPixWidth = $GLOBALS['imgTnWidth'];
+		if(isset($GLOBALS['imgLgWidth']) && $GLOBALS['imgLgWidth']) $this->imgWebWidth = $GLOBALS['imgLgWidth'];
+		if(isset($GLOBALS['imgFileSizeLimit']) && $GLOBALS['imgFileSizeLimit']) $this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
 	}
 
 	function __destruct(){
 		//Close connection or MD output file
-		if($this->dbMetadata && $this->collProcessedArr){
-			//Update Statistics
-			$this->updateCollectionStats();
-
+		if($this->dbMetadata){
+			if($this->collProcessedArr){
+				//Update Statistics
+//				$this->updateCollectionStats();
+			}
 			if(!($this->conn === false)) $this->conn->close();
 		}
 		else{
@@ -93,10 +116,36 @@ class BatchImageProcessor {
 		}
 		
 		//Close log file
-		$this->logOrEcho("\nImage upload process finished! (".date('Y-m-d h:i:s A').") ");
-		$this->logOrEcho("----------------------------------------------------------------\n");
+		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n\n");
 		if($this->logFH){
 			fclose($this->logFH);
+		}
+		if($this->logMode == 1){
+			echo '</ul>';
+		}
+	}
+
+	public function initProcessor($logTitle = ''){
+		if($this->logPath && $this->logMode == 2){
+			//Create log File
+			if(!file_exists($this->logPath)){
+				if(!mkdir($this->logPath,0,true)){
+					$echo("Warning: unable to create log file: ".$this->logPath);
+				}
+			}
+			if(file_exists($this->logPath)){
+				$titleStr = str_replace(' ','_',$logTitle);
+				if(strlen($titleStr) > 50) $titleStr = substr($titleStr,0,50);
+				$logFile = $this->logPath.$titleStr."_".date('Ymd').".log";
+				$this->logFH = fopen($logFile, 'a');
+				$this->logOrEcho("\nDateTime: ".date('Y-m-d h:i:s A'));
+			}
+			else{
+				echo 'ERROR creating Log file; path not found: '.$this->logPath."\n";
+			}
+		}
+		if($this->logMode == 1){
+			echo '<ul>';
 		}
 	}
 
@@ -112,9 +161,6 @@ class BatchImageProcessor {
 			exit();
 		}
 		
-		//Variable used in path to store original files
-		$this->origPathFrag = 'orig/'.date("Ym").'/';
-
 		$projProcessed = array();
 		foreach($this->collArr as $collid => $cArr){
 			$this->activeCollid = $collid;
@@ -136,16 +182,21 @@ class BatchImageProcessor {
 				}
 			}
 			
-			//Set target path fragment
-			$this->targetPathFrag = ''; 
-			if(isset($this->collArr[$collid]['sourcePathFrag'])){
-				$this->targetPathFrag .= $this->collArr[$collid]['sourcePathFrag'];
+			//Set source and target path fragments
+			$sourcePathFrag = '';
+			$this->targetPathFrag = '';
+			if(isset($cArr['sourcePathFrag'])){
+				$sourcePathFrag = $cArr['sourcePathFrag'];
+				$this->targetPathFrag = $cArr['sourcePathFrag'];
 			}
 			else{
 				$this->targetPathFrag .= $collStr;
 			}
 			if(substr($this->targetPathFrag,-1) != "/" && substr($this->targetPathFrag,-1) != "\\"){
 				$this->targetPathFrag .= '/';
+			}
+			if(substr($sourcePathFrag,-1) != "/" && substr($sourcePathFrag,-1) != "\\"){
+				$sourcePathFrag .= '/';
 			}
 			if(!file_exists($this->targetPathBase.$this->targetPathFrag)){
 				if(!mkdir($this->targetPathBase.$this->targetPathFrag,0777,true)){
@@ -156,6 +207,8 @@ class BatchImageProcessor {
 
 			//If originals are to be kept, make sure target folders exist
 			if($this->keepOrig){
+				//Variable used in path to store original files
+				$this->origPathFrag = 'orig/'.date("Ym").'/';
 				if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig/')){
 					if(!mkdir($this->targetPathBase.$this->targetPathFrag.'orig/')){
 						$this->logOrEcho("NOTICE: unable to create base folder to store original files (".$this->targetPathBase.$this->targetPathFrag.") ");
@@ -171,8 +224,8 @@ class BatchImageProcessor {
 			}
 			
 			//Lets start processing folder
-			$this->logOrEcho('Starting image processing: '.$this->targetPathFrag);
-			$this->processFolder($this->targetPathFrag);
+			$this->logOrEcho('Starting image processing');
+			$this->processFolder($sourcePathFrag);
 			$this->logOrEcho('Image upload complete');
 		}
 	}
@@ -244,12 +297,12 @@ class BatchImageProcessor {
 	 * @param pathFrag the path from sourcePathBase to the file to process. 
 	 */
 	private function processXMLFile($fileName,$pathFrag='') { 
-		if ($this->symbiotaClassPath!=null) {
+		if ($this->serverRoot) {
 			$foundSchema = false;
 			$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
-			if($xml->read())  {
+			if($xml->read()) {
 				// $this->logOrEcho($fileName." first node: ". $xml->name);
-				if ($xml->name=="DataSet") {	 
+				if ($xml->name=="DataSet") {
 					$xml = XMLReader::open($this->sourcePathBase.$pathFrag.$fileName);
 					$lapischema = $this->serverRoot . "/collections/admin/schemas/lapi_schema_v2.xsd";
 					$xml->setParserProperty(XMLReader::VALIDATE, true);
@@ -390,75 +443,81 @@ class BatchImageProcessor {
 				
 				//Create web image
 				$webImgCreated = false;
-				if($this->createWebImg && ($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
-					$webImgCreated = $this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
-				}
-				else{
-					$webImgCreated = copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName);
+				if($this->createWebImg){
+					if(($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
+						$webImgCreated = $this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
+					}
+					else{
+						$webImgCreated = copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName);
+					}
 				}
 				if($webImgCreated){
 					$this->logOrEcho("\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") ");
-					$tnUrl = "";$lgUrl = "";
-					//Create Large Image
-					$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
-					if($this->createLgImg){
-						if($width > ($this->webPixWidth*1.3)){
-							if($width < $this->lgPixWidth){
-								if(copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
-									$lgUrl = $lgTargetFileName;
-								}
-							}
-							else{
-								if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
-									$lgUrl = $lgTargetFileName;
-								}
+				}
+				else{
+					$this->logOrEcho("\tFailed to create web image ");
+				}
+				//Create Large Image
+				$lgUrl = "";
+				$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
+				if($this->createLgImg){
+					if($width > ($this->webPixWidth*1.3)){
+						if($width > $this->lgPixWidth || ($fileSize && $fileSize > $this->lgFileSizeLimit)){
+							if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
+								$lgUrl = $lgTargetFileName;
 							}
 						}
-					}
-					else{
-						$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
-						if(file_exists($this->sourcePathBase.$pathFrag.$lgSourceFileName)){
-							rename($this->sourcePathBase.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
-						}
-					}
-					//Create Thumbnail Image
-					$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
-					if($this->createTnImg){
-						if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
-							$tnUrl = $tnTargetFileName;
-						}
-					}
-					else{
-						$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
-						if(file_exists($this->sourcePathBase.$pathFrag.$tnFileName)){
-							rename($this->sourcePathBase.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
-						}
-					}
-					//Start clean up
-					if($this->sourceGdImg){
-						imagedestroy($this->sourceGdImg);
-						$this->sourceGdImg = null;
-					}
-					if($this->sourceImagickImg){
-						$this->sourceImagickImg->clear();
-						$this->sourceImagickImg = null;
-					}
-					//Database urls and metadata for images
-					if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
-					if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
-					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
-						//Final cleaning stage
-						if(file_exists($this->sourcePathBase.$pathFrag.$fileName)){ 
-							if($this->keepOrig){
-								if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
-									rename($this->sourcePathBase.$pathFrag.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
-								}
-							} else {
-								unlink($this->sourcePathBase.$pathFrag.$fileName);
+						else{
+							if(copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
+								$lgUrl = $lgTargetFileName;
 							}
 						}
-						$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
 					}
+				}
+				else{
+					$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
+					if(file_exists($this->sourcePathBase.$pathFrag.$lgSourceFileName)){
+						rename($this->sourcePathBase.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
+					}
+				}
+				//Create Thumbnail Image
+				$tnUrl = "";
+				$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
+				if($this->createTnImg){
+					if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
+						$tnUrl = $tnTargetFileName;
+					}
+				}
+				else{
+					$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
+					if(file_exists($this->sourcePathBase.$pathFrag.$tnFileName)){
+						rename($this->sourcePathBase.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
+					}
+				}
+				//Start clean up
+				if($this->sourceGdImg){
+					imagedestroy($this->sourceGdImg);
+					$this->sourceGdImg = null;
+				}
+				if($this->sourceImagickImg){
+					$this->sourceImagickImg->clear();
+					$this->sourceImagickImg = null;
+				}
+				//Database urls and metadata for images
+				if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
+				if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
+				if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
+					//Final cleaning stage
+					if(file_exists($this->sourcePathBase.$pathFrag.$fileName)){ 
+						if($this->keepOrig){
+							if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
+								rename($this->sourcePathBase.$pathFrag.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
+							}
+						} else {
+							unlink($this->sourcePathBase.$pathFrag.$fileName);
+						}
+					}
+					$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
 				}
 			}
 		}
@@ -496,7 +555,7 @@ class BatchImageProcessor {
 			$ct = system('convert '.$sourceImg.' -thumbnail '.$newWidth.'x'.($newWidth*1.5).' '.$targetPath, $retval);
 		}
 		else{
-			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgCompression?' -quality '.$this->jpgCompression:'').' '.$targetPath, $retval);
+			$ct = system('convert '.$sourceImg.' -resize '.$newWidth.'x'.($newWidth*1.5).($this->jpgQuality?' -quality '.$this->jpgQuality:'').' '.$targetPath, $retval);
 		}
 		if(file_exists($targetPath)){
 			$status = true;
@@ -518,8 +577,8 @@ class BatchImageProcessor {
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
 
-		if($this->jpgCompression){
-			$status = imagejpeg($tmpImg, $targetPath, $this->jpgCompression);
+		if($this->jpgQuality){
+			$status = imagejpeg($tmpImg, $targetPath, $this->jpgQuality);
 		}
 		else{
 			$status = imagejpeg($tmpImg, $targetPath);
@@ -547,15 +606,17 @@ class BatchImageProcessor {
 	 */ 
 	private function getPrimaryKey($str){
 		$specPk = '';
-		if(preg_match($this->collArr[$this->activeCollid]['pmterm'],$str,$matchArr)){
-			if(array_key_exists(1,$matchArr) && $matchArr[1]){
-				$specPk = $matchArr[1];
-			}
-			else{
-				$specPk = $matchArr[0];
-			}
-			if (isset($this->collArr[$this->activeCollid]['prpatt'])) { 				
-				$specPk = preg_replace($this->collArr[$this->activeCollid]['prpatt'],$this->collArr[$this->activeCollid]['prrepl'],$specPk);
+		if(isset($this->collArr[$this->activeCollid]['pmterm'])){
+			if(preg_match($this->collArr[$this->activeCollid]['pmterm'],$str,$matchArr)){
+				if(array_key_exists(1,$matchArr) && $matchArr[1]){
+					$specPk = $matchArr[1];
+				}
+				else{
+					$specPk = $matchArr[0];
+				}
+				if (isset($this->collArr[$this->activeCollid]['prpatt'])) { 				
+					$specPk = preg_replace($this->collArr[$this->activeCollid]['prpatt'],$this->collArr[$this->activeCollid]['prrepl'],$specPk);
+				}
 			}
 		}
 		return $specPk;
@@ -1120,7 +1181,7 @@ class BatchImageProcessor {
 			if(!$this->conn->query($sql)){
 				$this->logOrEcho('ERROR: unable to update image tid field; '.$this->conn->error);
 			}
-			
+
 			#Updating records with null families
 			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
 				'SET o.family = ts.family '. 
@@ -1187,7 +1248,6 @@ class BatchImageProcessor {
 		}
 		$this->logOrEcho("Stats update completed");
 	}
-	
 
 	//Set and Get functions
 	public function setCollArr($cArr){
@@ -1199,11 +1259,17 @@ class BatchImageProcessor {
 					$sql = 'SELECT collid, institutioncode, collectioncode, collectionname, managementtype FROM omcollections '.
 						'WHERE (collid IN('.implode(',',array_keys($this->collArr)).'))';
 					if($rs = $this->conn->query($sql)){
-						while($r = $rs->fetch_object()){
-							$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
-							$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
-							$this->collArr[$r->collid]['collname'] = $r->collectionname;
-							$this->collArr[$r->collid]['managementtype'] = $r->managementtype;
+						if($rs->num_rows){
+							while($r = $rs->fetch_object()){
+								$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
+								$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
+								$this->collArr[$r->collid]['collname'] = $r->collectionname;
+								$this->collArr[$r->collid]['managementtype'] = $r->managementtype;
+							}
+						}
+						else{
+							$this->logOrEcho('ABORT: unable to get collection metadata from database (collids might be wrong) ');
+							exit('ABORT: unable to get collection metadata from database');
 						}
 						$rs->free();
 					}
@@ -1247,10 +1313,6 @@ class BatchImageProcessor {
 		return $this->imgUrlBase;
 	}
 
-	public function setSymbiotaClassPath($path) { 
-		$this->symbiotaClassPath = $path;
-	}
-
 	public function setServerRoot($path) { 
 		$this->serverRoot = $path;
 	}
@@ -1287,12 +1349,20 @@ class BatchImageProcessor {
 		return $this->webFileSizeLimit;
 	}
 
-	public function setJpgCompression($jc){
-		$this->jpgCompression = $jc;
+	public function setLgFileSizeLimit($size){
+		$this->lgFileSizeLimit = $size;
 	}
 
-	public function getJpgCompression(){
-		return $this->jpgCompression;
+	public function getLgFileSizeLimit(){
+		return $this->lgFileSizeLimit;
+	}
+
+	public function setJpgQuality($q){
+		$this->jpgQuality = $q;
+	}
+
+	public function getJpgQuality(){
+		return $this->jpgQuality;
 	}
 
 	public function setCreateWebImg($c){
@@ -1350,13 +1420,18 @@ class BatchImageProcessor {
 	public function setUseImageMagick($useIM){
 		$this->processUsingImageMagick = $useIM;
 	}
-	 
-	public function setSilent($c){
-		$this->silent = $c;
+
+	public function setLogMode($c){
+		$this->logMode = $c;
 	}
 
-	public function getSilent(){
-		return $this->silent;
+	public function getLogMode(){
+		return $this->logMode;
+	}
+
+	public function setLogPath($path){
+		if($path && substr($path,-1) != '/' && substr($path,-1) != "\\") $path .= '/';
+		$this->logPath = $path;
 	}
 
 	//Misc functions
@@ -1521,12 +1596,13 @@ class BatchImageProcessor {
 	}
 
 	private function logOrEcho($str){
-		if(!$this->silent){
+		if($this->logMode == 2){
 			if($this->logFH){
 				fwrite($this->logFH,$str."\n");
-			} else {
-				echo $str."\n";
-			}	
+			}
+		}
+		elseif($this->logMode == 1){
+			echo '<li>'.$str."</li>\n";
 		}
 	}
 }

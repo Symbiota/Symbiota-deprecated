@@ -287,21 +287,20 @@ class OccurrenceDownloadManager extends OccurrenceManager{
     	$sql = "";
 		if($taxonFilterCode){
             $sql = "SELECT DISTINCT ts.family, t.sciname, CONCAT_WS(' ',t.unitind1,t.unitname1) AS genus, ".
-            	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS specificepithet, t.unitind3 AS infrarank, t.unitname3 AS infraspepithet, t.author ".
+            	"CONCAT_WS(' ',t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
 			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= $this->getSqlWhere()."AND t.RankId > 140 AND (ts.taxauthid = ".$taxonFilterCode.") ORDER BY ts.family, t.SciName ";
         }
         else{
-			$sql = "SELECT DISTINCT o.family, o.sciname, o.genus, IFNULL(o.specificepithet,'') AS specificepithet, ".
-				"IFNULL(o.taxonrank,'') AS infrarank, ".
-				"IFNULL(o.infraspecificepithet,'') AS infraspepithet, IFNULL(t.author, o.scientificnameauthorship) AS author ".
-				"FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ";
-			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()."AND o.SciName NOT LIKE '%aceae' AND o.SciName NOT IN ('Plantae','Polypodiophyta') ".
-                "ORDER BY o.family, o.SciName ";
+			$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
+            	'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author '.
+				'FROM (omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid) ';
+			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= 'INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ';
+			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= 'INNER JOIN fmvouchers sol ON o.occid = sol.occid ';
+			$sql .= $this->getSqlWhere().'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT IN ("Plantae","Polypodiophyta") '.
+                'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
         }
 		//Output checklist
     	$fileName = $defaultTitle;
@@ -323,10 +322,10 @@ class OccurrenceDownloadManager extends OccurrenceManager{
 		//Write column names out to file
 		if($result){
     		$outstream = fopen("php://output", "w");
-			$headArr = array("Family","ScientificName","Genus","SpecificEpithet","TaxonRank","InfraspecificEpithet","ScientificNameAuthorship");
+			$headArr = array("Family","ScientificName","Genus","SpecificEpithet","TaxonRank","InfraSpecificEpithet","ScientificNameAuthorship");
 			fputcsv($outstream, $headArr);
-			while($row = $result->fetch_row()){
-				fputcsv($outstream, $row);
+			while($row = $result->fetch_assoc()){
+				if($row['sciname']) fputcsv($outstream, $row);
 			}
 			fclose($outstream);
 		}
