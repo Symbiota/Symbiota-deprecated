@@ -107,7 +107,7 @@ class ImageBatchProcessor {
 		if($this->dbMetadata){
 			if($this->collProcessedArr){
 				//Update Statistics
-//				$this->updateCollectionStats();
+				$this->updateCollectionStats();
 			}
 			if(!($this->conn === false)) $this->conn->close();
 		}
@@ -117,12 +117,10 @@ class ImageBatchProcessor {
 		
 		//Close log file
 		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n\n");
-		if($this->logFH){
-			fclose($this->logFH);
-		}
 		if($this->logMode == 1){
 			echo '</ul>';
 		}
+		if($this->logFH) fclose($this->logFH);
 	}
 
 	public function initProcessor($logTitle = ''){
@@ -224,14 +222,14 @@ class ImageBatchProcessor {
 			}
 			
 			//Lets start processing folder
-			$this->logOrEcho('Starting image processing');
+			$this->logOrEcho('Starting image processing: '.$collStr);
 			$this->processFolder($sourcePathFrag);
 			$this->logOrEcho('Image upload complete');
 		}
 	}
 
 	private function processFolder($pathFrag = ''){
-		set_time_limit(2000);
+		set_time_limit(3600);
 		//$this->logOrEcho("Processing: ".$this->sourcePathBase.$pathFrag);
 		//Read file and loop through images
 		if(file_exists($this->sourcePathBase.$pathFrag)){
