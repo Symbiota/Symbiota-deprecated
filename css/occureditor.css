@@ -164,6 +164,27 @@ body{
 	width:	40px;
 }
 
+#exsDiv {
+	clear: both;
+}
+
+#ometidDiv{
+	float: left;
+}
+
+#ometidDiv select {
+	width: 600px;
+}
+
+#exsnumberDiv {
+	float:left;
+	margin-left:5px;
+}
+
+#exsnumberDiv input{
+	width:50px;
+}
+
 #scinameDiv {
 	float:	left;
 }
@@ -265,11 +286,11 @@ body{
 }
 
 #localityDiv input{
-	width:				99%;
+	width: 99%;
 }
 
 #localSecurityDiv{
-	clear:	both;
+	clear: both;
 	margin-bottom:5px;
 }
 
