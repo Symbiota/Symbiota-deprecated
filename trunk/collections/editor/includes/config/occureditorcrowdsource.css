@@ -82,7 +82,7 @@ body{
 #associatedCollectorsDiv {
 	position: absolute;
 	top: 65px;
-	left: 30px;
+	left: 25px;
 }
 
 #associatedCollectorsDiv input {
@@ -150,9 +150,32 @@ body{
 	display:none;
 }
 
-#scinameDiv {
+#exsDiv {
 	position: absolute;
 	top: 110px;
+	left: 25px;
+}
+
+#ometidDiv{
+	float: left;
+}
+
+#ometidDiv select {
+	width: 500px;
+}
+
+#exsnumberDiv {
+	float:left;
+	margin-left:5px;
+}
+
+#exsnumberDiv input{
+	width:50px;
+}
+
+#scinameDiv {
+	position: absolute;
+	top: 150px;
 	left: 25px;
 }
 
@@ -190,7 +213,7 @@ body{
 
 #countryDiv{
 	position: absolute;
-	top: 160px;
+	top: 200px;
 	left: 25px;
 }
 
@@ -200,7 +223,7 @@ body{
 
 #stateProvinceDiv{
 	position: absolute;
-	top: 160px;
+	top: 200px;
 	left: 180px;
 }
 
@@ -210,7 +233,7 @@ body{
 
 #countyDiv{
 	position: absolute;
-	top: 160px;
+	top: 200px;
 	left: 350px;
 }
 
@@ -224,7 +247,7 @@ body{
 
 #localityDiv{
 	position: absolute;
-	top: 200px;
+	top: 240px;
 	left: 25px;
 }
 
@@ -238,7 +261,7 @@ body{
 
 #decimalLatitudeDiv{
 	position: absolute;
-	top: 250px;
+	top: 290px;
 	left: 25px;
 }
 
@@ -248,7 +271,7 @@ body{
 
 #decimalLongitudeDiv{
 	position: absolute;
-	top: 250px;
+	top: 290px;
 	left: 110px;
 }
 
@@ -258,7 +281,7 @@ body{
 
 #coordinateUncertaintyInMetersDiv{
 	position: absolute;
-	top: 248px;
+	top: 288px;
 	left: 200px;
 }
 
@@ -268,7 +291,7 @@ body{
 
 #googleDiv{
 	position: absolute;
-	top: 268px;
+	top: 308px;
 	left: 280px;
 	cursor:	pointer;
 }
@@ -280,7 +303,7 @@ body{
 
 #geoLocateDiv{
 	position: absolute;
-	top: 263px;
+	top: 303px;
 	left: 300px;
 }
 
@@ -290,7 +313,7 @@ body{
 
 #geoToolsDiv{
 	position: absolute;
-	top: 240px;
+	top: 280px;
 	left: 500px;
 	z-index: 10; 
 }
@@ -298,7 +321,7 @@ body{
 #coordAidDiv{
 	display:	none;
 	position: absolute;
-	top: 300px;
+	top: 340px;
 	left: 25px;
 	width:	95%;
 	height: 175px;
@@ -335,7 +358,7 @@ body{
 
 #elevationDiv{
 	position: absolute;
-	top: 300px;
+	top: 340px;
 	left: 25px;
 }
 
@@ -345,7 +368,7 @@ body{
 
 #verbatimElevationDiv{
 	position: absolute;
-	top: 300px;
+	top: 340px;
 	left: 175px;
 }
 
@@ -363,7 +386,7 @@ body{
 
 #verbatimCoordinatesDiv{
 	position: absolute;
-	top: 250px;
+	top: 290px;
 	left: 320px;
 }
 
@@ -397,7 +420,7 @@ body{
 
 #habitatDiv{
 	position: absolute;
-	top: 350px;
+	top: 390px;
 	left: 25px;
 	z-index: 1; 
 }
@@ -408,7 +431,7 @@ body{
 
 #substrateDiv{
 	position: absolute;
-	top: 390px;
+	top: 430px;
 	left: 25px;
 }
 
@@ -426,7 +449,7 @@ body{
 
 #occurrenceRemarksDiv{
 	position: absolute;
-	top: 430px;
+	top: 470px;
 	left: 25px;
 }
 
@@ -534,7 +557,7 @@ body{
 
 #editButtonDiv{
 	position: absolute;
-	top: 480px;
+	top: 520px;
 	left: 50px;
 }
 

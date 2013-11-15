@@ -304,12 +304,12 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=131106" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=131115" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=131106" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=131115" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php 
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -644,10 +644,10 @@ else{
 											<?php
 											if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI){ 
 												?>
-												<div id="exsdiv" style="clear:both;">
-													<div style="float:left;">
+												<div id="exsDiv">
+													<div id="ometidDiv">
 														Exsiccati Title<br/>
-														<select name="ometid" style="width:600px;" onchange="fieldChanged('ometid')">
+														<select name="ometid" onchange="fieldChanged('ometid')">
 															<option value="">----------------------------------------------</option>
 															<?php 
 															$exsArr = $occManager->getExsiccatiTitleArr();
@@ -658,9 +658,9 @@ else{
 															?>
 														</select> 
 													</div>
-													<div style="float:left;margin-left:5px;">
+													<div id="exsnumberDiv">
 														Number<br/>
-														<input name="exsnumber" type="text" value="<?php echo isset($occArr['exsnumber'])?$occArr['exsnumber']:''; ?>" style="width:50px;" onchange="fieldChanged('exsnumber')" />
+														<input name="exsnumber" type="text" value="<?php echo isset($occArr['exsnumber'])?$occArr['exsnumber']:''; ?>" onchange="fieldChanged('exsnumber')" />
 													</div> 
 												</div>
 												<?php 
