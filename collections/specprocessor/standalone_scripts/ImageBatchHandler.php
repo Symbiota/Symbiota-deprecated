@@ -38,7 +38,7 @@ if($lgPixWidth) $imageProcessor->setLgPixWidth($lgPixWidth);
 if($webFileSizeLimit) $imageProcessor->setWebFileSizeLimit($webFileSizeLimit);
 if($lgFileSizeLimit) $imageProcessor->setLgFileSizeLimit($lgFileSizeLimit);
 $imageProcessor->setJpgQuality($jpgQuality);
-$imageProcessor->setUseImageMagick($useImageMagick);
+$imageProcessor->setUseImageMagick($useImageMagickBatch);
 
 if(isset($createWebImg) && $createWebImg) $imageProcessor->setCreateWebImg($createWebImg);
 $imageProcessor->setCreateTnImg($createTnImg);

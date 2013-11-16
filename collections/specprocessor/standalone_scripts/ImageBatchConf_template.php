@@ -2,19 +2,23 @@
 //Variables needing security
 //Base folder containing herbarium folder ; read access needed
 $sourcePathBase = '';
+
 //Folder where images are to be placed; write access needed
 $targetPathBase = '';
+
 //Url base needed to build image URL that will be saved in DB
 //Only needed if scripts are run on an exteral server
 $imgUrlBase = '';
+
 //Title (e.g. CNALH) and Path to where log files will be placed
 $logTitle = '';
 $logProcessorPath = $sourcePathBase.'/logs';
-
 //0 = silent, 1 = html, 2 = log file
 $logMode = 2;
+
 //If record matching PK is not found, should a new blank record be created?
 $createNewRec = true;
+
 //Weather to copyover images with matching names (includes path) or rename new image and keep both
 $copyOverImg = true;
 
@@ -26,19 +30,19 @@ $lgFileSizeLimit = 3000000;
 
 //Whether to use ImageMagick for creating thumbnails and web images. ImageMagick must be installed on server.
 // 0 = use GD library (default), 1 = use ImageMagick
-$useImageMagick = 0;
+$useImageMagickBatch = 0;
+
 //Value between 0 and 100
 $jpgQuality = 80;
 
-//Create web image
 $createWebImg = 1;
-//Create thumbnail versions of image
 $createTnImg = 1;
-//Create large version of image, given source image is large enough
 $createLgImg = 1;
+
 $keepOrig = 1;
 
-//0 = write image metadata to file; 1 = write metadata to a Symbiota database (connection variables must be set)
+//0 = write image metadata to file; 
+//1 = write metadata to a Symbiota database (connection variables must be set)
 $dbMetadata = 1;
 
 /**
