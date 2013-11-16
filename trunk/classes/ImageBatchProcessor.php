@@ -222,7 +222,7 @@ class ImageBatchProcessor {
 			}
 			
 			//Lets start processing folder
-			$this->logOrEcho('Starting image processing: '.$collStr);
+			$this->logOrEcho('Starting image processing: '.$sourcePathFrag);
 			$this->processFolder($sourcePathFrag);
 			$this->logOrEcho('Image upload complete');
 		}
@@ -434,88 +434,93 @@ class ImageBatchProcessor {
 				}
 				//Start the processing procedure
 				list($width, $height) = getimagesize($this->sourcePathBase.$pathFrag.$fileName);
-				$fileSize = filesize($this->sourcePathBase.$pathFrag.$fileName);
-				$this->logOrEcho("\tLoading image (".date('Y-m-d h:i:s A').")");
-				//ob_flush();
-				flush();
-				
-				//Create web image
-				$webImgCreated = false;
-				if($this->createWebImg){
-					if(($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
-						$webImgCreated = $this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
-					}
-					else{
-						$webImgCreated = copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName);
-					}
-				}
-				if($webImgCreated){
-					$this->logOrEcho("\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") ");
-				}
-				else{
-					$this->logOrEcho("\tFailed to create web image ");
-				}
-				//Create Large Image
-				$lgUrl = "";
-				$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
-				if($this->createLgImg){
-					if($width > ($this->webPixWidth*1.3)){
-						if($width > $this->lgPixWidth || ($fileSize && $fileSize > $this->lgFileSizeLimit)){
-							if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
-								$lgUrl = $lgTargetFileName;
-							}
+				if($width && $height){
+					$fileSize = filesize($this->sourcePathBase.$pathFrag.$fileName);
+					$this->logOrEcho("\tLoading image (".date('Y-m-d h:i:s A').")");
+					//ob_flush();
+					flush();
+					
+					//Create web image
+					$webImgCreated = false;
+					if($this->createWebImg){
+						if(($width > $this->webPixWidth  || $fileSize > $this->webFileSizeLimit)){
+							$webImgCreated = $this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName,$this->webPixWidth,round($this->webPixWidth*$height/$width),$width,$height);
 						}
 						else{
-							if(copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
-								$lgUrl = $lgTargetFileName;
+							$webImgCreated = copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$targetFileName);
+						}
+					}
+					if($webImgCreated){
+						$this->logOrEcho("\tWeb image copied to target folder (".date('Y-m-d h:i:s A').") ");
+					}
+					else{
+						$this->logOrEcho("\tFailed to create web image ");
+					}
+					//Create Large Image
+					$lgUrl = "";
+					$lgTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_lg.jpg";
+					if($this->createLgImg){
+						if($width > ($this->webPixWidth*1.3)){
+							if($width > $this->lgPixWidth || ($fileSize && $fileSize > $this->lgFileSizeLimit)){
+								if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
+									$lgUrl = $lgTargetFileName;
+								}
+							}
+							else{
+								if(copy($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$lgTargetFileName)){
+									$lgUrl = $lgTargetFileName;
+								}
 							}
 						}
 					}
-				}
-				else{
-					$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
-					if(file_exists($this->sourcePathBase.$pathFrag.$lgSourceFileName)){
-						rename($this->sourcePathBase.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
-					}
-				}
-				//Create Thumbnail Image
-				$tnUrl = "";
-				$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
-				if($this->createTnImg){
-					if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
-						$tnUrl = $tnTargetFileName;
-					}
-				}
-				else{
-					$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
-					if(file_exists($this->sourcePathBase.$pathFrag.$tnFileName)){
-						rename($this->sourcePathBase.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
-					}
-				}
-				//Start clean up
-				if($this->sourceGdImg){
-					imagedestroy($this->sourceGdImg);
-					$this->sourceGdImg = null;
-				}
-				if($this->sourceImagickImg){
-					$this->sourceImagickImg->clear();
-					$this->sourceImagickImg = null;
-				}
-				//Database urls and metadata for images
-				if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
-				if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
-				if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
-					//Final cleaning stage
-					if(file_exists($this->sourcePathBase.$pathFrag.$fileName)){ 
-						if($this->keepOrig){
-							if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
-								rename($this->sourcePathBase.$pathFrag.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
-							}
-						} else {
-							unlink($this->sourcePathBase.$pathFrag.$fileName);
+					else{
+						$lgSourceFileName = substr($fileName,0,strlen($fileName)-4).'_lg'.substr($fileName,strlen($fileName)-4);
+						if(file_exists($this->sourcePathBase.$pathFrag.$lgSourceFileName)){
+							rename($this->sourcePathBase.$pathFrag.$lgSourceFileName,$targetPath.$lgTargetFileName);
 						}
 					}
-					$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
+					//Create Thumbnail Image
+					$tnUrl = "";
+					$tnTargetFileName = substr($targetFileName,0,strlen($targetFileName)-4)."_tn.jpg";
+					if($this->createTnImg){
+						if($this->createNewImage($this->sourcePathBase.$pathFrag.$fileName,$targetPath.$tnTargetFileName,$this->tnPixWidth,round($this->tnPixWidth*$height/$width),$width,$height)){
+							$tnUrl = $tnTargetFileName;
+						}
+					}
+					else{
+						$tnFileName = substr($fileName,0,strlen($fileName)-4).'_tn'.substr($fileName,strlen($fileName)-4);
+						if(file_exists($this->sourcePathBase.$pathFrag.$tnFileName)){
+							rename($this->sourcePathBase.$pathFrag.$tnFileName,$targetPath.$tnTargetFileName);
+						}
+					}
+					//Start clean up
+					if($this->sourceGdImg){
+						imagedestroy($this->sourceGdImg);
+						$this->sourceGdImg = null;
+					}
+					if($this->sourceImagickImg){
+						$this->sourceImagickImg->clear();
+						$this->sourceImagickImg = null;
+					}
+					//Database urls and metadata for images
+					if($tnUrl) $tnUrl = $targetFolder.$tnUrl;
+					if($lgUrl) $lgUrl = $targetFolder.$lgUrl;
+					if($this->recordImageMetadata(($this->dbMetadata?$occId:$specPk),$targetFolder.$targetFileName,$tnUrl,$lgUrl)){
+						//Final cleaning stage
+						if(file_exists($this->sourcePathBase.$pathFrag.$fileName)){ 
+							if($this->keepOrig){
+								if(file_exists($this->targetPathBase.$this->targetPathFrag.$this->origPathFrag)){
+									rename($this->sourcePathBase.$pathFrag.$fileName,$this->targetPathBase.$this->targetPathFrag.$this->origPathFrag.$fileName.".orig");
+								}
+							} else {
+								unlink($this->sourcePathBase.$pathFrag.$fileName);
+							}
+						}
+						$this->logOrEcho("\tImage processed successfully (".date('Y-m-d h:i:s A').")!");
+					}
+				}
+				else{
+					$this->logOrEcho("File skipped (".$pathFrag.$fileName."), unable to obtain dimentions of original image");
 				}
 			}
 		}
@@ -527,7 +532,6 @@ class ImageBatchProcessor {
 	}
 
 	private function createNewImage($sourcePathBase, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight){
-		global $useImageMagick;
 		$status = false;
 		if($this->processUsingImageMagick) {
 			// Use ImageMagick to resize images 
