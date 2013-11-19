@@ -93,7 +93,7 @@ if(!$IS_ADMIN){
 				for(var k in tArr){
 					try{
 						var elem = openerForm.elements[k];
-						if(elem.disabled == false && (appendMode == false || elem.value == "")){
+						if(elem.disabled == false && elem.type != 'hidden' && (appendMode == false || elem.value == "")){
 							elem.value = tArr[k];
 							elem.style.backgroundColor = "lightblue";
 							if(k != "tid") opener.fieldChanged(k);
