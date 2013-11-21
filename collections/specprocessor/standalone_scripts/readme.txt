@@ -15,8 +15,8 @@ Required files
 	* Located in /trunk/classes/
 * SpecProcessorGPI.php
 	* Located in /trunk/classes/
-	* Required for parsing XML batch files 
+	* Required for parsing XML batch files that follow the ALUKA/GPI schema.
 * SpecProcessorNEVP.php
 	* Located in /trunk/classes/
-	* Required for parsing XML batch files 
+	* Required for parsing RDF/XML batch files containing new occurrence annotations (as used by NEVP).
 
