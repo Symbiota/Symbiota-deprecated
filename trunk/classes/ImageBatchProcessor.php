@@ -1276,8 +1276,8 @@ class ImageBatchProcessor {
 						$rs->free();
 					}
 					else{
-						$this->logOrEcho('ABORT: unable run SQL to obtain additional collection metadata: '.$this->error);
-						exit('ABORT: unable run SQL to obtain additional collection metadata'.$this->error);
+						$this->logOrEcho('ABORT: unable run SQL to obtain additional collection metadata: '.$this->conn->error);
+						exit('ABORT: unable run SQL to obtain additional collection metadata'.$this->conn->error);
 					}
 				}
 			}
