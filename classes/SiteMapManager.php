@@ -20,6 +20,8 @@ class SiteMapManager{
 		global $userRights, $isAdmin;
 		$adminArr = array();
 		$editorArr = array();
+		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS ccode, c.collectionname, c.colltype '.
+			'FROM omcollections c ';
 		if(!$isAdmin){
 			if(array_key_exists("CollAdmin",$userRights)){
 				$adminArr = $userRights['CollAdmin'];
@@ -27,33 +29,36 @@ class SiteMapManager{
 			if(array_key_exists("CollEditor",$userRights)){
 				$editorArr = $userRights['CollEditor'];
 			}
-		}
-		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS ccode, c.collectionname, c.colltype '.
-			'FROM omcollections c ';
-		if($adminArr || $editorArr){
-			$sql .= 'WHERE (c.collid IN('.implode(',',array_merge($adminArr,$editorArr)).')) ';
-		}
-		$sql .= "ORDER BY c.collectionname";
-		//echo "<div>".$sql."</div>";
-		$rs = $this->conn->query($sql);
-		if($rs){
-			while($row = $rs->fetch_object()){
-				$name = $row->collectionname.($row->ccode?" (".$row->ccode.")":"");
-				$isCollAdmin = ($isAdmin||in_array($row->collid,$adminArr)?1:0);
-				if($row->colltype == 'Observations'){
-					$this->obsArr[$row->collid]['name'] = $name;
-					$this->obsArr[$row->collid]['isadmin'] = $isCollAdmin; 
-				}
-				elseif($row->colltype == 'General Observations'){
-					$this->genObsArr[$row->collid]['name'] = $name;
-					$this->genObsArr[$row->collid]['isadmin'] = $isCollAdmin; 
-				}
-				else{
-					$this->collArr[$row->collid]['name'] = $name;
-					$this->collArr[$row->collid]['isadmin'] = $isCollAdmin; 
-				}
+			if($adminArr || $editorArr){
+				$sql .= 'WHERE (c.collid IN('.implode(',',array_merge($adminArr,$editorArr)).')) ';
 			}
-			$rs->close();
+			else{
+				$sql = '';
+			}
+		}
+		if($sql){
+			$sql .= "ORDER BY c.collectionname";
+			//echo "<div>".$sql."</div>";
+			$rs = $this->conn->query($sql);
+			if($rs){
+				while($row = $rs->fetch_object()){
+					$name = $row->collectionname.($row->ccode?" (".$row->ccode.")":"");
+					$isCollAdmin = ($isAdmin||in_array($row->collid,$adminArr)?1:0);
+					if($row->colltype == 'Observations'){
+						$this->obsArr[$row->collid]['name'] = $name;
+						$this->obsArr[$row->collid]['isadmin'] = $isCollAdmin; 
+					}
+					elseif($row->colltype == 'General Observations'){
+						$this->genObsArr[$row->collid]['name'] = $name;
+						$this->genObsArr[$row->collid]['isadmin'] = $isCollAdmin; 
+					}
+					else{
+						$this->collArr[$row->collid]['name'] = $name;
+						$this->collArr[$row->collid]['isadmin'] = $isCollAdmin; 
+					}
+				}
+				$rs->close();
+			}
 		}
 	}
 	

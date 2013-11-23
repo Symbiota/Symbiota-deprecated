@@ -50,6 +50,7 @@
 							<div style="float:left">
 								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 								<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 								<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 								<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 								<input name="submitaction" type="submit" value="Save OCR" />
@@ -90,6 +91,7 @@
 										</div>
 										<div style="float:left;margin-left:10px;">
 											<input type="hidden" name="editprlid" value="<?php echo $prlid; ?>" />
+											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
@@ -121,6 +123,7 @@
 									<div style="clear:both;">
 										<form name="tfdelform-<?php echo $prlid; ?>" method="post" action="occurrenceeditor.php" style="margin-left:10px;width:100px;" >
 											<input type="hidden" name="delprlid" value="<?php echo $prlid; ?>" />
+											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" /><br/>
 											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />

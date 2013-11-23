@@ -282,11 +282,10 @@ function searchDupesCatalogNumber(f){
 			url: "rpc/querycatalognumber.php",
 			data: { cn: cnValue, collid: f.collid.value, occid: f.occid.value }
 		}).done(function( msg ) {
-			var resObj = eval('(' + msg + ')')
-			if(resObj.length > 0){
+			if(msg.length > 6){
 				catalogNumberIsDupe = true;
 				if(confirm("Record(s) of same catalog number already exists. Do you want to view this record?")){
-					var occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
 					}
@@ -319,10 +318,9 @@ function verifyDupeCatalogNumber(f){
 		url: "rpc/querycatalognumber.php",
 		data: { cn: cnValue, collid: f.collid.value, occid: f.occid.value }
 	}).done(function( msg ) {
-		var resObj = eval('(' + msg + ')')
-		if(resObj.length > 0){
-			if(confirm("Another drecord exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){
-				var occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"dupesearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+		if(msg.length > 6){
+			if(confirm("Another record exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){
+				var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"dupesearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 				if(occWindow != null){
 					if (occWindow.opener == null) occWindow.opener = self;
 				}
@@ -337,59 +335,24 @@ function verifyDupeCatalogNumber(f){
 		}
 	});
 	
-/*	
-	xmlHttp = GetXmlHttpObject();
-	if(xmlHttp==null){
-		alert ("Your browser does not support AJAX!");
-		return;
-	}
-	var url = "rpc/querycatalognumber.php?cn=" + cnValue + "&collid=" + f.collid.value + "&occid=" + f.occid.value;
-	xmlHttp.onreadystatechange=function(){
-		if(xmlHttp.readyState==4 && xmlHttp.status==200){
-			var resObj = eval('(' + xmlHttp.responseText + ')')
-			if(resObj.length > 0){
-				if(confirm("Another record exists with the same catalog number, which is not allowed. Do you want to view the other record(s)?")){
-					var occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"dupesearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
-					if(occWindow != null){
-						if (occWindow.opener == null) occWindow.opener = self;
-					}
-					else{
-						alert("Unable to display record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
-					}
-				}
-				return false;
-			}
-			else{
-				return true;
-			}
-		}
-	};
-	xmlHttp.open("POST",url,true);
-	xmlHttp.send(null);
-*/
 }
 
 function searchDupesOtherCatalogNumbers(f){
-	var inValue = f.othercatalognumbers.value; 
-	if(inValue){
-		xmlHttp = GetXmlHttpObject();
-		if(xmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var occid = f.occid.value;
-	var url = "rpc/queryothercatalognumbers.php?invalue=" + inValue + "&collid=" + collId + "&occid=" + occid;
+	var ocnValue = f.othercatalognumbers.value;
+	if(ocnValue){
 
-	document.getElementById("dupeMsgDiv").style.display = "block";
-	document.getElementById("dupesearch").style.display = "block";
-	document.getElementById("dupenone").style.display = "none";
+		document.getElementById("dupeMsgDiv").style.display = "block";
+		document.getElementById("dupesearch").style.display = "block";
+		document.getElementById("dupenone").style.display = "none";
 
-	xmlHttp.onreadystatechange=function(){
-		if(xmlHttp.readyState==4 && xmlHttp.status==200){
-			var resObj = eval('(' + xmlHttp.responseText + ')');
-			if(resObj.length > 0){
+		$.ajax({
+			type: "POST",
+			url: "rpc/queryothercatalognumbers.php",
+			data: { invalue: ocnValue, collid: f.collid.value, occid: f.occid.value }
+		}).done(function( msg ) {
+			if(msg.length > 6){
 				if(confirm("Record(s) using the same identifier already exists. Do you want to view this record?")){
-					var occWindow=open("dupesearch.php?occidquery="+resObj+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
 					}
@@ -408,10 +371,8 @@ function searchDupesOtherCatalogNumbers(f){
 					document.getElementById("dupeMsgDiv").style.display = "none";
 					}, 3000);
 			}
-		}
-	};
-	xmlHttp.open("POST",url,true);
-		xmlHttp.send(null);
+		});
+
 	}
 }
 

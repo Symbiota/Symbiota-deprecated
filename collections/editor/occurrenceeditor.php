@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
@@ -1113,25 +1112,21 @@ else{
 												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
 													<br/>
-													<?php 
-													if($isEditor){
-														?>
-														Status Auto-Set:
-														<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
-															<option value=''>Not Activated</option>
-															<option value=''>-------------------</option>
-															<?php 
-															foreach($processingStatusArr as $v){
-																$keyOut = strtolower($v);
-																//Don't display all options if editor is crowd sourced 
-																if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
-																	echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
-																}
+													Status Auto-Set:
+													<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
+														<option value=''>Not Activated</option>
+														<option value=''>-------------------</option>
+														<?php 
+														foreach($processingStatusArr as $v){
+															$keyOut = strtolower($v);
+															//Don't display all options if editor is crowd sourced 
+															if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+																echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
-															?>
-														</select>
-														<?php
-													}
+														}
+														?>
+													</select>
+													<?php
 													if($occIndex !== false){
 														?>
 														<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
