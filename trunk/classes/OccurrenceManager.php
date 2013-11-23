@@ -102,7 +102,7 @@ class OccurrenceManager{
 		}
 	}
 
-	protected function getSqlWhere(){
+	public function getSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("surveyid",$this->searchTermsArr)){
 			//$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";

@@ -17,5 +17,5 @@
 		$result->close();
 	}
 	$con->close();
-	echo json_encode($retArr);
+	echo 'ocnum:'.implode(',',$retArr);
 ?>

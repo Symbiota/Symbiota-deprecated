@@ -1,7 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/SpecProcessorAbbyy.php');
-include_once($serverRoot.'/classes/SpecProcessorImage.php');
 
 class SpecProcessorManager {
 

@@ -7,7 +7,7 @@ include_once($serverRoot.'/classes/ImageBatchProcessor.php');
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
-$saction = 'test';
+
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprId = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
@@ -48,6 +48,13 @@ if($isEditor){
 		$csManager = new OccurrenceCrowdSource();
 		$csManager->setCollid($collid);
 		$statusStr = $csManager->editProject($omcsid,$_POST['instr'],$_POST['url']);
+	}
+	elseif($action == 'Download Specimen Records'){
+		$dlManager = new OccurrenceDownloadManager();
+		$dlManager->setSchemaType($_POST['schema']);
+		$dlManager->setDelimiter($_POST['format']);
+		$dlManager->setCharSetOut($_POST['cset']);
+		$dlManager->downloadSpecimens();
 	}
 }
 ?>
@@ -153,6 +160,7 @@ if($isEditor){
 				        <!-- 
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
+				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
 				         -->
 				    </ul>
 					<div id="introdiv">

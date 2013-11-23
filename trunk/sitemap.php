@@ -102,7 +102,9 @@ $smManager = new SiteMapManager();
 
 		        <fieldset style="margin:30px 0px 10px 10px;padding:15px;">
 		            <legend><b>Data Management Tools</b></legend>
-	            	<?php if($symbUid){ ?>
+	            	<?php 
+	            	if($symbUid){ 
+	            		?>
 	            		<h3>Identification Keys</h3>
 						<ul>
 		            		<?php if($isAdmin || array_key_exists("KeyEditor",$userRights)){ ?>
@@ -149,17 +151,27 @@ $smManager = new SiteMapManager();
 							feature. 
 						</div>
 						<ul>
-							<li>
-								<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
-									Basic Field Image Submission 
-								</a>
-							</li>
+		            		<?php 
+		            		if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+		            			?>
+								<li>
+									<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
+										Basic Field Image Submission 
+									</a>
+								</li>
+								<?php
+		            		}
+							if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("CollEditor",$userRights)){
+		            		?>
 							<li>
 								<a href="collections/editor/observationsubmit.php">
 									Image Observation Submission Module
 								</a>
 							</li>
-		            		<?php if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ ?>
+		            		<?php 
+							}
+		            		if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+		            			?>
 								<li>
 									<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
 									<b>Taxa without images:</b> 
@@ -259,10 +271,8 @@ $smManager = new SiteMapManager();
 	            				<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
 								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4">Text Descriptions</a></li>
 								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1">Edit Images</a></li>
-								<ul>
-									<li><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2">Edit Image Sorting Order</a></li>
-									<li><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3">Add a New Image</a></li>
-								</ul>
+								<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2">Edit Image Sorting Order</a></li>
+								<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3">Add a New Image</a></li>
 	            			</ul>
 			            	<?php 
 						}

@@ -15,7 +15,8 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 	$isEditor = 1;
 }
 if($isEditor && $action == 'Perform Backup'){
-	if(!$dlManager->dlCollectionBackup($collId,$cSet)){
+	$dlManager->setCharSetOut($cSet);
+	if(!$dlManager->dlCollectionBackup($collId)){
 		$statusStr = implode('<br/>',$dlManager->getErrorArr());
 	}
 }
@@ -44,8 +45,8 @@ if($isEditor && $action == 'Perform Backup'){
 					<?php 
 					$cSet = str_replace('-','',strtolower($charset));
 					?>
-					<input type="radio" name="cset" value="iso88591" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
-					<input type="radio" name="cset" value="utf8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
+					<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso88591'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
+					<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
 				</div>
 				<div style="clear:both;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />

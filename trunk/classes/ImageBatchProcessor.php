@@ -848,13 +848,16 @@ class ImageBatchProcessor {
 						foreach($headerArr as $k => $hStr){
 							if($hStr == 'catalognumber') $catNum = $recordArr[$k];
 							if(array_key_exists($hStr,$symbMap)){
-								$valueStr = $recordArr[$k];
-								//If value is enclosed by quotes, remove quotes
-								if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
-									$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+								$valueStr = '';
+								if(array_key_exists($k,$recordArr)) $valueStr = $recordArr[$k];
+								if($valueStr){
+									//If value is enclosed by quotes, remove quotes
+									if(substr($valueStr,0,1) == '"' && substr($valueStr,-1) == '"'){
+										$valueStr = substr($valueStr,1,strlen($valueStr)-2);
+									}
+									$valueStr = trim($valueStr);
+									if($valueStr) $recMap[$hStr] = $valueStr;
 								}
-								$valueStr = trim($valueStr);
-								if($valueStr) $recMap[$hStr] = $valueStr;
 							}
 						}
 

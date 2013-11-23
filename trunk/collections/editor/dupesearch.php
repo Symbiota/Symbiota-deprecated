@@ -144,6 +144,12 @@ if(!$IS_ADMIN){
 				elseif($dupeType == 'exact'){
 					echo '<span style="color:green;">Possible EXACT Duplicates</span>';
 				}
+				elseif($dupeType == 'catnu'){
+					echo '<span>Duplicate Catalog Number</span>';
+				}
+				elseif($dupeType == 'ocnum'){
+					echo '<span>Duplicate Alternate Catalog Number</span>';
+				}
 				else{
 					echo '<span style="color:orange;">Possible Matching Duplicate EVENTS</span>';
 				}

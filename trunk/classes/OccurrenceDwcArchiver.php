@@ -33,7 +33,7 @@ class OccurrenceDwcArchiver{
 
 		$this->ts = time();
 		
-		$this->condAllowArr = array('country','stateProvince','county','recordedBy');
+		$this->condAllowArr = array('country','stateprovince','county','recordedby');
 
 		$this->occurrenceFieldArr = array(
 			'id' => '',
@@ -46,12 +46,11 @@ class OccurrenceDwcArchiver{
 			'ownerInstitutionCode' => 'http://rs.tdwg.org/dwc/terms/ownerInstitutionCode',
 			'family' => 'http://rs.tdwg.org/dwc/terms/family',
 			'scientificName' => 'http://rs.tdwg.org/dwc/terms/scientificName',
+			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
 			'genus' => 'http://rs.tdwg.org/dwc/terms/genus',
 			'specificEpithet' => 'http://rs.tdwg.org/dwc/terms/specificEpithet',
 			'taxonRank' => 'http://rs.tdwg.org/dwc/terms/taxonRank',
 			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
-			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
- 			'taxonRemarks' => 'http://rs.tdwg.org/dwc/terms/taxonRemarks',
  			'identifiedBy' => 'http://rs.tdwg.org/dwc/terms/identifiedBy',
  			'dateIdentified' => 'http://rs.tdwg.org/dwc/terms/dateIdentified',
  			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
@@ -68,7 +67,6 @@ class OccurrenceDwcArchiver{
 			'endDayOfYear' => 'http://rs.tdwg.org/dwc/terms/endDayOfYear',
  			'verbatimEventDate' => 'http://rs.tdwg.org/dwc/terms/verbatimEventDate',
  			'habitat' => 'http://rs.tdwg.org/dwc/terms/habitat',
- 			'fieldNotes' => 'http://rs.tdwg.org/dwc/terms/fieldNotes',
  			'fieldNumber' => 'http://rs.tdwg.org/dwc/terms/fieldNumber',
  			'occurrenceRemarks' => 'http://rs.tdwg.org/dwc/terms/occurrenceRemarks',
 			'informationWithheld' => 'http://rs.tdwg.org/dwc/terms/informationWithheld',
@@ -234,12 +232,52 @@ class OccurrenceDwcArchiver{
 		return $this->collArr;
 	}
 
-	public function setConditionStr($condStr){
-		$condArr = explode(';',$condStr);
-		foreach($condArr as $rawV){
-			$tok = explode(':',$rawV);
-			if(count($tok) == 2){
-				if(in_array($tok[0],$this->condAllowArr)){
+	public function setConditionStr($condObj, $filter = 1){
+		$condArr = array();
+		if(is_array($condObj)){
+			//Array of key/value pairs (e.g. array(country => USA,United States, stateprovince => Arizona,New Mexico)
+			$condArr = $condObj;
+		}
+		elseif(is_string($condObj)){
+			//String of key/value pairs (e.g. country:USA,United States;stateprovince:Arizona,New Mexico;county-start:Pima,Eddy
+			$cArr = explode(';',$condStr);
+			foreach($cArr as $rawV){
+				$tok = explode(':',$rawV);
+				if(count($tok) == 2){
+					$condArr[$tok[0]] = $tok[1];
+				}
+			}
+		}
+		foreach($condArr as $k => $v){
+			if(!$filter || in_array(strtolower($k),$this->condAllowArr)){
+				$type = '';
+				if($p = strpos($k,'-')){
+					$type = strtolower(substr($k,0,$p));
+					$k = substr($k,$p);
+				}
+				if($type == 'like'){
+					$sqlFrag = '';
+					$terms = explode(',',$v);
+					foreach($terms as $t){
+						$sqlFrag .= 'OR (o.'.$k.' LIKE "%'.$this->cleanInStr($t).'%") ';
+					}
+					$this->conditionSql .= 'AND ('.substr($sqlFrag,3).') ';
+				}
+				elseif($type == 'start'){
+					$sqlFrag = '';
+					$terms = explode(',',$v);
+					foreach($terms as $t){
+						$sqlFrag .= 'OR (o.'.$k.' LIKE "'.$this->cleanInStr($t).'%") ';
+					}
+					$this->conditionSql .= 'AND ('.substr($sqlFrag,3).') ';
+				}
+				elseif($type == 'null'){
+					$this->conditionSql .= 'AND (o.'.$k.' IS NULL) ';
+				}
+				elseif($type == 'notnull'){
+					$this->conditionSql .= 'AND (o.'.$k.' IS NOT NULL) ';
+				}
+				else{
 					$this->conditionSql .= 'AND (o.'.$tok[0].' IN("'.str_replace(',','","',$this->cleanInStr($tok[1])).'")) ';
 				}
 			}
@@ -419,10 +457,12 @@ class OccurrenceDwcArchiver{
 			//Output records
 			$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 				'o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
-				'o.family, o.sciname AS scientificName, o.genus, o.specificEpithet, o.taxonRank, o.infraspecificEpithet, o.scientificNameAuthorship, '.
-				'o.taxonRemarks, o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
+				'o.family, o.sciname AS scientificName, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
+				'IFNULL(CONCAT_WS(" ",t.unitind1,t.unitname1),o.genus) AS genus, IFNULL(CONCAT_WS(" ",t.unitind2,t.unitname2),o.specificEpithet) AS specificEpithet, '.
+				'IFNULL(t.unitind3,o.taxonRank) AS taxonRank, IFNULL(t.unitname3,o.infraspecificEpithet) AS infraspecificEpithet, '.
+				'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
 				'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-				'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNotes, o.fieldNumber, '.
+				'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNumber, '.
 				'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.
 				'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
 				'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
@@ -434,6 +474,7 @@ class OccurrenceDwcArchiver{
 				'g.guid AS recordId, o.localitySecurity, c.collid '.
 				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
 			if($this->conditionSql) {
 				$sql .= $this->conditionSql;

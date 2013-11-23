@@ -301,7 +301,7 @@ if($collId) $collData = $collManager->getCollectionData();
 							?>
 							<li>
 								<a href="../specprocessor/index.php?collid=<?php echo $collId; ?>">
-									Specimen Batch Processing
+									Batch Processing Tools
 								</a>
 							</li>
 							<li>
@@ -333,7 +333,7 @@ if($collId) $collData = $collManager->getCollectionData();
 				<hr />
 				<div style="font-weight:bold;margin:20px;">
 					New collection added successfully! <br/>
-					Click <a href="../admin/specupload.php?action=addprofile&collid=<?php echo $collId; ?>">here</a> 
+					Click <a href="../admin/specuploadmanagement.php?collid=<?php echo $collId; ?>&action=addprofile">here</a> 
 					to upload specimen records for this new collection.
 				</div>
 				<hr />
