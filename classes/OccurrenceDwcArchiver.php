@@ -474,7 +474,7 @@ class OccurrenceDwcArchiver{
 				'g.guid AS recordId, o.localitySecurity, c.collid '.
 				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
 				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
 			if($this->conditionSql) {
 				$sql .= $this->conditionSql;
