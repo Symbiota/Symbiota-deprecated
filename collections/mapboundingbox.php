@@ -9,99 +9,81 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 
 <!DOCTYPE html >
 <html>
-  <head>
-    <title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>
-  </head> 
-  <body onload="initialize()"  onunload="GUnload()">
-    <script src="http://maps.google.com/maps?file=api&v=2&key=<?php echo $googleMapKey; ?>" type="text/javascript"></script>
-    <script type="text/javascript">
-      //<![CDATA[
-      
-      	var zoomLevel = 5;
+	<head>
+		<title><?php echo $defaultTitle; ?> - Coordinate Mapper</title>
+	</head> 
+	<body>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	<script type="text/javascript">
       	var map;
-        var r1=null;
-        var myrectangle;
-        var firstClick = true;
-        var eventOnMove;
-        var eventOnClick;
-      	
+      	var rectangle;
+		var latCenter = <?php echo $latCenter; ?>;
+		var lngCenter = <?php echo $lngCenter; ?>;
+
         function initialize(){
-            if (GBrowserIsCompatible()) {
-	            map = new GMap2(document.getElementById("map"));
-	            map.setCenter(new GLatLng(<?php echo $latCenter.','.$lngCenter; ?>), zoomLevel);
-                //map.addControl(new GScaleControl());
-                map.enableScrollWheelZoom();
-	            map.setUIToDefault();
-	            eventOnClick = GEvent.addListener(map, 'click', mapClickRectangle);
-	            GEvent.addListener(map, 'dblclick', function(overlay, point) {
-					document.getElementById("nlat").value = "";
-					document.getElementById("slat").value = "";
-					document.getElementById("elon").value = "";
-					document.getElementById("wlon").value = "";
-	            	map.clearOverlays();
-	                firstClick = true;
-					GEvent.removeListener(eventOnMove);
-	            });
-            }            
+			var dmOptions = {
+				zoom: 5,
+				center: new google.maps.LatLng(latCenter, lngCenter),
+				mapTypeId: google.maps.MapTypeId.TERRAIN,
+				scaleControl: true
+			};
+	
+	    	map = new google.maps.Map(document.getElementById("map"), dmOptions);
+
+			placeRectangle(latCenter, lngCenter);
+
+			google.maps.event.addListener(map, 'click', function(event) {
+				if(rectangle) rectangle.setMap(null);
+				placeRectangle(event.latLng.lat(),event.latLng.lng());
+			});
         }
 
-        function mapClickRectangle(overlay,point){
-        	if(firstClick){   // First click
-            	map.clearOverlays();
-                r1 = point;
-                myrectangle = null;
-                firstClick = false;
-                eventOnMove = GEvent.addListener(map, 'mousemove',mapDragRectangle);
-				document.getElementById("nlat").value = "";
-				document.getElementById("slat").value = "";
-				document.getElementById("elon").value = "";
-				document.getElementById("wlon").value = "";
-            }
-            else{   // Second click
-				GEvent.removeListener(eventOnMove);
-				if(point){
-	            	map.clearOverlays();
-	                firstClick = true;
-				}
-				else{
-	                //Add Coords by clicking the map
-					var bounds = myrectangle.getBounds();
-	                var sw = bounds.getSouthWest();
-	                var ne = bounds.getNorthEast();
-					document.getElementById("nlat").value = ne.lat().toFixed(5);
-					document.getElementById("slat").value = sw.lat().toFixed(5);
-					document.getElementById("elon").value = ne.lng().toFixed(5);
-					document.getElementById("wlon").value = sw.lng().toFixed(5);
-				}
-            }
-        }
+		function placeRectangle(lat, lng){
+			var bounds = new google.maps.LatLngBounds(
+				new google.maps.LatLng(lat - 1, lng - 1),
+				new google.maps.LatLng(lat + 1, lng + 1)
+			);
 
-        function mapDragRectangle(point){
-        	if(!firstClick){
-                drawRectangle(r1,point);
-            }
-        }
+			// Define a rectangle and set its editable property to true.
+			rectangle = new google.maps.Rectangle({
+				bounds: bounds,
+				editable: true,
+				draggable: true
+			});
 
-        function drawRectangle(a,b){
-			if(a && b){
-	            if (myrectangle != null) {
-	                map.removeOverlay(myrectangle);
-	            }
-	            myrectangle = new GPolygon(new Array(a,new GPoint(a.x,b.y),b,new GPoint(b.x,a.y),a),'#fd942d',1,1,'#96bdfe',.5);
-	            map.addOverlay(myrectangle);
-			}
-        }
+			google.maps.event.addListener(rectangle, 'bounds_changed', function(event) {
+				recordRectBounds(rectangle.getBounds());
+			});
+			
+			rectangle.setMap(map);
 
-        function updateParentForm() {
-            opener.document.getElementById("upperlat").value = document.getElementById("nlat").value;
-            opener.document.getElementById("bottomlat").value = document.getElementById("slat").value;
-            opener.document.getElementById("leftlong").value = document.getElementById("wlon").value;
-            opener.document.getElementById("rightlong").value = document.getElementById("elon").value;
-            self.close();
-            return false;
-        }
+			var newBounds = new google.maps.LatLngBounds(
+				new google.maps.LatLng(lat - 1, lng - 1),
+				new google.maps.LatLng(lat + 1, lng + 1)
+			);
+			recordRectBounds(newBounds);
+		}
 
-        //]]>
+		function recordRectBounds(bounds){
+			var ne = bounds.getNorthEast();
+			var sw = bounds.getSouthWest();
+			document.getElementById("nlat").value = ne.lat().toFixed(5);
+			document.getElementById("slat").value = sw.lat().toFixed(5);
+			document.getElementById("wlon").value = sw.lng().toFixed(5);
+			document.getElementById("elon").value = ne.lng().toFixed(5);
+		}
+
+		function updateParentForm() {
+			opener.document.getElementById("upperlat").value = document.getElementById("nlat").value;
+			opener.document.getElementById("bottomlat").value = document.getElementById("slat").value;
+			opener.document.getElementById("leftlong").value = document.getElementById("wlon").value;
+			opener.document.getElementById("rightlong").value = document.getElementById("elon").value;
+			self.close();
+			return false;
+		}
+
+		google.maps.event.addDomListener(window, 'load', initialize);
+
     </script>
     <div style="width:500px;">Click once to start drawing and again to finish rectangle. 
     Click on the Submit button to transfer Coordinates.</div>
