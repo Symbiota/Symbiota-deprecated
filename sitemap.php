@@ -352,7 +352,7 @@ $smManager = new SiteMapManager();
 							?>
 							<ul>
 								<li>
-									<a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php?newcoll=1">
+									<a href="<?php echo $clientRoot; ?>/collections/misc/collmetadata.php">
 										Create a New Collection or Observation Profile
 									</a>
 								</li>
