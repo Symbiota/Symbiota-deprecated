@@ -19,12 +19,15 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 		$dlManager->downloadGeorefCsv();
     }
     elseif($downloadType == "darwincore_text"){
-		$dlManager->downloadDarwinCoreCsv();  
+		$dlManager->setSchemaType('dwc');
+    	$dlManager->downloadSpecimens();
     }
     elseif($downloadType == "darwincore_xml"){
 		//$dlManager->downloadSpecimenDarwinCoreXml();  
     }
     else{
-        $dlManager->downloadSymbiotaCsv();  
+		//$dlManager->setCharSetOut($cSet);
+		$dlManager->setSchemaType('symbiota');
+    	$dlManager->downloadSpecimens();
     }
 ?>

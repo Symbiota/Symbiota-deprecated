@@ -6,7 +6,7 @@ include_once($serverRoot.'/classes/UuidFactory.php');
 class CollectionProfileManager {
 
 	private $conn;
-	private $collId;
+	private $collid;
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -16,9 +16,9 @@ class CollectionProfileManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function setCollectionId($collId){
-		if($collId && is_numeric($collId)){
-			$this->collId = $collId;
+	public function setCollectionId($collid){
+		if($collid && is_numeric($collid)){
+			$this->collid = $collid;
 		}
 	}
 
@@ -45,7 +45,7 @@ class CollectionProfileManager {
 
 	public function getCollectionData(){
 		$returnArr = Array();
-		if($this->collId){
+		if($this->collid){
 			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
 				"i.Address1, i.Address2, i.City, i.StateProvince, i.PostalCode, i.Country, i.Phone, ".
 				"c.collid, c.CollectionCode, c.CollectionName, ".
@@ -57,7 +57,7 @@ class CollectionProfileManager {
 				"c.securitykey, c.collectionguid ".
 				"FROM omcollections c INNER JOIN omcollectionstats cs ON c.collid = cs.collid ".
 				"LEFT JOIN institutions i ON c.iid = i.iid ".
-				"WHERE (c.collid = ".$this->collId.") ";
+				"WHERE (c.collid = ".$this->collid.") ";
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
@@ -110,7 +110,7 @@ class CollectionProfileManager {
 			//Get catagories
 			$sql = 'SELECT ccpk '.
 				'FROM omcollcatlink '.
-				'WHERE (collid = '.$this->collId.') ';
+				'WHERE (collid = '.$this->collid.') ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$returnArr['ccpk'] = $r->ccpk;
@@ -119,7 +119,7 @@ class CollectionProfileManager {
 			//Get additional statistics
 			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'WHERE (o.collid = '.$this->collId.') ';
+				'WHERE (o.collid = '.$this->collid.') ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$returnArr['imgpercent'] = ($returnArr['recordcnt']?round(($row->imgcnt/$returnArr['recordcnt'])*100):0);
@@ -128,7 +128,7 @@ class CollectionProfileManager {
 			//BOLD count
 			$sql = 'SELECT count(g.occid) as boldcnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
-				'WHERE (o.collid = '.$this->collId.') AND (g.resourceurl LIKE "http://www.boldsystems%") ';
+				'WHERE (o.collid = '.$this->collid.') AND (g.resourceurl LIKE "http://www.boldsystems%") ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$returnArr['boldcnt'] = $r->boldcnt;
@@ -137,7 +137,7 @@ class CollectionProfileManager {
 			//GenBank count
 			$sql = 'SELECT count(g.occid) as gencnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
-				'WHERE (o.collid = '.$this->collId.') AND (g.resourceurl LIKE "http://www.ncbi%") ';
+				'WHERE (o.collid = '.$this->collid.') AND (g.resourceurl LIKE "http://www.ncbi%") ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$returnArr['gencnt'] = $r->gencnt;
@@ -146,7 +146,7 @@ class CollectionProfileManager {
 			//Reference count
 			$sql = 'SELECT count(r.occid) as refcnt '.
 				'FROM omoccurrences o INNER JOIN referenceoccurlink r ON o.occid = r.occid '.
-				'WHERE (o.collid = '.$this->collId.') ';
+				'WHERE (o.collid = '.$this->collid.') ';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$returnArr['refcnt'] = $r->refcnt;
@@ -156,13 +156,13 @@ class CollectionProfileManager {
 			if(!$returnArr['guid']){
 				$returnArr['guid'] = UuidFactory::getUuidV4();
 				$conn = MySQLiConnectionFactory::getCon('write');
-				$sql = 'UPDATE omcollections SET collectionguid = "'.$returnArr['guid'].'" WHERE collid = '.$this->collId;
+				$sql = 'UPDATE omcollections SET collectionguid = "'.$returnArr['guid'].'" WHERE collid = '.$this->collid;
 				$conn->query($sql);
 			}
 			if(!$returnArr['skey']){
 				$returnArr['skey'] = UuidFactory::getUuidV4();
 				$conn = MySQLiConnectionFactory::getCon('write');
-				$sql = 'UPDATE omcollections SET securitykey = "'.$returnArr['skey'].'" WHERE collid = '.$this->collId;
+				$sql = 'UPDATE omcollections SET securitykey = "'.$returnArr['skey'].'" WHERE collid = '.$this->collid;
 				$conn->query($sql);
 			}  
 		}
@@ -170,8 +170,8 @@ class CollectionProfileManager {
 	}
 
 	public function submitCollEdits(){
-		$status = '';
-		if($this->collId){
+		$status = 'SUCCESS: edits saved successfully!';
+		if($this->collid){
 			$instCode = $this->cleanInStr($_POST['institutioncode']);
 			$collCode = $this->cleanInStr($_POST['collectioncode']);
 			$coleName = $this->cleanInStr($_POST['collectionname']);
@@ -212,7 +212,7 @@ class CollectionProfileManager {
 					'individualurl = '.($indUrl?'"'.$indUrl.'"':'NULL').', '.
 					'sortseq = '.($_POST['sortseq']?$_POST['sortseq']:'NULL').' ';
 			}
-			$sql .= 'WHERE (collid = '.$this->collId.')';
+			$sql .= 'WHERE (collid = '.$this->collid.')';
 			//echo $sql;
 			if(!$conn->query($sql)){
 				$status = 'ERROR updating collection: '.$conn->error;
@@ -221,17 +221,17 @@ class CollectionProfileManager {
 			
 			//Modify collection catagory, if needed
 			if(isset($_POST['ccpk']) && $_POST['ccpk']){
-				$rs = $conn->query('SELECT ccpk FROM omcollcatlink WHERE collid = '.$this->collId);
+				$rs = $conn->query('SELECT ccpk FROM omcollcatlink WHERE collid = '.$this->collid);
 				if($r = $rs->fetch_object()){
 					if($r->ccpk <> $_POST['ccpk']){
-						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$_POST['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collId)){
+						if(!$conn->query('UPDATE omcollcatlink SET ccpk = '.$_POST['ccpk'].' WHERE ccpk = '.$r->ccpk.' AND collid = '.$this->collid)){
 							$status = 'ERROR updating collection catagory link: '.$conn->error;
 							return $status;
 						}
 					}
 				}
 				else{
-					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collId.')')){
+					if(!$conn->query('INSERT INTO omcollcatlink (ccpk,collid) VALUES('.$_POST['ccpk'].','.$this->collid.')')){
 						$status = 'ERROR inserting collection catagory link(1): '.$conn->error;
 						return $status;
 					}
@@ -301,6 +301,7 @@ class CollectionProfileManager {
 					return $status;
 				}
 			}
+			$this->collid = $cid;
 		}
 		else{
 			$cid = 'ERROR inserting new collection: '.$conn->error;
@@ -353,8 +354,8 @@ class CollectionProfileManager {
 		ob_flush();
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
-			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
-			'WHERE cs.collid = '.$this->collId;
+			'SET cs.recordcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.collid = '.$this->collid.')) '.
+			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li> ';
 		
@@ -363,8 +364,8 @@ class CollectionProfileManager {
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.familycnt = (SELECT COUNT(DISTINCT o.family) '.
-			'FROM omoccurrences o WHERE (o.collid = '.$this->collId.')) '.
-			'WHERE cs.collid = '.$this->collId;
+			'FROM omoccurrences o WHERE (o.collid = '.$this->collid.')) '.
+			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li> ';
 		
@@ -374,8 +375,8 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.genuscnt = (SELECT COUNT(DISTINCT t.unitname1) '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 180) '.
-			'WHERE cs.collid = '.$this->collId;
+			'WHERE (o.collid = '.$this->collid.') AND t.rankid >= 180) '.
+			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li>';
 		
@@ -385,8 +386,8 @@ class CollectionProfileManager {
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.speciescnt = (SELECT count(DISTINCT t.unitname1, t.unitname2) AS spcnt '.
 			'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
-			'WHERE (o.collid = '.$this->collId.') AND t.rankid >= 220) '.
-			'WHERE cs.collid = '.$this->collId;
+			'WHERE (o.collid = '.$this->collid.') AND t.rankid >= 220) '.
+			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done</li>';
 		
@@ -395,8 +396,8 @@ class CollectionProfileManager {
 		flush();
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.georefcnt = (SELECT Count(o.occid) FROM omoccurrences o WHERE (o.DecimalLatitude Is Not Null) '.
-			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collId.')) '.
-			'WHERE cs.collid = '.$this->collId;
+			'AND (o.DecimalLongitude Is Not Null) AND (o.CollID = '.$this->collid.')) '.
+			'WHERE cs.collid = '.$this->collid;
 		$writeConn->query($sql);
 		echo 'Done!</li>';
 		
@@ -426,7 +427,7 @@ class CollectionProfileManager {
 			$sql = 'SELECT t.unitname1 as taxon, Count(o.occid) AS cnt '.
 				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'GROUP BY o.CollID, t.unitname1, o.Family '.
-				'HAVING (o.CollID = '.$this->collId.') '.
+				'HAVING (o.CollID = '.$this->collid.') '.
 				'AND (o.Family = "'.$family.'") AND (t.unitname1 != "'.$family.'") '.
 				'ORDER BY t.unitname1';
 		}
@@ -434,7 +435,7 @@ class CollectionProfileManager {
 			$sql = 'SELECT o.family as taxon, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.Family '.
-				'HAVING (o.CollID = '.$this->collId.') '.
+				'HAVING (o.CollID = '.$this->collid.') '.
 				'AND (o.Family IS NOT NULL) AND (o.Family <> "") '.
 				'ORDER BY o.Family';
 		}
@@ -454,7 +455,7 @@ class CollectionProfileManager {
 			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.country '.
-				'HAVING (o.CollID = '.$this->collId.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
+				'HAVING (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
 				'AND o.country = "'.$country.'" '.
 				'ORDER BY trim(o.StateProvince)';
 		}
@@ -462,7 +463,7 @@ class CollectionProfileManager {
 			$sql = 'SELECT trim(o.county) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.county '.
-				'HAVING (o.CollID = '.$this->collId.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
+				'HAVING (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
 				'AND o.stateprovince = "'.$state.'" '.
 				'ORDER BY trim(o.county)';
 		}
@@ -470,7 +471,7 @@ class CollectionProfileManager {
 			$sql = 'SELECT trim(o.country) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.Country '.
-				'HAVING (o.CollID = '.$this->collId.') AND o.Country IS NOT NULL AND o.Country <> "" '.
+				'HAVING (o.CollID = '.$this->collid.') AND o.Country IS NOT NULL AND o.Country <> "" '.
 				'ORDER BY trim(o.Country)';
 		}
 		//echo $sql;
@@ -516,11 +517,11 @@ class CollectionProfileManager {
 	public function echoOccurrenceListing($start, $limit){
 		global $clientRoot;
 		if(substr($clientRoot,-1) != '/') $clientRoot .= '/';
-		if($this->collId){
+		if($this->collid){
 			//Get count
 			$occCnt = 0;
 			if(!is_numeric($start)){
-				$sql = 'SELECT count(*) AS cnt FROM omoccurrences WHERE collid = '.$this->collId.' ';
+				$sql = 'SELECT count(*) AS cnt FROM omoccurrences WHERE collid = '.$this->collid.' ';
 				$rs = $this->conn->query($sql);
 				if($r = $rs->fetch_object()){
 					$occCnt = $r->cnt;
@@ -532,7 +533,7 @@ class CollectionProfileManager {
 			if(is_numeric($start)){
 				$sql = 'SELECT o.occid, o.catalognumber, o.occurrenceid, o.sciname, o.recordedby, o.recordnumber, g.guid '.
 					'FROM omoccurrences o INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-					'WHERE collid = '.$this->collId.' '.
+					'WHERE collid = '.$this->collid.' '.
 					'ORDER BY o.catalognumber,o.occid '.
 					'LIMIT '.$start.','.$limit;
 				//echo $sql;
@@ -551,7 +552,7 @@ class CollectionProfileManager {
 			else{
 				for($j = 0;$j < $occCnt;$j += $limit){
 					$endCnt = (($j+$limit)<$occCnt?($j+$limit):$occCnt);
-					echo '<div><a href="collectionindex.php?collid='.$this->collId.'&start='.$j.'&limit='.$limit.'">Records '.($j+1).' - '.$endCnt.'</a></div>';
+					echo '<div><a href="collectionindex.php?collid='.$this->collid.'&start='.$j.'&limit='.$limit.'">Records '.($j+1).' - '.$endCnt.'</a></div>';
 				}
 			}
 		}

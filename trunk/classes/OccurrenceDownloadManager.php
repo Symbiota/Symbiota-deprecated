@@ -8,7 +8,7 @@ class OccurrenceDownloadManager{
 	private $securityArr = array();
 	private $canReadRareSpp = false;
 	private $schemaType = 'symbiota';
-	private $delimiter = 'comma';
+	private $delimiter = ',';
 	private $charSetSource = '';
 	private $charSetOut = '';
 	private $sql = '';
@@ -506,7 +506,7 @@ xmlwriter_end_attribute($xml_resource);
 		if($this->delimiter == "\t"){
 			return 'text/html; charset='.$this->charSetOut;
 		}
-		elseif($d == 'comma' || $d == ','){
+		elseif($this->delimiter == 'comma' || $this->delimiter == ','){
 			return 'text/csv; charset='.$this->charSetOut;
 		}
 		return 'text/html; charset='.$this->charSetOut;
@@ -631,10 +631,10 @@ xmlwriter_end_attribute($xml_resource);
 		}
 		$retStr .= "_occur_".time();
 		//Set extension
-		if($this->delimiter=='tab'){
+		if($this->delimiter=="\t"){
 			$retStr .= ".tab";
 		}
-		elseif($this->delimiter=='comma'){
+		elseif($this->delimiter==','){
 			$retStr .= ".csv";
 		}
 		else{
@@ -712,7 +712,7 @@ xmlwriter_end_attribute($xml_resource);
 		}
 	}
 
-	private function encodeStr($inStr,$targetCharset){
+	private function encodeStr($inStr){
 		$retStr = $inStr;
 		if($this->charSetSource){
 			if($this->charSetOut == 'utf-8' && $this->charSetSource == 'iso-8859-1'){

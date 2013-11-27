@@ -39,14 +39,22 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
         }
 
 		function placeRectangle(lat, lng){
-			var bounds = new google.maps.LatLngBounds(
-				new google.maps.LatLng(lat - 1, lng - 1),
-				new google.maps.LatLng(lat + 1, lng + 1)
+			var boxWidth;
+			if(map.getBounds()){
+				var mapBounds = map.getBounds();
+				boxWidth = (mapBounds.getNorthEast().lat() - mapBounds.getSouthWest().lat())/8;
+			}
+			else{
+				boxWidth = 1;
+			}
+			var newBounds = new google.maps.LatLngBounds(
+				new google.maps.LatLng(lat - boxWidth, lng - boxWidth),
+				new google.maps.LatLng(lat + boxWidth, lng + boxWidth)
 			);
 
 			// Define a rectangle and set its editable property to true.
 			rectangle = new google.maps.Rectangle({
-				bounds: bounds,
+				bounds: newBounds,
 				editable: true,
 				draggable: true
 			});
@@ -57,10 +65,6 @@ $lngCenter = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3]
 			
 			rectangle.setMap(map);
 
-			var newBounds = new google.maps.LatLngBounds(
-				new google.maps.LatLng(lat - 1, lng - 1),
-				new google.maps.LatLng(lat + 1, lng + 1)
-			);
 			recordRectBounds(newBounds);
 		}
 
