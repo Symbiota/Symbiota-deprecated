@@ -195,16 +195,16 @@ function insertLatLng(f) {
 			}
 			else{
 				var vcStr = f.verbatimcoordinates.value;
-				vcStr = vcStr.replace(/-*\d{2}°+[NS\d\.\s\'\"-°]+[EW;]+/g, "");
+				vcStr = vcStr.replace(/-*\d{2}[°\u00B0]+[NS\d\.\s\'\"-°\u00B0]+[EW;]+/g, "");
 				vcStr = vcStr.replace(/^\s+|\s+$/g, "");
 				vcStr = vcStr.replace(/^;|;$/g, "");
 				if(vcStr != ""){
 					vcStr = vcStr + "; ";
 				}
-				var dmsStr = latDeg + "&deg; " + latMin + "' ";
-				if(latSec > 0) dmsStr += latSec + "'' ";
-				dmsStr += latNS + "  " + lngDeg + "&deg; " + lngMin + "' ";
-				if(lngSec) dmsStr += lngSec + "'' ";
+				var dmsStr = latDeg + "\u00B0 " + latMin + "' ";
+				if(latSec > 0) dmsStr += latSec + '" ';
+				dmsStr += latNS + "  " + lngDeg + "\u00B0 " + lngMin + "' ";
+				if(lngSec) dmsStr += lngSec + '" ';
 				dmsStr += lngEW;
 				f.verbatimcoordinates.value = vcStr + dmsStr;
 				var latDec = parseInt(latDeg) + (parseFloat(latMin)/60) + (parseFloat(latSec)/3600);

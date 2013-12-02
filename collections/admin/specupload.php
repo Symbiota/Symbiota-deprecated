@@ -511,13 +511,16 @@ $duManager->loadFieldMap();
 			echo '<div style="font-weight:bold;font-size:120%;">ERROR: you are not authorized to upload to this collection</div>';
 		}
 		else{
-			echo '<div style="font-weight:bold;font-size:120%;">';
-			echo 'ERROR: Either you have tried to reach this page without going through the collection managment menu ';
-			echo 'or you have tried to upload a file that is too large. ';
-			echo 'You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). ';
-			echo 'You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increaing PHP upload limits may help) '; 
-			echo 'Use the back arrows to get back to the file upload page.';
-			echo '</div>';
+			?>
+			<div style="font-weight:bold;font-size:120%;">
+				ERROR: Either you have tried to reach this page without going through the collection managment menu 
+				or you have tried to upload a file that is too large. 
+				You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). 
+				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increaing PHP upload limits may help,  
+				upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>) 
+				Use the back arrows to get back to the file upload page.
+			</div>
+			<?php 
 		}
 	}
 	?>

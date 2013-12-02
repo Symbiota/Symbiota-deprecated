@@ -19,7 +19,7 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 }
 
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML >
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
