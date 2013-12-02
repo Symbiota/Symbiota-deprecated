@@ -32,10 +32,18 @@ if($formSubmit){
 	}
 	elseif($formSubmit == 'Delete Char'){
 		$status = $keyManager->deleteChar();
-		if($status) $cid = 0;
+		if($status == true) $cid = 0;
 	}
 	elseif($formSubmit == 'Delete State'){
 		$status = $keyManager->deleteCharState($_POST['cs']);
+		$tabIndex = 1;
+	}
+	elseif($formSubmit == 'Upload Illustration'){
+		$status = $keyManager->uploadCsIllustration();
+		$tabIndex = 1;
+	}
+	elseif($formSubmit == 'Delete Illustration'){
+		$status = $keyManager->deleteCsIllustration($_POST['cs']);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Save Taxonomic Relevance'){
@@ -116,14 +124,14 @@ if(!$cid) header('Location: index.php');
 			return true;
 		}
 
-		function validateTaxonAddForm(f){
-			if(f.tid.value == ''){
-				alert("Please select a taxonomic name!");
+		function verifyStateIllustForm(f){
+			if(f.url == ''){
+				alert("Select a file to upload");
 				return false;
 			}
 			return true;
 		}
-
+		
 		function verifyCharStateDeletion(f){
 			var cid = f.cid.value;
 			var cs = f.cs.value;
@@ -190,6 +198,14 @@ if(!$cid) header('Location: index.php');
 				}
 			});
 		}
+
+		function validateTaxonAddForm(f){
+			if(f.tid.value == ''){
+				alert("Please select a taxonomic name!");
+				return false;
+			}
+			return true;
+		}
 	</script>
 </head>
 <body>
@@ -222,14 +238,16 @@ if(!$cid) header('Location: index.php');
 			if($statusStr){
 				?>
 				<hr/>
-				<div style="margin:15px;color:red;">
+				<div style="margin:15px;color:<?php echo (strpos($statusStr,'SUCCESS')===0?'green':'red'); ?>;">
 					<?php echo $statusStr; ?>
 				</div>
 				<hr/>
 				<?php 
 			}
 			$charStateArr = $keyManager->getCharStateArr($cid);
+			$charArr = $keyManager->getCharDetails($cid);
 			?>
+			<div style="font-weight:bold;font-size:150%;margin:15px;"><?php echo $charArr['charname']; ?></div>
 			<div id="tabs" style="margin:0px;">
 			    <ul>
 					<li><a href="#chardetaildiv"><span>Details</span></a></li>
@@ -238,10 +256,6 @@ if(!$cid) header('Location: index.php');
 					<li><a href="#chardeldiv"><span>Admin</span></a></li>
 				</ul>
 				<div id="chardetaildiv">
-					<?php 
-					//Show character details
-					$charArr = $keyManager->getCharDetails($cid);
-					?>
 					<form name="chareditform" action="chardetails.php" method="post" onsubmit="return validateCharEditForm(this)">
 						<fieldset style="margin:15px;padding:15px;">
 							<legend><b>Character Details</b></legend>
@@ -380,22 +394,58 @@ if(!$cid) header('Location: index.php');
 											<input type="text" name="notes" style="width:500px;" value="<?php echo $stateArr['notes']; ?>" />
 										</div>
 										<div style="padding-top:2px;">
-											<b>Sort Sequence</b><br />
-											<input type="text" name="sortsequence" value="<?php echo $stateArr['sortsequence']; ?>" />
-										</div>
-										<div style="width:100%;padding-top:4px;">
-											<div style="float:left;">
-												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-												<button name="formsubmit" type="submit" value="Save State">Save</button>
-											</div>
 											<div style="float:right;">
-												Entered By:
+												Entered By:<br/>
 												<input type="text" name="enteredby" value="<?php echo $stateArr['enteredby']; ?>" disabled />
 											</div>
+											<div>
+												<b>Sort Sequence</b><br />
+												<input type="text" name="sortsequence" value="<?php echo $stateArr['sortsequence']; ?>" />
+											</div>
+										</div>
+										<div style="width:100%;margin:20px 0px 10px 20px;">
+											<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+											<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+											<button name="formsubmit" type="submit" value="Save State">Save</button>
 										</div>
 									</fieldset>
 								</form>
+								<fieldset>
+									<legend>Illustration</legend>
+									<?php 
+									if($stateArr['url']){
+										?>
+										<div style="padding-top:2px;">
+											<a href="<?php echo $stateArr['url']; ?>"><img src="<?php echo $stateArr['url']; ?>" style="width:200px;" /></a>
+										</div>
+										<form name="stateillustdelform-<?php echo $stateArr['csimgid']; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustDelForm(this)" >
+											<div style="margin:10px;">
+												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+												<input name="csimgid" type="hidden" value="<?php echo $stateArr['csimgid']; ?>" />
+												<button name="formsubmit" type="submit" value="Delete Image">Delete Image</button>
+											</div>
+										</form>
+										<?php 
+									}
+									else{
+										?>
+										<form name="stateillustform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustForm(this)" >
+											<div style="padding-top:2px;">
+												<b>File Upload</b><br />
+												<input name="url" type="file" size="50" />
+												<input name="MAX_FILE_SIZE" type="hidden" value="1000000" />
+											</div>
+											<div style="padding-top:2px;">
+												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+												<button name="formsubmit" type="submit" value="Save State">Upload Image</button>
+											</div>
+										</form>
+										<?php
+									}
+									?>
+								</fieldset>
 								<form name="statedelform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character state?')">
 									<fieldset style="margin:15px;padding:15px;">
 										<legend><b>Delete Character State</b></legend>

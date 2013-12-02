@@ -5,6 +5,8 @@ include_once($serverRoot.'/classes/IdentCharAdmin.php');
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 
 $keyManager = new IdentCharAdmin();
+$keyManager->setCid($cid);
+$tLinks = $keyManager->getTaxonRelevance();
 ?>
 <div id="tlinkdiv" style="margin:15px;">
 	<div style="float:right;margin:10px;">
@@ -16,11 +18,7 @@ $keyManager = new IdentCharAdmin();
 		<b>Taxonomic relevance of character</b> - 
 		Tag taxonomic nodes where character is most relevant. 
 		Taxonomic branches can also be excluded. 
-		For example, left type is typically relevant to most flowering plants, though typically not used to identify Cactaceae.   
 	</div>
-	<?php 
-	$tLinks = $keyManager->getTaxonRelevance();
-	?>
 	<div id="taxonAddDiv" style="display:<?php echo ($tLinks?'none':'block'); ?>;margin:15px;">
 		<form name="taxonAddForm" action="chardetails.php" method="post" onsubmit="return validateTaxonAddForm(this)">
 			<fieldset style="padding:20px;">

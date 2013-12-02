@@ -121,9 +121,9 @@ class IdentCharAdmin{
 		}
 		return $statusStr;
 	}
-	
+
 	public function deleteChar(){
-		$status = 0;
+		$status = true;
 
 		//Delete character taxa links
 		$sql = 'DELETE FROM kmchartaxalink WHERE (cid = '.$this->cid.')';
@@ -157,27 +157,37 @@ class IdentCharAdmin{
 
 	public function getCharStateArr(){
 		$retArr = array();
-		$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, sortsequence, enteredby '.
-			'FROM kmcs '.
-			'WHERE cid = '.$this->cid.' '.
-			'ORDER BY sortsequence';
-		if($rs = $this->conn->query($sql)){
+		if($this->cid){
+			$sql = 'SELECT cid, cs, charstatename, implicit, notes, description, illustrationurl, sortsequence, enteredby '.
+				'FROM kmcs '.
+				'WHERE cid = '.$this->cid.' '.
+				'ORDER BY sortsequence';
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
+					$retArr[$r->cs]['implicit'] = $r->implicit;
+					$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
+					$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
+					$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
+					$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
+					$retArr[$r->cs]['enteredby'] = $r->enteredby;
+				}
+				$rs->free();
+			}
+			else{
+				trigger_error('unable to return character state array; '.$this->conn->error);
+			}
+			//Grab character set illustration 
+			$sql2 = 'SELECT cs, url, csimgid FROM kmcsimages '.
+				'WHERE cid = '.$this->cid.' AND cs IN ('.implode(',',$retArr).')';
+			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
-				$retArr[$r->cs]['implicit'] = $r->implicit;
-				$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
-				$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
-				$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
-				$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
-				$retArr[$r->cs]['enteredby'] = $r->enteredby;
+				$retArr[$r->cs]['url'] = $r->url;
+				$retArr[$r->cs]['csimgid'] = $r->csimgid;
 			}
 			$rs->free();
 		}
-		else{
-			trigger_error('unable to return character state array; '.$this->conn->error);
-		}
 		return $retArr;
-		
 	}
 
 	public function createCharState($csName,$illUrl,$desc,$n,$sort,$un){
@@ -274,22 +284,40 @@ class IdentCharAdmin{
 		}
 		return $status;
 	}
+	
+	public function uploadCsIllustration(){
+		$sql = 'INSERT INTO kmcsimages(cid, cs, url) ';
+		if(!$this->conn->query($sql)){
+			
+		}
+	}
+
+	public function deleteCsIllustration($csimgId){
+		$statusStr = 'SUCCESS: illustration uploaded successfully';
+		$sql = 'DELETE FROM kmcsimages WHERE csimgid = '.$csimgId;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR: unable to delete illustration; '.$this->error;
+		}
+		return $statusStr;
+	}
 
 	public function getTaxonRelevance(){
 		$retArr = array();
-		$sql = 'SELECT l.tid, l.relation, l.notes, t.sciname '.
-			'FROM kmchartaxalink l INNER JOIN taxa t ON l.tid = t.tid '.
-			'WHERE l.cid = '.$this->cid;
-		//echo $sql;
-		if($rs = $this->conn->query($sql)){
-			while($r = $rs->fetch_object()){
-				$retArr[$r->relation][$r->tid]['sciname'] = $r->sciname;
-				$retArr[$r->relation][$r->tid]['notes'] = $r->notes;
+		if($this->cid){
+			$sql = 'SELECT l.tid, l.relation, l.notes, t.sciname '.
+				'FROM kmchartaxalink l INNER JOIN taxa t ON l.tid = t.tid '.
+				'WHERE l.cid = '.$this->cid;
+			//echo $sql;
+			if($rs = $this->conn->query($sql)){
+				while($r = $rs->fetch_object()){
+					$retArr[$r->relation][$r->tid]['sciname'] = $r->sciname;
+					$retArr[$r->relation][$r->tid]['notes'] = $r->notes;
+				}
+				$rs->free();
 			}
-			$rs->free();
-		}
-		else{
-			trigger_error('unable to get Taxon Links; '.$this->conn->error);
+			else{
+				trigger_error('unable to get Taxon Links; '.$this->conn->error);
+			}
 		}
 		return $retArr;
 	}
