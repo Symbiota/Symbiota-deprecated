@@ -27,7 +27,7 @@ class OccurrenceCleaner {
 			$this->obsUid = $obsUid;
 		}
 	}
-
+	
 	public function getCollMap(){
 		$returnArr = Array();
 		if($this->collId){
@@ -49,19 +49,60 @@ class OccurrenceCleaner {
 		return $returnArr;
 	}
 
-	public function getDuplicateCatalogNumber($start){
-		//Search is not available for personal specimen management 
+	public function getDuplicateCatalogNumber($start, $limit = 500){
+		//Search is not available for personal specimen management
+		$dupArr = array();
+		$catArr = array();
+		$cnt = 0;
+		$sql1 = 'SELECT catalognumber '.
+			'FROM omoccurrences '.
+			'WHERE catalognumber IS NOT NULL AND collid = '.$this->collId;
+		//echo $sql1;
+		$rs = $this->conn->query($sql1);
+		while($r = $rs->fetch_object()){
+			$cn = $r->catalognumber;
+			if(array_key_exists($cn,$catArr)){
+				//Dupe found
+				$cnt++;
+				if($start < $cnt && !array_key_exists($cn,$dupArr)){
+					//Add dupe to array
+					$dupArr[$cn] = '';
+					if(count($dupArr) > $limit) break;
+				}
+			}
+			else{
+				$catArr[$cn] = '';
+			}
+		}
+		$rs->free();
+		
+		$retArr = array();
+		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
+			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
+			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
+			'FROM omoccurrences o '.
+			'WHERE o.collid = '.$this->collId.' AND o.catalognumber IN("'.implode('","',array_keys($dupArr)).'") '.
+			'ORDER BY o.catalognumber';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_assoc()){
+			$retArr[(string)$row['dupid']][$row['occid']] = array_change_key_case($row);
+		}
+		ksort($retArr);
+		
+		/*
 		$sql = 'SELECT o.catalognumber AS dupid, o.occid, o.catalognumber, o.othercatalognumbers, o.family, o.sciname, '.
 			'o.recordedby, o.recordnumber, o.associatedcollectors, o.eventdate, o.verbatimeventdate, '.
 			'o.country, o.stateprovince, o.county, o.municipality, o.locality, o.datelastmodified '.
 			'FROM omoccurrences o INNER JOIN (SELECT catalognumber FROM omoccurrences '.
 			'GROUP BY catalognumber, collid '. 
-			'HAVING Count(*)>1 AND collid = '.$this->collId.
+			'HAVING Count(occid)>1 AND collid = '.$this->collId.
 			' AND catalognumber IS NOT NULL) rt ON o.catalognumber = rt.catalognumber '.
 			'WHERE o.collid = '.$this->collId.' '.
 			'ORDER BY o.catalognumber, o.datelastmodified DESC LIMIT '.$start.', 505';
 		//echo $sql;
-		$retArr = $this->getDuplicates($sql); 
+		$retArr = $this->getDuplicates($sql);
+		*/ 
 		return $retArr;
 	}
 	

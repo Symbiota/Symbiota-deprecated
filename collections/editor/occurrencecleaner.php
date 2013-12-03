@@ -30,9 +30,12 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	$cleanManager->setObsUid($obsUid);
 }
 
+$limit = 200;
+if($action == 'listdupscatalog') $limit = 500;
+
 $dupArr = array();
 if($action == 'listdupscatalog'){
-	$dupArr = $cleanManager->getDuplicateCatalogNumber($start);
+	$dupArr = $cleanManager->getDuplicateCatalogNumber($start,$limit);
 	$function = $action;
 }
 elseif($action == 'listdupsrecordedby'){
@@ -206,18 +209,16 @@ elseif($action == 'listdupsrecordedby'){
 				if($action == 'listdupscatalog' || $action == 'listdupsrecordedby'){
 					//Look for duplicate catalognumbers 
 					if($dupArr){
-						$limitCnt = 200;
 						$recCnt = count($dupArr);
-						if($function == 'listdupscatalog') $limitCnt = 500;
 						//Build table
 						?>
 						<form name="mergeform" action="occurrencecleaner.php" method="post" onsubmit="return validateMergeForm(this)">
 							<?php 
-							if($recCnt > $limitCnt){
-								$href = 'occurrencecleaner.php?collid='.$collId.'&obsuid='.$obsUid.'&action='.$action.'&start='.($start+$limitCnt); 
-								echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limitCnt.' RECORDS &gt;&gt;</b></a></div>';
+							if($recCnt > $limit){
+								$href = 'occurrencecleaner.php?collid='.$collId.'&obsuid='.$obsUid.'&action='.$action.'&start='.($start+$limit); 
+								echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limit.' RECORDS &gt;&gt;</b></a></div>';
 							}
-							echo '<div><b>'.($start+1).' - '.($recCnt > $limitCnt?($limitCnt+$start):($recCnt+$start)).' Duplicate Clusters</b></div>';
+							echo '<div><b>'.($start+1).' to '.($start+$recCnt).' Duplicate Clusters </b></div>';
 							?>
 							<table class="styledtable">
 								<tr>
