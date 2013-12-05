@@ -7,8 +7,10 @@ if(!$symbUid) header('Location: ../../profile/index.php?refurl=../ident/admin/in
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
+$langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
 $keyManager = new IdentCharAdmin();
+$keyManager->setLangId($langId);
 //$keyManager->setCollId($collId);
 
 $keyManager->setCid($cid);
@@ -38,12 +40,12 @@ if($formSubmit){
 		$status = $keyManager->deleteCharState($_POST['cs']);
 		$tabIndex = 1;
 	}
-	elseif($formSubmit == 'Upload Illustration'){
-		$status = $keyManager->uploadCsIllustration();
+	elseif($formSubmit == 'Upload Image'){
+		$status = $keyManager->uploadCsImage($cid, $_POST['cs']);
 		$tabIndex = 1;
 	}
-	elseif($formSubmit == 'Delete Illustration'){
-		$status = $keyManager->deleteCsIllustration($_POST['cs']);
+	elseif($formSubmit == 'Delete Image'){
+		$status = $keyManager->deleteCsImage($_POST['csimgid']);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Save Taxonomic Relevance'){
@@ -343,10 +345,6 @@ if(!$cid) header('Location: index.php');
 									<input type="text" name="charstatename" maxlength="255" style="width:400px;" />
 								</div>
 								<div style="padding-top:4px;">
-									<b>Illustration URL</b><br />
-									<input type="text" name="illustrationurl" maxlength="250" style="width:500px;" />
-								</div>
-								<div style="padding-top:4px;">
 									<b>Description</b><br />
 									<input type="text" name="description" maxlength="255" style="width:500px;" />
 								</div>
@@ -381,10 +379,6 @@ if(!$cid) header('Location: index.php');
 											<b>Character State Name</b><br />
 											<input type="text" name="charstatename" maxlength="255" style="width:300px;" value="<?php echo $stateArr['charstatename']; ?>" />
 										</div>
-										<div style="padding-top:2px;clear:both;">
-											<b>Illustration URL</b><br />
-											<input type="text" name="illustrationurl" maxlength="250" style="width:500px;" value="<?php echo $stateArr['illustrationurl']; ?>" />
-										</div>
 										<div style="padding-top:2px;">
 											<b>Description</b><br />
 											<input type="text" name="description" maxlength="255" style="width:500px;" value="<?php echo $stateArr['description']; ?>"/>
@@ -410,13 +404,13 @@ if(!$cid) header('Location: index.php');
 										</div>
 									</fieldset>
 								</form>
-								<fieldset>
-									<legend>Illustration</legend>
+								<fieldset style="margin:15px;padding:15px;">
+									<legend><b>Illustration</b></legend>
 									<?php 
-									if($stateArr['url']){
+									if(isset($stateArr['csimgid'])){
 										?>
 										<div style="padding-top:2px;">
-											<a href="<?php echo $stateArr['url']; ?>"><img src="<?php echo $stateArr['url']; ?>" style="width:200px;" /></a>
+											<a href="<?php echo $stateArr['url']; ?>" target="_blank"><img src="<?php echo $stateArr['url']; ?>" style="width:200px;" /></a>
 										</div>
 										<form name="stateillustdelform-<?php echo $stateArr['csimgid']; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustDelForm(this)" >
 											<div style="margin:10px;">
@@ -439,7 +433,7 @@ if(!$cid) header('Location: index.php');
 											<div style="padding-top:2px;">
 												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
 												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-												<button name="formsubmit" type="submit" value="Save State">Upload Image</button>
+												<button name="formsubmit" type="submit" value="Upload Image">Upload Image</button>
 											</div>
 										</form>
 										<?php

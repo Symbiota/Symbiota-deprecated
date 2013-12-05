@@ -3,8 +3,10 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/IdentCharAdmin.php');
 
 $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
+$langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
 $keyManager = new IdentCharAdmin();
+$keyManager->setLangId($langId);
 $keyManager->setCid($cid);
 $tLinks = $keyManager->getTaxonRelevance();
 ?>
