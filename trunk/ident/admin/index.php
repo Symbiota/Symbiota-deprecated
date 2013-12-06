@@ -4,9 +4,12 @@ include_once($serverRoot.'/classes/IdentCharAdmin.php');
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
-$charManager = new IdentCharAdmin();
+$langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
+$charManager = new IdentCharAdmin();
+$charManager->setLangId($langId);
 $charArr = $charManager->getCharacterArr();
+
 $headingArr = array();
 if(isset($charArr['head'])){
 	$headingArr = $charArr['head'];

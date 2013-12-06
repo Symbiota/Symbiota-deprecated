@@ -31,7 +31,7 @@ class IdentCharAdmin{
 				$hid = $r->hid;
 				$hName = $this->cleanOutStr($r->headingname);
 				if(!$hid) $hid = 0;
-				if(!$hName) $hName = 'Undefined Heading';
+				if(!$hName) $hName = 'Heading Not Defined';
 				$headingArr[$hid] = $hName;
 				$retArr[$hid][$r->cid] = $this->cleanOutStr($r->charname);
 			}
@@ -589,7 +589,7 @@ class IdentCharAdmin{
 				$lang = 'English';
 			}
 		}
-		elseif(is_numeric($lang)){
+		if(is_numeric($lang)){
 			$this->langId = $lang;
 		}
 		else{
