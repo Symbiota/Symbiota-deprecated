@@ -287,48 +287,61 @@ class IdentCharAdmin{
 	}
 	
 	public function uploadCsImage($cid,$cs){
+		global $PARAMS_ARR;
 		$statusStr = '';
-		
-		$imgWidth = 1600;
-		$webFileSizeLimit = 300000;
-		$jpgCompression= 80;
-		
- 		$imageRootPath = $GLOBALS["imageRootPath"];
-		if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
-		$imageRootUrl = $GLOBALS["imageRootUrl"];
-		if(substr($imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
-		
-		
-		$imgPath = '';
-		//filepath is given if linking to an external image (no download)
-		if(array_key_exists("filepath",$_REQUEST)) $imgPath = $_REQUEST["filepath"];
-		if(!$imgPath){
-			//Image is to be downloaded
-			$userFile = basename($_FILES['userfile']['name']);
-			$fileName = $this->getFileName($userFile);
-			$downloadPath = $this->getDownloadPath($fileName,$subPath); 
-			if(move_uploaded_file($_FILES['userfile']['tmp_name'], $downloadPath)){
-				$imgPath = $downloadPath;
+		if(is_numeric($_POST['cid']) && is_numeric($_POST['cs'])){
+	 		$imageRootPath = $GLOBALS["imageRootPath"];
+			if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
+			if(file_exists($imageRootPath)){
+				$imageRootPath .= 'ident/';
+				if(!file_exists($imageRootPath)){
+					if(!mkdir($imageRootPath)){
+						return 'ERROR, unable to create upload directory: '.$imageRootPath;
+					}
+				}
+				$imageRootPath .= 'csimgs/';
+				if(!file_exists($imageRootPath)){
+					if(!mkdir($imageRootPath)){
+						return 'ERROR, unable to create upload directory: '.$imageRootPath;
+					}
+				}
+				//Create url prefix 
+				$imageRootUrl = $GLOBALS["imageRootUrl"];
+				if(substr($imageRootUrl,-1) != "/") $imageRootUrl .= "/";
+				$imageRootUrl .= 'ident/csimgs/';
+				
+				//Image is to be downloaded
+				$fileName = $this->cleanFileName(basename($_FILES['urlupload']['name']));
+				$imageRootPath = $this->getFullPath($imageRootPath,$fileName);
+				$imageRootPath = str_replace('.','_temp.',$imageRootPath);
+				move_uploaded_file($_FILES['userfile']['tmp_name'], $imageRootPath);
+				if(file_exists($imageRootPath)){
+					if(createNewCsImage($imageRootPath)){
+						//Add url to database 
+						$sql = 'INSERT INTO kmcsimages(cid, cs, url, notes, sortsequence, username) '.
+							'VALUES('.$cid.','.$cs.',"'.$imageRootPath.'","'.$this->cleanInStr($_POST['notes']).'",'.
+							(is_numeric($_POST['sortsequence'])?$_POST['sortsequence']:'NULL').',"'.$PARAMS_ARR['un'].'")';
+						if(!$this->conn->query($sql)){
+							$statusStr = 'ERROR loading char state image: '.$this->conn->error;
+						}
+					}
+				}
+				else{
+					return 'ERROR uploading file, file does not exist: '.$imageRootPath;
+				}
 			}
 		}
-		
-		
-		
-		
-		
-		
-		if(is_numeric($cid) && is_numeric($cs) && $url){
-			$sql = 'INSERT INTO kmcsimages(cid, cs, url) '.
-				'VALUES('.$cid.','.$cs.',"'.$this->cleanInStr($url).'")';
-			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR loading char state image: '.$this->conn->error;
-			}
+		else{
+			$statusStr = 'ERROR: Upload path does not exist (path: '.$imageRootPath.')';
 		}
 		return $statusStr;
 	}
 	
 
-	private function getFileName($fName){
+	private function cleanFileName($fName){
+		$pos = strrpos($fName,'.');
+		$ext = substr($fName,$pos+1);
+		$fName = substr($fName,0,$pos);
 		$fName = str_replace(" ","_",$fName);
 		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
 		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
@@ -338,122 +351,43 @@ class IdentCharAdmin{
 		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
 		$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
 		if(strlen($fName) > 30) {
-			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
+			$fName = substr($fName,0,30);
 		}
- 		return $fName;
+ 		return $fName.$ext;
  	}
  	
-	private function getDownloadPath($fileName,$subPath){
-		$path = $this->imageRootPath;
-		if($subPath) $path .= $subPath."/";
- 		if(!file_exists($path)){
- 			mkdir($path, 0775);
- 		}
+	private function getFullPath($subPath,$fileName){
  		//Check and see if file already exists, if so, rename filename until it has a unique name
  		$tempFileName = $fileName;
  		$cnt = 0;
- 		while(file_exists($path.$tempFileName)){
+ 		while(file_exists($subPath.$tempFileName)){
  			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
  			$cnt++;
  		}
- 		$fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
  		return $path.$fileName;
  	}
-	
-	public function uploadImage($imgPath,$tid=0){
-		global $paramsArr;
 
-		if(strpos($imgPath,$this->imageRootPath) === 0){
-			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
-		}
-		else{
-			$imgUrl = $imgPath;
-		}
-
-		$imgTnUrl = $this->createImageThumbnail($imgUrl);
-
-		$imgWebUrl = $imgUrl;
-		$imgLgUrl = "";
-		if(strpos($imgUrl,"http://") === false || strpos($imgUrl,$this->imageRootUrl) !== false){
-			//Is an imported image, thus resize and place
-			list($width, $height) = getimagesize($imgPath?$imgPath:$imgUrl);
-			$fileSize = filesize($imgPath?$imgPath:$imgUrl);
-			//Create large image
-			$createlargeimg = (array_key_exists('createlargeimg',$_REQUEST)&&$_REQUEST['createlargeimg']==1?true:false);
-			if($createlargeimg && ($width > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit)){
-				$lgWebUrlTemp = str_ireplace("_temp.jpg","_lg.jpg",$imgPath); 
-				if($width < ($this->lgPixWidth*1.2)){
-					if(copy($imgPath,$lgWebUrlTemp)){
-						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
-					}
-				}
-				else{
-					if($this->createNewImage($imgPath,$lgWebUrlTemp,$this->lgPixWidth)){
-						$imgLgUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$lgWebUrlTemp);
-					}
-				}
-			}
-
-			//Create web url
-			$imgTargetPath = str_ireplace("_temp.jpg",".jpg",$imgPath);
-			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
-				rename($imgPath,$imgTargetPath);
-			}
-			else{
-				$newWidth = ($width<($this->webPixWidth*1.2)?$width:$this->webPixWidth);
-				$this->createNewImage($imgPath,$imgTargetPath,$newWidth);
-			}
-			$imgWebUrl = str_ireplace($this->imageRootPath,$this->imageRootUrl,$imgTargetPath);
-			if(file_exists($imgPath)) unlink($imgPath);
-		}
-		$status = '';
-		if($imgWebUrl){
-			$status = $this->databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid);
-		}
-		return $status;
-	}
-	
-	private function createNewImageGD($sourcePath, $targetPath, $newWidth, $newHeight, $sourceWidth, $sourceHeight, $qualityRating = 0){
+	private function createNewCsImage($path){
 		$status = false;
+		$imgWidth = 800;
+		$webFileSizeLimit = 300000;
+		$qualityRating= 80;
 		
+		list($width, $height) = getimagesize($path);
+		$fileSize = filesize($path);
 		
+		$imgHeight = round($height*($imgWidth/$width));
 		
-		
-		if(!$qualityRating) $qualityRating = $this->jpgCompression;
-		
-		list($sourceWidth, $sourceHeight) = getimagesize($sourcePath);
-        $newWidth = $targetWidth;
-        $newHeight = round($sourceHeight*($targetWidth/$sourceWidth));
-        if($newHeight > $targetWidth*1.2){
-        	$newHeight = $targetWidth;
-        	$newWidth = round($sourceWidth*($targetWidth/$sourceHeight));
-        }
-		
-        if(!$this->sourceGdImg){
-	   		$this->sourceGdImg = imagecreatefromjpeg($sourcePath);
-	   	}
-		
-	   	
-	   	
-	   	
-		ini_set('memory_limit','512M');
-		$tmpImg = imagecreatetruecolor($newWidth,$newHeight);
+   		$sourceImg = imagecreatefromjpeg($path);
+		$newImg = imagecreatetruecolor($imgWidth,$imgHeight);
 		//imagecopyresampled($tmpImg,$sourceImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-		imagecopyresized($tmpImg,$this->sourceGdImg,0,0,0,0,$newWidth,$newHeight,$sourceWidth,$sourceHeight);
-
-		if($qualityRating){
-			$status = imagejpeg($tmpImg, $targetPath, $qualityRating);
-		}
-		else{
-			$status = imagejpeg($tmpImg, $targetPath);
-		}
-		
+		imagecopyresized($newImg,$sourceImg,0,0,0,0,$imgWidth,$imgHeight,$width,$height);
+		$status = imagejpeg($newImg, str_replace('_temp','',$path), $qualityRating);
 		if(!$status){
-			if($this->logErrFH) fwrite($this->logErrFH, "\tError: Unable to resize and write file: ".$targetPath."\n");
-			echo "<li style='margin-left:20px;'><b>Error:</b> Unable to resize and write file: $targetPath</li>\n";
+			echo 'Error: Unable to create image file: '.$path;
 		}
-		
-		imagedestroy($tmpImg);
+		imagedestroy($newImg);
+		imagedestroy($sourceImg);
 		return $status;
 	}
 

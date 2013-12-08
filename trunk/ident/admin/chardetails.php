@@ -41,7 +41,7 @@ if($formSubmit){
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Upload Image'){
-		$status = $keyManager->uploadCsImage($cid, $_POST['cs']);
+		$status = $keyManager->uploadCsImage($_POST);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Delete Image'){
@@ -75,10 +75,16 @@ if(!$cid) header('Location: index.php');
 		var tabIndex = <?php echo $tabIndex; ?>;
 
 		$(document).ready(function() {
-			$('#tabs').tabs(
-				{ active: tabIndex }
-			);
+			$('#tabs').tabs({ 
+				active: tabIndex,
+				 
+			});
 		});
+
+		function toggleCharState(csId){
+			toggle('cs-'+csId+'Div');
+			toggle('csplus-'+csId);
+		}
 
 		function updateUnits(obj){
 			var unitObj = document.getElementById("units");
@@ -366,140 +372,157 @@ if(!$cid) header('Location: index.php');
 					<?php 
 					if($charStateArr){
 						echo '<h3>Character States</h3>';
-						echo '<ul>';
 						foreach($charStateArr as $cs => $stateArr){
-							echo '<li>';
-							echo '<a href="#" onclick="toggle(\'cs-'.$cs.'Div\');">'.$stateArr['charstatename'].'</a>';
 							?>
-							<div id="<?php echo 'cs-'.$cs.'Div'; ?>" style="display:none;">
-								<form name="stateeditform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return validateStateEditForm(this)">
-									<fieldset style="margin:15px;padding:15px;">
-										<legend><b>Character State Details</b></legend>
-										<div>
-											<b>Character State Name</b><br />
-											<input type="text" name="charstatename" maxlength="255" style="width:300px;" value="<?php echo $stateArr['charstatename']; ?>" />
-										</div>
-										<div style="padding-top:2px;">
-											<b>Description</b><br />
-											<input type="text" name="description" maxlength="255" style="width:500px;" value="<?php echo $stateArr['description']; ?>"/>
-										</div>
-										<div style="padding-top:2px;">
-											<b>Notes</b><br />
-											<input type="text" name="notes" style="width:500px;" value="<?php echo $stateArr['notes']; ?>" />
-										</div>
-										<div style="padding-top:2px;">
-											<div style="float:right;">
-												Entered By:<br/>
-												<input type="text" name="enteredby" value="<?php echo $stateArr['enteredby']; ?>" disabled />
-											</div>
+							<div>
+								<div id="csplus-<?php echo $cs; ?>" style="margin:5px;">
+									<a href="#" onclick="toggleCharState(<?php echo $cs; ?>);return false;">
+										<img src="../../images/plus.jpg" style="width:10px;" />
+										<?php echo $stateArr['charstatename']; ?>
+									</a>
+								</div>
+								<div id="<?php echo 'cs-'.$cs.'Div'; ?>" style="display:none;">
+									<div style="margin:5px;">
+										<a href="#" onclick="toggleCharState(<?php echo $cs; ?>);return false;">
+											<img src="../../images/minus.jpg" style="width:10px;" />
+											<?php echo $stateArr['charstatename']; ?>
+										</a>
+									</div>
+									<form name="stateeditform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return validateStateEditForm(this)">
+										<fieldset style="margin:15px;padding:15px;">
+											<legend><b>Character State Details</b></legend>
 											<div>
-												<b>Sort Sequence</b><br />
-												<input type="text" name="sortsequence" value="<?php echo $stateArr['sortsequence']; ?>" />
-											</div>
-										</div>
-										<div style="width:100%;margin:20px 0px 10px 20px;">
-											<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-											<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-											<button name="formsubmit" type="submit" value="Save State">Save</button>
-										</div>
-									</fieldset>
-								</form>
-								<fieldset style="margin:15px;padding:15px;">
-									<legend><b>Illustration</b></legend>
-									<?php 
-									if(isset($stateArr['csimgid'])){
-										?>
-										<div style="padding-top:2px;">
-											<a href="<?php echo $stateArr['url']; ?>" target="_blank"><img src="<?php echo $stateArr['url']; ?>" style="width:200px;" /></a>
-										</div>
-										<form name="stateillustdelform-<?php echo $stateArr['csimgid']; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustDelForm(this)" >
-											<div style="margin:10px;">
-												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-												<input name="csimgid" type="hidden" value="<?php echo $stateArr['csimgid']; ?>" />
-												<button name="formsubmit" type="submit" value="Delete Image">Delete Image</button>
-											</div>
-										</form>
-										<?php 
-									}
-									else{
-										?>
-										<form name="stateillustform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustForm(this)" >
-											<div style="padding-top:2px;">
-												<b>File Upload</b><br />
-												<input name="url" type="file" size="50" />
-												<input name="MAX_FILE_SIZE" type="hidden" value="1000000" />
+												<b>Character State Name</b><br />
+												<input type="text" name="charstatename" maxlength="255" style="width:300px;" value="<?php echo $stateArr['charstatename']; ?>" />
 											</div>
 											<div style="padding-top:2px;">
+												<b>Description</b><br />
+												<input type="text" name="description" maxlength="255" style="width:500px;" value="<?php echo $stateArr['description']; ?>"/>
+											</div>
+											<div style="padding-top:2px;">
+												<b>Notes</b><br />
+												<input type="text" name="notes" style="width:500px;" value="<?php echo $stateArr['notes']; ?>" />
+											</div>
+											<div style="padding-top:2px;">
+												<div style="float:right;">
+													Entered By:<br/>
+													<input type="text" name="enteredby" value="<?php echo $stateArr['enteredby']; ?>" disabled />
+												</div>
+												<div>
+													<b>Sort Sequence</b><br />
+													<input type="text" name="sortsequence" value="<?php echo $stateArr['sortsequence']; ?>" />
+												</div>
+											</div>
+											<div style="width:100%;margin:20px 0px 10px 20px;">
 												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
 												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-												<button name="formsubmit" type="submit" value="Upload Image">Upload Image</button>
+												<button name="formsubmit" type="submit" value="Save State">Save</button>
 											</div>
-										</form>
-										<?php
-									}
-									?>
-								</fieldset>
-								<form name="statedelform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character state?')">
+										</fieldset>
+									</form>
 									<fieldset style="margin:15px;padding:15px;">
-										<legend><b>Delete Character State</b></legend>
-										Record first needs to be evaluated before it can be deleted from the system. 
-										The evaluation ensures that the deletion will not interfer with 
-										the integrity of linked data.      
-										<div style="margin:15px;">
-											<input name="verifycsdelete" type="button" value="Evaluate record for deletion" onclick="verifyCharStateDeletion(this.form);return false;" />
-										</div>
-										<div id="delverimgdiv" style="margin:15px;">
-											<b>Image Links: </b>
-											<span id="delvercsimgspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking image links...</span>
-											<div id="delcsimgfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-												<span style="color:red;">Warning:</span> 
-												One or more images are linked to this charcter state. 
-												Deleting this character state will also permanently remove these images.  
+										<legend><b>Illustration</b></legend>
+										<?php 
+										if(isset($stateArr['csimgid'])){
+											?>
+											<div style="padding-top:2px;">
+												<a href="<?php echo $stateArr['url']; ?>" target="_blank"><img src="<?php echo $stateArr['url']; ?>" style="width:200px;" /></a>
 											</div>
-											<div id="delcsimgappdiv-<?php echo $cs; ?>" style="display:none;">
-												<span style="color:green;">Approved for deletion.</span>
-												No images are directly associated with this character state.  
-											</div>
-										</div>
-										<div id="delverlangdiv" style="margin:15px;">
-											<b>Language Links: </b>
-											<span id="delvercslangspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking language links...</span>
-											<div id="delcslangfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-												<span style="color:red;">Warning:</span> 
-												Charcter state has links to langauge records. 
-												Deleting this character state will also permanently remove this data.  
-											</div>
-											<div id="delcslangappdiv-<?php echo $cs; ?>" style="display:none;">
-												<span style="color:green;">Approved for deletion.</span>
-												No langage mappings are directly associated with this character state.  
-											</div>
-										</div>
-										<div id="delverdescrdiv" style="margin:15px;">
-											<b>Description Links: </b>
-											<span id="delverdescrspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking description links...</span>
-											<div id="deldescrfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-												<span style="color:red;">Warning:</span> 
-												One or more descriptions are linked to this charcter state. 
-												Delete this character state will also permanently remove these descriptions.  
-											</div>
-											<div id="deldescrappdiv-<?php echo $cs; ?>" style="display:none;">
-												<span style="color:green;">Approved for deletion.</span>
-												No descriptions are directly associated with this character state.  
-											</div>
-										</div>
-										<div style="margin:15px;">
-											<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
-											<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
-											<input name="formsubmit" type="submit" value="Delete State" disabled />
-										</div>
+											<form name="stateillustdelform-<?php echo $stateArr['csimgid']; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustDelForm(this)" >
+												<div style="margin:10px;">
+													<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+													<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+													<input name="csimgid" type="hidden" value="<?php echo $stateArr['csimgid']; ?>" />
+													<button name="formsubmit" type="submit" value="Delete Image">Delete Image</button>
+												</div>
+											</form>
+											<?php 
+										}
+										else{
+											?>
+											<form name="stateillustform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustForm(this)" >
+												<div style="padding-top:2px;">
+													<b>File Upload</b><br />
+													<input name="urlupload" type="file" size="50" />
+													<input name="MAX_FILE_SIZE" type="hidden" value="1000000" />
+												</div>
+												<div style="padding-top:2px;">
+													<b>Notes:</b> 
+													<input name="notes" type="text" size="400" />
+												</div>
+												<div style="padding-top:2px;">
+													<b>Sort</b><br />
+													<input name="sortsequence" type="text" size="50" />
+												</div>
+												<div style="padding-top:2px;">
+													<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+													<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+													<button name="formsubmit" type="submit" value="Upload Image">Upload Image</button>
+												</div>
+											</form>
+											<?php
+										}
+										?>
 									</fieldset>
-								</form>
+									<form name="statedelform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character state?')">
+										<fieldset style="margin:15px;padding:15px;">
+											<legend><b>Delete Character State</b></legend>
+											Record first needs to be evaluated before it can be deleted from the system. 
+											The evaluation ensures that the deletion will not interfer with 
+											the integrity of linked data.      
+											<div style="margin:15px;">
+												<input name="verifycsdelete" type="button" value="Evaluate record for deletion" onclick="verifyCharStateDeletion(this.form);return false;" />
+											</div>
+											<div id="delverimgdiv" style="margin:15px;">
+												<b>Image Links: </b>
+												<span id="delvercsimgspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking image links...</span>
+												<div id="delcsimgfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+													<span style="color:red;">Warning:</span> 
+													One or more images are linked to this charcter state. 
+													Deleting this character state will also permanently remove these images.  
+												</div>
+												<div id="delcsimgappdiv-<?php echo $cs; ?>" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No images are directly associated with this character state.  
+												</div>
+											</div>
+											<div id="delverlangdiv" style="margin:15px;">
+												<b>Language Links: </b>
+												<span id="delvercslangspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking language links...</span>
+												<div id="delcslangfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+													<span style="color:red;">Warning:</span> 
+													Charcter state has links to langauge records. 
+													Deleting this character state will also permanently remove this data.  
+												</div>
+												<div id="delcslangappdiv-<?php echo $cs; ?>" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No langage mappings are directly associated with this character state.  
+												</div>
+											</div>
+											<div id="delverdescrdiv" style="margin:15px;">
+												<b>Description Links: </b>
+												<span id="delverdescrspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking description links...</span>
+												<div id="deldescrfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
+													<span style="color:red;">Warning:</span> 
+													One or more descriptions are linked to this charcter state. 
+													Delete this character state will also permanently remove these descriptions.  
+												</div>
+												<div id="deldescrappdiv-<?php echo $cs; ?>" style="display:none;">
+													<span style="color:green;">Approved for deletion.</span>
+													No descriptions are directly associated with this character state.  
+												</div>
+											</div>
+											<div style="margin:15px;">
+												<input name="cid" type="hidden" value="<?php echo $cid; ?>" />
+												<input name="cs" type="hidden" value="<?php echo $cs; ?>" />
+												<input name="formsubmit" type="submit" value="Delete State" disabled />
+											</div>
+										</fieldset>
+									</form>
+								</div>
 							</div>
 							<?php
-							echo '</li>';
 						}
-						echo '</ul>';
 					}
 					?>
 				</div>

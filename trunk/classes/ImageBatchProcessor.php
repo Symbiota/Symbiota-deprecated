@@ -161,7 +161,7 @@ class ImageBatchProcessor {
 		
 		$projProcessed = array();
 		foreach($this->collArr as $collid => $cArr){
-			$this->activeCollid = $collid;
+			$this->activeCollid = intval($collid);
 			$collStr = str_replace(' ','',$cArr['instcode'].($cArr['collcode']?'_'.$cArr['collcode']:''));
 
 			if(!$this->dbMetadata){
@@ -1263,8 +1263,14 @@ class ImageBatchProcessor {
 				$this->collArr = $cArr;
 				//Set additional collection info
 				if($this->dbMetadata){
+					//Extract numeric portion of collid keys (e.g. array may have 40a and 40b as keys)
+					$collidStr = '';
+					foreach($cArr as $collid => $cArr){
+						$collidStr .= ','.intval($collid);
+					}
+					//Get Metadata
 					$sql = 'SELECT collid, institutioncode, collectioncode, collectionname, managementtype FROM omcollections '.
-						'WHERE (collid IN('.implode(',',array_keys($this->collArr)).'))';
+						'WHERE (collid IN('.$collidStr.'))';
 					if($rs = $this->conn->query($sql)){
 						if($rs->num_rows){
 							while($r = $rs->fetch_object()){
