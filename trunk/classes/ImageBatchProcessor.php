@@ -1270,7 +1270,7 @@ class ImageBatchProcessor {
 					}
 					//Get Metadata
 					$sql = 'SELECT collid, institutioncode, collectioncode, collectionname, managementtype FROM omcollections '.
-						'WHERE (collid IN('.$collidStr.'))';
+						'WHERE (collid IN('.substr($collidStr,1).'))';
 					if($rs = $this->conn->query($sql)){
 						if($rs->num_rows){
 							while($r = $rs->fetch_object()){
