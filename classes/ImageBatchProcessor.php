@@ -23,7 +23,7 @@ if(isset($serverRoot)){
 	}
 }
 else{
-	//Files reside in same folder
+	//Files reside in same folder and script is run from within the folder
 	if(file_exists('SpecProcessorGPI.php')) { 
 		@require_once('SpecProcessorGPI.php');
 	}

@@ -1,8 +1,12 @@
 <?php 
 //Variables needing security
+
+//Server root is generally needed since scripts may be run from outside of folder (including crontab runs)
+//This is the path base folder of portal (e.g. trunk)
+$serverRoot = '';
+
 //Base folder containing herbarium folder ; read access needed
 $sourcePathBase = '';
-
 //Folder where images are to be placed; write access needed
 $targetPathBase = '';
 

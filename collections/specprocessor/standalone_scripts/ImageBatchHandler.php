@@ -2,17 +2,25 @@
 date_default_timezone_set('America/Phoenix');
 
 require_once('ImageBatchConf.php');
-if(file_exists('../../../config/symbini.php')) { 
+if(isset($serverRoot)) { 
+	if(file_exists($serverRoot.'/config/symbini.php')){
+		include_once($serverRoot.'/config/symbini.php');
+	}
+	if(file_exists($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php')) { 
+		include_once($serverRoot.'/collections/specprocessor/standalone_scripts/ImageBatchConnectionFactory.php');
+	}
+	if(file_exists($serverRoot.'/classes/ImageBatchProcessor.php')) { 
+		require_once($serverRoot.'/classes/ImageBatchProcessor.php');
+	}
+}
+else{
 	include_once('../../../config/symbini.php');
-}
-if(file_exists('ImageBatchConnectionFactory.php')) { 
-	include_once('ImageBatchConnectionFactory.php');
-}
-if(isset($serverRoot) && file_exists($serverRoot.'/classes/ImageBatchProcessor.php')) { 
-	require_once($serverRoot.'/classes/ImageBatchProcessor.php');
-}
-elseif(file_exists('ImageBatchProcessor.php')){
-	require_once('ImageBatchProcessor.php');
+	if(file_exists('ImageBatchConnectionFactory.php')) { 
+		include_once('ImageBatchConnectionFactory.php');
+	}
+	if(file_exists('ImageBatchProcessor.php')){
+		require_once('ImageBatchProcessor.php');
+	}
 }
 
 //-------------------------------------------------------------------------------------------//
