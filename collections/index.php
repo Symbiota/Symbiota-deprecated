@@ -32,7 +32,13 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		<script type="text/javascript" src="../js/jquery.js"></script>
 		<script type="text/javascript" src="../js/jquery-ui.js"></script>
 		<script language="javascript" type="text/javascript">
+			$('html').hide();
 			$(document).ready(function() {
+				$('html').show();
+			});
+
+			
+	    	$(document).ready(function() {
 				if(!navigator.cookieEnabled){
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 				}
