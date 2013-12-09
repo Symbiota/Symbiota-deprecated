@@ -10,20 +10,18 @@ $smManager = new SiteMapManager();
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle; ?> Site Map</title>
-    <link rel="stylesheet" href="css/main.css" type="text/css" />
-    <script type="text/javascript">
-	    function submitTaxaNoImgForm(f){
+	<title><?php echo $defaultTitle; ?> Site Map</title>
+	<link rel="stylesheet" href="css/main.css" type="text/css" />
+	<script type="text/javascript">
+		function submitTaxaNoImgForm(f){
 			if(f.clid.value != ""){
 				f.submit();
 			}
 			return false;
-	    }
-    </script>
+		}
+	</script>
 </head>
-
 <body>
-
 	<?php
 	$displayLeftMenu = (isset($sitemapMenu)?$sitemapMenu:"true");
 	include($serverRoot.'/header.php');
@@ -34,46 +32,47 @@ $smManager = new SiteMapManager();
 		echo " <b>Sitemap</b>";
 		echo "</div>";
 	}
-	    
+		
 	?> 
-        <!-- This is inner text! --> 
-        <div id="innertext">
-            <h1>Site Map</h1>
-            <div style="margin:10px;">
-	            <h2>Collections</h2>
-            	<ul>
-            		<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
-            		<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
-            		<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
-            		<?php 
-            		if(file_exists('webservices/dwc/rss.xml')){
-            			echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">RSS Feed</a></li>';
-            		}
-            		?>
-            		<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
-            		
-            	</ul>
-	            	
-	            <h2>Image Library</h2>
-            	<ul>
-            		<li><a href="imagelib/index.php">Image Library</a></li>
-            		<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
-            		<li><a href="misc/usagepolicy.php">Usage Policy and Copyright Information</a></li>
-            	</ul>
+		<!-- This is inner text! --> 
+		<div id="innertext">
+			<h1>Site Map</h1>
+			<div style="margin:10px;">
+				<h2>Collections</h2>
+				<ul>
+					<li><a href="collections/index.php">Search Engine</a> - search Collections</li>
+					<li><a href="collections/misc/collprofiles.php">Collections</a> - list of collection participating in project</li>
+					<li><a href="collections/datasets/datapublisher.php">Darwin Core Archives</a> - published datasets of selected collections</li>
+					<?php 
+					if(file_exists('webservices/dwc/rss.xml')){
+						echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml">RSS Feed</a></li>';
+					}
+					?>
+					<li><a href="collections/misc/rarespecies.php">Rare Species</a> - list of taxa where locality information is hidden due to rare/threatened/endangered status</li>
+					
+				</ul>
+					
+				<h2>Image Library</h2>
+				<ul>
+					<li><a href="imagelib/index.php">Image Library</a></li>
+					<li><a href="imagelib/photographers.php">Contributing Photographers</a></li>
+					<li><a href="misc/usagepolicy.php">Usage Policy and Copyright Information</a></li>
+				</ul>
 	
-	            <h2>Biotic Inventory Projects</h2>
-            	<ul>
-            		<?php 
-            		$projList = $smManager->getProjectList();
-            		foreach($projList as $pid => $pArr){
-            			echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
-            			echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
-            		}
-            		?>
-            	</ul>
+				<?php 
+				$projList = $smManager->getProjectList();
+				if($projList){
+					echo '<h2>Biotic Inventory Projects</h2><ul>';
+					foreach($projList as $pid => $pArr){
+						echo "<li><a href='projects/index.php?proj=".$pid."'>".$pArr["name"]."</a></li>\n";
+						echo "<ul><li>Manager: ".$pArr["managers"]."</li></ul>\n";
+					}
+					echo '</ul>';
+				}
+				?>
 
 				<h2>Dynamic Species Lists</h2>
-            	<ul>
+				<ul>
 					<li>
 						<a href="checklists/dynamicmap.php?interface=checklist">
 							Checklist
@@ -88,57 +87,53 @@ $smManager = new SiteMapManager();
 					</li>
 				</ul>
 
-				<h2>Misc Features</h2>
-				<ul>
-					<li>
-						<a href="ident/index.php">Identification Keys</a> 
-						- all keys registered within the system
-					</li>
-					<li>
-						<a href="checklists/index.php">Species Lists</a> 
-						- all species checklists registered within the system
-					</li>
-				</ul>
-
-		        <fieldset style="margin:30px 0px 10px 10px;padding:15px;">
-		            <legend><b>Data Management Tools</b></legend>
-	            	<?php 
-	            	if($symbUid){ 
-	            		?>
-	            		<h3>Identification Keys</h3>
-						<ul>
-		            		<?php if($isAdmin || array_key_exists("KeyEditor",$userRights)){ ?>
-								<li>
-									You are authorized to edit Identification Keys
-								</li>
-			            		<li>
-			            			To add or remove species names with a keys checklist, access the checklist editor that is aligned with the key. 
-			            			Note that you must have editing rights for that checklist.
-			            		</li>
-			            		<li>
-			            			To edit morphological characters, login and go to any key. Open the 
-			            			morphological character editor by clicking on the 
-			            			editing symbol to the right of Scientific Name that you wish to modify. 
-			            		</li>
-								<li>
-									Click on check project name below to open the  
-									<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a>
-									for that project  
-									<ul>
-										<?php 
-										foreach($projList as $pid => $pArr){
-											echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
-				            			}
-				            			?>
-		            				</ul>
-								</li>
-			            		<?php
-		            		}
-            				else{?>
-								<li>You are not authorized to edit Identification Keys</li>
-            				<?php }?>
-						</ul>
-						
+				<fieldset style="margin:30px 0px 10px 10px;padding:15px;">
+					<legend><b>Data Management Tools</b></legend>
+					<?php 
+					if($symbUid){
+						if($keyModIsActive){ 
+							?>
+							<h3>Identification Keys</h3>
+							<ul>
+								<?php 
+								if($isAdmin || array_key_exists("KeyEditor",$userRights)){ 
+									?>
+									<li>
+										You are authorized to edit Identification Keys
+									</li>
+									<li>
+										To add or remove species names with a keys checklist, access the checklist editor that is aligned with the key. 
+										Note that you must have editing rights for that checklist.
+									</li>
+									<li>
+										To edit morphological characters, login and go to any key. Open the 
+										morphological character editor by clicking on the 
+										editing symbol to the right of Scientific Name that you wish to modify. 
+									</li>
+									<li>
+										Click on check project name below to open the  
+										<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a>
+										for that project  
+										<ul>
+											<?php 
+											foreach($projList as $pid => $pArr){
+												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
+											}
+											?>
+										</ul>
+									</li>
+									<?php
+								}
+								else{
+									?>
+									<li>You are not authorized to edit Identification Keys</li>
+									<?php 
+								}
+								?>
+							</ul>
+							<?php
+						}
+						?>
 						<h3>Images</h3>
 						<div style="margin:10px;">
 							See the Symbiota documentation on 
@@ -151,27 +146,27 @@ $smManager = new SiteMapManager();
 							feature. 
 						</div>
 						<ul>
-		            		<?php 
-		            		if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
-		            			?>
+							<?php 
+							if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+								?>
 								<li>
 									<a href="taxa/admin/tpeditor.php?tabindex=1" target="_blank">
 										Basic Field Image Submission 
 									</a>
 								</li>
 								<?php
-		            		}
+							}
 							if($isAdmin || array_key_exists("CollAdmin",$userRights) || array_key_exists("CollEditor",$userRights)){
-		            		?>
+							?>
 							<li>
 								<a href="collections/editor/observationsubmit.php">
 									Image Observation Submission Module
 								</a>
 							</li>
-		            		<?php 
+							<?php 
 							}
-		            		if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
-		            			?>
+							if($isAdmin || array_key_exists('TaxonProfile',$userRights)){ 
+								?>
 								<li>
 									<?php if($submitAction == 'taxanoimages') echo '<a name="taxanoimages"><a/>'; ?>
 									<b>Taxa without images:</b> 
@@ -180,7 +175,7 @@ $smManager = new SiteMapManager();
 											<option value="">Select a Checklist</option>
 											<option value="">-------------------------------</option>
 											<?php 
-	            								$clArr = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
+												$clArr = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
 												foreach($clArr as $clid => $clname){
 													echo '<option value="'.$clid.'">'.$clname."</option>\n";
 												}
@@ -233,33 +228,33 @@ $smManager = new SiteMapManager();
 									}
 									?>
 								</li>
-            				<?php }?>
+							<?php }?>
 						</ul>
 
 						<h3>Biotic Inventory Projects</h3>
 						<ul>
 							<?php 
-	            			if($isAdmin){
-	            				echo '<li><a href="projects/index.php?newproj=1">Add a New Project</a></li>';
-	            				if($projList){
-	            					echo '<li><b>List of Current Projects</b> (click to edit)</li>';
-	            					echo '<ul>';
+							if($isAdmin){
+								echo '<li><a href="projects/index.php?newproj=1">Add a New Project</a></li>';
+								if($projList){
+									echo '<li><b>List of Current Projects</b> (click to edit)</li>';
+									echo '<ul>';
 									foreach($projList as $pid => $pArr){
 										echo '<li><a href="'.$clientRoot.'/projects/index.php?proj='.$pid.'&emode=1">'.$pArr['name'].'</a></li>';
-			            			}
-	            					echo '</ul>';
-	            				}
-	            				else{
-	            					echo '<li>There are no projects in the system</li>';	
-	            				}
+									}
+									echo '</ul>';
+								}
+								else{
+									echo '<li>There are no projects in the system</li>';	
+								}
 							}
 							else{
 								echo '<li>You are not authorized to edit any of the Projects</li>';
-	            			}
+							}
 							?>
 						</ul>
 	
-	            		<h3>Taxon Profile Page</h3>
+						<h3>Taxon Profile Page</h3>
 						<?php 
 						if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 							?>
@@ -267,14 +262,14 @@ $smManager = new SiteMapManager();
 								The following Species Profile page editing features are also available to editors via an
 								editing link located in the upper right of each Species Profile page. 
 							</div>
-	            			<ul>
-	            				<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
+							<ul>
+								<li><a href="taxa/admin/tpeditor.php?taxon=">Synonyms / Common Names</a></li>
 								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=4">Text Descriptions</a></li>
 								<li><a href="taxa/admin/tpeditor.php?taxon=&tabindex=1">Edit Images</a></li>
 								<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imagequicksort&tabindex=2">Edit Image Sorting Order</a></li>
 								<li style="margin-left:15px;"><a href="taxa/admin/tpeditor.php?taxon=&category=imageadd&tabindex=3">Add a New Image</a></li>
-	            			</ul>
-			            	<?php 
+							</ul>
+							<?php 
 						}
 						else{
 							?>
@@ -283,7 +278,7 @@ $smManager = new SiteMapManager();
 							</ul>
 							<?php 
 						}
-		            	?>
+						?>
 						<h3>Taxonomy</h3>
 						<ul>
 							<?php 
@@ -301,21 +296,21 @@ $smManager = new SiteMapManager();
 							}
 							?>
 						</ul>
-		            	
+						
 						<h3>Misc</h3>
 						<ul>
 							<?php 
 							if($isAdmin){
 								?>
-		            			<li><a href="profile/usermanagement.php">User Permissions</a></li>
-		            			<?php
+								<li><a href="profile/usermanagement.php">User Permissions</a></li>
+								<?php
 							}
 							else{
 								?>
-		            			<li>You are not authorized to manage permissions</li>
-		            			<?php
+								<li>You are not authorized to manage permissions</li>
+								<?php
 							}
-	            			?>
+							?>
 						</ul>
 
 						<h3>Checklists</h3>
@@ -326,18 +321,18 @@ $smManager = new SiteMapManager();
 							Below is a list of the checklists you are authorized to edit. 
 						</div>
 						<ul>
-		            		<?php 
-	            			if($isAdmin || array_key_exists("ClAdmin",$userRights)){
-	            				$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
-	            				foreach($clList as $k => $v){
-		            				echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
-		            			}
-	            			}
-	            			else{
+							<?php 
+							if($isAdmin || array_key_exists("ClAdmin",$userRights)){
+								$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
+								foreach($clList as $k => $v){
+									echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
+								}
+							}
+							else{
 								echo "<li>You are not authorized to edit any of the Checklists</li>";
-	            			}
-	            			?>
-	            		</ul>
+							}
+							?>
+						</ul>
 
 						<h3>Collections</h3>
 						<div style="margin:10px;">
@@ -361,30 +356,30 @@ $smManager = new SiteMapManager();
 										Collection GUID Mapper
 									</a>
 								</li>
-	            			</ul>
-	            			<?php
+							</ul>
+							<?php
 						}
 						?>
 						<div style="margin:10px;">
 							<div style="font-weight:bold;">
 								List of collections you have permissions to edit
 							</div>
-	            			<ul>
-	            			<?php 
-	            			$smManager->setCollectionList();
-	            			if($collList = $smManager->getCollArr()){
-		            			foreach($collList as $k => $cArr){
-		            				echo '<li>';
-		            				echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
-		            				echo $cArr['name'];
-		            				echo '</a>';
-		            				echo '</li>';
-		            			}
-	            			}
-	            			else{
-	            				echo "<li>You have no explicit editing permissions for a particular collections</li>";
-	            			}
-	            			?>
+							<ul>
+							<?php 
+							$smManager->setCollectionList();
+							if($collList = $smManager->getCollArr()){
+								foreach($collList as $k => $cArr){
+									echo '<li>';
+									echo '<a href="'.$clientRoot.'/collections/misc/collprofiles.php?collid='.$k.'&emode=1">';
+									echo $cArr['name'];
+									echo '</a>';
+									echo '</li>';
+								}
+							}
+							else{
+								echo "<li>You have no explicit editing permissions for a particular collections</li>";
+							}
+							?>
 							</ul>
 						</div>
 
@@ -407,54 +402,54 @@ $smManager = new SiteMapManager();
 							<div style="font-weight:bold;">
 								Observation Image Voucher Submission
 							</div>
-	            			<ul>
-	            				<?php 
-	            				if($obsList){
-	            					foreach($genObsList as $k => $oArr){
-		            					?>
+							<ul>
+								<?php 
+								if($obsList){
+									foreach($genObsList as $k => $oArr){
+										?>
 										<li>
 											<a href="collections/editor/observationsubmit.php?collid=<?php echo $k; ?>">
 												<?php echo $oArr['name']; ?>
 											</a>
 										</li>
-	            						<?php
-	            						if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
-	            					}
-	            					foreach($obsList as $k => $oArr){
-		            					?>
+										<?php
+										if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
+									}
+									foreach($obsList as $k => $oArr){
+										?>
 										<li>
 											<a href="collections/editor/observationsubmit.php?collid=<?php echo $k; ?>">
 												<?php echo $oArr['name']; ?>
 											</a>
 										</li>
-	            						<?php
-	            						if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
-	            					}
-	            				}
-	            				else{
-	            					echo "<li>There are no Observation Projects to which you have permissions</li>";
-	            				}
-	            				?>
-	            			</ul>
+										<?php
+										if($oArr['isadmin']) $obsManagementStr .= '<li><a href="collections/misc/collprofiles.php?collid='.$k.'&emode=1">'.$oArr['name']."</a></li>\n";
+									}
+								}
+								else{
+									echo "<li>There are no Observation Projects to which you have permissions</li>";
+								}
+								?>
+							</ul>
 							<?php
 							if($genObsList){ 
 								?>
 								<div style="font-weight:bold;">
 									Personal Specimen Management and Label Printing Features
 								</div>
-		            			<ul>
-		            				<?php 
-		            				foreach($genObsList as $k => $oArr){
-		            					?>
+								<ul>
+									<?php 
+									foreach($genObsList as $k => $oArr){
+										?>
 										<li>
 											<a href="collections/misc/collprofiles.php?collid=<?php echo $k; ?>&emode=1">
 												<?php echo $oArr['name']; ?>
 											</a>
 										</li>
 										<?php 
-		            				}
-		            				?>
-		            			</ul>
+									}
+									?>
+								</ul>
 								<?php
 							}
 							if($obsManagementStr){
@@ -462,22 +457,22 @@ $smManager = new SiteMapManager();
 								<div style="font-weight:bold;">
 									Observation project Management
 								</div>
-		            			<ul>
-		            				<?php echo $obsManagementStr; ?>
-		            			</ul>
-	            			<?php 
+								<ul>
+									<?php echo $obsManagementStr; ?>
+								</ul>
+							<?php 
 							}
 						?>
 						</div>
-	            		<?php 
+						<?php 
 					}
 					else{
 						echo 'Please <a href="'.$clientRoot.'/profile/index.php?refurl=../sitemap.php">login</a> to access editing tools.<br/>'.
 						'Contact a portal administrator for obtaining editing permissions.';
 					}
-	            ?>
-	            </fieldset>
-	            
+				?>
+				</fieldset>
+
 				<h2>About Symbiota</h2>
 				<ul>
 					<li>

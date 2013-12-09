@@ -77,7 +77,9 @@ if(!$cid) header('Location: index.php');
 		$(document).ready(function() {
 			$('#tabs').tabs({ 
 				active: tabIndex,
-				 
+				beforeLoad: function( event, ui ) {
+					$(ui.panel).html("<p>Loading...</p>");
+				}
 			});
 		});
 

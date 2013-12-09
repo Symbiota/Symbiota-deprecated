@@ -44,13 +44,17 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
+		$('html').hide();
+		$(document).ready(function() {
+			$('html').show();
+		});
 
 		$(document).ready(function() {
 			$('#tabs').tabs({
 				active: <?php echo $tabIndex; ?>,
-				//spinner: 'Loading...',
-				cache: false,
-				ajaxOptions: {cache: false}
+				beforeLoad: function( event, ui ) {
+					$(ui.panel).html("<p>Loading...</p>");
+				}
 			});
 		});
 
