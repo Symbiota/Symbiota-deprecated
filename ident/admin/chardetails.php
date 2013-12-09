@@ -440,19 +440,19 @@ if(!$cid) header('Location: index.php');
 										}
 										else{
 											?>
-											<form name="stateillustform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return verifyStateIllustForm(this)" >
+											<form name="stateillustform-<?php echo $cs; ?>" action="chardetails.php" method="post" enctype="multipart/form-data" onsubmit="return verifyStateIllustForm(this)" >
 												<div style="padding-top:2px;">
-													<b>File Upload</b><br />
+													<b>File Upload: </b>
 													<input name="urlupload" type="file" size="50" />
 													<input name="MAX_FILE_SIZE" type="hidden" value="1000000" />
 												</div>
 												<div style="padding-top:2px;">
 													<b>Notes:</b> 
-													<input name="notes" type="text" size="400" />
+													<input name="notes" type="text" style="width:90%" />
 												</div>
 												<div style="padding-top:2px;">
-													<b>Sort</b><br />
-													<input name="sortsequence" type="text" size="50" />
+													<b>Sort:</b> 
+													<input name="sortsequence" type="text" />
 												</div>
 												<div style="padding-top:2px;">
 													<input name="cid" type="hidden" value="<?php echo $cid; ?>" />

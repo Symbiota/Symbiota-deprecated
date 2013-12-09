@@ -286,10 +286,10 @@ class IdentCharAdmin{
 		return $status;
 	}
 	
-	public function uploadCsImage($cid,$cs){
+	public function uploadCsImage($formArr){
 		global $PARAMS_ARR;
 		$statusStr = '';
-		if(is_numeric($_POST['cid']) && is_numeric($_POST['cs'])){
+		if(is_numeric($formArr['cid']) && is_numeric($formArr['cs'])){
 	 		$imageRootPath = $GLOBALS["imageRootPath"];
 			if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
 			if(file_exists($imageRootPath)){
@@ -311,23 +311,25 @@ class IdentCharAdmin{
 				$imageRootUrl .= 'ident/csimgs/';
 				
 				//Image is to be downloaded
-				$fileName = $this->cleanFileName(basename($_FILES['urlupload']['name']));
-				$imageRootPath = $this->getFullPath($imageRootPath,$fileName);
-				$imageRootPath = str_replace('.','_temp.',$imageRootPath);
-				move_uploaded_file($_FILES['userfile']['tmp_name'], $imageRootPath);
-				if(file_exists($imageRootPath)){
-					if(createNewCsImage($imageRootPath)){
+				$fileName = $this->cleanFileName(basename($_FILES['urlupload']['name']),$imageRootUrl);
+				$imagePath = $imageRootPath.str_replace('.','_temp.',$fileName);
+				move_uploaded_file($_FILES['urlupload']['tmp_name'], $imagePath);
+				if(file_exists($imagePath)){
+					if($this->createNewCsImage($imagePath)){
 						//Add url to database 
+						$notes = $this->cleanInStr($formArr['notes']);
 						$sql = 'INSERT INTO kmcsimages(cid, cs, url, notes, sortsequence, username) '.
-							'VALUES('.$cid.','.$cs.',"'.$imageRootPath.'","'.$this->cleanInStr($_POST['notes']).'",'.
-							(is_numeric($_POST['sortsequence'])?$_POST['sortsequence']:'NULL').',"'.$PARAMS_ARR['un'].'")';
+							'VALUES('.$formArr['cid'].','.$formArr['cs'].',"'.$imageRootUrl.$fileName.'",'.
+							($notes?'"'.$notes.'"':'NULL').','.
+							(is_numeric($formArr['sortsequence'])?$formArr['sortsequence']:'50').',"'.$PARAMS_ARR['un'].'")';
 						if(!$this->conn->query($sql)){
 							$statusStr = 'ERROR loading char state image: '.$this->conn->error;
 						}
+						unlink($imagePath);
 					}
 				}
 				else{
-					return 'ERROR uploading file, file does not exist: '.$imageRootPath;
+					return 'ERROR uploading file, file does not exist: '.$imagePath;
 				}
 			}
 		}
@@ -338,33 +340,31 @@ class IdentCharAdmin{
 	}
 	
 
-	private function cleanFileName($fName){
-		$pos = strrpos($fName,'.');
-		$ext = substr($fName,$pos+1);
-		$fName = substr($fName,0,$pos);
-		$fName = str_replace(" ","_",$fName);
-		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
-		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
-		$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
-		$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
-		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
-		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
-		$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
-		if(strlen($fName) > 30) {
-			$fName = substr($fName,0,30);
+	private function cleanFileName($fName,$subPath){
+		if($fName){
+			$pos = strrpos($fName,'.');
+			$ext = substr($fName,$pos+1);
+			$fName = substr($fName,0,$pos);
+			$fName = str_replace(" ","_",$fName);
+			$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
+			$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
+			$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
+			$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
+			$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
+			$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
+			$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
+			if(strlen($fName) > 30) {
+				$fName = substr($fName,0,30);
+			}
+			//Check and see if file already exists, if so, rename filename until it has a unique name
+	 		$tempFileName = $fName;
+	 		$cnt = 1;
+	 		while(file_exists($subPath.$fName)){
+	 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fName);
+	 			$cnt++;
+	 		}
 		}
- 		return $fName.$ext;
- 	}
- 	
-	private function getFullPath($subPath,$fileName){
- 		//Check and see if file already exists, if so, rename filename until it has a unique name
- 		$tempFileName = $fileName;
- 		$cnt = 0;
- 		while(file_exists($subPath.$tempFileName)){
- 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fileName);
- 			$cnt++;
- 		}
- 		return $path.$fileName;
+ 		return $tempFileName.'.'.$ext;
  	}
 
 	private function createNewCsImage($path){
@@ -393,8 +393,21 @@ class IdentCharAdmin{
 
 	public function deleteCsImage($csImgId){
 		$statusStr = 'SUCCESS: image uploaded successfully';
-		$sql = 'DELETE FROM kmcsimages WHERE csimgid = '.$csImgId;
-		if(!$this->conn->query($sql)){
+		//Remove image from file system
+	 	$imageRootPath = $GLOBALS["imageRootPath"];
+		if(substr($imageRootPath,-1) != "/") $imageRootPath .= "/";
+		$imageRootPath .= 'ident/csimgs/';
+		$sql = 'SELECT url FROM kmcsimages WHERE csimgid = '.$csImgId;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$url = $r->url;
+			$url = substr($url,strrpos($url,'/')+1);
+			unlink($imageRootPath.$url);
+		}
+		$rs->free();
+		//Remove image record from database
+		$sqlDel = 'DELETE FROM kmcsimages WHERE csimgid = '.$csImgId;
+		if(!$this->conn->query($sqlDel)){
 			$statusStr = 'ERROR: unable to delete image; '.$this->error;
 		}
 		return $statusStr;
