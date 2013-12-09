@@ -1020,13 +1020,14 @@ class OccurrenceEditorManager {
 
 	public function carryOverValues($fArr){
 		$locArr = Array('recordedby','associatedcollectors','eventdate','verbatimeventdate','month','day','year',
-			'startdayofyear','enddayofyear','country','stateprovince','county','locality','decimallatitude','decimallongitude',
+			'startdayofyear','enddayofyear','country','stateprovince','county','municipality','locality','decimallatitude','decimallongitude',
 			'verbatimcoordinates','coordinateuncertaintyinmeters','footprintwkt','geodeticdatum','minimumelevationinmeters',
 			'maximumelevationinmeters','verbatimelevation','verbatimcoordinates','georeferencedby','georeferenceprotocol',
 			'georeferencesources','georeferenceverificationstatus','georeferenceremarks','habitat','substrate',
 			'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
 			'associatedtaxa','basisofrecord','language','labelproject');
-		return array_intersect_key($fArr,array_flip($locArr)); 
+		$retArr = $this->cleanOutArr(array_intersect_key($fArr,array_flip($locArr)));
+		return $retArr;
 	}
 
 	//Genetic links
