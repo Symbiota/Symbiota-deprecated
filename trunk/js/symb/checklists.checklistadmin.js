@@ -1,7 +1,15 @@
+$('html').hide();
 $(document).ready(function() {
-	$('#tabs').tabs(
-		{ active: tabIndex }
-	);
+	$('html').show();
+});
+
+$(document).ready(function() {
+	$('#tabs').tabs({ 
+		active: tabIndex,
+		beforeLoad: function( event, ui ) {
+			$(ui.panel).html("<p>Loading...</p>");
+		}
+	});
 });
 
 function openMappingAid() {
