@@ -118,76 +118,217 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return $this->combineArrays($labelInfo, $results);
 	}
 
-	protected function doGenericLabel($str) {
+	protected function analyzeLocalityLine($line) {//countPotentialLocalityWords > 0 for the line and it doesn't begin with Fairly common on, etc
+		$firstPart = "";
+		$lastPart = "";
+		if(preg_match("/^(.+?);;; (.+)$/", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 12166, mats[".$i++."] = ".$mat."\n";
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		} else if(preg_match("/^(.*[A-Za-z]{4,}\)?); (.+)$/", $line, $mats)) {
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		} else if(preg_match("/^(.+?); (.+)$/", $line, $mats)) {
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		} else if(preg_match("/^(.*[A-Za-z]{5,}\)?)\\. (.+)$/", $line, $mats)) {
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		} else if(preg_match("/^(.* (?:road|pine|park|tree))\\. (.+)$/", $line, $mats)) {
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		} else if(preg_match("/^(.* [A-Za-z]{4,}+\)?), (.+?)$/", $line, $mats)) {
+			$firstPart = trim($mats[1]);
+			$lastPart = trim($mats[2]);
+		}//echo "\nline 12293, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
+		if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
+			if(strlen($lastPart) < 4 && preg_match("/(.*[A-Za-z]{4,})[,;] (.+)/", $firstPart, $mats2)) {
+				$firstPart = trim($mats2[1]);
+				$lastPart = trim($mats2[2]);
+			}
+			if($this->countPotentialLocalityWords($firstPart) == 0) {
+				if($this->countPotentialHabitatWords($firstPart) > 0) return array('location' => $lastPart, 'habitat' => $firstPart);
+			}
+			if($this->countPotentialLocalityWords($lastPart) == 0) {
+				if(preg_match("/^((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant)|Found|Loose) On .+)/i", $lastPart)) return array('location' => $firstPart, 'substrate' => $lastPart);
+				if($this->countPotentialHabitatWords($lastPart) > 0) {
+					if(strcasecmp(substr($lastPart, 0, 3), "On ") == 0) return array('location' => $firstPart, 'substrate' => $lastPart);
+					return array('location' => $firstPart, 'habitat' => $lastPart);
+				}
+			}
+			if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|near|(?:with)?in|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $firstPart, $mats2)) {
+				$startOfFirstPart = trim($mats2[1]);
+				if($this->countPotentialLocalityWords($startOfFirstPart) == 0 && $this->countPotentialHabitatWords($startOfFirstPart) > 0) {
+					return array('location' => trim($mats2[2]).", ".$lastPart, 'habitat' => $startOfFirstPart);
+				}
+			}
+			$endOfLastPart = "";
+			$startOfLastPart = "";
+			if(preg_match("/(.*[A-Za-z]{5,})\\. (.+)/", $lastPart, $mats2)) {
+				$endOfLastPart = trim($mats2[2]);
+				$startOfLastPart = trim($mats2[1]);
+			} else if(preg_match("/(.+ (?:road|pine|park|tree))\\. (.+)/", $lastPart, $mats2)) {
+				$endOfLastPart = trim($mats2[2]);
+				$startOfLastPart = trim($mats2[1]);
+			}
+			if(strlen($startOfLastPart) > 0 && strlen($endOfLastPart) > 0) {
+				if($this->countPotentialLocalityWords($endOfLastPart) == 0 && $this->countPotentialHabitatWords($endOfLastPart) > 0) {
+					return array('location' => $firstPart.". ".$startOfLastPart, 'habitat' => $endOfLastPart);
+				}
+				$startOfFirstPart = "";
+				$endOfFirstPart = "";
+				if(preg_match("/(.*[A-Za-z]{5,})\\. (.+)/", $firstPart, $mats3)) {
+					$startOfFirstPart = trim($mats3[1]);
+					$endOfFirstPart = trim($mats3[2]);
+				} else if(preg_match("/(.+ (?:road|pine|park|tree))\\. (.+)/", $firstPart, $mats3)) {
+					$startOfFirstPart = trim($mats3[1]);
+					$endOfFirstPart = trim($mats3[2]);
+				}
+				if(strlen($startOfFirstPart) > 0 && strlen($endOfFirstPart) > 0) {
+					if($this->countPotentialLocalityWords($startOfFirstPart) == 0 && $this->countPotentialHabitatWords($startOfFirstPart) > 0) {
+						return array('location' => $endOfFirstPart.". ".$lastPart, 'habitat' => $startOfFirstPart);
+					}
+				}
+			}
+			$startOfFirstPart = "";
+			$endOfFirstPart = "";
+			if(preg_match("/(.*[A-Za-z]{5,})\\. (.+)/", $firstPart, $mats2)) {
+				$startOfFirstPart = trim($mats2[1]);
+				$endOfFirstPart = trim($mats2[2]);
+			} else if(preg_match("/(.+ (?:road|pine|park|tree))\\. (.+)/", $firstPart, $mats2)) {
+				$startOfFirstPart = trim($mats2[1]);
+				$endOfFirstPart = trim($mats2[2]);
+			}
+			if(strlen($startOfFirstPart) > 0 && strlen($endOfFirstPart) > 0) {
+				if($this->countPotentialLocalityWords($startOfFirstPart) == 0 && $this->countPotentialHabitatWords($startOfFirstPart) > 0) {
+					return array('location' => $endOfFirstPart.". ".$lastPart, 'habitat' => $startOfFirstPart);
+				}
+			}
+		}
+		return array('location' => trim(str_replace(";;;", ";", $line)));
+	}
+
+	protected function mergeFields($first, $last, $joiner = null) {
+		if(strlen($first) == 0) return $last;
+		else if(stripos($first, $last) === FALSE && stripos($last, $first) === FALSE) {
+			if($joiner == null) {
+				if(preg_match("/^[A-Z]/", $last)) $joiner = ".";
+				else $joiner = ",";
+			}
+			return trim($first, " :;,.").$joiner." ".ltrim($last, " :;,.");
+		} else return $first;
+	}
+
+	protected function doGenericLabel($str) {//echo "\nDoin' Generic\n";
 		$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 		$possibleNumbers = "[OQSZl|I!0-9]";
 		$state_province = '';
-		$possible_collector_num = '';
-		$scientificName = $this->getScientificName($str);
-		$associated_taxa = $this->getAssociatedTaxa($str);
-		$county = '';
+		$str = preg_replace
+		(
+			array
+			(
+				"/,\\n([A-Za-z]{3,}(?: [A-Za-z]{3,})?[.,])\\n/s",
+				"/ASPIC[I1!|].{1,3}[I1!|]A/i",
+				"/Deerlodge Co\\./i",
+				"/\\bC[0O].{2,4}TY: ([A-Z])/i",
+				"/([A-Za-z]) Co\\. , /",
+				"/([A-Za-z]) Coo, ([A-Z])/",
+				"/\\b199 ([0-9]) /",
+				"/DESOTO PARISH/i"
+			) ,
+			array
+			(
+				", \${1}\n",
+				"Aspicilia",
+				"Deer Lodge Co.",
+				"County: \${1}",
+				"\${1} Co., ",
+				"\${1} Co., \${2}",
+				"199\${1} ",
+				"De Soto Parish"
+			),
+			$str
+		);
+		//echo "\nstr\n".$str."\n";
 		$recordedBy = '';
 		$recordNumber = '';
+		$recordedById = '';
+		$identifiedBy = '';
+		$dateIdentified = array();
+		$otherCatalogNumbers = '';
+		$collectorInfo = $this->getCollector($str);
+		if($collectorInfo != null) {
+			if(array_key_exists('collectorName', $collectorInfo)) {
+				$recordedBy = str_replace(" . ", ", ", $collectorInfo['collectorName']);
+				$str = preg_replace("/".preg_quote($recordedBy, '/')."/i", "", $str);
+			}
+			if(array_key_exists('collectorNum', $collectorInfo)) $recordNumber = $collectorInfo['collectorNum'];
+			if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
+			if(array_key_exists('identifiedBy', $collectorInfo)) {
+				$identifiedBy = $collectorInfo['identifiedBy'];
+				$str = preg_replace("/".preg_quote($identifiedBy, '/')."/i", "", $str);
+			}
+			if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+		}
+		if(strlen($identifiedBy) == 0) {
+			$identifier = $this->getIdentifier($str, $possibleMonths);
+			if($identifier != null) {
+				$identifiedBy = $identifier[0];
+				$str = preg_replace("/".preg_quote($identifiedBy, '/')."/i", "", $str);
+				$dateIdentified = $identifier[1];
+				$fDI = $this->formatDate($dateIdentified);
+				if(strlen($fDI) > 0) $str = preg_replace("/".preg_quote($fDI, '/')."/i", "", $str);
+			}
+		}
+		$foundSciName = false;
+		$scientificName = $this->getScientificName($str);
+		if(strlen($scientificName) > 3) $foundSciName = true;
+		$associated_taxa = $this->getAssociatedTaxa($str);
+		$county = '';
 		$taxonRank = '';
+		$taxonRemarks = '';
 		$infraspecificEpithet = '';
 		$country = '';
 		$verbatimAttributes = '';
 		$georeferenceRemarks = '';
+		$occurrenceRemarks = '';
 		$habitat = '';
+		$lookingForRecordNumber = false;
 		$location = "";
 		$temp = $this->getLocality($str);
 		if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $location = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
+		//echo "\nline 12304, location: ".$location."\n";
 		$habitatArray = $this->getHabitat($str);
 		$temp = $habitatArray[1];
 		if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $habitat = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
+		//echo "\nline 12308, habitat: ".$habitat."\n";
 		$substrate = $this->getSubstrate($str);
 		$elevation = '';
+		$elevArr = $this->getElevation($str);
+		$temp = $elevArr[1];
+		if(strlen($temp) > 0) $elevation = $elevArr[1];
 		$event_date = array();
 		$matches = $this->getTaxonOfHeaderInfo($str);
 		$states = array();
 		if($matches != null) {
-			$info = $this->processTaxonOfHeaderInfo($matches);
-			if(array_key_exists('locality', $info)) $location = $info['locality'];
+			$info = $this->processTaxonOfHeaderInfo($matches);//foreach($info as $k => $v) echo "\n".$k.": ".$v."\n";
+			//if(array_key_exists('locality', $info)) $location = $info['locality'];
 			if(array_key_exists('county', $info)) $county = $info['county'];
 			if(array_key_exists('country', $info)) $country = $info['country'];
 			if(array_key_exists('stateProvince', $info)) $state_province = $info['stateProvince'];
-			if(array_key_exists('substrate', $info) && strlen($substrate) == 0) $substrate = $info['substrate'];
-			if(array_key_exists('scientificName', $info) && strlen($scientificName) == 0) $scientificName = $info['scientificName'];
 			if(array_key_exists('states', $info)) $states = $info['states'];
-			if(array_key_exists('verbatimAttributes', $info)) $verbatimAttributes = $info['verbatimAttributes'];
-			if(array_key_exists('recordNumber', $info)) $recordNumber = $info['recordNumber'];
-			if(array_key_exists('taxonRank', $info)) $taxonRank = $info['taxonRank'];
-			if(array_key_exists('infraspecificEpithet', $info)) $infraspecificEpithet = $info['infraspecificEpithet'];
-			if(array_key_exists('associatedTaxa', $info)) {
-				if(strlen($associated_taxa) == 0) $associated_taxa = $info['associatedTaxa'];
-				else $associated_taxa .= ", ".$info['associatedTaxa'];
-			}
+			if(array_key_exists('endOfFile', $info)) $str = $info['endOfFile'];
 		} else {
-			$foundSciName = false;
 			$countyMatches = $this->findCounty($str);
 			if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\ncountyMatches[".$i++."] = ".$countyMatche."\n";
 				$firstPart = trim($countyMatches[0]);
-				$secondPart = trim($countyMatches[1]);
-				$lastPart = trim($countyMatches[4]);
-				if(strlen($location) < 3) {
-					$hCount1 = $this->countPotentialHabitatWords($firstPart);
-					$lCount1 = $this->countPotentialLocalityWords($firstPart);
-					$hCount2 = $this->countPotentialHabitatWords($lastPart);
-					$lCount2 = $this->countPotentialLocalityWords($lastPart);
-					if($hCount1 + $lCount1 > $hCount2 + $lCount2) $location = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", ltrim($firstPart, " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					else $location = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", ltrim($lastPart, " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					//echo "\nlocation = ".$location."\n";
-				}
-				$county = trim($countyMatches[2]);
-				$country = trim($countyMatches[3]);
-				$m5 = trim($countyMatches[5]);
-				//echo "\nline 6978, firstPart: ".$firstPart."\nm5: ".$m5."\nlocation: ".$location."\n";
-				$sp = $this->getStateOrProvince($m5);
+				$lastPart = trim($countyMatches[3]);
+				$county = trim($countyMatches[1]);
+				$country = trim($countyMatches[2]);
+				$m4 = trim($countyMatches[4]);
+				$sp = $this->getStateOrProvince($m4);
 				if(count($sp) > 0) {
 					$state_province = $sp[0];
 					$country = $sp[1];
-					$m5Pos = stripos($location, $m5);
-					if($m5Pos !== FALSE && $m5Pos == 0) $location = trim(substr($location, strlen($m5)));
 				}
 				if(strlen($county) > 0 && (strlen($state_province) == 0 || strlen($country) == 0)) {
 					$polInfo = $this->getPolticalInfoFromCounty($county);
@@ -208,354 +349,494 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						if(array_key_exists('country', $polInfo)) $country = $polInfo['country'];
 					}
 				}
-				$lines = explode("\n", $secondPart);
-				foreach($lines as $line) {//echo "\nline 9144, line: ".$line."\n";
-					if(strlen($line) > 3) {
-						$psn = $this->processSciName($line);
-						if($psn != null) {
-							if(array_key_exists ('scientificName', $psn)) $scientificName = $psn['scientificName'];
-							if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-							if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-							if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-							if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-							if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-							if(array_key_exists ('substrate', $psn)) {
-								$substrate = $psn['substrate'];
-								if(stripos($habitat, $substrate) === FALSE) $habitat = $substrate." ".$habitat;
-							}
-							$foundSciName = true;
-							break;
+			}
+		}//echo "\nline 12504, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
+		$lines = explode("\n", $str);
+		foreach($lines as $line) {//echo "\nline 12361, line: ".$line."\n";
+			$line = trim($line, " ,");
+			if(preg_match("/((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]?S[,.]?A[,.]?|United States)(.+)/i", $line, $mats)) {
+				$match = trim($mats[1]);
+				if($this->isUSState($match)) {
+					$state_province = $match;
+					$country = "United States";
+					$line = trim($mats[2]);
+				} else if(preg_match("/((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:Canada)(.+)/i", $line, $mats)) {
+					$match = trim($mats[1]);
+					$sp = $this->getStateOrProvince($match);
+					if($sp) {
+						$pc = $sp[1];
+						if(strcasecmp($pc, "Canada") == 0) {
+							if(strlen($state_province) == 0) $state_province = $match;
+							$country = $pc;
+							$line = trim($mats[2]);
 						}
 					}
 				}
-				if(!$foundSciName) {
-					$lines = array_reverse(explode("\n", $firstPart));
-					foreach($lines as $line) {//echo "\nline 9165, line: ".$line."\n";
-						if(strlen($line) > 3) {
-							$psn = $this->processSciName($line);
-							if($psn != null) {
-								if(array_key_exists ('scientificName', $psn)) $scientificName = $psn['scientificName'];
-								if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-								if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-								if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-								if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-								if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-								if(array_key_exists ('substrate', $psn)) {
-									$substrate = $psn['substrate'];
-									if(stripos($habitat, $substrate) === FALSE) $habitat = $substrate." ".$habitat;
-								}
-								$foundSciName = true;
-								break;
-							}
-						}
+			}
+			if(strlen($county) > 1) {
+				$pat = "/^".preg_quote($county, "/")." (?:C[O0]UNTY|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)?[;:.,]?\\s".preg_quote($state_province, "/")."\\b(.+)/i";
+				if(preg_match($pat, $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^(?:STATE [O0]F ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^(?:U\\.?S\\.?A\\.?, ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^(?:United States(?: [O0]. America)?, ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^(?:C[O0]UNTY|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]? ".preg_quote($county, "/")."\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^.{0,2}[;:.,] ".preg_quote($county, "/")."\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				$pat = "/(.*)\\b(?:UNIVERSITY\\b|C[O0]LL(?:\\.|ected by)|HERBARIUM\\b|DET(?:\\.|ermined)|Identified\\b|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|Date\\b|".preg_quote($possibleMonths, "/")."|".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?))(.*)/i";
+				if(preg_match($pat, $line, $mats)) {
+					$temp = trim($mats[1], " ,;:");
+					if(strlen($temp) > 0) $line = $temp;
+					else $line = trim($mats[2], " ,;:");
+					if(preg_match($pat, $line, $mats)) {
+						$temp = trim($mats[1], " ,;:");
+						if(strlen($temp) > 0) $line = $temp;
+						else $line = trim($mats[2], " ,;:");
 					}
 				}
-				if(strlen($location) > 0) {//echo "\nline 9185, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
-					$elevArr = $this->getElevation($location);
-					$temp = $elevArr[0];
-					if(strlen($temp) > 0) {
-						$elevation = $elevArr[1];
-						$ePos = stripos($location, $elevation);
-						if($ePos !== FALSE) $habitat = substr($location, $ePos+strlen($elevation));
-						$location = $temp;
-					} else {
-						$termLocPat = "/(.*?)\\b(?:(?:(?:".$possibleMonths.")[ -](?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
-							$possibleNumbers."|3[1Iil!|OQ0\]]))|(?:(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
-							$possibleNumbers."|3[1Iil!|OQ0\]])[ -](?:".$possibleMonths."))|\\d{1,3}(?:\\.\\d{1,6})?\\s?°|".
-							"(?:T(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?[NS]\\sR(?:\\.|ange)?\\s?".
-							$possibleNumbers."{1,3}\\s[EW](?:sec(?:\\.|tion)\\s?".$possibleNumbers."{1,3}))|(?:sec(?:\\.|tion)\\s".
-							$possibleNumbers."{1,3})\\s(?:T(?:\\.|wnshp.?|ownship)?\\s?(?:".
-							$possibleNumbers."{1,3})\\s?[NS]\\sR(?:\\.|ange)?\\s?".$possibleNumbers."{1,3}\\s[EW]))\\b(.*)/is";
-						if(preg_match($termLocPat, $location, $lMats)) {//$i=0;foreach($lMats as $lMat) echo "\nlMats[".$i++."] = ".$lMat."\n";
-							$location = trim($lMats[1]);
-							$temp = trim($lMats[2]);
-							if(strlen($habitat) == 0 && !$this->isMostlyGarbage($temp, 0.50)) {
-								//$habitat = $temp;
-								if(preg_match("/(?:[1!|I][89]|[2Z][0O])".$possibleNumbers."{2}(.*)/i", $temp, $mats)) $temp = trim($mats[1]);
-								if(preg_match("/(.*)C[o0][lI!|](?:\\.|:|[lI!|]s?[:.]?|[lI!|]ectors?|lected)/i", $temp, $mats)) $temp = trim($mats[1]);
-								$pat2 = "/\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-									"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-									"(?:".$possibleNumbers."{1,3}\\s?\"?)?)?\\s?[EW](.*)/";
-								if(preg_match($pat2, $temp, $hMats2)) $temp = trim($hMats2[1]);
-								if(strlen($temp) > 3 && !$this->isMostlyGarbage($temp, 0.50)) $habitat = $temp;
-							}
-						}
-					}
-					if(!$foundSciName) {
-						$lines = explode("\n", $location);
-						foreach($lines as $line) {//echo "\nline 6117, line: ".$line."\n";
-							$psn = $this->processSciName($line);
-							if($psn != null) {
-								if(array_key_exists('scientificName', $psn)) $scientificName = $psn['scientificName'];
-								if(array_key_exists('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-								if(array_key_exists('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-								if(array_key_exists('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-								if(array_key_exists('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-								if(array_key_exists('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-								if(array_key_exists('substrate', $psn)) {
-									$substrate = $psn['substrate'];
-									if(stripos($habitat, $substrate) === FALSE) $habitat = $substrate." ".$habitat;
-								}
-								$foundSciName = true;
-								$pos = stripos($location, $line);
-								if($pos !== FALSE && $pos == 0) $location = trim(substr($location, strlen($line)));
-								break;
-							}
-						}
-					}
-				}
-			}//echo "\nline 6146, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
-			$lines = explode("\n", $str);
-			$lookingForHabitat = false;
-			$lookingForLocation = false;
-			foreach($lines as $line) {//echo "\nline 6142, line: ".$line."\n";
-				if(!$foundSciName) {
-					$psn = $this->processSciName($line);
-					if($psn != null) {
-						if(array_key_exists('scientificName', $psn)) $scientificName = $psn['scientificName'];
-						if(array_key_exists('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-						if(array_key_exists('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-						if(array_key_exists('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-						if(array_key_exists('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-						if(array_key_exists('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-						if(array_key_exists('substrate', $psn)) {
-							$substrate = $psn['substrate'];
-							if(stripos($habitat, $substrate) === FALSE) $habitat = $substrate." ".$habitat;
-						}
-						$foundSciName = true;
-						if($lookingForLocation) break;
-						else continue;
-					}
-				}
-				if(strlen($recordNumber) == 0) {
-					$noPos = stripos($line, "No. ");
-					if($noPos !== FALSE && $noPos == 0) {
-						$temp = trim(substr($line, $noPos+4));
-						$spacePos = strpos($temp, " ");
-						if($spacePos !== FALSE) {
-							$temp = trim(substr($temp, 0, $spacePos));
-							if($this->containsNumber($temp)) $recordNumber = $temp;
-						} else if($this->containsNumber($temp)) $recordNumber = $temp;
-					}
-				}
-				if(strlen($habitat) == 0) {
-					$onPos = stripos($line, "on ");
-					if($onPos !== FALSE && $onPos == 0) {
-						$temp = $line;
-						$inappropriateWords = array("road", "north", "south", "east", "west", "highway", "hiway", "area", "state",
-							"valley", "slope", "route", "Rd.", "Co.", "County");
-						foreach($inappropriateWords as $inappropriateWord) {
-							if(stripos($temp, $inappropriateWord) !== FALSE) {
-								if(strlen($location) == 0) {
-									$location = $line;
-									$lookingForLocation = true;
-								}
-								$temp = "";
-								break;
-							}
-						}
-						if(strlen($temp) > 0) {
-							if(preg_match("/(.*)\\b(?:UNIVERS|COLL(?:\\.|ect)|HERBAR|DET(?:\\.|ermin)|Identif|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".$possibleMonths.")/i", $temp, $mats)) {
-								$temp = trim($mats[1]);
-							}
-							if(strlen($habitat) > 5) {
-								$habitat = $temp;
-								continue;
-							}
-						}
-					}
-				}
-				if($lookingForLocation) {
-					if(preg_match("/(.*)\\b(?:UNIVERS|COLL(?:\\.|ect)|HERBAR|DET(?:\\.|ermin)|Identif|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".$possibleMonths.")/i", $line, $mats)) {
-					$temp = trim($mats[1]);
-						if(strlen($temp) > 6) {
-							if($lookingForLocation && stripos($location, $temp) === FALSE) $location .= " ".$temp;
-						}
-							} else if($lookingForLocation && stripos($location, $line) === FALSE) $location .= " ".$line;
-							if($foundSciName) break;
-						}
-					}
-				}//echo "\nline 6215, location: ".$location."\nscientificName: ".$scientificName."\n";
-				if(strlen($scientificName) == 0) {
-					$lines = explode("\n", $location);
-					foreach($lines as $line) {//echo "\nline 6086, line: ".$line."\n";
-						$psn = $this->processSciName($line);
-						if($psn != null) {
-							if(array_key_exists('scientificName', $psn)) $scientificName = $psn['scientificName'];
-							if(array_key_exists('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-							if(array_key_exists('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-							if(array_key_exists('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-							if(array_key_exists('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-							if(array_key_exists('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-							if(array_key_exists('substrate', $psn)) {
-						$substrate = $psn['substrate'];
-						if(stripos($habitat, $substrate) === FALSE) $habitat = $substrate." ".$habitat;
-							}
-							$pos = stripos($location, $line);
-							if($pos !== FALSE && $pos == 0) $location = trim(substr($location, strlen($line)));
-							break;
-						}
-					}
-				}//echo "\nline 6195, location: ".$location."\nscientificName: ".$scientificName."\n";
-				$location = str_replace
-				(
-					array("\r\n", "\n", "\r"),
-					array(" ", " ", " "),
-					trim($location)
-				);
-				$locationPatStr = "/(.*?)(\\stype\\s)?\\b(?:L|(?:|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)?[:;,)]?\\s(.+)/is";
-				if(preg_match($locationPatStr, $location, $locationMatches)) {
-					if(count($locationMatches) == 4 && strlen(trim($locationMatches[2])) == 0) $location = trim($locationMatches[3]);
-				} else if(preg_match($locationPatStr, $str, $locationMatches)) {
-					if(count($locationMatches) == 4 && strlen(trim($locationMatches[2])) == 0) $location = trim($locationMatches[3]);
-				}
-				$lPat = "/((?s).*?)\\b(?:[il1!|]at(?:[il1!|]tude|\\.)?|quad|[ec][lI!|][ec]v|Date|".
-					"C[o0][lI!|](?:\\.|:|[lI!|]s?[:.]?|[lI!|]ectors?|lected|[lI!|]?s[:.])|".
-					"(?:H[o0]st\\s)?+Det(?:\\.|ermined by)|(?:THE )?NEW \\w{4} B[OD]TAN.+|(?:(?:Assoc(?:[,.]|".
-					"[l!1|i]ated)\\s(?:Taxa|Spec[l!1|]es|P[l!1|]ants|spp[,.]?|with)[:;]?)|(?:along|together)\\swith)|(?:Substrat(?:um|e))|".
-					"(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".$possibleNumbers."|3[1Iil!|OQ0\]][ -])(?:".
-					$possibleMonths.")\\b|\\d{1,3}(?:\\.\\d{1,6})?\\s?°)/i";
-
-				$hPat = "/((?s).*?)\\b(?:[il1!|]at(?:[il1!|]tude|\\.)?|quad|[ec][lI!|][ec]v|[lI!|]ocality|[lI!|]ocation|".
-					"[lI!|]oc\\.|Date|Col(?:\\.|:|l[:.]|lectors?|lected|l?s[:.]?)|leg(?:it|\\.):?|Identif|Det(?:\\.|ermined by)|".
-					"[lI!|]at[li!|]tude|(?:THE )?NEW\\s\\w{4}\\sBOTAN.+|(?:(?:Assoc(?:[,.]|".
-					"[l!1|i]ated)\\s(?:Taxa|Spec[l!1|]es|P[l!1|]ants|spp[,.]?|with)[:;]?)|(?:along|together)\\swith))/i";
-				if(strlen($location) > 0) {//echo "\nline 7164, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
-					$habitatArr = $this->getHabitat($location);
-					$temp = $habitatArr[0];
-					if(strlen($temp) > 0) {
-						$location = trim($temp);
-						if(strlen($habitat) == 0) $habitat = trim($habitatArr[1]);
-						$nextLine = trim($habitatArr[2]);
-						$elevArr = $this->getElevation($nextLine);
-						$temp = $elevArr[0];
-						if(strlen($temp) > 0) {
-							//$habitat = $temp;
-							$elevation = $elevArr[1];
-						} else {
-							$elevArr = $this->getElevation($location);
-							$temp = $elevArr[0];
-							if(strlen($temp) > 0) {
-						$location = $temp;
-						$elevation = $elevArr[1];
-							}
-						}
-						$pat = "/(.*)\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-							"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-							"(?:".$possibleNumbers."{1,3}\\s?\")?)?\\s?[NS],?\\s{1,2}(?:Long(?:\\.|itude)?[:;]?\\s)?".
-							$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-							"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-							"(?:".$possibleNumbers."{1,3}\\s?\")?)?\\s?[EW](.*)/";
-						if(preg_match($pat, $location, $hMats)) {
-							$location = trim($hMats[1]);
-							$rest = trim($hMats[2]);
-							if(strlen($habitat) == 0) $habitat = rest;
-							else if(stripos($habitat, $rest) === FALSE) $habitat .= " ".trim($hMats[2]);
-						} else {//there may be an incomplete lat/long which has a good beginning and end
-							$pat = "/(.*?)\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°(.*+)/";
-							if(preg_match($pat, $location, $hMats)) {
-						$location = trim(ltrim($hMats[1], "."));
-						$temp = trim($hMats[2]);
-						$pat2 = "/\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-							"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-							"(?:".$possibleNumbers."{1,3}\\s?\")?)?\\s?[EW](.*)/";
-						if(preg_match($pat2, $temp, $hMats2)) {
-							$hMats21 = trim($hMats2[1]);
-							if(strlen($habitat) == 0) $habitat = $hMats21;
-							else if(stripos($habitat, $hMats21) === FALSE) $habitat .= " ".$hMats21;
-						}
-					}
-				}
-
-				if($this->isCompleteGarbage($location)) $location = "";
-				else $location = $this->terminateField($location, $lPat);
-				if($this->isCompleteGarbage($habitat)) $habitat = "";
-				else $habitat = $this->terminateField($habitat." ".$nextLine, $hPat);
 			} else {
-				$elevArr = $this->getElevation($location);
-				$temp = $elevArr[0];
-					if(strlen($temp) > 0) {
-					$location = str_replace
+				$pat = "/(.*)\\b(?:UNIVERSITY|COLL(?:\\.|ect(?:ed)?)|HERBARIUM|DET(?:\\.|ermined)|Identified|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".preg_quote($possibleMonths, "/").")\\b(.*)/i";
+				if(preg_match($pat, $line, $mats)) {
+					$temp = trim($mats[1], " ,;:");
+					if(strlen($temp) > 2) $line = $temp;
+					else $line = trim($mats[2], " ,;:");
+					if(preg_match($pat, $line, $mats)) {
+						$temp = trim($mats[1], " ,;:");
+						if(strlen($temp) > 2) $line = $temp;
+						else $line = trim($mats[2], " ,;:");
+					}
+				}
+			}
+			$firstPart = "";
+			$secondPart = "";
+			if(preg_match("/([^°]*?)(?:(?:Near|ca\\.?) )?(?:Lat(?:\\.|itude)[:;,]?)?[0-9!l|I]{1,3}+[,.][0-9!l|I]{1,6} ?° ?[NSEW](.+)/i", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 12401, mats[".$i++."] = ".$mat."\n";
+				$firstPart = trim($mats[1]);
+				$secondPart = trim($mats[2]);
+			} else if(preg_match("/([^°]*?)(?:(?:Near|ca\\.?) )?(?:Lat(?:\\.|itude)[:;,]?)?[0-9!l|I]{1,3}+ ?° ?[0-9!l|I]{1,3} ?'(.+)/i", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 12404, mats[".$i++."] = ".$mat."\n";
+				$firstPart = trim($mats[1]);
+				$secondPart = trim($mats[2]);
+			}
+			if(strlen($firstPart) > 0 || strlen($secondPart) > 0) {
+				if(preg_match("/[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
+					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?[EW](?:\\sLong(?:\\.|itude))?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
+				else if(preg_match("/[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
+					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?[NS5](?:\\sLong(?:\\.|itude))?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
+				if(strlen($elevation) > 0) {//echo "\nline 12584, firstPart: ".$firstPart."\nsecondPart: ".$secondPart."\n";
+					if(preg_match("/(.*)\\b".preg_quote($elevation, "/")."$/i", $secondPart, $mats)) $secondPart = trim($mats[1]);
+					else if(preg_match("/(.*)\\b".preg_quote($elevation, "/")."(.*)/i", $secondPart, $mats)) $secondPart = trim(trim($mats[1])." ".trim($mats[2]));
+					else if(preg_match("/^\\b".preg_quote($elevation, "/")."(.+)$/i", $firstPart, $mats)) $firstPart = trim($mats[1]);
+					else if(preg_match("/(.*)".preg_quote($elevation, "/")."(.*)/i", $firstPart, $mats)) $firstPart = trim(trim($mats[1])." ".trim($mats[2]));
+					if(preg_match("/(.+)\\b(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)/i", $firstPart, $mats2)) $firstPart = ltrim($mats2[1], " ,.;:");
+					else if(preg_match("/^(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1], " ,.;:");
+				}
+				$line = trim(trim($firstPart, " ,.;").";;; ".ltrim($secondPart, " ,.;"), " ;");
+			} else if(preg_match("/([^°]*?)(?:(?:Near|ca\\.?) )?(?:Lat(?:\\.|itude)[:;,]?)?[NS][0-9!l|I]{1,3}+(?:[,.][0-9!l|I]{1,6})? ?°(.+)/i", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 12149, mats[".$i++."] = ".$mat."\n";
+				$firstPart = trim($mats[1]);
+				$secondPart = trim($mats[2]);
+				if(preg_match("/[NS][0-9!l|I]{1,3}(?:[,.] ?[0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
+					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?(?:\\sLongitude)?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
+				else if(preg_match("/[NS][0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
+					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?(?:\\sLongitude)?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
+				if(strlen($elevation) > 0) {//echo "\nline 12279, firstPart: ".$firstPart."\nlsecondPart: ".$secondPart."\n";
+					if(preg_match("/(.+)\\b".preg_quote($elevation, "/")."$/i", $secondPart, $mats)) $secondPart = trim($mats[1]);
+					else if(preg_match("/\\b".preg_quote($elevation, "/")."(.+)$/i", $firstPart, $mats)) $firstPart = trim($mats[1]);
+					if(preg_match("/(.+)\\b(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)/i", $firstPart, $mats2)) $firstPart = ltrim($mats2[1], " ,.;:");
+					else if(preg_match("/^(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1], " ,.;:");
+				}
+				$line = trim(trim($firstPart, " ,.;").";;; ".ltrim($secondPart, " ,.;"), " ;");
+			} else if(strlen($elevation) > 0) {
+				if(preg_match("/(.+)\\b".preg_quote($elevation, "/")."(.+)/i", $line, $mats)) {
+					$firstPart = trim($mats[1], " ,.;");
+					$secondPart = ltrim($mats[2], " ,.;");
+					if(preg_match("/(.+)\\b(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)/i", $firstPart, $mats2)) $firstPart = trim(rtrim($mats2[1], "("), " ,.;:");
+					else if(preg_match("/(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim(ltrim($mats2[1], ")"), " ,.;:");
+					$line = trim($firstPart.";;; ".$secondPart, " ;");
+				}
+			}
+			$trsPatStr = "/(?(?=(?:.*)\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)".
+				"R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".
+				$possibleNumbers."{1,3})\\b)".
+			//if the condition is true then the form is TRS
+				"(.*)\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".
+				$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3})\\b(.+)|".
+			//else the form is STR
+				"(.*)\\b[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3}),?(?:\\s|\\n|\\r\\n)T(?:\\.|wnshp.?|ownship)?\\s?(?:".
+				$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?\\b(.+))/is";
+			if(preg_match($trsPatStr, $line, $trsMatches)) {//$i=0;foreach($trsMatches as $trsMatche) echo "\nline 12469, trsMatches[".$i++."] = ".$trsMatche."\n";
+				if(count($trsMatches) > 4) $line = trim(trim($trsMatches[3], " ,.;").". ".ltrim($trsMatches[4], " ,.;"));
+				else $line = trim(trim($trsMatches[1], " ,.;").". ".ltrim($trsMatches[2], " ,.;"));
+			}
+			$utmPatStr = "/(.*)\\b(?:UTM:?(?:\\s|\\n|\\r\\n)(?:Zone\\s)?(?:".$possibleNumbers."{1,2})(?:\\w?(?:\\s|\\n|\\r\\n))(?:".
+				$possibleNumbers."{1,8}E?(?:\\s|\\n|\\r\\n)".$possibleNumbers."{1,8}N?))\\b(.*)/is";
+			if(preg_match($utmPatStr, $line, $locMatches)) {
+				$line = trim(trim($locMatches[1], " ,.;").". ".ltrim($locMatches[2], " ,.;"));
+			}//echo "\nline 12620, line: ".$line."\n";
+			if(!$foundSciName) {//echo "\nline 12514, line: ".$line."\n";
+				$psn = $this->processSciName(trim(str_ireplace(array("Annotation ", "cf. "), "", $line), " \"\',"));
+				if($psn != null) {
+					if(array_key_exists('scientificName', $psn)) {
+						$scientificName = $psn['scientificName'];
+						$line2 = trim(preg_replace("/".preg_quote($scientificName, '/')."/i", "", $line));
+						if(strcasecmp($line2, $line) == 0) {
+							$words = array_reverse(explode(" ", $scientificName));
+							if(count($words) > 1) {
+								$word = $words[0];
+								$wLength = strlen($word);
+								if($wLength > 2) {
+									$pos = stripos($line, $word);
+									if($pos !== FALSE) $line = trim(substr($line, $pos+$wLength));
+								}
+							}
+						} else $line = $line2;
+					}
+					if(array_key_exists('infraspecificEpithet', $psn)) {
+						$infraspecificEpithet = $psn['infraspecificEpithet'];
+						$line = trim(preg_replace("/".preg_quote($infraspecificEpithet, '/')."/i", "", $line));
+					}
+					if(array_key_exists('taxonRank', $psn)) {
+						$taxonRank = $psn['taxonRank'];
+						$line = trim(preg_replace("/".preg_quote($taxonRank, '/')."/i", "", $line));
+					}
+					if(array_key_exists('verbatimAttributes', $psn)) {
+						$temp = $psn['verbatimAttributes'];
+						$line = trim(preg_replace("/".preg_quote($temp, '/')."/i", "", $line));
+						$verbatimAttributes = $this->mergeFields($verbatimAttributes, $temp);
+					}
+					if(array_key_exists('associatedTaxa', $psn)) {
+						$temp = $psn['associatedTaxa'];
+						$line = trim(preg_replace("/".preg_quote($temp, '/')."/i", "", $line));
+						$associated_taxa = $this->mergeFields($associated_taxa, $temp);
+					}
+					if(array_key_exists('recordNumber', $psn)) {
+						if(strlen($recordNumber) == 0) $recordNumber = $psn['recordNumber'];
+						$line = trim(preg_replace("/".preg_quote($recordNumber, '/')."/i", "", $line));
+					}
+					if(array_key_exists('taxonRemarks', $psn)) {
+						$temp = $psn['taxonRemarks'];
+						$line = trim(preg_replace("/".preg_quote($temp, '/')."/i", "", $line));
+						$taxonRemarks = $this->mergeFields($taxonRemarks, $temp);
+					}
+					if(array_key_exists('substrate', $psn)) {
+						$temp = $psn['substrate'];
+						$line = trim(preg_replace("/".preg_quote($temp, '/')."/i", "", $line));
+						$substrate = $this->mergeFields($substrate, $temp);
+					}
+					$line = $this->removeAuthority($line, $scientificName);
+					$foundSciName = true;
+					//echo "\nline 12555, line: ".$line."\n";
+				}
+			}
+			if(strlen($recordNumber) == 0) {
+				if(preg_match("/^No\\.:?(.*)/", $line, $mats)) {
+					$temp = trim($mats[1]);
+					if(strlen($temp) == 0) $lookingForRecordNumber = true;
+					else {
+						$spacePos = strpos($temp, " ");
+						if($spacePos !== FALSE) $temp = substr($temp, 0, $spacePos);
+						if($this->containsNumber($temp)) $recordNumber = $temp;
+					}
+				} else if($lookingForRecordNumber) {
+					$lookingForRecordNumber = false;
+					$spacePos = strpos($line, " ");
+					if($spacePos !== FALSE) $temp = substr($temp, 0, $spacePos);
+					else $temp = $line;
+					if($this->containsNumber($temp)) {
+						$recordNumber = $temp;
+						$line = trim(substr($line, 0, strpos($line, $temp)+strlen($temp)));
+					}
+				}
+			}//echo "\nline 12686, line: ".$line."\n";
+			if($this->containsVerbatimAttribute($line)) {
+				$pos = strpos($line, ";;;");
+				$rest = "";
+				if($pos !== FALSE) {
+					$firstPart = trim(substr($line, 0, $pos));
+					$lastPart = trim(substr($line, $pos+3));
+					if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+						$rest = $firstPart;
+						$line = $lastPart;
+					} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
+						$rest = $lastPart;
+						$line = $firstPart;
+					} else {
+						$rest = $line;
+						$line = "";
+					}
+				} else {
+					$rest = $line;
+					$line = "";
+				}//echo "\nline 12548, line: ".$line."\nrest: ".$rest."\n";
+				if(strlen($rest) > 0) {
+					$rest = trim(str_replace(";;;", ";", $rest));
+					if(preg_match("/^(On .+)[,;] (.+)/i", $rest, $mats)) {
+						$temp = trim($mats[1]);
+						if($this->countPotentialLocalityWords($temp) == 0) {
+							$substrate = $this->mergeFields($substrate, $temp);
+							$rest = trim($mats[2], " ;:,.&");
+						}
+					} else if(preg_match("/^(On .+[A-Za-z]{3,})[.] (.+)/i", $rest, $mats)) {
+						$temp = trim($mats[1]);
+						if($this->countPotentialLocalityWords($temp) == 0) {
+							$substrate = $this->mergeFields($substrate, $temp);
+							$rest = trim($mats[2], " ;:,.&");
+						}
+					} else if(preg_match("/(.+)[.,;] {1,2}(On .+)/i", $rest, $mats)) {
+						$temp = trim($mats[2]);
+						if($this->countPotentialLocalityWords($temp) == 0) {
+							$substrate = $this->mergeFields($substrate, $temp);
+							$rest = trim($mats[1], " ;:,.&");
+						}
+					}
+					if(strlen($rest) > 0 && !$this->isMostlyGarbage2($rest, 0.48)) {
+						if($this->containsVerbatimAttribute($rest)) {
+							if(preg_match("/(.+) Substrate[;:]? (.*)/i", $rest, $mats)){
+								$firstPart = trim($mats[1]);
+								$lastPart = trim($mats[2]);
+								if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+									$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
+									$substrate = $this->mergeFields($substrate, $lastPart);
+								} else $verbatimAttributes = $this->mergeFields($verbatimAttributes, $rest);
+							} else $verbatimAttributes = $this->mergeFields($verbatimAttributes, $rest);
+						} else if($this->countPotentialHabitatWords($rest) > 0) $habitat = $this->mergeFields($habitat, $rest);
+						else if($this->countPotentialLocalityWords($rest) > 0) $location = $this->mergeFields($location, $rest);
+						else $occurrenceRemarks = $rest;
+					}
+				}
+			}
+			if(preg_match("/^((?:(?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant))|Found|Loose) On .+)/i", $line)) {
+				$substrate = trim(str_replace(";;;", ";", $line));
+				$firstPart = "";
+				$lastPart = "";
+				if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|among|near|(?:with)?in|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $substrate, $mats)) {
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+					if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|among|near|(?:with)?in|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $firstPart, $mats2)) {
+						$firstPart = trim($mats2[1]);
+						$lastPart = trim($mats2[2])." ".$lastPart;
+					}
+				} else if(preg_match("/(.+); (.+)/", $substrate, $mats2)) {
+					$firstPart = trim($mats2[1]);
+					$lastPart = trim($mats2[2]);
+				} else if(preg_match("/(.*[A-Za-z]{5,}\)?)\\. (.+)/", $substrate, $mats2)) {
+					$firstPart = trim($mats2[1]);
+					$lastPart = trim($mats2[2]);
+				} else if(preg_match("/(.*  (?:road|pine|park|tree))\\. (.+)/", $substrate, $mats2)) {
+					$firstPart = trim($mats2[1]);
+					$lastPart = trim($mats2[2]);
+				} else if(preg_match("/(.*[A-Za-z]{4,}\)?), (.+)/", $substrate, $mats2)) {
+					$firstPart = trim($mats2[1]);
+					$lastPart = trim($mats2[2]);
+				}
+				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {//echo "\nline 12523, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
+					$startOfLastPart = "";
+					$endOfLastPart = "";
+					if($this->countPotentialLocalityWords($lastPart) == 0) {
+						if($this->countPotentialHabitatWords($lastPart) > 0) {
+							$substrate = $firstPart;
+							$habitat = $this->mergeFields($habitat, $lastPart);
+						}
+					} else if(preg_match("/(.+); (.+)/", $lastPart, $mats2)) {
+						$startOfLastPart = trim($mats2[1]);
+						$endOfLastPart = trim($mats2[2]);
+					} else if(preg_match("/(.*[A-Za-z]{5,}\)?)\\. (.+)/", $lastPart, $mats2)) {
+						$startOfLastPart = trim($mats2[1]);
+						$endOfLastPart = trim($mats2[2]);
+					} else if(preg_match("/(.* (?:road|pine|park|tree))\\. (.+)/", $lastPart, $mats2)) {
+						$startOfLastPart = trim($mats2[1]);
+						$endOfLastPart = trim($mats2[2]);
+					} else if(preg_match("/(.*[A-Za-z]{4,}\)?), (.+)/", $lastPart, $mats2)) {
+						$startOfLastPart = trim($mats2[1]);
+						$endOfLastPart = trim($mats2[2]);
+					} else {//the last part has locality words
+						$substrate = $firstPart;
+						$location = $this->mergeFields($location, $lastPart);
+					}
+					if(strlen($startOfLastPart) > 0 && strlen($endOfLastPart) > 0) {//the last part has locality words and 2 parts to analyze
+						$substrate = $firstPart;
+						if($this->countPotentialLocalityWords($startOfLastPart) == 0) {//all of the locality words are in endOfLastPart
+							if($this->countPotentialHabitatWords($startOfLastPart) > 0) {
+								$habitat = $this->mergeFields($habitat, $startOfLastPart);
+								$location = $this->mergeFields($location, $endOfLastPart);
+							} else $location = $this->mergeFields($location, $lastPart);
+						} else if($this->countPotentialLocalityWords($endOfLastPart) == 0) {//all of the locality words are in startOfLastPart
+							if($this->countPotentialHabitatWords($endOfLastPart) > 0) {
+								$location = $this->mergeFields($location, $startOfLastPart);
+								$habitat = $this->mergeFields($habitat, $endOfLastPart);
+							} else $location = $this->mergeFields($location, $lastPart);
+						} else $location = $this->mergeFields($location, $lastPart);
+					}
+				}
+			} else if(strcasecmp(substr($line, 0, 3), "On ") == 0) {//echo "\nline 12415, line: ".$line."\n";
+				if(stripos($line, " Workshop") === FALSE && stripos($line, " foray") === FALSE && stripos($line, " Society") === FALSE) {
+					$line = trim(str_replace(";;;", ";", $line));
+					if($this->countPotentialLocalityWords($line) > 0) {
+						$firstPart = "";
+						$lastPart = "";
+						if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|among|near|within|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.+); (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.*[A-Za-z]{5,}\)?)\\. (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.* (?:road|pine|park|tree))\\. (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.*[A-Za-z]{4,}\)?), (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						}
+						if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
+							if(strlen($lastPart) < 4 && preg_match("/(.*[A-Za-z]{4,})[,;] (.+)/", $firstPart, $mats2)) {
+								$firstPart = trim($mats2[1]);
+								$lastPart = trim($mats2[2]);
+							}
+							if($this->countPotentialLocalityWords($firstPart) == 0) {
+								if(strlen($substrate) > 0 && $this->countPotentialHabitatWords($firstPart) > 0) $habitat = $this->mergeFields($habitat, $firstPart);
+								else $substrate = $this->mergeFields($substrate, $firstPart);
+								$location = $this->mergeFields($location, $lastPart);
+							} else if($this->countPotentialLocalityWords($lastPart) == 0) {
+								if($this->countPotentialHabitatWords($lastPart) > 0) {
+									$location = $this->mergeFields($location, $firstPart);
+									$habitat = $this->mergeFields($habitat, $lastPart);
+								} else $location = $this->mergeFields($location, $line);
+							} else $location = $this->mergeFields($location, $line);
+						} else $location = $this->mergeFields($location, $line);
+					} else if($this->countPotentialHabitatWords($line) > 0) {
+						$firstPart = "";
+						$lastPart = "";
+						if(preg_match("/(.+); (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.*[A-Za-z]{5,}\)?)\\. (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.* (?:road|pine|park|tree))\\. (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						} else if(preg_match("/(.*[A-Za-z]{4,}\)?), (.+)/", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+						}
+						if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
+							if(strlen($lastPart) < 4 && preg_match("/(.*[A-Za-z]{4,})[,;] (.+)/", $firstPart, $mats2)) {
+								$firstPart = trim($mats2[1]);
+								$lastPart = trim($mats2[2]);
+							}
+							if($this->countPotentialHabitatWords($lastPart) > 0) {
+								if(strlen($substrate) > 0) $habitat = $this->mergeFields($habitat, $line);
+								else {
+									$habitat = $this->mergeFields($habitat, $lastPart);
+									$substrate = $this->mergeFields($substrate, $firstPart);
+								}
+							} else $substrate = $this->mergeFields($substrate, $line);
+						} else $substrate = $this->mergeFields($substrate, $line);
+					} else $substrate = $this->mergeFields($substrate, $line);
+				}
+			} else if($this->countPotentialLocalityWords($line) > 0 && !preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;]?/i", $line)) {//echo "\nline 12659, line: ".$line."\n";
+				$localityAnalysis = $this->analyzeLocalityLine($line);
+				if(array_key_exists('location', $localityAnalysis)) $location = $this->mergeFields($location, $localityAnalysis['location']);
+				if(array_key_exists('habitat', $localityAnalysis)) $habitat = $this->mergeFields($habitat, $localityAnalysis['habitat']);
+				if(array_key_exists('substrate', $localityAnalysis)) $substrate = $this->mergeFields($substrate, $localityAnalysis['substrate']);
+			} else if($this->countPotentialHabitatWords($line) > 0 && strcasecmp($line, "Habitat") != 0) {
+				$firstPart = "";
+				$lastPart = "";
+				$pos = strpos($line, ";;;");
+				if($pos !== FALSE) {
+					$firstPart = trim(substr($line, 0, $pos));
+					$lastPart = trim(substr($line, $pos+3));
+				} else if(preg_match("/(.+); (.+)/", $line, $mats)) {
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+				} else if(preg_match("/(.*[A-Za-z]{5,}\)?)\\. (.+)/", $line, $mats)) {
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+				} else if(preg_match("/(.* (?:road|pine|park|tree))\\. (.+)/", $line, $mats)) {
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+				} else if(preg_match("/(.*[A-Za-z]{4,}\)?), (.+)/", $line, $mats)) {
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+				}
+				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
+					if(preg_match("/^((?:(?:Fairly |Quite |Very |Not)?(?:(?:Un)?Common|Abundant) |Found |Loose )?On .+)/i", $lastPart)) {
+						if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|among|near|(?:with)?in|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $lastPart, $mats)) {
+							$substrate = $this->mergeFields($substrate, str_replace(";;;", ";", trim($mats[1])));
+							$habitat = $this->mergeFields($habitat, str_replace(";;;", ";", trim($mats[2])));
+						} else {
+							$substrate = $this->mergeFields($substrate, str_replace(";;;", ";", $lastPart));
+							$habitat = $this->mergeFields($habitat, str_replace(";;;", ";", $firstPart));
+						}
+					} else $habitat = $this->mergeFields($habitat, str_replace(";;;", ";", $line));
+				} else $habitat = $this->mergeFields($habitat, $line);
+			}
+		}//echo "\nline 12675, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\nverbatimAttributes: ".$verbatimAttributes."\n";
+		$location = str_replace
+		(
+			array("\r\n", "\n", "\r"),
+			array(" ", " ", " "),
+			trim($location)
+		);
+		$locationPatStr = "/(.*?)(\\stype\\s)?\\b(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;,)]?\\s(.+)/is";
+		if(preg_match($locationPatStr, $location, $locationMatches)) {
+			if(count($locationMatches) == 4 && strlen(trim($locationMatches[2])) == 0) $location = trim($locationMatches[1])." ".trim($locationMatches[3]);
+		}// else if(preg_match($locationPatStr, $str, $locationMatches)) {
+		//	if(count($locationMatches) == 4 && strlen(trim($locationMatches[2])) == 0) $location = trim($locationMatches[3]);
+		//}
+		//echo "\nline 12700, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\n";
+		$lPat = "/((?s).*?)\\b(?:[il1!|]at(?:[il1!|]tude)?\\b|quad\\b|[ec][lI!|][ec]v|Date|".
+			"C[o0][lI!|](?:[lI!|]s?|[lI!|]ectors?|lected b[vyg]|[lI!|]?s)\\b|".
+			"(?:H[o0]st\\s)?+Det(?:\\.|ermined by)|(?:THE )?NEW \\w{4} B[OD]TAN.+|(?:(?:Assoc(?:[,.]|".
+			"[l!1|i]ated)\\s(?:Taxa|Spec[l!1|]es|P[l!1|]ants|spp[,.]?|with)[:;]?)|(?:along|together)\\swith)|(?:Substrat(?:um|e))|".
+			"(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".$possibleNumbers."|3[1Iil!|OQ0\]][ -])(?:".
+			$possibleMonths.")\\b|\\d{1,3}(?:\\.\\d{1,6})?\\s?°)/i";
+		$hPat = "/((?s).*?)\\b(?:[il1!|]at(?:[il1!|]tude)?\\b|quad|[ec][lI!|][ec]v|[lI!|]ocality|[lI!|]ocation|".
+			"[lI!|]oc\\.|Date|Col(?:\\.|:|l[:.]|lectors?|lected|l?s[:.]?)|leg(?:it|\\.):?|Identif|Det(?:\\.|ermined by)|".
+			"[lI!|]at[li!|]tude|(?:THE )?NEW\\s\\w{4}\\sBOTAN.+|(?:(?:Assoc(?:[,.]|".
+			"[l!1|i]ated)\\s(?:Taxa|Spec[l!1|]es|P[l!1|]ants|spp[,.]?|with)[:;]?)|(?:along|together)\\swith))/i";
+		if(strlen($location) > 0 && strlen($elevation) == 0) {
+			$elevArr = $this->getElevation($location);
+			$temp = $elevArr[0];
+			if(strlen($temp) > 0) {
+				$location = trim($temp);
+				$elevation = $elevArr[1];
+				$temp = $elevArr[2];
+				if(strlen($temp) > 3) {
+					$temp = str_replace
 					(
 						array("\r\n", "\n", "\r"),
 						array(" ", " ", " "),
 						trim($temp)
 					);
-					$elevation = $elevArr[1];
-					$temp = $elevArr[2];
-					if(strlen($temp) > 0) {
-						$habitat = str_replace
-						(
-							array("\r\n", "\n", "\r"),
-							array(" ", " ", " "),
-							trim($temp)
-						);
+					if($this->countPotentialHabitatWords($temp) > 0) {
+						if(strlen($habitat) < 3) $habitat = $temp;
+						else if(stripos($habitat, $temp) === FALSE) $habitat = trim($habitat, " :;.,").", ".$temp;
 					}
 				}
-				$pat = "/(.*)\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-					"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-					"(?:".$possibleNumbers."{1,3}\\s?)?)?\\s?[NS],?\\s{1,2}(?:Long(?:\\.|itude)?[:;]?\\s)?".
-					$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-					"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-					"(?:".$possibleNumbers."{1,3}\\s?)?)?\\s?[EW](.*)/";
-				if(preg_match($pat, $location, $hMats)) {//$i=0;foreach($hMats as $hMat) echo "\nline 6224, hMats[".$i++."] = ".$hMat."\n";
-					$location = trim($hMats[1]);
-					$pHabitat = trim($hMats[2]);
-					if(strlen($habitat) == 0) $habitat = $pHabitat;
-					else if(stripos($habitat, $pHabitat) === FALSE) $habitat .= " ".$pHabitat;
-				} else {//there may be an incomplete lat/long which has a good beginning and end
-					$pat = "/(.*)\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°(.*+)/";
-					if(preg_match($pat, $location, $hMats)) {
-						$location = trim(ltrim($hMats[1], "."));
-						$temp = trim($hMats[2]);
-						$pat2 = "/\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-							"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-							"(?:".$possibleNumbers."{1,3}\\s?\")?)?\\s?[EW](.*)/";
-						if(preg_match($pat2, $temp, $hMats2)) {
-							$pHabitat = trim($hMats[1]);
-							if(strlen($habitat) == 0) $habitat = $pHabitat;
-							else if(stripos($habitat, $pHabitat) === FALSE) $habitat .= " ".$pHabitat;
-						} else if(strlen($habitat) == 0) $habitat = $temp;
-						else if(stripos($habitat, $temp) === FALSE) $habitat .= " ".$temp;
-					}
-				}//echo "\nline 6270, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
-				if($this->isCompleteGarbage($location)) $location = "";
-				else $location = $this->terminateField($location, $lPat);
-				if($this->isCompleteGarbage($habitat)) $habitat = "";
-				else {
-					$pat = "/(.*?)\\b(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
+			}//echo "\nline 12729, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
+
+			if($this->isCompleteGarbage($location)) $location = "";
+			else $location = $this->terminateField($location, $lPat);
+			//echo "\nline 12733, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\n";
+			if($this->isCompleteGarbage($habitat)) $habitat = "";
+			else {
+				$pat = "/(.*?)\\b(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
 					$possibleNumbers."|3[1Iil!|OQ0\]])[ -](?:".$possibleMonths.")\\b.*/i";
-						if(preg_match($pat, $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6277, mats[".$i++."] = ".$mat."\n";
-						$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					}
-					if(preg_match("/((?s).*?)(?:".$possibleMonths.")\\s(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
-						$possibleNumbers."|3[1Iil!|OQ0\]])[,.]?\\s(?:[1Iil!|][789]|[zZ2][OQ0])".$possibleNumbers."{2}/i", $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6280, mats[".$i++."] = ".$mat."\n";
-						$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					}
-					if(preg_match("/((?s).*?)(?:".$possibleMonths.")(?:[,.]\\s|[ -])(?:[1Iil!|][789]|[zZ2][OQ0])".$possibleNumbers."{2}/i", $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6282, mats[".$i++."] = ".$mat."\n";
-						$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					}
-					if(preg_match("/((?s).*?)(?:Sec?(:\\.|tion)|(?:C[OQ0][1Iil!|]{1,2}(?:\\.|ection|ected))|".
-						"(?:Latitude[ ,:;])|(?:N\wW YORK)|(?:B[O0]TAN[1!|I]CAL))/i", $habitat, $mats)) $habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
-					$trsPatStr = "/(?(?=\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)".
-						"R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".
-						$possibleNumbers."{1,3})\\b)".
-					//if the condition is true then the form is TRS
-						"\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".
-						$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3})\\b(.+)|".
-					//else the form is STR
-						"\\b[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3}),?(?:\\s|\\n|\\r\\n)T(?:\\.|wnshp.?|ownship)?\\s?(?:".
-						$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?\\b(.+))/is";
-					if(preg_match($trsPatStr, $habitat, $trsMatches)) $habitat = trim($trsMatches[1]);
-					$pat2 = "/\\b".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?°\\s?".
-						"(?:".$possibleNumbers."{1,3}(?:".$possibleNumbers."{1,6})?\\s?'\\s?".
-						"(?:".$possibleNumbers."{1,3}\\s?\"?)?)?\\s?[EW](.*)/";
-					if(preg_match($pat2, $habitat, $hMats2)) $habitat = trim($hMats2[1]);
-					if(preg_match($hPat, $habitat, $hMats2)) $habitat = trim($hMats2[1], " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
-					if(is_numeric($habitat)) $habitat = "";
+					if(preg_match($pat, $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6277, mats[".$i++."] = ".$mat."\n";
+					$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
 				}
+				if(preg_match("/((?s).*?)(?:".$possibleMonths.")\\s(?:[OQ0]?+".$possibleNumbers."|[Iil!|zZ12]".
+					$possibleNumbers."|3[1Iil!|OQ0\]])[,.]?\\s(?:[1Iil!|][789]|[zZ2][OQ0])".$possibleNumbers."{2}/i", $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6280, mats[".$i++."] = ".$mat."\n";
+					$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
+				}
+				if(preg_match("/((?s).*?)(?:".$possibleMonths.")(?:[,.]\\s|[ -])(?:[1Iil!|][789]|[zZ2][OQ0])".$possibleNumbers."{2}/i", $habitat, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 6282, mats[".$i++."] = ".$mat."\n";
+					$habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
+				}
+				if(preg_match("/((?s).*?)(?:Sec?(:\\.|tion)|(?:C[OQ0][1Iil!|]{1,2}(?:\\.|ection|ected))|".
+					"(?:Latitude[ ,:;])|(?:N\wW YORK)|(?:B[O0]TAN[1!|I]CAL))/i", $habitat, $mats)) $habitat = trim(ltrim($mats[1], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-"));
+				if(is_numeric($habitat)) $habitat = "";
 			}
-		}//echo "\nline 6305, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
+		}//echo "\nline 12752, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
 		if(strlen($elevation) == 0) {
 			$elevArr = $this->getElevation($str);
 			$temp = $elevArr[1];
@@ -701,7 +982,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-		}//echo "\nline 6395, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
+		}//echo "\nline 12879, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
 		$datePat = "/(?:(?(?=(?:.+)\\b(?:\\d{1,2})[- ]?(?:(?i)".$possibleMonths.")[- ](?:\\d{4})))".
 			"(.+)\\b(?:\\d{1,2})[- ]?(?:(?i)".$possibleMonths.")[- ](?:\\d{4})|".
 			"(?=(?:.+)\\b(?:(?i)".$possibleMonths.")\\s(?:\\d{1,2}),?\\s(?:\\d{4}))".
@@ -714,44 +995,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$location = trim($dateMatches[2]);
 				if(strlen($location) == 0 && $countMatches > 3) $location = trim($dateMatches[3]);
 			}
-		}//echo "\nline 6408, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
-		$locPatStr = "/(.*)\\b(?:\\d{1,3}(?:\\.\\d{1,7})?)\\s?°\\s?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)?\\s?\'".
-			"\\s?(?:\\d{1,3}(?:\\.\\d{1,3})?)?)?\\s?[NS]\\b,?(?:\\s|\\n|\\r\\n)(?:Long(?:\\.|(?:itude)?:?)?\\s?)?".
-			"(?:\\d{1,3}(?:\\.\\d{1,7})?)\\s?°".
-			"\\s?(?:(?:\\d{1,3}(?:\\.\\d{1,3})?)?\\s?\'\\s?(?:\\d{1,3}(?:\\.\\d{1,3})?)?)?\\s?[EW]\\b(?:[:;,.]?)(.*)/is";
-
-		if(preg_match($locPatStr, $location, $locMatches)) {
-			$location = trim($locMatches[1]);
-			if(strlen($habitat) == 0) $habitat = $this->terminateField(trim($locMatches[2]), $hPat);
-			//echo "\nline 1904, Locality: ".$location.", Habitat: ".$habitat.", Habitat2: ".$this->terminateField(trim($locMatches[2]), $hPat)."\n";
-		} else {
-			$possibleNumbers = "[OQSZl|I!\d]";
-			$trsPatStr = "/(?(?=(?:.+)\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)".
-				"R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".
-				$possibleNumbers."{1,3})\\b)".
-			//if the condition is true then the form is TRS
-				"(.+)\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".
-				$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3})\\b(.+)|".
-			//else the form is STR
-				"(.+)\\b[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".$possibleNumbers."{1,3}),?(?:\\s|\\n|\\r\\n)T(?:\\.|wnshp.?|ownship)?\\s?(?:".
-				$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?\\b(.+))/is";
-			if(preg_match($trsPatStr, $location, $locMatches)) {
-				$location = trim($locMatches[1]);
-				if(strlen($location) > 0) {
-					if(strlen($habitat) == 0) $habitat = $this->terminateField(trim(ltrim($locMatches[2], ".")), $hPat);
-				} else {
-					$location = trim($locMatches[3]);
-					if(strlen($habitat) == 0) $habitat = $this->terminateField(trim(ltrim($locMatches[4], ".")), $hPat);
-				}
-			} else {
-				$utmPatStr = "/(.*)\\b(?:UTM:?(?:\\s|\\n|\\r\\n)(?:Zone\\s)?(?:".$possibleNumbers."{1,2})(?:\\w?(?:\\s|\\n|\\r\\n))(?:".
-					$possibleNumbers."{1,8}E?(?:\\s|\\n|\\r\\n)".$possibleNumbers."{1,8}N?))\\b(.*)/is";
-				if(preg_match($utmPatStr, $location, $locMatches)) {
-					$location = trim($locMatches[1]);
-					if(strlen($habitat) == 0) $habitat = $this->terminateField(trim(ltrim($locMatches[2], ".")), $hPat);
-				}
-			}
-		}
+		}//echo "\nline 12951, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
 		if(strlen($scientificName) > 0 && strlen($location) > 0) {
 			$pos = strpos($location, $scientificName);
 			if($pos !== FALSE && $pos == 0) $location = trim(substr($location, strlen($scientificName)));
@@ -782,83 +1026,98 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			} else {
 				$dotPos = strpos($substrate, ". ");
 				if($dotPos !== FALSE) {
-					$location = trim(substr($substrate, $dotPos+2));
-					$substrate = trim(substr($substrate, 0, $dotPos+1));
+					$temp = trim(substr($substrate, $dotPos+2));
+					if($this->countPotentialLocalityWords($temp) > 0) {
+						$location = $temp;
+						$substrate = trim(substr($substrate, 0, $dotPos+1));
+					}
 				}
 			}
 		} else {//strlen(substrate) == 0
 			$sPos = strpos($location, ". On ");
-			$inappropriateWords = array("road", "highway", "hiway", "state", "route", "park", "Rd.", "Co.", "County", "miles");
 			if($sPos !== FALSE) {
 				$sub = trim(substr($location, $sPos+2));
-				foreach($inappropriateWords as $inappropriateWord) {
-					if(stripos($sub, $inappropriateWord) !== FALSE) {
-						$sub = "";
-						break;
-					}
-				}
-				if(strlen($sub) > 0) {
+				if($this->countPotentialLocalityWords($sub) == 0) {
 					$location = trim(substr($location, 0, $sPos));
-					$dotPos = strpos($sub, ".");
-					if($dotPos !== FALSE) {
-						if(strlen($habitat) == 0) $habitat = trim(substr($sub, $dotPos+1));
-						$substrate = trim(substr($sub, 0, $dotPos));
+					if(preg_match("/(.*[A-Za-z]{4,})\\. (.+)/", $sub, $mats)) {
+						$temp = trim($mats[2]);
+						if($this->countPotentialHabitatWords($temp) > 0) {
+							if(strlen($habitat) == 0) $habitat = $temp;
+							$substrate = trim($mats[1]);
+						} else $substrate = $sub;
 					} else $substrate = $sub;
 				}
-			} else {//echo "\nline 7530, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
-				$sPos = strpos($location, "On ");
-				if($sPos !== FALSE && $sPos == 0) {
-					$sub = $location;
-					//$pos = stripos($sub, ", in ");
-					$inappropriateWords = array("road", "north", "south", "east", "west", "highway", "hiway", "area", "state",
-					"valley", "slope", "route", "park", "Rd.", "Co.", "County", "miles");
-					if(preg_match("/(.*),\\s(in|along|within|at\\s.*)/i", $sub, $mats)) {
-						$temp = trim($mats[2]);
-						$sub = trim($mats[1]);
-						foreach($inappropriateWords as $inappropriateWord) {
-							if(stripos($sub, $inappropriateWord) !== FALSE) {
-								$sub = "";
-								break;
-							}
-						}
-						if(strlen($sub) > 0) {
-							$substrate = $sub;
-							$commaPos = strpos($temp, ", ");
+			} else if(strcasecmp(substr($location, 0, 3), "On ") == 0) {
+				$sub = $location;
+				if(preg_match("/(.+),\\s((?:in|along|within|at)\\s.*)/i", $sub, $mats)) {
+					$temp = trim($mats[2]);
+					$sub = trim($mats[1]);
+					if($this->countPotentialLocalityWords($sub) == 0) {
+						$substrate = $sub;
+						if($this->countPotentialLocalityWords($temp) > 0) {
+							$location = $temp;
+							$commaPos = strpos($location, ", ");
 							if($commaPos !== FALSE) {
-								$temp2 = trim(substr($temp, $commaPos+2));
-								$temp = trim(substr($temp, 0, $commaPos));
-								foreach($inappropriateWords as $inappropriateWord) {
-									if(stripos($temp2, $inappropriateWord) !== FALSE) {
-										$location = $temp2;
-										$habitat = $temp;
-										break;
-									}
+								$temp2 = trim(substr($location, $commaPos+2));
+								$temp = trim(substr($location, 0, $commaPos));
+								if($this->countPotentialHabitatWords($temp) > 0 && $this->countPotentialLocalityWords($temp2) > 0) {
+									$location = $temp2;
+									$habitat = $temp;
 								}
-							} else {
-								foreach($inappropriateWords as $inappropriateWord) {
-									if(stripos($temp, $inappropriateWord) !== FALSE) {
-										$temp = "";
-										break;
-									}
-								}
-								if(strlen($temp) > 0) $habitat = $temp;
 							}
-						}
-					} else {
-						foreach($inappropriateWords as $inappropriateWord) {
-							if(stripos($sub, $inappropriateWord) !== FALSE) {
-								$sub = "";
-								break;
-							}
-						}
-						if(strlen($sub) > 0 && !$this->containsNumber($sub)) {
+						} else if($this->countPotentialHabitatWords($temp) > 0) $habitat = $temp;
+					}
+				} else if(preg_match("/(.*[A-Za-z]{4,})\\. (.+)/", $sub, $mats)) {
+					$temp = trim($mats[2]);
+					$sub = trim($mats[1]);
+					if($this->countPotentialLocalityWords($sub) == 0) {
+						$substrate = $sub;
+						$location = $temp;
+					} else if(preg_match("/(.*[A-Za-z]{4,})\\. (.+)/", $sub, $mats2)) {
+						$temp = trim($mats2[2]);
+						$sub = trim($mats2[1]);
+						if($this->countPotentialLocalityWords($sub) == 0) {
 							$substrate = $sub;
-							$location = "";
+							$location = $temp;
 						}
+					} else if(preg_match("/(.+), (.+)/", $sub, $mats2)) {
+						$temp = trim($mats2[2]);
+						$sub = trim($mats2[1]);
+						if($this->countPotentialLocalityWords($sub) == 0) {
+							$substrate = $sub;
+							$location = $temp;
+						}
+					}
+				}
+			} else if(preg_match("/(.*[A-Za-z]{4,}) (on .+) ((?:along|within) .+)/", $location, $mats)) {//$i=0;foreach($mats as $mat) echo "\nmats[".$i++."] = ".$mat."\n";
+				$temp = trim($mats[1]);
+				$temp2 = trim($mats[2]);
+				$temp3 = trim($mats[3]);
+				$hCount1 = $this->countPotentialHabitatWords($temp);
+				$hCount2 = $this->countPotentialHabitatWords($temp2);
+				$hCount3 = $this->countPotentialHabitatWords($temp3);
+				$lCount1 = $this->countPotentialLocalityWords($temp);
+				$lCount2 = $this->countPotentialLocalityWords($temp2);
+				$lCount3 = $this->countPotentialLocalityWords($temp3);
+				//echo "\nhCount1: ".$hCount1."\nlCount1: ".$lCount1."\nhCount2: ".$hCount2."\nlCount2: ".$lCount2."\nhCount3: ".$hCount3."\nlCount3: ".$lCount3."\n";
+				if($lCount2 == 0) {
+					$substrate = $temp2;
+					if($hCount1 > $lCount1) {
+						if(strlen($habitat) == 0) $habitat = $temp;
+						else if(stripos($habitat, $temp) === FALSE) $habitat = trim($habitat, " ;:,.").", ".$temp;
+						$location = "";
+					} else if($lCount1 > 0) $location = $temp;
+					else $location = "";
+					if($hCount3 > $lCount3) {
+						if(strlen($habitat) == 0) $habitat = trim($temp3, " ;:,.");
+						else if(stripos($habitat, $temp3) === FALSE) $habitat = trim($habitat, " ;:,.").", ".$temp3;
+					} else if($lCount3 > 0) {
+						if(strlen($location) == 0) $location = $temp3;
+						else if(stripos($location, $temp3) === FALSE) $location = trim($location, " ;:,.").", ".$temp3;
 					}
 				}
 			}
-		}//echo "\nline 7583, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
+		}//echo "\nline 13021, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\n";
 		if((strlen($state_province) == 0 || strlen($country) == 0 ) && strlen($county) > 0) {
 			$ps = $this->getStateFromCounty($county, $states);
 			if(count($ps) > 0) {
@@ -866,42 +1125,65 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strlen($country) == 0) $country = $ps[1];
 			}
 		}
-		$sPat = "/((?s).*)\\b(?:\\son\\s|s\\.\\s[il1!|]at\\.|[il1!|]at(?:[il1!|]tude|\\.)?|quad|[ec][lI!|][ec]v|[ (]\\d{2,}|\\d{2,}\\s|[lI!|]ocality|[lI!|]ocation|".
-			"[lI!|]oc\\.|Date|Col(?:\\.|:|l[:.]|lectors?|lected|l?s[:.])|leg(?:it|\\.):?|Identif|Det(?:\\.|ermined by)|".
-			"D[lI!|]v[lI!|]s[lI!|][o0]n|(?:U\\.?\\s?S\\.?\\s)?+D[ec]partm[ec]nt|(?:THE )?NEW \\w{4} BOTAN.+|Lichens?|Univers|State|".
-			$state_province."|".$county.")/i";
 		if(strlen($location) > 0 && strlen($scientificName) > 0) {
 			$pos = stripos($location, $scientificName);
 			if($pos !== FALSE && $pos == 0) $location = substr($location, strlen($scientificName));
 		}
-		$subPat = "/((?s).*)\\b(?:[il1!|]at(?:[il1!|]tude|\\.)?|quad|[ec][lI!|][ec]v|Date|Col(?:\\.|".
-			":|ls?[:.]?|lectors?|lected|l?s[:.])|(?:H[o0]st\\s)?+Det(?:\\.|ermined by)|(?:THE )?NEW \\w{4} B[OD]TAN.+|(?:(?:Assoc(?:\\.|".
-			"[l!1|i]ated)\\s(?:Taxa|Spec[l!1|]es|P[l!1|]ants|with)[:;]?)|(?:along|together)\\swith)|State|".$county."|".$state_province.")/i";
-		if(strlen($substrate) > 0) $substrate = $this->terminateField(trim($substrate), $subPat);
+
+		if(strlen($substrate) > 0) {
+			if(preg_match("/(.+?)[;,.]? ((?:Growing )?(?:along |together )?with[;,]?) (.+)/i", $substrate, $mats)) {
+				$substrate = trim($mats[1]);
+				$temp1 = trim($mats[3], " ,");
+				$temp2 = $temp1;
+				$isAssTaxaList = true;
+				$pos = strpos($temp1, "&");
+				$processed = false;
+				if($pos !== FALSE) {
+					$temp3 = trim(substr($temp1, 0, $pos));
+					$temp4 = trim(substr($temp1, $pos+1));
+					$processed = true;
+					if(strlen($temp4) > 3 && $this->processSciName(trim($temp4, " \"\',")) == null) $isAssTaxaList = false;
+					else $temp1 = $temp3;
+				} else if(strpos($temp1, " and ") !== FALSE) {
+					$processed = true;
+					$temps = array_reverse(explode(" and ", $temp1));
+					foreach($temps as $temp) {
+						if(strlen($temp) > 3) {
+							if($this->processSciName(trim($temp, " \"\',")) == null) {
+								$isAssTaxaList = false;
+								break;
+							} else $temp1 = trim(substr($temp1, 0, " and ".stripos($temp1, $temp)));
+						}
+					}
+				}
+				if($isAssTaxaList && strpos($temp1, ", ") !== FALSE) {
+					$processed = true;
+					$temps = array_reverse(explode(", ", $temp1));
+					foreach($temps as $temp) {
+						if(strlen($temp) > 3) {
+							if($this->processSciName(trim($temp, " \"\',")) == null) {
+								$isAssTaxaList = false;
+								break;
+							}
+						}
+					}
+				}
+				if(!$processed) if($this->processSciName(trim($temp2, " \"\',")) == null) $isAssTaxaList = false;
+				if($isAssTaxaList) $associated_taxa = $this->mergeFields($associated_taxa, $temp2, ",");
+				else $habitat = $this->mergeFields($habitat, trim($mats[2])." ".$temp2, ",");
+			}
+			$subPat = "/((?s).*)\\b(?:[il1!|]at(?:[il1!|]tude|\\.)?|quad|[ec][lI!|][ec]v|Date|Col(?:\\.|:|ls?[:.]|lectors?|lected|l?s[:.])|".
+				"(?:H[o0]st\\s)?+Det(?:\\.|ermined by)|(?:THE )?NEW \\w{4} B[OD]TAN.+|State|".$county."|".$state_province.")/i";
+			$substrate = $this->terminateField(trim($substrate), $subPat);
+		}
+		if(strlen($habitat) > 0) {
+			if(preg_match("/^Habitat[;:.,]?(.*)/i", $habitat, $mats)) $habitat = trim($mats[1]);
+		}
 		if(strlen($county) > 0 && strlen($state_province) > 0 && strcasecmp($county, $state_province) != 0) {
 			$pos = stripos($county, $state_province);
 			if($pos !== FALSE) $county = trim(substr($county, $pos+strlen($state_province)), " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-");
 		}
 		if(preg_match("/(.*)[0OD]at[ec]/i", $georeferenceRemarks, $mat)) $georeferenceRemarks = $mat[1];
-		if(strlen($scientificName) == 0) {
-			$lines = explode("\n", $str);
-			foreach($lines as $line) {
-				$psn = $this->processSciName($line);
-				if($psn != null) {
-					if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-					if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-					if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-					if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-					if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-					if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-					//$location = trim(substr($location, strpos($location, $lWords0)+strlen($lWords0)));
-					if(array_key_exists ('scientificName', $psn)) {
-						$scientificName = $psn['scientificName'];
-						break;
-					}
-				}
-			}
-		}
 		return array
 		(
 			'scientificName' => $this->formatSciName($scientificName),
@@ -909,31 +1191,36 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			'country' => ucfirst(trim($country, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")),
 			'county' => ucfirst(trim($county, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")),
 			'georeferenceRemarks' => trim($georeferenceRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'occurrenceRemarks' => trim($occurrenceRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'locality' => trim($location, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'habitat' => trim($habitat, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'associatedTaxa' => trim($associated_taxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'taxonRank' => trim($taxonRank, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'taxonRemarks' => trim($taxonRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'infraspecificEpithet' => trim($infraspecificEpithet, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_"),
 			'recordNumber' => trim($recordNumber, " \t\n\r\0\x0B,:.;!\"\'\\~@#$%^&*_-"),
-			'substrate' => trim($substrate, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'substrate' => trim($substrate, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_"),
 			'verbatimElevation' => trim($elevation, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'eventDate' => $event_date,
-			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
+			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'recordedById' => $recordedById,
+			'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'dateIdentified' => $dateIdentified,
+			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 		);
 	}
 
-	protected function getTaxonOfHeaderInfo($str) {
-		$statePatStr = "/((?s).*)?((?:(?:[EP][L1!|]ANT[5S])|(?:ASC[O0D]MYC[EC]T[EC]S[5S])|(?:FL[O0D]R\\w)|(?:F(?:U|(?:LI))N[EGC][Il!1.,])|".
-			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN(?:[5S]|(?:FL[O0D]R\\w)))|(?:CRYPT[O0DQU]GAM[5S])|".
-			"(?:BRY[O0DQU](?:(?:FL[O0D]R\\w)|(?:PHYT(?:A|[EC][5S]))))|(?:M[O0][5S]{2}E[5S])|".
+	private function getTaxonOfHeaderInfo($str) {
+		$statePatStr = "/((?s).*)?((?:(?:[EP][L1!|]ANT[5S])|(?:ASC[O0D]MYC[EC]T[EC]S[5S])|(?:FL[O0D]RA)|(?:F(?:U|(?:LI))N[EGC][Il!1.,])|".
+			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN(?:[5S]|(?:FL[O0D]RA)))|(?:CRYPT[O0DQU]GAM[5S])|".
+			"(?:BRY[O0DQU](?:(?:FL[O0D]RA)|(?:PHYT(?:A|[EC][5S]))))|(?:M[O0][5S]{2}E[5S])|".
 			"(?:MU[5S][CG][l1|I!])|(?:HEPAT[L1!|]CA.)|(?:P[L1!|]ANT[5S])|(?:[5S]PHAGNA))".
 			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][EFPKI1][RFPN]?)(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
 		if(preg_match($statePatStr, $str, $matches)) {
 			if(preg_match($statePatStr, $matches[1], $matches2)) {
 				return array($matches2[1], $matches2[3], $matches2[4].$matches[2].$matches[3].$matches[4]);
-			}
-			else return array($matches[1], $matches[3], $matches[4]);
+			} else return array($matches[1], $matches[3], $matches[4]);
 		}
 		return null;
 	}
@@ -943,26 +1230,19 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$location = "";
 		$state_province = "";
 		$county = "";
-		$scientificName = "";
-		$substrate = "";
-		$recordNumber = "";
-		$habitat = "";
-		$associatedTaxa = "";
-		$taxonRank = "";
-		$infraspecificEpithet = "";
-		$verbatimAttributes = "";
 		$states = array();
 		$startOfFile = trim($matches[0]);
 		$endOfLine = trim($matches[1]);
 		$endOfFile = trim($matches[2]);
+		$workingEndOfFile = $endOfFile;
 		$sLen = strlen($endOfLine);
-		//echo "\nline 1402, startOfFile: ".$startOfFile."\n\tendOfLine: ".$endOfLine."\n\tendOfFile: ".$endOfFile."\n";
+		//echo "\nline 332, startOfFile: ".$startOfFile."\n\tendOfLine: ".$endOfLine."\n\tendOfFile: ".$endOfFile."\n";
 		//if there is nothing after the "Taxons of", get it from the beginning of the next line
 		if($sLen == 0) {
 			$eolPos = strpos($endOfFile, "\n");
 			if($eolPos !== FALSE) {
 				$firstLine = trim(substr($endOfFile, 0, $eolPos));
-				$endOfFile = trim(substr($endOfFile, $eolPos+1));
+				$workingEndOfFile = trim(substr($endOfFile, $eolPos+1));
 				$commaPos = strpos($firstLine, ",");
 				if($commaPos !== FALSE) {
 					$firstPart = trim(substr($firstLine, 0, $commaPos));
@@ -970,25 +1250,25 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$spacePos = strpos($lastPart, " ");
 					if($spacePos !== FALSE) {
 						$endOfLine = $firstPart.", ".substr($lastPart, 0, $spacePos);
-						$endOfFile = substr($lastPart, $spacePos+1)."\n".$endOfFile;
+						$workingEndOfFile = substr($lastPart, $spacePos+1)."\n".$workingEndOfFile;
 					} else $endOfLine = $firstLine;
 				} else {
 					$spacePos = strpos($firstLine, " ");
 					if($spacePos !== FALSE) {
 						$endOfLine = trim(substr($firstLine, 0, $spacePos));
-						$endOfFile = substr($firstLine, $spacePos+1)."\n".$endOfFile;
+						$workingEndOfFile = substr($firstLine, $spacePos+1)."\n".$workingEndOfFile;
 					} else $endOfLine = $firstLine;
 				}
 			}
 		//if there is an isolated character at the end of the line, remove it
 		} else if($sLen > 2 && substr($endOfLine, $sLen-2, 1) == " ") $endOfLine = trim(substr($endOfLine, 0, $sLen-1));
-		//echo "\nline 1443, startOfFile: ".$startOfFile."\n\tendOfLine: ".$endOfLine."\n\tendOfFile: ".$endOfFile."\n";
+		//echo "\nline 358, startOfFile: ".$startOfFile."\n\nendOfLine: ".$endOfLine."\n\nendOfFile: ".$endOfFile."\n\nworkingEndOfFile: ".$workingEndOfFile."\n\n";
 		$commaPos = strpos($endOfLine, ',');
 		$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:il))?|May|Jun[.e]?|Jul[.y]|Aug(?:\\.|(?:ust))?|Sep(?:\\.|(?:t\\.?)|(?:tember))?|Oct(?:\\.|(?:ober))?|Nov(?:\\.|(?:ember))?|Dec(?:\\.|(?:ember))?";
 		if($commaPos !== FALSE) {
 			$firstPart = trim(substr($endOfLine, 0, $commaPos));
 			$secondPart = trim(substr($endOfLine, $commaPos+1));
-			//echo "\nline 1434, firstPart: ".$firstPart."\n\tsecondPart: ".$secondPart."\n";
+			//echo "\nline 364, firstPart: ".$firstPart."\n\tsecondPart: ".$secondPart."\n";
 			$sp = $this->getStateOrProvince($firstPart);
 			if(count($sp) > 0) {
 				$state_province = $sp[0];
@@ -1000,35 +1280,62 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				}
 				$countyMatches = $this->findCounty($firstPart, $state_province);
 				if($countyMatches != null) {
-					$county = trim($countyMatches[2]);
+					$county = trim($countyMatches[1]);
 				} else {
 					$countyMatches = $this->findCounty($secondPart, $state_province);
-					if($countyMatches != null) $county = trim($countyMatches[2]);
+					if($countyMatches != null) $county = trim($countyMatches[1]);
 				}
 			} else {
-				$country = $this->getCountry(trim($secondPart));
-				if(strlen($country) > 0) {
-					$states = $this->getStatesFromCountry($country);
-					foreach($states as $state) {
-						if(strcasecmp($firstPart, $state) == 0) $state_province = $state;
+				$sp = $this->getStateOrProvince($secondPart);
+				if(count($sp) > 0) {
+					$state_province = $sp[0];
+					$country = $sp[1];
+					$countyMatches = $this->findCounty($firstPart, $state_province);
+					if($countyMatches != null) {
+						$state_province = trim($countyMatches[4]);
+						$county = trim($countyMatches[1]);
+						$country = trim($countyMatches[2]);
 					}
-				} else {
-					$sp = $this->getStateOrProvince($secondPart);
-					if(count($sp) > 0) {
-						$state_province = $sp[0];
-						if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))\\b/i", $firstPart, $cMatches)) {
-							$county = trim($cMatches[1]);
-						}
-						$country = $sp[1];
+				}
+				if(strlen($county) == 0) {
+					$countyMatches = $this->findCounty($firstPart);
+					if($countyMatches != null) {
+						$state_province = trim($countyMatches[4]);
+						$county = trim($countyMatches[1]);
+						$country = trim($countyMatches[2]);
 					} else {
-						$sp = $this->getStateOrProvince($firstPart);
-						if(count($sp) > 0) {
-							$state_province = $sp[0];
-							if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))\\b/i", $secondPart, $cMatches)) {
-								$county = trim($cMatches[1]);
+						$countyMatches = $this->findCounty($secondPart);
+						if($countyMatches != null) {
+							$state_province = trim($countyMatches[4]);
+							$county = trim($countyMatches[1]);
+							$country = trim($countyMatches[2]);
+						} else {
+							$country = $this->getCountry(trim($secondPart));
+							if(strlen($country) > 0) {
+								$states = $this->getStatesFromCountry($country);
+								foreach($states as $state) {
+									if(strcasecmp($firstPart, $state) == 0) $state_province = $state;
+								}
+							} else {
+								$sp = $this->getStateOrProvince($secondPart);
+								if(count($sp) > 0) {
+									$state_province = $sp[0];
+									if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))\\b/i", $firstPart, $cMatches)) {
+										$county = trim($cMatches[1]);
+									}
+									$country = $sp[1];
+								} else {
+									$sp = $this->getStateOrProvince($firstPart);
+									if(count($sp) > 0) {
+										$state_province = $sp[0];
+										if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))\\b/i", $secondPart, $cMatches)) {
+											$county = trim($cMatches[1]);
+										}
+										$country = $sp[1];
+									} else $country = $this->getCountry(trim($firstPart));
+								}
 							}
-							$country = $sp[1];
-						} else $country = $this->getCountry(trim($firstPart));
+						}
 					}
 				}
 			}
@@ -1036,14 +1343,22 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$ps = $this->getStateOrProvince(trim($endOfLine));
 			if(count($ps) > 0) {
 				$state_province = $ps[0];
+				$l = strlen($state_province);
+				if($l > 0) {
+					$pos = stripos($endOfLine, $state_province);
+					if($pos !== FALSE) {
+						$rest = trim(substr($endOfLine, $pos+$l));
+						if(strlen($rest) > 2) $endOfFile = $rest."\n".$workingEndOfFile;
+					}
+				}
 				$country = $ps[1];
 				if(strcasecmp($state_province, $endOfLine) != 0) {
 					if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))/i", $endOfLine, $cMatches)) {
 						$countyMatches = $this->findCounty($endOfLine, $state_province);
 						if($countyMatches != null) {
-							if(strlen($state_province) == 0) $state_province = trim($countyMatches[5]);
-							if(strlen($location) == 0) $location = trim($countyMatches[0]);
-							$county = trim($countyMatches[2]);
+							$state_province = trim($countyMatches[4]);
+							$county = trim($countyMatches[1]);
+							$country = trim($countyMatches[2]);
 						}
 					}
 				}
@@ -1053,10 +1368,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))/i", $endOfLine)) {
 						$countyMatches = $this->findCounty($endOfLine, $state_province);
 						if($countyMatches != null) {
-							if(strlen($state_province) == 0) $state_province = trim($countyMatches[5]);
-							if(strlen($location) == 0) $location = trim($countyMatches[0]);
-							$county = trim($countyMatches[2]);
-							$country = trim($countyMatches[3]);
+							$state_province = trim($countyMatches[4]);
+							$county = trim($countyMatches[1]);
+							$country = trim($countyMatches[2]);
+							if(strlen($state_province) == 0 && strlen($country) > 0) $states = $this->getStatesFromCountry($country);
 						}
 					}
 					else {
@@ -1070,396 +1385,38 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if(preg_match("/(.*)\\s(?:Co(?:\\.|unty)|Par[il!|]sh|B[o0]r[o0]ugh|Dist(?:\\.|rict))/i", $endOfLine, $cMatches)) {
 						$countyMatches = $this->findCounty($endOfLine, $state_province);
 						if($countyMatches != null) {
-							if(strlen($state_province) == 0) $state_province = trim($countyMatches[5]);
-							if(strlen($location) == 0) $location = trim($countyMatches[0]);
-							$county = trim($countyMatches[2]);
+							$state_province = trim($countyMatches[4]);
+							$county = trim($countyMatches[1]);
+						}
+					} else {
+						$l = strlen($country);
+						if($l > 0) {
+							$pos = stripos($endOfLine, $country);
+							if($pos !== FALSE) {
+								$rest = trim(substr($endOfLine, $pos+$l));
+								if(strlen($rest) > 2) $endOfFile = $rest."\n".$workingEndOfFile;
+							}
 						}
 					}
-					$states = $this->getStatesFromCountry($country);
-				} else $states = $this->getStatesFromCountry($country);
+					if(strlen($state_province) == 0) $states = $this->getStatesFromCountry($country);
+				} else if(strlen($state_province) == 0) $states = $this->getStatesFromCountry($country);
 			}
 		}
-		$eolPos = strpos($endOfFile, "\n");
-		$temp = "";//first line of endOfFile
-		$rest = "";//rest of endOfFile
-		$foundSciName = false;
-		if($eolPos !== FALSE) {
-			$temp = trim(substr($endOfFile, 0, $eolPos));
-			$rest = trim(substr($endOfFile, $eolPos+1));
-		} else $temp = $endOfFile;
-		if(strlen($rest) > 0) {
-			if(preg_match("/\\s(?:&|var\\.?|s(?:ub)?sp\\.|f\\.)$/i", $temp)) {//combine the first line and the next line
-				$eolPos = strpos($rest, "\n");
-				if($eolPos !== FALSE) {
-					$temp .= " ".trim(substr($rest, 0, $eolPos));
-					$rest = trim(substr($rest, $eolPos+1));
-				} else {
-					$temp .= " ".$rest;
-					$rest = "";
-				}
-			}
-		}
-		if(strlen($rest) > 0) {//echo "\nline 1557, temp: ".$temp.", rest: ".$rest."\n";
-			$eolPos = strpos($rest, "\n");
-			if($eolPos !== FALSE) {
-				$nl = trim(substr($rest, 0, $eolPos));//get the next line
-				if(preg_match("/^(var\\.?|s(?:ub)?sp\\.|f\\.)\\s(.*)/i", $nl, $tMats)) {
-					$rest = trim(substr($rest, $eolPos+1));
-					$tR = $tMats[1];
-					$t = trim($tMats[2]);
-					$sPos = strpos($t, ";");
-					if($sPos === FALSE) $sPos = strpos($t, " ");
-					if($sPos !== FALSE) {
-						$temp .= " ".$tR." ".trim(substr($t, 0, $sPos));
-						$rest = trim(substr($t, $sPos+1))." ".$rest;
-					} else $temp .= " ".$nl;
-					$eolPos = strpos($rest, "\n");
-					if($eolPos !== FALSE) $nl = trim(substr($rest, 0, $eolPos));
-					else $nl = $rest;
-				}
-				if(preg_match("/^(?:\+|on)\\s/i", $nl)) {
-					$temp .= " ".$nl;
-					$rest = trim(substr($rest, $eolPos+1));
-				}
-			} else {
-				if(preg_match("/^(?:var\\.?|s(?:ub)?sp\\.|f\\.)\\s/i", $rest)) {
-					$sPos = strpos($rest, ";");
-					if($sPos === FALSE) $sPos = strpos($rest, " ");
-					if($sPos !== FALSE) {
-						$temp .= " ".trim(substr($rest, 0, $sPos));
-						$rest = trim(substr($rest, $sPos+1));
-					} else {
-						$temp .= " ".$rest;
-						$rest = "";
-					}
-				}
-				if(preg_match("/^(?:\+|on)\\s/i", $rest)) {
-					$temp .= " ".$rest;
-					$rest = "";
-				}
-			}
-		}
-		if
-		(!is_numeric($temp) &&
-			!preg_match("/\\b(?:lichens?|loc(?:\\.|ality|ation)|loc(?:\\.|ality|ation)|Herbarium|Univers|".
-				"County|Par[il!|]sh|B[o0]r[o0]ugh|Park|Island|Quadrangle|Dist(?:\\.|rict)|U\\.?S\\.?A\\.?|NEW Y\\wRK|".
-				"B[O0]TAN[I1!l|]CAL|=)\\b/i", $temp)
-		) {//echo "\nline 1608, temp: ".$temp."\n";
-			$psn = $this->processSciName($temp);
-			if($psn != null) {
-				if(array_key_exists ('scientificName', $psn)) {
-					$scientificName = $psn['scientificName'];
-					$foundSciName = true;
-				}
-				if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-				if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-				if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-				if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-				if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-				if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-			}
-		}
-		if(!$foundSciName && strlen($rest) > 0) {
-			$eolPos = strpos($rest, "\n");
-			if($eolPos !== FALSE) {
-				$temp = trim(substr($rest, 0, $eolPos));
-				$rest = trim(substr($rest, $eolPos+1));
-			} else $temp = $rest;
-			if(strlen($rest) > 0) {
-				if(preg_match("/\\s(?:&|var\\.?|s(?:ub)?sp\\.|f\\.)$/i", $temp)) {
-					$eolPos = strpos($rest, "\n");
-					if($eolPos !== FALSE) {
-						$temp .= " ".trim(substr($rest, 0, $eolPos));
-						$rest = trim(substr($rest, $eolPos+1));
-					} else {
-						$temp .= " ".$rest;
-						$rest = "";
-					}
-				}
-			}
-			if(strlen($rest) > 0) {
-				$eolPos = strpos($rest, "\n");
-				if($eolPos !== FALSE) {
-					$nl = trim(substr($rest, 0, $eolPos));
-					if(preg_match("/^(var\\.?|s(?:ub)?sp\\.|f\\.)\\s(.*)/i", $nl, $tMats)) {
-						$rest = trim(substr($rest, $eolPos+1));
-						$tR = $tMats[1];
-						$t = trim($tMats[2]);
-						$sPos = strpos($t, ";");
-						if($sPos === FALSE) $sPos = strpos($t, " ");
-						if($sPos !== FALSE) {
-							$temp .= " ".$tR." ".trim(substr($t, 0, $sPos));
-							$rest = trim(substr($t, $sPos+1))." ".$rest;
-						} else $temp .= " ".$nl;
-						$eolPos = strpos($rest, "\n");
-						if($eolPos !== FALSE) $nl = trim(substr($rest, 0, $eolPos));
-						else $nl = $rest;
-					}
-					if(preg_match("/^(?:\+|on)\\s/i", $nl)) {
-						$temp .= " ".$nl;
-						$rest = trim(substr($rest, $eolPos+1));
-					}
-				} else {
-					if(preg_match("/^(?:var\\.?|s(?:ub)?sp\\.|f\\.)\\s/i", $rest)) {
-						$sPos = strpos($rest, ";");
-						if($sPos === FALSE) $sPos = strpos($rest, " ");
-						if($sPos !== FALSE) {
-							$temp .= " ".trim(substr($rest, 0, $sPos));
-							$rest = trim(substr($rest, $sPos+1));
-						} else {
-							$temp .= " ".$rest;
-							$rest = "";
-						}
-					}
-					if(preg_match("/^(?:\+|on)\\s/i", $rest)) {
-						$temp .= " ".$rest;
-						$rest = "";
-					}
-				}
-			}
-			if
-			(!is_numeric($temp) &&
-				!preg_match("/\\b(?:lichens?|loc(?:\\.|ality|ation)|loc(?:\\.|ality|ation)|Herbarium|Univers|".
-				"County|Par[il!|]sh|B[o0]r[o0]ugh|Park|Island|Quadrangle|Dist(?:\\.|rict)|U\\.?S\\.?A\\.?|NEW Y\\wRK|".
-				"B[O0]TAN[I1!l|]CAL|=)\\b/i", $temp)
-			) {
-				$psn = $this->processSciName($temp);
-				if($psn != null) {
-					if(array_key_exists ('scientificName', $psn)) {
-						$scientificName = $psn['scientificName'];
-						$foundSciName = true;
-					}
-					if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-					if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-					if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-					if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-					if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-					if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-				}
-			}
-		}//echo "\nline 2201, endOfFile: ".$endOfFile."\n\tcounty: ".$county."\n";
 		if(strlen($county) == 0) {
 			$countyMatches = $this->findCounty($endOfFile, $state_province);
-			if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 1708, countyMatches[".$i++."] = ".$countyMatche."\n";
-				if(strlen($state_province) == 0) $state_province = trim($countyMatches[5]);
-				$firstPart = trim($countyMatches[0]);
-				$secondPart = trim($countyMatches[1]);
-				$county = trim($countyMatches[2]);
-				if(strlen($country) == 0) $country = trim($countyMatches[3]);
-				if(strlen($county) > 0) {//echo "\nline 2211, location: ".$location."\n\tcounty: ".$county."\nfirstPart: ".$firstPart."\nsecondPart: ".$secondPart."\n";
-					$location = ltrim($countyMatches[4], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-");
-					$pos = stripos($location, $scientificName);
-					if($pos !== FALSE && $pos < 6) $location = substr($location, $pos+strlen($scientificName));
-					if(strlen($county) > 0) {
-						$county = ucwords
-						(
-							strtolower
-							(
-								str_replace(array('1', '!', '|', '5', '2', '0'), array('l', 'l', 'l', 'S', 'Z', 'O'), trim($county))
-							)
-						);
-					}
-					$onPos = stripos($secondPart, "on ");
-					if($onPos !== FALSE) {
-						if($onPos == 0) {
-							$substrate = trim($secondPart);
-						} else if(strlen($scientificName) == 0) {
-							$psn = $this->processSciName($secondPart);
-							if($psn != null) {
-								if(array_key_exists ('scientificName', $psn)) {
-									$scientificName = $psn['scientificName'];
-									$foundSciName = true;
-								}
-								if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-								if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-								if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-								if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-								if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-								if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-							}
-						}
-					} else if(strlen($scientificName) == 0) {
-						$psn = $this->processSciName($secondPart);
-						if($psn != null) {
-							if(array_key_exists ('scientificName', $psn)) {
-								$scientificName = $psn['scientificName'];
-								$foundSciName = true;
-							}
-							if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-							if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-							if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-							if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-							if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-							if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-						}
-					}
-					if(strlen($scientificName) == 0) {
-						$psn = $this->processSciName($firstPart);
-						if($psn != null) {
-							if(array_key_exists ('scientificName', $psn)) {
-								$scientificName = $psn['scientificName'];
-								$foundSciName = true;
-							}
-							if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-							if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-							if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-							if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-							if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-							if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-						}
-					}
-					if(strlen($location) > 0) {
-						if(strlen($scientificName) == 0) {
-							$lWords = explode("\n", $location);
-							if(count($lWords) > 1) {
-								$lWords0 = trim($lWords[0]);
-								$psn = $this->processSciName($lWords0);
-								if($psn != null) {
-									if(array_key_exists ('scientificName', $psn)) {
-										$scientificName = $psn['scientificName'];
-										$foundSciName = true;
-									}
-									if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-									if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-									if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-									if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-									if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-									if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-									$location = trim(substr($location, strpos($location, $lWords0)+strlen($lWords0)));
-								}
-							}
-						}
-						$pos = strpos($location, "\n\n");
-						if($pos !== FALSE) {
-							$temp = trim(substr($location, 0, $pos));
-							$pos2 = strpos($temp, "\n");
-							if($pos2 === FALSE) {
-								$sp = $this->getStateOrProvince($temp);
-								if(count($sp) > 0) {
-									if(strlen($state_province) == 0) $state_province = $sp[0];
-									if(strlen($country) == 0) $country = $sp[1];
-									$location = trim(substr($location, $pos));
-								} else if(strlen($scientificName) == 0) {
-									$psn = $this->processSciName($temp);
-									if($psn != null) {
-										if(array_key_exists ('scientificName', $psn)) {
-											$scientificName = $psn['scientificName'];
-											$foundSciName = true;
-										}
-										if(array_key_exists ('infraspecificEpithet', $psn)) $infraspecificEpithet = $psn['infraspecificEpithet'];
-										if(array_key_exists ('taxonRank', $psn)) $taxonRank = $psn['taxonRank'];
-										if(array_key_exists ('verbatimAttributes', $psn)) $verbatimAttributes = $psn['verbatimAttributes'];
-										if(array_key_exists ('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
-										if(array_key_exists ('recordNumber', $psn)) $recordNumber = $psn['recordNumber'];
-										if(array_key_exists ('substrate', $psn)) $substrate = $psn['substrate'];
-										$location = trim(substr($location, strpos($location, $temp)+strlen($temp)));
-									}
-								}
-							}
-						}
-					}
-				}
-				if(strlen($country) > 0 && strlen($state_province) == 0) {
-					if(preg_match("/\\bU\\.?S\\.?A\\.?\\b/", $country) || preg_match("/United States/i", $country)) {
-						$ps = $this->getStateFromCounty($county, null, "United States");
-						if(count($ps) > 0) $state_province = $ps[0];
-					} else {
-						$ps = $this->getStateFromCounty($county, null, $country);
-						if(count($ps) > 0) $state_province = $ps[0];
-					}
-					if(strlen($state_province) == 0) {
-						$thirdPart = ltrim($countyMatches[4], " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-");
-						if(strlen($thirdPart) > 0) {
-							$states = $this->getStatesFromCountry($country);
-							foreach($states as $s) if(strcasecmp($s, $thirdPart) == 0) $state_province = $s;
-							if(strlen($state_province) == 0) $location = $thirdPart." ".$location;
-						}
-					}
-				}
-			} else if(count($states) > 0 && strlen($state_province) == 0) {
-				foreach($states as $state) {
-					$countyPatStr = "/(.*)".$state."[:;,.)\\n\\r]\\s?(.*)/is";
-					if(preg_match($countyPatStr, $endOfFile, $countyMatches)) {
-						$state_province = $state;
-						$firstPart = trim($countyMatches[1]);
-						$location = trim($countyMatches[2]);
-						$countyPos = stripos($location, " County");
-						if($countyPos !== FALSE && strlen($county) == 0) {
-							$county = substr($location, 0, $countyPos);
-							$location = substr($location, $countyPos+6);
-						}
-					}
-				}
-			}
-		}
-		if(strlen($substrate) == 0) {
-			$lines = explode("\n", $endOfFile);
-			$lookingForLocation = false;
-			foreach($lines as $line) {
-				if(preg_match("/^(on\\s.*)/i", $line, $mats)) {
-					$sub = trim($mats[1]);
-					$inappropriateWords = array(" road", " north", " south", " east", " west", " highway", " hiway", " area", " state",
-						" valley", " slope", " route", " Rd.", " Co.", " County");
-					foreach($inappropriateWords as $inappropriateWord) {
-						if(stripos($sub, $inappropriateWord) !== FALSE) {
-							if(strlen($location) == 0) {
-								$location = $sub;
-								$lookingForLocation = true;
-							}
-							$sub = "";
-							break;
-						}
-					}
-					if(strlen($sub) > 0) {
-						if(preg_match("/(.*)\\b(?:UNIVERS|COLL(?:\\.|ect)|HERBAR|DET(?:\\.|ermin)|Identif|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".$possibleMonths.")/i", $sub, $mats)) {
-							$sub = trim($mats[1]);
-						}
-						$dotPos = strpos($sub, ".");
-						if($dotPos !== FALSE) {
-							if(strlen($habitat) == 0) $habitat = trim(substr($sub, $dotPos+1));
-							$substrate = trim(substr($sub, 0, $dotPos));
-						} else $substrate = $sub;
-						continue;
-					}
-				}
-				if($lookingForLocation) {
-					if(preg_match("/(.*)\\b(?:UNIVERS|COLL(?:\\.|ect)|HERBAR|DET(?:\\.|ermin)|Identif|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".$possibleMonths.")/i", $line, $mats2)) {
-						$temp = trim($mats2[1]);
-						if(strlen($temp) > 6 && stripos($location, $temp) === FALSE) $location .= " ".$temp;
-					} else if(stripos($location, $line) === FALSE) $location .= " ".$line;
-				}
-			}
-		}//echo "\nline 1895, location: ".$location."\nscientificName: ".$scientificName."\n";
-		if(strlen($location) == 0) $location = trim($endOfFile);
-		$locationPatStr = "/(.*)\\b(?:L|(?:|_))[o0]c(?:a[1!l]ity|ati[o0]n|\\.)?[:;,)]?\\s(.*)(?:(?:\\r\\n|\\n\\r|\\n)(.*))?/i";
-		if(preg_match($locationPatStr, $location, $locationMatches)) {
-			$location = trim($locationMatches[2]);
-			if(count($locationMatches) == 4) $location .= " ".trim($locationMatches[3]);
-		} else if(preg_match($locationPatStr, $endOfFile, $locationMatches)) {
-			$location = trim($locationMatches[2]);
-			if(count($locationMatches) == 4) $location .= " ".trim($locationMatches[3]);
-		}
-		if(strlen($state_province) > 0 && strlen($country) == 0) {
-			$sp = $this->getStateOrProvince($state_province);
-			if(count($sp) > 0) {
-				$state_province = $sp[0];
-				$country = $sp[1];
+			if($countyMatches != null) {
+				$state_province = trim($countyMatches[4]);
+				$county = trim($countyMatches[1]);
+				$country = trim($countyMatches[2]);
 			}
 		}
 		return array
 		(
 			'country' => $country,
-			'locality' => $location,
 			'stateProvince' => $state_province,
-			'verbatimAttributes' => $verbatimAttributes,
-			'associatedTaxa' => $associatedTaxa,
-			'infraspecificEpithet' => $infraspecificEpithet,
-			'taxonRank' => $taxonRank,
 			'county' => $county,
-			'scientificName' => $scientificName,
-			'recordNumber' => $recordNumber,
 			'states' => $states,
-			'substrate' => $substrate
+			'endOfFile' => $endOfFile
 		);
 	}
 
@@ -1467,7 +1424,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		if($name) {
 			$name = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $name));
 			$recordNumber = "";
-			if(preg_match("/^([0-9]{1,4}) ?([A-Za-z])[.,*#]\\s(.*)/", $name, $mats)) {
+			if(preg_match("/^([0-9]{1,4}) ?([A-Za-z])[.,*#]\\s(.*)/", $name, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 526, mats[".$i++."] = ".$mat."\n";
 				$recordNumber = trim($mats[1]).trim($mats[2]);
 				$name = trim($mats[3]);
 			} else if(preg_match("/^([0-9]{1,4} ?)[.,*#]\\s(.*)/", $name, $mats)) {
@@ -1482,14 +1439,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			} else if(preg_match("/^([0-9]{2,6}[A-Za-z]?)[.,*#]?\\s(.*)/", $name, $mats)) {
 				$recordNumber = trim($mats[1]);
 				$name = trim($mats[2]);
-			} else if(preg_match("/([0-9]{1,3}[A-Za-z]?)[.,*#]\\s(.*)/", $name, $mats)) {
+			} else if(preg_match("/^.{0,6}+([0-9]{1,3}[A-Za-z]?)[.,*#]\\s(.*)/", $name, $mats)) {
 				$recordNumber = trim($mats[1]);
 				$name = trim($mats[2]);
 			} else if(preg_match("/^([A-Za-z]+)\\s\([A-Za-z]+\)\\s([A-Za-z]+.*)/", $name, $mats)) {
 				$name = trim($mats[1])." ".trim($mats[2]);
+			} else if(preg_match("/^[A-Za-z]+ \(([A-Za-z]+ [A-Za-z]+)\)$/", $name, $mats)) {
+				$name = trim($mats[1]);
 			}
 			if($this->isPossibleSciName($name)) return array('scientificName' => $name, 'recordNumber' => $recordNumber);
-			else {//echo "\nline 2636, name: ".$name.", recordNumber: ".$recordNumber."\n";
+			else {//echo "\nline 549, name: ".$name.", recordNumber: ".$recordNumber."\n";
 				$results = array();
 				$foundSciName = false;
 				if(stripos($name, " strain") !== FALSE) {
@@ -1635,7 +1594,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					}
 				}
-				if(!$foundSciName) {//echo "\nline 3188, name: ".$name.", recordNumber: ".$recordNumber."\n";
+				if(!$foundSciName) {//echo "\nline 696, name: ".$name.", recordNumber: ".$recordNumber."\n";
 					$name = str_ireplace(array("0", "1", "!", "|", "5", "2"), array("O", "l", "l", "l", "S", "Z"), $name);
 					//echo "\nline 2692, name: ".$name."\n";
 					if(preg_match("/^([A-Za-z.]{4,}\\s[A-Za-z.]{3,}).*/i", $name, $mats)) {
@@ -1669,6 +1628,33 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
+	protected function removeAuthority($line, $sciname) {
+		if($line) {
+			if($sciname) {
+				$sql = "SELECT author FROM taxa t WHERE t.sciName = '".$sciname."'";
+				if($rs = $this->conn->query($sql)) {
+					$author = "";
+					if($r = $rs->fetch_object()) $author = $r->author;
+					else {
+						$sql = "SELECT author FROM taxa t WHERE t.sciName = '".$this->formatSciname($sciname)."'";
+						if($rs = $this->conn->query($sql)) {
+							if($r = $rs->fetch_object()) $author = $r->author;
+						}
+					}
+					if(strlen($author) > 0) {
+						//echo "\n".$author."\nline: ".$line."\n/\(?".$author." ?\)?(.*)/i\n";
+						if(preg_match("/(.*)\(?".preg_quote($author, '/')." ?\)?(.*)/is", $line, $mats)) return trim(trim($mats[1])." ".trim($mats[2]));
+						else {
+							$author = str_replace(". ", ".", $author);
+							if(preg_match("/(.*)\(?".$author." ?\)?(.*)/is", $line, $mats)) return trim(trim($mats[1])." ".trim($mats[2]));
+						}
+					}
+				}
+			}
+			return $line;
+		} return "";
+	}
+
 	protected function isPossibleSciName($name) {//echo "\nInput to isPossibleSciName: ".$name."\n";
 		$name = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $name), " \t\n\r\0\x0B,.:;!\"\'\\~@#$%^&*_-");
 		$numPat = "/(.*)\\s\\w\\s(.*)/";
@@ -1691,20 +1677,22 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$sql = "SELECT * FROM taxa t WHERE t.sciName = '".$word0."'";
 					if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
 					if(strlen($word1) > 3 && strcasecmp($word1, "florida") != 0 && strcasecmp($word1, "americani") != 0
-						&& strcasecmp($word1, "clara") != 0 && strcasecmp($word1, "barbara") != 0 && strcasecmp($word1, "superior") != 0) {
+						&& strcasecmp($word1, "clara") != 0 && strcasecmp($word1, "barbara") != 0
+						&& strcasecmp($word1, "superior") != 0 && strcasecmp($word1, "minnesota") != 0
+						 && strcasecmp($word1, "acre") != 0) {
 						$sql = "SELECT * FROM taxa t WHERE t.unitName2 = '".$word1."'";
 						if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
 					}
 				}
 				if(count($words) > 3 && (strlen($word0) < 4 || strlen($word1) < 4 || strlen($words[2]) < 4)) {
 					$name2 = str_replace(array("\"", "'"), "", $word0.trim($word1).trim($words[2]));
+					//echo "\nline 760, sql: ".$sql."\n";
 					$sql = "SELECT * FROM taxa t WHERE t.sciName = '".$name2."'";
 					if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
 				}
 				if(count($words) < 6) {
 					$name2 = trim(str_replace(array("1", "!", "|", "5", "0", "\"", "'"), array("l", "l", "l", "S", "O", "", ""), $word0." ".trim($word1)));
 					$sql = "SELECT * FROM taxa t WHERE t.sciName = '".$name2."'";
-					//echo "\nline 1078, sql: ".$sql."\n";
 					if($r2s = $this->conn->query($sql)) if($r2s->num_rows > 0) return true;
 				}
 				if(preg_match("/^\\w{3,24}\\s\\w{3,24}\\s\([a-zA-Z01üé&. ]{1,14}\\.?\\s?\)\\s?(?:[A-Z]\\.\\s){0,2}[a-zA-Z01ü&. ]{2,19}\\.?$/", $name)) {
@@ -1846,6 +1834,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return preg_match("/\\d+/", $s);
 	}
 
+	protected function containsText($s) {
+		return preg_match("/[A-Za-z]+/", $s);
+	}
+
 	protected function isText($s) {
 		$splitChars = str_split($s);
 		foreach($splitChars as $splitChar) {
@@ -1855,13 +1847,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return TRUE;
 	}
 
-	protected function combineArrays($array1, $array2) {//combines 2 arrays.  Unlike the PHP array_merge function, if the second array has a value it overwrites
+	private function combineArrays($array1, $array2) {//combines 2 arrays.  Unlike the PHP array_merge function, if the second array has a value it overwrites
 		if($array1 && $array2) {
 			$result = array();
 			foreach($array2 as $k2 => $v2) {
-				if(is_array($v2)) {
-					if(count($v2) > 0) $result[$k2] = $v2;
-				} else if(strlen($v2) > 0) $result[$k2] = $v2;
+				if(!is_array($v2) && strlen($v2) > 0) $result[$k2] = $v2;
 			}
 			foreach($array1 as $k1 => $v1) if(!array_key_exists($k1, $result)) $result[$k1] = $v1;
 			return $result;
@@ -1915,16 +1905,18 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/\\bkm\\b/i", "/\\binternational\\b/i", "/ P(?i)arks?\\b/", "/ I(?i)sl(?:e|ands?)/", "/\\bcamp(?:grounds?)?\\b/i",
 			"/ F(?i)alls/", "/\\bcounty\\b/i", "/\\sdistrict\\b/i", "/\\bjunction\\b/i", "/\\sC(?i)anyon\\b/", "/ C(?i)reek\\b/",
 			"/ L(?i)oop\\b/", "/\\bservice\\b/", "/\\sstation\\b/", "/\\btown\\b/", "/\\bC(?i)oast\\b/", "/\\bS(?i)hore\\b/",
-			"/\\bpeninsula\\b/i", "/\\bentrance\\b/i", "/\\bL(?i)ake\\b/", "/\\sW(?i)ilderness\\b/", "/\\sR(?i)ange\\b/",
-			"/\\b(?:Nationa[l1|I!]|St(?:\\.|ate)|Nat[l1|I!]?\\.)\\sForest\\b/i", "/\\sP(?i)eak\\b/", "/\\sS(?i)prings\\b/",
-			"/\\b(?:Nationa[l1|I!]|St(?:\\.|ate)|Nat[l1|I!]?\\.|Prov[l1|I!]nc[l1|I!]a[l1|I!])\\sPark\\b/i", "/\\bdrive\\b/i",
-			"/ P(?i)reserve\\b/", "/\\bRd\\b/i", "/\\bR(?i)egion(?:a[l1|I!])?\\b/", "/\\b[O0](?i)utlook\\b/", "/\\bintersection\\b/i",
+			"/\\bpeninsula\\b/i", "/\\bentrance\\b/i", "/\\bL(?i)ake\\b/", "/\\sW(?i)ilderness\\b/", "/\\sR(?i)ange\\b/", "/\\bPass\\b/",
+			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.)\\s(?-i)F(?i)orest\\b/", "/\\bvicinit(?:y|ate)\\b/i",
+			"/\\sP(?i)eak\\b/", "/\\sS(?i)prings\\b/", "/\\bU\\. ?S\\. ?\\d{1,2}\\b/", "/\\bcamino\\b/", "/[A-Za-z]{3,} G(?i)ulch\\b/",
+			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.|(?-i)P(?i)rov[l1|I!]nc[l1|I!]a[l1|I!])\\s(?-i)P(?i)ark\\b/i",
+			"/\\bdrive\\b/i", "/[A-Za-z]{3,} R(?i)eserv(?:e|oir)\\b/", "/[A-Za-z]{3,} B(?i)utte\\b/",
+			"/ P(?i)reserve\\b/", "/\\bR(?i)d\\b/", "/\\bR(?i)egion(?:a[l1|I!])?\\b/", "/\\b[O0](?i)utlook\\b/", "/\\bintersection\\b/i",
 			"/\\bWildlife Management\\b/", "/\\bQuad\\b/i", "/\\sR(?i)anch\\b/", "/\\sstreet\\b/i", "/ Ave\\b/i", "/\\sLane\\b/i",
 			"/ Divide\\b/i", "/\\bMts?\\b/", "/\\bMount /i", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i",
 			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d/", "/ Gruppe\\b/", "/ A(?i)rea\\b/",
-			"/\\b[A-Z][A-Za-z]{2,} G(?i)u[l1|I!]ch\\b/", "/ T(?i)rail/", "/ B(?i)ay\\b/");
+			"/\\b[A-Z][A-Za-z]{2,} G(?i)u[l1|I!]ch\\b/", "/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/");
 		$result = 0;
-		foreach($lWords as $lWord) if(preg_match($lWord, $pLoc)) {/*echo "\nmatched: ".$lWord."\n";*/$result++;}
+		foreach($lWords as $lWord) if(preg_match($lWord, $pLoc)) {/*echo "\nlocality matched: ".$lWord."\n";*/$result++;}
 		if(preg_match("/.*\\s(?:N(?:[EW]|orth(?:east|west)?)?|S(?:[EW]|outh(?:east|west)?)?|E(?:ast)?|W(?:est)?)\\s[o0QD]f\\s.+/i", $pLoc)) $result++;
 		if($this->containsNumber($pLoc) && $result > 0 &&
 			!preg_match("/\\b(?:Jan(?:\\.|(?:ua\\w{1,2}))?|Feb(?:\\.|(?:rua\\w{1,2}))?|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:i[l1|I!]))?|May|Jun[.e]?|Ju[l1|I!][.y]?|Aug(?:\\.|(?:ust))?|[S5]ep(?:\\.|(?:t\\.?)|(?:temb\\w{1,2}))?|[O0]ct(?:\\.|(?:[O0]b\\w{1,2}))?|N[O0]v(?:\\.|(?:emb\\w{1,2}))?|Dec(?:\\.|(?:emb\\w{1,2}))?)\\b/i", $pLoc) &&
@@ -1935,10 +1927,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
 		$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
-		$hWords = array("field", "rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "p[l1|I!]ants?",
+		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "p[l1|I!]ants?", "humus",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix", "acer ",
-			"a[l1|I!]ders?", "tundra","abies", "calcareous", "slope", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone",
-			"sandy", "cedars?", "trees?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
+			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone", "stand",
+			"sandy", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
 			"aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate", "thuja", "shad(?:y|ed?)",
 			"(?:[a-z]{2})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
 			"f[l1|I!][0o]{2}dp[l1|I!]ain", "gneiss", "moss(?:es|y)?", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp",
@@ -1947,21 +1939,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "Sphagnum", "hemlocks?", "Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus",
 			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
 			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
-			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating");
+			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?");
 		$result = 0;
-		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nmatched: ".$hWord."\n";*/$result++;}
+		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
 		//return $result/count(explode(" ", $pHab));
-	}
-
-	protected function containsVerbatimAttribute($word) {
-		$vaWords = array("atranorin", "fatty acid", "cortex", "areolate", "medulla", "podetia", "apothecia", "thallus", "strain", "squamul",
-			"soredia", "fruticose", "fruiticose", "crustose", "corticolous", "saxicolous", "terricolous", "evernic acid",
-			"isidia", "TLC", "crystal", "stictic acid", "usnic acid", "salazinic acid", "parietin", "anthraquinone", "pigment");
-		foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
-		if(preg_match("/\\b[KPC][+-]\\b/", $word)) return true;
-		if(preg_match("/\\bUV[+-]\\b/", $word)) return true;
-		return false;
 	}
 
 	protected function convertSlashedDates($string) {//echo "\nInput to convertSlashedDates: ".$string."\n";
@@ -1997,7 +1979,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return false;
 	}
 
-	private function getStatesFromCountry($c) {
+	protected function getStatesFromCountry($c) {
 		$cResult = array();
 		if($c) {
 			$sql = "SELECT sp.stateName ".
@@ -2011,7 +1993,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return $cResult;
 	}
 
-	private function getCounties($state) {
+	protected function getCounties($state) {
 		$cResult = array();
 		if($state) {
 			$sql = "SELECT c.countyName ".
@@ -2025,7 +2007,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return $cResult;
 	}
 
-	private function getStateFromCounty($c, $ss=null, $country="") {
+	protected function getStateFromCounty($c, $ss=null, $country="") {
 		if($c) {
 			//$c = "Jackson";
 			$sql = "SELECT cr.countryName, sp.stateName FROM (lkupstateprovince sp ".
@@ -2062,7 +2044,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return array();
 	}
 
-	private function getCountryFromState($s) {
+	protected function getCountryFromState($s) {
 		if($s) {
 			//$c = "Jackson";
 			$sql = "SELECT c.countryName FROM lkupstateprovince sp INNER JOIN lkupcountry c ".
@@ -2076,7 +2058,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return '';
 	}
 
-	private function getPolticalInfoFromCounty($c, $ss=null) {
+	protected function getPolticalInfoFromCounty($c, $ss=null) {
 		if($c) {
 			$result = array();
 			$pos = strripos($c, " ");
@@ -2129,11 +2111,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getIdentifier($str, $possibleMonths) {//echo "\nInput to getIdentifier: ".$str."\n";
 		$identified_by = "";
-		$detPatStr = "/[^(]\\b(?:(?:D[ec][trf](?:[.:;,=]|[ec]rmin[ec]d)|(?:[Il!|]d[ec]nt[Il!|]f[Il!|][ec]d))(?:\\sb[vy])?)[;:]?\\s?(.+)(?:(?:\\n|\\r\\n)((?s).+))?/i";
-		if(preg_match($detPatStr, $str, $detMatches)) $identified_by = trim($detMatches[1], " .\t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
-		else {
+		$detPatStr = "/[^(]\\b(?:(?:D[ec][trf](?:[.:;,=1]|[ec]rmin[ec]d)|(?:[Il!|]d[ec]nt[Il!|]f[Il!|][ec]d))(?:\\sb[vy])?)[;:]?\\s?(.+)(?:(?:\\n|\\r\\n)((?s).+))?/i";
+		if(preg_match($detPatStr, $str, $detMatches)) {//$i=0;foreach($detMatches as $detMatche) echo "\ndetMatches[".$i++."] = ".$detMatche."\n";
+			$identified_by = trim($detMatches[1], " .\t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
+		} else {
 			$detPatStr = "/[^(]\\b(?:(?:D[ec][trf][ec]rmin[ec]r[sz]?)|(?:[Il!|]d[ec]nt[Il!|]f[Il!|][ec]r[sz]?))[;:]?\\s?(.+)(?:(?:\\n|\\r\\n)((?s).+))?/i";
-			if(preg_match($detPatStr, $str, $detMatches)) $identified_by = trim($detMatches[1], " .\t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
+			if(preg_match($detPatStr, $str, $detMatches)) {//$i=0;foreach($detMatches as $detMatche) echo "\ndetMatches[".$i++."] = ".$detMatche."\n";
+				$identified_by = trim($detMatches[1], " .\t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
+			}
 		}
 		if(strlen($identified_by) > 0) {
 			$date_identified = array();
@@ -2211,15 +2196,19 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(preg_match("/(.*)\\bDate\\b/i", $identified_by, $ms)) $identified_by = $ms[1];
 				if(preg_match("/(.*)\\bAlt\\b/i", $identified_by, $ms)) $identified_by = $ms[1];
 				if(preg_match("/(.*)\\bNo\\b/i", $identified_by, $ms)) $identified_by = $ms[1];
+				if(preg_match("/(.*)\\bAccession\\b/i", $identified_by, $ms)) $identified_by = $ms[1];
+				if(preg_match("/(.*)\\bUniversity\\b/i", $identified_by, $ms)) $identified_by = $ms[1];
+				if(preg_match("/.*\\bDet[;:. ]{1,2}(.+)/i", $identified_by, $ms)) $identified_by = $ms[1];
 				$identified_by = trim($identified_by, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
 			}
-			if(!$this->isMostlyGarbage2($identified_by, 0.50)) return array($identified_by, $date_identified);
+			if(!$this->isMostlyGarbage2($identified_by, 0.50) && $this->containsText($identified_by) && str_word_count($identified_by) < 7) return array($identified_by, $date_identified);
 			else return array("", $date_identified);
 		} else if(count($detMatches) > 2) return $this->getIdentifier(trim($detMatches[2]), $possibleMonths);
 		return null;
 	}
 
-	private function processCollectorName($lastName, $name) {
+	protected function processCollectorName($lastName, $name) {
+		$name = trim(preg_replace("/^Coll. ([A-Z])/i", "\${1}", $name));
 		$firstPart = trim(substr($name, 0, strpos($name, $lastName)));
 		if(preg_match("/.*\\b(?:Dr|Rev)\\.?(.+)/i", $firstPart, $mats)) $firstPart = trim($mats[1]);
 		if(substr_count($firstPart, " ") > 1) {
@@ -2375,7 +2364,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 									if(strcmp(substr(strrev($collectorNum), 0, 1), "(") == 0) $collectorNum = trim($collectorNum, " ()");
 								}
 							}
-							if(preg_match("/\\b(?:[1!l|I][89][OQ1!Il|ZS&0-9]{2}|[2Z][O0]{2}[OQ1!Il|ZS&0-9])/", $collectorNum)) $collectorNum = "";
+							if(preg_match("/\\b(?:[1!l|I][89][OQ1!Il|ZS&0-9]{2}|[2Z][O0]{2}[OQ1!Il|ZS&0-9])/", $collectorNum) || str_word_count($collectorNum) > 2) $collectorNum = "";
 						} else $collectorNum = "";
 						$cfds['collectorName'] = $collectorName;
 						$cfds['collectorNum'] = $collectorNum;
@@ -2394,13 +2383,13 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$count = count($sStrs);
 		if($count > 0) {
 			$possibleNumbers = "[OQSZl|I!&0-9]";
-			foreach($sStrs as $sStr) {//echo "\nline 10661, sStr: ".$sStr."\n";
+			foreach($sStrs as $sStr) {
 				$sStr = trim($sStr);
-				if(preg_match("/(?:(?:N(?:um(?:ber)?|o)\\.)|#)\\s?(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)$/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
-				if(preg_match("/N(?:um(?:ber)?|o)\\s(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)$/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
-				if(preg_match("/^(?:(?:N(?:um(?:ber)?|o)\\.)|#)\\s?(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
-				if(preg_match("/^N(?:um(?:ber)?|o)\\s(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
-				if(preg_match("/^N(?:um(?:ber)?|o)\\s(".$possibleNumbers."{1,5}+\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
+				if(preg_match("/(?:(?:N(?:um(?:ber)?|[o0])\\.)|#)\\s?(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)$/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
+				if(preg_match("/N(?:um(?:ber)?|[o0])\\s(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)$/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
+				if(preg_match("/^(?:(?:N(?:um(?:ber)?|[o0])\\.)|#)\\s?(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
+				if(preg_match("/^N(?:um(?:ber)?|[o0])\\s(".$possibleNumbers."{0,2}+,?".$possibleNumbers."{3}\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
+				if(preg_match("/^(?:(?:N(?:um(?:ber)?|[o0])[.,;:*#])|#)\\s(".$possibleNumbers."{1,5}+\\w?+)\\b/i", $sStr, $cMats)) return $this->replaceMistakenNumbers(trim($cMats[1]));
 				if(preg_match("/\\sSpecimen:\\s(.*)/i", $sStr, $cMats)) {
 					$temp = trim($cMats[1]);
 					if($this->containsNumber($temp)) return $temp;
@@ -2567,7 +2556,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$isIdentifier = true;
 				}
 				if(count($collMatches) > 2) $nextLine = trim($collMatches[2]);
-			} else if(preg_match("/(?<!Date )\\bC[o0D](?:[l1|!i]{2}|U)[ec]{2}t[ec]d[:,;. *](?!\\s?(?:on|during)\\s(?:the\\s)?)(.+)(?:\\n(.+))?/i", $str, $collMatches)) {
+			} else if(preg_match("/(?<!Date )\\bC[o0D](?:[l1|!i]{2}|U)[ec]{2}t[ec]d[:,;. *](?!\\s?(?:(?:on|during|at|in|near|from)\\s(?:the\\s)?)|with suppo)(.+)(?:\\n(.+))?/i", $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n1612, collMatches[".$i++."] = ".$collMatche."\n";
 				$collector = trim($collMatches[1]);
 				$collPatternStr = "/\\bC[o0D](?:[l1|!I]{2}|U)[ec]{2}t[ec]d[:,;. *](?:\\s?(?:and|&)\\s(?:det(?:[;:,.=]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)(?:\\n(.+))?/i";
 				if(preg_match($collPatternStr, trim($collMatches[0]), $collMatches2)) {
@@ -2593,40 +2582,25 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			} else if(preg_match("/C[o0D](?:[l1|!i]{2}|U)[ec]{2}t[o0]r?s?[:,;. *=]{1,3}(.+)(?:(?:\\r\\n|\\n|\\r)(.*))?/i", $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n11513, collMatches[".$i++."] = ".$collMatche."\n";
 				$collector = trim($collMatches[1]);
 				if(count($collMatches) > 2) $nextLine = trim($collMatches[2]);
-				$collPatternStr = "/(.*)\\b(?:(?:det(?:[;:,.=]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)/i";
+				$collPatternStr = "/(.*)\\b(?:(?:det(?:[;:,.=1]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)/i";
 				if(preg_match($collPatternStr, $collector, $collMatches2)) {
 					$collector = trim($collMatches2[1]);
 					$identifiedBy = trim($collMatches2[2]);
 				}
-			} else if(preg_match("/(.*)\\bC[o0D](?:[l1|!i]{2}|U)[:,;. *]{1,3}(?!\\s?Date)(.+)(?:(?:\\r\\n|\\n|\\r)(.*))?/i", $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n1982, collMatches[".$i++."] = ".$collMatche."\n";
+			} else if(preg_match("/(.*)\\bC[o0D](?:[l1|!i]{2}|U)s?[:,;. *]{1,3}(?!\\s?Date)(.+)(?:(?:\\r\\n|\\n|\\r)(.*))?/i", $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n1630, collMatches[".$i++."] = ".$collMatche."\n";
 				$collector = trim($collMatches[2]);
 				if(count($collMatches) > 3) $nextLine = trim($collMatches[3]);
-				$collPatternStr = "/(.*)\\bC[o0D](?:[l1|!I]{2}|U)[:,;. *]{1,3}(?:\\s?(?:and|&)\\s?(?:det(?:[;:,.=]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)(?:\\n(.+))?/i";
-				if(preg_match($collPatternStr, trim($collMatches[0]), $collMatches2)) {//$i=0;foreach($collMatches2 as $collMatche2) echo "\n1986, collMatches2[".$i++."] = ".$collMatche2."\n";
-					$collector = trim($collMatches2[2]);
+				$collPatternStr = "/(?:(?:and|&)\\s?(?:det(?:[;:,.=1]|ermined)|[l1|!i]dent[l1|!i]f[l1|!i]ed)(?:\\sb[vyg])?)[:,;. *]{1,3}(.+)(?:\\n(.+))?/i";
+				if(preg_match($collPatternStr, $collector, $collMatches2)) {//$i=0;foreach($collMatches2 as $collMatche2) echo "\n1634, collMatches2[".$i++."] = ".$collMatche2."\n";
+					$collector = trim($collMatches2[1]);
 					$isIdentifier = true;
-					if(preg_match("/^No. (.*)/i", $collector, $mats)) {
-						$collector = trim($collMatches2[1], " ,.");
-						$temp = trim($mats[1]);
-						if($this->containsNumber($temp)) {
-							$collectorNum = $temp;
-							if(preg_match("/(.*)(?:".$possibleMonths.")/", $collectorNum, $mats2)) $collectorNum = trim($mats2[1], " ,.");
-							if(strlen($collector) > 0 && strlen($collectorNum) > 0) {
-								return array
-								(
-									'collectorName' => $collector,
-									'collectorNum' => $collectorNum,
-									'identifiedBy' => $collector
-								);
-							}
-						}
-					} else if(preg_match("/(.{6,})No. (.*)/i", $collector, $mats)) {
+					if(preg_match("/(.{6,})No. (.+)/i", $collector, $mats)) {
 						$collector = trim($mats[1], " ,.");
 						$temp = trim($mats[2]);
 						if($this->containsNumber($temp)) {
 							$collectorNum = $temp;
 							if(preg_match("/(.*)(?:".$possibleMonths.")/", $collectorNum, $mats2)) $collectorNum = trim($mats2[1], " ,.");
-							if(strlen($collector) > 0 && strlen($collectorNum) > 0) {
+							if(strlen($collector) > 0 && strlen($collectorNum) > 0 && str_word_count($collectorNum) < 3) {
 								return array
 								(
 									'collectorName' => $collector,
@@ -2636,7 +2610,38 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							}
 						}
 					}
-				} else if(preg_match("/\\bb[vyg][:,;. *]{1,3}(.+)/i", $collector, $collMatches2)) $collector = trim($collMatches2[1]);
+				} else if(preg_match("/(.+)[:,;. *]{1,3}Det(?:[:,;. *1]|ermined)(?:\\sb[vyg])?[:,;. *]?(.+)/i", $collector, $collMatches2)) {//$i=0;foreach($collMatches2 as $collMatche2) echo "\n1727, collMatches2[".$i++."] = ".$collMatche2."\n";
+					$collector = trim($collMatches2[1]);
+					$identifiedBy = trim($collMatches2[2]);
+					$identifiedBy = trim(preg_replace("/(?:[!|I12Z]?[!|IZS0-9]|3[01!|I1]) (?:".$possibleMonths.") (?:[1!|!|I1]9[!|IZS0-9]{2}|[2Z]0[!|IZS0-9]{2})/", "", $identifiedBy));
+					if(preg_match("/(.+) (?:N[0o]|#)[:,;. *]?(.+)/i", $identifiedBy, $mats3)) {
+						$temp = trim($mats3[2]);
+						if($this->containsNumber($temp) && str_word_count($temp) < 6) {
+							return array
+							(
+								'collectorName' => $collector,
+								'collectorNum' => $temp,
+								'identifiedBy' => trim($mats3[1])
+							);
+						}
+					} else {
+						$pos = strrpos($identifiedBy, "  ");
+						if($pos === FALSE) $pos = strrpos($identifiedBy, " ");
+						if($pos !== FALSE) {
+							$temp2 = trim(substr($identifiedBy, $pos+1));
+							$temp = trim(substr($identifiedBy, 0, $pos));
+							if($this->containsNumber($temp2) && strlen($temp) > 0 && str_word_count($temp2) < 3) {
+								return array
+								(
+									'collectorName' => $collector,
+									'collectorNum' => $temp2,
+									'identifiedBy' => $temp
+								);
+							}
+						}
+					}
+				} else if(preg_match("/(?<! Confirmed )\\bb[vyg][:,;. *]{1,3}(.+)/i", $collector, $collMatches2)) $collector = trim($collMatches2[1]);
+				if(preg_match("/(.*)\\bDate\\b/i", $collector, $mats)) $collector = trim($mats[1]);
 			} else {
 				$collPatternStr = "/(?:\\r\\n|\\n|\\r)(.+),\\s?Co[l1!I]{2}(?:[,.*#]|ectors?)?\\b(?:(?:\\r\\n|\\n|\\r|\\s)(.*))?/i";
 				if(preg_match($collPatternStr, $str, $collMatches)) {
@@ -2659,7 +2664,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 					if(count($collMatches) > 2) {
 						$nextLine = $collMatches[2];
-						if($this->containsNumber($nextLine) && !preg_match("/.*(?:".$possibleMonths.").*/i", $nextLine)) {
+						if($this->containsNumber($nextLine) && !preg_match("/.*(?:".$possibleMonths.").*/i", $nextLine) && str_word_count($nextLine) < 3) {
 							$collectorNum = $nextLine;
 						}
 					}
@@ -2689,7 +2694,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-			if(strlen($collector) > 1) {//echo "\n11806, collector = ".$collector."\nnextLine: ".$nextLine."\n";
+			if(strlen($collector) > 1) {//echo "\n1799, collector = ".$collector."\nnextLine: ".$nextLine."\n";
 				$collector = trim($collector);
 				if(strlen($collector) <= 3 && strcasecmp(substr($collector, 0, 2), "No") == 0) $collector = "";
 				$collector = trim(preg_replace("/\\s{2,}/m", " ", $collector));
@@ -2703,6 +2708,24 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$nextLine = "";
 					}
 				}
+				if(preg_match("/(.*?)(?:No\\.?|#)\\s?([1-9!|lI][0-9OQ!|lI]?,[0-9OQ!|lI]{3}[abc]?)/i", $collector, $cMats)) {
+					if($isIdentifier) $identifiedBy = $collector;
+					return array
+					(
+						'collectorName' => trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+						'collectorNum' => trim($this->replaceMistakenNumbers(trim($cMats[2])), " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+						'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
+					);
+				}
+				if(preg_match("/(.*?)(?:No\\.?|#)\\s?([0-9OQ!|lI]+[abc]?)/i", $collector, $cMats)) {
+					if($isIdentifier) $identifiedBy = $collector;
+					return array
+					(
+						'collectorName' => trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+						'collectorNum' => trim($this->replaceMistakenNumbers(trim($cMats[2])), " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+						'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
+					);
+				}
 				if(preg_match("/(.*?)\(No\\.?\\s?([0-9OQ!|lI]+[abc]?)\)/i", $collector, $cMats)) {
 					if($isIdentifier) $identifiedBy = $collector;
 					return array
@@ -2714,11 +2737,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				}
 				if(preg_match("/(.*)\\bSpecimen:\\s(.*)/i", $collector, $cMats)) {
 					$temp = trim($cMats[2]);
-					if($this->containsNumber($temp)) {
+					if($this->containsNumber($temp) && str_word_count($temp) < 3) {
 						$collector  = trim($cMats[1]);
 						$collectorNum = $temp;
 					}
-				}
+				}//echo "\n1844, collector = ".$collector."\nnextLine: ".$nextLine."\n";
 				if(preg_match("/(.*?)\\s(?:[NW][o0Q][.ou]|#)(.*)/i", $collector, $cMats)) {
 					$collector = trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
 					$temp = trim($cMats[2]);
@@ -2784,7 +2807,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					if(preg_match($mPat, $temp, $dMatches)) {
 						if(count($dMatches) > 1) {
 							$temp = trim($dMatches[1]);
-							if(strlen($temp) > 1 && $this->containsNumber($temp)) $collectorNum = $temp;
+							if(strlen($temp) > 1 && $this->containsNumber($temp) && str_word_count($temp) < 3) $collectorNum = $temp;
 						}
 					}
 					$collector = trim($mats[1]);
@@ -2799,7 +2822,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strlen($collectorNum) > 0) {
 					$temp = $this->terminateCollectorNum($collectorNum);
 				}
-				if(strlen($collector) > 0 && strlen($collectorNum) == 0) {
+				if(strlen($collector) > 0 && strlen($collectorNum) == 0) {//echo "\n1925, collector = ".$collector."\nnextLine: ".$nextLine."\n";
 					$spacePos = strrpos($collector, " ");
 					if($spacePos !== FALSE) {//echo "\nline 6961, spacePos !== FALSE\n";
 						$potCollector = trim(substr($collector, 0, $spacePos));
@@ -2809,7 +2832,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							$potCollector = trim(substr($potCollector, 0, $spacePos));
 							$spacePos = strrpos($potCollector, " ");
 						}
-						if(strlen($potCollector) > 3 && $this->containsNumber($potCollNum)) {
+						if(strlen($potCollector) > 3 && $this->containsNumber($potCollNum) && str_word_count($potCollNum) < 3) {
 							$collector = $potCollector;
 							$collectorNum = $potCollNum;
 						}
@@ -2851,7 +2874,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					} else {
 						$lines = array_reverse(explode("\n", trim($str)));
-						$count = count($lines);;
+						$count = count($lines);
 						$index = 0;
 						$lastLine = trim($lines[0]);
 						while(strlen($lastLine) == 0 && $index < $count) {
@@ -2870,7 +2893,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						'collectorName' => trim($collector, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
 						'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
 						'otherCatalogNumbers' => $otherCatalogNumbers,
-						'identifiedBy' => $identifiedBy
+						'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
 					);
 				}
 			}
@@ -2888,16 +2911,34 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$result = $this->extractCollectorInfo($str, trim($collMatches[1]), trim($collMatches[2]));
 				if($result != null) return $result;
 			}
-			$collPatternStr = "/(.*)(?:\\r\\n|\\n|\\r)(.*)(?:\\r\\n|\\n|\\r)(.*)(?:\\r\\n|\\n|\\r)(.*)$/i";
-			if(preg_match($collPatternStr, $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n6995, collMatches[".$i++."] = ".$collMatche."\n";
-				$result = $this->extractCollectorInfo($str, trim($collMatches[4]));
-				if($result != null) return $result;
-				$result = $this->extractCollectorInfo($str, trim($collMatches[3]), trim($collMatches[4]));
-				if($result != null) return $result;
-				$result = $this->extractCollectorInfo($str, trim($collMatches[2]), trim($collMatches[3]));
-				if($result != null) return $result;
-				$result = $this->extractCollectorInfo($str, trim($collMatches[1]), trim($collMatches[2]));
-				if($result != null) return $result;
+			$collPatternStr = "/(?:(?:(.*)(?:\\r\\n|\\n|\\r)(.*))?(?:\\r\\n|\\n|\\r)(.*)(?:\\r\\n|\\n|\\r))?(.*)$/i";
+			if(preg_match($collPatternStr, $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n2034, collMatches[".$i++."] = ".$collMatche."\n";
+				$countMatches = count($collMatches);
+				if($countMatches == 5) {
+					$result = $this->extractCollectorInfo($str, trim($collMatches[4]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[3]), trim($collMatches[4]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[2]), trim($collMatches[3]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[1]), trim($collMatches[2]));
+					if($result != null) return $result;
+				} else if($countMatches == 4) {
+					$result = $this->extractCollectorInfo($str, trim($collMatches[3]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[2]), trim($collMatches[3]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[1]), trim($collMatches[2]));
+					if($result != null) return $result;
+				} else if($countMatches == 3) {
+					$result = $this->extractCollectorInfo($str, trim($collMatches[2]));
+					if($result != null) return $result;
+					$result = $this->extractCollectorInfo($str, trim($collMatches[1]), trim($collMatches[2]));
+					if($result != null) return $result;
+				} else if($countMatches == 2) {
+					$result = $this->extractCollectorInfo($str, trim($collMatches[1]));
+					if($result != null) return $result;
+				}
 			}
 			$collPatternStr = "/(.*)(?:\\r\\n|\\n|\\r)(.*)(?:\\r\\n|\\n|\\r)(.*)(?:\\r\\n|\\n|\\r)(.*)(?:\\n|\\n\\r)NEW \\w{4} BOTAN.+/i";
 			if(preg_match($collPatternStr, $str, $collMatches)) {//$i=0;foreach($collMatches as $collMatche) echo "\n6973, collMatches[".$i++."] = ".$collMatche.".\n";
@@ -2941,7 +2982,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return array();
 	}
 
-	protected function getCollectorFromDatabase($name, $string) {
+	private function getCollectorFromDatabase($name, $string) {
 		if(strlen($name) > 2) {//echo "\nInput to getCollectorFromDatabase, Name: ".$name.", String: ".$string."\n";
 			$sql = "SELECT c.recordedById, c.familyName, c.firstName, c.middleInitial ".
 				"FROM omcollectors c ".
@@ -2976,9 +3017,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	protected function getScientificName($s) {
-		$sciNamePatStr = "/Scientific Name[:;,]?\\b(.*)/i";
+		$sciNamePatStr = "/Scientific Name\\b[:;,]? (.*)/i";
 		if(preg_match($sciNamePatStr, $s, $sciNameMatches)) return trim($sciNameMatches[1]);
-		return null;
+		return "";
 	}
 
 	protected function getMunicipality($s) {
@@ -3004,25 +3045,23 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getLocality($s) {
 		//echo "\nInput to getLocality: ".$s."\n";
-		$locationPatStr = "/\\b(?:L|(?:\|\_))?[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)?[:;,)]?\\s(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
-		if(preg_match($locationPatStr, $s, $locationMatches)) {
+		$locationPatStr = "/\\n(?:L|(?:\|_))[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]?\\s(?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
+		if(preg_match($locationPatStr, $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2118, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
-			if(count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
+			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
-		} else {
-			$locationPatStr = "/\\bC[o0][il1!|]{2}[ec]{2}t[il1!|][o0]n\\sS[il1!|]te[:;,.]?\\s(.+)/i";
-			if(preg_match($locationPatStr, $s, $locationMatches)) {
-				$location = trim($locationMatches[1]);
-				if(count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
-				return $location;
-			} else {
-				$locationPatStr = "/\\b((?:\\w+\\s)*S[il1!|]te[:;,.]?\\s.+)(?:(?:\\n|\\r\\n)((?s).+))?/i";
-				if(preg_match($locationPatStr, $s, $locationMatches)) {
-					$location = trim($locationMatches[1]);
-					if(count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
-					return $location;
-				}
-			}
+		} if(preg_match("/\\bL[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]\\s(?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2122, locationMatches[".$i++."] = ".$locationMatche."\n";
+			$location = trim($locationMatches[1]);
+			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
+			return $location;
+		} else if(preg_match("/\\bC[o0][il1!|]{2}[ec]{2}t[il1!|][o0]n\\sS[il1!|]te[:;,.]\\s(.+)/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2126, locationMatches[".$i++."] = ".$locationMatche."\n";
+			$location = trim($locationMatches[1]);
+			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
+			return $location;
+		} else if(preg_match("/\\n(S(?i)[il1!|]te[:;.]\\s.+)(?:(?:\\n|\\r\\n)((?s).+))?/", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2130, locationMatches[".$i++."] = ".$locationMatche."\n";
+			$location = trim($locationMatches[1]);
+			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
+			return $location;
 		}
 	}
 
@@ -3049,33 +3088,41 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getHabitat($string) {//echo "\nInput to getHabitat: ".$string."\n\n";
 		if(strlen($string) > 0) {
-			$habitatPatStr = "/((?s).+)\\b(?:Micro)?Hab(?:[il1!|]tat)?[:;,.]?\\s(.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)(?:\\r\\n|\\n\\r|\\n|\\r)/i";
-			if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nfirst Match\n";
-				$firstPart = trim($habitatMatches[1]);
-				$habitat = trim($habitatMatches[2]);
-				$nextLine = trim($habitatMatches[3]);
-				//echo "\nline 7600, firstPart: ".$firstPart.", habitat: ".$habitat.", nextLine: ".$nextLine."\n\n";
-				return array($firstPart, $habitat, $nextLine);
+			$string = preg_quote($string, "/");
+			$habitatPatStr = "/((?s).+)\\n(?:Micro)?Hab[il1!|]tat[:;,.]? (.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)(?:\\r\\n|\\n\\r|\\n|\\r)/i";
+			if(preg_match($habitatPatStr, $string, $habitatMatches)) {//$i=0;foreach($habitatMatches as $habitatMatche) echo "\nhabitatMatches[".$i++."] = ".$habitatMatche."\n";
+				$firstPart = stripslashes(trim($habitatMatches[1]));
+				$habitat = stripslashes(trim($habitatMatches[2]));
+				$nextLine = stripslashes(trim($habitatMatches[3]));
+				//echo "\nline 2148, firstPart: ".$firstPart.", habitat: ".$habitat.", nextLine: ".$nextLine."\n\n";
+				if(!$this->isMostlyGarbage($habitat, 0.51) && !preg_match("/^.{0,3}(?:Co[il1!|]{2}ect[^i]|Det(?:\\.|ermine))/i", $habitat)) return array($firstPart, str_replace(array("\r\n", "\n", "\r"), array(" ", " ", " "), $habitat), $nextLine);
 			} else {
-				$habitatPatStr = "/((?s).+)\\b(?:Micro)?Hab(?:[il1!|]tat)?[:;,.]?\\s(.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)/i";
+				$habitatPatStr = "/((?s).+)\\n(?:Micro)?Hab[il1!|]tat[:;,.]? (.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)/i";
 				if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nsecond Match\n";
-					$firstPart = trim($habitatMatches[1]);
-					$habitat = trim($habitatMatches[2]);
-					$nextLine = trim($habitatMatches[3]);
-					return array($firstPart, $habitat, $nextLine);
+					$firstPart = stripslashes(trim($habitatMatches[1]));
+					$habitat = stripslashes(trim($habitatMatches[2]));
+					$nextLine = stripslashes(trim($habitatMatches[3]));
+					if(!$this->isMostlyGarbage($habitat, 0.51) && !preg_match("/^.{0,3}(?:Co[il1!|]{2}ect[^i]|Det(?:\\.|ermine))/i", $habitat)) return array($firstPart, str_replace(array("\r\n", "\n", "\r"), array(" ", " ", " "), $habitat), $nextLine);
 				} else {
-					$habitatPatStr = "/((?s).+)\\b(?:Micro)?Hab(?:[il1!|]tat)?[:;,.]?\\s(.+)/i";
+					$habitatPatStr = "/((?s).+)\\n(?:Micro)?Hab[il1!|]tat[:;,.]? (.+)/i";
 					if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nthird Match\n";
-						$firstPart = trim($habitatMatches[1]);
-						$habitat = trim($habitatMatches[2]);
-						return array($firstPart, $habitat, "");
+						$firstPart = stripslashes(trim($habitatMatches[1]));
+						$habitat = stripslashes(trim($habitatMatches[2]));
+						if(!$this->isMostlyGarbage($habitat, 0.51) && !preg_match("/^.{0,3}(?:Co[il1!|]{2}ect[^i]|Det(?:\\.|ermine))/i", $habitat)) return array($firstPart, str_replace(array("\r\n", "\n", "\r"), array(" ", " ", " "), $habitat), "");
 					} else {
-						$habitatPatStr = "/((?s).+)(?:\\n|\\r\\n)S[il1!|]te[:;,.]?\\s(.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)(?:\\r\\n|\\n\\r|\\n|\\r)/i";
-						if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nfourth Match\n";
-							$firstPart = trim($habitatMatches[1]);
-							$habitat = trim($habitatMatches[2]);
-							$nextLine = trim($habitatMatches[3]);
-							return array($firstPart, $habitat, $nextLine);
+						$habitatPatStr = "/((?s).+) (?:Micro)?Hab[il1!|]tat[:;,.] (.+)/i";
+						if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nthird Match\n";
+							$firstPart = stripslashes(trim($habitatMatches[1]));
+							$habitat = stripslashes(trim($habitatMatches[2]));
+							if(!$this->isMostlyGarbage($habitat, 0.51) && !preg_match("/^.{0,3}(?:Co[il1!|]{2}ect[^i]|Det(?:\\.|ermine))/i", $habitat)) return array($firstPart, str_replace(array("\r\n", "\n", "\r"), array(" ", " ", " "), $habitat), "");
+						} else {
+							$habitatPatStr = "/((?s).+)(?:\\n|\\r\\n)S[il1!|]te[:;,.]? (.+)(?:\\r\\n|\\n\\r|\\n|\\r)((?s).+)(?:\\r\\n|\\n\\r|\\n|\\r)/i";
+							if(preg_match($habitatPatStr, $string, $habitatMatches)) {//echo "\nfourth Match\n";
+								$firstPart = stripslashes(trim($habitatMatches[1]));
+								$habitat = stripslashes(trim($habitatMatches[2]));
+								$nextLine = stripslashes(trim($habitatMatches[3]));
+								if(!$this->isMostlyGarbage($habitat, 0.51) && !preg_match("/^.{0,3}(?:Co[il1!|]{2}ect[^i]|Det(?:\\.|ermine))/i", $habitat)) return array($firstPart, str_replace(array("\r\n", "\n", "\r"), array(" ", " ", " "), $habitat), $nextLine);
+							}
 						}
 					}
 				}
@@ -3087,39 +3134,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function getSubstrate($string) {
 		if(strlen($string) > 0) {
 			$sub = "";
-			$subPatStr = "/Substrat(?:e|um)[:;,.]?(.+)(?:\\s|\\n|\\r\\n)/i";
+			$subPatStr = "/\\nSubstrat(?:e|um)[:;,.]?(?: is\\b)?(.+)(?:\\s|\\n|\\r\\n)/i";
 			if(preg_match($subPatStr, $string, $subMatches)) $sub = trim($subMatches[1]);
-			/*else {
-				$subPatStr = "/\\bOn\\s((?:[(A-Za-z),;:.&\-']+?\\s)+)/i";
-				if(preg_match($subPatStr, $string, $subMatches)) $sub = trim($subMatches[1]);
-			}
-			if(strlen($sub) > 0) {
-				$pos = stripos($sub, " in ");
-				if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-				else {
-					$pos = stripos($sub, " along ");
-					if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-					else {
-						$pos = stripos($sub, " above ");
-						if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-						else {
-							$pos = stripos($sub, " below ");
-							if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-							else {
-								$pos = stripos($sub, " elev");
-								if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-								else {
-									$pos = stripos($sub, " near");
-									if($pos > 0) $sub = trim(substr($sub, 0, $pos));
-								}
-							}
-						}
-					}
-				}
-			}
-			$inappropriateWords = array("road", "north", "south", "east", "west", "highway", "hiway", "area", "state",
-				"valley", "slope", "route", "Rd.", "Co.", "County");
-			foreach($inappropriateWords as $inappropriateWord) if(stripos($sub, $inappropriateWord) !== FALSE) $sub = "";*/
+			else if(preg_match("/ Substrat(?:e|um)[:;] (.+)(?:\\s|\\n|\\r\\n)/i", $string, $subMatches)) $sub = trim($subMatches[1]);
 			$sub = trim($sub, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
 			if(strlen($sub) > 2 && !$this->isMostlyGarbage($sub, 0.48)) return $sub;
 		}
@@ -3161,10 +3178,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function getElevation($string) {
 		if(strlen($string) > 0) {//echo "\nInput to getElevation: ".$string."\n";
 			$possibleNumbers = "[OQSZl|I!&0-9^]";
-			$elevPatStr = "/(.*?)\\b((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[SZl|I!&1-9])(?:\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[SZl|I!&1-9]))?)\\s(m\\.?s\\.?m[,.;:]{0,2})\\s(.*)/is";
+			$elevPatStr = "/(.*?)\\b((?:[SZl|I!&1-9],".$possibleNumbers."{3}|[SZl|I!&1-9]".$possibleNumbers."{1,3}|[SZl|I!&1-9])".
+				"(?: ?- ?(?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[SZl|I!&1-9]))?)\\s(m\\.?s\\.?m[,.;:]{0,2})\\s?(.*)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
 				//foreach($elevMatches as $elevMatche) echo "\nelevMatches0[".$i++."]: ".$elevMatche."\n";
@@ -3193,7 +3209,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					array("5", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "about", "above", "above", "above", "meters"),
 					trim($elevMatches[2])
 				);
-				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[1]));
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
 			}
 			$elevPatStr = "/(?:(?(?=(?:.*?)(?:(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|Alt(?:\\.|itude)?)[:;,]?)\\s".
 				"(?:(?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
@@ -3447,19 +3463,23 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$c = trim($mats1)." and ".trim($mats2);
 					$containsAmpersand = true;
 				}
-				$sql = "select lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
+				$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
 					"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
 					"on lk1.stateid = lk2.stateid ".
 					"where lk1.countyName = '".str_replace(array("\"", "'"), "", $c)."'";
 				if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
-				if($r2s = $this->conn->query($sql)) {
-					$num_rows = $r2s->num_rows;
+				if($rs = $this->conn->query($sql)) {
+					$num_rows = $rs->num_rows;
 					if($num_rows > 0) {
-						if($containsAmpersand) $c = $mats1."&".$mats2;
-						while($r2 = $r2s->fetch_object()) {
-							array_push($result, array('county' => ucwords(strtolower($c)), 'stateProvince' => $r2->stateName, 'country' => $r2->countryName));
+						if($r = $rs->fetch_object()) {
+							$c = $r->countyName;
+							if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
+							array_push($result, array('county' => $c, 'stateProvince' => $r->stateName, 'country' => $r->countryName));
+							while($r = $rs->fetch_object()) {
+								array_push($result, array('county' => $c, 'stateProvince' => $r->stateName, 'country' => $r->countryName));
+							}
+							return $result;
 						}
-						return $result;
 					} else {
 						$c = ucwords
 						(
@@ -3467,23 +3487,65 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							(
 								str_replace
 								(
-									array('1', '!', '|', '5', '2', '0', 'ST.', 'St.', '[', ']', '(', ')', '"', '\''),
-									array('l', 'l', 'l', 'S', 'Z', 'O', 'Saint', 'Saint', '', '', '', '', '', ''),
+									array('1', '!', '|', '5', '2', '0', 'ST.', 'St.', '[', ']', '(', ')', '"', '\'', '-'),
+									array('l', 'l', 'l', 'S', 'Z', 'O', 'Saint', 'Saint', '', '', '', '', '', '', ' '),
 									$c
 								)
 							)
 						);
-						$sql = "select lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
+						$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
 							"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
 							"on lk1.stateid = lk2.stateid ".
 							"where lk1.countyName = '".$c."'";
 						if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
-						if($r3s = $this->conn->query($sql)) {
-							if($containsAmpersand) $c = $mats1."&".$mats2;
-							while($r3 = $r3s->fetch_object()) {
-								array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
+						if($r2s = $this->conn->query($sql)) {
+							$num_rows = $r2s->num_rows;
+							if($num_rows > 0) {
+								if($r2 = $r2s->fetch_object()) {
+									$c = $r2->countyName;
+									if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
+									array_push($result, array('county' => $c, 'stateProvince' => $r2->stateName, 'country' => $r2->countryName));
+									while($r2 = $r2s->fetch_object()) {
+										array_push($result, array('county' => $c, 'stateProvince' => $r2->stateName, 'country' => $r2->countryName));
+									}
+									return $result;
+								}
+							} else if(stripos($c, "berg") !== FALSE) {
+								$c = str_ireplace("berg", "burg", $c);
+								$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
+									"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
+									"on lk1.stateid = lk2.stateid ".
+									"where lk1.countyName = '".$c."'";
+								if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
+								if($r3s = $this->conn->query($sql)) {
+									if($r3 = $r3s->fetch_object()) {
+										$c = $r3->countyName;
+										if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
+										while($r3 = $r3s->fetch_object()) {
+											array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
+										}
+										return $result;
+									}
+								}
+							} else if(stripos($c, "burg") !== FALSE) {
+								$c = str_ireplace("burg", "berg", $c);
+								$sql = "select lk1.countyName, lk2.stateName, lk3.countryName from lkupcounty lk1 INNER JOIN ".
+									"(lkupstateprovince lk2 inner join lkupcountry lk3 on lk2.countryid = lk3.countryid) ".
+									"on lk1.stateid = lk2.stateid ".
+									"where lk1.countyName = '".$c."'";
+								if(strlen($state_province) > 0) $sql .= " AND lk2.stateName = '".$state_province."'";
+								if($r3s = $this->conn->query($sql)) {
+									if($r3 = $r3s->fetch_object()) {
+										$c = $r3->countyName;
+										if($containsAmpersand) $c = str_ireplace(" and ", " & ", $c);
+										array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
+										while($r3 = $r3s->fetch_object()) {
+											array_push($result, array('county' => $c, 'stateProvince' => $r3->stateName, 'country' => $r3->countryName));
+										}
+										return $result;
+									}
+								}
 							}
-							return $result;
 						}
 					}
 				}
@@ -3491,75 +3553,42 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	private function processCountyMatches($firstPart, $middlePart, $lastPart) {//echo "\nLine 1290, Input to processCountyMatches, firstPart: ".$firstPart."\nmiddlePart: ".$middlePart."\nlastPart: ".$lastPart."\n";
+	private function processCountyMatches($firstPart, $lastPart) {//echo "\nLine 2574, Input to processCountyMatches, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
 		$countyArray = null;
 		$possibleState = "";
 		$county = "";
 		$possibleCountry = "";
+		$nextWord = "";
 		$firstPart = trim($firstPart, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-");
-		$middlePart = trim($middlePart, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-");
 		$lastPart = trim($lastPart, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-");
 		if(strpos($lastPart, "\n") !== FALSE) {
 			$nextWords = explode("\n", $lastPart);
 			$nextWord = trim($nextWords[0], " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
 		} else $nextWord = trim($lastPart, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
-
 		if(strpos($firstPart, "\n") !== FALSE) {
 			$prevLines = array_reverse(explode("\n", $firstPart));
 			$num = 0;
-			if(strlen($middlePart) > 0) {
-				$countyArray = $this->processCountyString($middlePart, $nextWord);
-				if($countyArray != null && count($countyArray) > 0) {
-					if(count($countyArray) == 1) return $countyArray[0];
-					else {
-						foreach($countyArray as $vs) {
-							$county = $vs['county'];
-							if(array_key_exists('stateProvince', $vs)) {
-								$possibleState = $vs['stateProvince'];
-								foreach($prevLines as $prevLine) {
-									if(stripos($prevLine, $possibleState) !== FALSE) return $vs;
-									else {
-										$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $county, $possibleState);
-										if($temp) return $vs;
-									}
-								}
-							}
-						}
-					}
-				}
-			} else {
-				$i=0;
-				foreach($prevLines as $prevLine) {
-					if($i++ < 2) {
-						if($countyArray == null || count($countyArray) == 0) {
-							$countyArray = $this->processCountyString($prevLine, $nextWord);
-							if($countyArray != null && count($countyArray) > 0) {
-								if(count($countyArray) == 1)  return array_pop($countyArray);
-								else {
-									foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 1332, ".$k.": ".$v."\n";
-										if(array_key_exists('stateProvince', $vs)) {
-											$possibleStateProvince = $vs['stateProvince'];
-											if(stripos($prevLine, $possibleStateProvince) !== FALSE) return $vs;
-											else {
-												$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $possibleStateProvince);
-												if($temp) return $vs;
-											}
+			$i=0;
+			foreach($prevLines as $prevLine) {
+				if($i++ < 2) {
+					if($countyArray == null || count($countyArray) == 0) {
+						$countyArray = $this->processCountyString($prevLine, $nextWord);
+						if($countyArray != null && count($countyArray) > 0) {
+							if(count($countyArray) == 1)  return array_pop($countyArray);
+							else {
+								foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 795, ".$k.": ".$v."\n";
+									if(array_key_exists('stateProvince', $vs)) {
+										$possibleStateProvince = $vs['stateProvince'];
+										if(stripos($prevLine, $possibleStateProvince) !== FALSE) return $vs;
+										else {
+											$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $possibleStateProvince);
+											if($temp) return $vs;
 										}
 									}
 								}
 							}
-						} else {
-							foreach($countyArray as $vs) {
-								if(array_key_exists('stateProvince', $vs)) {
-									if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
-									else {
-										$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $vs['stateProvince']);
-										if($temp) return $vs;
-									}
-								}
-							}
 						}
-					} else if($countyArray != null && count($countyArray) > 0) {
+					} else {
 						foreach($countyArray as $vs) {
 							if(array_key_exists('stateProvince', $vs)) {
 								if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
@@ -3570,6 +3599,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							}
 						}
 					}
+				} else if($countyArray != null && count($countyArray) > 0) {
+					foreach($countyArray as $vs) {//foreach($vs as $k => $v) echo "\nline 788, ".$k.": ".$v."\n";
+						if(array_key_exists('stateProvince', $vs)) {
+							if(stripos($prevLine, $vs['stateProvince']) !== FALSE) return $vs;
+							else {
+								$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $prevLine." ".$nextWord), $vs['county'], $vs['stateProvince']);
+								if($temp) return $vs;
+							}
+						}
+					}
 				}
 			}
 			if($countyArray != null && count($countyArray) > 0) {
@@ -3577,25 +3616,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strcasecmp($county, "Park") != 0) return array('county' => $county);//park is so common in the labels it should not be returned unless its state is found
 			}
 		} else {
-			if(strlen($middlePart) > 0) {
-				$countyArray = $this->processCountyString($middlePart, $nextWord);
-				if($countyArray != null && count($countyArray) > 0) {
-					if(count($countyArray) == 1) return $countyArray[0];
-					else {
-						foreach($countyArray as $vs) {
-							if(array_key_exists('stateProvince', $vs)) {
-								if(stripos($firstPart, $vs['stateProvince']) !== FALSE) return $vs;
-								else {
-									$temp = $this->fetchStateAndCountryFromLine(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $firstPart." ".$nextWord), $vs['county'], $vs['stateProvince']);
-									if($temp) return $vs;
-								}
-							}
-						}
-						$county = $countyArray[0]['county'];
-						if(strcasecmp($county, "Park") != 0) return array('county' => $county);//park is so common in the labels it should not be returned unless its state is found
-					}
-				}
-			} else if(strlen($firstPart) > 0) {
+			if(strlen($firstPart) > 0) {
 				$countyArray = $this->processCountyString($firstPart, $nextWord);
 				if($countyArray != null && count($countyArray) > 0) {
 					if(count($countyArray) == 1) return $countyArray[0];
@@ -3930,50 +3951,40 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	private function getCountyMatches($c, $state_province="") {//echo "\nLine 1183, Input to getCountyMatches: ".$c."\n";
+	private function getCountyMatches($c, $state_province="") {//echo "\nLine 3140, Input to getCountyMatches: ".$c."\n";
 	//this function has the side-effect of removing double quotes
-		$countyPatStr = "/(?:(?(?=(?:.*+)(?:(?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\b(?:C[o0q]un[tf]y|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b[,:]?(?:.*)))".
+		if($c) {
+			$tempC = str_replace("\"", "", $c);
+			$countyPatStr = "/(.{3,})(?:C[o0q]un[tf][yv]|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;](.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(.*+)((?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\b(?:C[o0q]un[tf]y|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\b[,:]?(.*)|".
+			$countyPatStr = "/(.{3,})(?:C[o0q]un[tf][yv]|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[,.] (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(?:(?(?=(?:.*+)(?:(?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\bCo\\.(?:.*)))".
+			$countyPatStr = "/(.{3,})\\b(?:C[o0][.,]?)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;] (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(.*+)((?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\bCo\\.(.*)|".
+			$countyPatStr = "/(.*)\\n(?:C[o0][.,]?)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;,] (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(?:(?(?=(?:.*+)(?:(?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\bCo,(?:.*)))".
+			$countyPatStr = "/(.{3,})(?:C[o0q]un[tf][yv]|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))\\b(.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(.*+)((?:[!|150a-zA-Z]+(?:\\.?\\s?[!|150a-zA-Z]*))".
-			"(?:\\.?\\s?[!|150a-zA-Z]*)?)?\\s?\\bCo,(.*)|".
+			$countyPatStr = "/(.*)\\n(?:C[o0q]un[tf][yv]|Par[il!|]sh|B[o0]r[o0]ugh)[:;,.] (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(?:(?(?=(?:.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?[,:]?+(?:.*)))".
+			$countyPatStr = "/(.{3,})\\b(?:C[o0q][.,]|Go\\.)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;,]? (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(.*)\\b(?:C[o0q](?:(?:unty)|\\.)|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?[,:]?+(.*)|".
+			$countyPatStr = "/(.{3,})\\b(?:C[o0q][.,])(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;,]?(.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 
-			"(?:(?(?=(?:.*)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))\\s?:?+(?:.*)))".
-
-			"(.*?)\\b(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))[,:]?\\s?:?+(.*)|".
-
-			"(.*?)(?:\\n\\r|\\r\\n|\\n|\\r|\\s)(?:Co[,.]|Go\\.|Par[il!|]sh|B[o0]r[o0]ugh)(?!(?:(?i)\\s(?:Road|Hiway|Hwy|Highway|line)))[,:]?+(.*))))))/is";
-
-		$tempC = str_replace("\"", "", $c);
-		if(preg_match($countyPatStr, $tempC, $countyMatches)) {
-			//$i = 0;
-			//foreach($countyMatches as $countyMatch) echo "\ncountyMatches[".$i++."] = ".$countyMatch."\n";
-			if(count($countyMatches) > 14) return array($countyMatches[14], "", $countyMatches[15]);
-			else if(count($countyMatches) > 12) return array($countyMatches[12], "", $countyMatches[13]);
-			else if(count($countyMatches) > 10) return array($countyMatches[10], "", $countyMatches[11]);
-			else if(count($countyMatches) > 7) return array($countyMatches[7], $countyMatches[8], $countyMatches[9]);
-			else if(count($countyMatches) > 4) return array($countyMatches[4], $countyMatches[5], $countyMatches[6]);
-			else if(count($countyMatches) > 0) return array($countyMatches[1], $countyMatches[2], $countyMatches[3]);
+			$countyPatStr = "/(.*)\\n(?:C[o0q][.,]?)(?!(?:\\s(?:Road|Rd|Hiway|Hwy|Highway|line)))[:;,]? (.*)/is";
+			if(preg_match($countyPatStr, $tempC, $countyMatches)) return array($countyMatches[1], $countyMatches[2]);
 		}
 	}
 
-	protected function findCounty($c, $state_province="") {//echo "\nLine 1193, Input to findCounty: ".$c."\n";
+	protected function findCounty($c, $state_province="") {//echo "\nLine 3002, Input to findCounty: ".$c."\nstate_province: ".$state_province."\n";
 		$firstPart = "";
 		$secondPart = "";
 		$lastPart = "";
@@ -3982,15 +3993,20 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$county = "";
 		$country = "";
 		$cm = $this->getCountyMatches($c);
-		if($cm != null) {
+		if($cm != null) {//$i=0;foreach($cm as $m) echo "\nLine 3187, cm[".$i++."] = ".$m."\n";
 			$firstPart = trim($cm[0]);
-			$secondPart = trim($cm[1]);
-			$lastPart = trim($cm[2]);
-			$cs = $this->processCountyMatches($firstPart, $secondPart, $lastPart);
+			$lastPart = trim($cm[1]);
+			$cs = $this->processCountyMatches($firstPart, $lastPart);
 			if($cs != null) {
 				$county = $cs['county'];
-				if(array_key_exists('stateProvince', $cs)) $state = $cs['stateProvince'];
-				if(array_key_exists('country', $cs)) $country = $cs['country'];
+				if(array_key_exists('stateProvince', $cs)) {
+					$sp = $cs['stateProvince'];
+					if(strlen($sp) > 0) $state = $sp;
+				}
+				if(array_key_exists('country', $cs)) {
+					$t = $cs['country'];
+					if(strlen($t) > 0) $country = $t;
+				}
 			}
 		}
 		if(strlen($county) == 0) {
@@ -3998,10 +4014,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$counties = $this->getCounties($state_province);
 				if(count($counties) > 0) {
 					foreach($counties as $countie) {
-						if(strlen($secondPart) > 0) {
-							$county = $this->findTokenAtEnd($secondPart, $countie);
-							if(strlen($county) > 0) break;
-						} else if(strlen($firstPart) > 0) {
+						if(strlen($firstPart) > 0) {
 							$county = $this->findTokenAtEnd($firstPart, $countie);
 							if(strlen($county) > 0) break;
 						}
@@ -4014,9 +4027,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$cm = $this->getCountyMatches($firstPart);
 			if($cm != null) {
 				$firstPart = trim($cm[0]);
-				$secondPart = trim(trim($cm[1])." ".$secondPart);
-				$lastPart = trim($cm[2])." ".$lastPart;
-				$cs = $this->processCountyMatches($firstPart, $secondPart, $lastPart);
+				$lastPart = trim($cm[1])." ".$lastPart;
+				$cs = $this->processCountyMatches($firstPart, $lastPart);
 				if($cs != null) {
 					$county = $cs['county'];
 					if(array_key_exists('stateProvince', $cs)) $state = $cs['stateProvince'];
@@ -4029,10 +4041,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$counties = $this->getCounties($state_province);
 				if(count($counties) > 0) {
 					foreach($counties as $countie) {
-						if(strlen($secondPart) > 0) {
-							$county = $this->findTokenAtEnd($secondPart, $countie);
-							if(strlen($county) > 0) break;
-						} else if(strlen($firstPart) > 0) {
+						if(strlen($firstPart) > 0) {
 							$county = $this->findTokenAtEnd($firstPart, $countie);
 							if(strlen($county) > 0) break;
 						}
@@ -4057,10 +4066,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$pos = strpos($county, ".");
 			if($pos !== FALSE) {
 				$temp = trim(substr($county, 0, $pos));
-				if(strlen($temp) > 3) {
-					$county = trim(substr($county, $pos+1));
-					$secondPart .= " ".$temp;
-				}
+				if(strlen($temp) > 3) $county = trim(substr($county, $pos+1));
 			}
 			if(strlen($state) > 0) {
 				$tState = substr($state, 0, strlen($state)-1);
@@ -4110,6 +4116,10 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					);
 				}
 			}
+			if(strlen($state_province) > 0) {
+				$state = $state_province;
+				if($this->isUSState($state_province)) $country = "USA";
+			}
 			$county = ucwords
 			(
 				strtolower
@@ -4122,11 +4132,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					)
 				)
 			);
-			return array($firstPart, $secondPart, $county, $country, $lastPart, $state);
+			return array($firstPart, $county, $country, $lastPart, $state);
 		}
 	}
 
-	private function getNumericMonth($m) {//echo "\nInput to getNumericMonth: ".$m."\n";
+	protected function getNumericMonth($m) {//echo "\nInput to getNumericMonth: ".$m."\n";
 		$index = 1;
 		$monthArray = array
 		(
@@ -4152,7 +4162,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 //gets dates in the form DayMonthYear.  If not found it will get dates like Month, Year
-	private function getDMYDates($str, $possibleMonths) {
+	protected function getDMYDates($str, $possibleMonths) {
 		$results = array();
 		if($str) {
 			$datePatternStr = "/(?:(?(?=(?:.*)\\b(?:\\d{1,2})[-\\s]?(?:(?i)".$possibleMonths.")[-\\s]?(?:\\d{4})))".
@@ -4178,7 +4188,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return $results;
 	}
 
-	private function getMDYDates($str, $possibleMonths) {
+	protected function getMDYDates($str, $possibleMonths) {
 		$results = array();
 		if($str) {
 			$datePatternStr = "/(.*)\\b((?i)".$possibleMonths.")\\s?(\\d{1,2}),?\\s(\\d{4})(.*)/s";
@@ -4191,7 +4201,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return $results;
 	}
 
-	private function getNumericDates($str) {
+	protected function getNumericDates($str) {
 		$results = array();
 		$letterMonths = array
 		(
@@ -4523,12 +4533,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
 			$pattern =
 				array(
+				"/[_-]{3,}/",
+				"/([A-Za-z])Co\\., ([A-Z])/",
 				"/^LEWIS\\sAND\\sCLARK\\s?CAVERNS\\s?STATE\\sPARK/m",
+				"/LOUISIANA STATE UNIVERSITY(?:\\r\\n| )HERBARIUM/is",
+				"/[|!1I ]{9,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
 				"/[\|!Iil\"'1U~()@\[\]{}H\/\\\]{6,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
 				"/^.{1,2}$/m", //one-character lines (Tesseract must generate a 2-char end of line)
 				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
 				);
-			$replacement = array("LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "\${1}\${2}\$3 \${4}".chr(176));
+			$replacement = array(" ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
 			$str = preg_replace($pattern, $replacement, $str, -1);
 			$str = str_replace("Â°", chr(176), $str);
 			$str = $this->replaceMissingDegreeSignsInLatLongs($str);
@@ -4839,8 +4853,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					'Alabama'=>'/^(?:A[il!|1]abama|A[il!|1]\\.?|A[il!|1]a\\.?)$/i',
 					'Alaska'=>'/^(?:A[il!|1]aska|AK\\.?)$/i',
 					'Arkansas'=>'/^(?:Arkan[s5]a[s5]|AR\\.?|Ark\\.?)$/i',
-					'California'=>'/^(?:Ca[il!|1]{2}f[o0uq]rn[il!|1]a|CA\\.|Cal[il!|1]f\\.?)$/i',
-					'Colorado'=>'/^(?:C[o0uq][il!|1][o0uq]rad[o0uq]|C[o0uq]\\.|C[o0uq][il!|1][o0uq]\\.?)$/i',
+					'California'=>'/^(?:C(?i)a[il!|1]{2}f[o0uq]rn[il!|1]a|Cal[il!|1]f\\.?|(?-i)C(?i)A\\.)$/',
+					'Colorado'=>'/^(?:C(?i)[o0uq][il!|1][o0uq]rad[o0uq]|C[o0uq][il!|1][o0]\\.?|(?-i)C(?i)[o0uq]\\.)$/',
 					'Connecticut'=>'/^(?:C[o0uq]nn[ec]{2}t[il!|1]cut|CT\\.?|C[o0uq]nn\\.?)$/i',
 					'Delaware'=>'/^(?:D[ec]lawar[ec]|DE\\.?|Del\\.?)$/i',
 					'DC'=>'/^(?:D[il!|1][s5]tr[il!|1]ct [o0uq]f C[o0uq][il!|1]umb[il!|1]a|D\\.?C\\.?)$/i',
@@ -4857,11 +4871,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					'Maine'=>'/^(?:Ma[il!|1]ne|ME\\.?)$/i',
 					'Maryland'=>'/^(?:Mary[il!|1]and|MD\\.?)$/i',
 					'Massachusetts'=>'/^(?:Ma[s5]{2}achu[s5][ec]tt[s5]|MA\\.?|Ma[s5]{2}\\.?)$/i',
-					'Michigan'=>'/^(?:M[il!|1][ec]h[il!|1]gan|M[il!|1]\\.?|M[il!|1][ec]h\\.?)$/i',
+					'Michigan'=>'/^(?:M(?i)[il!|1][ec]h[il!|1]gan|M[il!|1][ec]h\\.?|(?-i)M(?i)[il!|1]\\.?)$/',
 					'Minnesota'=>'/^(?:M[il!|1]nn[ec]s[o0uq]ta|MN\\.?|M[il!|1]nn\\.?)$/i',
 					'Mississippi'=>'/^(?:M[il!|1][s5]{2}[il!|1][s5]{2}[il!|1]pp[il!|1]|M[s5]\\.?|M[il!|1][s5]{2}\\.?)$/i',
 					'Missouri'=>'/^(?:M[il!|1][s5]{2}[o0uq]ur[il!|1]|M[o0uq]\\.?)$/i',
-					'Montana'=>'/^(?:M[o0uq]ntana|MT\\.?|M[o0uq]nt\\.?)$/i',
+					'Montana'=>'/^(?:M(?i)[o0uq]ntana|M[o0uq]nt\\.?|(?-i)M(?i)T\\.?)$/',
 					'Nebraska'=>'/^(?:N[ec]braska|N[ec]\\.?|N[ec]br\\.?)$/i',
 					'Nevada'=>'/^(?:N[ec]vada|NV\\.?|N[ec]v\\.?)$/i',
 					'New Hampshire'=>'/^(?:N[ec]w\\sHampsh[il!|1]r[ec]|N\\.?H\\.?)$/i',
@@ -4874,6 +4888,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					'Oklahoma'=>'/^(?:[o0uq]k[il!|1]ah[o0uq]ma|[o0uq]K\\.|[o0uq]k[il!|1]a\\.?)$/i',
 					'Oregon'=>'/^(?:[o0uq]r[ec]g[o0uq]n|[o0uq]R\\.|[o0uq]r[ec]g\\.?)$/i',
 					'Pennsylvania'=>'/^(?:P[ec]nnsy[il!|1]van[il!|1]a|PA\\.?)$/i',
+					'Puerto Rico'=>'/^(?:Puert[o0] R[il!|1]c[o0]|PR\\.?)$/i',
 					'Rhode Island'=>'/^(?:Rh[o0uq]de\\s[il!|1]s[il!|1]and|R\\.?I\\.?)$/i',
 					'South Carolina'=>'/^(?:S[o0uq]uth\\sCar[o0uq][il!|1]{2}na|S\\.?C\\.?)$/i',
 					'South Dakota'=>'/^(?:S[o0uq]uth\\sDak[o0uq]ta|S\\.?D\\.?|S\\.?\\sDak\\.?)$/i',
@@ -4981,6 +4996,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			'[o0uq]klah[o0uq]ma|[o0uq]K\\.?|[o0uq]kla\\.?|'.
 			'[o0uq]reg[o0uq]n|[o0uq]R\\.?|[o0uq]reg\\.?|'.
 			'Pennsylvan[il!|1]a|PA\\.?|'.
+			'Puert[o0] R[il!|1]c[o0]|PR\\.?|'.
 			'Rh[o0uq]de [il!|1]s[il!|1]and|R\\.?I\\.?|'.
 			'S[o0uq]uth Car[o0uq]l[il!|1]na|S\\.?C\\.?|'.
 			'S[o0uq]uth Dak[o0uq]ta|S\\.?D\\.?|S\\.? Dak\\.?|'.

@@ -24,6 +24,18 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		else return false;
 	}
 
+	protected function containsVerbatimAttribute($word) {
+		$vaWords = array("atranorin", "fatty acid", "cortex", "areolate", "medulla", "podetia", "apothecia", "thallus", "strain", "squamul",
+			"soredia", "fruticose", "fruiticose", "crustose", "corticolous", "saxicolous", "terricolous", "Synoicous", "chemotype", "terpene",
+			"isidia", "TLC", "monoicous", "dioicous", "sporangium", "parietin", "anthraquinone", "pigment", "ostiole", "epiphyte",
+			"sporophyte", "Archegonia", "thalli", "antheridia", "archegonia", "androecium", "gynoecium", "Autoicous", "Paroicous", "Heteroicous",
+			"cladautoicous", "Gametangia");
+		foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
+		if(preg_match("/\\b[KPC][+-]\\b/", $word)) return true;
+		if(preg_match("/\\bUV[+-]\\b/", $word)) return true;
+		return false;
+	}
+
 	private function doReliquiaeFlowersianaeLabel($s) {
 		$pattern =
 			array
