@@ -84,19 +84,14 @@ class OccurrenceEditorDupes {
 		$retArr = array();
 		$lastName = $this->parseLastName($collName);
 		if($lastName && $collNum){
-			$sql = 'SELECT occid FROM omoccurrences '.
-				'WHERE (processingstatus IS NULL OR processingstatus != "unprocessed") '.
-				'AND (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = ';
-			if(is_numeric($collNum)){
-				$sql .= $collNum.') ';
-			}
-			else{
-				$sql .= '"'.$collNum.'") ';
-			}
+			$sql = 'SELECT occid, processingstatus FROM omoccurrences '.
+				'WHERE (recordedby LIKE "%'.$lastName.'%") AND (recordnumber = "'.trim($collNum).'") ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->occid] = $r->occid;
+				if(!$r->processingstatus || $r->processingstatus != 'unprocessed'){
+					$retArr[$r->occid] = $r->occid;
+				}
 			}
 			$rs->free();
 		}
