@@ -247,6 +247,20 @@ class ObservationSubmitManager {
 			if(file_exists($imgPath)) unlink($imgPath);
 				
 			if($imgWebUrl){
+				//If central images are on remote server and new ones stored locally, then we need to use full domain
+			    //e.g. this portal is sister portal to central portal
+		    	if($GLOBALS['imageDomain']){
+					if(substr($imgWebUrl,0,1) == '/'){
+						$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+					}
+					if($imgTnUrl && substr($imgTnUrl,0,1) == '/'){
+						$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+		    		}
+		    		if($imgLgUrl && substr($imgLgUrl,0,1) == '/'){
+					$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+		    		}
+		    	}
+				
 				$caption = $this->cleanInStr($occArr['caption'.$imgCnt]);
 				$notes = $this->cleanInStr($occArr["notes"].$imgCnt);
 				$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographeruid, imagetype, caption, occid, notes, sortsequence) '.

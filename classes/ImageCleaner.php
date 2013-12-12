@@ -197,16 +197,24 @@ class ImageCleaner{
 					        	}
 							    imagedestroy($tmpWebImg);
 						    }
-		
+
+						    //If central images are on remote server and new one stored locally, then we need to use full domain
+					    	if($GLOBALS['imageDomain'] && substr($targetUrl,0,1) == '/'){
+					    		$targetUrl = 'http://'.$_SERVER['HTTP_HOST'].$targetUrl;
+					    	}
 						    //Insert urls into database
-						    $webFullUrl = '';
+					    	$webFullUrl = '';
 					    	if($webFileName && $webFileName != $fileName){
-					    		if(strtolower(substr($webFileName,0,4)) != "http") $webFullUrl = $targetUrl;
+					    		if(strtolower(substr($webFileName,0,4)) != "http"){
+					    			$webFullUrl = $targetUrl;
+					    		}
 					    		$webFullUrl .= $webFileName;
 					    	}
 						    $lgFullUrl = '';
 						    if($lgFileName){
-					    		if(strtolower(substr($lgFileName,0,4)) != "http") $lgFullUrl = $targetUrl;
+					    		if(strtolower(substr($lgFileName,0,4)) != "http"){
+					    			$lgFullUrl = $targetUrl;
+					    		}
 						    	$lgFullUrl .= $lgFileName;
 						    }
 	

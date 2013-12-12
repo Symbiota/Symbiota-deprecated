@@ -97,16 +97,30 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
 		$sourceUrl = $this->cleanInStr($_REQUEST["sourceurl"]);
 
-		$sql = "UPDATE images ".
-			"SET url = \"".$url."\", thumbnailurl = ".($tnUrl?"\"".$tnUrl."\"":"NULL").
-			",originalurl = ".($origUrl?"\"".$origUrl."\"":"NULL").",occid = ".$occId.",caption = ".
-			($caption?"\"".$caption."\"":"NULL").
-			",photographer = ".($photographer?'"'.$photographer.'"':"NULL").
-			",photographeruid = ".($photographerUid?$photographerUid:"NULL").
-			",notes = ".($notes?"\"".$notes."\"":"NULL").
-			",copyright = ".($copyRight?"\"".$copyRight."\"":"NULL").",imagetype = \"specimen\",sourceurl = ".
-			($sourceUrl?"\"".$sourceUrl."\"":"NULL").
-			" WHERE (imgid = ".$imgId.')';
+		//If central images are on remote server and new ones stored locally, then we need to use full domain
+	    //e.g. this portal is sister portal to central portal
+    	if($GLOBALS['imageDomain']){
+    		if(substr($url,0,1) == '/'){
+	    		$url = 'http://'.$_SERVER['HTTP_HOST'].$url;
+    		}
+    		if($tnUrl && substr($tnUrl,0,1) == '/'){
+	    		$tnUrl = 'http://'.$_SERVER['HTTP_HOST'].$tnUrl;
+    		}
+    		if($origUrl && substr($origUrl,0,1) == '/'){
+	    		$origUrl = 'http://'.$_SERVER['HTTP_HOST'].$origUrl;
+    		}
+    	}
+
+	    $sql = 'UPDATE images '.
+			'SET url = "'.$url.'", thumbnailurl = '.($tnUrl?'"'.$tnUrl.'"':'NULL').
+			',originalurl = '.($origUrl?'"'.$origUrl.'"':'NULL').',occid = '.$occId.',caption = '.
+			($caption?'"'.$caption.'"':'NULL').
+			',photographer = '.($photographer?'"'.$photographer.'"':"NULL").
+			',photographeruid = '.($photographerUid?$photographerUid:"NULL").
+			',notes = '.($notes?'"'.$notes.'"':'NULL').
+			',copyright = '.($copyRight?'"'.$copyRight.'"':'NULL').',imagetype = "specimen",sourceurl = '.
+			($sourceUrl?'"'.$sourceUrl.'"':'NULL').
+			' WHERE (imgid = '.$imgId.')';
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			$status .= "ERROR: image not changed, ".$this->conn->error."SQL: ".$sql;
@@ -294,6 +308,21 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
 		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
 		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
+
+		//If central images are on remote server and new ones stored locally, then we need to use full domain
+	    //e.g. this portal is sister portal to central portal
+    	if($GLOBALS['imageDomain']){
+    		if(substr($webUrl,0,1) == '/'){
+	    		$webUrl = 'http://'.$_SERVER['HTTP_HOST'].$webUrl;
+    		}
+    		if($tnUrl && substr($tnUrl,0,1) == '/'){
+	    		$tnUrl = 'http://'.$_SERVER['HTTP_HOST'].$tnUrl;
+    		}
+    		if($lgUrl && substr($lgUrl,0,1) == '/'){
+	    		$lgUrl = 'http://'.$_SERVER['HTTP_HOST'].$lgUrl;
+    		}
+    	}
+
 		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
 			'owner, sourceurl, copyright, occid, username, notes) '.
 			'VALUES ('.($_REQUEST['tid']?$_REQUEST['tid']:'NULL').',"'.$webUrl.'",'.

@@ -90,9 +90,11 @@ class ImageShared{
 		global $paramsArr;
 
 		if(strpos($imgPath,$this->imageRootPath) === 0){
+			//Image to be uploaded to local server
 			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
 		}
 		else{
+			//Image exists on remote server (e.g. url passed to ) 
 			$imgUrl = $imgPath;
 		}
 
@@ -141,34 +143,47 @@ class ImageShared{
 	
 	public function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid){
 		global $paramsArr;
-		$caption = $this->cleanInStr($_REQUEST["caption"]);
-		$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):"");
-		$photographerUid = $_REQUEST["photographeruid"];
-		$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
-		$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
-		$owner = $this->cleanInStr($_REQUEST["owner"]);
-		$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanInStr($_REQUEST["locality"]):"");
-		$occId = $_REQUEST["occid"];
-		$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
-		$sortSequence = $_REQUEST["sortsequence"];
-		//$addToTid = (array_key_exists("addtoparent",$_REQUEST)?$this->parentTid:0);
-		//if(array_key_exists("addtotid",$_REQUEST)){
-			//$addToTid = $_REQUEST["addtotid"];
-		//}
-		$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
-			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
-			'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
-			($photographer?'"'.$this->cleanInStr($photographer).'"':'NULL').','.
-			($photographerUid?$photographerUid:'NULL').',"'.
-			$this->cleanInStr($caption).'","'.$this->cleanInStr($owner).'","'.
-			$sourceUrl.'","'.$this->cleanInStr($copyRight).'","'.
-			$this->cleanInStr($locality).'",'.
-			($occId?$occId:'NULL').',"'.$this->cleanInStr($notes).'","'.
-			$paramsArr['un'].'",'.($sortSequence?$this->cleanInStr($sortSequence):'50').')';
-		//echo $sql;
-		$status = "";
-		if(!$this->conn->query($sql)){
-			$status = "loadImageData: ".$this->conn->error."<br/>SQL: ".$sql;
+		if($imgWebUrl){
+			$caption = $this->cleanInStr($_REQUEST["caption"]);
+			$photographer = (array_key_exists("photographer",$_REQUEST)?$this->cleanInStr($_REQUEST["photographer"]):"");
+			$photographerUid = $_REQUEST["photographeruid"];
+			$sourceUrl = (array_key_exists("sourceurl",$_REQUEST)?trim($_REQUEST["sourceurl"]):"");
+			$copyRight = $this->cleanInStr($_REQUEST["copyright"]);
+			$owner = $this->cleanInStr($_REQUEST["owner"]);
+			$locality = (array_key_exists("locality",$_REQUEST)?$this->cleanInStr($_REQUEST["locality"]):"");
+			$occId = $_REQUEST["occid"];
+			$notes = (array_key_exists("notes",$_REQUEST)?$this->cleanInStr($_REQUEST["notes"]):"");
+			$sortSequence = $_REQUEST["sortsequence"];
+	
+			//If central images are on remote server and new ones stored locally, then we need to use full domain
+		    //e.g. this portal is sister portal to central portal
+	    	if($GLOBALS['imageDomain']){
+	    		if(substr($imgWebUrl,0,1) == '/'){
+		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+	    		}
+	    		if($imgTnUrl && substr($imgTnUrl,0,1) == '/'){
+		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+	    		}
+	    		if($imgLgUrl && substr($imgLgUrl,0,1) == '/'){
+		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+	    		}
+	    	}
+	    	//Load record
+			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, caption, '.
+				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence) '.
+				'VALUES ('.($tid?$tid:'NULL').',"'.$imgWebUrl.'",'.($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				($photographer?'"'.$this->cleanInStr($photographer).'"':'NULL').','.
+				($photographerUid?$photographerUid:'NULL').',"'.
+				$this->cleanInStr($caption).'","'.$this->cleanInStr($owner).'","'.
+				$sourceUrl.'","'.$this->cleanInStr($copyRight).'","'.
+				$this->cleanInStr($locality).'",'.
+				($occId?$occId:'NULL').',"'.$this->cleanInStr($notes).'","'.
+				$paramsArr['un'].'",'.($sortSequence?$this->cleanInStr($sortSequence):'50').')';
+			//echo $sql;
+			$status = "";
+			if(!$this->conn->query($sql)){
+				$status = "loadImageData: ".$this->conn->error."<br/>SQL: ".$sql;
+			}
 		}
 		return $status;
 	} 
@@ -185,7 +200,20 @@ class ImageShared{
 			'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, imagetype, anatomy) '.
 			'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
         if ($statement = $this->conn->prepare($sql)) {
-           $statement->bind_param("issssisssssississ",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy);
+		    //If central images are on remote server and new ones stored locally, then we need to use full domain
+		    //e.g. this portal is sister portal to central portal
+	    	if($GLOBALS['imageDomain']){
+	    		if(substr($imgWebUrl,0,1) == '/'){
+		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+	    		}
+	    		if(substr($imgTnUrl,0,1) == '/'){
+		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+	    		}
+	    		if(substr($imgLgUrl,0,1) == '/'){
+		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+	    		}
+	    	}
+        	$statement->bind_param("issssisssssississ",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy);
 
            $statement->execute();
            $rows = $statement->affected_rows;
@@ -218,7 +246,21 @@ class ImageShared{
             'owner=?, sourceurl=?, copyright=?, locality=?, occid=?, notes=?, username=?, sortsequence=?, imagetype=?, anatomy=? '.
             'where imgid = ? ';
         if ($statement = $this->conn->prepare($sql)) {
-           $statement->bind_param("issssisssssississi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy,$imgid);
+		    //If central images are on remote server and new ones stored locally, then we need to use full domain
+		    //e.g. this portal is sister portal to central portal
+        	if($GLOBALS['imageDomain']){
+	    		if(substr($imgWebUrl,0,1) == '/'){
+		    		$imgWebUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgWebUrl;
+	    		}
+	    		if(substr($imgTnUrl,0,1) == '/'){
+		    		$imgTnUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgTnUrl;
+	    		}
+	    		if(substr($imgLgUrl,0,1) == '/'){
+		    		$imgLgUrl = 'http://'.$_SERVER['HTTP_HOST'].$imgLgUrl;
+	    		}
+	    	}
+        	
+        	$statement->bind_param("issssisssssississi",$tid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$photographer,$photographerUid,$caption,$owner,$sourceUrl,$copyright,$locality,$occid,$notes,$username,$sortSequence,$imagetype,$anatomy,$imgid);
 
            $statement->execute();
            $rows = $statement->affected_rows;

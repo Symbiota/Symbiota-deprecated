@@ -116,10 +116,6 @@ class ImageBatchProcessor {
 		}
 		
 		//Close log file
-		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n\n");
-		if($this->logMode == 1){
-			echo '</ul>';
-		}
 		if($this->logFH) fclose($this->logFH);
 	}
 
@@ -141,9 +137,6 @@ class ImageBatchProcessor {
 			else{
 				echo 'ERROR creating Log file; path not found: '.$this->logPath."\n";
 			}
-		}
-		if($this->logMode == 1){
-			echo '<ul>';
 		}
 	}
 
@@ -220,11 +213,17 @@ class ImageBatchProcessor {
 					}
 				}
 			}
-			
+
 			//Lets start processing folder
+			if($this->logMode == 1){
+				echo '<ul>';
+			}
 			$this->logOrEcho('Starting image processing: '.$sourcePathFrag);
 			$this->processFolder($sourcePathFrag);
-			$this->logOrEcho('Image upload complete');
+			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n\n");
+			if($this->logMode == 1){
+				echo '</ul>';
+			}
 		}
 	}
 
