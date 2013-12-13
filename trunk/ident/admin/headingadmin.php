@@ -29,6 +29,7 @@ if($isEditor && $action){
 		$statusStr = $charManager->deleteHeading($hid);
 	}
 }
+$charArr = $charManager->getCharacterArr();
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -66,7 +67,7 @@ if($isEditor && $action){
 					<img src="../../images/add.png" alt="Create New Heading" />
 				</a>
 			</div>
-			<div id="addheadingdiv" style="display:<?php echo ($hid?'none':'block'); ?>;">
+			<div id="addheadingdiv" style="display:none;">
 				<form name="newheadingform" action="headingadmin.php" method="post" onsubmit="return validateNewHeadingForm(this)">
 					<fieldset>
 						<legend><b>New Heading</b></legend>
@@ -91,6 +92,7 @@ if($isEditor && $action){
 			<div id="headinglist">
 				<?php 
 				if($charArr){
+					unset($charArr['head']);
 					?>
 					<h3>Characters by Heading</h3>
 					<?php 
@@ -99,7 +101,7 @@ if($isEditor && $action){
 						<div>
 							<a href="#" onclick="toggle('heading-<?php echo $headingId; ?>');"><?php echo $headingArr[$headingId]['name']; ?></a>
 							<a href="#" onclick="toggle('headingedit-<?php echo $headingId; ?>');"><img src="../../images/edit.png" /></a>
-							<div id="headingedit-<?php echo $headingId; ?>">
+							<div id="headingedit-<?php echo $headingId; ?>" style="display:none;">
 								<fieldset>
 									<legend>Heading Editor</legend>
 									<form name="headingeditform" action="headingadmin.php" method="post">
