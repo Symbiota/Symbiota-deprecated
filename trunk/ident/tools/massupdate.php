@@ -1,33 +1,32 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyMassUpdate.php');
 header("Content-Type: text/html; charset=".$charset);
 
- $isEditor = false;
- if($isAdmin || array_key_exists("KeyEditor",$userRights)){
- 	$isEditor = true;
- }
-  	
- $muManager = new KeyMassUpdate();
+$isEditor = false;
+if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+	$isEditor = true;
+}
+
+$muManager = new KeyMassUpdate();
 
 $removeAttrs = Array();
 $addAttrs = Array();
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
-$clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:""; 
-$taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:""; 
+$clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:'all'; 
+$taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'all';
 $generaOnly = array_key_exists("generaonly",$_REQUEST)?$_REQUEST["generaonly"]:""; 
-$cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:""; 
+$cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
 $removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
 $addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
- 
-if($projValue) $muManager->setProj($projValue);
+
+$muManager->setProj($projValue);
 if($langValue) $muManager->setLang($langValue);
-if($clFilter) $muManager->setClFilter($clFilter);
-if($taxonFilter) $muManager->setTaxonFilter($taxonFilter);
+$muManager->setClFilter($clFilter);
+$muManager->setTaxonFilter($taxonFilter);
 if($generaOnly) $muManager->setGeneraOnly($generaOnly);
 if($cidValue) $muManager->setCid($cidValue);
 
@@ -43,15 +42,13 @@ if($addAttrs || $removeAttrs){
 }
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
- <head>
-  <title><?php echo $defaultTitle; ?> Character Mass Updater</title>
+<!DOCTYPE html>
+<html>
+<head>
+	<title><?php echo $defaultTitle; ?> Character Mass Updater</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language="JavaScript">
-		
+	
 		var addStr = ";";
 		var removeStr = ";";
 		var dataChanged = false;
@@ -130,36 +127,27 @@ if($addAttrs || $removeAttrs){
 </head>
 <body>
 <?php 
-$displayLeftMenu = (isset($ident_tools_massupdateMenu)?$ident_tools_massupdateMenu:false);
+$displayLeftMenu = false;
 include($serverRoot.'/header.php');
-if(isset($ident_tools_massupdateCrumbs)){
-	if($ident_tools_massupdateCrumbs){
+?>
+<div class='navpath'>
+	<a href='../../index.php'>Home</a> 
+	<?php 
+	if($cidValue){
 		?>
-		<div class='navpath'>
-			<?php echo $ident_tools_massupdateCrumbs; ?>
-			<a href='massupdate.php'>
-				<b>Character Mass-update Editor</b>
-			</a>
-		</div>
+		&gt;&gt;
+		<a href='massupdate.php?clf=<?php echo $clFilter.'&tf='.$taxonFilter.'&lang='.$langValue; ?>'>
+			<b>Return to Character List</b>
+		</a>
 		<?php 
 	}
-}
-else{
 	?>
-	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
-		<a href='massupdate.php'>
-			<b>Character Mass-update Editor</b>
-		</a>
-	</div>
-	<?php 
-}
-?>
+</div>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 	
+	<?php
 	if($isEditor){
-		if(!$clFilter || !$taxonFilter || !$cidValue){
+		if(!$cidValue){
 			?>
 			<table>
 				<tr><td>
@@ -167,10 +155,10 @@ else{
 				  		<fieldset style="padding:15px;">
 				  			<legend><b>Step 1: Limit Scope</b></legend>
 							<div style='font-weight:bold;'>Checklist:</div>
-					  		<select name="clf"> 
-								<option value='all'>-- Select a Checklist --</option>
+							<select name="clf"> 
+								<option value="">-- Select a Checklist --</option>
 								<option value="all" <?php echo ($clFilter=="all"?"SELECTED":""); ?>>Checklist Filter Off (all taxa)</option>
-								<option value='all'>---------------------------------</option>
+								<option value="">---------------------------------</option>
 						 		<?php 
 						 		$selectList = $muManager->getClQueryList();
 					 			foreach($selectList as $key => $value){
@@ -180,8 +168,9 @@ else{
 					  		</select>
 					  		<div style='font-weight:bold;'>Taxon:</div>
 							<select name="tf">
-					 			<option value='0'>-- Select Taxon --</option>
-					 			<option value='0'>--------------------------</option>
+					 			<option value="">-- Select Taxon --</option>
+					 			<option value="all" <?php if($taxonFilter == 'all') echo 'SELECTED'; ?>>All Taxa</option>
+					 			<option value="">--------------------------</option>
 						  		<?php 
 						  		$selectList = $muManager->getTaxaQueryList();
 					  			foreach($selectList as $value){
@@ -200,33 +189,25 @@ else{
 					</form>
 				</td>
 				<td>
-					<?php 
-		 			if($clFilter && $taxonFilter){
-						?>
-						<form id="setupform2" action="massupdate.php" method="post">
-							<fieldset style="padding:0px 15px 15px 15px;">
-								<legend><b>Step 2: Select Character</b></legend>
-						 		<?php 
-				 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
-								foreach($cList as $h => $charData){
-									echo "<div style='margin-top:1em;font-size:125%;'>$h</div>\n";
-									ksort($charData);
-									foreach($charData as $cidKey => $charValue){
-										echo "<div> <input name='cid' type='radio' value='".$cidKey."' ".($cidKey == $cidValue?"checked":"").">$charValue</div>\n";
-									}
-									echo "<input type='submit' name='action' id='list' value='Submit Criteria' />";
+					<form id="setupform2" name="setupform2" action="massupdate.php" method="post">
+						<fieldset style="padding:0px 15px 15px 15px;">
+							<legend><b>Step 2: Select Character</b></legend>
+					 		<?php 
+			 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
+							foreach($cList as $h => $charData){
+								echo "<div style='margin-top:1em;font-size:125%;'>$h</div>\n";
+								ksort($charData);
+								foreach($charData as $cidKey => $charValue){
+									echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="this.form.submit()">'.$charValue.'</div>'."\n";
 								}
-						 		?>
-				 				<input type='submit' name='action' id='list' value='Submit Criteria' />
-								<input type="hidden" name="proj" value="<?php echo $projValue; ?>" />
-								<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
-						 		<input type="hidden" name="clf" value="<?php echo $clFilter; ?>" />
-						 		<input type="hidden" name="tf" value="<?php echo $taxonFilter; ?>" />
-						 	</fieldset>
-					 	</form>
-						<?php 
-					}
-					?>
+							}
+					 		?>
+							<input type="hidden" name="proj" value="<?php echo $projValue; ?>" />
+							<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
+					 		<input type="hidden" name="clf" value="<?php echo $clFilter; ?>" />
+					 		<input type="hidden" name="tf" value="<?php echo $taxonFilter; ?>" />
+					 	</fieldset>
+					</form>
 			 	</td></tr>
 			</table>
 		<?php
@@ -266,8 +247,11 @@ else{
 						<tr>
 							<td>
 								<span style='font-weight:bold;'>
-									<a href='editor.php?taxon=<?php echo $fam; ?>&action=Get+Character+Info' target='_blank'>
+									<a href="massupdate.php?clf=<?php echo $clFilter.'&tf='.$fam.'&cid='.$cidValue.'&proj='.$projValue.'&lang='.$langValue; ?>">
 										<?php echo $fam; ?>
+									</a>
+									<a href='editor.php?taxon=<?php echo $fam; ?>&action=Get+Character+Info' target='_blank'>
+										<img src="../../images/edit.png" />
 									</a>
 								</span>
 							</td>
@@ -303,15 +287,16 @@ else{
 					ksort($sciNameArr);
 					foreach($sciNameArr as $sciName => $sciArr){
 						$display = $sciArr["display"];
+						$t = $sciArr["TID"];
 						?>
 						<tr>
 							<td>
+								<?php echo $display; ?> 
 								<a href='editor.php?taxon=<?php echo $sciName; ?>&action=Get+Character+Info' target='_blank'>
-									<?php echo $display; ?>
+									<img src="../../images/edit.png" />
 								</a>
 							</td>
 							<?php 
-							$t = $sciArr["TID"];
 							$csValues = $sciArr["csArray"];
 							foreach($sList as $cs => $csName){
 								$isSelected = false;
