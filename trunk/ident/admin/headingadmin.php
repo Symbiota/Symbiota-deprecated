@@ -39,8 +39,12 @@ $charArr = $charManager->getCharacterArr();
 	<link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript">
-		function validateNewHeadingForm(f){
-
+		function validateHeadingForm(f){
+			if(f.headingname.value == ""){
+				alert("Heading must have a title");
+				return false;
+			}
+			return true;
 		}
 	</script>
 	<style type="text/css">
@@ -68,7 +72,7 @@ $charArr = $charManager->getCharacterArr();
 				</a>
 			</div>
 			<div id="addheadingdiv" style="display:none;">
-				<form name="newheadingform" action="headingadmin.php" method="post" onsubmit="return validateNewHeadingForm(this)">
+				<form name="newheadingform" action="headingadmin.php" method="post" onsubmit="return validateHeadingForm(this)">
 					<fieldset>
 						<legend><b>New Heading</b></legend>
 						<div>
@@ -91,28 +95,30 @@ $charArr = $charManager->getCharacterArr();
 			</div>
 			<div id="headinglist">
 				<?php 
-				if($charArr){
-					unset($charArr['head']);
+				if($headingArr){
 					?>
-					<h3>Characters by Heading</h3>
+					<h3>Headings with Characters</h3>
 					<?php 
-					foreach($charArr as $headingId => $charList){
+					foreach($headingArr as $headingId => $headArr){
 						?>
 						<div>
-							<a href="#" onclick="toggle('heading-<?php echo $headingId; ?>');"><?php echo $headingArr[$headingId]['name']; ?></a>
+							<a href="#" onclick="toggle('heading-<?php echo $headingId; ?>');"><?php echo $headArr['name']; ?></a>
 							<a href="#" onclick="toggle('headingedit-<?php echo $headingId; ?>');"><img src="../../images/edit.png" /></a>
-							<div id="headingedit-<?php echo $headingId; ?>" style="display:none;">
-								<fieldset>
-									<legend>Heading Editor</legend>
-									<form name="headingeditform" action="headingadmin.php" method="post">
+							<div id="headingedit-<?php echo $headingId; ?>" style="display:none;margin:20px;">
+								<fieldset style="padding:15px;">
+									<legend><b>Heading Editor</b></legend>
+									<form name="headingeditform" action="headingadmin.php" method="post" onsubmit="return validateHeadingForm(this)">
 										<div style="margin:2px;">
-											<input name="headingname" type="text" value="<?php echo $headingArr[$headingId]['name']; ?>" />
+											<b>Heading Name</b><br/>
+											<input name="headingname" type="text" value="<?php echo $headArr['name']; ?>" />
 										</div>
 										<div style="margin:2px;">
-											<input name="notes" type="text" value="<?php echo $headingArr[$headingId]['notes']; ?>" />
+											<b>Notes</b><br/>
+											<input name="notes" type="text" value="<?php echo $headArr['notes']; ?>" />
 										</div>
 										<div style="margin:2px;">
-											<input name="sortsequence" type="text" value="<?php echo $headingArr[$headingId]['sortsequence']; ?>" />
+											<b>Sort Sequence</b><br/>
+											<input name="sortsequence" type="text" value="<?php echo $headArr['sortsequence']; ?>" />
 										</div>
 										<div>
 											<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
@@ -120,8 +126,8 @@ $charArr = $charManager->getCharacterArr();
 										</div>
 									</form>
 								</fieldset>
-								<fieldset>
-									<legend>Delete Heading</legend>
+								<fieldset style="padding:15px;">
+									<legend><b>Delete Heading</b></legend>
 									<form name="headingdeleteform" action="headingadmin.php" method="post">
 										<input name="hid" type="hidden" value="<?php echo $headingId; ?>" />
 										<button name="action" type="submit" value="Delete">Delete Heading</button>
@@ -130,6 +136,7 @@ $charArr = $charManager->getCharacterArr();
 							</div>
 							<div id="heading-<?php echo $headingId; ?>" style="display:none;">
 								<?php 
+								$charList = $charArr[$headingId];
 								foreach($charList as $cid => $charName){
 									?>
 									<ul>

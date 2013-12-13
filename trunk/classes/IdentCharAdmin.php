@@ -471,6 +471,7 @@ class IdentCharAdmin{
 		if($this->langId) $sqlWhere = 'AND (langid = '.$this->langId.') ';
 		if($sqlWhere) $sql .= 'WHERE '.substr($sqlWhere,3);
 		$sql .= 'ORDER BY sortsequence,headingname';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->hid]['name'] = $this->cleanOutStr($r->headingname);
