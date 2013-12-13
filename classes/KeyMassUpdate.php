@@ -6,7 +6,7 @@ class KeyMassUpdate{
 	private $con;
 	private $taxonNameFilter;
 	private $taxonFilterTid;
-	private $taxonFilterRank;
+	private $taxonFilterRankId= 10;
 	private $tidFilter;
 	private $clidFilter;
 	private $generaOnly;
@@ -28,14 +28,22 @@ class KeyMassUpdate{
 		if(!($this->con === null)) $this->con->close();
 	}
 	
-	public function setTaxonFilter($name){
-		$sql = 'SELECT tid, rankid FROM taxa WHERE sciname = "'.$name.'"';
-		$rs = $this->con->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->taxonFilterTid = $r->tid;
-			$this->taxonFilterRankid = $r->rankid;
+	public function setTaxonFilter($taxon){
+		if($taxon && $taxon != 'all'){
+			$sql = '';
+			if(is_numeric($taxon)){
+				$sql = 'SELECT tid, rankid FROM taxa WHERE tid = '.$taxon;
+			}
+			else{
+				$sql = 'SELECT tid, rankid FROM taxa WHERE sciname = "'.$taxon.'"';
+			}
+			$rs = $this->con->query($sql);
+			if($r = $rs->fetch_object()){
+				$this->taxonFilterTid = $r->tid;
+				$this->taxonFilterRankId = $r->rankid;
+			}
+			$rs->free();
 		}
-		$rs->free();
 	}
 	
 	public function setClFilter($clid){
@@ -125,23 +133,23 @@ class KeyMassUpdate{
 
 	public function getCharList(){
 		$headingArray = Array();		//Heading => Array(CID => CharName)
-		if($this->taxonFilterTid){
+		$sql = "SELECT DISTINCT ch.headingname, c.CID, c.CharName ".
+			"FROM kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID ".
+			"INNER JOIN kmcharheading ch ON c.hid = ch.hid ".
+			"LEFT JOIN kmchardependance cd ON c.CID = cd.CID ".
+			"WHERE ch.language = '".$this->lang."' AND (ctl.Relation = 'include') ".
+			"AND (c.chartype='UM' OR c.chartype='OM') AND (c.defaultlang='".$this->lang."') ";
+		if($this->taxonFilterTid && $this->taxonFilterTid != 'all'){
 			$strFrag = implode(",",$this->getParents($this->taxonFilterTid));
-			$sql = "SELECT DISTINCT ch.headingname, c.CID, c.CharName ".
-				"FROM ((kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID) ".
-				"INNER JOIN kmcharheading ch ON c.hid = ch.hid) ".
-				"LEFT JOIN kmchardependance cd ON c.CID = cd.CID ".
-				"WHERE ch.language = 'English' AND (ctl.Relation = 'include') ".
-				"AND (c.chartype='UM' Or c.chartype='OM') AND (c.defaultlang='".$this->lang."') ".
-				"AND (ctl.TID In ($strFrag)) ".
-				"ORDER BY c.hid, c.SortSequence, c.CharName";
-			//echo $sql;
-			$result = $this->con->query($sql);
-			while($row = $result->fetch_object()){
-				$headingArray[$row->headingname][$row->CID] = $row->CharName;
-			}
-			$result->free();
+			$sql .= "AND (ctl.TID In ($strFrag)) ";
 		}
+		$sql .= "ORDER BY c.hid, c.SortSequence, c.CharName";
+		//echo $sql;
+		$result = $this->con->query($sql);
+		while($row = $result->fetch_object()){
+			$headingArray[$row->headingname][$row->CID] = $row->CharName;
+		}
+		$result->free();
 		return $headingArray;
 	}
 	
@@ -210,7 +218,7 @@ class KeyMassUpdate{
 	public function getTaxaList(){
 		//Get all Taxa found in checklist 
 		$taxaList = Array();
-		if($this->taxonFilterRankid > 100){
+		if($this->taxonFilterRankId > 100){
 			$parArr = Array();
 			$famArr = Array();
 			$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, ts.ParentTID, t.RankId, d.CID, d.CS, d.Inherited ".
@@ -219,7 +227,7 @@ class KeyMassUpdate{
 			if($this->clidFilter && $this->clidFilter != "all"){
 				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
 			}
-			$sql .= "WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.hierarchystr LIKE '%,".$this->taxonFilterTid.",%') ";
+			$sql .= 'WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.hierarchystr LIKE "%,'.$this->taxonFilterTid.',%") ';
 			if($this->clidFilter && $this->clidFilter != "all"){
 				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
 			}
@@ -227,7 +235,7 @@ class KeyMassUpdate{
 			$rs = $this->con->query($sql);
 			while($row1 = $rs->fetch_object()){
 				$sciName = $row1->SciName;
-				$sciNameDisplay = "<div style='margin-left:10px'><i>$sciName</i></div>";
+				$sciNameDisplay = "<span style='margin-left:10px'><i>$sciName</i></span>";
 				$family = $row1->Family;
 				if(!$this->generaOnly){
 					$taxaList[$family][$sciName]["TID"] = $row1->TID;
@@ -253,7 +261,7 @@ class KeyMassUpdate{
 				$sciName = $row->SciName;
 				$rankId = $row->RankId;
 				$family = ($rankId == 140?$sciName:$row->Family);
-				$sciNameDisplay = '<div style="margin-left:5px;font-style:italic;">'.$sciName.'</div>';
+				$sciNameDisplay = '<span style="margin-left:5px;font-style:italic;">'.$sciName.'</span>';
 				$taxaList[$family][$sciName]["TID"] = $row->TID;
 				$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
 				$taxaList[$family][$sciName]["csArray"][$row->CS] = $row->Inherited;
@@ -268,7 +276,10 @@ class KeyMassUpdate{
 			if($this->clidFilter && $this->clidFilter != "all"){
 				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
 			}
-			$sql .= "WHERE (ts.taxauthid = 1) AND (ts.hierarchystr LIKE '%,".$this->taxonFilterTid.",%') ";
+			$sql .= 'WHERE (ts.taxauthid = 1) ';
+			if($this->taxonFilterTid && $this->taxonFilterTid != 'all'){
+				$sql .= 'AND (ts.hierarchystr LIKE "%,'.$this->taxonFilterTid.',%") ';
+			}
 			if($this->clidFilter && $this->clidFilter != "all"){
 				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
 			}
@@ -285,6 +296,7 @@ class KeyMassUpdate{
 				"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
 				"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
 				"WHERE (ts.taxauthid = 1 AND t.SciName IN('$famStr'))";
+			//echo $sql;
 			$rs = $this->con->query($sql);
 			while($row = $rs->fetch_object()){
 				$family = $row->sciname;
