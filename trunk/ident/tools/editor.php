@@ -6,27 +6,26 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/KeyEditorManager.php');
 header("Cache-control: private; Content-Type: text/html; charset=".$charset);
  
- $addValues = Array();
- $removeValues = Array();
- $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
- $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
- $charValue = array_key_exists("char",$_REQUEST)?$_REQUEST["char"]:""; 
- $child1Value = array_key_exists("child1",$_REQUEST)?$_REQUEST["child1"]:""; 
- $child2Value = array_key_exists("child2",$_REQUEST)?$_REQUEST["child2"]:""; 
- $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
- $tQueryValue = array_key_exists("tquery",$_REQUEST)?$_REQUEST["tquery"]:""; 
- $tidValue = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
- $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
- $addValues = array_key_exists("add",$_REQUEST)?$_REQUEST["add"]:""; 
- $removeValues = array_key_exists("remove",$_REQUEST)?$_REQUEST["remove"]:""; 
- 
- $editorManager = new KeyEditorManager();
- if($langValue) $editorManager->setLanguage($langValue);
- $editable = false;
- if($isAdmin || array_key_exists("KeyEditor",$userRights)){
- 	$editable = true;
- }
- 
+$addValues = Array();
+$removeValues = Array();
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+$charValue = array_key_exists("char",$_REQUEST)?$_REQUEST["char"]:""; 
+$child1Value = array_key_exists("child1",$_REQUEST)?$_REQUEST["child1"]:""; 
+$child2Value = array_key_exists("child2",$_REQUEST)?$_REQUEST["child2"]:""; 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
+$tQueryValue = array_key_exists("tquery",$_REQUEST)?$_REQUEST["tquery"]:""; 
+$tidValue = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+$addValues = array_key_exists("add",$_REQUEST)?$_REQUEST["add"]:""; 
+$removeValues = array_key_exists("remove",$_REQUEST)?$_REQUEST["remove"]:""; 
+
+$editorManager = new KeyEditorManager();
+if($langValue) $editorManager->setLanguage($langValue);
+$editable = false;
+if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
+	$editable = true;
+}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

@@ -4,7 +4,7 @@ include_once($serverRoot.'/classes/KeyMassUpdate.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
 	$isEditor = true;
 }
 
@@ -35,6 +35,10 @@ if($cidValue) $muManager->setCid($cidValue);
 
 if($addAttrs || $removeAttrs){
 	if($removeAttrs) $muManager->setRemoves($removeAttrs);
+
+	
+	
+	
 	if($addAttrs) $muManager->setAdds($addAttrs);
 	$muManager->deleteInheritance();
 	$muManager->processAttrs();

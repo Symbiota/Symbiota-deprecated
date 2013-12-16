@@ -175,6 +175,16 @@ if($isAdmin){
 										</li>
 										<?php 
 									}
+									if(array_key_exists("KeyAdmin",$userPermissions)){ 
+										?>
+										<li>
+											<b><?php echo str_replace('KeyAdmin','Identification Keys Administrator',$userPermissions["KeyAdmin"]); ?></b>
+											<a href="usermanagement.php?del=KeyAdmin&userid=<?php echo $userId; ?>">
+												<img src="../images/del.gif" style="border:0px;width:15px;" title="Delete permission" />
+											</a>
+										</li>
+										<?php 
+									}
 									if(array_key_exists("KeyEditor",$userPermissions)){ 
 										?>
 										<li>
@@ -323,6 +333,9 @@ if($isAdmin){
 										}
 										if(!array_key_exists("TaxonProfile",$userPermissions)){
 											echo "<div><input type='checkbox' name='p[]' value='TaxonProfile' /> Taxon Profile Editor</div>";
+										}
+										if(!array_key_exists("KeyAdmin",$userPermissions)){
+											echo "<div><input type='checkbox' name='p[]' value='KeyAdmin' /> Identification Key Administrator</div>";
 										}
 										if(!array_key_exists("KeyEditor",$userPermissions)){
 											echo "<div><input type='checkbox' name='p[]' value='KeyEditor' /> Identification Key Editor</div>";

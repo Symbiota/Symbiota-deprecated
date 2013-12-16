@@ -3,25 +3,26 @@
  * Created on Jul 9, 2006
  * By E.E. Gilbert
  */
- //set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
- include_once('../../config/symbini.php');
- include_once($serverRoot.'/classes/KeyCharDeficitManager.php');
- header("Content-Type: text/html; charset=".$charset);
+
+//set_include_path( get_include_path() . PATH_SEPARATOR . $_SERVER['DOCUMENT_ROOT']."" );
+include_once('../../config/symbini.php');
+include_once($serverRoot.'/classes/KeyCharDeficitManager.php');
+header("Content-Type: text/html; charset=".$charset);
  
- $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
- $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
- $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
- $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
- $cfValue = array_key_exists("cf",$_REQUEST)?$_REQUEST["cf"]:""; 
- $cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:"";
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
+$cfValue = array_key_exists("cf",$_REQUEST)?$_REQUEST["cf"]:""; 
+$cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:"";
   
- $cdManager = new KeyCharDeficitManager();
- if($langValue) $cdManager->setLanguage($langValue);
- if($projValue) $cdManager->setProject($projValue);
- $editable = false;
- if($isAdmin || array_key_exists("KeyEditor",$userRights)){
- 	$editable = true;
- }
+$cdManager = new KeyCharDeficitManager();
+if($langValue) $cdManager->setLanguage($langValue);
+if($projValue) $cdManager->setProject($projValue);
+$editable = false;
+if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
+	$editable = true;
+}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
