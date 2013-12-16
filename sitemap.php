@@ -20,6 +20,7 @@ $smManager = new SiteMapManager();
 			return false;
 		}
 	</script>
+	<script type="text/javascript" src="js/symb/shared.js"></script>
 </head>
 <body>
 	<?php
@@ -60,6 +61,7 @@ $smManager = new SiteMapManager();
 				</ul>
 	
 				<?php 
+				$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
 				$projList = $smManager->getProjectList();
 				if($projList){
 					echo '<h2>Biotic Inventory Projects</h2><ul>';
@@ -91,36 +93,78 @@ $smManager = new SiteMapManager();
 					<legend><b>Data Management Tools</b></legend>
 					<?php 
 					if($symbUid){
-						if($keyModIsActive){ 
+						if($keyModIsActive || array_key_exists("KeyAdmin",$userRights)){ 
+							$clActive = array();
+							if($clList && isset($userRights['ClAdmin'])){
+								$clActive = array_intersect_key($clList,array_flip($userRights['ClAdmin']));
+							}
 							?>
 							<h3>Identification Keys</h3>
 							<ul>
 								<?php 
-								if($isAdmin || array_key_exists("KeyEditor",$userRights)){ 
+								if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 									?>
 									<li>
-										You are authorized to edit Identification Keys
+										You are authorized to access the <a href="<?php echo $clientRoot; ?>/ident/admin/index.php">Characters and Character States Editor</a>
 									</li>
+									<?php 
+									if($clActive){
+										asort($clActive);
+										?>
+										<ul id="testkeyhead">
+											<li style="">
+												<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;">Display Test Keys</a>
+											</li>
+										</ul>
+										<ul id="testkey" style="display:none;">
+											<?php 
+											foreach($clActive as $clKey => $clValue){
+												echo '<li style=""><a href="'.$clientRoot.'/ident/key.php?cl='.$clKey.'&taxon=All+Species">'.$clValue.'</a></li>';
+											}
+											?>
+										</ul>
+										<?php 
+									}
+								}
+								if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){ 
+									?>
 									<li>
-										To add or remove species names with a keys checklist, access the checklist editor that is aligned with the key. 
-										Note that you must have editing rights for that checklist.
-									</li>
-									<li>
+										You are authorized to edit Identification Keys. 
 										To edit morphological characters, login and go to any key. Open the 
 										morphological character editor by clicking on the 
 										editing symbol to the right of Scientific Name that you wish to modify. 
 									</li>
 									<li>
-										Click on check project name below to open the  
-										<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a>
-										for that project  
-										<ul>
-											<?php 
-											foreach($projList as $pid => $pArr){
-												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
+										For coding characters in a table format, open the   
+										<a href="<?php echo $clientRoot; ?>/ident/tools/massupdate.php">Mass-Update Editor</a><br/>
+										<?php 
+										if($projList){
+											//Show Checklists that user has explicit editing rights
+											if($clActive){
+												echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Checklist</b></div>';
+												echo '<ul>';
+												foreach($clActive as $vClid => $name){
+													echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$vClid."'>".$name."</a></li>";
+												}
+												echo '</ul>';
 											}
-											?>
-										</ul>
+											//Show projects for access to a greater scope of checklist 
+											echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Inventory Project</b></div>';
+											foreach($projList as $pid => $pArr){
+												echo '<ul>';
+												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?proj=".$pid."'>".$pArr["name"]."</a></li>";
+												echo '</ul>';
+											}
+										}
+										elseif($clList){
+											echo '<div style="margin:5px 0px 0px 10px;"><b>Editor by Checklist</b></div>';
+											echo '<ul>';
+											foreach($clList as $clidKey => $clName){
+												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$clidKey."'>".$clName."</a></li>";
+											}
+											echo '<ul>';
+										}
+										?>
 									</li>
 									<?php
 								}
@@ -322,8 +366,7 @@ $smManager = new SiteMapManager();
 						</div>
 						<ul>
 							<?php 
-							if($isAdmin || array_key_exists("ClAdmin",$userRights)){
-								$clList = $smManager->getChecklistList($isAdmin,(array_key_exists('ClAdmin',$userRights)?$userRights['ClAdmin']:0));
+							if($clList){
 								foreach($clList as $k => $v){
 									echo "<li><a href='".$clientRoot."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
 								}
