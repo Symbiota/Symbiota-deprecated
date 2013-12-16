@@ -80,7 +80,7 @@ class OccurrenceIndividualManager {
 			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, '.
 			'georeferenceremarks, verbatimattributes, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
-			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid '.
+			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, municipality '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
 		if($this->occId){
 			$sql .= 'WHERE (o.occid = '.$this->occId.')';
