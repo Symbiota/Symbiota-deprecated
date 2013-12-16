@@ -436,6 +436,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').', ';
 						$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').', ';
 						if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
+                      if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].'.  ';
 						?>
 						<div>
 							<b>Locality:</b>
