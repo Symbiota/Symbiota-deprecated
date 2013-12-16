@@ -485,7 +485,7 @@ class IdentCharAdmin{
 	public function addHeading($name,$notes,$sortSeq){
 		$statusStr = '';
 		$sql = 'INSERT INTO kmcharheading(headingname,notes,langid,sortsequence) '.
-			'VALUES ("'.$name.'",'.($notes?'"'.$notes.'"':'NULL').','.$langId.','.
+			'VALUES ("'.$name.'",'.($notes?'"'.$notes.'"':'NULL').','.$this->langId.','.
 			(is_numeric($sortSeq)?$sortSeq:'NULL').')';
 		if(!$this->conn->query($sql)){
 			$statusStr = 'Error adding heading: '.$this->conn->error;

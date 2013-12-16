@@ -5,12 +5,11 @@ include_once($serverRoot.'/classes/IdentCharAdmin.php');
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/headingadmin.php?'.$_SERVER['QUERY_STRING']);
 
 $hid = array_key_exists('hid',$_REQUEST)?$_REQUEST['hid']:0;
-$action = array_key_exists('action',$_GET)?$_GET['action']:'';
+$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
 $charManager = new IdentCharAdmin();
 $charManager->setLangId($langId);
-$headingArr = $charManager->getHeadingArr();
 
 $isEditor = false;
 if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
@@ -20,7 +19,7 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
 $statusStr = '';
 if($isEditor && $action){
 	if($action == 'Create'){
-		$statusStr = $charManager->addingHeading($_POST['headingname'],$_POST['notes'],$_POST['sortsequence']);
+		$statusStr = $charManager->addHeading($_POST['headingname'],$_POST['notes'],$_POST['sortsequence']);
 	}
 	elseif($action == 'Save'){
 		$statusStr = $charManager->editHeading($hid,$_POST['headingname'],$_POST['notes'],$_POST['sortsequence']);
@@ -29,6 +28,7 @@ if($isEditor && $action){
 		$statusStr = $charManager->deleteHeading($hid);
 	}
 }
+$headingArr = $charManager->getHeadingArr();
 $charArr = $charManager->getCharacterArr();
 ?>
 <!DOCTYPE HTML>
