@@ -56,7 +56,7 @@ function initAutoComplete(formElem){
 	$("#"+formElem).autocomplete({
 		source: function( request, response ){
 			$.ajax({
-				url: "rpc/checklistspeciessuggest.php",
+				url: "rpc/clspeciessuggest.php",
 				dataType: "json",
 				data: {
 					term : request.term,

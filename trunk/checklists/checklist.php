@@ -95,21 +95,16 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?></title>
 	<link rel="stylesheet" href="../css/main.css?ver=131016" type="text/css"/>
-	<?php
-		$keywordStr = "virtual flora,species list,".$clManager->getClName();
-		if(array_key_exists("authors",$clArray) && $clArray["authors"]) $keywordStr .= ",".$clArray["authors"];
-		echo'<meta name="keywords" content="'.$keywordStr.'" />';
-	?>
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
 		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-		var taxonArr = new Array(<?php $clManager->echoFilterList();?>);
 		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
+	<script type="text/javascript" src="../js/symb/shared.js?ver=130330"></script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=130330"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
@@ -527,6 +522,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 						}
 					}
 					else{
+						$voucherArr = $clManager->getVoucherArr();
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
 							if($family != $prevfam){
@@ -539,7 +535,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 							}
 							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
 							echo "<div id='tid-$tid' style='margin:0px 0px 3px 10px;'>";
-							echo "<div>";
+							echo '<div style="clear:left">';
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"]) && !$printMode) echo "<a href='".$spUrl."' target='_blank'>";
 							echo "<b><i>".$sppArr["sciname"]."</b></i> ";
 							if(array_key_exists("author",$sppArr)) echo $sppArr["author"];
@@ -563,14 +559,20 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 							echo "</div>\n";
 							if($showVouchers){
 								$voucStr = '';
-								if(array_key_exists('vouchers',$sppArr)){
-									$vArr = $sppArr['vouchers'];
-									foreach($vArr as $occid => $collName){
+								if(array_key_exists($tid,$voucherArr)){
+									$voucCnt = 0;
+									foreach($voucherArr[$tid] as $occid => $collName){
 										$voucStr .= ', ';
-										if(!$printMode) $voucStr .= '<a style="cursor:pointer" onclick="return openPopup(\'../collections/individual/index.php?occid='.$occid.'\',\'individwindow\')">';
+										if($voucCnt == 4){
+											$voucStr .= '<a href="#" onclick="return toggleVoucherDiv('.$tid.',this);">more ...</a>';
+											$voucStr .= '<span id="voucdiv-'.$tid.'" style="display:none;">';
+										}
+										if(!$printMode) $voucStr .= '<a href="#" onclick="return openIndividualPopup('.$occid.')">';
 										$voucStr .= $collName;
 										if(!$printMode) $voucStr .= "</a>\n";
+										$voucCnt++;
 									}
+									if($voucCnt > 4) $voucStr .= '</span>';
 									$voucStr = substr($voucStr,2);
 								}
 								$noteStr = '';

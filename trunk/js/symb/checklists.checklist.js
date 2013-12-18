@@ -1,6 +1,11 @@
 $(document).ready(function() {
 	//Filter autocomplete
-	$("#taxonfilter").autocomplete({ source: taxonArr }, { delay: 0, minLength: 2 });
+	$("#taxonfilter").autocomplete({ 
+		source: function( request, response ) {
+			$.getJSON( "rpc/clsearchsuggest.php", { term: request.term, cl: clid }, response );
+		}
+	},
+	{ minLength: 3 });
 
 	//Species add form
 	$("#speciestoadd").autocomplete({
@@ -12,43 +17,15 @@ $(document).ready(function() {
 
 });
 
-function toggle(target){
-	var objDiv = document.getElementById(target);
-	if(objDiv){
-		if(objDiv.style.display=="none"){
-			objDiv.style.display = "block";
-		}
-		else{
-			objDiv.style.display = "none";
-		}
-	}
-	else{
-	  	var divs = document.getElementsByTagName("div");
-	  	for (var h = 0; h < divs.length; h++) {
-	  	var divObj = divs[h];
-			if(divObj.className == target){
-				if(divObj.style.display=="none"){
-					divObj.style.display="block";
-				}
-			 	else {
-			 		divObj.style.display="none";
-			 	}
-			}
-		}
-	
-	  	var spans = document.getElementsByTagName("span");
-	  	for (var i = 0; i < spans.length; i++) {
-	  	var spanObj = spans[i];
-			if(spanObj.className == target){
-				if(spanObj.style.display=="none"){
-					spanObj.style.display="inline";
-				}
-			 	else {
-			 		spanObj.style.display="none";
-			 	}
-			}
-		}
-	}
+function toggleVoucherDiv(tid,anchorObj){
+	toggle("voucdiv-"+tid);
+	anchorObj.style.display = "none";
+	return false;
+}
+
+function openIndividualPopup(occid){
+	var indUrl = "../collections/individual/index.php?occid="+occid;
+	openPopup(indUrl,"indwindow");
 	return false;
 }
 
@@ -64,7 +41,7 @@ function openPopup(urlStr,windowName){
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
-
+	
 function showImagesChecked(f){
 	if(f.showimages.checked){
 		f.showvouchers.checked = false;
@@ -128,21 +105,6 @@ function GetXmlHttpObject(){
     	}
   	}
 	return xmlHttp;
-}
-
-function isNumeric(sText){
-   	var ValidChars = "0123456789-.";
-   	var IsNumber = true;
-   	var Char;
- 
-   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
-	   Char = sText.charAt(i); 
-		if (ValidChars.indexOf(Char) == -1){
-			IsNumber = false;
-			break;
-      	}
-   	}
-	return IsNumber;
 }
 
 Array.prototype.unique = function() {
