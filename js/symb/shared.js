@@ -17,7 +17,7 @@ function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
 		if(ele.style.display=="none"){
-			ele.style.display="block";
+			ele.style.display="";
   		}
 	 	else {
 	 		ele.style.display="none";
@@ -38,3 +38,4 @@ function toggle(target){
 		}
 	}
 }
+

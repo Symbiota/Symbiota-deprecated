@@ -7,6 +7,8 @@ class ChecklistManager {
 	private $clid;
 	private $dynClid;
 	private $clName;
+	private $childClidArr = array();
+	private $voucherArr = array();
 	private $pid = '';
 	private $projName = '';
 	private $taxaList = Array();
@@ -58,6 +60,18 @@ class ChecklistManager {
 				trigger_error('ERROR setting checklist ID, SQL: '.$sql, E_USER_ERROR);
 			}
 		}
+		//Get children checklists
+		$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
+		$sqlChild = $sqlChildBase.$this->clid.')';
+		do{
+			$childStr = "";
+			$rsChild = $this->conn->query($sqlChild);
+			while($rChild = $rsChild->fetch_object()){
+				$this->childClidArr[] = $rChild->clidchild;
+				$childStr .= ','.$rChild->clidchild;
+			}
+			$sqlChild = $sqlChildBase.substr($childStr,1).')';
+		}while($childStr);
 		return $retStr;
 	}
 
@@ -131,16 +145,19 @@ class ChecklistManager {
 	public function getTaxaList($pageNumber = 1,$retLimit = 500){
 		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		if(!$this->clid && !$this->dynClid) return;
-		$voucherArr = Array();
 		if($this->showVouchers){
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
 			$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
 				'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,"s.n.")) AS collector '.
 				'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 				'INNER JOIN omcollections c ON o.collid = c.collid '.
-				'WHERE (v.clid = '.$this->clid.')';
+				'WHERE (v.clid IN ('.$clidStr.'))';
 	 		$vResult = $this->conn->query($vSql);
 			while ($row = $vResult->fetch_object()){
-				$voucherArr[$row->tid][$row->occid] = $row->collector.' ['.$row->institutioncode.']';
+				$this->voucherArr[$row->tid][$row->occid] = $row->collector.' ['.$row->institutioncode.']';
 			}
 			$vResult->close();
 		}
@@ -176,9 +193,6 @@ class ChecklistManager {
 					if($row->notes) $clStr .= ", ".$row->notes;
 					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
-					if(array_key_exists($tid,$voucherArr)){
-						$this->taxaList[$tid]["vouchers"] = $voucherArr[$tid];  
-					}
 				}
 				$this->taxaList[$tid]["sciname"] = $sciName;
 				$this->taxaList[$tid]["family"] = $family;
@@ -254,6 +268,12 @@ class ChecklistManager {
 		$retArr = array();
 		if(!$this->basicSql) $this->setClSql();
 		if($this->clid){
+			//Add children checklists to query
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
+			
 			$maxLat = -90;
 			$minLat = 90;
 			$maxLng = -180;
@@ -265,12 +285,12 @@ class ChecklistManager {
 				if($tid){
 					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
 						'FROM fmchklstcoordinates cc INNER JOIN taxa t ON cc.tid = t.tid '.
-						'WHERE cc.tid = '.$tid.' AND cc.clid = '.$this->clid.' AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
+						'WHERE cc.tid = '.$tid.' AND cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				else{
 					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
 						'FROM fmchklstcoordinates cc INNER JOIN ('.$this->basicSql.') t ON cc.tid = t.tid '.
-						'WHERE cc.clid = '.$this->clid.' AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
+						'WHERE cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				if($abbreviated){
 					$sql1 .= 'LIMIT 50'; 
@@ -306,7 +326,7 @@ class ChecklistManager {
 						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'WHERE v.tid = '.$tid.' AND v.clid = '.$this->clid.' AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
+							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND o.localitysecurity = 0 ';
 					}
 					else{
@@ -314,7 +334,7 @@ class ChecklistManager {
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,"s.n."),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
-							'WHERE v.clid = '.$this->clid.' AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
+							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND o.localitysecurity = 0 ';
 					}
 					if($abbreviated){
@@ -382,19 +402,26 @@ class ChecklistManager {
 
 	private function setClSql(){
 		if($this->clid){
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, ts.family, '. 
+				//Filter checklist through thesaurus
+				$this->basicSql = 'SELECT DISTINCT t.tid, ctl.clid ts.uppertaxonomy, ts.family, '. 
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
 					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid '.
-	    	  		'WHERE (ctl.clid = '.$this->clid.') AND (ts.taxauthid = '.$this->thesFilter.')';
-			} 
+					'LEFT JOIN fmchklstchildren ch ON ctl.clid = ch.clid '.
+			  		'WHERE (ctl.clid IN ('.$clidStr.')) AND (ts.taxauthid = '.$this->thesFilter.')';
+			}
 			else{
+				//Raw checklist without filtering through checklist
 				$this->basicSql = 'SELECT DISTINCT t.tid, ts.uppertaxonomy, IFNULL(ctl.familyoverride,ts.family) AS family, '.
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
 					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
-	    	  		'WHERE (ts.taxauthid = 1) AND (ctl.clid = '.$this->clid.')';
+				'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.'))';
 			}
 		}
 		else{
@@ -476,6 +503,14 @@ class ChecklistManager {
 
 	public function getClid(){
 		return $this->clid;
+	}
+
+	public function getChildClidArr(){
+		return $this->childClidArr;
+	}
+
+	public function getVoucherArr(){
+		return $this->voucherArr;
 	}
 
 	public function getClName(){
