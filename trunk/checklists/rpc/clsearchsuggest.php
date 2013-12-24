@@ -13,13 +13,26 @@ if(is_numeric($clid)){
 		
 	$sql = 'SELECT t.sciname '. 
 		'FROM taxa t INNER JOIN fmchklsttaxalink cl ON t.tid = cl.tid '.
-		'WHERE sciname LIKE "'.$queryString.'%" AND cl.clid = '.$clid.' ORDER BY sciname';
+		'WHERE t.sciname LIKE "'.$queryString.'%" AND cl.clid = '.$clid;
 	//echo $sql;
 	$result = $conn->query($sql);
 	while ($r = $result->fetch_object()) {
 		$returnArr[] = $r->sciname;
 	}
+	$result->free();
+	
+	$sql = 'SELECT DISTINCT ts.family '. 
+		'FROM fmchklsttaxalink cl INNER JOIN taxstatus ts ON cl.tid = ts.tid '.
+		'WHERE ts.family LIKE "'.$queryString.'%" AND cl.clid = '.$clid.' AND ts.taxauthid = 1 ';
+	//echo $sql;
+	$result = $conn->query($sql);
+	while ($r = $result->fetch_object()) {
+		$returnArr[] = $r->family;
+	}
+	$result->free();
+	
 	$conn->close();
 }
+sort($returnArr);
 echo json_encode($returnArr);
 ?>

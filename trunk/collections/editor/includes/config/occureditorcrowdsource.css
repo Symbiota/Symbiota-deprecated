@@ -213,7 +213,7 @@ body{
 
 #countryDiv{
 	position: absolute;
-	top: 200px;
+	top: 205px;
 	left: 25px;
 }
 
@@ -223,7 +223,7 @@ body{
 
 #stateProvinceDiv{
 	position: absolute;
-	top: 200px;
+	top: 205px;
 	left: 180px;
 }
 
@@ -233,7 +233,7 @@ body{
 
 #countyDiv{
 	position: absolute;
-	top: 200px;
+	top: 205px;
 	left: 350px;
 }
 
@@ -247,7 +247,7 @@ body{
 
 #localityDiv{
 	position: absolute;
-	top: 240px;
+	top: 245px;
 	left: 25px;
 }
 
@@ -261,7 +261,7 @@ body{
 
 #decimalLatitudeDiv{
 	position: absolute;
-	top: 290px;
+	top: 295px;
 	left: 25px;
 }
 
@@ -271,7 +271,7 @@ body{
 
 #decimalLongitudeDiv{
 	position: absolute;
-	top: 290px;
+	top: 295px;
 	left: 110px;
 }
 
@@ -281,7 +281,7 @@ body{
 
 #coordinateUncertaintyInMetersDiv{
 	position: absolute;
-	top: 288px;
+	top: 293px;
 	left: 200px;
 }
 
@@ -291,7 +291,7 @@ body{
 
 #googleDiv{
 	position: absolute;
-	top: 308px;
+	top: 313px;
 	left: 280px;
 	cursor:	pointer;
 }
@@ -303,7 +303,7 @@ body{
 
 #geoLocateDiv{
 	position: absolute;
-	top: 303px;
+	top: 308px;
 	left: 300px;
 }
 
@@ -313,7 +313,7 @@ body{
 
 #geoToolsDiv{
 	position: absolute;
-	top: 280px;
+	top: 285px;
 	left: 500px;
 	z-index: 10; 
 }
@@ -321,7 +321,7 @@ body{
 #coordAidDiv{
 	display:	none;
 	position: absolute;
-	top: 340px;
+	top: 345px;
 	left: 25px;
 	width:	95%;
 	height: 175px;
@@ -358,7 +358,7 @@ body{
 
 #elevationDiv{
 	position: absolute;
-	top: 340px;
+	top: 345px;
 	left: 25px;
 }
 
@@ -368,7 +368,7 @@ body{
 
 #verbatimElevationDiv{
 	position: absolute;
-	top: 340px;
+	top: 345px;
 	left: 175px;
 }
 
@@ -386,7 +386,7 @@ body{
 
 #verbatimCoordinatesDiv{
 	position: absolute;
-	top: 290px;
+	top: 295px;
 	left: 320px;
 }
 
@@ -420,7 +420,7 @@ body{
 
 #habitatDiv{
 	position: absolute;
-	top: 390px;
+	top: 395px;
 	left: 25px;
 	z-index: 1; 
 }
@@ -431,7 +431,7 @@ body{
 
 #substrateDiv{
 	position: absolute;
-	top: 430px;
+	top: 435px;
 	left: 25px;
 }
 
@@ -449,7 +449,7 @@ body{
 
 #occurrenceRemarksDiv{
 	position: absolute;
-	top: 470px;
+	top: 475px;
 	left: 25px;
 }
 
@@ -557,7 +557,7 @@ body{
 
 #editButtonDiv{
 	position: absolute;
-	top: 520px;
+	top: 525px;
 	left: 50px;
 }
 

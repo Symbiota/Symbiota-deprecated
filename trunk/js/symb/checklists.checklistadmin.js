@@ -85,17 +85,6 @@ function verifyPointAddForm(f){
 	return true;
 }
 
-function isNumeric(sText){
-   	var ValidChars = "0123456789-.";
-   	var IsNumber = true;
-   	var Char;
- 
-   	for (var i = 0; i < sText.length && IsNumber == true; i++){ 
-	   Char = sText.charAt(i); 
-		if (ValidChars.indexOf(Char) == -1){
-			IsNumber = false;
-			break;
-      	}
-   	}
-	return IsNumber;
+function validateAddChildForm(f){
+	
 }
