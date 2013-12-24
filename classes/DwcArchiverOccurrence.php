@@ -1,7 +1,8 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/UuidFactory.php');
 
-class OccurrenceDwcArchiver{
+class DwcArchiverOccurrence{
 
 	private $conn;
 
@@ -28,6 +29,11 @@ class OccurrenceDwcArchiver{
 		global $serverRoot, $userRights, $isAdmin;
 		//ini_set('memory_limit','512M');
 		set_time_limit(500);
+
+		//Ensure that PHP DOMDocument class is installed
+		if(!class_exists('DOMDocument')){
+			exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
+		}
 
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 
@@ -140,9 +146,10 @@ class OccurrenceDwcArchiver{
 			'metadataLanguage' => 'http://rs.tdwg.org/ac/terms/metadataLanguage'	//en
 		);
 
-		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
-			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','coordinatePrecision',
-			'verbatimCoordinates','georeferenceRemarks','habitat');
+ 		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT',
+			'verbatimCoordinates','georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources',
+			'georeferenceVerificationStatus','habitat','informationWithheld');
 	}
 
 	public function __destruct(){
@@ -197,26 +204,30 @@ class OccurrenceDwcArchiver{
 		else{
 			//Don't limit by collection id 
 		}
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, '.
+		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
 			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-			'c.guidtarget, c.collectionguid, c.latitudedecimal, c.longitudedecimal, i.address1, i.address2, i.city, i.stateprovince, '. 
-			'i.postalcode, i.country, i.phone '.
+			'c.guidtarget, c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
+			'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
 			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
 		//echo $sql.'<br/>';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$inst = $r->institutioncode;
-			if($r->collectioncode) $inst .= '-'.$r->collectioncode;
-			$this->collArr[$r->collid]['collcode'] = $inst;
+			$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
+			$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
 			$this->collArr[$r->collid]['collname'] = htmlspecialchars($r->collectionname);
 			$this->collArr[$r->collid]['description'] = htmlspecialchars($r->fulldescription);
+			$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
 			$this->collArr[$r->collid]['url'] = $r->url;
 			$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
 			$this->collArr[$r->collid]['email'] = $r->email;
 			$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
-			$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
 			$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
 			$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
+			$this->collArr[$r->collid]['icon'] = $r->icon;
+			$this->collArr[$r->collid]['colltype'] = $r->colltype;
+			$this->collArr[$r->collid]['rights'] = $r->rights;
+			$this->collArr[$r->collid]['rightsholder'] = $r->rightsholder;
+			$this->collArr[$r->collid]['usageterm'] = $r->usageterm;
 			$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
 			$this->collArr[$r->collid]['address2'] = htmlspecialchars($r->address2);
 			$this->collArr[$r->collid]['city'] = $r->city;
@@ -240,7 +251,7 @@ class OccurrenceDwcArchiver{
 		}
 		elseif(is_string($condObj)){
 			//String of key/value pairs (e.g. country:USA,United States;stateprovince:Arizona,New Mexico;county-start:Pima,Eddy
-			$cArr = explode(';',$condStr);
+			$cArr = explode(';',$condObj);
 			foreach($cArr as $rawV){
 				$tok = explode(':',$rawV);
 				if(count($tok) == 2){
@@ -278,13 +289,13 @@ class OccurrenceDwcArchiver{
 					$this->conditionSql .= 'AND (o.'.$k.' IS NOT NULL) ';
 				}
 				else{
-					$this->conditionSql .= 'AND (o.'.$tok[0].' IN("'.str_replace(',','","',$this->cleanInStr($tok[1])).'")) ';
+					$this->conditionSql .= 'AND (o.'.$k.' IN("'.str_replace(',','","',$v).'")) ';
 				}
 			}
 		}
 	}
 
-	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities){
+	public function createDwcArchive($includeDets, $includeImgs, $redactLocalities, $type = 'coll'){
 		global $serverRoot;
 		if(!$this->targetPath) $this->setTargetPath();
 		$archiveFile = '';
@@ -310,7 +321,12 @@ class OccurrenceDwcArchiver{
 			//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 			
 			$this->writeMetaFile();
-			$this->writeEmlFile();
+			if($type == 'coll'){
+				$this->writeEmlFile($this->getCollectionEmlArr());
+			}
+			else{
+				$this->writeEmlFile();
+			}
 			$this->writeOccurrenceFile($redactLocalities);
 			if($includeDets) $this->writeDeterminationFile();
 			if($includeImgs) $this->writeImageFile($redactLocalities);
@@ -332,115 +348,284 @@ class OccurrenceDwcArchiver{
 	}
 	
 	private function writeMetaFile(){
-		global $charset;
-
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->ts.'-meta.xml', 'w');
 
-		//Output header 
-		$outStr = '<archive metadata="eml.xml" xmlns="http://rs.tdwg.org/dwc/text/" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-			xsi:schemaLocation="http://rs.tdwg.org/dwc/text/   http://rs.tdwg.org/dwc/text/tdwg_dwc_text.xsd">
-			<core encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Occurrence">
-				<files>
-					<location>occurrences.csv</location>
-				</files>
-				<id index="0" />';
-		$fieldCnt = 0;
-		foreach($this->occurrenceFieldArr as $k => $v){
-			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
-			$fieldCnt++;
-		}
-		$outStr .= '</core>
-			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Identification">
-				<files>
-					<location>identifications.csv</location>
-				</files>
-				<coreid index="0" />';
-		$fieldCnt = 0;
-		foreach($this->determinationFieldArr as $k => $v){
-			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
-			$fieldCnt++;
-		}
-		$outStr .= '</extension>
-			<extension encoding="'.($charset=='UTF-8'?'UTF-8':'ISO-8859-1').'" fieldsTerminatedBy="," linesTerminatedBy="\n" fieldsEnclosedBy=\'"\' ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Image">
-				<files>
-					<location>images.csv</location>
-				</files>
-				<coreid index="0" />';
-		$fieldCnt = 0;
-		foreach($this->imageFieldArr as $k => $v){
-			if($fieldCnt > 0) $outStr .= '<field index="'.$fieldCnt.'" term="'.$v.'" /> ';
-			$fieldCnt++;
-		}
-		$outStr .= '</extension>
-		</archive>';
+		//Create new DOM document 
+		$newDoc = new DOMDocument('1.0','UTF-8');
+
+		//Add root element 
+		$rootElem = $newDoc->createElement('archive');
+		$rootElem->setAttribute('metadata','eml.xml');
+		$rootElem->setAttribute('xmlns','http://rs.tdwg.org/dwc/text/');
+		$rootElem->setAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+		$rootElem->setAttribute('xsi:schemaLocation','http://rs.tdwg.org/dwc/text/   http://rs.tdwg.org/dwc/text/tdwg_dwc_text.xsd');
+		$newDoc->appendChild($rootElem);
+
+		//Core file definition
+		$coreElem = $newDoc->createElement('core');
+		$coreElem->setAttribute('encoding',$GLOBALS['charset']);
+		$coreElem->setAttribute('fieldsTerminatedBy',',');
+		$coreElem->setAttribute('linesTerminatedBy','\n');
+		$coreElem->setAttribute('fieldsEnclosedBy','"');
+		$coreElem->setAttribute('ignoreHeaderLines','1');
+		$coreElem->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Occurrence');
 		
-		fwrite($fh,$outStr);
-   		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->ts.'-meta.xml');
-    	$this->zipArchive->renameName($this->targetPath.$this->ts.'-meta.xml','meta.xml');
+		$filesElem = $newDoc->createElement('files');
+		$filesElem->appendChild($newDoc->createElement('location','occurrences.csv'));
+		$coreElem->appendChild($filesElem);
+
+		$idElem = $newDoc->createElement('id');
+		$idElem->setAttribute('index','0');
+		$coreElem->appendChild($idElem);
+
+		$occCnt = 0;
+		foreach($this->occurrenceFieldArr as $k => $v){
+			if($occCnt){
+				$fieldElem = $newDoc->createElement('field');
+				$fieldElem->setAttribute('index',$occCnt);
+				$fieldElem->setAttribute('term',$v);
+				$coreElem->appendChild($fieldElem);
+			}
+			$occCnt++;
+		}
+		$rootElem->appendChild($coreElem);
+
+		//Identification extension
+		$extElem1 = $newDoc->createElement('extension');
+		$extElem1->setAttribute('encoding',$GLOBALS['charset']);
+		$extElem1->setAttribute('fieldsTerminatedBy',',');
+		$extElem1->setAttribute('linesTerminatedBy','\n');
+		$extElem1->setAttribute('fieldsEnclosedBy','"');
+		$extElem1->setAttribute('ignoreHeaderLines','1');
+		$extElem1->setAttribute('rowType','http://rs.tdwg.org/dwc/terms/Identification');
+
+		$filesElem1 = $newDoc->createElement('files');
+		$filesElem1->appendChild($newDoc->createElement('location','identifications.csv'));
+		$extElem1->appendChild($filesElem1);
+		
+		$coreIdElem1 = $newDoc->createElement('coreid');
+		$coreIdElem1->setAttribute('index','0');
+		$extElem1->appendChild($coreIdElem1);
+		
+		//List identification fields
+		$detCnt = 0;
+		foreach($this->determinationFieldArr as $k => $v){
+			if($detCnt){
+				$fieldElem = $newDoc->createElement('field');
+				$fieldElem->setAttribute('index',$detCnt);
+				$fieldElem->setAttribute('term',$v);
+				$extElem1->appendChild($fieldElem);
+			}
+			$detCnt++;
+		}
+		$rootElem->appendChild($extElem1);
+
+		//Image extension
+		$extElem2 = $newDoc->createElement('extension');
+		$extElem2->setAttribute('encoding',$GLOBALS['charset']);
+		$extElem2->setAttribute('fieldsTerminatedBy',',');
+		$extElem2->setAttribute('linesTerminatedBy','\n');
+		$extElem2->setAttribute('fieldsEnclosedBy','"');
+		$extElem2->setAttribute('ignoreHeaderLines','1');
+		$extElem2->setAttribute('rowType','http://rs.gbif.org/terms/1.0/Image');
+
+		$filesElem2 = $newDoc->createElement('files');
+		$filesElem2->appendChild($newDoc->createElement('location','images.csv'));
+		$extElem2->appendChild($filesElem2);
+		
+		$coreIdElem2 = $newDoc->createElement('coreid');
+		$coreIdElem2->setAttribute('index','0');
+		$extElem2->appendChild($coreIdElem2);
+		
+		//List image fields
+		$imgCnt = 0;
+		foreach($this->imageFieldArr as $k => $v){
+			if($imgCnt){
+				$fieldElem = $newDoc->createElement('field');
+				$fieldElem->setAttribute('index',$imgCnt);
+				$fieldElem->setAttribute('term',$v);
+				$extElem2->appendChild($fieldElem);
+			}
+			$imgCnt++;
+		}
+		$rootElem->appendChild($extElem2);
+		
+		$tempFileName = $this->targetPath.$this->ts.'-meta.xml';
+		$newDoc->save($tempFileName);
+		$this->zipArchive->addFile($tempFileName);
+    	$this->zipArchive->renameName($tempFileName,'meta.xml');
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
-	private function writeEmlFile(){
+	private function getDatasetEmlArr(){
 		global $clientRoot, $defaultTitle, $adminEmail;
+		
+		$urlPathPrefix = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		
+		$emlArr = array();
+		$emlArr['title'] = $defaultTitle.' general data extract';
+		
+		$emlArr['creator'][0]['organizationName'] = $USER_DISPLAY_NAME;
+		
+		$emlArr['metadataProvider'][0]['organizationName'] = $defaultTitle;
+		$emlArr['metadataProvider'][0]['electronicMailAddress'] = $adminEmail;
+		$emlArr['metadataProvider'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
+		
+		$emlArr['pubDate'] = date("Y-m-d");
+		
+		//Display search criteria
+				
+		return $emlArr;
+	}
 
+	private function getCollectionEmlArr(){
+		global $clientRoot, $defaultTitle, $adminEmail;
+		
+		$urlPathPrefix = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		
+		//Create arr using the first occurrence of $this->collArr
+		$collId = key($this->collArr);
+		$cArr = $this->collArr[$collId];
+		
+		$emlArr = array();
+		$emlArr['alternateIdentifier'][] = $cArr['collectionguid'];
+		$emlArr['alternateIdentifier'][] = $urlPathPrefix.'collections/misc/misc/collprofiles.php?collid='.$collId;
+		$emlArr['title'] = $cArr['collname'];
+		
+		$emlArr['creator'][0]['organizationName'] = $defaultTitle;
+		$emlArr['creator'][0]['electronicMailAddress'] = $adminEmail;
+		$emlArr['creator'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
+		
+		$emlArr['metadataProvider'][0]['organizationName'] = $defaultTitle;
+		$emlArr['metadataProvider'][0]['electronicMailAddress'] = $adminEmail;
+		$emlArr['metadataProvider'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
+		
+		$emlArr['pubDate'] = date("Y-m-d");
+		$emlArr['description'] = $cArr['description'];
+
+		$emlArr['contact'][0]['individualName'] = $cArr['contact'];
+		$emlArr['contact'][0]['organizationName'] = $cArr['collname'];
+
+		$emlArr['contact'][0]['deliveryPoint'] = $cArr['address1'].($cArr['address2']?', '.$cArr['address2']:'');
+		$emlArr['contact'][0]['city'] = $cArr['city'];
+		$emlArr['contact'][0]['administrativeArea'] = $cArr['state'];
+		$emlArr['contact'][0]['postalCode'] = $cArr['postalcode'];
+		$emlArr['contact'][0]['country'] = $cArr['country'];
+		
+		$emlArr['contact'][0]['phone'] = $cArr['phone'];
+		$emlArr['contact'][0]['electronicMailAddress'] = $cArr['email'];
+		$emlArr['contact'][0]['onlineUrl'] = $cArr['url'];
+		
+		$emlArr['intellectualRights'] = $cArr['rights'];
+				
+		return $emlArr;
+	}
+
+	private function writeEmlFile($emlArr){
 		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->ts.'-eml.xml', 'w');
 
-		//Output header 
-		$outStr = '<eml xmlns="eml://ecoinformatics.org/eml-2.1.1" 
-			xmlns:dc="http://purl.org/dc/terms/" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-			xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.0.1/eml.xsd">';
-		foreach($this->collArr as $collId => $cArr){
-			$outStr .= '<dataset>';
-			$outStr .= '<title xml:lang="eng">'.$cArr['collname'].'</title>';
-	
-			$outStr .= '<creator>';
-			$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
-			$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
-			$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
-			$outStr .= '</creator>';
-	
-			$outStr .= '<metadataProvider>';
-			$outStr .= '<organizationName>'.$defaultTitle.'</organizationName>';
-			$outStr .= '<electronicMailAddress>'.$adminEmail.'</electronicMailAddress>';
-			$outStr .= '<onlineUrl>http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'index.php</onlineUrl>';
-			$outStr .= '</metadataProvider>';
-	
-			$outStr .= '<pubDate>'.date("Y-m-d").'</pubDate>';
-			$outStr .= '<language>eng</language>';
-			$outStr .= '<abstract><para>'.$cArr['description'].'</para></abstract>';
-			
-			$outStr .= '<contact>';
-			$outStr .= '<individualName>'.$cArr['contact'].'</individualName>';
-			$outStr .= '<organizationName>'.$cArr['collname'].'</organizationName>';
-			$outStr .= '<address>';
-			$outStr .= '<deliveryPoint>';
-			$outStr .= $cArr['address1'];
-			$outStr .= ($cArr['address2']?', ':'').$cArr['address2'];
-			$outStr .= '</deliveryPoint>';
-			$outStr .= '<city>'.$cArr['city'].'</city>';
-			$outStr .= '<administrativeArea>'.$cArr['state'].'</administrativeArea>';
-			$outStr .= '<postalCode>'.$cArr['postalcode'].'</postalCode>';
-			$outStr .= '<country>'.$cArr['country'].'</country>';
-			$outStr .= '</address>';
-			$outStr .= '<phone>'.$cArr['phone'].'</phone>';
-			$outStr .= '<electronicMailAddress>'.$cArr['email'].'</electronicMailAddress>';
-			$outStr .= '<onlineUrl>'.$cArr['url'].'</onlineUrl>';
-			$outStr .= '</contact>';
-	
-			$outStr .= '</dataset>';
+		if(!$emlArr) $emlArr = $this->getDatasetEmlArr();
+		
+		//Create new DOM document 
+		$newDoc = new DOMDocument('1.0','UTF-8');
+
+		//Add root element 
+		$rootElem = $newDoc->createElement('eml:eml');
+		$rootElem->setAttribute('xmlns:eml','eml://ecoinformatics.org/eml-2.1.1');
+		$rootElem->setAttribute('xmlns:dc','http://purl.org/dc/terms/');
+		$rootElem->setAttribute('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance');
+		$rootElem->setAttribute('xsi:schemaLocation','eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.0.1/eml.xsd');
+		$rootElem->setAttribute('packageId',UuidFactory::getUuidV4());
+		$rootElem->setAttribute('system','http://symbiota.org');
+		$rootElem->setAttribute('scope','system');
+		$rootElem->setAttribute('xml:lang','eng');
+		
+		$newDoc->appendChild($rootElem);
+
+		$cArr = array();
+		$datasetElem = $newDoc->createElement('dataset');
+		$rootElem->appendChild($datasetElem);
+
+		if(array_key_exists('alternateIdentifier',$emlArr)){
+			foreach($emlArr['alternateIdentifier'] as $v){
+				$datasetElem->appendChild($newDoc->createElement('alternateIdentifier',$v));
+			}
 		}
-		$outStr .= '</eml>';
+		
+		if(array_key_exists('title',$emlArr)){
+			$titleElem = $newDoc->createElement('title',$emlArr['title']);
+			$titleElem->setAttribute('xml:lang','eng');
+			$datasetElem->appendChild($titleElem);
+		}
 
-		fwrite($fh,$outStr);
-   		fclose($fh);
-		$this->zipArchive->addFile($this->targetPath.$this->ts.'-eml.xml');
-    	$this->zipArchive->renameName($this->targetPath.$this->ts.'-eml.xml','eml.xml');
+		if(array_key_exists('creator',$emlArr)){
+			$createArr = $emlArr['creator'];
+			foreach($createArr as $childArr){
+				$creatorElem = $newDoc->createElement('creator');
+				foreach($childArr as $k => $v){
+					$creatorElem->appendChild($newDoc->createElement($k,$v));
+				}
+				$datasetElem->appendChild($creatorElem);
+			}
+		}
+
+		if(array_key_exists('metadataProvider',$emlArr)){
+			$mdArr = $emlArr['metadataProvider'];
+			foreach($mdArr as $childArr){
+				$mdElem = $newDoc->createElement('metadataProvider');
+				foreach($childArr as $k => $v){
+					$mdElem->appendChild($newDoc->createElement($k,$v));
+				}
+				$datasetElem->appendChild($mdElem);
+			}
+		}
+		
+		if(array_key_exists('pubDate',$emlArr)){
+			$datasetElem->appendChild($newDoc->createElement('pubDate',$emlArr['pubDate']));
+		}
+		$datasetElem->appendChild($newDoc->createElement('language','eng'));
+
+		if(array_key_exists('description',$emlArr)){
+			$abstractElem = $newDoc->createElement('abstract');
+			$abstractElem->appendChild($newDoc->createElement('para',$emlArr['description']));
+			$datasetElem->appendChild($abstractElem);
+		}
+		
+		if(array_key_exists('contact',$emlArr)){
+			$contactArr = $emlArr['contact'];
+			foreach($contactArr as $childArr){
+				$contactElem = $newDoc->createElement('contact');
+				$contactElem->appendChild($newDoc->createElement('individualName',$childArr['individualName']));
+				$contactElem->appendChild($newDoc->createElement('organizationName',$childArr['organizationName']));
+				
+				$addressElem = $newDoc->createElement('address');
+				$addressElem->appendChild($newDoc->createElement('deliveryPoint',$childArr['deliveryPoint']));
+				$addressElem->appendChild($newDoc->createElement('city',$childArr['city']));
+				$addressElem->appendChild($newDoc->createElement('administrativeArea',$childArr['administrativeArea']));
+				$addressElem->appendChild($newDoc->createElement('postalCode',$childArr['postalCode']));
+				$addressElem->appendChild($newDoc->createElement('country',$childArr['country']));
+				$contactElem->appendChild($addressElem);
+				
+				$contactElem->appendChild($newDoc->createElement('phone',$childArr['phone']));
+				$contactElem->appendChild($newDoc->createElement('electronicMailAddress',$childArr['electronicMailAddress']));
+				$contactElem->appendChild($newDoc->createElement('onlineUrl',$childArr['onlineUrl']));
+				
+				$datasetElem->appendChild($contactElem);
+			}
+		}
+		
+		if(array_key_exists('intellectualRights',$emlArr)){
+			$rightsElem = $newDoc->createElement('intellectualRights');
+			$rightsElem = $newDoc->createElement('para',$emlArr['intellectualRights']);
+			$datasetElem->appendChild($rightsElem);
+		}
+		
+		$tempFileName = $this->targetPath.$this->ts.'-eml.xml';
+		$newDoc->save($tempFileName);
+
+		$this->zipArchive->addFile($tempFileName);
+    	$this->zipArchive->renameName($tempFileName,'eml.xml');
 
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -484,23 +669,9 @@ class OccurrenceDwcArchiver{
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 				while($r = $rs->fetch_assoc()){
 					if($redactLocalities && $r["localitySecurity"] > 0 && !$this->canReadRareSpp){
-						$r["habitat"] = '[Redacted]';
-						$r["locality"] = '[Redacted]';
-						$r["decimalLatitude"] = '[Redacted]';
-						$r["decimalLongitude"] = '[Redacted]';
-						$r["geodeticDatum"] = '[Redacted]';
-						$r["coordinateUncertaintyInMeters"] = '[Redacted]';
-						$r["footprintWKT"] = '[Redacted]';
-						$r["verbatimCoordinates"] = '[Redacted]';
-						$r["georeferencedBy"] = '[Redacted]';
-						$r["georeferenceProtocol"] = '[Redacted]';
-						$r["georeferenceSources"] = '[Redacted]';
-						$r["georeferenceVerificationStatus"] = '[Redacted]';
-						$r["georeferenceRemarks"] = '[Redacted]';
-						$r["minimumElevationInMeters"] = '[Redacted]';
-						$r["maximumElevationInMeters"] = '[Redacted]';
-						$r["verbatimElevation"] = '[Redacted]';
-						$r["informationWithheld"] = 'Locality Redacted';
+						foreach($this->securityArr as $v){
+							if(array_key_exists($v,$r)) $r[$v] = '[Redacted]';
+						}
 					}
 					unset($r['localitySecurity']);
 					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
@@ -598,12 +769,12 @@ class OccurrenceDwcArchiver{
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
 			if($redactLocalities && !$this->canReadRareSpp){
-				$sql .= 'AND (o.localitySecurity = 0 || o.localitySecurity IS NULL) ';
+				$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
 			}
 			if($this->conditionSql) {
 				$sql .= $this->conditionSql;
 			}
-			$sql .= 'ORDER BY o.occid';
+			//$sql .= 'ORDER BY o.occid';
 			//echo $sql;
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 				$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
@@ -702,7 +873,7 @@ class OccurrenceDwcArchiver{
 		$this->logOrEcho("Mapping data to RSS feed... \n");
 		
 		//Create new document and write out to target
-		$newDoc = new DOMDocument();
+		$newDoc = new DOMDocument('1.0','UTF-8');
 
 		//Add root element 
 		$rootElem = $newDoc->createElement('rss');
@@ -811,10 +982,6 @@ class OccurrenceDwcArchiver{
 		$retArr = Array();
 		$rssFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'webservices/dwc/rss.xml';
 		if(file_exists($rssFile)){
-			//Get other existing DWCAs by reading and parsing current rss.xml feed and load into array
-			if(!class_exists('DOMDocument')){
-				exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
-			}
 			$xmlDoc = new DOMDocument();
 			$xmlDoc->load($rssFile);
 			$items = $xmlDoc->getElementsByTagName("item");

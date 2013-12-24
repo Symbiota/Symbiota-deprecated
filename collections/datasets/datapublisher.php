@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDwcArchiver.php');
+include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $emode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
@@ -16,7 +16,7 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 	$editable = 1;
 }
 
-$dwcaManager = new OccurrenceDwcArchiver();
+$dwcaManager = new DwcArchiverOccurrence();
 $dwcaManager->setTargetPath($serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/');
 if($collId) $dwcaManager->setCollArr($collId);
 
