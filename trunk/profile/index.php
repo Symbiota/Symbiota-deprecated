@@ -45,7 +45,7 @@ elseif($action == "Login"){
 	if(!$password) $password = "emptypwd"; 
 	$statusStr = $pHandler->authenticate($login, $password);
     if($statusStr == "success"){
-    	if($refUrl){
+    	if($refUrl && !strpos($refUrl,'newprofile.php')){
 			header("Location: ".$refUrl);
         }
         else{
@@ -147,9 +147,7 @@ if(isset($profile_indexCrumbs)){
 			</div>
 			
 			<div style="margin:20px 0px 10px 140px;">
-				<?php 
-					if($refUrl) echo "<input type='hidden' name='refurl' value='".$refUrl."'/>";
-				?>
+				<input type="hidden" name="refurl" value="<?php echo $refUrl; ?>" />
 				<input type="submit" value="Login" name="action">
 			</div>
 	  	</fieldset>
@@ -158,7 +156,7 @@ if(isset($profile_indexCrumbs)){
 				Don't have an Account?
 			</div>
 			<div style="">
-				<a href="newprofile.php">Create an account now</a>
+				<a href="newprofile.php?refurl=<?php echo $refUrl; ?>">Create an account now</a>
 			</div>
 			<div style="font-weight:bold;margin-top:5px">
 				Can't remember your password?
@@ -178,10 +176,6 @@ if(isset($profile_indexCrumbs)){
 		</div>
 	</form>
 </div>
-
-<?php
-	include($serverRoot.'/footer.php');
-?>
-
+<?php include($serverRoot.'/footer.php'); ?>
 </body>
 </html>	
