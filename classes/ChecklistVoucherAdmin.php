@@ -223,18 +223,21 @@ class ChecklistVoucherAdmin {
 	public function getMissingTaxa(){
 		$retArr = Array();
 		if($this->sqlFrag){
-			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname FROM omoccurrences o LEFT JOIN '.
-				'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
-				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'WHERE t.rankid >= 220 AND intab.tid IS NULL AND ('.$this->sqlFrag.') '.
-				'ORDER BY o.sciname ';
+			
+			$sql = 'SELECT DISTINCT o.tidinterpreted, o.sciname, IFNULL(o.cultivationstatus,0) as culstat FROM omoccurrences o '. 
+				'WHERE ('.$this->sqlFrag.') AND o.tidinterpreted NOT IN(SELECT ts1.tid FROM taxstatus ts1 '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
+				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '. 
+				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1)';
+			
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
-				$retArr[$row->tidinterpreted] = $this->cleanOutStr($row->sciname);
+				if(strpos($row->sciname,' ') && !$row->culstat){
+					$retArr[$row->tidinterpreted] = $this->cleanOutStr($row->sciname);
+				}
 			}
+			asort($retArr);
 			$rs->free();
 		}
 		return $retArr;
@@ -245,26 +248,25 @@ class ChecklistVoucherAdmin {
 		if($this->sqlFrag){
 			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(":",c.institutioncode,c.collectioncode,IFNULL(o.catalognumber,"<no catalog number>")) AS collcode, '.
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
-				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
+				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality, IFNULL(o.cultivationstatus,0) as culstat '.
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'WHERE t.rankid >= 220 AND ('.$this->sqlFrag.') '.
-				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tid = ts2.tidaccepted '.
-				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) '.
 				'AND o.tidinterpreted NOT IN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) ';
+				'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1)';
 			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			$spTidArr = array();
 			while($r = $rs->fetch_object()){
-				$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
-				$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
-				$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
-				$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
-				$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
-				$retArr[$r->sciname][$r->occid]['locality'] = $r->locality;
+				if(!$r->culstat){
+					$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
+					$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
+					$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
+					$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
+					$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
+					$retArr[$r->sciname][$r->occid]['locality'] = $r->locality;
+				}
 			}
 			$rs->free();
 		}
@@ -283,7 +285,7 @@ class ChecklistVoucherAdmin {
 				'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'WHERE (o.occid NOT IN (SELECT occid FROM fmvouchers WHERE clid = '.$this->clid.')) AND ('.$this->sqlFrag.') '.
 				'AND o.tidinterpreted IS NULL AND o.sciname IS NOT NULL ';
-			//echo '<div>'.$sql.'</div>';
+			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$sciname = $r->sciname;
@@ -297,35 +299,6 @@ class ChecklistVoucherAdmin {
 			}
 			$rs->free();
 		}
-		return $retArr;
-	}
-	
-	public function hasChildrenChecklists(){
-		$hasChildren = false;
-		$sql = 'SELECT count(*) AS clcnt FROM fmchecklists WHERE (parentclid = '.$this->clid.')';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			if($row->clcnt > 0) $hasChildren = true;
-		}
-		$rs->free();
-		return $hasChildren;
-	}
-
-	public function getChildTaxa(){
-		$retArr = Array();
-		$sql = 'SELECT DISTINCT t.tid, t.sciname, c.name '.
-			'FROM taxa t INNER JOIN fmchklsttaxalink ctl1 ON t.tid = ctl1.tid '.
-			'INNER JOIN fmchecklists c ON ctl1.clid = c.clid '.
-			'LEFT JOIN (SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid WHERE (ctl.clid = '.$this->clid.')) intab ON ctl1.tid = intab.tid '.
-			'WHERE (c.parentclid = '.$this->clid.') AND intab.tid IS NULL '.
-			'ORDER BY t.sciname';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->tid]['sciname'] = $r->sciname;
-			$retArr[$r->tid]['cl'] = $r->name;
-		}
-		$rs->free();
 		return $retArr;
 	}
 	
@@ -355,14 +328,12 @@ class ChecklistVoucherAdmin {
 			'o.recordedby, o.recordnumber, o.eventdate, o.country, o.stateprovince, o.county, o.municipality, o.locality, '.
 			'o.decimallatitude, o.decimallongitude, o.minimumelevationinmeters, o.habitat, o.occurrenceremarks, o.occid, '.
 			'o.localitysecurity, o.collid '.
-			'FROM omoccurrences o LEFT JOIN '.
-			'(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			'WHERE o.tidinterpreted NOT IN(SELECT ts1.tid FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-			'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) intab ON o.tidinterpreted = intab.tid '.
-			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE intab.tid IS NULL AND ('.$this->sqlFrag.') '.
+			'WHERE (ctl.clid = '.$this->clid.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1) AND ('.$this->sqlFrag.') '.
 			'ORDER BY o.family, o.sciname, c.institutioncode ';
-		//echo '<div>'.$sql.'</div>';
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			echo $this->arrayToCsv(array("family","scientificName","institutionCode","catalogNumber","identifiedBy","dateIdentified",
  			"recordedBy","recordNumber","eventDate","country","stateProvince","county","municipality","locality",

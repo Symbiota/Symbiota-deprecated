@@ -205,7 +205,6 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 				        <li><a href="#nonVoucheredDiv"><span>Non-Vouchered Taxa</span></a></li>
 				        <li><a href="vamissingtaxa.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos.'&displaymode='.($tabIndex==1?$displayMode:0); ?>"><span>Missing Taxa</span></a></li>
 				        <li><a href="vaconflicts.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos; ?>"><span>Voucher Conflicts</span></a></li>
-				        <li><a href="vachildvouchers.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos; ?>"><span>Children Vouchers</span></a></li>
 				        <li><a href="#reportDiv"><span>Reports</span></a></li>
 				    </ul>
 					<div id="nonVoucheredDiv">

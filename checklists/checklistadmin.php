@@ -17,6 +17,7 @@ $clManager->setClid($clid);
 
 $statusStr = "";
 $isEditor = 0;
+
 if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 	$isEditor = 1;
 
@@ -44,6 +45,12 @@ if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userR
 	elseif($action == 'Add Point'){
 		$statusStr = $clManager->addPoint($_POST['pointtid'],$_POST['pointlat'],$_POST['pointlng'],$_POST['notes']);
 	}
+	elseif($action && array_key_exists('clidadd',$_POST)){
+		$statusStr = $clManager->addChildChecklist($_POST['clidadd']);
+	}
+	elseif($action && array_key_exists('cliddel',$_GET)){
+		$statusStr = $clManager->deleteChildChecklist($_GET['cliddel']);
+	}
 }
 $clArray = $clManager->getMetaData();
 
@@ -63,6 +70,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
+	<script type="text/javascript" src="../js/symb/shared.js"></script>
 	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js"></script>
 </head>
 
@@ -102,6 +110,7 @@ $voucherProjects = $clManager->getVoucherProjects();
 			        <li><a href="#admintab"><span>Admin</span></a></li>
 			        <li><a href="#desctab"><span>Description</span></a></li>
 <!-- 			        <li><a href="#pointtab"><span>Non-vouchered Points</span></a></li> -->
+			        <li><a href="checklistadminchildren.php?clid=<?php echo $clid.'&pid='.$pid.'&start='.$startPos; ?>"><span>Related Checklists</span></a></li>
 					<?php
 					if($voucherProjects){
 						?>

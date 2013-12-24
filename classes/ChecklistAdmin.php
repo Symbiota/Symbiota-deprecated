@@ -41,8 +41,8 @@ class ChecklistAdmin {
 				$retArr["access"] = $row->access;
 				$retArr["dynamicsql"] = $row->dynamicsql;
 				$retArr["datelastmodified"] = $row->datelastmodified;
-	    	}
-	    	$result->free();
+			}
+			$result->free();
 		}
 		return $retArr;
 	}
@@ -88,7 +88,91 @@ class ChecklistAdmin {
 		}
 		return $statusStr;
 	}
+
+	//Child checklist functions
+	public function getChildrenChecklist(){
+		$retArr = Array();
+		$targetStr = $this->clid;
+		do{
+			$sql = 'SELECT c.clid, c.name, child.clid as pclid '.
+				'FROM fmchklstchildren child INNER JOIN fmchecklists c ON child.clidchild = c.clid '.
+				'WHERE child.clid IN('.trim($targetStr,',').') '.
+				'ORDER BY c.name ';
+			$rs = $this->conn->query($sql);
+			$targetStr = '';
+			while($r = $rs->fetch_object()){
+				$retArr[$r->clid]['name'] = $r->name;
+				$retArr[$r->clid]['pclid'] = $r->pclid;
+				$targetStr .= ','.$r->clid;
+			}
+			$rs->free();
+		}while($targetStr);
+		asort($retArr);
+		return $retArr;
+	}
 	
+	public function getParentChecklists(){
+		$retArr = Array();
+		$targetStr = $this->clid;
+		do{
+			$sql = 'SELECT c.clid, c.name, child.clid as pclid '.
+				'FROM fmchklstchildren child INNER JOIN fmchecklists c ON child.clid = c.clid '.
+				'WHERE child.clidchild IN('.trim($targetStr,',').') ';
+			$rs = $this->conn->query($sql);
+			$targetStr = '';
+			while($r = $rs->fetch_object()){
+				$retArr[$r->clid] = $r->name;
+				$targetStr .= ','.$r->clid;
+			}
+			if($targetStr) $targetStr = substr($targetStr,1);
+			$rs->free();
+		}while($targetStr);
+		asort($retArr);
+		return $retArr;
+	}
+	
+	public function getChildSelectArr(){
+		$retArr = array();
+		$clidStr = '';
+		if(isset($GLOBALS['USER_RIGHTS']) && $GLOBALS['USER_RIGHTS']['ClAdmin']){
+			$clidStr = implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']);
+		}
+		if($clidStr){
+			$sql = 'SELECT clid, name '.
+				'FROM fmchecklists '.
+				'WHERE clid <> '.$this->clid.' AND clid IN('.$clidStr.') '.
+				'ORDER BY name';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->clid] = $r->name;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function addChildChecklist($clidAdd){
+		$statusStr = '';
+		$sql = 'INSERT INTO fmchklstchildren(clid, clidchild, modifieduid) '.
+			'VALUES('.$this->clid.','.$clidAdd.','.$GLOBALS['SYMB_UID'].') ';
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR adding child checklist link';
+		}
+		return $statusStr;
+	}
+
+	public function deleteChildChecklist($clidDel){
+		$statusStr = '';
+		$sql = 'DELETE FROM fmchklstchildren WHERE clid = '.$this->clid.' AND clidchild = '.$clidDel;
+		//echo $sql;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR deleting child checklist link';
+		}
+		return $statusStr;
+	}
+
 	//Species editing functions (called from checklist.php)
 	public function echoSpeciesAddList(){
 		$sql = "SELECT DISTINCT t.tid, t.sciname FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid ".
@@ -103,15 +187,15 @@ class ChecklistAdmin {
 		//echo $sql;
 		$result = $this->clCon->query($sql);
 		if($result){
-	        while($row = $result->fetch_object()){
-	        	if($this->taxonFilter){
-	        		echo "<option value='".$row->tid."'>".$this->cleanOutStr($row->sciname)."</option>\n";
-	        	}
-	        	else{
-	        		echo "<option>".$this->cleanOutStr($row->sciname)."</option>\n";
-	        	}
-	       	}
-	       	$result->free();
+			while($row = $result->fetch_object()){
+				if($this->taxonFilter){
+					echo "<option value='".$row->tid."'>".$this->cleanOutStr($row->sciname)."</option>\n";
+				}
+				else{
+					echo "<option>".$this->cleanOutStr($row->sciname)."</option>\n";
+				}
+		   	}
+		   	$result->free();
 		}
 	}
 
@@ -143,31 +227,31 @@ class ChecklistAdmin {
 		return $insertStatus;
 	}
 	
-    //Point functions
-    public function addPoint($tid,$lat,$lng,$notes){
-    	$statusStr = '';
-    	if(is_numeric($tid) && is_numeric($lat) && is_numeric($lng)){
-    		$sql = 'INSERT INTO fmchklstcoordinates(clid,tid,decimallatitude,decimallongitude,notes) '.
-    			'VALUES('.$this->clid.','.$tid.','.$lat.','.$lng.',"'.$this->cleanInStr($notes).'")';
-    		if(!$this->conn->query($sql)){
-    			$statusStr = 'ERROR: unable to add point. '.$this->conn->error;
-    		}
-    	}
-    	return $statusStr;
-    }
-    
-    public function removePoint($pointPK){
-    	$statusStr = '';
-    	if($pointPK && is_numeric($pointPK)){
-			if(!$this->conn->query('DELETE FROM fmchklstcoordinates WHERE (chklstcoordid = '.$pointPK.')')){
-    			$statusStr = 'ERROR: unable to remove point. '.$this->conn->error;
+	//Point functions
+	public function addPoint($tid,$lat,$lng,$notes){
+		$statusStr = '';
+		if(is_numeric($tid) && is_numeric($lat) && is_numeric($lng)){
+			$sql = 'INSERT INTO fmchklstcoordinates(clid,tid,decimallatitude,decimallongitude,notes) '.
+				'VALUES('.$this->clid.','.$tid.','.$lat.','.$lng.',"'.$this->cleanInStr($notes).'")';
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR: unable to add point. '.$this->conn->error;
 			}
-    	}
-    	return $statusStr;
-    }
-    
+		}
+		return $statusStr;
+	}
+	
+	public function removePoint($pointPK){
+		$statusStr = '';
+		if($pointPK && is_numeric($pointPK)){
+			if(!$this->conn->query('DELETE FROM fmchklstcoordinates WHERE (chklstcoordid = '.$pointPK.')')){
+				$statusStr = 'ERROR: unable to remove point. '.$this->conn->error;
+			}
+		}
+		return $statusStr;
+	}
+	
 	//Editor management
-    public function getEditors(){
+	public function getEditors(){
 		$editorArr = array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as uname '.
 			'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
