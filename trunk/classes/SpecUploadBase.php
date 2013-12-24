@@ -657,10 +657,43 @@ class SpecUploadBase extends SpecUpload{
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li> ');
 
+		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning country and state/province fields ...');
+		ob_flush();
+		flush();
+		//Convert country abbreviations to full spellings
+		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupcountry c ON u.country = c.iso3 '.
+			'SET u.country = c.countryName '.
+			'WHERE u.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupcountry c ON u.country = c.iso '.
+			'SET u.country = c.countryName '.
+			'WHERE u.collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		//Convert state abbreviations to full spellings
+		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateProvince = s.abbrev '.
+			'SET u.stateProvince = s.stateName '.
+			'WHERE u.collid = '.$this->collId;
+		$this->conn->query($sql);
+
+		//Fill null country with state matches 
+		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateprovince = s.statename '.
+			'INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+			'SET u.country = c.countryName '.
+			'WHERE u.country IS NULL AND c.countryname = "United States" AND u.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$sql = 'UPDATE uploadspectemp u INNER JOIN lkupstateprovince s ON u.stateprovince = s.statename '.
+			'INNER JOIN lkupcountry c ON s.countryid = c.countryid '.
+			'SET u.country = c.countryName '.
+			'WHERE u.country IS NULL AND u.collid = '.$this->collId;
+		$this->conn->query($sql);
+		$this->outputMsg('Done!</li> ');
+
 		$this->outputMsg('<li style="font-weight:bold;margin-left:10px;">Cleaning illegal and errored coordinates...');
 		ob_flush();
 		flush();
-		$sql = 'UPDATE uploadspectemp SET DecimalLongitude = -1*DecimalLongitude '.
+		$sql = 'UPDATE uploadspectemp '.
+			'SET DecimalLongitude = -1*DecimalLongitude '.
 			'WHERE DecimalLongitude > 0 AND (Country = "USA" OR Country = "United States" OR Country = "U.S.A." OR Country = "Canada" OR Country = "Mexico") AND collid = '.$this->collId;
 		$this->conn->query($sql);
 
@@ -671,9 +704,16 @@ class SpecUploadBase extends SpecUpload{
 
 		//Move illegal coordinates to verbatim
 		$sql = 'UPDATE uploadspectemp '.
-			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude), DecimalLatitude = NULL, DecimalLongitude = NULL '.
-			'WHERE DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180 AND collid = '.$this->collId;
+			'SET verbatimcoordinates = CONCAT_WS(" ",DecimalLatitude, DecimalLongitude) '.
+			'WHERE verbatimcoordinates IS NULL AND collid = '.$this->collId.
+			' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
 		$this->conn->query($sql);
+
+		$sql = 'UPDATE uploadspectemp '.
+			'SET DecimalLatitude = NULL, DecimalLongitude = NULL '.
+			'WHERE collid = '.$this->collId.' AND (DecimalLatitude < -90 OR DecimalLatitude > 90 OR DecimalLongitude < -180 OR DecimalLongitude > 180)';
+		$this->conn->query($sql);
+
 		$this->outputMsg('Done!</li> ');
 	}
 
@@ -1174,7 +1214,9 @@ class SpecUploadBase extends SpecUpload{
 				//Place into verbatim coord field
 				$vCoord = (isset($recMap['verbatimcoordinates'])?$recMap['verbatimcoordinates']:'');
 				if($vCoord) $vCoord .= '; ';
-				$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
+				if(stripos($vCoord,$recMap['verbatimlatitude']) === false && stripos($vCoord,$recMap['verbatimlongitude']) === false){
+					$recMap['verbatimcoordinates'] = $vCoord.$recMap['verbatimlatitude'].', '.$recMap['verbatimlongitude'];
+				}
 			}
 			//Transfer DMS to verbatim coords
 			if(isset($recMap['latdeg']) && $recMap['latdeg'] && isset($recMap['lngdeg']) && $recMap['lngdeg']){
@@ -1727,6 +1769,8 @@ class SpecUploadBase extends SpecUpload{
 
 	private function parseVerbatimCoordinates($inStr,$target=''){
 		$retArr = array();
+		if(strpos($inStr,' to ')) return $retArr;
+		if(strpos($inStr,' betw ')) return $retArr;
 		//Get rid of curly quotes
 		$search = array("’", "‘", "`", "”", "“"); 
 		$replace = array("'", "'", "'", '"', '"'); 
@@ -1737,13 +1781,15 @@ class SpecUploadBase extends SpecUpload{
 		$lngDeg = 'null';$lngMin = 0;$lngSec = 0;$lngEW = 'W';
 		//Grab lat deg and min
 		if(!$target || $target == 'LL'){
-			if(preg_match('/(-*\d+\.+\d+)([NSns]{0,1})\s*(-*\d+\.+\d+)([EWew]{0,1})/i',$inStr,$m)){
+			if(preg_match('/([NSns]{0,1})(-{0,1}\d{1,2}\.{1}\d+)\D{0,1}\s{0,1}([NSns]{0,1})\D{0,1}\s*([EWew]{0,1})(-{0,1}\d{1,3}\.{1}\d+)\D{0,1}\s{0,1}([EWew]{0,1})\D*/',$inStr,$m)){
 				//Decimal degree format
-				$retArr['lat'] = $m[1];
-				$retArr['lng'] = $m[3];
-				$latDir = $m[2];
+				$retArr['lat'] = $m[2];
+				$retArr['lng'] = $m[5];
+				$latDir = $m[3];
+				if(!$latDir && $m[1]) $latDir = $m[1];
 				if($retArr['lat'] > 0 && $latDir && ($latDir = 'S' || $latDir = 's')) $retArr['lat'] = -1*$retArr['lat'];
-				$lngDir = $m[4];
+				$lngDir = $m[6];
+				if(!$lngDir && $m[4]) $lngDir = $m[4];
 				if($retArr['lng'] > 0 && $latDir && ($lngDir = 'W' || $lngDir = 'w')) $retArr['lng'] = -1*$retArr['lng'];
 			}
 			elseif(preg_match('/(\d{1,2})\D{1,3}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$inStr,$m)){

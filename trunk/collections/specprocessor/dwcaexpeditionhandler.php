@@ -1,23 +1,23 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($serverRoot.'/classes/DwcArchiverExpedition.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $cond = array_key_exists("cond",$_REQUEST)?$_REQUEST["cond"]:'';
-$collType = array_key_exists("colltype",$_REQUEST)?$_REQUEST["colltype"]:'specimens';
-$includeDets = array_key_exists("dets",$_REQUEST)?$_REQUEST["dets"]:1;
-$includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
+
+$collid = '22';
+$cond = 'stateprovince:Arizona;ocr:exsic';
 
 if($collid){
-	$dwcaHandler = new DwcArchiverOccurrence();
+	$dwcaHandler = new DwcArchiverExpedition();
 	
 	$dwcaHandler->setSilent(1);
 	$dwcaHandler->setFileName('webreq');
-	$dwcaHandler->setCollArr($collid,$collType);
+	$dwcaHandler->setCollArr($collid);
 	if($cond) $dwcaHandler->setConditionStr($cond);
 
-	$archiveFile = $dwcaHandler->createDwcArchive($includeDets, $includeImgs, 1);
+	$archiveFile = $dwcaHandler->createDwcArchive();
 
 	if($archiveFile){
 		//ob_start();

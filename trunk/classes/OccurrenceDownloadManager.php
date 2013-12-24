@@ -89,7 +89,7 @@ class OccurrenceDownloadManager{
     }
 
 	public function downloadDwca(){
-		include_once($serverRoot.'/classes/OccurrenceDwcArchiver.php');
+		include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
 		$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 		$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -99,7 +99,7 @@ class OccurrenceDownloadManager{
 		$includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
 		
 		if($collid){
-			$dwcaHandler = new OccurrenceDwcArchiver();
+			$dwcaHandler = new DwcArchiverOccurrence();
 			
 			$dwcaHandler->setSilent(1);
 			$dwcaHandler->setFileName('webreq');
