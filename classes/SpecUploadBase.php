@@ -912,10 +912,10 @@ class SpecUploadBase extends SpecUpload{
 		ob_flush();
 		flush();
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT u.tidinterpreted, round(u.decimallatitude,3), round(u.decimallongitude,3) '.
-			'FROM uploadspectemp u '.
-			'WHERE u.tidinterpreted IS NOT NULL AND u.decimallatitude IS NOT NULL '.
-			'AND u.decimallongitude IS NOT NULL';
+			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
+			'FROM omoccurrences o '.
+			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
+			'AND o.decimallongitude IS NOT NULL';
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
@@ -1163,7 +1163,7 @@ class SpecUploadBase extends SpecUpload{
 					if(trim($vcStr)) $recMap['verbatimcoordinates'] = trim($vcStr);
 				}
 			}
-			elseif(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude'])){
+			if(array_key_exists('verbatimcoordinates',$recMap) && $recMap['verbatimcoordinates'] && (!isset($recMap['decimallatitude']) || !$recMap['decimallatitude'])){
 				$coordArr = $this->parseVerbatimCoordinates($recMap['verbatimcoordinates']);
 				if($coordArr){
 					if(array_key_exists('lat',$coordArr)) $recMap['decimallatitude'] = $coordArr['lat'];
@@ -1792,7 +1792,7 @@ class SpecUploadBase extends SpecUpload{
 				if(!$lngDir && $m[4]) $lngDir = $m[4];
 				if($retArr['lng'] > 0 && $latDir && ($lngDir = 'W' || $lngDir = 'w')) $retArr['lng'] = -1*$retArr['lng'];
 			}
-			elseif(preg_match('/(\d{1,2})\D{1,3}\s*(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$inStr,$m)){
+			elseif(preg_match('/(\d{1,2})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$inStr,$m)){
 				//DMS format
 				$latDeg = $m[1];
 				$latMin = $m[2];
