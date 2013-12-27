@@ -1492,9 +1492,27 @@ class SpecUploadBase extends SpecUpload{
 							$tok = explode(',',$size);
 							$m = $tok[0];
 							$d = $tok[1];
-							$vTok = explode('.',$valueStr);
-							if(isset($vTok[0]) && strlen($vTok[0]) > ($m-$d)) $valueStr = '';
-							if(isset($vTok[1]) && strlen($vTok[1]) > $d) $valueStr = '';
+							if($m && $d){
+								$dec = substr($valueStr,strpos($valueStr,'.'));
+								if(strlen($dec) > $d){
+									$valueStr = round($valueStr,$d);
+								}
+								$rawLen = strlen(str_replace(array('-','.'),'',$valueStr));
+								if($rawLen > $m){
+									if(strpos($valueStr,'.') !== false){
+										$decLen = strlen(substr($valueStr,strpos($valueStr,'.')));
+										if($decLen < ($rawLen - $m)){
+											$valueStr = '';
+										}
+										else{
+											$valueStr = round($valueStr,$decLen - ($rawLen - $m));
+										}
+									}
+									else{
+										$valueStr = '';
+									}
+								}
+							}
 						}
 						if(is_numeric($valueStr)){
 							$sqlValues .= ",".$valueStr;
@@ -1812,7 +1830,7 @@ class SpecUploadBase extends SpecUpload{
 					}
 				}
 				//Grab lng deg and min
-				if(preg_match('/(\d{1,3})\s*\D{1,3}\s*(\d{1,2}\.{0,1}\d*)\s{0,1}[\'m]{1}(.*)/i',$leftOver,$m)){
+				if(preg_match('/(\d{1,3})\D{1,3}\s{0,2}(\d{1,2}\.{0,1}\d*)[\'m]{1}(.*)/i',$leftOver,$m)){
 					$lngDeg = $m[1];
 					$lngMin = $m[2];
 					$leftOver = trim($m[3]);
