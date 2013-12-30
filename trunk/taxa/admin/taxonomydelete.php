@@ -75,6 +75,44 @@ function GetXmlHttpObject(){
 			data integrity.      
 		</div>
 		<div style="margin:15px;">
+			<b>Children Taxa</b>
+			<div style="margin:10px"> 
+				<?php 
+				if(array_key_exists('child',$verifyArr)){
+					$childArr = $verifyArr['child'];
+					echo '<div style="color:red;">Warning: children taxa exist for this taxon. They must be remapped before this taxon can be removed</div>';
+					foreach($childArr as $childTid => $childSciname){
+						echo '<div style="margin:3px 10px;"><a href="taxonomyeditor.php?target='.$childTid.'" target="_blank">'.$childSciname.'</a></div>';
+					} 
+				}
+				else{
+					?>
+					<span style="color:green;">Approved:</span> no children taxa are linked to this taxon
+					<?php 
+				}
+				?>
+			</div>
+		</div>
+		<div style="margin:15px;">
+			<b>Synonym Links</b>
+			<div style="margin:10px">
+				<?php
+				if(array_key_exists('syn',$verifyArr)){
+					$synArr = $verifyArr['syn'];
+					echo '<div style="color:red;">Warning: synonym links exist for this taxon. They must be remapped before this taxon can be removed</div>';
+					foreach($synArr as $synTid => $synSciname){
+						echo '<div style="margin:3px 10px;"><a href="taxonomyeditor.php?target='.$synTid.'" target="_blank">'.$synSciname.'</a></div>';
+					}
+				}
+				else{
+					?>
+					<span style="color:green;">Approved:</span> no synonyms are linked to this taxon
+					<?php
+				}
+				?>
+			</div>
+		</div>
+		<div style="margin:15px;">
 			<b>Images</b>
 			<div style="margin:10px"> 
 				<?php 
@@ -223,11 +261,57 @@ function GetXmlHttpObject(){
 				<div style="margin:10px 0px;">
 				</div>
 				<form name="deletetaxonform" method="post" action="taxonomyeditor.php" onsubmit="return confirm('Are you sure you want to delete this taxon? Action can not be undone!')">
-					<div>
-						<input name="submitaction" type="submit" value="Delete Taxon" /> 
-						<input name="target" type="hidden" value="<?php echo $tid; ?>" /> 
-						<input name="genusstr" type="hidden" value="<?php echo $genusStr; ?>" /> 
-					</div>
+					<?php
+					$deactivateStr = '';
+					if(array_key_exists('child',$verifyArr)) $deactivateStr = 'disabled';
+					if(array_key_exists('syn',$verifyArr)) $deactivateStr = 'disabled';
+					if($verifyArr['img'] > 0) $deactivateStr = 'disabled';
+					if(array_key_exists('tdesc',$verifyArr)) $deactivateStr = 'disabled';
+					?>
+					<input name="submitaction" type="submit" value="Delete Taxon" <?php echo $deactivateStr; ?> /> 
+					<input name="target" type="hidden" value="<?php echo $tid; ?>" /> 
+					<input name="genusstr" type="hidden" value="<?php echo $genusStr; ?>" />
+					<div style="margin:15px 5px">
+						<?php 
+						if($deactivateStr){
+							?>
+							<div style="font-weight:bold;">
+								Taxon cannot be deleted until all children, synonyms, images, and text descriptions are removed or remapped to another taxon.
+							</div>
+							<?php 
+						}
+						else{
+							if(array_key_exists('vern',$verifyArr)){
+								?>
+								<div style="color:red;">
+									Warning: Vernaculars will be deleted with taxon
+								</div>
+								<?php 
+							}
+							if(array_key_exists('kmdecr',$verifyArr)){
+								?>
+								<div style="color:red;">
+									Warning: Morphological Key Characters will be deleted with taxon
+								</div>
+								<?php 
+							}
+							if(array_key_exists('cl',$verifyArr)){
+								?>
+								<div style="color:red;">
+									Warning: Links to checklists will be deleted with taxon
+								</div>
+								<?php 
+							}
+							if(array_key_exists('link',$verifyArr)){
+								?>
+								<div style="color:red;">
+									Warning: Linked Resources will be deleted with taxon
+								</div>
+								<?php 
+							}
+						}
+						?>
+					</div> 
 				</form>
 			</fieldset>
 		</div>
