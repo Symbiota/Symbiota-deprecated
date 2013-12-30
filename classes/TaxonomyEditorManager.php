@@ -585,6 +585,26 @@ class TaxonomyEditorManager{
 	//Delete taxon functions
 	public function verifyDeleteTaxon(){
 		$retArr = array();
+
+		//Children taxa
+		$sql ='SELECT t.tid, t.sciname '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
+			'WHERE ts.parenttid = '.$this->tid.' ORDER BY t.sciname';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['child'][$r->tid] = $r->sciname;
+		}
+		$rs->free();
+		
+		//Synonym taxa
+		$sql ='SELECT t.tid, t.sciname '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '. 
+			'WHERE ts.tidaccepted = '.$this->tid.' AND ts.tid <> ts.tidaccepted ORDER BY t.sciname';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr['syn'][$r->tid] = $r->sciname;
+		}
+		$rs->free();
 		
 		//Field images
 		$sql ='SELECT COUNT(imgid) AS cnt FROM images WHERE tid = '.$this->tid;
@@ -601,7 +621,7 @@ class TaxonomyEditorManager{
 			$retArr['vern'][] = $r->vernacularname;
 		}
 		$rs->free();
-		
+
 		//Text Descriptions
 		$sql ='SELECT tdbid,caption FROM taxadescrblock WHERE tid = '.$this->tid;
 		$rs = $this->conn->query($sql);
@@ -688,7 +708,7 @@ class TaxonomyEditorManager{
 		$sql ='DELETE FROM taxadescrblock WHERE tid = '.$this->tid;
 		$this->conn->query($sql);
 
-		//occurrences
+		//Occurrences
 		$sql = 'UPDATE omoccurrences SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
 		$this->conn->query($sql);
 		
@@ -708,18 +728,41 @@ class TaxonomyEditorManager{
 		$sql ='DELETE FROM taxalinks WHERE tid = '.$this->tid;
 		$this->conn->query($sql);
 
-		$statusStr = 'SUCCESS: taxon deleted!<br/><a href="taxonomydisplay.php">Return to taxonomy display page</a>';
-		//Taxon status
+		//Get taxon status details so if taxa removal fails, we can still initiate old name
+		$taxStatusArr = array();
+		$sqlTS = 'SELECT tidaccepted, parenttid, hierarchystr, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence '.
+			'FROM taxstatus WHERE tid = '.$this->tid;
+		$rs = $this->conn->query($sqlTS);
+		if($r = $rs->fetch_object()){
+			$taxStatusArr[0]['tidaccepted'] = $r->tidaccepted;
+			$taxStatusArr[0]['parenttid'] = $r->parenttid;
+			$taxStatusArr[0]['hierarchystr'] = $r->hierarchystr;
+			$taxStatusArr[0]['uppertaxonomy'] = $r->uppertaxonomy;
+			$taxStatusArr[0]['family'] = $r->family;
+			$taxStatusArr[0]['unacceptabilityreason'] = $r->unacceptabilityreason;
+			$taxStatusArr[0]['notes'] = $r->notes;
+			$taxStatusArr[0]['sortsequence'] = $r->sortsequence;
+		}
+		$rs->free();
+
+		//Delete taxon
+		$statusStr = 'SUCCESS: taxon deleted!';
 		$sql ='DELETE FROM taxstatus WHERE tid = '.$this->tid;
 		if($this->conn->query($sql)){
 			//Delete taxon
 			$sql ='DELETE FROM taxa WHERE tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
-				$statusStr = 'ERROR attempting to delete taxon: '.$this->error;
+				$statusStr = 'ERROR attempting to delete taxon: '.$this->conn->error;
+				//Reinstate taxstatus record
+				$tsNewSql = 'INSERT INTO taxstatus(tid,taxauthid,tidaccepted, parenttid, hierarchystr, uppertaxonomy, family, unacceptabilityreason, notes, sortsequence) '.
+					'VALUES('.$this->tid.','.$this->taxAuthId.','.$taxStatusArr[0]['tidaccepted'].','.$taxStatusArr[0]['parenttid'].',"'.$taxStatusArr[0]['hierarchystr'].'","'.
+					$taxStatusArr[0]['uppertaxonomy'].'","'.$taxStatusArr[0]['family'].'","'.$taxStatusArr[0]['unacceptabilityreason'].'","'.
+					$taxStatusArr[0]['unacceptabilityreason'].'",'.$taxStatusArr[0]['sortsequence'].')';
+				$this->conn->query($tsNewSql);
 			}
 		}
 		else{
-			$statusStr = 'ERROR attempting to delete taxon: '.$this->error;
+			$statusStr = 'ERROR attempting to delete taxon status: '.$this->conn->error;
 		}
 
 		return $statusStr;

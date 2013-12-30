@@ -1,5 +1,4 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TaxonomyEditorManager.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -88,7 +87,7 @@ if($editable){
 }
  
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$target; ?></title>
@@ -301,16 +300,16 @@ if(isset($taxa_admin_taxonomyeditorCrumbs)){
 			<div id="taxonstatusdiv" style="height:400px;">
 				<fieldset style="width:95%;">
 					<legend><b>Taxonomic Placement</b></legend>
-					<div style="padding:7px 7px 0px 7px;background-color:silver;margin:-15px -10px 5px 0px;float:right;">
-						<form id="taxauthidform" name="taxauthidform" action="taxonomyeditor.php" method="GET">
-							<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
-							<select name="taxauthid" onchange="document.getElementById('taxauthidform').submit()">
-								<option value="0">Default Taxonomy</option>
-								<option value="0">----------------------------</option>
+					<div style="padding:3px 7px;background-color:silver;margin:-12px -10px 5px 0px;float:right;">
+						<form name="taxauthidform" action="taxonomyeditor.php" method="post">
+							<select name="taxauthid" onchange="this.form.submit()">
+								<option value="1">Default Taxonomy</option>
+								<option value="1">----------------------------</option>
 								<?php 
 									$taxonEditorObj->echoTaxonomicThesaurusIds();
 								?>
 							</select>
+							<input type="hidden" name="target" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 						</form>
 					</div>
 					<div style="font-size:120%;font-weight:bold;">Status: 
