@@ -150,6 +150,11 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 			if($this->countPotentialLocalityWords($lastPart) == 0) {
 				if(preg_match("/^((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant)|Found|Loose) On .+)/i", $lastPart)) return array('location' => $firstPart, 'substrate' => $lastPart);
+				if(preg_match("/^(.+)\\. {1,2}((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose )?On .+)/i", $lastPart, $mats)) {
+					$startOfLastPart = trim($mats[1]);
+					if($this->countPotentialHabitatWords($startOfLastPart) > 0) return array('location' => $firstPart, 'habitat' => $startOfLastPart, 'substrate' => trim($mats[2]));
+					else return array('location' => $firstPart.". ".$startOfLastPart, 'substrate' => trim($mats[2]));
+				}
 				if($this->countPotentialHabitatWords($lastPart) > 0) {
 					if(strcasecmp(substr($lastPart, 0, 3), "On ") == 0) return array('location' => $firstPart, 'substrate' => $lastPart);
 					return array('location' => $firstPart, 'habitat' => $lastPart);
@@ -296,21 +301,23 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$location = "";
 		$temp = $this->getLocality($str);
 		if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $location = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
-		//echo "\nline 12304, location: ".$location."\n";
 		$habitatArray = $this->getHabitat($str);
 		$temp = $habitatArray[1];
 		if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $habitat = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
-		//echo "\nline 12308, habitat: ".$habitat."\n";
 		$substrate = $this->getSubstrate($str);
 		$elevation = '';
 		$elevArr = $this->getElevation($str);
 		$temp = $elevArr[1];
-		if(strlen($temp) > 0) $elevation = $elevArr[1];
+		if(strlen($temp) > 0) {
+			$elevation = $temp;
+			$str = trim(trim($elevArr[0])."\n".trim($elevArr[2]));
+			//echo "\nstr\n".$str."\n";
+		}
 		$event_date = array();
 		$matches = $this->getTaxonOfHeaderInfo($str);
 		$states = array();
 		if($matches != null) {
-			$info = $this->processTaxonOfHeaderInfo($matches);//foreach($info as $k => $v) echo "\n".$k.": ".$v."\n";
+			$info = $this->processTaxonOfHeaderInfo($matches);//foreach($info as $k => $v) echo "\nline 13802, ".$k.": ".$v."\n";
 			//if(array_key_exists('locality', $info)) $location = $info['locality'];
 			if(array_key_exists('county', $info)) $county = $info['county'];
 			if(array_key_exists('country', $info)) $country = $info['country'];
@@ -350,9 +357,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-		}//echo "\nline 12504, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
+		}//echo "\nline 13583, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nscientificName: ".$scientificName."\n";
 		$lines = explode("\n", $str);
-		foreach($lines as $line) {//echo "\nline 12361, line: ".$line."\n";
+		foreach($lines as $line) {//echo "\nline 13677, line: ".$line."\n";
 			$line = trim($line, " ,");
 			if(preg_match("/((?:[A-Za-z]{1,12}[,.]? )?[A-Za-z]{2,})[,.] (?:U[,.]?S[,.]?A[,.]?|United States)(.+)/i", $line, $mats)) {
 				$match = trim($mats[1]);
@@ -372,14 +379,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					}
 				}
-			}
+			}//echo "\nline 13638, line: ".$line."\nstate_province: ".$state_province."\n";
 			if(strlen($county) > 1) {
 				$pat = "/^".preg_quote($county, "/")." (?:C[O0]UNTY|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)?[;:.,]?\\s".preg_quote($state_province, "/")."\\b(.+)/i";
 				if(preg_match($pat, $line, $mats)) $line = trim($mats[1], " ,;:");
 				else if(preg_match("/^(?:STATE [O0]F ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 				else if(preg_match("/^(?:U\\.?S\\.?A\\.?, ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 				else if(preg_match("/^(?:United States(?: [O0]. America)?, ".preg_quote($state_province, "/")."[.,:;] )?".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
-				else if(preg_match("/^(?:C[O0]UNTY|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]? ".preg_quote($county, "/")."\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+				else if(preg_match("/^(?:C[O0]UNTY|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]? ".preg_quote($county, "/")."[;:.,]?\\s?(.*)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 				else if(preg_match("/^.{0,2}[;:.,] ".preg_quote($county, "/")."\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 				$pat = "/(.*)\\b(?:UNIVERSITY\\b|C[O0]LL(?:\\.|ected by)|HERBARIUM\\b|DET(?:\\.|ermined)|Identified\\b|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|Date\\b|".preg_quote($possibleMonths, "/")."|".preg_quote($county, "/")." (?:COUNTY|PARISH|BOROUGH|Co\\b\\.?))(.*)/i";
 				if(preg_match($pat, $line, $mats)) {
@@ -392,6 +399,47 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						else $line = trim($mats[2], " ,;:");
 					}
 				}
+			} else if(preg_match("/^(.+?):(.*)$/", $line, $mats)) {
+				$temp = trim($mats[1]);
+				if(preg_match("/^STATE [O0]F (.+)/i", $temp, $mats2)) $temp = trim($mats2[1]);
+				if(strlen($temp) > 3 && str_word_count($temp) < 4) {
+					$sp = $this->getStateOrProvince($temp);
+					if(count($sp) > 0) {
+						if(strlen($state_province) == 0) $state_province = $sp[0];
+						if(strlen($country) == 0) $country = $sp[1];
+						$line = trim($mats[2]);
+					} else if(strlen($country) > 0) {
+						$states = $this->getStatesFromCountry($country);
+						foreach($states as $state) if(strcasecmp($state, $temp) == 0) {
+							$state_province = $temp;
+							$line = trim($mats[2]);
+						}
+					} else {
+						$country = $this->getCountry($temp);
+						if(strlen($country) > 0) {
+							$line = trim($mats[2], " .;:");
+							if(preg_match("/^(.+?[A-Za-z]{4,})\\.(.*+)$/", $line, $mats2)) {
+								$temp = trim($mats2[1]);
+								if(preg_match("/^(.+[A-Za-z]{4,})[:;](.*)/", $temp, $mats3)) {
+									$temp = trim($mats3[1]);
+									if(str_word_count($temp) < 4) {
+										$sp = $this->getStateOrProvince($temp);
+										if(count($sp) > 0) {
+											if(strlen($state_province) == 0) $state_province = $sp[0];
+											$line = trim($mats3[2]);
+										}
+									}
+								} else if(str_word_count($temp) < 4) {
+									$sp = $this->getStateOrProvince($temp);
+									if(count($sp) > 0) {
+										if(strlen($state_province) == 0) $state_province = $sp[0];
+										$line = trim($mats2[2]);
+									}
+								}
+							}
+						}
+					}
+				}//echo "\nline 13754, line: ".$line."\nstate_province: ".$state_province."\n";
 			} else {
 				$pat = "/(.*)\\b(?:UNIVERSITY|COLL(?:\\.|ect(?:ed)?)|HERBARIUM|DET(?:\\.|ermined)|Identified|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden|Date|".preg_quote($possibleMonths, "/").")\\b(.*)/i";
 				if(preg_match($pat, $line, $mats)) {
@@ -419,14 +467,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?[EW](?:\\sLong(?:\\.|itude))?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
 				else if(preg_match("/[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
 					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?[NS5](?:\\sLong(?:\\.|itude))?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
-				if(strlen($elevation) > 0) {//echo "\nline 12584, firstPart: ".$firstPart."\nsecondPart: ".$secondPart."\n";
-					if(preg_match("/(.*)\\b".preg_quote($elevation, "/")."$/i", $secondPart, $mats)) $secondPart = trim($mats[1]);
-					else if(preg_match("/(.*)\\b".preg_quote($elevation, "/")."(.*)/i", $secondPart, $mats)) $secondPart = trim(trim($mats[1])." ".trim($mats[2]));
-					else if(preg_match("/^\\b".preg_quote($elevation, "/")."(.+)$/i", $firstPart, $mats)) $firstPart = trim($mats[1]);
-					else if(preg_match("/(.*)".preg_quote($elevation, "/")."(.*)/i", $firstPart, $mats)) $firstPart = trim(trim($mats[1])." ".trim($mats[2]));
-					if(preg_match("/(.+)\\b(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)/i", $firstPart, $mats2)) $firstPart = ltrim($mats2[1], " ,.;:");
-					else if(preg_match("/^(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1], " ,.;:");
-				}
 				$line = trim(trim($firstPart, " ,.;").";;; ".ltrim($secondPart, " ,.;"), " ;");
 			} else if(preg_match("/([^°]*?)(?:(?:Near|ca\\.?) )?(?:Lat(?:\\.|itude)[:;,]?)?[NS][0-9!l|I]{1,3}+(?:[,.][0-9!l|I]{1,6})? ?°(.+)/i", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 12149, mats[".$i++."] = ".$mat."\n";
 				$firstPart = trim($mats[1]);
@@ -435,12 +475,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?(?:\\sLongitude)?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
 				else if(preg_match("/[NS][0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?°(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?'".
 					"(?:\\s?[0-9!l|I]{1,3}(?:[,.][0-9!l|I]{1,6})? ?\")?)?\\s?(?:\\sLongitude)?\\.?(.*)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1]);
-				if(strlen($elevation) > 0) {//echo "\nline 12279, firstPart: ".$firstPart."\nlsecondPart: ".$secondPart."\n";
-					if(preg_match("/(.+)\\b".preg_quote($elevation, "/")."$/i", $secondPart, $mats)) $secondPart = trim($mats[1]);
-					else if(preg_match("/\\b".preg_quote($elevation, "/")."(.+)$/i", $firstPart, $mats)) $firstPart = trim($mats[1]);
-					if(preg_match("/(.+)\\b(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)/i", $firstPart, $mats2)) $firstPart = ltrim($mats2[1], " ,.;:");
-					else if(preg_match("/^(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim($mats2[1], " ,.;:");
-				}
 				$line = trim(trim($firstPart, " ,.;").";;; ".ltrim($secondPart, " ,.;"), " ;");
 			} else if(strlen($elevation) > 0) {
 				if(preg_match("/(.+)\\b".preg_quote($elevation, "/")."(.+)/i", $line, $mats)) {
@@ -450,7 +484,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					else if(preg_match("/(?:elev(?:\\.|ation)?|alt(?:\\.|itude)?)(.+)/i", $secondPart, $mats2)) $secondPart = trim(ltrim($mats2[1], ")"), " ,.;:");
 					$line = trim($firstPart.";;; ".$secondPart, " ;");
 				}
-			}
+			}//echo "\nline 13724, line: ".$line."\n";
 			$trsPatStr = "/(?(?=(?:.*)\\bT(?:\\.|wnshp.?|ownship)?\\s?(?:".$possibleNumbers."{1,3})\\s?(?:[NS])\\.?,?(?:\\s|\\n|\\r\\n)".
 				"R(?:\\.|ange)?\\s?(?:".$possibleNumbers."{1,3}\\s?[EW])\\.?,?(?:\\s|\\n|\\r\\n)[S5](?:\\.|ect?\\.?|ection)?\\s?(?:".
 				$possibleNumbers."{1,3})\\b)".
@@ -468,8 +502,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				$possibleNumbers."{1,8}E?(?:\\s|\\n|\\r\\n)".$possibleNumbers."{1,8}N?))\\b(.*)/is";
 			if(preg_match($utmPatStr, $line, $locMatches)) {
 				$line = trim(trim($locMatches[1], " ,.;").". ".ltrim($locMatches[2], " ,.;"));
-			}//echo "\nline 12620, line: ".$line."\n";
-			if(!$foundSciName) {//echo "\nline 12514, line: ".$line."\n";
+			}
+			if(!$foundSciName) {
 				$psn = $this->processSciName(trim(str_ireplace(array("Annotation ", "cf. "), "", $line), " \"\',"));
 				if($psn != null) {
 					if(array_key_exists('scientificName', $psn)) {
@@ -521,7 +555,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 					$line = $this->removeAuthority($line, $scientificName);
 					$foundSciName = true;
-					//echo "\nline 12555, line: ".$line."\n";
 				}
 			}
 			if(strlen($recordNumber) == 0) {
@@ -543,8 +576,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$line = trim(substr($line, 0, strpos($line, $temp)+strlen($temp)));
 					}
 				}
-			}//echo "\nline 12686, line: ".$line."\n";
-			if($this->containsVerbatimAttribute($line)) {
+			}//echo "\nline 13849, line: ".$line."\nscientificName: ".$scientificName."\n";
+			if($this->containsVerbatimAttribute($line)) {//echo "\nline 13850, containsVerbatimAttribute\n";
 				$pos = strpos($line, ";;;");
 				$rest = "";
 				if($pos !== FALSE) {
@@ -563,28 +596,82 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				} else {
 					$rest = $line;
 					$line = "";
-				}//echo "\nline 12548, line: ".$line."\nrest: ".$rest."\n";
+				}
 				if(strlen($rest) > 0) {
 					$rest = trim(str_replace(";;;", ";", $rest));
-					if(preg_match("/^(On .+)[,;] (.+)/i", $rest, $mats)) {
+					if(preg_match("/^((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+[A-Za-z]{4,})[,;.] (.++)$/i", $rest, $mats)) {
 						$temp = trim($mats[1]);
 						if($this->countPotentialLocalityWords($temp) == 0) {
 							$substrate = $this->mergeFields($substrate, $temp);
 							$rest = trim($mats[2], " ;:,.&");
+						} else {
+							$temp2 = "";
+							$rest2 = "";
+							if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							}
+							if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
+								$substrate = $this->mergeFields($substrate, $temp2);
+								$rest = $rest2.". ".$rest;
+							}
 						}
-					} else if(preg_match("/^(On .+[A-Za-z]{3,})[.] (.+)/i", $rest, $mats)) {
-						$temp = trim($mats[1]);
-						if($this->countPotentialLocalityWords($temp) == 0) {
-							$substrate = $this->mergeFields($substrate, $temp);
-							$rest = trim($mats[2], " ;:,.&");
-						}
-					} else if(preg_match("/(.+)[.,;] {1,2}(On .+)/i", $rest, $mats)) {
+					} else if(preg_match("/(.+)[.,;] {1,2}((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+)/i", $rest, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 13965, mats[".$i++."] = ".$mat."\n";
 						$temp = trim($mats[2]);
 						if($this->countPotentialLocalityWords($temp) == 0) {
 							$substrate = $this->mergeFields($substrate, $temp);
 							$rest = trim($mats[1], " ;:,.&");
+						} else {
+							$temp2 = "";
+							$rest2 = "";
+							if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
+								$temp2 = trim($mats2[1]);
+								$rest2 = trim($mats2[2]);
+							}
+							if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
+								$substrate = $this->mergeFields($substrate, $temp2);
+								$rest = trim($mats[1], " ;:,.&");
+								$location = $this->mergeFields($location, $rest2);
+							}
 						}
 					}
+					if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $rest, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 13970, mats[".$i++."] = ".$mat."\n";
+						$firstPart = trim($mats[1]);
+						$lastPart = trim($mats[2]);
+						if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+							if($this->countPotentialHabitatWords($lastPart) > 0) {
+								$habitat = $this->mergeFields($habitat, $lastPart);
+								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
+								$rest = "";
+							} else if($this->countPotentialLocalityWords($lastPart) > 0) {
+								$location = $this->mergeFields($location, $lastPart);
+								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
+								$rest = "";
+							}
+						} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
+							if($this->countPotentialHabitatWords($firstPart) > 0) {
+								$habitat = $this->mergeFields($habitat, $firstPart);
+								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
+								$rest = "";
+							} else if($this->countPotentialLocalityWords($firstPart) > 0) {
+								$location = $this->mergeFields($location, $firstPart);
+								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
+								$rest = "";
+							}
+						}
+					}//echo "\nline 13994, rest: ".$rest."\n";
 					if(strlen($rest) > 0 && !$this->isMostlyGarbage2($rest, 0.48)) {
 						if($this->containsVerbatimAttribute($rest)) {
 							if(preg_match("/(.+) Substrate[;:]? (.*)/i", $rest, $mats)){
@@ -601,7 +688,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 			}
-			if(preg_match("/^((?:(?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant))|Found|Loose) On .+)/i", $line)) {
+			if(preg_match("/^((?:(?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant))|Found|Loose|Growing) On .+)/i", $line)) {
 				$substrate = trim(str_replace(";;;", ";", $line));
 				$firstPart = "";
 				$lastPart = "";
@@ -625,7 +712,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$firstPart = trim($mats2[1]);
 					$lastPart = trim($mats2[2]);
 				}
-				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {//echo "\nline 12523, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
+				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {//echo "\nline 14145, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
 					$startOfLastPart = "";
 					$endOfLastPart = "";
 					if($this->countPotentialLocalityWords($lastPart) == 0) {
@@ -664,7 +751,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						} else $location = $this->mergeFields($location, $lastPart);
 					}
 				}
-			} else if(strcasecmp(substr($line, 0, 3), "On ") == 0) {//echo "\nline 12415, line: ".$line."\n";
+			} else if(strcasecmp(substr($line, 0, 3), "On ") == 0) {
 				if(stripos($line, " Workshop") === FALSE && stripos($line, " foray") === FALSE && stripos($line, " Society") === FALSE) {
 					$line = trim(str_replace(";;;", ";", $line));
 					if($this->countPotentialLocalityWords($line) > 0) {
@@ -686,7 +773,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							$firstPart = trim($mats[1]);
 							$lastPart = trim($mats[2]);
 						}
-						if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
+						if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {//echo "\nline 13073, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
 							if(strlen($lastPart) < 4 && preg_match("/(.*[A-Za-z]{4,})[,;] (.+)/", $firstPart, $mats2)) {
 								$firstPart = trim($mats2[1]);
 								$lastPart = trim($mats2[2]);
@@ -733,12 +820,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						} else $substrate = $this->mergeFields($substrate, $line);
 					} else $substrate = $this->mergeFields($substrate, $line);
 				}
-			} else if($this->countPotentialLocalityWords($line) > 0 && !preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;]?/i", $line)) {//echo "\nline 12659, line: ".$line."\n";
+			} else if($this->countPotentialLocalityWords($line) > 0 && !preg_match("/^(?:L|(?:\|_))[o0]ca(?:[1!l]ity|ti[o0]n|\\.)[:;]?/i", $line)) {//echo "\nline 14268, line: ".$line."\n";
 				$localityAnalysis = $this->analyzeLocalityLine($line);
 				if(array_key_exists('location', $localityAnalysis)) $location = $this->mergeFields($location, $localityAnalysis['location']);
 				if(array_key_exists('habitat', $localityAnalysis)) $habitat = $this->mergeFields($habitat, $localityAnalysis['habitat']);
 				if(array_key_exists('substrate', $localityAnalysis)) $substrate = $this->mergeFields($substrate, $localityAnalysis['substrate']);
-			} else if($this->countPotentialHabitatWords($line) > 0 && strcasecmp($line, "Habitat") != 0) {
+			} else if($this->countPotentialHabitatWords($line) > 0 && strcasecmp($line, "Habitat") != 0) {//echo "\nline 13850, countPotentialHabitatWords\n";
 				$firstPart = "";
 				$lastPart = "";
 				$pos = strpos($line, ";;;");
@@ -758,8 +845,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					$firstPart = trim($mats[1]);
 					$lastPart = trim($mats[2]);
 				}
-				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {
-					if(preg_match("/^((?:(?:Fairly |Quite |Very |Not)?(?:(?:Un)?Common|Abundant) |Found |Loose )?On .+)/i", $lastPart)) {
+				if(strlen($firstPart) > 0 && strlen($lastPart) > 0) {//echo "\nline 14274, firstPart: ".$firstPart."\nlastPart: ".$lastPart."\n";
+					if(preg_match("/^((?:(?:Fairly |Quite |Very |Not)?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+)/i", $lastPart)) {
 						if(preg_match("/([A-Za-z ,-]+)[,.]? ((?:along|among|near|(?:with)?in|at|be(?:low|yond|neath|hind)|above|under) .+)/i", $lastPart, $mats)) {
 							$substrate = $this->mergeFields($substrate, str_replace(";;;", ";", trim($mats[1])));
 							$habitat = $this->mergeFields($habitat, str_replace(";;;", ";", trim($mats[2])));
@@ -770,7 +857,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					} else $habitat = $this->mergeFields($habitat, str_replace(";;;", ";", $line));
 				} else $habitat = $this->mergeFields($habitat, $line);
 			}
-		}//echo "\nline 12675, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\nverbatimAttributes: ".$verbatimAttributes."\n";
+		}//echo "\nline 14130, habitat: ".$habitat."\nlocation: ".$location."\nsubstrate: ".$substrate."\nhabitat: ".$habitat."\nverbatimAttributes: ".$verbatimAttributes."\n";
 		$location = str_replace
 		(
 			array("\r\n", "\n", "\r"),
@@ -1212,8 +1299,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	private function getTaxonOfHeaderInfo($str) {
-		$statePatStr = "/((?s).*)?((?:(?:[EP][L1!|]ANT[5S])|(?:ASC[O0D]MYC[EC]T[EC]S[5S])|(?:FL[O0D]RA)|(?:F(?:U|(?:LI))N[EGC][Il!1.,])|".
-			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN(?:[5S]|(?:FL[O0D]RA)))|(?:CRYPT[O0DQU]GAM[5S])|".
+		$statePatStr = "/((?s).*)?((?:[EP][L1!|]ANT[5S]|(?:ASC[O0D]MYC[EC]T[EC]S[5S])|(?:FL[O0D]RA)|(?:F(?:U|(?:LI))N[EGC][Il!1.,])|".
+			"(?:.{1,2}[I|!l][ECU](?:H|(?:I-?I)|TI)EN'?[5S]|FL[O0D]RA)|(?:CRYPT[O0DQU]GAM[5S])|".
 			"(?:BRY[O0DQU](?:(?:FL[O0D]RA)|(?:PHYT(?:A|[EC][5S]))))|(?:M[O0][5S]{2}E[5S])|".
 			"(?:MU[5S][CG][l1|I!])|(?:HEPAT[L1!|]CA.)|(?:P[L1!|]ANT[5S])|(?:[5S]PHAGNA))".
 			"(?:\\r\\n|\\n|\\r|\\s)?[DOU0][EFPKI1][RFPN]?)(.*)(?:\\r\\n|\\n|\\r)((?s).*)/i";
@@ -1360,6 +1447,14 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							$county = trim($countyMatches[1]);
 							$country = trim($countyMatches[2]);
 						}
+					}
+				}
+				if(strlen($county) == 0) {
+					$countyMatches = $this->findCounty($endOfFile, $state_province);
+					if($countyMatches != null) {
+						$state_province = trim($countyMatches[4]);
+						$county = trim($countyMatches[1]);
+						$country = trim($countyMatches[2]);
 					}
 				}
 			} else {
@@ -1645,7 +1740,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						//echo "\n".$author."\nline: ".$line."\n/\(?".$author." ?\)?(.*)/i\n";
 						if(preg_match("/(.*)\(?".preg_quote($author, '/')." ?\)?(.*)/is", $line, $mats)) return trim(trim($mats[1])." ".trim($mats[2]));
 						else {
-							$author = str_replace(". ", ".", $author);
+							$author = preg_quote(str_replace(". ", ".", $author), '/');
 							if(preg_match("/(.*)\(?".$author." ?\)?(.*)/is", $line, $mats)) return trim(trim($mats[1])." ".trim($mats[2]));
 						}
 					}
@@ -1909,15 +2004,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.)\\s(?-i)F(?i)orest\\b/", "/\\bvicinit(?:y|ate)\\b/i",
 			"/\\sP(?i)eak\\b/", "/\\sS(?i)prings\\b/", "/\\bU\\. ?S\\. ?\\d{1,2}\\b/", "/\\bcamino\\b/", "/[A-Za-z]{3,} G(?i)ulch\\b/",
 			"/\\b(?:N(?i)ationa[l1|I!]|(?-i)S(?i)t(?:\\.|ate)|(?-i)N(?i)at[l1|I!]?\\.|(?-i)P(?i)rov[l1|I!]nc[l1|I!]a[l1|I!])\\s(?-i)P(?i)ark\\b/i",
-			"/\\bdrive\\b/i", "/[A-Za-z]{3,} R(?i)eserv(?:e|oir)\\b/", "/[A-Za-z]{3,} B(?i)utte\\b/",
+			"/\\bdrive\\b/i", "/[A-Za-z]{3,} R(?i)eserv(?:e|oir)\\b/", "/[A-Za-z]{3,} B(?i)utte\\b/", "/\\bReserve: /",
 			"/ P(?i)reserve\\b/", "/\\bR(?i)d\\b/", "/\\bR(?i)egion(?:a[l1|I!])?\\b/", "/\\b[O0](?i)utlook\\b/", "/\\bintersection\\b/i",
 			"/\\bWildlife Management\\b/", "/\\bQuad\\b/i", "/\\sR(?i)anch\\b/", "/\\sstreet\\b/i", "/ Ave\\b/i", "/\\sLane\\b/i",
-			"/ Divide\\b/i", "/\\bMts?\\b/", "/\\bMount /i", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i",
+			"/ Divide\\b/i", "/\\bMts?\\b/", "/\\bMount /i", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i", "/\\sR(?i)idge\\b/",
+			"/\\b(?i:N(?:orth(?:east|west)?)?|S(?:outh(?:east|west)?)?|E(?:ast)?|W(?:est)?|[NE]?NE|[NW]?NW|[SE]?SE|[SW]?SW) (?:of|from) (?-i)[A-Z]/i",
 			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d/", "/ Gruppe\\b/", "/ A(?i)rea\\b/",
-			"/\\b[A-Z][A-Za-z]{2,} G(?i)u[l1|I!]ch\\b/", "/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/");
+			"/\\b[A-Z][A-Za-z]{2,} G(?i)u[l1|I!]ch\\b/", "/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/");
 		$result = 0;
 		foreach($lWords as $lWord) if(preg_match($lWord, $pLoc)) {/*echo "\nlocality matched: ".$lWord."\n";*/$result++;}
-		if(preg_match("/.*\\s(?:N(?:[EW]|orth(?:east|west)?)?|S(?:[EW]|outh(?:east|west)?)?|E(?:ast)?|W(?:est)?)\\s[o0QD]f\\s.+/i", $pLoc)) $result++;
+		if(preg_match("/\\b(?:N(?:[EW]|orth(?:east|west)?)?|S(?:[EW]|outh(?:east|west)?)?|E(?:ast)?|W(?:est)?)\\s[o0QD]f\\s.+/i", $pLoc)) $result++;
 		if($this->containsNumber($pLoc) && $result > 0 &&
 			!preg_match("/\\b(?:Jan(?:\\.|(?:ua\\w{1,2}))?|Feb(?:\\.|(?:rua\\w{1,2}))?|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:i[l1|I!]))?|May|Jun[.e]?|Ju[l1|I!][.y]?|Aug(?:\\.|(?:ust))?|[S5]ep(?:\\.|(?:t\\.?)|(?:temb\\w{1,2}))?|[O0]ct(?:\\.|(?:[O0]b\\w{1,2}))?|N[O0]v(?:\\.|(?:emb\\w{1,2}))?|Dec(?:\\.|(?:emb\\w{1,2}))?)\\b/i", $pLoc) &&
 			!preg_match("/\\d{1,2}\/\\d{1,2}\/(?:\\d{2}|\\d{4})/", $pLoc)) $result++;
@@ -1928,18 +2024,19 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
 		$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
 		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "p[l1|I!]ants?", "humus",
-			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix", "acer ",
-			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone", "stand",
+			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix", "acer ", "trunks?",
+			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone", "stand", "chert",
 			"sandy", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
 			"aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate", "thuja", "shad(?:y|ed?)",
-			"(?:[a-z]{2})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
-			"f[l1|I!][0o]{2}dp[l1|I!]ain", "gneiss", "moss(?:es|y)?", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp",
+			"(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
+			"f[l1|I!][0o]{2}dp[l1|I!]ain", "gneiss", "moss(?:es|y)?", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp", "branches",
 			"Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus", "ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?",
 			"w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya", "ravine", "Aesculus", "cypress(?:es)?", "Empetrum",
 			"Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "Sphagnum", "hemlocks?", "Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus",
 			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
 			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
-			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?");
+			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
+			"flood ?plain");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
@@ -1971,6 +2068,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function isCountryInDatabase($c) {//echo "\nInput to isCountryInDatabase: ".$c."\n";
 		if($c) {
+			if(strcasecmp($c, "NEW GUINEA") == 0) return true;
 			$sql = "SELECT * FROM lkupcountry luc WHERE luc.countryName = '".str_replace(array("\"", "'"), "", $c)."'";
 			if($r2s = $this->conn->query($sql)){
 				if($r2 = $r2s->fetch_object()) return true;
@@ -2284,7 +2382,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$familyName = $cfds['familyName'];
 						$collectorName = $cfds['collectorName'];
 						$collectorNum = trim(substr($cStr, strpos($cStr, $familyName)+strlen($familyName)), " \t\n\r\0\x0B,:;!\"\'\\~@#$%^*_-");
-						if(preg_match("/(.*)(?:No.?|#)(.*)/i", $collectorNum, $matches)) {
+						if(preg_match("/(.*)(?:No\\b.?|#)(.*)/i", $collectorNum, $matches)) {
 							$collectorNum = trim($matches[2], " \t\n\r\0\x0B,:;!\"\'\\~@#$%^*_-");
 							$firstPart = trim($matches[1]);
 							$andPos = strpos($firstPart, "&");
@@ -3045,12 +3143,12 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getLocality($s) {
 		//echo "\nInput to getLocality: ".$s."\n";
-		$locationPatStr = "/\\n(?:L|(?:\|_))[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]?\\s(?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
-		if(preg_match($locationPatStr, $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2118, locationMatches[".$i++."] = ".$locationMatche."\n";
+		$locationPatStr = "/\\n(?:L|(?:\|_))[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]? (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i";
+		if(preg_match($locationPatStr, $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2170, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
 			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
-		} if(preg_match("/\\bL[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)]\\s(?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2122, locationMatches[".$i++."] = ".$locationMatche."\n";
+		} if(preg_match("/\\bL[o0]c(?:a[1!lI]{2}ty|ati[o0]n|\\.)[:;,)] (?!Habitat)(.*)(?:(?:\\n|\\n\\r)(.*))?/i", $s, $locationMatches)) {//$i=0;foreach($locationMatches as $locationMatche) echo "\nline 2174, locationMatches[".$i++."] = ".$locationMatche."\n";
 			$location = trim($locationMatches[1]);
 			if(strlen($location) < 3 && count($locationMatches) == 3) $location .= " ".trim($locationMatches[2]);
 			return $location;
@@ -3178,243 +3276,278 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function getElevation($string) {
 		if(strlen($string) > 0) {//echo "\nInput to getElevation: ".$string."\n";
 			$possibleNumbers = "[OQSZl|I!&0-9^]";
-			$elevPatStr = "/(.*?)\\b((?:[SZl|I!&1-9],".$possibleNumbers."{3}|[SZl|I!&1-9]".$possibleNumbers."{1,3}|[SZl|I!&1-9])".
+			$approximateIndicators = "ab[o0]ut |ab[o0](?:ve|w) |ca\\.? |approx(?:\\.|imately)? |ar[o0]und |[-~]";
+			//first, units: m.s.m. with a range of numbers preceded by label (elevation or altitude)
+			$elevPatStr = "/(.*)\(?\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)[:;,]?\\s?".
+				"((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[IO0-9])".
 				"(?: ?- ?(?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[SZl|I!&1-9]))?)\\s(m\\.?s\\.?m[,.;:]{0,2})\\s?(.*)/is";
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9])))\\sm\\.?s\\.?(?:[mn]|r[na])\)?[,.;: ]{0,2}(.*)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
-				//foreach($elevMatches as $elevMatche) echo "\nelevMatches0[".$i++."]: ".$elevMatche."\n";
-				$elevation = str_ireplace
-					(
-						array("^", "O", "Q", "l", "|", "I", "!", "S", "Z", "&"),
-						array("5", "0", "0", "1", "1", "1", "1", "5", "2", "6"),
-						trim($elevMatches[2])
-					)." ".strtolower(trim($elevMatches[3]));
-				$firstPart = trim($elevMatches[1]);
-				$nextPart = trim($elevMatches[4]);
-				return array($firstPart, $elevation, $nextPart);
+				//foreach($elevMatches as $elevMatche) echo "\nline 2297, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
 			}
-			$elevPatStr = "/(.*)\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|Alt(?:\\.|itude)?[:;,]?)?\\s?".
-				"((?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|~)?(?:".$possibleNumbers."|[l|I!1]".
-				$possibleNumbers.",?".$possibleNumbers."{3}|[SZl|I!&1-9^],?".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,2})".
-				"(?:\\s{0,2}(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eter[5s]?)|Feet)?\\s?-\\s?(?:".$possibleNumbers."|[l|I!1]".$possibleNumbers.
-				",?".$possibleNumbers."{3}|[SZl|I!&1-9^],?".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}))".
-				"\\s{0,2}(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eter[5s]?)?|Feet))(.*+)/is";
+			//next units: m.s.m. with a range of numbers followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
+				"(?: ?- ?(?:[SZl|I!&1-9^],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[I1-9])))\\s".
+				"m\\.?s\\.?(?:[mn]|r[na])[,.;: ]{0,2}".
+				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[:;,]?\\s?(.*)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
-				//foreach($elevMatches as $elevMatch) echo "\nelevMatches1[".$i++."] = ".$elevMatch."\n";
+				//foreach($elevMatches as $elevMatche) echo "\nline 2315, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
+			}
+			//next units: m.s.m. with a range of numbers
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
+				"(?: ?- ?(?:[SZl|I!&1-9^],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9])))\\s".
+				"m\\.?s\\.?(?:[mn]|r[na])\)?[,.;: ]{0,2}(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2332, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
+			}
+			//next units: m.s.m. preceded by approximate indicator and label
+			$elevPatStr = "/(.*)\(?\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)[:;,]?\\s?".
+				"(?: |\\n)(".$approximateIndicators.")((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|".$possibleNumbers."))\\sm\\.?s\\.?(?:[mn]|r[na])\)?[,.;: ]{0,2}(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2349, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array
+				(
+					trim($elevMatches[1]),
+					$this->replaceMistakenLetters(trim($elevMatches[2]))." ".$this->replaceMistakenNumbers(trim($elevMatches[3]))." m.s.m.",
+					trim($elevMatches[4])
+				);
+			}
+			//next units: m.s.m. preceded by approximate indicator, followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?(".$approximateIndicators.")([SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|".$possibleNumbers.")\\sm\\.?s\\.?(?:[mn]|r[na])[,.;: ]{0,2}".
+				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)\)?[:;,]?\\s?(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2367, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array
+				(
+					trim($elevMatches[1]),
+					$this->replaceMistakenLetters(trim($elevMatches[2]))." ".$this->replaceMistakenNumbers(trim($elevMatches[3]))." m.s.m.",
+					trim($elevMatches[4])
+				);
+			}
+			//next units: m.s.m. preceded by approximate indicator
+			$elevPatStr = "/(.*)(?: |\\n)\(?(".$approximateIndicators.")([SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|".$possibleNumbers.")\\sm\\.?s\\.?(?:[mn]|r[na])\)?[,.;: ]{0,2}(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2384, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array
+				(
+					trim($elevMatches[1]),
+					$this->replaceMistakenLetters(trim($elevMatches[2]))." ".$this->replaceMistakenNumbers(trim($elevMatches[3]))." m.s.m.",
+					trim($elevMatches[4])
+				);
+			}
+			//next units: m.s.m. preceded by label
+			$elevPatStr = "/(.*)\(?\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))[:;,]?\\s?".
+				"((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}|".$possibleNumbers."))\\sm\\.?s\\.?(?:[mn]|r[na])\)?[,.;: ]{0,2}(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2401, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
+			}
+			//next units: m.s.m. followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|".$possibleNumbers."))\\sm\\.?s\\.?(?:[mn]|r[na])[,.;: ]{0,2}".
+				"\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[:;,]?\\s?(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2418, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
+			}
+			//next units: m.s.m.
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|".$possibleNumbers."))\\sm\\.?s\\.?(?:[mn]|r[na])[,.;: ]{0,2}(.*)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatche) echo "\nline 2434, elevMatches0[".$i++."]: ".$elevMatche."\n";
+				return array(trim($elevMatches[1]), $this->replaceMistakenNumbers(trim($elevMatches[2]))." m.s.m.", trim($elevMatches[3]));
+			}
+			//feet or meters, range, preceded by label
+			$elevPatStr = "/(.*)\(?\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)[:;,]?\\s?".
+				"((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,. \n]| [it]t[,. \n]|(?:m|rn)(?:[,. \n]|eter[5s]?)?|Feet)?".
+				"\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9]))".
+				"\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?[,.;: ]{0,2}(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2314, elevMatches1[".$i++."] = ".$elevMatch."\n";
 				$elevation = str_ireplace
 				(
-					array("^", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "ab0ut", "ab0ve", "ab0w", "abow", "meter5"),
-					array("5", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "about", "above", "above", "above", "meters"),
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
 					trim($elevMatches[2])
 				);
 				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
 			}
-			$elevPatStr = "/(?:(?(?=(?:.*?)(?:(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|Alt(?:\\.|itude)?)[:;,]?)\\s".
-				"(?:(?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[0-9])".
-				"(?:\\s?(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?".
-				"\\s{0,2}(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet))[,;]?(?:(?:\\s|\\n|\\r\\n)?(?:.*+))))".
-
-				"(.*?)(?:(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.?)?|Alt(?:\\.|itude)?)[:;,]?)\\s((?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[0-9])".
-				"(?:\\s?(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}".
-				"(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet))[,;]?(?:(?:\\s|\\n|\\r\\n)?(.*+))|".
-
-				"(.*?)(?:(?:E[li1|][ce]v(?:ati[o0][nr]|\\.?)?|Alt(?:\\.|itude)?)[:;,]?)\\s((?:ab[o0]ut\\s|ab[o0]ve\\s|ca(?:\\.?\\s|\\,\\s?)|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[0-9]])".
-				"(?:\\s?(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}".
-				"(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet))[,;]?(.*+))/is";
-
+			//feet or meters, range followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,. \n]| [it]t[,. \n]|(?:m|rn)(?:[,. \n]|eter[5s]?)|Feet)?".
+				"\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9])".
+				"\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))),? ?".
+				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[,.;: ]{0,2}(.*+)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
-				//foreach($elevMatches as $elevMatch) echo "\nelevMatches1[".$i++."] = ".$elevMatch."\n";
-				if(count($elevMatches) == 4) {
-					$elevation = trim($elevMatches[2]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[1]);
-						$nextPart = $elevMatches[3];
-					}
-				} else {
-					$elevation = trim($elevMatches[5]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[4]);
-						$nextPart = trim($elevMatches[6]);
-					}
-				}
+				//foreach($elevMatches as $elevMatch) echo "\nline 2352, elevMatches1[".$i++."] = ".$elevMatch."\n";
 				$elevation = str_ireplace
 				(
-					array("^", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "ab0ut", "ab0ve", "ab0w", "abow", "meter5"),
-					array("5", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "about", "above", "above", "above", "meters"),
-					$elevation
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
 				);
-				return array($firstPart, $elevation, $nextPart);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
 			}
-			$elevPatStr = "/(?:(?(?=(?:.*?)(?:(?:E[li1|][ce]v(?:ati[o0][nr]|\\.)?|Alt(?:\\.|itude)?)[:;,]?)\\s".
-				"(?:(?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])".
-				"(?:\\s?(?:ft\\.|tt\\.|(?:m|rn)(?:\\.|eters?)|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?".
-				"\\s{0,2}(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet))\\b[,;]?(?:(?:\\s|\\n|\\r\\n)?(?:.*+))))".
-
-				"(.*?)(?:(?:E[li1|][ce]v(?:ati[o0][nr]|\\.?)?|Alt(?:\\.|itude)?)[:;,]?)\\s((?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])".
-				"(?:\\s?(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}(?:ft\\.?|tt\\.?|m\\.?|rn\\.?|Feet))\\b[,;]?(?:(?:\\s|\\n|\\r\\n)?(.*+))|".
-
-				"(.*?)(?:(?:E[li1|][ce]v(?:ati[o0][nr]|\\.?)?|Alt(?:\\.|itude)?)[:;,]?)\\s((?:ab[o0]ut\\s|ab[o0]ve\\s|ca(?:\\.?\\s|\\,\\s?)|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])".
-				"(?:\\s?(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet))\\b[,;]?(.*+))/is";
-
+			//feet or meters, approximate, preceded by label
+			$elevPatStr = "/^(.*?)\(?+\\b(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)[:;,]?\\s?".
+				"(".$approximateIndicators.")((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet)))\)?[,.;: ]{0,2}(.*+)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
-				//foreach($elevMatches as $elevMatch) echo "\nelevMatches2[".$i++."] = ".$elevMatch."\n";
-				if(count($elevMatches) == 4) {
-					$elevation = trim($elevMatches[2]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[1]);
-						$nextPart = $elevMatches[3];
-					}
-				} else {
-					$elevation = trim($elevMatches[5]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[4]);
-						$nextPart = trim($elevMatches[6]);
-					}
-				}
-				$elevation = str_ireplace
+				//foreach($elevMatches as $elevMatch) echo "\nline 2444, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = $this->replaceMistakenLetters($elevMatches[2]).
+				str_ireplace
 				(
-					array("^", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "ab0ut", "ab0ve", "ab0w", "abow", "meter5"),
-					array("5", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "about", "above", "above", "above", "meters"),
-					$elevation
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[3])
 				);
-				return array($firstPart, $elevation, $nextPart);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[4]));
 			}
-
-			$elevPatStr = "/(?:(?(?=(?:.*?[^°])\\s(?:(?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])(?:\\.[0-9])?".
-				"(?:\\s?(?:ft\\.?|tt\\.?|m\\.?|rn\\.?|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet))\\b[,;]?(?:(?:\\s|\\n|\\r\\n)?(?:.*+))))".
-
-				"(.*?[^°])\\s((?:ab[o0]ut\\s|ab[o0](?:ve|w)\\s|ca\\.?\\s|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])(?:\\.[0-9])?".
-				"(?:\\s?(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet))\\b[,;]?".
-				"(?:(?:\\s|\\n|\\r\\n)?(.*+))|".
-
-				"(.*?[^°])\\s((?:ab[o0]ut\\s|ab[o0]ve\\s|ca(?:\\.?\\s|\\,\\s?)|[-~])?".
-				"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])(?:\\.[0-9])?".
-				"(?:\\s?(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet)?\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^],".$possibleNumbers."{3}|".
-				"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?\\s{0,2}(?:ft\\.?|tt\\.?|(?:m|rn)(?:\\.|eters?)?|Feet))\\b[,;]?(.*+))/is";
-
+			//feet or meters, preceded by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:\\.|itude)?)[:;,]?\\s?".
+				"((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet)))\)?[,.;: ]{0,2}(.*+)/is";
 			if(preg_match($elevPatStr, $string, $elevMatches)) {
 				//$i=0;
-				//foreach($elevMatches as $elevMatch) echo "\nelevMatches3[".$i++."] = ".$elevMatch."\n";
-				if(count($elevMatches) == 4) {
-					$elevation = trim($elevMatches[2]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[1]);
-						$nextPart = $elevMatches[3];
-					}
-				} else {
-					$elevation = trim($elevMatches[5]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE ||
-						stripos($elevation, "ls") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[4]);
-						$nextPart = trim($elevMatches[6]);
-					}
-				}
+				//foreach($elevMatches as $elevMatch) echo "\nline 2386, elevMatches1[".$i++."] = ".$elevMatch."\n";
 				$elevation = str_ireplace
 				(
-					array("^", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "ab0ut", "ab0ve", "ab0w", "abow", "meter5"),
-					array("5", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "about", "above", "above", "above", "meters"),
-					$elevation
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
 				);
-				return array($firstPart, $elevation, $nextPart);
-				$possibleNumbers = "[OQZl|I!&0-9^]";
-				$elevPatStr = "/(.*?)(?:(?:Alt\\.?(\\s\(m\\s?\\.?\))?)[:;,]?)\\s(".
-					"(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-					"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9])".
-					"(?:\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9],".$possibleNumbers."{3}|".
-					"[SZl|I!&1-9^]".$possibleNumbers."{1,4}|[1-9]))?".
-					"\\s{0,2})\\b[,;]?(?:\\s|\\n|\\r\\n)(.*)/is";
-				if(preg_match($elevPatStr, $string, $elevMatches)) {
-					$elevation = trim($elevMatches[3]);
-					if(strcasecmp($elevation, "ISM") == 0 || stripos($elevation, "ssii") !== FALSE) {
-						$elevation = "";
-						$firstPart = "";
-						$nextPart = "";
-					} else {
-						$firstPart = trim($elevMatches[1]);
-						//$unit = trim($elevMatches[2]);
-						$elevation = str_replace
-						(
-							array("^", "O", "Q", "l", "|", "I", "!", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "ab0ut"),
-							array("5", "0", "0", "1", "1", "1", "1", "2", "ft", "m", " ", " ", " ", "6", "about"),
-							$elevation
-						).
-						" ".
-						str_replace
-						(
-							array("(", ")"),
-							array("", ""),
-							trim($elevMatches[2])
-						);
-						$nextLine = trim($elevMatches[4]);
-						$pos = strpos($nextLine, "Notes");
-						if($pos !== FALSE) $nextLine = substr($nextLine, 0, $pos);
-						return array($firstPart, $elevation, $nextLine);
-					}
-				}
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
+			}
+			//feet or meters, approximate, followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?(".$approximateIndicators.")".
+				"\\b((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))),? ?".
+				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[,.;: ]{0,2}(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2402, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = $this->replaceMistakenLetters($elevMatches[2]).
+				str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[3])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[4]));
+			}
+			//feet or meters, followed by label
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))),? ?".
+				"(?:[ce][li1|][ce]v(?:ati[o0][nr]|\\.)?|A[l|I!1]t(?:[,. ]|itude))\)?[,.;: ]{0,2}(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2417, elevMatches[".$i++."] = ".$elevMatch."\n";
+				$elevation = str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
+			}
+			//feet or meters, range, exact, no label
+			$elevPatStr = "/(.*)(?: |\\n)\(?((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[IO0-9])".
+				"(?:\\s{0,2}(?:ft[,. \n]| [it]t[,. \n]|(?:m|rn)(?:[,. \n]|eter[5s]?)|Feet)?".
+				"\\s?-\\s?(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9]))".
+				"\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?[,.;: ]{0,2}".
+				"(?!(?:N(?:orth)? |S(?:outh)? |E(?:ast)? |W(?:est)? |[NE]?NE |[NW]?NW |[SE]?SE |[SW]?SW )?(?:of|from|above|be(?:low|neath|side|yond))\\b)(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2664, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
+			}
+			//feet or meters, approximate, no label
+			$elevPatStr = "/(.*)(?: |\\n)\(?(".$approximateIndicators.")".
+				"((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}|[I1-9])".
+				"\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?[,.;: ]{0,2}".
+				"(?!(?:N(?:orth)? |S(?:outh)? |E(?:ast)? |W(?:est)? |[NE]?NE |[NW]?NW |[SE]?SE |[SW]?SW )?(?:of|from|above|be(?:low|neath|side))\\b)(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2470, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = $this->replaceMistakenLetters($elevMatches[2]).
+				str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[3])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[4]));
+			}
+			//labels formated as XXXm/YYYft or XXXft/YYYm
+			$elevPatStr = "/(.*)(?: |\\n|\\r)\(?((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[1-9])".
+				"\\s?(?:ft[,.; ]?|(?:m|rn)(?:[,.; \n]|eter[5s]?)?|Feet)\/(?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^]".$possibleNumbers."{1,3}+|[1-9])".
+				"\\s?(?:ft[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?".
+				"(?!(?:N(?:orth)? |S(?:outh)? |E(?:ast)? |W(?:est)? |[NE]?NE |[NW]?NW |[SE]?SE |[SW]?SW )?(?:of|from|above|be(?:low|neath|side))\\b)(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2485, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
+			}
+			//just numbers, feet or meters
+			$elevPatStr = "/(.*)(?: |\\n|\\r)\(?((?:[l|I!1]".$possibleNumbers.",".$possibleNumbers."{3}|[SZl|I!&1-9^],".$possibleNumbers."{3}|".
+				"[l|I!1]".$possibleNumbers."{4}|[SZl|I!&1-9^][OlI0-9]{1,3}+|[0-9])".
+				"\\s{0,2}(?:ft[,.; \n]| [it]t[,.; \n]|(?:m|rn)(?:[,.; \n]|eter[5s]?)|Feet))\)?[,.;: ]{0,2}".
+				"(?!(?:N(?:orth)? |S(?:outh)? |E(?:ast)? |W(?:est)? |[NE]?NE |[NW]?NW |[SE]?SE |[SW]?SW )?(?:of|from|above|be(?:low|neath|side))\\b)(.*+)/is";
+			if(preg_match($elevPatStr, $string, $elevMatches)) {
+				//$i=0;
+				//foreach($elevMatches as $elevMatch) echo "\nline 2485, elevMatches1[".$i++."] = ".$elevMatch."\n";
+				$elevation = str_ireplace
+				(
+					array("it", "O", "Q", "l", "|", "I", "!", "S", "Z", "tt", "rn", "\r\n", "\n", "\r", "&", "meter5"),
+					array("ft", "0", "0", "1", "1", "1", "1", "5", "2", "ft", "m", " ", " ", " ", "6", "meters"),
+					trim($elevMatches[2])
+				);
+				return array(trim($elevMatches[1]), $elevation, trim($elevMatches[3]));
 			}
 		}
 		return array("", "", "");
@@ -3996,6 +4129,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		if($cm != null) {//$i=0;foreach($cm as $m) echo "\nLine 3187, cm[".$i++."] = ".$m."\n";
 			$firstPart = trim($cm[0]);
 			$lastPart = trim($cm[1]);
+			if(strlen($state_province) > 0) {
+				$counties = $this->getCounties($state_province);
+				if(count($counties) > 0) {
+					foreach($counties as $countie) {
+						if(strcasecmp($countie, $firstPart) == 0) return array("", $countie, $this->getCountryFromState($state_province), $lastPart, $state_province);
+						else if(strcasecmp($countie, $lastPart) == 0) return array($firstPart, $countie, $this->getCountryFromState($state_province), "", $state_province);
+					}
+				}
+
+			}
 			$cs = $this->processCountyMatches($firstPart, $lastPart);
 			if($cs != null) {
 				$county = $cs['county'];
@@ -4533,16 +4676,23 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$false_num_class = "[OSZl|I!\d]";//the regex class that represents numbers and characters that numbers are commonly replaced with
 			$pattern =
 				array(
+				"/ +([:;])([A-Za-z])/",
+				"/ +([,.])([A-HJKLMNPRT-Ya-kmnp-y])/",
+				"/ +([,:;.]\\W)/",
 				"/[_-]{3,}/",
 				"/([A-Za-z])Co\\., ([A-Z])/",
 				"/^LEWIS\\sAND\\sCLARK\\s?CAVERNS\\s?STATE\\sPARK/m",
-				"/LOUISIANA STATE UNIVERSITY(?:\\r\\n| )HERBARIUM/is",
+				"/(?:THE )?L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY(?:\\r\\n| )(?:L[|!1Il][CG]HEN )?HERBAR[|!1Il]UM/is",
+				"/(?:THE )?(?:MYC[O0]L[O0]G[|!1Il]CAL )?HERBAR[|!1Il]UM [ODQ0]F(?:\\r\\n| )L[O0]U[|!1Il]S[|!1Il]ANA STATE UN[|!1Il]VERS[|!1Il]TY/is",
+				"/With the Cooperation of (?:Mr\\. )?Charles [DP]eering/is",
+				"/(?:(?:HERBAR[|!1Il]UM [ODQ0]F\\s)?+The )?+NEW Y[O0]RK B[O0]TAN[|!1Il][CG]AL [CG]ARDEN/is",
 				"/[|!1I ]{9,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
 				"/[\|!Iil\"'1U~()@\[\]{}H\/\\\]{6,}/", //strings of ~s, 's, "s, @s, ls, Is, 1s, |s ,/s, \s, Us and Hs more than six characters long (from barcodes)
 				"/^.{1,2}$/m", //one-character lines (Tesseract must generate a 2-char end of line)
-				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
+				"/(lat|long)(\.|,|:|.:|itude)(:|,)?\s?(".$false_num_class."{1,3}(?:\.".$false_num_class."{1,7})?)\"/i" //the beginning of lat-long repair
 				);
-			$replacement = array(" ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
+			$replacement = array("\${1} \${2}", "\${1} \${2}", "\${1}", " ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
+			//$replacement = array(" ", "\${1} Co., \${2}", "LICHENS OF LEWIS AND CLARK CAVERNS STATE PARK", "", "", "", "", "", "", "", "\${1}\${2}\$3 \${4}".chr(176));
 			$str = preg_replace($pattern, $replacement, $str, -1);
 			$str = str_replace("Â°", chr(176), $str);
 			$str = $this->replaceMissingDegreeSignsInLatLongs($str);
