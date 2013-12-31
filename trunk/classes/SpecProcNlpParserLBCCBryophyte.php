@@ -74,13 +74,14 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		$firstPart = "";
 		$county = "";
 		$habitat = "";
+		$taxonRemarks = "";
 		$countyMatches = $this->findCounty($s, "");
 		if($countyMatches) {//$i=0;foreach($countyMatches as $countyMatche) echo "\nline 7015, countyMatches[".$i++."] = ".$countyMatche."\n";
 			$firstPart = $countyMatches[0];
-			$state_province = trim($countyMatches[5]);
-			$country = $countyMatches[3];
-			$county = $countyMatches[2];
-			$location = trim($countyMatches[4]);
+			$state_province = trim($countyMatches[4]);
+			$country = $countyMatches[2];
+			$county = $countyMatches[1];
+			$location = trim($countyMatches[3]);
 			//sometimes the colon after "Co." is misinterpreted as "i"
 			if(strcasecmp(substr($location, 0, 2), "i ") == 0) $location = trim(substr($location, 1));
 		} else {
@@ -274,6 +275,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 						if(array_key_exists('associatedTaxa', $psn)) $associatedTaxa = $psn['associatedTaxa'];
 						if(array_key_exists('recordNumber', $psn) && strlen($recordNumber) == 0) $recordNumber = $psn['recordNumber'];
 						if(array_key_exists('substrate', $psn)) $substrate = $psn['substrate'];
+						if(array_key_exists('taxonRemarks', $psn)) $substrate = $psn['taxonRemarks'];
 						break;
 					}
 				}
@@ -289,6 +291,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 				'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'infraspecificEpithet' => trim($infraspecificEpithet, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'taxonRank' => trim($taxonRank, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+				'taxonRemarks' => trim($taxonRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'associatedTaxa' => trim($associatedTaxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'habitat' => trim($habitat, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
