@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/IdentCharAdmin.php');
+include_once($serverRoot.'/classes/KeyCharAdmin.php');
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/headingadmin.php?'.$_SERVER['QUERY_STRING']);
 
@@ -8,7 +8,7 @@ $hid = array_key_exists('hid',$_REQUEST)?$_REQUEST['hid']:0;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
-$charManager = new IdentCharAdmin();
+$charManager = new KeyCharAdmin();
 $charManager->setLangId($langId);
 
 $isEditor = false;
