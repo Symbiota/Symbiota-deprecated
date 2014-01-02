@@ -1,7 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 
-class IdentCharAdmin{
+class KeyCharAdmin{
 
 	private $conn;
 	private $cid = 0;
@@ -442,7 +442,7 @@ class IdentCharAdmin{
 			//echo $sql;
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR: unable to add Taxon Relevance; '.$this->conn->error;
-				trigger_error('ERROR: unable to add Taxon Relevance; '.$this->conn->error);
+				//trigger_error('ERROR: unable to add Taxon Relevance; '.$this->conn->error);
 			}
 		}
 		return $statusStr;
@@ -551,20 +551,6 @@ class IdentCharAdmin{
 		}
 	}
 
-	public function getTaxonArr(){
-		$retArr = array();
-		$sql = 'SELECT tid, sciname '. 
-			'FROM taxa '.
-			'WHERE rankid < 220 '.
-			'ORDER BY sciname';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->tid] = $r->sciname;
-		}
-		$rs->free();
-		return $retArr;
-	}
-	
 	public function getLanguageArr(){
 		$retArr = array();
 		$sql = 'SELECT langid, langname '.

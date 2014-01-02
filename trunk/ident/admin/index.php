@@ -1,12 +1,12 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/IdentCharAdmin.php');
+include_once($serverRoot.'/classes/KeyCharAdmin.php');
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php?'.$_SERVER['QUERY_STRING']);
 
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
-$charManager = new IdentCharAdmin();
+$charManager = new KeyCharAdmin();
 $charManager->setLangId($langId);
 $charArr = $charManager->getCharacterArr();
 
@@ -30,6 +30,7 @@ if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
     <link type="text/css" href="../../css/main.css" rel="stylesheet" />
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript">
+
 		function validateNewCharForm(f){
 			if(f.charname.value == ""){
 				alert("Character name must have a value");

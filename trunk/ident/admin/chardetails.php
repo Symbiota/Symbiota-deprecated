@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/IdentCharAdmin.php');
+include_once($serverRoot.'/classes/KeyCharAdmin.php');
 
 if(!$symbUid) header('Location: ../../profile/index.php?refurl=../ident/admin/index.php');
 
@@ -9,7 +9,7 @@ $cid = array_key_exists('cid',$_REQUEST)?$_REQUEST['cid']:0;
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $langId = array_key_exists('langid',$_REQUEST)?$_REQUEST['langid']:'';
 
-$keyManager = new IdentCharAdmin();
+$keyManager = new KeyCharAdmin();
 $keyManager->setLangId($langId);
 //$keyManager->setCollId($collId);
 
@@ -33,27 +33,29 @@ if($formSubmit){
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Delete Char'){
-		$status = $keyManager->deleteChar();
-		if($status == true) $cid = 0;
+		$statusStr = $keyManager->deleteChar();
+		if($statusStr == true) $cid = 0;
 	}
 	elseif($formSubmit == 'Delete State'){
-		$status = $keyManager->deleteCharState($_POST['cs']);
+		$statusStr = $keyManager->deleteCharState($_POST['cs']);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Upload Image'){
-		$status = $keyManager->uploadCsImage($_POST);
+		$statusStr = $keyManager->uploadCsImage($_POST);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Delete Image'){
-		$status = $keyManager->deleteCsImage($_POST['csimgid']);
+		$statusStr = $keyManager->deleteCsImage($_POST['csimgid']);
 		$tabIndex = 1;
 	}
 	elseif($formSubmit == 'Save Taxonomic Relevance'){
-		$status = $keyManager->saveTaxonRelevance($_POST['tid'], $_POST['relation'], $_POST['notes']);
-		$tabIndex = 2;
+		if(isset($_POST['tid']) && $_POST['tid']){
+			$statusStr = $keyManager->saveTaxonRelevance($_POST['tid'], $_POST['relation'], $_POST['notes']);
+			$tabIndex = 2;
+		}
 	}
 	elseif($formSubmit == 'deltaxon'){
-		$status = $keyManager->deleteTaxonRelevance($_POST['tid']);
+		$statusStr = $keyManager->deleteTaxonRelevance($_POST['tid']);
 		$tabIndex = 2;
 	}
 }
