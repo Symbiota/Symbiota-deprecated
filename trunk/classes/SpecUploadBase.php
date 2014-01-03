@@ -904,24 +904,24 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="font-weight:bold;">Transfer process complete</li>');
 		$this->outputMsg('<li style="font-weight:bold;">House cleaning a stats update </li>');
 
-		//Remove records from occurrence temp table
-		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
-		$this->conn->query($sql);
-		
 		$this->outputMsg('<li style="margin-left:10px;font-weight:bold;">Updating georeference indexing... ');
 		ob_flush();
 		flush();
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
-			'FROM omoccurrences o '.
+			'FROM uploadspectemp o '.
 			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL';
+			'AND o.decimallongitude IS NOT NULL AND collid = '.$this->collId;
 		if($this->conn->query($sql)){
 			$this->outputMsg('Done!</li> ');
 		}
 		else{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
+		
+		//Remove records from occurrence temp table
+		$sql = 'DELETE FROM uploadspectemp WHERE collid = '.$this->collId;
+		$this->conn->query($sql);
 		
 		//Update collection stats
 		$sql = 'UPDATE omcollectionstats SET uploaddate = NOW() WHERE collid = '.$this->collId;

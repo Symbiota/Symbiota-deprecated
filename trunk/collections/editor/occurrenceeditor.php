@@ -646,16 +646,8 @@ else{
 												<div id="exsDiv">
 													<div id="ometidDiv">
 														Exsiccati Title<br/>
-														<select name="ometid" onchange="fieldChanged('ometid')">
-															<option value="">----------------------------------------------</option>
-															<?php 
-															$exsArr = $occManager->getExsiccatiTitleArr();
-															$selectedOmetid = (isset($occArr['ometid'])?$occArr['ometid']:'');
-															foreach($exsArr as $ometid => $esxTitle){
-																echo '<option value="'.$ometid.'" '.($selectedOmetid==$ometid?'SELECTED':'').'>'.$esxTitle.'</option>';
-															}
-															?>
-														</select> 
+														<input id="exstitleinput" name="exstitle" value="<?php echo (isset($occArr['exstitle'])?$occArr['exstitle']:''); ?>" /> 
+														<input id="ometidinput" name="ometid" type="hidden" value="<?php echo (isset($occArr['ometid'])?$occArr['ometid']:''); ?>" /> 
 													</div>
 													<div id="exsnumberDiv">
 														Number<br/>

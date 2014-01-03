@@ -34,45 +34,86 @@ $(document).ready(function() {
 		active: tabTarget
 	});
 
+	$( "#exstitleinput" ).autocomplete({
+		source: "rpc/exsiccatisuggest.php",
+		minLength: 2,
+		autoFocus: true,
+		select: function( event, ui ) {
+			if(ui.item){
+				$( "#ometidinput" ).val(ui.item.id);
+				fieldChanged('ometid');
+			}
+			else{
+				$( "#ometidinput" ).val("");
+				fieldChanged('ometid');
+			}
+		},
+		change: function( event, ui ) {
+			if($( this ).val() == ""){
+				$( "#ometidinput" ).val("");
+			}
+			else{
+				if($( "#ometidinput" ).val() == ""){
+					$.ajax({
+						type: "POST",
+						url: "rpc/exsiccativalidation.php",
+						data: { term: $( this ).val() }
+					}).done(function( msg ) {
+						if(msg == ""){
+							alert("Exsiccati title not found within system");
+						}
+						else{
+							$( "#ometidinput" ).val(msg);
+							fieldChanged('ometid');
+						}
+					});
+				}
+			}
+		}
+	});
+
 	$("#ffsciname").autocomplete({ 
 		source: "rpc/getspeciessuggest.php", 
+		minLength: 3,
 		change: function(event, ui) {
 			verifyFullformSciName();
 			fieldChanged('sciname');
 		}
-	},
-	{ minLength: 3 });
+	});
 
 	//Misc fields with lookups
 	$("#ffcountry").autocomplete({ 
 			source: countryArr,
+			minLength: 1,
+			autoFocus: true,
 			change: function(event, ui) {
 				fieldChanged('country');
 			}
-		},
-		{ minLength: 1, autoFocus: true } 
+		} 
 	);
 
 	$("#ffstate").autocomplete({
 			source: function( request, response ) {
 				$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
 			},
+			minLength: 2,
+			autoFocus: true,
 			change: function(event, ui) {
 				fieldChanged('stateprovince');
 			}		
-		},
-		{ minLength: 2, autoFocus: true, matchContains: false }
+		}
 	);
 
 	$("#ffcounty").autocomplete({ 
 			source: function( request, response ) {
 				$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
 			},
+			minLength: 2,
+			autoFocus: true,
 			change: function(event, ui) {
 				fieldChanged('county');
 			}		
-		},
-		{ minLength: 2, autoFocus: true, matchContains: false }
+		}
 	);
 
 	$("#catalognumber").keydown(function(evt){
