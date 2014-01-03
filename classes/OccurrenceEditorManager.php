@@ -624,7 +624,7 @@ class OccurrenceEditorManager {
 								//Use REPLACE rather than INSERT so that if record with occid already exists, it will be removed before insert
 								$sql1 = 'REPLACE INTO omexsiccatiocclink(omenid, occid) '.
 									'VALUES('.$exsNumberId.','.$occArr['occid'].')';
-								echo $sql1;
+								//echo $sql1;
 								if(!$this->conn->query($sql1)){
 									$status = 'ERROR adding exsiccati: '.$this->conn->error.'; '.$sql1;
 								}
@@ -902,11 +902,12 @@ class OccurrenceEditorManager {
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$this->occurrenceMap[$this->occid]['ometid'] = $r->ometid;
+			$this->occurrenceMap[$this->occid]['exstitle'] = $r->title.($r->abbreviation?' ['.$r->abbreviation.']':'');
 			$this->occurrenceMap[$this->occid]['exsnumber'] = $r->exsnumber;
 		}
 		$rs->free();
 	}
-	
+
 	public function getExsiccatiTitleArr(){
 		$retArr = array();
 		$sql = 'SELECT DISTINCT ometid, title, abbreviation FROM omexsiccatititles ORDER BY title ';
