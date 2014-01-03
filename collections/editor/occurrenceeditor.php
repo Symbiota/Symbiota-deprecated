@@ -303,7 +303,7 @@ else{
     <?php 
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=131123" type="text/css" rel="stylesheet" id="editorCssLink" /> 
+		<link href="includes/config/occureditorcrowdsource.css?ver=140103" type="text/css" rel="stylesheet" id="editorCssLink" /> 
 		<?php 
     }
     else{
@@ -324,7 +324,7 @@ else{
     ?>
 	<script src="../../js/jquery.js?ver=131123" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=131123" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js?ver=131123" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js?ver=140103" type="text/javascript"></script>
 	<script type="text/javascript">
 		var collId = "<?php echo $collId; ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
@@ -344,10 +344,10 @@ else{
 		}
 		?>
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=131123"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=131202"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=131123"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=131123"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140103"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140103"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140103"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140103"></script>
 </head>
 <body>
 	<!-- inner text -->

@@ -59,7 +59,7 @@
                 var image = this.element;
                 image.css("display", "none");
                 if(!o.src) {
-                        o.src = image.attr("src");
+                    o.src = image.attr("src");
                 }
                 // Set up the viewport
                 image.wrap("<div/>");
@@ -83,6 +83,7 @@
                         ,position: "relative" /* Needed by IE for some reason */
                         ,width: o.viewportWidth + "px"
                         ,height: o.viewportHeight + "px"
+                        ,border: "solid 1px #084B8A"
                 });
                 if(o.allowPan || o.allowZoom) {
                         viewport.mousedown(function(e) {self._handleMouseDown(e);});
@@ -98,16 +99,14 @@
                 
                 var i = new Image();
                 i.onload = function() {
-                  o.imageWidth = i.width;
-                  o.imageHeight = i.height;
-                  self._configure();
+                    o.imageWidth = i.width;
+                    o.imageHeight = i.height;
+                    self._configure();
                 }
                 i.src = o.src;
-                
-                
 
                 if(o.src != image.attr("src")) {
-                        image.attr("src", o.src);
+                    image.attr("src", o.src);
                 }
         }
 
@@ -121,7 +120,9 @@
                 o._height = o.imageHeight;
 
                 // There is only one scale value. We don't stretch images.
-                var scale = Math.max(o.viewportWidth/(o.w * o.imageWidth), o.viewportHeight/(o.h * o.imageHeight));
+                //var scale = Math.max(o.viewportWidth/(o.w * o.imageWidth), o.viewportHeight/(o.h * o.imageHeight));
+                //Modified to allow minimum zoom below portal size (egbot: Jan 2014)
+                var scale = Math.min(o.viewportWidth/(o.w * o.imageWidth), o.viewportHeight/(o.h * o.imageHeight));
 
                 o._width = o._width * scale;
                 o._height = o._height * scale;
@@ -425,27 +426,38 @@
 
                 var minX = -o._width + o.viewportWidth;
                 var minY = -o._height + o.viewportHeight;
-
-                if(o._absx > 0) {
-                        o._absx = 0;
+                if(o._absx >= 0) {
+                	//Keeps image from going too far to rigth
+                	if(o._width > o.viewportWidth){
+                		o._absx = 0;
+                	}
+                	else{
+                		o._absx = minX/2;
+                	}
                 }
                 else if(o._absx < minX) {
-                        o._absx = minX;
+                	//Keeps image from being moved too far to left
+                    o._absx = minX;
                 }
 
-                if(o._absy > 0) {
-                        o._absy = 0;
+                if(o._absy >= 0) {
+                	if(o._height > o.viewportHeight){
+                		o._absy = 0;
+                	}
+                	else{
+                		o._absy = minY/2;
+                	}
                 }    
                 else if(o._absy < minY) {
-                        o._absy = minY;
+                    o._absy = minY;
                 }
                 
                 o.x = (-o._absx/o._width);
                 o.y = (-o._absy/o._height);
 
                 image.css({
-                        left: o._absx + "px"
-                        ,top: o._absy + "px"
+                    left: o._absx + "px"
+                    ,top: o._absy + "px"
                 });
                 this._trigger("change", null, o);
         }
@@ -462,7 +474,21 @@
                 var viewport = image.parent();
                 
                 var wasZoomed = true;
-                
+
+				//Modified to allow zooming in beyond image size (egbot: Jan 2014)
+				if((o._width < o.viewportWidth) && (o._height < o.viewportHeight)){
+					if((o.viewportWidth - o._width) > (o.viewportHeight - o._height)) {
+						o._width = parseInt(o.imageWidth * (o.viewportHeight/o.imageHeight));
+						o._height = o.viewportHeight;
+					}
+    				else{
+						o._height = parseInt(o.imageHeight * (o.viewportWidth/o.imageWidth));
+						o._width = o.viewportWidth;
+					}
+					wasZoomed = false;
+                }
+
+                /*
                 if(o._width < o.viewportWidth) {
                         o._height = parseInt(o.imageHeight * (o.viewportWidth/o.imageWidth));
                         o._width = o.viewportWidth;
@@ -474,7 +500,7 @@
                         o._height = o.viewportHeight;
                         wasZoomed = false;
                 }
-
+                */
 
                 if(o._width > o.imageMaxWidth) {
                         o._height = parseInt(o._height * (o.imageMaxWidth/o._width));
@@ -505,9 +531,9 @@
                 	//originOffetY = e.clientY - viewport.offset().top;
                 }
                 else{
-                        // Scale at center of viewport
-                        originOffetX = o.viewportWidth/2;
-                        originOffetY = o.viewportHeight/2;
+                    // Scale at center of viewport
+                    originOffetX = o.viewportWidth/2;
+                    originOffetY = o.viewportHeight/2;
                 }
                 
                 var cx = o._width /(-o._absx + originOffetX);
@@ -538,7 +564,7 @@
                 var image = this.element;
                 var o = this.options;
 
-                if(o.viewportWidth > o._width || o.viewportHeight > o._height) {
+                if(o.viewportWidth > o._width && o.viewportHeight > o._height) {
                         var factor = o.viewportWidth / o._width;
                         o._width = o.viewportWidth;
                         o._height = o._height * factor;
