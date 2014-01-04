@@ -8,10 +8,10 @@ $county = array_key_exists('county',$_REQUEST)?$_REQUEST['county']:'';
 
 if(!$country || !$state || !$county){
 	$locArr = explode(";",$locality);
-	$locality = array_pop($locArr);
-	if(!$country && $locArr) $country = array_shift($locArr);
-	if(!$state && $locArr) $state = array_shift($locArr);
-	if(!$county && $locArr) $county = array_shift($locArr);
+	$locality = trim(array_pop($locArr));
+	if(!$country && $locArr) $country = trim(array_shift($locArr));
+	if(!$state && $locArr) $state = trim(array_shift($locArr));
+	if(!$county && $locArr) $county = trim(array_shift($locArr));
 }
 //Modify TRS data to make it more compatable to the GeoLocate format (S23 needs to be Sec23) 
 if(preg_match('/\d{1,2}[NS]{1}T\s\d{1,2}[EW]{1}R\s\d{1,2}S/',$locality)){
@@ -37,20 +37,25 @@ if(strtolower($charset) == "iso-8859-1"){
 }
 
 $country = removeAccents($country);
+$state = removeAccents($state);
+$county = removeAccents($county);
 
-$urlVariables = 'country='.urlencode($country).'&state='.urlencode($state).'&county='.$county.'&locality='.$locality;
+$urlVariables = 'country='.urlencode($country).'&state='.urlencode($state).'&county='.urlencode($county).'&locality='.urlencode($locality);
+if(isset($PORTAL_GUID) && $PORTAL_GUID){
+	$urlVariables .= '&gc='.$PORTAL_GUID;
+}
 
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>GEOLocate Tool</title>
 	<link rel="stylesheet" href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" />
 	<style>
 		iframe {
 			width: 1020px;
-			height:720px;
+			height:750px;
 			margin: 0px;
 			border: 1px solid #000;
 		}
