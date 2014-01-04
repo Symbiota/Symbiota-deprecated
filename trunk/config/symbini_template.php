@@ -5,6 +5,7 @@ $DEFAULTCATID = 2;
 $defaultTitle = '';
 $adminEmail = '';
 $charset = '';					//ISO-8859-1 or UTF-8
+$PORTAL_GUID = '';
 
 $clientRoot = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet') 
 $serverRoot = '';				//Full path to Symbiota project root folder

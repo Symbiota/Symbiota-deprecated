@@ -104,7 +104,6 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 	<script type="text/javascript">
 		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/shared.js?ver=130330"></script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=130330"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
@@ -546,14 +545,20 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 							if($isEditor){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
 								?> 
-								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;cursor:pointer;" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
-									<img src='../images/edit.png' style='width:13px;' title='edit details' />
+								<span class="editspp" style="display:<?php echo ($editMode==1?'inline':'none'); ?>;">
+									<a href="#" onclick="openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$clid; ?>','editorwindow');">
+										<img src='../images/edit.png' style='width:13px;' title='edit details' />
+									</a>
 								</span>
-								<?php if($showVouchers && $dynSqlExists){ ?>
-								<span class="editspp" style="display:none;cursor:pointer;" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clid."&targettid=".$tid;?>','editorwindow');">
-									<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
-								</span>
-								<?php
+								<?php 
+								if($showVouchers && $dynSqlExists){ 
+									?>
+									<span class="editspp" style="display:none;">
+										<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clid."&targettid=".$tid;?>','editorwindow');">
+											<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
+										</a>
+									</span>
+									<?php
 								} 
 							}
 							echo "</div>\n";
