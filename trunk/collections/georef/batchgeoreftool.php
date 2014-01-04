@@ -175,7 +175,7 @@ header("Content-Type: text/html; charset=".$charset);
 											Display all speciemsn inclulding previously georeferenced
 										</div>
 									</div>
-									<div style="padding:2px">
+									<div style="padding:2px;clear:both;">
 										<b>Locality Term:</b> 
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 										<span style="margin-left:175px;">
@@ -388,7 +388,7 @@ header("Content-Type: text/html; charset=".$charset);
 											</td>
 										</tr>
 										<tr>
-											<td colspan="7">
+											<td colspan="6">
 												<input name="submitaction" type="submit" value="Update Coordinates" />
 												<span id="workingspan" style="display:none;">
 													<img src="../../images/workingcircle.gif" />
@@ -401,7 +401,12 @@ header("Content-Type: text/html; charset=".$charset);
 												<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
 												<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
 												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-												<input name="georefby" type="hidden" value="<?php echo $paramsArr['un']; ?>" />
+											</td>
+											<td align="right">
+												<div style="margin:10px;">
+													Georeferenced by: 
+													<input name="georefby" type="text" value="<?php echo $paramsArr['un']; ?>" readonly />
+												</div>
 											</td>
 										</tr>
 									</table>
