@@ -27,10 +27,10 @@ class TaxonomyDisplayManager{
 		$taxaParentIndex = Array();
 		if($this->targetStr){
 			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid, ts.parenttid, ts.tidaccepted, ts.hierarchystr '.
-				'FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) '.
-				'INNER JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted) '.
-				'INNER JOIN taxa t1 ON ts1.tid = t1.tid '.
-				'WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) ';
+				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
+				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tidaccepted '.
+				'LEFT JOIN taxa t1 ON ts1.tid = t1.tid '.
+				'WHERE (ts.taxauthid = 1 OR ts.taxauthid IS NULL) AND (ts1.taxauthid = 1 OR ts1.taxauthid IS NULL) ';
 			if(is_numeric($this->targetStr)){
 				$sql .= 'AND (t.tid IN('.implode(',',$this->targetStr).') OR (ts1.tid = '.$this->targetStr.'))';
 			}
@@ -45,14 +45,14 @@ class TaxonomyDisplayManager{
 			while($row = $rs->fetch_object()){
 				$tid = $row->tid;
 				$parentTid = $row->parenttid;
-				if($tid == $row->tidaccepted){
+				if($tid == $row->tidaccepted || !$row->tidaccepted){
 					$this->taxaArr[$tid]["sciname"] = $row->sciname;
 					$this->taxaArr[$tid]["author"] = $row->author; 
 					$this->taxaArr[$tid]["parenttid"] = $parentTid; 
 					$this->taxaArr[$tid]["rankid"] = $row->rankid;
 					$this->indentMap[$row->rankid] = 0;
 					$this->searchTaxonRank = $row->rankid;
-					if($parentTid) $taxaParentIndex[$tid] = $parentTid;
+					$taxaParentIndex[$tid] = ($parentTid?$parentTid:0);
 					if($row->hierarchystr) $hArray = array_merge($hArray,explode(",",$row->hierarchystr));
 				}
 				else{

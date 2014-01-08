@@ -965,7 +965,7 @@ else{
 													if(isset($reproductiveConditionTerms)){
 														if($reproductiveConditionTerms){
 															?>
-															<select name="reproductivecondition" onchange="fieldChanged('reproductivecondition');" tabindex="99" />
+															<select name="reproductivecondition" onchange="fieldChanged('reproductivecondition');" tabindex="99" >
 																<option value="">-----------------</option>
 																<?php
 																foreach($reproductiveConditionTerms as $term){

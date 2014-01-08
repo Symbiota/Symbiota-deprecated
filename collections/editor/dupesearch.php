@@ -80,7 +80,7 @@ if(!$IS_ADMIN){
 						unset($tempOcc['recordnumber']);
 					}
 					foreach($tempOcc as $k => $v){
-						if($v) echo 'oArr["'.$k.'"] = "'.$v.'";'."\n";
+						if($v) echo 'oArr["'.$k.'"] = "'.str_replace('"','\"',$v).'";'."\n";
 					}
 					echo 'occArr['.$occId.'] = oArr;'."\n";
 				}
