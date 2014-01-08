@@ -5,21 +5,33 @@ var taxAuthId;
 
 $(document).ready(function() {
 
-	$('#tabs').tabs();
+	$('#tabs').tabs({active: tabIndex});
 
-	$("#uppertaxonomy").autocomplete({ source: "rpc/getuppertaxonsuggest.php" },{ minLength: 3 });
+	$("#uppertaxonomy").autocomplete({ 
+		source: "rpc/getuppertaxonsuggest.php", 
+		minLength: 1,
+		autoFocus: true
+	});
 
 	$("#parentstr").autocomplete({
 		source: function( request, response ) {
 			$.getJSON( "rpc/gettaxasuggest.php", { term: request.term, taid: document.taxauthidform.taxauthid.value, rhigh: document.taxoneditform.rankid.value }, response );
-		}
-	},{ minLength: 3 }
-	);
+		},
+		minLength: 3,
+		autoFocus: true
+	});
 
-	$("#aefacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3 });
+	$("#aefacceptedstr").autocomplete({ 
+		source: "rpc/getacceptedsuggest.php",
+		minLength: 3,
+		autoFocus: true
+	});
 
-	$("#ctnafacceptedstr").autocomplete({ source: "rpc/getacceptedsuggest.php" },{ minLength: 3 });
-
+	$("#ctnafacceptedstr").autocomplete({ 
+		source: "rpc/getacceptedsuggest.php",
+		minLength: 3,
+		autoFocus: true
+	});
 });
 
 function toggle(target){
