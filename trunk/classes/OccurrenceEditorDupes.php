@@ -230,31 +230,33 @@ class OccurrenceEditorDupes {
 		$connWrite = MySQLiConnectionFactory::getCon("write");
 		
 		
-		$oArr = array();
 		//Merge records
+		$tArr = array();
+		$sArr = array();
 		$sql = 'SELECT * FROM omoccurrences WHERE occid = '.$targetOccid.' OR occid = '.$sourceOccid;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_assoc()){
-			$tempArr = array();
-			foreach($r as $k => $v){
-				$tempArr[strtolower($k)] = $v;
-			}
+			$tempArr = array_change_key_case($r);
 			$id = $tempArr['occid'];
 			unset($tempArr['occid']);
 			unset($tempArr['collid']);
 			unset($tempArr['dbpk']);
 			unset($tempArr['datelastmodified']);
+			if($id == $targetOccid){
+				$tArr = $tempArr;
+			}
+			else{
+				$sArr = $tempArr;
+			}
 			$oArr[$id] = $tempArr;
 		}
 		$rs->free();
 
-		$tArr = $oArr[$targetOccid];
-		$sArr = $oArr[$sourceOccid];
 		$sqlFrag = '';
 		foreach($sArr as $k => $v){
 			if(($v != '') && $tArr[$k] == ''){
-				$sqlFrag .= ','.$k.'="'.$v.'"';
-			} 
+				$sqlFrag .= ','.$k.'="'.str_replace('"','\"',$v).'"';
+			}
 		}
 		if($sqlFrag){
 			//Remap source to target
