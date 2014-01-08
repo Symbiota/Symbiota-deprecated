@@ -55,31 +55,32 @@ class VoucherManager {
 			"WHERE ((cllink.TID = ".$this->tid.") AND (cllink.CLID = ".$this->clid."))";
  		$result = $this->conn->query($sql);
 		if($row = $result->fetch_object()){
-			$checklistData["habitat"] = $row->Habitat;
-			$checklistData["abundance"] = $row->Abundance;
-			$checklistData["notes"] = $row->Notes;
-			$checklistData["internalnotes"] = $row->internalnotes;
-			$checklistData["source"] = $row->source;
-			$checklistData["familyoverride"] = $row->familyoverride;
-			if(!$this->clName) $this->clName = $row->Name;
-			if(!$this->taxonName) $this->taxonName = $row->SciName;
+			$checklistData["habitat"] = $this->cleanOutStr($row->Habitat);
+			$checklistData["abundance"] = $this->cleanOutStr($row->Abundance);
+			$checklistData["notes"] = $this->cleanOutStr($row->Notes);
+			$checklistData["internalnotes"] = $this->cleanOutStr($row->internalnotes);
+			$checklistData["source"] = $this->cleanOutStr($row->source);
+			$checklistData["familyoverride"] = $this->cleanOutStr($row->familyoverride);
+			if(!$this->clName) $this->clName = $this->cleanOutStr($row->Name);
+			if(!$this->taxonName) $this->taxonName = $this->cleanOutStr($row->SciName);
 		}
 		$result->close();
 		return $checklistData;
 	}
 
 	public function editClData($eArr){
+		$retStr = 'SUCCESS editing checklist details';
 		$innerSql = "";
 		foreach($eArr as $k => $v){
 			$valStr = trim($v);
-			$innerSql .= ",".$k."=".($valStr?"\"".$valStr."\" ":"NULL ");
+			$innerSql .= ",".$k."=".($valStr?'"'.$this->cleanInStr($valStr).'" ':'NULL');
 		}
 		$sqlClUpdate = 'UPDATE fmchklsttaxalink SET '.substr($innerSql,1).
-			'WHERE (tid = '.$this->tid.') AND (clid = '.$this->clid.')';
+			' WHERE (tid = '.$this->tid.') AND (clid = '.$this->clid.')';
 		if(!$this->conn->query($sqlClUpdate)){
-			return "ERROR: ".$conn->error."<br/>SQL: ".$sqlClUpdate.";<br/> ";
+			$retStr = "ERROR editing details: ".$this->conn->error."<br/>SQL: ".$sqlClUpdate.";<br/> ";
 		}
-		return "";
+		return $retStr;
 	}
 
 	public function renameTaxon($newTaxon){
@@ -140,7 +141,7 @@ class VoucherManager {
 						'WHERE (TID = '.$nTaxon.') AND (CLID = '.$this->clid.')';
 					$this->conn->query($sqlCl);
 					//Delete unwanted taxon
-					$sqlDel = 'DELETE FROM fmchklsttaxalink ctl WHERE (ctl.CLID = '.$this->clid.') AND (ctl.TID = '.$this->tid.')';
+					$sqlDel = 'DELETE FROM fmchklsttaxalink WHERE (CLID = '.$this->clid.') AND (TID = '.$this->tid.')';
 					if($this->conn->query($sqlDel)){
 						$this->tid = $nTaxon;
 						$this->taxonName = '';
@@ -165,13 +166,17 @@ class VoucherManager {
 	public function getVoucherData(){
 		$voucherData = Array();
  		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = 'SELECT v.occid, CONCAT(o.recordedby," ",IFNULL(o.recordnumber,"s.n.")) AS collector, v.notes, v.editornotes '.
+		$sql = 'SELECT v.occid, CONCAT(o.recordedby," ",IFNULL(o.recordnumber,"s.n.")) AS collector, o.catalognumber, '.
+			'o.sciname, o.eventdate, v.notes, v.editornotes '.
 			'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 			'WHERE (v.TID = '.$this->tid.') AND (v.CLID = '.$this->clid.')';
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$occId = $row->occid;
 			$voucherData[$occId]["collector"] = $row->collector;
+			$voucherData[$occId]["catalognumber"] = $row->catalognumber;
+			$voucherData[$occId]["sciname"] = $row->sciname;
+			$voucherData[$occId]["eventdate"] = $row->eventdate;
 			$voucherData[$occId]["notes"] = $row->notes;
 			$voucherData[$occId]["editornotes"] = $row->editornotes;
 		}
@@ -179,22 +184,19 @@ class VoucherManager {
 		return $voucherData;
 	}
 	
-	public function editVoucher($editArr){
-		if($this->tid && $this->clid){
-			$occId = $editArr['occid'];
-			unset($editArr['occid']);
-			$setStr = '';
-			foreach($editArr as $k => $v){
-				$setStr .= ', '.$k.' = "'.$this->cleanInStr($v).'"';
+	public function editVoucher($occid, $notes, $editorNotes){
+		$statusStr = 'SUCCESS editing voucher ';
+		if($this->tid && $this->clid && is_numeric($occid)){
+			$sql = 'UPDATE fmvouchers SET '.
+				'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').
+				',editornotes = '.($editorNotes?'"'.$this->cleanInStr($editorNotes).'"':'NULL').
+				' WHERE (occid = '.$occid.') AND (tid = '.$this->tid.') AND (clid = '.$this->clid.')';
+			//echo $sql;
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR editing voucher: '.$this->conn->error;
 			}
-			$setStr = substr($setStr,2);
-			$sqlVoucUpdate = 'UPDATE fmvouchers v '.
-				'SET '.$setStr.' WHERE (v.occid = "'.
-				$this->conn->real_escape_string($occId).'") AND (v.TID = '.$this->tid.
-				') AND (v.CLID = '.$this->clid.')';
-			//echo $sqlVoucUpdate;
-			$this->conn->query($sqlVoucUpdate);
 		}
+		return $statusStr;
 	}
 	
 	public function addVoucher($vOccId, $vNotes, $vEditNotes){
@@ -253,10 +255,21 @@ class VoucherManager {
 	}
 
 	public function removeVoucher($delOid){
+		$statusStr = 'SUCCESS deleting voucher ';
 		if(is_numeric($delOid)){
 			$sqlDel = 'DELETE FROM fmvouchers WHERE occid = '.$delOid.' AND (TID = '.$this->tid.') AND (CLID = '.$this->clid.')';
-			$this->conn->query($sqlDel);
+			if(!$this->conn->query($sqlDel)){
+				$statusStr = 'ERROR deleting voucher: '.$this->conn->error;
+			}
 		}
+		return $statusStr;
+	}
+
+	private function cleanOutStr($str){
+		$newStr = str_replace('"',"&quot;",$str);
+		$newStr = str_replace("'","&apos;",$newStr);
+		//$newStr = $this->conn->real_escape_string($newStr);
+		return $newStr;
 	}
 
 	private function cleanInStr($str){

@@ -277,7 +277,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 					?>
 					<!-- Option box -->
 					<div id="cloptiondiv">
-						<form id='changetaxonomy' name='changetaxonomy' action='checklist.php' method='post'>
+						<form name='optionform' action='checklist.php' method='post'>
 							<fieldset>
 							    <legend><b>Options</b></legend>
 								<!-- Taxon Filter option -->
