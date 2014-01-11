@@ -92,7 +92,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 					}
 					return true;
 				},
-				activate: tabIndex 
+				active: tabIndex 
 			});
 		});
 

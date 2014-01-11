@@ -45,7 +45,7 @@ class SpecUploadFile extends SpecUploadBase{
 				}
 				else{
 					echo '<div style="margin:15px;">';
-					echo '<div style="font-weight:bold;font-size:120%;color:red;">ERROR: unable to upload image; '.$_FILES['uploadfile']['error'].' </div>';
+					echo '<div style="font-weight:bold;font-size:120%;color:red;">ERROR: unable to upload file; '.$_FILES['uploadfile']['error'].' </div>';
 					echo '<div style="font-weight:bold;font-size:120%;">The zip file may be too large for the upload limits set within the PHP configurations (upload_max_filesize = '.ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size").')</div>';
 					echo '</div>';
 					return false;
