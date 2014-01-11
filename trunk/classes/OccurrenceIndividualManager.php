@@ -264,21 +264,30 @@ class OccurrenceIndividualManager {
 
 	public function addComment($commentStr){
 		global $symbUid;
+ 		$con = MySQLiConnectionFactory::getCon("write");
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
 			'VALUES('.$this->occId.',"'.$this->cleanInStr($commentStr).'",'.$symbUid.',1)';
 		//echo 'sql: '.$sql;
-		$statudStr = $this->conn->query($sql);
-		return $statudStr;
+		if(!$con->query($sql)){
+			$statusStr = 'ERROR adding comment: '.$con->error;
+		}
+		$con->close();
+		
+		return $statusStr;
 	}
 	
 	public function deleteComment($comId){
 		$statusStr = '';
+ 		$con = MySQLiConnectionFactory::getCon("write");
 		if(is_numeric($comId)){
 			$sql = 'DELETE FROM omoccurcomments WHERE comid = '.$comId;
-			$statudStr = $this->conn->query($sql);
+			if(!$con->query($sql)){
+				$statusStr = 'ERROR adding comment: '.$con->error;
+			}
 		}
-		return $statudStr;
+		$con->close();
+		return $statusStr;
 	}
 	
 	public function reportComment($repComId){
@@ -300,7 +309,9 @@ class OccurrenceIndividualManager {
 				trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
 			}
 			//Set Review status to supress
-			$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId);
+ 			$con = MySQLiConnectionFactory::getCon("write");
+			$con->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId);
+			$con->close();
 			
 			//Email to portal admin
 			$emailAddr = $GLOBALS['adminEmail'];
@@ -317,12 +328,15 @@ class OccurrenceIndividualManager {
 	}
 	
 	public function makeCommentPublic($comId){
-		$this->conn->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId);
+ 		$con = MySQLiConnectionFactory::getCon("write");
+		$con->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId);
+		$con->close();
 	}
 
 	public function getGeneticArr(){
 		$retArr = array();
 		if($this->occId){
+ 			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'SELECT idoccurgenetic, identifier, resourcename, locus, resourceurl, notes '.
 				'FROM omoccurgenetic '.
 				'WHERE occid = '.$this->occId;

@@ -220,11 +220,12 @@ class ImageBatchProcessor {
 			}
 			$this->logOrEcho('Starting image processing: '.$sourcePathFrag);
 			$this->processFolder($sourcePathFrag);
-			$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n\n");
+			$this->logOrEcho('Done uploading '.$sourcePathFrag.' ('.date('Y-m-d h:i:s A').')');
 			if($this->logMode == 1){
 				echo '</ul>';
 			}
 		}
+		$this->logOrEcho("Image upload process finished! (".date('Y-m-d h:i:s A').") \n");
 	}
 
 	private function processFolder($pathFrag = ''){
