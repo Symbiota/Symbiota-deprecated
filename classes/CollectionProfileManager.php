@@ -18,7 +18,7 @@ class CollectionProfileManager {
 
 	public function setCollectionId($collid){
 		if($collid && is_numeric($collid)){
-			$this->collid = $collid;
+			$this->collid = $this->cleanInStr($collid);
 		}
 	}
 
@@ -420,7 +420,8 @@ class CollectionProfileManager {
 		echo '<li>Finished updating collection statistics</li>';
 	}
 
-	public function getTaxonCounts($family=''){
+	public function getTaxonCounts($f=''){
+		$family = $this->cleanInStr($f);
 		$returnArr = Array();
 		$sql = '';
 		if($family){
@@ -448,15 +449,17 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getGeographicCounts($country="",$state=""){
+	public function getGeographicCounts($c="",$s=""){
 		$returnArr = Array();
+		$country = $this->cleanInStr($c);
+		$state = $this->cleanInStr($s);
 		$sql = '';
 		if($country){
 			$sql = 'SELECT trim(o.stateprovince) as termstr, Count(*) AS cnt '.
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.country '.
 				'HAVING (o.CollID = '.$this->collid.') AND (o.StateProvince IS NOT NULL) AND (o.StateProvince <> "") '.
-				'AND o.country = "'.$country.'" '.
+				'AND (o.country = "'.$country.'") '.
 				'ORDER BY trim(o.StateProvince)';
 		}
 		elseif($state){
@@ -464,7 +467,7 @@ class CollectionProfileManager {
 				'FROM omoccurrences o '.
 				'GROUP BY o.CollID, o.StateProvince, o.county '.
 				'HAVING (o.CollID = '.$this->collid.') AND (o.county IS NOT NULL) AND (o.county <> "") '.
-				'AND o.stateprovince = "'.$state.'" '.
+				'AND (o.stateprovince = "'.$state.'") '.
 				'ORDER BY trim(o.county)';
 		}
 		else{
@@ -514,8 +517,10 @@ class CollectionProfileManager {
 	}
 
 	//Used to index specimen records for particular collection
-	public function echoOccurrenceListing($start, $limit){
+	public function echoOccurrenceListing($s, $l){
 		global $clientRoot;
+		$start = $this->cleanInStr($s);
+		$limit = $this->cleanInStr($l);
 		if(substr($clientRoot,-1) != '/') $clientRoot .= '/';
 		if($this->collid){
 			//Get count
