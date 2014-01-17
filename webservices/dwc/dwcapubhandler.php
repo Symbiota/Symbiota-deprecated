@@ -12,12 +12,15 @@ $includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
 if($collid){
 	$dwcaHandler = new DwcArchiverOccurrence();
 	
+	$dwcaHandler->initPublisher();
 	$dwcaHandler->setSilent(1);
 	$dwcaHandler->setFileName('webreq');
 	$dwcaHandler->setCollArr($collid,$collType);
 	if($cond) $dwcaHandler->setConditionStr($cond);
+	$dwcaHandler->setIncludeDets($includeDets);
+	$dwcaHandler->setIncludeImgs($includeImgs);
 
-	$archiveFile = $dwcaHandler->createDwcArchive($includeDets, $includeImgs, 1);
+	$archiveFile = $dwcaHandler->createDwcArchive();
 
 	if($archiveFile){
 		//ob_start();

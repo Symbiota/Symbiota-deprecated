@@ -315,7 +315,7 @@ class OccurrenceIndividualManager {
 			
 			//Email to portal admin
 			$emailAddr = $GLOBALS['adminEmail'];
-			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'];
+			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'/collections/individual/index.php?tabindex=2&occid='.$this->occId;
 			$subject = $GLOBALS['defaultTitle'].' inappropriate comment reported<br/>';
 			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
 			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
