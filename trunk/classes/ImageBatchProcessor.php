@@ -613,9 +613,6 @@ class ImageBatchProcessor {
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){
 					$specPk = $matchArr[1];
 				}
-				else{
-					$specPk = $matchArr[0];
-				}
 				if (isset($this->collArr[$this->activeCollid]['prpatt'])) { 				
 					$specPk = preg_replace($this->collArr[$this->activeCollid]['prpatt'],$this->collArr[$this->activeCollid]['prrepl'],$specPk);
 				}
