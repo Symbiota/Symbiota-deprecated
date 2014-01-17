@@ -1,6 +1,7 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
 class DwcArchiverExpedition{
 
@@ -410,7 +411,43 @@ class DwcArchiverExpedition{
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
-	private function writeEmlFile(){
+	public function writeEmlFile(){
+		global $clientRoot, $defaultTitle, $adminEmail;
+		
+		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
+		
+		$urlPathPrefix = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		
+		$emlArr = array();
+		$emlArr['alternateIdentifier'][] = UuidFactory::getUuidV4();
+		$emlArr['title'] = $this->title;
+		
+		$emlArr['creator'][0]['organizationName'] = $defaultTitle;
+		$emlArr['creator'][0]['electronicMailAddress'] = $adminEmail;
+		$emlArr['creator'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
+		
+		$emlArr['metadataProvider'][0]['organizationName'] = $defaultTitle;
+		$emlArr['metadataProvider'][0]['electronicMailAddress'] = $adminEmail;
+		$emlArr['metadataProvider'][0]['onlineUrl'] = $urlPathPrefix.'index.php';
+		
+		$emlArr['pubDate'] = date("Y-m-d");
+		$emlArr['language'] = 'eng';
+		$emlArr['description'] = $this->description;
+
+		//Get EML string
+		$dwcaHandler = new DwcArchiverOccurrence();
+		$emlDoc = $dwcaHandler->getEmlDom($emlArr);
+		
+		$tempFileName = $this->targetPath.$this->ts.'-eml.xml';
+		$emlDoc->save($tempFileName);
+
+		$this->zipArchive->addFile($tempFileName);
+    	$this->zipArchive->renameName($tempFileName,'eml.xml');
+
+    	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
+	}
+
+	private function writeEmlFile_old(){
 		global $clientRoot, $defaultTitle, $adminEmail;
 		
 		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");

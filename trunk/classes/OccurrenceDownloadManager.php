@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
 class OccurrenceDownloadManager{
 	
@@ -89,7 +90,6 @@ class OccurrenceDownloadManager{
     }
 
 	public function downloadDwca(){
-		include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
 		$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 		$collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -101,12 +101,15 @@ class OccurrenceDownloadManager{
 		if($collid){
 			$dwcaHandler = new DwcArchiverOccurrence();
 			
+			$dwcaHandler->initPublisher();
 			$dwcaHandler->setSilent(1);
 			$dwcaHandler->setFileName('webreq');
 			$dwcaHandler->setCollArr($collid,$collType);
 			if($cond) $dwcaHandler->setConditionStr($cond);
-		
-			$archiveFile = $dwcaHandler->createDwcArchive($includeDets, $includeImgs, 1);
+			$dwcaHandler->setIncludeDets($includeDets);
+			$dwcaHandler->setIncludeImgs($includeImgs);
+
+			$archiveFile = $dwcaHandler->createDwcArchive();
 		
 			if($archiveFile){
 				//ob_start();
