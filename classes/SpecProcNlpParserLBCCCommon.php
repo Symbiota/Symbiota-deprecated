@@ -4261,7 +4261,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			}
 			if(strlen($state_province) > 0) {
 				$state = $state_province;
-				if($this->isUSState($state_province)) $country = "USA";
+				if($this->isUSState($state_province)) $country = "U.S.A.";
 			}
 			$county = ucwords
 			(
@@ -5107,7 +5107,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	protected function isUSState($state) {
 		if($state != null) {//echo "\nInput State: ".$state."\n";
 			$state = trim($state, " ,");
-			$statePatStr = '/\\b(A[il!|1]abama|A[il!|1]\\.?|A[il!|1]a\\.?|'.
+			$statePatStr = '(A[il!|1]abama|A[il!|1]\\.?|A[il!|1]a\\.?|'.
 			'A[il!|1]aska|AK\\.?|'.
 			'Ar[il!|1]z[o0uq]na|AZ\\.?|Ar[il!|1]z\\.?|'.
 			'Arkansas|AR\\.?|Ark\\.?|'.
@@ -5159,18 +5159,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			'West V[il!|1]rg[il!|1]n[il!|1]a|W\\.? Va?\\.?|'.
 			'W[il!|1]sc[o0uq]ns[il!|1]n|W[il!|1]s?\\.?|'.
 			'Wy[o0uq]ming|Wy[o0uq]?\\.?'.
-			')\\b/i';
-			$m = preg_match($statePatStr, $state, $matches);
+			')';
+			$m = preg_match('/^'.$statePatStr.'$/i', $state, $matches);
 			if($m) {
-				//echo "matches[1] ".$matches[1]."\n";
 				$thisState = $matches[1];
 				if($state == $thisState) return true;
-				/*else {
-					if(strpos($state, " ") > 1) {
-						$tStates = explode(" ", $state);
-						foreach ($tStates as $tState) if($tState == $thisState) return true;
-					}
-				}*/
+			}
+			$m = preg_match('/\\b'.$statePatStr.'[ ,.:;\n]{1,2}/i', $state, $matches);
+			if($m) {
+				$thisState = $matches[1];
+				if($state == $thisState) return true;
 			}
 			return ($m && ($state == $matches[1] || $state == $matches[1]."."));
 		}
