@@ -193,6 +193,9 @@ header("Content-Type: text/html; charset=".$charset);
 							<form name="georefform" method="post" action="batchgeoreftool.php" onsubmit="return verifyGeorefForm(this)">
 								<div style="float:right;">
 									<span>
+										<a href="#" onclick="geoCloneTool();"><img src="../../images/list.png" title="Search for clones previously georeferenced" style="width:18px;" /></a>
+									</span>
+									<span style="margin-left:10px;">
 										<a href="#" onclick="geoLocateLocality();"><img src="../../images/geolocate.gif" title="GeoLocate locality" style="width:18px;" /></a>
 									</span>
 									<span style="margin-left:10px;">
