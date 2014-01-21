@@ -154,6 +154,22 @@ function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
 	f.georeferencesources.value = baseStr+"GeoLocate";
 }
 
+function geoCloneTool(){
+	var selObj = document.getElementById("locallist");
+	if(selObj.selectedIndex > -1){
+		var f = document.queryform;
+		var locality = selObj.options[selObj.selectedIndex].text;
+		var country = f.qcountry.value;
+		var state = f.qstate.value;
+		var county = f.qcounty.value;
+		cloneWindow=open("georefclone.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=800,height=600,left=20,top=20");
+		if(cloneWindow.opener == null) cloneWindow.opener = self;
+	}
+	else{
+		alert("Select a locality in list to open that record set in the editor");
+	}
+}
+
 function analyseLocalityStr(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){

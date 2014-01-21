@@ -2002,10 +2002,20 @@ class SpecUploadBase extends SpecUpload{
 	protected function encodeString($inStr){
 		global $charset;
 		$retStr = $inStr;
-		//Get rid of curly quotes
+		//Get rid of curly (smart) quotes
 		$search = array("’", "‘", "`", "”", "“"); 
 		$replace = array("'", "'", "'", '"', '"'); 
 		$inStr= str_replace($search, $replace, $inStr);
+		//Get rid of UTF-8 curly smart quotes and dashes 
+		$badwordchars=array("\xe2\x80\x98", // left single quote
+							"\xe2\x80\x99", // right single quote
+							"\xe2\x80\x9c", // left double quote
+							"\xe2\x80\x9d", // right double quote
+							"\xe2\x80\x94", // em dash
+							"\xe2\x80\xa6" // elipses
+		);
+		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
+		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
 		
 		if($inStr){
 			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){

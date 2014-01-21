@@ -40,7 +40,12 @@ class OccurrenceGeorefTools {
 					}
 				}
 				if(array_key_exists('qcountry',$this->qryVars) && $this->qryVars['qcountry']){
-					$sql .= 'AND (country = "'.$this->qryVars['qcountry'].'") ';
+					$countySearch = $this->qryVars['qcountry'];
+					$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
+					if(in_array($countySearch,$synArr)){
+						$countySearch = implode('","',$synArr);
+					}
+					$sql .= 'AND (country IN("'.$countySearch.'")) ';
 				}
 				else{
 					$orderBy .= 'country,';
@@ -212,6 +217,56 @@ class OccurrenceGeorefTools {
 		return $retArr;
 	} 
 
+	public function getGeorefClones($locality, $country, $state, $county){
+		$occArr = array();
+		$sql = 'SELECT count(occid) AS cnt, decimallatitude, decimallongitude, coordinateUncertaintyInMeters, country, stateprovince, county, georeferencedby '. 
+			'FROM omoccurrences '. 
+			'WHERE decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL AND locality = "'.$this->cleanInStr($locality).'" ';
+		if($country){
+			$synArr = array('usa','u.s.a', 'united states','united states of america','u.s.');
+			if(in_array($country,$synArr)){
+				$country = implode('","',$synArr);
+			}
+			$sql .= 'AND (country IN("'.$this->cleanInStr($country).'")) ';
+		}
+		if($state){
+			$sql .= 'AND (stateprovince = "'.$this->cleanInStr($state).'") ';
+		}
+		if($county){
+			$county = str_ireplace(array(' county',' parish'),'',$county);
+			$sql .= 'AND (county LIKE "'.$this->cleanInStr($county).'%") ';
+		}
+		$sql .= 'GROUP BY decimallatitude, decimallongitude '.
+			'ORDER BY georeferencedBy DESC, count(occid) DESC';
+		//echo '<div>'.$sql.'</div>';
+		
+		$rs = $this->conn->query($sql);
+		$cnt = 0;
+		$lat = 0;
+		$lng = 0;
+		while($r = $rs->fetch_object()){
+			if($lat != $r->decimallatitude && $lng != $r->decimallongitude){
+				$lat = $r->decimallatitude;
+				$lng = $r->decimallongitude;
+				$occArr[$cnt]['cnt'] = $r->cnt;
+				$occArr[$cnt]['lat'] = $r->decimallatitude;
+				$occArr[$cnt]['lng'] = $r->decimallongitude;
+				$occArr[$cnt]['err'] = $r->coordinateUncertaintyInMeters;
+				$occArr[$cnt]['country'] = $r->country;
+				$occArr[$cnt]['state'] = $r->stateprovince;
+				$occArr[$cnt]['county'] = $r->county;
+				$occArr[$cnt]['georefby'] = $r->georeferencedby;
+				$cnt++;
+			}
+			else{
+				$occArr[$cnt]['cnt'] = ($occArr[$cnt]['cnt']+$r->cnt);
+				if($occArr[$cnt]['georefby'] != $r->georeferencedby) $occArr[$cnt]['georefby'] = $occArr[$cnt]['georefby'].', '.$r->georeferencedby;
+			}
+		}
+		$rs->free();
+		return $occArr;
+	}
+	
 	public function setCollId($cid){
 		if(is_numeric($cid)){
 			$this->collId = $cid;
