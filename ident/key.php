@@ -6,13 +6,7 @@ $editable = false;
 if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 	$editable = true;
 }
-?> 
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
-
-<?php
 $spLink = "../taxa/index.php?taxon=--SPECIES--";
 // $spLink = "http://mobot.mobot.org/cgi-bin/search_vast?name=--SPECIES--";
 $secondaryLink = "";
@@ -50,11 +44,9 @@ if($rv) $dataManager->setRelevanceValue($rv);
 $data = Array();
 $chars = Array();
 $taxa = Array();
-if($keyModIsActive){
-	$data = $dataManager->getData();
-	$chars = $data["chars"];  				//$chars = Array(HTML Strings)
-	$taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
-}
+$data = $dataManager->getData();
+$chars = $data["chars"];  				//$chars = Array(HTML Strings)
+$taxa = $data["taxa"];					//$taxa  = Array(family => array(TID => DisplayName))
 
 //Harevest and remove language list from $chars
 $languages = Array();
@@ -63,6 +55,8 @@ if($chars){
 	unset($chars["Languages"]);
 }
 ?>
+
+<!DOCTYPE html>
 <head>
 	<title><?php echo $defaultTitle; ?> Web-Key: <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
 	<link rel='stylesheet' href='../css/main.css' type='text/css' />
