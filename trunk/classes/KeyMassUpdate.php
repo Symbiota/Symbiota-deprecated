@@ -205,7 +205,7 @@ class KeyMassUpdate{
 	public function getStates(){
 		$stateArr = Array();
 		$sql = 'SELECT kmcs.CharStateName, kmcs.CS FROM kmcs '.
-			'WHERE (kmcs.Language = "'.$this->lang.'") AND (kmcs.CID = '.$this->cid.') '.
+			'WHERE (kmcs.CID = '.$this->cid.') '.
 			'ORDER BY kmcs.SortSequence, (kmcs.CS + 1)';
 		$rs = $this->con->query($sql);
 		while($row = $rs->fetch_object()){
