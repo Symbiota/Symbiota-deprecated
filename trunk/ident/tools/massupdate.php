@@ -13,10 +13,9 @@ $muManager = new KeyMassUpdate();
 $removeAttrs = Array();
 $addAttrs = Array();
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $clFilter = array_key_exists("clf",$_REQUEST)?$_REQUEST["clf"]:'all'; 
 $taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'all';
-$generaOnly = array_key_exists("generaonly",$_REQUEST)?$_REQUEST["generaonly"]:""; 
+$generaOnly = array_key_exists("generaonly",$_REQUEST)?$_REQUEST["generaonly"]:0; 
 $cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
 $removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
 $addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
@@ -35,10 +34,6 @@ if($cidValue) $muManager->setCid($cidValue);
 
 if($addAttrs || $removeAttrs){
 	if($removeAttrs) $muManager->setRemoves($removeAttrs);
-
-	
-	
-	
 	if($addAttrs) $muManager->setAdds($addAttrs);
 	$muManager->deleteInheritance();
 	$muManager->processAttrs();
@@ -62,6 +57,18 @@ if($addAttrs || $removeAttrs){
 		function verifyClose() { 
 			if(dataChanged == true) { 
 				return "You will lose any unsaved data if you don't first save your changes!"; 
+			}
+		}
+
+		function submitFilterForm(inputObj){
+			var f = inputObj.form;
+			if((f.clf.value == "" || f.clf.value == "all") && (f.tf.value == "" || f.tf.value == "all")){
+				alert("Taxon OR checklist needs to have a defined scope ");
+				inputObj.checked = false;
+				return false;
+			}
+			else{
+				f.submit();
 			}
 		}
 
@@ -153,101 +160,91 @@ include($serverRoot.'/header.php');
 	if($isEditor){
 		if(!$cidValue){
 			?>
-			<table>
-				<tr><td>
-					<form id="setupform1" action="massupdate.php" method="post">
-				  		<fieldset style="padding:15px;">
-				  			<legend><b>Step 1: Limit Scope</b></legend>
-							<div style='font-weight:bold;'>Checklist:</div>
-							<select name="clf"> 
-								<option value="">-- Select a Checklist --</option>
-								<option value="all" <?php echo ($clFilter=="all"?"SELECTED":""); ?>>Checklist Filter Off (all taxa)</option>
-								<option value="">---------------------------------</option>
-						 		<?php 
-						 		$selectList = $muManager->getClQueryList();
-					 			foreach($selectList as $key => $value){
-					 				echo "<option value='".$key."' ".($key==$clFilter?"SELECTED":"").">$value</option>\n";
-					 			}
-						 		?>
-					  		</select>
-					  		<div style='font-weight:bold;'>Taxon:</div>
-							<select name="tf">
-					 			<option value="">-- Select Taxon --</option>
-					 			<option value="all" <?php if($taxonFilter == 'all') echo 'SELECTED'; ?>>All Taxa</option>
-					 			<option value="">--------------------------</option>
-						  		<?php 
-						  		$selectList = $muManager->getTaxaQueryList();
-					  			foreach($selectList as $value){
-					  				echo "<option ".($value==$taxonFilter?"SELECTED":"").">$value</option>\n";
-					  			}
-						  		?>
-							</select>
-							<div>
-								<input type="checkbox" name="generaonly" value="1" <?php if($generaOnly) echo "checked"; ?> /> 
-								Exclude Species Rank
-							</div>
-							<div>
-								<input type='submit' name='action' id='list' value='Display Character List' />
-							</div>
-						</fieldset>
-					</form>
-				</td>
-				<td>
-					<form id="setupform2" name="setupform2" action="massupdate.php" method="post">
-						<fieldset style="padding:0px 15px 15px 15px;">
-							<legend><b>Step 2: Select Character</b></legend>
+			<form id="filterform" action="massupdate.php" method="post" onsubmit="return verifyFilterForm(this)">
+		  		<fieldset style="padding:15px;">
+		  			<legend><b>Define Group of Taxa to Edit</b></legend>
+		  			<div style="margin: 10px 0px;">
+		  				Define checklist and/or taxon scope and then select character to be edited. The action of selecting character will submit form.   
+		  			</div>
+		  			<div>
+						<b>Checklist:</b> 
+						<select name="clf"> 
+							<option value="">-- Select a Checklist --</option>
+							<option value="all" <?php echo ($clFilter=="all"?"SELECTED":""); ?>>Checklist Filter Off (all taxa)</option>
+							<option value="">---------------------------------</option>
 					 		<?php 
-			 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
-							foreach($cList as $h => $charData){
-								echo "<div style='margin-top:1em;font-size:125%;'>$h</div>\n";
-								ksort($charData);
-								foreach($charData as $cidKey => $charValue){
-									echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="this.form.submit()">'.$charValue.'</div>'."\n";
-								}
-							}
+					 		$selectList = $muManager->getClQueryList();
+				 			foreach($selectList as $key => $value){
+				 				echo "<option value='".$key."' ".($key==$clFilter?"SELECTED":"").">$value</option>\n";
+				 			}
 					 		?>
-							<input type="hidden" name="proj" value="<?php echo $projValue; ?>" />
-							<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
-					 		<input type="hidden" name="clf" value="<?php echo $clFilter; ?>" />
-					 		<input type="hidden" name="tf" value="<?php echo $taxonFilter; ?>" />
-					 	</fieldset>
-					</form>
-			 	</td></tr>
-			</table>
+				  		</select><br/>
+				  		<b>Taxon:</b> 
+						<select name="tf">
+				 			<option value="">-- Select Taxon --</option>
+				 			<option value="all" <?php if($taxonFilter == 'all') echo 'SELECTED'; ?>>All Taxa</option>
+				 			<option value="">--------------------------</option>
+					  		<?php 
+					  		$selectList = $muManager->getTaxaQueryList();
+				  			foreach($selectList as $value){
+				  				echo "<option ".($value==$taxonFilter?"SELECTED":"").">$value</option>\n";
+				  			}
+					  		?>
+						</select>
+					</div>
+					<div style="margin: 10px 0px;">
+						<input type="checkbox" name="generaonly" value="1" <?php if($generaOnly) echo "checked"; ?> /> 
+						Exclude Species Rank
+					</div>
+			 		<?php 
+	 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
+					foreach($cList as $h => $charData){
+						echo "<div style='margin-top:1em;font-size:125%;'>$h</div>\n";
+						ksort($charData);
+						foreach($charData as $cidKey => $charValue){
+							echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="submitFilterForm(this)">'.$charValue.'</div>'."\n";
+						}
+					}
+			 		?>
+					<input type="hidden" name="proj" value="<?php echo $projValue; ?>" />
+					<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
+			 	</fieldset>
+			</form>
 		<?php
 		}
 		else{
-			$inheritStr = "<span title='State Inherited from parent taxon'> (I)</span>";
+			$inheritStr = "&nbsp;<span title='State has been inherited from parent taxon'><b>(i)</b></span>";
 			?>
-	     	<table class="styledtable">
-	     		<?php 
-	     		$sList = $muManager->getStates();
+			<div><?php echo $inheritStr; ?> = character state is inherited as true from a parent taxon (genus, family, etc)</div>
+		 	<table class="styledtable">
+				<?php 
+		 		$sList = $muManager->getStates();
 				//List CharState columns and replace spaces with line breaks
 				$headerStr = '<tr><th/>';
-     		
-	     		foreach($sList as $cs => $csName){
+	 		
+		 		foreach($sList as $cs => $csName){
 					$csNameNew = str_replace(" ","<br/>",$csName);
-	     			$sList[$cs] = $csName;
-	     			$headerStr .= '<th>'.$csNameNew.'</th>';
-	     		}
-	     		$headerStr .= '</tr>'."\n";
-	     		echo $headerStr;
-	     		?>
+		 			$sList[$cs] = $csName;
+		 			$headerStr .= '<th>'.$csNameNew.'</th>';
+		 		}
+		 		$headerStr .= '</tr>'."\n";
+		 		echo $headerStr;
+		 		?>
 				<tr>
 					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
 						<input type='submit' name='action' value='Save Changes' onclick='submitAttrs();' />
 					</td>
 				</tr>
-	     		<?php 
-	     		$count = 0;
-	     		//Array(familyName => Array(SciName => Array("TID" => TIDvalue,"csArray" => Array(csValues => Inheritance))))
-	     		$tList = $muManager->getTaxaList();
+		 		<?php 
+		 		$count = 0;
+		 		//Array(familyName => Array(SciName => Array("TID" => TIDvalue,"csArray" => Array(csValues => Inheritance))))
+		 		$tList = $muManager->getTaxaList();
 				ksort($tList);
-	     		foreach($tList as $fam => $sciNameArr){
+		 		foreach($tList as $fam => $sciNameArr){
 					//Show Family first
-	     			if(array_key_exists($fam,$sciNameArr)){
-	      				$famArr = $sciNameArr[$fam];
-	      				?>
+		 			if(array_key_exists($fam,$sciNameArr)){
+		  				$famArr = $sciNameArr[$fam];
+		  				?>
 						<tr>
 							<td>
 								<span style='font-weight:bold;'>
@@ -278,14 +275,14 @@ include($serverRoot.'/header.php');
 									$jsStr = "addAttr('".$t."-".$cs."');";	
 								}
 								echo "<td align='center' width='15'>";
-								echo "<input type=\"checkbox\" name=\"csDisplay\" onclick=\"".$jsStr."\" ".($isSelected && !$isInherited?"CHECKED":"")." title=\"".$csName."\"/>".($isInherited?"(I)":"");
+								echo '<input type="checkbox" name="csDisplay" onclick="'.$jsStr.'" '.($isSelected && !$isInherited?'CHECKED':'').' title="'.$csName.'"/>'.($isInherited?'(I)':'');
 								echo "</td>\n";
 							}
 							?>
 						</tr>
 						<?php 
 						unset($sciNameArr[$fam]);
-	     			}
+		 			}
 
 					//Go through taxa names and list
 					ksort($sciNameArr);
@@ -318,11 +315,11 @@ include($serverRoot.'/header.php');
 									$jsStr = "addAttr('".$t."-".$cs."');";
 								}
 								?>
-								<td width='10' align='center'>
-									<div <?php echo ($isSelected?"style='text-weight:bold;'":"")?>>
-										<input type="checkbox" name="csDisplay" onclick="<?php echo $jsStr.'" '.($isSelected && !$isInherited?'CHECKED':''); ?> title="<?php echo $csName; ?>" />
-										<?php echo ($isInherited?$inheritStr:""); ?>
-									</div>
+								<td width='10' align='center' style="white-space:nowrap;">
+									<?php 
+									echo '<input type="checkbox" name="csDisplay" onclick="'.$jsStr.'" '.($isSelected && !$isInherited?'CHECKED':'').' title="'.$csName.'" />';
+									if($isInherited) echo $inheritStr;
+									?>
 								</td>
 								<?php 
 							}
@@ -339,10 +336,10 @@ include($serverRoot.'/header.php');
 								</td>
 							</tr>
 							<?php 
-	     					echo $headerStr;
+		 					echo $headerStr;
 						}
 					}
-	     		}
+		 		}
 				?>
 				<tr>
 					<td align='right' colspan='<?php echo (count($sList)+1); ?>'>
@@ -358,7 +355,7 @@ include($serverRoot.'/header.php');
 				<input type='hidden' name='lang' value='<?php echo $langValue; ?>' />
 			</form>
 			<?php
-     	}
+	 	}
 	}
 	elseif(!$symbUid){
 		?>

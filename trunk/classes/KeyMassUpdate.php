@@ -110,10 +110,10 @@ class KeyMassUpdate{
 		$sql = 'SELECT DISTINCT ts.UpperTaxonomy, ts.Family, t.UnitName1 '. 
 			'FROM fmchklsttaxalink ctl INNER JOIN taxstatus ts ON ctl.tid = ts.tid '. 
 			'INNER JOIN taxa t ON ts.tidaccepted = t.TID ';
-		$sqlWhere = '';
-		if($this->clidFilter && $this->clidFilter != 'all') $sqlWhere .= '(ctl.CLID = '.$this->clidFilter.') ';
+		//$sqlWhere = '';
+		//if($this->clidFilter && $this->clidFilter != 'all') $sqlWhere .= '(ctl.CLID = '.$this->clidFilter.') ';
 		//if($this->pid) $sqlWhere .= ($sqlWhere?'AND ':'').'(cpl.pid = '.$this->pid.') ';
-		if($sqlWhere) $sql .= 'WHERE '.$sqlWhere;
+		//if($sqlWhere) $sql .= 'WHERE '.$sqlWhere;
 		$sql .= ' ORDER BY t.unitname1';
 		//echo $sql;
 		$result = $this->con->query($sql);
@@ -218,37 +218,40 @@ class KeyMassUpdate{
 	public function getTaxaList(){
 		//Get all Taxa found in checklist 
 		$taxaList = Array();
-		if($this->taxonFilterRankId > 100){
-			$parArr = Array();
-			$famArr = Array();
-			$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, ts.ParentTID, t.RankId, d.CID, d.CS, d.Inherited ".
-				"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
-				"LEFT JOIN (SELECT d.TID, d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (d.CID=".$this->cid.")) AS d ON t.TID = d.TID) ";
-			if($this->clidFilter && $this->clidFilter != "all"){
-				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
+		$parArr = Array();
+		$famArr = Array();
+		$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, ts.ParentTID, t.RankId, d.CID, d.CS, d.Inherited ".
+			"FROM ((taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) ".
+			"LEFT JOIN (SELECT d.TID, d.CID, d.CS, d.Inherited FROM kmdescr d WHERE (d.CID=".$this->cid.")) AS d ON t.TID = d.TID) ";
+		if($this->clidFilter && $this->clidFilter != "all"){
+			$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
+		}
+		$sql .= 'WHERE (t.RankId = 220) AND (ts.taxauthid = 1) ';
+		if($this->taxonFilterTid){
+			$sql .= 'AND (ts.hierarchystr LIKE "%,'.$this->taxonFilterTid.',%") ';
+		}
+		if($this->clidFilter && $this->clidFilter != "all"){
+			$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
+		}
+		//echo $sql;
+		$rs = $this->con->query($sql);
+		while($row1 = $rs->fetch_object()){
+			$sciName = $row1->SciName;
+			$sciNameDisplay = "<span style='margin-left:10px'><i>$sciName</i></span>";
+			$family = $row1->Family;
+			if(!$this->generaOnly){
+				$taxaList[$family][$sciName]["TID"] = $row1->TID;
+				$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
+				$taxaList[$family][$sciName]["csArray"][$row1->CS] = $row1->Inherited;
 			}
-			$sql .= 'WHERE (t.RankId = 220) AND (ts.taxauthid = 1) AND (ts.hierarchystr LIKE "%,'.$this->taxonFilterTid.',%") ';
-			if($this->clidFilter && $this->clidFilter != "all"){
-				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
-			}
-			//echo $sql;
-			$rs = $this->con->query($sql);
-			while($row1 = $rs->fetch_object()){
-				$sciName = $row1->SciName;
-				$sciNameDisplay = "<span style='margin-left:10px'><i>$sciName</i></span>";
-				$family = $row1->Family;
-				if(!$this->generaOnly){
-					$taxaList[$family][$sciName]["TID"] = $row1->TID;
-					$taxaList[$family][$sciName]["display"] = $sciNameDisplay;
-					$taxaList[$family][$sciName]["csArray"][$row1->CS] = $row1->Inherited;
-				}
-				$parTID = $row1->ParentTID;
-				if(!in_array($parTID,$parArr)) $parArr[] = $parTID;
-				if(!in_array($family,$famArr)) $famArr[] = $family;
-			}
-			$rs->close();
-	
-			//Get all genera and family and add them to list
+			$parTID = $row1->ParentTID;
+			if(!in_array($parTID,$parArr)) $parArr[] = $parTID;
+			if(!in_array($family,$famArr)) $famArr[] = $family;
+		}
+		$rs->close();
+
+		//Get all genera and family and add them to list
+		if($parArr && $famArr){
 			$taxaStr = implode(",",$parArr);
 			$famStr = implode("','",$famArr);
 			$sql = "SELECT DISTINCT t.TID, ts.Family, t.SciName, t.RankId, ts.ParentTID, d.CID, d.CS, d.Inherited ".
@@ -256,6 +259,7 @@ class KeyMassUpdate{
 				"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
 				"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
 				"WHERE (ts.taxauthid = 1 AND (((t.RankId = 180) AND (t.TID IN(".$taxaStr."))) OR (t.SciName IN('$famStr'))))";
+			//echo $sql;
 			$rs = $this->con->query($sql);
 			while($row = $rs->fetch_object()){
 				$sciName = $row->SciName;
@@ -268,44 +272,7 @@ class KeyMassUpdate{
 			}
 			$rs->close();
 		}
-		else{
-			//Get all relavent family
-			$famArr = Array();
-			$sql = "SELECT DISTINCT ts.family ".
-				"FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted ";
-			if($this->clidFilter && $this->clidFilter != "all"){
-				$sql .= "INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid ";
-			}
-			$sql .= 'WHERE (ts.taxauthid = 1) ';
-			if($this->taxonFilterTid && $this->taxonFilterTid != 'all'){
-				$sql .= 'AND (ts.hierarchystr LIKE "%,'.$this->taxonFilterTid.',%") ';
-			}
-			if($this->clidFilter && $this->clidFilter != "all"){
-				$sql .= "AND (ctl.CLID = ".$this->clidFilter.")" ;
-			}
-			//echo $sql;
-			$rs = $this->con->query($sql);
-			while($r = $rs->fetch_object()){
-				$famArr[] = $r->family;
-			}
-			$rs->close();
-			//Add all families to ouput list
-			$famStr = implode("','",$famArr);
-			$sql = "SELECT DISTINCT t.TID, t.sciname, d.cs, d.inherited ".
-				"FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-				"LEFT JOIN (SELECT di.TID, di.CID, di.CS, di.Inherited FROM kmdescr di ".
-				"WHERE (di.CID=".$this->cid.")) AS d ON t.TID = d.TID ".
-				"WHERE (ts.taxauthid = 1 AND t.SciName IN('$famStr'))";
-			//echo $sql;
-			$rs = $this->con->query($sql);
-			while($row = $rs->fetch_object()){
-				$family = $row->sciname;
-				$taxaList[$family][$family]["TID"] = $row->TID;
-				$taxaList[$family][$family]["display"] = '<div style="margin-left:3px">'.$family.'</div>';
-				$taxaList[$family][$family]["csArray"][$row->cs] = $row->inherited;
-			}
-			$rs->close();
-		}
+
 		return $taxaList;
 	}
 

@@ -100,6 +100,17 @@ $smManager = new SiteMapManager();
 							}
 							?>
 							<h3>Identification Keys</h3>
+							<?php 
+							if(!$keyModIsActive && array_key_exists("KeyAdmin",$userRights)){
+								?>
+								<div style="color:red;margin-left:10px;">
+									Note: The Identification Key module is deactivated within this portal. 
+									However, as a Identification Key Adminitrator you have access to editing tools and 
+									keys for development and testing.
+								</div>
+								<?php 
+							}
+							?>
 							<ul>
 								<?php 
 								if($isAdmin || array_key_exists("KeyAdmin",$userRights)){
@@ -111,18 +122,18 @@ $smManager = new SiteMapManager();
 									if($clActive){
 										asort($clActive);
 										?>
-										<ul id="testkeyhead">
-											<li style="">
-												<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;">Display Test Keys</a>
-											</li>
-										</ul>
-										<ul id="testkey" style="display:none;">
+										<li id="testkeyhead" style="margin-left:15px;">
+											<a href="#" onclick="toggle('testkey');toggle('testkeyhead');return false;">Display Test Keys</a>
+										</li>
+										<div id="testkey" style="display:none;margin-left:15px;">
 											<?php 
 											foreach($clActive as $clKey => $clValue){
-												echo '<li style=""><a href="'.$clientRoot.'/ident/key.php?cl='.$clKey.'&taxon=All+Species">'.$clValue.'</a></li>';
+												echo '<li>';
+												echo '<a href="'.$clientRoot.'/ident/key.php?cl='.$clKey.'&taxon=All+Species">'.$clValue.'</a>';
+												echo '</li>';
 											}
 											?>
-										</ul>
+										</div>
 										<?php 
 									}
 								}
@@ -162,7 +173,7 @@ $smManager = new SiteMapManager();
 											foreach($clList as $clidKey => $clName){
 												echo "<li><a href='".$clientRoot."/ident/tools/massupdate.php?clf=".$clidKey."'>".$clName."</a></li>";
 											}
-											echo '<ul>';
+											echo '</ul>';
 										}
 										?>
 									</li>
