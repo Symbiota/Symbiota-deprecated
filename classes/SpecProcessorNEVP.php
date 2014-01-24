@@ -56,6 +56,25 @@ if (!class_exists('Result')) {
 	    public $failurecount = 0; // number of records with errors in processing
 	    public $insertcount = 0; // number of records successfully inserted
 	    public $updatecount = 0; // number of records successfully updated
+        public $imagecount = 0 ;  // number of images records encountered
+        public $imagefailurecount = 0 ;  // number of images with errors in processing
+        public $imageinsertcount = 0 ;  //  number of images inserted
+        public $imageupdatecount = 0 ;  //  number of images updated
+
+        function __construct() {
+           $couldparse = false; // document compliant with expectations
+	       $success = false; // completed without errors
+	       $errors = "";     // error messages
+           $recordcount = 0;  // number of core records encountered
+	       $successcount = 0; // number of records successfully processed
+	       $failurecount = 0; // number of records with errors in processing
+	       $insertcount = 0; // number of records successfully inserted
+	       $updatecount = 0; // number of records successfully updated
+           $imagecount = 0 ;  // number of images records encountered
+           $imagefailurecount = 0 ;  // number of images with errors in processing
+           $imageinsertcount = 0 ;  //  number of images inserted
+           $imageupdatecount = 0 ;  //  number of images updated
+        }
     }
 }
 
@@ -92,12 +111,13 @@ class IDENTIFICATION {
    public $infraspecificrank;
    public $infraspecificepithet;
    public $infraspecificauthor;
-   public $nomenclaturalcode = "ICNAFP";
+   public $nomenclaturalcode = "ICNafp";
    public $identifiedby;
    public $dateidentified;
    public $typestatus;
    public $isfiledundernameincollection; 
    public $taxonid;
+   public $taxonguid;
 
    public function write() { 
      $date = "";
@@ -154,6 +174,8 @@ class ANNOTATION {
    public $annotatedat;
    public $motivations = array();
    public $annotator;
+   public $serializer;
+   public $serializedat;
 }
 
 class ANNOTATOR { 
@@ -172,6 +194,7 @@ class OCCURRENCE {
    public $datelastmodified;
    public $identifications = array();
    public $recordedby;
+   public $collectorid; 
    public $recordnumber; // collectornumber
    public $country = null;
    public $stateprovince;
@@ -186,6 +209,8 @@ class OCCURRENCE {
    public $storagelocation;
    public $associatedmedia = array();
    public $recordenteredby;
+   public $containingDocument = null;
+   public $fundingsource = null;
 
    public function getFiledUnderID() { 
         $result = null;
@@ -201,14 +226,38 @@ class OCCURRENCE {
    }
 
    public function write() { 
-       global $createNewRec, $result; 
-       $occ = new OmOccurrences();
+       global $createNewRec, $result, $debug; 
+       // set up writer class instances
+       $occ = new OmOccurrences();  // Note: We may create a new instance below.
+
        $det = new OmOccurDeterminations();
+
        $imageHandler = new ImageShared();
+       $imageHandler->documentGuid = $this->containingDocument->guid;
+       $imageHandler->documentDate = $this->containingDocument->date;
+
+       // Special case handling of HUH double barcode errors
+       $cc = $this->collectioncode;
+       if ($cc=='A' || $cc=='GH' || $cc=='FH' || $cc=='AMES' || $cc=='ECON' || $cc=='NEVP') { 
+          // Known cases of sheets where a new barcode number was added in addition to an existing number for the sheet.
+          // original existing number is the correct number.
+          if ($this->catalognumber=='00447650') { $this->catalognumber='00354371'; $this->occurrenceid = '4b11b05c-03f3-4f72-a917-a4a48fc2fb33'; } 
+          if ($this->catalognumber=='00447657') { $this->catalognumber='00354391'; $this->occurrenceid = '96dc15ca-6224-4d63-9039-9633cafca7be'; } 
+          if ($this->catalognumber=='00448806') { $this->catalognumber='00348333'; $this->occurrenceid = '1c2e1397-614a-44c0-bfa4-1edc1d4bb455'; }
+          if ($this->catalognumber=='00448807') { $this->catalognumber='00348334'; $this->occurrenceid = 'b5551dfc-53b4-4792-96bc-d66d748f2de2'; }
+          if ($this->catalognumber=='00448821') { $this->catalognumber='00348335'; $this->occurrenceid = '251eb221-b8f8-4d30-a3b7-fafb067262e5'; }
+          if ($this->catalognumber=='00448775') { $this->catalognumber='00348331'; $this->occurrenceid = '032c0d22-78b2-4c8e-88f6-9ef6638fb707'; }
+          if ($this->catalognumber=='00448797') { $this->catalognumber='00348332'; $this->occurrenceid = 'ba20e76f-4d97-4943-b150-b7141b9b24e3'; }
+          if ($this->catalognumber=='00448506') { $this->catalognumber='00415842'; $this->occurrenceid = '1688968c-dd07-4483-b20c-6137d465443a'; }
+          if ($this->catalognumber=='00448485') { $this->catalognumber='00415838'; $this->occurrenceid = '591ddf2e-b92a-46a7-85de-63f628688598'; }
+       }  
+       // End Special case
+       if ($debug) { echo "Preparing to save [$cc][$this->catalognumber]"; } 
        $collid = $occ->lookupCollId($this->institutioncode, $this->collectioncode);
        $collreportmatch = "collid=[$collid], institutionCode=[$this->institutioncode], collectionCode=[$this->collectioncode]\n";
        // Record exists if there is a matching DarwinCore triplet.  
        $exists = $occ->loadByDWCTriplet($this->institutioncode, $this->collectioncode, $this->catalognumber);
+       if ($debug) { echo "Exists=[$exists]"; } 
        if (!$exists) {
            // Image upload process in TcnImageTools creates omoccurrences records where 
            // collectioncode is not populated, but collid is. Need to handle both cases.
@@ -224,16 +273,29 @@ class OCCURRENCE {
           $occ->setcatalogNumber($this->catalognumber);
           $occ->setprocessingStatus("unprocessed");
           // Provide for link to authoritative database record (which doesn't yet exist).
-          $occ->setdbpk($this->collectioncode . $this->catalognumber);
+          // extract just the uuid from the urn:uuid:{uuid} string.  
+          $matches = explode(':',$this->occurrenceid);
+          if (count($matches)==3) { 
+             $uuid = $matches[2];
+             if ($debug) { echo "extracted uuid=[$uuid]"; }
+             $occ->setdbpk($uuid);
+          } else { 
+             // if the expected uuid wasn't found, use the catalog number as the best available proxy for dbbk
+             $occ->setdbpk($this->catalognumber);
+          }
           // if creating a new occurrence record, assume it was created by the annotator on the dc:created date.
           $occ->setrecordenteredby($this->recordenteredby);
           $occ->setdateentered($this->datemodified);
+          $occ->setstorageLocation($this->storagelocation);  // NEVP ingest
+          $occ->setfundingSource($this->fundingsource);      // NEVP ingest
+          $occ->setdocumentGuid($this->containingDocument->guid);
+          $occ->setdocumentDate($this->containingDocument->date);
        }
        $occ->setoccurrenceId($this->occurrenceid);
        $occ->setbasisOfRecord($this->basisofrecord);
        // TODO: Handle datemodified
        // TODO: Lookup collector with botanist guid
-       // TODO: Split collectors on pipe.
+       $this->recordedby = str_replace("|",";",$this->recordedby);
        if (strpos(";",$this->recordedby)>0) { 
            // split on first semicolon.
            $occ->setrecordedBy(substr($this->recordedby,0,strpos(";",$this->recordedby)));
@@ -256,12 +318,9 @@ class OCCURRENCE {
        if ($this->collectingevent != null) { 
           // Symbiota event date is a mysql date field, thus less 
           // expressive than an ISO date field.
-          if (strlen($this->collectingevent->eventdate)>10) { 
-              // TODO: Handle more cases of ISO date ranges.
-              $occ->seteventDate(substr($this->collectingevent->eventdate,0,10));
-          } else { 
-              $occ->seteventDate($this->collectingevent->eventdate);
-          }
+          // TODO: Handle more cases of ISO date ranges (symbiota handles with day of year fields).
+          // Pass off responsibility for parsing range to OmOccurrences implementation.
+          $occ->seteventDate($this->collectingevent->eventdate);
           $occ->setyear($this->collectingevent->startyear);
           $occ->setmonth($this->collectingevent->startmonth);
           $occ->setday($this->collectingevent->startday);
@@ -299,6 +358,7 @@ class OCCURRENCE {
            $occ->setinfraSpecificEpithet($filedUnder->infraspecificepithet);
            $occ->setidentificationQualifier($filedUnder->identificationqualifier);
            $occ->setscientificNameAuthorship($filedUnder->scientificnameauthorship);
+           $occ->settaxonGuid($filedUnder->taxonguid);
            // work out value for taxon rank.
            $occ->settaxonRank($filedUnder->infraspecificrank);
            if (strlen($filedUnder->infraspecificepithet)>0 && strlen($filedUnder->infraspecificrank)==0) {
@@ -317,31 +377,40 @@ class OCCURRENCE {
        // TODO: Handle motivations (transcribing and NSF abstract numbers).
 
        
+       if ($debug) { echo ",createnew=[$createNewRec]\n"; } 
        if (!$exists || $createNewRec==1) {
            // if record exists, then TcnImageConf variable createNewRec specifies policy for update.
            $saveresult = $occ->save();
            $occid = $occ->getoccid();
+           if ($debug) { echo "occid=[$occid],saveresult=[$saveresult]\n"; } 
            if ($saveresult===TRUE) {
+               if (preg_match('/Barcode .* exists\./',$occ->errorMessage())) { 
+                   $result->updatecount++;
+               } else { 
                if ($exists) {
-                   // echo "Updated occid: [".$occ->getoccid()."]\n";
+                    if ($debug) { echo "Updated occid: [".$occ->getoccid()."]\n"; } 
                    $result->updatecount++;
                } else {
-                   // echo "Added occid: [".$occ->getoccid()."]\n";
+                    if ($debug) { echo "Added occid: [".$occ->getoccid()."]\n"; } 
                    $result->insertcount++;
                }
                foreach($this->identifications as $id) {
                     $id->occid = $occ->getoccid();
                     $id->write();
                }
+               }
                // Create image records from associatedmedia array.
                foreach($this->associatedmedia as $media) {
+                  $sourceUrl = null;
+                  $imgWebUrl = null;
                   $mediaguid = $media->guid;
                   foreach($media->accesspoints as $accesspoint) {  
                      $imageresult = getiPlantIDForNEVP($accesspoint->accessURI);
                      if ($imageresult->statusok===FALSE) { 
                         echo "Error: " . $imageresult->error . "\n";
+                        $result->imagefailurecount++;
                      } else { 
-echo "[$accesspoint->format]";
+                        if ($debug) { echo "[$accesspoint->format]"; } 
                         $iPlantID = $imageresult->resource_uniq;
                         if ($accesspoint->format=="dng") { 
                            // Original dng file
@@ -355,22 +424,35 @@ echo "[$accesspoint->format]";
                         } 
                      }
                   }
-                  $tid = $det->lookupTID($filedUnder->scientificname);
-                  $caption = "$this->collectioncode $this->catalognumber $filedUnder->scientificname";
-                  $locality = $occ->getcountry() ." $this->stateprovince $this->county $this->municipality $this->locality";
-                  $sortsequence = 50;  // default number
-                  $copyright = $media->rights;  
-                  $owner = $media->owner;        
-                  $notes = $media->usageterms;    
-echo "[$imgWebUrl][$occid]";
-                  $imgid = $imageHandler->getImgIDForSourceURL($sourceUrl); 
-                  if ($imgid=="") { 
-                     // add this image record
-	                 $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
-                  } else { 
-	                 $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
-                  } 
-echo "[$isaveresult]";
+                  if ($sourceUrl!=null && $imgWebUrl!=null) { 
+                     // found something to save.
+                     $result->imagecount++;
+                     $tid = $det->lookupTID($filedUnder->scientificname);
+                     $caption = "$this->collectioncode $this->catalognumber $filedUnder->scientificname";
+                     $locality = $occ->getcountry() ." $this->stateprovince $this->county $this->municipality $this->locality";
+                     $sortsequence = 50;  // default number
+                     $copyright = $media->rights;  
+                     $owner = $media->owner;        
+                     $notes = $media->usageterms;    
+                     $imgid = $imageHandler->getImgIDForSourceURL($sourceUrl); 
+                     if ($imgid=="") { 
+                        // add this image record
+   	                    $isaveresult = $imageHandler->databaseImageRecord($imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+                        if ($isaveresult===TRUE) { 
+                           $result->imageinsertcount++;
+                        } else { 
+                           $result->imagefailurecount++;
+                        }
+                     } else {  
+   	                    $isaveresult = $imageHandler->updateImageRecord($imgid,$imgWebUrl,$imgTnUrl,$imgLgUrl,$tid,$caption,$this->recordenteredby,null,$sourceUrl,$copyright,$owner,$locality,$occid,$notes,$sortsequence,"specimen","");
+                        if ($isaveresult===TRUE) { 
+                           $result->imageupdatecount++;
+                        } else { 
+                           $result->imagefailurecount++;
+                        } 
+                     } 
+                     if ($debug) { echo "imagesaveresult=[$isaveresult]\n"; } 
+                  }
                }
 
                $result->successcount++;
@@ -428,6 +510,12 @@ class ACCESSPOINT {
    public $hashValue;
 }
 
+class DOCUMENT { 
+   public $guid;
+   public $date;
+
+} 
+
 class NEVPProcessor { 
     
     public $currentAnnotation = null;
@@ -437,16 +525,25 @@ class NEVPProcessor {
     public $currentOcc = null;
     public $currentId = null;
     public $currentDate = null;
+    public $currentDocument = null;
+    public $currentSerializer = null;
     public $currentTag = "";
     public $acount = 0;       // number of annotations expected
     public $countfound = 0;  // number of annotations found  
     
     function startElement($parser, $name, $attrs) {
-        global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP;
+        global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP,$currentDocument,$currentSerializer;
         $currentTag = $name;
         
-// echo "[$name]";
+        // echo "[$name]";
         switch ($name) { 
+         case "RDF:DESCRIPTION":
+             // There are multiple RDF:Descriptions, but the first one has the document guid.
+             if ($currentDocument==null)  {
+                $currentDocument = new Document();
+                $currentDocument->guid = $attrs['RDF:ABOUT'];
+             }
+             break;
            case "OA:ANNOTATION":
               $currentAnnotation = new ANNOTATION();
               $currentAnnotation->id = $attrs['RDF:ABOUT'];
@@ -469,13 +566,22 @@ class NEVPProcessor {
            case "OA:ANNOTATEDBY":
               $currentAnnotator = new ANNOTATOR();
               break;
+           case "OA:SERIALIZEDBY":
+              $currentSerializer = new ANNOTATOR();
+              break;
            case "DWCFP:OCCURRENCE":
            case "DWCFP:OCCURENCE":
               $currentOcc = new OCCURRENCE();
-              $currentOcc->occurrenceid = $attrs['RDF:ABOUT'];
+              $currentOcc->occurrenceid .= $attrs['RDF:ABOUT'];
               break;
            case "DWCFP:IDENTIFICATION":
               $currentId = new IDENTIFICATION();
+              break;
+           case "DWCFP:TAXON":
+              $currentId->taxonguid = $attrs['RDF:ABOUT'];
+              break;
+           case "DWCFP:HASCOLLECTOR":
+              $currentOcc->collectorid = $attrs['RDF:RESOURCE'];
               break;
            case "DWCFP:EVENT":
               $currentDate = new EVENT();
@@ -500,6 +606,9 @@ class NEVPProcessor {
               }
               $currentOcc->basisofrecord = $basis;
               break;
+           case "VIVO:HASFUNDINGVEHICLE": 
+              $currentOcc->fundingsource = $attrs['RDF:RESOURCE'];
+              break;
         }  
   
         if (!in_array($parser,$depth)) { 
@@ -509,7 +618,7 @@ class NEVPProcessor {
     }
     
     function endElement($parser, $name) {
-        global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP;
+        global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP,$currentSerializer, $currentDocument;
         $depth[$parser]--;
         
         switch ($name) { 
@@ -529,12 +638,17 @@ class NEVPProcessor {
            case "OA:ANNOTATION":
               $this->countfound++;
               $currentOcc->recordenteredby=$currentAnnotation->annotator->name;
+              $currentOcc->containingDocument = clone $currentDocument;
               $currentOcc->write();
               $currentOcc = null;
               break;
            case "OA:ANNOTATEDBY":
               $currentAnnotation->annotator = $currentAnnotator;
               $currentAnnotator = null;
+              break;
+           case "OA:SERIALIZEDBY":
+              $currentAnnotation->serializer = $currentSerializer->name;
+              $currentSerializer = null;
               break;
            case "DWCFP:HASASSOCIATEDMEDIA":
               $currentOcc->associatedmedia[] = clone $currentMedia;
@@ -548,7 +662,7 @@ class NEVPProcessor {
     }
     
     function value($parser, $data) { 
-       global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia,$currentAP;
+       global $depth, $currentOcc, $currentTag, $currentId, $currentDate, $currentAnnotator, $currentAnnotation, $currentMedia,$currentAP,$currentDocument,$currentSerializer;
     
 // Top level of document: [RDF:RDF][RDF:DESCRIPTION][RDFS:COMMENT][RDFS:COMMENT][CO:COUNT]
 // Annotation: [OA:ANNOTATION][OA:HASTARGET][OA:SPECIFICRESOURCE][OA:HASSELECTOR][OAD:KVPAIRQUERYSELECTOR][DWC:COLLECTIONCODE][DWC:INSTITUTIONCODE][OA:HASSOURCE][OA:HASBODY]
@@ -556,7 +670,6 @@ class NEVPProcessor {
 // Annotation, following occurrence in body: [OAD:HASEVIDENCE][OAD:HASEXPECTATION][OAD:EXPECTATION_INSERT][OA:MOTIVATEDBY][OAD:TRANSCRIBING][OA:MOTIVATEDBY][OA:ANNOTATEDBY][FOAF:PERSON][OA:ANNOTATEDAT][OA:SERIALIZEDBY][FOAF:AGENT][FOAF:NAME][OA:SERIALIZEDAT]
 // [DC:TYPE] -- nowhere to put in symbiota
 // [DWCFP:HASIDENTIFICATION] -- nowhere to put in symbiota
-// TODO: Extract annotator and serializer
        if ($data!=null) { $data = trim($data); } 
        switch ($currentTag) {
          case "CO:COUNT":
@@ -564,6 +677,13 @@ class NEVPProcessor {
                 $this->acount = $data;
              }
              break;
+         case "DC:CREATED":
+             if ($currentDocument->date==null) {
+                $currentDocument->date = substr($data,0,10);
+                if ($debug) { echo "date=[$currentDocument->date]"; } 
+             }
+             break;
+
 
          case "DWC:INSTITUTIONCODE": 
              $currentOcc->institutioncode .= $data;
@@ -619,7 +739,13 @@ class NEVPProcessor {
              break;
 
          case "DWC:SCIENTIFICNAME":
+             if (strlen(trim($currentId->scientificname))>0) { 
+                 // handle split of scientific name into parts on multiplication sign
+                 // add a space back in.
+                 $currentId->scientificname .= " ";
+             }
              $currentId->scientificname .= $data;
+             $currentId->scientificname = trim($currentId->scientificname);
              break;
          case "DWC:FAMILY":
              $currentId->family .= $data;
@@ -686,6 +812,10 @@ class NEVPProcessor {
                 // we are inside the annotated by, not serialized by
                 $currentAnnotator->name .= $data;
              } 
+             if ($currentSerializer!=null) { 
+                // we are inside the serialized by
+                $currentSerializer->name .= $data;
+             }
              break;
          case "FOAF:WORLPLACEHOMEPAGE":
              if ($currentAnnotator!=null) { 
@@ -698,6 +828,9 @@ class NEVPProcessor {
                 // we are inside the annotated by, not serialized by
                 $currentAnnotator->mbox_sha1sum .= $data;
              } 
+             break;
+         case "OA:SEARIALIZEDAT":
+             $currentAnnotation->serializedAt .= $data;
              break;
 
          // AssociatedMedia Image
@@ -734,6 +867,10 @@ class NEVPProcessor {
     public function process($file) {
         global $result,$depth;
         $result = new Result();
+        $result->insertcount = 0;
+        $result->successcount = 0;
+        $result->failurecount = 0;
+        $result->updatecount = 0;
         $result->couldparse = true;
 
         $parser = xml_parser_create('UTF-8');
