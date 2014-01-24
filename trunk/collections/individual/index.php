@@ -220,6 +220,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 					}
 					if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
 						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) . 						
+	                    (isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
 						(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 						(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'');
 						echo '<li>';
