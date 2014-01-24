@@ -589,6 +589,18 @@ CREATE TABLE `omoccurrences` (
    private $labelProject; // YEAR 
    private $dateEntered; // TIMESTAMP 
    private $dateLastModified; // TIMESTAMP 
+
+   // No implementation in Symbiota
+   public $dateSerialized;
+   public $serializedBy;
+   public $collectorid; 
+   public $documentGuid;
+   public $documentDate;
+   public $storageLocation;
+   public $fundingSource;
+   private $taxonGuid;
+
+   // supporting fields
    private $dirty;
    private $loaded;
    private $error;
@@ -1613,10 +1625,47 @@ CREATE TABLE `omoccurrences` (
    }
    public function seteventDate($eventDate) {
        if (strlen($eventDate) > omoccurrences::EVENTDATE_SIZE) { 
-           throw new Exception('Value exceeds field length.');
-       } 
-       $this->eventDate = $this->l_addslashes($eventDate);
+           // parse event data
+           $dateArr = explode('/',$eventDate);
+           if (count($dateArr)<>2) { 
+                throw new Exception("Date range [$eventDate] not in expected 0000-00-00/0000-00-00 form.");
+           } else { 
+               if (strlen($dateArr[0]) > omoccurrences::EVENTDATE_SIZE) { 
+                  throw new Exception('Value exceeds field length.');
+               } else { 
+                  $this->eventDate = $this->l_addslashes($dateArr[0]);
+                  $this->startDayOfYear = $this->getDayOfYear($dateArr[0],true);
+                  $this->endDayOfYear = $this->getDayOfYear($dateArr[1],false);
+               }
+           }
+       } else { 
+           $this->eventDate = $this->l_addslashes($eventDate);
+       }
        $this->dirty = true;
+      
+   }
+   /**
+    * Given a date, return the day of year for that date, assuming a gregorian calendar date.
+    * @param the date for which to get the day of the year.
+    * @param lower, if true, and date isn't specified to day, assume lower bound is desired
+    *   if false, assume upper bound is desired, e.g. for 1880/01,true return 1, for 
+        1880/01,false return 31.
+    * @return an integer representing the day of the year from 1 to 365.
+    */
+   public function getDayOfYear($date,$lower=true) {
+      if ($lower) { 
+        if (strlen($date==4)) { $date = "$date-01-01"; }
+        if (strlen($date==7)) { $date = "$date-01"; }
+      } else { 
+        if (strlen($date==4)) { $date = "$date-12-31"; }
+        if (strlen($date==7)) { 
+           $dateArray = date_parse($date);
+           $m = cal_days_in_month(CAL_GREGORIAN, $dateArray['month'], $dateArray['year']);
+           $date = "$date-$m";
+         }
+      }
+      $dateArr = date_parse($date);
+      return GregorianToJD($dateArr['month'], $dateArr['day'], $dateArr['year']) - GregorianToJD(1, 1, $dateArr['year']) + 1;
    }
 /*year*/
    public function getyear() {
@@ -2626,6 +2675,77 @@ CREATE TABLE `omoccurrences` (
        $this->dateLastModified = $this->l_addslashes($dateLastModified);
        $this->dirty = true;
    }
+/*taxonGuid*/
+   public function gettaxonGuid() {
+       // Note: Not stored to DB.
+       if ($this->taxonGuid==null) { 
+          return null;
+       } else { ;
+          return trim($this->l_stripslashes($this->taxonGuid));
+       }
+   }
+   public function settaxonGuid($taxonGuid) {
+       $this->taxonGuid = $this->l_addslashes($taxonGuid);
+       // Note: Not stored to DB.
+       // $this->dirty = true;
+   }
+/*storageLocation*/
+   public function getstorageLocation() {
+       // Note: Not stored to DB.
+       if ($this->storageLocation==null) { 
+          return null;
+       } else { ;
+          return trim($this->l_stripslashes($this->storageLocation));
+       }
+   }
+   public function setstorageLocation($storageLocation) {
+       $this->storageLocation = $this->l_addslashes($storageLocation);
+       // Note: Not stored to DB.
+       // $this->dirty = true;
+   }
+/*fundingSource*/
+   public function getfundingSource() {
+       // Note: Not stored to DB.
+       if ($this->fundingSource==null) { 
+          return null;
+       } else { ;
+          return trim($this->l_stripslashes($this->fundingSource));
+       }
+   }
+   public function setfundingSource($fundingSource) {
+       $this->fundingSource = $this->l_addslashes($fundingSource);
+       // Note: Not stored to DB.
+       // $this->dirty = true;
+   }
+/*documentGuid*/
+   public function getdocumentGuid() {
+       // Note: Not stored to DB.
+       if ($this->documentGuid==null) { 
+          return null;
+       } else { ;
+          return trim($this->l_stripslashes($this->documentGuid));
+       }
+   }
+   public function setdocumentGuid($documentGuid) {
+       $this->documentGuid = $this->l_addslashes($documentGuid);
+       // Note: Not stored to DB.
+       // $this->dirty = true;
+   }
+/*documentDate*/
+   public function getdocumentDate() {
+       // Note: Not stored to DB.
+       if ($this->documentDate==null) { 
+          return null;
+       } else { ;
+          return trim($this->l_stripslashes($this->documentDate));
+       }
+   }
+   public function setdocumentDate($documentDate) {
+       $this->documentDate = $this->l_addslashes($documentDate);
+       // Note: Not stored to DB.
+       // $this->dirty = true;
+   }
+
    public function PK() { // get value of primary key 
         $returnvalue = '';
         $returnvalue .= $this->getoccid();

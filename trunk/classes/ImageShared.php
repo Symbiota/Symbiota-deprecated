@@ -13,6 +13,10 @@ class ImageShared{
 	private $webFileSizeLimit = 300000;
 	private $jpgCompression= 80;
 
+    // No implementation in Symbiota
+    public $documentGuid;  // Guid for transfer document containing image record.
+    public $documentDate;  // Creation date for transfer document containing image record.       
+
  	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon("write");
  		$this->imageRootPath = $GLOBALS["imageRootPath"];
