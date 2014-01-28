@@ -43,8 +43,11 @@ class UuidFactory {
 		//Populate occurrence GUIDs
 		$this->echoStr("Populating occurrence GUIDs\n");
 		$sql = 'SELECT o.occid '.
-			'FROM omoccurrences o '.
-			'WHERE o.occid NOT IN(SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
+			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+			'WHERE g.occid IS NULL ';
+		//$sql = 'SELECT o.occid '.
+		//	'FROM omoccurrences o '.
+		//	'WHERE o.occid NOT IN(SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
@@ -67,10 +70,14 @@ class UuidFactory {
 		
 		//Populate determination GUIDs
 		$this->echoStr("Populating determination GUIDs\n");
-		$sql = 'SELECT d.detid FROM omoccurdeterminations d ';
+		$sql = 'SELECT d.detid FROM omoccurdeterminations d LEFT JOIN guidoccurdeterminations g ON d.detid = g.detid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE d.detid NOT IN(SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
+		$sql .= 'WHERE g.detid IS NULL ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
+		//$sql = 'SELECT d.detid FROM omoccurdeterminations d ';
+		//if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
+		//$sql .= 'WHERE d.detid NOT IN(SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
+		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
 		if($rs->num_rows){
@@ -92,10 +99,14 @@ class UuidFactory {
 		
 		//Populate image GUIDs
 		$this->echoStr("Populating image GUIDs\n");
-		$sql = 'SELECT i.imgid FROM images i ';
+		$sql = 'SELECT i.imgid FROM images i LEFT JOIN guidimages g ON i.imgid = g.imgid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
+		$sql .= 'WHERE g.imgid IS NULL ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
+		//$sql = 'SELECT i.imgid FROM images i ';
+		//if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
+		//$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
+		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$recCnt = 0;
