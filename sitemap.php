@@ -93,6 +93,16 @@ $smManager = new SiteMapManager();
 					<legend><b>Data Management Tools</b></legend>
 					<?php 
 					if($symbUid){
+						if($isAdmin){
+							?>
+							<h3>Administrative Functions (Super Admins only)</h3>
+							<ul>
+								<li><a href="profile/usermanagement.php">User Permissions</a></li>
+<!-- 								<li><a href="profile/usertaxonomymanager.php">User Taxonomy Relationships</a></li>  -->
+							</ul>
+							<?php
+						}
+
 						if($keyModIsActive || array_key_exists("KeyAdmin",$userRights)){ 
 							$clActive = array();
 							if($clList && isset($userRights['ClAdmin'])){
@@ -348,22 +358,6 @@ $smManager = new SiteMapManager();
 							}
 							else{
 								echo '<li>You are not authorized to edit taxonomy</li>';
-							}
-							?>
-						</ul>
-						
-						<h3>Misc</h3>
-						<ul>
-							<?php 
-							if($isAdmin){
-								?>
-								<li><a href="profile/usermanagement.php">User Permissions</a></li>
-								<?php
-							}
-							else{
-								?>
-								<li>You are not authorized to manage permissions</li>
-								<?php
 							}
 							?>
 						</ul>

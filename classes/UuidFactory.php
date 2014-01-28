@@ -150,8 +150,11 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(o.occid) as reccnt '.
-			'FROM omoccurrences o '.
-			'WHERE o.occid NOT IN (SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
+			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+			'WHERE g.occid IS NULL ';
+		//$sql = 'SELECT COUNT(o.occid) as reccnt '.
+		//	'FROM omoccurrences o '.
+		//	'WHERE o.occid NOT IN (SELECT occid FROM guidoccurrences WHERE occid IS NOT NULL) ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
@@ -167,10 +170,15 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(d.detid) as reccnt '.
-			'FROM omoccurdeterminations d ';
+			'FROM omoccurdeterminations d LEFT JOIN guidoccurdeterminations g ON d.detid = g.detid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
-		$sql .= 'WHERE d.detid NOT IN (SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
+		$sql .= 'WHERE g.detid IS NULL ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
+		//$sql = 'SELECT COUNT(d.detid) as reccnt '.
+		//	'FROM omoccurdeterminations d ';
+		//if($collId) $sql .= 'INNER JOIN omoccurrences o ON d.occid = o.occid ';
+		//$sql .= 'WHERE d.detid NOT IN (SELECT detid FROM guidoccurdeterminations WHERE detid IS NOT NULL) ';
+		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -185,10 +193,15 @@ class UuidFactory {
 		$retCnt = 0;
 		$conn = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT COUNT(i.imgid) as reccnt '.
-			'FROM images i ';
+			'FROM images i LEFT JOIN guidimages g ON i.imgid = g.imgid ';
 		if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
+		$sql .= 'WHERE g.imgid IS NULL ';
 		if($collId) $sql .= 'AND o.collid = '.$collId;
+		//$sql = 'SELECT COUNT(i.imgid) as reccnt '.
+		//	'FROM images i ';
+		//if($collId) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
+		//$sql .= 'WHERE i.imgid NOT IN(SELECT imgid FROM guidimages WHERE imgid IS NOT NULL) ';
+		//if($collId) $sql .= 'AND o.collid = '.$collId;
 		//echo $sql;
 		$rs = $conn->query($sql);
 		while($r = $rs->fetch_object()){
