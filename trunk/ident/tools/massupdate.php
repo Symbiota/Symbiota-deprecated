@@ -199,7 +199,7 @@ include($serverRoot.'/header.php');
 			 		<?php 
 	 				$cList = $muManager->getCharList();			//Array(Heading => Array(CID => CharName))
 					foreach($cList as $h => $charData){
-						echo "<div style='margin-top:1em;font-size:125%;'>$h</div>\n";
+						echo "<div style='margin-top:1em;font-size:125%;font-weight:bold;'>$h</div>\n";
 						ksort($charData);
 						foreach($charData as $cidKey => $charValue){
 							echo '<div> <input name="cid" type="radio" value="'.$cidKey.'" onclick="submitFilterForm(this)">'.$charValue.'</div>'."\n";
@@ -210,7 +210,7 @@ include($serverRoot.'/header.php');
 					<input type="hidden" name="lang" value="<?php echo $langValue; ?>" />
 			 	</fieldset>
 			</form>
-		<?php
+			<?php
 		}
 		else{
 			$inheritStr = "&nbsp;<span title='State has been inherited from parent taxon'><b>(i)</b></span>";
@@ -286,11 +286,22 @@ include($serverRoot.'/header.php');
 
 					//Go through taxa names and list
 					ksort($sciNameArr);
+					//$cnt = 1;
 					foreach($sciNameArr as $sciName => $sciArr){
 						$display = $sciArr["display"];
+						$trClassStr = '';
+						/*
+						if(strpos($display,'10px')){
+							if($cnt % 2) $trClassStr = 'class="alt"';
+							$cnt++;
+						}
+						else{
+							$cnt = 1;
+						}
+						*/
 						$t = $sciArr["TID"];
 						?>
-						<tr>
+						<tr <?php echo $trClassStr; ?>>
 							<td>
 								<?php echo $display; ?> 
 								<a href='editor.php?taxon=<?php echo $sciName; ?>&action=Get+Character+Info' target='_blank'>

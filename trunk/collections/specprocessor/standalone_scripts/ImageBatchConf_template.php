@@ -62,6 +62,6 @@ $dbMetadata = 1;
  */
 
 $collArr = array(
-	7 => array('sourcePathFrag' => 'brit/bryophytes/', 'pmterm' => '/^(BRIT\d{1,7})\D*/', 'prpatt' => '/^/', 'prrepl' => 'barcode-'),
-	8 => array('sourcePathFrag' => 'khd/vasc/', 'pmterm' => '/^KHD(\d{8})\D*/')
+	1 => array('sourcePathFrag' => 'abc/lichens', 'pmterm' => '/^ABC(\d{8})\D*/'),
+	2 => array('sourcePathFrag' => 'def/vasc/', 'pmterm' => '/^DEF(\d{8})\D*/')
 );
