@@ -650,7 +650,7 @@ class DwcArchiverOccurrence{
 			$datasetElem->appendChild($newDoc->createElement('pubDate',$emlArr['pubDate']));
 		}
 		$langStr = 'eng';
-		if(array_key_exists('language',$emlArr['language']) && $emlArr) $langStr = $emlArr['language'];
+		if(array_key_exists('language',$emlArr) && $emlArr) $langStr = $emlArr['language'];
 		$datasetElem->appendChild($newDoc->createElement('language',$langStr));
 
 		if(array_key_exists('description',$emlArr) && $emlArr['description']){
