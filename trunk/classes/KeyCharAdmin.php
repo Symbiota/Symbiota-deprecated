@@ -163,13 +163,15 @@ class KeyCharAdmin{
 				'ORDER BY sortsequence';
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
-					$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
-					$retArr[$r->cs]['implicit'] = $r->implicit;
-					$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
-					$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
-					$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
-					$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
-					$retArr[$r->cs]['enteredby'] = $r->enteredby;
+					if(is_numeric($r->cs)){
+						$retArr[$r->cs]['charstatename'] = $this->cleanOutStr($r->charstatename);
+						$retArr[$r->cs]['implicit'] = $r->implicit;
+						$retArr[$r->cs]['notes'] = $this->cleanOutStr($r->notes);
+						$retArr[$r->cs]['description'] = $this->cleanOutStr($r->description);
+						$retArr[$r->cs]['illustrationurl'] = $r->illustrationurl;
+						$retArr[$r->cs]['sortsequence'] = $this->cleanOutStr($r->sortsequence);
+						$retArr[$r->cs]['enteredby'] = $r->enteredby;
+					}
 				}
 				$rs->free();
 			}
@@ -180,6 +182,7 @@ class KeyCharAdmin{
 				//Grab character set illustration 
 				$sql2 = 'SELECT cs, url, csimgid FROM kmcsimages '.
 					'WHERE cid = '.$this->cid.' AND cs IN ('.implode(',',array_keys($retArr)).')';
+				//echo $sql2;
 				$rs = $this->conn->query($sql2);
 				while($r = $rs->fetch_object()){
 					$retArr[$r->cs]['url'] = $r->url;

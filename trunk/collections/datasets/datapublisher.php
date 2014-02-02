@@ -47,6 +47,9 @@ $dwcaManager->initPublisher();
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 	<title>Darwin Core Archiver Publisher</title>
     <link rel="stylesheet" href="../../css/main.css" type="text/css">
+	<style type="text/css">
+		.nowrap { white-space: nowrap; }
+	</style>
 	<script type="text/javascript">
 		function toggle(target){
 			var objDiv = document.getElementById(target);
@@ -284,7 +287,7 @@ include($serverRoot."/header.php");
 					<tr>
 						<td><?php echo '<a href="../misc/collprofiles.php?collid='.$v['collid'].'">'.str_replace(' DwC-Archive','',$v['title']).'</a>'; ?></td>
 						<td><?php echo substr($v['description'],24); ?></td>
-						<td>
+						<td class="nowrap">
 							<?php 
 							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
 							$sizeStr = $dwcaManager->humanFilesize($filePath);
@@ -299,7 +302,7 @@ include($serverRoot."/header.php");
 							}
 							?>
 						</td> 
-						<td><?php echo date("Y-m-d", strtotime($v['pubDate'])); ?></td>
+						<td class="nowrap"><?php echo date("Y-m-d", strtotime($v['pubDate'])); ?></td>
 					</tr>
 					<?php 
 				}
