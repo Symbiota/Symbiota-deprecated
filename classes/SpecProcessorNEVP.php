@@ -296,10 +296,10 @@ class OCCURRENCE {
        // TODO: Handle datemodified
        // TODO: Lookup collector with botanist guid
        $this->recordedby = str_replace("|",";",$this->recordedby);
-       if (strpos(";",$this->recordedby)>0) { 
+       if (strpos($this->recordedby,";")>0) { 
            // split on first semicolon.
-           $occ->setrecordedBy(substr($this->recordedby,0,strpos(";",$this->recordedby)));
-           $occ->setassociatedCollectors(substr($this->recordedby,strpos(";",$this->recordedby),strlen($this->recordedby)));
+           $occ->setrecordedBy(substr($this->recordedby,0,strpos($this->recordedby,";")));
+           $occ->setassociatedCollectors(substr($this->recordedby,strpos($this->recordedby,";"),strlen($this->recordedby)));
        } else { 
            $occ->setrecordedBy($this->recordedby);
            $occ->setassociatedCollectors("");

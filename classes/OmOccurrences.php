@@ -1623,9 +1623,18 @@ CREATE TABLE `omoccurrences` (
           return trim($this->l_stripslashes($this->eventDate));
        }
    }
+
+   /**
+    * Take an ISO date and set the value of the date field eventDate, 
+    * and, if a range in the same year is provided, set the 
+    * values of startDayOfYear and endDayOfYear.
+    *
+    * @param eventDate in ISO date format (e.g. 0000-00-00/0000-00-00
+    *   or 0000-00-00).
+    */
    public function seteventDate($eventDate) {
        if (strlen($eventDate) > omoccurrences::EVENTDATE_SIZE) { 
-           // parse event data
+           // A range was provided, parse it into start and end dates.
            $dateArr = explode('/',$eventDate);
            if (count($dateArr)<>2) { 
                 throw new Exception("Date range [$eventDate] not in expected 0000-00-00/0000-00-00 form.");
@@ -1633,17 +1642,21 @@ CREATE TABLE `omoccurrences` (
                if (strlen($dateArr[0]) > omoccurrences::EVENTDATE_SIZE) { 
                   throw new Exception('Value exceeds field length.');
                } else { 
+                  // set the event date as the first part of the provided range.
                   $this->eventDate = $this->l_addslashes($dateArr[0]);
-                  $this->startDayOfYear = $this->getDayOfYear($dateArr[0],true);
-                  $this->endDayOfYear = $this->getDayOfYear($dateArr[1],false);
+                  if (substr($dateArr[0],0,4)==substr($dateArr[1],0,4)) { 
+                     // date range is in same year, set start/end days of year.
+                     $this->startDayOfYear = $this->getDayOfYear($dateArr[0],true);
+                     $this->endDayOfYear = $this->getDayOfYear($dateArr[1],false);
+                  }
                }
            }
        } else { 
            $this->eventDate = $this->l_addslashes($eventDate);
        }
        $this->dirty = true;
-      
    }
+
    /**
     * Given a date, return the day of year for that date, assuming a gregorian calendar date.
     * @param the date for which to get the day of the year.
