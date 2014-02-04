@@ -264,6 +264,8 @@ class OCCURRENCE {
            $exists = $occ->loadByCollidCatalog($collid, $this->catalognumber);
            // TODO: Question for Ed: Find out if institutioncode and collectioncode should be populated if we
            // end up here.
+           // Guidance from Ed: omoccurrences.institutioncode and omoccurrences.collectioncode should only
+           // be populated if different from the values in omcollections for the omoccurrences.collid.
        }
        if (!$exists) { 
        	  $occ = new OmOccurrences();
@@ -295,15 +297,20 @@ class OCCURRENCE {
        $occ->setbasisOfRecord($this->basisofrecord);
        // TODO: Handle datemodified
        // TODO: Lookup collector with botanist guid
-       $this->recordedby = str_replace("|",";",$this->recordedby);
+
+       // Separators in name strings may be amperstand (HUH standard for name pairs), semicolon, or pipe (AppleCore).
+       // convert all to semicolon and split on that.
+       $this->recordedby = str_replace("|",";",$this->recordedby); 
+       $this->recordedby = str_replace("&",";",$this->recordedby); 
        if (strpos($this->recordedby,";")>0) { 
            // split on first semicolon.
-           $occ->setrecordedBy(substr($this->recordedby,0,strpos($this->recordedby,";")));
-           $occ->setassociatedCollectors(substr($this->recordedby,strpos($this->recordedby,";"),strlen($this->recordedby)));
+           $occ->setrecordedBy(trim(substr($this->recordedby,0,strpos($this->recordedby,";"))));
+           $occ->setassociatedCollectors(trim(substr($this->recordedby,strpos($this->recordedby,";")+1,strlen($this->recordedby))));
        } else { 
-           $occ->setrecordedBy($this->recordedby);
+           $occ->setrecordedBy(trim($this->recordedby));
            $occ->setassociatedCollectors("");
        }
+       $occ->setcollectorid($this->collectorid);
        if ($this->recordnumber!=null) { $occ->setrecordNumber($this->recordnumber); }
        $occ->settypeStatus($this->getTypeStatusList());
        if ($this->country==null) { 
@@ -317,8 +324,9 @@ class OCCURRENCE {
        if ($this->locality!=null) { $occ->setlocality($this->locality); } 
        if ($this->collectingevent != null) { 
           // Symbiota event date is a mysql date field, thus less 
-          // expressive than an ISO date field.
-          // TODO: Handle more cases of ISO date ranges (symbiota handles with day of year fields).
+          // expressive than an ISO date field, but also has 
+          // startdayofyear and enddayofyear fields for handling ranges within a year.
+          //
           // Pass off responsibility for parsing range to OmOccurrences implementation.
           $occ->seteventDate($this->collectingevent->eventdate);
           $occ->setyear($this->collectingevent->startyear);
@@ -375,7 +383,9 @@ class OCCURRENCE {
            }
        }
        // TODO: Handle motivations (transcribing and NSF abstract numbers).
-
+       // NSF abstract number handled here with fundingsource (but not 
+       // implemented in symbiota).
+       // motivations extracted, but nothing done with here.
        
        if ($debug) { echo ",createnew=[$createNewRec]\n"; } 
        if (!$exists || $createNewRec==1) {
@@ -457,7 +467,7 @@ class OCCURRENCE {
 
                $result->successcount++;
            } else {
-               $result->errors .= "Error: [" . $occ->errorMessage() . "]\n";
+               $result->errors .= "Error in ". $this->collectioncode  ."-".  $this->catalognumber .": [" . $occ->errorMessage() . "]\n";
                if ($occ->errorMessage()=="Cannot add or update a child row: a foreign key constraint fails (`symbiota`.`omoccurrences`, CONSTRAINT `FK_omoccurrences_collid` FOREIGN KEY (`collid`) REFERENCES `omcollections` (`CollID`) ON DELETE CASCADE ON UPDATE CASCADE)") { 
                    $result->errors .= "Interpretation: Record contains a collectionCode and institutionCode combination which was not found in omcollections (or only a collectionCode that was not found in omcollections or omoccurrences). \n";
                    $result->errors .= $collreportmatch;
@@ -578,10 +588,10 @@ class NEVPProcessor {
               $currentId = new IDENTIFICATION();
               break;
            case "DWCFP:TAXON":
-              $currentId->taxonguid = $attrs['RDF:ABOUT'];
+              $currentId->taxonguid .= $attrs['RDF:ABOUT'];
               break;
            case "DWCFP:HASCOLLECTOR":
-              $currentOcc->collectorid = $attrs['RDF:RESOURCE'];
+              $currentOcc->collectorid .= $attrs['RDF:RESOURCE'];
               break;
            case "DWCFP:EVENT":
               $currentDate = new EVENT();
@@ -637,6 +647,7 @@ class NEVPProcessor {
               break;
            case "OA:ANNOTATION":
               $this->countfound++;
+              $currentOcc->recordedby = trim($currentOcc->recordedby);
               $currentOcc->recordenteredby=$currentAnnotation->annotator->name;
               $currentOcc->containingDocument = clone $currentDocument;
               $currentOcc->write();
@@ -698,7 +709,16 @@ class NEVPProcessor {
              $currentOcc->datelastmodified .= $data;
              break;
          case "DWC:RECORDEDBY":
-             $currentOcc->recordedby .= $data;
+             if ($currentOcc->recordedby=="") { 
+                $currentOcc->recordedby .= $data;
+             } else { 
+                if (substr($data,0,1)=="&") { 
+                   // add a space back in if removed by parser
+                   $currentOcc->recordedby .= " $data ";
+                } else { 
+                   $currentOcc->recordedby .= $data;
+                }
+             }
              break;
          case "DWC:RECORDNUMBER":
              $currentOcc->recordnumber .= $data;
