@@ -785,6 +785,7 @@ class NEVPProcessor {
          case "DWC:INFRASPECIFICEPITHET":
              $currentId->infraspecificepithet .= $data;
              break;
+         case "DWC:INFRASPECIFICRANK":
          case "DWCFP:INFRASPECIFICRANK":
              $currentId->infraspecificrank .= $data;
              break;
