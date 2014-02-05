@@ -2744,6 +2744,12 @@ CREATE TABLE `omoccurrences` (
        // Note: Not stored to DB.
        // $this->dirty = true;
    }
+/* collectorId */
+   public function setcollectorid($collectorid) { 
+      $this->collectorid = $collectorid;
+      // Note: Not stored to DB.
+      // $this->dirty = true;
+   } 
 /*documentDate*/
    public function getdocumentDate() {
        // Note: Not stored to DB.
