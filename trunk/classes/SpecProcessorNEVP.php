@@ -131,7 +131,7 @@ class IDENTIFICATION {
          $id->keyvalueset('scientificNameAuthorship',$this->scientificnameauthorship);
      }
      $code ="";
-     if ($this->nomenclaturalcode!=null && strlen($this->nomeclaturalcode)>0) {
+     if ($this->nomenclaturalcode!=null && strlen($this->nomenclaturalcode)>0) {
         $code = "[" + $this->nomenclaturalcode + "]";
      }
      $id->keyvalueset('identificationRemarks',$this->typestatus + $code);
