@@ -29,7 +29,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 			"soredia", "fruticose", "fruiticose", "crustose", "corticolous", "saxicolous", "terricolous", "Synoicous", "chemotype", "terpene",
 			"isidia", "TLC", "monoicous", "dioicous", "sporangium", "parietin", "anthraquinone", "pigment", "ostiole", "epiphyte",
 			"sporophyte", "Archegonia", "thalli", "antheridia", "archegonia", "androecium", "gynoecium", "Autoicous", "Paroicous", "Heteroicous",
-			"cladautoicous", "Gametangia");
+			"cladautoicous", "Gametangia", "paraphyses(?! branched/ ?unbranched)");
 		foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
 		if(preg_match("/\\b[KPC][+-]\\b/", $word)) return true;
 		if(preg_match("/\\bUV[+-]\\b/", $word)) return true;
