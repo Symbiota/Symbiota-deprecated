@@ -24,15 +24,15 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		else return false;
 	}
 
-	protected function containsVerbatimAttribute($word) {
-		$vaWords = array("atranorin", "fatty acid", "cortex", "areolate", "medulla", "podetia", "apothecia", "thallus", "strain", "squamul",
-			"soredia", "fruticose", "fruiticose", "crustose", "corticolous", "saxicolous", "terricolous", "Synoicous", "chemotype", "terpene",
-			"isidia", "TLC", "monoicous", "dioicous", "sporangium", "parietin", "anthraquinone", "pigment", "ostiole", "epiphyte",
-			"sporophyte", "Archegonia", "thalli", "antheridia", "archegonia", "androecium", "gynoecium", "Autoicous", "Paroicous", "Heteroicous",
-			"cladautoicous", "Gametangia", "paraphyses(?! branched/ ?unbranched)");
-		foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
-		if(preg_match("/\\b[KPC][+-]\\b/", $word)) return true;
-		if(preg_match("/\\bUV[+-]\\b/", $word)) return true;
+	protected function containsVerbatimAttribute($pAtt) {
+		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podetiae?", "apotheciae?", "thall(?:us|i)", "strain",
+			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",
+			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangium",
+			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "soralia", "spor(?:ophyt)?es?",
+			"Archegonia", "antheridia", "archegonia", "androecium", "gynoecium", "Autoicous", "Paroicous", "Heteroicous",
+			"cladautoicous", "Gametangia", "paraphyses(?! ?branched\\/)", "pruinose");
+		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
+		foreach($vaWords as $vaWord) if(preg_match("/".$vaWord."/i", $pAtt)) return true;
 		return false;
 	}
 
