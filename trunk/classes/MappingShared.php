@@ -6,6 +6,7 @@ class MappingShared{
 	private $iconColors = Array();
 	private $googleIconArr = Array();
 	private $taxaArr = Array();
+	private $fieldArr = Array();
 	private $sqlWhere;
 	private $searchTerms = 0;
 
