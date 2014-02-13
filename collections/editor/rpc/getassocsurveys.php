@@ -10,9 +10,9 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[$row->surveyid] = utf8_encode($row->projectname);
+		$retArr[$row->surveyid] = $row->projectname;
 	}
 	$result->close();
 	$con->close();
-	echo json_encode($retArr);
+	echo '["'.implode('","',($retArr)).'"]';
 ?>

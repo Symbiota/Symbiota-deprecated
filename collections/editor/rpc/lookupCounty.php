@@ -16,12 +16,12 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArr[] = utf8_encode($row->countyname);
+		$retArr[] = $row->countyname;
 	}
 	$result->close();
 	$con->close();
 	if($retArr){
-		echo json_encode($retArr);
+		echo '["'.implode('","',($retArr)).'"]';
 	}
 	else{
 		echo '';

@@ -10,7 +10,7 @@
 	//echo $sql;
 	$result = $con->query($sql);
 	while($row = $result->fetch_object()) {
-		$retArr[$row->clid] = utf8_encode($row->name);
+		$retArr[$row->clid] = $row->name;
 	}
 	$result->close();
 	$con->close();

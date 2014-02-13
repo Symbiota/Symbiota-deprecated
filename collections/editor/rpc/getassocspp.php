@@ -29,10 +29,10 @@
 		//echo $sql;
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {
-			$retArr[] = utf8_encode($row->sciname);
+			$retArr[] = $row->sciname;
 		}
 		$con->close();
-		echo json_encode($retArr);
+		echo '["'.implode('","',($retArr)).'"]';
 	}
 	else{
 		echo '';
