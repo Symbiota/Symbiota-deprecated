@@ -4247,7 +4247,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		}
 	}
 
-	private function processCArray($cArray, $s, $nextWord = null) {//echo "\nLine 1531, Input to processCArray: ".$s.", nextWord: ".$nextWord."\n";
+	protected function processCArray($cArray, $s, $nextWord = null) {//echo "\nLine 1531, Input to processCArray: ".$s.", nextWord: ".$nextWord."\n";
 		if($cArray) {//echo "\nLine 1532, cArray is not null\n";
 			$num = 0;
 			foreach($cArray as $vs) {
