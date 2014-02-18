@@ -101,30 +101,4 @@ function getiPlantID($inputFilename,$irodsPath){
     return $result;  
 }
 
-/**
-* NEVP specific lookup method, wraps getiPlantID()
-* sets path filter to iplant\/home\/shared\/NEVP.* /
-* assumes that filename is unique within NEVP.
-* 
-* @param targetFilename, the filename, with or without path to query for.
-* 
-* @return a BisqueResult object.
-* 
-* Example Invocation: 
-* <pre>
-
-$result = getiPlantIDForNEVP("irods://data.iplantcollaborative.org/iplant/home/shared/NEVP/BRU/IMG_0046.dng");
-if ($result->statusok===FALSE) { 
-   echo "Error: " . $result->error . "\n";
-} else { 
-   echo $result->resource_uniq . "\n";
-}
-
- </pre>
-*
-*/
-function getiPlantIDForNEVP($targetFilename) { 
-   return getiPlantID($targetFilename,"irods:\/\/data.iplantcollaborative.org\/iplant\/home\/shared\/NEVP.*/");
-}
-
 ?>
