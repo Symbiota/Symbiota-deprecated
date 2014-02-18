@@ -415,7 +415,9 @@ class OCCURRENCE {
                   $imgWebUrl = null;
                   $mediaguid = $media->guid;
                   foreach($media->accesspoints as $accesspoint) {  
-                     $imageresult = getiPlantIDForNEVP($accesspoint->accessURI);
+                     $irodsPath = str_replace('/','\/',$accesspint->accessURI);
+                     $irodsPath = preg_replace('/^file:/','irods:',$irodsPath);
+                     $imageresult = getiPlantID($accesspoint->accessURI,$irodsPath);
                      if ($imageresult->statusok===FALSE) { 
                         echo "Error: " . $imageresult->error . "\n";
                         $result->imagefailurecount++;
