@@ -3,6 +3,24 @@
 * Utility functions for working with iPlant resources.
 */
 
+$test = FALSE;
+if ($test) { 
+   $file = 'file://data.iplantcollaborative.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng';
+   // expected result values are: 
+   // uri=http://bovary.iplantcollaborative.org/data_service/image/4976710
+   // resource_uniq = 00-CiMyDXbqTSF8pL6mPgfswW
+   // filter=value=irods://data.iplantcollaborative.org/iplant/home/shared/NEVP/HUH/2014-01-17-190012/NEBC00485241.dng
+   $filter = str_replace('/','\/',$file);
+   $filter = preg_replace('/^file:/','irods:',$filter);
+   echo "$file\n";
+   $result = getiPlantID($file,$filter);
+   echo $result->statusok. "\n";
+   echo $result->error. "\n";
+   echo $result->uri. "\n";
+   echo $result->resource_uniq. "\n";
+   echo $result->value. "\n";
+}
+
 /**
 * Data structure to hold results of attempted query on bisque, including
 * status and errors from request.
@@ -38,7 +56,10 @@ class BisqueResult {
 * @param inputFilename a full irods path to a file, or just a filename without the path.
 *
 * @param irodsPath  Fragment of an iRods path to filter on, broad filter is 
-* "iplant\/home\/shared\/.*", project specfic filter is "iplant\/home\/shared\/NEVP.*"
+* "irods:\/\/data.iplantcollaborative.org\/iplant\/home\/shared\/.*", 
+* project specfic filter is "irods:\/\/data.iplantcollaborative.org\/iplant\/home\/shared\/NEVP.*"
+* can also be the specific irods path to a file (e.g. the same as inputFilename but
+* with / escaped.  Is placed into a regex /^$irodsPath$/ for matching.
 * 
 * @returns a BisqueResult object.
 */
@@ -56,7 +77,7 @@ function getiPlantID($inputFilename,$irodsPath){
            $result->responsedocument = $contents; 
            $xml = new SimpleXMLElement($contents);
            foreach ($xml->image as $entry) {
-               if (preg_match( '/^irods:\/\/data.iplantcollaborative.org\/'.$irodsPath, (string)$entry->attributes()->value) ){
+               if (preg_match( '/^'.$irodsPath.'$/', (string)$entry->attributes()->value) ){
                    $result->resource_uniq = (string)$entry->attributes()->resource_uniq;
                    $result->created = (string)$entry->attributes()->created;
                    $result->name = (string)$entry->attributes()->name;
@@ -83,6 +104,7 @@ function getiPlantID($inputFilename,$irodsPath){
 /**
 * NEVP specific lookup method, wraps getiPlantID()
 * sets path filter to iplant\/home\/shared\/NEVP.* /
+* assumes that filename is unique within NEVP.
 * 
 * @param targetFilename, the filename, with or without path to query for.
 * 
@@ -102,7 +124,7 @@ if ($result->statusok===FALSE) {
 *
 */
 function getiPlantIDForNEVP($targetFilename) { 
-   return getiPlantID($targetFilename,"iplant\/home\/shared\/NEVP.*/");
+   return getiPlantID($targetFilename,"irods:\/\/data.iplantcollaborative.org\/iplant\/home\/shared\/NEVP.*/");
 }
 
 ?>
