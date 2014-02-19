@@ -68,6 +68,9 @@ $imgLibManager = new ImageLibraryManager();
 				<div>
 					<a href="photographers.php">Contributing Photographers</a>
 				</div>
+				<div>
+					<a href="imgsearch.php">Search for Images</a>
+				</div>
 			</div>
 		</div>
 		<div style='clear:both;'><hr/></div>
