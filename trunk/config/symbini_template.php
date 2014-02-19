@@ -33,6 +33,7 @@ $NLP_LBCC_ACTIVATED = 0;
 $occurrenceModIsActive = 1;
 $floraModIsActive = 1;
 $keyModIsActive = 1;
+$RequestTrackingIsActive = 1;   // Allow users to request actions such as requests for images to be made for specimens
 
 $fpEnabled = 0;				//Enable Filtered-Push modules
 

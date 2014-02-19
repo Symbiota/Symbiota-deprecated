@@ -4,8 +4,8 @@ include_once($serverRoot.'/config/dbconnection.php');
 class OccurrenceIndividualManager {
 
 	private $conn;
-	private $occId;
-	private $collId;
+	private $occid;
+	private $collid;
 	private $dbpk;
 	private $occArr = array();
 	private $metadataArr = array();
@@ -20,17 +20,17 @@ class OccurrenceIndividualManager {
    
 	public function setOccid($occid){
 		if(is_numeric($occid)){
-			$this->occId = $occid;
+			$this->occid = $occid;
 		}
 	}
 
 	public function getOccid(){
-		return $this->occId;
+		return $this->occid;
 	}
 
 	public function getCollId($id){
  		if(is_numeric($o)){
-			$this->collId = $id;
+			$this->collid = $id;
  		}
 	}
 	
@@ -39,10 +39,10 @@ class OccurrenceIndividualManager {
 	}
 	
 	private function setMetadata(){
-		if($this->collId){
+		if($this->collid){
 			$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
 				'publicedits, rights, rightsholder, accessrights, guidtarget '.
-				'FROM omcollections WHERE collid = '.$this->collId;
+				'FROM omcollections WHERE collid = '.$this->collid;
 			$rs = $this->conn->query($sql);
 			if($rs){
 				$this->metadataArr = $rs->fetch_assoc();
@@ -82,11 +82,11 @@ class OccurrenceIndividualManager {
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
 			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, municipality '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
-		if($this->occId){
-			$sql .= 'WHERE (o.occid = '.$this->occId.')';
+		if($this->occid){
+			$sql .= 'WHERE (o.occid = '.$this->occid.')';
 		}
-		elseif($this->collId && $this->dbpk){
-			$sql .= 'WHERE (o.collid = '.$this->collId.') AND (o.dbpk = "'.$this->dbpk.'")';
+		elseif($this->collid && $this->dbpk){
+			$sql .= 'WHERE (o.collid = '.$this->collid.') AND (o.dbpk = "'.$this->dbpk.'")';
 		}
 		else{
 			trigger_error('Specimen identifier is null or invalid; '.$this->conn->error,E_USER_ERROR);
@@ -94,8 +94,8 @@ class OccurrenceIndividualManager {
 
 		if($result = $this->conn->query($sql)){
 			if($this->occArr = $result->fetch_assoc()){
-				if(!$this->occId) $this->occId = $this->occArr['occid'];
-				if(!$this->collId) $this->collId = $this->occArr['collid'];
+				if(!$this->occid) $this->occid = $this->occArr['occid'];
+				if(!$this->collid) $this->collid = $this->occArr['collid'];
 				$this->setMetadata();
 				//Set occurrenceId according to guidsource \
 				if($this->metadataArr['guidtarget'] == 'catalogNumber'){
@@ -134,7 +134,7 @@ class OccurrenceIndividualManager {
 	private function setImages(){
 		global $imageDomain;
 		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
-			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
+			'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
@@ -163,7 +163,8 @@ class OccurrenceIndividualManager {
 		$sql = 'SELECT detid, dateidentified, identifiedby, sciname, scientificnameauthorship, identificationqualifier, '.
 			'identificationreferences, identificationremarks '.
 			'FROM omoccurdeterminations '.
-			'WHERE (occid = '.$this->occId.') ORDER BY sortsequence';
+			'WHERE (occid = '.$this->occid.') AND appliedstatus = 1 '.
+			'ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
@@ -187,7 +188,7 @@ class OccurrenceIndividualManager {
 		$sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
 			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
-			'WHERE (llink.occid = '.$this->occId.') AND llink.returndate IS NULL';
+			'WHERE (llink.occid = '.$this->occid.') AND llink.returndate IS NULL';
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
@@ -208,14 +209,14 @@ class OccurrenceIndividualManager {
 			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN omoccurduplicatelink d2 ON d.duplicateid = d2.duplicateid '.
-			'WHERE (d2.occid = '.$this->occId.') AND (o.occid <> '.$this->occId.') ';
+			'WHERE (d2.occid = '.$this->occid.') AND (o.occid <> '.$this->occid.') ';
 		/*
 		$sql = 'SELECT d.occid, c.institutioncode, c.collectioncode, c.collectionname, o.catalognumber, o.occurrenceid, o.sciname, '.
 			'o.identifiedby, o.dateidentified, d.notes '.
 			'FROM omoccurduplicatelink d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'WHERE d.duplicateid IN(SELECT duplicateid FROM omoccurduplicatelink WHERE occid = '.$this->occId.') '.
-			'AND (o.occid <> '.$this->occId.')';
+			'WHERE d.duplicateid IN(SELECT duplicateid FROM omoccurduplicatelink WHERE occid = '.$this->occid.') '.
+			'AND (o.occid <> '.$this->occid.')';
 		*/
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
@@ -241,7 +242,7 @@ class OccurrenceIndividualManager {
 		//return $retArr;
 		$sql = 'SELECT c.comid, c.comment, u.username, c.reviewstatus, c.initialtimestamp '.
 			'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
-			'WHERE (c.occid = '.$this->occId.') ';
+			'WHERE (c.occid = '.$this->occid.') ';
 		if(!$isEditor) $sql .= 'AND c.reviewstatus = 1 ';
 		$sql .= 'ORDER BY c.initialtimestamp';
 		//echo $sql.'<br/><br/>';
@@ -267,7 +268,7 @@ class OccurrenceIndividualManager {
  		$con = MySQLiConnectionFactory::getCon("write");
 		$statusStr = '';
 		$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
-			'VALUES('.$this->occId.',"'.$this->cleanInStr($commentStr).'",'.$symbUid.',1)';
+			'VALUES('.$this->occid.',"'.$this->cleanInStr($commentStr).'",'.$symbUid.',1)';
 		//echo 'sql: '.$sql;
 		if(!$con->query($sql)){
 			$statusStr = 'ERROR adding comment: '.$con->error;
@@ -335,11 +336,11 @@ class OccurrenceIndividualManager {
 
 	public function getGeneticArr(){
 		$retArr = array();
-		if($this->occId){
+		if($this->occid){
  			$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'SELECT idoccurgenetic, identifier, resourcename, locus, resourceurl, notes '.
 				'FROM omoccurgenetic '.
-				'WHERE occid = '.$this->occId;
+				'WHERE occid = '.$this->occid;
 			$result = $this->conn->query($sql);
 			if($result){
 				while($r = $result->fetch_object()){
@@ -363,7 +364,7 @@ class OccurrenceIndividualManager {
 		$sql = 'SELECT e.ocedid, e.fieldname, e.fieldvalueold, e.fieldvaluenew, e.reviewstatus, e.appliedstatus, '.
 			'CONCAT_WS(", ",u.lastname,u.firstname) as editor, e.initialtimestamp '.
 			'FROM omoccuredits e INNER JOIN users u ON e.uid = u.uid '.
-			'WHERE e.occid = '.$this->occId.' ORDER BY e.initialtimestamp DESC ';
+			'WHERE e.occid = '.$this->occid.' ORDER BY e.initialtimestamp DESC ';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
@@ -393,7 +394,7 @@ class OccurrenceIndividualManager {
 		$returnArr = Array();
 		$sql = 'SELECT c.name, c.clid, v.notes '.
 			'FROM fmchecklists c INNER JOIN fmvouchers v ON c.clid = v.clid '.
-			'WHERE v.occid = '.$this->occId.' ORDER BY c.name';
+			'WHERE v.occid = '.$this->occid.' ORDER BY c.name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
@@ -432,7 +433,7 @@ class OccurrenceIndividualManager {
 		$retArr = array();
 		$sql = 'SELECT archiveobj, notes '.
 			'FROM guidoccurrences '.
-			'WHERE occid = '.$this->occId.' AND archiveobj IS NOT NULL ';
+			'WHERE occid = '.$this->occid.' AND archiveobj IS NOT NULL ';
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			if($r = $rs->fetch_object()){
@@ -447,7 +448,7 @@ class OccurrenceIndividualManager {
 		if(!$retArr){
 			$sql = 'SELECT archiveobj, notes '.
 				'FROM guidoccurrences '.
-				'WHERE occid IS NULL AND archiveobj LIKE \'%"occid":"'.$this->occId.'"%\'';
+				'WHERE occid IS NULL AND archiveobj LIKE \'%"occid":"'.$this->occid.'"%\'';
 			//echo $sql;
 			if($rs = $this->conn->query($sql)){
 				if($r = $rs->fetch_object()){
@@ -461,6 +462,71 @@ class OccurrenceIndividualManager {
 			}
 		}
 		return $retArr;
+	}
+
+	/*
+	 * Return: 0 = false, 2 = full editor, 3 = taxon editor, but not for this collection
+	 */
+	public function isTaxonomicEditor(){
+		$isEditor = 0;
+		
+		//Grab taxonomic node id and geographic scopes
+		$editTidArr = array();
+		$sqlut = 'SELECT idusertaxonomy, tid, geographicscope '.
+			'FROM usertaxonomy '.
+			'WHERE editorstatus = "OccurrenceEditor" AND uid = '.$GLOBALS['SYMB_UID'];
+		//echo $sqlut;
+		$rsut = $this->conn->query($sqlut);
+		while($rut = $rsut->fetch_object()){
+			//Is a taxonomic editor, but not explicitly approved for this collection
+			$editTidArr[$rut->tid] = $rut->geographicscope;
+		}
+		$rsut->free();
+		
+		//Get relevant tids for active occurrence
+		if($editTidArr){
+			$occTidArr = array();
+			$sql = '';
+			if($this->occArr['tidinterpreted']){
+				$occTidArr[] = $this->occArr['tidinterpreted'];
+				$sql = 'SELECT hierarchystr, parenttid '.
+					'FROM taxstatus '.
+					'WHERE taxauthid = 1 AND (tid = '.$this->occArr['tidinterpreted'].')';
+			}
+			elseif($this->occArr['sciname'] || $this->occArr['family']){
+				//Get all relevant tids within the taxonomy hierarchy
+				$sql = 'SELECT DISTINCT ts.hierarchystr, ts.parenttid '.
+					'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
+					'WHERE ts.taxauthid = 1 ';
+				if($this->occArr['sciname']){
+					//Try to isolate genus
+					$taxon = $this->occArr['sciname'];
+					$tok = explode(' ',$this->occArr['sciname']);
+					if(count($tok) > 1){
+						if(strlen($tok[0]) > 2) $taxon = $tok[0];
+					}
+					$sql .= 'AND (t.sciname = "'.$this->cleanInStr($taxon).'") ';
+				}
+				elseif($this->occArr['family']){
+					$sql .= 'AND (t.sciname = "'.$this->cleanInStr($this->occArr['family']).'") ';
+				}
+			}
+			if($sql){
+				$rs2 = $this->conn->query($sql);
+				while($r2 = $rs2->fetch_object()){
+					$occTidArr[] = $r2->parenttid;
+					$occTidArr = array_merge($occTidArr,explode(',',$r2->hierarchystr));
+				}
+				$rs2->free();
+			}
+			if($occTidArr){
+				if(array_intersect(array_keys($editTidArr),$occTidArr)){
+					$isEditor = 3;
+					//TODO: check to see if specimen is within geographic scope
+				}					
+			}
+		}
+		return $isEditor;
 	}
 
 	private function encodeStrTargeted($inStr,$inCharset,$outCharset){

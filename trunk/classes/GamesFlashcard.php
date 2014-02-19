@@ -162,5 +162,4 @@ class GamesFlashcard{
 		$this->lang = $l;
 	}
 }
-?>
- 
+?> 

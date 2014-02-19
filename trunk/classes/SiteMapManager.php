@@ -76,19 +76,25 @@ class SiteMapManager{
 
 	public function getChecklistList($isAdmin, $clArr){
 		$returnArr = Array();
-		$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl WHERE cl.access LIKE "public%"';
-		if(!$isAdmin && $clArr){
-			$sql .= 'AND (cl.clid IN('.implode(',',$clArr).')) ';
+		$sql = 'SELECT clid, name, access FROM fmchecklists ';
+		if($isAdmin){
+			//Show all without restrictions
 		}
-		$sql .= 'ORDER BY cl.name';
+		elseif($clArr){
+			$sql .= 'WHERE (access LIKE "public%" OR clid IN('.implode(',',$clArr).')) ';
+		}
+		else{
+			//Show only public lists
+			$sql .= 'WHERE (access LIKE "public%") ';
+		}
+		$sql .= 'ORDER BY name';
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
-		if($rs){
-			while($row = $rs->fetch_object()){
-				$returnArr[$row->clid] = $row->name;
-			}
-			$rs->close();
+		while($row = $rs->fetch_object()){
+			$clName = $row->name.($row->access=='private'?' (limited access)':'');
+			$returnArr[$row->clid] = $clName;
 		}
+		$rs->close();
 		return $returnArr;
 	}
 

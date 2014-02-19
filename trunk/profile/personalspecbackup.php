@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PersonalSpecimenManager.php');
+include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = $_REQUEST["collid"];
@@ -8,7 +8,7 @@ $action = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:'';
 $cSet = array_key_exists("cset",$_REQUEST)?$_REQUEST["cset"]:'utf8';
 $zipFile = array_key_exists("zipfile",$_REQUEST)?$_REQUEST["zipfile"]:0;
 
-$dlManager = new PersonalSpecimenManager();
+$dlManager = new ProfileManager();
 $dlManager->setUid($symbUid);
 
 $editable = 0;
@@ -19,7 +19,7 @@ if($isAdmin
 }
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">

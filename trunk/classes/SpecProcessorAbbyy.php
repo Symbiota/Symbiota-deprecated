@@ -49,5 +49,4 @@ class SpecProcessorAbbyy extends SpecProcessorManager{
 		return $statusArr;
 	}
 }
-?>
- 
+?> 

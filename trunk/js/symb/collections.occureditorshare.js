@@ -161,7 +161,7 @@ function toggleCustomDiv3(){
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
-		if(ele.style.display=="block"){
+		if(ele.style.display=="block" || ele.style.display==""){
 			ele.style.display="none";
   		}
 	 	else {

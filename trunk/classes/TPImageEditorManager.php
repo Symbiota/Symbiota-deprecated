@@ -102,4 +102,3 @@ class TPImageEditorManager extends TPEditorManager{
 	}
 }
 ?>
-

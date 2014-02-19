@@ -1,18 +1,37 @@
 <?php
-	include_once('../../../config/dbconnection.php');
-	$con = MySQLiConnectionFactory::getCon("readonly");
-	$retArr = Array();
-	$queryString = $con->real_escape_string($_REQUEST['term']);
+include_once('../../../config/symbini.php'); 
+include_once($serverRoot.'/config/dbconnection.php');
+header("Content-Type: application/json; charset=".$charset);
+$con = MySQLiConnectionFactory::getCon("readonly");
+$retArr = Array();
+$term = $con->real_escape_string($_REQUEST['term']);
 
-	$sql = "SELECT DISTINCT t.tid, t.sciname ". 
-		"FROM taxa t ".
-		"WHERE t.sciname LIKE '".$queryString."%' ".
-		"ORDER BY t.sciname LIMIT 10";
-	//echo $sql;
-	$result = $con->query($sql);
-	while ($row = $result->fetch_object()) {
-		$retArr[] = $row->sciname;
+$sql = "SELECT DISTINCT tid, sciname ". 
+	"FROM taxa ".
+	"WHERE sciname LIKE '".$term."%' ";
+//echo $sql;
+$rs = $con->query($sql);
+while ($r = $rs->fetch_object()){
+	$retArr[] = array('id' => $r->tid, 'value' => $r->sciname);
+	//$retArr[] = '"id": '.$r->tid.',"value":"'.str_replace('"',"''",$r->sciname).'"';
+}
+$rs->free();
+$con->close();
+
+if($retArr){
+	if($charset == 'UTF-8'){
+		echo json_encode($retArr);
 	}
-	$con->close();
-	echo '["'.implode('","',($retArr)).'"]';
+	else{
+		$str = '[';
+		foreach($retArr as $k => $vArr){
+			$str .= '{"id":"'.$vArr['id'].'","value":"'.str_replace('"',"''",$vArr['value']).'"},';
+		}
+		echo trim($str,',').']';
+		//echo '[{'.implode('},{',$retArr).'}]';
+	}
+}
+else{
+	echo 'null';
+}
 ?>

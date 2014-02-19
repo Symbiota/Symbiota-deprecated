@@ -1,17 +1,17 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PersonalSpecimenManager.php');
+include_once($serverRoot.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
 
-$specHandler = new PersonalSpecimenManager();
+$specHandler = new ProfileManager();
 
-$occArr = array();
+$collArr = array();
 if($symbUid){
 	$specHandler->setUid($symbUid);
-	$occArr = $specHandler->getOccurrenceArr();
+	$collArr = $specHandler->getPersonalCollectionArr();
 }
 
 $statusStr = '';
@@ -29,8 +29,8 @@ if($symbUid){
 		<hr/>
 		<?php 
 	}
-	if(array_key_exists('general observations',$occArr)){
-		$genArr = $occArr['general observations'];
+	if(array_key_exists('general observations',$collArr)){
+		$genArr = $collArr['general observations'];
 		foreach($genArr as $collId => $cName){
 			?>
 			<fieldset style="margin:15px;padding:15px;">
@@ -85,8 +85,8 @@ if($symbUid){
 	else{
 		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to active this feature.</div>';
 	}
-	if(array_key_exists('preserved specimens',$occArr)){
-		$cArr = $occArr['preserved specimens'];
+	if(array_key_exists('preserved specimens',$collArr)){
+		$cArr = $collArr['preserved specimens'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
@@ -104,8 +104,8 @@ if($symbUid){
 		</fieldset>
 		<?php 
 	}
-	if(array_key_exists('observations',$occArr)){
-		$cArr = $occArr['observations'];
+	if(array_key_exists('observations',$collArr)){
+		$cArr = $collArr['observations'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>

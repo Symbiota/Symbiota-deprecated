@@ -238,4 +238,4 @@ $result = "         <oa:Annotation rdf:about=\"urn:uuid:$uuid#Annotation\">
 	}
 }
 
-?> 
+?>

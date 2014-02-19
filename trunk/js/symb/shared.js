@@ -29,7 +29,7 @@ function toggle(target){
 	  		var divObj = divObjs[i];
 	  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
 				if(divObj.style.display=="none"){
-					divObj.style.display="block";
+					divObj.style.display="";
 				}
 			 	else {
 			 		divObj.style.display="none";

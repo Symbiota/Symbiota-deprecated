@@ -1,12 +1,12 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
 
-class ImageDetailManager{
+class ImageDetailManager {
 	
 	private $conn;
 	private $imgId;
 
-	public function __construct($id,$conType){
+	public function __construct($id,$conType='readonly'){
  		$this->conn = MySQLiConnectionFactory::getCon($conType);
  		if(is_numeric($id)){
 	 		$this->imgId = $id;
@@ -287,5 +287,6 @@ class ImageDetailManager{
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
+
 }
 ?>

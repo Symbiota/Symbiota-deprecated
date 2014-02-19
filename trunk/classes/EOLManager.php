@@ -280,4 +280,4 @@ class EOLManager {
 		return $newStr;
 	}
 }
-?> 
+?>

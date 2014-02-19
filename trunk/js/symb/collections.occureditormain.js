@@ -76,8 +76,41 @@ $(document).ready(function() {
 		source: "rpc/getspeciessuggest.php", 
 		minLength: 3,
 		change: function(event, ui) {
-			verifyFullformSciName();
+			if($( "#ffsciname" ).val()){
+				$.ajax({
+					type: "POST",
+					url: "rpc/verifysciname.php",
+					dataType: "json",
+					data: { term: $( "#ffsciname" ).val() }
+				}).done(function( data ) {
+					if(data){
+						$( "#tidinterpreted" ).val(data.tid);
+						$( 'input[name=family]' ).val(data.family);
+						$( 'input[name=scientificnameauthorship]' ).val(data.author);
+						if(data.status == 1){ 
+							$( 'input[name=localitysecurity]' ).prop('checked', true);
+						}
+					}
+					else{
+						alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+						$( "#tidinterpreted" ).val("");
+						$( 'input[name=scientificnameauthorship]' ).val("");
+						$( 'input[name=family]' ).val("");
+						$( 'input[name=localitysecurity]' ).prop('checked', false);
+					}
+				});
+			}
+			else{
+				$( "#tidinterpreted" ).val("");
+				$( 'input[name=scientificnameauthorship]' ).val("");
+				$( 'input[name=family]' ).val("");
+				$( 'input[name=localitysecurity]' ).prop('checked', false);
+			}				
 			fieldChanged('sciname');
+			fieldChanged('tidinterpreted');
+			fieldChanged('scientificnameauthorship');
+			fieldChanged('family');
+			fieldChanged('localitysecurity');
 		}
 	});
 
@@ -130,28 +163,6 @@ $(document).ready(function() {
 	//Remember Auto Duplicate search status 
 	if(getCookie("autodupe") == 1) document.fullform.autodupe.checked = true; 
 });
-
-function initDetAddAutocomplete(){
-	$("#dafsciname").autocomplete({
-		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) {
-			pauseSubmit = true;
-			verifyDetSciName(document.detaddform);
-		}
-	},
-	{ minLength: 3 });
-}
-
-function initDetEditAutocomplete(inputName){
-	$("#"+inputName).autocomplete({
-		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) {
-			pauseSubmit = true;
-			verifyDetSciName(document.deteditform);
-		}
-	},
-	{ minLength: 3 });
-}
 
 function toggleStyle(){
 	var cssObj = document.getElementById('editorCssLink');
@@ -243,12 +254,12 @@ function parseVerbatimElevation(f){
 
 function verbatimCoordinatesChanged(f){
 	if(!f.decimallatitude.value){
-		parseVerbatimCoordinates(f);
+		parseVerbatimCoordinates(f,0);
 	}
 	fieldChanged("verbatimcoordinates");
 }
 
-function parseVerbatimCoordinates(f){
+function parseVerbatimCoordinates(f,verbose){
 	if(f.verbatimcoordinates.value){
 		var latDec = null;
 		var lngDec = null;
@@ -378,7 +389,7 @@ function parseVerbatimCoordinates(f){
 			decimalLongitudeChanged(f);
 		}
 		else{
-			alert("Unable to parse coordinates");
+			if(verbose) alert("Unable to parse coordinates");
 		}
 	}
 }
@@ -472,51 +483,6 @@ function verifyGotoNew(f){
 	f.gotomode.value = 1;
 	f.submit();
 }
-
-function verifyFullformSciName(){
-	var f = document.fullform;
-	var sciNameStr = f.sciname.value;
-	if(sciNameStr != ""){
-		snXmlHttp = GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/verifysciname.php";
-		url=url + "?sciname=" + sciNameStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				if(snXmlHttp.responseText){
-					var retObj = eval("("+snXmlHttp.responseText+")");
-					f.tidtoadd.value = retObj.tid;
-					f.scientificnameauthorship.value = retObj.author;
-					f.family.value = retObj.family;
-					if(retObj.sstatus == "1"){
-						f.localitysecurity.checked = true;
-						fieldChanged('localitysecurity');
-						document.getElementById("locsecreason").style.display = "inline";
-					}
-					else if(f.localitysecurity.checked == true){
-						f.localitysecurity.checked = false;
-						fieldChanged('localitysecurity');
-					}
-				}
-				else{
-					f.tidtoadd.value = "";
-					//f.scientificnameauthorship.value = "";
-					//f.family.value = "";
-					alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
-					f.sciname.focus();
-				}
-				fieldChanged('scientificnameauthorship');
-				fieldChanged('family');
-				pauseSubmit = false;
-			}
-		};
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
-} 
 
 function verifyDecimalLatitude(f){
 	if(!isNumeric(f.decimallatitude.value)){
@@ -911,32 +877,43 @@ function parseDate(dateStr){
 }
 
 //Determination form methods 
-function verifyDetSciName(f){
-	var sciNameStr = f.sciname.value;
-	snXmlHttp = GetXmlHttpObject();
-	if(snXmlHttp==null){
-  		alert ("Your browser does not support AJAX!");
-  		return;
-  	}
-	var url = "rpc/verifysciname.php?sciname=" + sciNameStr;
-	snXmlHttp.onreadystatechange=function(){
-		if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-			if(snXmlHttp.responseText){
-				var retObj = eval("("+snXmlHttp.responseText+")");
-				f.scientificnameauthorship.value = retObj.author;
-				f.tidtoadd.value = retObj.tid;
-				f.family.value = retObj.family;
+function initDetAutocomplete(f){
+	$( f.sciname ).autocomplete({ 
+		source: "rpc/getspeciessuggest.php", 
+		minLength: 3,
+		change: function(event, ui) {
+			if(f.sciname.value){
+				pauseSubmit = true;
+				verifyDetSciName(f);
 			}
 			else{
 				f.scientificnameauthorship.value = "";
-				alert("WARNING: Taxon not found, perhaps misspelled or not in the taxonomic thesaurus? This is only a problem if this is the current determination or images need to be remapped to this name. If taxon is spelled correctly, continue entering specimen and name can be add to thesaurus afterward.");
-				f.sciname.focus();
-			}
-			pauseSubmit = false;
+				f.family.value = "";
+				f.tidtoadd.value = "";
+			}				
 		}
-	};
-	snXmlHttp.open("POST",url,true);
-	snXmlHttp.send(null);
+	});
+}
+
+function verifyDetSciName(f){
+	$.ajax({
+		type: "POST",
+		url: "rpc/verifysciname.php",
+		dataType: "json",
+		data: { term: f.sciname.value }
+	}).done(function( data ) {
+		if(data){
+			f.scientificnameauthorship.value = data.author;
+			f.family.value = data.family;
+			f.tidtoadd.value = data.tid;
+		}
+		else{
+			alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
+			f.scientificnameauthorship.value = "";
+			f.family.value = "";
+			f.tidtoadd.value = "";
+		}
+	});
 } 
 
 function detDateChanged(f){
@@ -949,7 +926,7 @@ function detDateChanged(f){
 			var yearPattern = /[1,2]{1}\d{3}/;
 			var newYear = newDateStr.match(yearPattern);
 			var curYear = dateIdentified.match(yearPattern);
-			if(newYear[0] > curYear[0]){
+			if(curYear == null || newYear[0] > curYear[0]){
 				isNew = true;
 			}
 		}
@@ -958,10 +935,9 @@ function detDateChanged(f){
 		}
 	}
 	f.makecurrent.checked = isNew;
-	f.remapimages.checked = isNew;
 }
 
-function verifyDetAddForm(f){
+function verifyDetForm(f){
 	if(f.sciname.value == ""){
 		alert("Scientific Name field must have a value");
 		return false;
@@ -974,31 +950,7 @@ function verifyDetAddForm(f){
 		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
 		return false;
 	}
-	//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
-	if(pauseSubmit){
-		var date = new Date();
-		var curDate = null;
-		do{ 
-			curDate = new Date(); 
-		}while(curDate - date < 5000 && pauseSubmit);
-	}
-	return true;
-}
-
-function verifyDetEditForm(f){
-	if(f.sciname.value == ""){
-		alert("Scientific Name field must have a value");
-		return false;
-	}
-	if(f.identifiedby.value == ""){
-		alert("Determiner field must have a value (enter 'unknown' if not defined)");
-		return false;
-	}
-	if(f.dateidentified.value == ""){
-		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
-		return false;
-	}
-	if(!isNumeric(f.sortsequence.value)){
+	if(f.sortsequence && !isNumeric(f.sortsequence.value)){
 		alert("Sort Sequence field must be a numeric value only");
 		return false;
 	}

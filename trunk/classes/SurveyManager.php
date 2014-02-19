@@ -369,5 +369,4 @@ class SurveyManager {
 	}
 	
 }
-?>
- 
+?> 

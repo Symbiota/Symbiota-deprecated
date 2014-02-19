@@ -30,17 +30,29 @@ $statusStr = '';
 $displayLocality = false;
 $isEditor = false;
 
-if($symbUid){
-	if(array_key_exists("SuperAdmin",$userRights) 
-	|| (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))
-	|| (array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor']))
-	|| $occArr['observeruid'] == $symbUid){
+if($SYMB_UID){
+	//Check editing status
+	if($IS_ADMIN || (array_key_exists('CollAdmin',$userRights) && in_array($collId,$userRights['CollAdmin']))){
 		$isEditor = true;
 	}
-	if($isEditor || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights) 
-	|| (array_key_exists("RareSppReader",$userRights) && in_array($collId,$userRights["RareSppReader"]))){
+	elseif((array_key_exists('CollEditor',$userRights) && in_array($collId,$userRights['CollEditor']))){
+		$isEditor = true;
+	}
+	elseif($occArr['observeruid'] == $SYMB_UID){
+		$isEditor = true;
+	}
+	elseif($indManager->isTaxonomicEditor()){
+		$isEditor = true;
+	}
+	
+	//Check locality security
+	if($isEditor || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
 		$displayLocality = true;
 	}
+	elseif(array_key_exists("RareSppReader",$userRights) && in_array($collId,$userRights["RareSppReader"])){
+		$displayLocality = true;
+	}
+	
 	//Form action submitted
 	if(array_key_exists('commentstr',$_POST)){
 		$indManager->addComment($_POST['commentstr']);
@@ -667,9 +679,9 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							?>
 							<div style="margin-bottom:10px;">
 								<?php 
-								if($symbUid){
+								if($SYMB_UID){
 									?>
-									Do you see an obvious error? If so, errors can fixed using the  
+									Do you see an error? If so, errors can be fixed using the  
 									<a href="../editor/occurrenceeditor.php?occid=<?php echo $occArr['occid'];?>">
 										Occurrence Editor.
 									</a>
@@ -791,7 +803,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 					<fieldset style="padding:20px;">
 						<legend><b>New Comment</b></legend>
 						<?php 
-						if($symbUid){
+						if($SYMB_UID){
 							?>
 							<form name="commentform" action="index.php" method="post" onsubmit="return verifyCommentForm(this);">
 								<textarea name="commentstr" rows="8" style="width:98%;"></textarea>

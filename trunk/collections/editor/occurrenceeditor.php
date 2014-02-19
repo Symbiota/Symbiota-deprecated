@@ -20,7 +20,7 @@ if(!$action && array_key_exists('carryloc',$_REQUEST)){
 
 //Create Occurrence Manager
 $occManager;
-if(strpos($action,'Determination')){
+if(strpos($action,'Determination') || strpos($action,'Verification')){
 	$occManager = new OccurrenceEditorDeterminations();
 }
 elseif(strpos($action,'Image')){
@@ -49,13 +49,11 @@ $navStr = '';
 if($symbUid){
 	//Set variables
 	$occManager->setSymbUid($symbUid); 
-	if($occId) $occManager->setOccId($occId); 
-	if($collId) $occManager->setCollId($collId);
+	$occManager->setOccId($occId); 
+	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
 	if($occId && !$collId && !$crowdSourceMode) $collId = $collMap['collid'];
-	if($isAdmin || ($collId && array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
-		$isEditor = 1;
-	}
+
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 
 	//Bring in config variables
@@ -85,7 +83,10 @@ if($symbUid){
 	}
 	if(isset($ACTIVATEEXSICCATI) && $ACTIVATEEXSICCATI) $occManager->setExsiccatiMode(true);
 	
-	if(!$isEditor){
+	if($isAdmin || ($collId && array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+		$isEditor = 1;
+	}
+	else{
 		if($isGenObs){ 
 			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 				//Approved General Observation editors can add records
@@ -96,18 +97,23 @@ if($symbUid){
 				 $isEditor = 2;
 			}
 			elseif($occManager->getObserverUid() == $symbUid){
-				//User can only edit their own records
+				//Users can edit their own records
 				$isEditor = 2;
 			}
 		}
 		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
 			$isEditor = 2;
 		}
+		elseif(array_key_exists("CollTaxon",$userRights) && $occId){
+			//Check to see if this user is authorized to edit this occurrence given their taxonomic editing authority
+			//0 = not editor, 2 = full editor, 3 = taxon editor, but not for this specific occurrence
+			$isEditor = $occManager->isTaxonomicEditor();
+		}
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
 	}
-	if($isEditor || $crowdSourceMode){
+	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 		if($action == 'Save OCR'){
 			$statusStr = $occManager->insertTextFragment($_REQUEST['imgid'],$_REQUEST['rawtext'],$_REQUEST['rawnotes']);
 			if(is_numeric($statusStr)){
@@ -123,66 +129,83 @@ if($symbUid){
 		}
 	}
 	if($isEditor){
-		if($action == 'Add Record'){
-			$statusStr = $occManager->addOccurrence($_REQUEST);
-			if(strpos($statusStr,'SUCCESS') !== false){
-				$occManager->setQueryVariables();
-				$qryCnt = $occManager->getQueryRecordCount();
-				$qryCnt++;
-				if($goToMode){
-					//Go to new record
-					$occIndex = $qryCnt;
-				}
-				else{
-					//Stay on record and get $occId
-					$occId = $occManager->getOccId();
-				}
-			}
-		}
-		elseif($action == 'Delete Occurrence'){
-			$statusStr = $occManager->deleteOccurrence($occId);
-			if(strpos($statusStr,'SUCCESS') !== false){
-				$occId = 0;
-				$occManager->setOccId(0);
-			}
-		}
-		elseif($action == "Submit Image Edits"){
-			$statusStr = $occManager->editImage($_REQUEST);
-		}
-		elseif($action == "Submit New Image"){
-			$statusStr = $occManager->addImage($_REQUEST);
-		}
-		elseif($action == "Delete Image"){
-			$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
-			$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
-		}
-		elseif($action == "Remap Image"){
-			$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
-		}
-		elseif($action == "Add New Determination"){
-			$statusStr = $occManager->addDetermination($_REQUEST);
+		//Available to full editors and taxon editors
+		if($action == "Add New Determination"){
+			$statusStr = $occManager->addDetermination($_POST,$isEditor);
+			$tabTarget = 1;
 		}
 		elseif($action == "Submit Determination Edits"){
-			$statusStr = $occManager->editDetermination($_REQUEST);
+			$statusStr = $occManager->editDetermination($_POST);
+			$tabTarget = 1;
 		}
 		elseif($action == "Delete Determination"){
-			$statusStr = $occManager->deleteDetermination($_REQUEST['detid']);
+			$statusStr = $occManager->deleteDetermination($_POST['detid']);
+			$tabTarget = 1;
 		}
-		elseif($action == "Make Determination Current"){
-			$remapImages = array_key_exists('remapimages',$_REQUEST)?$_REQUEST['remapimages']:0;
-			$statusStr = $occManager->makeDeterminationCurrent($_REQUEST['detid'],$remapImages);
-		}
-		elseif($action == 'editgeneticsubmit'){
-			$statusStr = $occManager->editGeneticResource($_POST);
-		}
-		elseif($action == 'deletegeneticsubmit'){
-			$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
-		}
-		elseif($action == 'addgeneticsubmit'){
-			$statusStr = $occManager->addGeneticResource($_POST);
+		//Only full editors can perform following actions
+		if($isEditor == 1 || $isEditor == 2){
+			if($action == 'Add Record'){
+				$statusStr = $occManager->addOccurrence($_REQUEST);
+				if(strpos($statusStr,'SUCCESS') !== false){
+					$occManager->setQueryVariables();
+					$qryCnt = $occManager->getQueryRecordCount();
+					$qryCnt++;
+					if($goToMode){
+						//Go to new record
+						$occIndex = $qryCnt;
+					}
+					else{
+						//Stay on record and get $occId
+						$occId = $occManager->getOccId();
+					}
+				}
+			}
+			elseif($action == 'Delete Occurrence'){
+				$statusStr = $occManager->deleteOccurrence($occId);
+				if(strpos($statusStr,'SUCCESS') !== false){
+					$occId = 0;
+					$occManager->setOccId(0);
+				}
+			}
+			elseif($action == "Submit Image Edits"){
+				$statusStr = $occManager->editImage($_REQUEST);
+			}
+			elseif($action == "Submit New Image"){
+				$statusStr = $occManager->addImage($_REQUEST);
+			}
+			elseif($action == "Delete Image"){
+				$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
+				$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
+			}
+			elseif($action == "Remap Image"){
+				$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
+			}
+			elseif($action == "Apply Determination"){
+				$makeCurrent = 0;
+				if(array_key_exists('makecurrent',$_POST)) $makeCurrent = 1;
+				$statusStr = $occManager->applyDetermination($_POST['detid'],$makeCurrent);
+				$tabTarget = 1;
+			}
+			elseif($action == "Make Determination Current"){
+				$statusStr = $occManager->makeDeterminationCurrent($_POST['detid']);
+				$tabTarget = 1;
+			}
+			elseif($action == "Submit Verification Edits"){
+				$statusStr = $occManager->editIdentificationRanking($_POST['confidenceranking'],$_POST['notes']);
+				$tabTarget = 1;
+			}
+			elseif($action == 'editgeneticsubmit'){
+				$statusStr = $occManager->editGeneticResource($_POST);
+			}
+			elseif($action == 'deletegeneticsubmit'){
+				$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
+			}
+			elseif($action == 'addgeneticsubmit'){
+				$statusStr = $occManager->addGeneticResource($_POST);
+			}
 		}
 	}
-
+	
 	if($goToMode){
 		$occId = 0;
 		//Adding new record, override query form and prime for current user's dataentry for the day
@@ -240,7 +263,7 @@ if($symbUid){
 	elseif($goToMode == 2){
 		$occArr = $occManager->carryOverValues($_REQUEST);
 	}
-
+	
 	if($qryCnt !== false){
 		if($qryCnt == 0){
 			if(!$goToMode){
@@ -343,10 +366,22 @@ else{
 			<?php 
 		}
 		?>
+        function requestImage(){
+            $.ajax({ 
+                type: "POST",
+                url: 'rpc/makeactionrequest.php',
+                data: { <?php echo " occid: '$occId' , "; ?> requesttype: 'Image' },
+                success: function( response ) {
+                   $('div#imagerequestresult').html(response);
+                }
+            });
+        }
+
+
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=140103"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=140103"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140103"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=140128"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=140103"></script>
 </head>
 <body>
@@ -358,7 +393,7 @@ else{
 			<div id="titleDiv">
 				<?php 
 				echo $collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')'; 
-				if($isEditor || $crowdSourceMode){
+				if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 					?>
 					<div id="querySymbolDiv">
 						<a href="#" title="Search / Filter" onclick="toggle('querydiv');document.getElementById('statusdiv').style.display = 'none';return false;"><img src="../../images/find.png" style="width:16px;" /></a>
@@ -404,7 +439,7 @@ else{
 							<?php
 						}
 						else{
-							if(!$isGenObs || $isAdmin){ 
+							if(!$isGenObs || $isEditor == 1 || $isEditor == 2){ 
 								?>
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
 								<?php
@@ -416,7 +451,7 @@ else{
 							}
 						}
 						?>
-						<b>Editor</b>
+						<b><?php if($isEditor == 3) echo 'Taxonomic '; ?>Editor</b>
 					</div>
 					<?php
 				}
@@ -479,17 +514,18 @@ else{
 									if($occId && $isEditor){
 										// Get symbiota user email as the annotator email (for fp)
 										$pHandler = new ProfileManager();
-										$person = $pHandler->getPersonByUid($symbUid);
+										$pHandler->setUid($symbUid);
+										$person = $pHandler->getPerson();
 										$userEmail = ($person?$person->getEmail():'');
 										
-										$anchorVars = 'occid='.$occId.'&occindex='.$occIndex.'&em='.$isEditor.'&csmode='.$crowdSourceMode;
-										$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).'&sciname='.urlencode($occArr['sciname']).
+										$anchorVars = 'occid='.$occId.'&occindex='.$occIndex.'&csmode='.$crowdSourceMode;
+
+										$detVars = 'identby='.urlencode($occArr['identifiedby']).'&dateident='.urlencode($occArr['dateidentified']).
+											'&sciname='.urlencode($occArr['sciname']).'&em='.$isEditor.
 											'&annotatorname='.urlencode($userDisplayName).'&annotatoremail='.urlencode($userEmail).
 											(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 											(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'').
 											'&catalognumber='.urlencode($occArr['catalognumber']);
-										
-										$imgVars = 'tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
 										?>
 										<li id="detTab">
 											<a href="includes/determinationtab.php?<?php echo $anchorVars.'&'.$detVars; ?>" 
@@ -502,19 +538,22 @@ else{
 											echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
 											echo '</li>';
 										} 
-										?>
-										<li id="imgTab">
-											<a href="includes/imagetab.php?<?php echo $anchorVars.'&'.$imgVars; ?>" 
-												style="margin:0px 20px 0px 20px;">Images</a>
-										</li>
-										<li id="genTab">
-											<a href="includes/genetictab.php?<?php echo $anchorVars; ?>" 
-												style="margin:0px 20px 0px 20px;">Genetic Links</a>
-										</li>
-										<li id="adminTab">
-											<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
-										</li>
-										<?php
+										if($isEditor == 1 || $isEditor == 2){
+											$imgVars = 'tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
+											?>
+											<li id="imgTab">
+												<a href="includes/imagetab.php?<?php echo $anchorVars.'&'.$imgVars; ?>" 
+													style="margin:0px 20px 0px 20px;">Images</a>
+											</li>
+											<li id="genTab">
+												<a href="includes/genetictab.php?<?php echo $anchorVars; ?>" 
+													style="margin:0px 20px 0px 20px;">Genetic Links</a>
+											</li>
+											<li id="adminTab">
+												<a href="#admindiv" style="margin:0px 20px 0px 20px;">Admin</a>
+											</li>
+											<?php
+										}
 									}
 									?>
 								</ul>
@@ -551,7 +590,7 @@ else{
 													<?php echo (defined('CATALOGNUMBERLABEL')?CATALOGNUMBERLABEL:'Catalog Number'); ?>
 													<a href="#" onclick="return dwcDoc('catalogNumber')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="fieldChanged('catalognumber');<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form)'; ?>" <?php if(!$isEditor) echo 'disabled'; ?> />
+													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="fieldChanged('catalognumber');<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form)'; ?>" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
 												</div>
 												<div id="otherCatalogNumbersDiv">
 													<?php echo (defined('OTHERCATALOGNUMBERSLABEL')?OTHERCATALOGNUMBERSLABEL:'Other Numbers'); ?>
@@ -665,11 +704,14 @@ else{
 													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php echo (!$isEditor && $occArr['sciname'] != ''?'disabled ':''); ?> />
-													<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
+													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" <?php if((!$isEditor || $isEditor == 3) && $occArr['sciname']) echo 'disabled '; ?> />
+													<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="" />
 													<?php 
 													if(!$isEditor && isset($occArr['sciname']) && $occArr['sciname'] != ''){
 														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
+													}
+													elseif($isEditor == 3){
+														echo '<div style="clear:both;color:red;margin-left:5px;">Limited editing right: use determination tab to edit identification</div>';
 													}
 													?>
 												</div>
@@ -677,14 +719,14 @@ else{
 													<?php echo (defined('SCIENTIFICNAMEAUTHORSHIPLABEL')?SCIENTIFICNAMEAUTHORSHIPLABEL:'Author'); ?>
 													<a href="#" onclick="return dwcDoc('scientificNameAuthorship')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php echo ($isEditor?'':'disabled '); ?> />
+													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
 												<div id="identificationQualifierDiv">
 													<?php echo (defined('IDENTIFICATIONQUALIFIERLABEL')?IDENTIFICATIONQUALIFIERLABEL:'ID Qualifier'); ?>
 													<a href="#" onclick="return dwcDoc('identificationQualifier')"><img class="docimg" src="../../images/qmark.png" /></a>
-													<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php echo ($isEditor?'':'disabled '); ?> />
+													<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
 												</div>
 												<div  id="familyDiv">
 													<?php echo (defined('FAMILYLABEL')?FAMILYLABEL:'Family'); ?>
@@ -805,7 +847,7 @@ else{
 												</div>
 												<div id="verbatimCoordinatesDiv">
 													<div style="float:left;margin:18px 2px 0px 2px" title="Recalculate Decimal Coordinates">
-														<a href="#" onclick="parseVerbatimCoordinates(document.fullform);return false">&lt;&lt;</a>
+														<a href="#" onclick="parseVerbatimCoordinates(document.fullform,1);return false">&lt;&lt;</a>
 													</div>
 													<div style="float:left;">
 														<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
@@ -1088,7 +1130,7 @@ else{
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<?php 
 											if($occId){ 
-												if($isEditor && !$crowdSourceMode){ 
+												if(($isEditor == 1 || $isEditor == 2) && !$crowdSourceMode){ 
 													?>
 													<div style="float:right;">
 														<fieldset style="padding:15px;background-color:lightyellow;">
@@ -1152,7 +1194,7 @@ else{
 									</form>
 								</div>
 								<?php
-								if($occId && $isEditor){
+								if($occId && ($isEditor == 1 || $isEditor == 2)){
 									?>
 									<div id="admindiv">
 										<fieldset style="padding:15px;margin:10px 0px;">
@@ -1289,9 +1331,5 @@ else{
 		}
 		?>
 	</div>
-<?php 	
-//include($serverRoot.'/footer.php');
-?>
-
 </body>
 </html>

@@ -104,5 +104,4 @@ class SpecProcNlpProfiles extends SpecProcNlp{
 		return $status;
 	}
 }
-?>
- 
+?> 

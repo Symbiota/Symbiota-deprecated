@@ -1,28 +1,41 @@
 <?php
-include_once('../../../config/dbconnection.php');
-
+include_once('../../../config/symbini.php'); 
+include_once($serverRoot.'/config/dbconnection.php');
+header("Content-Type: application/json; charset=".$charset);
 $con = MySQLiConnectionFactory::getCon("readonly");
 $retArr = Array();
-$sciName = $con->real_escape_string($_REQUEST['sciname']);
-// Is the string length greater than 0?
-if($sciName){
-	$sql = 'SELECT DISTINCT t.tid, t.sciname, t.author, ts.family, securitystatus '.
+$term = trim($con->real_escape_string($_REQUEST['term']));
+if($term){
+	$sql = 'SELECT DISTINCT t.tid, t.author, ts.family, t.securitystatus '.
 		'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-		'WHERE t.sciname = "'.$sciName.'" AND ts.taxauthid = 1 ';
+		'WHERE t.sciname = "'.$term.'" AND ts.taxauthid = 1 ';
 	//echo $sql;
-	$result = $con->query($sql);
-	while ($row = $result->fetch_object()) {
-		$retArr['tid'] = $row->tid;
-		$retArr['author'] = $row->author;
-		$retArr['family'] = $row->family;
-		$retArr['sstatus'] = $row->securitystatus;
+	$rs = $con->query($sql);
+	while ($r = $rs->fetch_object()) {
+		$retArr['tid'] = $r->tid;
+		$retArr['family'] = $r->family;
+		$retArr['author'] = $r->author;
+		$retArr['status'] = $r->securitystatus;
+		//$retArr[] = '"family": '.$r->family.',"author":"'.str_replace('"',"''",$r->author).'","status":'.$r->securitystatus;
+	}
+	$rs->free();
+	$con->close();
+}
+
+if($retArr){
+	if($charset == 'UTF-8'){
+		echo json_encode($retArr);
+	}
+	else{
+		$str = '[';
+		foreach($retArr as $k => $vArr){
+			$str .= '{"tid":"'.$vArr['tid'].'","family":"'.$vArr['family'].'","author":"'.str_replace('"',"''",$vArr['author']).'","status":"'.$vArr['status'].'"},';
+		}
+		echo trim($str,',').']';
+		//echo '[{'.implode('},{',$retArr).'}]';
 	}
 }
-$con->close();
-if($retArr){
-	echo json_encode($retArr);
-}
 else{
-	echo '';
+	echo 'null';
 }
 ?>

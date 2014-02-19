@@ -1,6 +1,7 @@
 <?php
 include_once('../../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+include_once($serverRoot.'/classes/OccurrenceActionManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $occId = $_GET['occid'];
@@ -10,6 +11,7 @@ $instCode = $_GET['instcode'];
 $crowdSourceMode = $_GET['csmode'];
 
 $occManager = new OccurrenceEditorImages();
+$occActionManager = new OccurrenceActionManager();
 
 $occManager->setOccId($occId); 
 $imageArr = $occManager->getImageMap();
@@ -106,6 +108,17 @@ $imageArr = $occManager->getImageMap();
 				<div style="margin-left:10px;">
 					<input type="checkbox" name="nolgimage" value="1" /> Do not keep large version of image, when applicable 
 				</div>
+				<div style="margin:0px 0px 5px 10px;">
+					<b>Describe this image</b>
+				</div>
+                    <?php 
+                       $kArr = $occManager->getImageTagValues();
+                       foreach($kArr as $key => $description) { 
+				          echo "<div style='margin-left:10px;'>\n";
+					      echo "   <input name='ch_$key' type='checkbox' value='0' />$description</br>\n";
+                          echo "</div>\n";
+                       }
+                    ?>
 				<div style="margin:10px 0px 10px 20px;">
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 					<input type="hidden" name="tid" value="<?php echo $tid; ?>" />
@@ -181,6 +194,19 @@ $imageArr = $occManager->getImageMap();
 							<div>
 								<b>Notes:</b> 
 								<?php echo $imgArr["notes"]; ?>
+							</div>
+							<div>
+								<b>Tags:</b> 
+                                <?php 
+                                   $kArr = $occManager->getImageTagUsage($imgId);
+                                   $comma = "";
+                                   foreach($kArr as $tags) { 
+				                       if ($tags->value==1) { 
+				                   	      echo "$comma$tags->shortlabel";
+				                   	      $comma = ",";  
+                                       }
+                                   }
+                                ?>   
 							</div>
 							<div>
 								<b>Copyright:</b>
@@ -291,6 +317,19 @@ $imageArr = $occManager->getImageMap();
 											<input name='oldtnurl' type='hidden' value='<?php echo $imgArr["tnurl"];?>' />
 										<?php } ?>
 									</div>
+				                    <div>
+					                   <b>Describe this image</b>
+				                    </div>
+                                        <?php 
+                                           $kArr = $occManager->getImageTagUsage($imgId);
+                                           foreach($kArr as $tags) { 
+				                              echo "<div style='margin-left:10px;'>\n";
+				                              if ($tags->value==1) { $checked = 'CHECKED'; } else { $checked=''; }  
+					                          echo "   <input name='ch_".$tags->tagkey."' type='checkbox' $checked value='".$tags->value."' />".$tags->description."\n";
+					                          echo "   <input name='hidden_".$tags->tagkey."' type='hidden' value='".$tags->value."' />\n";
+                                              echo "</div>\n";
+                                           }
+                                         ?>									
 									<div style="margin-top:10px;">
 										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
@@ -300,45 +339,39 @@ $imageArr = $occManager->getImageMap();
 									</div>
 								</fieldset>
 							</form>
-							<?php 
-							if($_REQUEST['em'] == 1 || $paramsArr['un'] == $imgArr["username"]){
-								?>
-								<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
-									<fieldset>
-										<legend><b>Delete Image</b></legend>
-										<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+							<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
+								<fieldset>
+									<legend><b>Delete Image</b></legend>
+									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
+									<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
+									<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
+									<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+									<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+									<div style="margin-left:20px;">
+										(Note: leaving unchecked removes image from database w/o removing from server)
+									</div>
+									<input type="submit" name="submitaction" value="Delete Image" />
+								</fieldset>
+							</form>
+							<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
+								<fieldset>
+									<legend><b>Remap to Another Specimen</b></legend>
+									<div>
+										<b>Occurrence Record #:</b> 
+										<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
+										<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
+											Open Occurrence Linking Aid
+										</span>
+									</div>
+									<div style="margin-left:20px;">
+										* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
-										<div style="margin-left:20px;">
-											(Note: leaving unchecked removes image from database w/o removing from server)
-										</div>
-										<input type="submit" name="submitaction" value="Delete Image" />
-									</fieldset>
-								</form>
-								<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
-									<fieldset>
-										<legend><b>Remap to Another Specimen</b></legend>
-										<div>
-											<b>Occurrence Record #:</b> 
-											<input id="imgoccid-<?php echo $imgId; ?>" name="occid" type="text" value="" />
-											<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
-												Open Occurrence Linking Aid
-											</span>
-										</div>
-										<div style="margin-left:20px;">
-											* Leave Occurrence Record Number blank to completely remove mapping to a specimen record <br/>
-											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
-											<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-											<input type="submit" name="submitaction" value="Remap Image" />
-										</div>
-									</fieldset>
-								</form>
-								<?php
-							}
-							?>
+										<input type="submit" name="submitaction" value="Remap Image" />
+									</div>
+								</fieldset>
+							</form>
 						</div>
 						<hr/>
 					</td>
@@ -352,7 +385,17 @@ $imageArr = $occManager->getImageMap();
 		else{
 			?>
 			<h2>No images linked to this collection record.</h2>
-			<div style="margin-left:15px;">Click symbol to right to add an image</div>
+			<div style="margin-left:15px;">Click + symbol at above right to add an image</div>
+            <?php
+              if ($RequestTrackingIsActive==1) { 
+			     echo "<div style=\"margin-left:15px;\"><button onClick=' requestImage() '>Make an imaging request.</button></div><div id='imagerequestresult'></div>";
+                 echo "<div>"; 
+                 foreach ($occActionManager->listOccurrenceActionRequests($occId) as $request) { 
+                   echo "$request<br/>";
+                 }
+                 echo "</div>";
+              }
+            ?>
 			<?php 
 		}
 		?>

@@ -42,7 +42,7 @@ class OccurrenceEditorManager {
 	
 	public function setOccId($id){
 		if(is_numeric($id)){
-			$this->occid = $this->conn->real_escape_string($id);
+			$this->occid = $this->cleanInStr($id);
 		}
 	}
 	
@@ -52,7 +52,7 @@ class OccurrenceEditorManager {
 
 	public function setCollId($id){
 		if($id && is_numeric($id)){
-			$this->collId = $this->conn->real_escape_string($id);
+			$this->collId = $this->cleanInStr($id);
 		}
 	}
 
@@ -81,6 +81,7 @@ class OccurrenceEditorManager {
 				$rs->free();
 			}
 		}
+		if(!$this->collId) $this->collId = $this->collMap['collid'];
 		return $this->collMap;
 	}
 	
@@ -133,6 +134,10 @@ class OccurrenceEditorManager {
 	public function setSqlWhere($occIndex=0, $recLimit = 1){
 		$sqlWhere = '';
 		$sqlOrderBy = '';
+        if ($this->qryArr==null) { 
+            // supress warnings on array_key_exists(key,null) calls below
+            $this->qryArr=array(); 
+        } 
 		if(array_key_exists('id',$this->qryArr)){
 			$idTerm = $this->qryArr['id'];
 			if(strtolower($idTerm) == 'is null'){
@@ -482,7 +487,14 @@ class OccurrenceEditorManager {
 	public function editOccurrence($occArr,$autoCommit){
 		global $paramsArr;
 		$status = '';
-		if(!$autoCommit && $this->getObserverUid() == $paramsArr['uid']) $autoCommit = 1;
+		if(!$autoCommit && $this->getObserverUid() == $paramsArr['uid']){
+			//Specimen is owned by editor 
+			$autoCommit = 1;
+		}
+		if($autoCommit == 3){
+			//Is a Taxon Editor, but without explicit rights to edit this occurrence
+			$autoCommit = 0;
+		}
 		
 		$editedFields = trim($occArr['editedfields']);
 		$editArr = array_unique(explode(';',$editedFields));
@@ -521,29 +533,31 @@ class OccurrenceEditorManager {
 				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
 			foreach($editArr as $fieldName){
 				if(!array_key_exists($fieldName,$occArr)){
-					//Field is a checkbox that is unchecked
+					//Field is a checkbox that is unchecked: cultivationstatus, localitysecurity
 					$occArr[$fieldName] = 0;
 				}
 				$newValue = $this->cleanInStr($occArr[$fieldName]);
 				$oldValue = $this->cleanInStr($oldValues[$fieldName]);
 				//Version edits only if value has changed and is not a skeletal record with previously null values 
 				if($oldValue != $newValue && (!$isSkeletal || $oldValue)){
-					if($fieldName == 'ometid'){
-						//Exsiccati title has been changed, thus grab title string
-						$exsTitleStr = '';
-						$sql = 'SELECT title FROM omexsiccatititles WHERE ometid = '.$occArr['ometid'];
-						$rs = $this->conn->query($sql);
-						if($r = $rs->fetch_object()){
-							$exsTitleStr = $r->title;
+					if($fieldName != 'tidinterpreted'){
+						if($fieldName == 'ometid'){
+							//Exsiccati title has been changed, thus grab title string
+							$exsTitleStr = '';
+							$sql = 'SELECT title FROM omexsiccatititles WHERE ometid = '.$occArr['ometid'];
+							$rs = $this->conn->query($sql);
+							if($r = $rs->fetch_object()){
+								$exsTitleStr = $r->title;
+							}
+							$rs->free();
+							//Setup old and new strings
+							if($newValue) $newValue = $exsTitleStr.' (ometid: '.$occArr['ometid'].')';
+							if($oldValue) $oldValue = $oldValues['title'].' (ometid: '.$oldValues['ometid'].')';
 						}
-						$rs->free();
-						//Setup old and new strings
-						if($newValue) $newValue = $exsTitleStr.' (ometid: '.$occArr['ometid'].')';
-						if($oldValue) $oldValue = $oldValues['title'].' (ometid: '.$oldValues['ometid'].')';
+						$sqlEdit = $sqlEditsBase.'"'.$fieldName.'","'.$newValue.'","'.$oldValue.'")';
+						//echo '<div>'.$sqlEdit.'</div>';
+						$this->conn->query($sqlEdit);
 					}
-					$sqlEdit = $sqlEditsBase.'"'.$fieldName.'","'.$newValue.'","'.$oldValue.'")';
-					//echo '<div>'.$sqlEdit.'</div>';
-					$this->conn->query($sqlEdit);
 				}
 			}
 			//Edit record only if user is authorized to autoCommit 
@@ -562,25 +576,17 @@ class OccurrenceEditorManager {
 					if(in_array($oField,$this->occFieldArr) && $oField != 'observeruid'){
 						$vStr = $this->cleanInStr($ov);
 						$sql .= ','.$oField.' = '.($vStr!==''?'"'.$vStr.'"':'NULL');
+						//Adjust occurrenceMap which was generated but edit was submitted and will not be re-harvested afterwards
 						if(array_key_exists($this->occid,$this->occurrenceMap) && array_key_exists($oField,$this->occurrenceMap[$this->occid])){
 							$this->occurrenceMap[$this->occid][$oField] = $vStr;
 						}
 					}
 				}
 				//Add tidinterpreted
-				if(in_array('sciname',$editArr) && in_array('sciname',$occArr) && $occArr['sciname']){
-					$sqlTid = 'SELECT tid FROM taxa WHERE (sciname = "'.$occArr['sciname'].'")';
-					$rsTid = $this->conn->query($sqlTid);
-					$newTid = '';
-					if($r = $rsTid->fetch_object()){
-						$newTid = $r->tid;
-						$sql .= ',tidinterpreted = '.$newTid;
-					}
-					else{
-						$sql .= ',tidinterpreted = NULL';
-					}
+				if(in_array('tidinterpreted',$editArr)){
 					//Remap images
-					$sqlImgTid = 'UPDATE images SET tid = '.($newTid?$newTid:'NULL').' WHERE occid = ('.$occArr['occid'].')';
+					$sqlImgTid = 'UPDATE images SET tid = '.($occArr['tidinterpreted']?$occArr['tidinterpreted']:'NULL').' '.
+						'WHERE occid = ('.$occArr['occid'].')';
 					$this->conn->query($sqlImgTid);
 				}
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
@@ -677,7 +683,7 @@ class OccurrenceEditorManager {
 			($occArr["ownerinstitutioncode"]?'"'.$this->cleanInStr($occArr["ownerinstitutioncode"]).'"':"NULL").','.
 			($occArr["family"]?'"'.$this->cleanInStr($occArr["family"]).'"':"NULL").','.
 			'"'.$this->cleanInStr($occArr["sciname"]).'",'.
-			($occArr["tidtoadd"]?$occArr["tidtoadd"]:"NULL").','.
+			($occArr["tidinterpreted"]?$occArr["tidinterpreted"]:"NULL").','.
 			($occArr["scientificnameauthorship"]?'"'.$this->cleanInStr($occArr["scientificnameauthorship"]).'"':"NULL").','.
 			($occArr["identifiedby"]?'"'.$this->cleanInStr($occArr["identifiedby"]).'"':"NULL").','.
 			($occArr["dateidentified"]?'"'.$this->cleanInStr($occArr["dateidentified"]).'"':"NULL").','.
@@ -944,7 +950,7 @@ class OccurrenceEditorManager {
 
 	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
 		$statusStr = '';
-		$fn = $this->conn->real_escape_string($fieldName);
+		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 		$nv = $this->cleanInStr($newValue);
 		if($fn && ($ov || $nv)){
@@ -984,7 +990,7 @@ class OccurrenceEditorManager {
 	}
 	
 	public function getBatchUpdateCount($fieldName,$oldValue,$buMatch){
-		$fn = $this->conn->real_escape_string($fieldName);
+		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 		$sql = 'SELECT COUNT(o.occid) AS retcnt FROM omoccurrences o ';
 		//Add raw string fragment if present, yet unlikely
@@ -1228,6 +1234,124 @@ class OccurrenceEditorManager {
 			$isLocked = true;
 		}
 		return $isLocked;
+	}
+
+	/*
+	 * Return: 0 = false, 2 = full editor, 3 = taxon editor, but not for this collection
+	 */
+	public function isTaxonomicEditor(){
+		global $USER_RIGHTS;
+		$isEditor = 0;
+		
+		//Get list of userTaxonomyIds that user has been aproved for this collection
+		$udIdArr = array();
+		if(array_key_exists('CollTaxon',$USER_RIGHTS)){
+			foreach($USER_RIGHTS['CollTaxon'] as $vStr){
+				$tok = explode(':',$vStr);
+				if($tok[0] == $this->collId){
+					//Collect only userTaxonomyIds that are relevant to current collid
+					$udIdArr[] = $tok[1];
+				}
+			}
+		} 
+		//Grab taxonomic node id and geographic scopes
+		$editTidArr = array();
+		$sqlut = 'SELECT idusertaxonomy, tid, geographicscope '.
+			'FROM usertaxonomy '.
+			'WHERE editorstatus = "OccurrenceEditor" AND uid = '.$GLOBALS['SYMB_UID'];
+		//echo $sqlut;
+		$rsut = $this->conn->query($sqlut);
+		while($rut = $rsut->fetch_object()){
+			if(in_array('all',$udIdArr) || in_array($rut->idusertaxonomy,$udIdArr)){
+				//Is an approved editor for given collection
+				$editTidArr[2][$rut->tid] = $rut->geographicscope;
+			}
+			else{
+				//Is a taxonomic editor, but not explicitly approved for this collection
+				$editTidArr[3][$rut->tid] = $rut->geographicscope;
+			}
+		}
+		$rsut->free();
+		//Get relevant tids for active occurrence
+		if($editTidArr){
+			$occTidArr = array();
+			$tid = 0;
+			$sciname = '';
+			$family = '';
+			if($this->occurrenceMap && $this->occurrenceMap['tidinterpreted']){
+				$tid = $this->occurrenceMap['tidinterpreted'];
+				$sciname = $this->occurrenceMap['sciname'];
+				$family = $this->occurrenceMap['family'];
+			}
+			if(!$tid && !$sciname && !$family){
+				$sql = 'SELECT tidinterpreted, sciname, family '.
+					'FROM omoccurrences '.
+					'WHERE occid = '.$this->occid;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$tid = $r->tidinterpreted;
+					$sciname = $r->sciname;
+					$family = $r->family;
+				}
+				$rs->free();
+			}
+			//Get relevant tids
+			if($tid){
+				$occTidArr[] = $tid;
+				$sql2 = 'SELECT hierarchystr, parenttid '.
+					'FROM taxstatus '.
+					'WHERE taxauthid = 1 AND (tid = '.$tid.')';
+				$rs2 = $this->conn->query($sql2);
+				while($r2 = $rs2->fetch_object()){
+					$occTidArr[] = $r2->parenttid;
+					$occTidArr = array_merge($occTidArr,explode(',',$r2->hierarchystr));
+				}
+				$rs2->free();
+			}
+			elseif($sciname || $family){
+				//Get all relevant tids within the taxonomy hierarchy
+				$sqlWhere = '';
+				if($sciname){
+					//Try to isolate genus
+					$taxon = $sciname;
+					$tok = explode(' ',$sciname);
+					if(count($tok) > 1){
+						if(strlen($tok[0]) > 2) $taxon = $tok[0];
+					}
+					$sqlWhere .= '(t.sciname = "'.$this->cleanInStr($taxon).'") ';
+				}
+				elseif($family){
+					$sqlWhere .= '(t.sciname = "'.$this->cleanInStr($family).'") ';
+				}
+				if($sqlWhere){
+					$sql2 = 'SELECT DISTINCT ts.hierarchystr, ts.parenttid '.
+						'FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
+						'WHERE ts.taxauthid = 1 AND ('.$sqlWhere.')';
+					//echo $sql2;
+					$rs2 = $this->conn->query($sql2);
+					while($r2 = $rs2->fetch_object()){
+						$occTidArr[] = $r2->parenttid;
+						$occTidArr = array_merge($occTidArr,explode(',',$r2->hierarchystr));
+					}
+					$rs2->free();
+				}
+			}
+			if($occTidArr){
+				//Check to see if approved tids have overlap 
+				if(array_key_exists(2,$editTidArr) && array_intersect(array_keys($editTidArr[2]),$occTidArr)){
+					$isEditor = 2;
+					//TODO: check to see if specimen is within geographic scope
+				}
+				//If not, check to see if unapproved tids have overlap (e.g. taxon editor, but w/o explicit rights 
+				if(!$isEditor){
+					if(array_key_exists(3,$editTidArr) && array_intersect(array_keys($editTidArr[3]),$occTidArr)){
+						$isEditor = 3;
+						//TODO: check to see if specimen is within geographic scope
+					}					
+				}
+			}
+		}
+		return $isEditor;
 	}
 	
 	//Misc functions
