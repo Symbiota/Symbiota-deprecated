@@ -504,4 +504,4 @@ class ExsiccatiManager {
 		return $newStr;
 	}
 }
-?> 
+?>

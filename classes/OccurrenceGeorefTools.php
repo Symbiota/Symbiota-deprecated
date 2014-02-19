@@ -363,4 +363,4 @@ class OccurrenceGeorefTools {
 		return ($aCnt > $bCnt) ? -1 : 1;
 	}
 }
-?> 
+?>

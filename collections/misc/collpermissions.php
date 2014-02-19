@@ -1,48 +1,64 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionPermissions.php');
+include_once($serverRoot.'/classes/PermissionsManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
-$permManager = new CollectionPermissions();
-$permManager->setCollectionId($collId);
+$permManager = new PermissionsManager();
 
 $isEditor = 0;		 
-if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($SYMB_UID){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
 		$isEditor = 1;
 	}
 }
 
 if($isEditor){
 	if(array_key_exists('deladmin',$_GET)){
-		$uid = $_GET['deladmin'];
-		$permManager->deletePermission($uid,'admin');
+		$permManager->deletePermission($_GET['deladmin'],'CollAdmin-'.$collId);
 	}
 	elseif(array_key_exists('deleditor',$_GET)){
-		$uid = $_GET['deleditor'];
-		$permManager->deletePermission($uid,'editor');
+		$permManager->deletePermission($_GET['deleditor'],'CollEditor-'.$collId);
 	}
 	elseif(array_key_exists('delrare',$_GET)){
-		$uid = $_GET['delrare'];
-		$permManager->deletePermission($uid,'rare');
+		$permManager->deletePermission($_GET['delrare'],'RareSppReader-'.$collId);
+	}
+	elseif(array_key_exists('delidenteditor',$_GET)){
+		$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon-'.$collId.':'.$_GET['utid']);
+		if(is_numeric($_GET['utid'])){
+			$permManager->deletePermission($_GET['delidenteditor'],'CollTaxon-'.$collId.':all');
+		}
 	}
 	elseif($action == 'Add Permissions for User'){
-		$uid = $_POST['uid'];
-		$right = $_POST['righttype'];
-		$permManager->addUser($uid,$right);
+		$rightType = $_POST['righttype'];
+		$userRight = '';
+		if($$rightType == 'admin'){
+			$userRight = 'CollAdmin-'.$collId;
+		}
+		elseif($rightType == 'editor'){
+			$userRight = 'CollEditor-'.$collId;
+		}
+		elseif($rightType == 'rare'){
+			$userRight = 'RareSppReader-'.$collId;
+		}
+		$permManager->addPermission($_POST['uid'],$userRight);
+	}
+	elseif($action == 'Add Identification Editor'){
+		$identEditor = $_POST['identeditor'];
+		$pTokens = explode(':',$identEditor);
+		$permManager->addPermission($pTokens[0],'CollTaxon-'.$collId.':'.$pTokens[1]);
 	}
 }
-
-$collData = $permManager->getCollectionData();
-
+$collData = current($permManager->getCollectionMetadata($collId));
+$collName = '';
+if($collData) $collName = $collData['collectionname'];
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." ".($collId?$collData["collectionname"]:"") ; ?> Collection Permissions</title>
+	<title><?php echo $collName; ?> Collection Permissions</title>
 	<link rel="stylesheet" href="../../css/main.css" type="text/css" />
 	<script language=javascript>
 		function verifyAddRights(f){
@@ -57,6 +73,7 @@ $collData = $permManager->getCollectionData();
 			return true;
 		}
 	</script>
+	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 </head>
 <body>
 	<?php
@@ -65,19 +82,18 @@ $collData = $permManager->getCollectionData();
 	if(isset($collections_misc_collpermissionsCrumbs)){
 		if($collections_misc_collpermissionsCrumbs){
 			echo "<div class='navpath'>";
-			echo "<a href='../../index.php'>Home</a> &gt; ";
+			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 			echo $collections_misc_collpermissionsCrumbs;
-			echo " <b>".($collData?$collData["collectionname"]:"Collection Profiles")."</b>";
+			echo " <b>".($collName?$collName:"Collection Profiles")."</b>";
 			echo "</div>";
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt; 
-			<a href='../index.php'>Collections</a> &gt; 
-			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt; 
-			<b><?php echo $collData['collectionname'].' Permissions'; ?></b>
+			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt;&gt; 
+			<b><?php echo $collName.' Permissions'; ?></b>
 		</div>
 		<?php 
 	}
@@ -87,7 +103,7 @@ $collData = $permManager->getCollectionData();
 	<div id="innertext">
 		<?php
 		if($isEditor){
-			$collPerms = $permManager->getEditors();
+			$collPerms = $permManager->getCollectionEditors($collId);
 			?>
 			<fieldset style="margin:15px;padding:15px;">
 				<legend><b>Administrators</b></legend>
@@ -112,8 +128,8 @@ $collData = $permManager->getCollectionData();
 					<?php 
 				}
 				else{
-					echo '<div style="font-weight:bold;font-size:120%;">';
-					echo 'No one has explicitly assigned Administrative Permissions (excluding Super Admins)';
+					echo '<div style="font-weight:bold;">';
+					echo 'There are no administrative permissions (excluding Super Admins)';
 					echo '</div>';
 				}
 				?>
@@ -141,8 +157,8 @@ $collData = $permManager->getCollectionData();
 					<?php 
 				}
 				else{
-					echo '<div style="font-weight:bold;font-size:120%;">';
-					echo 'No one has explicitly assigned Editor Permissions';
+					echo '<div style="font-weight:bold;">';
+					echo 'There are no general Editor permissions';
 					echo '</div>';
 				}
 				?>
@@ -173,13 +189,13 @@ $collData = $permManager->getCollectionData();
 					<?php 
 				}
 				else{
-					echo '<div style="font-weight:bold;font-size:110%;">';
-					echo 'No one has explicitly assigned permissions to view locality data for species with a Rare/Threatened/Protected Species status';
+					echo '<div style="font-weight:bold;">';
+					echo 'There are no Sensitive Species Reader permissions';
 					echo '</div>';
 				}
 				?>
 				<div style="margin:10px">
-					*Administrators and Editors automatically inherit protected species viewing rights
+					*Administrators and editors automatically inherit protected species viewing rights
 				</div>
 			</fieldset>
 			<fieldset style="margin:15px;padding:15px;">
@@ -208,7 +224,111 @@ $collData = $permManager->getCollectionData();
 					</div> 
 				</form>
 			</fieldset>
-			<?php
+			<?php 
+			$taxonEditorArr = $permManager->getTaxonEditorArr($collId,1);
+			$taxonSelectArr = $permManager->getTaxonEditorArr($collId,0);
+			if($taxonEditorArr || $taxonSelectArr){
+				?>
+				<fieldset style="margin:15px;padding:15px;">
+					<legend><b>Identification Editors</b></legend>
+					<div style="float:right;" title="Add a new user">
+						<a href="#" onclick="toggle('addUserDiv');return false;">
+							<img style='border:0px;width:15px;' src='../../images/add.png'/>
+						</a>
+					</div>
+					<div id="addUserDiv" style="display:none;">
+						<fieldset style="margin:15px;padding:15px;">
+							<legend><b>Add Identification Editor</b></legend>
+							<div style="margin:0px 20px 10px 10px;">
+								The user list below contains only Identification Editors that been approved by a portal manager. 
+								Contact your portal manager to request the addition of a new user.
+							</div>
+							<div style="margin:10px;">
+								<form name="addidenteditor" action="collpermissions.php" method="post" onsubmit="return verifyAddIdentEditor(this)">
+									<div>
+										<b>User</b><br/> 
+										<select name="identeditor">
+											<option value="">Select User</option>
+											<option value="">--------------------------</option>
+											<?php 
+											foreach($taxonSelectArr as $uid => $uArr){
+												$username = $uArr['username'];
+												unset($uArr['username']);
+												if(!isset($taxonEditorArr[$uid]['all'])) echo '<option value="'.$uid.':all">'.$username.' - All Approved Taxonomy</option>';
+												unset($uArr['all']);
+												foreach($uArr as $utid => $sciname){
+													if(!isset($taxonEditorArr[$uid]['utid'][$utid])) echo '<option value="'.$uid.':'.$utid.'">'.$username.' - '.$sciname.'</option>';
+												}
+											}
+											?>
+										</select> 
+									</div>
+									<div style="margin:15px 0px">
+										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+										<input name="action" type="submit" value="Add Identification Editor" />
+									</div> 
+								</form>
+							</div>
+						</fieldset>
+					</div>
+					<div style="margin:10px;">
+						Following users have permission to edit occurrence records that are  
+						insignificantly identified to a taxon that is within the scope of their taxonomic interest 
+						and has an identification confidence ranking value of less than 6. 
+						Identification Editors can also edit occurrence records that are only identified to 
+						order or above or lack an identification altogether.
+					</div>
+					<?php 
+					if($taxonEditorArr){
+						?>
+						<ul>
+						<?php 
+						foreach($taxonEditorArr as $uid => $uArr){
+							$username = $uArr['username'];
+							unset($uArr['username']);
+							$hasAll = false;
+							if(array_key_exists('all',$uArr)){
+								$hasAll = true;
+								unset($uArr['all']);
+								?>
+								<li>
+									<?php echo $username.' (All approved taxonomic ranges listed below)'; ?> 
+									<a href="collpermissions.php?collid=<?php echo $collId.'&delidenteditor='.$uid.'&utid=all'; ?>" onclick="return confirm('Are you sure you want to remove identification editing rights for this user?');" title="Delete permissions for this user">
+										<img src="../../images/drop.png" style="width:12px;" />
+									</a>
+								</li>
+								<?php
+							}
+							foreach($uArr as $utid => $sciname){
+								?>
+								<li>
+									<?php 
+									echo $username.' ('.$sciname.')';
+									if(!$hasAll){ 
+										?> 
+										<a href="collpermissions.php?collid=<?php echo $collId.'&delidenteditor='.$uid.'&utid='.$utid; ?>" onclick="return confirm('Are you sure you want to remove identification editing rights for this user?');" title="Delete permissions for this user">
+											<img src="../../images/drop.png" style="width:12px;" />
+										</a>
+										<?php 
+									}
+									?>
+								</li>
+								<?php
+							} 
+						}
+						?>
+						</ul>
+						<?php 
+					}
+					else{
+						echo '<div style="font-weight:bold;margin:20px">';
+						echo 'There are no Identification Editor permissions';
+						echo '</div>';
+					}
+					?>
+				</fieldset>
+				<?php
+			}
 		}
 		else{
 			echo '<div style="font-weight:bold;font-size:120%;">';

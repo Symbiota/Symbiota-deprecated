@@ -330,6 +330,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
 				            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
 				            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
+				            if($fieldArr["date1"] || $fieldArr["date1"]) $localStr .= $fieldArr["date1"]."-" . $fieldArr["date2"] . "m, ";
 				            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
 				            ?>
 				            <td colspan='3'>

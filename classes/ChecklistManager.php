@@ -589,4 +589,4 @@ class ChecklistManager {
 		return $str;
 	}
 }
-?> 
+?>

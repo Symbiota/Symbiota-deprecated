@@ -19,7 +19,7 @@ class ImageCleaner{
 		$this->rootPathBase = $GLOBALS["imageRootPath"];
 		if(substr($this->rootPathBase,-1) != "/") $this->rootPathBase .= "/";  
 		$this->urlPath = $GLOBALS["imageRootUrl"];
-		if(!$this->urlPath) exit('imageRootUrl is not set');
+		if(!$this->urlPath) exit('FATAL ERROR: imageRootUrl is not set');
 		if(substr($this->urlPath,-1) != "/") $this->urlPath .= "/";
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		
@@ -35,7 +35,7 @@ class ImageCleaner{
 	}
 
 	function __destruct(){
-		$this->conn->close();
+		if($this->conn) $this->conn->close();
 	}
 
 	public function getMissingTnCount(){
@@ -115,18 +115,19 @@ class ImageCleaner{
 			//Create file names
 			$fileName = substr($sourcePath,strrpos($sourcePath,'/')+1);
 			
-			if(file_exists($sourcePath) || $this->url_exists($sourcePath)){
+			//Get image statistics
+			$tempSourcePath = $sourcePath;
+			if(strtolower(substr($sourcePath,0,7)) == 'http://'){
+				$tempPath = $this->getTempPath().time().'.jpg';
+				if(copy($sourcePath,$tempPath)) $tempSourcePath = $tempPath;
+			}
+			if($imgSize = getimagesize($tempSourcePath)){
 				if(is_dir($targetPath)){
-					//Get image statistics
-					$tempSourcePath = $sourcePath;
-					if(strtolower(substr($sourcePath,0,7)) == 'http://'){
-						$tempPath = $this->getTempPath().time().'.jpg';
-						if(copy($sourcePath,$tempPath)) $tempSourcePath = $tempPath;
-					}
-					list($sourceWidth, $sourceHeight) = getimagesize($tempSourcePath);
+					$sourceWidth = $imgSize[0];
+					$sourceHeight = $imgSize[1];
 
 					$sourceImg = imagecreatefromjpeg($tempSourcePath);  
-					
+
 					if($sourceImg){
 						//Create thumbnail
 						if(strtolower(substr($fileName,-4)) == '.jpg"'){
@@ -159,7 +160,7 @@ class ImageCleaner{
 						    $fileSize = 0;
 						    if(!$webIsEmpty){
 							    if(strtolower(substr($tempSourcePath,0,7)) == 'http://'){
-							    	$fileSize = $this->getRemoteSize($tempSourcePath);
+							    	$fileSize = $this->getRemoteFileSize($tempSourcePath);
 							    }
 							    else{
 							    	$fileSize = filesize($tempSourcePath);
@@ -299,24 +300,7 @@ class ImageCleaner{
 		return $tPath;
 	}
 
-	private function url_exists($url) {
-	    // Version 4.x supported
-	    $handle   = curl_init($url);
-	    if (false === $handle)
-	    {
-	        return false;
-	    }
-	    curl_setopt($handle, CURLOPT_HEADER, false);
-	    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
-	    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
-	    curl_setopt($handle, CURLOPT_NOBODY, true);
-	    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
-	    $connectable = curl_exec($handle);
-	    curl_close($handle);  
-	    return $connectable;
-	}
-
-	private function getRemoteSize($remoteFile){
+	private function getRemoteFileSize($remoteFile){
 		$ch = curl_init($remoteFile);
 		curl_setopt($ch, CURLOPT_NOBODY, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

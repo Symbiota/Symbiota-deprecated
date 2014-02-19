@@ -185,5 +185,4 @@ class SpecProcNlpParser extends SpecProcNlp{
 	}
 
 }
-?>
- 
+?> 

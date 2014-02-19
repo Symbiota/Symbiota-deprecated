@@ -1,8 +1,32 @@
 $(document).ready(function() {
-	$('#tabs').tabs(
-		{ active: tabIndex }
-	);
+	$('#tabs').tabs({ 
+		active: tabIndex,
+		beforeLoad: function( event, ui ) {
+			$(ui.panel).html("<p>Loading...</p>");
+		}
+	});
+
 });
+
+function initTaxonAutoComplete(){
+	$( "#taxoninput" ).autocomplete({
+		source: "rpc/taxasuggest.php",
+		minLength: 4,
+		autoFocus: true
+	});
+}
+
+function verifyAddTaxonomyForm(f){
+	if(f.editorstatus.value == ""){
+		alert("Select the Scope of Relationship");
+		return false;
+	}
+	if(f.taxoninput.value == ""){
+		alert("Select the Taxonomic Name");
+		return false;
+	}
+	return true;
+}
 
 function openMappingAid() {
     mapWindow=open("../tools/mappointaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
@@ -70,22 +94,6 @@ function checkNewLoginForm(f){
     return true;
 }
 
-function deleteLogin(userId,login){
-    if(window.confirm('Are you sure you want to delete '+login+' as a Login?')){
-		dlXmlHttp = GetXmlHttpObject();
-		if(dlXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/deletelogin.php";
-		url=url + "?userid=" + userId + "&login=" + login;
-		url=url + "&sid="+Math.random();
-		document.getElementById("un-"+login).style.display = "none";
-		dlXmlHttp.open("POST",url,true);
-		dlXmlHttp.send(null);
-    }
-}
-
 function verifyClAddForm(f){
 	if(f.nclname.value == ""){
 		alert("The Checklist Name field must have a value before a new checklist can be created");
@@ -104,77 +112,4 @@ function verifyClAddForm(f){
 		return false;
 	}
 	return true;
-}
-
-function toggle(target){
-	var objDiv = document.getElementById(target);
-	if(objDiv){
-		if(objDiv.style.display=="none"){
-			objDiv.style.display = "block";
-		}
-		else{
-			objDiv.style.display = "none";
-		}
-	}
-	else{
-	  	var divs = document.getElementsByTagName("div");
-	  	for(var h = 0; h < divs.length; h++) {
-	  		var divObj = divs[h];
-			if(divObj.className == target){
-				if(divObj.style.display=="none"){
-					divObj.style.display="block";
-				}
-			 	else {
-			 		divObj.style.display="none";
-			 	}
-			}
-		}
-	
-	  	var spans = document.getElementsByTagName("span");
-	  	for(var i = 0; i < spans.length; i++) {
-	  		var spanObj = spans[i];
-			if(spanObj.className == target){
-				if(spanObj.style.display=="none"){
-					spanObj.style.display="inline";
-				}
-			 	else {
-			 		spanObj.style.display="none";
-			 	}
-			}
-		}
-	}
-	return false;
-}
-
-function isNumeric(sText){
-   	var ValidChars = "0123456789-.";
-   	var IsNumber = true;
-   	var Char;
- 
-   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-	   Char = sText.charAt(i); 
-		if(ValidChars.indexOf(Char) == -1){
-			IsNumber = false;
-			break;
-      	}
-   	}
-	return IsNumber;
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

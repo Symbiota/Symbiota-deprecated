@@ -384,4 +384,4 @@ class KeyMassUpdate{
 		$this->childrenStr = implode(",",array_unique($childrenArr));
 	}
 }
-?>	
+?>

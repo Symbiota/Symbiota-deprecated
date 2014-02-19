@@ -279,5 +279,4 @@ class VoucherManager {
 		return $newStr;
 	}
  }
-?>
- 
+?> 

@@ -6,8 +6,6 @@ if(isset($fpEnabled) && $fpEnabled){
 
 class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
-	private $detMap = Array();
-
 	public function __construct(){
  		parent::__construct();
 	}
@@ -17,53 +15,80 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	}
 
 	public function getDetMap($identBy, $dateIdent, $sciName){
-		if(!$this->detMap && $this->occid){
-			$this->setDeterminations($identBy, $dateIdent, $sciName);
-		}
-		return $this->detMap;
-	}
-
-	private function setDeterminations($identBy, $dateIdent, $sciName){
+		$retArr = array();
+		$hasCurrent = 0;
 		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
-			"identificationQualifier, identificationReferences, identificationRemarks, sortsequence ".
+			"identificationQualifier, iscurrent, appliedstatus, identificationReferences, identificationRemarks, sortsequence ".
 			"FROM omoccurdeterminations ".
-			"WHERE (occid = ".$this->occid.") ORDER BY sortsequence";
+			"WHERE (occid = ".$this->occid.") ORDER BY iscurrent DESC, sortsequence";
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$detId = $row->detid;
-			$this->detMap[$detId]["identifiedby"] = $this->cleanOutStr($row->identifiedBy);
-			$this->detMap[$detId]["dateidentified"] = $this->cleanOutStr($row->dateIdentified);
-			$this->detMap[$detId]["sciname"] = $this->cleanOutStr($row->sciname);
-			$this->detMap[$detId]["scientificnameauthorship"] = $this->cleanOutStr($row->scientificNameAuthorship);
-			$this->detMap[$detId]["identificationqualifier"] = $this->cleanOutStr($row->identificationQualifier);
-			$this->detMap[$detId]["identificationreferences"] = $this->cleanOutStr($row->identificationReferences);
-			$this->detMap[$detId]["identificationremarks"] = $this->cleanOutStr($row->identificationRemarks);
-			$this->detMap[$detId]["sortsequence"] = $row->sortsequence;
-			if($row->identifiedBy == $identBy && $row->dateIdentified == $dateIdent && $row->sciname == $sciName){
-				$this->detMap[$detId]["iscurrent"] = "1";
+			$retArr[$detId]["identifiedby"] = $this->cleanOutStr($row->identifiedBy);
+			$retArr[$detId]["dateidentified"] = $this->cleanOutStr($row->dateIdentified);
+			$retArr[$detId]["sciname"] = $this->cleanOutStr($row->sciname);
+			$retArr[$detId]["scientificnameauthorship"] = $this->cleanOutStr($row->scientificNameAuthorship);
+			$retArr[$detId]["identificationqualifier"] = $this->cleanOutStr($row->identificationQualifier);
+			if($row->iscurrent == 1) $hasCurrent = 1;
+			$retArr[$detId]["iscurrent"] = $row->iscurrent;
+			$retArr[$detId]["appliedstatus"] = $row->appliedstatus;
+			$retArr[$detId]["identificationreferences"] = $this->cleanOutStr($row->identificationReferences);
+			$retArr[$detId]["identificationremarks"] = $this->cleanOutStr($row->identificationRemarks);
+			$retArr[$detId]["sortsequence"] = $row->sortsequence;
+		}
+		$result->free();
+		if(!$hasCurrent){
+			//Try to guess which is current
+			foreach($retArr as $detId => $detArr){
+				if($detArr['identifiedby'] == $identBy && $detArr['dateidentified'] == $dateIdent && $detArr['sciname'] == $sciName){
+					$retArr[$detId]["iscurrent"] = "1";
+					break;
+				}
 			}
 		}
-		$result->close();
+		
+		return $retArr;
 	}
-
-	public function addDetermination($detArr){
+	
+	public function addDetermination($detArr,$isEditor){
 		$status = "Determination submitted successfully!";
-		$isCurrent = false;
-		if(array_key_exists('makecurrent',$detArr) && $detArr['makecurrent'] == "1") $isCurrent = true;
+		if(!$this->occid) return 'ERROR: occid is null';
+		$isCurrent = 0;
+		if(!array_key_exists('makecurrent',$detArr)) $detArr['makecurrent'] = 0;
+		if($detArr['makecurrent'] == 1 && $isEditor < 3){
+			$isCurrent = 1;
+		}
+		if($isEditor == 3){
+			$status = "Determination has been added successfully, but is pending approval before being activated";
+		}
 		$sortSeq = 1;
 		if(preg_match('/([1,2]{1}\d{3})/',$detArr['dateidentified'],$matches)){
 			$sortSeq = 2100-$matches[1];
 		}
+		if($isCurrent){
+			//Set all dets for this specimen to not current
+			$sqlSetCur1 = 'UPDATE omoccurdeterminations SET iscurrent = 0 WHERE appliedstatus = 1 AND occid = '.$this->occid;
+			if(!$this->conn->query($sqlSetCur1)){
+				$status = 'ERROR resetting dets to not current: '.$this->conn->error;
+				//$status .= '; '.$sqlSetCur1;
+			}
+		}
 		//Load new determination into omoccurdeterminations
 		$sciname = $this->cleanInStr($detArr['sciname']);
+		$notes = $this->cleanInStr($detArr['identificationremarks']);
+		if($isEditor==3 && is_numeric($detArr['confidenceranking'])) {
+			$notes .= ($notes?'; ':'').'ConfidenceRanking: '.$detArr['confidenceranking'];
+		}
 		$sql = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
-			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'VALUES ('.$detArr['occid'].',"'.$this->cleanInStr($detArr['identifiedby']).'","'.$this->cleanInStr($detArr['dateidentified']).'","'.
+			'identificationQualifier, iscurrent, appliedStatus, identificationReferences, identificationRemarks, sortsequence) '.
+			'VALUES ('.$this->occid.',"'.$this->cleanInStr($detArr['identifiedby']).'","'.$this->cleanInStr($detArr['dateidentified']).'","'.
 			$sciname.'",'.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
 			($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
+			$detArr['makecurrent'].','.($isEditor==3?0:1).','.
 			($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
-			($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').','.$sortSeq.')';
+			($notes?'"'.$notes.'"':'NULL').','.
+			$sortSeq.')';
 		//echo "<div>".$sql."</div>";
 		if($this->conn->query($sql)){
 			//Create and insert Symbiota GUID for determination(UUID)
@@ -79,7 +104,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 					'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, IFNULL(dateidentified,"assumed to be collection date") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-					'FROM omoccurrences WHERE (occid = '.$detArr['occid'].')';
+					'FROM omoccurrences WHERE (occid = '.$this->occid.')';
 				//echo "<div>".$sqlInsert."</div>";
 				if($this->conn->query($sqlInsert)){
 					//Create and insert Symbiota GUID for determination(UUID)
@@ -109,14 +134,16 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').', '.
 					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').', localitysecurity = '.$sStatus.
-					' WHERE (occid = '.$detArr['occid'].')';
+					' WHERE (occid = '.$this->occid.')';
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
-			}
-			$remapImages = false;
-			if(array_key_exists('remapimages',$detArr) && $detArr['remapimages'] == "1") $remapImages = true;
-			if($remapImages){
-				$sql = 'UPDATE images SET tid = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' WHERE (occid = '.$detArr['occid'].')';
+				//Add identification confidence
+				if(isset($detArr['confidenceranking'])){
+					$idStatus = $this->editIdentificationRanking($detArr['confidenceranking'],'');
+					if($idStatus) $status .= '; '.$idStatus;
+				}
+				//Remap images
+				$sql = 'UPDATE images SET tid = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' WHERE (occid = '.$this->occid.')';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR: Annotation added but failed to remap images to new name';
@@ -195,10 +222,38 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 		return $status;
 	}
+	
+	public function applyDetermination($detId, $makeCurrent){
+		$statusStr = 'Determiantion has been applied';
+		//Get ConfidenceRanking value
+		$iqStr = '';
+		$sqlcr = 'SELECT identificationremarks FROM omoccurdeterminations WHERE detid = '.$detId;
+		$rscr = $this->conn->query($sqlcr);
+		if($rcr = $rscr->fetch_object()){
+			$iqStr = $rcr->identificationremarks;
+			if(preg_match('/ConfidenceRanking: (\d{1,2})/',$iqStr,$m)){
+				if($makeCurrent) $this->editIdentificationRanking($m[1],'');
+				$iqStr = trim(str_replace('ConfidenceRanking: '.$m[1],'',$iqStr),' ;');				
+			}
+		}
+		$rscr->free();
+		
+		//Update applied status of det
+		$sql = 'UPDATE omoccurdeterminations '.
+			'SET appliedstatus = 1, iscurrent = '.$makeCurrent.', '.
+			'identificationremarks = '.($iqStr?'"'.$this->cleanInStr($iqStr).'"':'NULL').' WHERE detid = '.$detId;
+		if(!$this->conn->query($sql)){
+			$statusStr = 'ERROR attempting to apply dertermiantion: '.$this->conn->error;
+		}
+		if($makeCurrent){
+			$this->makeDeterminationCurrent($detId);
+		}
+		return $statusStr;
+	}
 
-	public function makeDeterminationCurrent($detId,$remapImages){
+	public function makeDeterminationCurrent($detId){
 		$status = 'Determination is now current!';
-		//Make sure current is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
+		//Make sure determination data within omoccurrences is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
 		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 			'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, '.
@@ -208,8 +263,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		if($this->conn->query($sqlInsert)){
 			//Create and insert Symbiota GUID for determination(UUID)
 			$guid = UuidFactory::getUuidV4();
-			$detId = $this->conn->insert_id;
-			if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$detId.')')){
+			if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$this->conn->insert_id.')')){
 				$status .= ' (Warning: Symbiota GUID mapping #1 failed)';
 			}
 		}
@@ -239,17 +293,61 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			' WHERE (detid = '.$detId.')';
 		//echo "<div>".$sqlNewDet."</div>";
 		$this->conn->query($sqlNewDet);
+		//Set all dets for this specimen to not current
+		$sqlSetCur1 = 'UPDATE omoccurdeterminations SET iscurrent = 0 WHERE occid = '.$this->occid;
+		if(!$this->conn->query($sqlSetCur1)){
+			$status = 'ERROR resetting dets to not current: '.$this->conn->error;
+			//$status .= '; '.$sqlSetCur1;
+		}
+		//Set targetted det to current
+		$sqlSetCur2 = 'UPDATE omoccurdeterminations SET iscurrent = 1 WHERE detid = '.$detId;
+		if(!$this->conn->query($sqlSetCur2)){
+			$status = 'ERROR setting target det to current: '.$this->conn->error;
+			//$status .= '; '.$sqlSetCur2;
+		}
 
-		if($remapImages){
-			if($tid){
-				$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occid.')';
-				//echo $sql;
-				$this->conn->query($sql);
-			}
-			else{
-				$status = 'ERROR: Annotation made current but failed to remap image because taxon name not linked to taxonomic thesaurus.';
-			}
+		if($tid){
+			$sql = 'UPDATE images SET tid = '.$tid.' WHERE (occid = '.$this->occid.')';
+			//echo $sql;
+			$this->conn->query($sql);
+		}
+		else{
+			$status = 'ERROR: Annotation made current but failed to remap image because taxon name not linked to taxonomic thesaurus.';
 		}
 	}
+
+	public function getIdentificationRanking(){
+		//Get Identification ranking
+		$retArr = array();
+		$sql = 'SELECT v.ovsid, v.ranking, v.notes, l.username '.
+			'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
+			'WHERE v.category = "identification" AND v.occid = '.$this->occid;
+		//echo "<div>".$sql."</div>";
+		$rs = $this->conn->query($sql);
+		//There can only be one identification ranking per specimen
+		if($r = $rs->fetch_object()){
+			$retArr['ovsid'] = $r->ovsid;
+			$retArr['ranking'] = $r->ranking;
+			$retArr['notes'] = $r->notes;
+			$retArr['username'] = $r->username;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function editIdentificationRanking($ranking,$notes){
+		$statusStr = '';
+		if(is_numeric($ranking)){
+			//Will be replaced if an identification ranking already exists for occurrence record 
+			$sql = 'REPLACE INTO omoccurverification(occid,category,ranking,notes,uid) '.
+				'VALUES('.$this->occid.',"identification",'.$ranking.','.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.$GLOBALS['SYMB_UID'].')';
+			if(!$this->conn->query($sql)){
+				$statusStr .= 'WARNING editing/add confidence ranking failed ('.$this->conn->error.') ';
+				//echo $sql;
+			}
+		}
+		return $statusStr;
+	}
+
 }
 ?>

@@ -161,7 +161,7 @@ class OccurrenceManager{
 						//$sql2 = "SELECT DISTINCT ts.family FROM taxstatus ts ".
 						//	"WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE '%,".$r1->tid.",%') AND ts.family IS NOT NULL AND ts.family <> '' ";
 						$sql2 = 'SELECT DISTINCT t.sciname FROM taxstatus ts INNER JOIN taxa t ON ts.tid = t.tid '.
-							'WHERE ts.taxauthid = 1 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%") AND t.rankid = 140';
+							'WHERE ts.taxauthid = 1 AND t.rankid = 140 AND (ts.hierarchystr LIKE "%,'.$r1->tid.',%" OR ts.parenttid = '.$r1->tid.') ';
 						$sqlWhereTaxa .= "OR (o.family IN(".$sql2.")) ";
 					}
 				}
@@ -256,6 +256,17 @@ class OccurrenceManager{
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(" OR ",$localArr);
+		}
+		if(array_key_exists("elevlow",$this->searchTermsArr) || array_key_exists("elevhigh",$this->searchTermsArr)){
+            $elevlow = 0;
+            $elevhigh = 30000;
+            if (array_key_exists("elevlow",$this->searchTermsArr))  { $elevlow = $this->searchTermsArr["elevlow"]; } 
+            if (array_key_exists("elevhigh",$this->searchTermsArr))  { $elevhigh = $this->searchTermsArr["elevhigh"]; } 
+			$tempArr = Array();
+			$sqlWhere .= "AND ( " .
+                         "      ( minimumElevationInMeters >= $elevlow AND maximumElevationInMeters <= $elevhigh ) OR " .
+                         "      ( maximumElevationInMeters is null AND minimumElevationInMeters >= $elevlow AND minimumElevationInMeters <= $elevhigh ) ".
+                         "    ) ";
 		}
 		if(array_key_exists("llbound",$this->searchTermsArr)){
 			$llboundArr = explode(";",$this->searchTermsArr["llbound"]);
@@ -1031,6 +1042,30 @@ class OccurrenceManager{
 			}
 			else{
 				unset($this->searchTermsArr["local"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("elevlow",$_REQUEST)){
+			$elevlow = $this->conn->real_escape_string(trim($_REQUEST["elevlow"]));
+			if($elevlow){
+				$str = str_replace(",",";",$elevlow);
+				$searchArr[] = "elevlow:".$str;
+				$this->searchTermsArr["elevlow"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["elevlow"]);
+			}
+			$searchFieldsActivated = true;
+		}
+		if(array_key_exists("elevhigh",$_REQUEST)){
+			$elevhigh = $this->conn->real_escape_string(trim($_REQUEST["elevhigh"]));
+			if($elevhigh){
+				$str = str_replace(",",";",$elevhigh);
+				$searchArr[] = "elevhigh:".$str;
+				$this->searchTermsArr["elevhigh"] = $str;
+			}
+			else{
+				unset($this->searchTermsArr["elevhigh"]);
 			}
 			$searchFieldsActivated = true;
 		}

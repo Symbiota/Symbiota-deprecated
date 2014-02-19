@@ -768,22 +768,6 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 		
-		if(stripos($this->collMetadataArr["managementtype"],'snapshot') !== false){
-			//Update DBPKs for records that were processed via the portal, walked back to collection's central database, and now come back to portal with assigned DBPKs 
-			$this->outputMsg('<li style="font-weight:bold;">Updating DBPKs for records originally processed in portal, walked back to central database, and now return to portal with assigned DBPKs... ');
-			ob_flush();
-			flush();
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
-				'SET o.dbpk = u.dbpk '.
-				'WHERE u.collid = '.$this->collId.' AND o.dbpk IS NULL AND u.dbpk IS NOT NULL';
-			if($this->conn->query($sql)){
-				$this->outputMsg('Done!</li> ');
-			}
-			else{
-				$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
-			}
-		}
-		
 		$this->outputMsg('<li style="font-weight:bold;">Inserting new records into active occurrence table... ');
 		ob_flush();
 		flush();
@@ -824,6 +808,24 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
 		}
 
+		$this->outputMsg('<li style="font-weight:bold;">Linking to newly inserted occurrences in prep for loading determiantion history and associatedmedia... ');
+		ob_flush();
+		flush();
+		//Update occid by matching dbpk 
+		$sqlOcc1 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.dbpk = o.dbpk AND u.collid = o.collid '.
+			'SET u.occid = o.occid '.
+			'WHERE (u.occid IS NULL AND u.collid = '.$this->collId.')';
+		if(!$this->conn->query($sqlOcc1)){
+			$this->outputMsg('<div>ERROR updating occid after occurrence insert: '.$this->conn->error.'</div>');
+		}
+		//Update occid by linking catalognumbers
+		$sqlOcc2 = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
+			'SET u.occid = o.occid '.
+			'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL ';
+		if(!$this->conn->query($sqlOcc2)){
+			$this->outputMsg('<div>ERROR updating occid (2nd step) after occurrence insert: '.$this->conn->error.'</div>');
+		}
+		$this->outputMsg('Done!</li> ');
 		ob_flush();
 		flush();
 	}
@@ -832,14 +834,6 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="font-weight:bold;">Tranferring and activating Determination History... ');
 		ob_flush();
 		flush();
-		//Link identification records to occurrence records
-		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.dbpk = o.dbpk '.
-			'SET u.occid = o.occid '.
-			'WHERE (o.collid = '.$this->collId.' AND u.collid = '.$this->collId.')';
-		if(!$this->conn->query($sql)){
-			$this->outputMsg('FAILED! ERROR: '.$this->conn->error.'</li> ');
-		}
-
 		//Load identification history records
 		$sql = 'INSERT IGNORE INTO omoccurdeterminations (occid, sciname, scientificNameAuthorship, identifiedBy, dateIdentified, '.
 			'identificationQualifier, identificationReferences, identificationRemarks) '.
@@ -870,39 +864,54 @@ class SpecUploadBase extends SpecUpload{
 	
 	private function transferAssociatedMedia(){
 		//Check to see if we have any images to process
-		$imgCnt = 0;
-		$sql = 'SELECT count(*) AS cnt '.
+		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
-			'WHERE associatedmedia LIKE "%.jpg" AND collid = '.$this->collId;
+			'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$imgCnt = $r->cnt;
-		}
-		if($imgCnt){
-			$this->outputMsg('<li style="font-weight:bold;">Tranferring '.$imgCnt.' image URLs... ');
-			ob_flush();
-			flush();
-			//Update occid by linking catalognumbers
-			$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
-				'SET u.occid = o.occid '.
-				'WHERE u.collid = '.$this->collId.' AND u.occid IS NULL AND u.catalogNumber IS NOT NULL ';
-			$this->conn->query($sql);
+		$this->outputMsg('<li style="font-weight:bold;">Tranferring image URLs for '.$rs->num_rows.' occurrence records... ');
+		ob_flush();
+		flush();
+		while($r = $rs->fetch_object()){
+			$mediaFile = trim(str_replace(';',',',$r->associatedmedia),', ');
+			$mediaArr = explode(',',$mediaFile);
+			foreach($mediaArr as $mediaUrl){
+				$mediaUrl = trim($mediaUrl);
+				if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
+					if($this->urlExists($mediaUrl)){
+						//Check to make sure image isn't already linked to this specimen
+						$sqlTest = 'SELECT imgid, url, originalurl '.
+							'FROM images '.
+							'WHERE occid = '.$r->occid.' AND (url = "'.$mediaUrl.'" OR originalurl = "'.$mediaUrl.'")';
+						$rsTest = $this->conn->query($sqlTest);
+						if(!$rsTest->num_rows){
+							//File doesn't already exists, thus let's load it
+							$sqlInsert = 'INSERT INTO images(occid,tid,originalurl,url) '.
+								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","")';
+							if($this->conn->query($sqlInsert)){
+								$this->imageTransferCount++;
+							}
+							else{
+								$this->outputMsg('<div style="margin-left:10px;">ERROR loading image: '.$this->conn->error.'</div>');
+								$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
+							}
+						}
+						$rsTest->close();
+					}
+					else{
+						echo 'Bad url: '.$mediaUrl.'<br/>';
+					}
+				}
+			}
 			//Load images
-			$sql = 'INSERT INTO images(occid,tid,urloriginal) '.
-				'SELECT occid, tidinterpreted, associatedmedia FROM uploadspectemp '.
-				'WHERE associatedmedia LIKE "%.jpg" AND collid = '.$this->collId.' AND occid IS NOT NULL ';
-			$this->conn->query($sql);
-			//Clean and populate url and thumbnailurl
-			$imgManager = new ImageCleaner();
-			$imgManager->setVerbose(0);
-			$imgManager->buildThumbnailImages($this->collId);
-			$this->outputMsg('Done!</li> ');
 		}
+		$this->outputMsg('Done! ('.$this->imageTransferCount.' images)</li> ');
+		ob_flush();
+		flush();
 	}
 
 	protected function finalCleanup(){
 		$this->outputMsg('<li style="font-weight:bold;">Transfer process complete</li>');
-		$this->outputMsg('<li style="font-weight:bold;">House cleaning a stats update </li>');
+		$this->outputMsg('<li style="font-weight:bold;">House cleaning</li>');
 
 		$this->outputMsg('<li style="margin-left:10px;font-weight:bold;">Updating georeference indexing... ');
 		ob_flush();
@@ -977,7 +986,8 @@ class SpecUploadBase extends SpecUpload{
 			'WHERE cs.collid = '.$this->collId;
 		$this->conn->query($sql);
 		$this->outputMsg('Done!</li>');
-		
+
+		/*
 		$this->outputMsg('<li style="margin-left:10px;font-weight:bold;">Searching for duplicate Catalog Numbers... ');
 		ob_flush();
 		flush();
@@ -994,7 +1004,8 @@ class SpecUploadBase extends SpecUpload{
 			$this->outputMsg('All good!</li>');
 		}
 		$rs->free();
-
+		*/
+		
 		$this->outputMsg('<li style="margin-left:10px;font-weight:bold;">Populating global unique identifiers (GUIDs) for all records... ');
 		ob_flush();
 		flush();
@@ -1002,7 +1013,17 @@ class SpecUploadBase extends SpecUpload{
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids($this->collId);
 		$this->outputMsg('Done!</li>');
-		
+
+		if($this->imageTransferCount){
+			$this->outputMsg('<li style="margin-left:10px;font-weight:bold;">Building thumbnails for '.$this->imageTransferCount.' specimen images... ');
+			ob_flush();
+			flush();
+			//Clean and populate null basic url and thumbnailurl fields
+			$imgManager = new ImageCleaner();
+			$imgManager->setVerbose(0);
+			$imgManager->buildThumbnailImages($this->collId);
+			$this->outputMsg('Done!</li>');
+		}
 	}
 	
 	protected function loadRecord($recMap){
@@ -1999,6 +2020,37 @@ class SpecUploadBase extends SpecUpload{
 		if(is_numeric($boolIn)) $this->includeImages = $boolIn;
 	}
 	
+	private function urlExists($url) {
+		$exists = false;
+		if(!strstr($url, "http://")){
+	        $url = "http://".$url;
+	    }
+	    if(file_exists($url)){
+			$exists = true;
+	    }
+
+	    if(!$exists){
+		    // Version 4.x supported
+		    $handle   = curl_init($url);
+		    if (false === $handle){
+				$exists = false;
+		    }
+		    curl_setopt($handle, CURLOPT_HEADER, false);
+		    curl_setopt($handle, CURLOPT_FAILONERROR, true);  // this works
+		    curl_setopt($handle, CURLOPT_HTTPHEADER, Array("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.15) Gecko/20080623 Firefox/2.0.0.15") ); // request as if Firefox   
+		    curl_setopt($handle, CURLOPT_NOBODY, true);
+		    curl_setopt($handle, CURLOPT_RETURNTRANSFER, false);
+		    $exists = curl_exec($handle);
+		    curl_close($handle);
+	    }
+	     
+		//One more  check
+	    if(!$exists){
+	    	$exists = (@fclose(@fopen($url,"r")));
+	    }
+	    return $exists;
+	}	
+
 	protected function encodeString($inStr){
 		global $charset;
 		$retStr = $inStr;

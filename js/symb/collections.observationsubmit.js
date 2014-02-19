@@ -2,48 +2,37 @@ var taxonValid = false;
 
 $(document).ready(function() {
 	$("#sciname").autocomplete({ 
-		source: "rpc/getspeciessuggest.php",
-		change: function(event, ui) { 
-			verifySciName();
-		}
-	},{ minLength: 3 });
-});
-
-function verifySciName(){
-	var sciNameStr = document.obsform.sciname.value;
-	if(sciNameStr){
-		snXmlHttp = GetXmlHttpObject();
-		if(snXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "rpc/verifysciname.php";
-		url=url + "?sciname=" + sciNameStr;
-		snXmlHttp.onreadystatechange=function(){
-			if(snXmlHttp.readyState==4 && snXmlHttp.status==200){
-				if(snXmlHttp.responseText){
-					var retObj = eval("("+snXmlHttp.responseText+")");
-					document.obsform.scientificnameauthorship.value = retObj.author;
-					document.obsform.family.value = retObj.family;
-					taxonValid = true;
-				}
-				else{
-					document.obsform.scientificnameauthorship.value = "";
-					document.obsform.family.value = "";
-					alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
-					snXmlHttp = null;
-					taxonValid = false;
-				}
+		source: "rpc/getspeciessuggest.php", 
+		minLength: 3,
+		change: function(event, ui) {
+			var f = document.obsform;
+			if( f.sciname.value ){
+				$.ajax({
+					type: "POST",
+					url: "rpc/verifysciname.php",
+					dataType: "json",
+					data: { term: f.sciname.value }
+				}).done(function( data ) {
+					if(data){
+						f.scientificnameauthorship.value = data.author;
+						f.family.value = data.family;
+						taxonValid = true;
+					}
+					else{
+						alert("Taxon not found. Maybe misspelled or needs to be added to taxonomic thesaurus.");
+						f.scientificnameauthorship.value = "";
+						f.family.value = "";
+						taxonValid = false;
+					}
+				});
 			}
-		};
-		snXmlHttp.open("POST",url,true);
-		snXmlHttp.send(null);
-	}
-	else{
-		document.obsform.scientificnameauthorship.value = "";
-		document.obsform.family.value = "";
-	}
-} 
+			else{
+				f.scientificnameauthorship.value = "";
+				f.family.value = "";
+			}				
+		}
+	});
+});
 
 function toggle(target){
 	var ele = document.getElementById(target);
@@ -332,22 +321,4 @@ function isNumeric(sText){
       	}
    	}
 	return IsNumber;
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

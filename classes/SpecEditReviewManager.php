@@ -262,5 +262,4 @@ class SpecEditReviewManager {
 		return $retArr;
 	}
 }
-?>
- 
+?> 

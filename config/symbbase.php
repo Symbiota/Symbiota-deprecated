@@ -27,7 +27,12 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 		foreach($uRights as $v){
 			$tArr = explode("-",$v);
 			if(count($tArr) > 1){
-				$USER_RIGHTS[$tArr[0]][] = $tArr[1];
+				if(strpos($tArr[1],',')){
+					$USER_RIGHTS[$tArr[0]] = explode(',',$tArr[1]);
+				}
+				else{
+					$USER_RIGHTS[$tArr[0]][] = $tArr[1];
+				}
 			}
 			else{
 				$USER_RIGHTS[$tArr[0]] = "";
@@ -37,6 +42,7 @@ if((isset($_COOKIE["SymbiotaBase"]) && (!isset($submit) || $submit != "logout"))
 }
 
 $USER_DISPLAY_NAME = (array_key_exists("dn",$PARAMS_ARR)?$PARAMS_ARR["dn"]:"");
+$USERNAME = (array_key_exists("un",$PARAMS_ARR)?$PARAMS_ARR["un"]:0);
 $SYMB_UID = (array_key_exists("uid",$PARAMS_ARR)?$PARAMS_ARR["uid"]:0);
 $IS_ADMIN = (array_key_exists("SuperAdmin",$USER_RIGHTS)?1:0);
 //Need to get rid of following once all parameters are remapped to constants

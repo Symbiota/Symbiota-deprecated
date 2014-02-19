@@ -49,5 +49,4 @@ class InventoryDynSqlManager {
 		return $this->clName;
 	}
 }
-?>
- 
+?> 

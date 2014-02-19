@@ -530,5 +530,4 @@ class SpecProcessorManager {
 		return $newStr;
 	}
 }
-?>
- 
+?> 

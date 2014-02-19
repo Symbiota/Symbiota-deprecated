@@ -87,6 +87,10 @@ $collManager->reset();
 			<div>
 				Locality: <input type="text" id="locality" size="43" name="local" value="<?php if(array_key_exists("local",$collArray)) echo $collArray["local"]; ?>" />
 			</div>
+			<div>
+				Elevation: <input type="text" id="elevlow" size="10" name="elevlow" value="<?php if(array_key_exists("elevlow",$collArray)) echo $collArray["elevlow"]; ?>" /> to  
+				<input type="text" id="elevhigh" size="10" name="elevhigh" value="<?php if(array_key_exists("elevhigh",$collArray)) echo $collArray["elevhigh"]; ?>" />
+			</div>
 			<div style="margin:10 0 10 0;">
 				<hr>
 				<h1>Latitude and Longitude: </h1>
