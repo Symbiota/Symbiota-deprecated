@@ -75,6 +75,7 @@ function getiPlantID($inputFilename,$irodsPath){
         // parse the returned document
         if ($contents!="") {
            $result->responsedocument = $contents; 
+           $result->statusok = FALSE;
            $xml = new SimpleXMLElement($contents);
            foreach ($xml->image as $entry) {
                if (preg_match( '/^'.$irodsPath.'$/', (string)$entry->attributes()->value) ){
@@ -94,9 +95,11 @@ function getiPlantID($inputFilename,$irodsPath){
            }
        } else { 
           $result->error = "Empty Response document from $url";
+          $result->statusok = FALSE;
        }
     } else { 
        $result->error = "No response from $url";
+       $result->statusok = FALSE;
     }
     return $result;  
 }
