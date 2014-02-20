@@ -261,9 +261,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		else return false;
 	}
 
-	private function isLichenFloraOfAlaskaLabel($s) {//there are 2 kinds of FloraOfAlaska labels: The ones with AKFWS herbarium
-		//and those with a Lat/Long label
-		$akfwsPat = "/.*L[1Il!|][CE]H[CE]N\\s?FL[O0Q]\\wA[.,]?\\s[O0Q]\\w\\sA[1Il!|]A[S5]KA.*/is";
+	private function isLichenFloraOfAlaskaLabel($s) {
+		$akfwsPat = "/.*(?:L[1Il!|][CE]H[CE]N|[GC]RYPT[O0Q][GC]AM[1Il!|][GC])\\s?FL[O0Q]\\wA[.,]?\\s[O0Q]\\w\\sA[1Il!|]A[S5]KA.*/is";
 		if(preg_match($akfwsPat, $s)) return true;
 		else return false;
 	}
@@ -337,13 +336,20 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 	private function isAKFWSLabel($s) {//there are 2 kinds of AKFWS labels: the older ones with AKFWS herbarium above the Flora of Alaska
 		//and the newer ones with AKFWS HERBARIUM ** FLORA of ALASKA on the same line
 		//this function is called on labels that already match isFloraOfAlaska
-		$akfwsPat = "/[AL]\\w{3,6}\\sHE[RSEK]\\s?B[A-Za-z0-9!| ]{4,10}.+/is";
-		if(preg_match($akfwsPat, $s)) return true;
-		else {
-			$akfwsPat = "/[AL]\\wF\\w[S5]\\s[HBS]E[RSEK]B[A-Za-z0-9!| ]{4,10}.+/is";
-			if(preg_match($akfwsPat, $s)) return true;
-			else return false;
-		}
+		if(preg_match("/A.{1,3}[S53]\\s[HBS]E[RSEK]B.+/is", $s)) return true;
+		else if(preg_match("/A.F.[S53]\\s[HBS]E[RSEK]B.+/is", $s)) return true;
+		else if(preg_match("/A.F.[S53]\\sHE[RSEK].+/is", $s)) return true;
+		else if(preg_match("/AK.{1,2}[S53]\\sHE[RSEK]BA.+/is", $s)) return true;
+		else if(preg_match("/A.{4,5} HE[RSEK]BAR[1Il!|]U.+/is", $s)) return true;
+		else if(preg_match("/.{1,3}F[UVW][S53] [HBS]E[RSEK]BAR[1Il!|]U.+/is", $s)) return true;
+		else if(preg_match("/A.{2,4}[S53]\\sHE[RSEK]BAR[1Il!|].+/is", $s)) return true;
+		else if(preg_match("/A.{1,2}[VUW][S53]\\sHE[RSEK]BA.+/is", $s)) return true;
+		else if(preg_match("/A.{1,2}FW[S53]\\sHE[RSEK]BA.+/is", $s)) return true;
+		else if(preg_match("/AKF.{1,2}[S53]\\sHE[RSEK]BA.+/is", $s)) return true;
+		else if(preg_match("/[AL][A-Za-z]F[A-Za-z][S53]\\s[HBS]E[RSEK]B[A-Za-z0-9!| ]{4,10}.+/is", $s)) return true;
+		else if(preg_match("/A[A-Za-z]{1,2}[VUW][A-Za-z]{1,2} HE[RSEK] ?B[A-Za-z0-9!| ]{4,10}.+/is", $s)) return true;
+		else if(preg_match("/A[A-Za-z]{1,2}[VUW][A-Za-z]{1,2} HE[RSEK] ?B[A-Za-z0-9!| ]{4,10}.+/is", $s)) return true;
+		else return false;
 	}
 
 	private function isMultipleChoiceLabel($s) {//these labels contain choices for the fields that have to be underlined or circled and can't be parsed
@@ -386,6 +392,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$taxonRank = '';
 		$verbatimAttributes = '';
 		$associatedTaxa = '';
+		$associatedCollectors = '';
 		$taxonRemarks = '';
 		$otherCatalogNumbers = '';
 		$date_identified = array();
@@ -418,6 +425,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 				if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}
 		$lines = explode("\n", $s);
@@ -527,7 +535,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'taxonRank' => trim($taxonRank, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'taxonRemarks' => trim($taxonRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'associatedTaxa' => trim($associatedTaxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
+			'associatedTaxa' => trim($associatedTaxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 		);
 	}
 
@@ -872,7 +881,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		else if($this->isUSFishAndWildlifeServiceLabel($s)) return $this->doUSFishAndWildlifeServiceLabel($s);
 		else if($this->isLichenFloraOfAlaskaLabel($s)) return $this->doLichenFloraOfAlaskaLabel($s);
 		else {
-		$pattern =
+			$pattern =
 			array
 			(
 				"/\\s(Det\\.\\s.*)/",
@@ -895,6 +904,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			$infraspecificEpithet = '';
 			$taxonRank = '';
 			$verbatimAttributes = '';
+			$associatedCollectors = '';
 			$associatedTaxa = '';
 			$location = '';
 			$substrate = '';
@@ -912,6 +922,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 					if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 					if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 					if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+					if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 				}
 			}
 			$akfwsPat = "/.*FL[O0]\\wA[,.]?\\s[O0]\\w\\sA[1Il!|]A[S5]KA[,.]?+(.+)/is";
@@ -979,6 +990,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				'recordNumber' => $recordNumber,
 				'recordedById' => $recordedById,
 				'otherCatalogNumbers' => $otherCatalogNumbers,
+				'associatedCollectors' => $associatedCollectors,
 				'identifiedBy' => $identifiedBy,
 				'locality' => trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $location), " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 				'substrate' => trim($substrate, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
@@ -994,8 +1006,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		}
 	}
 
-	private function doAlcanExpeditionLabel($s) {//new style labels have the AKFWS Herbarium followed by ** Flora of Alaska
-		//They also have separate sections on the label for latitude and longtude
+	private function doAlcanExpeditionLabel($s) {
 		//echo "\nDid AlcanExpeditionLabel\n";
 		//$akfwsPat = "/.*ALCAN EXPEDITION(.+)/is";
 		//if(preg_match($akfwsPat, $s, $ms)) $s = trim($ms[1]);
@@ -2519,7 +2530,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				"Eversman",
 				"Bryoria fuscescens",
 				"Montana",
-				"Alectoria\\sglabra",
+				"Alectoria glabra",
 				"\${1}. ",
 				"mosses. ",
 				"",
@@ -2546,6 +2557,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		if(preg_match("/.*B[O0Q].?[SZ]EMAN.?(?:,\\sM[O0Q]NTANA)?+(.*)/is", $s, $mats)) $s = trim($mats[1]);
 		$verbatimCoordinates = $this->getVerbatimCoordinates($s);
 		$associatedTaxa = "";
+		$associatedCollectors = "";
 		$recordNumber = "";
 		$identifiedBy = "";
 		$state_province = "";
@@ -2561,6 +2573,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 				if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}
 		$elevation = '';
@@ -2594,7 +2607,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$lookingForAssociatedTaxa = false;
 		if(strlen($firstPart) > 0) $s = $firstPart;
 		$lines = explode("\n", $s);
-		foreach($lines as $line) {//echo "\nline 6933, line: ".$line."\n";
+		foreach($lines as $line) {//echo "\nline 7940, line: ".$line."\n";
 			$line = trim($line, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
 			if(preg_match("/(.*)[NH][o0Q]\\.?\\s((?:[A-Z]\\d-)?[SZl|I!1-9]".$possibleNumbers."{0,2}+)[.,]?+(.*)/i", $line, $mats)) {
 				$recordNumber = $this->replaceMistakenNumbers(trim($mats[2]));
@@ -2889,7 +2902,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordedById' => $recordedById,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'verbatimCoordinates' => $verbatimCoordinates
+			'verbatimCoordinates' => $verbatimCoordinates,
+			'associatedCollectors' => $associatedCollectors
 		);
 	}
 
@@ -2926,6 +2940,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordedBy = '';
 		$recordedById = '';
 		$otherCatalogNumbers = '';
+		$associatedCollectors = '';
 		$identifiedBy = '';
 		$collectorInfo = $this->getCollector($s);
 		if($collectorInfo != null) {
@@ -2934,6 +2949,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 			if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 			if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+			if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 		}//echo "\nline 6079, s:\n".$s."\nrecordedBy:\n".$recordedBy."\nrecordNumber:\n".$recordNumber."\nidentifiedBy:\n".$identifiedBy."\n";
 		$lfPat = "/.*M[O0Q]NTANA\\s?STATE\\s?UN[1Il!|]VERSITY\\s?HERBAR[1Il!|]UM?+(.*)/is";
 		if(preg_match($lfPat, $s, $mats)) $s = trim($mats[1]);
@@ -3084,7 +3100,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				array("l", "l", "l", "o"),
 				trim($identifiedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 			),
-			'dateIdentified' => $dateIdentified
+			'dateIdentified' => $dateIdentified,
+			'associatedCollectors' => $associatedCollectors
 		);
 	}
 
@@ -3144,6 +3161,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$habitat = "";
 		$state_province = "";
 		$otherCatalogNumbers = "";
+		$associatedCollectors = "";
 		$verbatimAttributes = "";
 		$verbatimElevation = "";
 		$elevationArray = $this->getElevation($s);
@@ -3183,6 +3201,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 					if($l > 2 && $l < 5 && strcasecmp(substr($temp, 0, 3), "s.n") == 0) $recordedBy = trim(substr($recordedBy, 0, $pos));
 				}
 			}
+			if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 		}//echo "\nline 7590, location: ".$location.", scientificName: ".$scientificName."\n";
 		$lines = explode("\n", $s);
 		foreach($lines as $line) {//echo "\nline 6112, line: ".$line."\n";
@@ -3408,6 +3427,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'infraspecificEpithet' => trim($infraspecificEpithet, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'associatedTaxa' => trim($associatedTaxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'ometid' => "88",
 			'exsnumber' => $exsnumber
 		);
@@ -3442,6 +3462,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordedBy = '';
 		$recordedById = '';
 		$otherCatalogNumbers = '';
+		$associatedCollectors = '';
 		$identifiedBy = '';
 		$collectorInfo = $this->getCollector($s);
 		if($collectorInfo != null) {
@@ -3450,6 +3471,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 			if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 			if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+			if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 		}//echo "\nline 5925, collectorName: ".$collectorName.", collectorNum: ".$collectorNum."\n";
 		$state_province = "";
 		$identifiedBy = '';
@@ -3558,6 +3580,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedBy' => $recordedBy,
 			'recordedById' => $recordedById,
 			'$otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'$associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'country' => $country,
 			'locality' => trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $location), " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
@@ -3616,6 +3639,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordedBy = "";
 		$recordedById = "";
 		$otherCatalogNumbers = "";
+		$associatedCollectors = "";
 		$workingSection = "";
 		$verbatimEventDate = "";
 		$collectorInfo = $this->getCollector($s);
@@ -3626,6 +3650,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 				if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}
 		$elevation = '';
@@ -3880,6 +3905,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedById' => $recordedById,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'verbatimCoordinates' => $verbatimCoordinates,
+			'associatedCollectors' => $associatedCollectors,
 			'ometid' => $ometid,
 			'exsnumber' => $exsnumber
 		);
@@ -4027,6 +4053,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$verbatimAttributes = "";
 		$verbatimCoordinates = $this->getVerbatimCoordinates($s);
 		$associatedTaxa = "";
+		$associatedCollectors = "";
 		$recordNumber = "";
 		$identifiedBy = "";
 		$municipality = "";
@@ -4046,11 +4073,13 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 					if(array_key_exists('collectorID', $collectorInfo)) "181";
 					if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 					if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+					if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 				} else {
 					if(array_key_exists('collectorNum', $collectorInfo)) $recordNumber = $collectorInfo['collectorNum'];
 					if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 					if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 					if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+					if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 				}
 			}
 		}
@@ -4236,6 +4265,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedById' => $recordedById,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'verbatimCoordinates' => $verbatimCoordinates,
+			'associatedCollectors' => $associatedCollectors,
 			'ometid' => "242",
 			'exsnumber' => $exsnumber
 		);
@@ -4278,6 +4308,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		}
 		$verbatimCoordinates = $this->getVerbatimCoordinates($s);
 		$associatedTaxa = "";
+		$associatedCollectors = "";
 		$recordNumber = "";
 		$identifiedBy = "";
 		$state_province = "";
@@ -4293,6 +4324,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 				if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}
 		$elevation = '';
@@ -4402,7 +4434,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordedById' => $recordedById,
 			'otherCatalogNumbers' => trim($otherCatalogNumbers, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'verbatimCoordinates' => $verbatimCoordinates
+			'verbatimCoordinates' => $verbatimCoordinates,
+			'associatedCollectors' => $associatedCollectors
 		);
 	}
 
@@ -4948,6 +4981,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordNumber = '';
 		$recordedById = '';
 		$otherCatalogNumbers = '';
+		$associatedCollectors = '';
 		$identifiedBy = '';
 		$s = trim(preg_replace($pattern, $replacement, $s, -1));
 		$collectorInfo = $this->getCollector($s);
@@ -4965,6 +4999,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 			if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 			if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+			if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 		}
 		$county = "";
 		$country = "";
@@ -5657,7 +5692,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'substrate' => preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", trim($substrate, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_")),
 			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordedById' => trim($recordedById, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'recordNumber' => trim($recordNumber, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-")
+			'recordNumber' => trim($recordNumber, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-"),
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;.!\"\'\\~@#$%^&*_-")
 		);
 	}
 
@@ -5691,6 +5727,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$substrate = "";
 		$stateProvince = "";
 		$otherCatalogNumbers = "";
+		$associatedCollectors = "";
 		$verbatimAttributes = "";
 		$associatedTaxa = "";
 		$recordedBy = "";
@@ -5743,7 +5780,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		if($collectorInfo != null) {
 			if(array_key_exists('collectorName', $collectorInfo)) {
 				$recordedBy = $collectorInfo['collectorName'];
-				$recordNumber = $collectorInfo['collectorNum'];
+				if(array_key_exists('collectorNum', $collectorInfo)) $recordNumber = $collectorInfo['collectorNum'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}//echo "\nline 6721, recordedBy: ".$recordedBy.", recordNumber: ".$recordNumber."\n";
 		$lines = explode("\n", $s);
@@ -5863,6 +5901,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'verbatimAttributes' => trim($verbatimAttributes, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'associatedTaxa' => trim($associatedTaxa, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordNumber' => trim($recordNumber, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 		);
 	}
 
@@ -5901,6 +5940,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$foundSciName = false;
 		$lookingForLocation = false;
 		$associatedTaxa = "";
+		$associatedCollectors = "";
 		$stateProvince = "";
 		$date_identified = array();
 		$verbatimAttributes = "";
@@ -5978,6 +6018,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorName', $collectorInfo)) $recordedBy = $collectorInfo['collectorName'];
 				if(array_key_exists('collectorNum', $collectorInfo)) $recordNumber = $collectorInfo['collectorNum'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 			}
 		}
 		if(strlen($location) > 0) {
@@ -6051,6 +6092,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'identifiedBy' => trim($identified_by, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'taxonRank' => $taxonRank,
 			'associatedTaxa' => $associatedTaxa,
+			'associatedCollectors' => $associatedCollectors,
 			'infraspecificEpithet' => trim($infraspecificEpithet, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'ometid' => "259",
@@ -6179,6 +6221,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$substrate = '';
 		$scientificName = '';
 		$associatedTaxa = '';
+		$associatedCollectors = '';
 		$location = "";
 		$habitat = '';
 		$elevation = '';
@@ -6290,6 +6333,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 					if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 					if(array_key_exists('identifiedBy', $collectorInfo) && strlen($identifiedBy) == 0) $identifiedBy = $collectorInfo['identifiedBy'];
 					if(array_key_exists('otherCatalogNumbers', $collectorInfo) && strlen($otherCatalogNumbers) == 0) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+					if(array_key_exists('associatedCollectors', $collectorInfo) && strlen($associatedCollectors) == 0) $associatedCollectors = $collectorInfo['associatedCollectors'];
 				}
 			}
 		}
@@ -6337,7 +6381,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				array("l", "l", "l", "o"),
 				trim($identifiedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 			),
-			'dateIdentified' => $dateIdentified
+			'dateIdentified' => $dateIdentified,
+			'associatedCollectors' => $associatedCollectors
 		);
 	}
 
@@ -6367,6 +6412,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordNumber = '';
 		$recordedById = '';
 		$otherCatalogNumbers = '';
+		$associatedCollectors = '';
 		$country = '';
 		$location = '';
 		$substrate = '';
@@ -6386,13 +6432,14 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				if(array_key_exists('collectorID', $collectorInfo)) $recordedById = $collectorInfo['collectorID'];
 				if(array_key_exists('identifiedBy', $collectorInfo)) $identifiedBy = $collectorInfo['identifiedBy'];
 				if(array_key_exists('otherCatalogNumbers', $collectorInfo)) $otherCatalogNumbers = $collectorInfo['otherCatalogNumbers'];
+				if(array_key_exists('associatedCollectors', $collectorInfo)) $associatedCollectors = $collectorInfo['associatedCollectors'];
 				if(strcasecmp($recordedBy, "Aaron Guy Johnson") == 0) {
 					$recordedBy = "Anita Johnson";
 					$recordedById = "";
 				}
 			}
 		}
-		$lfaPat = "/.*L[1Il!|][CE]H[CE]N\\sFL[O0]\\wA[,.]?\\s[O0]\\w\\sA[1Il!|]A[S5]KA[,.]?+(.+)/is";
+		$lfaPat = "/.*(?:L[1Il!|][CE]H[CE]N|[GC]RYPT[O0Q][GC]AM[1Il!|][GC])\\s?FL[O0Q]\\wA[.,]?\\s[O0Q]\\w\\sA[1Il!|]A[S5]KA(.+)/is";
 		if(preg_match($lfaPat, $s, $ms)) $s = trim($ms[1]);
 		$state_province = "Alaska";
 		$country = "USA";
@@ -6482,7 +6529,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 				trim($georeferenceRemarks, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 			),
 			'habitat' => trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $habitat), " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
-			'verbatimElevation' => trim($elevation, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
+			'verbatimElevation' => trim($elevation, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
+			'associatedCollectors' => trim($associatedCollectors, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-")
 		);
 	}
 
@@ -7257,6 +7305,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$recordedBy = "";
 		$recordNumber = "";
 		$associatedTaxa = "";
+		$associatedCollectors = "";
 		$country = "";
 		$habitat = "";
 		$taxonRank = "";
@@ -7467,9 +7516,13 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 							if(strlen($recordNumber) > 0 && preg_match("/(.*)".preg_quote($recordNumber, '/')."(.*)/is", $location, $mats)) $location = trim($mats[1])." ".trim($mats[2]);
 							if(stripos($s, "Deposited at NY in ".$recordNumber) !== FALSE) $recordNumber = "";
 						}
-						if(array_key_exists('identifiedBy', $collectorInfo)) if(strlen($identified_by) == 0) {
+						if(array_key_exists('identifiedBy', $collectorInfo) && strlen($identified_by) == 0) {
 							$identified_by = $collectorInfo['identifiedBy'];
 							if(strlen($identified_by) > 0 && preg_match("/(.*)".preg_quote($identified_by, '/')."(.*)/is", $location, $mats)) $location = trim($mats[1])." ".trim($mats[2]);
+						}
+						if(array_key_exists('associatedCollectors', $collectorInfo) && strlen($associatedCollectors) == 0) {
+							$associatedCollectors = $collectorInfo['associatedCollectors'];
+							if(strlen($associatedCollectors) > 0 && preg_match("/(.*)".preg_quote($associatedCollectors, '/')."(.*)/is", $location, $mats)) $location = trim($mats[1])." ".trim($mats[2]);
 						}
 					}
 				}
@@ -7535,9 +7588,13 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 								if(preg_match("/(.*)".str_replace("/", "\/", $recordNumber)."(.*)/i", $habitat, $mats)) $habitat = trim($mats[1])." ".trim($mats[2]);
 								if(stripos($s, "Deposited at NY in ".$recordNumber) !== FALSE) $recordNumber = "";
 							}
-							if(array_key_exists('identifiedBy', $collectorInfo)) if(strlen($identified_by) == 0) {
+							if(array_key_exists('identifiedBy', $collectorInfo) && strlen($identified_by) == 0) {
 								$identified_by = $collectorInfo['identifiedBy'];
 								if(preg_match("/(.*)".str_replace("/", "\/", $identified_by)."(.*)/i", $habitat, $mats)) $habitat = trim($mats[1])." ".trim($mats[2]);
+							}
+							if(array_key_exists('associatedCollectors', $collectorInfo) && strlen($associatedCollectors) == 0) {
+								$associatedCollectors = $collectorInfo['associatedCollectors'];
+								if(strlen($associatedCollectors) > 0 && preg_match("/(.*)".preg_quote($associatedCollectors, '/')."(.*)/is", $habitat, $mats)) $habitat = trim($mats[1])." ".trim($mats[2]);
 							}
 						}
 					}
@@ -7596,7 +7653,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			'recordedBy' => trim($recordedBy, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'recordNumber' => trim($recordNumber, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-"),
 			'ometid' => "93",
-			'exsnumber' => $exsnumber
+			'exsnumber' => $exsnumber,
+			'associatedCollectors' => $associatedCollectors
 		);
 	}
 
@@ -7883,6 +7941,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			$akfwsPat = "/.*\\bA\\wF\\w[S5]\\s[HB]E[RS]B[\w!|\s]{4,10}\\s[\"\'*]{1,3}\\sFL[O0]\\w{1,2}A\\s[O0]\\w\\sA[1Il!|]A[S5]KA(.+)/is";
 			if(preg_match($akfwsPat, $s, $ms)) $s = trim($ms[1]);
 		}
+		$s = trim(str_ireplace(array(" habitat ", "Stephen & Sandra Talbot"), array("\nhabitat ", "Stephen Talbot & Sandra Talbot"), $s));
 		$state_province = "Alaska";
 		$identifiedBy = '';
 		$dateIdentified = array();
@@ -7895,18 +7954,20 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		$habitat = '';
 		$habitatArray = $this->getHabitat($s);
 		if($habitatArray != null && count($habitatArray) > 0) {
-			$habitat = $habitatArray[1]." ".$habitatArray[2];
-			$patStr = "/(.*)[QO0]ua[ad]\\.?\\s[MH]ap/is";
-			if(preg_match($patStr, $habitat, $mat)) $habitat = $mat[1];
-			$patStr = "/^([0GQO]n\\s.+)/i";
-			if(preg_match($patStr, $habitat, $mat)) $substrate = $this->terminateSubstrate($mat[1]);
+			$habitat = trim($habitatArray[1]." ".$habitatArray[2]);
+			if(strlen($habitat) > 0) {
+				$patStr = "/(.*)[QO0]ua[ad]\\.?\\s[MH]ap/is";
+				if(preg_match($patStr, $habitat, $mat)) $habitat = $mat[1];
+				$patStr = "/^([0GQO]n\\s.+)/i";
+				if(preg_match($patStr, $habitat, $mat)) $substrate = $this->terminateSubstrate($mat[1]);
+			}
 		}
 		$elevation = '';
 		$elevationArray = $this->getElevation($s);
 		if($elevationArray != null && count($elevationArray) > 0) $elevation = $elevationArray[1];
 		//Occasionally the habitats and locations are confused in the output so check
 		$possibleNumbers = "[OQSZl|I!0-9]";
-		if(strlen($location) == 0) {
+		if(strlen($location) == 0 && strlen($habitat) > 0) {
 			$patStr = "/(.*)\\b(?:\\d{1,3}(?:\\.\\d{1,7})?)\\s?°.*\\d[\"\']\\s?[EW](.*)/is";
 			if(preg_match($patStr, $habitat, $mat)) {
 				$location = $mat[1];
