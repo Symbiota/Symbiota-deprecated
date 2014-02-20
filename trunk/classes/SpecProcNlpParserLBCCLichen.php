@@ -4439,7 +4439,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		);
 	}
 
-	public function doMycologicalCollectionsLabel($s) {
+	private function doMycologicalCollectionsLabel($s) {
 		$mycPat = "/(.*)MYC[O0Q]LOG[1Il!|]CAL\\s?C[O0Q][1Il!|]{2}ECT[1Il!|][O0Q]NS(.*)/is";
 		if(preg_match($mycPat, $s, $matches)) {
 			$t = trim($matches[1]);
