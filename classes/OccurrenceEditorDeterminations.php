@@ -124,6 +124,8 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				}
 				$rsSs->free();
 				
+				$tidToAdd = $detArr['tidtoadd'];
+				if($tidToAdd && !is_numeric($tidToAdd)) $tidToAdd = 0;
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
 					'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
@@ -133,7 +135,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
 					'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
 					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').', '.
-					'tidinterpreted = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').', localitysecurity = '.$sStatus.
+					'tidinterpreted = '.($tidToAdd?$tidToAdd:'NULL').', localitysecurity = '.$sStatus.
 					' WHERE (occid = '.$this->occid.')';
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
@@ -143,7 +145,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					if($idStatus) $status .= '; '.$idStatus;
 				}
 				//Remap images
-				$sql = 'UPDATE images SET tid = '.($detArr['tidtoadd']?$detArr['tidtoadd']:'NULL').' WHERE (occid = '.$this->occid.')';
+				$sql = 'UPDATE images SET tid = '.($tidToAdd?$tidToAdd:'NULL').' WHERE (occid = '.$this->occid.')';
 				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR: Annotation added but failed to remap images to new name';
