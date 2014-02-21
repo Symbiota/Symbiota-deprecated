@@ -27,11 +27,7 @@ if($retArr){
 		echo json_encode($retArr);
 	}
 	else{
-		$str = '[';
-		foreach($retArr as $k => $vArr){
-			$str .= '{"tid":"'.$vArr['tid'].'","family":"'.$vArr['family'].'","author":"'.str_replace('"',"''",$vArr['author']).'","status":"'.$vArr['status'].'"},';
-		}
-		echo trim($str,',').']';
+		echo '{"tid":"'.$retArr['tid'].'","family":"'.$retArr['family'].'","author":"'.str_replace('"',"''",$retArr['author']).'","status":"'.$retArr['status'].'"}';
 		//echo '[{'.implode('},{',$retArr).'}]';
 	}
 }
