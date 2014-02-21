@@ -47,7 +47,7 @@ CREATE TABLE imagetagkey (
    sortorder int not null,  -- sort order that can be used to order picklists or checkboxes on page layouts.
    initialtimestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
    INDEX (sortorder) 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasOrganism','Image shows an organism.','Organism',0);
 INSERT into imagetagkey (tagkey,description_en,shortlabel,sortorder) values ('HasLabel','Image shows label data.','Label',10);
@@ -65,7 +65,7 @@ CREATE TABLE imagetag (
    initialtimestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
    INDEX (keyvalue), 
    CONSTRAINT UNIQUE INDEX (imgid,keyvalue) 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `imagetag`
   ADD CONSTRAINT `FK_imagetag_imgid`
@@ -109,7 +109,7 @@ CREATE TABLE actionrequesttype (
    context varchar(255),  --  if not null, the table for actionrequest.tablename
    description varchar(255),
    initialtimestamp TIMESTAMP NOT NULL DEFAULT current_timestamp
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE actionrequest (
    actionrequestid bigint primary key not null auto_increment,
@@ -125,7 +125,7 @@ CREATE TABLE actionrequest (
    resolution varchar(12),      --  BOM resolutions (WontFix,Duplicate,Fix, etc.) for state resolved.
    statesetdate datetime,       --  date/time the state was changed
    resolutionremarks varchar(900)  --  notes about the resolution ~ BOM comment
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `actionrequest`
   ADD CONSTRAINT `FK_actionreq_uid1`
