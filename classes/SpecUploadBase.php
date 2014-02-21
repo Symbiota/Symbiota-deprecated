@@ -863,12 +863,24 @@ class SpecUploadBase extends SpecUpload{
 	}
 	
 	private function transferAssociatedMedia(){
+		//Grab image data to make sure link wasn't previously loaded
+		$existingImages = array();
+		$sqlTest = 'SELECT i.occid, i.imgid, i.url, i.originalurl '.
+			'FROM images i INNER JOIN uploadspectemp u ON i.occid = u.occid '.
+			'WHERE associatedmedia IS NOT NULL AND u.collid = '.$this->collId;
+		//echo $sqlTest;
+		$rsTest = $this->conn->query($sqlTest);
+		while($rowTest = $rsTest->fetch_object()){
+			$existingImages[$rowTest->occid][$rowTest->imgid]['url'] = $rowTest->url;
+			$existingImages[$rowTest->occid][$rowTest->imgid]['orig'] = $rowTest->originalurl;
+		}
+		$rsTest->free();
 		//Check to see if we have any images to process
 		$sql = 'SELECT associatedmedia, tidinterpreted, occid '.
 			'FROM uploadspectemp '.
 			'WHERE associatedmedia IS NOT NULL AND occid IS NOT NULL AND collid = '.$this->collId;
 		$rs = $this->conn->query($sql);
-		$this->outputMsg('<li style="font-weight:bold;">Tranferring image URLs for '.$rs->num_rows.' occurrence records... ');
+		$this->outputMsg('<li style="font-weight:bold;">Tranferring new image URLs for '.$rs->num_rows.' occurrence records... ');
 		ob_flush();
 		flush();
 		while($r = $rs->fetch_object()){
@@ -878,13 +890,19 @@ class SpecUploadBase extends SpecUpload{
 				$mediaUrl = trim($mediaUrl);
 				if(!strpos($mediaUrl,' ') && !strpos($mediaUrl,'"')){
 					if($this->urlExists($mediaUrl)){
-						//Check to make sure image isn't already linked to this specimen
-						$sqlTest = 'SELECT imgid, url, originalurl '.
-							'FROM images '.
-							'WHERE occid = '.$r->occid.' AND (url = "'.$mediaUrl.'" OR originalurl = "'.$mediaUrl.'")';
-						$rsTest = $this->conn->query($sqlTest);
-						if(!$rsTest->num_rows){
-							//File doesn't already exists, thus let's load it
+						//If file doesn't already exists, let's load it
+						$loadImage = true;
+						if(array_key_exists($r->occid,$existingImages)){
+							foreach($existingImages[$r->occid] as $urlArr){
+								if($urlArr['url'] == $mediaUrl){
+									$loadImage = false;
+								}
+								elseif(array_key_exists('orig',$urlArr) && $urlArr['orig'] == $mediaUrl){
+									$loadImage = false;
+								}
+							}
+						}
+						if($loadImage){
 							$sqlInsert = 'INSERT INTO images(occid,tid,originalurl,url) '.
 								'VALUES('.$r->occid.','.($r->tidinterpreted?$r->tidinterpreted:'NULL').',"'.$mediaUrl.'","")';
 							if($this->conn->query($sqlInsert)){
@@ -895,7 +913,6 @@ class SpecUploadBase extends SpecUpload{
 								$this->outputMsg('<div style="margin-left:10px;">SQL: '.$sqlInsert.'</div>');
 							}
 						}
-						$rsTest->close();
 					}
 					else{
 						echo 'Bad url: '.$mediaUrl.'<br/>';
