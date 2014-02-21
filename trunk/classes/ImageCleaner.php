@@ -56,7 +56,7 @@ class ImageCleaner{
 		if($collid) $sql .= 'INNER JOIN omoccurrences o ON ti.occid = o.occid ';
 		$sql .= 'WHERE (ti.thumbnailurl IS NULL OR ti.thumbnailurl = "") '; 
 		if($collid) $sql .= 'AND (o.collid = '.$collid.') ';
-		echo $sql;
+		//echo $sql;
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$statusStr = 'ERROR';
