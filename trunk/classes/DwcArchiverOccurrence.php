@@ -331,7 +331,8 @@ class DwcArchiverOccurrence{
 			
 			//Clean up
 			unlink($this->targetPath.$this->ts.'-meta.xml');
-			unlink($this->targetPath.$this->ts.'-eml.xml');
+			rename($this->targetPath.$this->ts.'-eml.xml',$this->targetPath.str_replace('.zip','.eml',$this->fileName));
+			//unlink($this->targetPath.$this->ts.'-eml.xml');
 			unlink($this->targetPath.$this->ts.'-occur.csv');
 			if($this->includeImgs) unlink($this->targetPath.$this->ts.'-images.csv');
 			if($this->includeDets) unlink($this->targetPath.$this->ts.'-det.csv');

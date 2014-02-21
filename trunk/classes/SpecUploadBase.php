@@ -2022,7 +2022,7 @@ class SpecUploadBase extends SpecUpload{
 	
 	private function urlExists($url) {
 		$exists = false;
-		if(!strstr($url, "http://")){
+		if(!strstr($url, "http")){
 	        $url = "http://".$url;
 	    }
 	    if(file_exists($url)){
