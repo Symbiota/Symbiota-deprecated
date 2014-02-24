@@ -85,7 +85,9 @@ class ImageCleaner{
 						$sourcePath = str_replace($this->urlPath,$this->rootPathBase,$imgUrl);
 					}
 					else{
-						$sourcePath = 'http://'.$_SERVER['HTTP_HOST'].$imgUrl;
+						$protocol = "http://";
+						if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $protocol = "https://";
+						$sourcePath = $protocol.$_SERVER['HTTP_HOST'].$imgUrl;
 					}
 				}
 			}
@@ -119,7 +121,7 @@ class ImageCleaner{
 			
 			//Get image statistics
 			$tempSourcePath = $sourcePath;
-			if(strtolower(substr($sourcePath,0,7)) == 'http://'){
+			if(strtolower(substr($sourcePath,0,4)) == 'http'){
 				$tempPath = $this->getTempPath().time().'.jpg';
 				if(copy($sourcePath,$tempPath)) $tempSourcePath = $tempPath;
 			}
@@ -161,7 +163,7 @@ class ImageCleaner{
 						    $webFileName = '';
 						    $fileSize = 0;
 						    if(!$webIsEmpty){
-							    if(strtolower(substr($tempSourcePath,0,7)) == 'http://'){
+							    if(strtolower(substr($tempSourcePath,0,4)) == 'http'){
 							    	$fileSize = $this->getRemoteFileSize($tempSourcePath);
 							    }
 							    else{
@@ -203,7 +205,9 @@ class ImageCleaner{
 
 						    //If central images are on remote server and new one stored locally, then we need to use full domain
 					    	if($GLOBALS['imageDomain'] && substr($targetUrl,0,1) == '/'){
-					    		$targetUrl = 'http://'.$_SERVER['HTTP_HOST'].$targetUrl;
+								$protocol = "http://";
+								if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $protocol = "https://";
+								$targetUrl = $protocol.$_SERVER['HTTP_HOST'].$targetUrl;
 					    	}
 						    //Insert urls into database
 					    	$webFullUrl = '';
