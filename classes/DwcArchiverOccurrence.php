@@ -464,7 +464,7 @@ class DwcArchiverOccurrence{
 		global $clientRoot, $defaultTitle, $adminEmail;
 		
 		$urlPathPrefix = 'http://'.$_SERVER["SERVER_NAME"];
-		if($_SERVER["SERVER_PORT"] || $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 		
 		$emlArr = array();
@@ -472,7 +472,7 @@ class DwcArchiverOccurrence{
 			$collId = key($this->collArr);
 			$cArr = $this->collArr[$collId];
 
-			$emlArr['alternateIdentifier'][] = $urlPathPrefix.'collections/misc/misc/collprofiles.php?collid='.$collId;
+			$emlArr['alternateIdentifier'][] = $urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId;
 			$emlArr['title'] = $cArr['collname'];
 			$emlArr['description'] = $cArr['description'];
 	
@@ -544,7 +544,7 @@ class DwcArchiverOccurrence{
 				$iconUrlPrefix = '';
 				if(substr($collArr['icon'],0,5) != 'http:'){
 					$iconUrlPrefix .= 'http://'.$_SERVER["SERVER_NAME"];
-					if($_SERVER["SERVER_PORT"] || $_SERVER["SERVER_PORT"] != 80) $iconUrlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $iconUrlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 					if(substr($collArr['icon'],0,7) == 'images/'){
 						$iconUrlPrefix .= $clientRoot;
 					}
