@@ -95,7 +95,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "            <td><input type=\"checkbox\" id=\"id_needed\" name=\"id_needed\" checked=\"true\" \/><\/td>";
     controlsHtml += "        <\/tr>";
     controlsHtml += "        <tr>";
-    controlsHtml += "            <td>Display images dentified to species: <\/td>";
+    controlsHtml += "            <td>Display images identified to species: <\/td>";
     controlsHtml += "            <td><input type=\"checkbox\" id=\"id_to_species\" name=\"id_to_species\" checked=\"true\" \/><\/td>";
     controlsHtml += "        <\/tr>";
     controlsHtml += "    <\/table>";
