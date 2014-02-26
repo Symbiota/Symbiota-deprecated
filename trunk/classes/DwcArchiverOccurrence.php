@@ -463,8 +463,11 @@ class DwcArchiverOccurrence{
 	private function getEmlArr(){
 		global $clientRoot, $defaultTitle, $adminEmail;
 		
-		$urlPathPrefix = 'http://'.$_SERVER["SERVER_NAME"];
+		$urlPathPrefix = "http://";
+		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+		$urlPathPrefix .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+		$localDomain = $urlPathPrefix;
 		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 		
 		$emlArr = array();
@@ -536,21 +539,22 @@ class DwcArchiverOccurrence{
 			//Collection metadata section (additionalMetadata)
 			$emlArr['collMetadata'][$cnt]['attr']['identifier'] = $collArr['collectionguid'];
 			$emlArr['collMetadata'][$cnt]['attr']['id'] = $id;
-			$emlArr['collMetadata'][$cnt]['alternateIdentifier'] = $urlPathPrefix.'collections/misc/misc/collprofiles.php?collid='.$id;
+			$emlArr['collMetadata'][$cnt]['alternateIdentifier'] = $urlPathPrefix.'collections/misc/collprofiles.php?collid='.$id;
 			$emlArr['collMetadata'][$cnt]['parentCollectionIdentifier'] = $collArr['instcode']; 
 			$emlArr['collMetadata'][$cnt]['collectionIdentifier'] = $collArr['collcode']; 
 			$emlArr['collMetadata'][$cnt]['collectionName'] = $collArr['collname'];
 			if($collArr['icon']){
-				$iconUrlPrefix = '';
-				if(substr($collArr['icon'],0,5) != 'http:'){
-					$iconUrlPrefix .= 'http://'.$_SERVER["SERVER_NAME"];
-					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $iconUrlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-					if(substr($collArr['icon'],0,7) == 'images/'){
-						$iconUrlPrefix .= $clientRoot;
-					}
-					if(substr($iconUrlPrefix,-1) != '/') $iconUrlPrefix .= '/';
+				$imgLink = '';
+				if(substr($collArr['icon'],0,17) == 'images/collicons/'){
+					$imgLink = $urlPathPrefix.$collArr['icon'];
 				}
-				$emlArr['collMetadata'][$cnt]['resourceLogoUrl'] = $iconUrlPrefix.$collArr['icon'];
+				elseif(substr($collArr['icon'],0,1) == '/'){
+					$imgLink = $localDomain.$collArr['icon'];
+				}
+				else{
+					$imgLink = $collArr['icon'];
+				}
+				$emlArr['collMetadata'][$cnt]['resourceLogoUrl'] = $imgLink;
 			}
 			$emlArr['collMetadata'][$cnt]['onlineUrl'] = $collArr['url'];
 			$emlArr['collMetadata'][$cnt]['intellectualRights'] = $collArr['rights'];
@@ -802,6 +806,11 @@ class DwcArchiverOccurrence{
 			$sql .= 'ORDER BY o.collid,o.occid'; 
 			//echo '<div>'.$sql.'</div>';
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+				$urlPathPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+				$urlPathPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 				while($r = $rs->fetch_assoc()){
 					if($this->redactLocalities && $r["localitySecurity"] > 0){
 						foreach($this->securityArr as $v){
@@ -809,7 +818,7 @@ class DwcArchiverOccurrence{
 						}
 					}
 					unset($r['localitySecurity']);
-					$r['references'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+					$r['references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
 					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 					if($guidTarget == 'catalogNumber'){
 						$r['occurrenceID'] = $r['catalogNumber'];
@@ -912,10 +921,20 @@ class DwcArchiverOccurrence{
 			//$sql .= 'ORDER BY o.occid';
 			//echo $sql;
 			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-				$referencePrefix = 'http://'.$_SERVER["SERVER_NAME"];
-				if(isset($imageDomain) && $imageDomain) $referencePrefix = $imageDomain;
+				$urlPathPrefix = "http://";
+				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+				$urlPathPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$localDomain = '';
+				if(isset($imageDomain) && $imageDomain){
+					$localDomain = $imageDomain;
+				}
+				else{
+					$localDomain = $urlPathPrefix;
+				}
+				$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 				while($r = $rs->fetch_assoc()){
-					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $referencePrefix.$r['accessURI'];
+					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
 						$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
 						$r['webstatement'] = $r['rights'];
@@ -939,7 +958,7 @@ class DwcArchiverOccurrence{
 						}
 					}
 					if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
-					$r['associatedSpecimenReference'] = 'http://'.$_SERVER["SERVER_NAME"].$clientRoot.'/collections/individual/index.php?occid='.$r['occid'];
+					$r['associatedSpecimenReference'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
 					$r['type'] = 'StillImage';
 					$r['subtype'] = 'Photograph';
 					$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
@@ -1028,9 +1047,13 @@ class DwcArchiverOccurrence{
 		//Add title, link, description, language
 		$titleElem = $newDoc->createElement('title',$defaultTitle.' Darwin Core Archive rss feed');
 		$channelElem->appendChild($titleElem);
-		$linkStr = 'http://'.$_SERVER["SERVER_NAME"];
-		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $linkStr .= ':'.$_SERVER["SERVER_PORT"];
-		$linkElem = $newDoc->createElement('link',$linkStr);
+		$urlPathPrefix = "http://";
+		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+		$urlPathPrefix .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+		$localDomain = $urlPathPrefix;
+		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+		$linkElem = $newDoc->createElement('link',$urlPathPrefix);
 		$channelElem->appendChild($linkElem);
 		$descriptionElem = $newDoc->createElement('description',$defaultTitle.' Darwin Core Archive rss feed');
 		$channelElem->appendChild($descriptionElem);
@@ -1051,20 +1074,25 @@ class DwcArchiverOccurrence{
 			$itemTitleElem = $newDoc->createElement('title',$title);
 			$itemElem->appendChild($itemTitleElem);
 			//Icon
-			$iconUrlPrefix = 'http://'.$_SERVER["SERVER_NAME"];
-			if($_SERVER["SERVER_PORT"] || $_SERVER["SERVER_PORT"] != 80) $iconUrlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-			if(substr($cArr['icon'],0,7) == 'images/'){
-				$iconUrlPrefix .= $clientRoot;
+			$imgLink = '';
+			if(substr($cArr['icon'],0,17) == 'images/collicons/'){
+				//Link is a 
+				$imgLink = $urlPathPrefix.$cArr['icon'];
 			}
-			if(substr($iconUrlPrefix,-1) != '/') $iconUrlPrefix .= '/';
-			$iconElem = $newDoc->createElement('image',$iconUrlPrefix.$cArr['icon']);
+			elseif(substr($cArr['icon'],0,1) == '/'){
+				$imgLink = $localDomain.$cArr['icon'];
+			}
+			else{
+				$imgLink = $cArr['icon'];
+			}
+			$iconElem = $newDoc->createElement('image',$imgLink);
 			$itemElem->appendChild($iconElem);
 			
 			//description
 			$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$cArr['collname']);
 			$itemElem->appendChild($descTitleElem);
 			//GUIDs
-			$guidElem = $newDoc->createElement('guid','http://'.$_SERVER["SERVER_NAME"].$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/misc/collprofiles.php?collid='.$collId);
+			$guidElem = $newDoc->createElement('guid',$urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId);
 			$itemElem->appendChild($guidElem);
 			$guidElem2 = $newDoc->createElement('guid',$cArr['collectionguid']);
 			$itemElem->appendChild($guidElem2);
@@ -1075,7 +1103,7 @@ class DwcArchiverOccurrence{
 			$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
 			$itemElem->appendChild($recTypeTitleElem);
 			//link
-			$linkTitleElem = $newDoc->createElement('link',$linkStr.$clientRoot.(substr($clientRoot,-1)=='/'?'':'/').'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.zip');
+			$linkTitleElem = $newDoc->createElement('link',$urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.zip');
 			$itemElem->appendChild($linkTitleElem);
 			//pubDate
 			//$dsStat = stat($this->targetPath.$instCode.'_DwC-A.zip');

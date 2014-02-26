@@ -318,6 +318,216 @@ class SpecProcessorManager {
 		return $projArr;
 	}
 
+	//Report functions
+	public function getProcessingStats(){
+		$retArr = array();
+		$retArr['total'] = $this->getTotalCount();
+		$retArr['ps'] = $this->getProcessingStatusCounts();
+		$retArr['noimg'] = $this->getSpecNoImageCount();
+		$retArr['unprocnoimg'] = $this->getUnprocSpecNoImage();
+		$retArr['noskel'] = $this->getSpecNoSkel();
+		return $retArr;
+	}
+
+	public function getTotalCount(){
+		$totalCnt = 0;
+		if($this->collid){
+			//Get processing status counts
+			$psArr = array();
+			$sql = 'SELECT count(*) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collid;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$totalCnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $totalCnt;
+	}
+
+	public function getProcessingStatusCount($ps){
+		$cnt = 0;
+		if($this->collid){
+			//Get processing status counts
+			$psArr = array();
+			$sql = 'SELECT count(*) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collid.' AND processingstatus = "'.$this->cleanInStr($ps).'"';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+	
+	public function getProcessingStatusCounts(){
+		$retArr = array();
+		if($this->collid){
+			//Get processing status counts
+			$psArr = array();
+			$sql = 'SELECT processingstatus, count(*) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collid.' GROUP BY processingstatus';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$psArr[strtolower($r->processingstatus)] = $r->cnt;
+			}
+			$rs->free();
+			//Load into $retArr in a specific order
+			$statusArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
+			foreach($statusArr as $v){
+				if(array_key_exists($v,$psArr)){
+					$retArr[$v] = $psArr[$v];
+					unset($psArr[$v]);
+				}
+			}
+			//Grab untraditional processing statuses 
+			foreach($psArr as $k => $cnt){
+				$retArr[$k] = $cnt;
+			}
+		}
+		return $retArr;
+	}
+	
+	public function getSpecNoImageCount(){
+		$cnt = 0;
+		if($this->collid){
+			//Count specimens without images
+			$sql = 'SELECT count(o.occid) AS cnt '.
+				'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
+				'WHERE o.collid = '.$this->collid.' AND i.imgid IS NULL ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	public function getUnprocSpecNoImage(){
+		$cnt = 0;
+		if($this->collid){
+			//Count unprocessed specimens without images
+			$sql = 'SELECT count(o.occid) AS cnt '.
+				'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
+				'WHERE (o.collid = '.$this->collid.') AND (i.imgid IS NULL) AND (o.processingstatus = "unprocessed") ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	public function getSpecNoSkel(){
+		$cnt = 0;
+		if($this->collid){
+			//Count specimens without skeletal data
+			$sql = 'SELECT count(o.occid) AS cnt '.
+				'FROM omoccurrences o '.
+				'WHERE (o.collid = '.$this->collid.') AND (o.processingstatus = "unprocessed") '.
+				'AND (o.sciname IS NULL) AND (o.stateprovince IS NULL)';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	public function getSpecNoOcr(){
+		$cnt = 0;
+		if($this->collid){
+			//Count specimens with images but without OCR
+			$sql = 'SELECT count(o.occid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'INNER JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+				'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$cnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $cnt;
+	}
+
+	public function downloadReportData($target){
+		$fileName = 'SymbSpecNoImages_'.time().'.csv';
+		header ('Content-Type: text/csv; charset='.$GLOBALS['charset']);
+		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+		$headerArr = array('occid','catalogNumber','sciname','recordedBy','recordNumber','eventDate','country','stateProvince','county','processingstatus');
+		$sql = 'SELECT o.'.implode(',',$headerArr).' ';
+		if($target == 'dlnoimg'){
+			$sql .= 'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
+				'WHERE o.collid = '.$this->collid.' AND i.imgid IS NULL ';
+		}
+		elseif($target == 'unprocnoimg'){
+			$sql .= 'FROM omoccurrences o LEFT JOIN images i ON o.occid = i.occid '.
+				'WHERE (o.collid = '.$this->collid.') AND (i.imgid IS NULL) AND (o.processingstatus = "unprocessed") ';
+		}
+		elseif($target == 'noskel'){
+			$sql .= 'FROM omoccurrences o '.
+				'WHERE (o.collid = '.$this->collid.') AND (o.processingstatus = "unprocessed") '.
+				'AND (o.sciname IS NULL) AND (o.stateprovince IS NULL)';
+		}
+		//echo $sql;
+		$result = $this->conn->query($sql);
+		//Write column names out to file
+		if($result){
+    		$outstream = fopen("php://output", "w");
+			fputcsv($outstream, $headerArr);
+			while($row = $result->fetch_assoc()){
+				fputcsv($outstream, $row);
+			}
+			fclose($outstream);
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+        if($result) $result->close();
+	}
+
+	public function getUserStats(){
+		$retArr = array();
+		if($this->collid){
+			//Processing scores by user
+			$sql = 'SELECT recordenteredby, processingstatus, COUNT(occid) as cnt '.
+				'FROM omoccurrences '.
+				'WHERE recordenteredby IS NOT NULL AND collid = '.$this->collid.' '.
+				'GROUP BY recordenteredby, processingstatus ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->recordenteredby][strtolower($r->processingstatus)] = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
+	public function getIssues(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT count(*) AS cnt '.
+				'FROM omoccurrences '.
+				'WHERE processingstatus = "unprocessed" AND stateProvince IS NOT NULL AND locality IS NOT NULL AND collid = '.$this->collid;
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr['loc'] = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+	
 	//Set and Get functions
 	public function setSpprId($id) {
 		if($id && is_numeric($id)){

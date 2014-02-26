@@ -49,12 +49,17 @@ if($isEditor){
 		$csManager->setCollid($collid);
 		$statusStr = $csManager->editProject($omcsid,$_POST['instr'],$_POST['url']);
 	}
-	elseif($action == 'Download Specimen Records'){
-		$dlManager = new OccurrenceDownloadManager();
-		$dlManager->setSchemaType($_POST['schema']);
-		$dlManager->setDelimiter($_POST['format']);
-		$dlManager->setCharSetOut($_POST['cset']);
-		$dlManager->downloadSpecimens();
+	elseif($action == 'dlnoimg'){
+		$specManager->downloadReportData($action);
+		exit;
+	}
+	elseif($action == 'unprocnoimg'){
+		$specManager->downloadReportData($action);
+		exit;
+	}
+	elseif($action == 'noskel'){
+		$specManager->downloadReportData($action);
+		exit;
 	}
 }
 ?>
@@ -159,9 +164,10 @@ if($isEditor){
 				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing Module</a></li>
 				        <!-- 
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
-				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
-				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
 				         -->
+				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
+				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
+				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
 				    </ul>
 					<div id="introdiv">
 						<h1>Specimen Processor Control Panel</h1>
@@ -172,7 +178,7 @@ if($isEditor){
 							and crowdsourcing data entry. 
 							Use tabs above for access tools.     
 						</div>
-						<div style="margin:10px">
+						<div style="margin:10px;height:400px;">
 							<h2>Image Loading</h2>
 							<div style="margin:15px">
 								The batch image loading module is designed to batch process specimen images that are deposited in a 
@@ -193,11 +199,20 @@ if($isEditor){
 								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
 							</div>
 
+							<!--  
 							<h2>Optical Character Resolution (OCR)</h2>
 							<div style="margin:15px">Description to be added </div>
 
 							<h2>Natural Language Processing (NLP)</h2>
 							<div style="margin:15px 0px 40px 15px">Description to be added </div>
+							-->
+							
+							
+							
+							
+							
+							
+							
 						</div>
 					</div>
 				</div>

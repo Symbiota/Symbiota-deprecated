@@ -4,7 +4,7 @@ if(!$displayQuery && array_key_exists('displayquery',$_REQUEST)) $displayQuery =
 $qIdentifier=''; $qOtherCatalogNumbers=''; 
 $qRecordedBy=''; $qRecordNumber=''; $qEventDate=''; 
 $qEnteredBy=''; $qObserverUid='';$qProcessingStatus=''; $qDateLastModified='';
-$qImgOnly='';
+$qImgOnly='';$qWithoutImg='';
 $qCustomField1='';$qCustomType1='';$qCustomValue1='';
 $qCustomField2='';$qCustomType2='';$qCustomValue2='';
 $qCustomField3='';$qCustomType3='';$qCustomValue3='';
@@ -20,6 +20,7 @@ if($qryArr){
 	$qProcessingStatus = (array_key_exists('ps',$qryArr)?$qryArr['ps']:'');
 	$qDateLastModified = (array_key_exists('dm',$qryArr)?$qryArr['dm']:'');
 	$qImgOnly = (array_key_exists('io',$qryArr)?$qryArr['io']:0);
+	$qWithoutImg = (array_key_exists('woi',$qryArr)?$qryArr['woi']:0);
 	$qCustomField1 = (array_key_exists('cf1',$qryArr)?$qryArr['cf1']:'');
 	$qCustomType1 = (array_key_exists('ct1',$qryArr)?$qryArr['ct1']:'');
 	$qCustomValue1 = (array_key_exists('cv1',$qryArr)?$qryArr['cv1']:'');
@@ -37,7 +38,7 @@ if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
 	$processingStatusArr = $PROCESSINGSTATUS;
 }
 else{
-	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed');
+	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending review','expert required','reviewed','closed');
 }
 ?>
 <div id="querydiv" style="clear:both;width:790px;display:<?php echo ($displayQuery?'block':'none'); ?>;">
@@ -125,6 +126,10 @@ else{
 							$keyOut = strtolower($v);
 							echo '<option value="'.$keyOut.'" '.($qProcessingStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 						}
+						echo '<option value="isnull" '.($qProcessingStatus=='isnull'?'SELECTED':'').'>No Set Status</option>';
+						if(!in_array($qProcessingStatus,$processingStatusArr)){
+							echo '<option value="'.$qProcessingStatus.'" SELECTED>'.$qProcessingStatus.'</option>';
+						}
 						?>
 					</select>
 				</div>
@@ -179,7 +184,7 @@ else{
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
-			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2||$qCustomType2=='IS NULL'?'block':'none');?>;">
+			<div id="customdiv2" style="margin:2px 0px;display:<?php echo ($qCustomValue2||$qCustomType2=='NULL'||$qCustomType2=='NOTNULL'?'block':'none');?>;">
 				Custom Field 2: 
 				<select name="q_customfield2">
 					<option value="">Select Field Name</option>
@@ -202,7 +207,7 @@ else{
 					<img src="../../images/editplus.png" />
 				</a>
 			</div>
-			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue3||$qCustomType3=='IS NULL'?'block':'none');?>;">
+			<div id="customdiv3" style="margin:2px 0px;display:<?php echo ($qCustomValue3||$qCustomType3=='NULL'||$qCustomType3=='NOTNULL'?'block':'none');?>;">
 				Custom Field 3: 
 				<select name="q_customfield3">
 					<option value="">Select Field Name</option>
@@ -257,7 +262,9 @@ else{
 			</div>
 			<div style="margin:5px 0px;">
 				<input name="q_imgonly" type="checkbox" value="1" <?php echo ($qImgOnly==1?'checked':''); ?> /> 
-				Only occurrences with images
+				With images
+				<input name="q_withoutimg" type="checkbox" value="1" <?php echo ($qWithoutImg==1?'checked':''); ?> /> 
+				Without images
 			</div>
 		</fieldset>
 	</form>

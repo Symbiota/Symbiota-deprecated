@@ -35,7 +35,7 @@ if($isEditor){
 	elseif($action == 'Add Permissions for User'){
 		$rightType = $_POST['righttype'];
 		$userRight = '';
-		if($$rightType == 'admin'){
+		if($rightType == 'admin'){
 			$userRight = 'CollAdmin-'.$collId;
 		}
 		elseif($rightType == 'editor'){

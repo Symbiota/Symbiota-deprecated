@@ -189,7 +189,7 @@ if($symbUid){
 								?>
 								<li>
 									<a href="../specprocessor/index.php?collid=<?php echo $collid; ?>">
-										Batch Processing Tools
+										Processing Toolbox
 									</a>
 								</li>
 								<li>
