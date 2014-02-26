@@ -115,6 +115,7 @@ class OccurrenceEditorManager {
 			if(array_key_exists('q_datelastmodified',$_REQUEST) && $_REQUEST['q_datelastmodified']) $this->qryArr['dm'] = trim($_REQUEST['q_datelastmodified']);
 			if(array_key_exists('q_ocrfrag',$_REQUEST) && $_REQUEST['q_ocrfrag']) $this->qryArr['ocr'] = trim($_REQUEST['q_ocrfrag']); 
 			if(array_key_exists('q_imgonly',$_REQUEST) && $_REQUEST['q_imgonly']) $this->qryArr['io'] = 1;
+			if(array_key_exists('q_withoutimg',$_REQUEST) && $_REQUEST['q_withoutimg']) $this->qryArr['woi'] = 1;
 			for($x=1;$x<4;$x++){
 				if(array_key_exists('q_customfield'.$x,$_REQUEST) && $_REQUEST['q_customfield'.$x]) $this->qryArr['cf'.$x] = $_REQUEST['q_customfield'.$x];
 				if(array_key_exists('q_customtype'.$x,$_REQUEST) && $_REQUEST['q_customtype'.$x]) $this->qryArr['ct'.$x] = $_REQUEST['q_customtype'.$x];
@@ -293,6 +294,7 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
 		}
+		//recordedBy: collector
 		if(array_key_exists('rb',$this->qryArr)){
 			if(strtolower($this->qryArr['rb']) == 'is null'){
 				$sqlWhere .= 'AND (o.recordedby IS NULL) ';
@@ -302,6 +304,7 @@ class OccurrenceEditorManager {
 				$sqlOrderBy .= ',(o.recordnumber+1)';
 			}
 		}
+		//eventDate: collection date
 		if(array_key_exists('ed',$this->qryArr)){
 			if(strtolower($this->qryArr['ed']) == 'is null'){
 				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
@@ -337,18 +340,25 @@ class OccurrenceEditorManager {
 			
 			$sqlOrderBy .= ',o.datelastmodified';
 		}
+		//Processing status
 		if(array_key_exists('ps',$this->qryArr)){
-			if(strtolower($this->qryArr['ps']) == 'is null'){
+			if($this->qryArr['ps'] == 'isnull'){
 				$sqlWhere .= 'AND (o.processingstatus IS NULL) ';
 			}
 			else{
 				$sqlWhere .= 'AND (o.processingstatus LIKE "'.$this->qryArr['ps'].'%") ';
 			}
 		}
+		//Without images
+		if(array_key_exists('woi',$this->qryArr)){
+			$sqlWhere .= 'AND (i.imgid IS NULL) ';
+		}
+		//OCR
 		if(array_key_exists('ocr',$this->qryArr)){
 			//Used when OCR frag comes from set field within queryformcrowdsourcing
 			$sqlWhere .= 'AND (ocr.rawstr LIKE "%'.$this->qryArr['ocr'].'%") ';
 		}
+		//Custom search fields
 		for($x=1;$x<4;$x++){
 			$cf = (array_key_exists('cf'.$x,$this->qryArr)?$this->qryArr['cf'.$x]:'');
 			$ct = (array_key_exists('ct'.$x,$this->qryArr)?$this->qryArr['ct'.$x]:'');
@@ -420,6 +430,9 @@ class OccurrenceEditorManager {
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
 			}
+			elseif(array_key_exists('woi',$this->qryArr)){
+				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
+			}
 			if($this->crowdSourceMode){
 				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
 			}
@@ -458,6 +471,9 @@ class OccurrenceEditorManager {
 			}
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+			}
+			elseif(array_key_exists('woi',$this->qryArr)){
+				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
 			}
 			if($this->crowdSourceMode){
 				$sql .= 'INNER JOIN omcrowdsourcequeue q ON q.occid = o.occid ';
@@ -962,6 +978,9 @@ class OccurrenceEditorManager {
 			elseif(array_key_exists('io',$this->qryArr)){
 				$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
 			}
+			elseif(array_key_exists('woi',$this->qryArr)){
+				$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
+			}
 			//Strip ORDER BY and/or LIMIT fragments
 			if(strpos($this->sqlWhere,'ORDER BY')){
 				$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
@@ -999,6 +1018,9 @@ class OccurrenceEditorManager {
 		}
 		elseif(array_key_exists('io',$this->qryArr)){
 			$sql .= 'INNER JOIN images i ON o.occid = i.occid ';
+		}
+		elseif(array_key_exists('woi',$this->qryArr)){
+			$sql .= 'LEFT JOIN images i ON o.occid = i.occid ';
 		}
 		//Strip ORDER BY and/or LIMIT fragments
 		if(strpos($this->sqlWhere,'ORDER BY')){

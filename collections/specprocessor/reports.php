@@ -1,306 +1,197 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDownloadManager.php');
+include_once($serverRoot.'/classes/SpecProcessorManager.php');
 header("Content-Type: text/html; charset=".$charset);
-
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
-$action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
-$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$collid = $_REQUEST['collid'];
+$menu = array_key_exists('menu',$_REQUEST)?$_REQUEST['menu']:'';
 
-$customField1 = array_key_exists('customfield1',$_REQUEST)?$_REQUEST['customfield1']:'';
-$customType1 = array_key_exists('customtype1',$_REQUEST)?$_REQUEST['customtype1']:'';
-$customValue1 = array_key_exists('customvalue1',$_REQUEST)?$_REQUEST['customvalue1']:'';
-$customField2 = array_key_exists('customfield2',$_REQUEST)?$_REQUEST['customfield2']:'';
-$customType2 = array_key_exists('customtype2',$_REQUEST)?$_REQUEST['customtype2']:'';
-$customValue2 = array_key_exists('customvalue2',$_REQUEST)?$_REQUEST['customvalue2']:'';
+$tabIndex = 4;
 
-$dlManager = new OccurrenceDownloadManager();
-$collMeta = $dlManager->getCollectionMetadata($collid);
+$procManager = new SpecProcessorManager();
+$procManager->setCollId($collid);
 
 $isEditor = false;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
  	$isEditor = true;
 }
 
-$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By','typeStatus'=>'Type Status',
-	'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
-	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
-	'verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
-	'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
-	'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex',
-	'individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol','country'=>'Country',
-	'stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality','locality'=>'Locality',
-	'decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude','geodeticDatum'=>'Geodetic Datum',
-	'coordinateUncertaintyInMeters'=>'Uncertainty (m)','verbatimCoordinates'=>'Verbatim Coordinates',
-	'georeferencedBy'=>'Georeferenced By','georeferenceProtocol'=>'Georeference Protocol','georeferenceSources'=>'Georeference Sources',
-	'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
-	'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
-	'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition');
 ?>
-<html>
-	<head>
-		<title>Occurrence Export Manager</title>
-		<link href="<?php echo $clientRoot; ?>/css/main.css" type="text/css" rel="stylesheet" />
-		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
-		<script src="../../js/jquery.js" type="text/javascript"></script>
-		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-		<script src="../../js/symb/shared.js" type="text/javascript"></script>
-		<script language="javascript">
-			$(function() {
-				var dialogArr = new Array("schema","");
-				var dialogStr = "";
-				for(i=0;i<dialogArr.length;i++){
-					dialogStr = dialogArr[i]+"info";
-					$( "#"+dialogStr+"dialog" ).dialog({
-						autoOpen: false,
-						modal: true
-					});
-	
-					$( "#"+dialogStr ).click(function() {
-						$( "#"+this.id+"dialog" ).dialog( "open" );
-					});
-				}
-	
-			});
-	
-			function validateDownloadForm(f){
-
-				return true;
-			}
-
-		</script>
-	</head>
-	<body>
-		<!-- This is inner text! -->
-		<div id="innertext">
-			<div style="padding:15px;">
-				This download module is designed to aid collection managers in extracting specimen data
-				for import into local systems.
-				This feature is particularly useful for extracting records that have been processed 
-				using the digitization tools built into the portal 
-				(crowdsourcing, OCR/NLP, basic data entry, etc). 
+<div id="innertext">
+	<div style="float:right;width:165px;">
+		<fieldset>
+			<legend><b>Sub-Menu</b></legend>
+			<ul>
+				<li><a href="index.php?tabindex=<?php echo $tabIndex.'&collid='.$collid; ?>">General Stats</a><br/></li>
+				<li><a href="index.php?menu=user&tabindex=<?php echo $tabIndex.'&collid='.$collid; ?>">User Stats</a><br/></li>
+				<li><a href="index.php?menu=user&tabindex=<?php echo $tabIndex.'&collid='.$collid; ?>">Possible Issues</a><br/></li>
+			</ul>
+		</fieldset>
+	</div>
+	<?php 
+	if($isEditor){
+		$urlBase = '&csmode=0&occindex=0&occid=&q_processingstatus=&q_recordedby=&q_recordnumber=&q_eventdate=&q_identifier=&q_othercatalognumbers='.
+			'&q_observeruid=&q_datelastmodified=&q_imgonly=&q_withoutimg=&q_customfield1=&q_customtype1=EQUALS&q_customvalue1='.
+			'&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=&q_customvalue3=';
+		$eUrl = '../editor/occurrenceeditor.php?collid='.$collid; 
+		$beUrl = '../editor/occurrencetabledisplay.php?collid='.$collid;
+		if($menu == 'user'){
+			?>
+			<div style="margin:15px 0px 25px 15px;">
+				<table class="styledtable" style="width:500px;">
+					<tr>
+						<th>User</th>
+						<th>Processing Status</th>
+						<th>Count</th>
+					</tr>
+					<?php 
+					if($userStats = $procManager->getUserStats()){
+						$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
+						foreach($userStats as $username => $psArr){
+							$eUrl .= '&q_enteredby='.$username.str_replace(array('&q_enteredby='),'',$urlBase); 
+							$beUrl .= '&q_enteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_enteredby='),'',$urlBase);
+							foreach($orderArr as $ps){
+								if(array_key_exists($ps,$psArr)){
+									$eUrl .= '&q_processingstatus='.$ps;
+									$beUrl .= '&q_processingstatus='.$ps.'&buoldvalue='.$ps;
+									echo '<tr>';
+									echo '<td>'.$username.'</td>';
+									echo '<td>'.$ps.'</td>';
+									echo '<td>';
+									echo $psArr[$ps];
+									echo '<span style="margin-left:10px;"><a href="'.$eUrl.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+									echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+									echo '</td>';
+									echo '</tr>';
+									unset($psArr[$ps]);
+								}
+							}
+							foreach($psArr as $pStatus => $cnt){
+								if($pStatus){
+									$eUrl .= '&q_processingstatus='.$pStatus;
+									$beUrl .= '&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
+								}
+								else{
+									$eUrl .= '&q_processingstatus=isnull';
+									$beUrl .= '&q_processingstatus=isnull';
+									$pStatus = 'Not Set';
+								}
+								echo '<tr>';
+								echo '<td>'.$username.'</td>';
+								echo '<td>'.$pStatus.'</td>';
+								echo '<td>';
+								echo $cnt;
+								echo '<span style="margin-left:10px;"><a href="'.$eUrl.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+								echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+								echo '</td>';
+								echo '</tr>';
+							}
+						}
+					}
+					else{
+						echo '<tr><td colspan="5">No records processed</td></tr>';
+					}
+					?>
+				</table>
 			</div>
 			<?php 
-			if($collMeta['manatype'] == 'Snapshot'){
-				?>
-				<div style="padding:15px;">
-					Records imported from a central database will be linked to the primary record
-					through a specimen unique identifier (barcode, primary key, etc) 
-					which is stored in the portal database. 
-					New records that are digitized directly 
-					in the data portal due to image/skeletal records ingestion 
-					antoher batch processing workflow will have a null unique identifier, 
-					which will identify the record as new and not yet synchronized to the central database.
-					When new records are extracted from the portal, imported into the central database, 
-					and then the portal's data snapshot is refreshed, these records should be synchronized
-					with the central records.
-				</div>
-				<?php
-			}
-			if($isEditor){
-				if($collid){
-					?>
-					<form name="downloadform" action="index.php" method="post" onsubmit="return validateDownloadForm(this);">
-						<fieldset>
-							<legend><b>Download Specimen Records</b></legend>
-							<table>
-								<tr>
-									<td>
-										<div style="margin:10px;">
-											<b>Processing Status:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<select name="Processing Status">
-												<option value="all">All Records</option>
-												<?php 
-												$statusArr = $dlManager->getProcessingStatusList($collid);
-												foreach($statusArr as $v){
-													echo '<option value="'.$v.'" '.($v == 'unprocessed'?'selected':'').'>'.ucwords($v).'</option>';
-												}
-												?>
-											</select>
-										</div> 
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<div style="margin:10px;">
-											<b>Additional Filter:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<select name="customfield1">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php 
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype1">
-												<option>EQUALS</option>
-												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" />
-										</div> 
-										<div style="margin:10px 0px;">
-											<select name="customfield2">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php 
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField2?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype2">
-												<option>EQUALS</option>
-												<option <?php echo ($customType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" />
-										</div> 
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Structure:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="radio" name="schema" value="dwc" /> Darwin Core
-											<a href="" title="More Information">
-												<img src="../../images/info.png" style="width:15px;" />
-											</a><br/>
-											<input type="radio" name="schema" value="symbiota" CHECKED /> Symbiota Native
-											<!--  <input type="radio" name="schema" value="specify" /> Specify -->
-											<a id="schemainfo" href="#" onclick="return false" title="More Information">
-												<img src="../../images/info.png" style="width:15px;" />
-											</a>
-											<div id="schemainfodialog">
-												Symbiota native is very similar to Darwin Core except with the addtion of a few fields
-												such as substrate, associated collectors, verbatim description.
-											</div>
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>File Format:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="radio" name="format" value="csv" CHECKED /> Comma Delimited (CSV)<br/>
-											<input type="radio" name="format" value="tab" /> Tab Delimited<br/>
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Character Set:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<?php 
-											$cSet = strtolower($charset);
-											?>
-											<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
-											<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Additional Data:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="checkbox" name="identifications" value="1" onchange="this.form.zip.checked = true" /> Determination History<br/>
-											<input type="checkbox" name="images" value="1" onchange="this.form.zip.checked = true" /> Image Records
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Compression:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="checkbox" name="zip" value="1" checked /> Archive File (ZIP file)<br/>
-										</div>
-									</td>
-								</tr>
-								<?php 
-								if($collMeta['manatype'] == 'Snapshot'){
-									?>
-									<tr>
-										<td>
-											<div style="margin:10px;">
-												<b>New Records Only:</b> 
-											</div> 
-										</td>
-										<td>
-											<div style="margin:10px 0px;">
-												<input type="checkbox" name="newrecs" value="1" CHECKED />
-												<a id="newrecsinfo" href="#" onclick="return false" title="More Information">
-													<img src="../../images/info.png" style="width:15px;" />
-												</a>
-												<div id="newrecsinfodialog">
-													New recorded entered and processed directly within the 
-													portal which have not yet imported into and synchonized with 
-													the central database.
-												</div>
-											</div>
-										</td>
-									</tr>
-									<?php 
-								}
-								?>
-								<tr>
-									<td colspan="2">
-										<div style="margin:10px;">
-											<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" value="Download Specimen Records" />
-										</div>
-									</td>
-								</tr>
-							</table>							
-						</fieldset>
-					</form>
+		}
+		elseif($menu == 'issues'){
+			$issueArr = $procManager->getIssues();
+			$eUrl .= str_replace(array('&q_customfield1=','&q_customfield2=','&q_customtype1=EQUALS','&q_customtype2=EQUALS'),'',$urlBase).
+				'&q_processingstatus=unprocessed&q_customfield1=locality&q_customtype1=NOTNULL&q_customfield2=stateProvince&q_customtype2=NOTNULL';
+			$beUrl .= str_replace(array('&q_customfield1=','&q_customfield2=','&q_customtype1=EQUALS','&q_customtype2=EQUALS'),'',$urlBase).
+				'&q_processingstatus=unprocessed&bufieldname=processingstatus&buoldvalue=unprocessed'.
+				'&q_customfield1=locality&q_customtype1=NOTNULL&q_customfield2=stateProvince&q_customtype2=NOTNULL';
+			echo '<div style="margin:10px;height:400px;">';
+			echo 'Mark as unprocessed but apparently with data: ';
+			echo $issueArr['loc'];
+			echo '<span style="margin-left:10px;"><a href="'.$eUrl.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+			echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+			echo '</div>';
+		}
+		else{
+			$statsArr = $procManager->getProcessingStats();
+			?>
+			<div style="margin:10px;height:400px;">
+				<div style="margin:5px;">
+					<b>Total Specimens:</b> 
 					<?php 
-				}
-				else{
-					echo '<div>ERROR: collection identifier not defined. Contact administrator</div>';
-				}
-			}
-			else{
-				?>
-				<div style='font-weight:bold;'>
-					Access denied
+					echo $statsArr['total']; 
+					echo '<span style="margin-left:10px;"><a href="'.$eUrl.$urlBase.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+					echo '<span style="margin-left:10px;"><a href="'.$beUrl.$urlBase.'" target="_blank" title="Editor in Table View"><img src="../../images/list.png" style="width:12px;" /></a></span>';
+					echo '<span style="margin-left:10px;"><a href="../misc/collbackup.php?collid='.$collid.'" target="_blank" title="Download Full Data"><img src="../../images/dl.png" style="width:13px;" /></a></span>';
+					?>
+				</div>
+				<div style="margin:5px;">
+					<b>Specimens without Images:</b> 
+					<?php 
+					$eUrl1 = $eUrl.str_replace(array('&q_withoutimg='),'',$urlBase).'&q_withoutimg=1';
+					$beUrl1 = $beUrl.str_replace(array('&q_withoutimg='),'',$urlBase).'&q_withoutimg=1';
+					echo $statsArr['noimg']; 
+					echo '<span style="margin-left:10px;"><a href="'.$eUrl1.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+					echo '<span style="margin-left:10px;"><a href="'.$beUrl1.'" target="_blank" title="Batch Edit Records"><img src="../../images/list.png" style="width:12px;" /></a></span>';
+					echo '<span style="margin-left:10px;"><a href="index.php?submitaction=dlnoimg&tabindex='.$tabIndex.'&collid='.$collid.'" target="_blank" title="Download Report File"><img src="../../images/dl.png" style="width:13px;" /></a></span>';
+					?>
 				</div>
 				<?php 
-			}
-			?>
-		</div>
-	</body>
-</html>
+				if($statsArr['unprocnoimg']){
+					?>
+					<div style="margin:5px;">
+						<b>Unprocessed Specimens without Images:</b> 
+						<?php 
+						$eUrl2 = $eUrl.str_replace(array('&q_withoutimg=','&q_processingstatus='),'',$urlBase).'&q_processingstatus=unprocessed&q_withoutimg=1';
+						$beUrl2 = $beUrl.str_replace(array('&q_withoutimg=','&q_processingstatus='),'',$urlBase).'&q_processingstatus=unprocessed&q_withoutimg=1';
+						echo $statsArr['unprocnoimg']; 
+						echo '<span style="margin-left:10px;"><a href="'.$eUrl2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+						echo '<span style="margin-left:10px;"><a href="'.$beUrl2.'" target="_blank" title="Batch Edit Records"><img src="../../images/list.png" style="width:12px;" /></a></span>';
+						echo '<span style="margin-left:10px;"><a href="index.php?submitaction=unprocnoimg&tabindex='.$tabIndex.'&collid='.$collid.'" target="_blank" title="Download Report File"><img src="../../images/dl.png" style="width:13px;" /></a></span>';
+						?>
+					</div>
+					<?php 
+				}
+				if($statsArr['noskel']){
+					?>
+					<div style="margin:5px;">
+						<b>Unprocessed Specimens without Skeletal Data:</b> 
+						<?php 
+						$eUrl3 = $eUrl.str_replace(array('&q_processingstatus=','q_customtype1=','&q_customfield1=','q_customtype2=','&q_customfield2='),'',$urlBase).
+							'&q_processingstatus=unprocessed&q_customfield1=stateProvince&q_customtype1=NULL&q_customfield2=sciname&q_customtype2=NULL';
+						$beUrl3 = $beUrl.str_replace(array('&q_processingstatus=','q_customtype1=','&q_customfield1=','q_customtype2=','&q_customfield2='),'',$urlBase).
+							'&q_processingstatus=unprocessed&q_customfield1=stateProvince&q_customtype1=NULL&q_customfield2=sciname&q_customtype2=NULL';
+						echo $statsArr['noskel']; 
+						echo '<span style="margin-left:10px;"><a href="'.$eUrl3.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+						echo '<span style="margin-left:10px;"><a href="'.$beUrl3.'" target="_blank" title="Batch Edit Records"><img src="../../images/list.png" style="width:12px;" /></a></span>';
+						echo '<span style="margin-left:10px;"><a href="index.php?submitaction=noskel&tabindex='.$tabIndex.'&collid='.$collid.'" target="_blank" title="Download Report File"><img src="../../images/dl.png" style="width:14px;" /></a></span>';
+						?>
+					</div>
+					<?php 
+				}
+				?>
+				<div style="margin:20px 5px;">
+					<table class="styledtable" style="width:400px;">
+						<tr><th>Processing Status</th><th>Count</th></tr>
+						<?php 
+						foreach($statsArr['ps'] as $processingStatus => $cnt){
+							if(!$processingStatus) $processingStatus = 'No Status Set';
+							echo '<tr>';
+							echo '<td>'.$processingStatus.'</td>';
+							echo '<td>';
+							echo $cnt;
+							$eUrl4 = $eUrl.str_replace(array('&q_processingstatus='),'',$urlBase).'&q_processingstatus='.$processingStatus;
+							$beUrl4 = $beUrl.str_replace(array('&q_processingstatus='),'',$urlBase).'&q_processingstatus='.$processingStatus;
+							echo '<span style="margin-left:10px;"><a href="'.$eUrl4.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+							echo '<span style="margin-left:10px;"><a href="'.$beUrl4.'" target="_blank" title="Batch Edit Records"><img src="../../images/list.png" style="width:12px;" /></a></span>';
+							echo '</td>';
+							echo '</tr>';
+						}
+						?>
+					</table>
+				</div>
+			</div>
+			<?php 
+		}
+	}
+	?>
+</div>

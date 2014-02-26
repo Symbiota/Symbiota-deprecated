@@ -1,8 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDownloadManager.php');
+include_once($serverRoot.'/classes/OccurrenceDownload.php');
 header("Content-Type: text/html; charset=".$charset);
-
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
@@ -15,7 +14,7 @@ $customField2 = array_key_exists('customfield2',$_REQUEST)?$_REQUEST['customfiel
 $customType2 = array_key_exists('customtype2',$_REQUEST)?$_REQUEST['customtype2']:'';
 $customValue2 = array_key_exists('customvalue2',$_REQUEST)?$_REQUEST['customvalue2']:'';
 
-$dlManager = new OccurrenceDownloadManager();
+$dlManager = new OccurrenceDownload();
 $collMeta = $dlManager->getCollectionMetadata($collid);
 
 $isEditor = false;
@@ -23,10 +22,17 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
  	$isEditor = true;
 }
 
+$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','catalogNumber'=>'Catalog Number',
+	'otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
+	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','eventDate'=>'Collection Date',
+	'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality',
+	'locality'=>'Locality','decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude',
+	'georeferenceSources'=>'Georeference Sources');
+/*
 $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By','typeStatus'=>'Type Status',
 	'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
 	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
-	'verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
+	'eventDate'=>'Collection Date','verbatimEventDate'=>'Verbatim Date','habitat'=>'Habitat','substrate'=>'Substrate','occurrenceRemarks'=>'Occurrence Remarks',
 	'associatedTaxa'=>'Associated Taxa','verbatimAttributes'=>'Description','reproductiveCondition'=>'Reproductive Condition',
 	'establishmentMeans'=>'Establishment Means','lifeStage'=>'Life Stage','sex'=>'Sex',
 	'individualCount'=>'Individual Count','samplingProtocol'=>'Sampling Protocol','country'=>'Country',
@@ -37,6 +43,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 	'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
 	'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
 	'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition');
+*/
 ?>
 <html>
 	<head>
@@ -48,7 +55,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
 		<script language="javascript">
 			$(function() {
-				var dialogArr = new Array("schema","");
+				var dialogArr = new Array("schemanative","schemageoref","newrecs");
 				var dialogStr = "";
 				for(i=0;i<dialogArr.length;i++){
 					dialogStr = dialogArr[i]+"info";
@@ -65,43 +72,79 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			});
 	
 			function validateDownloadForm(f){
-
+				if(f.processingstatus.value == "" && f.customfield1.value == ""){
+					alert("Select a processing status or an additional filter requirement");
+					return false;
+				}
+				else if(f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
+					alert("New records cannot have an unprocessed or undefined processing status. Please select a valud processing status value.");
+					return false;
+				}
 				return true;
 			}
 
+			function georefRadioClicked(radioButton){
+				var f = radioButton.form;
+				if(radioButton.value == "georef"){
+					f.customfield1.value = "decimalLatitude";
+					f.customtype1.value = "NOTNULL";
+					f.customvalue1.value = "";
+					f.customfield2.value = "georeferenceSources";
+					f.customtype2.value = "STARTS";
+					f.customvalue2.value = "georef batch tool";
+					f.identifications.checked = false;
+					f.images.checked = false;
+				}
+				else{
+					f.customfield1.value = "";
+					f.customtype1.value = "EQUALS";
+					f.customvalue1.value = "";
+					f.customfield2.value = "";
+					f.customtype2.value = "EQUALS";
+					f.customvalue2.value = "";
+					f.identifications.checked = true;
+					f.images.checked = true;
+				}
+			}
 		</script>
 	</head>
 	<body>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<div style="padding:15px;">
+			<div style="padding:15px 0px;">
 				This download module is designed to aid collection managers in extracting specimen data
-				for import into local systems.
-				This feature is particularly useful for extracting records that have been processed 
-				using the digitization tools built into the portal 
-				(crowdsourcing, OCR/NLP, basic data entry, etc). 
+				for import into local systems for research or management purposes.
+				<?php 
+				if($collMeta['manatype'] == 'Snapshot'){
+					?> 
+					<a href="#" onclick="toggle('moreinfodiv');this.style.display = 'none';return false;" style="font-size:90%">more info...</a> 
+					<span id="moreinfodiv" style="display:none;">
+						This feature is particularly useful for extracting records that have been processed 
+						using the digitization tools built into the portal 
+						(crowdsourcing, OCR/NLP, basic data entry, etc). 
+						Records imported from a central database will be linked to the primary record
+						through a specimen unique identifier (barcode, primary key, etc) 
+						which is stored in the portal database. 
+						New records that are digitized directly 
+						in the data portal due to image/skeletal records ingestion, or 
+						another batch processing workflow, will have a null unique identifier, 
+						which identifies the record as new and not yet synchronized to the central database.
+						When new records are extracted from the portal, imported into the central database, 
+						and then the portal's data snapshot is refreshed, 
+						the catalog number will be used to automatically synchronized
+						the portal specimen records with those in the central database. 
+						Synchronization will only work if the catalog number field is 
+						populated and enforces as unique (e.g. no duplicates) in the local, central database. 
+					</span>
+					<?php
+				}
+				?>
 			</div>
 			<?php 
-			if($collMeta['manatype'] == 'Snapshot'){
-				?>
-				<div style="padding:15px;">
-					Records imported from a central database will be linked to the primary record
-					through a specimen unique identifier (barcode, primary key, etc) 
-					which is stored in the portal database. 
-					New records that are digitized directly 
-					in the data portal due to image/skeletal records ingestion 
-					antoher batch processing workflow will have a null unique identifier, 
-					which will identify the record as new and not yet synchronized to the central database.
-					When new records are extracted from the portal, imported into the central database, 
-					and then the portal's data snapshot is refreshed, these records should be synchronized
-					with the central records.
-				</div>
-				<?php
-			}
 			if($isEditor){
 				if($collid){
 					?>
-					<form name="downloadform" action="index.php" method="post" onsubmit="return validateDownloadForm(this);">
+					<form name="downloadform" action="../download/downloadhandler.php" method="post" onsubmit="return validateDownloadForm(this);">
 						<fieldset>
 							<legend><b>Download Specimen Records</b></legend>
 							<table>
@@ -113,27 +156,54 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
-											<select name="Processing Status">
-												<option value="all">All Records</option>
+											<select name="processingstatus">
+												<option value="">All Records</option>
 												<?php 
 												$statusArr = $dlManager->getProcessingStatusList($collid);
 												foreach($statusArr as $v){
-													echo '<option value="'.$v.'" '.($v == 'unprocessed'?'selected':'').'>'.ucwords($v).'</option>';
+													echo '<option value="'.$v.'">'.ucwords($v).'</option>';
 												}
 												?>
 											</select>
 										</div> 
 									</td>
 								</tr>
+								<?php 
+								if($collMeta['manatype'] == 'Snapshot'){
+									?>
+									<tr>
+										<td>
+											<div style="margin:10px;">
+												<b>New Data Only:</b> 
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<input type="checkbox" name="newrecs" value="1" /> (e.g. records processed within portal)
+												<a id="newrecsinfo" href="#" onclick="return false" title="More Information">
+													<img src="../../images/info.png" style="width:13px;" />
+												</a>
+												<div id="newrecsinfodialog">
+													Limit to new records entered and processed directly within the 
+													portal which have not yet imported into and synchonized with 
+													the central database. Avoid importing unprocessed skeletal records since 
+													future imports will involve more complex data coordination. 
+												</div>
+											</div>
+										</td>
+									</tr>
+									<?php 
+								}
+								?>
 								<tr>
 									<td>
 										<div style="margin:10px;">
-											<b>Additional Filter:</b>
+											<b>Additional<br/>Filters:</b>
 										</div> 
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
-											<select name="customfield1">
+											<select name="customfield1" style="width:200px">
 												<option value="">Select Field Name</option>
 												<option value="">---------------------------------</option>
 												<?php 
@@ -143,7 +213,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												?>
 											</select>
 											<select name="customtype1">
-												<option>EQUALS</option>
+												<option value="EQUALS">EQUALS</option>
 												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
 												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
 												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
@@ -152,7 +222,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" />
 										</div> 
 										<div style="margin:10px 0px;">
-											<select name="customfield2">
+											<select name="customfield2" style="width:200px">
 												<option value="">Select Field Name</option>
 												<option value="">---------------------------------</option>
 												<?php 
@@ -162,7 +232,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												?>
 											</select>
 											<select name="customtype2">
-												<option>EQUALS</option>
+												<option value="EQUALS">EQUALS</option>
 												<option <?php echo ($customType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
 												<option <?php echo ($customType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
 												<option <?php echo ($customType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
@@ -180,19 +250,41 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
-											<input type="radio" name="schema" value="dwc" /> Darwin Core
-											<a href="" title="More Information">
-												<img src="../../images/info.png" style="width:15px;" />
+											<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" /> 
+											Darwin Core
+											<a id="schemainfodwc" href="#" target="" title="More Information">
+												<img src="../../images/info.png" style="width:13px;" />
 											</a><br/>
-											<input type="radio" name="schema" value="symbiota" CHECKED /> Symbiota Native
-											<!--  <input type="radio" name="schema" value="specify" /> Specify -->
-											<a id="schemainfo" href="#" onclick="return false" title="More Information">
-												<img src="../../images/info.png" style="width:15px;" />
-											</a>
-											<div id="schemainfodialog">
+											<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED /> 
+											Symbiota Native
+											<a id="schemanativeinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:13px;" />
+											</a><br/>
+											<div id="schemanativeinfodialog">
 												Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 												such as substrate, associated collectors, verbatim description.
 											</div>
+											<input type="radio" name="schema" value="georef" onclick="georefRadioClicked(this)" /> 
+											Batch Georeferenced Data
+											<a id="schemageorefinfo" href="#" onclick="return false" title="More Information">
+												<img src="../../images/info.png" style="width:13px;" />
+											</a><br/>
+											<div id="schemageorefinfodialog">
+												Downloading georefence data will extract only the fields related to 
+												georeferencing and the catalog number. 
+												<?php 
+												if($collMeta['manatype'] == 'Snapshot'){
+													?>
+													This will allow the collection 
+													make use of the batch georeference tools and import new coordinate data
+													into their central database. Note that it is up to the collection manager to 
+													ensure that coordinates are imported into empty fields 
+													and existing coordinates are not copied over.
+													<?php 
+												}
+												?> 
+											</div>
+											<!--  <input type="radio" name="schema" value="specify" /> Specify -->
 										</div>
 									</td>
 								</tr>
@@ -225,61 +317,37 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</div>
 									</td>
 								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Additional Data:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="checkbox" name="identifications" value="1" onchange="this.form.zip.checked = true" /> Determination History<br/>
-											<input type="checkbox" name="images" value="1" onchange="this.form.zip.checked = true" /> Image Records
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td valign="top">
-										<div style="margin:10px;">
-											<b>Compression:</b>
-										</div> 
-									</td>
-									<td>
-										<div style="margin:10px 0px;">
-											<input type="checkbox" name="zip" value="1" checked /> Archive File (ZIP file)<br/>
-										</div>
-									</td>
-								</tr>
-								<?php 
-								if($collMeta['manatype'] == 'Snapshot'){
-									?>
+								<!-- 	
 									<tr>
-										<td>
+										<td valign="top">
 											<div style="margin:10px;">
-												<b>New Records Only:</b> 
+												<b>Additional Data:</b>
 											</div> 
 										</td>
 										<td>
 											<div style="margin:10px 0px;">
-												<input type="checkbox" name="newrecs" value="1" CHECKED />
-												<a id="newrecsinfo" href="#" onclick="return false" title="More Information">
-													<img src="../../images/info.png" style="width:15px;" />
-												</a>
-												<div id="newrecsinfodialog">
-													New recorded entered and processed directly within the 
-													portal which have not yet imported into and synchonized with 
-													the central database.
-												</div>
+												<input type="checkbox" name="identifications" value="1" onchange="this.form.zip.checked = true" checked /> Determination History<br/>
+												<input type="checkbox" name="images" value="1" onchange="this.form.zip.checked = true" checked /> Image Records
 											</div>
 										</td>
 									</tr>
-									<?php 
-								}
-								?>
+									<tr>
+										<td valign="top">
+											<div style="margin:10px;">
+												<b>Compression:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<input type="checkbox" name="zip" value="1" checked /> Archive File (ZIP file)<br/>
+											</div>
+										</td>
+									</tr>
+								-->
 								<tr>
 									<td colspan="2">
 										<div style="margin:10px;">
-											<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
+											<input type="hidden" name="targetcollid" value="<?php echo $collid; ?>" />
 											<input type="submit" name="submitaction" value="Download Specimen Records" />
 										</div>
 									</td>

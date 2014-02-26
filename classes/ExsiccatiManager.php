@@ -81,8 +81,8 @@ class ExsiccatiManager {
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$titleStr = $r->title;
-				if($r->editor) $titleStr .= ', '.$r->editor;
+				$titleStr = (strlen($r->title)>100?substr($r->title,0,100).'...':$r->title);
+				if($r->editor) $titleStr .= ', '.(strlen($r->editor)>50?substr($r->editor,0,50).'...':$r->editor);
 				if($r->exsrange) $titleStr .= ' ['.$r->exsrange.']';
 				$retArr[$r->ometid] = $this->cleanOutStr($titleStr);
 			}
@@ -143,37 +143,52 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 
-	public function getExsOccArr($omenid){
+	public function getExsOccArr($id, $target = 'omenid'){
 		$retArr = array();
-		$sql = 'SELECT ol.ranking, ol.notes, o.occid, o.occurrenceid, o.catalognumber, '.
-			'CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")") AS collname, '.
+		$sql = 'SELECT en.omenid, en.exsnumber, ol.ranking, ol.notes, o.occid, o.occurrenceid, o.catalognumber, '.
+			'c.collid, c.collectionname, CONCAT_WS("-",c.institutioncode,c.collectioncode) AS collcode, '.
 			'o.sciname, o.scientificnameauthorship, o.recordedby, o.recordnumber, DATE_FORMAT(o.eventdate,"%d %M %Y") AS eventdate, '.
 			'trim(o.country) AS country, trim(o.stateprovince) AS stateprovince, trim(o.county) AS county, '.
-			'trim(o.municipality) AS municipality, o.locality, i.thumbnailurl, i.url '.
+			'trim(o.municipality) AS municipality, o.locality, o.decimallatitude, o.decimallongitude, '.
+			'i.imgid, i.thumbnailurl, i.url '.
 			'FROM omexsiccatiocclink ol INNER JOIN omoccurrences o ON ol.occid = o.occid '.
 			'INNER JOIN omcollections c ON o.collid = c.collid '.
-			'LEFT JOIN images i ON o.occid = i.occid '.
-			'WHERE ol.omenid = '.$omenid.' ORDER BY ol.ranking, o.recordedby, o.recordnumber';
+			'INNER JOIN omexsiccatinumbers en ON ol.omenid = en.omenid '.
+			'LEFT JOIN images i ON o.occid = i.occid ';
+		if($target == 'omenid'){
+			$sql .= 'WHERE ol.omenid = '.$id;
+		}
+		else{
+			$sql .= 'WHERE en.ometid = '.$id;
+		}
+		$sql .= ' ORDER BY en.exsnumber+1, ol.ranking, o.recordedby, o.recordnumber';
+		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
-				$retArr[$r->occid]['ranking'] = $this->cleanOutStr($r->ranking);
-				$retArr[$r->occid]['notes'] = $this->cleanOutStr($r->notes);
-				$retArr[$r->occid]['collname'] = $this->cleanOutStr($r->collname);
-				$retArr[$r->occid]['occurrenceid'] = $r->occurrenceid;
-				$retArr[$r->occid]['catalognumber'] = $r->catalognumber;
-				$retArr[$r->occid]['sciname'] = $this->cleanOutStr($r->sciname);
-				$retArr[$r->occid]['author'] = $this->cleanOutStr($r->scientificnameauthorship);
-				$retArr[$r->occid]['recordedby'] = $this->cleanOutStr($r->recordedby);
-				$retArr[$r->occid]['recordnumber'] = $this->cleanOutStr($r->recordnumber);
-				$retArr[$r->occid]['eventdate'] = $r->eventdate;
-				$retArr[$r->occid]['country'] = $r->country;
-				$retArr[$r->occid]['stateprovince'] = $r->stateprovince;
-				$retArr[$r->occid]['county'] = $r->county;
-				$retArr[$r->occid]['municipality'] = $r->municipality;
-				$retArr[$r->occid]['locality'] = $this->cleanOutStr($r->locality);
+				if(!isset($retArr[$r->omenid][$r->occid])){
+					$retArr[$r->omenid][$r->occid]['exsnum'] = $this->cleanOutStr($r->exsnumber);
+					$retArr[$r->omenid][$r->occid]['ranking'] = $this->cleanOutStr($r->ranking);
+					$retArr[$r->omenid][$r->occid]['notes'] = $this->cleanOutStr($r->notes);
+					$retArr[$r->omenid][$r->occid]['collid'] = $r->collid;
+					$retArr[$r->omenid][$r->occid]['collname'] = $this->cleanOutStr($r->collectionname);
+					$retArr[$r->omenid][$r->occid]['collcode'] = $this->cleanOutStr($r->collcode);
+					$retArr[$r->omenid][$r->occid]['occurrenceid'] = $r->occurrenceid;
+					$retArr[$r->omenid][$r->occid]['catalognumber'] = $r->catalognumber;
+					$retArr[$r->omenid][$r->occid]['sciname'] = $this->cleanOutStr($r->sciname);
+					$retArr[$r->omenid][$r->occid]['author'] = $this->cleanOutStr($r->scientificnameauthorship);
+					$retArr[$r->omenid][$r->occid]['recby'] = $this->cleanOutStr($r->recordedby);
+					$retArr[$r->omenid][$r->occid]['recnum'] = $this->cleanOutStr($r->recordnumber);
+					$retArr[$r->omenid][$r->occid]['eventdate'] = $r->eventdate;
+					$retArr[$r->omenid][$r->occid]['country'] = $r->country;
+					$retArr[$r->omenid][$r->occid]['state'] = $r->stateprovince;
+					$retArr[$r->omenid][$r->occid]['county'] = $r->county;
+					$retArr[$r->omenid][$r->occid]['locality'] = $this->cleanOutStr(($r->municipality?$r->municipality.'; ':'').$r->locality);
+					$retArr[$r->omenid][$r->occid]['lat'] = $r->decimallatitude;
+					$retArr[$r->omenid][$r->occid]['lng'] = $r->decimallongitude;
+				}
 				if($r->url){ 
-					$retArr[$r->occid]['url'] = $r->url;
-					$retArr[$r->occid]['tnurl'] = ($r->thumbnailurl?$r->thumbnailurl:$r->url);
+					$retArr[$r->omenid][$r->occid]['img'][$r->imgid]['url'] = $r->url;
+					$retArr[$r->omenid][$r->occid]['img'][$r->imgid]['tnurl'] = ($r->thumbnailurl?$r->thumbnailurl:$r->url);
 				}
 			}
 			$rs->close();
@@ -472,16 +487,111 @@ class ExsiccatiManager {
 		}
 		return $statusStr;
 	} 
+	
+	public function batchImport($targetCollid,$postArr){
+		$statusStr = '';
+		$con = MySQLiConnectionFactory::getCon("write");
+		$datasetId = '';
+		$datasetTitle = '';
+		if(array_key_exists('dataset',$postArr)){
+			//Create new dataset to link all new records
+			$datasetTitle = $postArr['dataset'];
+			$sqlDs = 'INSERT INTO omoccurdatasets(name, uid) VALUES("'.$this->cleanInStr($datasetTitle).'",'.$GLOBALS['SYMB_UID'].') ';
+			if($con->query($sqlDs)){
+				$datasetId = $con->insert_id;
+			}
+			else{
+				$statusStr = 'ERROR creating dataset, '.$con->error;
+				$statusStr .= '<br/>SQL: '.$sqlDs;
+			}
+		}
+		$transferCnt = 0;
+		foreach($postArr as $k => $catNum){
+			if(substr($k,0,4) == 'occ:' && $catNum){
+				$tokArr = explode('-',substr($k,4));
+				//Transfer occurrence record
+				if(is_numeric($tokArr[0])){
+					$sql1 = 'INSERT INTO omoccurrences(collid, catalognumber, family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
+						'taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, '. 
+						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
+						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
+						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
+						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
+						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
+						'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, verbatimCoordinates, '.
+						'georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, '.
+						'minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, disposition, genericcolumn1, genericcolumn2, '.
+						'processingstatus, dateEntered) '.
+						'SELECT '.$targetCollid.', "'.$this->cleanInStr($catNum).'", family, scientificName, sciname, tidinterpreted, scientificNameAuthorship, '.
+						'taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, identificationQualifier, typeStatus, '.
+						'recordedBy, recordNumber, recordedById, associatedCollectors, eventDate, year, month, day, startDayOfYear, endDayOfYear, '.
+						'verbatimEventDate, habitat, substrate, fieldNotes, fieldnumber, occurrenceRemarks, informationWithheld, dataGeneralizations, '. 
+						'associatedOccurrences, associatedTaxa, dynamicProperties, verbatimAttributes, reproductiveCondition, '.
+						'cultivationStatus, establishmentMeans, lifeStage, sex, individualCount, samplingProtocol, samplingEffort, '.
+						'preparations, country, stateProvince, county, municipality, locality, localitySecurity, localitySecurityReason, '.
+						'decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, footprintWKT, verbatimCoordinates, '.
+						'georeferencedBy, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, '.
+						'minimumElevationInMeters, maximumElevationInMeters, verbatimElevation, disposition, genericcolumn1, genericcolumn2, '.
+						'processingstatus, "'.date('Y-m-d H:i:s').'" AS dateEntered '. 
+						'FROM omoccurrences '.
+						'WHERE occid = '.$tokArr[0];
+					if($con->query($sql1)){
+						$transferCnt++;
+						//Add new record to exsiccati index 
+						$newOccid = $con->insert_id;
+						if($newOccid && $tokArr[1]){
+							$sql2 = 'INSERT INTO omexsiccatiocclink(omenid,occid) VALUES('.$tokArr[1].','.$newOccid.') ';
+							if(!$con->query($sql2)){
+								$statusStr = 'ERROR linking new record to exsiccati: '.$con->error;
+								$statusStr .= '<br/>SQL: '.$sql2;
+							}
+						}
+						if($datasetId){
+							//Add to dataset
+							$sql3 = 'INSERT INTO omoccurdatasetlink(occid,datasetid) VALUES('.$newOccid.','.$datasetId.') ';
+							if(!$con->query($sql3)){
+								$statusStr = 'ERROR add new record to dataset: '.$con->error;
+								$statusStr .= '<br/>SQL: '.$sql3;
+							}
+						}
+					}
+					else{
+						$statusStr = 'ERROR transferring record #'.$tokArr[0].'; '.$con->error;
+						$statusStr .= '<br/>SQL: '.$sql1;
+					}
+				}
+			}
+		}
+		$con->close();
+		if($transferCnt){
+			$statusStr = 'SUCCESS transferring '.$transferCnt.' records ';
+			//if($datasetId) $statusStr = '<br/>Records linked to dataset: <a href="">'.$datasetTitle.'</a>';
+		}
+		return $statusStr;
+	}
 
-	public function getCollArr($exsOnly){
+	//Misc
+	public function getCollArr($ometid = 0){
 		$retArr = array();
 		$sql ='SELECT DISTINCT c.collid, c.collectionname, c.institutioncode, c.collectioncode '.
 			'FROM omcollections c ';
-		if($exsOnly){
-			$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
-				'INNER JOIN omexsiccatiocclink ol ON o.occid = ol.occid ';
+		if($ometid){
+			if($ometid == 'all'){
+				$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
+					'INNER JOIN omexsiccatiocclink ol ON o.occid = ol.occid ';
+			}
+			elseif(is_numeric($ometid)){
+				$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
+					'INNER JOIN omexsiccatiocclink ol ON o.occid = ol.occid '.
+					'INNER JOIN omexsiccatinumbers en ON ol.omenid = en.omenid ';
+			}
+		}
+		$sql .= 'WHERE (colltype != "General Observations") ';
+		if($ometid && is_numeric($ometid)){
+			$sql .= 'AND (en.ometid = '.$ometid.') ';
 		}
 		$sql .= 'ORDER BY c.collectionname, c.institutioncode';
+		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->collid] = $this->cleanOutStr($r->collectionname).' ('.$r->institutioncode.($r->collectioncode?' - '.$r->collectioncode:'').')';
@@ -490,6 +600,32 @@ class ExsiccatiManager {
 		return $retArr;
 	}
 
+	public function getExsTableRow($occid,$oArr,$omenid,$targetCollid){
+		$isTarget = false;
+		if($targetCollid == $oArr['collid']) $isTarget = true;
+		$retStr = '<tr>';
+		$retStr .= '<td align="center">';
+		if($isTarget){
+			$retStr .= '<span style="color:red;"><b>Cannot Import</b><br/>Is Target Collection</span>';
+		}
+		else{
+			$retStr .= '<input name="occ:'.$occid.'-'.$omenid.'" type="text" />';
+		}
+		$retStr .= '</td>';
+		$retStr .= '<td align="center"><a href="index.php?omenid='.$omenid.'" target="_blank" tabindex="1">#'.$oArr['exsnum'].'</a><br/>[rank: '.$oArr['ranking'].']</td>';
+		$retStr .= '<td>';
+		$retStr .= '<span '.($isTarget?'style="color:red;"':'').' title="'.$oArr['collname'].'">'.$oArr['collcode'].'</span>, ';
+		$retStr .= '<a href="../individual/index.php?occid='.$occid.'" target="_blank" tabindex="1">'.$oArr['recby'].' '.($oArr['recnum']?$oArr['recnum']:'s.n.').'</a>';
+		$retStr .= ($oArr['eventdate']?', '.$oArr['eventdate']:'');
+		$retStr .= ', <i>'.$oArr['sciname'].'</i> '.$oArr['author'];
+		$retStr .= $oArr['country'].', '.$oArr['state'].', '.$oArr['county'].', '.(strlen($oArr['locality'])>75?substr($oArr['locality'],0,75).'...':$oArr['locality']);
+		if($oArr['lat']) $retStr .= ', '.$oArr['lat'].' '.$oArr['lng'];
+		if($oArr['notes']) $retStr .= ', <b>'.$oArr['notes'].'</b>';
+		$retStr .= '</td>';
+		$retStr .= '</tr>';
+		return $retStr;
+	}
+	
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);

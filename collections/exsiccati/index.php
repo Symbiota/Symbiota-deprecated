@@ -274,7 +274,7 @@ if($isEditor && $formSubmit){
 									<option value="">All Collections</option>
 									<option value="">-----------------------</option>
 									<?php 
-									$acroArr = $exsManager->getCollArr(1);
+									$acroArr = $exsManager->getCollArr('all');
 									foreach($acroArr as $id => $collTitle){
 										echo '<option value="'.$id.'" '.($id==$collId?'SELECTED':'').'>'.$collTitle.'</option>';
 									}
@@ -610,7 +610,7 @@ if($isEditor && $formSubmit){
 			<hr/> 
 			<div style="margin:15px 10px 0px 0px;">
 				<?php 
-				$exsOccArr = $exsManager->getExsOccArr($omenId);
+				$exsOccArr = array_shift($exsManager->getExsOccArr($omenId));
 				if($exsOccArr){
 					?>
 					<table style="width:90%;">
@@ -638,8 +638,8 @@ if($isEditor && $formSubmit){
 									</div>
 									<div style="clear:both;">
 										<?php
-										echo $occArr['recordedby'];
-										echo ($occArr['recordnumber']?' #'.$occArr['recordnumber'].' ':' s.n. ');
+										echo $occArr['recby'];
+										echo ($occArr['recnum']?' #'.$occArr['recnum'].' ':' s.n. ');
 										echo '<span style="margin-left:70px;">'.$occArr['eventdate'].'</span> ';
 										?>
 									</div>
@@ -652,9 +652,8 @@ if($isEditor && $formSubmit){
 									<div>
 										<?php
 										echo $occArr['country'];
-										echo (($occArr['country'] && $occArr['stateprovince'])?', ':'').$occArr['stateprovince'];
+										echo (($occArr['country'] && $occArr['state'])?', ':'').$occArr['state'];
 										echo ($occArr['county']?', '.$occArr['county']:'');
-										echo ($occArr['municipality']?', '.$occArr['municipality']:'');
 										echo ($occArr['locality']?', '.$occArr['locality']:'');
 										?>
 									</div>
@@ -669,10 +668,11 @@ if($isEditor && $formSubmit){
 								</td>
 								<td style="width:100px;">
 									<?php
-									if(array_key_exists('url',$occArr)){
+									if(array_key_exists('img',$occArr)){
+										$imgArr = array_shift($occArr['img']);
 										?>
-										<a href="<?php echo $occArr['url']; ?>">
-											<img src="<?php echo $occArr['tnurl']; ?>" style="width:75px;" />
+										<a href="<?php echo $imgArr['url']; ?>">
+											<img src="<?php echo $imgArr['tnurl']; ?>" style="width:75px;" />
 										</a>
 										<?php
 									} 

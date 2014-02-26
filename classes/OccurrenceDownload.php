@@ -2,19 +2,21 @@
 include_once($serverRoot.'/config/dbconnection.php');
 include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
 
-class OccurrenceDownloadManager{
+class OccurrenceDownload{
 	
 	private $conn;
 	private $headerArr = array();
+	private $isRareReader = false;
+	private $collidRareReader = array();
 	private $securityArr = array();
-	private $canReadRareSpp = false;
 	private $schemaType = 'symbiota';
 	private $delimiter = ',';
 	private $charSetSource = '';
 	private $charSetOut = '';
-	private $sql = '';
  	private $sqlWhere = '';
  	private $conditionArr = array();
+	private $includeIdentHistory = false;
+	private $includeImages = false;
  	
 	private $buFileName;
 	private $buFilePath;
@@ -30,14 +32,20 @@ class OccurrenceDownloadManager{
 		//Create file pathName
 		$this->buFileName = 'symbdl_'.time();
 
-		$this->securityArr = Array("locality","locationRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-			"decimalLatitude","decimalLongitude","geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","coordinatePrecision",
-			"verbatimCoordinates","verbatimCoordinateSystem","georeferenceRemarks",
-			"verbatimLatitude","verbatimLongitude","habitat");
-
+		//Set rare species variables
+		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
+			'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
 		if($isAdmin || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
-			$this->canReadRareSpp = true;
+			$this->isRareReader = true;
 		}
+		if(array_key_exists('CollEditor', $userRights)){
+			$this->collidRareReader = $userRights['CollEditor'];
+		}
+		if(array_key_exists('RareSppReader', $userRights)){
+			$this->collidRareReader = array_unique(array_merge($this->collidRareReader,$userRights['RareSppReader']));
+		}
+		
 		//Character set
 		$this->charSetSource = strtolower($charset);
 		$this->charSetOut = $charset;
@@ -49,6 +57,7 @@ class OccurrenceDownloadManager{
 	}
 
 	public function downloadSpecimens(){
+		if(!$this->headerArr) $this->setHeaderArr();
     	$fileName = $this->getFileName();
 		header ('Content-Type: '.$this->getContentType());
 		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
@@ -61,12 +70,13 @@ class OccurrenceDownloadManager{
 				fputcsv($outstream, $this->headerArr);
     		}
     		else{
-				fwrite($outstream, implode($this->delimiter,$this->headerArr));
+				fwrite($outstream, implode($this->delimiter,$this->headerArr)."\n");
     		}
 			while($row = $result->fetch_assoc()){
 				$this->stripSensitiveFields($row);
 				if($this->schemaType == 'dwc'){
 					unset($row["localitySecurity"]);
+					unset($row["localitySecurityReason"]);
 					unset($row["collid"]);
 				}
 				$this->encodeArr($row);
@@ -74,7 +84,7 @@ class OccurrenceDownloadManager{
 					fputcsv($outstream, $row);
 	    		}
 	    		else{
-					fwrite($outstream, implode($this->delimiter,$row));
+					fwrite($outstream, implode($this->delimiter,$row)."\n");
 	    		}
 			}
 			fclose($outstream);
@@ -477,18 +487,7 @@ xmlwriter_end_attribute($xml_resource);
         $result->close();
     }*/
 
-	private function setUploadPath(){
-		$tPath = $GLOBALS["serverRoot"];
-		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
-		$tPath .= "temp/";
-		if(file_exists($tPath."downloads/")){
-			$tPath .= "downloads/";
-		}
-		//echo $this->buFilePath;
-		$this->buFilePath = $tPath;
-	}
-
-	//General setter and getters
+	//General setter, getters, and other configurations
 	public function setSchemaType($t){
 		$this->schemaType = $t;
 	}
@@ -497,7 +496,7 @@ xmlwriter_end_attribute($xml_resource);
 		if($d == 'tab' || $d == "\t"){
 			$this->delimiter = "\t";
 		}
-		elseif($d == 'comma' || $d == ','){
+		elseif($d == 'csv' || $d == 'comma' || $d == ','){
 			$this->delimiter = ",";
 		}
 		else{
@@ -506,13 +505,12 @@ xmlwriter_end_attribute($xml_resource);
 	}
 	
 	private function getContentType(){
-		if($this->delimiter == "\t"){
-			return 'text/html; charset='.$this->charSetOut;
-		}
-		elseif($this->delimiter == 'comma' || $this->delimiter == ','){
+		if($this->delimiter == 'comma' || $this->delimiter == ','){
 			return 'text/csv; charset='.$this->charSetOut;
 		}
-		return 'text/html; charset='.$this->charSetOut;
+		else{
+			return 'text/html; charset='.$this->charSetOut;
+		}
 	}
 	
 	public function setCharSetOut($cs){
@@ -525,15 +523,78 @@ xmlwriter_end_attribute($xml_resource);
 		return $this->errorArr;
 	}
 	
-	public function addCondition($c){
-		$this->conditionArr[] = $this->cleanInStr($c);
+	public function setIncludeIdentHistory($c){
+		$this->includeIdentHistory = $c;
+	}
+
+	public function setIncludeImages($c){
+		$this->includeImages = $c;
+	}
+
+	public function setIsRareReader($cond){
+		if($cond == 1 || $cond === true){
+			$this->isRareReader = true;
+		}
 	}
 	
+	private function setUploadPath(){
+		$tPath = $GLOBALS["serverRoot"];
+		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\') $tPath .= '/';
+		$tPath .= "temp/";
+		if(file_exists($tPath."downloads/")){
+			$tPath .= "downloads/";
+		}
+		//echo $this->buFilePath;
+		$this->buFilePath = $tPath;
+	}
+
 	public function setSqlWhere($sqlStr){
 		$this->sqlWhere = $sqlStr;
 	}
 
-	private function getSql($isDwc = false){
+	public function addCondition($field, $cond, $value = ''){
+		if($field){
+			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
+				$this->conditionArr[$field]['value'] = $this->cleanInStr($value);
+				$this->conditionArr[$field]['cond'] = $cond;
+			}
+		}
+	}
+
+	private function applyConditions(){
+		if($this->conditionArr){
+			$sqlFrag = '';
+			foreach($this->conditionArr as $field => $valueArr){
+				$cond = $valueArr['cond'];
+				$value = $valueArr['value'];
+				$sqlFrag .= 'AND o.'.$field.' ';
+				switch($cond) {
+					case 'EQUALS':
+						$sqlFrag .= '= "'.$value.'" ';
+						break;
+					case 'STARTS':
+						$sqlFrag .= 'LIKE "'.$value.'%" ';
+						break;
+					case 'LIKE':
+						$sqlFrag .= 'LIKE "%'.$value.'%" ';
+						break;
+					case 'NULL':
+						$sqlFrag .= 'IS NULL ';
+						break;
+					case 'NOTNULL':
+						$sqlFrag .= 'IS NOT NULL ';
+						break;
+				}
+			}
+			//Build where
+			if(!$this->sqlWhere){
+				$this->sqlWhere = 'WHERE ';
+			}
+			$this->sqlWhere .= substr($sqlFrag,4);
+		}
+	}
+
+	public function getSql(){
 		$sql = '';
 		if($this->schemaType == 'dwc'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
@@ -550,24 +611,13 @@ xmlwriter_end_attribute($xml_resource);
 				"o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, ".
 				"o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 				"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
-				"o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, o.occid, o.collid, o.localitySecurity ".
+				"o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, ".
+				"o.occid, g.guid, o.localitySecurity, o.collid ".
 				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
-				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
-			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","occurrenceId",
-				"family","scientificName","scientificNameAuthorship","genus","specificEpithet","taxonRank","infraspecificEpithet",
-				"identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
-				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-				"verbatimEventDate","habitat","fieldNumber","occurrenceRemarks",
-				"dynamicProperties","associatedTaxa","reproductiveCondition","establishmentMeans",
-				"lifeStage","sex","individualCount","samplingProtocol","preparations",
-				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-				"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId");
 		}
-		else{
+		elseif($this->schemaType == 'symbiota'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
 				'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.occurrenceId, '.
 				'o.family, o.sciname, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
@@ -584,10 +634,49 @@ xmlwriter_end_attribute($xml_resource);
 				"o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, ".
 				"o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, ".
 				"o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, ".
-				"c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.collid, o.occid ".
+				"c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.localitySecurityReason, o.collid, o.occid, g.guid ".
 	            'FROM (omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID) '.
-				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
+		}
+		elseif($this->schemaType == 'georef'){
+			$sql = 'SELECT o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
+				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
+				'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+				'o.localitySecurity, o.localitySecurityReason, o.collid, o.occid, g.guid '.
+	            'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+		}
+		//if(array_key_exists("sol.clid",$this->sqlWhere)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
+		if(strpos($this->sqlWhere,'sol.clid')) $sql .= 'INNER JOIN fmvouchers sol ON o.occid = sol.occid ';
+		$this->applyConditions();
+		$sql .= $this->sqlWhere;
+		$sql .= "ORDER BY o.collid";
+		//echo $sql;
+		return $sql;
+	}
+	
+	public function setHeaderArr($hArr = null){
+		if($hArr && is_array($hArr)){
+			$this->headerArr = $hArr;
+		}
+		elseif($this->schemaType == 'dwc'){
+			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","occurrenceId",
+				"family","scientificName","scientificNameAuthorship","genus","specificEpithet","taxonRank","infraspecificEpithet",
+				"identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
+				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
+				"verbatimEventDate","habitat","fieldNumber","occurrenceRemarks",
+				"dynamicProperties","associatedTaxa","reproductiveCondition","establishmentMeans",
+				"lifeStage","sex","individualCount","samplingProtocol","preparations",
+				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
+				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+				"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId","recordId");
+		}
+		elseif($this->schemaType == 'symbiota'){
 			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","occurrenceId",
 				"family","scientificName","scientificNameAuthorship","genus","specificEpithet","taxonRank","infraspecificEpithet",
 				"identifiedBy","dateIdentified","identificationReferences",
@@ -601,14 +690,15 @@ xmlwriter_end_attribute($xml_resource);
 				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 		 		"disposition","duplicatequantity","modified","language","rights","rightsHolder","accessRights",
-		 		"localitySecurity","collId","symbiotaId");
+		 		"localitySecurity","localitySecurityReason","collId","symbiotaId","recordId");
 		}
-
-		//if(array_key_exists("sol.clid",$this->sqlWhere)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(strpos($this->sqlWhere,'sol.clid')) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-		$sql .= $this->sqlWhere;
-		$sql .= "ORDER BY o.collid";
-		return $sql;
+		elseif($this->schemaType == 'georef'){
+			$this->headerArr = array("catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
+		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
+				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+				"localitySecurity","localitySecurityReason","collId","symbiotaId","recordId");
+		}
 	}
 
 	private function getFileName(){
@@ -630,9 +720,9 @@ xmlwriter_end_attribute($xml_resource);
 		}
 		$retStr = str_replace(" ","",$retStr);
 		if(!$retStr){
-			$retStr = "symbiota";
+			$retStr = "Symbiota";
 		}
-		$retStr .= "_occur_".time();
+		$retStr .= "Occur_".time();
 		//Set extension
 		if($this->delimiter=="\t"){
 			$retStr .= ".tab";
@@ -680,31 +770,15 @@ xmlwriter_end_attribute($xml_resource);
 		//Get all active processing statuses and then merge all extra statuses that may exists for one reason or another
 		return array_merge(array_intersect($templateArr,$psArr),array_diff($psArr,$templateArr));
 	}
-
+	
 	//Misc functions
 	private function stripSensitiveFields(&$row){
     	global $userRights;
-		if(!$this->canReadRareSpp && $row["localitySecurity"] == 1 
-			&& (!array_key_exists("CollEditor", $userRights) || !in_array($row["collid"],$userRights["CollEditor"]))
-			&& (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
-			$row["habitat"] = 'Protected';
-			$row["locality"] = 'Protected';
-			$row["decimalLatitude"] = 'Protected';
-			$row["decimalLongitude"] = 'Protected';
-			$row["geodeticDatum"] = 'Protected';
-			$row["coordinateUncertaintyInMeters"] = 'Protected';
-			$row["footprintWKT"] = 'Protected';
-			$row["verbatimCoordinates"] = 'Protected';
-			$row["georeferencedBy"] = 'Protected';
-			$row["georeferenceProtocol"] = 'Protected';
-			$row["georeferenceSources"] = 'Protected';
-			$row["georeferenceVerificationStatus"] = 'Protected';
-			$row["georeferenceRemarks"] = 'Protected';
-			$row["minimumElevationInMeters"] = 'Protected';
-			$row["maximumElevationInMeters"] = 'Protected';
-			$row["verbatimElevation"] = 'Protected';
+		if($row["localitySecurity"] == 1 && !$this->isRareReader && !in_array($row["collid"],$this->collidRareReader)){
+			foreach($this->securityArr as $fieldName){
+				$row[$fieldName] = '[redacted]';
+			}
 		}
-		return $row;
 	}
 
 	private function encodeArr(&$inArr){

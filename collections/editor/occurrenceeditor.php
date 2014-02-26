@@ -1100,6 +1100,9 @@ else{
 																echo '<option value="'.$keyOut.'" '.($pStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
 														}
+														if(!in_array($pStatus,$processingStatusArr)){
+															echo '<option value="'.$pStatus.'" SELECTED>'.$pStatus.'</option>';
+														}
 														?>
 													</select>
 												</div>

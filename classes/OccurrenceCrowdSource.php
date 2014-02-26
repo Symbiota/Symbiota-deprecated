@@ -83,7 +83,7 @@ class OccurrenceCrowdSource {
 				'GROUP BY q.reviewstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['rs'][$r->reviewstatus] = $r->cnt;
+				$retArr[$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
 			
@@ -97,18 +97,37 @@ class OccurrenceCrowdSource {
 				$toAddCnt = $r->cnt;
 			}
 			$rs->free();
-			$retArr['rs']['toadd'] = $toAddCnt;
+			$retArr['toadd'] = $toAddCnt;
+		}
+		return $retArr;
+	}
+
+	public function getProcessingStats(){
+		$retArr = array();
+		if($this->collid){
+			//Users to exclude because they are not volunteers 
+			$excludeUidArr = array();
+			$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
+				'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
+			$rs1 = $this->conn->query($sql1);
+			while($r1 = $rs1->fetch_object()){
+				$excludeUidArr[] = $r1->uid;
+			}
+			$rs1->free();
 			
 			//Processing scores by user
 			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
-				'WHERE c.collid = '.$this->collid.' GROUP BY username ORDER BY usersum DESC ';
+				'WHERE c.collid = '.$this->collid.' '.
+				'GROUP BY username ORDER BY usersum DESC ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['ps'][$r->uid]['score'] = $r->usersum;
-				$retArr['ps'][$r->uid]['name'] = $r->username;
+				if(!in_array($r->uid,$excludeUidArr)){
+					$retArr[$r->uid]['score'] = $r->usersum;
+					$retArr[$r->uid]['name'] = $r->username;
+				}
 			}
 			$rs->free();
 
@@ -119,7 +138,9 @@ class OccurrenceCrowdSource {
 				'GROUP BY q.uidprocessor, q.reviewstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr['ps'][$r->uidprocessor][$r->reviewstatus] = $r->cnt;
+				if(!in_array($r->uidprocessor,$excludeUidArr)){
+					$retArr[$r->uidprocessor][$r->reviewstatus] = $r->cnt;
+				}
 			}
 			$rs->free();
 		}
@@ -127,15 +148,31 @@ class OccurrenceCrowdSource {
 	}
 
 	public function getTopScores(){
-		$retArr = array(); 
-		$sql = 'SELECT CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
+		$retArr = array();
+		//Users to exclude because they are not volunteers 
+		$excludeUidArr = array();
+		$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
+			'WHERE (pname LIKE "CollAdmin-%" OR pname LIKE "CollEditor-%" OR pname = "SuperAdmin")';
+		$rs1 = $this->conn->query($sql1);
+		while($r1 = $rs1->fetch_object()){
+			$excludeUidArr[] = $r1->uid;
+		}
+		$rs1->free();
+		//Get users
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
 			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid '.
 			'GROUP BY firstname,u.lastname '.
-			'ORDER BY sum(q.points) DESC '.
-			'LIMIT 10';
+			'ORDER BY sum(q.points) DESC ';
 		$rs = $this->conn->query($sql);
+		$cnt = 0;
 		while($r = $rs->fetch_object()){
-			$retArr[$r->toppoints] = $r->user;
+			if(!in_array($r->uid,$excludeUidArr)){
+				$topPoints = $r->toppoints;
+				if(!$topPoints) $topPoints = 0;
+				$retArr[$topPoints] = $r->user;
+				$cnt++;
+				if($cnt > 10) break;
+			}
 		}
 		$rs->free();
 		return $retArr;

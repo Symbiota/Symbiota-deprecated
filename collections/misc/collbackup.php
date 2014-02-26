@@ -1,12 +1,12 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDownloadManager.php');
+include_once($serverRoot.'/classes/OccurrenceDownload.php');
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $action = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:'';
 $cSet = array_key_exists("cset",$_REQUEST)?$_REQUEST["cset"]:'';
 
-$dlManager = new OccurrenceDownloadManager();
+$dlManager = new OccurrenceDownload();
 
 $statusStr = '';
 $isEditor = 0;

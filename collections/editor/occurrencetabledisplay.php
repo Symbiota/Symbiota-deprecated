@@ -184,8 +184,9 @@ else{
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 			}
 			if($isEditor == 1 || $isGenObs){
+				$buFieldName = (array_key_exists('bufieldname',$_GET)?$_GET['bufieldname']:'');
 				?>
-				<div id="batchupdatediv" style="width:600px;clear:both;display:none;">
+				<div id="batchupdatediv" style="width:600px;clear:both;display:<?php echo ($buFieldName?'block':'none'); ?>;">
 					<form name="batchupdateform" action="occurrencetabledisplay.php" method="post" onsubmit="return false;">
 						<fieldset>
 							<legend><b>Batch Update</b></legend>
@@ -196,16 +197,15 @@ else{
 										<option value="">Select Field Name</option>
 										<option value="">----------------------</option>
 										<?php 
-										$buFieldName = (array_key_exists('bufieldname',$_POST)?$_POST['bufieldname']:'');
 										foreach($headerMapBase as $k => $v){
-											echo '<option value="'.$k.'">'.$v.'</option>';
+											echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
 										}
 										?>
 									</select>
 								</div>
 								<div style="margin:2px;">
 									Current Value: 
-									<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_POST)?$_POST['buoldvalue']:''); ?>" /> 
+									<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_REQUEST)?$_REQUEST['buoldvalue']:''); ?>" /> 
 								</div>
 								<div style="margin:2px;">
 									New Value:

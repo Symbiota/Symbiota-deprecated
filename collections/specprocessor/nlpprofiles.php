@@ -1,14 +1,13 @@
 <?php
-//error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorNlp.php');
+include_once($serverRoot.'/classes/SpecProcNlp.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 
-$nlpManager = new SpecProcessorNlp();
+$nlpManager = new SpecProcNlp();
 
 $nlpManager->setCollId($collId);
 
