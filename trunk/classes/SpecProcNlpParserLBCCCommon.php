@@ -287,7 +287,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	}
 
 	protected function doGenericLabel($str, $ometid="", $fields=null) {//echo "\nDoin' Generic\n";
-		$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|(?:ch))|Apr(?:\\.|(?:il))|May|Jun[.e]|Jul[.y]|Aug(?:\\.|(?:ust))|Sep(?:\\.|(?:t\\.?)|(?:tember))|Oct(?:\\.|(?:ober))|Nov(?:\\.|(?:ember))|Dec(?:\\.|(?:ember))";
+		$possibleMonths = "Jan(?:\\.|(?:uary))|Feb(?:\\.|(?:ruary))|Mar(?:\\.|ch\\b)|Apr(?:\\.|il\\b)|May\\b|Jun(?:\\.|e\\b)|Jul(?:\\.|y\\b)|Aug(?:\\.|(?:ust\\b))|Sep(?:\\.|(?:t\\b\\.?)|tember\\b)|Oct(?:\\.|ober\\b)|Nov(?:\\.|ember\\b)|Dec(?:\\.|ember\\b)";
 		$possibleNumbers = "[OQSZl|I!0-9]";
 		$str = preg_replace
 		(
@@ -489,21 +489,21 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						}
 					}
 				}
-			}//echo "\nline 13632, line: ".$line."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\n";
+			}//echo "\nline 13664, line: ".$line."\ncounty: ".$county."\nstateProvince: ".$stateProvince."\n";
 			if(strlen($stateProvince) > 1) {
 				$pat;
 				if(strlen($county) > 1) {
 					$temp_county = preg_quote($county, "/");
 					if(stripos($temp_county, "Saint ") !== FALSE) $temp_county = str_ireplace("Saint ", "S(?:ain)?t.? ", $temp_county);
 					if(stripos($temp_county, "Sainte ") !== FALSE) $temp_county = str_ireplace("Sainte ", "S(?:ain)?te?.? ", $temp_county);
-					$pat = "/^.{0,6}".$temp_county." (?:C[O0]UNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)(?! PARK)[;:.,]?(?: ".preg_quote($stateProvince, "/").")?(.*?)$/i";
-					if(preg_match($pat, $line, $mats)) {/*echo "\nline 13639, matched\n";*/$line = trim($mats[1], " ,;:");}
+					$pat = "/^.{0,6}".$temp_county." (?:C[O0]UNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT|Co\\b\\.?)(?! (?:PARK|FOREST|P?RESERVE))[;:.,]?(?: ".preg_quote($stateProvince, "/").")?(.*?)$/i";
+					if(preg_match($pat, $line, $mats)) {/*echo "\nline 13672, matched\n";*/$line = trim($mats[1], " ,;:");}
 					else if(preg_match("/^(?:(?:STATE [O0]F )?".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:COUNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					else if(preg_match("/^(?:U\\.?S\\.?A\\.?,? ".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:COUNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					else if(preg_match("/^(?:United States(?: [O0]. America)?, ".preg_quote($stateProvince, "/")."[.,:;] )?".$temp_county." (?:COUNT[V?Y]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?)?[;:.,]?\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					else if(preg_match("/^(?:C[O0]UNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|D[I1!||]STR[I1!||]CT)[;:.,]? ".$temp_county."[;:.,]?\\s?(.*)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
-					else if(preg_match("/^.{0,6}".$temp_county."[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|[A-Za-z]+(?: [A-Za-z]+) (?:STATE|NATIONAL|PROVINCIAL|COUNTY) PARK))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
-					else if(preg_match("/^.{0,6}".preg_quote($stateProvince, "/")."[;:.,]?[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|[A-Za-z]+(?: [A-Za-z]+) (?:STATE|NATIONAL|PROVINCIAL|COUNTY) PARK))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+					else if(preg_match("/^.{0,6}".$temp_county."[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|(?:[A-Za-z]+(?: [A-Za-z]+) )?(?:STATE|NATIONAL|NATL\\b\\.?|PROVINCIAL|COUNTY) (?:PARK|FOREST|P?RESERVE)))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
+					else if(preg_match("/^.{0,6}".preg_quote($stateProvince, "/")."[;:.,]?[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|[A-Za-z]+(?: [A-Za-z]+) (?:STATE|NATIONAL|NATL\\b\\.?|PROVINCIAL|COUNTY) (?:PARK|FOREST|P?RESERVE)))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					$pat = "/(.*)\\b(?:UNIVERSITY\\b|C[O0]LL(?:\\.|ected by)|HERBARIUM\\b|DET(?:\\.|ermined)|Identified\\b|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|Date\\b|".$possibleMonths."|".$temp_county." (?:COUNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?))(.*)/i";
 				} else {
 					if(preg_match("/^.{0,6}(?: ".preg_quote($stateProvince, "/").")(.*?)$/i", $line, $mats)) $line = trim($mats[1], " ,;:");
@@ -665,7 +665,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						else $line = trim($mats[2], " ,;:");
 					}
 				}
-			}//echo "\nline 13814, line: ".$line."\n";
+			}//echo "\nline 13840, line: ".$line."\n";
 			$firstPart = "";
 			$secondPart = "";
 			//try to match the first part of a lat/long
@@ -824,155 +824,177 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				}
 			}
 			if($this->containsVerbatimAttribute($line)) {//echo "\nline 13635, containsVerbatimAttribute\n";
-				$pos = strpos($line, ";;;");
-				$rest = "";
-				if($pos !== FALSE) {
-					$firstPart = trim(substr($line, 0, $pos));
-					$lastPart = trim(substr($line, $pos+3));
-					if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
-						$rest = $firstPart;
-						$line = $lastPart;
-					} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
-						$rest = $lastPart;
-						$line = $firstPart;
+				$words = explode($line, " ");
+				$skipToNext = false;
+				if(count($words) > 2) {
+					$first = $words[0];
+					$rest = trim(substr($line, strpos($line, $first)+strlen($first)));
+					if($this->containsVerbatimAttribute($first) && !$this->containsVerbatimAttribute($rest)) {
+						$verbatimAttributes = $this->mergeFields($verbatimAttributes, $first);
+						$line = $rest;
+						$skipToNext = true;
 					} else {
-						$rest = $line;
-						$line = "";
-					}
-				} else {
-					$pos = strpos($line, "; ");
-					if($pos !== FALSE) {
-						$firstPart = trim(substr($line, 0, $pos));
-						$lastPart = trim(substr($line, $pos+2));
-						if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
-							$rest = $firstPart;
-							$line = $lastPart;
-						} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
-							$rest = $lastPart;
-							$line = $firstPart;
-						} else {
-							$rest = $line;
-							$line = "";
+						$words = array_reverse($words);
+						$last = $words[0];
+						$rest = trim(substr($line, 0, strpos($line, $first)));
+						if($this->containsVerbatimAttribute($last) && !$this->containsVerbatimAttribute($rest)) {
+							$verbatimAttributes = $this->mergeFields($verbatimAttributes, $last);
+							$line = $rest;
+							$skipToNext = true;
 						}
-					} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $line, $mats)) {
-						$firstPart = trim($mats[1]);
-						$lastPart = trim($mats[2]);
-						if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
-							$rest = $firstPart;
-							$line = $lastPart;
-						} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
-							$rest = $lastPart;
-							$line = $firstPart;
-						} else {
-							$rest = $line;
-							$line = "";
-						}
-					} else {
-						$rest = $line;
-						$line = "";
 					}
 				}
-				if(strlen($rest) > 0) {//echo "\nline 13682, rest: ".$rest."\n";
-					$rest = trim(str_replace(";;;", ";", $rest));
-					if(preg_match("/^((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+[A-Za-z]{4,})[,;.] (.++)$/i", $rest, $mats)) {
-						$temp = trim($mats[1]);
-						if($this->countPotentialLocalityWords($temp) == 0) {
-							$substrate = $this->mergeFields($substrate, $temp);
-							$rest = trim($mats[2], " ;:,.&");
-						} else {
-							$temp2 = "";
-							$rest2 = "";
-							if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							}
-							if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
-								$substrate = $this->mergeFields($substrate, $temp2);
-								$rest = $rest2.". ".$rest;
-							}
-						}
-					} else if(preg_match("/^(Corticolous (on .+))/i", $rest, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 13637, mats[".$i++."] = ".$mat."\n";
-						$verbatimAttributes = "Corticolous";
-						$temp = trim($mats[1]);
-						if(preg_match("/^(Corticolous on [A-Za-z]+ )((?:along|on|at) .+)/i", $rest, $mats2)) {//$i=0;foreach($mats as $mat) echo "\nline 13641, mats[".$i++."] = ".$mat."\n";
-							$temp = trim($mats2[2]);
-							if($this->countPotentialLocalityWords($temp) > 0) {
-								$substrate = $this->mergeFields($substrate, trim($mats2[1]));
-								$locality = $this->mergeFields($locality, trim($mats2[2]));
-							} else if($this->countPotentialHabitatWords($temp) > 0) {
-								$substrate = $this->mergeFields($substrate, trim($mats2[1]));
-								$habitat = $this->mergeFields($habitat, trim($mats2[2]));
-							}
-						} else $substrate = $this->mergeFields($substrate, $rest);
-					} else if(preg_match("/(.+)[.,;] {1,2}((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+)/i", $rest, $mats)) {
-						$temp = trim($mats[2]);
-						if($this->countPotentialLocalityWords($temp) == 0) {
-							$substrate = $this->mergeFields($substrate, $temp);
-							$rest = trim($mats[1], " ;:,.&");
-						} else {
-							$temp2 = "";
-							$rest2 = "";
-							if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
-								$temp2 = trim($mats2[1]);
-								$rest2 = trim($mats2[2]);
-							}
-							if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
-								$substrate = $this->mergeFields($substrate, $temp2);
-								$rest = trim($mats[1], " ;:,.&");
-								$locality = $this->mergeFields($locality, $rest2);
-							}
-						}
-					}
-					if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $rest, $mats)) {
-						$firstPart = trim($mats[1]);
-						$lastPart = trim($mats[2]);
+				if(!$skipToNext) {
+					$pos = strpos($line, ";;;");
+					$rest = "";
+					if($pos !== FALSE) {
+						$firstPart = trim(substr($line, 0, $pos));
+						$lastPart = trim(substr($line, $pos+3));
 						if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
-							if($this->countPotentialHabitatWords($lastPart) > 0) {
-								$habitat = $this->mergeFields($habitat, $lastPart);
-								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
-								$rest = "";
-							} else if($this->countPotentialLocalityWords($lastPart) > 0) {
-								$locality = $this->mergeFields($locality, $lastPart);
-								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
-								$rest = "";
-							}
+							$rest = $firstPart;
+							$line = $lastPart;
 						} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
-							if($this->countPotentialHabitatWords($firstPart) > 0) {
-								$habitat = $this->mergeFields($habitat, $firstPart);
-								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
-								$rest = "";
-							} else if($this->countPotentialLocalityWords($firstPart) > 0) {
-								$locality = $this->mergeFields($locality, $firstPart);
-								$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
-								$rest = "";
+							$rest = $lastPart;
+							$line = $firstPart;
+						} else {
+							$rest = $line;
+							$line = "";
+						}
+					} else {
+						$pos = strpos($line, "; ");
+						if($pos !== FALSE) {
+							$firstPart = trim(substr($line, 0, $pos));
+							$lastPart = trim(substr($line, $pos+2));
+							if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+								$rest = $firstPart;
+								$line = $lastPart;
+							} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
+								$rest = $lastPart;
+								$line = $firstPart;
+							} else {
+								$rest = $line;
+								$line = "";
 							}
+						} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $line, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+							if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+								$rest = $firstPart;
+								$line = $lastPart;
+							} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
+								$rest = $lastPart;
+								$line = $firstPart;
+							} else {
+								$rest = $line;
+								$line = "";
+							}
+						} else {
+							$rest = $line;
+							$line = "";
 						}
 					}
-					if(strlen($rest) > 0 && !$this->isMostlyGarbage2($rest, 0.48)) {
-						if($this->containsVerbatimAttribute($rest)) {
-							if(preg_match("/(.+) Substrate[;:]? (.*)/i", $rest, $mats)){
-								$firstPart = trim($mats[1]);
-								$lastPart = trim($mats[2]);
-								if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+					if(strlen($rest) > 0) {//echo "\nline 13682, rest: ".$rest."\n";
+						$rest = trim(str_replace(";;;", ";", $rest));
+						if(preg_match("/^((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+[A-Za-z]{4,})[,;.] (.++)$/i", $rest, $mats)) {
+							$temp = trim($mats[1]);
+							if($this->countPotentialLocalityWords($temp) == 0) {
+								$substrate = $this->mergeFields($substrate, $temp);
+								$rest = trim($mats[2], " ;:,.&");
+							} else {
+								$temp2 = "";
+								$rest2 = "";
+								if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								}
+								if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
+									$substrate = $this->mergeFields($substrate, $temp2);
+									$rest = $rest2.". ".$rest;
+								}
+							}
+						} else if(preg_match("/^(Corticolous (on .+))/i", $rest, $mats)) {//$i=0;foreach($mats as $mat) echo "\nline 13637, mats[".$i++."] = ".$mat."\n";
+							$verbatimAttributes = "Corticolous";
+							$temp = trim($mats[1]);
+							if(preg_match("/^(Corticolous on [A-Za-z]+ )((?:along|on|at) .+)/i", $rest, $mats2)) {//$i=0;foreach($mats as $mat) echo "\nline 13641, mats[".$i++."] = ".$mat."\n";
+								$temp = trim($mats2[2]);
+								if($this->countPotentialLocalityWords($temp) > 0) {
+									$substrate = $this->mergeFields($substrate, trim($mats2[1]));
+									$locality = $this->mergeFields($locality, trim($mats2[2]));
+								} else if($this->countPotentialHabitatWords($temp) > 0) {
+									$substrate = $this->mergeFields($substrate, trim($mats2[1]));
+									$habitat = $this->mergeFields($habitat, trim($mats2[2]));
+								}
+							} else $substrate = $this->mergeFields($substrate, $rest);
+						} else if(preg_match("/(.+)[.,;] {1,2}((?:(?:Fairly |Quite |Very |Not )?(?:(?:Un)?Common|Abundant) |Found |Loose |Growing )?On .+)/i", $rest, $mats)) {
+							$temp = trim($mats[2]);
+							if($this->countPotentialLocalityWords($temp) == 0) {
+								$substrate = $this->mergeFields($substrate, $temp);
+								$rest = trim($mats[1], " ;:,.&");
+							} else {
+								$temp2 = "";
+								$rest2 = "";
+								if(preg_match("/(.+); (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								} else if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								} else if(preg_match("/(.+[A-Za-z]{3,}), (.+)/i", $temp, $mats2)) {
+									$temp2 = trim($mats2[1]);
+									$rest2 = trim($mats2[2]);
+								}
+								if(strlen($temp2) > 0 && $this->countPotentialLocalityWords($temp2) == 0) {
+									$substrate = $this->mergeFields($substrate, $temp2);
+									$rest = trim($mats[1], " ;:,.&");
+									$locality = $this->mergeFields($locality, $rest2);
+								}
+							}
+						}
+						if(preg_match("/(.+[A-Za-z]{3,})\\. (.+)/i", $rest, $mats)) {
+							$firstPart = trim($mats[1]);
+							$lastPart = trim($mats[2]);
+							if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+								if($this->countPotentialHabitatWords($lastPart) > 0) {
+									$habitat = $this->mergeFields($habitat, $lastPart);
 									$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
-									$substrate = $this->mergeFields($substrate, $lastPart);
+									$rest = "";
+								} else if($this->countPotentialLocalityWords($lastPart) > 0) {
+									$locality = $this->mergeFields($locality, $lastPart);
+									$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
+									$rest = "";
+								}
+							} else if($this->containsVerbatimAttribute($lastPart) && !$this->containsVerbatimAttribute($firstPart)) {
+								if($this->countPotentialHabitatWords($firstPart) > 0) {
+									$habitat = $this->mergeFields($habitat, $firstPart);
+									$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
+									$rest = "";
+								} else if($this->countPotentialLocalityWords($firstPart) > 0) {
+									$locality = $this->mergeFields($locality, $firstPart);
+									$verbatimAttributes = $this->mergeFields($verbatimAttributes, $lastPart);
+									$rest = "";
+								}
+							}
+						}
+						if(strlen($rest) > 0 && !$this->isMostlyGarbage2($rest, 0.48)) {
+							if($this->containsVerbatimAttribute($rest)) {
+								if(preg_match("/(.+) Substrate[;:]? (.*)/i", $rest, $mats)){
+									$firstPart = trim($mats[1]);
+									$lastPart = trim($mats[2]);
+									if($this->containsVerbatimAttribute($firstPart) && !$this->containsVerbatimAttribute($lastPart)) {
+										$verbatimAttributes = $this->mergeFields($verbatimAttributes, $firstPart);
+										$substrate = $this->mergeFields($substrate, $lastPart);
+									} else $verbatimAttributes = $this->mergeFields($verbatimAttributes, $rest);
 								} else $verbatimAttributes = $this->mergeFields($verbatimAttributes, $rest);
-							} else $verbatimAttributes = $this->mergeFields($verbatimAttributes, $rest);
-						} else if($this->countPotentialHabitatWords($rest) > 0) $habitat = $this->mergeFields($habitat, $rest);
-						else if($this->countPotentialLocalityWords($rest) > 0) $locality = $this->mergeFields($locality, $rest);
-						else $occurrenceRemarks = $rest;
+							} else if($this->countPotentialHabitatWords($rest) > 0) $habitat = $this->mergeFields($habitat, $rest);
+							else if($this->countPotentialLocalityWords($rest) > 0) $locality = $this->mergeFields($locality, $rest);
+							else $occurrenceRemarks = $rest;
+						}
 					}
 				}
 			}//echo "\nline 14016, line: ".$line."\n";

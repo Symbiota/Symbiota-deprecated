@@ -193,7 +193,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 	}
 
 	private function isLichensAndMossesOfYellowstoneLabel($s) {
-		$yPat = "/.*L[1Il!|][CE]H[CE]N[S5]\\sAND\\sM[O0Q]sses.*(?:[O0Q]F)?.*YE[1Il!|]{2}[O0Q]WST[O0Q]NE.*/is";
+		$yPat = "/.*(?:L[1Il!|]|U)[CE]H[CE]N[S5]\\sAND\\sM[O0Q]sses.*(?:[O0Q]F)?.*YE[1Il!|]{2}[O0Q]WST[O0Q]NE.*/is";
 		if(preg_match($yPat, $s)) return true;
 		else return false;
 	}
@@ -8474,17 +8474,18 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 	protected function containsVerbatimAttribute($pAtt) {
 		$pAtt = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pAtt));
 		//if(strpos($pAtt, "|") !== FALSE || strpos($pAtt, "/") !== FALSE || strpos($pAtt, "\"") !== FALSE) $pAtt = preg_quote($pAtt, '/');
-		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podetiae?", "apotheciae?", "thall(?:us|i)", "strain",
-			"dis[ck]s?(?! (?:convex\\/|color))", "squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?",
-			"crust(?:ose)?", "corticolous", "saxicolous", "terricolous", "chemotype", "terpenes?", "isidi(?:a(?:te)?|um)", "TLC",
-			"parietin", "anthraquinones?", "pigment(?:s|ed)?", "soralia", "ostioles?", "spores", "cluster(?:s|ed)", "exciple",
-			"paraphyses(?! ?branched\\/)", "foliose", "pruinose", "Chemica[l1|I!] contents", "ciliate", "sterile",
-			"(?:(?:nor)?stictic|usnic|sa[l1|I!]azinic|psoromic|ga[l1|I!]binic|[o0][l1|I!]ivetoric|evernic) acid");
+		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)", "apotheci(?:a|um)(?! ?\\/)",
+			"thall(?:us|i)", "strain", "dis[ck]s?(?! (?:convex\\/|color))", "squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose",
+			"fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous", "terricolous", "chemotype", "terpenes?",
+			"isidi(?:a(?:te)?|um)", "TLC", "parietin", "anthraquinones?", "pigment(?:s|ed)?", "soralia", "ostioles?", "spores",
+			"cluster(?:s|ed)", "exciple", "paraphyses(?! ?branched\\/)", "foliose", "pruinose", "Chemica[l1|I!] contents", "ciliate",
+			"sterile", "septate(?! ?\\/)", "(?:(?:nor)?stictic|usnic|sa[l1|I!]azinic|psoromic|ga[l1|I!]binic|[o0][l1|I!]ivetoric|evernic) acids?");
 		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
-		foreach($vaWords as $vaWord) if(preg_match("/".$vaWord."/i", $pAtt)) return true;
+		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
 		if(preg_match("/\\b[KPC][+-]/", $pAtt)) return true;
 		if(preg_match("/\\bUV[+-]/", $pAtt)) return true;
 		if(preg_match("/\\bPD[+-]/", $pAtt)) return true;
+		if(preg_match("/\\bHC[Il][+-]/", $pAtt)) return true;
 		return false;
 	}
 }
