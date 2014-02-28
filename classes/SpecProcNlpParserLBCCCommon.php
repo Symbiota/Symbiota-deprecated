@@ -412,7 +412,16 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			$temp = $habitatArray[1];
 			if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $habitat = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
 		}
-		if(strlen($substrate) == 0) $substrate = $this->getSubstrate($str);
+		if(strlen($substrate) == 0) {
+			$subArray = $this->getSubstrate($str);
+			if($subArray) {
+				$temp = trim($subArray[2]);
+				if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) {
+					$substrate = $temp;
+					$str = trim(str_replace(array($subArray[1], "\n\n"), "\n", $str));
+				}
+			}
+		}
 		if(strlen($verbatimElevation) == 0) {
 			$elevArr = $this->getElevation($str);
 			$temp = $elevArr[1];
@@ -3758,14 +3767,9 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
 	protected function getSubstrate($string) {
 		if(strlen($string) > 0) {
-			$sub = "";
-			$subPatStr = "/\\nSubstrat(?:e|um)[:;,.]?(?: is\\b)?(.+)(?:\\s|\\n|\\r\\n)/i";
-			if(preg_match($subPatStr, $string, $subMatches)) $sub = trim($subMatches[1]);
-			else if(preg_match("/ Substrat(?:e|um)[:;] (.+)(?:\\s|\\n|\\r\\n)/i", $string, $subMatches)) $sub = trim($subMatches[1]);
-			$sub = trim($sub, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
-			if(strlen($sub) > 2 && !$this->isMostlyGarbage($sub, 0.48)) return $sub;
+			$subPatStr = "/(Substrat(?:e|um)(?:[:;,.]| (?:i|wa)s | (?:appear|seem)(?:s|ed) to be )?(.{3,}?)[;:.\n] ?)/i";
+			if(preg_match($subPatStr, $string, $subMatches)) return $subMatches;
 		}
-		return "";
 	}
 
 	protected function terminateSubstrate($sub) {
