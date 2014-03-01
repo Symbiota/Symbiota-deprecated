@@ -644,7 +644,7 @@ xmlwriter_end_attribute($xml_resource);
 				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
 				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 				'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-				'o.localitySecurity, o.localitySecurityReason, o.collid, o.occid, g.guid '.
+				'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, o.collid, o.occid, g.guid '.
 	            'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
 				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
@@ -697,7 +697,7 @@ xmlwriter_end_attribute($xml_resource);
 		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
 				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-				"localitySecurity","localitySecurityReason","collId","symbiotaId","recordId");
+				"localitySecurity","localitySecurityReason","modified","collId","symbiotaId","recordId");
 		}
 	}
 

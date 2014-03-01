@@ -22,9 +22,9 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 <!doctype html>
 <html>
 	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> Collections Search</title>
-	    <link type="text/css" href="../css/main.css" rel="stylesheet" />
+		<link type="text/css" href="../css/main.css" rel="stylesheet" />
 		<script type="text/javascript">
 			<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
 		</script>
@@ -38,7 +38,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			});
 
 			
-	    	$(document).ready(function() {
+			$(document).ready(function() {
 				if(!navigator.cookieEnabled){
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 				}
@@ -154,10 +154,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						}
 					}
 				}
-		      	return formVerified;
-		    }
+			  	return formVerified;
+			}
 
-		    function verifyOtherCatForm(f){
+			function verifyOtherCatForm(f){
 				var dbElements = document.getElementsByName("surveyid[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];
@@ -165,19 +165,19 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				}
 			   	alert("Please choose at least one checkbox!");
 				return false;
-		    }
+			}
 
 			function checkKey(e){
-		        var key;
-		        if(window.event){
-		            key = window.event.keyCode;
-		        }else{
-		            key = e.keyCode;
-		        }
-		        if(key == 13){
-		            document.collections.submit();
-		        }
-		    }
+				var key;
+				if(window.event){
+					key = window.event.keyCode;
+				}else{
+					key = e.keyCode;
+				}
+				if(key == 13){
+					document.collections.submit();
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -204,23 +204,23 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	<div id="innertext">
 		<h1>Collections to be Searched</h1>
 		<div id="tabs" style="margin:0px;">
-		    <ul>
-		        <?php 
+			<ul>
+				<?php 
 				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">Specimens &amp; Observations</a></li>';
 				if($specArr) echo '<li><a href="#specimendiv">Specimens</a></li>';
 				if($obsArr) echo '<li><a href="#observationdiv">Observations</a></li>';
 				if($otherCatArr) echo '<li><a href="#otherdiv">Federal Units</a></li>';
 				?>
-		    </ul>
-	        <?php 
-	        if($specArr && $obsArr){
+			</ul>
+			<?php 
+			if($specArr && $obsArr){
 				?>
 				<div id="specobsdiv">
 					<form name="collform1" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 20px;">
+						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
-			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-			        	</div>
+					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+						</div>
 						<?php 
 						$collManager->outputFullCollArr($specArr); 
 						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
@@ -229,29 +229,29 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						<div style="clear:both;">&nbsp;</div>
 					</form>
 				</div>
-	        <?php 
-	        }
-	        if($specArr){
-	        	?>
+			<?php 
+			}
+			if($specArr){
+				?>
 				<div id="specimendiv">
 					<form name="collform2" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 20px;">
+						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballspeccb" name="db[]" class="spec" value='allspec' type="checkbox" onclick="selectAll(this);" checked />
-			         		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
-			        	</div>
+					 		Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+						</div>
 						<?php
 						$collManager->outputFullCollArr($specArr);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
 				</div>
-	        	<?php 
-	        }
-	        if($obsArr){
-	        	?>
+				<?php 
+			}
+			if($obsArr){
+				?>
 				<div id="observationdiv">
 					<form name="collform3" action="harvestparams.php" method="get" onsubmit="return verifyCollForm(this)">
-			        	<div style="margin:0px 0px 10px 20px;">
+						<div style="margin:0px 0px 10px 20px;">
 							<input id="dballobscb" name="db[]" class="obs" value='allobs' type="checkbox" onclick="selectAll(this);" checked />
 							Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
 						</div>
@@ -262,7 +262,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 					</form>
 				</div>
 				<?php 
-	        } 
+			} 
 			if($otherCatArr){ 
 				?>
 				<div id="otherdiv">
@@ -273,10 +273,10 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<fieldset style="margin:10px;">
 								<legend style="font-weight:bold;"><?php echo $projTitle; ?></legend>
 								<div style="margin:40px 15px;float:right;">
-						        	<input type="image" src='../images/next.jpg'
-						                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-						                onmouseout="javascript:this.src = '../images/next.jpg';"
-						                title="Click button to advance to the next step" />
+									<input type="image" src='../images/next.jpg'
+										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+										onmouseout="javascript:this.src = '../images/next.jpg';"
+										title="Click button to advance to the next step" />
 								</div>
 								<div style="margin:10px;">
 									<?php 

@@ -191,11 +191,13 @@ function recordNumberChanged(){
 
 function decimalLatitudeChanged(f){
 	verifyDecimalLatitude(f);
+	verifyCoordinates(f);
 	fieldChanged('decimallatitude');
 }
 
 function decimalLongitudeChanged(f){
 	verifyDecimalLongitude(f);
+	verifyCoordinates(f);
 	fieldChanged('decimallongitude');
 }
 
@@ -225,27 +227,36 @@ function verbatimElevationChanged(f){
 
 function parseVerbatimElevation(f){
 	if(f.verbatimelevation.value){
-		var ftMin = "";
-		var ftMax = "";
+		var min = "";
+		var max = "";
 		var verbElevStr = f.verbatimelevation.value;
 		verbElevStr = verbElevStr.replace(/,/g ,"");
 		
 		var regEx1 = /(\d+)\s*-\s*(\d+)\s*[ft|feet|']/i; 
 		var regEx2 = /(\d+)\s*[ft|feet|']/i; 
+		var regEx3 = /(\d+)\s*-\s*(\d+)\s{0,1}m{1}/i; 
+		var regEx4 = /(\d+)\s{0,1}m{1}/i; 
 		var extractStr = "";
 		if(extractArr = regEx1.exec(verbElevStr)){
-			ftMin = extractArr[1];
-			ftMax = extractArr[2];
+			min = Math.round(extractArr[1]*.3048);
+			max = Math.round(extractArr[2]*.3048);
 		}
 		else if(extractArr = regEx2.exec(verbElevStr)){
-			ftMin = extractArr[1];
+			min = Math.round(extractArr[1]*.3048);
+		}
+		else if(extractArr = regEx3.exec(verbElevStr)){
+			min = extractArr[1];
+			max = extractArr[2];
+		}
+		else if(extractArr = regEx4.exec(verbElevStr)){
+			mMin = extractArr[1];
 		}
 
-		if(ftMin){
-			f.minimumelevationinmeters.value = Math.round(ftMin*.3048);
+		if(min){
+			f.minimumelevationinmeters.value = min;
 			fieldChanged("minimumelevationinmeters");
-			if(ftMax){
-				f.maximumelevationinmeters.value = Math.round(ftMax*.3048);
+			if(max){
+				f.maximumelevationinmeters.value = max;
 				fieldChanged("maximumelevationinmeters");
 			}
 		}
@@ -514,43 +525,92 @@ function verifyDecimalLongitude(f){
 		alert("Decimal Longitude can not be less than -180 degrees " );
 		return false;
 	}
+	return true;
+}
 
-	//Check to see if coordinates are within country/state
+function verifyCoordinates(f){
+	//Check to see if coordinates are within country/state/county
+	var lngValue = f.decimallongitude.value;
 	var latValue = f.decimallatitude.value;
 	if(latValue && lngValue){
-		xmlHttp = GetXmlHttpObject();
-		if(xmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return;
-	  	}
-		var url = "http://ws.geonames.org/countrySubdivisionJSON?lat="+latValue+"&lng="+lngValue;
-		xmlHttp.onreadystatechange=function(){
-			if(xmlHttp.readyState==4 && xmlHttp.status==200){
-				if(xmlHttp.responseText){
-					var retArr = eval("("+xmlHttp.responseText+")");
-					var cValue = retArr["countryName"];
-					if(cValue && !f.country.value) f.country.value = cValue; 
-					var sValue = retArr["adminName1"];
-					if(sValue){
-						var currentState = f.stateprovince.value;
-						if(currentState){
-							sValue = sValue.toLowerCase();
-							currentState = currentState.toLowerCase();
-							if(currentState.indexOf(sValue) == -1) alert("Are coordinates accurate? They currently map to: "+cValue+", "+sValue+" Click globe symbol to display coordinates in map.");
+		var url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+latValue+","+lngValue+"&sensor=false";
+		
+		$.ajax({
+			type: "GET",
+			url: "http://maps.googleapis.com/maps/api/geocode/json?sensor=false",
+			dataType: "json",
+			data: { latlng: latValue+","+lngValue }
+		}).done(function( data ) {
+			if(data){
+				if(data.status != "ZERO_RESULTS"){
+					var result = data.results[0];
+					if(result.address_components){
+						var compArr = result.address_components;
+						var coordCountry = "";
+						var coordState = "";
+						var coordCounty = "";
+						for (var p1 in compArr) {
+							var compObj = compArr[p1];
+							if(compObj.long_name && compObj.types){
+								var longName = compObj.long_name;
+								var types = compObj.types;
+								if(types[0] == "country"){
+									var coordCountry = longName;
+								}
+								else if(types[0] == "administrative_area_level_1"){
+									var coordState = longName;
+								}
+								else if(types[0] == "administrative_area_level_2"){
+									var coordCounty = longName;
+								}
+							}
 						}
-						else{
-							f.stateprovince.value = sValue;
-							//http://api.geonames.org/findNearbyPostalCodes?lat=-32&lng=-64&username=demo
+						var coordValid = true;
+						if(f.country.value != ""){
+							//if(f.country.value.toLowerCase().indexOf(coordCountry.toLowerCase()) == -1) coordValid = false;
+						}
+						else if(coordCountry != ""){
+							f.country.value = coordCountry;
+						}
+						if(coordState != ""){
+							if(f.stateprovince.value != ""){
+								if(f.stateprovince.value.toLowerCase().indexOf(coordState.toLowerCase()) == -1) coordValid = false;
+							}
+							else{
+								f.stateprovince.value = coordState;
+							}
+						}
+						if(coordCounty != ""){
+							var coordCountyIn = coordCounty.replace(" County","");
+							coordCountyIn = coordCountyIn.replace(" Parish","");
+							if(f.county.value != ""){
+								var fCounty = f.county.value;
+								if(f.county.value.toLowerCase().indexOf(coordCountyIn.toLowerCase()) == -1){
+									if(f.county.value.toLowerCase() != coordCountyIn.toLowerCase()){
+										coordValid = false;
+									}
+								}
+							}
+							else{
+								f.county.value = coordCountyIn;
+							}
+						}
+						if(!coordValid){
+							var msg = "Are coordinates accurate? They currently map to: "+coordCountry+", "+coordState;
+							if(coordCounty) msg = msg + ", " + coordCounty;
+							msg = msg + ". Click globe symbol to display coordinates in map.";
+							alert(msg);
 						}
 					}
 				}
+				else{
+					if(f.country.value != ""){
+						alert("Unable to identify country! Are coordinates accurate? Click globe symbol to display coordinates in map.");
+					}
+				}
 			}
-		};
-		xmlHttp.open("POST",url,true);
-		xmlHttp.send(null);
+		});
 	}
-	
-	return true;
 }
 
 function verifyMinimumElevationInMeters(f){
@@ -926,7 +986,7 @@ function detDateChanged(f){
 			var yearPattern = /[1,2]{1}\d{3}/;
 			var newYear = newDateStr.match(yearPattern);
 			var curYear = dateIdentified.match(yearPattern);
-			if(curYear == null || newYear[0] > curYear[0]){
+			if(curYear != null && newYear != newYear[0] > curYear[0]){
 				isNew = true;
 			}
 		}

@@ -14,8 +14,8 @@ $isEditor = 0;
 if($IS_ADMIN){
 	$isEditor = 1;
 }
-elseif($collId){
-	if(array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])){
+elseif($collid){
+	if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
 		$isEditor = 1;
 	}
 }
