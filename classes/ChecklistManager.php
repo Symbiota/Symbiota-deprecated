@@ -167,6 +167,7 @@ class ChecklistManager {
 		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
+		//echo $this->basicSql; 
 		while($row = $result->fetch_object()){
 			$this->filterArr[$row->uppertaxonomy] = "";
 			$family = strtoupper($row->family);
@@ -408,7 +409,7 @@ class ChecklistManager {
 			}
 			if($this->thesFilter){
 				//Filter checklist through thesaurus
-				$this->basicSql = 'SELECT DISTINCT t.tid, ctl.clid ts.uppertaxonomy, ts.family, '. 
+				$this->basicSql = 'SELECT DISTINCT t.tid, ctl.clid, ts.uppertaxonomy, ts.family, '. 
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM (taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted) '.
 					'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = ts.tid '.

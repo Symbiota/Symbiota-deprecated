@@ -102,7 +102,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
 				$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-					'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, IFNULL(dateidentified,"assumed to be collection date") AS di, '.
+					'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, IFNULL(dateidentified,"unknown") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 					'FROM omoccurrences WHERE (occid = '.$this->occid.')';
 				//echo "<div>".$sqlInsert."</div>";
@@ -258,8 +258,8 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//Make sure determination data within omoccurrences is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
 		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'SELECT occid, IFNULL(identifiedby,"assumed to be collector") AS idby, '.
-			'IFNULL(dateidentified,"assumed to be collection date") AS iddate, sciname, scientificnameauthorship, '.
+			'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, '.
+			'IFNULL(dateidentified,"unknown") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
 			'FROM omoccurrences WHERE (occid = '.$this->occid.')';
 		if($this->conn->query($sqlInsert)){

@@ -192,6 +192,17 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							<b>Notes:</b> 
 							<input type="text" name="identificationremarks" style="width:350px;" />
 						</div>
+						<div style='margin:3px;'>
+							<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination
+						</div>
+						<?php 
+						global $fpEnabled;
+						if($fpEnabled){
+							echo '<div style="float:left;margin-left:30px;">';
+							echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
+							echo '</div>';
+						}
+						?>
 						<div style='margin:15px;'>
 							<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 							<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
@@ -209,14 +220,6 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							<div style="float:left;">
 								<input type="submit" name="submitaction" value="Add New Determination" />
 							</div>
-							<div style="float:left;margin-left:30px;">
-								<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination <br />
-								<?php 
-								global $fpEnabled;
-								if($fpEnabled)
-									echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
-								?>
-							</div>
 						</div>
 					</fieldset>
 				</form>
@@ -224,7 +227,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 			<?php
 			foreach($detArr as $detId => $detRec){
 				$canEdit = 0;
-				if((!$detRec['iscurrent'] && $editMode < 3) || !$detRec['appliedstatus']) $canEdit = 1;
+				if($editMode < 3 || !$detRec['appliedstatus']) $canEdit = 1;
 				?>
 				<div id="detdiv-<?php echo $detId;?>">
 					<div>
@@ -323,7 +326,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 								</div>
 							</form>
 							<?php 
-							if($editMode < 3){
+							if($editMode < 3 && !$detRec['iscurrent']){
 								?>
 								<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
 									<form name="detremapform" action="occurrenceeditor.php" method="post">

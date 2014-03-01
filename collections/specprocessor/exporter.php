@@ -55,7 +55,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
 		<script language="javascript">
 			$(function() {
-				var dialogArr = new Array("schemanative","schemageoref","newrecs");
+				var dialogArr = new Array("schemanative","newrecs");
 				var dialogStr = "";
 				for(i=0;i<dialogArr.length;i++){
 					dialogStr = dialogArr[i]+"info";
@@ -81,30 +81,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					return false;
 				}
 				return true;
-			}
-
-			function georefRadioClicked(radioButton){
-				var f = radioButton.form;
-				if(radioButton.value == "georef"){
-					f.customfield1.value = "decimalLatitude";
-					f.customtype1.value = "NOTNULL";
-					f.customvalue1.value = "";
-					f.customfield2.value = "georeferenceSources";
-					f.customtype2.value = "STARTS";
-					f.customvalue2.value = "georef batch tool";
-					f.identifications.checked = false;
-					f.images.checked = false;
-				}
-				else{
-					f.customfield1.value = "";
-					f.customtype1.value = "EQUALS";
-					f.customvalue1.value = "";
-					f.customfield2.value = "";
-					f.customtype2.value = "EQUALS";
-					f.customvalue2.value = "";
-					f.identifications.checked = true;
-					f.images.checked = true;
-				}
 			}
 		</script>
 	</head>
@@ -174,7 +150,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<tr>
 										<td>
 											<div style="margin:10px;">
-												<b>New Data Only:</b> 
+												<b>New Records Only:</b> 
 											</div> 
 										</td>
 										<td>
@@ -264,26 +240,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 												such as substrate, associated collectors, verbatim description.
 											</div>
-											<input type="radio" name="schema" value="georef" onclick="georefRadioClicked(this)" /> 
-											Batch Georeferenced Data
-											<a id="schemageorefinfo" href="#" onclick="return false" title="More Information">
-												<img src="../../images/info.png" style="width:13px;" />
-											</a><br/>
-											<div id="schemageorefinfodialog">
-												Downloading georefence data will extract only the fields related to 
-												georeferencing and the catalog number. 
-												<?php 
-												if($collMeta['manatype'] == 'Snapshot'){
-													?>
-													This will allow the collection 
-													make use of the batch georeference tools and import new coordinate data
-													into their central database. Note that it is up to the collection manager to 
-													ensure that coordinates are imported into empty fields 
-													and existing coordinates are not copied over.
-													<?php 
-												}
-												?> 
-											</div>
 											<!--  <input type="radio" name="schema" value="specify" /> Specify -->
 										</div>
 									</td>
@@ -348,7 +304,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<td colspan="2">
 										<div style="margin:10px;">
 											<input type="hidden" name="targetcollid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" value="Download Specimen Records" />
+											<input type="submit" name="submitaction" value="Download Records" />
 										</div>
 									</td>
 								</tr>
@@ -356,6 +312,86 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						</fieldset>
 					</form>
 					<?php 
+					if($collMeta['manatype'] == 'Snapshot'){
+						?>
+						<form name="exportgeorefform" action="../download/downloadhandler.php" method="post" onsubmit="return validateExportGeorefForm(this);">
+							<fieldset>
+								<legend><b>Export Batch Georeferenced Data</b></legend>
+								<div style="margin:15px;">
+									This module extracts coordinate data only for the records that have been georeferenced using the 
+									<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>" target="_blank">batch georeferencing tools</a> built into the portal. 
+									These downloads are particularly tailored for importing the new coordinates into their local database. 
+									If no records have been georeferenced within the portal, the output file will be empty.
+								</div>
+								<table>
+									<tr>
+										<td>
+											<div style="margin:10px;">
+												<b>Processing Status:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<select name="processingstatus">
+													<option value="">All Records</option>
+													<?php 
+													$statusArr = $dlManager->getProcessingStatusList($collid);
+													foreach($statusArr as $v){
+														echo '<option value="'.$v.'">'.ucwords($v).'</option>';
+													}
+													?>
+												</select>
+											</div> 
+										</td>
+									</tr>
+									<tr>
+										<td valign="top">
+											<div style="margin:10px;">
+												<b>File Format:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<input type="radio" name="format" value="csv" CHECKED /> Comma Delimited (CSV)<br/>
+												<input type="radio" name="format" value="tab" /> Tab Delimited<br/>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td valign="top">
+											<div style="margin:10px;">
+												<b>Character Set:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<?php 
+												$cSet = strtolower($charset);
+												?>
+												<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
+												<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td colspan="2">
+											<div style="margin:10px;">
+												<input name="customfield1" type="hidden" value="decimalLatitude" />
+												<input name="customtype1" type="hidden" value="NOTNULL" />
+												<input name="customvalue1" type="hidden" value="" />
+												<input name="customfield2" type="hidden" value="georeferenceSources" />
+												<input name="customtype2" type="hidden" value="STARTS" />
+												<input name="customvalue2" type="hidden" value="georef batch tool" />
+												<input name="targetcollid" type="hidden" value="<?php echo $collid; ?>" />
+												<input name="submitaction" type="submit" value="Download Records" />
+											</div>
+										</td>
+									</tr>
+								</table>							
+							</fieldset>
+						</form>
+						<?php
+					} 
 				}
 				else{
 					echo '<div>ERROR: collection identifier not defined. Contact administrator</div>';

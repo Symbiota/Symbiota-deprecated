@@ -626,6 +626,9 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							elseif(strpos($collMetadata['individualurl'],'--CATALOGNUMBER--') && $occArr['catalognumber']){
 								$indUrl = str_replace('--CATALOGNUMBER--',$occArr['catalognumber'],$collMetadata['individualurl']);
 							}
+							elseif(strpos($collMetadata['individualurl'],'--OCCURRENCEID--') && $occArr['occurrenceid']){
+								$indUrl = str_replace('--OCCURRENCEID--',$occArr['occurrenceid'],$collMetadata['individualurl']);
+							}
 							if($indUrl){
 								echo '<div style="margin-top:10px;clear:both;">';
 								echo '<b>Source:</b> <a href="'.$indUrl.'">';

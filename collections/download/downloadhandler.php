@@ -12,14 +12,14 @@ $targetCollid = array_key_exists("targetcollid",$_REQUEST)?$_REQUEST["targetcoll
 
 $dlManager = new OccurrenceDownload();
 
-if($action == 'Download Specimen Records'){
+if($action == 'Download Records'){
 	if($targetCollid) $dlManager->addCondition('collid','EQUALS',$targetCollid);
 	if($_POST['processingstatus']){
 		$dlManager->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
 	}
 	$dlManager->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
 	$dlManager->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
-	$dlManager->setSchemaType($_POST['schema']);
+	if(isset($_POST['schema'])) $dlManager->setSchemaType($_POST['schema']);
 	$dlManager->setDelimiter($_POST['format']);
 	$dlManager->setCharSetOut($_POST['cset']);
 	/*

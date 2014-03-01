@@ -77,10 +77,11 @@ if($isEditor){
 					select: function(event, ui) {
 						return true;
 					},
-					active: <?php echo $tabIndex; ?>
-					//,spinner: 'Loading...'
+					active: <?php echo $tabIndex; ?>,
+					beforeLoad: function( event, ui ) {
+						$(ui.panel).html("<p>Loading...</p>");
+					}
 				});
-
 			});
 		</script>
 	</head>
@@ -165,7 +166,7 @@ if($isEditor){
 				        <!-- 
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId; ?>">Optical Character Recognition</a></li>
 				         -->
-				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">Natural Language Processing</a></li>
+				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
 				        <li><a href="reports.php?collid=<?php echo $collid.'&menu='.(isset($_REQUEST['menu'])?$_REQUEST['menu']:''); ?>">Reports</a></li>
 				        <li><a href="exporter.php?collid=<?php echo $collid; ?>">Exporter</a></li>
 				    </ul>
