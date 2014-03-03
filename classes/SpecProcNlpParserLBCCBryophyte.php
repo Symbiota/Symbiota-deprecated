@@ -11,10 +11,35 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 
 	protected function getLabelInfo($str, $collId=null) {
 		if($str) {
-			if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
+			if($this->isFontinalaceaeExsiccataeLabel($str)) return $this->doFontinalaceaeExsiccataeLabel($str);
+			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
 		return array();
+	}
+
+	private function isFontinalaceaeExsiccataeLabel($s) {
+		$pat = "/.*F[O0Q]NT[1Il!|]NA[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.*/is";
+		if(preg_match($pat, $s)) return true;
+		else return false;
+	}
+
+	private function doFontinalaceaeExsiccataeLabel($s) {
+		$pattern =
+			array
+			(
+				"/.?F[O0Q]NT[1Il!|]NA[1Il!|]A[CGOQ]EAE EXS[1Il!|][CGOQ]{2}AT.{0,3}/i",
+				"/Ed[1Il!|]t[ce]d b[yv] Bru[ce]{2} A[1Il!|]{2}[ce]n/i",
+				"/D[1Il!|]str[1Il!|]but[ce]d b[yv] M[1Il!|][s5]{2}our[1Il!|] B[o0]tan[1Il!|]ca[1Il!|] [CGOQ]ard[ce]n/i"
+			);
+		$replacement =
+			array
+			(
+				"",
+				"",
+				""
+			);
+		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "48");
 	}
 
 	private function isReliquiaeFlowersianaeLabel($s) {
@@ -25,14 +50,15 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 	}
 
 	protected function containsVerbatimAttribute($pAtt) {
-		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podetiae?", "apotheciae?", "thall(?:us|i)", "strain",
+		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
+			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain",
 			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",
-			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangium",
-			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "soralia", "spor(?:ophyt)?es?",
-			"Archegonia", "antheridia", "archegonia", "androecium", "gynoecium", "Autoicous", "Paroicous", "Heteroicous",
-			"cladautoicous", "Gametangia", "paraphyses(?! ?branched\\/)", "pruinose");
+			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
+			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?",
+			"antheridi(?:a|um)", "archegoni(?:a|um)", "androeci(?:a|um)", "gynoeci(?:a|um)", "Autoicous", "Paroicous", "Heteroicous",
+			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose");
 		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
-		foreach($vaWords as $vaWord) if(preg_match("/".$vaWord."/i", $pAtt)) return true;
+		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
 		return false;
 	}
 
