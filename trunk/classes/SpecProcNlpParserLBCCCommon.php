@@ -405,7 +405,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		$lookingForRecordNumber = false;
 		if(strlen($locality) == 0) {
 			$temp = $this->getLocality($str);
-			if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $locality = $this->mergeFields($locality, preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp));
+			if(strlen($temp) > 0 && !$this->isMostlyGarbage($temp, 0.48)) $locality = preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $temp);
 		}
 		if(strlen($habitat) == 0) {
 			$habitatArray = $this->getHabitat($str);
@@ -2394,7 +2394,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"/\\bWildlife Management\\b/", "/\\bQuad\\b/i", "/\\sR(?i)anch\\b/", "/\\sstreet\\b/i", "/ Ave\\b/i", "/\\sLane\\b/i",
 			"/ Divide\\b/i", "/\\bMts?\\b/", "/\\bMount /i", "/\\b(?:Conference|Visitors|Environmenta[l1|I!]) Center\\b/i", "/\\sR(?i)idge\\b/",
 			"/\\b(?i:N(?:orth(?:east|west)?)?|S(?:outh(?:east|west)?)?|E(?:ast)?|W(?:est)?|[NE]?NE|[NW]?NW|[SE]?SE|[SW]?SW) (?:of|from) (?-i)[A-Z]/i",
-			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d/", "/ Gruppe\\b/", "/ A(?i)rea\\b/",
+			"/\\b[A-Za-z]{3,}v[l1|I!]{3}e\\b/i", "/\\b[A-Z][A-Za-z]{2,}t[o0]wn\\b/i", "/~ ?\\d/", "/ Gruppe\\b/", "/ A(?i)rea\\b/", "/ quarry/i",
 			"/\\b[A-Z][A-Za-z]{2,} G(?i)u[l1|I!]ch\\b/", "/ T(?i)rail/", "/ B(?i)ay\\b/", "/[A-Za-z] A(?i)rboretum\\b/", "/ R(?i)iver\\b/",
 			"/[A-Za-z]{3,} R(?i)ock\\b/", "/[A-Za-z]{3,} K(?i)eys?\\b/", "/[A-Za-z]{3,} S(?i)ound\\b/", "/\\bstate [1-9]/i", "/\\bprovince\\b/i");
 		$result = 0;
@@ -2423,7 +2423,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
 			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
 			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
-			"flood ?plain", "terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation");
+			"flood ?plain", "terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
@@ -3348,7 +3348,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$collector  = trim($cMats[1]);
 						$collectorNum = $temp;
 					}
-				}//echo "\n2023, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
+				}//echo "\n2103, collector = ".$collector."\ncollectorNum: ".$collectorNum."\nnextLine: ".$nextLine."\n";
 				if(preg_match("/(.*?)\\s(?:[NW][o0Q][.ou]|#)(.*)/i", $collector, $cMats)) {
 					$collector = trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
 					$temp = trim($cMats[2]);
@@ -3429,7 +3429,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					}
 				}
 				if(strlen($nextLine) > 0 && (strlen($collector) == 0 || strlen($collectorNum) == 0)) {
-					if(preg_match("/(.*?)\\b(?:[N][o0Q][.o]|#)(.*)/i", $nextLine, $cMats)) {
+					if(preg_match("/(.*?)\\b(?:[N][o0Q][.o]|#)(.*)/i", $nextLine, $cMats)) {//$i=0;foreach($cMats as $cMat) echo "\n11513, cMats[".$i++."] = ".$cMat."\n";
 						$collector .= " ".trim($cMats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-");
 						$temp = trim($cMats[2]);
 						if($this->containsNumber($temp)) $collectorNum = $this->terminateCollectorNum($temp);
@@ -3457,7 +3457,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 				if(strlen($collectorNum) > 0) {
 					$temp = $this->terminateCollectorNum($collectorNum);
 				}
-				if(strlen($collector) > 0 && strlen($collectorNum) == 0) {//echo "\n1925, collector = ".$collector."\nnextLine: ".$nextLine."\n";
+				if(strlen($collector) > 0 && strlen($collectorNum) == 0) {//echo "\n2212, collector = ".$collector."\nnextLine: ".$nextLine."\n";
 					$spacePos = strrpos($collector, " ");
 					if($spacePos !== FALSE) {//echo "\nline 6961, spacePos !== FALSE\n";
 						$potCollector = trim(substr($collector, 0, $spacePos));
@@ -3500,7 +3500,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						if(count($mats2) > 1) $collector = trim($mats2[1]);
 					}
 				}
-				//echo "\nline 2211, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
+				//echo "\nline 2255, collector: ".$collector.", collectorNum: ".$collectorNum."\n";
 				if(strlen($collector) > 0) {
 					if($isIdentifier) $identifiedBy = $collector;
 					if(strlen($collectorNum) > 2) {
@@ -3522,14 +3522,24 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 							if(preg_match("/(.+)Det(?:[:,;. *]|ermined)/i", $collectorNum, $mats2)) $collectorNum = trim($mats2[1]);
 						} else if(is_numeric($lastLine)) $collectorNum = $lastLine;
 					}
-					//if(strcasecmp($collector, "Date") === 0) $collector = "";
-					return array
-					(
-						'collectorName' => trim($collector, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
-						'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
-						'otherCatalogNumbers' => $otherCatalogNumbers,
-						'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
-					);
+					if(preg_match("/(.+)(?: and |&)(.+)/i", $collector, $mats)) {
+						return array
+						(
+							'collectorName' => trim($mats[1], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'associatedCollectors' => trim($mats[2], " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'otherCatalogNumbers' => $otherCatalogNumbers,
+							'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
+						);
+					} else {
+						return array
+						(
+							'collectorName' => trim($collector, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'collectorNum' => trim($collectorNum, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-"),
+							'otherCatalogNumbers' => $otherCatalogNumbers,
+							'identifiedBy' => trim($identifiedBy, " \t\n\r\0\x0B.,:;!\"\'\\~@#$%^&*_-")
+						);
+					}
 				}
 			}
 			//I have observed that on many labels -- especially those from NYBG -- have a line that says
