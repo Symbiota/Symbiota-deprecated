@@ -36,7 +36,7 @@ if($symbUid){
 			<fieldset style="margin:15px;padding:15px;">
 				<legend style="font-weight:bold;"><b><?php echo $cName; ?></b></legend>
 				<div style="margin-left:10px">
-					Total Record Count: <?php echo $specHandler->getRecordCount($collId); ?>
+					Total Record Count: <?php echo $specHandler->getPersonalOccurrenceCount($collId); ?>
 				</div>
 				<ul>
 					<li>
