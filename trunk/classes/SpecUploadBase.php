@@ -733,7 +733,7 @@ class SpecUploadBase extends SpecUpload{
 		ob_flush();
 		flush();
 		$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON u.occid = o.occid '.
-			'SET o.basisOfRecord = u.basisOfRecord, o.catalogNumber = u.catalogNumber, '.
+			'SET o.basisOfRecord = u.basisOfRecord, o.catalogNumber = u.catalogNumber, o.occurrenceid = u.occurrenceid, '.
 			'o.otherCatalogNumbers = u.otherCatalogNumbers, o.ownerInstitutionCode = u.ownerInstitutionCode, o.family = u.family, '.
 			'o.scientificName = u.scientificName, o.sciname = u.sciname, o.tidinterpreted = u.tidinterpreted, o.genus = u.genus, o.institutionID = u.institutionID, '.
 			'o.collectionID = u.collectionID, o.specificEpithet = u.specificEpithet, o.datasetID = u.datasetID, o.taxonRank = u.taxonRank, '.
@@ -771,8 +771,8 @@ class SpecUploadBase extends SpecUpload{
 		$this->outputMsg('<li style="font-weight:bold;">Inserting new records into active occurrence table... ');
 		ob_flush();
 		flush();
-		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, ownerInstitutionCode, '.
-			'institutionID, collectionID, institutionCode, collectionCode, '.
+		$sql = 'INSERT IGNORE INTO omoccurrences (collid, dbpk, basisOfRecord, catalogNumber, otherCatalogNumbers, occurrenceid, '.
+			'ownerInstitutionCode, institutionID, collectionID, institutionCode, collectionCode, '.
 			'family, scientificName, sciname, tidinterpreted, genus, specificEpithet, datasetID, taxonRank, infraspecificEpithet, '.
 			'scientificNameAuthorship, taxonRemarks, identifiedBy, dateIdentified, identificationReferences, identificationRemarks, '.
 			'identificationQualifier, typeStatus, recordedBy, recordNumber, associatedCollectors, '.
@@ -785,8 +785,8 @@ class SpecUploadBase extends SpecUpload{
 			'coordinatePrecision, locationRemarks, verbatimCoordinates, verbatimCoordinateSystem, georeferencedBy, georeferenceProtocol, '.
 			'georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, minimumElevationInMeters, maximumElevationInMeters, '.
 			'verbatimElevation, previousIdentifications, disposition, modified, language, recordEnteredBy, duplicateQuantity ) '.
-			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.ownerInstitutionCode, '.
-			'u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
+			'SELECT u.collid, u.dbpk, u.basisOfRecord, u.catalogNumber, u.otherCatalogNumbers, u.occurrenceid, '.
+			'u.ownerInstitutionCode, u.institutionID, u.collectionID, u.institutionCode, u.collectionCode, '.
 			'u.family, u.scientificName, u.sciname, u.tidinterpreted, u.genus, u.specificEpithet, u.datasetID, u.taxonRank, u.infraspecificEpithet, '.
 			'u.scientificNameAuthorship, u.taxonRemarks, u.identifiedBy, u.dateIdentified, u.identificationReferences, u.identificationRemarks, '.
 			'u.identificationQualifier, u.typeStatus, u.recordedBy, u.recordNumber, u.associatedCollectors, '.
