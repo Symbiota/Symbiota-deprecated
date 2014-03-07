@@ -55,7 +55,7 @@ $collData = $collManager->getCollectionData();
 	<script language=javascript>
 
 		$(function() {
-			var dialogArr = new Array("instcode","collcode","pedits","rights","rightsholder","accessrights","guid","colltype","management","icon","sourceurl","sort");
+			var dialogArr = new Array("instcode","collcode","pedits","rights","rightsholder","accessrights","guid","colltype","management","icon","collectionguid","sourceurl","sort");
 			var dialogStr = "";
 			for(i=0;i<dialogArr.length;i++){
 				dialogStr = dialogArr[i]+"info";
@@ -526,17 +526,24 @@ $collData = $collManager->getCollectionData();
 										</div>
 									</td>
 								</tr>
+								<tr>
+									<td>
+										Global Unique ID:
+									</td>
+									<td>
+										<input type="text" name="collectionguid" value="<?php echo ($collid?$collData["guid"]:'');?>" style="width:90%;" />
+										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="collectionguidinfodialog">
+											Global Unique Identifier for this collection. If you leave blank, portal will automatically 
+											generate a UUID for this collection (recommended if GUID is not known to already exist). 
+										</div>
+									</td>
+								</tr>
 								<?php
 								if($collid){ 
 									?>
-									<tr>
-										<td>
-											Global Unique ID:
-										</td>
-										<td>
-											<?php echo $collData['guid']; ?>
-										</td>
-									</tr>
 									<tr>
 										<td>
 											Security Key:

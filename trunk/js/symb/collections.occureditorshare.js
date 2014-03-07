@@ -39,15 +39,16 @@ function verifyQueryForm(f){
 
 	if(!verifyLeaveForm()) return false;
 
-	var validformat1 = /^\s*\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
-	var validformat2 = /^\s*\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd
+	var validformat1 = /^\s*[<>]{0,1}\s{0,1}\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd, >yyyy-mm-dd, <yyyy-mm-dd
+	var validformat2 = /^\s*\d{4}-\d{2}-\d{2}\s{1,3}-\s{1,3}\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd - yyyy-mm-dd
+	var validformat3 = /^\s*>{1}\s{0,1}\d{4}-\d{2}-\d{2}\s{1,3}AND\s{1,3}<{1}\s{0,1}\d{4}-\d{2}-\d{2}\s*$/i //Format: >yyyy-mm-dd AND <yyyy-mm-dd
 
 	if(f.q_eventdate){
 		var edDateStr = f.q_eventdate.value;
 		if(edDateStr){
 			try{
-				if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr)){
-					alert("Event date must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+				if(!validformat1.test(edDateStr) && !validformat2.test(edDateStr) && !validformat3.test(edDateStr)){
+					alert("Event date must one of following formats: YYYY-MM-DD, YYYY-MM-DD - YYYY-MM-DD, >YYYY-MM-DD, <YYYY-MM-DD, >YYYY-MM-DD AND <YYYY-MM-DD");
 					return false;
 				}
 			}
@@ -60,8 +61,8 @@ function verifyQueryForm(f){
 		var modDateStr = f.q_datelastmodified.value;
 		if(modDateStr){
 			try{
-				if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr)){
-					alert("Date entered must follow YYYY-MM-DD for a single date and YYYY-MM-DD - YYYY-MM-DD as a range");
+				if(!validformat1.test(modDateStr) && !validformat2.test(modDateStr) && !validformat3.test(modDateStr)){
+					alert("Date entered must one of following formats: YYYY-MM-DD, YYYY-MM-DD - YYYY-MM-DD, >YYYY-MM-DD, <YYYY-MM-DD, >YYYY-MM-DD AND <YYYY-MM-DD");
 					return false;
 				}
 			}
