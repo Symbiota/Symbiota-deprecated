@@ -185,6 +185,7 @@ class CollectionProfileManager {
 			$rights = $this->cleanInStr($_POST['rights']);
 			$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
 			$accessRights = $this->cleanInStr($_POST['accessrights']);
+			$collectionGuid = $this->cleanInStr($_POST['collectionguid']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
@@ -202,7 +203,8 @@ class CollectionProfileManager {
 				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
-				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
+				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').', '.
+				'collectionguid = '.($collectionGuid?'"'.$collectionGuid.'"':'NULL').' ';
 			if(array_key_exists('icon',$_POST)){
 				$icon = $this->cleanInStr($_POST['icon']);
 				$indUrl = $this->cleanInStr($_POST['individualurl']);
@@ -260,11 +262,12 @@ class CollectionProfileManager {
 		$icon = array_key_exists('icon',$_POST)?$this->cleanInStr($_POST['icon']):'';
 		$managementType = array_key_exists('managementtype',$_POST)?$this->cleanInStr($_POST['managementtype']):'';
 		$collType = array_key_exists('colltype',$_POST)?$this->cleanInStr($_POST['colltype']):'';
+		$guid = array_key_exists('collectionguid',$_POST)?$this->cleanInStr($_POST['collectionguid']):'';
+		if(!$guid) $guid = UuidFactory::getUuidV4();
 		$indUrl = array_key_exists('individualurl',$_POST)?$this->cleanInStr($_POST['individualurl']):'';
 		$sortSeq = array_key_exists('sortseq',$_POST)?$_POST['sortseq']:'';
 		
 		$conn = MySQLiConnectionFactory::getCon("write");
-		$guid = UuidFactory::getUuidV4();
 		$sql = 'INSERT INTO omcollections(institutioncode,collectioncode,collectionname,iid,fulldescription,homepage,'.
 			'contact,email,latitudedecimal,longitudedecimal,publicedits,guidtarget,rights,rightsholder,accessrights,icon,'.
 			'managementtype,colltype,collectionguid,individualurl,sortseq) '.

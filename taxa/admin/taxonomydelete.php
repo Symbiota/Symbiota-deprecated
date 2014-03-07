@@ -171,6 +171,53 @@ function GetXmlHttpObject(){
 			</div>
 		</div>
 		<div style="margin:15px;">
+			<b>Occurrence records:</b> 
+			<div style="margin:10px"> 
+				<?php 
+				if(array_key_exists('occur',$verifyArr)){
+					?>
+					<span style="color:red;">Warning, linked occurrence records exist:</span>
+					<ul>
+						<?php
+						foreach($verifyArr['occur'] as $occid){
+							echo '<li>';
+							echo '<a href="../../collections/individual/index.php?occid='.$occid.'">#'.$occid.'</a>';
+							echo '</li>';
+						}
+						?> 
+					</ul>
+					<?php 
+				}
+				else{
+					?>
+					<span style="color:green;">Approved:</span> occurrence records linked to this taxon
+					<?php 
+				}
+				?>
+				<?php 
+				if(array_key_exists('dets',$verifyArr)){
+					?>
+					<span style="color:red;">Warning, linked determination records exist:</span>
+					<ul>
+						<?php
+						foreach($verifyArr['dets'] as $occid){
+							echo '<li>';
+							echo '<a href="../../collections/individual/index.php?occid='.$occid.'" target="_blank">#'.$occid.'</a>';
+							echo '</li>';
+						}
+						?> 
+					</ul>
+					<?php 
+				}
+				else{
+					?>
+					<span style="color:green;">Approved:</span> no occurrence determinations linked to this taxon
+					<?php 
+				}
+				?>
+			</div>
+		</div>
+		<div style="margin:15px;">
 			<b>Checklists:</b> 
 			<div style="margin:10px"> 
 				<?php 
@@ -243,7 +290,7 @@ function GetXmlHttpObject(){
 				<form name="remaptaxonform" method="post" action="taxonomyeditor.php">
 					<div style="margin-bottom:5px;">
 						Target taxon: 
-						<input id="remaptvalue" name="remaptvalue" type="text" value="" /><br/>
+						<input id="remaptvalue" name="remaptvalue" type="text" value="" style="width:300px;" /><br/>
 						<input name="remaptid" type="hidden" value="" />
 					</div>
 					<div>

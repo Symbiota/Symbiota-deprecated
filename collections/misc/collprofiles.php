@@ -261,7 +261,50 @@ if($symbUid){
 					<b>Global Unique Identifier: </b>
 					<?php echo ($collid?$collData['guid']:''); ?>
 				</div>
+				<div style="margin-top:5px;">
+					<b>Usage Rights:</b> 
+					<?php 
+					if($collid && $collData['rights']){
+						$rights = $collData['rights'];
+						$rightsUrl = '';
+						if(substr($rights,0,4) == 'http'){
+							$rightsUrl = $rights;
+							if($rightsTerms){
+								if($rightsArr = array_keys($rightsTerms,$rights)){
+									$rights = current($rightsArr);
+								}
+							}
+						}
+						if($rightsUrl) echo '<a href="'.$rightsUrl.'" target="_blank">';
+						echo $rights;
+						if($rightsUrl) echo '</a>';
+					}
+					elseif(file_exists('../../misc/usagepolicy.php')){
+						echo '<a href="../../misc/usagepolicy.php" target="_blank">default policy</a>';
+					}
+					?>
+				</div>
  				<?php 
+ 				if($collid && $collData['rightsholder']){
+ 					?>
+					<div style="margin-top:5px;">
+						<b>Rights Holder:</b> 
+						<?php 
+						echo $collData['rightsholder'];  
+						?>
+					</div>
+ 					<?php 
+ 				}
+ 				if($collid && $collData['accessrights']){
+ 					?>
+					<div style="margin-top:5px;">
+						<b>Access Rights:</b> 
+						<?php 
+						echo $collData['accessrights'];  
+						?>
+					</div>
+ 					<?php 
+ 				}
  				if($collData["institutionname"]){ 
  					?>
 					<div style="float:left;font-weight:bold;margin-top:5px;">Address:&nbsp;</div>
@@ -278,8 +321,7 @@ if($symbUid){
 					<?php 
  				} 
  				?>
- 				<div style="clear:both;">&nbsp;</div>
-				<div style="clear:both;">
+				<div style="clear:both;margin-top:5px;">
 					<div style="font-weight:bold;">Collection Statistics</div>
 					<ul>
 						<li><?php echo $collData["recordcnt"];?> specimens</li>
