@@ -169,7 +169,7 @@ function verifySpecEditForm(f){
 	return true;
 }
 
-function addSpecimen(f){ 
+function addSpecimen(f,splist){ 
 	var catalogNumber = f.catalognumber.value;
 	var loanid = f.loanid.value;
 	var collid = f.collid.value;
@@ -199,6 +199,12 @@ function addSpecimen(f){
 						document.getElementById("addspecerr1").style.display = "none";
 						}, 5000);
 					//alert("ERROR: Specimen record not found in database.");
+				}
+				else if(responseCode == "1"){
+					if(splist == 0){
+						document.getElementById("speclistdiv").style.display = "block";
+						document.getElementById("nospecdiv").style.display = "none";
+					}
 				}
 				else if(responseCode == "2"){
 					document.getElementById("addspecsuccess").style.display = "none";
