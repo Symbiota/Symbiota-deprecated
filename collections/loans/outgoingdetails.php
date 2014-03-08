@@ -204,7 +204,7 @@ $specList = $loanManager->getSpecList($loanId);
 			</a>
 		</div>
 		<div id="newspecdiv" style="display:<?php echo ($eMode?'block':'none'); ?>;">
-			<form name="addspecform" action="index.php" method="post" onsubmit="return addSpecimen(this);">
+			<form name="addspecform" action="index.php?collid=<?php echo $collId; ?>&loanid=<?php echo $loanId; ?>&loantype=<?php echo $loanType; ?>#addspecdiv" method="post" onsubmit="return addSpecimen(this,<?php echo (!$specList?'0':'1'); ?>);">
 				<fieldset>
 					<legend><b>Add Specimen</b></legend>
 					<div style="float:left;padding-bottom:2px;">
@@ -230,9 +230,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</fieldset>
 			</form>
 		</div>
-		<?php 
-		if($specList){
-		?>
+		<div id="speclistdiv" style="<?php echo (!$specList?'display:none;':''); ?>">	
 			<div style="height:25px;margin-top:15px;">
 				<div style="float:left;margin-left:15px;">
 					<input name="" value="" type="checkbox" onclick="selectAll(this);" />
@@ -303,12 +301,8 @@ $specList = $loanManager->getSpecList($loanId);
 					</tr>
 				</table>
 			</form>
-		<?php
-		}
-		else{
-			echo '<div style="font-weight:bold;font-size:120%;">There are no specimens registered for this loan.</div>';
-		}
-		?>
+		</div>	
+		<div id="nospecdiv" style="font-weight:bold;font-size:120%;<?php echo ($specList?'display:none;':''); ?>">There are no specimens registered for this loan.</div>';
 	</div>
 	<div id="outloandeldiv">
 		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this loan?')">
