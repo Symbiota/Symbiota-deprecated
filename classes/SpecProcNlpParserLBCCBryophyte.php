@@ -12,6 +12,10 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 	protected function getLabelInfo($str, $collId=null) {
 		if($str) {
 			if($this->isFontinalaceaeExsiccataeLabel($str)) return $this->doFontinalaceaeExsiccataeLabel($str);
+			else if($this->isKryptogamaeExsiccatiVindobonensiLabel($str)) return $this->doKryptogamaeExsiccatiVindobonensiLabel($str);
+			else if($this->isFryeMossExsiccatiLabel($str)) return $this->doFryeMossExsiccatiLabel($str);
+			else if($this->isHepaticaeEuropeaeExsiccatiaeLabel($str)) return $this->doHepaticaeEuropeaeExsiccatiaeLabel($str);
+			else if($this->isBryophytaTerraNovLabradorLabel($str)) return $this->doBryophytaTerraNovLabradorLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
@@ -42,6 +46,78 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "48");
 	}
 
+	private function isFryeMossExsiccatiLabel($s) {
+		$pat = "/.*Frye. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|].*/is";
+		if(preg_match($pat, $s)) return true;
+		else return false;
+	}
+
+	private function doFryeMossExsiccatiLabel($s) {
+		$pattern =
+			array
+			(
+				"/.?Frye. M.[S5$]{2} Exs[1Il!|][CG]{2}at[1Il!|]/i"
+			);
+		$replacement =
+			array
+			(
+				""
+			);
+		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "109");
+	}
+
+	private function isHepaticaeEuropeaeExsiccatiaeLabel($s) {
+		if(preg_match("/.*H[ce]patica[ce] [ce]ur[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.*/is", $s)) return true;
+		else if(preg_match("/[S5][ce]hiffn[ce]r. H[ce]pat[1Il!|]ca[ce] [ce]ur[o0]pa[ce]a[ce] [ce].*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doHepaticaeEuropeaeExsiccatiaeLabel($s) {
+		$pattern =
+			array
+			(
+				"/(?:[VW][.,] )?[S5][ce]hiffn[ce]r. H[ce]patica[ce] [ce]ur[o0]pa[ce]a[ce] [ce]xsi[ce]{2}ata?.?/i",
+			);
+		$replacement =
+			array
+			(
+				""
+			);
+		return $this->doGenericLabel(str_replace("\n\n", "\n", trim(preg_replace($pattern, $replacement, $s, -1))), "64");
+	}
+
+	private function isBryophytaTerraNovLabradorLabel($s) {
+		if(preg_match("/.*BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE.*Bra[s5]{2}ard.*/is", $s)) return true;
+		else if(preg_match("/.*A EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE Ed[1Il!|]t[ce]d b[yv] [CG]uy R. Bra[s5]{2}ard.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doBryophytaTerraNovLabradorLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE.+Bra[s5]{2}ard/i",
+				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE\\sEd[1Il!|]t[ce]d b[yv] Guy R. Bra[s5]{2}ard/is",
+				"/BRY[0O]PHYTA EX[S5][1Il!|][CG]{2}ATA TERRAE-NOVAE.{1,6}LABRAD[0O]R[1Il!|][CG]AE/i",
+				"/Ed[1Il!|]t[ce]d b[yv] Guy R. Bra[s5]{2}ard/i",
+				"/\\bCanada[,.] (Newf[0o]und[1Il!|]and|Labrad[0o]r)[:;]/i",
+				"/Distributed by Memorial University of Newfoundland/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"",
+				"\n\${1}:",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "346", array('country' => 'Canada', 'stateProvince' => 'Newfoundland and Labrador'));
+	}
+
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
 		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
@@ -51,7 +127,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 
 	protected function containsVerbatimAttribute($pAtt) {
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
-			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain",
+			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome",
 			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",
 			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
 			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?",
