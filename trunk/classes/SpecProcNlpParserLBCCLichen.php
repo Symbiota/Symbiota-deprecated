@@ -358,19 +358,13 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		return false;
 	}
 
-	private function isKryptogamaeExsiccatiVindobonensiLabel($s) {
-		if(preg_match("/[CGK]rypt[0o]gamae Exs[1!lI][ec]{2}at.+V[1!lI]nd[0o]b[0o]n.+/is", $s)) return true;
-		else if(preg_match("/Mus[ec][0o] Pa[1!lI]at[1!lI]n.+Vind[0o]b[0o]n.+/is", $s)) return true;
-		else return false;
-	}
-
 	private function isLichenesIsidiosiEtSorediosiExsiccatiLabel($s) {
 		if(preg_match("/(?:[1Il!|]{2}|U)chenes ?[1!lI]s[1!lI]d[1!lI][0o]s[1!lI] ?Et ?S[0o]red[1!lI][0o]s[1!lI] ?Crustacei ?Exs[1!lI]ccat./is", $s)) return true;
 		else return false;
 	}
 
 	private function isLichenesAmericaniExsiccatiLabel($s) {
-		if(preg_match("/(?:[1Il!|]{2}|U)chenes ?Amer[1Il!|]can[1Il!|] ?Exs[1!lI]ccat./is", $s)) return true;
+		if(preg_match("/(?:[1Il!|]{2}|U)chene[s5] ?Amer[1Il!|]can[1Il!|] ?Exs[1!lI][ce]{2}at./is", $s)) return true;
 		else return false;
 	}
 
@@ -3987,83 +3981,6 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		);
 	}
 
-	private function doKryptogamaeExsiccatiVindobonensiLabel($s) {
-		$pattern =
-			array
-			(
-				"/[CKG]rypt[o0]gama[ce] [ce]xsi[ce]{2}ata[ce] [ce]dita[ce] a Mus[ce][o0] Hist[.,] Natur[.,] Vind[o0]b[o0]n[ce]nsi/is",
-				"/ \(sect[.,] .{3,15}\)/i"
-			);
-		$replacement =
-			array
-			(
-				"",
-				""
-			);
-		$s = trim(preg_replace($pattern, $replacement, $s, -1));
-		//echo "\nline 8296, s:\n".$s."\n";
-		$ometid = "";
-		$exsnumber = "";
-		$scientificName = "";
-		$infraspecificEpithet = "";
-		$taxonRank = "";
-		$verbatimAttributes = "";
-		$associatedTaxa = "";
-		$substrate = "";
-		$lines = explode("\n", $s);
-		foreach($lines as $line) {//echo "\nline 9032, line: ".$line."\n";
-			$line = trim($line, " \t\n\r\0\x0B,:;!\"\'\\~@#$%^&*_-");
-			$psn = $this->processSciName($line);
-			if($psn != null) {
-				if(array_key_exists ('scientificName', $psn)) {
-					$scientificName = $psn['scientificName'];
-					$s = trim(str_replace($scientificName, "", $s));
-				}
-				if(array_key_exists ('infraspecificEpithet', $psn)) {
-					$infraspecificEpithet = $psn['infraspecificEpithet'];
-					$s = trim(str_replace($infraspecificEpithet, "", $s));
-				}
-				if(array_key_exists ('taxonRank', $psn)) {
-					$taxonRank = $psn['taxonRank'];
-					$s = trim(str_replace($taxonRank, "", $s));
-				}
-				if(array_key_exists ('verbatimAttributes', $psn)) {
-					$verbatimAttributes = $psn['verbatimAttributes'];
-					$s = trim(str_replace($verbatimAttributes, "", $s));
-				}
-				if(array_key_exists ('associatedTaxa', $psn)) {
-					$associatedTaxa = $psn['associatedTaxa'];
-					$s = trim(str_replace($associatedTaxa, "", $s));
-				}
-				if(array_key_exists ('substrate', $psn)) {
-					$substrate = $psn['substrate'];
-					$s = trim(str_replace($substrate, "", $s));
-				}
-				if(array_key_exists ('recordNumber', $psn)) {
-					$exsnumber = $psn['recordNumber'];
-					$s = trim(str_replace($exsnumber, "", $s));
-					//$s = trim(str_replace($line, "", $s));
-					if(strlen($exsnumber) > 0) break;
-				}
-			}
-		}
-		$iExsNumber = intval($exsnumber);
-		if($iExsNumber > 2600) $ometid = "222";
-		else if($iExsNumber > 400) $ometid = "221";
-		else if($iExsNumber > 100) $ometid = "220";
-		else $ometid = "78";
-		$exsnumber = str_replace(" ", "", $exsnumber);
-		$fields = array();
-		$fields['scientificName'] = $this->formatSciName($scientificName);
-		$fields['exsNumber'] = $exsnumber;
-		$fields['infraspecificEpithet'] = $infraspecificEpithet;
-		$fields['taxonRank'] = $taxonRank;
-		$fields['verbatimAttributes'] = $verbatimAttributes;
-		$fields['associatedTaxa'] = $associatedTaxa;
-		$fields['substrate'] = $substrate;
-		return $this->doGenericLabel($s, $ometid, $fields);
-	}
-
 	private function doLichenesAmericaniExsiccatiLabel($s) {
 		$pattern =
 			array
@@ -5155,13 +5072,17 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			if(strlen($country) == 0) $country = trim($countyMatches[2]);
 			$firstPart = trim($countyMatches[0]);
 			$lastPart = trim($countyMatches[3]);
-			$countHab1 = $this->countPotentialHabitatWords($firstPart);
-			$countHab2 = $this->countPotentialHabitatWords($lastPart);
-			$countLoc1 = $this->countPotentialLocalityWords($firstPart);
-			$countLoc2 = $this->countPotentialLocalityWords($lastPart);
-			//echo "\nfirstPart: ".$firstPart."\nlastPart: ".$lastPart."\ncountHab1: ".$countHab1."\ncountHab2 :".$countHab2."\ncountLoc1: ".$countLoc1."\ncountLoc2: ".$countLoc2."\n";
-			if($countLoc2 + $countHab2 > $countLoc1 + $countHab1) $workingSection = $lastPart;
-			else if($countLoc1 + $countHab1 > 0) $workingSection = $firstPart;
+			if(str_word_count($firstPart) > 3) {
+				if(str_word_count($lastPart) > 3) {
+					$countHab1 = $this->countPotentialHabitatWords($firstPart);
+					$countHab2 = $this->countPotentialHabitatWords($lastPart);
+					$countLoc1 = $this->countPotentialLocalityWords($firstPart);
+					$countLoc2 = $this->countPotentialLocalityWords($lastPart);
+					//echo "\nfirstPart: ".$firstPart."\nlastPart: ".$lastPart."\ncountHab1: ".$countHab1."\ncountHab2: ".$countHab2."\ncountLoc1: ".$countLoc1."\ncountLoc2: ".$countLoc2."\n";
+					if($countLoc2 + $countHab2 > $countLoc1 + $countHab1) $workingSection = $lastPart;
+					else if($countLoc1 + $countHab1 > 0) $workingSection = $firstPart;
+				} else $workingSection = $firstPart;
+			} else $workingSection = $lastPart;
 		}
 		//echo "\nline 7404, workingSection: ".$workingSection."\n";
 		$lookForAssciatedTaxa = false;
@@ -8483,10 +8404,10 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			"sterile", "septate(?! ?\\/)", "(?:(?:nor)?stictic|usnic|sa[l1|I!]azinic|psoromic|ga[l1|I!]binic|[o0][l1|I!]ivetoric|evernic) acids?");
 		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
 		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
-		if(preg_match("/\\b[KPC][+-]/", $pAtt)) return true;
-		if(preg_match("/\\bUV[+-]/", $pAtt)) return true;
-		if(preg_match("/\\bPD[+-]/", $pAtt)) return true;
-		if(preg_match("/\\bHC[Il][+-]/", $pAtt)) return true;
+		if(preg_match("/\\b[KPC][+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bUV[+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bPD[+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bHC[Il][+-]\\B/", $pAtt)) return true;
 		return false;
 	}
 }
