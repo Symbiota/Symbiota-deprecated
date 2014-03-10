@@ -91,7 +91,7 @@ $projArr = $csManager->getProjectDetails();
 						if(isset($statsArr[5])) $pendingCnt = $statsArr[5];
 						echo $pendingCnt;
 						if($pendingCnt){ 
-							echo ' (<a href="crowdsource/review.php?rstatus=5&collid='.$collid.'">Review</a>)';
+							echo ' (<a href="crowdsource/review.php?rstatus=5&collid='.$collid.'" target="_blank">Review</a>)';
 						} 
 						?> 
 					</div>
@@ -102,7 +102,7 @@ $projArr = $csManager->getProjectDetails();
 						if(isset($statsArr[10])) $reviewedCnt = $statsArr[10];
 						echo $reviewedCnt;
 						if($reviewedCnt){
-							echo ' (<a href="crowdsource/review.php?rstatus=10&collid='.$collid.'">Review</a>)';
+							echo ' (<a href="crowdsource/review.php?rstatus=10&collid='.$collid.'" target="_blank">Review</a>)';
 						}
 						?> 
 					</div>
@@ -111,13 +111,18 @@ $projArr = $csManager->getProjectDetails();
 						<?php
 						echo $statsArr['toadd'];
 						if($statsArr['toadd']){
-							echo ' (<a href="index.php?submitaction=addtoqueue&tabindex=2&collid='.$collid.'&omcsid='.$omcsid.'">Add to Queue</a>)';
+							echo ' (<a href="index.php?submitaction=addtoqueue&tabindex=2&collid='.$collid.'&omcsid='.$omcsid.'" target="_blank">Add to Queue</a>)';
 						}
 						?>
 					</div>
 				</div>
-				<div style="font-weight:bold;text-decoration:underline">By User:</div>
-				<div style="margin:15px 0px 25px 15px;">
+				<?php 
+				$stats = $csManager->getProcessingStats();
+				$volStats = (array_key_exists('v',$stats)?$stats['v']:null);
+				$editStats = (array_key_exists('e',$stats)?$stats['e']:null);
+				?>
+				<div style="margin:15px;">
+					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Volunteers</div>
 					<table class="styledtable" style="width:500px;">
 						<tr>
 							<th>User</th>
@@ -126,8 +131,43 @@ $projArr = $csManager->getProjectDetails();
 							<th>Approved</th>
 						</tr>
 						<?php 
-						if($userStats = $csManager->getProcessingStats()){
-							foreach($userStats as $uid => $uArr){
+						if($volStats){
+							foreach($volStats as $uid => $uArr){
+								echo '<tr>';
+								echo '<td>'.$uArr['name'].'</td>';
+								echo '<td>'.$uArr['score'].'</td>';
+								$pendingCnt = (isset($uArr[5])?$uArr[5]:0);
+								echo '<td>';
+								echo $pendingCnt;
+								if($pendingCnt) echo ' (<a href="crowdsource/review.php?rstatus=5&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+								echo '</td>';
+								//Closed
+								$closeCnt = (isset($uArr[10])?$uArr[10]:0);
+								echo '<td>';
+								echo $closeCnt;
+								if($closeCnt) echo ' (<a href="crowdsource/review.php?rstatus=10&collid='.$collid.'&uid='.$uid.'">Review</a>)';
+								echo '</td>';
+								echo '</tr>';
+							}
+						}
+						else{
+							echo '<tr><td colspan="5">No records processed</td></tr>';
+						}
+						?>
+					</table>
+				</div>
+				<div style="margin:25px 15px">
+					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Approved Editors</div>
+					<table class="styledtable" style="width:500px;">
+						<tr>
+							<th>User</th>
+							<th>Score</th>
+							<th>Pending Review</th>
+							<th>Approved</th>
+						</tr>
+						<?php 
+						if($editStats){
+							foreach($editStats as $uid => $uArr){
 								echo '<tr>';
 								echo '<td>'.$uArr['name'].'</td>';
 								echo '<td>'.$uArr['score'].'</td>';
