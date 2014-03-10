@@ -138,11 +138,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
                    $sql = null;
                    if (array_key_exists("ch_$key",$_REQUEST)) {
                       // checkbox is selected for this image
-                      $sql = "INSERT IGNORE into imagetag (imgid,tagvalue) values (?,?) ";
+                      $sql = "INSERT IGNORE into imagetag (imgid,keyvalue) values (?,?) ";
                    } else { 
                       if (array_key_exists("hidden_$key",$_REQUEST) && $_REQUEST["hidden_$key"]==1) {
                          // checkbox is not selected and this tag was used for this image
-                         $sql = "DELETE from imagetag where imgid = ? and tagvalue = ? ";
+                         $sql = "DELETE from imagetag where imgid = ? and keyvalue = ? ";
                       } 
                    } 
                    if ($sql!=null) { 
@@ -186,11 +186,15 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 		$result->close();
 		
+		//Remove any OCR text blocks linked to the image
+		$sqlOcr = 'DELETE FROM specprocessorrawlabels WHERE (imgid = '.$imgIdDel.')';
+		$this->conn->query($sqlOcr);
+		
 		$sql = "DELETE FROM images WHERE (imgid = ".$imgIdDel.')';
 		//echo $sql;
 		if($this->conn->query($sql)){
 			if($removeImg){
-				//Remove images only if there are no other references to the image
+				//Remove images from server only if there are no other references to the image
 				$sql = "SELECT imgid FROM images WHERE (url = '".$imgUrl."')";
 				$rs = $this->conn->query($sql);
 				if(!$rs->num_rows){
@@ -382,7 +386,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
                 $kArr = $this->getImageTagValues();
                 foreach($kArr as $key => $description) { 
                    if (array_key_exists("ch_$key",$_REQUEST)) {
-                      $sql = "INSERT into imagetag (imgid,tagvalue) values (?,?) ";
+                      $sql = "INSERT into imagetag (imgid,keyvalue) values (?,?) ";
                       $stmt = $this->conn->stmt_init();
                       $stmt->prepare($sql);
                       if ($stmt) { 
@@ -571,11 +575,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
           default:
             $sql = "select * from ( " .
                    "  select tagkey, description_en, shortlabel, sortorder, not isnull(imgid) from imagetagkey k " .
-                   "     left join imagetag i on k.tagkey = i.tagvalue " . 
+                   "     left join imagetag i on k.tagkey = i.keyvalue " . 
                    "     where (i.imgid is null or i.imgid = ? ) " .
                    "  union " .
                    "  select tagkey, description_en, shortlabel, sortorder, 0 from imagetagkey k " .
-                   "     left join imagetag i on k.tagkey = i.tagvalue " . 
+                   "     left join imagetag i on k.tagkey = i.keyvalue " . 
                    "     where (i.imgid is not null and i.imgid <> ? ) " .
                    " ) a order by sortorder ";
        }

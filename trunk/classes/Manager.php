@@ -12,7 +12,7 @@ class Manager  {
 
 	public function __construct($id=null,$conType='readonly'){
  		$this->conn = MySQLiConnectionFactory::getCon($conType);
- 		if(id !=null || is_numeric($id)){
+ 		if($id !=null || is_numeric($id)){
 	 		$this->id = $id;
  		}
 	}

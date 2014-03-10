@@ -203,7 +203,7 @@ $imageArr = $occManager->getImageMap();
                                    foreach($kArr as $tags) { 
 				                       if ($tags->value==1) { 
 				                   	      echo "$comma$tags->shortlabel";
-				                   	      $comma = ",";  
+				                   	      $comma = ", ";  
                                        }
                                    }
                                 ?>   
