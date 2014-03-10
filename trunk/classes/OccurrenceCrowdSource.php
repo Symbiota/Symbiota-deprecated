@@ -90,7 +90,7 @@ class OccurrenceCrowdSource {
 			//Get record count for those available for adding to queue
 			$sql = 'SELECT count(o.occid) as cnt '.
 				'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL AND o.locality IS NULL ';
+				'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
 			$toAddCnt = 0;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -219,7 +219,7 @@ class OccurrenceCrowdSource {
 		$sql = 'INSERT INTO omcrowdsourcequeue(occid, omcsid) '.
 			'SELECT o.occid, '.$this->omcsid.' AS csid '.
 			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" AND o.locality IS NULL ';
+			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" ';
 		if($variableMap){
 			$sqlVar = '';
 			foreach($variableMap as $k => $v){
@@ -279,15 +279,15 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 	
-	public function submitReviews(){
+	public function submitReviews($postArr){
 		$statusStr = '';
-		$occidArr = $_POST['occid'];
+		$occidArr = $postArr['occid'];
 		if($occidArr){
 			$successArr = array();
 			$con = MySQLiConnectionFactory::getCon("write");
 			foreach($occidArr as $occid){
-				$points = $_POST['p-'.$occid];
-				$comments = $this->cleanInStr($_POST['c-'.$occid]);
+				$points = $postArr['p-'.$occid];
+				$comments = $this->cleanInStr($postArr['c-'.$occid]);
 				$sql = 'UPDATE omcrowdsourcequeue '.
 					'SET points = '.$points.',notes = '.($comments?'"'.$comments.'"':'NULL').',reviewstatus = 10 '.
 					'WHERE occid = '.$occid;

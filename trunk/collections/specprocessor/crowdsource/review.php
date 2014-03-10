@@ -22,8 +22,8 @@ if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['
 }
 
 $statusStr = '';
-if($action == 'Submit Reveiws'){
-	$statusStr = $csManager->submitReviews();
+if(array_key_exists('occid',$_POST)){
+	$statusStr = $csManager->submitReviews($_POST);
 }
 
 $projArr = $csManager->getProjectDetails();
@@ -171,6 +171,13 @@ $projArr = $csManager->getProjectDetails();
 					?>
 					<div style="clear:both;">
 						<form name="reviewform" method="post" action="review.php" onsubmit="return validateReviewForm(this)">
+							<?php
+							if($collid){
+								echo '<input name="collid" type="hidden" value="'.$collid.'" />';
+								echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
+								echo '<input name="uid" type="hidden" value="'.$uid.'" />';
+							}
+							?>
 							<table class="styledtable">
 								<tr>
 									<?php 
@@ -247,9 +254,6 @@ $projArr = $csManager->getProjectDetails();
 								<div>
 									<?php
 									if($collid){
-										echo '<input name="collid" type="hidden" value="'.$collid.'" />';
-										echo '<input name="rstatus" type="hidden" value="'.$rStatus.'" />';
-										echo '<input name="uid" type="hidden" value="'.$uid.'" />';
 										echo '<input name="action" type="submit" value="Submit Reveiws" />';
 									}
 									?>

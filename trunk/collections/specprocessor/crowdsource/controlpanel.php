@@ -78,9 +78,14 @@ $projArr = $csManager->getProjectDetails();
 						<b>Records in Queue:</b> 
 						<?php
 						$unprocessedCnt = 0;
-						if(isset($statsArr[0])) $unprocessedCnt = $statsArr[0];
+						if(isset($statsArr[0]) && $statsArr[0]) $unprocessedCnt = $statsArr[0];
 						if($unprocessedCnt){
-							echo '<a href="../editor/occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&reset=1&collid='.$collid.'" target="_blank">'.$unprocessedCnt.'</a>';
+							echo '<a href="../editor/occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&reset=1&collid='.$collid.'" target="_blank">';
+							echo $unprocessedCnt;
+							echo '</a>';
+						}
+						else{
+							echo $unprocessedCnt;
 						}
 						?>
 					</div>
