@@ -155,6 +155,11 @@ class OccurrenceEditorManager {
 				$iInFrag = array();
 				$searchIsNum = false;
 				foreach($iArr as $v){
+					$v = trim($v);
+					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
+						//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
+					}
 					if($p = strpos($v,' - ')){
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
@@ -175,10 +180,17 @@ class OccurrenceEditorManager {
 					}
 					else{
 						$vStr = trim($v);
-						$iInFrag[] = $vStr;
-						if(is_numeric($vStr) && substr($vStr,0,1) == '0'){
-							$iInFrag[] = ltrim($vStr,0);
+						if(is_numeric($vStr)){
+							if($iInFrag){
+								//Only tag as numeric if there are more than one term (if not, it doesn't match what the sort order is)
+								$ocnIsNum = true;
+							}
+							if(substr($vStr,0,1) == '0'){
+								//Add value with left padded zeros removed
+								$iInFrag[] = ltrim($vStr,0);
+							}
 						}
+						$iInFrag[] = $vStr;
 					}
 				}
 				$iWhere = '';
@@ -187,24 +199,37 @@ class OccurrenceEditorManager {
 				}
 				if($iInFrag){
 					if($isOccid){
-						$iWhere .= 'OR (o.occid IN('.implode(',',$iInFrag).')) ';
+						foreach($iInFrag as $term){
+							if(substr($term,0,1) == '<' || substr($term,0,1) == '>'){
+								$iWhere .= 'OR (o.occid '.substr($term,0,1).' '.trim(substr($term,1)).') ';
+							}
+							else{
+								$iWhere .= 'OR (o.occid = '.$term.') ';
+							}
+						}
 					}
 					else{
-						$iWhere .= 'OR (o.catalogNumber IN("'.implode('","',$iInFrag).'")) ';
-					} 
-				}
-				if($searchIsNum){
-					if($isOccid){
-						$sqlOrderBy .= ',(o.occid+1)';
+						foreach($iInFrag as $term){
+							if(substr($term,0,1) == '<' || substr($term,0,1) == '>'){
+								$tStr = trim(substr($term,1));
+								if(!is_numeric($tStr)) $tStr = '"'.$tStr.'"';
+								$iWhere .= 'OR (o.catalognumber '.substr($term,0,1).' '.$tStr.') ';
+							}
+							else{
+								$iWhere .= 'OR (o.catalognumber = "'.$term.'") ';
+							}
+						}
 					}
-					else{
-						$sqlOrderBy .= ',(o.catalogNumber+1)';
-					}
-				}
-				else{
-					$sqlOrderBy .= ',o.catalogNumber';
 				}
 				$sqlWhere .= 'AND ('.substr($iWhere,3).') ';
+				if(!$isOccid){
+					if($searchIsNum){
+						$sqlOrderBy .= ',(o.catalogNumber+1)';
+					}
+					else{
+						$sqlOrderBy .= ',o.catalogNumber';
+					}
+				}
 			}
 		}
 		//otherCatalogNumbers
@@ -218,8 +243,13 @@ class OccurrenceEditorManager {
 				$ocnBetweenFrag = array();
 				$ocnInFrag = array();
 				foreach($ocnArr as $v){
+					$v = trim($v);
+					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
+						//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
+					}
 					if(strpos('%',$v) !== false){
-						$ocnBetweenFrag[] = '(o.othercatalognumbers LIKE "'.$term1.'")';
+						$ocnBetweenFrag[] = '(o.othercatalognumbers LIKE "'.$v.'")';
 					}
 					elseif($p = strpos($v,' - ')){
 						$term1 = trim(substr($v,0,$p));
@@ -235,8 +265,14 @@ class OccurrenceEditorManager {
 						}
 					}
 					else{
-						if(is_numeric($v)) $ocnIsNum = true;
-						$ocnInFrag[] = trim($v);
+						$ocnInFrag[] = $v;
+						if(is_numeric($v)){
+							$ocnIsNum = true;
+							if(substr($v,0,1) == '0'){
+								//Add value with left padded zeros removed
+								$ocnInFrag[] = ltrim($vStr,0);
+							}
+						}
 					}
 				}
 				$ocnWhere = '';
@@ -244,7 +280,16 @@ class OccurrenceEditorManager {
 					$ocnWhere .= 'OR '.implode(' OR ',$ocnBetweenFrag);
 				}
 				if($ocnInFrag){
-					$ocnWhere .= 'OR (o.othercatalognumbers IN("'.implode('","',$ocnInFrag).'")) ';
+					foreach($ocnInFrag as $term){
+						if(substr($term,0,1) == '<' || substr($term,0,1) == '>'){
+							$tStr = trim(substr($term,1));
+							if(!is_numeric($tStr)) $tStr = '"'.$tStr.'"';
+							$ocnWhere .= 'OR (o.othercatalognumbers '.substr($term,0,1).' '.$tStr.') ';
+						}
+						else{
+							$ocnWhere .= 'OR (o.othercatalognumbers = "'.$term.'") ';
+						}
+					}
 				}
 				$sqlOrderBy .= ',(o.othercatalognumbers'.($ocnIsNum?'+1':'').')';
 				$sqlWhere .= 'AND ('.substr($ocnWhere,3).') ';
@@ -261,6 +306,11 @@ class OccurrenceEditorManager {
 				$rnBetweenFrag = array();
 				$rnInFrag = array();
 				foreach($rnArr as $v){
+					$v = trim($v);
+					if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$v)){
+						//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+						$v = str_ireplace(array('>',' and ','<'),array('',' - ',''),$v);
+					}
 					if($p = strpos($v,' - ')){
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
@@ -275,12 +325,16 @@ class OccurrenceEditorManager {
 						}
 					}
 					else{
-						$v = trim($v);
+						$condStr = '=';
+						if(substr($v,0,1) == '<' || substr($v,0,1) == '>'){
+							$condStr = substr($v,0,1);
+							$v = trim(substr($v,1));
+						}
 						if(is_numeric($v)){
-							$rnInFrag[] = $v;
+							$rnInFrag[] = $condStr.' '.$v;
 						}
 						else{
-							$rnInFrag[] = '"'.$v.'"';
+							$rnInFrag[] = $condStr.' "'.$v.'"';
 						}
 					}
 				}
@@ -289,7 +343,9 @@ class OccurrenceEditorManager {
 					$rnWhere .= 'OR '.implode(' OR ',$rnBetweenFrag);
 				}
 				if($rnInFrag){
-					$rnWhere .= 'OR (o.recordnumber IN('.implode(',',$rnInFrag).')) ';
+					foreach($rnInFrag as $term){
+						$rnWhere .= 'OR (o.recordnumber '.$term.') ';
+					}
 				}
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
@@ -310,11 +366,19 @@ class OccurrenceEditorManager {
 				$sqlWhere .= 'AND (o.eventdate IS NULL) ';
 			}
 			else{
-				if($p = strpos($this->qryArr['ed'],' - ')){
-					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.substr($this->qryArr['ed'],0,$p).'" AND "'.substr($this->qryArr['ed'],$p+3).'") ';
+				$edv = trim($this->qryArr['ed']);
+				if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$edv)){
+					//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+					$edv = str_ireplace(array('>',' and ','<'),array('',' - ',''),$edv);
+				}
+				if($p = strpos($edv,' - ')){
+					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.trim(substr($edv,0,$p)).'" AND "'.trim(substr($edv,$p+3)).'") ';
+				}
+				elseif(substr($edv,0,1) == '<' || substr($edv,0,1) == '>'){
+					$sqlWhere .= 'AND (o.eventdate '.substr($edv,0,1).' "'.trim(substr($edv,1)).'") ';
 				}
 				else{
-					$sqlWhere .= 'AND (o.eventdate = "'.$this->qryArr['ed'].'") ';
+					$sqlWhere .= 'AND (o.eventdate = "'.$edv.'") ';
 				}
 				$sqlOrderBy .= ',o.eventdate';
 			}
@@ -331,13 +395,20 @@ class OccurrenceEditorManager {
 			$sqlWhere .= 'AND (o.observeruid = '.$this->qryArr['ouid'].') ';
 		}
 		if(array_key_exists('dm',$this->qryArr)){
-			if($p = strpos($this->qryArr['dm'],' - ')){
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.substr($this->qryArr['dm'],0,$p).'" AND "'.substr($this->qryArr['dm'],$p+3).'") ';
+			$dmv = trim($this->qryArr['dm']);
+			if(preg_match('/^>{1}.*\s{1,3}AND\s{1,3}<{1}.*/i',$dmv)){
+				//convert ">xxxxx and <xxxxx" format to "xxxxx - xxxxx"
+				$dmv = str_ireplace(array('>',' and ','<'),array('',' - ',''),$dmv);
+			}
+			if($p = strpos($dmv,' - ')){
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) BETWEEN "'.trim(substr($dmv,0,$p)).'" AND "'.trim(substr($dmv,$p+3)).'") ';
+			}
+			elseif(substr($dmv,0,1) == '<' || substr($dmv,0,1) == '>'){
+				$sqlWhere .= 'AND (o.datelastmodified '.substr($dmv,0,1).' "'.trim(substr($dmv,1)).'") ';
 			}
 			else{
-				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$this->qryArr['dm'].'") ';
+				$sqlWhere .= 'AND (DATE(o.datelastmodified) = "'.$dmv.'") ';
 			}
-			
 			$sqlOrderBy .= ',o.datelastmodified';
 		}
 		//Processing status
@@ -378,6 +449,14 @@ class OccurrenceEditorManager {
 				}
 				elseif($ct=='NOTNULL'){
 					$sqlWhere .= 'AND (o.'.$cf.' IS NOT NULL) ';
+				}
+				elseif($ct=='GREATER' && $cv){
+					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
+					$sqlWhere .= 'AND (o.'.$cf.' > '.$cv.') ';
+				}
+				elseif($ct=='LESS' && $cv){
+					if(!is_numeric($cv)) $cv = '"'.$cv.'"';
+					$sqlWhere .= 'AND (o.'.$cf.' < '.$cv.') ';
 				}
 				elseif($ct=='LIKE' && $cv){
 					if(strpos($cv,'%') !== false){
@@ -543,8 +622,6 @@ class OccurrenceEditorManager {
 			$rs->free();
 
 			//Version edits 
-			$isSkeletal = false;
-			if($oldValues['processingstatus'] == 'unprocessed' && !$oldValues['recordenteredby']) $isSkeletal = true; 
 			$sqlEditsBase = 'INSERT INTO omoccuredits(occid,reviewstatus,appliedstatus,uid,fieldname,fieldvaluenew,fieldvalueold) '.
 				'VALUES ('.$occArr['occid'].',1,'.($autoCommit?'1':'0').','.$paramsArr['uid'].',';
 			foreach($editArr as $fieldName){
@@ -554,8 +631,8 @@ class OccurrenceEditorManager {
 				}
 				$newValue = $this->cleanInStr($occArr[$fieldName]);
 				$oldValue = $this->cleanInStr($oldValues[$fieldName]);
-				//Version edits only if value has changed and is not a skeletal record with previously null values 
-				if($oldValue != $newValue && (!$isSkeletal || $oldValue)){
+				//Version edits only if value has changed  
+				if($oldValue != $newValue){
 					if($fieldName != 'tidinterpreted'){
 						if($fieldName == 'ometid'){
 							//Exsiccati title has been changed, thus grab title string
@@ -608,7 +685,7 @@ class OccurrenceEditorManager {
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
 				//echo $sql;
 				if($this->conn->query($sql)){
-					if($this->crowdSourceMode){
+					if(strtolower($occArr['processingstatus']) != 'unprocessed'){
 						//UPDATE uid within omcrowdsourcequeue, only if not yet processed
 						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 '.
 							'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';

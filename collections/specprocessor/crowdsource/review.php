@@ -44,6 +44,10 @@ $projArr = $csManager->getProjectDetails();
 			}
 		}
 
+		function selectCheckbox(occid){
+			document.getElementById("o-"+occid).checked = true;
+		}
+
 		function expandNotes(textObj){
 			textObj.style.width = "300px";
 		}
@@ -101,7 +105,7 @@ $projArr = $csManager->getProjectDetails();
 			if($start > 0) $navStr .= '<a href="'.$urlPrefix.'&start='.($start-$limit).'&limit='.$limit.'">';
 			$navStr .= '&lt;&lt;';
 			if($start > 0) $navStr .= '</a>';
-			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).'&nbsp;&nbsp;|&nbsp;&nbsp;';
+			$navStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;'.($start + 1).' - '.($end).' of '.number_format($totalCnt).'&nbsp;&nbsp;|&nbsp;&nbsp;';
 			if($totalCnt > ($start+$limit)) $navStr .= '<a href="'.$urlPrefix.'&start='.($start+$limit).'&limit='.$limit.'">';
 			$navStr .= '&gt;&gt;';
 			if($totalCnt > ($start+$limit)) $navStr .= '</a>';
@@ -158,8 +162,7 @@ $projArr = $csManager->getProjectDetails();
 					<?php echo ($collid?$projArr['name']:$USER_DISPLAY_NAME); ?>
 				</div>
 				<div style="clear:both;">
-					<div style="float:right;"><?php echo $navStr; ?></div>
-					<div><b>Total Record Count:</b> <?php echo number_format($totalCnt); ?></div>
+					<?php echo $navStr; ?>
 				</div>
 			</div>
 			<div style="clear:both;">
@@ -196,14 +199,14 @@ $projArr = $csManager->getProjectDetails();
 										$points = 2;
 										if(isset($rArr['points'])) $points = $rArr['points'];
 										if($collid){
-											echo '<td><input name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
-											echo '<td><select name="p-'.$occid.'" style="width:45px;">';
+											echo '<td><input id="o-'.$occid.'" name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
+											echo '<td><select name="p-'.$occid.'" style="width:45px;" onchange="selectCheckbox('.$occid.')">';
 											echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
 											echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
 											echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
 											echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
 											echo '</select></td>';
-											echo '<td><input name="c-'.$occid.'" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)"/></td>';
+											echo '<td><input name="c-'.$occid.'" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)" onchange="selectCheckbox('.$occid.')" /></td>';
 										}
 										else{
 											echo '<td><input name="p-'.$occid.'" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
@@ -261,7 +264,7 @@ $projArr = $csManager->getProjectDetails();
 						?>
 						<div style="clear:both;margin:30px 15px;font-weight:bold;">
 							<div style="font-size:120%;">
-								There are no more records available for review
+								There are no more records to review for this user
 							</div>
 							<div style="margin:15px;">
 								Return to <a href="../index.php?tabindex=2&collid=<?php echo $collid; ?>">Control Panel</a>

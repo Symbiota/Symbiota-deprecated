@@ -106,12 +106,12 @@ class OccurrenceCrowdSource {
 		$retArr = array();
 		if($this->collid){
 			//Users to exclude because they are not volunteers 
-			$excludeUidArr = array();
+			$editorUidArr = array();
 			$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
 				'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
 			$rs1 = $this->conn->query($sql1);
 			while($r1 = $rs1->fetch_object()){
-				$excludeUidArr[] = $r1->uid;
+				$editorUidArr[] = $r1->uid;
 			}
 			$rs1->free();
 			
@@ -124,10 +124,10 @@ class OccurrenceCrowdSource {
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				if(!in_array($r->uid,$excludeUidArr)){
-					$retArr[$r->uid]['score'] = $r->usersum;
-					$retArr[$r->uid]['name'] = $r->username;
-				}
+				$tag = 'v';
+				if(in_array($r->uid,$editorUidArr)) $tag = 'e';
+				$retArr[$tag][$r->uid]['score'] = $r->usersum;
+				$retArr[$tag][$r->uid]['name'] = $r->username;
 			}
 			$rs->free();
 
@@ -138,9 +138,9 @@ class OccurrenceCrowdSource {
 				'GROUP BY q.uidprocessor, q.reviewstatus';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				if(!in_array($r->uidprocessor,$excludeUidArr)){
-					$retArr[$r->uidprocessor][$r->reviewstatus] = $r->cnt;
-				}
+				$tag = 'v';
+				if(in_array($r->uidprocessor,$editorUidArr)) $tag = 'e';
+				$retArr[$tag][$r->uidprocessor][$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
 		}
@@ -282,20 +282,26 @@ class OccurrenceCrowdSource {
 	public function submitReviews(){
 		$statusStr = '';
 		$occidArr = $_POST['occid'];
-		foreach($occidArr as $occid){
-			$points = $_POST['p-'.$occid];
-			$comments = $this->cleanInStr($_POST['c-'.$occid]);
-			$sql = 'UPDATE omcrowdsourcequeue '.
-				'SET points = '.$points.',notes = '.($comments?'"'.$comments.'"':'NULL').',reviewstatus = 10 '.
-				'WHERE occid = '.$occid;
+		if($occidArr){
+			$successArr = array();
 			$con = MySQLiConnectionFactory::getCon("write");
-			if($con->query($sql)){
-				//Change status to reviewed
-				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid = '.$occid;
-				$con->query($sql2);
+			foreach($occidArr as $occid){
+				$points = $_POST['p-'.$occid];
+				$comments = $this->cleanInStr($_POST['c-'.$occid]);
+				$sql = 'UPDATE omcrowdsourcequeue '.
+					'SET points = '.$points.',notes = '.($comments?'"'.$comments.'"':'NULL').',reviewstatus = 10 '.
+					'WHERE occid = '.$occid;
+				if($con->query($sql)){
+					$successArr[] = $occid;
+				}
+				else{
+					$statusStr = 'ERROR submitting reviews; '.$con->error.'<br/>SQL = '.$sql;
+				}
 			}
-			else{
-				$statusStr = 'ERROR submitting reviews; '.$con->error.'<br/>SQL = '.$sql;
+			if($successArr){
+				//Change status to reviewed
+				$sql2 = 'UPDATE omoccurrences SET processingstatus = "reviewed" WHERE occid IN('.implode(',',$successArr).')';
+				$con->query($sql2);
 			}
 			$con->close();
 		}
