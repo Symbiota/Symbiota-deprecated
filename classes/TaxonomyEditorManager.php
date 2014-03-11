@@ -730,11 +730,11 @@ class TaxonomyEditorManager{
 		$statusStr = '';
 		if($targetTid){
 			//Remap occurrence records
-			$sql ='UPDATE omoccurrences SET tidinterpreted = '.$targetTid.' WHERE tid = '.$this->tid;
+			$sql ='UPDATE omoccurrences SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR transferring occurrence records ('.$this->conn->error.')<br/>';
 			}
-			$sql ='UPDATE omoccurdeterminations SET tidinterpreted = '.$targetTid.' WHERE tid = '.$this->tid;
+			$sql ='UPDATE omoccurdeterminations SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR transferring occurrence determination records ('.$this->conn->error.')<br/>';
 			}

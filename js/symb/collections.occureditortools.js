@@ -75,14 +75,18 @@ function geoLocateUpdateCoord(latValue,lngValue,coordErrValue){
 
 	var f = document.fullform;
 	f.decimallatitude.value = latValue;
-	f.decimallatitude.onchange();
 	f.decimallongitude.value = lngValue;
-	f.decimallongitude.onchange();
 	f.coordinateuncertaintyinmeters.value = coordErrValue;
-	f.coordinateuncertaintyinmeters.onchange();
 	f.georeferencesources.value = "GeoLocate";
-	f.georeferencesources.onchange();
 	f.geodeticdatum.value = "WGS84";
+
+	verifyDecimalLatitude(f);
+	fieldChanged('decimallatitude');
+	verifyDecimalLongitude(f);
+	fieldChanged('decimallongitude');
+	verifyCoordinates(f);
+	f.coordinateuncertaintyinmeters.onchange();
+	f.georeferencesources.onchange();
 	f.geodeticdatum.onchange();
 	//f.georeferenceverificationstatus.value = "reviewed - high confidence";
 	//f.georeferenceverificationstatus.onchange();
