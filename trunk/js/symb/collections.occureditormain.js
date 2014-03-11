@@ -191,7 +191,7 @@ function recordNumberChanged(){
 
 function decimalLatitudeChanged(f){
 	verifyDecimalLatitude(f);
-	verifyCoordinates(f);
+	//verifyCoordinates(f);
 	fieldChanged('decimallatitude');
 }
 
