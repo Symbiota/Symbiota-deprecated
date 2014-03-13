@@ -23,9 +23,9 @@ $imageArr = $occManager->getImageMap();
 	</div>
 	<div id="addimgdiv" style="display:<?php echo ($imageArr?'none':''); ?>;">
 		<form name="imgnewform" action="occurrenceeditor.php" method="post" enctype="multipart/form-data" onsubmit="return verifyImgAddForm(this);">
-			<fieldset>
+			<fieldset style="padding:15px">
 				<legend><b>Add a New Image</b></legend>
-				<div style='padding:10px;width:90%;border:1px solid yellow;background-color:FFFF99;'>
+				<div style='padding:15px;width:90%;border:1px solid yellow;background-color:FFFF99;'>
 					<div class="targetdiv" style="display:block;">
 						<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
 							Select an image file located on your computer that you want to upload:
@@ -35,35 +35,36 @@ $imageArr = $occManager->getImageMap();
 						<div>
 							<input name='imgfile' type='file' size='70'/>
 						</div>
-						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-							Link to External Image
+						<div style="float:right;text-decoration:underline;font-weight:bold;">
+							<a href="#" onclick="toggle('targetdiv');return false;">Link to External Image</a>
 						</div>
 					</div>
 					<div class="targetdiv" style="display:none;">
 						<div style="margin-bottom:10px;">
-							Enter a URL to an image already located on a local or remote web server. 
-							If a thumbanil or large version also exists in addition to central image, 
-							enter those urls in the appropriate fields. The central and thumbnail urls 
-							must be JPGs, though the large image can be a dynamic resource (e.g. Zoomify resource).  
+							Enter a URL to an image already located on a web server. 
+							If the image is larger than a typical web image, the url will be saved as the large version 
+							and a basic web derivative will be created. 
+							If a large version already exists, it can be entered manually in the second field.   
 						</div>
 						<div>
-							<b>Central Image URL:</b><br/> 
+							<b>Image URL:</b><br/> 
 							<input type='text' name='imgurl' size='70'/>
 						</div>
 						<div>
-							<b>Thumbnail URL:</b><br/> 
-							<input type='text' name='tnurl' size='70'/>
-						</div>
-						<div>
-							<b>Large Image URL:</b><br/>
+							<b>Large Image URL (optional):</b><br/>
 							<input type='text' name='lgurl' size='70'/>
+						</div>
+						<div style="float:right;text-decoration:underline;font-weight:bold;">
+							<a href="#" onclick="toggle('targetdiv');return false;">
+								Upload Local Image
+							</a>
 						</div>
 						<div>
 							<input type="checkbox" name="copytoserver" value="1" /> Copy to Server
 						</div>
-						<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-							Upload Local Image
-						</div>
+					</div>
+					<div>
+						<input type="checkbox" name="nolgimage" value="1" /> Do not map large version of image (when applicable) 
 					</div>
 				</div>
 				<div style="clear:both;margin:20px 0px 5px 10px;">
@@ -105,9 +106,6 @@ $imageArr = $occManager->getImageMap();
 					<b>Source Webpage:</b>
 					<input name="sourceurl" type="text" size="40" value="" />
 				</div>
-				<div style="margin-left:10px;">
-					<input type="checkbox" name="nolgimage" value="1" /> Do not keep large version of image, when applicable 
-				</div>
 				<div style="margin:0px 0px 5px 10px;">
 					<b>Describe this image</b>
 				</div>
@@ -125,6 +123,7 @@ $imageArr = $occManager->getImageMap();
 					<input type="hidden" name="institutioncode" value="<?php echo $instCode; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
+					<input type="hidden" name="tabindex" value="2" />
 					<input type="submit" name="submitaction" value="Submit New Image" />
 				</div>
 			</fieldset>
@@ -214,25 +213,25 @@ $imageArr = $occManager->getImageMap();
 							</div>
 							<div>
 								<b>Source Webpage:</b>
-								<a href="<?php echo $imgArr["sourceurl"]; ?>">
+								<a href="<?php echo $imgArr["sourceurl"]; ?>" target="_blank">
 									<?php echo $imgArr["sourceurl"]; ?>
 								</a>
 							</div>
 							<div>
 								<b>Web URL: </b>
-								<a href="<?php echo $imgArr["url"]; ?>">
+								<a href="<?php echo $imgArr["url"]; ?>" target="_blank">
 									<?php echo $imgArr["url"]; ?>
 								</a>
 							</div>
 							<div>
 								<b>Large Image URL: </b>
-								<a href="<?php echo $imgArr["origurl"]; ?>">
+								<a href="<?php echo $imgArr["origurl"]; ?>" target="_blank">
 									<?php echo $imgArr["origurl"]; ?>
 								</a>
 							</div>
 							<div>
 								<b>Thumbnail URL: </b>
-								<a href="<?php echo $imgArr["tnurl"]; ?>">
+								<a href="<?php echo $imgArr["tnurl"]; ?>" target="_blank">
 									<?php echo $imgArr["tnurl"]; ?>
 								</a>
 							</div>
@@ -243,7 +242,7 @@ $imageArr = $occManager->getImageMap();
 					<td colspan="2">
 						<div id="img<?php echo $imgId; ?>editdiv" style="display:none;clear:both;">
 							<form name="img<?php echo $imgId; ?>editform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgEditForm(this);">
-								<fieldset>
+								<fieldset style="padding:15px">
 									<legend><b>Edit Image Data</b></legend>
 									<div>
 										<b>Caption:</b><br/> 
@@ -340,7 +339,7 @@ $imageArr = $occManager->getImageMap();
 								</fieldset>
 							</form>
 							<form name="img<?php echo $imgId; ?>delform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgDelForm(this);">
-								<fieldset>
+								<fieldset style="padding:15px">
 									<legend><b>Delete Image</b></legend>
 									<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 									<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
@@ -354,7 +353,7 @@ $imageArr = $occManager->getImageMap();
 								</fieldset>
 							</form>
 							<form name="img<?php echo $imgId; ?>remapform" action="occurrenceeditor.php" method="post" onsubmit="return verifyImgRemapForm(this);">
-								<fieldset>
+								<fieldset style="padding:15px">
 									<legend><b>Remap to Another Specimen</b></legend>
 									<div>
 										<b>Occurrence Record #:</b> 
@@ -395,8 +394,6 @@ $imageArr = $occManager->getImageMap();
                  }
                  echo "</div>";
               }
-            ?>
-			<?php 
 		}
 		?>
 	</div>

@@ -168,17 +168,17 @@ if($symbUid){
 				}
 			}
 			elseif($action == "Submit Image Edits"){
-				$statusStr = $occManager->editImage($_REQUEST);
+				$statusStr = $occManager->editImage($_POST);
 			}
 			elseif($action == "Submit New Image"){
-				$statusStr = $occManager->addImage($_REQUEST);
+				$statusStr = $occManager->addImage($_POST);
 			}
 			elseif($action == "Delete Image"){
-				$removeImg = (array_key_exists("removeimg",$_REQUEST)?$_REQUEST["removeimg"]:0);
-				$statusStr = $occManager->deleteImage($_REQUEST["imgid"], $removeImg);
+				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
+				$statusStr = $occManager->deleteImage($_POST["imgid"], $removeImg);
 			}
 			elseif($action == "Remap Image"){
-				$statusStr = $occManager->remapImage($_REQUEST["imgid"], $_REQUEST["occid"]);
+				$statusStr = $occManager->remapImage($_POST["imgid"], $_POST["occid"]);
 			}
 			elseif($action == "Apply Determination"){
 				$makeCurrent = 0;
