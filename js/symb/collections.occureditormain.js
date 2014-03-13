@@ -31,7 +31,10 @@ $(document).ready(function() {
 			}
 			return true;
 		},
-		active: tabTarget
+		active: tabTarget,
+		beforeLoad: function( event, ui ) {
+			$(ui.panel).html("<p>Loading...</p>");
+		}
 	});
 
 	$( "#exstitleinput" ).autocomplete({

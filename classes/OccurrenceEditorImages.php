@@ -238,7 +238,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		return $statusStr;
 	}
 	
-	public function addImage(){
+	public function addImage($postArr){
 		$status = '';
 		//Set download paths and variables
 		set_time_limit(120);
@@ -251,75 +251,103 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		if(array_key_exists('imgLgWidth',$GLOBALS)) $this->lgPixWidth = $GLOBALS['imgLgWidth'];
 		if(array_key_exists('imgFileSizeLimit',$GLOBALS)) $this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
 		
-		//Check for image path or download image file
-		$imgUrlLink = (array_key_exists("imgurl",$_REQUEST)?$_REQUEST["imgurl"]:"");
-		$sourceImgUri = $imgUrlLink;
 		$copyToServer = 0;
-		if(array_key_exists('copytoserver',$_REQUEST)) $copyToServer = $_REQUEST['copytoserver'];
+		if(array_key_exists('copytoserver',$postArr)) $copyToServer = $postArr['copytoserver'];
+		$sourceImgUri = '';
 		$lgUrl = '';
-		$tnUrl = '';
-		$imgPath = "";
-		if($sourceImgUri){
-			//URL of image supplied for mapping or upload
-			$tnUrl = $_REQUEST["tnurl"];
-			$lgUrl = $_REQUEST["lgurl"];
-			//Set file name
-			$fName = basename($sourceImgUri);
-			$this->setFileName($fName);
+		$sourceIsUpload = true;
+		if(array_key_exists("imgurl",$postArr) && $postArr['imgurl']){
+			//Source image is a URI supplied by user
+			$sourceImgUri = $postArr['imgurl'];
+			$lgUrl = $postArr["lgurl"];
+			$this->setFileName(basename($sourceImgUri));
+			$sourceIsUpload = false;
 		}
 		else{
 			//Source image is an image upload
 			if(!$this->loadImage()) return;
 			$sourceImgUri = $this->targetPath.$this->fileName;
 		}
-		if(!$tnUrl){
-			//Create local thumbnail no matter what, this way size is guaranteed to be correct 
-			$newTnName = str_ireplace("_temp.jpg","_tn.jpg",$this->fileName);
-			if($this->createNewImage($sourceImgUri,$this->targetPath.$newTnName,$this->tnPixWidth,70)){
-				$tnUrl = $this->targetUrl.$newTnName;
-			}
+
+		//Create local thumbnail no matter what, this way size is guaranteed to be correct 
+		$tnUrl = '';
+		$newTnName = str_ireplace("_temp.jpg","_tn.jpg",$this->fileName);
+		if($this->createNewImage($sourceImgUri,$this->targetPath.$newTnName,$this->tnPixWidth,70)){
+			$tnUrl = $this->targetUrl.$newTnName;
 		}
 
 		list($width, $height) = getimagesize($sourceImgUri);
-		$fileSize = 0;
-		$fileSize = filesize($sourceImgUri);
-		//Create large
-		$noLargeVersion = (array_key_exists('nolgimage',$_REQUEST)?1:0);
-		if(!$noLargeVersion && (!$lgUrl || $copyToServer)){
-			if($width > ($this->webPixWidth*1.2)){
-				//Image is larger than basic web version
-				$newLgName = str_ireplace("_temp.jpg","_lg.jpg",$this->fileName);
-				if($width < ($this->lgPixWidth*1.2)){
-					if(copy($sourceImgUri,$this->targetPath.$newLgName)){
-						$lgUrl = $this->targetUrl.$newLgName;
-					}
-				}
-				else{
-					if($this->createNewImage($sourceImgUri,$this->targetPath.$newLgName,$this->lgPixWidth)){
-						$lgUrl = $this->targetUrl.$newLgName;
+
+		//Establish web version
+		$webUrl = $sourceImgUri;
+		$newWebName = str_ireplace("_temp.jpg",".jpg",$this->fileName);
+		if($width > ($this->webPixWidth*1.2)){
+			//image is too big, thus let's refactor
+			$newWidth = ($width<($this->webPixWidth*1.1)?$width:$this->webPixWidth);
+			if($this->createNewImage($sourceImgUri,$this->targetPath.$newWebName,$newWidth,70)){
+				$webUrl = $this->targetUrl.$newWebName;
+			}
+		}
+		elseif($sourceIsUpload || $copyToServer){
+			if(copy($sourceImgUri,$this->targetPath.$newWebName)){
+				$webUrl = $this->targetUrl.$newWebName;
+				//test file size
+				$fileSize = filesize($this->targetPath.$newWebName);
+				if($fileSize && $fileSize > $this->webFileSizeLimit){
+					$newWidth = ($width<($this->webPixWidth*1.1)?$width:$this->webPixWidth);
+					if($this->createNewImage($sourceImgUri,$this->targetPath.$newWebName,$newWidth,70)){
+						$webUrl = $this->targetUrl.$newWebName;
 					}
 				}
 			}
 		}
 		
-		$webUrl = $sourceImgUri;
-		if(!$imgUrlLink || $copyToServer){
-			//Create web version of image unless url link that is not meant to be loaded to local server 
-			$newWebName = str_ireplace("_temp.jpg",".jpg",$this->fileName);
-			if($width < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
-				if(copy($sourceImgUri,$this->targetPath.$newWebName)){
-					$webUrl = $this->targetUrl.$newWebName;					
+		//Create large
+		if(!array_key_exists('nolgimage',$postArr)){
+			if(!$sourceIsUpload){
+				//Source is URI
+				//If large URI was supplied, all is set
+				if(!$lgUrl && $width > ($this->webPixWidth*1.2)){
+					//Lg URI was not supplied but source is big enough to serve as lg version
+					$lgUrl = $sourceImgUri;
+					$lgWidth = $width;
+					$lgHeight = $height;
 				}
 			}
-			else{
-				$newWidth = ($width<($this->webPixWidth*1.1)?$width:$this->webPixWidth);
-				if($this->createNewImage($sourceImgUri,$this->targetPath.$newWebName,$newWidth)){
-					$webUrl = $this->targetUrl.$newWebName;
+			if($sourceIsUpload || $copyToServer){
+				$lgSource = $sourceImgUri;
+				if($lgUrl){
+					$lgSource = $lgUrl;
+					$this->sourceImg = null;
+				}
+				//Test size
+				$lgWidth = 0;
+				$lgHeight = 0;
+				if(!$lgWidth || !$lgWidth){
+					list($lgWidth, $lgHeight) = getimagesize($lgSource);
+				}
+				$newLgName = str_ireplace("_temp.jpg","_lg.jpg",$this->fileName);
+				if($lgWidth > ($this->lgPixWidth*1.2)){
+					//Image is too large, thus let's resize and cop
+					if($this->createNewImage($lgSource,$this->targetPath.$newLgName,$this->lgPixWidth)){
+						$lgUrl = $this->targetUrl.$newLgName;
+					}
+				}
+				elseif($lgWidth < ($this->webPixWidth*1.2)){
+					//Image is too small, thus abort
+					$lgUrl = '';
+				}
+				else{
+					//Image is just right so let's copy as is
+					if(copy($lgSource,$this->targetPath.$newLgName)){
+						$lgUrl = $this->targetUrl.$newLgName;
+					}
 				}
 			}
-			if(strpos($sourceImgUri,$this->targetPath) === 0) unlink($sourceImgUri);
 		}
 
+		if($sourceIsUpload) unlink($sourceImgUri);
+		
 		//Load to database
 		if($webUrl) $status = $this->databaseImage($webUrl,$tnUrl,$lgUrl);
 
@@ -438,26 +466,28 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 	}
 
 	private function setFileName($fName){
-		$fName = str_replace(" ","_",$fName);
-		$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
-		$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
-		$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
-		$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
-		$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
-		$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
-		$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
-		if(strlen($fName) > 30) {
-			$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
+		if($fName){
+			$fName = str_replace(" ","_",$fName);
+			$fName = str_replace(array(chr(231),chr(232),chr(233),chr(234),chr(260)),"a",$fName);
+			$fName = str_replace(array(chr(230),chr(236),chr(237),chr(238)),"e",$fName);
+			$fName = str_replace(array(chr(239),chr(240),chr(241),chr(261)),"i",$fName);
+			$fName = str_replace(array(chr(247),chr(248),chr(249),chr(262)),"o",$fName);
+			$fName = str_replace(array(chr(250),chr(251),chr(263)),"u",$fName);
+			$fName = str_replace(array(chr(264),chr(265)),"n",$fName);
+			$fName = preg_replace("/[^a-zA-Z0-9\-_\.]/", "", $fName);
+			if(strlen($fName) > 30) {
+				$fName = substr($fName,0,25).substr($fName,strrpos($fName,"."));
+			}
+	 		//Check and see if file already exists, if so, rename filename until it has a unique name
+	 		$tempFileName = $fName;
+	 		$cnt = 0;
+			while(file_exists($this->targetPath.$tempFileName)){
+	 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fName);
+	 			$cnt++;
+	 		}
+			
+			$this->fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
 		}
- 		//Check and see if file already exists, if so, rename filename until it has a unique name
- 		$tempFileName = $fName;
- 		$cnt = 0;
-		while(file_exists($this->targetPath.$tempFileName)){
- 			$tempFileName = str_ireplace(".jpg","_".$cnt.".jpg",$fName);
- 			$cnt++;
- 		}
-		
-		$this->fileName = str_ireplace(".jpg","_temp.jpg",$tempFileName);
  	}
  	
 	private function setRootPaths(){
