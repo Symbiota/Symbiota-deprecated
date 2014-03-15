@@ -983,13 +983,13 @@ function detDateChanged(f){
 	var isNew = false;
 	var newDateStr = f.dateidentified.value;
 	if(newDateStr){
-		dateIdentified = document.fullform.dateidentified.value;
+		var dateIdentified = document.fullform.dateidentified.value;
 		if(dateIdentified == "") dateIdentified = document.fullform.eventdate.value;
 		if(dateIdentified){
 			var yearPattern = /[1,2]{1}\d{3}/;
 			var newYear = newDateStr.match(yearPattern);
 			var curYear = dateIdentified.match(yearPattern);
-			if(curYear != null && newYear != newYear[0] > curYear[0]){
+			if(curYear && newYear && newYear[0] > curYear[0]){
 				isNew = true;
 			}
 		}
