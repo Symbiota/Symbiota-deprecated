@@ -128,7 +128,7 @@ class SpecDatasetManager {
 					'FROM omoccurrences '.($_POST['recordedby']?'use index(Index_collector) ':'').
 					'WHERE collid = '.$this->collId.' '.$sqlWhere;
 				if($sqlOrderBy) $sql .= 'ORDER BY '.substr($sqlOrderBy,1);
-				$sql .= ' LIMIT 100';
+				$sql .= ' LIMIT 500';
 				//echo '<div>'.$sql.'</div>';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
