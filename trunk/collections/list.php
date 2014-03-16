@@ -27,6 +27,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	'labelproject','basisofrecord');
 ?>
 
+<!DOCTYPE html >
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
@@ -182,9 +183,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	        </li>
 	    </ul>
 		<div id="speclist">
-
 			<div class='button' style='margin:15px 15px 0px 0px;float:right;width:13px;height:13px;' title='Download Specimen Data'>
-				<a href='download/download.php'>
+				<a href='download/index.php?dltype=specimen'>
 					<img src='../images/dl.png'/>
 				</a>
 			</div>
@@ -398,7 +398,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 	    <div id="maps" style="min-height:400px;margin-bottom:10px;">
 	
 		    <div class="button" style="margin-top:20px;float:right;width:13px;height:13px;" title="Download Coordinate Data">
-				<a href="download/downloadhandler.php?dltype=georef"><img src="../images/dl.png"/></a>
+				<a href="download/index.php?dltype=georef"><img src="../images/dl.png"/></a>
 	        </div>
 	        <div style='margin-top:10px;'>
 	        	<h2>Google Map</h2>

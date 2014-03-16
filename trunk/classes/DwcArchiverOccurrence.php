@@ -5,36 +5,47 @@ include_once($serverRoot.'/classes/UuidFactory.php');
 class DwcArchiverOccurrence{
 
 	private $conn;
-
 	private $ts;
 	
 	private $collArr;
+	private $customWhereSql;
 	private $conditionSql;
+ 	private $conditionArr = array();
 	private $condAllowArr;
 
 	private $targetPath;
-	private $fileName;
-	private $zipArchive;
 	
 	private $logFH;
-	private $silent = 0;
+	private $verbose = 0;
 
-	private $occurrenceFieldArr;
-	private $determinationFieldArr;
-	private $imageFieldArr;
+	private $schemaType = 'dwc';			//dwc, symbiota, backup
+	private $occurrenceFieldArr = array();
+	private $determinationFieldArr = array();
+	private $imageFieldArr = array();
 	private $securityArr = array();
 	private $includeDets = 1;
 	private $includeImgs = 1;
 	private $redactLocalities = 1;
+	private $rareReaderArr = array();
+	private $charSetSource = '';
+	private $charSetOut = '';
 	
 	public function __construct(){
+		global $serverRoot, $charset;
 		//Ensure that PHP DOMDocument class is installed
 		if(!class_exists('DOMDocument')){
 			exit('FATAL ERROR: PHP DOMDocument class is not installed, please contact your server admin');
 		}
-
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
 		$this->ts = time();
+		if(!$this->logFH && $this->verbose){
+			$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+			$this->logFH = fopen($logFile, 'a');
+		}
+		
+		//Character set
+		$this->charSetSource = strtoupper($charset);
+		$this->charSetOut = $this->charSetSource;
 	}
 
 	public function __destruct(){
@@ -44,123 +55,367 @@ class DwcArchiverOccurrence{
 		}
 	}
 
-	public function initPublisher(){
+	private function initPublisher(){
 		//ini_set('memory_limit','512M');
 		set_time_limit(500);
 		
-		$this->condAllowArr = array('country','stateprovince','county','recordedby');
+		$this->condAllowArr = array('catalognumber','othercatalognumbers','occurrenceid','family','sciname','scientificname',
+			'country','stateprovince','county','recordedby','recordnumber','eventdate','municipality',
+			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','modified');
 
-		$this->occurrenceFieldArr = array(
-			'id' => '',
-			'institutionCode' => 'http://rs.tdwg.org/dwc/terms/institutionCode',
-			'collectionCode' => 'http://rs.tdwg.org/dwc/terms/collectionCode',
-			'basisOfRecord' => 'http://rs.tdwg.org/dwc/terms/basisOfRecord',
-			'occurrenceID' => 'http://rs.tdwg.org/dwc/terms/occurrenceID',
-			'catalogNumber' => 'http://rs.tdwg.org/dwc/terms/catalogNumber',
-			'otherCatalogNumbers' => 'http://rs.tdwg.org/dwc/terms/otherCatalogNumbers',
-			'ownerInstitutionCode' => 'http://rs.tdwg.org/dwc/terms/ownerInstitutionCode',
-			'family' => 'http://rs.tdwg.org/dwc/terms/family',
-			'scientificName' => 'http://rs.tdwg.org/dwc/terms/scientificName',
-			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
-			'genus' => 'http://rs.tdwg.org/dwc/terms/genus',
-			'specificEpithet' => 'http://rs.tdwg.org/dwc/terms/specificEpithet',
-			'taxonRank' => 'http://rs.tdwg.org/dwc/terms/taxonRank',
-			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
- 			'identifiedBy' => 'http://rs.tdwg.org/dwc/terms/identifiedBy',
- 			'dateIdentified' => 'http://rs.tdwg.org/dwc/terms/dateIdentified',
- 			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
- 			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
- 			'identificationQualifier' => 'http://rs.tdwg.org/dwc/terms/identificationQualifier',
-			'typeStatus' => 'http://rs.tdwg.org/dwc/terms/typeStatus',
-			'recordedBy' => 'http://rs.tdwg.org/dwc/terms/recordedBy',
-			'recordNumber' => 'http://rs.tdwg.org/dwc/terms/recordNumber',
-			'eventDate' => 'http://rs.tdwg.org/dwc/terms/eventDate',
-			'year' => 'http://rs.tdwg.org/dwc/terms/year',
-			'month' => 'http://rs.tdwg.org/dwc/terms/month',
-			'day' => 'http://rs.tdwg.org/dwc/terms/day',
-			'startDayOfYear' => 'http://rs.tdwg.org/dwc/terms/startDayOfYear',
-			'endDayOfYear' => 'http://rs.tdwg.org/dwc/terms/endDayOfYear',
- 			'verbatimEventDate' => 'http://rs.tdwg.org/dwc/terms/verbatimEventDate',
- 			'habitat' => 'http://rs.tdwg.org/dwc/terms/habitat',
- 			'fieldNumber' => 'http://rs.tdwg.org/dwc/terms/fieldNumber',
- 			'occurrenceRemarks' => 'http://rs.tdwg.org/dwc/terms/occurrenceRemarks',
-			'informationWithheld' => 'http://rs.tdwg.org/dwc/terms/informationWithheld',
- 			'dynamicProperties' => 'http://rs.tdwg.org/dwc/terms/dynamicProperties',
- 			'associatedTaxa' => 'http://rs.tdwg.org/dwc/terms/associatedTaxa',
- 			'reproductiveCondition' => 'http://rs.tdwg.org/dwc/terms/reproductiveCondition',
-			'establishmentMeans' => 'http://rs.tdwg.org/dwc/terms/establishmentMeans',
-			'lifeStage' => 'http://rs.tdwg.org/dwc/terms/lifeStage',
-			'sex' => 'http://rs.tdwg.org/dwc/terms/sex',
- 			'individualCount' => 'http://rs.tdwg.org/dwc/terms/individualCount',
- 			'samplingProtocol' => 'http://rs.tdwg.org/dwc/terms/samplingProtocol',
- 			'preparations' => 'http://rs.tdwg.org/dwc/terms/preparations',
- 			'country' => 'http://rs.tdwg.org/dwc/terms/country',
- 			'stateProvince' => 'http://rs.tdwg.org/dwc/terms/stateProvince',
- 			'county' => 'http://rs.tdwg.org/dwc/terms/county',
- 			'municipality' => 'http://rs.tdwg.org/dwc/terms/municipality',
- 			'locality' => 'http://rs.tdwg.org/dwc/terms/locality',
- 			'decimalLatitude' => 'http://rs.tdwg.org/dwc/terms/decimalLatitude',
- 			'decimalLongitude' => 'http://rs.tdwg.org/dwc/terms/decimalLongitude',
-	 		'geodeticDatum' => 'http://rs.tdwg.org/dwc/terms/geodeticDatum',
-	 		'coordinateUncertaintyInMeters' => 'http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters',
-	 		'footprintWKT' => 'http://rs.tdwg.org/dwc/terms/footprintWKT',
-	 		'verbatimCoordinates' => 'http://rs.tdwg.org/dwc/terms/verbatimCoordinates',
-			'georeferencedBy' => 'http://rs.tdwg.org/dwc/terms/georeferencedBy',
-			'georeferenceProtocol' => 'http://rs.tdwg.org/dwc/terms/georeferenceProtocol',
-			'georeferenceSources' => 'http://rs.tdwg.org/dwc/terms/georeferenceSources',
-			'georeferenceVerificationStatus' => 'http://rs.tdwg.org/dwc/terms/georeferenceVerificationStatus',
-			'georeferenceRemarks' => 'http://rs.tdwg.org/dwc/terms/georeferenceRemarks',
-			'minimumElevationInMeters' => 'http://rs.tdwg.org/dwc/terms/minimumElevationInMeters',
-			'maximumElevationInMeters' => 'http://rs.tdwg.org/dwc/terms/maximumElevationInMeters',
-			'verbatimElevation' => 'http://rs.tdwg.org/dwc/terms/verbatimElevation',
-	 		'disposition' => 'http://rs.tdwg.org/dwc/terms/disposition',
-	 		'language' => 'http://purl.org/dc/terms/language',
-	 		'rights' => 'http://rs.tdwg.org/dwc/terms/rights',
-	 		'rightsHolder' => 'http://rs.tdwg.org/dwc/terms/rightsHolder',
-	 		'accessRights' => 'http://rs.tdwg.org/dwc/terms/accessRights',
-	 		'modified' => 'http://purl.org/dc/terms/modified',
-	 		'recordId' => 'http://portal.idigbio.org/terms/recordId',
-			'references' => 'http://purl.org/dc/terms/references'
- 		);
-		$this->determinationFieldArr = array(
-	 		'coreid' => '',
-			'identifiedBy' => 'http://rs.tdwg.org/dwc/terms/identifiedBy',
-			'dateIdentified' => 'http://rs.tdwg.org/dwc/terms/dateIdentified',
-			'identificationQualifier' => 'http://rs.tdwg.org/dwc/terms/identificationQualifier',
-			'scientificName' => 'http://rs.tdwg.org/dwc/terms/scientificName',
-			'scientificNameAuthorship' => 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship',
-			'genus' => 'http://rs.tdwg.org/dwc/terms/genus',
-			'specificEpithet' => 'http://rs.tdwg.org/dwc/terms/specificEpithet',
-			'taxonRank' => 'http://rs.tdwg.org/dwc/terms/taxonRank',
-			'infraspecificEpithet' => 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet',
-			'identificationReferences' => 'http://rs.tdwg.org/dwc/terms/identificationReferences',
-			'identificationRemarks' => 'http://rs.tdwg.org/dwc/terms/identificationRemarks',
-	 		'recordId' => 'http://portal.idigbio.org/terms/recordId'
-		);
-		$this->imageFieldArr = array(
-			'coreid' => '',
-			'accessURI' => 'http://rs.tdwg.org/ac/terms/accessURI',		//url 
-			'providerManagedID' => 'http://rs.tdwg.org/ac/terms/providerManagedID',	//GUID
-	 		'title' => 'http://purl.org/dc/terms/title',	//scientific name
-	 		'comments' => 'http://rs.tdwg.org/ac/terms/comments',	//General notes	
-			'Owner' => 'http://ns.adobe.com/xap/1.0/rights/Owner',	//Institution name
-			'rights' => 'http://purl.org/dc/terms/rights',		//Copyright unknown
-			'UsageTerms' => 'http://ns.adobe.com/xap/1.0/rights/UsageTerms',	//Creative Commons BY-SA 3.0 license
-			'WebStatement' => 'http://ns.adobe.com/xap/1.0/rights/WebStatement',	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
-			'MetadataDate' => 'http://ns.adobe.com/xap/1.0/MetadataDate',	//timestamp
-			'associatedSpecimenReference' => 'http://rs.tdwg.org/ac/terms/associatedSpecimenReference',	//reference url in portal
-			'type' => 'http://purl.org/dc/terms/type',		//StillImage
-			'subtype' => 'http://rs.tdwg.org/ac/terms/subtype',		//Photograph
-			'format' => 'http://purl.org/dc/terms/format',		//jpg
-			'metadataLanguage' => 'http://rs.tdwg.org/ac/terms/metadataLanguage'	//en
-		);
+		//Occurrence map
+		$occurFieldArr['id'] = 'o.occid';
+		$occurTermArr['institutionCode'] = 'http://rs.tdwg.org/dwc/terms/institutionCode';
+		$occurFieldArr['institutionCode'] = 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode';
+		$occurTermArr['collectionCode'] = 'http://rs.tdwg.org/dwc/terms/collectionCode';
+		$occurFieldArr['collectionCode'] = 'IFNULL(o.collectionCode,c.collectionCode) AS collectionCode';
+		if($this->schemaType != 'backup'){
+			$occurTermArr['collectionID'] = 'http://rs.tdwg.org/dwc/terms/collectionID';
+			$occurFieldArr['collectionID'] = 'IFNULL(o.collectionID,c.collectionGUID) AS collectionID';
+		}
+		$occurTermArr['basisOfRecord'] = 'http://rs.tdwg.org/dwc/terms/basisOfRecord';
+		$occurFieldArr['basisOfRecord'] = 'o.basisOfRecord';
+		$occurTermArr['occurrenceID'] = 'http://rs.tdwg.org/dwc/terms/occurrenceID';
+		$occurFieldArr['occurrenceID'] = 'o.occurrenceID';
+		$occurTermArr['catalogNumber'] = 'http://rs.tdwg.org/dwc/terms/catalogNumber';
+		$occurFieldArr['catalogNumber'] = 'o.catalogNumber';
+		$occurTermArr['otherCatalogNumbers'] = 'http://rs.tdwg.org/dwc/terms/otherCatalogNumbers';
+		$occurFieldArr['otherCatalogNumbers'] = 'o.otherCatalogNumbers';
+		$occurTermArr['family'] = 'http://rs.tdwg.org/dwc/terms/family';
+		$occurFieldArr['family'] = 'o.family';
+		$occurTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
+		$occurFieldArr['scientificName'] = 't.sciname AS scientificName';
+		$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
+		$occurFieldArr['verbatimScientificName'] = 'o.sciname AS verbatimScientificName';
+		if($this->schemaType == 'backup'){
+			$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
+			$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
+		}
+		$occurTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
+		$occurFieldArr['scientificNameAuthorship'] = 'IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship';
+		$occurTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
+		$occurFieldArr['genus'] = 'CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus';
+		$occurTermArr['specificEpithet'] = 'http://rs.tdwg.org/dwc/terms/specificEpithet';
+		$occurFieldArr['specificEpithet'] = 'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet';
+		$occurTermArr['taxonRank'] = 'http://rs.tdwg.org/dwc/terms/taxonRank';
+		$occurFieldArr['taxonRank'] = 't.unitind3 AS taxonRank';
+		$occurTermArr['infraspecificEpithet'] = 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet';
+		$occurFieldArr['infraspecificEpithet'] = 't.unitname3 AS infraspecificEpithet';
+ 		$occurTermArr['identifiedBy'] = 'http://rs.tdwg.org/dwc/terms/identifiedBy';
+ 		$occurFieldArr['identifiedBy'] = 'o.identifiedBy';
+ 		$occurTermArr['dateIdentified'] = 'http://rs.tdwg.org/dwc/terms/dateIdentified';
+ 		$occurFieldArr['dateIdentified'] = 'o.dateIdentified';
+ 		$occurTermArr['identificationReferences'] = 'http://rs.tdwg.org/dwc/terms/identificationReferences';
+ 		$occurFieldArr['identificationReferences'] = 'o.identificationReferences';
+ 		$occurTermArr['identificationRemarks'] = 'http://rs.tdwg.org/dwc/terms/identificationRemarks';
+ 		$occurFieldArr['identificationRemarks'] = 'o.identificationRemarks';
+ 		$occurTermArr['identificationQualifier'] = 'http://rs.tdwg.org/dwc/terms/identificationQualifier';
+ 		$occurFieldArr['identificationQualifier'] = 'o.identificationQualifier';
+		$occurTermArr['typeStatus'] = 'http://rs.tdwg.org/dwc/terms/typeStatus';
+		$occurFieldArr['typeStatus'] = 'o.typeStatus';
+		$occurTermArr['recordedBy'] = 'http://rs.tdwg.org/dwc/terms/recordedBy';
+		if($this->schemaType == 'dwc'){
+			$occurFieldArr['recordedBy'] = 'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy';
+		}
+		else{
+			$occurFieldArr['recordedBy'] = 'o.recordedBy';
+			$occurTermArr['recordedByID'] = 'http://symbiota.org/terms/recordedByID';
+			$occurFieldArr['recordedByID'] = 'o.recordedById';
+			$occurTermArr['associatedCollectors'] = 'http://symbiota.org/terms/associatedCollectors'; 
+			$occurFieldArr['associatedCollectors'] = 'o.associatedCollectors'; 
+		}
+		$occurTermArr['recordNumber'] = 'http://rs.tdwg.org/dwc/terms/recordNumber';
+		$occurFieldArr['recordNumber'] = 'o.recordNumber';
+		$occurTermArr['eventDate'] = 'http://rs.tdwg.org/dwc/terms/eventDate';
+		$occurFieldArr['eventDate'] = 'o.eventDate';
+		$occurTermArr['year'] = 'http://rs.tdwg.org/dwc/terms/year';
+		$occurFieldArr['year'] = 'o.year';
+		$occurTermArr['month'] = 'http://rs.tdwg.org/dwc/terms/month';
+		$occurFieldArr['month'] = 'o.month';
+		$occurTermArr['day'] = 'http://rs.tdwg.org/dwc/terms/day';
+		$occurFieldArr['day'] = 'o.day';
+		$occurTermArr['startDayOfYear'] = 'http://rs.tdwg.org/dwc/terms/startDayOfYear';
+		$occurFieldArr['startDayOfYear'] = 'o.startDayOfYear';
+		$occurTermArr['endDayOfYear'] = 'http://rs.tdwg.org/dwc/terms/endDayOfYear';
+		$occurFieldArr['endDayOfYear'] = 'o.endDayOfYear';
+		$occurTermArr['verbatimEventDate'] = 'http://rs.tdwg.org/dwc/terms/verbatimEventDate';
+		$occurFieldArr['verbatimEventDate'] = 'o.verbatimEventDate';
+		$occurTermArr['occurrenceRemarks'] = 'http://rs.tdwg.org/dwc/terms/occurrenceRemarks';
+		$occurTermArr['habitat'] = 'http://rs.tdwg.org/dwc/terms/habitat';
+		if($this->schemaType != 'dwc'){
+			$occurFieldArr['occurrenceRemarks'] = 'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks';
+			$occurFieldArr['habitat'] = 'CONCAT_WS("; ",o.habitat, o.substrate) AS habitat';
+		}
+		else{
+			$occurFieldArr['occurrenceRemarks'] = 'o.occurrenceRemarks';
+			$occurFieldArr['habitat'] = 'o.habitat';
+			$occurTermArr['substrate'] = 'http://symbiota.org/terms/substrate';
+			$occurFieldArr['substrate'] = 'o.substrate';
+			$occurTermArr['verbatimAttributes'] = 'http://symbiota.org/terms/verbatimAttributes';
+			$occurFieldArr['verbatimAttributes'] = 'o.verbatimAttributes';
+		}
+		$occurTermArr['fieldNumber'] = 'http://rs.tdwg.org/dwc/terms/fieldNumber';
+		$occurFieldArr['fieldNumber'] = 'o.fieldNumber';
+		$occurTermArr['informationWithheld'] = 'http://rs.tdwg.org/dwc/terms/informationWithheld';
+		$occurFieldArr['informationWithheld'] = 'o.informationWithheld';
+		$occurTermArr['dataGeneralizations'] = 'http://rs.tdwg.org/dwc/terms/dataGeneralizations';
+		$occurFieldArr['dataGeneralizations'] = 'o.dataGeneralizations';
+		$occurTermArr['dynamicProperties'] = 'http://rs.tdwg.org/dwc/terms/dynamicProperties';
+		$occurFieldArr['dynamicProperties'] = 'o.dynamicProperties';
+		$occurTermArr['associatedTaxa'] = 'http://rs.tdwg.org/dwc/terms/associatedTaxa';
+		$occurFieldArr['associatedTaxa'] = 'o.associatedTaxa';
+		$occurTermArr['reproductiveCondition'] = 'http://rs.tdwg.org/dwc/terms/reproductiveCondition';
+		$occurFieldArr['reproductiveCondition'] = 'o.reproductiveCondition';
+		$occurTermArr['establishmentMeans'] = 'http://rs.tdwg.org/dwc/terms/establishmentMeans';
+		$occurFieldArr['establishmentMeans'] = 'o.establishmentMeans';
+		if($this->schemaType != 'dwc'){
+			$occurTermArr['cultivationStatus'] = 'http://symbiota.org/terms/cultivationStatus';
+			$occurFieldArr['cultivationStatus'] = 'cultivationStatus';
+		}
+		$occurTermArr['lifeStage'] = 'http://rs.tdwg.org/dwc/terms/lifeStage';
+		$occurFieldArr['lifeStage'] = 'o.lifeStage';
+		$occurTermArr['sex'] = 'http://rs.tdwg.org/dwc/terms/sex';
+		$occurFieldArr['sex'] = 'o.sex';
+		$occurTermArr['individualCount'] = 'http://rs.tdwg.org/dwc/terms/individualCount';
+		$occurFieldArr['individualCount'] = 'o.individualCount';
+		$occurTermArr['samplingProtocol'] = 'http://rs.tdwg.org/dwc/terms/samplingProtocol';
+		$occurFieldArr['samplingProtocol'] = 'o.samplingProtocol';
+		$occurTermArr['samplingEffort'] = 'http://rs.tdwg.org/dwc/terms/samplingEffort';
+		$occurFieldArr['samplingEffort'] = 'o.samplingEffort';
+		$occurTermArr['preparations'] = 'http://rs.tdwg.org/dwc/terms/preparations';
+		$occurFieldArr['preparations'] = 'o.preparations';
+		$occurTermArr['country'] = 'http://rs.tdwg.org/dwc/terms/country';
+		$occurFieldArr['country'] = 'o.country';
+		$occurTermArr['stateProvince'] = 'http://rs.tdwg.org/dwc/terms/stateProvince';
+		$occurFieldArr['stateProvince'] = 'o.stateProvince';
+		$occurTermArr['county'] = 'http://rs.tdwg.org/dwc/terms/county';
+		$occurFieldArr['county'] = 'o.county';
+		$occurTermArr['municipality'] = 'http://rs.tdwg.org/dwc/terms/municipality';
+		$occurFieldArr['municipality'] = 'o.municipality';
+		$occurTermArr['locality'] = 'http://rs.tdwg.org/dwc/terms/locality';
+		$occurFieldArr['locality'] = 'o.locality';
+		$occurTermArr['localitySecurity'] = 'http://symbiota.org/terms/localitySecurity';
+		$occurFieldArr['localitySecurity'] = 'o.localitySecurity';
+		if($this->schemaType != 'dwc'){
+			$occurTermArr['localitySecurityReason'] = 'http://symbiota.org/terms/localitySecurityReason';
+			$occurFieldArr['localitySecurityReason'] = 'o.localitySecurityReason';
+		}
+		$occurTermArr['decimalLatitude'] = 'http://rs.tdwg.org/dwc/terms/decimalLatitude';
+		$occurFieldArr['decimalLatitude'] = 'o.decimalLatitude';
+		$occurTermArr['decimalLongitude'] = 'http://rs.tdwg.org/dwc/terms/decimalLongitude';
+		$occurFieldArr['decimalLongitude'] = 'o.decimalLongitude';
+		$occurTermArr['geodeticDatum'] = 'http://rs.tdwg.org/dwc/terms/geodeticDatum';
+		$occurFieldArr['geodeticDatum'] = 'o.geodeticDatum';
+		$occurTermArr['coordinateUncertaintyInMeters'] = 'http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters';
+		$occurFieldArr['coordinateUncertaintyInMeters'] = 'o.coordinateUncertaintyInMeters';
+		$occurTermArr['footprintWKT'] = 'http://rs.tdwg.org/dwc/terms/footprintWKT';
+		$occurFieldArr['footprintWKT'] = 'o.footprintWKT';
+		$occurTermArr['verbatimCoordinates'] = 'http://rs.tdwg.org/dwc/terms/verbatimCoordinates';
+		$occurFieldArr['verbatimCoordinates'] = 'o.verbatimCoordinates';
+		$occurTermArr['georeferencedBy'] = 'http://rs.tdwg.org/dwc/terms/georeferencedBy';
+		$occurFieldArr['georeferencedBy'] = 'o.georeferencedBy';
+		$occurTermArr['georeferenceProtocol'] = 'http://rs.tdwg.org/dwc/terms/georeferenceProtocol';
+		$occurFieldArr['georeferenceProtocol'] = 'o.georeferenceProtocol';
+		$occurTermArr['georeferenceSources'] = 'http://rs.tdwg.org/dwc/terms/georeferenceSources';
+		$occurFieldArr['georeferenceSources'] = 'o.georeferenceSources';
+		$occurTermArr['georeferenceVerificationStatus'] = 'http://rs.tdwg.org/dwc/terms/georeferenceVerificationStatus';
+		$occurFieldArr['georeferenceVerificationStatus'] = 'o.georeferenceVerificationStatus';
+		$occurTermArr['georeferenceRemarks'] = 'http://rs.tdwg.org/dwc/terms/georeferenceRemarks';
+		$occurFieldArr['georeferenceRemarks'] = 'o.georeferenceRemarks';
+		$occurTermArr['minimumElevationInMeters'] = 'http://rs.tdwg.org/dwc/terms/minimumElevationInMeters';
+		$occurFieldArr['minimumElevationInMeters'] = 'o.minimumElevationInMeters';
+		$occurTermArr['maximumElevationInMeters'] = 'http://rs.tdwg.org/dwc/terms/maximumElevationInMeters';
+		$occurFieldArr['maximumElevationInMeters'] = 'o.maximumElevationInMeters';
+		$occurTermArr['verbatimElevation'] = 'http://rs.tdwg.org/dwc/terms/verbatimElevation';
+		$occurFieldArr['verbatimElevation'] = 'o.verbatimElevation';
+		$occurTermArr['disposition'] = 'http://rs.tdwg.org/dwc/terms/disposition';
+		$occurFieldArr['disposition'] = 'o.disposition';
+		$occurTermArr['language'] = 'http://purl.org/dc/terms/language';
+		$occurFieldArr['language'] = 'o.language';
+		if($this->schemaType == 'backup'){
+			$occurTermArr['observeruID'] = 'http://symbiota.org/terms/observeruID';
+			$occurFieldArr['observeruID'] = 'o.observeruid';
+			$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
+			$occurFieldArr['processingStatus'] = 'o.processingstatus';
+			$occurTermArr['recordEnteredBy'] = 'http://symbiota.org/terms/recordEnteredBy';
+			$occurFieldArr['recordEnteredBy'] = 'o.recordEnteredBy';
+			$occurTermArr['duplicateQuantity'] = 'http://symbiota.org/terms/duplicateQuantity';
+			$occurFieldArr['duplicateQuantity'] = 'o.duplicateQuantity';
+			$occurTermArr['labelProject'] = 'http://symbiota.org/terms/labelProject';
+			$occurFieldArr['labelProject'] = 'o.labelProject';
+			$occurTermArr['dateEntered'] = 'http://symbiota.org/terms/dateEntered';
+			$occurFieldArr['dateEntered'] = 'o.dateEntered';
+		}
+		$occurTermArr['modified'] = 'http://purl.org/dc/terms/modified';
+		$occurFieldArr['modified'] = 'IFNULL(o.modified,o.datelastmodified) AS modified';
+		if($this->schemaType == 'dwc'){
+			//If not DWC, don't output right becasue that data is already in the eml file
+	 		$occurTermArr['rights'] = 'http://rs.tdwg.org/dwc/terms/rights';
+	 		$occurFieldArr['rights'] = 'c.rights';
+			$occurTermArr['rightsHolder'] = 'http://rs.tdwg.org/dwc/terms/rightsHolder';
+			$occurFieldArr['rightsHolder'] = 'c.rightsHolder';
+			$occurTermArr['accessRights'] = 'http://rs.tdwg.org/dwc/terms/accessRights';
+			$occurFieldArr['accessRights'] = 'c.accessRights';
+		}
+		else{
+			$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
+			$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
+		}
+		$occurTermArr['collectionId'] = 'http://symbiota.org/terms/collectionId'; 
+		$occurFieldArr['collectionId'] = 'c.collid'; 
+		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
+		$occurFieldArr['recordId'] = 'g.guid AS recordId';
+		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
+		$occurFieldArr['references'] = '';
+		$this->occurrenceFieldArr['terms'] = $occurTermArr;
+		$this->occurrenceFieldArr['fields'] = $occurFieldArr;
 
- 		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+		//Determination history map
+		$detFieldArr['coreid'] = 'o.occid';
+		$detTermArr['identifiedBy'] = 'http://rs.tdwg.org/dwc/terms/identifiedBy';
+		$detFieldArr['identifiedBy'] = 'd.identifiedBy';
+		if($this->schemaType == 'backup'){
+			$detTermArr['identifiedByID'] = 'http://symbiota.org/terms/identifiedByID';
+			$detFieldArr['identifiedByID'] = 'd.idbyid';
+		}
+		$detTermArr['dateIdentified'] = 'http://rs.tdwg.org/dwc/terms/dateIdentified';
+		$detFieldArr['dateIdentified'] = 'd.dateIdentified';
+		$detTermArr['identificationQualifier'] = 'http://rs.tdwg.org/dwc/terms/identificationQualifier';
+		$detFieldArr['identificationQualifier'] = 'd.identificationQualifier';
+		$detTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
+		$detFieldArr['scientificName'] = 'd.sciName AS scientificName';
+		if($this->schemaType == 'backup'){
+			$detTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
+			$detFieldArr['tidInterpreted'] = 'd.tidinterpreted';
+		}
+		if($this->schemaType != 'dwc'){
+			$detTermArr['identificationIsCurrent'] = 'http://symbiota.org/terms/identificationIsCurrent';
+			$detFieldArr['identificationIsCurrent'] = 'd.iscurrent';
+		}
+		$detTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
+		$detFieldArr['scientificNameAuthorship'] = 'd.scientificNameAuthorship';
+		$detTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
+		$detFieldArr['genus'] = 'CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus';
+		$detTermArr['specificEpithet'] = 'http://rs.tdwg.org/dwc/terms/specificEpithet';
+		$detFieldArr['specificEpithet'] = 'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet';
+		$detTermArr['taxonRank'] = 'http://rs.tdwg.org/dwc/terms/taxonRank';
+		$detFieldArr['taxonRank'] = 't.unitind3 AS taxonRank';
+		$detTermArr['infraspecificEpithet'] = 'http://rs.tdwg.org/dwc/terms/infraspecificEpithet';
+		$detFieldArr['infraspecificEpithet'] = 't.unitname3 AS infraspecificEpithet';
+		$detTermArr['identificationReferences'] = 'http://rs.tdwg.org/dwc/terms/identificationReferences';
+		$detFieldArr['identificationReferences'] = 'd.identificationReferences';
+		$detTermArr['identificationRemarks'] = 'http://rs.tdwg.org/dwc/terms/identificationRemarks';
+		$detFieldArr['identificationRemarks'] = 'd.identificationRemarks';
+		$detTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
+		$detFieldArr['recordId'] = 'g.guid AS recordId';
+		$this->determinationFieldArr['terms'] = $detTermArr;
+		$this->determinationFieldArr['fields'] = $detFieldArr;
+		
+		//image map
+		$this->imageFieldArr['coreid'] = '';
+		$this->imageFieldArr['accessURI'] = 'http://rs.tdwg.org/ac/terms/accessURI';	 
+		if($this->schemaType == 'backup'){
+			$this->imageFieldArr['thumbnailURI'] = 'http://symbiota.org/terms/thumbnailURI';	
+			$this->imageFieldArr['webURI'] = 'http://symbiota.org/terms/webURI';
+			$this->imageFieldArr['rights'] = 'http://purl.org/dc/terms/rights';	
+		}
+		else{
+			$this->imageFieldArr['Owner'] = 'http://ns.adobe.com/xap/1.0/rights/Owner';	//Institution name
+			$this->imageFieldArr['rights'] = 'http://purl.org/dc/terms/rights';		//Copyright unknown
+			$this->imageFieldArr['UsageTerms'] = 'http://ns.adobe.com/xap/1.0/rights/UsageTerms';	//Creative Commons BY-SA 3.0 license
+			$this->imageFieldArr['WebStatement'] = 'http://ns.adobe.com/xap/1.0/rights/WebStatement';	//http://creativecommons.org/licenses/by-nc-sa/3.0/us/
+		}
+		$this->imageFieldArr['caption'] = 'http://rs.tdwg.org/ac/terms/caption';	
+		$this->imageFieldArr['comments'] = 'http://rs.tdwg.org/ac/terms/comments';	
+		$this->imageFieldArr['providerManagedID'] = 'http://rs.tdwg.org/ac/terms/providerManagedID';	//GUID
+		$this->imageFieldArr['MetadataDate'] = 'http://ns.adobe.com/xap/1.0/MetadataDate';	//timestamp
+		$this->imageFieldArr['associatedSpecimenReference'] = 'http://rs.tdwg.org/ac/terms/associatedSpecimenReference';	//reference url in portal
+		$this->imageFieldArr['type'] = 'http://purl.org/dc/terms/type';		//StillImage
+		$this->imageFieldArr['subtype'] = 'http://rs.tdwg.org/ac/terms/subtype';		//Photograph
+		$this->imageFieldArr['format'] = 'http://purl.org/dc/terms/format';		//jpg
+		$this->imageFieldArr['metadataLanguage'] = 'http://rs.tdwg.org/ac/terms/metadataLanguage';	//en
+
+		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT',
 			'verbatimCoordinates','georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources',
 			'georeferenceVerificationStatus','habitat','informationWithheld');
 	}
-	
+
+	private function getSqlOccurrences(){
+		$sql = '';
+		$fieldArr = $this->occurrenceFieldArr['fields'];
+		if($fieldArr){
+			$sqlFrag = '';
+			foreach($fieldArr as $fieldName => $colName){
+				$sqlFrag .= ', '.$colName;
+			}
+			$sql = 'SELECT '.trim($sqlFrag,', ').
+				' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
+				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
+			if($this->conditionSql) {
+				$sql .= $this->conditionSql;
+			}
+			$sql .= 'ORDER BY o.collid,o.occid'; 
+			//echo '<div>'.$sql.'</div>'; exit;
+		}
+		return $sql;
+	}
+
+	public function getSqlDeterminations(){
+		$sql = ''; 
+		$fieldArr = $this->determinationFieldArr['fields'];
+		if($fieldArr){
+			$sqlFrag = '';
+			foreach($fieldArr as $fieldName => $colName){
+				$sqlFrag .= ', '.$colName;
+			}
+			$sql = 'SELECT '.trim($sqlFrag,', ').
+				' FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
+			'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
+			'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
+			'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
+			if($this->conditionSql) {
+				$sql .= $this->conditionSql.' AND d.appliedstatus = 1 ';
+			}
+			else{
+				$sql .= 'WHERE d.appliedstatus = 1 ';
+			}
+			$sql .= 'ORDER BY o.collid,o.occid';
+			//echo '<div>'.$sql.'</div>'; exit;
+		}
+		return $sql;
+	}
+
+	public function getSqlImages(){
+		$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as accessURI, ';
+		if($this->schemaType == 'backup'){
+			$sql .= 'i.thumbnailurl, i.url, i.copyright, ';
+		}
+		else{
+			$sql .= 'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
+				'c.rights, i.copyright AS usageterms, c.accessrights AS webstatement, ';
+		}
+		$sql .= 'i.caption, i.notes, g.guid AS providermanagedid, i.initialtimestamp AS metadatadate '.
+			'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+			'INNER JOIN omcollections c ON o.collid = c.collid '.
+			'INNER JOIN guidimages g ON i.imgid = g.imgid '.
+			'INNER JOIN guidoccurrences og ON o.occid = og.occid ';
+		if($this->redactLocalities){
+			if($this->rareReaderArr){
+				$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+			}
+			else{
+				$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+			}
+		}
+		if($this->conditionSql) {
+			$sql .= $this->conditionSql;
+		}
+		//echo $sql;
+		return $sql;
+	}
+
 	public function setTargetPath($tp = ''){
 		if($tp){
 			$this->targetPath = $tp;
@@ -184,15 +439,15 @@ class DwcArchiverOccurrence{
 		}
 	}
 
-	public function setFileName($seed){
-		$this->fileName = $this->conn->real_escape_string(str_replace(' ','_',$seed)).'_DwC-A.zip';
+	private function resetCollArr($collTarget){
+		unset($this->collArr);
+		$this->collArr = array();
+		$this->setCollArr($collTarget);
 	}
-
+	
 	public function setCollArr($collTarget, $collType = ''){
 		$collTarget = $this->cleanInStr($collTarget);
 		$collType = $this->cleanInStr($collType);
-		unset($this->collArr);
-		$this->collArr = array();
 		$sqlWhere = '';
 		if($collType == 'specimens'){
 			$sqlWhere = '(c.colltype = "Preserved Specimens") ';
@@ -206,150 +461,208 @@ class DwcArchiverOccurrence{
 		else{
 			//Don't limit by collection id 
 		}
-		$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
-			'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-			'c.guidtarget, c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
-			'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
-			'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
-		//echo $sql.'<br/>';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
-			$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
-			$this->collArr[$r->collid]['collname'] = htmlspecialchars($r->collectionname);
-			$this->collArr[$r->collid]['description'] = htmlspecialchars($r->fulldescription);
-			$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
-			$this->collArr[$r->collid]['url'] = $r->url;
-			$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
-			$this->collArr[$r->collid]['email'] = $r->email;
-			$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
-			$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
-			$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
-			$this->collArr[$r->collid]['icon'] = $r->icon;
-			$this->collArr[$r->collid]['colltype'] = $r->colltype;
-			$this->collArr[$r->collid]['rights'] = $r->rights;
-			$this->collArr[$r->collid]['rightsholder'] = $r->rightsholder;
-			$this->collArr[$r->collid]['usageterm'] = $r->usageterm;
-			$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
-			$this->collArr[$r->collid]['address2'] = htmlspecialchars($r->address2);
-			$this->collArr[$r->collid]['city'] = $r->city;
-			$this->collArr[$r->collid]['state'] = $r->stateprovince;
-			$this->collArr[$r->collid]['postalcode'] = $r->postalcode;
-			$this->collArr[$r->collid]['country'] = $r->country;
-			$this->collArr[$r->collid]['phone'] = $r->phone;
+		if($sqlWhere){
+			$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
+				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
+				'c.guidtarget, c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
+				'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
+				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
+			//echo $sql.'<br/>';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$this->collArr[$r->collid]['instcode'] = $r->institutioncode;
+				$this->collArr[$r->collid]['collcode'] = $r->collectioncode;
+				$this->collArr[$r->collid]['collname'] = htmlspecialchars($r->collectionname);
+				$this->collArr[$r->collid]['description'] = htmlspecialchars($r->fulldescription);
+				$this->collArr[$r->collid]['collectionguid'] = $r->collectionguid;
+				$this->collArr[$r->collid]['url'] = $r->url;
+				$this->collArr[$r->collid]['contact'] = htmlspecialchars($r->contact);
+				$this->collArr[$r->collid]['email'] = $r->email;
+				$this->collArr[$r->collid]['guidtarget'] = $r->guidtarget;
+				$this->collArr[$r->collid]['lat'] = $r->latitudedecimal;
+				$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
+				$this->collArr[$r->collid]['icon'] = $r->icon;
+				$this->collArr[$r->collid]['colltype'] = $r->colltype;
+				$this->collArr[$r->collid]['rights'] = $r->rights;
+				$this->collArr[$r->collid]['rightsholder'] = $r->rightsholder;
+				$this->collArr[$r->collid]['usageterm'] = $r->usageterm;
+				$this->collArr[$r->collid]['address1'] = htmlspecialchars($r->address1);
+				$this->collArr[$r->collid]['address2'] = htmlspecialchars($r->address2);
+				$this->collArr[$r->collid]['city'] = $r->city;
+				$this->collArr[$r->collid]['state'] = $r->stateprovince;
+				$this->collArr[$r->collid]['postalcode'] = $r->postalcode;
+				$this->collArr[$r->collid]['country'] = $r->country;
+				$this->collArr[$r->collid]['phone'] = $r->phone;
+			}
+			$rs->free();
 		}
-		$rs->free();
 	}
 
 	public function getCollArr(){
 		return $this->collArr;
 	}
 
-	public function setConditionStr($condObj, $filter = 1){
-		$condArr = array();
-		if(is_array($condObj)){
-			//Array of key/value pairs (e.g. array(country => USA,United States, stateprovince => Arizona,New Mexico)
-			$condArr = $condObj;
-		}
-		elseif(is_string($condObj)){
-			//String of key/value pairs (e.g. country:USA,United States;stateprovince:Arizona,New Mexico;county-start:Pima,Eddy
-			$cArr = explode(';',$condObj);
-			foreach($cArr as $rawV){
-				$tok = explode(':',$rawV);
-				if(count($tok) == 2){
-					$condArr[$tok[0]] = $tok[1];
-				}
-			}
-		}
-		foreach($condArr as $k => $v){
-			if(!$filter || in_array(strtolower($k),$this->condAllowArr)){
-				$type = '';
-				if($p = strpos($k,'-')){
-					$type = strtolower(substr($k,0,$p));
-					$k = substr($k,$p);
-				}
-				if($type == 'like'){
-					$sqlFrag = '';
-					$terms = explode(',',$v);
-					foreach($terms as $t){
-						$sqlFrag .= 'OR (o.'.$k.' LIKE "%'.$this->cleanInStr($t).'%") ';
-					}
-					$this->conditionSql .= 'AND ('.substr($sqlFrag,3).') ';
-				}
-				elseif($type == 'start'){
-					$sqlFrag = '';
-					$terms = explode(',',$v);
-					foreach($terms as $t){
-						$sqlFrag .= 'OR (o.'.$k.' LIKE "'.$this->cleanInStr($t).'%") ';
-					}
-					$this->conditionSql .= 'AND ('.substr($sqlFrag,3).') ';
-				}
-				elseif($type == 'null'){
-					$this->conditionSql .= 'AND (o.'.$k.' IS NULL) ';
-				}
-				elseif($type == 'notnull'){
-					$this->conditionSql .= 'AND (o.'.$k.' IS NOT NULL) ';
-				}
-				else{
-					$this->conditionSql .= 'AND (o.'.$k.' IN("'.str_replace(',','","',$v).'")) ';
-				}
+	public function setCustomWhereSql($sql){
+		$this->customWhereSql = $sql;
+	}
+	
+	public function addCondition($field, $cond, $value = ''){
+		if($field && in_array(strtolower($field),$this->condAllowArr)){
+			if(!trim($cond)) $cond = 'EQUALS';
+			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
+				$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
 			}
 		}
 	}
 
-	public function createDwcArchive(){
-		global $serverRoot;
+	private function applyConditions(){
+		$sqlFrag = '';
+		if($this->conditionArr){
+			foreach($this->conditionArr as $field => $condArr){
+				$sqlFrag2 = '';
+				foreach($condArr as $cond => $valueArr){
+					if($cond == 'NULL'){
+						$sqlFrag2 .= 'OR '.$field.' IS NULL ';
+					}
+					elseif($cond == 'NOTNULL'){
+						$sqlFrag2 .= 'OR '.$field.' IS NOT NULL ';
+					}
+					elseif($cond == 'EQUALS'){
+						$sqlFrag2 .= 'OR '.$field.' IN("'.implode('","',$valueArr).'") ';
+					}
+					else{
+						foreach($valueArr as $value){
+							if($cond == 'STARTS'){
+								$sqlFrag2 .= 'OR '.$field.' LIKE "'.$value.'%" ';
+							}
+							elseif($cond == 'LIKE'){ 
+								$sqlFrag2 .= 'OR '.$field.' LIKE "%'.$value.'%" ';
+							}
+						}
+					}
+				}
+				$sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
+			}
+		}
+		//Build where
+		$this->conditionSql = '';
+		if($this->customWhereSql){
+			$this->conditionSql = $this->customWhereSql.' ';
+		}
+		if($this->collArr && (!$this->conditionSql || !stripos($this->conditionSql,'collid in('))){
+			$this->conditionSql .= 'AND (o.collid IN('.implode(',',array_keys($this->collArr)).')) ';
+		}
+		if($sqlFrag){
+			$this->conditionSql .= $sqlFrag;
+		}
+		if($this->conditionSql){
+			//Make sure it starts with WHERE 
+			if(substr($this->conditionSql,0,4) == 'AND '){
+				$this->conditionSql = 'WHERE'.substr($this->conditionSql,3);
+			}
+			elseif(substr($this->conditionSql,0,6) != 'WHERE '){
+				$this->conditionSql = 'WHERE '.$this->conditionSql;
+			}
+		}
+	}
+
+	public function createDwcArchive($fileNameSeed = ''){
+		$status = false;
+		if(!$this->occurrenceFieldArr){
+			$this->initPublisher();
+		}
+		if(!$fileNameSeed){
+			if(count($this->collArr) == 1){
+				$firstColl = current($this->collArr);
+				if($firstColl){
+					$fileNameSeed = $firstColl['instcode'];
+					if($firstColl['collcode']) $fileNameSeed .= '-'.$firstColl['collcode'];
+				}
+				if($this->schemaType == 'backup'){
+					$fileNameSeed .= '_backup_'.$this->ts;
+				}
+			}
+			else{
+				$fileNameSeed = 'SymbiotaOutput_'.$this->ts;
+			}
+		}
+		$fileName = str_replace(array(' ','"',"'"),'',$fileNameSeed).'_DwC-A.zip';
+		
+		$this->applyConditions();
 		if(!$this->targetPath) $this->setTargetPath();
 		$archiveFile = '';
-		if($this->collArr){
-			if(!$this->logFH && !$this->silent){
-				$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-				$this->logFH = fopen($logFile, 'a');
-			}
-			$this->logOrEcho('Creating DwC-A file...'."\n");
-			
-			if(!class_exists('ZipArchive')){
-				$this->logOrEcho("FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin\n");
-				exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
-			}
-	
-			$archiveFile = $this->targetPath.$this->fileName;
+		$this->logOrEcho('Creating DwC-A file: '.$fileName."\n");
+		ob_flush();
+		flush();
+		
+		if(!class_exists('ZipArchive')){
+			$this->logOrEcho("FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin\n");
+			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
+		}
+
+		$status = $this->writeOccurrenceFile();
+		if($status){
+			$archiveFile = $this->targetPath.$fileName;
 			if(file_exists($archiveFile)) unlink($archiveFile);
-			$this->zipArchive = new ZipArchive;
-			$status = $this->zipArchive->open($archiveFile, ZipArchive::CREATE);
+			$zipArchive = new ZipArchive;
+			$status = $zipArchive->open($archiveFile, ZipArchive::CREATE);
 			if($status !== true){
 				exit('FATAL ERROR: unable to create archive file: '.$status);
 			}
 			//$this->logOrEcho("DWCA created: ".$archiveFile."\n");
 			
+			//Occurrences
+			$zipArchive->addFile($this->targetPath.$this->ts.'-occur.csv');
+			$zipArchive->renameName($this->targetPath.$this->ts.'-occur.csv','occurrences.csv');
+			//Determination history
+			if($this->includeDets) {
+				$this->writeDeterminationFile();
+				$zipArchive->addFile($this->targetPath.$this->ts.'-det.csv');
+				$zipArchive->renameName($this->targetPath.$this->ts.'-det.csv','identifications.csv');
+			}
+			//Images
+			if($this->includeImgs){
+				$this->writeImageFile();
+				$zipArchive->addFile($this->targetPath.$this->ts.'-images.csv');
+				$zipArchive->renameName($this->targetPath.$this->ts.'-images.csv','images.csv');
+			}
+			//Meta file
 			$this->writeMetaFile();
+			$zipArchive->addFile($this->targetPath.$this->ts.'-meta.xml');
+    		$zipArchive->renameName($this->targetPath.$this->ts.'-meta.xml','meta.xml');
+			//EML file
 			$this->writeEmlFile();
-			$this->writeOccurrenceFile();
-			if($this->includeDets) $this->writeDeterminationFile();
-			if($this->includeImgs) $this->writeImageFile();
-			$this->zipArchive->close();
-			
-			//Clean up
-			unlink($this->targetPath.$this->ts.'-meta.xml');
-			rename($this->targetPath.$this->ts.'-eml.xml',$this->targetPath.str_replace('.zip','.eml',$this->fileName));
-			//unlink($this->targetPath.$this->ts.'-eml.xml');
+			$zipArchive->addFile($this->targetPath.$this->ts.'-eml.xml');
+    		$zipArchive->renameName($this->targetPath.$this->ts.'-eml.xml','eml.xml');
+
+			$zipArchive->close();
 			unlink($this->targetPath.$this->ts.'-occur.csv');
-			if($this->includeImgs) unlink($this->targetPath.$this->ts.'-images.csv');
-			if($this->includeDets) unlink($this->targetPath.$this->ts.'-det.csv');
-	
-			$this->logOrEcho("\n-----------------------------------------------------\n");
+			unlink($this->targetPath.$this->ts.'-det.csv');
+			unlink($this->targetPath.$this->ts.'-images.csv');
+			unlink($this->targetPath.$this->ts.'-meta.xml');
+			if($this->schemaType == 'dwc'){
+				rename($this->targetPath.$this->ts.'-eml.xml',$this->targetPath.str_replace('.zip','.eml',$fileName));
+			}
+			else{
+				unlink($this->targetPath.$this->ts.'-eml.xml');
+			}
 		}
 		else{
-			echo 'ERROR: unable to create DwC-A for collection #'.implode(',',array_keys($this->collArr));
+			$errStr = "FAILED to create archive file. No records were located in this collection. If records exist, it may be that they don't have Symbiota GUID assignments. Have the portal manager run the GUID mapper (available in sitemap)";
+			$this->logOrEcho($errStr);
 		}
+		
+		$this->logOrEcho("\n-----------------------------------------------------\n");
 		return $archiveFile;
 	}
 	
 	private function writeMetaFile(){
 		$this->logOrEcho("Creating meta.xml (".date('h:i:s A').")... ");
-
+		ob_flush();
+		flush();
+		
 		//Create new DOM document 
-		$newDoc = new DOMDocument('1.0','UTF-8');
+		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
 		//Add root element 
 		$rootElem = $newDoc->createElement('archive');
@@ -361,7 +674,7 @@ class DwcArchiverOccurrence{
 
 		//Core file definition
 		$coreElem = $newDoc->createElement('core');
-		$coreElem->setAttribute('encoding',$GLOBALS['charset']);
+		$coreElem->setAttribute('encoding',$this->charSetOut);
 		$coreElem->setAttribute('fieldsTerminatedBy',',');
 		$coreElem->setAttribute('linesTerminatedBy','\n');
 		$coreElem->setAttribute('fieldsEnclosedBy','"');
@@ -376,21 +689,26 @@ class DwcArchiverOccurrence{
 		$idElem->setAttribute('index','0');
 		$coreElem->appendChild($idElem);
 
-		$occCnt = 0;
-		foreach($this->occurrenceFieldArr as $k => $v){
-			if($occCnt){
-				$fieldElem = $newDoc->createElement('field');
-				$fieldElem->setAttribute('index',$occCnt);
-				$fieldElem->setAttribute('term',$v);
-				$coreElem->appendChild($fieldElem);
-			}
+		$occCnt = 1;
+		$termArr = $this->occurrenceFieldArr['terms'];
+		if($this->schemaType == 'dwc'){
+			unset($termArr['localitySecurity']);
+		}
+		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+			unset($termArr['collectionId']);
+		}
+		foreach($termArr as $k => $v){
+			$fieldElem = $newDoc->createElement('field');
+			$fieldElem->setAttribute('index',$occCnt);
+			$fieldElem->setAttribute('term',$v);
+			$coreElem->appendChild($fieldElem);
 			$occCnt++;
 		}
 		$rootElem->appendChild($coreElem);
 
 		//Identification extension
 		$extElem1 = $newDoc->createElement('extension');
-		$extElem1->setAttribute('encoding',$GLOBALS['charset']);
+		$extElem1->setAttribute('encoding',$this->charSetOut);
 		$extElem1->setAttribute('fieldsTerminatedBy',',');
 		$extElem1->setAttribute('linesTerminatedBy','\n');
 		$extElem1->setAttribute('fieldsEnclosedBy','"');
@@ -407,14 +725,13 @@ class DwcArchiverOccurrence{
 		
 		//List identification fields
 		if($this->includeDets){
-			$detCnt = 0;
-			foreach($this->determinationFieldArr as $k => $v){
-				if($detCnt){
-					$fieldElem = $newDoc->createElement('field');
-					$fieldElem->setAttribute('index',$detCnt);
-					$fieldElem->setAttribute('term',$v);
-					$extElem1->appendChild($fieldElem);
-				}
+			$detCnt = 1;
+			$termArr = $this->determinationFieldArr['terms'];
+			foreach($termArr as $k => $v){
+				$fieldElem = $newDoc->createElement('field');
+				$fieldElem->setAttribute('index',$detCnt);
+				$fieldElem->setAttribute('term',$v);
+				$extElem1->appendChild($fieldElem);
 				$detCnt++;
 			}
 			$rootElem->appendChild($extElem1);
@@ -423,7 +740,7 @@ class DwcArchiverOccurrence{
 		//Image extension
 		if($this->includeImgs){
 			$extElem2 = $newDoc->createElement('extension');
-			$extElem2->setAttribute('encoding',$GLOBALS['charset']);
+			$extElem2->setAttribute('encoding',$this->charSetOut);
 			$extElem2->setAttribute('fieldsTerminatedBy',',');
 			$extElem2->setAttribute('linesTerminatedBy','\n');
 			$extElem2->setAttribute('fieldsEnclosedBy','"');
@@ -452,10 +769,7 @@ class DwcArchiverOccurrence{
 			$rootElem->appendChild($extElem2);
 		}
 		
-		$tempFileName = $this->targetPath.$this->ts.'-meta.xml';
-		$newDoc->save($tempFileName);
-		$this->zipArchive->addFile($tempFileName);
-    	$this->zipArchive->renameName($tempFileName,'meta.xml');
+		$newDoc->save($this->targetPath.$this->ts.'-meta.xml');
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -570,14 +884,12 @@ class DwcArchiverOccurrence{
 	
 	private function writeEmlFile(){
 		$this->logOrEcho("Creating eml.xml (".date('h:i:s A').")... ");
+		ob_flush();
+		flush();
 		
 		$emlDoc = $this->getEmlDom();
 
-		$tempFileName = $this->targetPath.$this->ts.'-eml.xml';
-		$emlDoc->save($tempFileName);
-
-		$this->zipArchive->addFile($tempFileName);
-    	$this->zipArchive->renameName($tempFileName,'eml.xml');
+		$emlDoc->save($this->targetPath.$this->ts.'-eml.xml');
 
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -591,7 +903,7 @@ class DwcArchiverOccurrence{
 		
 		if(!$emlArr) $emlArr = $this->getEmlArr();
 		//Create new DOM document 
-		$newDoc = new DOMDocument('1.0','UTF-8');
+		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
 		//Add root element 
 		$rootElem = $newDoc->createElement('eml:eml');
@@ -612,13 +924,16 @@ class DwcArchiverOccurrence{
 
 		if(array_key_exists('alternateIdentifier',$emlArr)){
 			foreach($emlArr['alternateIdentifier'] as $v){
-				$datasetElem->appendChild($newDoc->createElement('alternateIdentifier',$v));
+				$altIdElem = $newDoc->createElement('alternateIdentifier');
+				$altIdElem->appendChild($newDoc->createTextNode($v));
+				$datasetElem->appendChild($altIdElem);
 			}
 		}
 		
 		if(array_key_exists('title',$emlArr)){
-			$titleElem = $newDoc->createElement('title',$emlArr['title']);
+			$titleElem = $newDoc->createElement('title');
 			$titleElem->setAttribute('xml:lang','eng');
+			$titleElem->appendChild($newDoc->createTextNode($emlArr['title']));
 			$datasetElem->appendChild($titleElem);
 		}
 
@@ -634,7 +949,9 @@ class DwcArchiverOccurrence{
 					}
 				}
 				foreach($childArr as $k => $v){
-					$creatorElem->appendChild($newDoc->createElement($k,$v));
+					$newChildElem = $newDoc->createElement($k);
+					$newChildElem->appendChild($newDoc->createTextNode($v));
+					$creatorElem->appendChild($newChildElem);
 				}
 				$datasetElem->appendChild($creatorElem);
 			}
@@ -645,22 +962,30 @@ class DwcArchiverOccurrence{
 			foreach($mdArr as $childArr){
 				$mdElem = $newDoc->createElement('metadataProvider');
 				foreach($childArr as $k => $v){
-					$mdElem->appendChild($newDoc->createElement($k,$v));
+					$newChildElem = $newDoc->createElement($k);
+					$newChildElem->appendChild($newDoc->createTextNode($v));
+					$mdElem->appendChild($newChildElem);
 				}
 				$datasetElem->appendChild($mdElem);
 			}
 		}
 		
 		if(array_key_exists('pubDate',$emlArr) && $emlArr['pubDate']){
-			$datasetElem->appendChild($newDoc->createElement('pubDate',$emlArr['pubDate']));
+			$pubElem = $newDoc->createElement('pubDate');
+			$pubElem->appendChild($newDoc->createTextNode($emlArr['pubDate']));
+			$datasetElem->appendChild($pubElem);
 		}
 		$langStr = 'eng';
 		if(array_key_exists('language',$emlArr) && $emlArr) $langStr = $emlArr['language'];
-		$datasetElem->appendChild($newDoc->createElement('language',$langStr));
+		$langElem = $newDoc->createElement('language');
+		$langElem->appendChild($newDoc->createTextNode($langStr));
+		$datasetElem->appendChild($langElem);
 
 		if(array_key_exists('description',$emlArr) && $emlArr['description']){
 			$abstractElem = $newDoc->createElement('abstract');
-			$abstractElem->appendChild($newDoc->createElement('para',$emlArr['description']));
+			$paraElem = $newDoc->createElement('para');
+			$paraElem->appendChild($newDoc->createTextNode($emlArr['description']));
+			$abstractElem->appendChild($paraElem);
 			$datasetElem->appendChild($abstractElem);
 		}
 		
@@ -673,12 +998,16 @@ class DwcArchiverOccurrence{
 				unset($contactArr['addr']);
 			}
 			foreach($contactArr as $contactKey => $contactValue){
-				$contactElem->appendChild($newDoc->createElement($contactKey,$contactValue));
+				$conElem = $newDoc->createElement($contactKey);
+				$conElem->appendChild($newDoc->createTextNode($contactValue));
+				$contactElem->appendChild($conElem);
 			}
 			if(isset($contactArr['addr'])){
 				$addressElem = $newDoc->createElement('address');
 				foreach($addrArr as $aKey => $aVal){
-					$addressElem->appendChild($newDoc->createElement($aKey, $aVal));
+					$childAddrElem = $newDoc->createElement($aKey);
+					$childAddrElem->appendChild($newDoc->createTextNode($aVal));
+					$addressElem->appendChild($childAddrElem);
 				}
 				$contactElem->appendChild($addressElem);
 			}
@@ -695,12 +1024,16 @@ class DwcArchiverOccurrence{
 					unset($assocArr['address']);
 				}
 				foreach($assocArr as $aKey => $aArr){
-					$assocElem->appendChild($newDoc->createElement($aKey,$aArr));
+					$childAssocElem = $newDoc->createElement($aKey);
+					$childAssocElem->appendChild($newDoc->createTextNode($aArr));
+					$assocElem->appendChild($childAssocElem);
 				}
 				if($addrArr){
 					$addrElem = $newDoc->createElement('address');
 					foreach($addrArr as $addrKey => $addrValue){
-						$addrElem->appendChild($newDoc->createElement($addrKey,$addrValue));
+						$childAddrElem = $newDoc->createElement($addrKey);
+						$childAddrElem->appendChild($newDoc->createTextNode($addrValue));
+						$addrElem->appendChild($childAddrElem);
 					}
 					$assocElem->appendChild($addrElem);
 				}
@@ -710,20 +1043,25 @@ class DwcArchiverOccurrence{
 		
 		if(array_key_exists('intellectualRights',$emlArr)){
 			$rightsElem = $newDoc->createElement('intellectualRights');
-			$rightsElem->appendChild($newDoc->createElement('para',$emlArr['intellectualRights']));
+			$paraElem = $newDoc->createElement('para');
+			$paraElem->appendChild($newDoc->createTextNode($emlArr['intellectualRights']));
+			$rightsElem->appendChild($paraElem);
 			$datasetElem->appendChild($rightsElem);
 		}
 
 		$symbElem = $newDoc->createElement('symbiota');
-		$symbElem->appendChild($newDoc->createElement('dateStamp',date("c")));
+		$dateElem = $newDoc->createElement('dateStamp');
+		$dateElem->appendChild($newDoc->createTextNode(date("c")));
+		$symbElem->appendChild($dateElem);
 		//Citation
 		$id = UuidFactory::getUuidV4();
-		$citeElem = $newDoc->createElement('citation',$GLOBALS['defaultTitle'].' - '.$id);
+		$citeElem = $newDoc->createElement('citation');
+		$citeElem->appendChild($newDoc->createTextNode($GLOBALS['defaultTitle'].' - '.$id));
 		$citeElem->setAttribute('identifier',$id);
 		$symbElem->appendChild($citeElem);
 		//Physical
 		$physicalElem = $newDoc->createElement('physical');
-		$physicalElem->appendChild($newDoc->createElement('characterEncoding',$GLOBALS['charset']));
+		$physicalElem->appendChild($newDoc->createElement('characterEncoding',$this->charSetOut));
 		//format
 		$dfElem = $newDoc->createElement('dataFormat');
 		$edfElem = $newDoc->createElement('externallyDefinedFormat');
@@ -749,11 +1087,15 @@ class DwcArchiverOccurrence{
 					unset($collArr['abstract']);
 				}
 				foreach($collArr as $collKey => $collValue){
-					$collElem->appendChild($newDoc->createElement($collKey,$collValue));
+					$collElem2 = $newDoc->createElement($collKey);
+					$collElem2->appendChild($newDoc->createTextNode($collValue));
+					$collElem->appendChild($collElem2);
 				}
 				if($abstractStr){
 					$abstractElem = $newDoc->createElement('abstract');
-					$abstractElem->appendChild($newDoc->createElement('para',$abstractStr));
+					$abstractElem2 = $newDoc->createElement('para');
+					$abstractElem2->appendChild($newDoc->createTextNode($abstractStr));
+					$abstractElem->appendChild($abstractElem2);
 					$collElem->appendChild($abstractElem);
 				}
 				$symbElem->appendChild($collElem);
@@ -772,123 +1114,99 @@ class DwcArchiverOccurrence{
 	private function writeOccurrenceFile(){
 		global $clientRoot;
 		$this->logOrEcho("Creating occurrences.csv (".date('h:i:s A').")... ");
-		if($this->collArr){
-			$fh = fopen($this->targetPath.$this->ts.'-occur.csv', 'w');
+		ob_flush();
+		flush();
+		$hasRecords = false;
+		$fh = fopen($this->targetPath.$this->ts.'-occur.csv', 'w');
+		
+		//Output records
+		$sql = $this->getSqlOccurrences();
+		$fieldArr = $this->occurrenceFieldArr['fields'];
+		if($this->schemaType == 'dwc'){
+			unset($fieldArr['localitySecurity']);
+		}
+		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+			unset($fieldArr['collectionId']);
+		}
+		//Output header
+		fputcsv($fh, array_keys($fieldArr));
+		
+		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$urlPathPrefix = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+			$urlPathPrefix .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+			$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
 			
-			//Output header
-			fputcsv($fh, array_keys($this->occurrenceFieldArr));
-			
-			//Output records
-			$sql = 'SELECT o.occid, IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-				'o.basisOfRecord, o.occurrenceID, o.catalogNumber, o.otherCatalogNumbers, o.ownerInstitutionCode, '.
-				'o.family, o.sciname AS scientificName, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
-				'IFNULL(CONCAT_WS(" ",t.unitind1,t.unitname1),o.genus) AS genus, IFNULL(CONCAT_WS(" ",t.unitind2,t.unitname2),o.specificEpithet) AS specificEpithet, '.
-				'IFNULL(t.unitind3,o.taxonRank) AS taxonRank, IFNULL(t.unitname3,o.infraspecificEpithet) AS infraspecificEpithet, '.
-				'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, o.typeStatus, '.
-				'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-				'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNumber, '.
-				'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, o.informationWithheld, '.
-				'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
-				'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
-				'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
-				'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-				'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, o.disposition, '.
-				'o.language, c.rights, c.rightsHolder, c.accessRights, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-				'g.guid AS recordId, o.localitySecurity, c.collid '.
-				'FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
-				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.
-				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql;
-			}
-			$sql .= 'ORDER BY o.collid,o.occid'; 
-			//echo '<div>'.$sql.'</div>';
-			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-				$urlPathPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-				$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
-				$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
-				while($r = $rs->fetch_assoc()){
-					if($this->redactLocalities && $r["localitySecurity"] > 0){
-						foreach($this->securityArr as $v){
-							if(array_key_exists($v,$r)) $r[$v] = '[Redacted]';
-						}
-					}
-					unset($r['localitySecurity']);
-					$r['references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
-					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
-					if($guidTarget == 'catalogNumber'){
-						$r['occurrenceID'] = $r['catalogNumber'];
-					}
-					elseif($guidTarget == 'symbiotaUUID'){
-						$r['occurrenceID'] = $r['recordId'];
-					}
-					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-					unset($r['collid']);
-					fputcsv($fh, $this->addcslashesArr($r));
+			while($r = $rs->fetch_assoc()){
+				$hasRecords = true;
+				if(!array_key_exists($r['collid'],$this->collArr)){
+					$this->setCollArr($r['collid']);
 				}
-				$rs->free();
+				//Protect sensitive records
+				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
+					foreach($this->securityArr as $v){
+						if(array_key_exists($v,$r)) $r[$v] = '[Redacted]';
+					}
+				}
+				
+				$r['references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
+				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+				if($guidTarget == 'catalogNumber'){
+					$r['occurrenceID'] = $r['catalogNumber'];
+				}
+				elseif($guidTarget == 'symbiotaUUID'){
+					$r['occurrenceID'] = $r['recordId'];
+				}
+				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+				if($this->schemaType == 'dwc'){
+					unset($r['localitySecurity']);
+				}
+				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+					unset($r['collid']);
+				}
+				$this->encodeArr($r);
+				$this->addcslashesArr($r);
+				fputcsv($fh, $r);
 			}
-			else{
-				$this->logOrEcho("ERROR creating occurrence.csv file: ".$this->conn->error."\n");
-				$this->logOrEcho("\tSQL: ".$sql."\n");
-			}
-	
-			fclose($fh);
-			$this->zipArchive->addFile($this->targetPath.$this->ts.'-occur.csv');
-			$this->zipArchive->renameName($this->targetPath.$this->ts.'-occur.csv','occurrences.csv');
+			$rs->free();
 		}
 		else{
-			$this->logOrEcho("ERROR: collections not defined; occurrences.csv not created\n");
+			$this->logOrEcho("ERROR creating occurrence.csv file: ".$this->conn->error."\n");
+			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
+
+			fclose($fh);
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
+		return $hasRecords;
 	}
 	
 	private function writeDeterminationFile(){
 		$this->logOrEcho("Creating identifications.csv (".date('h:i:s A').")... ");
-		if($this->collArr){
-			$fh = fopen($this->targetPath.$this->ts.'-det.csv', 'w');
-			
-			//Output header
-			fputcsv($fh, array_keys($this->determinationFieldArr));
-			
-			//Output records
-			$sql = 'SELECT d.occid, d.identifiedBy, d.dateIdentified, d.identificationQualifier, d.sciName AS scientificName, '.
-				'd.scientificNameAuthorship, CONCAT_WS(" ",t.unitname1,t.unitname1) AS genus, '. 
-				'CONCAT_WS(" ",t.unitname2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, '. 
-				't.unitname3 AS infraspecificEpithet, d.identificationReferences, d.identificationRemarks, g.guid AS recordId '.
-				'FROM (omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid) '.
-				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
-				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
-				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid '. 
-				'WHERE o.collid IN('.implode(',',array_keys($this->collArr)).') ';
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql;
+		ob_flush();
+		flush();
+		$fh = fopen($this->targetPath.$this->ts.'-det.csv', 'w');
+		
+		//Output header
+		fputcsv($fh, array_keys($this->determinationFieldArr['fields']));
+		
+		//Output records
+		$sql = $this->getSqlDeterminations();
+		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			while($r = $rs->fetch_assoc()){
+				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+				$this->encodeArr($r);
+				$this->addcslashesArr($r);
+				fputcsv($fh, $r);
 			}
-			$sql .= 'ORDER BY o.collid,o.occid';
-			//echo $sql;
-			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-				while($r = $rs->fetch_assoc()){
-					$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
-					fputcsv($fh, $this->addcslashesArr($r));
-				}
-				$rs->free();
-			}
-			else{
-				$this->logOrEcho("ERROR creating identifications.csv file: ".$this->conn->error."\n");
-				$this->logOrEcho("\tSQL: ".$sql."\n");
-			}
-				
-			fclose($fh);
-			$this->zipArchive->addFile($this->targetPath.$this->ts.'-det.csv');
-			$this->zipArchive->renameName($this->targetPath.$this->ts.'-det.csv','identifications.csv');
+			$rs->free();
 		}
 		else{
-			$this->logOrEcho("ERROR: collections not defined; identifications.csv not created\n");
+			$this->logOrEcho("ERROR creating identifications.csv file: ".$this->conn->error."\n");
+			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
+			
+		fclose($fh);
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
 
@@ -896,47 +1214,32 @@ class DwcArchiverOccurrence{
 		global $clientRoot,$imageDomain;
 
 		$this->logOrEcho("Creating images.csv (".date('h:i:s A').")... ");
-		if($this->collArr){
-			$fh = fopen($this->targetPath.$this->ts.'-images.csv', 'w');
-			
-			//Output header
-			fputcsv($fh, array_keys($this->imageFieldArr));
-	
-			//Output records
-			$sql = 'SELECT o.occid, IFNULL(i.originalurl,i.url) as accessURI, g.guid AS providermanagedid, '. 
-				'o.sciname AS title, IFNULL(i.caption,i.notes) as comments, '.
-				'IFNULL(c.rightsholder,CONCAT(c.collectionname," (",CONCAT_WS("-",c.institutioncode,c.collectioncode),")")) AS owner, '.
-				'c.rights, "" AS usageterms, c.accessrights AS webstatement, c.initialtimestamp AS metadatadate '.
-				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid '.
-				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
-				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
-				'WHERE c.collid IN('.implode(',',array_keys($this->collArr)).') ';
-			if($this->redactLocalities){
-				$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+		ob_flush();
+		flush();
+		$fh = fopen($this->targetPath.$this->ts.'-images.csv', 'w');
+		
+		//Output header
+		fputcsv($fh, array_keys($this->imageFieldArr));
+
+		//Output records
+		$sql = $this->getSqlImages();
+		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$urlPathPrefix = "http://";
+			if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
+			$urlPathPrefix .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
+			$localDomain = '';
+			if(isset($imageDomain) && $imageDomain){
+				$localDomain = $imageDomain;
 			}
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql;
+			else{
+				$localDomain = $urlPathPrefix;
 			}
-			//$sql .= 'ORDER BY o.occid';
-			//echo $sql;
-			if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
-				$urlPathPrefix = "http://";
-				if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
-				$urlPathPrefix .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
-				$localDomain = '';
-				if(isset($imageDomain) && $imageDomain){
-					$localDomain = $imageDomain;
-				}
-				else{
-					$localDomain = $urlPathPrefix;
-				}
-				$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
-				while($r = $rs->fetch_assoc()){
-					if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
+			$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
+			while($r = $rs->fetch_assoc()){
+				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
+				if($this->schemaType != 'backup'){
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
-						$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
 						$r['webstatement'] = $r['rights'];
 						$r['rights'] = '';
 						if(!$r['usageterms']){
@@ -958,43 +1261,41 @@ class DwcArchiverOccurrence{
 						}
 					}
 					if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
-					$r['associatedSpecimenReference'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
-					$r['type'] = 'StillImage';
-					$r['subtype'] = 'Photograph';
-					$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
-					if($extStr == 'jpg' || $extStr == 'jpeg'){
-						$r['format'] = 'image/jpeg';
-					}
-					elseif($extStr == 'gif'){
-						$r['format'] = 'image/gif';
-					}
-					elseif($extStr == 'png'){
-						$r['format'] = 'image/png';
-					}
-					elseif($extStr == 'tiff' || $extStr == 'tif'){
-						$r['format'] = 'image/tiff';
-					}
-					else{
-						$r['format'] = '';
-					}
-					$r['metadataLanguage'] = 'en';
-					//Load record array into output file
-					fputcsv($fh, $this->addcslashesArr($r));
 				}
-				$rs->free();
+				$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+				$r['associatedSpecimenReference'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
+				$r['type'] = 'StillImage';
+				$r['subtype'] = 'Photograph';
+				$extStr = strtolower(substr($r['accessURI'],strrpos($r['accessURI'],'.')+1));
+				if($extStr == 'jpg' || $extStr == 'jpeg'){
+					$r['format'] = 'image/jpeg';
+				}
+				elseif($extStr == 'gif'){
+					$r['format'] = 'image/gif';
+				}
+				elseif($extStr == 'png'){
+					$r['format'] = 'image/png';
+				}
+				elseif($extStr == 'tiff' || $extStr == 'tif'){
+					$r['format'] = 'image/tiff';
+				}
+				else{
+					$r['format'] = '';
+				}
+				$r['metadataLanguage'] = 'en';
+				//Load record array into output file
+				$this->encodeArr($r);
+				$this->addcslashesArr($r);
+				fputcsv($fh, $r);
 			}
-			else{
-				$this->logOrEcho("ERROR creating images.csv file: ".$this->conn->error."\n");
-				$this->logOrEcho("\tSQL: ".$sql."\n");
-			}
-			
-			fclose($fh);
-			$this->zipArchive->addFile($this->targetPath.$this->ts.'-images.csv');
-			$this->zipArchive->renameName($this->targetPath.$this->ts.'-images.csv','images.csv');
+			$rs->free();
 		}
 		else{
-			$this->logOrEcho("ERROR: collections not defined; images.csv not created\n");
+			$this->logOrEcho("ERROR creating images.csv file: ".$this->conn->error."\n");
+			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
+		
+		fclose($fh);
 		
     	$this->logOrEcho("Done!! (".date('h:i:s A').")\n");
 	}
@@ -1005,22 +1306,21 @@ class DwcArchiverOccurrence{
 
 		$this->initPublisher();
 
-		$logFile = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
-		$this->logFH = fopen($logFile, 'a');
 		$this->logOrEcho("Starting batch process (".date('Y-m-d h:i:s A').")\n");
 		$this->logOrEcho("\n-----------------------------------------------------\n\n");
+		ob_flush();
+		flush();
 		
+		$successArr = array();
 		foreach($collIdArr as $id){
 			//Create a separate DWCA object for each collection
-			$this->setCollArr($id);
-			$collTitle = $this->collArr[$id]['instcode'];
-			if($this->collArr[$id]['collcode']) $collTitle .= '-'.$this->collArr[$id]['collcode'];
-			$this->logOrEcho('Starting DwC-A process for '.$collTitle."\n");
-			$this->setFileName($collTitle);
-			$this->createDwcArchive();
+			$this->resetCollArr($id);
+			if($this->createDwcArchive()){
+				$successArr[] = $id;
+			}
 		}
-		//Reset $this->collArr with all the collections and then rebuild the RSS feed 
-		$this->setCollArr(implode(',',$collIdArr));
+		//Reset $this->collArr with all the collections ran successfully and then rebuild the RSS feed 
+		$this->resetCollArr(implode(',',$successArr));
 		$this->writeRssFile();
 		$this->logOrEcho("Batch process finished! (".date('Y-m-d h:i:s A').") \n");
 	}
@@ -1031,7 +1331,7 @@ class DwcArchiverOccurrence{
 		$this->logOrEcho("Mapping data to RSS feed... \n");
 		
 		//Create new document and write out to target
-		$newDoc = new DOMDocument('1.0','UTF-8');
+		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
 		//Add root element 
 		$rootElem = $newDoc->createElement('rss');
@@ -1045,7 +1345,8 @@ class DwcArchiverOccurrence{
 		$rootElem->appendChild($channelElem);
 		
 		//Add title, link, description, language
-		$titleElem = $newDoc->createElement('title',$defaultTitle.' Darwin Core Archive rss feed');
+		$titleElem = $newDoc->createElement('title');
+		$titleElem->appendChild($newDoc->createTextNode($defaultTitle.' Darwin Core Archive rss feed'));
 		$channelElem->appendChild($titleElem);
 		$urlPathPrefix = "http://";
 		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) $urlPathPrefix = "https://";
@@ -1053,9 +1354,11 @@ class DwcArchiverOccurrence{
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPathPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$localDomain = $urlPathPrefix;
 		$urlPathPrefix .= $clientRoot.(substr($clientRoot,-1)=='/'?'':'/');
-		$linkElem = $newDoc->createElement('link',$urlPathPrefix);
+		$linkElem = $newDoc->createElement('link');
+		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
 		$channelElem->appendChild($linkElem);
-		$descriptionElem = $newDoc->createElement('description',$defaultTitle.' Darwin Core Archive rss feed');
+		$descriptionElem = $newDoc->createElement('description');
+		$descriptionElem->appendChild($newDoc->createTextNode($defaultTitle.' Darwin Core Archive rss feed'));
 		$channelElem->appendChild($descriptionElem);
 		$languageElem = $newDoc->createElement('language','en-us');
 		$channelElem->appendChild($languageElem);
@@ -1071,7 +1374,8 @@ class DwcArchiverOccurrence{
 			$instCode = $cArr['instcode'];
 			if($cArr['collcode']) $instCode .= '-'.$cArr['collcode'];
 			$title = $instCode.' DwC-Archive';
-			$itemTitleElem = $newDoc->createElement('title',$title);
+			$itemTitleElem = $newDoc->createElement('title');
+			$itemTitleElem->appendChild($newDoc->createTextNode($title));
 			$itemElem->appendChild($itemTitleElem);
 			//Icon
 			$imgLink = '';
@@ -1085,17 +1389,25 @@ class DwcArchiverOccurrence{
 			else{
 				$imgLink = $cArr['icon'];
 			}
-			$iconElem = $newDoc->createElement('image',$imgLink);
+			$iconElem = $newDoc->createElement('image');
+			$iconElem->appendChild($newDoc->createTextNode($imgLink));
 			$itemElem->appendChild($iconElem);
 			
 			//description
-			$descTitleElem = $newDoc->createElement('description','Darwin Core Archive for '.$cArr['collname']);
+			$descTitleElem = $newDoc->createElement('description');
+			$descTitleElem->appendChild($newDoc->createTextNode('Darwin Core Archive for '.$cArr['collname']));
 			$itemElem->appendChild($descTitleElem);
 			//GUIDs
-			$guidElem = $newDoc->createElement('guid',$urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId);
+			$guidElem = $newDoc->createElement('guid');
+			$guidElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/misc/collprofiles.php?collid='.$collId));
 			$itemElem->appendChild($guidElem);
-			$guidElem2 = $newDoc->createElement('guid',$cArr['collectionguid']);
+			$guidElem2 = $newDoc->createElement('guid');
+			$guidElem2->appendChild($newDoc->createTextNode($cArr['collectionguid']));
 			$itemElem->appendChild($guidElem2);
+			//EML file link
+			$emlElem = $newDoc->createElement('emllink');
+			$emlElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.eml'));
+			$itemElem->appendChild($emlElem);
 			//type
 			$typeTitleElem = $newDoc->createElement('type','DWCA');
 			$itemElem->appendChild($typeTitleElem);
@@ -1103,11 +1415,13 @@ class DwcArchiverOccurrence{
 			$recTypeTitleElem = $newDoc->createElement('recordType','DWCA');
 			$itemElem->appendChild($recTypeTitleElem);
 			//link
-			$linkTitleElem = $newDoc->createElement('link',$urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.zip');
+			$linkTitleElem = $newDoc->createElement('link');
+			$linkTitleElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.zip'));
 			$itemElem->appendChild($linkTitleElem);
 			//pubDate
 			//$dsStat = stat($this->targetPath.$instCode.'_DwC-A.zip');
-			$pubDateTitleElem = $newDoc->createElement('pubDate',date("D, d M Y H:i:s"));
+			$pubDateTitleElem = $newDoc->createElement('pubDate');
+			$pubDateTitleElem->appendChild($newDoc->createTextNode(date("D, d M Y H:i:s")));
 			$itemElem->appendChild($pubDateTitleElem);
 			$itemArr[$title] = $itemElem;
 		}
@@ -1149,9 +1463,11 @@ class DwcArchiverOccurrence{
 			if($i->getAttribute('collid') == $collId){
 				$link = $i->getElementsByTagName("link");
 				$nodeValue = $link->item(0)->nodeValue;
-				$fileUrl = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/');
-				$fileUrl .= 'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
-				unlink($fileUrl);
+				$filePath = $serverRoot.(substr($serverRoot,-1)=='/'?'':'/');
+				$filePath .= 'collections/datasets/dwc'.substr($nodeValue,strrpos($nodeValue,'/'));
+				unlink($filePath);
+				$emlPath = str_replace('.zip','.eml',$filePath);
+				if(file_exists($emlPath)) unlink($emlPath);
 				$cElem->removeChild($i);
 			}
 		}
@@ -1220,10 +1536,14 @@ class DwcArchiverOccurrence{
 		return $retArr;
 	}
 
-	public function setSilent($c){
-		$this->silent = $c;
+	public function setVerbose($c){
+		$this->verbose = $c;
 	}
 	
+	public function setSchemaType($type){
+		$this->schemaType = $type;
+	}
+
 	public function setIncludeDets($includeDets){
 		$this->includeDets = $includeDets;
 	}
@@ -1232,16 +1552,28 @@ class DwcArchiverOccurrence{
 		$this->includeImgs = $includeImgs;
 	}
 	
-	public function setCanReadRareSpecies($canRead){
-		if($canRead) $this->redactLocalities = 0;
-	}
-
 	public function setRedactLocalities($redact){
 		$this->redactLocalities = $redact;
 	}
-	
+
+	public function setRareReaderArr($approvedCollid){
+		if(is_array($approvedCollid)){ 
+			$this->rareReaderArr = $approvedCollid;
+		}
+		elseif(is_string($approvedCollid)){
+			$this->rareReaderArr = explode(',',$approvedCollid);
+		}
+	}
+
+	public function setCharSetOut($cs){
+		$cs = strtoupper($cs);
+		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
+			$this->charSetOut = $cs;
+		}
+	}
+
 	private function logOrEcho($str){
-		if(!$this->silent){
+		if($this->verbose){
 			if($this->logFH){
 				fwrite($this->logFH,$str);
 			} 
@@ -1251,31 +1583,24 @@ class DwcArchiverOccurrence{
 		}
 	}
 
-	private function encodeArr(&$inArr,$targetCharset){
-		foreach($inArr as $k => $v){
-			$inArr[$k] = $this->encodeString($v,$targetCharset);
+	private function encodeArr(&$inArr){
+		if($this->charSetSource && $this->charSetOut != $this->charSetSource){
+			foreach($inArr as $k => $v){
+				$inArr[$k] = $this->encodeStr($v);
+			}
 		}
 	}
-	
-	private function encodeString($inStr,$targetCharset){
-		global $charset;
+
+	private function encodeStr($inStr){
 		$retStr = $inStr;
-		
-		$portalCharset = ''; 
-		if(strtolower($charset) == 'utf-8' || strtolower($charset) == 'utf8'){
-			$portalCharset = 'utf-8';
-		}
-		elseif(strtolower($charset) == 'iso-8859-1'){
-			$portalCharset = 'iso-8859-1';
-		}
-		if($portalCharset){
-			if($targetCharset == 'utf8' && $portalCharset == 'iso-8859-1'){
+		if($this->charSetSource){
+			if($this->charSetOut == 'utf-8' && $this->charSetSource == 'iso-8859-1'){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif($targetCharset == "iso88591" && $portalCharset == 'utf-8'){
+			elseif($this->charSetOut == "iso-8859-1" && $this->charSetSource == 'utf-8'){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
@@ -1285,12 +1610,10 @@ class DwcArchiverOccurrence{
 		return $retStr;
 	}
 	
-	private function addcslashesArr($arr){
-		$retArr = array();
+	private function addcslashesArr(&$arr){
 		foreach($arr as $k => $v){
-			$retArr[$k] = addcslashes($v,"\n\r\"\\");
+			$arr[$k] = addcslashes($v,"\n\r\"\\");
 		}
-		return $retArr;
 	}
 
 	public function humanFilesize($filePath) {

@@ -26,6 +26,7 @@ if($action){
 		$redactLocalities = 0;
 		$dwcaManager->setRedactLocalities(0);
 	}
+	$dwcaManager->setTargetPath($serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/');
 }
 
 $editable = 0;
@@ -33,13 +34,11 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collId,$us
 	$editable = 1;
 }
 
-$dwcaManager->setTargetPath($serverRoot.(substr($serverRoot,-1)=='/'?'':'/').'collections/datasets/dwc/');
 $collArr = array();
 if($collId){
 	$dwcaManager->setCollArr($collId);
 	$collArr = $dwcaManager->getCollArr();
 }
-$dwcaManager->initPublisher();
 ?>
 <!DOCTYPE html>
 <html>
@@ -204,7 +203,6 @@ include($serverRoot."/header.php");
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
-			$dwcaManager->setFileName($collArr[$collId]['collcode']);
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
 			echo '</ul>';
@@ -234,7 +232,7 @@ include($serverRoot."/header.php");
 			}
 		}
 		else{
-			echo '<div style="margin:20px;font-weight:bold;color:red;">No data archives have been published for this portal</div>';
+			echo '<div style="margin:20px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
 		}
 		?>
 		<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
@@ -270,7 +268,8 @@ include($serverRoot."/header.php");
 		if($isAdmin){
 			if($action == 'Create/Refresh Darwin Core Archive(s)'){
 				echo '<ul>';
-				$dwcaManager->batchCreateDwca($_POST['coll'], $includeDets, $includeImgs, $redactLocalities);
+				$dwcaManager->setVerbose(1);
+				$dwcaManager->batchCreateDwca($_POST['coll']);
 				echo '</ul>';
 			}
 			elseif(array_key_exists('colliddel',$_POST)){
