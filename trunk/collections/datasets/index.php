@@ -182,7 +182,7 @@ if($symbUid){
 								<input type="submit" name="submitaction" value="Filter Specimen Records" />
 							</span>
 							<span style="margin-left:20px;">
-								* Specimen return is limited to 100 records
+								* Specimen return is limited to 500 records
 							</span>
 							<!-- 
 							<span style="margin-left:150px;">
