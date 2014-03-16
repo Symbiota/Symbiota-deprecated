@@ -67,6 +67,25 @@ class SpecProcNlp{
 		if(!($this->conn === false)) $this->conn->close();
 	}
 
+	public function parseRawOcrRecord($prlid){
+		$rawStr = '';
+		if(is_numeric($prlid)){
+			//Get raw OCR string
+			$sql = 'SELECT rawstr '.
+				'FROM specprocessorrawlabels '.
+				'WHERE (prlid = '.$prlid.')';
+			//echo $sql;
+			$cnt = 0;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$rawStr = $r->rawstr;
+			}
+			$rs->free();
+			//Parse and return
+		}
+		return $this->parseTextBlock($rawStr);
+	}
+		
 	public function parseTextBlock($rawStr){
 		//Parse and return
 		$dwcArr = array_change_key_case($this->parse($rawStr));
