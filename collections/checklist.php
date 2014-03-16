@@ -9,8 +9,8 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 
 	<div>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='Download Checklist Data'>
-			<a href='download/downloadhandler.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
-				<img width='15px' src='../images/dl.png'/>
+			<a href='download/index.php?dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+				<img width="15px" src="../images/dl.png" />
 			</a>
 		</div>
 		<?php 

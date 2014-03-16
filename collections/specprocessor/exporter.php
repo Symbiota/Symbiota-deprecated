@@ -13,6 +13,9 @@ $customValue1 = array_key_exists('customvalue1',$_REQUEST)?$_REQUEST['customvalu
 $customField2 = array_key_exists('customfield2',$_REQUEST)?$_REQUEST['customfield2']:'';
 $customType2 = array_key_exists('customtype2',$_REQUEST)?$_REQUEST['customtype2']:'';
 $customValue2 = array_key_exists('customvalue2',$_REQUEST)?$_REQUEST['customvalue2']:'';
+$customField3 = array_key_exists('customfield3',$_REQUEST)?$_REQUEST['customfield3']:'';
+$customType3 = array_key_exists('customtype3',$_REQUEST)?$_REQUEST['customtype3']:'';
+$customValue3 = array_key_exists('customvalue3',$_REQUEST)?$_REQUEST['customvalue3']:'';
 
 $dlManager = new OccurrenceDownload();
 $collMeta = $dlManager->getCollectionMetadata($collid);
@@ -22,13 +25,6 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
  	$isEditor = true;
 }
 
-$advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','catalogNumber'=>'Catalog Number',
-	'otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
-	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','eventDate'=>'Collection Date',
-	'country'=>'Country','stateProvince'=>'State/Province','county'=>'County','municipality'=>'Municipality',
-	'locality'=>'Locality','decimalLatitude'=>'Decimal Latitude','decimalLongitude'=>'Decimal Longitude',
-	'georeferenceSources'=>'Georeference Sources');
-/*
 $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identifiedBy'=>'Identified By','typeStatus'=>'Type Status',
 	'catalogNumber'=>'Catalog Number','otherCatalogNumbers'=>'Other Catalog Numbers','occurrenceId'=>'Occurrence ID (GUID)',
 	'recordedBy'=>'Collector/Observer','recordNumber'=>'Collector Number','associatedCollectors'=>'Associated Collectors',
@@ -43,7 +39,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 	'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferenceRemarks'=>'Georeference Remarks',
 	'minimumElevationInMeters'=>'Elevation Minimum (m)','maximumElevationInMeters'=>'Elevation Maximum (m)',
 	'verbatimElevation'=>'Verbatim Elevation','disposition'=>'Disposition');
-*/
 ?>
 <html>
 	<head>
@@ -55,7 +50,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
 		<script language="javascript">
 			$(function() {
-				var dialogArr = new Array("schemanative","newrecs");
+				var dialogArr = new Array("schemanative","schemadwc","newrecs");
 				var dialogStr = "";
 				for(i=0;i<dialogArr.length;i++){
 					dialogStr = dialogArr[i]+"info";
@@ -81,6 +76,12 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					return false;
 				}
 				return true;
+			}
+
+			function extensionSelected(obj){
+				if(obj.checked == true){
+					obj.form.zip.checked = true;
+				}
 			}
 		</script>
 	</head>
@@ -216,6 +217,25 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											</select>
 											<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" />
 										</div> 
+										<div style="margin:10px 0px;">
+											<select name="customfield3" style="width:200px">
+												<option value="">Select Field Name</option>
+												<option value="">---------------------------------</option>
+												<?php 
+												foreach($advFieldArr as $k => $v){
+													echo '<option value="'.$k.'" '.($k==$customField3?'SELECTED':'').'>'.$v.'</option>';
+												}
+												?>
+											</select>
+											<select name="customtype3">
+												<option value="EQUALS">EQUALS</option>
+												<option <?php echo ($customType3=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
+												<option <?php echo ($customType3=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
+												<option <?php echo ($customType3=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
+												<option <?php echo ($customType3=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+											</select>
+											<input name="customvalue3" type="text" value="<?php echo $customValue3; ?>" style="width:200px;" />
+										</div> 
 									</td>
 								</tr>
 								<tr>
@@ -226,12 +246,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
-											<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" /> 
-											Darwin Core
-											<a id="schemainfodwc" href="#" target="" title="More Information">
-												<img src="../../images/info.png" style="width:13px;" />
-											</a><br/>
-											<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED /> 
+											<input type="radio" name="schema" value="symbiota" CHECKED /> 
 											Symbiota Native
 											<a id="schemanativeinfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:13px;" />
@@ -240,7 +255,42 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 												such as substrate, associated collectors, verbatim description.
 											</div>
+											<input type="radio" name="schema" value="dwc" /> 
+											Darwin Core
+											<a id="schemainfodwc" href="#" target="" title="More Information">
+												<img src="../../images/info.png" style="width:13px;" />
+											</a><br/>
+											<div id="schemadwcinfodialog">
+												Darwin Core is a TDWG endorsed exchange standard specifically for biodiversity datasets. 
+												For more information, visit the <a href="">Darwin Core Documentation</a> website.
+											</div>
 											<!--  <input type="radio" name="schema" value="specify" /> Specify -->
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td valign="top">
+										<div style="margin:10px;">
+											<b>Data Extensions:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
+											<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
+											*Output must be a compressed archive 
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td valign="top">
+										<div style="margin:10px;">
+											<b>Compression:</b>
+										</div> 
+									</td>
+									<td>
+										<div style="margin:10px 0px;">
+											<input type="checkbox" name="zip" value="1" checked /> Archive Data Package (ZIP file)<br/>
 										</div>
 									</td>
 								</tr>
@@ -273,33 +323,6 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</div>
 									</td>
 								</tr>
-								<!-- 	
-									<tr>
-										<td valign="top">
-											<div style="margin:10px;">
-												<b>Additional Data:</b>
-											</div> 
-										</td>
-										<td>
-											<div style="margin:10px 0px;">
-												<input type="checkbox" name="identifications" value="1" onchange="this.form.zip.checked = true" checked /> Determination History<br/>
-												<input type="checkbox" name="images" value="1" onchange="this.form.zip.checked = true" checked /> Image Records
-											</div>
-										</td>
-									</tr>
-									<tr>
-										<td valign="top">
-											<div style="margin:10px;">
-												<b>Compression:</b>
-											</div> 
-										</td>
-										<td>
-											<div style="margin:10px 0px;">
-												<input type="checkbox" name="zip" value="1" checked /> Archive File (ZIP file)<br/>
-											</div>
-										</td>
-									</tr>
-								-->
 								<tr>
 									<td colspan="2">
 										<div style="margin:10px;">
@@ -347,6 +370,18 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<tr>
 										<td valign="top">
 											<div style="margin:10px;">
+												<b>Compression:</b>
+											</div> 
+										</td>
+										<td>
+											<div style="margin:10px 0px;">
+												<input type="checkbox" name="zip" value="1" checked /> Archive Data Package (ZIP file)<br/>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td valign="top">
+											<div style="margin:10px;">
 												<b>File Format:</b>
 											</div> 
 										</td>
@@ -376,13 +411,11 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<tr>
 										<td colspan="2">
 											<div style="margin:10px;">
-												<input name="customfield1" type="hidden" value="decimalLatitude" />
-												<input name="customtype1" type="hidden" value="NOTNULL" />
-												<input name="customvalue1" type="hidden" value="" />
 												<input name="customfield2" type="hidden" value="georeferenceSources" />
 												<input name="customtype2" type="hidden" value="STARTS" />
 												<input name="customvalue2" type="hidden" value="georef batch tool" />
 												<input name="targetcollid" type="hidden" value="<?php echo $collid; ?>" />
+												<input name="schema" type="hidden" value="georef" />
 												<input name="submitaction" type="submit" value="Download Records" />
 											</div>
 										</td>

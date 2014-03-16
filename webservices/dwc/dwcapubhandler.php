@@ -12,15 +12,37 @@ $includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
 if($collid){
 	$dwcaHandler = new DwcArchiverOccurrence();
 	
-	$dwcaHandler->initPublisher();
-	$dwcaHandler->setSilent(1);
-	$dwcaHandler->setFileName('webreq');
+	$dwcaHandler->setVerbose(0);
 	$dwcaHandler->setCollArr($collid,$collType);
-	if($cond) $dwcaHandler->setConditionStr($cond);
+	if($cond){
+		//String of cond-key/value pairs (e.g. country:USA,United States;stateprovince:Arizona,New Mexico;county-start:Pima,Eddy
+		$cArr = explode(';',$condObj);
+		foreach($cArr as $rawV){
+			$field = '';
+			$cond = 'EQUALS';
+			$valueArr = array();
+			$tok = explode(':',$rawV);
+			if($p = strpos($tok[0],'-')){
+				$field = substr($tok[0],0,$p);
+				$cond = strtoupper(substr($tok[0],$p));
+			}
+			if(isset($tok[1]) && $tok[1]){
+				$valueArr = explode(',',$tok[1]);
+			}
+			if($valueArr){
+				foreach($valueArr as $v){
+					$dwcaHandler->addCondition($field, $cond, $v);
+				}
+			}
+			else{
+				$dwcaHandler->addCondition($field, $cond);
+			}
+		}
+	}
 	$dwcaHandler->setIncludeDets($includeDets);
 	$dwcaHandler->setIncludeImgs($includeImgs);
 
-	$archiveFile = $dwcaHandler->createDwcArchive();
+	$archiveFile = $dwcaHandler->createDwcArchive('webreq');
 
 	if($archiveFile){
 		//ob_start();
