@@ -1,3 +1,6 @@
+<script src="../../js/jquery.js?ver=131123" type="text/javascript"></script>
+<script src="../../js/jquery-ui.js?ver=131123" type="text/javascript"></script>
+
 <?php
 /* Copyright � 2012 President and Fellows of Harvard College
  *
@@ -23,37 +26,107 @@
 
 include_once('../../../config/symbini.php');
 include_once('fp/FPNetworkFactory.php');
+include_once('fp/common/AnnotationGenerator.php');
 
 // check that the client helper has been installed
 $file = 'fp/FPNetworkFactory.php';
 $includePaths = explode(PATH_SEPARATOR, get_include_path());
 $fileExists = false;
 
-foreach($includePaths as $p) {
-  $fullname = $p.DIRECTORY_SEPARATOR.$file;
-  if(is_file($fullname)) {
-    $fileExists = true;
-    break;
-  }
+foreach ($includePaths as $p) {
+    $fullname = $p . DIRECTORY_SEPARATOR . $file;
+    if (is_file($fullname)) {
+        $fileExists = true;
+        break;
+    }
 }
 
-if (!$fileExists) { 
-   echo "FilteredPush Support has been enabled in this Symbiota installation, but FilteredPush helper code is not installed.<BR>";
-   echo "<strong>$file not found.</strong>";
-} else { 
+if (!$fileExists) {
+    echo "FilteredPush Support has been enabled in this Symbiota installation, but FilteredPush helper code is not installed.<BR>";
+    echo "<strong>$file not found.</strong>";
+} else {
 
 // Check for required query params
-     if (array_key_exists('catalognumber', $_GET) &&
-		    (array_key_exists('collectioncode', $_GET) || (array_key_exists('institutioncode', $_GET)))
-        ) 
-     {
- 	    $endpoint = FPNetworkFactory::getSparqlEndpoint();
-	
-  	    // returns query result formatted as html
-	    echo $endpoint->getAnnotations($_GET);
-     } else {
-	    throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
-     }
+    if (array_key_exists('catalognumber', $_GET) &&
+        (array_key_exists('collectioncode', $_GET) || (array_key_exists('institutioncode', $_GET)))
+    ) {
+        $endpoint = FPNetworkFactory::getSparqlEndpoint();
+
+        // returns query result formatted as html
+        $results = json_decode($endpoint->getAnnotations($_GET));
+
+        $annotations = array();
+        $responses = array();
+
+        foreach ($results as $result) {
+            if (isset($result->describesObject)) {
+                $responses[] = $result;
+            } else {
+                $annotations[] = $result;
+            }
+        }
+
+        foreach ($annotations as $annotation) {
+            echo "<h1>" . $annotation->scientificName . " - (" . $annotation->scientificNameAuthorship . ")</h1>";
+            echo "<p><a href=\"includes/response.php?uri=" . $annotation->uri . "\" onclick=\"window.open(this.href, 'popupwindow', 'width=500,height=400'); return false;\">Respond</a><br />";
+            echo "<a href=\"http://localhost:8082/clientHelper/getAnnotation/?uri=" . $annotation->uri . "\" target=\"_blank\">View</a><br /></p>";
+            ?>
+            <table>
+                <tr>
+                    <td><b>Created By:</b></td>
+                    <td style="padding-right:35px;"><? echo $annotation->createdBy ?></td>
+                    <td><b>Created On:</b></td>
+                    <td><? echo $annotation->date ?></td>
+                </tr>
+                <tr>
+                    <td><b>Collection Code:</b></td>
+                    <td style="padding-right:35px;"><? echo $_GET['collectioncode'] ?></td>
+                    <td><b>Catalog Number:</b></td>
+                    <td><? echo $_GET['catalognumber'] ?></td>
+                </tr>
+                <tr>
+                    <td><b>Institution Code:</b></td>
+                    <td style="padding-right:35px;"><? echo $_GET['institutioncode'] ?></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><b>Date Identified:</b></td>
+                    <td style="padding-right:35px;"><? echo $annotation->dateIdentified ?></td>
+                    <td><b>Identified By:</b></td>
+                    <td><? echo $annotation->identifiedBy ?></td>
+                </tr>
+            </table>
+            <?
+
+            foreach ($responses as $response) {
+                if ($response->describesObject == $annotation->uri) {
+                    ?>
+                    <ul>
+                        <li>
+                            <table>
+                                <tr>
+                                    <td><b>Created By:</b></td>
+                                    <td style="padding-right:35px;"><? echo $response->createdBy ?></td>
+                                    <td><b>Created On:</b></td>
+                                    <td><? echo $response->date ?></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Opinion:</b></td>
+                                    <td style="padding-right:35px;"><? echo $response->opinionText ?></td>
+                                    <td><b>Polarity:</b></td>
+                                    <td><? echo $response->polarity ?></td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                <?
+                }
+            }
+        }
+    } else {
+        throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
+    }
 
 }
 
