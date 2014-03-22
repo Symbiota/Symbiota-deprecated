@@ -158,7 +158,7 @@ class KeyEditorManager{
 	private function setCharStates($cidStr){
 		//cs Array: cid => (cs => charStateName)
 		$sql = "SELECT CID, CS, CharStateName FROM kmcs ".
-			"WHERE (CID In ($cidStr)) AND (Language = '".$this->language."') ".
+			"WHERE (CID In ($cidStr)) ".
 		"ORDER BY SortSequence";
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
