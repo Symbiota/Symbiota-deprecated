@@ -151,7 +151,7 @@ class OccurrenceDownload{
 					fwrite($outstream, implode($this->delimiter,$this->headerArr)."\n");
 				}
 				while($row = $result->fetch_assoc()){
-					$this->stripSensitiveFields($row);
+					//$this->stripSensitiveFields($row);
 					if($this->schemaType == 'dwc'){
 						//Strip out data that is needed for evaluation but shouldn't be output
 						unset($row["localitySecurity"]);
@@ -282,7 +282,7 @@ xmlwriter_end_attribute($xml_resource);
 	
 	private function getContentType(){
 		if($this->zipFile){
-			return 'text/csv; charset='.$this->charSetOut;
+			return 'application/zip; charset='.$this->charSetOut;
 		}
 		elseif($this->delimiter == 'comma' || $this->delimiter == ','){
 			return 'text/csv; charset='.$this->charSetOut;
@@ -449,7 +449,7 @@ xmlwriter_end_attribute($xml_resource);
 						't.unitind3 AS taxonRank, t.unitname3 AS infraspecificEpithet, '.
 						'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, '.
 						'o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-						'o.verbatimEventDate, CONCAT_WS('; ',o.habitat, o.substrate) AS habitat, o.fieldNumber, CONCAT_WS('; ',o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, '.
+						'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNumber, CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, '.
 						'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
 						'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
 						'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
@@ -477,7 +477,7 @@ xmlwriter_end_attribute($xml_resource);
 						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 						'o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, '.
 						'c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.localitySecurityReason, '.
-						'o.processingstatus, o.recordEnteredBy, o.duplicateQuantity, o.labelProject, o.collid, o.dbpk, o.occid, g.guid ';
+						'o.processingstatus, o.recordEnteredBy, o.labelProject, o.collid, o.dbpk, o.occid, g.guid ';
 				}
 				$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
 						'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
@@ -490,7 +490,7 @@ xmlwriter_end_attribute($xml_resource);
 				$sql .= "ORDER BY o.collid";
 			}
 		}
-		//echo $sql;
+		//echo $sql; exit;
 		return $sql;
 	}
 	
@@ -535,7 +535,11 @@ xmlwriter_end_attribute($xml_resource);
 				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
 				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
 		 		"disposition","duplicatequantity","modified","language","rights","rightsHolder","accessRights",
-		 		"localitySecurity","localitySecurityReason","collId","sourcePrimaryKey","symbiotaId","recordId");
+		 		"localitySecurity","localitySecurityReason","processingstatus","recordEnteredBy",
+			 	"labelProject","collId","sourcePrimaryKey","symbiotaId","recordId");
+
+			'o.localitySecurityReason, '.
+			'o.processingstatus, o.recordEnteredBy, o.duplicateQuantity, o.labelProject, o.collid, o.dbpk, o.occid, g.guid ';
 		}
 	}
 

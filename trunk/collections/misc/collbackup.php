@@ -44,7 +44,7 @@ if($isAdmin || array_key_exists("CollAdmin",$userRights) && in_array($collid,$us
 						<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf8'?'checked':''); ?> /> UTF-8 (unicode)
 					</div>
 					<div id="workingdiv" style="clear:both;margin:20px;display:<?php echo ($action == 'Perform Backup'?'block':'none'); ?>;">
-						<b>Downloading backup file...</b> <img src="../../images/workingcircle.gif" />
+						<b>Downloading backup file...</b> 
 					</div>
 					<div style="clear:both;">
 						<input type="hidden" name="collid" value="<?php echo $collid; ?>" />

@@ -29,34 +29,26 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere())).
-				" AND ts1.taxauthid = ".$taxonAuthorityId." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ORDER BY ts.family, t.SciName ";
+				" AND ts1.taxauthid = ".$taxonAuthorityId." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ";
         }
         else{
 			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
-				'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
+				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
 			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
 			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
-			$sql .= $this->getSqlWhere()." AND (ts.taxauthid = 1) ".
-				"ORDER BY IFNULL(ts.family,o.family), o.sciname ";
+			$sql .= $this->getSqlWhere()." AND (t.rankid > 140) AND (ts.taxauthid = 1) ";
         }
 		//echo "<div>".$sql."</div>";
         $result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$family = strtoupper($row->family);
+			if(!$family) $family = 'undefined';
 			$sciName = $row->sciname;
 			if($sciName && substr($sciName,-5)!='aceae'){
-				if($family){
-					if(!array_key_exists($family,$returnVec) || !in_array($sciName,$returnVec[$family])){
-						$returnVec[$family][] = $sciName;
-					}
-				}
-				else{
-					if(!array_key_exists('undefined',$returnVec) || !in_array($sciName,$returnVec['undefined'])){
-						$returnVec['undefined'][] = $sciName;
-					}
-				}
+				$returnVec[$family][] = $sciName;
+				$this->checklistTaxaCnt++;
 			}
-			$this->checklistTaxaCnt++;
         }
         return $returnVec;
 	}

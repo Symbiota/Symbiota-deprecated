@@ -52,9 +52,14 @@ $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"
 		<?php
 			$checklistArr = $checklistManager->getChecklist($taxonFilter);
 			echo "<div style='font-weight:bold;font-size:125%;'>Taxa Count: ".$checklistManager->getChecklistTaxaCnt()."</div>";
-			$undFamilyArray = Array();
-			if(array_key_exists("undefined",$checklistArr)) $undFamilyArray = $checklistArr["undefined"]; 
+			$undFamilyArray = null;
+			if(array_key_exists("undefined",$checklistArr)){
+				$undFamilyArray = $checklistArr["undefined"];
+				unset($checklistArr["undefined"]); 
+			}
+			ksort($checklistArr);
 			foreach($checklistArr as $family => $sciNameArr){
+				sort($sciNameArr);
 				echo "<div style='margin-left:5;margin-top:5;'><h3>".$family."</h3></div>";
 				foreach($sciNameArr as $sciName){
 					echo "<div style='margin-left:20;font-style:italic;'><a target='_blank' href='../taxa/index.php?taxon=".$sciName."'>".$sciName."</a></div>";

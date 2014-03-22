@@ -203,6 +203,7 @@ include($serverRoot."/header.php");
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
+			$dwcaManager->setVerbose(1);
 			$dwcaManager->createDwcArchive();
 			$dwcaManager->writeRssFile();
 			echo '</ul>';

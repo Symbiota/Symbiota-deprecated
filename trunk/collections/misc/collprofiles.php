@@ -78,7 +78,7 @@ if($symbUid){
 		<?php
 		if($editCode > 1){
 			if($action == 'UpdateStatistics'){
-				echo '<h2>Updating statisitcs related to this collection...</h2>';
+				echo '<h2>Updating statistics related to this collection...</h2>';
 				echo '<ul>';
 				$collManager->updateStatistics();
 				echo '</ul><hr/>';
