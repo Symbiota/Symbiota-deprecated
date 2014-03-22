@@ -31,6 +31,20 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 			}
 	
 		});
+
+		function extensionSelected(obj){
+			if(obj.checked == true){
+				obj.form.zip.checked = true;
+			}
+		}
+
+		function zipSelected(obj){
+			if(obj.checked == false){
+				obj.form.images.checked = false;
+				obj.form.identifications.checked = false;
+			}
+		}
+		
 		function validateDownloadForm(f){
 			return true;
 		}
@@ -130,8 +144,8 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 								</td>
 								<td>
 									<div style="margin:10px 0px;">
-										<input type="checkbox" name="identifications" value="1" onchange="this.form.zip.checked = true" checked /> include Determination History<br/>
-										<input type="checkbox" name="images" value="1" onchange="this.form.zip.checked = true" checked /> include Image Records<br/>
+										<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this)" checked /> include Determination History<br/>
+										<input type="checkbox" name="images" value="1" onchange="extensionSelected(this)" checked /> include Image Records<br/>
 										*Output must be a compressed archive 
 									</div>
 								</td>
@@ -176,7 +190,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<input type="checkbox" name="zip" value="1" checked />Compressed ZIP file<br/>
+									<input type="checkbox" name="zip" value="1" onchange="zipSelected(this)" checked />Compressed ZIP file<br/>
 								</div>
 							</td>
 						</tr>

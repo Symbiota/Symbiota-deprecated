@@ -41,12 +41,7 @@ if($schema == "backup"){
 				unlink($archiveFile);
 			}
 			else{
-				header('Content-Description: Data File Transfer Error');
-				header('Content-Type: text/plain');
-				header('Expires: 0');
-				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-				header('Pragma: public');
-				//echo 'Error: unable to create archive';
+				echo 'ERROR creating output file. Query probably did not include any records.';
 			}
 		}
 	}
@@ -72,18 +67,44 @@ else{
 		}
 	}
 		
-	if($zip && ($schema == 'symbiota' || $schema == 'dwc')){
-
+	if($schema == "georef"){
+		$dlManager = new OccurrenceDownload();
+		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
+			$occurManager = new OccurrenceManager();
+			$dlManager->setSqlWhere($occurManager->getSqlWhere());
+		}
+		$dlManager->setSchemaType($schema);
+		$dlManager->setCharSetOut($cSet);
+		$dlManager->setDelimiter($format);
+		$dlManager->setZipFile($zip);
+		$dlManager->addCondition('decimalLatitude','NOTNULL','');
+		$dlManager->addCondition('decimalLongitude','NOTNULL','');
+		if(isset($_POST['customfield1'])){
+			$dlManager->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
+		}
+		$dlManager->downloadData();
+	}
+	elseif($schema == 'checklist'){
+		$dlManager = new OccurrenceDownload();
+		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
+			$occurManager = new OccurrenceManager();
+			$dlManager->setSqlWhere($occurManager->getSqlWhere());
+		}
+		$dlManager->setSchemaType($schema);
+		$dlManager->setCharSetOut($cSet);
+		$dlManager->setDelimiter($format);
+		$dlManager->setZipFile($zip);
+		$taxonFilterCode = array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0;
+		$dlManager->setTaxonFilter($taxonFilterCode); 
+		$dlManager->downloadData();
+	}
+	else{
+		//Is an occurrence download 
 		$dwcaHandler = new DwcArchiverOccurrence();
 		$dwcaHandler->setCharSetOut($cSet);
 		$dwcaHandler->setSchemaType($schema);
+		$dwcaHandler->setDelimiter($format);
 		$dwcaHandler->setVerbose(0);
-		
-		$includeIdent = (array_key_exists('identifications',$_POST)?1:0);
-		$dwcaHandler->setIncludeDets($includeIdent);
-		$images = (array_key_exists('images',$_POST)?1:0);
-		$dwcaHandler->setIncludeImgs($images);
-
 		$dwcaHandler->setRedactLocalities($redactLocalities);
 		if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 
@@ -91,95 +112,83 @@ else{
 			$occurManager = new OccurrenceManager();
 			$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 		}
+		else{
+			//Request is coming from exporter.php for collection manager tools
+			$dwcaHandler->setCollArr($_POST['targetcollid']);
 
-		$archiveFile = $dwcaHandler->createDwcArchive('webreq');
-		
-		if($archiveFile){
+			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
+				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
+			}
+			if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
+				$dwcaHandler->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
+			}
+			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
+				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
+			}
+			if(array_key_exists('customfield3',$_POST) && $_POST['customfield3']){
+				$dwcaHandler->addCondition($_POST['customfield3'],$_POST['customtype3'],$_POST['customvalue3']);
+			}
+			if(array_key_exists('newrecs',$_POST) && $_POST['newrecs'] == 1){
+				$dwcaHandler->addCondition('dbpk','NULL');
+				$dwcaHandler->addCondition('catalognumber','NOTNULL');
+			}
+		}
+		$outputFile = null;
+		if($zip){
+			//Ouput file is a zip file
+			$includeIdent = (array_key_exists('identifications',$_POST)?1:0);
+			$dwcaHandler->setIncludeDets($includeIdent);
+			$images = (array_key_exists('images',$_POST)?1:0);
+			$dwcaHandler->setIncludeImgs($images);
+			
+			$outputFile = $dwcaHandler->createDwcArchive('webreq');
+			
+		}
+		else{
+			//Output file is a flat occurrence file (not a zip file)
+			$outputFile = $dwcaHandler->getOccurrenceFile();
+		}
+		if($outputFile){
 			//ob_start();
+			$contentDesc = '';
 			if($schema == 'dwc'){
-				header('Content-Description: Darwin Core Archive File');
+				$contentDesc = 'Darwin Core ';
 			}
 			else{
-				header('Content-Description: Symbiota Archive File');
+				$contentDesc = 'Symbiota ';
 			}
-			header('Content-Type: application/zip');
-			header('Content-Disposition: attachment; filename='.basename($archiveFile));
+			$contentDesc .= 'Occurrence ';
+			if($zip){
+				$contentDesc .= 'Archive ';
+			}
+			$contentDesc .= 'File';
+			header('Content-Description: '.$contentDesc);
+			
+			if($zip){
+				header('Content-Type: application/zip');
+			}
+			elseif($format == 'csv'){
+				header('Content-Type: text/csv; charset='.$charset);
+			}
+			else{
+				header('Content-Type: text/html; charset='.$charset);
+			}
+			
+			header('Content-Disposition: attachment; filename='.basename($outputFile));
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header('Pragma: public');
-			header('Content-Length: ' . filesize($archiveFile));
+			header('Content-Length: ' . filesize($outputFile));
 			ob_clean();
 			flush();
 			//od_end_clean();
-			readfile($archiveFile);
-			unlink($archiveFile);
-			exit;
+			readfile($outputFile);
+			unlink($outputFile);
 		}
 		else{
-			header('Content-Description: DwC-A File Transfer Error');
-			header('Content-Type: text/plain');
-			header('Expires: 0');
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			echo 'Error: unable to create archive';
+			echo 'ERROR creating output file. Query may have not include any records.';
 		}
-	}
-	else{
-		$dlManager = new OccurrenceDownload();
-		$dlManager->setSchemaType($schema);
-		$dlManager->setCharSetOut($cSet);
-		$dlManager->setDelimiter($format);
-		$dlManager->setZipFile($zip);
-	
-		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-			$occurManager = new OccurrenceManager();
-			$dlManager->setSqlWhere($occurManager->getSqlWhere());
-		}
-	
-		if($schema == "georef"){
-			$dlManager->addCondition('decimalLatitude','NOTNULL','');
-			$dlManager->addCondition('decimalLongitude','NOTNULL','');
-			if(isset($_POST['customfield1'])){
-				$dlManager->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
-			}
-		}
-		elseif($schema == 'checklist'){
-			$taxonFilterCode = array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0;
-			$dlManager->setTaxonFilter($taxonFilterCode); 
-		}
-		else{
-			
-			if(array_key_exists('targetcollid',$_POST) && $_POST['targetcollid']){
-				$dlManager->addCondition('collid','EQUALS',$_POST['targetcollid']);
-			}
-			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
-				$dlManager->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
-			}
-			if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
-				$dlManager->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
-			}
-			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
-				$dlManager->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
-			}
-			if(array_key_exists('customfield3',$_POST) && $_POST['customfield3']){
-				$dlManager->addCondition($_POST['customfield3'],$_POST['customtype3'],$_POST['customvalue3']);
-			}
-			if(array_key_exists('identifications',$_POST) && $_POST['identifications'] == 1){
-				$dlManager->setIncludeIdentHistory(true);
-			}
-			if(array_key_exists('images',$_POST) && $_POST['images'] == 1){
-				$dlManager->setIncludeImages(true);
-			}
-			if(array_key_exists('zip',$_POST) && $_POST['zip'] == 1){
-				$dlManager->setZipFile(true);
-			}
-			if(array_key_exists('newrecs',$_POST) && $_POST['newrecs'] == 1){
-				$dlManager->addCondition('dbpk','NULL');
-				$dlManager->addCondition('catalognumber','NOTNULL');
-			}
-		}
-		$dlManager->downloadData();
 	}
 }
 ?>

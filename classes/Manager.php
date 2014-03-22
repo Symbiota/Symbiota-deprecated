@@ -1,10 +1,12 @@
 <?php 
-
 /**
  *  Base class for managers.  Supplies $conn for connection, $id for primary key, and 
  *  $errormessage/getErrorMessage(), along with supporting clean methods cleanOutStr()
  *  cleanInStr() and cleanInArray();
  */
+
+include_once($serverRoot.'/config/dbconnection.php');
+
 class Manager  {
 	protected $conn = null;
 	protected $id = null;

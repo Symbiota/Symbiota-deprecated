@@ -28,6 +28,9 @@ elseif($collid){
 if($isEditor){
 	if($action == 'Save Edits'){
 		$statusStr = $collManager->submitCollEdits();
+		if($statusStr == true){
+			header('Location: collprofiles.php?collid='.$collid);
+		}
 	}
 	elseif($action == "Create New Collection"){
 		if($IS_ADMIN){
@@ -42,7 +45,7 @@ if($isEditor){
 		}
 	}
 }
-$collData = $collManager->getCollectionData();
+$collData = $collManager->getCollectionData(1);
 ?>
 <html>
 <head>

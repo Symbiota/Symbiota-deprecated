@@ -31,10 +31,10 @@ class CollectionProfileManager {
 		while($row = $rs->fetch_object()){
 			$returnArr[$row->collid]['institutioncode'] = $row->institutioncode;
 			$returnArr[$row->collid]['collectioncode'] = $row->collectioncode;
-			$returnArr[$row->collid]['collectionname'] = $this->cleanOutStr($row->collectionname);
-			$returnArr[$row->collid]['fulldescription'] = $this->cleanOutStr($row->fulldescription);
+			$returnArr[$row->collid]['collectionname'] = $row->collectionname;
+			$returnArr[$row->collid]['fulldescription'] = $row->fulldescription;
 			$returnArr[$row->collid]['homepage'] = $row->homepage;
-			$returnArr[$row->collid]['contact'] = $this->cleanOutStr($row->contact);
+			$returnArr[$row->collid]['contact'] = $row->contact;
 			$returnArr[$row->collid]['email'] = $row->email;
 			$returnArr[$row->collid]['icon'] = $row->icon;
 			$returnArr[$row->collid]['guid'] = $row->collectionguid;
@@ -43,7 +43,7 @@ class CollectionProfileManager {
 		return $returnArr;
 	}
 
-	public function getCollectionData(){
+	public function getCollectionData($filterForForm = 0){
 		$returnArr = Array();
 		if($this->collid){
 			$sql = "SELECT c.institutioncode, i.iid, i.InstitutionName, ".
@@ -63,21 +63,21 @@ class CollectionProfileManager {
 			if($row = $rs->fetch_object()){
 				$returnArr['institutioncode'] = $row->institutioncode;
 				$returnArr['iid'] = $row->iid;
-				$returnArr['institutionname'] = $this->cleanOutStr($row->InstitutionName);
-				$returnArr['address2'] = $this->cleanOutStr($row->Address1);
-				$returnArr['address1'] = $this->cleanOutStr($row->Address2);
-				$returnArr['city'] = $this->cleanOutStr($row->City);
-				$returnArr['stateprovince'] = $this->cleanOutStr($row->StateProvince);
+				$returnArr['institutionname'] = $row->InstitutionName;
+				$returnArr['address2'] = $row->Address1;
+				$returnArr['address1'] = $row->Address2;
+				$returnArr['city'] = $row->City;
+				$returnArr['stateprovince'] = $row->StateProvince;
 				$returnArr['postalcode'] = $row->PostalCode;
-				$returnArr['country'] = $this->cleanOutStr($row->Country);
+				$returnArr['country'] = $row->Country;
 				$returnArr['phone'] = $row->Phone;
 				$returnArr['collectioncode'] = $row->CollectionCode;
-				$returnArr['collectionname'] = $this->cleanOutStr($row->CollectionName);
-				$returnArr['fulldescription'] = $this->cleanOutStr($row->FullDescription);
+				$returnArr['collectionname'] = $row->CollectionName;
+				$returnArr['fulldescription'] = $row->FullDescription;
 				$returnArr['homepage'] = $row->Homepage;
 				$returnArr['individualurl'] = $row->individualurl;
-				$returnArr['contact'] = $this->cleanOutStr($row->Contact);
-				$returnArr['email'] = $this->cleanOutStr($row->email);
+				$returnArr['contact'] = $row->Contact;
+				$returnArr['email'] = $row->email;
 				$returnArr['latitudedecimal'] = $row->latitudedecimal;
 				$returnArr['longitudedecimal'] = $row->longitudedecimal;
 				$returnArr['icon'] = $row->icon;
@@ -85,9 +85,9 @@ class CollectionProfileManager {
 				$returnArr['managementtype'] = $row->managementtype;
 				$returnArr['publicedits'] = $row->publicedits;
 				$returnArr['guidtarget'] = $row->guidtarget;
-				$returnArr['rights'] = $this->cleanOutStr($row->rights);
-				$returnArr['rightsholder'] = $this->cleanOutStr($row->rightsholder);
-				$returnArr['accessrights'] = $this->cleanOutStr($row->accessrights);
+				$returnArr['rights'] = $row->rights;
+				$returnArr['rightsholder'] = $row->rightsholder;
+				$returnArr['accessrights'] = $row->accessrights;
 				$returnArr['sortseq'] = $row->sortseq;
 				$returnArr['skey'] = $row->securitykey;
 				$returnArr['guid'] = $row->collectionguid;
@@ -166,11 +166,14 @@ class CollectionProfileManager {
 				$conn->query($sql);
 			}  
 		}
+		if($filterForForm){
+			$this->cleanOutArr($returnArr);
+		}
 		return $returnArr;
 	}
 
 	public function submitCollEdits(){
-		$status = 'SUCCESS: edits saved successfully!';
+		$status = true;
 		if($this->collid){
 			$instCode = $this->cleanInStr($_POST['institutioncode']);
 			$collCode = $this->cleanInStr($_POST['collectioncode']);
@@ -563,6 +566,12 @@ class CollectionProfileManager {
 					echo '<div><a href="collectionindex.php?collid='.$this->collid.'&start='.$j.'&limit='.$limit.'">Records '.($j+1).' - '.$endCnt.'</a></div>';
 				}
 			}
+		}
+	}
+
+	public function cleanOutArr(&$arr){
+		foreach($arr as $k => $v){
+			$arr[$k] = $this->cleanOutStr($v);
 		}
 	}
 

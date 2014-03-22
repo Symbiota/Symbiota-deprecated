@@ -286,8 +286,8 @@ class OccurrenceManager{
 				$lat2 = $pointArr[0] + $latRadius;
 				$long1 = $pointArr[1] - $longRadius;
 				$long2 = $pointArr[1] + $longRadius;
-				$sqlWhere .= "AND (o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2." AND ".
-					"o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.") ";
+				$sqlWhere .= "AND ((o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2.") AND ".
+					"(o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.")) ";
 			}
 			$this->localSearchArr[] = "Point radius: ".$pointArr[0].", ".$pointArr[1].", within ".$pointArr[2]." miles";
 		}

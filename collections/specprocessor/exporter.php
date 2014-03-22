@@ -83,6 +83,13 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 					obj.form.zip.checked = true;
 				}
 			}
+
+			function zipChanged(cbObj){
+				if(cbObj.checked == false){
+					cbObj.form.identifications.checked = false;
+					cbObj.form.images.checked = false;
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -290,7 +297,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
-											<input type="checkbox" name="zip" value="1" checked /> Archive Data Package (ZIP file)<br/>
+											<input type="checkbox" name="zip" value="1" onchange="zipChanged(this)" checked /> Archive Data Package (ZIP file)<br/>
 										</div>
 									</td>
 								</tr>
