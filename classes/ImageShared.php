@@ -75,9 +75,12 @@ class ImageShared{
  	
 	private function getDownloadPath($fileName,$subPath){
 		$path = $this->imageRootPath;
+		if(!$path) trigger_error('Path empty in getDownloadPath method',E_USER_ERROR);
 		if($subPath) $path .= $subPath."/";
  		if(!file_exists($path)){
- 			mkdir($path, 0775);
+ 			if(mkdir($path, 0775)){
+ 				trigger_error('Unable to create directory: '.$path,E_USER_ERROR);
+ 			}
  		}
  		//Check and see if file already exists, if so, rename filename until it has a unique name
  		$tempFileName = $fileName;
@@ -93,6 +96,8 @@ class ImageShared{
 	public function uploadImage($imgPath,$tid=0){
 		global $paramsArr;
 
+		if(!$imgPath) trigger_error('Image path null in uploadImage method',E_USER_ERROR);
+		
 		if(strpos($imgPath,$this->imageRootPath) === 0){
 			//Image to be uploaded to local server
 			$imgUrl = str_replace($this->imageRootPath,$this->imageRootUrl,$imgPath);
