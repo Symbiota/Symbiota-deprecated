@@ -1220,8 +1220,6 @@ class DwcArchiverOccurrence{
 		$this->applyConditions();
 		if(!$this->targetPath) $this->setTargetPath();
 		$filePath = $this->writeOccurrenceFile();
-		echo $filePath;
-		exit;
 		return $filePath;
 	}
 	
