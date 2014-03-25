@@ -451,13 +451,17 @@ class DwcArchiverOccurrence{
 				$tPath = ini_get('upload_tmp_dir');
 			}
 			if(!$tPath){
-				$tPath = $GLOBALS["serverRoot"]."/temp";
-			}
-			if(file_exists($tPath."/downloads")){
-				$tPath .= "/downloads";
+				$tPath = $GLOBALS["serverRoot"];
+				if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
+					$tPath .= '/';
+				}
+				$tPath .= "temp/";
 			}
 			if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
 				$tPath .= '/';
+			}
+			if(file_exists($tPath."downloads")){
+				$tPath .= "downloads/";
 			}
 			$this->targetPath = $tPath;
 		}
@@ -1214,7 +1218,10 @@ class DwcArchiverOccurrence{
 	
 	public function getOccurrenceFile(){
 		$this->applyConditions();
+		if(!$this->targetPath) $this->setTargetPath();
 		$filePath = $this->writeOccurrenceFile();
+		echo $filePath;
+		exit;
 		return $filePath;
 	}
 	
