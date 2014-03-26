@@ -162,11 +162,11 @@ function toggleCustomDiv3(){
 function toggle(target){
 	var ele = document.getElementById(target);
 	if(ele){
-		if(ele.style.display=="block" || ele.style.display==""){
-			ele.style.display="none";
+		if(ele.style.display=="none" || ele.style.display==""){
+			ele.style.display="block";
   		}
 	 	else {
-	 		ele.style.display="block";
+	 		ele.style.display="none";
 	 	}
 	}
 	else{
@@ -175,7 +175,7 @@ function toggle(target){
 	  		var divObj = divObjs[i];
 	  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
 				if(divObj.style.display=="none"){
-					divObj.style.display="block";
+					divObj.style.display="";
 				}
 			 	else {
 			 		divObj.style.display="none";
