@@ -99,11 +99,14 @@ function nlpLbcc(nlpButton,prlid){
 	var f = nlpButton.form;
 	var rawOcr = f.rawtext.innerText;
 	if(!rawOcr) rawOcr = f.rawtext.textContent;
+	var cnumber = f.cnumber.value;
+	var iUrl = f.iurl.value;
+	var collid = f.collid.value;
 
 	$.ajax({
 		type: "POST",
 		url: "rpc/nlplbcc.php",
-		data: { rawocr: rawOcr }
+		data: { rawocr: rawOcr, iurl: iUrl, collid: collid, catalognumber: cnumber }
 	}).done(function( msg ) {
 		pushDwcArrToForm(msg);
 	});
