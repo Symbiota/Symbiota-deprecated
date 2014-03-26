@@ -841,11 +841,14 @@ function distributeEventDate(y,m,d){
 	}
 }
 
-function verbatimEventDateChanged(vedInput){
+function verbatimEventDateChanged(vedObj){
 	fieldChanged('verbatimeventdate');
 
-	vedValue = vedInput.value;
-	var f = document.fullform;
+	var f = vedObj.form;
+
+	var vedValue = vedObj.value;
+	vedValue = vedValue.replace(" - "," to ");
+	vedValue = vedValue.replace(" / "," to ");
 	
 	if(vedValue.indexOf(" to ") > -1){
 		if(f.eventdate.value == ""){

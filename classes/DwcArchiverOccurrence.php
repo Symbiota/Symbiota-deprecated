@@ -1458,8 +1458,10 @@ class DwcArchiverOccurrence{
 			$guidElem2->appendChild($newDoc->createTextNode($cArr['collectionguid']));
 			$itemElem->appendChild($guidElem2);
 			//EML file link
+			$fileNameSeed = str_replace(array(' ','"',"'"),'',$instCode).'_DwC-A';
+			
 			$emlElem = $newDoc->createElement('emllink');
-			$emlElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.eml'));
+			$emlElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.$fileNameSeed.'.eml'));
 			$itemElem->appendChild($emlElem);
 			//type
 			$typeTitleElem = $newDoc->createElement('type','DWCA');
@@ -1469,7 +1471,7 @@ class DwcArchiverOccurrence{
 			$itemElem->appendChild($recTypeTitleElem);
 			//link
 			$linkTitleElem = $newDoc->createElement('link');
-			$linkTitleElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.str_replace(' ','_',$instCode).'_DwC-A.zip'));
+			$linkTitleElem->appendChild($newDoc->createTextNode($urlPathPrefix.'collections/datasets/dwc/'.$fileNameSeed.'.zip'));
 			$itemElem->appendChild($linkTitleElem);
 			//pubDate
 			//$dsStat = stat($this->targetPath.$instCode.'_DwC-A.zip');

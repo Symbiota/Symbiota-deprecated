@@ -78,7 +78,7 @@ class ImageBatchProcessor {
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
 	function __construct(){
-		ini_set('memory_limit','512M');
+		ini_set('memory_limit','1024M');
 		ini_set('auto_detect_line_endings', true);
 		if($this->dbMetadata){
 			//Set collection
