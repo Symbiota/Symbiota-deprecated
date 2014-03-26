@@ -441,7 +441,7 @@ function verifyFullForm(f){
 		return false;
 	}
 	if(f.ometid && ((f.ometid.value != "" && f.exsnumber.value == "") || (f.ometid.value == "" && f.exsnumber.value != ""))){
-		alert("If an Exsiccati title is entered, the exsiccati number must also be entered");
+		alert("You must have both an exsiccati title and exsiccati number or neither");
 		return false;
 	}
 	if(!verifyDecimalLatitude(f)){
