@@ -1,21 +1,22 @@
 <?php
-class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 
-	function __construct() {
-		parent::__construct();
+class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
+
+	function __construct($catalogNumber="") {
+		parent::__construct($catalogNumber);
 	}
 
-	function __destruct(){
-		parent::__destruct();
-	}
-
-	protected function getLabelInfo($str, $collId=null) {
+	private function getLabelInfo($str) {//return array('exsnumber' => 'exsnumber: '.$this->catalogNumber);
 		if($str) {
 			if($this->isFontinalaceaeExsiccataeLabel($str)) return $this->doFontinalaceaeExsiccataeLabel($str);
 			else if($this->isKryptogamaeExsiccatiVindobonensiLabel($str)) return $this->doKryptogamaeExsiccatiVindobonensiLabel($str);
 			else if($this->isFryeMossExsiccatiLabel($str)) return $this->doFryeMossExsiccatiLabel($str);
 			else if($this->isHepaticaeEuropeaeExsiccatiaeLabel($str)) return $this->doHepaticaeEuropeaeExsiccatiaeLabel($str);
 			else if($this->isBryophytaTerraNovLabradorLabel($str)) return $this->doBryophytaTerraNovLabradorLabel($str);
+			else if($this->isBryophytaNeotropicaExsiccataLabel($str)) return $this->doBryophytaNeotropicaExsiccataLabel($str);
+			else if($this->isBryophytaSelectaExsiccataLabel($str)) return $this->doBryophytaSelectaExsiccataLabel($str);
+			else if($this->isHepaticaeJaponicaeExsiccataeLabel($str)) return $this->doHepaticaeJaponicaeExsiccataeLabel($str);
+			else if($this->isBryophytorumTyporumExsiccataLabel($str)) return $this->doBryophytorumTyporumExsiccataLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
@@ -118,6 +119,99 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		return $this->doGenericLabel($s, "346", array('country' => 'Canada', 'stateProvince' => 'Newfoundland and Labrador'));
 	}
 
+	private function isBryophytaNeotropicaExsiccataLabel($s) {
+		if(preg_match("/.*RY[0O]PHYTA NE[0O]TR[0O]P[1Il!|]CA EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doBryophytaNeotropicaExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.RY[0O]PHYTA NE[0O]TR[0O]P[1Il!|]CA EX[S5][1Il!|][CG]{2}AT./i",
+				"/Fascicle [1Il!|]{1,3} (19..)[,.]? ?/i",
+				"/[ce]d[1Il!|]t[ce]d b[yv] [S5]. R[0o]b Gradst[ce][1Il!|]n d[1Il!|]str[1Il!|]but[ce]d b[yv] th[ce] [1Il!|]nst[1Il!|]tut[ce] of [S5]yst[ce]mat[1Il!|][ce] B[0o]tan[yv], Utr[ce]{2}ht./i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "5");
+	}
+
+	private function isBryophytaSelectaExsiccataLabel($s) {
+		if(preg_match("/.*RY[0O]PHYTA [S5]ELECTA EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doBryophytaSelectaExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/(?:H. [1Il!|]n[0o]u[ce][;:,.] ?)?.RY[0O]PHYTA [S5]ELECTA EX[S5][1Il!|][CG]{2}AT./i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "6");
+	}
+
+	private function isHepaticaeJaponicaeExsiccataeLabel($s) {
+		if(preg_match("/.*EPAT[1Il!|][CG]A.{1,2}JAP[0O]N[1Il!|][CG]A.{1,2}EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doHepaticaeJaponicaeExsiccataeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.{1,2}EPAT[1Il!|][CG]A.{1,2}JAP[0O]N[1Il!|][CG]A.{1,2}EX[S5][1Il!|][CG]{2}AT.{1,3}(?:s[ec]r[,.] \([1Il!|]9\\d{2}\) Edit[ec]d by [S5]. Hattor[1Il!|]?)?/i",
+				"/(?:s[ec]r[,.] \([1Il!|]9\\d{2}\) Edit[ec]d b[yv] [S5]. Hattor[1Il!|]?)/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "68");
+	}
+
+	private function isBryophytorumTyporumExsiccataLabel($s) {
+		if(preg_match("/.*RY[0O]PHYT[0O]RUM TYP[0O]RUM EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doBryophytorumTyporumExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.{1,2}RY[0O]PHYT[0O]RUM TYP[0O]RUM EX[S5][1Il!|][CG]{2}AT./i",
+				"/Ed[1Il!|]t[ec]d b[yv] W[1Il!|]{3,5}am R. Buck D[1Il!|]str[1Il!|]but[ec]d b[yv] ?/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "11");
+	}
+
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
 		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
@@ -125,7 +219,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon{
 		else return false;
 	}
 
-	protected function containsVerbatimAttribute($pAtt) {
+	private function containsVerbatimAttribute($pAtt) {
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
 			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome",
 			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",

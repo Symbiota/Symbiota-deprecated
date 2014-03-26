@@ -1,32 +1,27 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlpParserLBCCBryophyte.php');
-include_once($serverRoot.'/classes/SpecProcNlpParserLBCCLichen.php');
 
 class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 
-	function __construct() {
-		parent::__construct();
+	protected $conn;
+
+	function __construct($catalogNumber="") {
+		$this->catalogNumber = $catalogNumber;
+		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
 
 	function __destruct(){
-		parent::__destruct();
+		if(!($this->conn === false)) $this->conn->close();
 	}
 
 	protected function parse($rawStr) {
-		$handler;
-		$url = $this->url;
-		if(stripos($url, "/bryophytes/") !== FALSE) $handler = new SpecProcNlpParserLBCCBryophyte();
-		else if(stripos($url, "/lichens/") !== FALSE) $handler = new SpecProcNlpParserLBCCLichen();
-		else return array();
-		$results = array();
 		$rawStr = trim($this->fixString(str_replace("\t", " ", $rawStr)));
 		//If OCR source is from tesseract (utf-8 is default), convert to a latin1 character set
 		//if(mb_detect_encoding($rawStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 		//	$rawStr = utf8_decode($rawStr);
 		//}
-		$labelInfo = array();
 		if(strlen($rawStr) > 0 && !$this->isMostlyGarbage2($rawStr, 0.50)) {
-			$labelInfo = $handler->getLabelInfo($rawStr, $this->collId);
+			$results = array();
+			$labelInfo = $this->getLabelInfo($rawStr, $this->collId);
 			if($labelInfo) {
 				$recordedBy = "";
 				$recordedById = "";
@@ -116,10 +111,29 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 						$results['decimalLongitude'] = round($this->getDigitalLatLong($long), 5);
 					}
 				}
+				if(array_key_exists('ometid', $labelInfo)) {
+					$exsTitleAndAbbr = $this->getExsiccatiTitleAndAbbreviation($labelInfo['ometid']);
+					if($exsTitleAndAbbr) $results['exstitle'] = $exsTitleAndAbbr;
+				}
+			}
+			//return $this->combineArrays($labelInfo, $results);
+			return $this->combineArrays($results, $labelInfo);
+		}
+		return array();
+	}
+
+	private function getLabelInfo($str) {
+		if($str) return $this->doGenericLabel($str);
+		return array();
+	}
+
+	private function getExsiccatiTitleAndAbbreviation($ometid) {
+		if($ometid) {
+			$sql = "SELECT CONCAT(title, ' [', abbreviation, ']') titleAndAbbr from omexsiccatititles where ometid = ".$ometid;
+			if($rs = $this->conn->query($sql)) {
+				if($r = $rs->fetch_object()) return $r->titleAndAbbr;
 			}
 		}
-		//return $this->combineArrays($labelInfo, $results);
-		return $this->combineArrays($results, $labelInfo);
 	}
 
 	protected function analyzeLocalityLine($line, $acceptableSmallWords="(?:road|pine|park|tree|fork|cove|camp|fire|bay|log|soil|sand|oaks?|base)") {//countPotentialLocalityWords > 0 for the line and it doesn't begin with Fairly common on, etc
@@ -522,7 +536,6 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 					else if(preg_match("/^.{0,6}".$temp_county."[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|(?:[A-Za-z]+(?: [A-Za-z]+) )?(?:STATE|NATIONAL|NATL\\b\\.?|PROVINCIAL|COUNT[V?Yi]) (?:PARK|FOREST|P?RESERVE)))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					else if(preg_match("/^.{0,6}".preg_quote($stateProvince, "/")."[;:.,]?[;:.,]? (?!(?:River|Mountains?|Mts?\\.?|[A-Za-z]+(?: [A-Za-z]+) (?:STATE|NATIONAL|NATL\\b\\.?|PROVINCIAL|COUNT[V?Yi]) (?:PARK|FOREST|P?RESERVE)))(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					$pat = "/^(.*?)(?: UNIVERSITY\\b|\\bC[O0]LL(?:\\.|ected by)|\\bHERBARIUM\\b|\\bDET(?:\\.|ermined)|Identified\\b|\\bNew\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|\\bDate\\b|\\b(?:[O|!lI0-9]{1,2}[- ])?(?:".$possibleMonths.")|[\n ]".$temp_county." (?:COUNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?))(.*)$/i";
-					//$pat = "/^(.*?)\\b(?:UNIVERSITY\\b|C[O0]LL(?:\\.|ected by)|HERBARIUM\\b|DET(?:\\.|ermined)|\\bIdentified\\b|New\\s?Y[o0]rk\\s?B[o0]tan[1!il|]cal\\s?Garden\\b|Date|(?:[O|!lI0-9]{1,2}[- ])?(?:".$possibleMonths.")|".$temp_county." (?:COUNT[V?Yi]|PAR[I1!||]SH|B[O0]R[O0]U[GC]H|Co\\b\\.?))(.*)$/i";
 				} else {
 					if(preg_match("/^.{0,6}(?: ".preg_quote($stateProvince, "/").")(.*?)$/i", $line, $mats)) $line = trim($mats[1], " ,;:");
 					else if(preg_match("/^(?:(?:STATE [O0]F |ESTAD[O0] (?:DE )?)".preg_quote($stateProvince, "/")."[.,:;])\\s(.+)/i", $line, $mats)) $line = trim($mats[1], " ,;:");
@@ -2324,7 +2337,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			if(array_key_exists('month', $date)) {
 				$result .= "-".$date['month'];
 				if(array_key_exists('day', $date)) $result .= "-".$date['day'];
-			}
+				else $result .= "-00";
+			} else $result .= "-00-00";
 			return $result;
 		}
 		return "";
@@ -5301,8 +5315,8 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 	private function fixString($str) {
 		if($str) {
 			$catNo = $this->catalogNumber;
-			$needles = array("Â«", "Ã±", "â€¢", "Ã“", "Â»", "Ã¢", "Ã¨", "Ã¬", "Ã¹", "ÃŸ", "Ã ", "Ã¶", "Ãº", "Ã¡", "Ã¤", "Ã¼", "Ã³", "Ã­", "(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
-			$replacements = array(".", "ñ", ".", "O", ".", "a", "e", "i", "u", "B", "a", "o", "u", "a", "a", "ü", "o", "i", "(Fée)", "(Fée)", "A.", "A", "A.", "A", "A", "AK", " ", " W ", "W", "Müll.", ">", "<", "-", "", "&", "'", "\"", "W", " W.", " W.", "W.", "W", "W", "W", "", "\"", "é", "Ach.", "A.", "A","W","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
+			$needles = array("â€”", "Â«", "Ã±", "â€¢", "Ã“", "Â»", "Ã¢", "Ã¨", "Ã¬", "Ã¹", "ÃŸ", "Ã ", "Ã¶", "Ãº", "Ã¡", "Ã¤", "Ã¼", "Ã³", "Ã­", "(FÂ£e)", "(F6e)", "/\\_", "/\\", "/'\\_", "/'\\", "/°\\", "AÂ£", " ", " V/", "Â¥", "Miill.", "&gt;", "&lt;", "—", "ï»¿", "&amp;", "&apos;", "&quot;", "\/V", " VV_", " VV.", "\/\/_", "\/\/", "\X/", "\\'X/", chr(157), chr(226).chr(128).chr(156), "Ã©", "/\ch.", "/\.", "/-\\", "X/", "\X/", "\Y/", "`\â€˜i/", chr(96), chr(145), chr(146), "â€˜", "’" , chr(226).chr(128).chr(152), chr(226).chr(128).chr(153), chr(226).chr(128), "“", "”", "”", chr(147), chr(148), chr(152), "Â°", "º", chr(239));
+			$replacements = array("-", ".", "ñ", ".", "O", ".", "a", "e", "i", "u", "B", "a", "o", "u", "a", "a", "ü", "o", "i", "(Fée)", "(Fée)", "A.", "A", "A.", "A", "A", "AK", " ", " W ", "W", "Müll.", ">", "<", "-", "", "&", "'", "\"", "W", " W.", " W.", "W.", "W", "W", "W", "", "\"", "é", "Ach.", "A.", "A","W","W", "W", "W", "'", "'", "'", "'", "'", "'", "'", "\"", "\"", "\"", "\"", "\"", "\"", "\"", "°", "°", "°");
 			$pat = "/\\A[^\w(]+(.*)/s";
 			if(preg_match($pat, $str, $patMatches)) $str = trim($patMatches[1]);
 			$str = str_replace($needles, $replacements, $str);
@@ -5898,6 +5912,25 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 			return $result;
 		}
 		return "";
+	}
+
+	private function containsVerbatimAttribute($pAtt) {
+		$pAtt = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pAtt));
+		//if(strpos($pAtt, "|") !== FALSE || strpos($pAtt, "/") !== FALSE || strpos($pAtt, "\"") !== FALSE) $pAtt = preg_quote($pAtt, '/');
+		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
+			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))",
+			"thall(?:us|i)", "strain", "dis[ck]s?(?! (?:convex\\/|color))", "squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose",
+			"fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous", "terricolous", "chemotype", "terpenes?",
+			"isidi(?:a(?:te)?|um)", "TLC", "parietin", "anthraquinones?", "pigment(?:s|ed)?", "soralia", "ostioles?", "spores",
+			"cluster(?:s|ed)", "exciple", "paraphyses(?! ?branched\\/)", "foliose", "pruinose", "Chemica[l1|I!] contents", "ciliate",
+			"sterile", "septate(?! ?\\/)", "(?:(?:nor)?stictic|usnic|sa[l1|I!]azinic|psoromic|ga[l1|I!]binic|[o0][l1|I!]ivetoric|evernic) acids?");
+		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
+		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
+		if(preg_match("/\\b[KPC][+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bUV[+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bPD[+-]\\B/", $pAtt)) return true;
+		if(preg_match("/\\bHC[Il][+-]\\B/", $pAtt)) return true;
+		return false;
 	}
 }
 

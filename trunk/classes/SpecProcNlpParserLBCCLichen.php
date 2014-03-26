@@ -1,15 +1,13 @@
 <?php
-class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 
-	function __construct() {
-		parent::__construct();
+class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon {
+
+	function __construct($collid=null, $catalogNumber="") {
+		$this->collId = $collid;
+		parent::__construct($catalogNumber);
 	}
 
-	function __destruct(){
-		parent::__destruct();
-	}
-
-	protected function getLabelInfo($str, $collId=null) {
+	private function getLabelInfo($str) {
 		if($str) {
 			$pat = "/(.*)HERBAR[1Il!|]UM\\s?[O0Q]F\\s?THE UN[1Il!|]VER[S5][1Il!|]TY\\s?[O0Q]F\\s?M[1Il!|]CH[1Il!|]GAN?+(.*)/is";
 			if(preg_match($pat, $str, $matches)) {
@@ -50,8 +48,8 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 			else if($this->isCalicialesExsiccataeLabel($str)) return $this->doCalicialesExsiccataeLabel($str);
 			else if($this->isLichenesAmericaniExsiccatiLabel($str)) return $this->doLichenesAmericaniExsiccatiLabel($str);
 			else if($this->isMultipleChoiceLabel($str)) return array();
-			else if($collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
-			else if($collId == 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
+			else if($this->collId == 42 && $this->isLichensOfLabel($str)) return $this->doMTLichensOfLabel($str);
+			else if($this->collId == 42 && $this->isHerbariumOfForestServiceLabel($str)) return array();
 			else return $this->doGenericLabel($str);
 		}
 		return array();
@@ -8392,7 +8390,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon{
 		return $this->doGenericLabel(str_replace("\n\n", "\n", $s), "293", $fields);
 	}
 
-	protected function containsVerbatimAttribute($pAtt) {
+	private function containsVerbatimAttribute($pAtt) {
 		$pAtt = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pAtt));
 		//if(strpos($pAtt, "|") !== FALSE || strpos($pAtt, "/") !== FALSE || strpos($pAtt, "\"") !== FALSE) $pAtt = preg_quote($pAtt, '/');
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
