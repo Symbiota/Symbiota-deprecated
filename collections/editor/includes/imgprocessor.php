@@ -23,8 +23,8 @@
 						</fieldset>
 					</div>
 					<div style="float:right;margin-right:20px;font-weight:bold;">
-						Image <?php echo $imgCnt; ?> of 
-						<?php 
+						Image <?php echo $imgCnt; ?> of
+						<?php
 						echo count($imgArr);
 						if(count($imgArr)>1){
 							echo '<a href="#" onclick="return nextLabelProcessingImage('.($imgCnt+1).');">=&gt;&gt;</a>';
@@ -33,9 +33,9 @@
 					</div>
 				</div>
 				<div style="width:100%;clear:both;">
-					<?php 
+					<?php
 					$fArr = array();
-					if(array_key_exists($imgId,$fragArr)){ 
+					if(array_key_exists($imgId,$fragArr)){
 						$fArr = $fragArr[$imgId];
 					}
 					?>
@@ -60,7 +60,7 @@
 					</div>
 					<div id="tfeditdiv-<?php echo $imgCnt; ?>" style="clear:both;">
 						<?php
-						if(array_key_exists($imgId,$fragArr)){ 
+						if(array_key_exists($imgId,$fragArr)){
 							$fragCnt = 1;
 							$targetPrlid = '';
 							if(isset($newPrlid) && $newPrlid) $targetPrlid = $newPrlid;
@@ -98,11 +98,13 @@
 											<input name="submitaction" type="submit" value="Save OCR Edits" />
 										</div>
 										<div style="float:left;margin-left:20px;">
-											<?php 
+											<input type="hidden" name="iurl" value="<?php echo $iUrl; ?>" />
+											<input type="hidden" id="cnumber" name="cnumber" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" />
+											<?php
 											if(isset($SALIX_PATH)){
 												echo '<input name="salixocr" type="button" value="SALIX Parse" onclick="nlpSalix(this,'.$prlid.')" />';
 												echo '<img id="workingcircle_salix-'.$prlid.'" src="../../images/workingcircle.gif" style="display:none;" /><br/>';
-											} 
+											}
 											if(isset($NLP_LBCC_ACTIVATED) && $NLP_LBCC_ACTIVATED){
 												echo '<input id="nlplbccbutton" name="nlplbccbutton" type="button" value="Parse OCR (LBCC)" onclick="nlpLbcc(this,'.$prlid.')" />';
 												echo '<img id="workingcircle_lbcc-'.$prlid.'" src="../../images/workingcircle.gif" style="display:none;" />';
@@ -111,13 +113,13 @@
 										</div>
 									</form>
 									<div style="float:right;font-weight:bold;margin-right:20px;">
-										<?php 
-										echo $fragCnt.' of '.count($fArr); 
+										<?php
+										echo $fragCnt.' of '.count($fArr);
 										if(count($fArr) > 1){
 											?>
 											<a href="#" onclick="return nextRawText(<?php echo $imgCnt.','.($fragCnt+1); ?>)">=&gt;&gt;</a>
 											<?php
-										} 
+										}
 										?>
 									</div>
 									<div style="clear:both;">
