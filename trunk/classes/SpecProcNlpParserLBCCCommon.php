@@ -122,7 +122,7 @@ class SpecProcNlpParserLBCCCommon extends SpecProcNlp {
 		return array();
 	}
 
-	private function getLabelInfo($str) {
+	protected function getLabelInfo($str) {
 		if($str) return $this->doGenericLabel($str);
 		return array();
 	}

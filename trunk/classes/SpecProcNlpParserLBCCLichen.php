@@ -7,7 +7,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon {
 		parent::__construct($catalogNumber);
 	}
 
-	private function getLabelInfo($str) {
+	protected function getLabelInfo($str) {
 		if($str) {
 			$pat = "/(.*)HERBAR[1Il!|]UM\\s?[O0Q]F\\s?THE UN[1Il!|]VER[S5][1Il!|]TY\\s?[O0Q]F\\s?M[1Il!|]CH[1Il!|]GAN?+(.*)/is";
 			if(preg_match($pat, $str, $matches)) {
