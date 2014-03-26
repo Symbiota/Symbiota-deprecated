@@ -6,7 +6,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		parent::__construct($catalogNumber);
 	}
 
-	private function getLabelInfo($str) {//return array('exsnumber' => 'exsnumber: '.$this->catalogNumber);
+	protected function getLabelInfo($str) {
 		if($str) {
 			if($this->isFontinalaceaeExsiccataeLabel($str)) return $this->doFontinalaceaeExsiccataeLabel($str);
 			else if($this->isKryptogamaeExsiccatiVindobonensiLabel($str)) return $this->doKryptogamaeExsiccatiVindobonensiLabel($str);
