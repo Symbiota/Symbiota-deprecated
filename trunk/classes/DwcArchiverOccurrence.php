@@ -281,7 +281,7 @@ class DwcArchiverOccurrence{
 	private function getSqlOccurrences(){
 		$sql = '';
 		$fieldArr = $this->occurrenceFieldArr['fields'];
-		if($fieldArr){
+		if($fieldArr && $this->conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
 				$sqlFrag .= ', '.$colName;
@@ -289,11 +289,8 @@ class DwcArchiverOccurrence{
 			$sql = 'SELECT '.trim($sqlFrag,', ').
 				' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql;
-			}
-			$sql .= 'ORDER BY o.collid,o.occid'; 
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.$this->conditionSql.
+				'ORDER BY o.collid LIMIT 1000000'; 
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
@@ -360,7 +357,7 @@ class DwcArchiverOccurrence{
 			else{
 				$sql .= 'WHERE d.appliedstatus = 1 ';
 			}
-			$sql .= 'ORDER BY o.collid,o.occid';
+			$sql .= 'ORDER BY o.collid';
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
@@ -1141,6 +1138,7 @@ class DwcArchiverOccurrence{
 		
 		//Output records
 		$sql = $this->getSqlOccurrences();
+		if(!$sql) return false;
 		//Output header
 		$fieldArr = $this->occurrenceFieldArr['fields'];
 		if($this->schemaType == 'dwc'){
