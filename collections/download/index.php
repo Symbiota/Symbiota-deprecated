@@ -207,7 +207,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 									?>
 									<input name="publicsearch" type="hidden" value="1" />
 									<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilterCode; ?>" />
-									<input type="submit" name="submitaction" value="Download Checklist" />
+									<input type="submit" name="submitaction" value="Download Data" />
 								</div>
 							</td>
 						</tr>
