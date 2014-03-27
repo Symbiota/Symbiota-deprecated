@@ -619,7 +619,6 @@ class DwcArchiverOccurrence{
 			$this->logOrEcho("FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin\n");
 			exit('FATAL ERROR: PHP ZipArchive class is not installed, please contact your server admin');
 		}
-
 		$status = $this->writeOccurrenceFile();
 		if($status){
 			$archiveFile = $this->targetPath.$fileName;
@@ -1661,14 +1660,14 @@ class DwcArchiverOccurrence{
 
 	private function encodeStr($inStr){
 		$retStr = $inStr;
-		if($this->charSetSource){
-			if($this->charSetOut == 'utf-8' && $this->charSetSource == 'iso-8859-1'){
+		if($inStr && $this->charSetSource){
+			if($this->charSetOut == 'UTF-8' && $this->charSetSource == 'ISO-8859-1'){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif($this->charSetOut == "iso-8859-1" && $this->charSetSource == 'utf-8'){
+			elseif($this->charSetOut == "ISO-8859-1" && $this->charSetSource == 'UTF-8'){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
@@ -1680,7 +1679,7 @@ class DwcArchiverOccurrence{
 	
 	private function addcslashesArr(&$arr){
 		foreach($arr as $k => $v){
-			$arr[$k] = addcslashes($v,"\n\r\"\\");
+			if($v) $arr[$k] = addcslashes($v,"\n\r\"\\");
 		}
 	}
 
