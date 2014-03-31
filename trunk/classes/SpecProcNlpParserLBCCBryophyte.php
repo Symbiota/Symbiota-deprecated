@@ -17,6 +17,9 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isBryophytaSelectaExsiccataLabel($str)) return $this->doBryophytaSelectaExsiccataLabel($str);
 			else if($this->isHepaticaeJaponicaeExsiccataeLabel($str)) return $this->doHepaticaeJaponicaeExsiccataeLabel($str);
 			else if($this->isBryophytorumTyporumExsiccataLabel($str)) return $this->doBryophytorumTyporumExsiccataLabel($str);
+			else if($this->isSphagnaBorealiAmericanaExsiccataLabel($str)) return $this->doSphagnaBorealiAmericanaExsiccataLabel($str);
+			else if($this->isMossesOfTheInteriorHighlandsExsiccataeLabel($str)) return $this->doMossesOfTheInteriorHighlandsExsiccataeLabel($str);
+			else if($this->isCryptogamaeGermaniaeExsiccataeLabel($str)) return $this->doCryptogamaeGermaniaeExsiccataeLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
@@ -166,6 +169,109 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		return $this->doGenericLabel($s, "6");
 	}
 
+	private function isSphagnaBorealiAmericanaExsiccataLabel($s) {
+		if(preg_match("/.*[S5]PHA[CG]N.{2}B ?[0OQ][RB]E ?A[1Il!|]{1,2}.{1,3}ME ?R[1Il!|] ?[CGO] ?AN.{1,3}EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
+		if(preg_match("/.*[S5]PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.*/i", $s)) return true;
+		if(preg_match("/.*[S5]PHA[CG]NA B[0OQ][RB]EA[1Il!|]{1,2}-AMER[1Il!|][CG].{3,6}EX[S5][1Il!|][CG]{2}AT.*/i", $s)) return true;
+		if(preg_match("/.*[S5]PHA[CG]NA.{1,3}O ?R.{1,3}[1Il!|]{1,2}-AM.R[1Il!|][CG]AN.{2,4}EX[S5][1Il!|][CG]{2}ATA.*/i", $s)) return true;
+		return false;
+	}
+
+	private function doSphagnaBorealiAmericanaExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.?[S5]PHA[CG]N.{2}B ?[0OQ][RB]E ?A[1Il!|]{1,2}.{1,3}ME ?R[1Il!|] ?[CGO] ?AN.{1,3}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
+				"/.?[S5]PHA[CG]NA ?BO.*[1Il!|]{1,2} AMER[1Il!|][CG]AN.{1,3}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
+				"/.?[S5]PHA[CG]NA B[0OQ][RB]EA[1Il!|]{1,2}-AMER[1Il!|][CG].{3,6}EX[S5][1Il!|][CG]{2}AT.{1,3}/i",
+				"/.?[S5]PHA[CG]NA.{1,3}O ?R.{1,3}[1Il!|]{1,2}-AM.R[1Il!|][CG]AN.{2,4}EX[S5][1Il!|][CG]{2}ATA.{0,2}/i",
+				"/[CG]urav[ec]runt D[,.] ?[CG][,.] ?Eat[0o]n ?[ec]t ?E[,.] ?Fax[0o]n[,.]?/i",
+				"/\\n(\\d{1,3})\\. [S58]\\. ([A-Za-z])/",
+				"/\\n(\\d{1,3}\\. Sphagnum [A-Za-z]{3,}[,.]? .{3,})\\n(?:V|[l1|I].)(?i)ar\\.? /s",
+				"/\\bpal.escens\\b/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"",
+				"",
+				"\n\${1}. Sphagnum \${2}",
+				"\n\${1} var ",
+				"pallescens",
+				"\n"
+			),
+			$s
+		));//echo "\nline 5120, s:\n".$s."\n";
+		$fields = array();
+		$foundSciName = false;
+		$lines = explode("\n", $s);
+		foreach($lines as $line) {
+			if(preg_match("/^[0-9]{1,3}[,.] .+/", $line, $mats)) {
+				$psn = $this->processSciName(trim($line, " \"\',"));
+				if($psn != null) {
+					$scientificName = "";
+					if(array_key_exists('scientificName', $psn)) {
+						$scientificName = $psn['scientificName'];
+						$fields['scientificName'] = $scientificName;
+						$s = str_replace("\n\n", "\n", str_replace($line, "", $s));
+					}
+					if(array_key_exists('verbatimAttributes', $psn)) $fields['verbatimAttributes'] = $psn['verbatimAttributes'];
+					if(array_key_exists('associatedTaxa', $psn)) $fields['associatedTaxa'] = $psn['associatedTaxa'];
+					if(array_key_exists('recordNumber', $psn)) $fields['exsNumber'] = $psn['recordNumber'];
+					if(array_key_exists('taxonRemarks', $psn)) $fields['taxonRemarks'] = $psn['taxonRemarks'];
+					if(array_key_exists('substrate', $psn)) $fields['substrate'] = $psn['substrate'];
+					$foundSciName = true;
+					if(array_key_exists('taxonRank', $psn)) {
+						$taxonRank = $psn['taxonRank'];
+						$fields['taxonRank'] = $taxonRank;
+						if(array_key_exists('infraspecificEpithet', $psn)) {
+							$infraspecificEpithet = $psn['infraspecificEpithet'];
+							$fields['infraspecificEpithet'] = $infraspecificEpithet;
+							$line = trim(substr($line, stripos($line, $infraspecificEpithet)+strlen($infraspecificEpithet)));
+						}
+					} else if(strlen($scientificName) > 0) $line = trim(substr($line, stripos($line, $scientificName)+strlen($scientificName)));
+					if(preg_match("/(.{3,}), ([A-Za-z]{3,}(?: [A-Za-z]{3,})?)[,.]?$/", $line, $mats)) {
+						$firstPart = trim($mats[1]);
+						$lastPart = trim($mats[2]);
+						$sp = $this->getStateOrProvince($lastPart);
+						if(count($sp) > 0) {
+							$stateProvince = $sp[0];
+							$countyMatches = $this->findCounty($firstPart, $stateProvince);
+							if($countyMatches != null) {
+								$fields['county'] = trim($countyMatches[1]);
+								$fields['locality'] = trim($countyMatches[0]);
+							} else $fields['locality'] = $firstPart;
+							$fields['stateProvince'] = $stateProvince;
+							$fields['country'] = $sp[1];
+							break;
+						}
+					}
+				}
+			} else if($foundSciName) {
+				if(preg_match("/(.{3,}), ([A-Za-z]{3,}(?: [A-Za-z]{3,})?)[,.]?$/", $line, $mats)) {//$i=0;foreach($mats as $mat) echo "\nmats[".$i++."] = ".$mat."\n";
+					$firstPart = trim($mats[1]);
+					$lastPart = trim($mats[2]);
+					$sp = $this->getStateOrProvince($lastPart);
+					if(count($sp) > 0) {
+						$stateProvince = $sp[0];
+						$countyMatches = $this->findCounty($firstPart, $stateProvince);
+						if($countyMatches != null) {//$i=0;foreach($countyMatches as $countyMatche) echo "\ncountyMatches[".$i++."] = ".$countyMatche."\n";
+							$fields['county'] = trim($countyMatches[1]);
+							$fields['locality'] = trim($countyMatches[0]);
+						} else $fields['locality'] = $firstPart;
+						$fields['stateProvince'] = $stateProvince;
+						$fields['country'] = $sp[1];
+						$s = str_replace("\n\n", "\n", str_replace($line, "", $s));
+					}
+				}
+				break;
+			}
+		}
+		return $this->doGenericLabel($s, "212", $fields);
+	}
+
 	private function isHepaticaeJaponicaeExsiccataeLabel($s) {
 		if(preg_match("/.*EPAT[1Il!|][CG]A.{1,2}JAP[0O]N[1Il!|][CG]A.{1,2}EX[S5][1Il!|][CG]{2}AT.*/is", $s)) return true;
 		else return false;
@@ -212,11 +318,81 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		return $this->doGenericLabel($s, "11");
 	}
 
+	private function isCryptogamaeGermaniaeExsiccataeLabel($s) {
+		if(preg_match("/.*r[yv]pt[0o][gyj]a.{1,2}a[ec] [CG][ec].man ?[1Il!|]a.{1,2}[,.] A.{1,2}[s5]t[rx][1Il!|]a[ec] [ec]. ?(?:H|[1Il!|]{2})[ec][1Il!|]v[ec]t[1Il!|]a[ec] [ec]x[s5][1Il!|][ec]{2}at.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doCryptogamaeGermaniaeExsiccataeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/[^\n]{0,2}(?:W[,.].{1,4}[CG]ULA[,.] )?.{1,2}r[yv]pt[0o][gyj]a.{1,2}a[ec] [CG][ec].man ?[1Il!|]a.{1,2}[,.] A.{1,2}[s5]t[rx][1Il!|]a[ec] [ec]. ?(?:H|[1Il!|]{2})[ec][1Il!|]v[ec]t[1Il!|]a[ec] [ec]x[s5][1Il!|][ec]{2}at.[^\n]{1,3}+/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "36");
+	}
+
+	private function isMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
+		if(preg_match("/.*[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at.*/is", $s)) return true;
+		else return false;
+	}
+
+	private function doMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/[^\n]{1,2}[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
+				//"/[^\n]?M[0O][s5]{2}[ec][s5] ?[0O]. ?th[ec] ?[1Il!|]nt[ec]r[1Il!|][0O]r ?H[1Il!|]gh[1Il!|]and[s5] ?Ex[s5]i[ec]{2}at[^\n]{2,3}+/i",
+				"/Ed[1Il!|]t[ec]d b[yv] Pau[1Il!|] Red.[ec]a(?:m|rn)[,.] Bru[ec]{2} A[1Il!|]{2}[ec]n & R[0o]b[ec]rt.{1,3}ag[1Il!| ]{1,4}+/i",
+				"/[^\n]?D[1Il!|][s5]tr[1Il!|]but[ec]d ?b[yv] ?M[1Il!|][s5]{2}[0o]ur[1Il!|] ?B[0o]tan[1Il!|][ec]a[1Il!|] ?[CG]ard[ec].*/is",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "347");
+	}
+
 	private function isReliquiaeFlowersianaeLabel($s) {
 		$pat = "/.*Re[1Il!|]{2}[qgO]u[1Il!|]a[ec]\\s?F[1Il!|][O0Q]wers[1Il!|]ana.*/is";
 		//$pat = "/.*RELIQUIAE\\sFLOWERSIANA.*/is";
 		if(preg_match($pat, $s)) return true;
 		else return false;
+	}
+
+	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
+		//$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
+		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
+		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "p[l1|I!]ants?", "humus",
+			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix", "acer ",
+			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone", "stand", "chert",
+			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
+			"aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate", "th[uv]ja", "shad(?:y|ed?)",
+			"(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
+			"f[l1|I!][0o]{2}dp[l1|I!]ain", "gneiss", "moss(?:es|y)?", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp", "branches",
+			"Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus", "ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?",
+			"w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya", "ravine", "Aesculus", "cypress(?:es)?", "Empetrum",
+			"Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?", "Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?",
+			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
+			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
+			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
+			"flood ?plain", "terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry");
+		$result = 0;
+		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
+		return $result/(count(explode(" ", $pHab))*count($hWords));
+		//return $result/count(explode(" ", $pHab));
 	}
 
 	private function containsVerbatimAttribute($pAtt) {
