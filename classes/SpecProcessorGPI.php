@@ -563,12 +563,16 @@ class GPIProcessor {
          case "AUTHOR":
              $currentId->author .= $data;
              break;
+         // Aluka schema specifies infra- terms with a dash after infra.
+         case "INFRA-SPECIFICEPITHET":
          case "INFRASPECIFICEPITHET":
              $currentId->infraspecificepithet .= $data;
              break;
+         case "INFRA-SPECIFICRANK":
          case "INFRASPECIFICRANK":
              $currentId->infraspecificrank .= $data;
              break;
+         case "INFRA-SPECIFICAUTHOR":
          case "INFRASPECIFICAUTHOR":
              $currentId->infraspecificauthor .= $data;
              break;
