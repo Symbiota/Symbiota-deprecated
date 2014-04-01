@@ -182,6 +182,11 @@ if(isset($profile_viewprofileCrumbs)){
 		            echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
 		        }
 		        ?>
+                <?php
+                if ($person->getIsTaxonomyEditor()) {
+                    echo '<li><a href="imagesforid.php">IDs Needed</a></li>';
+                }
+                ?>
 		        <li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
 		    </ul>
 		    <?php
