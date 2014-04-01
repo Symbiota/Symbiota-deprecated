@@ -177,6 +177,19 @@ class Person{
 			$this->isTaxonomyEditor = true;
 		}
 	}
+
+    /** Test to see if person has any taxon interest 
+     * self expressed or assigned with or without an editor role. 
+     * 
+     * @return true if person has any entry in usertaxonomy, otherwise false. 
+     */ 
+    public function getIsHasTaxonInterest(){
+        if (count($this->userTaxonomy) > 0) {
+           return true;
+        } else {
+           return false;
+        }
+    }
 	
 	public function getIsTaxonomyEditor(){
 		return $this->isTaxonomyEditor;
