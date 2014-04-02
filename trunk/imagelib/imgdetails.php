@@ -35,16 +35,17 @@ if($isEditor){
 }
 
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
 	<title><?php echo $defaultTitle." Image Details: #".$imgId; ?></title>
 	<link type="text/css" href="../css/main.css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/imagelib.imgdetails.js"></script>
+	<script src="../js/jquery.js" type="text/javascript"></script>
+	<script src="../js/jquery-ui.js" type="text/javascript"></script>
+	<script src="../js/symb/imagelib.imgdetails.js" type="text/javascript"></script>
+	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
 <body>
 	<?php
