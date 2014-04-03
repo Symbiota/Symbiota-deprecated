@@ -1,6 +1,5 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/PersonalSpecimenManager.php');
 include_once($serverRoot . '/classes/PhotographerManager.php');
 include_once($serverRoot . '/classes/ImageExplorer.php');
 @header("Content-Type: text/html; charset=".$charset);
@@ -8,7 +7,6 @@ include_once($serverRoot . '/classes/ImageExplorer.php');
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
 
-$specHandler = new PersonalSpecimenManager();
 $pManager = new PhotographerManager();
 $imageExplorer = new ImageExplorer();
 
@@ -64,26 +62,6 @@ our animation centered, and no-repeating */
     }
 </style>
 <div style="margin:10px;">
-<?php 
-if($symbUid){
-	//Collection is defined and User is logged-in and have permissions
-    $taxa = array();
-    $taxa = $specHandler->getAreasOfExpertise();
-	if (count($taxa)==0) {
-		echo "<h2>No specimens in your registered speciality need identification to the species level</h2>";
-	} else { 
-		echo "<h2>Specimens with images needing identification in your area of expertise.</h2>";
-	//foreach ($pendingIdents as $key => $value) {
-	//	echo "<a href='../collections/editor/occurrenceeditor.php?occid=$key'>$value->sciname</a> $value->collectionCode $value->institutionCode $value->stateProvince " . $value->getImageLink() . "<BR>";
-	//}
-
-	}
-	
-}
-else{
-	echo '<h2>Please <a href="../profile/index.php?&refurl='.$clientRoot.'/profile/personalspec.php?collid='.$collId.'">login</a></h2>';
-}
-?>
     <script type="text/javascript">
         <?php
             $pList = array();
