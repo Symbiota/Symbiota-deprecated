@@ -181,10 +181,13 @@ if(isset($profile_viewprofileCrumbs)){
 		        if ($person->getIsTaxonomyEditor()) { 
 		            echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
 		        }
-		        ?>
-                <?php
                 if ($person->getIsTaxonomyEditor()) {
-                    echo '<li><a href="imagesforid.php">IDs Needed</a></li>';
+                    echo '<li><a href="imagesforid.php">Images for ID</a></li>';
+                }
+                if( $fpEnabled) {
+                    if ($person->getIsHasTaxonInterest()) {
+                        echo '<li><a href="taxoninterests.php?family=test">Taxon Interests</a></li>';
+                    }
                 }
                 ?>
 		        <li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>

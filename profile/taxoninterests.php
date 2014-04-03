@@ -26,6 +26,7 @@
 
 include_once('../../../config/symbini.php');
 include_once('fp/FPNetworkFactory.php');
+include_once('fp/FPConfig.php');
 include_once('fp/common/AnnotationGenerator.php');
 
 // check that the client helper has been installed
@@ -46,10 +47,6 @@ if (!$fileExists) {
     echo "<strong>$file not found.</strong>";
 } else {
 
-// Check for required query params
-    if (array_key_exists('catalognumber', $_GET) &&
-        (array_key_exists('collectioncode', $_GET) || (array_key_exists('institutioncode', $_GET)))
-    ) {
         $endpoint = FPNetworkFactory::getSparqlEndpoint();
 
         // returns query result formatted as html
@@ -124,9 +121,6 @@ if (!$fileExists) {
                 }
             }
         }
-    } else {
-        throw new Exception("catalognumber and either collectioncode or institutioncode required for \"Annotations\" tab view.");
-    }
 
 }
 
