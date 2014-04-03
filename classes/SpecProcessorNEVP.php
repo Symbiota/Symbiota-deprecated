@@ -262,8 +262,6 @@ class OCCURRENCE {
            // Image upload process in TcnImageTools creates omoccurrences records where 
            // collectioncode is not populated, but collid is. Need to handle both cases.
            $exists = $occ->loadByCollidCatalog($collid, $this->catalognumber);
-           // TODO: Question for Ed: Find out if institutioncode and collectioncode should be populated if we
-           // end up here.
            // Guidance from Ed: omoccurrences.institutioncode and omoccurrences.collectioncode should only
            // be populated if different from the values in omcollections for the omoccurrences.collid.
        }
@@ -271,6 +269,7 @@ class OCCURRENCE {
        	  $occ = new OmOccurrences();
           $occ->setcollid($collid);
           $occ->setcollectionCode($this->collectioncode);
+          $occ->setcollectionID($this->collectionid);
           $occ->setinstitutionCode($this->institutioncode);
           $occ->setcatalogNumber($this->catalognumber);
           $occ->setprocessingStatus("unprocessed");
@@ -295,8 +294,6 @@ class OCCURRENCE {
        }
        $occ->setoccurrenceId($this->occurrenceid);
        $occ->setbasisOfRecord($this->basisofrecord);
-       // TODO: Handle datemodified
-       // TODO: Lookup collector with botanist guid
 
        // Separators in name strings may be amperstand (HUH standard for name pairs), semicolon, or pipe (AppleCore).
        // convert all to semicolon and split on that.
@@ -523,8 +520,8 @@ class ACCESSPOINT {
 }
 
 class DOCUMENT { 
-   public $guid;
-   public $date;
+   public $guid = null;
+   public $date = null;
 
 } 
 
@@ -551,9 +548,9 @@ class NEVPProcessor {
         switch ($name) { 
          case "RDF:DESCRIPTION":
              // There are multiple RDF:Descriptions, but the first one has the document guid.
-             if ($currentDocument==null)  {
-                $currentDocument = new Document();
-                $currentDocument->guid = $attrs['RDF:ABOUT'];
+             if ($this->currentDocument==null)  {
+                $this->currentDocument = new Document();
+                $this->currentDocument->guid = $attrs['RDF:ABOUT'];
              }
              break;
            case "OA:ANNOTATION":
@@ -651,7 +648,7 @@ class NEVPProcessor {
               $this->countfound++;
               $currentOcc->recordedby = trim($currentOcc->recordedby);
               $currentOcc->recordenteredby=$currentAnnotation->annotator->name;
-              $currentOcc->containingDocument = clone $currentDocument;
+              $currentOcc->containingDocument = clone $this->currentDocument;
               $currentOcc->write();
               $currentOcc = null;
               break;
@@ -691,9 +688,9 @@ class NEVPProcessor {
              }
              break;
          case "DC:CREATED":
-             if ($currentDocument->date==null) {
-                $currentDocument->date = substr($data,0,10);
-                if ($debug) { echo "date=[$currentDocument->date]"; } 
+             if ($this->currentDocument->date==null) {
+                $this->currentDocument->date = substr($data,0,10);
+                if ($debug) { echo "date=[$this->currentDocument->date]"; } 
              }
              break;
 
@@ -782,7 +779,12 @@ class NEVPProcessor {
              $currentId->specificepithet .= $data;
              break;
          case "DWC:SCIENTIFICNAMEAUTHORSHIP":
-             $currentId->scientificnameauthorship .= $data;
+              if (substr($data,0,1)=="&") {
+                 // add a space back in if removed by parser
+                 $currentId->scientificnameauthorship .= " $data ";
+              } else {
+                 $currentId->scientificnameauthorship .= $data;
+              }
              break;
          case "DWC:INFRASPECIFICEPITHET":
              $currentId->infraspecificepithet .= $data;
@@ -895,6 +897,8 @@ class NEVPProcessor {
         $result->failurecount = 0;
         $result->updatecount = 0;
         $result->couldparse = true;
+
+        $this->currentDocument = null;
 
         $parser = xml_parser_create('UTF-8');
 
