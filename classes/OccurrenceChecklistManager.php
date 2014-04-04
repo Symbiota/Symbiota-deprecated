@@ -26,8 +26,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
                 'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid) '.
                 'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid) '.
 				'INNER JOIN taxstatus ts ON t.tid = ts.tid ';
-			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere())).
 				" AND ts1.taxauthid = ".$taxonAuthorityId." AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 140 ";
         }
@@ -35,8 +34,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$sql = 'SELECT DISTINCT IFNULL(ts.family,o.family) AS family, o.sciname '.
 				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
 				'LEFT JOIN taxstatus ts ON t.tid = ts.tid ';
-			//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+			if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 			$sql .= $this->getSqlWhere()." AND (t.rankid > 140) AND (ts.taxauthid = 1) ";
         }
 		//echo "<div>".$sql."</div>";
@@ -55,7 +53,6 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 
 	public function buildSymbiotaChecklist($taxonAuthorityId){
 		global $clientRoot,$userId;
-		if($this->dynamicClid) return $this->dynamicClid;
 		$conn = $this->getConnection("write");
 		$sqlCreateCl = "";
 		$expirationTime = date('Y-m-d H:i:s',time()+259200);
@@ -74,23 +71,18 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
 			if(!$taxonAuthorityId){
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-				//if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+				if(array_key_exists("clid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 				$sqlTaxaInsert .= $this->getSqlWhere()." AND t.RankId > 180";
 			}
 			else{
 				$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." ".
                 "FROM ((omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid) INNER JOIN taxa t ON ts.TidAccepted = t.Tid) ";
-				//if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				if(array_key_exists("surveyid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+				if(array_key_exists("clid",$this->searchTermsArr)) $sqlTaxaInsert .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 				$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$this->getSqlWhere()))."AND ts.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
 			}
 			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;
 			$conn->query($sqlTaxaInsert);
-			$this->dynamicClid = $dynClid;
-			$collVarCookie = "dynclid:".$dynClid; 
-			if(array_key_exists("collvars",$_COOKIE)) $collVarCookie .= "&".$_COOKIE["collvars"];
-			setCookie("collvars",$collVarCookie,time()+64800,($clientRoot?$clientRoot:'/'));
+
 			//Delete checklists that are greater than one week old
 			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()'); 
 		}

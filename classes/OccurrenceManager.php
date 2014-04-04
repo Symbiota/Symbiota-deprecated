@@ -10,7 +10,6 @@ class OccurrenceManager{
 	protected $localSearchArr = Array();
 	protected $useCookies = 1;
 	protected $reset = 0;
-	protected $dynamicClid;
 	private $clName;
 	private $collArrIndex = 0;
 	
@@ -27,8 +26,8 @@ class OccurrenceManager{
 		if(array_key_exists("colldbs",$_COOKIE)){
 			$this->searchTermsArr["db"] = $_COOKIE["colldbs"];
 		}
-		elseif(array_key_exists("collsurveyid",$_COOKIE)){
-			$this->searchTermsArr["surveyid"] = $_COOKIE["collsurveyid"];
+		elseif(array_key_exists("collclid",$_COOKIE)){
+			$this->searchTermsArr["clid"] = $_COOKIE["collclid"];
 		}
 		$this->readRequestVariables();
  	}
@@ -51,11 +50,11 @@ class OccurrenceManager{
 			//reset all other search terms except maintain the db terms 
 			$dbsTemp = "";
 			if(array_key_exists("db",$this->searchTermsArr)) $dbsTemp = $this->searchTermsArr["db"];
-			$surveyIdTemp = "";
-			if(array_key_exists("surveyid",$this->searchTermsArr)) $surveyIdTemp = $this->searchTermsArr["surveyid"];
+			$clidTemp = "";
+			if(array_key_exists("clid",$this->searchTermsArr)) $clidTemp = $this->searchTermsArr["clid"];
 			unset($this->searchTermsArr);
 			if($dbsTemp) $this->searchTermsArr["db"] = $dbsTemp;
-			if($surveyIdTemp) $this->searchTermsArr["surveyid"] = $surveyIdTemp;
+			if($clidTemp) $this->searchTermsArr["clid"] = $clidTemp;
 		}
 	}
 
@@ -78,10 +77,7 @@ class OccurrenceManager{
 			$collVarStr = $_COOKIE["collvars"];
 			$varsArr = explode("&",$collVarStr);
 			foreach($varsArr as $value){
-				if(strpos($value,"dynclid") === 0){
-					$this->dynamicClid = substr($value,strpos($value,":")+1);
-				}
-				elseif(strpos($value,"reccnt") === 0){
+				if(strpos($value,"reccnt") === 0){
 					$this->recordCount = substr($value,strpos($value,":")+1);
 				}
 			}
@@ -103,10 +99,9 @@ class OccurrenceManager{
 	}
 
 	public function getSqlWhere(){
-		$sqlWhere = "";
-		if(array_key_exists("surveyid",$this->searchTermsArr)){
-			//$sqlWhere .= "AND (sol.surveyid IN('".str_replace(";","','",$this->searchTermsArr["surveyid"])."')) ";
-			$sqlWhere .= "AND (sol.clid IN('".$this->searchTermsArr["surveyid"]."')) ";
+		$sqlWhere = ""; 
+		if(array_key_exists('clid',$this->searchTermsArr)){
+			$sqlWhere .= "AND (v.clid IN('".$this->searchTermsArr['clid']."')) ";
 		}
 		elseif(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
 			//Do nothing if db = all
@@ -130,7 +125,7 @@ class OccurrenceManager{
 				}
 			}
 		}
-		
+
 		if(array_key_exists("taxa",$this->searchTermsArr)){
 			$sqlWhereTaxa = "";
 			$useThes = (array_key_exists("usethes",$this->searchTermsArr)?$this->searchTermsArr["usethes"]:0);
@@ -423,11 +418,11 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(", ",$typestatusArr);
 		}
-		if(array_key_exists("clid",$this->searchTermsArr)){
-			$clid = $this->searchTermsArr["clid"];
+		if(array_key_exists("dynsqlid",$this->searchTermsArr)){
+			$dynSqlId = $this->searchTermsArr["dynsqlid"];
 			$clSql = ""; 
-			if($clid){
-				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
+			if($dynSqlId){
+				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$dynSqlId.')';
 				$result = $this->conn->query($sql);
 				if($row = $result->fetch_object()){
 					$clSql = $row->dynamicsql;
@@ -439,11 +434,6 @@ class OccurrenceManager{
 				}
 			}
 		}
-		if(array_key_exists("sql",$this->searchTermsArr)){
-			$sqlTerm = $this->searchTermsArr["sql"];
-			$sqlWhere .= "AND (".$clSql.") ";
-			$this->localSearchArr[] = "SQL: ".$clSql;
-		}
 		$retStr = '';
 		if($sqlWhere){
 			$retStr = 'WHERE '.substr($sqlWhere,4);
@@ -452,7 +442,7 @@ class OccurrenceManager{
 			//Make the sql valid, but return nothing
 			$retStr = 'WHERE o.collid = -1 ';
 		}
-		//echo $retStr;
+		//echo $retStr; exit;
 		return $retStr; 
 	}
 
@@ -776,42 +766,31 @@ class OccurrenceManager{
 	}
 	
 	public function getOccurVoucherProjects(){
-		$returnArr = Array();
-		$sql = 'SELECT p.projname, cl.clid, cl.name '.
-			'FROM (fmprojects p INNER JOIN fmchklstprojlink pl ON p.pid = pl.pid) '. 
-			'INNER JOIN fmchecklists cl ON pl.clid = cl.clid '.
-			'INNER JOIN fmvouchers v ON cl.clid = v.clid '.
-			'WHERE p.occurrencesearch = 1 '. 
-			'ORDER BY p.sortsequence, p.projname, cl.name'; 
+		$retArr = Array();
+		$titleArr = Array();
+		$sql = 'SELECT p2.pid AS parentpid, p2.projname as catname, p1.pid, p1.projname, '.
+			'c.clid, c.name as clname '.
+			'FROM fmprojects p1 INNER JOIN fmprojects p2 ON p1.parentpid = p2.pid '.
+			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
+			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
+			'WHERE p2.occurrencesearch = 1 AND p2.ispublic = 1 AND p1.ispublic = 1 '.
+			'ORDER BY p2.sortsequence, p2.projname, p1.projname';
 		//echo "<div>$sql</div>";
 		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->projname][$row->clid] = $row->name;
+		while($r = $rs->fetch_object()){
+			if(!array_key_exists($r->parentpid,$titleArr)) $titleArr[$r->parentpid] = $r->catname;
+			if(!array_key_exists($r->pid,$titleArr)) $titleArr[$r->pid] = $r->projname;
+			$retArr[$r->parentpid][$r->pid][$r->clid] = $r->clname;
 		}
 		$rs->close();
-		return $returnArr;
-	}
-	
-	public function getSurveys(){
-		$returnArr = Array();
-		$sql = "SELECT p.projname, s.surveyid, s.projectname ".
-			"FROM (fmprojects p INNER JOIN omsurveyprojlink spl ON p.pid = spl.pid) ".
-			"INNER JOIN omsurveys s ON spl.surveyid = s.surveyid ".
-			"WHERE p.occurrencesearch = 1 ".
-			"ORDER BY p.sortsequence, p.projname, s.projectname"; 
-		//echo "<div>$sql</div>";
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr[$row->projname][$row->surveyid] = $row->projectname;
-		}
-		$rs->close();
-		return $returnArr;
+		$retArr['titles'] = $titleArr;
+		return $retArr;
 	}
 	
 	public function getDatasetSearchStr(){
 		$retStr ="";
-		if(array_key_exists("surveyid",$this->searchTermsArr)){
-			$retStr = $this->getSurveyStr();
+		if(array_key_exists("clid",$this->searchTermsArr)){
+			$retStr = $this->getClidVoucherStr();
 		}
 		else{
 			if(!array_key_exists('db',$this->searchTermsArr) || $this->searchTermsArr['db'] == 'all'){
@@ -848,14 +827,17 @@ class OccurrenceManager{
 		return $retStr;
 	}
 	
-	private function getSurveyStr(){
-		$returnStr = "";
+	private function getClidVoucherStr(){
+		$retStr = 'Various Voucher Projects';
+		/*
 		$sql = "SELECT projectname FROM omsurveys WHERE (surveyid IN(".str_replace(";",",",$this->searchTermsArr["surveyid"]).")) ";
 		$rs = $this->conn->query($sql);
 		while($row = $rs->fetch_object()){
 			$returnStr .= " ;".$row->projectname; 
 		}
 		return substr($returnStr,2);
+		*/
+		return $retStr;
 	}
 
 	public function getTaxaSearchStr(){
@@ -889,37 +871,40 @@ class OccurrenceManager{
 
 	private function readRequestVariables(){
 		global $clientRoot;
-		//Search will be confinded to a surveyid, collid, catid, or will remain open to all collection
-		if(array_key_exists("surveyid",$_REQUEST)){
-			//Limit by servey id 
-			$surveyidArr = $_REQUEST["surveyid"];
-			if(is_string($surveyidArr)) $surveyidArr = Array($surveyidArr); 
-		 	$surveyidStr = implode(",",$surveyidArr);
-		 	if($this->useCookies) setCookie("collsurveyid",$surveyidStr,0,($clientRoot?$clientRoot:'/'));
-			$this->searchTermsArr["surveyid"] = $surveyidStr;
-			//Since survey ID is being searched, clear colldbs
+		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection
+		if(array_key_exists('clid',$_REQUEST)){
+			//Limit by checklist voucher links
+			$clidIn = $_REQUEST['clid'];
+			$clidStr = '';
+			if(is_string($clidIn)){
+				$clidStr = $clidIn;
+			}
+			else{
+				$clidStr = $this->conn->real_escape_string(implode(',',array_unique($clidIn)));
+			}
+		 	if($this->useCookies) setCookie("collclid",$clidStr,0,($clientRoot?$clientRoot:'/'));
+			$this->searchTermsArr["clid"] = $clidStr;
+			//Since checklist vouchers are being searched, clear colldbs
 			setCookie("colldbs","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
-		else{
+		elseif(array_key_exists("db",$_REQUEST)){
 			//Limit collids and/or catids
 			$dbStr = '';
-			if(array_key_exists("db",$_REQUEST)){
-				$dbs = $_REQUEST["db"];
-				if(is_string($dbs)){
-					$dbStr = $dbs.';';
-				}
-				else{
-					$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
-				}
-				if(strpos($dbStr,'allspec') !== false){
-					$dbStr = 'allspec';
-				}
-				elseif(strpos($dbStr,'allobs') !== false){
-					$dbStr = 'allobs';
-				}
-				elseif(strpos($dbStr,'all') !== false){
-					$dbStr = 'all';
-				}
+			$dbs = $_REQUEST["db"];
+			if(is_string($dbs)){
+				$dbStr = $dbs.';';
+			}
+			else{
+				$dbStr = $this->conn->real_escape_string(implode(',',array_unique($dbs))).';';
+			}
+			if(strpos($dbStr,'allspec') !== false){
+				$dbStr = 'allspec';
+			}
+			elseif(strpos($dbStr,'allobs') !== false){
+				$dbStr = 'allobs';
+			}
+			elseif(strpos($dbStr,'all') !== false){
+				$dbStr = 'all';
 			}
 			if(substr($dbStr,0,3) != 'all' && array_key_exists('cat',$_REQUEST)){
 				$catArr = array();
@@ -938,8 +923,8 @@ class OccurrenceManager{
 				if($this->useCookies) setCookie("colldbs",$dbStr,0,($clientRoot?$clientRoot:'/'));
 				$this->searchTermsArr["db"] = $dbStr;
 			}
-			//Since coll IDs are being searched, clear survey ids
-			setCookie("collsurveyid","",time()-3600,($clientRoot?$clientRoot:'/'));
+			//Since coll IDs are being searched, clear checklist voucher ids
+			setCookie("collclid","",time()-3600,($clientRoot?$clientRoot:'/'));
 		}
 		if(array_key_exists("taxa",$_REQUEST)){
 			$taxa = $this->conn->real_escape_string($_REQUEST["taxa"]);
@@ -1138,10 +1123,10 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
-		if(array_key_exists("clid",$_REQUEST)){
-			$clid = $this->conn->real_escape_string($_REQUEST["clid"]);
-			$searchArr[] = "clid:".$clid;
-			$this->searchTermsArr["clid"] = $clid;
+		if(array_key_exists("dynsqlid",$_REQUEST)){
+			$dynSqlId = $this->conn->real_escape_string($_REQUEST["dynsqlid"]);
+			$searchArr[] = "dynsqlid:".$dynSqlId;
+			$this->searchTermsArr["dynsqlid"] = $dynSqlId;
 			$searchFieldsActivated = true;
 		}
 		$latLongArr = Array();

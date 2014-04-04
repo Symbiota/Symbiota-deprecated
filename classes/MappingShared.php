@@ -56,8 +56,7 @@ class MappingShared{
 			}
 		}
 		$sql .= "FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ";
-		//if(array_key_exists("surveyid",$this->searchTermsArr)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-		if(($this->searchTerms == 1) && (array_key_exists("surveyid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+		if(($this->searchTerms == 1) && (array_key_exists("clid",$this->searchTermsArr))) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 		$sql .= $mapWhere;
 		$sql .= " AND (o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL)";
 		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){

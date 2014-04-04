@@ -10,10 +10,10 @@ $interface = array_key_exists("interface",$_REQUEST)&&$_REQUEST["interface"]?$_R
 //$taxonFilter = 1;
 $dynClid = $checklistManager->buildSymbiotaChecklist($taxonFilter);
 if($interface == "key"){
-	header("Location: ../ident/key.php?crumblink=occurcl&dynclid=".$dynClid."&taxon=All Species");
+	header("Location: ../ident/key.php?dynclid=".$dynClid."&taxon=All Species");
 }
 else{
-	header("Location: ../checklists/checklist.php?crumblink=occurcl&dynclid=".$dynClid);
+	header("Location: ../checklists/checklist.php?dynclid=".$dynClid);
 }
 
 ?>
