@@ -24,7 +24,7 @@
 * Author: David B. Lowery
 */
 
-include_once('../../../config/symbini.php');
+include_once('../config/symbini.php');
 include_once('fp/FPNetworkFactory.php');
 include_once('fp/FPConfig.php');
 include_once('fp/common/AnnotationGenerator.php');
@@ -64,8 +64,8 @@ if (!$fileExists) {
         }
 
         foreach ($annotations as $annotation) {
-            echo "<h1>" . $annotation->scientificName . " - (" . $annotation->scientificNameAuthorship . ")</h1>";
-            echo "<p><a href=\"includes/response.php?uri=" . $annotation->uri . "\" onclick=\"window.open(this.href, 'popupwindow', 'width=500,height=400'); return false;\">Respond</a><br />";
+            echo "<h1>" . $_GET['scientificName'] . " - (" . $annotation->scientificNameAuthorship . ")</h1>";
+            echo "<p><a href=\"response.php?uri=" . $annotation->uri . "\" onclick=\"window.open(this.href, 'popupwindow', 'width=500,height=400'); return false;\">Respond</a><br />";
             echo "<a href=\"".CLIENTHELPER_ENDPOINT."/clientHelper/getAnnotation/?uri=" . $annotation->uri . "\" target=\"_blank\">View</a><br /></p>";
             ?>
             <table>
