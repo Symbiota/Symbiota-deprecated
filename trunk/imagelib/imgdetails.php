@@ -44,7 +44,7 @@ if($isEditor){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../js/symb/imagelib.imgdetails.js" type="text/javascript"></script>
+	<script src="../js/symb/imagelib.imgdetails.js?ver=20140402" type="text/javascript"></script>
 	<script src="../js/symb/shared.js" type="text/javascript"></script>
 </head>
 <body>
