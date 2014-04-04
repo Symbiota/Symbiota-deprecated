@@ -318,3 +318,7 @@ div.genericpopup{
 	border:					black solid 3px;
 }
 
+#tabs a{
+	outline-color: transparent;
+}
+
