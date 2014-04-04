@@ -276,46 +276,8 @@ include($serverRoot."/header.php");
 			elseif(array_key_exists('colliddel',$_POST)){
 				$dwcaManager->deleteArchive($_POST['colliddel']);
 			}
-		}
-		if($dwcaArr = $dwcaManager->getDwcaItems()){
 			?>
-			<table class="styledtable" style="margin:10px;">
-				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Pub Date</th></tr>
-				<?php 
-				foreach($dwcaArr as $k => $v){ 
-					?>
-					<tr>
-						<td><?php echo '<a href="../misc/collprofiles.php?collid='.$v['collid'].'">'.str_replace(' DwC-Archive','',$v['title']).'</a>'; ?></td>
-						<td><?php echo substr($v['description'],24); ?></td>
-						<td class="nowrap">
-							<?php 
-							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
-							$sizeStr = $dwcaManager->humanFilesize($filePath);
-							echo '<a href="'.$filePath.'">DwC-A ('.$sizeStr.')</a>';
-							if($isAdmin){
-								?>
-								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
-									<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
-									<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
-								</form>
-								<?php
-							}
-							?>
-						</td> 
-						<td class="nowrap"><?php echo date("Y-m-d", strtotime($v['pubDate'])); ?></td>
-					</tr>
-					<?php 
-				}
-				?>
-			</table>
-			<?php 
-		}
-		else{
-			echo '<div style="margin:10px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
-		}
-		if($isAdmin){
-			?>
-			<div id="dwcaadmindiv" style="display:<?php echo ($emode?'block':'none'); ?>;">
+			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
 						<legend><b>Publish / Refresh DWCA Files</b></legend>
@@ -356,6 +318,42 @@ include($serverRoot."/header.php");
 				</form>
 			</div>
 			<?php 
+		}
+		if($dwcaArr = $dwcaManager->getDwcaItems()){
+			?>
+			<table class="styledtable" style="margin:10px;">
+				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Pub Date</th></tr>
+				<?php 
+				foreach($dwcaArr as $k => $v){ 
+					?>
+					<tr>
+						<td><?php echo '<a href="../misc/collprofiles.php?collid='.$v['collid'].'">'.str_replace(' DwC-Archive','',$v['title']).'</a>'; ?></td>
+						<td><?php echo substr($v['description'],24); ?></td>
+						<td class="nowrap">
+							<?php 
+							$filePath = 'dwc'.substr($v['link'],strrpos($v['link'],'/'));
+							$sizeStr = $dwcaManager->humanFilesize($filePath);
+							echo '<a href="'.$filePath.'">DwC-A ('.$sizeStr.')</a>';
+							if($isAdmin){
+								?>
+								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
+									<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
+									<input type="image" src="../../images/del.gif" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+								</form>
+								<?php
+							}
+							?>
+						</td> 
+						<td class="nowrap"><?php echo date("Y-m-d", strtotime($v['pubDate'])); ?></td>
+					</tr>
+					<?php 
+				}
+				?>
+			</table>
+			<?php 
+		}
+		else{
+			echo '<div style="margin:10px;font-weight:bold;color:red;">No data archives have been published for this collection</div>';
 		}
 	}
 	?>

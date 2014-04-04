@@ -140,7 +140,6 @@ class OccurrenceDownload{
 		$recCnt = 0;
 		if($outstream){
 			$sql = $this->getSql();
-			//echo $sql;
 			$result = $this->conn->query($sql,MYSQLI_USE_RESULT);
 			if($result){
 				//Write column names out to file
@@ -293,7 +292,8 @@ xmlwriter_end_attribute($xml_resource);
 	}
 	
 	public function setCharSetOut($cs){
-		if($cs == 'iso-8859-1' || $cs == 'utf-8'){
+		$cs = strtoupper($cs);
+		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
 			$this->charSetOut = $cs;
 		}
 	}
@@ -384,8 +384,7 @@ xmlwriter_end_attribute($xml_resource);
 					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author '.
 					'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
 					'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
-				//if(array_key_exists("sol.clid",$this->sqlWhere)) $sql .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				if(strpos($this->sqlWhere,'sol.clid')) $sql .= "INNER JOIN fmvouchers sol ON o.occid = sol.occid ";
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
 				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -401,8 +400,7 @@ xmlwriter_end_attribute($xml_resource);
 				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
 					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3, t.unitname3, t.author '.
 					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				//if(array_key_exists("sol.clid",$this->sqlWhere)) $sql .= 'INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ';
-				if(strpos($this->sqlWhere,'sol.clid')) $sql .= 'INNER JOIN fmvouchers sol ON o.occid = sol.occid ';
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
 				if($this->redactLocalities){
 					if($this->rareReaderArr){
@@ -422,12 +420,11 @@ xmlwriter_end_attribute($xml_resource);
 					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 					'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-					'o.collid, o.dbpk, o.occid, g.guid '.
+					'o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid '.
 					'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
 					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				//if(array_key_exists("sol.clid",$this->sqlWhere)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				if(strpos($this->sqlWhere,'sol.clid')) $sql .= 'INNER JOIN fmvouchers sol ON o.occid = sol.occid ';
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 				$this->applyConditions();
 				$sql .= $this->sqlWhere;
 				if($this->redactLocalities){
@@ -457,7 +454,7 @@ xmlwriter_end_attribute($xml_resource);
 						'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 						'o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, '.
-						'o.occid, g.guid, o.localitySecurity, o.collid ';
+						'o.occid, CONCAT("urn:uuid:",g.guid) AS guid, o.localitySecurity, o.collid ';
 				}
 				elseif($this->schemaType == 'symbiota'){
 					$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
@@ -477,14 +474,13 @@ xmlwriter_end_attribute($xml_resource);
 						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 						'o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, '.
 						'c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.localitySecurityReason, '.
-						'o.processingstatus, o.recordEnteredBy, o.labelProject, o.collid, o.dbpk, o.occid, g.guid ';
+						'o.processingstatus, o.recordEnteredBy, o.labelProject, o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
 				}
 				$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
 						'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 						'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 				
-				//if(array_key_exists("sol.clid",$this->sqlWhere)) $this->sqlFrag .= "INNER JOIN omsurveyoccurlink sol ON o.occid = sol.occid ";
-				if(strpos($this->sqlWhere,'sol.clid')) $sql .= 'INNER JOIN fmvouchers sol ON o.occid = sol.occid ';
+				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 				$this->applyConditions();
 				$sql .= $this->sqlWhere;
 				$sql .= "ORDER BY o.collid";
