@@ -67,11 +67,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			});
 	
 			function validateDownloadForm(f){
-				if(f.processingstatus.value == "" && f.customfield1.value == ""){
-					alert("Select a processing status or an additional filter requirement");
-					return false;
-				}
-				else if(f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
+				if(f.newrecs.checked == true && (f.processingstatus.value == "unprocessed" || f.processingstatus.value == "")){
 					alert("New records cannot have an unprocessed or undefined processing status. Please select a valud processing status value.");
 					return false;
 				}

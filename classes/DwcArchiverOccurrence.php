@@ -78,7 +78,7 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['collectionCode'] = 'IFNULL(o.collectionCode,c.collectionCode) AS collectionCode';
 		if($this->schemaType != 'backup'){
 			$occurTermArr['collectionID'] = 'http://rs.tdwg.org/dwc/terms/collectionID';
-			$occurFieldArr['collectionID'] = 'IFNULL(o.collectionID,c.collectionGUID) AS collectionID';
+			$occurFieldArr['collectionID'] = 'o.collectionID';
 		}
 		$occurTermArr['basisOfRecord'] = 'http://rs.tdwg.org/dwc/terms/basisOfRecord';
 		$occurFieldArr['basisOfRecord'] = 'o.basisOfRecord';
@@ -268,8 +268,8 @@ class DwcArchiverOccurrence{
 			$occurTermArr['sourcePrimaryKey'] = 'http://symbiota.org/terms/sourcePrimaryKey'; 
 			$occurFieldArr['sourcePrimaryKey'] = 'o.dbpk'; 
 		}
-		$occurTermArr['collectionId'] = 'http://symbiota.org/terms/collectionId'; 
-		$occurFieldArr['collectionId'] = 'c.collid'; 
+		$occurTermArr['collId'] = 'http://symbiota.org/terms/collId'; 
+		$occurFieldArr['collId'] = 'c.collid'; 
 		$occurTermArr['recordId'] = 'http://portal.idigbio.org/terms/recordId';
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
@@ -289,8 +289,12 @@ class DwcArchiverOccurrence{
 			$sql = 'SELECT '.trim($sqlFrag,', ').
 				' FROM (omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid) '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
-				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID '.$this->conditionSql.
-				'ORDER BY o.collid LIMIT 1000000'; 
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
+			if(strpos($this->conditionSql,'v.clid')){
+				//Search criteria came from custom search page
+				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			$sql .= $this->conditionSql.'ORDER BY o.collid LIMIT 1000000'; 
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
@@ -341,7 +345,7 @@ class DwcArchiverOccurrence{
 	public function getSqlDeterminations(){
 		$sql = ''; 
 		$fieldArr = $this->determinationFieldArr['fields'];
-		if($fieldArr){
+		if($fieldArr && $this->conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
 				if($colName) $sqlFrag .= ', '.$colName;
@@ -351,13 +355,12 @@ class DwcArchiverOccurrence{
 				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql.' AND d.appliedstatus = 1 ';
+			if(strpos($this->conditionSql,'v.clid')){
+				//Search criteria came from custom search page
+				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 			}
-			else{
-				$sql .= 'WHERE d.appliedstatus = 1 ';
-			}
-			$sql .= 'ORDER BY o.collid';
+			$sql .= $this->conditionSql.'AND d.appliedstatus = 1 '.
+				'ORDER BY o.collid';
 			//echo '<div>'.$sql.'</div>'; exit;
 		}
 		return $sql;
@@ -411,7 +414,7 @@ class DwcArchiverOccurrence{
 	public function getSqlImages(){
 		$sql = ''; 
 		$fieldArr = $this->imageFieldArr['fields'];
-		if($fieldArr){
+		if($fieldArr && $this->conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
 				if($colName) $sqlFrag .= ', '.$colName;
@@ -421,6 +424,11 @@ class DwcArchiverOccurrence{
 				'INNER JOIN omcollections c ON o.collid = c.collid '.
 				'INNER JOIN guidimages g ON i.imgid = g.imgid '.
 				'INNER JOIN guidoccurrences og ON o.occid = og.occid ';
+			if(strpos($this->conditionSql,'v.clid')){
+				//Search criteria came from custom search page
+				$sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			$sql .= $this->conditionSql;
 			if($this->redactLocalities){
 				if($this->rareReaderArr){
 					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
@@ -428,9 +436,6 @@ class DwcArchiverOccurrence{
 				else{
 					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
 				}
-			}
-			if($this->conditionSql) {
-				$sql .= $this->conditionSql;
 			}
 		}
 		//echo $sql;
@@ -488,8 +493,8 @@ class DwcArchiverOccurrence{
 		}
 		if($sqlWhere){
 			$sql = 'SELECT c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.fulldescription, c.collectionguid, '.
-				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, '.
-				'c.guidtarget, c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
+				'IFNULL(c.homepage,i.url) AS url, IFNULL(c.contact,i.contact) AS contact, IFNULL(c.email,i.email) AS email, c.guidtarget, '.
+				'c.latitudedecimal, c.longitudedecimal, c.icon, c.managementtype, c.colltype, c.rights, c.rightsholder, c.usageterm, '.
 				'i.address1, i.address2, i.city, i.stateprovince, i.postalcode, i.country, i.phone '.
 				'FROM omcollections c LEFT JOIN institutions i ON c.iid = i.iid WHERE '.$sqlWhere;
 			//echo 'SQL: '.$sql.'<br/>';
@@ -508,6 +513,7 @@ class DwcArchiverOccurrence{
 				$this->collArr[$r->collid]['lng'] = $r->longitudedecimal;
 				$this->collArr[$r->collid]['icon'] = $r->icon;
 				$this->collArr[$r->collid]['colltype'] = $r->colltype;
+				$this->collArr[$r->collid]['managementtype'] = $r->managementtype;
 				$this->collArr[$r->collid]['rights'] = $r->rights;
 				$this->collArr[$r->collid]['rightsholder'] = $r->rightsholder;
 				$this->collArr[$r->collid]['usageterm'] = $r->usageterm;
@@ -712,7 +718,7 @@ class DwcArchiverOccurrence{
 			unset($termArr['localitySecurity']);
 		}
 		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
-			unset($termArr['collectionId']);
+			unset($termArr['collId']);
 		}
 		foreach($termArr as $k => $v){
 			$fieldElem = $newDoc->createElement('field');
@@ -1144,13 +1150,18 @@ class DwcArchiverOccurrence{
 			unset($fieldArr['localitySecurity']);
 		}
 		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
-			unset($fieldArr['collectionId']);
+			unset($fieldArr['collId']);
 		}
 		$this->writeOutRecord($fh,array_keys($fieldArr));
 		if(!$this->collArr){
 			//Collection array not previously primed by source  
 			$sql1 = 'SELECT DISTINCT o.collid FROM omoccurrences o ';
-			if($this->conditionSql) $sql1 .= $this->conditionSql;
+			if($this->conditionSql){
+				if(stripos($this->conditionSql,'v.clid')){
+					$sql1 .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+				}
+				$sql1 .= $this->conditionSql;
+			}
 			$rs1 = $this->conn->query($sql1);
 			$collidStr = '';
 			while($r1 = $rs1->fetch_object()){
@@ -1179,6 +1190,15 @@ class DwcArchiverOccurrence{
 				}
 				
 				$r['references'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
+				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
+				//Add collection GUID based on management type
+				$managementType = $this->collArr[$r['collid']]['managementtype'];
+				if($managementType && $managementType == 'Live Data'){
+					if(array_key_exists('collectionID',$r) && !$r['collectionID']){
+						$r['collectionID'] = $this->collArr[$r['collid']]['collectionguid'];
+					}
+				}
+				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 				if($guidTarget == 'catalogNumber'){
 					$r['occurrenceID'] = $r['catalogNumber'];
@@ -1186,13 +1206,13 @@ class DwcArchiverOccurrence{
 				elseif($guidTarget == 'symbiotaUUID'){
 					$r['occurrenceID'] = $r['recordId'];
 				}
-				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
 				if($this->schemaType == 'dwc'){
 					unset($r['localitySecurity']);
 				}
 				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
 					unset($r['collid']);
 				}
+				
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
 				$this->writeOutRecord($fh,$r);
@@ -1234,7 +1254,7 @@ class DwcArchiverOccurrence{
 		$sql = $this->getSqlDeterminations();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			while($r = $rs->fetch_assoc()){
-				$r['recordId'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['recordId'];
+				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
 				$this->writeOutRecord($fh,$r);
@@ -1304,7 +1324,7 @@ class DwcArchiverOccurrence{
 					}
 					if(!$r['usageterms']) $r['usageterms'] = 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)';
 				}
-				$r['providermanagedid'] = 'urn:uuid:'.$_SERVER["SERVER_NAME"].':'.$r['providermanagedid'];
+				$r['providermanagedid'] = 'urn:uuid:'.$r['providermanagedid'];
 				$r['associatedSpecimenReference'] = $urlPathPrefix.'collections/individual/index.php?occid='.$r['occid'];
 				$r['type'] = 'StillImage';
 				$r['subtype'] = 'Photograph';
