@@ -13,10 +13,7 @@ $collList = $collManager->getFullCollectionList($catId);
 $specArr = (isset($collList['spec'])?$collList['spec']:null);
 $obsArr = (isset($collList['obs'])?$collList['obs']:null);
 
-//$otherCatArr = $collManager->getSurveys();
 $otherCatArr = $collManager->getOccurVoucherProjects();
-//$ownerInstArr = $collManager->getOwnerInstitutions();
-//$specProjArr = $collManager->getSpecProjects();
 ?>
 
 <!doctype html>
@@ -52,25 +49,16 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				var ele = document.getElementById(target);
 				if(ele){
 					if(ele.style.display=="none"){
-						ele.style.display="block";
+						if(ele.id.substring(0,5) == "minus" || ele.id.substring(0,4) == "plus"){
+							ele.style.display = "inline";
+				  		}
+						else{
+							ele.style.display = "block";
+						}
 			  		}
 				 	else {
 				 		ele.style.display="none";
 				 	}
-				}
-				else{
-					var divObjs = document.getElementsByTagName("div");
-				  	for (i = 0; i < divObjs.length; i++) {
-				  		var divObj = divObjs[i];
-				  		if(divObj.getAttribute("class") == target || divObj.getAttribute("className") == target){
-							if(divObj.style.display=="none"){
-								divObj.style.display="block";
-							}
-						 	else {
-						 		divObj.style.display="none";
-						 	}
-						}
-					}
 				}
 			}
 
@@ -78,6 +66,12 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				toggle("minus-"+catid);
 				toggle("plus-"+catid);
 				toggle("cat-"+catid);
+			}
+
+			function togglePid(pid){
+				toggle("minus-pid-"+pid);
+				toggle("plus-pid-"+pid);
+				toggle("pid-"+pid);
 			}
 
 			function selectAll(cb){
@@ -115,6 +109,21 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				var catObj = document.getElementById(catTarget);
 				catObj.checked = false;
 				uncheckAll();
+			}
+
+			function selectAllPid(cb){
+				var boxesChecked = true;
+				if(!cb.checked){
+					boxesChecked = false;
+				}
+				var target = "pid-"+cb.value;
+				var inputObjs = document.getElementsByTagName("input");
+			  	for (i = 0; i < inputObjs.length; i++) {
+			  		var inputObj = inputObjs[i];
+			  		if(inputObj.getAttribute("class") == target || inputObj.getAttribute("className") == target){
+			  			inputObj.checked = boxesChecked;
+			  		}
+			  	}
 			}
 
 			function verifyCollForm(f){
@@ -158,12 +167,17 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 			}
 
 			function verifyOtherCatForm(f){
-				var dbElements = document.getElementsByName("surveyid[]");
-				for(i = 0; i < dbElements.length; i++){
-					var dbElement = dbElements[i];
-					if(dbElement.checked) return true;
+				var pidElems = document.getElementsByName("pid[]");
+				for(i = 0; i < pidElems.length; i++){
+					var pidElem = pidElems[i];
+					if(pidElem.checked) return true;
 				}
-			   	alert("Please choose at least one checkbox!");
+				var clidElems = document.getElementsByName("clid[]");
+				for(i = 0; i < clidElems.length; i++){
+					var clidElem = clidElems[i];
+					if(clidElem.checked) return true;
+				}
+			   	alert("Please choose at least one search region!");
 				return false;
 			}
 
@@ -263,33 +277,46 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 				</div>
 				<?php 
 			} 
-			if($otherCatArr){ 
+			if($otherCatArr){
+				$titleArr = $otherCatArr['titles'];
+				unset($otherCatArr['titles']);
 				?>
 				<div id="otherdiv">
 					<form id="othercatform" action="harvestparams.php" method="get" onsubmit="return verifyOtherCatForm(this)">
 						<?php 
-						foreach($otherCatArr as $projTitle => $surveyArr){
+						foreach($otherCatArr as $catPid => $catArr){
 							?>
-							<fieldset style="margin:10px;">
-								<legend style="font-weight:bold;"><?php echo $projTitle; ?></legend>
-								<div style="margin:40px 15px;float:right;">
-									<input type="image" src='../images/next.jpg'
-										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-										onmouseout="javascript:this.src = '../images/next.jpg';"
-										title="Click button to advance to the next step" />
-								</div>
-								<div style="margin:10px;">
-									<?php 
-									foreach($surveyArr as $surveyId => $surveyName){
-										?>
-										<div style="margin:5px;">
-											<input name="surveyid[]" value='<?php echo $surveyId; ?>' type='checkbox' />
-											<?php echo $surveyName; ?>
+							<fieldset style="margin:10px;padding:10px;">
+								<legend style="font-weight:bold;"><?php echo $titleArr[$catPid]; ?></legend>
+								<?php 
+								foreach($catArr as $pid => $clidArr){
+									?>
+									<div>
+										<a href="#" onclick="togglePid('<?php echo $pid; ?>');return false;"><img id="plus-pid-<?php echo $pid; ?>" src="../images/plus.gif" /><img id="minus-pid-<?php echo $pid; ?>" src="../images/minus.gif" style="display:none;" /></a>
+										<input name="pid[]" type="checkbox" value="<?php echo $pid; ?>" onchange="selectAllPid(this);" />
+										<b><?php echo $titleArr[$pid]; ?></b>
+									</div>
+									<div id="pid-<?php echo $pid; ?>" style="margin:10px 15px;display:none;">
+										<div style="margin:20px 15px;float:right;">
+											<input type="image" src='../images/next.jpg'
+												onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+												onmouseout="javascript:this.src = '../images/next.jpg';"
+												title="Click button to advance to the next step" />
 										</div>
 										<?php 
-									}
-									?>
-								</div>
+										foreach($clidArr as $clid => $clidName){
+											?>
+											<div>
+												<input name="clid[]" class="pid-<?php echo $pid; ?>" type="checkbox" value="<?php echo $clid; ?>" />
+												<?php echo $clidName; ?>
+											</div>
+											<?php
+										} 
+										?>
+									</div>
+									<?php
+								} 
+								?>
 							</fieldset>
 							<?php 
 						}
