@@ -135,28 +135,12 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 		else{
 			if(isset($checklists_checklistCrumbs)){
 				if($checklists_checklistCrumbs){
-					if($dynClid){
-						if($clArray["type"] == "Specimen Checklist"){
-							echo "<a href='".$clientRoot."/collections/list.php'>";
-							echo "Occurrence Checklist";
-							echo "</a> &gt;&gt; ";
-						}
-					}
-					else{
-						echo $checklists_checklistCrumbs;
-					}
+					echo $checklists_checklistCrumbs;
 					echo " <b>".$clManager->getClName()."</b>";
 				}
 			}
 			else{
 				echo '<a href="../index.php">Home</a> &gt;&gt; ';
-				if($dynClid){
-					if($clArray['type'] == 'Specimen Checklist'){
-						echo '<a href="'.$clientRoot.'/collections/list.php">';
-						echo 'Occurrence Checklist';
-						echo '</a> &gt;&gt; ';
-					}
-				}
 				echo ' <b>'.$clManager->getClName().'</b>';
 			}
 		}
@@ -554,7 +538,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 								if($showVouchers && $dynSqlExists){ 
 									?>
 									<span class="editspp" style="display:none;">
-										<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&clid=".$clid."&targettid=".$tid;?>','editorwindow');">
+										<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&dynsqlid=".$clid."&targettid=".$tid;?>','editorwindow');">
 											<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
 										</a>
 									</span>
