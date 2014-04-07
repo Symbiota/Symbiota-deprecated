@@ -79,6 +79,15 @@ $(document).ready(function() {
 		source: "rpc/getspeciessuggest.php", 
 		minLength: 3,
 		change: function(event, ui) {
+			$( "#tidinterpreted" ).val("");
+			$( 'input[name=scientificnameauthorship]' ).val("");
+			$( 'input[name=family]' ).val("");
+			$( 'input[name=localitysecurity]' ).prop('checked', false);
+			fieldChanged('sciname');
+			fieldChanged('tidinterpreted');
+			fieldChanged('scientificnameauthorship');
+			fieldChanged('family');
+			fieldChanged('localitysecurity');
 			if($( "#ffsciname" ).val()){
 				$.ajax({
 					type: "POST",
@@ -96,10 +105,6 @@ $(document).ready(function() {
 					}
 					else{
 						alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus. You can continue entering specimen and name will be add to thesaurus later.");
-						$( "#tidinterpreted" ).val("");
-						$( 'input[name=scientificnameauthorship]' ).val("");
-						$( 'input[name=family]' ).val("");
-						$( 'input[name=localitysecurity]' ).prop('checked', false);
 					}
 				});
 			}
@@ -108,12 +113,7 @@ $(document).ready(function() {
 				$( 'input[name=scientificnameauthorship]' ).val("");
 				$( 'input[name=family]' ).val("");
 				$( 'input[name=localitysecurity]' ).prop('checked', false);
-			}				
-			fieldChanged('sciname');
-			fieldChanged('tidinterpreted');
-			fieldChanged('scientificnameauthorship');
-			fieldChanged('family');
-			fieldChanged('localitysecurity');
+			}
 		}
 	});
 
@@ -410,7 +410,7 @@ function parseVerbatimCoordinates(f,verbose){
 
 //Form verification code
 function verifyFullForm(f){
-
+	f.submitaction.focus();
 	if(abortFormVerification) return true;
 
 	if(!verifyDupeCatalogNumber(f)) return false;
