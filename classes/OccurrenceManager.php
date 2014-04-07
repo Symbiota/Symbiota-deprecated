@@ -101,7 +101,7 @@ class OccurrenceManager{
 	public function getSqlWhere(){
 		$sqlWhere = ""; 
 		if(array_key_exists('clid',$this->searchTermsArr)){
-			$sqlWhere .= "AND (v.clid IN('".$this->searchTermsArr['clid']."')) ";
+			$sqlWhere .= "AND (v.clid IN(".$this->searchTermsArr['clid'].")) ";
 		}
 		elseif(array_key_exists("db",$this->searchTermsArr) && $this->searchTermsArr['db']){
 			//Do nothing if db = all

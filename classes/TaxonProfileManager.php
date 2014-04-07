@@ -711,8 +711,7 @@ class TaxonProfileManager {
 			$sql .= 'WHERE (c.CLID = '.$intVal.')';
 		}
 		else{
-			$sql .= "WHERE (c.Name = '".$inValue.
-				"') OR (c.Title = '".$inValue."')";
+			$sql .= "WHERE (c.Name = '".$inValue."')";
 		}
 		//echo $sql;
 		$result = $this->con->query($sql);
