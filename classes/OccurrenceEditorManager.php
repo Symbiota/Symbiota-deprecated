@@ -591,6 +591,7 @@ class OccurrenceEditorManager {
 			$autoCommit = 0;
 		}
 
+		//Processing edit
 		$editedFields = trim($occArr['editedfields']);
 		$editArr = array_unique(explode(';',$editedFields));
 		foreach($editArr as $k => $fName){
@@ -602,6 +603,19 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($editArr){
+			//Deal with scientific name changes, which isn't allows handled correctly with AJAX code
+			if(in_array('sciname',$editArr) && $occArr['sciname'] && !$occArr['tidinterpreted']){
+				$sql2 = 'SELECT t.tid, t.author, ts.family '.
+					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+					'WHERE ts.taxauthid = 1 AND sciname = "'.$occArr['sciname'].'"';
+				$rs2 = $this->conn->query($sql2);
+				while($r2 = $rs2->fetch_object()){
+					$occArr['tidinterpreted'] = $r2->tid;
+					if(!$occArr['scientificnameauthorship']) $occArr['scientificnameauthorship'] = $r2->author;
+					if(!$occArr['family']) $occArr['family'] = $r2->family;
+				}
+				$rs2->free();
+			}
 			//Add edits to omoccuredits
 			//Get old values before they are changed
 			$sql = '';
@@ -678,13 +692,14 @@ class OccurrenceEditorManager {
 						}
 					}
 				}
-				//Add tidinterpreted
+				//If sciname was changed, update image tid link 
 				if(in_array('tidinterpreted',$editArr)){
 					//Remap images
 					$sqlImgTid = 'UPDATE images SET tid = '.($occArr['tidinterpreted']?$occArr['tidinterpreted']:'NULL').' '.
 						'WHERE occid = ('.$occArr['occid'].')';
 					$this->conn->query($sqlImgTid);
 				}
+				//Update occurrence record
 				$sql = 'UPDATE omoccurrences SET '.substr($sql,1).' WHERE (occid = '.$occArr['occid'].')';
 				//echo $sql;
 				if($this->conn->query($sql)){

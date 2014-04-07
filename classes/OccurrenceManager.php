@@ -773,7 +773,7 @@ class OccurrenceManager{
 			'FROM fmprojects p1 INNER JOIN fmprojects p2 ON p1.parentpid = p2.pid '.
 			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
 			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
-			'WHERE p2.occurrencesearch = 1 AND p2.ispublic = 1 AND p1.ispublic = 1 '.
+			'WHERE p2.occurrencesearch = 1 AND p1.ispublic = 1 '.
 			'ORDER BY p2.sortsequence, p2.projname, p1.projname';
 		//echo "<div>$sql</div>";
 		$rs = $this->conn->query($sql);
@@ -783,7 +783,7 @@ class OccurrenceManager{
 			$retArr[$r->parentpid][$r->pid][$r->clid] = $r->clname;
 		}
 		$rs->close();
-		$retArr['titles'] = $titleArr;
+		if($titleArr) $retArr['titles'] = $titleArr;
 		return $retArr;
 	}
 	
