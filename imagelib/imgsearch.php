@@ -169,6 +169,25 @@ $imageExplorer = new ImageExplorer();
             $('#previousPage').click(function(event) {
                 imgExplorer.previousPage();
             });
+
+            $('#nextPage_bottom').click(function(event) {
+                imgExplorer.nextPage();
+            });
+
+            $('#previousPage_bottom').click(function(event) {
+                imgExplorer.previousPage();
+            });
+
+            $('#displayOptions').click(function(event) {
+                $("#options" ).toggle('slide', 500 );
+                console.log($('#displayOptions').text());
+                if ($('#displayOptions').text() == "Show options...") {
+                    $('#displayOptions').text("Hide options...");
+                } else {
+                    $('#displayOptions').text("Show options...");
+                }
+            });
+
         });
     </script>
     <meta name='keywords' content=''/>
