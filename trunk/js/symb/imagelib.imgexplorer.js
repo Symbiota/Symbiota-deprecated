@@ -38,6 +38,20 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
         $('body').removeClass("loading");
 
         $('#count').html(ImageExplorer.currStart + " - " + (ImageExplorer.currStart+ImageExplorer.currLimit) + " of " + $('#imgCnt').val() + " images")
+        $('#count_bottom').html(ImageExplorer.currStart + " - " + (ImageExplorer.currStart+ImageExplorer.currLimit) + " of " + $('#imgCnt').val() + " images")
+
+
+        if (parseFloat($('#imgCnt').val()) <= ImageExplorer.currLimit) {
+            $("#previousPage").css("display","none");
+            $("#nextPage").css("display","none");
+            $("#previousPage_bottom").css("display","none");
+            $("#nextPage_bottom").css("display","none");
+        } else {
+            $("#previousPage").css("display","inline");
+            $("#nextPage").css("display","inline");
+            $("#previousPage_bottom").css("display","inline");
+            $("#nextPage_bottom").css("display","inline");
+        }
 
         // hack to get autocomplete to close after a search
         var $focused = $(':focus');
@@ -78,21 +92,22 @@ ImageExplorer.lookupValue = function(facet, label) {
 
 ImageExplorer.prototype.init = function(containerId) {
     var controlsHtml="";
-    controlsHtml += "<div style=\"margin-top: 20px\">";
+    controlsHtml += "<a id=\"displayOptions\" href=\"#\"><span id=\"displayOptionsText\">Show</span> options...</a>";
+    controlsHtml += "<div id=\"options\" style=\"margin-top: 20px\">";
     controlsHtml += "    <table>";
     controlsHtml += "        <tr>";
     controlsHtml += "            <td>Images displayed per group: <\/td>";
     controlsHtml += "            <td>";
     controlsHtml += "                <select id=\"count_per_category\" name=\"count_per_category\">";
-    controlsHtml += "                    <option value=\"taxon\" selected=\"selected\">One per taxon<\/option>";
+    controlsHtml += "                    <option value=\"taxon\" >One per taxon<\/option>";
     controlsHtml += "                    <option value=\"specimen\">One per specimen<\/option>";
-    controlsHtml += "                    <option value=\"all\">All images<\/option>";
+    controlsHtml += "                    <option value=\"all\" selected=\"selected\">All images<\/option>";
     controlsHtml += "                <\/select>";
     controlsHtml += "            <\/td>";
     controlsHtml += "        <\/tr>";
     controlsHtml += "        <tr>";
     controlsHtml += "            <td>Display images needing identification: <\/td>";
-    controlsHtml += "            <td><input type=\"checkbox\" id=\"id_needed\" name=\"id_needed\" checked=\"true\" \/><\/td>";
+    controlsHtml += "            <td><input type=\"checkbox\" id=\"id_needed\" name=\"id_needed\" \/><\/td>";
     controlsHtml += "        <\/tr>";
     controlsHtml += "        <tr>";
     controlsHtml += "            <td>Display images identified to species: <\/td>";
@@ -112,6 +127,14 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "</div>";
     controlsHtml += "<hr />";
     controlsHtml += "<div id=\"images\"><\/div>";
+    controlsHtml += "<div id=\"pagination_bottom\" style=\"float:left; width:800px; margin-top:40px\">";
+    controlsHtml += "<hr />";
+    controlsHtml += "    <div style=\"float:right;\">";
+    controlsHtml += "        <span id=\"previousPage_bottom\"><a href=\"#\"><< Previous Page</a></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span id=\"nextPage_bottom\"><a href=\"#\">Next Page >></a></span>";
+    controlsHtml += "    <\/div>";
+    controlsHtml += "    <div id=\"count_bottom\" style=\"font-weight:bold;\">Images: 0 - 100 of 136<\/div>";
+    controlsHtml += "</div>";
+
 
     $("#"+containerId).html(controlsHtml);
 
@@ -192,4 +215,6 @@ ImageExplorer.prototype.init = function(containerId) {
     }
 
     this.search();
+
+    $("#options").toggle();
 }
