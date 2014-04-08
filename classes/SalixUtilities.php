@@ -5,7 +5,7 @@ class SalixUtilities {
 
 	private $conn;
 	private $verbose = 1;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 		set_time_limit(600);
@@ -15,23 +15,9 @@ class SalixUtilities {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function buildWordStats($reset = 1){
-		$collArr = array();
-		$sqlColl = 'SELECT collid, CONCAT(collectionname,CONCAT_WS(" - ",institutioncode, collectioncode)) as collname '.
-			'FROM omcollections '.
-			'WHERE colltype = "Preserved Specimens" and collid = 1 ';
-		$rsColl = $this->conn->query($sqlColl);
-		while($rColl = $rsColl->fetch_object()){
-			$collArr[$rColl->collid] = $rColl->collname;
-		}
-		$rsColl->free();
-		
-		//Build word stats
-		foreach($collArr as $collid => $collName){
-			$this->echoStr('Starting to build word stats for: '.$collName);
-			ob_flush();
-			flush();
-			
+	public function buildWordStats($collid, $reset = 1){
+		if($collid){
+			//Reset wordstats table for that collection
 			if($reset){
 				if($this->conn->query('DELETE FROM salixwordstats WHERE collid = '.$collid)){
 					$this->echoStr('Deleting old word stats');
@@ -40,6 +26,7 @@ class SalixUtilities {
 					$this->echoStr('ERROR deleting old word stats: '.$this->conn->error);
 				}
 			}
+			//Build word stats
 			$this->echoStr('Starting to collect Words');
 			ob_flush();
 			flush();
@@ -47,7 +34,8 @@ class SalixUtilities {
 			$recCnt = 0;
 			$sql = 'SELECT locality, habitat, substrate, verbatimAttributes, occurrenceRemarks '.
 				'FROM omoccurrences '.
-				'WHERE locality IS NOT NULL AND collid = '.$collid.' LIMIT 10000';
+				'WHERE locality IS NOT NULL AND collid = '.$collid;
+			//$sql .= ' LIMIT 10000';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$this->countWords($statsArr, 'loc', $r->locality);
@@ -151,6 +139,23 @@ class SalixUtilities {
 	}
 	
 	//misc fucntions 
+	public function batchWordStats($collTarget, $reset = 1){
+		$collArr = array();
+		$sqlColl = 'SELECT collid, CONCAT(collectionname,CONCAT_WS(" - ",institutioncode, collectioncode)) as collname '.
+			'FROM omcollections '.
+			'WHERE colltype = "Preserved Specimens" ';
+		if($collTarget) $sqlColl .= 'AND collid IN('.$collTarget.')';
+		$rsColl = $this->conn->query($sqlColl);
+		while($rColl = $rsColl->fetch_object()){
+			$this->echoStr('Starting to build word stats for: '.$r->collname);
+			ob_flush();
+			flush();
+			$this->buildWordStats($r->collid,$reset);
+		}
+		$rsColl->free();
+		
+	}
+
 	private function echoStr($str){
 		if($this->verbose){
 			echo '<li>'.$str."</li>\n";

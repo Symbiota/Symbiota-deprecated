@@ -288,6 +288,12 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							?>
 							<fieldset style="margin:10px;padding:10px;">
 								<legend style="font-weight:bold;"><?php echo $titleArr[$catPid]; ?></legend>
+								<div style="margin:0px 15px;float:right;">
+									<input type="image" src='../images/next.jpg'
+										onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
+										onmouseout="javascript:this.src = '../images/next.jpg';"
+										title="Click button to advance to the next step" />
+								</div>
 								<?php 
 								foreach($catArr as $pid => $clidArr){
 									?>
@@ -297,12 +303,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 										<b><?php echo $titleArr[$pid]; ?></b>
 									</div>
 									<div id="pid-<?php echo $pid; ?>" style="margin:10px 15px;display:none;">
-										<div style="margin:20px 15px;float:right;">
-											<input type="image" src='../images/next.jpg'
-												onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-												onmouseout="javascript:this.src = '../images/next.jpg';"
-												title="Click button to advance to the next step" />
-										</div>
 										<?php 
 										foreach($clidArr as $clid => $clidName){
 											?>

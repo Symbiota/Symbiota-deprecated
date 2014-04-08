@@ -624,10 +624,10 @@ class OccurrenceManager{
 		if(isset($occArr['cat'])){
 			$catArr = $occArr['cat'];
 			?>
-		    <div style="float:right;margin-top:80px;">
+			<div style="float:right;margin-top:80px;">
 	        	<input type="image" src='../images/next.jpg'
-	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-	                onmouseout="javascript:this.src = '../images/next.jpg';"
+	                onmouseover="this.src = '../images/next_rollover.jpg';" 
+	                onmouseout="this.src = '../images/next.jpg';"
 	                title="Click button to advance to the next step" />
 	    	</div>
 			<table>
@@ -703,8 +703,8 @@ class OccurrenceManager{
 			?>
 		    <div style="float:right;margin-top:80px;">
 	        	<input type="image" src='../images/next.jpg'
-	                onmouseover="javascript:this.src = '../images/next_rollover.jpg';" 
-	                onmouseout="javascript:this.src = '../images/next.jpg';"
+	                onmouseover="this.src = '../images/next_rollover.jpg';" 
+	                onmouseout="this.src = '../images/next.jpg';"
 	                title="Click button to advance to the next step" />
 	    	</div>
 			<table>
@@ -773,6 +773,7 @@ class OccurrenceManager{
 			'FROM fmprojects p1 INNER JOIN fmprojects p2 ON p1.parentpid = p2.pid '.
 			'INNER JOIN fmchklstprojlink cl ON p1.pid = cl.pid '.
 			'INNER JOIN fmchecklists c ON cl.clid = c.clid '.
+			'INNER JOIN fmvouchers v ON c.clid = v.clid '.
 			'WHERE p2.occurrencesearch = 1 AND p1.ispublic = 1 '.
 			'ORDER BY p2.sortsequence, p2.projname, p1.projname';
 		//echo "<div>$sql</div>";
