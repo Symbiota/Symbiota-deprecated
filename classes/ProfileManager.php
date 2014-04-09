@@ -190,19 +190,14 @@ class ProfileManager{
 		if($newPwd){
 			$editCon = $this->getConnection("write");
 			if($isSelf){
-				$sqlTest = 'SELECT ul.uid FROM userlogin ul WHERE (ul.username = "'.$this->uid.
-					'") AND ((ul.password = PASSWORD("'.$this->cleanInStr($oldPwd).
+				$sqlTest = 'SELECT ul.uid FROM userlogin ul WHERE (ul.uid = '.$this->uid.') '.
+					'AND ((ul.password = PASSWORD("'.$this->cleanInStr($oldPwd).
 					'")) OR (ul.password = OLD_PASSWORD("'.$this->cleanInStr($oldPwd).'")))';
 				$rsTest = $editCon->query($sqlTest);
 				if(!$rsTest->num_rows) return false;
 			}
-			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->cleanInStr($newPwd).'") '; 
-			if($isSelf){
-				$sql .= 'WHERE (ul.username = "'.$this->uid.'")';
-			}
-			else{
-				$sql .= 'WHERE (uid = '.$this->uid.')';
-			}
+			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->cleanInStr($newPwd).'") '.
+				'WHERE (uid = '.$this->uid.')';
 			$successCnt = $editCon->query($sql);
 			$editCon->close();
 			if($successCnt > 0) $success = true;

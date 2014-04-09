@@ -76,10 +76,10 @@ if($isEditor){
 		$updateStatus = false;
 	    if($isSelf){
 		    $oldPwd = $_REQUEST["oldpwd"];
-		    $updateStatus = $pHandler->changePassword($paramsArr["un"], $newPwd, $oldPwd, $isSelf);
+		    $updateStatus = $pHandler->changePassword($newPwd, $oldPwd, $isSelf);
 	    }
 	    else{
-	    	$updateStatus = $pHandler->changePassword($userId, $newPwd);
+	    	$updateStatus = $pHandler->changePassword($newPwd);
 	    }
 	    if($updateStatus){
 		    $statusStr = "<span color='green'>Password update successful!</span>";
