@@ -26,7 +26,7 @@ if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$u
  	$isEditor = true;
 }
 
-$status = "";
+$statusStr = "";
 if($isEditor){
 	if($action == 'Add New Image Project'){
 		$specManager->addProject($_REQUEST);
@@ -37,11 +37,19 @@ if($isEditor){
 	elseif($action == 'Delete Image Project'){
 		$specManager->deleteProject($_REQUEST['sppriddel']);
 	}
-	elseif($action == 'addtoqueue'){
+	elseif($action == 'Add to Queue'){
 		$csManager = new OccurrenceCrowdSource();
 		$csManager->setCollid($collid);
-		$statusStr = $csManager->addToQueue();
+		$statusStr = $csManager->addToQueue($_POST['omcsid'],$_POST['family'],$_POST['taxon'],$_POST['country'],$_POST['stateprovince'],$_POST['limit']);
+		if(is_numeric($statusStr)){
+			$statusStr .= ' records added to queue';
+		}
 		$action = '';
+	}
+	elseif($action == 'delqueue'){
+		$csManager = new OccurrenceCrowdSource();
+		$csManager->setCollid($collid);
+		$statusStr = $csManager->deleteQueue($_GET['omcsid']);
 	}
 	elseif($action == 'Edit Crowdsource Project'){
 		$omcsid = $_POST['omcsid'];
@@ -70,7 +78,7 @@ if($isEditor){
 		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-		<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=131106"></script>
+		<script type="text/javascript" src="../../js/symb/shared.js?ver=131106"></script>
 		<script language=javascript>
 			$(document).ready(function() {
 				$('#tabs').tabs({
@@ -82,6 +90,7 @@ if($isEditor){
 						$(ui.panel).html("<p>Loading...</p>");
 					}
 				});
+
 			});
 		</script>
 	</head>
@@ -114,7 +123,7 @@ if($isEditor){
 			if($action == 'Upload ABBYY File'){
 				$statusArr = $specManager->loadLabelFile();
 				if($statusArr){
-					$status = '<div style="padding:15px;"><ul><li>'.implode('</li><li>',$statusArr).'</li></ul></div>';
+					$statusStr = '<ul><li>'.implode('</li><li>',$statusArr).'</li></ul>';
 				}
 			}
 			elseif($action == 'Process Images'){
@@ -147,11 +156,13 @@ if($isEditor){
 				$imageProcessor->batchLoadImages();
 				echo '</div>'."\n";
 			}
-			if($status){ 
+			if($statusStr){ 
 				?>
 				<div style='margin:20px 0px 20px 0px;'>
 					<hr/>
-					<?php echo $status; ?>
+					<div style="margin:15px;color:<?php echo (stripos($statusStr,'error') !== false?'red':'green'); ?>">
+						<?php echo $statusStr; ?>
+					</div>
 					<hr/>
 				</div>
 				<?php 
