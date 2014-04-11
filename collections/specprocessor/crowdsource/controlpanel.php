@@ -82,12 +82,15 @@ $projArr = $csManager->getProjectDetails();
 						if($unprocessedCnt){
 							echo '<a href="../editor/occurrencetabledisplay.php?csmode=1&occindex=0&displayquery=1&reset=1&collid='.$collid.'" target="_blank">';
 							echo $unprocessedCnt;
+							echo '</a> ';
+							echo '<a href="index.php?submitaction=delqueue&tabindex=2&collid='.$collid.'&omcsid='.$omcsid.'">';
+							echo '<img src="../../images/drop.png" style="width:12px;" title="Delete all unprocessed records from queue" />';
 							echo '</a>';
 						}
 						else{
 							echo $unprocessedCnt;
 						}
-						?>
+						?> 
 					</div>
 					<div>
 						<b>Pending Approval:</b> 
@@ -116,7 +119,78 @@ $projArr = $csManager->getProjectDetails();
 						<?php
 						echo $statsArr['toadd'];
 						if($statsArr['toadd']){
-							echo ' (<a href="index.php?submitaction=addtoqueue&tabindex=2&collid='.$collid.'&omcsid='.$omcsid.'" target="_blank">Add to Queue</a>)';
+							$criteriaArr = $csManager->getQueueLimitCriteria()
+							?>
+							(<a href="#" onclick="toggle('addQueueDiv'); return false;">Add to Queue</a>)
+							<div id="addQueueDiv" style="display:none;margin-left:30px;">
+								<form method="post" action="index.php">
+									<fieldset>
+										<legend><b>Criteria</b></legend>
+										<div>
+											<b>Family:</b> 
+											<select name="family">
+												<option value="">---------------------</option>
+												<?php 
+												$familyArr = $criteriaArr['family'];
+												sort($familyArr);
+												foreach($familyArr as $familyStr){
+													echo '<option value="'.$familyStr.'">'.$familyStr.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div>
+											<b>Genus/Species:</b> 
+											<select name="taxon">
+												<option value="">---------------------</option>
+												<?php 
+												$taxaArr = $criteriaArr['taxa'];
+												sort($taxaArr);
+												foreach($taxaArr as $taxaStr){
+													echo '<option value="'.$taxaStr.'">'.$taxaStr.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div>
+											<b>Country:</b> 
+											<select name="country">
+												<option value="">---------------------</option>
+												<?php 
+												$countryArr = $criteriaArr['country'];
+												sort($countryArr);
+												foreach($countryArr as $countryStr){
+													echo '<option value="'.$countryStr.'">'.$countryStr.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div>
+											<b>State/Province:</b> 
+											<select name="stateprovince">
+												<option value="">---------------------</option>
+												<?php 
+												$stateArr = $criteriaArr['state'];
+												sort($stateArr);
+												foreach($stateArr as $stateStr){
+													echo '<option value="'.$stateStr.'">'.$stateStr.'</option>';
+												}
+												?>
+											</select>
+										</div>
+										<div>
+											<b>Record limit:</b> <input name="limit" type="text" value="1000" />
+										</div>
+										<div>
+											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+											<input name="omcsid" type="hidden" value="<?php echo $omcsid; ?>" />
+											<input name="tabindex" type="hidden" value="2" />
+											<input name="submitaction" type="submit" value="Add to Queue" />
+										</div>
+									</fieldset>
+								</form>
+							</div>
+							<?php 
 						}
 						?>
 					</div>

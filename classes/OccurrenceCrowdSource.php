@@ -211,28 +211,96 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 
-	public function addToQueue($variableMap = null){
+	public function addToQueue($omcsid,$family,$taxon,$country,$stateProvince,$limit){
 		$statusStr = 'SUCCESS: specimens added to queue';
 		if(!$this->omcsid) return 'ERROR adding to queue, omcsid is null';
 		if(!$this->collid) return 'ERROR adding to queue, collid is null';
 		$con = MySQLiConnectionFactory::getCon("write");
-		$sql = 'INSERT INTO omcrowdsourcequeue(occid, omcsid) '.
-			'SELECT o.occid, '.$this->omcsid.' AS csid '.
-			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
-			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" ';
-		if($variableMap){
-			$sqlVar = '';
-			foreach($variableMap as $k => $v){
-				$sqlVar .= 'AND '.$k.' = "'.$v.'" ';
-			}
-			$sql .= $sqlVar;
+		$sqlFrag = 'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid ';
+		$sqlFrag .= 'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND o.processingstatus = "unprocessed" ';
+		if($family){
+			$sqlFrag .= 'AND (o.family = "'.$this->cleanInStr($family).'") '; 
 		}
+		if($taxon){
+			$sqlFrag .= 'AND (o.sciname LIKE "'.$this->cleanInStr($taxon).'%") '; 
+		}
+		if($country){
+			$sqlFrag .= 'AND (o.country = "'.$this->cleanInStr($country).'") '; 
+		}
+		if($stateProvince){
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($stateProvince).'") '; 
+		}
+		//Get count
+		$sqlCnt = 'SELECT COUNT(o.occid) AS cnt '.$sqlFrag;
+		$rs = $con->query($sqlCnt);
+		if($r = $rs->fetch_object()){
+			$statusStr = $r->cnt;
+			if($statusStr > $limit) $statusStr = $limit;
+		}
+		$rs->free();
+		//Run insert query
+		if($limit){
+			$sqlFrag .= 'LIMIT '.$limit;
+		}
+		$sql = 'INSERT INTO omcrowdsourcequeue(occid, omcsid) '.
+			'SELECT o.occid, '.$omcsid.' AS csid '.$sqlFrag;
 		if(!$con->query($sql)){
 			$statusStr = 'ERROR adding to queue: '.$con->error;
 			$statusStr .= '; SQL: '.$sql;
 		}
 		$con->close();
 		return $statusStr;
+	}
+	
+	public function deleteQueue(){
+		$statusStr = 'SUCCESS: all specimens removed from queue';
+		if(!$this->omcsid) return 'ERROR adding to queue, omcsid is null';
+		if(!$this->collid) return 'ERROR adding to queue, collid is null';
+		$con = MySQLiConnectionFactory::getCon("write");
+		$sql = 'DELETE FROM omcrowdsourcequeue '.
+			'WHERE omcsid = '.$this->omcsid.' AND uidprocessor IS NULL and reviewstatus = 0 ';
+		if(!$con->query($sql)){
+			$statusStr = 'ERROR removing specimens from queue: '.$con->error;
+			$statusStr .= '; SQL: '.$sql;
+		}
+		$con->close();
+		return $statusStr;
+	}
+	
+	public function getQueueLimitCriteria(){
+		$country = array();
+		$state = array();
+		$sql = 'SELECT DISTINCT o.country, o.stateprovince '.
+			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+			'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->country) $country[$r->country] = '';
+			if($r->stateprovince) $state[$r->stateprovince] = '';
+		}
+		$rs->free();
+		$retArr = array();
+		$retArr['country'] = array_keys($country);
+		$retArr['state'] = array_keys($state);
+		//Add genera to $sciname
+		$family = array();
+		$sciname = array();
+		$sql = 'SELECT DISTINCT o.family, o.sciname, t.unitname1 '.
+			'FROM omoccurrences o LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
+			'LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
+			'WHERE o.collid = '.$this->collid.' AND o.processingstatus = "unprocessed" AND q.occid IS NULL ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if($r->family) $family[$r->family] = '';
+			if($r->sciname){
+				$sciname[$r->sciname] = '';
+				if($r->unitname1 && !array_key_exists($r->unitname1,$sciname)) $sciname[$r->unitname1] = '';
+			}
+		}
+		$rs->free();
+		$retArr['family'] = array_keys($family);
+		$retArr['taxa'] = array_keys($sciname);
+		return $retArr;
 	}
 
 	//Reveiw functions

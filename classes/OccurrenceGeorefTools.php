@@ -135,7 +135,7 @@ class OccurrenceGeorefTools {
 					//Update coordinates
 					$sql = 'UPDATE omoccurrences '.
 						'SET decimallatitude = '.$geoRefArr['decimallatitude'].', decimallongitude = '.$geoRefArr['decimallongitude'].
-						',georeferencedBy = "'.$this->cleanInStr($geoRefArr['georefby']).'"';
+						',georeferencedBy = "'.$this->cleanInStr($geoRefArr['georefby']).' ('.date('Y-m-d H:i:s').')'.'"';
 					if($geoRefArr['georeferenceverificationstatus']){
 						$sql .= ',georeferenceverificationstatus = "'.$this->cleanInStr($geoRefArr['georeferenceverificationstatus']).'"';
 					}
