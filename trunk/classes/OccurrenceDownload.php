@@ -10,6 +10,7 @@ class OccurrenceDownload{
 	private $rareReaderArr = array();
 	private $securityArr = array();
 	private $schemaType = 'symbiota';			//symbiota,dwc,georef,checklist
+	private $extended = 0;
 	private $delimiter = ',';
 	private $charSetSource = '';
 	private $charSetOut = '';
@@ -63,12 +64,6 @@ class OccurrenceDownload{
 		elseif($this->schemaType == 'georef'){
 			$contentDesc = 'Symbiota Occurrence Georeference Data';
 		}
-		elseif($this->schemaType == 'dwc'){
-			$contentDesc = 'Simple Darwin Core Occurrence File';
-		}
-		else{
-			$contentDesc = 'Symbiota Occurrence File';
-		}
 		if($this->zipFile){
 			//Create zip file, load data, then stream to user
 			$zipArchive = null;
@@ -86,7 +81,7 @@ class OccurrenceDownload{
 					$tempName = 'checklist';
 				}
 				elseif($this->schemaType == 'georeference'){
-					$tempName = 'checklist';
+					$tempName = 'georef';
 				}
 				else{
 					$tempName = 'occurrence';
@@ -151,12 +146,6 @@ class OccurrenceDownload{
 				}
 				while($row = $result->fetch_assoc()){
 					//$this->stripSensitiveFields($row);
-					if($this->schemaType == 'dwc'){
-						//Strip out data that is needed for evaluation but shouldn't be output
-						unset($row["localitySecurity"]);
-						unset($row["localitySecurityReason"]);
-						unset($row["collid"]);
-					}
 					$this->encodeArr($row);
 					if($this->delimiter == ","){
 						fputcsv($outstream, $row);
@@ -267,6 +256,10 @@ xmlwriter_end_attribute($xml_resource);
 		$this->schemaType = $t;
 	}
 
+	public function setExtended($e){
+		$this->extended = $e;
+	}
+
 	public function setDelimiter($d){
 		if($d == 'tab' || $d == "\t"){
 			$this->delimiter = "\t";
@@ -338,21 +331,21 @@ xmlwriter_end_attribute($xml_resource);
 				$sqlFrag2 = '';
 				foreach($condArr as $cond => $valueArr){
 					if($cond == 'NULL'){
-						$sqlFrag2 .= 'OR '.$field.' IS NULL ';
+						$sqlFrag2 .= 'OR o.'.$field.' IS NULL ';
 					}
 					elseif($cond == 'NOTNULL'){
-						$sqlFrag2 .= 'OR '.$field.' IS NOT NULL ';
+						$sqlFrag2 .= 'OR o.'.$field.' IS NOT NULL ';
 					}
 					elseif($cond == 'EQUALS'){
-						$sqlFrag2 .= 'OR '.$field.' IN("'.implode('","',$valueArr).'") ';
+						$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
 					}
 					else{
 						foreach($valueArr as $value){
 							if($cond == 'STARTS'){
-								$sqlFrag2 .= 'OR '.$field.' LIKE "'.$value.'%" ';
+								$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
 							}
 							elseif($cond == 'LIKE'){ 
-								$sqlFrag2 .= 'OR '.$field.' LIKE "%'.$value.'%" ';
+								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
 							}
 						}
 					}
@@ -413,78 +406,36 @@ xmlwriter_end_attribute($xml_resource);
 				$sql .= 'ORDER BY IFNULL(o.family,"not entered"), o.SciName ';
 			}
 		}
-		else{
-			if($this->schemaType == 'georef'){
-				$sql = 'SELECT o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
-					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
-					'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
+		elseif($this->schemaType == 'georef'){
+			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
+				'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, ';
+			if($this->extended){
+				$sql .= 'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 					'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-					'o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid '.
-					'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
-					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
-					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-				$this->applyConditions();
-				$sql .= $this->sqlWhere;
-				if($this->redactLocalities){
-					if($this->rareReaderArr){
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
-					}
-					else{
-						$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
-					}
-				}
-				$sql .= "ORDER BY o.collid";
+					'o.processingstatus, o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
 			}
 			else{
-				if($this->schemaType == 'dwc'){
-					$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-						'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.occurrenceId, '.
-						'o.family, o.sciname AS scientificName, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
-						'CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, '.
-						't.unitind3 AS taxonRank, t.unitname3 AS infraspecificEpithet, '.
-						'o.identifiedBy, o.dateIdentified, o.identificationReferences, o.identificationRemarks, o.identificationQualifier, '.
-						'o.typeStatus, o.recordedBy, o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-						'o.verbatimEventDate, CONCAT_WS("; ",o.habitat, o.substrate) AS habitat, o.fieldNumber, CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks, '.
-						'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.establishmentMeans, '.
-						'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
-						'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-						'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
-						'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-						'o.disposition, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, c.rights, c.rightsHolder, c.accessRights, '.
-						'o.occid, CONCAT("urn:uuid:",g.guid) AS guid, o.localitySecurity, o.collid ';
-				}
-				elseif($this->schemaType == 'symbiota'){
-					$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-						'o.basisOfRecord, o.catalogNumber, o.otherCatalogNumbers, o.occurrenceId, '.
-						'o.family, o.sciname, IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship, '.
-						'CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, '.
-						't.unitind3 AS taxonRank, t.unitname3 AS infraspecificEpithet, '.
-						'o.identifiedBy, o.dateIdentified, o.identificationReferences, '.
-						'o.identificationRemarks, o.identificationQualifier, o.typeStatus, o.recordedBy, o.associatedCollectors, '.
-						'o.recordNumber, o.eventDate, o.year, o.month, o.day, o.startDayOfYear, o.endDayOfYear, '.
-						'o.verbatimEventDate, o.habitat, o.substrate, o.fieldNumber, o.occurrenceRemarks, o.informationWithheld, o.verbatimAttributes, '.
-						'o.dynamicProperties, o.associatedTaxa, o.reproductiveCondition, o.cultivationStatus, o.establishmentMeans, '.
-			 			'o.lifeStage, o.sex, o.individualCount, o.samplingProtocol, o.preparations, '.
-						'o.country, o.stateProvince, o.county, o.municipality, o.locality, o.decimalLatitude, o.decimalLongitude, '.
-						'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.footprintWKT, o.verbatimCoordinates, '.
-						'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-						'o.disposition, o.duplicateQuantity, IFNULL(o.modified,o.datelastmodified) AS modified, o.language, '.
-						'c.rights, c.rightsHolder, c.accessRights, o.localitySecurity, o.localitySecurityReason, '.
-						'o.processingstatus, o.recordEnteredBy, o.labelProject, o.collid, o.dbpk, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
-				}
-				$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.CollID = o.CollID '.
-						'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
-						'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
-				
-				if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
-				$this->applyConditions();
-				$sql .= $this->sqlWhere;
-				$sql .= "ORDER BY o.collid";
+				$sql .= 'o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
+					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS guid ';
 			}
+			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+			if(strpos($this->sqlWhere,'v.clid')) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			$this->applyConditions();
+			$sql .= $this->sqlWhere;
+			if($this->redactLocalities){
+				if($this->rareReaderArr){
+					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL OR c.collid IN('.implode(',',$this->rareReaderArr).')) ';
+				}
+				else{
+					$sql .= 'AND (o.localitySecurity = 0 OR o.localitySecurity IS NULL) ';
+				}
+			}
+			$sql .= "ORDER BY o.collid";
 		}
 		//echo $sql; exit;
 		return $sql;
@@ -495,47 +446,22 @@ xmlwriter_end_attribute($xml_resource);
 			$this->headerArr = array('family','scientificName','genus','specificEpithet','taxonRank','infraSpecificEpithet',
 				'scientificNameAuthorship');
 		}
-		elseif($this->schemaType == 'dwc'){
-			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","occurrenceId",
-				"family","scientificName","scientificNameAuthorship","genus","specificEpithet","taxonRank","infraspecificEpithet",
-				"identifiedBy","dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
-				"typeStatus","recordedBy","recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-				"verbatimEventDate","habitat","fieldNumber","occurrenceRemarks",
-				"dynamicProperties","associatedTaxa","reproductiveCondition","establishmentMeans",
-				"lifeStage","sex","individualCount","samplingProtocol","preparations",
-				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-				"disposition","modified","language","rights","rightsHolder","accessRights","symbiotaId","recordId");
-		}
 		elseif($this->schemaType == 'georef'){
-			$this->headerArr = array("catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-				"localitySecurity","localitySecurityReason","modified","collId","sourcePrimaryKey","symbiotaId","recordId");
-		}
-		else{
-			//symbiota
-			$this->headerArr = array("institutionCode","collectionCode","basisOfRecord","catalogNumber","otherCatalogNumbers","occurrenceId",
-				"family","scientificName","scientificNameAuthorship","genus","specificEpithet","taxonRank","infraspecificEpithet",
-				"identifiedBy","dateIdentified","identificationReferences",
-				"identificationRemarks","identificationQualifier","typeStatus","recordedBy","associatedCollectors",
-				"recordNumber","eventDate","year","month","day","startDayOfYear","endDayOfYear",
-		 		"verbatimEventDate","habitat","substrate","fieldNumber","occurrenceRemarks","informationWithheld","verbatimAttributes",
-				"dynamicproperties","associatedTaxa","reproductiveCondition","cultivationStatus","establishmentMeans",
-	 			"lifeStage", "sex", "individualCount", "samplingProtocol", "preparations",
-				"country","stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-		 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
-				"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
-				"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
-		 		"disposition","duplicatequantity","modified","language","rights","rightsHolder","accessRights",
-		 		"localitySecurity","localitySecurityReason","processingstatus","recordEnteredBy",
-			 	"labelProject","collId","sourcePrimaryKey","symbiotaId","recordId");
-
-			'o.localitySecurityReason, '.
-			'o.processingstatus, o.recordEnteredBy, o.duplicateQuantity, o.labelProject, o.collid, o.dbpk, o.occid, g.guid ';
+			if($this->extended){
+				$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
+			 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
+					"georeferencedBy","georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+					"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+					"localitySecurity","localitySecurityReason","modified",
+					"processingstatus","collId","sourcePrimaryKey","symbiotaId","recordId");
+			}
+			else{
+				$this->headerArr = array("institutionCode","collectionCode","catalogNumber","occurrenceId","decimalLatitude","decimalLongitude",
+			 		"geodeticDatum","coordinateUncertaintyInMeters","footprintWKT","verbatimCoordinates",
+					"georeferenceProtocol","georeferenceSources","georeferenceVerificationStatus",
+					"georeferenceRemarks","minimumElevationInMeters","maximumElevationInMeters","verbatimElevation",
+					"modified","symbiotaId","recordId");
+			}
 		}
 	}
 
@@ -574,17 +500,11 @@ xmlwriter_end_attribute($xml_resource);
 		if($fileName){
 			$retStr = str_replace(" ","",$fileName).'_';
 		}
-		if($this->schemaType == 'dwc'){
-			$retStr .= "DwC_";
-		}
 		elseif($this->schemaType == 'georef'){
 			$retStr .= "Georef_";
 		}
 		elseif($this->schemaType == 'checklist'){
 			$retStr .= "Checklist_";
-		}
-		else{
-			$retStr .= "Symbiota_";
 		}
 		$retStr .= '_'.time();
 		//Set extension

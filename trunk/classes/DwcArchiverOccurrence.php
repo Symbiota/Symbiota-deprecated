@@ -19,6 +19,7 @@ class DwcArchiverOccurrence{
 	private $verbose = 0;
 
 	private $schemaType = 'dwc';			//dwc, symbiota, backup
+	private $extended = 0;
 	private $delimiter = ',';
 	private $fileExt = '.csv';
 	private $occurrenceFieldArr = array();
@@ -94,7 +95,7 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['scientificName'] = 't.sciname AS scientificName';
 		$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
 		$occurFieldArr['verbatimScientificName'] = 'o.sciname AS verbatimScientificName';
-		if($this->schemaType == 'backup'){
+		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
 			$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
 			$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
 		}
@@ -239,7 +240,7 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['disposition'] = 'o.disposition';
 		$occurTermArr['language'] = 'http://purl.org/dc/terms/language';
 		$occurFieldArr['language'] = 'o.language';
-		if($this->schemaType == 'backup'){
+		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
 			$occurTermArr['observeruID'] = 'http://symbiota.org/terms/observeruID';
 			$occurFieldArr['observeruID'] = 'o.observeruid';
 			$occurTermArr['processingStatus'] = 'http://symbiota.org/terms/processingStatus';
@@ -304,7 +305,7 @@ class DwcArchiverOccurrence{
 		$detFieldArr['coreid'] = 'o.occid';
 		$detTermArr['identifiedBy'] = 'http://rs.tdwg.org/dwc/terms/identifiedBy';
 		$detFieldArr['identifiedBy'] = 'd.identifiedBy';
-		if($this->schemaType == 'backup'){
+		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
 			$detTermArr['identifiedByID'] = 'http://symbiota.org/terms/identifiedByID';
 			$detFieldArr['identifiedByID'] = 'd.idbyid';
 		}
@@ -314,7 +315,7 @@ class DwcArchiverOccurrence{
 		$detFieldArr['identificationQualifier'] = 'd.identificationQualifier';
 		$detTermArr['scientificName'] = 'http://rs.tdwg.org/dwc/terms/scientificName';
 		$detFieldArr['scientificName'] = 'd.sciName AS scientificName';
-		if($this->schemaType == 'backup'){
+		if($this->schemaType == 'backup' || ($this->schemaType == 'symbiota' && $this->extended)){
 			$detTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
 			$detFieldArr['tidInterpreted'] = 'd.tidinterpreted';
 		}
@@ -538,7 +539,7 @@ class DwcArchiverOccurrence{
 	}
 	
 	public function addCondition($field, $cond, $value = ''){
-		if($field && in_array(strtolower($field),$this->condAllowArr)){
+		if($field){
 			if(!trim($cond)) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
 				$this->conditionArr[$field][$cond][] = $this->cleanInStr($value);
@@ -553,26 +554,26 @@ class DwcArchiverOccurrence{
 				$sqlFrag2 = '';
 				foreach($condArr as $cond => $valueArr){
 					if($cond == 'NULL'){
-						$sqlFrag2 .= 'OR '.$field.' IS NULL ';
+						$sqlFrag2 .= 'OR o.'.$field.' IS NULL ';
 					}
 					elseif($cond == 'NOTNULL'){
-						$sqlFrag2 .= 'OR '.$field.' IS NOT NULL ';
+						$sqlFrag2 .= 'OR o.'.$field.' IS NOT NULL ';
 					}
 					elseif($cond == 'EQUALS'){
-						$sqlFrag2 .= 'OR '.$field.' IN("'.implode('","',$valueArr).'") ';
+						$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
 					}
 					else{
 						foreach($valueArr as $value){
 							if($cond == 'STARTS'){
-								$sqlFrag2 .= 'OR '.$field.' LIKE "'.$value.'%" ';
+								$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
 							}
 							elseif($cond == 'LIKE'){ 
-								$sqlFrag2 .= 'OR '.$field.' LIKE "%'.$value.'%" ';
+								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
 							}
 						}
 					}
 				}
-				$sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
+				if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 			}
 		}
 		//Build where
@@ -1195,7 +1196,9 @@ class DwcArchiverOccurrence{
 				$managementType = $this->collArr[$r['collid']]['managementtype'];
 				if($managementType && $managementType == 'Live Data'){
 					if(array_key_exists('collectionID',$r) && !$r['collectionID']){
-						$r['collectionID'] = $this->collArr[$r['collid']]['collectionguid'];
+						$guid = $this->collArr[$r['collid']]['collectionguid'];
+						if(strlen($guid) == 36) $guid = 'urn:uuid:'.$guid;
+						$r['collectionID'] = $guid;
 					}
 				}
 				//Set occurrence GUID based on GUID target
@@ -1219,7 +1222,7 @@ class DwcArchiverOccurrence{
 			}
 			$rs->free();
 			if(!$hasRecords){
-				$filePath = false;
+				$this->writeOutRecord($fh,array('No records returned. Modify query variables to be more inclusive.'));
 				$this->logOrEcho("No records returned. Modify query variables to be more inclusive. \n");
 			}
 		}
@@ -1346,8 +1349,8 @@ class DwcArchiverOccurrence{
 				}
 				$r['metadataLanguage'] = 'en';
 				//Load record array into output file
-				$this->encodeArr($r);
-				$this->addcslashesArr($r);
+				//$this->encodeArr($r);
+				//$this->addcslashesArr($r);
 				$this->writeOutRecord($fh,$r);
 			}
 			$rs->free();
@@ -1616,6 +1619,10 @@ class DwcArchiverOccurrence{
 		$this->schemaType = $type;
 	}
 	
+	public function setExtended($e){
+		$this->extended = $e;
+	} 
+
 	public function setDelimiter($d){
 		if($d == 'tab' || $d == "\t"){
 			$this->delimiter = "\t";
@@ -1699,7 +1706,7 @@ class DwcArchiverOccurrence{
 	
 	private function addcslashesArr(&$arr){
 		foreach($arr as $k => $v){
-			if($v) $arr[$k] = addcslashes($v,"\n\r\"\\");
+			if($v) $arr[$k] = addcslashes($v,"\n\r\\");
 		}
 	}
 
