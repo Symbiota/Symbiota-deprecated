@@ -329,8 +329,9 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 								<tr>
 									<td colspan="2">
 										<div style="margin:10px;">
-											<input type="hidden" name="targetcollid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" value="Download Records" />
+											<input name="targetcollid" type="hidden" value="<?php echo $collid; ?>" />
+											<input name="extended" type="hidden" value="1" />
+											<input name="submitaction" type="submit" value="Download Records" />
 										</div>
 									</td>
 								</tr>
@@ -414,11 +415,12 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<tr>
 										<td colspan="2">
 											<div style="margin:10px;">
-												<input name="customfield2" type="hidden" value="georeferenceSources" />
-												<input name="customtype2" type="hidden" value="STARTS" />
-												<input name="customvalue2" type="hidden" value="georef batch tool" />
+												<input name="customfield1" type="hidden" value="georeferenceSources" />
+												<input name="customtype1" type="hidden" value="STARTS" />
+												<input name="customvalue1" type="hidden" value="georef batch tool" />
 												<input name="targetcollid" type="hidden" value="<?php echo $collid; ?>" />
 												<input name="schema" type="hidden" value="georef" />
+												<input name="extended" type="hidden" value="1" />
 												<input name="submitaction" type="submit" value="Download Records" />
 											</div>
 										</td>

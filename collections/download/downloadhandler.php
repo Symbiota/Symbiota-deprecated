@@ -49,6 +49,7 @@ if($schema == "backup"){
 else{
 	$zip = (array_key_exists('zip',$_POST)?$_POST['zip']:0);
 	$format = $_POST['format'];
+	$extended = (array_key_exists('extended',$_POST)?$_POST['extended']:0);
 
 	$redactLocalities = 1;
 	$rareReaderArr = array();
@@ -74,12 +75,19 @@ else{
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
 		$dlManager->setSchemaType($schema);
+		$dlManager->setExtended($extended);
 		$dlManager->setCharSetOut($cSet);
 		$dlManager->setDelimiter($format);
 		$dlManager->setZipFile($zip);
 		$dlManager->addCondition('decimalLatitude','NOTNULL','');
 		$dlManager->addCondition('decimalLongitude','NOTNULL','');
-		if(isset($_POST['customfield1'])){
+		if(array_key_exists('targetcollid',$_POST) && $_POST['targetcollid']){
+			$dlManager->addCondition('collid','EQUALS',$_POST['targetcollid']);
+		}
+		if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
+			$dlManager->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
+		}
+		if(array_key_exists('customfield1',$_POST) && $_POST['customfield1']){
 			$dlManager->addCondition($_POST['customfield1'],$_POST['customtype1'],$_POST['customvalue1']);
 		}
 		$dlManager->downloadData();
@@ -103,6 +111,7 @@ else{
 		$dwcaHandler = new DwcArchiverOccurrence();
 		$dwcaHandler->setCharSetOut($cSet);
 		$dwcaHandler->setSchemaType($schema);
+		$dwcaHandler->setExtended($extended);
 		$dwcaHandler->setDelimiter($format);
 		$dwcaHandler->setVerbose(0);
 		$dwcaHandler->setRedactLocalities($redactLocalities);
@@ -115,7 +124,6 @@ else{
 		else{
 			//Request is coming from exporter.php for collection manager tools
 			$dwcaHandler->setCollArr($_POST['targetcollid']);
-
 			if(array_key_exists('processingstatus',$_POST) && $_POST['processingstatus']){
 				$dwcaHandler->addCondition('processingstatus','EQUALS',$_POST['processingstatus']);
 			}
@@ -148,47 +156,42 @@ else{
 			//Output file is a flat occurrence file (not a zip file)
 			$outputFile = $dwcaHandler->getOccurrenceFile();
 		}
-		if($outputFile){
-			//ob_start();
-			$contentDesc = '';
-			if($schema == 'dwc'){
-				$contentDesc = 'Darwin Core ';
-			}
-			else{
-				$contentDesc = 'Symbiota ';
-			}
-			$contentDesc .= 'Occurrence ';
-			if($zip){
-				$contentDesc .= 'Archive ';
-			}
-			$contentDesc .= 'File';
-			header('Content-Description: '.$contentDesc);
-			
-			if($zip){
-				header('Content-Type: application/zip');
-			}
-			elseif($format == 'csv'){
-				header('Content-Type: text/csv; charset='.$charset);
-			}
-			else{
-				header('Content-Type: text/html; charset='.$charset);
-			}
-			
-			header('Content-Disposition: attachment; filename='.basename($outputFile));
-			header('Content-Transfer-Encoding: binary');
-			header('Expires: 0');
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			header('Content-Length: ' . filesize($outputFile));
-			ob_clean();
-			flush();
-			//od_end_clean();
-			readfile($outputFile);
-			unlink($outputFile);
+		//ob_start();
+		$contentDesc = '';
+		if($schema == 'dwc'){
+			$contentDesc = 'Darwin Core ';
 		}
 		else{
-			echo 'ERROR creating output file. Query may have not include any records.';
+			$contentDesc = 'Symbiota ';
 		}
+		$contentDesc .= 'Occurrence ';
+		if($zip){
+			$contentDesc .= 'Archive ';
+		}
+		$contentDesc .= 'File';
+		header('Content-Description: '.$contentDesc);
+		
+		if($zip){
+			header('Content-Type: application/zip');
+		}
+		elseif($format == 'csv'){
+			header('Content-Type: text/csv; charset='.$charset);
+		}
+		else{
+			header('Content-Type: text/html; charset='.$charset);
+		}
+		
+		header('Content-Disposition: attachment; filename='.basename($outputFile));
+		header('Content-Transfer-Encoding: binary');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Content-Length: ' . filesize($outputFile));
+		ob_clean();
+		flush();
+		//od_end_clean();
+		readfile($outputFile);
+		unlink($outputFile);
 	}
 }
 ?>
