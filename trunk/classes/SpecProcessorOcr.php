@@ -102,7 +102,6 @@ class SpecProcessorOcr{
 					$rawStr = $this->ocrImage();
 				}
 				//$rawStr = $this->cleanRawStr($rawStr);
-				$rawStr = $rawStr;
 				if(!$rawStr) {
 					//Check for and remove problematic boarder
 					if($this->imageTrimBorder()){
@@ -113,7 +112,6 @@ class SpecProcessorOcr{
 							$rawStr = $this->ocrImage();
 						}
 						//$rawStr = $this->cleanRawStr($rawStr);
-						$rawStr = $rawStr;
 					}
 					if(!$rawStr) $rawStr = 'Failed OCR return';
 				}
@@ -348,11 +346,19 @@ class SpecProcessorOcr{
 
 	private function loadImage($imgUrl){
 		if($imgUrl){
-			//If there is an image domain name is set in symbini.php and url is relative,
-			//then it's assumed that image is located on another server, thus add domain to url
-			if(array_key_exists("imageDomain",$GLOBALS)){
-				if(substr($imgUrl,0,1)=="/"){
+			if(substr($imgUrl,0,1)=="/"){
+				if(array_key_exists("imageDomain",$GLOBALS) && $GLOBALS["imageDomain"]){
+					//If there is an image domain name is set in symbini.php and url is relative,
+					//then it's assumed that image is located on another server, thus add domain to url
 					$imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+				}
+				else{
+					$urlDomain = "http://";
+					if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) 
+						$urlDomain = "https://";
+					$urlDomain .= $_SERVER["SERVER_NAME"];
+					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlDomain .= ':'.$_SERVER["SERVER_PORT"];
+					$imgUrl = $urlDomain.$imgUrl;
 				}
 			}
 			//Set temp folder path and file names
