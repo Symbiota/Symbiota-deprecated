@@ -302,7 +302,7 @@ if($symbUid){
 	if($specImgArr){
 		$imgUrlPrefix = (isset($imageDomain)?$imageDomain:'');
 		foreach($specImgArr as $imgId => $i2){
-			$iUrl = ($i2['origurl']?$i2['origurl']:$i2['url']);
+			$iUrl = $i2['url'];
 			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
 			$imgArr[$imgId] = $iUrl;
 		}

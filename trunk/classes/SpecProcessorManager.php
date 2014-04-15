@@ -11,7 +11,6 @@ class SpecProcessorManager {
 	protected $collectionName;
 	protected $managementType;
 	protected $specKeyPattern;
-	protected $specKeyRetrieval;
 	protected $coordX1;
 	protected $coordX2;
 	protected $coordY1;
@@ -25,9 +24,9 @@ class SpecProcessorManager {
 	protected $jpgQuality = 80;
 	protected $webMaxFileSize = 400000;
 	protected $lgMaxFileSize = 3000000;
-	protected $createWebImg = 1;
-	protected $createTnImg = 1;
-	protected $createLgImg = 1;
+	protected $webImg = 1;
+	protected $tnImg = 1;
+	protected $lgImg = 1;
 	
 	protected $createNewRec = true;
 	protected $copyOverImg = true;
@@ -85,120 +84,6 @@ class SpecProcessorManager {
 		}
 	}
 
-	protected function getPrimaryKey($str){
-		$specPk = '';
-		$pkPattern = $this->specKeyPattern;
-		if(substr($pkPattern,0,1) != '/' && substr($pkPattern,-1) != '/') $pkPattern = '/'.$pkPattern.'/';
-		if(preg_match($pkPattern,$str,$matchArr)){
-			if(array_key_exists(1,$matchArr) && $matchArr[1]){
-				$specPk = $matchArr[1];
-			}
-			else{
-				$specPk = $matchArr[0];
-			}
-		}
-		return $specPk;
-	}
-	
-	protected function getOccId($specPk){
-		$occId = 0;
-		//Check to see if record with pk already exists
-		$sql = 'SELECT occid FROM omoccurrences WHERE (catalognumber = "'.$specPk.'") AND (collid = '.$this->collid.')';
-		$rs = $this->conn->query($sql);
-		if($row = $rs->fetch_object()){
-			$occId = $row->occid;
-		}
-		$rs->close();
-		if(!$occId && $this->createNewRec){
-			//Records does not exist, create a new one to which image will be linked
-			$sql2 = 'INSERT INTO omoccurrences(collid,catalognumber'.(stripos($this->managementType,'Live')!==false?'':',dbpk').',processingstatus) '.
-				'VALUES('.$this->collid.',"'.$specPk.'"'.(stripos($this->managementType,'Live')!==false?'':',"'.$specPk.'"').',"unprocessed")';
-			if($this->conn->query($sql2)){
-				$occId = $this->conn->insert_id;
-				if($this->logFH) fwrite($this->logFH, "\tSpecimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.") \n");
-				echo "<li style='margin-left:10px;'>Specimen record does not exist; new empty specimen record created and assigned an 'unprocessed' status (occid = ".$occId.")</li>\n";
-			} 
-		}
-		if(!$occId){
-			if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: File skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
-			if($this->logFH) fwrite($this->logFH, "\tFile skipped, unable to locate specimen record ".$specPk." (".date('Y-m-d h:i:s A').") \n");
-			echo "<li style='margin-left:10px;'>File skipped, unable to locate specimen record ".$specPk."</li>\n";
-		}
-		return $occId;
-	}
-	
-	protected function recordImageMetadata($specID,$webUrl,$tnUrl,$oUrl){
-		$status = false;
-		if($this->dbMetadata){
-			$status = $this->databaseImage($specID,$webUrl,$tnUrl,$oUrl);
-		}
-		else{
-			$status = $this->writeMetadataToFile($specID,$webUrl,$tnUrl,$oUrl);
-		}
-		return $status;
-	}
-	
-	private function databaseImage($occId,$webUrl,$tnUrl,$oUrl){
-		$status = true;
-		if($occId && is_numeric($occId)){
-	        //echo "<li style='margin-left:20px;'>Preparing to load record into database</li>\n";
-			if($this->logFH) fwrite($this->logFH, "\tPreparing to load record into database\n");
-			//Check to see if image url already exists for that occid
-			$imgId = 0;
-			$sql = 'SELECT imgid '.
-				'FROM images WHERE (occid = '.$occId.') AND (url = "'.$this->imgUrlBase.$webUrl.'")';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$imgId = $r->imgid;
-			}
-			$rs->close();
-			$sql1 = 'INSERT images(occid,url';
-			$sql2 = 'VALUES ('.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
-			if($imgId){
-				$sql1 = 'REPLACE images(imgid,occid,url';
-				$sql2 = 'VALUES ('.$imgId.','.$occId.',"'.$this->imgUrlBase.$webUrl.'"';
-			}
-			if($tnUrl){
-				$sql1 .= ',thumbnailurl';
-				$sql2 .= ',"'.$this->imgUrlBase.$tnUrl.'"';
-			}
-			if($oUrl){
-				$sql1 .= ',originalurl';
-				$sql2 .= ',"'.$this->imgUrlBase.$oUrl.'"'; 
-			}
-			$sql1 .= ',imagetype,owner) ';
-			$sql2 .= ',"specimen","'.$this->collectionName.'")';
-			if(!$this->conn->query($sql1.$sql2)){
-				$status = false;
-				if($this->logErrFH) fwrite($this->logErrFH, "\tERROR: Unable to load image record into database: ".$this->conn->error."; SQL: ".$sql1.$sql2."\n");
-			}
-			if($imgId){
-				if($this->logErrFH) fwrite($this->logErrFH, "\tWARNING: Existing image record replaced; occid: $occId \n");
-				echo "<li style='margin-left:20px;'>Existing image database record replaced</li>\n";
-			}
-			else{
-				echo "<li style='margin-left:20px;'>Image record loaded into database</li>\n";
-				if($this->logFH) fwrite($this->logFH, "\tSUCCESS: Image record loaded into database\n");
-			}
-		}
-		else{
-			$status = false;
-			if($this->logErrFH) fwrite($this->logErrFH, "ERROR: Missing occid (omoccurrences PK), unable to load record \n");
-	        echo "<li style='margin-left:20px;'><b>ERROR:</b> Unable to load image into database. See error log for details</li>\n";
-		}
-		ob_flush();
-		flush();
-		return $status;
-	}
-
-	private function writeMetadataToFile($specPk,$webUrl,$tnUrl,$oUrl){
-		$status = true;
-		if($this->mdOutputFH){
-			$status = fwrite($this->mdOutputFH, $this->collid.',"'.$specPk.'","'.$this->imgUrlBase.$webUrl.'","'.$this->imgUrlBase.$tnUrl.'","'.$this->imgUrlBase.$oUrl.'"'."\n");
-		}
-		return $status;
-	}
-
 	//OCR and NLP scripts
 	//Not yet implimented and may not be. OCR is not a great method for obtaining primary identifier for specimen record.
 	//Functions not needed for standalone scripts
@@ -239,13 +124,12 @@ class SpecProcessorManager {
 			$sql = 'UPDATE specprocessorprojects '.
 				'SET title = "'.$this->cleanInStr($editArr['title']).'", '.
 				'speckeypattern = "'.$this->cleanInStr($editArr['speckeypattern']).
-				'", speckeyretrieval = "'.(array_key_exists('speckeyretrieval',$editArr)?$editArr['speckeyretrieval']:'filename').
 				'", sourcepath = "'.$this->cleanInStr($editArr['sourcepath']).
 				'", targetpath = "'.$this->cleanInStr($editArr['targetpath']).'", imgurl = "'.$editArr['imgurl'].
 				'", webpixwidth = '.$editArr['webpixwidth'].', tnpixwidth = '.$editArr['tnpixwidth'].', lgpixwidth = '.$editArr['lgpixwidth'].
 				', jpgcompression = '.$editArr['jpgquality'].
-				', createtnimg = '.(array_key_exists('createtnimg',$editArr)?'1':'0').
-				', createlgimg = '.(array_key_exists('createlgimg',$editArr)?'1':'0').' '.
+				', createtnimg = '.$editArr['tnimg'].
+				', createlgimg = '.$editArr['lgimg'].' '.
 				'WHERE (spprid = '.$editArr['spprid'].')';
 			//echo 'SQL: '.$sql;
 			$this->conn->query($sql);
@@ -253,14 +137,14 @@ class SpecProcessorManager {
 	}
 
 	public function addProject($addArr){
-		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,speckeyretrieval,sourcepath,targetpath,'.
+		$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,sourcepath,targetpath,'.
 			'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
 			'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
-			$this->cleanInStr($addArr['speckeypattern']).'","'.$addArr['speckeyretrieval'].'","'.
+			$this->cleanInStr($addArr['speckeypattern']).'","'.
 			$this->cleanInStr($addArr['sourcepath']).'","'.$this->cleanInStr($addArr['targetpath']).'","'.
 			$addArr['imgurl'].'",'.$addArr['webpixwidth'].','.
 			$addArr['tnpixwidth'].','.$addArr['lgpixwidth'].','.$addArr['jpgquality'].','.
-			(array_key_exists('createtnimg',$addArr)?'1':'0').','.(array_key_exists('createlgimg',$addArr)?'1':'0').')';
+			$addArr['tnimg'].','.$addArr['lgimg'].')';
 		$this->conn->query($sql);
 	}
 
@@ -271,7 +155,7 @@ class SpecProcessorManager {
 
 	public function setProjVariables(){
 		if($this->spprid){
-			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.speckeyretrieval, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
+			$sql = 'SELECT p.collid, p.title, p.speckeypattern, p.coordx1, p.coordx2, p.coordy1, p.coordy2, '. 
 				'p.sourcepath, p.targetpath, p.imgurl, p.webpixwidth, p.tnpixwidth, p.lgpixwidth, p.jpgcompression, p.createtnimg, p.createlgimg '.
 				'FROM specprocessorprojects p '.
 				'WHERE (p.spprid = '.$this->spprid.')';
@@ -281,7 +165,6 @@ class SpecProcessorManager {
 				if(!$this->collid) $this->setCollId($row->collid); 
 				$this->title = $row->title;
 				$this->specKeyPattern = $row->speckeypattern;
-				$this->specKeyRetrieval = $row->speckeyretrieval;
 				$this->coordX1 = $row->coordx1;
 				$this->coordX2 = $row->coordx2;
 				$this->coordY1 = $row->coordy1;
@@ -296,8 +179,8 @@ class SpecProcessorManager {
 				if($row->tnpixwidth) $this->tnPixWidth = $row->tnpixwidth;
 				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
 				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
-				$this->createTnImg = $row->createtnimg;
-				$this->createLgImg = $row->createlgimg;
+				$this->tnImg = $row->createtnimg;
+				$this->lgImg = $row->createlgimg;
 			}
 			$rs->close();
 		}
@@ -567,14 +450,6 @@ class SpecProcessorManager {
 		return $this->specKeyPattern;
 	}
 
-	public function setSpecKeyRetrieval($p){
-		$this->specKeyRetrieval = $p;
-	}
-
-	public function getSpecKeyRetrieval(){
-		return $this->specKeyRetrieval;
-	}
-
 	public function setCoordX1($x){
 		$this->coordX1 = $x;
 	}
@@ -680,28 +555,28 @@ class SpecProcessorManager {
 		return $this->lgMaxFileSize;
 	}
 	
-	public function setCreateWebImg($c){
-		$this->createWebImg = $c;
+	public function setWebImg($c){
+		$this->webImg = $c;
 	}
 
-	public function getCreateWebImg(){
-		return $this->createWebImg;
+	public function getWebImg(){
+		return $this->webImg;
 	}
 
-	public function setCreateTnImg($c){
-		$this->createTnImg = $c;
+	public function setTnImg($c){
+		$this->tnImg = $c;
 	}
 
-	public function getCreateTnImg(){
-		return $this->createTnImg;
+	public function getTnImg(){
+		return $this->tnImg;
 	}
 
-	public function setCreateLgImg($c){
-		$this->createLgImg = $c;
+	public function setLgImg($c){
+		$this->lgImg = $c;
 	}
 
-	public function getCreateLgImg(){
-		return $this->createLgImg;
+	public function getLgImg(){
+		return $this->lgImg;
 	}
 	
 	public function setCreateNewRec($c){
