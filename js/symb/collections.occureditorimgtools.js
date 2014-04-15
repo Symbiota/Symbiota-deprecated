@@ -53,44 +53,42 @@ function initImageTool(imgId){
 	}
 }
 
-function ocrImage(ocrButton,imgCnt){
+function ocrImage(ocrButton,imgidVar,imgCnt){
 	ocrButton.disabled = true;
 	document.getElementById("workingcircle-"+imgCnt).style.display = "inline";
 	
 	var imgObj = document.getElementById("activeimg-"+imgCnt);
-	var imgUrl = imgObj.src;
 
-	var x = $(imgObj).imagetool('properties').x;
-	var y = $(imgObj).imagetool('properties').y;
-	var w = $(imgObj).imagetool('properties').w;
-	var h = $(imgObj).imagetool('properties').h;
-
-	var ocrXmlHttp = GetXmlHttpObject();
-	if(ocrXmlHttp == null){
-		alert ("Your browser does not support AJAX!");
-		return false;
-	}
-	var url="rpc/ocrimage.php?url="+imgUrl;
+	var xVar = 0;
+	var yVar = 0;
+	var wVar = 1;
+	var hVar = 1;
+	var ocrBestVar = 0;
+	
 	if(document.getElementById("ocrfull").checked == false){
-		url = url+"&x="+x+"&y="+y+"&w="+w+"&h="+h;
+		xVar = $(imgObj).imagetool('properties').x;
+		yVar = $(imgObj).imagetool('properties').y;
+		wVar = $(imgObj).imagetool('properties').w;
+		hVar = $(imgObj).imagetool('properties').h;
 	}
 	if(document.getElementById("ocrbest").checked == true){
-		url = url+"&ocrbest=1";
+		ocrBestVar = 1;
 	}
-	ocrXmlHttp.onreadystatechange=function(){
-		if(ocrXmlHttp.readyState==4 && ocrXmlHttp.status==200){
-			var rawStr = ocrXmlHttp.responseText;
-			document.getElementById("tfeditdiv-"+imgCnt).style.display = "none";
-			document.getElementById("tfadddiv-"+imgCnt).style.display = "block";
-			var addform = document.getElementById("imgaddform-"+imgCnt);
-			addform.rawtext.innerText = rawStr;
-			addform.rawtext.textContent = rawStr;
-			document.getElementById("workingcircle-"+imgCnt).style.display = "none";
-			ocrButton.disabled = false;
-		}
-	};
-	ocrXmlHttp.open("POST",url,true);
-	ocrXmlHttp.send(null);
+
+	$.ajax({
+		type: "POST",
+		url: "rpc/ocrimage.php",
+		data: { imgid: imgidVar, ocrbest: ocrBestVar, x: xVar, y: yVar, w: wVar, h: hVar }
+	}).done(function( msg ) {
+		var rawStr = msg;
+		document.getElementById("tfeditdiv-"+imgCnt).style.display = "none";
+		document.getElementById("tfadddiv-"+imgCnt).style.display = "block";
+		var addform = document.getElementById("imgaddform-"+imgCnt);
+		addform.rawtext.innerText = rawStr;
+		addform.rawtext.textContent = rawStr;
+		document.getElementById("workingcircle-"+imgCnt).style.display = "none";
+		ocrButton.disabled = false;
+	});
 }
 
 function nlpLbcc(nlpButton,prlid){
@@ -201,22 +199,4 @@ function nextRawText(imgCnt,fragCnt){
 	fragObj.style.display = "block";
 	ocrFragCnt = fragCnt;
 	return false;
-}
-
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
 }

@@ -12,7 +12,7 @@
 				</div>
 				<div style="width:100%;">
 					<div style="float:left;">
-						<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgCnt; ?>);" />
+						<input type="button" value="OCR Image" onclick="ocrImage(this,<?php echo $imgId.','.$imgCnt; ?>);" />
 						<img id="workingcircle-<?php echo $imgCnt; ?>" src="../../images/workingcircle.gif" style="display:none;" />
 					</div>
 					<div style="float:left;">

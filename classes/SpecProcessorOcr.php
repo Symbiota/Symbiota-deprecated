@@ -68,14 +68,27 @@ class SpecProcessorOcr{
 						$this->databaseRawStr($r->imgid,$rawStr);
 						$recCnt++;
 					}
-		 			$rs->close();
+		 			$rs->free();
 				}
 			}
 		}
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function ocrImageByUrl($imgUrl,$getBest = 0,$sciName=''){
+	public function ocrImageById($imgid,$getBest = 0,$sciName=''){
+		$con = MySQLiConnectionFactory::getCon("readonly");
+		$sql = 'SELECT url, originalurl FROM images WHERE imgid = '.$imgid;
+		if($rs = $con->query($sql)){
+			if($r = $rs->fetch_object()){
+				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
+				$this->ocrImageByUrl($imgUrl, $getBest, $sciName);
+			}
+			$rs->free();
+		}
+		$con->close();
+	}
+	
+	private function ocrImageByUrl($imgUrl,$getBest = 0,$sciName=''){
 		$rawStr = '';
 		if($imgUrl){
 			if($this->loadImage($imgUrl)){
