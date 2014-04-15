@@ -76,16 +76,18 @@ class SpecProcessorOcr{
 	}
 
 	public function ocrImageById($imgid,$getBest = 0,$sciName=''){
+		$rawStr = '';
 		$con = MySQLiConnectionFactory::getCon("readonly");
 		$sql = 'SELECT url, originalurl FROM images WHERE imgid = '.$imgid;
 		if($rs = $con->query($sql)){
 			if($r = $rs->fetch_object()){
 				$imgUrl = ($r->originalurl?$r->originalurl:$r->url);
-				$this->ocrImageByUrl($imgUrl, $getBest, $sciName);
+				$rawStr = $this->ocrImageByUrl($imgUrl, $getBest, $sciName);
 			}
 			$rs->free();
 		}
 		$con->close();
+		return $rawStr;
 	}
 	
 	private function ocrImageByUrl($imgUrl,$getBest = 0,$sciName=''){
