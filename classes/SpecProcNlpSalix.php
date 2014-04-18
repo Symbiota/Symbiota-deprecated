@@ -36,11 +36,11 @@ class SpecProcNlpSalix extends SpecProcNlp{
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			//Not sure if this is the best way organize the word stats, but it's an idea
-			$wordFreqArr[$r->firstword][$r->secondword]['loc'] = $r->localityfreq;
-			$wordFreqArr[$r->firstword][$r->secondword]['hab'] = $r->habitatFreq;
-			$wordFreqArr[$r->firstword][$r->secondword]['sub'] = $r->substrateFreq;
-			$wordFreqArr[$r->firstword][$r->secondword]['att'] = $r->verbatimAttributesFreq;
-			$wordFreqArr[$r->firstword][$r->secondword]['rem'] = $r->occurrenceRemarksFreq;
+			$this->wordFreqArr[$r->firstword][$r->secondword]['loc'] = $r->localityfreq;
+			$this->wordFreqArr[$r->firstword][$r->secondword]['hab'] = $r->habitatFreq;
+			$this->wordFreqArr[$r->firstword][$r->secondword]['sub'] = $r->substrateFreq;
+			$this->wordFreqArr[$r->firstword][$r->secondword]['att'] = $r->verbatimAttributesFreq;
+			$this->wordFreqArr[$r->firstword][$r->secondword]['rem'] = $r->occurrenceRemarksFreq;
 		}
 		$rs->free();
 	}
