@@ -201,8 +201,8 @@ $displayLeftMenu = (isset($imagelib_photographersMenu) ? $imagelib_photographers
 include($serverRoot . '/header.php');
 echo '<div class="navpath">';
 echo '<a href="../index.php">Home</a> &gt;&gt; ';
-echo '<a href="index.php">Image Library</a> &gt;&gt; ';
-echo '<b>Image Listing</b>';
+echo '<a href="index.php">Browse Images</a> &gt;&gt; ';
+echo '<b>Image Search</b>';
 echo "</div>";
 ?>
 <!-- This is inner text! -->
