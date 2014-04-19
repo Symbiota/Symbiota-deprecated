@@ -20,6 +20,10 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isSphagnaBorealiAmericanaExsiccataLabel($str)) return $this->doSphagnaBorealiAmericanaExsiccataLabel($str);
 			else if($this->isMossesOfTheInteriorHighlandsExsiccataeLabel($str)) return $this->doMossesOfTheInteriorHighlandsExsiccataeLabel($str);
 			else if($this->isCryptogamaeGermaniaeExsiccataeLabel($str)) return $this->doCryptogamaeGermaniaeExsiccataeLabel($str);
+			else if($this->isBryophytaArcticaExsiccataLabel($str)) return $this->doBryophytaArcticaExsiccataLabel($str);
+			else if($this->isBryophytaHawaiicaExsiccataLabel($str)) return $this->doBryophytaHawaiicaExsiccataLabel($str);
+			else if($this->isPlantaeUruguayensesExsiccataeLabel($str)) return $this->doPlantaeUruguayensesExsiccataeLabel($str);
+			else if($this->isOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($str)) return $this->doOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
@@ -337,6 +341,155 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			$s
 		));//echo "\nline 4941, s:\n".$s."\n";
 		return $this->doGenericLabel($s, "36");
+	}
+
+	private function isBryophytaArcticaExsiccataLabel($s) {
+		if(preg_match("/.*RY[0OQ]P(?:H|li)YTA AR[CG] ?T[1Il!|][CG] ?A EX[S5]I[CG]{2}ATA.*/is", $s)) return true;
+		if(preg_match("/.*Bry[o0]p(?:h|li)yta Ar[ec].[1Il!|][ec]a Exsi[ec]{2}ata.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doBryophytaArcticaExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.{1,2}RY[0OQ]P(?:H|li)YTA AR[CG]T[1Il!|][CG]A EX[S5]I[CG]{2}ATA.{1,2}/i",
+				"/Ed[1Il!|]t[ce]d b[yv] W[1Il!|]{3,5}a(?:m|rn) [CG][,.] [S5]t[ce]{2}r[ce] and K[ji][ce][1Il!|]d A[,.] H[o0][1Il!|]m[ce]n/i",
+				"/Bry[o0]p(?:h|li)yta Ar[ec].[1Il!|][ec]a Exsi[ec]{2}ata/i",
+				"/Ed[1Il!|]t[ce]d b[yv] W[1Il!|]{3,5}a(?:m|rn) [CG][,.] [S5]t[ce]{2}r[ce][,.] K[ji][ce][1Il!|]d A[,.] H[o0][1Il!|]m[ce]n and G[ce]rt [S5][,.] M[o0]g[ce]ns[ce]n/i",
+				"/D[1Il!|][s5]tr[1Il!|]but[ce]d b[yv] th[ce] B[o0]tan[1Il!|][ce]a[1Il!|] Mu[s5][ce]u(?:m|rn)[,.] [CG][o0]p[ce]nhag[ce]n, and /is",
+				"/D[1Il!|][s5]tr[1Il!|]but[ce]d b[yv]\\sand B[o0]tan[1Il!|][ce]a[1Il!|] Mu[s5][ce]u(?:m|rn)[,.] [CG][o0]p[ce]nhag[ce]n /is",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 5120, s:\n".$s."\n";
+		$fields = array();
+		$exsnumber = "";
+		$foundSciName = false;
+		$lines = explode("\n", $s);
+		foreach($lines as $line) {
+			if(preg_match("/^[0-9]{1,3}[,.] .+/", $line, $mats)) {
+				$psn = $this->processSciName(trim($line, " \"\',"));
+				if($psn != null) {
+					$scientificName = "";
+					if(array_key_exists('scientificName', $psn)) {
+						$scientificName = $psn['scientificName'];
+						$fields['scientificName'] = $scientificName;
+						$s = str_replace("\n\n", "\n", str_replace($line, "", $s));
+					}
+					if(array_key_exists('verbatimAttributes', $psn)) $fields['verbatimAttributes'] = $psn['verbatimAttributes'];
+					if(array_key_exists('associatedTaxa', $psn)) $fields['associatedTaxa'] = $psn['associatedTaxa'];
+					if(array_key_exists('recordNumber', $psn)) {
+						$exsnumber = $psn['recordNumber'];
+						$fields['exsNumber'] = $exsnumber;
+					}
+					if(array_key_exists('taxonRemarks', $psn)) $fields['taxonRemarks'] = $psn['taxonRemarks'];
+					if(array_key_exists('substrate', $psn)) $fields['substrate'] = $psn['substrate'];
+					$foundSciName = true;
+					if(array_key_exists('taxonRank', $psn)) {
+						$taxonRank = $psn['taxonRank'];
+						$fields['taxonRank'] = $taxonRank;
+						if(array_key_exists('infraspecificEpithet', $psn)) {
+							$infraspecificEpithet = $psn['infraspecificEpithet'];
+							$fields['infraspecificEpithet'] = $infraspecificEpithet;
+							$line = trim(substr($line, stripos($line, $infraspecificEpithet)+strlen($infraspecificEpithet)));
+						}
+					} else if(strlen($scientificName) > 0) $line = trim(substr($line, stripos($line, $scientificName)+strlen($scientificName)));
+					break;
+				}
+			}
+		}
+		$ometid = "";
+		$iExsNumber = 0;
+		$exsnumber = str_replace(" ", "", $exsnumber);
+		if(is_numeric($exsnumber)) $iExsNumber = intval($exsnumber);
+		else if(strlen($exsnumber) > 1) {//remove the last character and see if the remainder is numeric
+			$temp = trim(substr($exsnumber, 0, strlen($exsnumber)-1));
+			if(is_numeric($temp)) $iExsNumber = intval($temp);
+		}
+		if($iExsNumber > 0) {
+			if($iExsNumber > 50) $ometid = "349";
+			else $ometid = "348";
+		} else $ometid = "348";
+		return $this->doGenericLabel($s, $ometid, $fields);
+	}
+
+	private function isBryophytaHawaiicaExsiccataLabel($s) {
+		if(preg_match("/.*RY[0O]PHYTA HA[WV]A[1Il!| ]{2,3}CA EX[S5][1Il!|][CG]{2}ATA.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doBryophytaHawaiicaExsiccataLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.{1,2}RY[0O]PHYTA HA[WV]A[1Il!| ]{2,3}CA EX[S5][1Il!|][CG]{2}ATA.?/is",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "4", array('country' => "United States", 'stateProvince' => "Hawaii"));
+	}
+
+	private function isOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($s) {
+		if(preg_match("/.*TH[0OQ]TR[1Il!|][CG]HA[CG]EA. B[0OQ]. ?E ?AL ?[1Il!|].?AMER[1Il!|][CG]ANA. EX[S5][1Il!|][CG]{2}ATA.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/[^\n]+TH[0OQ]TR[1Il!|][CG]HA[CG]EA. B[0OQ]. ?EAL ?[1Il!|].?AMER[1Il!|][CG]ANA. EX[S5][1Il!|][CG]{2}ATA[^\n ]* ?/i",
+				"/Ed[1Il!|]t[ce]d b[yv] Da[1Il!|][ce] H. V[1Il!|].{1,2} ?/i",
+				"/ ?[0OD][1Il!|][s5]tr[1Il!|]but[ce]d b[yv] .h[ce] Un[1Il!|]v[ce]r[s5][1Il!|]ty of A[1Il!|]b[ce]rta/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 5293, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "350");
+	}
+
+	private function isPlantaeUruguayensesExsiccataeLabel($s) {
+		if(preg_match("/.*P[1Il!|]ANTA. [UV]R[UV][CG][UV]A[YV]EN[S5]E[S5] EX[S5]I[CG]{2}ATA.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doPlantaeUruguayensesExsiccataeLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/[^\n]?P[1Il!|]ANTA. [UV]R[UV][CG][UV]A[YV]EN[S5]E[S5] EX[S5]I[CG]{2}ATA.?/is",
+				"/[O0Q].{1,2}A[S5] ED. (?:Prof[,.] )?DR. (?:W|Guil)[,.] (?:G[,.] )?HERTE., M[O0Q]NTEVIDE[O0Q], URU[CG]UA[YV]/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "197");
 	}
 
 	private function isMossesOfTheInteriorHighlandsExsiccataeLabel($s) {
