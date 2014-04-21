@@ -46,9 +46,9 @@ class SpecProcNlpSalix extends SpecProcNlp{
 	}
 	
 	private function rebuildWordStats(){
-		$salixhanlder = new SalixUtilities();
-		$salixhanlder->setVerbose(0);
-		$salixhanlder->buildWordStats($this->collId, 1);
+		$salixHandler = new SalixUtilities();
+		$salixHandler->setVerbose(0);
+		$salixHandler->buildWordStats($this->collId, 1);
 	}
 
 }

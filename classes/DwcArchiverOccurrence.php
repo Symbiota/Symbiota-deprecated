@@ -835,7 +835,7 @@ class DwcArchiverOccurrence{
 			$emlArr['title'] = $defaultTitle.' general data extract';
 		}
 		if(isset($GLOBALS['USER_DISPLAY_NAME']) && $GLOBALS['USER_DISPLAY_NAME']){
-			$emlArr['creator'][0]['individualName'] = $GLOBALS['USER_DISPLAY_NAME'];
+			//$emlArr['creator'][0]['individualName'] = $GLOBALS['USER_DISPLAY_NAME'];
 			$emlArr['associatedParty'][0]['individualName'] = $GLOBALS['USER_DISPLAY_NAME'];
 			$emlArr['associatedParty'][0]['role'] = 'CONTENT_PROVIDER';
 		}
@@ -901,7 +901,7 @@ class DwcArchiverOccurrence{
 			
 			$cnt++; 
 		}
-		
+		$this->utf8EncodeArr($emlArr);
 		return $emlArr;
 	}
 	
@@ -1094,6 +1094,7 @@ class DwcArchiverOccurrence{
 		if(array_key_exists('collMetadata',$emlArr)){
 			
 			foreach($emlArr['collMetadata'] as $k => $collArr){
+				$this->utf8EncodeArr($collArr);
 				$collElem = $newDoc->createElement('collection');
 				if(isset($collArr['attr']) && $collArr['attr']){
 					$attrArr = $collArr['attr'];
@@ -1439,6 +1440,7 @@ class DwcArchiverOccurrence{
 		//Create new item for target archives and load into array
 		$itemArr = array();
 		foreach($this->collArr as $collId => $cArr){
+			$this->utf8EncodeArr($cArr);
 			$itemElem = $newDoc->createElement('item');
 			$itemAttr = $newDoc->createAttribute('collid');
 			$itemAttr->value = $collId;
@@ -1674,6 +1676,21 @@ class DwcArchiverOccurrence{
 			echo '<li>'.$str.'</li>';
 			ob_flush();
 			flush();
+		}
+	}
+	
+	private function utf8EncodeArr(&$inArr){
+		if($this->charSetSource == 'ISO-8859-1'){
+			foreach($inArr as $k => $v){
+				if(is_array($v)){
+					$this->utf8EncodeArr($v);
+				}
+				elseif(is_string($v)){
+					if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+						$inArr[$k] = utf8_encode($v);
+					}
+				}
+			}
 		}
 	}
 	

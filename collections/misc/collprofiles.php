@@ -7,6 +7,10 @@ $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
+if($eMode && !$SYMB_UID){
+	header('Location: ../../profile/index.php?refurl=../collections/misc/collprofiles.php?'.$_SERVER['QUERY_STRING']);
+}
+
 $showFamilyList = array_key_exists("sfl",$_REQUEST)?$_REQUEST["sfl"]:0;
 $familyDist = array_key_exists('family',$_REQUEST)?$_REQUEST['family']:'';
 $showGeographicList = array_key_exists("sgl",$_REQUEST)?$_REQUEST["sgl"]:0;
@@ -257,10 +261,18 @@ if($symbUid){
 					}
 					?>
 				</div>
-				<div style="margin-top:5px;">
-					<b>Global Unique Identifier: </b>
-					<?php echo ($collid?$collData['guid']:''); ?>
-				</div>
+				<?php 
+				if(stripos($collData['managementtype'],'live') !== false){
+					?>
+					<div style="margin-top:5px;">
+						<b>Global Unique Identifier: </b>
+						<?php 
+						echo ($collid?$collData['guid']:'');
+						?>
+					</div>
+					<?php
+				}
+				?>
 				<div style="margin-top:5px;">
 					<b>Usage Rights:</b> 
 					<?php 

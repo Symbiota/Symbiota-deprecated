@@ -29,7 +29,8 @@ class UuidFactory {
 			$conn = MySQLiConnectionFactory::getCon("write");
 			while($r = $rs->fetch_object()){
 				$guid = UuidFactory::getUuidV4();
-				$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" WHERE collid = '.$r->collid;
+				$insSql = 'UPDATE omcollections SET collectionguid = "'.$guid.'" '.
+					'WHERE collectionguid IS NULL AND collid = '.$r->collid;
 				if(!$conn->query($insSql)){
 					$this->echoStr('ERROR: '.$conn->error);
 				}

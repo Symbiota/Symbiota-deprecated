@@ -509,9 +509,10 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
 							if($family != $prevfam){
+								$famUrl = "../taxa/index.php?taxauthid=1&taxon=$family&cl=".$clid;
 								?>
-								<div class="familydiv" id="<?php echo $family;?>" style="margin:15px 0px 5px 0px;">
-									<div style="font-weight:bold;font-size:120%;"><?php echo $family;?></div>
+								<div class="familydiv" id="<?php echo $family;?>" style="margin:15px 0px 5px 0px;font-weight:bold;font-size:120%;">
+									<a href="<?php echo $famUrl; ?>" target="_blank" style="color:black;"><?php echo $family;?></a>
 								</div>
 								<?php
 								$prevfam = $family;
