@@ -534,14 +534,38 @@ $collData = $collManager->getCollectionData(1);
 										Global Unique ID:
 									</td>
 									<td>
-										<input type="text" name="collectionguid" value="<?php echo ($collid?$collData["guid"]:'');?>" style="width:90%;" />
+									<?php
+									if($collid){
+										echo $collData["guid"]; 
+										?>
 										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="collectionguidinfodialog">
-											Global Unique Identifier for this collection. If you leave blank, portal will automatically 
-											generate a UUID for this collection (recommended if GUID is not known to already exist). 
+											Global Unique Identifier for this collection.  
+											If your collection already has a GUID (e.g. previously assigned by a  
+											collection management application such as Specify), that identifier should be represented here.
+											If you need to change this value, contact your portal manager.  
 										</div>
+										<?php
+									}
+									else{
+										//New collection 
+										?>
+										<input type="text" name="collectionguid" value="" style="width:90%;" />
+										<a id="collectionguidinfo2" href="#" onclick="return false" title="More information">
+											<img src="../../images/info.png" style="width:15px;" />
+										</a>
+										<div id="collectionguidinfo2dialog">
+											Global Unique Identifier for this collection. 
+											If your collection already has a GUID (e.g. previously assigned by a  
+											collection management application such as Specify), that identifier should be entered here.
+											If you leave blank, the portal will automatically 
+											generate a UUID for this collection (recommended if GUID is not known to already exist).  
+										</div>
+										<?php
+									}
+									?>
 									</td>
 								</tr>
 								<?php

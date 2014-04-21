@@ -156,13 +156,15 @@ class CollectionProfileManager {
 			if(!$returnArr['guid']){
 				$returnArr['guid'] = UuidFactory::getUuidV4();
 				$conn = MySQLiConnectionFactory::getCon('write');
-				$sql = 'UPDATE omcollections SET collectionguid = "'.$returnArr['guid'].'" WHERE collid = '.$this->collid;
+				$sql = 'UPDATE omcollections SET collectionguid = "'.$returnArr['guid'].'" '.
+					'WHERE collectionguid IS NULL AND collid = '.$this->collid;
 				$conn->query($sql);
 			}
 			if(!$returnArr['skey']){
 				$returnArr['skey'] = UuidFactory::getUuidV4();
 				$conn = MySQLiConnectionFactory::getCon('write');
-				$sql = 'UPDATE omcollections SET securitykey = "'.$returnArr['skey'].'" WHERE collid = '.$this->collid;
+				$sql = 'UPDATE omcollections SET securitykey = "'.$returnArr['skey'].'" '.
+					'WHERE securitykey IS NULL AND collid = '.$this->collid;
 				$conn->query($sql);
 			}  
 		}
@@ -188,7 +190,6 @@ class CollectionProfileManager {
 			$rights = $this->cleanInStr($_POST['rights']);
 			$rightsHolder = $this->cleanInStr($_POST['rightsholder']);
 			$accessRights = $this->cleanInStr($_POST['accessrights']);
-			$collectionGuid = $this->cleanInStr($_POST['collectionguid']);
 			
 			$conn = MySQLiConnectionFactory::getCon("write");
 			$sql = 'UPDATE omcollections '.
@@ -206,8 +207,7 @@ class CollectionProfileManager {
 				'guidtarget = '.($guidTarget?'"'.$guidTarget.'"':'NULL').','.
 				'rights = '.($rights?'"'.$rights.'"':'NULL').','.
 				'rightsholder = '.($rightsHolder?'"'.$rightsHolder.'"':'NULL').','.
-				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').', '.
-				'collectionguid = '.($collectionGuid?'"'.$collectionGuid.'"':'NULL').' ';
+				'accessrights = '.($accessRights?'"'.$accessRights.'"':'NULL').' ';
 			if(array_key_exists('icon',$_POST)){
 				$icon = $this->cleanInStr($_POST['icon']);
 				$indUrl = $this->cleanInStr($_POST['individualurl']);
