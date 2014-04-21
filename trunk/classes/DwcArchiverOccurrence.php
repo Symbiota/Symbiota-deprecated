@@ -901,7 +901,7 @@ class DwcArchiverOccurrence{
 			
 			$cnt++; 
 		}
-		$this->utf8EncodeArr($emlArr);
+		$emlArr = $this->utf8EncodeArr($emlArr);
 		return $emlArr;
 	}
 	
@@ -1094,7 +1094,7 @@ class DwcArchiverOccurrence{
 		if(array_key_exists('collMetadata',$emlArr)){
 			
 			foreach($emlArr['collMetadata'] as $k => $collArr){
-				$this->utf8EncodeArr($collArr);
+				$collArr = $this->utf8EncodeArr($collArr);
 				$collElem = $newDoc->createElement('collection');
 				if(isset($collArr['attr']) && $collArr['attr']){
 					$attrArr = $collArr['attr'];
@@ -1440,7 +1440,7 @@ class DwcArchiverOccurrence{
 		//Create new item for target archives and load into array
 		$itemArr = array();
 		foreach($this->collArr as $collId => $cArr){
-			$this->utf8EncodeArr($cArr);
+			$cArr = $this->utf8EncodeArr($cArr);
 			$itemElem = $newDoc->createElement('item');
 			$itemAttr = $newDoc->createAttribute('collid');
 			$itemAttr->value = $collId;
@@ -1679,19 +1679,24 @@ class DwcArchiverOccurrence{
 		}
 	}
 	
-	private function utf8EncodeArr(&$inArr){
+	private function utf8EncodeArr($inArr){
+		$retArr = $inArr;
 		if($this->charSetSource == 'ISO-8859-1'){
-			foreach($inArr as $k => $v){
+			foreach($retArr as $k => $v){
 				if(is_array($v)){
-					$this->utf8EncodeArr($v);
+					$retArr[$k] = $this->utf8EncodeArr($v);
 				}
 				elseif(is_string($v)){
 					if(mb_detect_encoding($v,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-						$inArr[$k] = utf8_encode($v);
+						$retArr[$k] = utf8_encode($v);
 					}
+				}
+				else{
+					$retArr[$k] = $v;
 				}
 			}
 		}
+		return $retArr;
 	}
 	
 	private function encodeArr(&$inArr){
