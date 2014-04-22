@@ -238,7 +238,8 @@ function parseVerbatimElevation(f){
 		var regEx1 = /(\d+)\s*-\s*(\d+)\s*[ft|feet|']/i; 
 		var regEx2 = /(\d+)\s*[ft|feet|']/i; 
 		var regEx3 = /(\d+)\s*-\s*(\d+)\s{0,1}m{1}/i; 
-		var regEx4 = /(\d+)\s{0,1}m{1}/i; 
+		var regEx4 = /(\d+)\s{0,1}-\s{0,1}(\d+)\s{0,1}m{1}/i; 
+		var regEx5 = /(\d+)\s{0,1}m{1}/i; 
 		var extractStr = "";
 		if(extractArr = regEx1.exec(verbElevStr)){
 			min = Math.round(extractArr[1]*.3048);
@@ -252,7 +253,11 @@ function parseVerbatimElevation(f){
 			max = extractArr[2];
 		}
 		else if(extractArr = regEx4.exec(verbElevStr)){
-			mMin = extractArr[1];
+			min = extractArr[1];
+			max = extractArr[2];
+		}
+		else if(extractArr = regEx5.exec(verbElevStr)){
+			min = extractArr[1];
 		}
 
 		if(min){
