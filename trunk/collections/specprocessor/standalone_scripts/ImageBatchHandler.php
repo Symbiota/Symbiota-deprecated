@@ -48,13 +48,16 @@ if($lgFileSizeLimit) $imageProcessor->setLgFileSizeLimit($lgFileSizeLimit);
 $imageProcessor->setJpgQuality($jpgQuality);
 $imageProcessor->setUseImageMagick($useImageMagickBatch);
 
-if(isset($createWebImg) && $createWebImg) $imageProcessor->setCreateWebImg($createWebImg);
-$imageProcessor->setCreateTnImg($createTnImg);
-$imageProcessor->setCreateLgImg($createLgImg);
+if(isset($webImg) && $webImg) $imageProcessor->setWebImg($webImg);
+elseif(isset($createWebImg) && $createWebImg) $imageProcessor->setCreateWebImg($createWebImg);
+if(isset($tnImg) && $tnImg) $imageProcessor->setTnImg($tnImg);
+elseif(isset($createTnImg) && $createTnImg) $imageProcessor->setCreateTnImg($createTnImg);
+if(isset($lgImg) && $lgImg) $imageProcessor->setLgImg($lgImg);
+elseif(isset($createLgImg) && $createLgImg) $imageProcessor->setCreateLgImg($createLgImg);
 $imageProcessor->setKeepOrig($keepOrig);
 $imageProcessor->setCreateNewRec($createNewRec);
-$imageProcessor->setCopyOverImg($copyOverImg);
-
+if(isset($imgExists)) $imageProcessor->setImgExists($imgExists);
+elseif(isset($copyOverImg)) $imageProcessor->setCopyOverImg($copyOverImg);
 
 //Run process
 $imageProcessor->batchLoadImages();

@@ -28,8 +28,6 @@ class SpecProcessorManager {
 	protected $tnImg = 1;
 	protected $lgImg = 1;
 	
-	protected $createNewRec = true;
-	protected $copyOverImg = true;
 	protected $dbMetadata = 1;			//Only used when run as a standalone script
 	protected $processUsingImageMagick = 0;
 	
@@ -577,22 +575,6 @@ class SpecProcessorManager {
 
 	public function getLgImg(){
 		return $this->lgImg;
-	}
-	
-	public function setCreateNewRec($c){
-		$this->createNewRec = $c;
-	}
-
-	public function getCreateNewRec(){
-		return $this->createNewRec;
-	}
-	
-	public function setCopyOverImg($c){
-		$this->copyOverImg = $c;
-	}
-
-	public function getCopyOverImg(){
-		return $this->copyOverImg;
 	}
 	
 	public function setDbMetadata($v){

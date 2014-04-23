@@ -24,7 +24,7 @@ $logMode = 2;
 $createNewRec = true;
 
 //Weather to copyover images with matching names (includes path) or rename new image and keep both
-$copyOverImg = true;
+$imgExists = 2;
 
 $webPixWidth = 1400;
 $tnPixWidth = 200;
@@ -39,9 +39,9 @@ $useImageMagickBatch = 0;
 //Value between 0 and 100
 $jpgQuality = 80;
 
-$createWebImg = 1;
-$createTnImg = 1;
-$createLgImg = 1;
+$webImg = 1;			// 1 = evaluate source and import, 2 = import source and use as is, 3 = map to source  
+$tnImg = 1;				// 1 = create from source, 2 = import source, 3 = map to source, 0 = exclude 
+$lgImg = 1;				// 1 = import source, 2 = map to source, 3 = import large version (_lg.jpg), 4 = map large version (_lg.jpg), 0 = exclude
 
 $keepOrig = 1;
 

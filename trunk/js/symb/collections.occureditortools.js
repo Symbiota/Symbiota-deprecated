@@ -3,6 +3,7 @@ function openAssocSppAid(){
 	if(assocWindow != null){
 		if (assocWindow.opener == null) assocWindow.opener = self;
 		fieldChanged("associatedtaxa");
+		assocWindow.focus();
 	}
 	else{
 		alert("Unable to open associated species tool, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -42,6 +43,7 @@ function openMappingAid() {
 	var mapWindow=open("mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 	if(mapWindow != null){
 		if (mapWindow.opener == null) mapWindow.opener = self;
+		mapWindow.focus();
 	}
 	else{
 		alert("Unable to open map, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -66,7 +68,10 @@ function geoLocateLocality(){
 	}
 	else{
 		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=1,width=1050,height=700,left=20,top=20");
-		if(geolocWindow.opener == null) geolocWindow.opener = self;
+		if(geolocWindow.opener == null){
+			geolocWindow.opener = self;
+		}
+		geolocWindow.focus();
 	}
 }
 
@@ -292,6 +297,7 @@ function searchDupesCatalogNumber(f){
 					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+collId+"&curoccid="+occid,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
+						occWindow.focus();
 					}
 					else{
 						alert("Unable to display record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -327,6 +333,7 @@ function verifyDupeCatalogNumber(f){
 				var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"dupesearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 				if(occWindow != null){
 					if (occWindow.opener == null) occWindow.opener = self;
+					occWindow.focus();
 				}
 				else{
 					alert("Unable to display record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -359,6 +366,7 @@ function searchDupesOtherCatalogNumbers(f){
 					var occWindow=open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+f.occid.value,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 					if(occWindow != null){
 						if (occWindow.opener == null) occWindow.opener = self;
+						occWindow.focus();
 					}
 					else{
 						alert("Unable to show record, which is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
@@ -409,12 +417,14 @@ function searchDupes(f,silent){
 			var dupOccWindow = open("dupesearch.php?occidquery="+msg+"&collid="+f.collid.value+"&curoccid="+currOccidIn,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 			if(dupOccWindow != null){
 				if(dupOccWindow.opener == null) dupOccWindow.opener = self;
-				if(window.focus) {dupOccWindow.focus()}
+				dupOccWindow.focus();
 				document.getElementById("dupesearch").style.display = "none";
 				document.getElementById("dupeMsgDiv").style.display = "none";
 			}
 			else{
 				alert("Duplicate found but unable to display. This is likely due to your browser blocking popups. Please adjust your browser settings to allow popups from this website.");
+				document.getElementById("dupeMsgDiv").style.display = "none";
+				document.getElementById("dupesearch").style.display = "none";
 			}
 		}
 		else{

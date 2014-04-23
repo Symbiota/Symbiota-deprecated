@@ -104,6 +104,24 @@ if($spprId) $specManager->setProjVariables();
 					alert("JPG compression needs to be a numeric value between 30 and 100");
 					return false;
 				}
+				else if(f.speckeypattern.value == ""){
+					alert("Regular expression field must have a value");
+					return false;
+				}
+				else if(f.sourcepath.value == ""){
+					alert("Image source path must have a value");
+					return false;
+				}
+				else if(f.imgurl.value == ""){
+					alert("Image URL base must have a value");
+					return false;
+				}
+				else if(f.targetpath.value == ""){
+					alert("Note that since target path is null, scripts will attempt to simply map to images using the Image URL base path");
+					if(f.targetpath.value == ""){
+
+					}
+				}
 				return true;
 			}
 
@@ -153,11 +171,10 @@ if($spprId) $specManager->setProjVariables();
 									</tr>
 									<tr>
 										<td>
-											<b>Regular Expression for<br/>
-											Extracting Unique Identifier (PK): </b> 
+											<b>Regular Expression:</b>
 										</td>
 										<td style="padding-top:13px;"> 
-											<input name="speckeypattern" type="text" style="width:300px;" value="<?php echo $specManager->getSpecKeyPattern(); ?>"/>
+											<input name="speckeypattern" type="text" style="width:300px;" value="<?php echo $specManager->getSpecKeyPattern(); ?>" />
 											<a id="speckeypatterninfo" href="#" onclick="return false" title="More Information">
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
@@ -171,23 +188,6 @@ if($spprId) $specManager->setProjVariables();
 									</tr>
 									<tr>
 										<td>
-											<b>Retrieve Identifier from:</b> 
-										</td>
-										<td> 
-											<input name="speckeyretrieval" type="radio" value="filename" <?php echo ($specManager->getSpecKeyRetrieval()=='filename' || !$spprId?'checked':''); ?> /> Image File Name
-											<a id="speckeyretrievalinfo" href="#" onclick="return false" title="More Information">
-												<img src="../../images/info.png" style="width:15px;" />
-											</a><br/>
-											<input name="speckeyretrieval" type="radio" value="ocr" <?php echo ($specManager->getSpecKeyRetrieval()=='ocr'?'checked':''); ?> /> OCR from image
-											<div id="speckeyretrievalinfodialog">
-												Obtaining identifier from file name is typically more reliable than using OCR. 
-												The Tesseract OCR engine used in this interface can not read barcodes dirrectly.  
-												The identifier must be within every image and in clear, typed face that can be OCRed.
-											</div>
-										</td>
-									</tr>
-									<tr>
-										<td>
 											<b>Image source path:</b>
 										</td>
 										<td> 
@@ -196,8 +196,10 @@ if($spprId) $specManager->setProjVariables();
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
 											<div id="sourcepathinfodialog">
-												Server path to folder containing source images. 
-												The web server (e.g. apache user) must have read/write access to to this folder.
+												Server path to folder containing source images.
+												If a URL (e.g. http://) is supplied, the web server needs to be configured to list 
+												all files within the directory, or the html output needs to list all images in anchor tags.
+												Scripts will attempt to crawl through all child directories.
 											</div>
 										</td>
 									</tr>
@@ -212,7 +214,8 @@ if($spprId) $specManager->setProjVariables();
 											</a>
 											<div id="targetpathinfodialog">
 												Web server path to where the image derivatives will be depositied. 
-												The web server (e.g. apache user) must have read/write access to to this folder.
+												The web server (e.g. apache user) must have read/write access to this directory.
+												If this field is left blank, the portal's default image target (imageRootPath) will be used.
 											</div>
 										</td>
 									</tr>
@@ -226,8 +229,10 @@ if($spprId) $specManager->setProjVariables();
 												<img src="../../images/info.png" style="width:15px;" />
 											</a>
 											<div id="imgurlinfodialog">
-												Image URL prefix that will access the target folder from the browser (generally without the domain).
-												This will be used to create the image URLs that will be stored in the database.  
+												Image URL prefix that will access the target folder from the browser.
+												This will be used to create the image URLs that will be stored in the database.
+												If absolute URL is supplied without the domain name, the portal domain will be assumed. 
+												If this field is left blank, the portal's default image url will be used ($imageRootUrl).
 											</div>
 										</td>
 									</tr>
@@ -297,18 +302,25 @@ if($spprId) $specManager->setProjVariables();
 									</tr>
 									<tr>
 										<td>
-											<b>Create thumbnail:</b>
+											<b>Thumbnail:</b>
 										</td>
 										<td> 
-											<input name="createtnimg" type="checkbox" value="1" CHECKED />
+											<input name="tnimg" type="radio" value="1" CHECKED /> Create new thumbnail from source image<br/>
+											<input name="tnimg" type="radio" value="2" /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
+											<input name="tnimg" type="radio" value="3" /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+											<input name="tnimg" type="radio" value="4" /> Exclude thumbnail <br/>
 										</td>
 									</tr>
 									<tr>
 										<td>
-											<b>Create large image:</b>
+											<b>Large Image:</b>
 										</td>
 										<td> 
-											<input name="createlgimg" type="checkbox" value="1" CHECKED />
+											<input name="lgimg" type="radio" value="1" CHECKED /> Import source image as large version<br/>
+											<input name="lgimg" type="radio" value="2" /> Map to source image as large version<br/>
+											<input name="lgimg" type="radio" value="3" /> Import large version from source location (source name with _lg.jpg suffix)<br/>
+											<input name="lgimg" type="radio" value="4" /> Map to large version at source location (source name with _lg.jpg suffix)<br/>
+											<input name="lgimg" type="radio" value="5" /> Exclude large version<br/>
 										</td>
 									</tr>
 									<tr>
@@ -360,52 +372,66 @@ if($spprId) $specManager->setProjVariables();
 									<div style="font-size:120%;font-weight:bold;">
 										<?php echo $specManager->getTitle(); ?>
 									</div>
-									<div style="margin:10px;">
-										This process will create web quality versions of the specimen images found within 
-										the &#8220;source folder&#8221;, deposit them into the &#8220;target folder&#8221;, 
-										and link them to their prespective specimen record. 
-									</div>
-									<fieldset style="margin:15px;">
-										<legend><b>Image Versions</b></legend>
-										<div style="margin:0px 0px 10px 10px;">
-											Web Versions:<br/>
-											<input type="radio" name="mapweb" value="1" CHECKED /> 
-											Create basic web images<br/>
-											<input type="radio" name="mapweb" value="0" /> 
-											Use existing images without resizing or compressing
-											<br/><br/> 
-											Thumbnails:<br/>
-											<input type="radio" name="maptn" value="1" <?php echo ($specManager->getCreateTnImg()?'CHECKED':'') ?> /> 
-											Create Thumbnails<br/>
-											<input type="radio" name="maptn" value="0" <?php echo ($specManager->getCreateTnImg()?'':'CHECKED') ?> /> 
-											Use existing thumbnail (files must end in _tn.jpg), or skip altogether
-											<br/><br/> 
-											Large Images:<br/>
-											<input type="radio" name="maplarge" value="1" <?php echo ($specManager->getCreateLgImg()?'CHECKED':'') ?> />
-											Create Large Versions<br/>
-											<input type="radio" name="maplarge" value="0" <?php echo ($specManager->getCreateLgImg()?'':'CHECKED') ?> /> 
-											Use existing large images (files must end in _lg.jpg), or skip altogether
-										</div>
-									</fieldset>
-									<div style="margin:25px;">
-										<b>Action if specimen record is not found:</b> 
-										<div style="margin:0px 0px 10px 10px;">
-											<input type="radio" name="createnewrec" value="0" /> 
-											Leave image and go to next<br/>
-											<input type="radio" name="createnewrec" value="1" CHECKED /> 
-											Create empty record and link image
-										</div>
-										<b>Action if image file exists with same name:</b> 
-										<div style="margin:0px 0px 10px 10px;">
-											<input type="radio" name="copyoverimg" value="0" /> 
-											Rename image and save<br/>
-											<input type="radio" name="copyoverimg" value="1" CHECKED /> 
-											Copy over existing image
-										</div>
-									</div>
 									<fieldset style="margin:15px;">
 										<legend><b>Project Variables</b></legend>
 										<table>
+											<tr>
+												<td>
+													<b>Web Image:</b>
+												</td>
+												<td> 
+													<input name="webimg" type="radio" value="1" CHECKED /> Evaluate and import source image<br/>
+													<input name="webimg" type="radio" value="2" /> Import source image as is without resizing<br/>
+													<input name="webimg" type="radio" value="3" /> Map to source image without importing<br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Thumbnail:</b>
+												</td>
+												<td> 
+													<input name="tnimg" type="radio" value="1" <?php echo ($specManager->getTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
+													<input name="tnimg" type="radio" value="2" <?php echo ($specManager->getTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
+													<input name="tnimg" type="radio" value="3" <?php echo ($specManager->getTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
+													<input name="tnimg" type="radio" value="0" <?php echo (!$specManager->getTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<b>Large Image:</b>
+												</td>
+												<td> 
+													<input name="lgimg" type="radio" value="1" <?php echo ($specManager->getLgImg() == 1?'CHECKED':'') ?> /> Import source image as large version<br/>
+													<input name="lgimg" type="radio" value="2" <?php echo ($specManager->getLgImg() == 2?'CHECKED':'') ?> /> Map to source image as large version<br/>
+													<input name="lgimg" type="radio" value="3" <?php echo ($specManager->getLgImg() == 3?'CHECKED':'') ?> /> Import existing large version (source name with _lg.jpg suffix)<br/>
+													<input name="lgimg" type="radio" value="4" <?php echo ($specManager->getLgImg() == 4?'CHECKED':'') ?> /> Map to exiting large version (source name with _lg.jpg suffix)<br/>
+													<input name="lgimg" type="radio" value="0" <?php echo (!$specManager->getLgImg()?'CHECKED':'') ?> /> Exclude large version<br/>
+												</td>
+											</tr>
+											<tr>
+												<td title="Unable to match primary identifer with an existing database record">
+													<b>Missing record:</b> 
+												</td>
+												<td>
+													<input type="radio" name="createnewrec" value="0" /> 
+													Skip image import and go to next<br/>
+													<input type="radio" name="createnewrec" value="1" CHECKED /> 
+													Create empty record and link image
+												</td>
+											</tr>
+											<tr>
+												<td title="Image with exact same name already exists">
+													<b>Image already exists:</b> 
+												</td>
+												<td>
+													<input type="radio" name="imgexists" value="0" CHECKED /> 
+													Skip import<br/>
+													<input type="radio" name="imgexists" value="1" /> 
+													Rename image and save both<br/>
+													<input type="radio" name="imgexists" value="2" /> 
+													Copy over existing image
+												</td>
+											</tr>
 											<tr>
 												<td>
 													<b>Source folder:</b>
@@ -468,14 +494,6 @@ if($spprId) $specManager->setProjVariables();
 												</td>
 												<td> 
 													<?php echo $specManager->getSpecKeyPattern();?><br/>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<b>PK obtained from:</b> 
-												</td>
-												<td> 
-													<?php echo $specManager->getSpecKeyRetrieval();?><br/>
 												</td>
 											</tr>
 										</table>
