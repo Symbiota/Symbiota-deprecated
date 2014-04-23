@@ -16,7 +16,7 @@ $spNlpId = array_key_exists('spnlpid',$_REQUEST)?$_REQUEST['spnlpid']:0;
 
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 
-$specManager= new SpecProcessorManager();
+$specManager = new SpecProcessorManager();
 
 $specManager->setCollId($collid);
 $specManager->setSpprId($spprId);
@@ -145,11 +145,11 @@ if($isEditor){
 				$imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
 				$imageProcessor->setJpgQuality($specManager->getJpgQuality());
 				$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
-				$imageProcessor->setCreateWebImg($_REQUEST['mapweb']);
-				$imageProcessor->setCreateTnImg($_REQUEST['maptn']);
-				$imageProcessor->setCreateLgImg($_REQUEST['maplarge']);
+				$imageProcessor->setWebImg($_REQUEST['webimg']);
+				$imageProcessor->setTnImg($_REQUEST['tnimg']);
+				$imageProcessor->setLgImg($_REQUEST['lgimg']);
 				$imageProcessor->setCreateNewRec($_REQUEST['createnewrec']);
-				$imageProcessor->setCopyOverImg($_REQUEST['copyoverimg']);
+				$imageProcessor->setImgExists($_REQUEST['imgexists']);
 				$imageProcessor->setKeepOrig(0);
 				
 				//Run process

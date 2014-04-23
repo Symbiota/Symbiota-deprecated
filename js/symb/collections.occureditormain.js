@@ -1067,12 +1067,14 @@ function verifyImgDelForm(f){
 function dwcDoc(dcTag){
     dwcWindow=open("http://rs.tdwg.org/dwc/terms/index.htm#"+dcTag,"dwcaid","width=1250,height=300,left=20,top=20,scrollbars=1");
     if(dwcWindow.opener == null) dwcWindow.opener = self;
+    dwcWindow.focus();
     return false;
 }
 
 function openOccurrenceSearch(target) {
 	collId = document.fullform.collid.value;
 	occWindow=open("imgremapaid.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+	occWindow.focus();
 	if (occWindow.opener == null) occWindow.opener = self;
 }
 
