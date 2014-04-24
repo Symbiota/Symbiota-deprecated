@@ -37,8 +37,10 @@ ImageExplorer.prototype.search = function(query, searchCollection) {
         $("#images").html(result);
         $('body').removeClass("loading");
 
-        $('#count').html(ImageExplorer.currStart + " - " + (ImageExplorer.currStart+ImageExplorer.currLimit) + " of " + $('#imgCnt').val() + " images")
-        $('#count_bottom').html(ImageExplorer.currStart + " - " + (ImageExplorer.currStart+ImageExplorer.currLimit) + " of " + $('#imgCnt').val() + " images")
+        var toValue = ImageExplorer.currStart+ImageExplorer.currLimit;
+        if($('#imgCnt').val() < toValue) toValue = $('#imgCnt').val();
+        $('#count').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images")
+        $('#count_bottom').html(ImageExplorer.currStart + " - " + toValue + " of " + $('#imgCnt').val() + " images")
 
 
         if (parseFloat($('#imgCnt').val()) <= ImageExplorer.currLimit) {
@@ -115,7 +117,7 @@ ImageExplorer.prototype.init = function(containerId) {
     controlsHtml += "        <\/tr>";
     controlsHtml += "    <\/table>";
     controlsHtml += "<\/div>";
-    controlsHtml += "<div style=\"margin: 20px 0px 90px 0px\">"
+    controlsHtml += "<div style=\"margin: 20px 0px 60px 0px\">"
     controlsHtml += "    <span><em>Try searching for: taxon, owner, country, state, photographer or tag.</em></span>";
     controlsHtml += "    <div id=\"searchbox\"></div>";
     controlsHtml += "</div>";
