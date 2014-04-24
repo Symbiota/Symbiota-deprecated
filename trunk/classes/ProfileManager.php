@@ -484,7 +484,8 @@ class ProfileManager{
 			'FROM usertaxonomy ut INNER JOIN taxa t ON ut.tid = t.tid '.
 			'WHERE ut.uid = ?';
 		$statement = $this->conn->prepare($sql);
-		$statement->bind_param('i', $person->getUid());
+		$uid = $person->getUid();
+		$statement->bind_param('i', $uid);
 		$statement->execute();
 		$statement->bind_result($id, $tid, $sciname, $editorStatus, $geographicScope, $notes, $modifiedUid, $modifiedtimestamp);
 		while($statement->fetch()){
