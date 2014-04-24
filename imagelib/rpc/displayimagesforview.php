@@ -73,13 +73,37 @@ include_once($serverRoot.'/classes/PhotographerManager.php');
 
                     <div class="tndiv" style="margin-top: 15px; margin-bottom: 15px">
                         <div class="tnimg">
-                            <a href="#" onclick="openImagePopup(<?php echo $imgId; ?>)">
-                                <img src="<?php echo $imgUrl; ?>" />
-                            </a>
+                        	<?php 
+							if($imgArr['occid']){
+								echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');">';
+							}
+							else{
+								echo '<a href="#" onclick="openImagePopup('.$imgId.')">';
+							}
+							echo '<img src="'.$imgUrl.'" />';
+							echo '</a>';
+							?>
                         </div>
                         <div>
-                            <?php echo "<a href=\"#\" onclick=\"openTaxonPopup(".$imgArr['tid'].")\" >".$imgArr['sciname']."</a><br />" . $imgArr['stateprovince'] . "<br /><a href=\"#\" onclick=\"openIndPU(".$imgArr['occid'].");\">" . $imgArr['instcode'] . " - " . $imgArr['catalognumber']. "</a>"; ?>
-                            </a>
+                            <?php 
+                            $sciname = $imgArr['sciname'];
+                            if($sciname){
+                            	if(strpos($imgArr['sciname'],' ')) $sciname = '<i>'.$sciname.'</i>';
+                            	if($imgArr['tid']) echo '<a href="#" onclick="openTaxonPopup('.$imgArr['tid'].')" >';
+                            	echo $sciname;
+                            	if($imgArr['tid']) echo '</a>';
+                            	echo '<br />';
+                            }
+                            if($imgArr['stateprovince']) echo $imgArr['stateprovince'] . "<br />";
+                            if($imgArr['catalognumber']){
+	                            echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');">';
+	                            echo $imgArr['instcode'] . ": " . $imgArr['catalognumber'];
+	                            echo '</a>';
+                            }
+                            elseif($imgArr['photographer']){
+								echo $imgArr['photographer'].'<br />';
+                            }
+                            ?>
                         </div>
                     </div>
                 <?php

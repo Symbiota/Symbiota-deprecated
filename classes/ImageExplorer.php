@@ -147,7 +147,14 @@ class ImageExplorer{
 		if(isset($searchCriteria['tags']) && $searchCriteria['tags']){
 			$sqlWhere .= 'AND it.tagvalue IN("'.implode('","',$this->cleanInArray($searchCriteria['tags'])).'") ';
 		}
-
+		else{
+			/* If no tags, then limit to sort value less than 500, 
+			 * this is old system for limiting certain images to specimen details page only,
+			 * will replace with tag system in near future 
+			*/
+			$sqlWhere .= 'AND i.sortsequence < 500 ';
+		}
+		
 		//Set collection 
 		if(isset($searchCriteria['collection']) && $searchCriteria['collection']){
 			$sqlWhere .= 'AND o.collid IN('.implode(',',$this->cleanInArray($searchCriteria['collection'])).') ';
@@ -157,7 +164,7 @@ class ImageExplorer{
 		if(isset($searchCriteria['photographer']) && $searchCriteria['photographer']){
 			$sqlWhere .= 'AND i.photographerUid IN('.implode(',',$this->cleanInArray($searchCriteria['photographer'])).') ';
 		}
-
+		
 		if (isset($searchCriteria['idToSpecies']) && $searchCriteria['idToSpecies'] 
 		 && isset($searchCriteria['idNeeded']) && $searchCriteria['idNeeded'] ) { 
 			// if both are checked, don't include filter on either 
@@ -182,7 +189,7 @@ class ImageExplorer{
 	   		   $includeVerification = TRUE;
 	   		    // include occurrences with no verification of identification and an id of species or lower or those with an identification verification of good
 	   		    // differs from the query above only in rankid>=220 and ranking>=5
-			    $sqlWhere .= "AND ( " . 
+			    $sqlWhere .= "AND ( (o.occid IS NULL AND t.rankid >= 220) OR " . 
 			                 "   (o.occid NOT IN (SELECT occid FROM omoccurverification WHERE (category = \"identification\")) AND t.rankid >= 220) " .
 			                 " OR " . 
 			                 "   (v.category = 'identification' AND v.ranking >= 5) " . 
@@ -232,13 +239,14 @@ class ImageExplorer{
 			}
 		}
 		
+		$sqlStr .= 'ORDER BY i.sortsequence ';
 		//Set start and limit
 		$start = (isset($searchCriteria['start'])?$searchCriteria['start']:0);
 		$limit = (isset($searchCriteria['limit'])?$searchCriteria['limit']:50);
 		$sqlStr .= 'LIMIT '.$start.','.$limit;
 
-        error_log($sqlStr);
-		//echo $sqlStr;
+        //error_log($sqlStr);
+		//echo $sqlStr; exit;
 		return $sqlStr;
 	}
 
