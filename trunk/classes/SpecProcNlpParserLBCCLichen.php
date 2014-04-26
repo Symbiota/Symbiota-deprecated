@@ -7991,24 +7991,5 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon {
 		$fields['substrate'] = $substrate;
 		return $this->doGenericLabel(str_replace("\n\n", "\n", $s), "293", $fields);
 	}
-
-	private function containsVerbatimAttribute($pAtt) {
-		$pAtt = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pAtt));
-		//if(strpos($pAtt, "|") !== FALSE || strpos($pAtt, "/") !== FALSE || strpos($pAtt, "\"") !== FALSE) $pAtt = preg_quote($pAtt, '/');
-		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
-			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))",
-			"thall(?:us|i)", "strain", "dis[ck]s?(?! (?:convex\\/|color))", "squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose",
-			"fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous", "terricolous", "chemotype", "terpenes?",
-			"isidi(?:a(?:te)?|um)", "TLC", "parietin", "anthraquinones?", "pigment(?:s|ed)?", "soralia", "ostioles?", "spores",
-			"cluster(?:s|ed)", "exciple", "paraphyses(?! ?branched\\/)", "foliose", "pruinose", "Chemica[l1|I!] contents", "ciliate",
-			"sterile", "septate(?! ?\\/)", "(?:(?:nor)?stictic|usnic|sa[l1|I!]azinic|psoromic|ga[l1|I!]binic|[o0][l1|I!]ivetoric|evernic) acids?");
-		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
-		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
-		if(preg_match("/\\b[KPC][+-]\\B/", $pAtt)) return true;
-		if(preg_match("/\\bUV[+-]\\B/", $pAtt)) return true;
-		if(preg_match("/\\bPD[+-]\\B/", $pAtt)) return true;
-		if(preg_match("/\\bHC[Il][+-]\\B/", $pAtt)) return true;
-		return false;
-	}
 }
 ?>

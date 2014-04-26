@@ -24,6 +24,11 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			else if($this->isBryophytaHawaiicaExsiccataLabel($str)) return $this->doBryophytaHawaiicaExsiccataLabel($str);
 			else if($this->isPlantaeUruguayensesExsiccataeLabel($str)) return $this->doPlantaeUruguayensesExsiccataeLabel($str);
 			else if($this->isOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($str)) return $this->doOrthotrichaceaeBorealiAmericanaeExsiccataeLabel($str);
+			else if($this->isNorthAmericanMusciPerfectiLabel($str)) return $this->doNorthAmericanMusciPerfectiLabel($str);
+			else if($this->isNorthAmericanMusciPleurocarpiLabel($str)) return $this->doNorthAmericanMusciPleurocarpiLabel($str);
+			else if($this->isHandLenseMossesLabel($str)) return $this->doHandLenseMossesLabel($str);
+			else if($this->isMacounCanadianMossesLabel($str)) return $this->doMacounCanadianMossesLabel($str);
+			else if($this->isBrinkmanCanadianMossesLabel($str)) return $this->doBrinkmanCanadianMossesLabel($str);
 			else if($this->isReliquiaeFlowersianaeLabel($str)) return $this->doReliquiaeFlowersianaeLabel($str);
 			else return $this->doGenericLabel($str);
 		}
@@ -124,6 +129,131 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 			$s
 		));//echo "\nline 4941, s:\n".$s."\n";
 		return $this->doGenericLabel($s, "346", array('country' => 'Canada', 'stateProvince' => 'Newfoundland and Labrador'));
+	}
+
+	private function isNorthAmericanMusciPerfectiLabel($s) {
+		if(preg_match("/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?Perfect[1Il!|].*/is", $s)) return true;
+		if(preg_match("/.*P[ce]rf[ce]{2}t[1Il!|].*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/is", $s)) return true;
+		return false;
+	}
+
+	private function doNorthAmericanMusciPerfectiLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?Perfect[1Il!|].*/i",
+				"/.*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, "180");
+	}
+
+	private function isHandLenseMossesLabel($s) {
+		if(preg_match("/.*HAND.?LEN[S5] M[0O][S5]{2}E[S5].*/is", $s)) return true;
+		if(preg_match("/.*M[0O][S5]{2}E[S5].?[1Il!|][S5]{2}UED ?[BH][VY] ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/is", $s)) return true;
+		return false;
+	}
+
+	private function doHandLenseMossesLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*HAND.?LEN[S5] M[0O][S5]{2}E[S5].*/i",
+				"/.*[1Il!|][S5]{2}UED ?[BH][VY] ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/i",
+				"/A[,.]? J[,.]? G\\b[,.]?/",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"A. J. Grout",
+				"\n"
+			),
+			$s
+		));
+		return $this->doGenericLabel($s, "54");
+	}
+
+	private function isBrinkmanCanadianMossesLabel($s) {
+		if(preg_match("/.*Brinkman.*[CG]anad[1Il!|]an M[0O][S5]{2}e.*/is", $s)) return true;
+		return false;
+	}
+
+	private function doBrinkmanCanadianMossesLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*Brinkman.*[CG]anad[1Il!|]an M[0O][S5]{2}e.*/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"\n"
+			),
+			$s
+		));
+		return $this->doGenericLabel($s, "28", array('country' => "Canada", 'recordedBy' => "Alfred Brinkman"));
+	}
+
+	private function isMacounCanadianMossesLabel($s) {
+		if(preg_match("/.*[CG]anad[1Il!|]an M[0O][S5]{2}e[S5].*Mac[0O]un.*/is", $s)) return true;
+		if(preg_match("/.*Ma[ce][0O]un[:;] Can. M[0O][S5]{2}e[S5].*/is", $s)) return true;
+		return false;
+	}
+
+	private function doMacounCanadianMossesLabel($s) {
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*[CG]anad[1Il!|]an M[0O][S5]{2}e[S5].*/i",
+				"/.*Ma[ce][0O]un[:;] Can[,.*] M[0O][S5]{2}e[S5].*/i",
+				"/[CG][0O][1Il!|]{2}[ec]{2}t[ec]d b[yv] J[0O]hn Ma[ec][0O]un[,. ]{1,2} ?/i",
+				"/D[ec]t[ec]rmin[ec]d b[yv] Dr. ?N[.,] [CG][.,] Kind ?b[ec]rg.?/",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));
+		return $this->doGenericLabel($s, "351", array('country' => "Canada", 'recordedBy' => "John Macoun", 'identifiedBy' => "Dr. N. C. Kindberg"));
+	}
+
+	private function isNorthAmericanMusciPleurocarpiLabel($s) {
+		if(preg_match("/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*/is", $s)) return true;
+		if(preg_match("/.*P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/is", $s)) return true;
+		return false;
+	}
+
+	private function doNorthAmericanMusciPleurocarpiLabel($s) {
+		$ometid = "182";
+		if(preg_match("/P[1Il!|][ce]ur[0o][ce]arp[1Il!|] ?Supp[1Il!|]emen./i", $s, $mats)) $ometid = "183";
+		$s = trim(preg_replace
+		(
+			array(
+				"/.*N[0o]rth ?Amer[1Il!|]can ?Mus[ce][1Il!|] ?P[1Il!|][ce]ur[0o][ce]arp[1Il!|].*/i",
+				"/.*[1Il!|][S5]{2}UED ?BY ?A[,.] ?J[,.] GR[0O]UT[,.] ?PH[,.].*/i",
+				"/\\n{2,}/"
+			),
+			array(
+				"",
+				"",
+				"\n"
+			),
+			$s
+		));//echo "\nline 4941, s:\n".$s."\n";
+		return $this->doGenericLabel($s, $ometid);
 	}
 
 	private function isBryophytaNeotropicaExsiccataLabel($s) {
@@ -529,34 +659,34 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 		//$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
 		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
 		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:us|s)?", "p[l1|I!]ants?", "humus",
-			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix", "acer ",
-			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "boulders?", "Granit(?:e|ic)", "limestone", "sandstone", "stand", "chert",
+			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
+			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()boulders?(?!\))", "Granit(?:e|ic)", "limestone", "sandstone", "stand", "chert",
 			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
 			"aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate", "th[uv]ja", "shad(?:y|ed?)",
 			"(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
-			"f[l1|I!][0o]{2}dp[l1|I!]ain", "gneiss", "moss(?:es|y)?", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp", "branches",
+			"f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp", "branches", "acer",
 			"Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus", "ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?",
 			"w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya", "ravine", "Aesculus", "cypress(?:es)?", "Empetrum",
 			"Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?", "Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?",
 			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
 			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
 			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
-			"flood ?plain", "terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry");
+			"terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry", "mats?", "depression",
+			"Ombrotrophic", "rivulets?", "hummock[sy]?");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
 		//return $result/count(explode(" ", $pHab));
 	}
 
-	private function containsVerbatimAttribute($pAtt) {
+	protected function containsVerbatimAttribute($pAtt) {
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
 			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome",
 			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",
 			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
 			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?",
 			"antheridi(?:a|um)", "archegoni(?:a|um)", "androeci(?:a|um)", "gynoeci(?:a|um)", "Autoicous", "Paroicous", "Heteroicous",
-			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose");
-		//foreach($vaWords as $vaWord) if(stripos($word, $vaWord) !== FALSE) return true;
+			"cladautoicous", "Gametangi(?:a|um)", "paraphyses(?! ?branched\\/)", "pruinose", "short[- ]leaved");
 		foreach($vaWords as $vaWord) if(preg_match("/\\b".$vaWord."\\b/i", $pAtt)) return true;
 		return false;
 	}
