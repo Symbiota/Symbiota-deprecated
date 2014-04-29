@@ -102,7 +102,7 @@ class DwcArchiverOccurrence{
 		$occurTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
 		$occurFieldArr['scientificNameAuthorship'] = 'IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship';
 		$occurTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
-		$occurFieldArr['genus'] = 'CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus';
+		$occurFieldArr['genus'] = 'IF(t.rankid >= 180,CONCAT_WS(" ",t.unitind1,t.unitname1),NULL) AS genus';
 		$occurTermArr['specificEpithet'] = 'http://rs.tdwg.org/dwc/terms/specificEpithet';
 		$occurFieldArr['specificEpithet'] = 'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet';
 		$occurTermArr['taxonRank'] = 'http://rs.tdwg.org/dwc/terms/taxonRank';
