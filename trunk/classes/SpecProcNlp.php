@@ -1,5 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/OccurrenceUtilities.php');
 include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
 include_once($serverRoot.'/classes/SpecProcNlpParser.php');
 include_once($serverRoot.'/classes/SpecProcNlpParserLBCCCommon.php');
@@ -23,9 +24,6 @@ class SpecProcNlp {
 	private $outFH;
 	private $logFH;
 	private $outFilePath;
-
-	private $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
-		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -374,116 +372,6 @@ class SpecProcNlp {
 		return (isset($retArr[$bestMatch])?$retArr[$bestMatch]:null);
 	}
 
-	private function formatDate($inStr){
-		$retDate = '';
-		$dateStr = trim($inStr);
-		if(!$dateStr) return;
-		$t = '';
-		$y = '';
-		$m = '00';
-		$d = '00';
-		//Remove time portion if it exists
-		if(preg_match('/\d{2}:\d{2}:\d{2}/',$dateStr,$match)){
-			$t = $match[0];
-		}
-		if(preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\D*/',$dateStr,$match)){
-			//Format: yyyy-m-d or yyyy-mm-dd
-			$y = $match[1];
-			$m = $match[2];
-			$d = $match[3];
-		}
-		elseif(preg_match('/^(\d{1,2})[\s\/-]{1}(\D{3,})\.*[\s\/-]{1}(\d{2,4})/',$dateStr,$match)){
-			//Format: dd mmm yyyy, d mmm yy, dd-mmm-yyyy, dd-mmm-yy
-			$d = $match[1];
-			$mStr = $match[2];
-			$y = $match[3];
-			$mStr = strtolower(substr($mStr,0,3));
-			if(array_key_exists($mStr,$this->monthNames)){
-				$m = $this->monthNames[$mStr];
-			}
-		}
-		elseif(preg_match('/^(\d{1,2})-(\D{3,})-(\d{2,4})/',$dateStr,$match)){
-			//Format: dd-mmm-yyyy
-			$d = $match[1];
-			$mStr = $match[2];
-			$y = $match[3];
-			$mStr = strtolower(substr($mStr,0,3));
-			$m = $this->monthNames[$mStr];
-		}
-		elseif(preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/',$dateStr,$match)){
-			//Format: mm/dd/yyyy, m/d/yy
-			$m = $match[1];
-			$d = $match[2];
-			$y = $match[3];
-		}
-		elseif(preg_match('/^(\D{3,})\.*\s{1}(\d{1,2}),{0,1}\s{1}(\d{2,4})/',$dateStr,$match)){
-			//Format: mmm dd, yyyy
-			$mStr = $match[1];
-			$d = $match[2];
-			$y = $match[3];
-			$mStr = strtolower(substr($mStr,0,3));
-			$m = $this->monthNames[$mStr];
-		}
-		elseif(preg_match('/^(\d{1,2})-(\d{1,2})-(\d{2,4})/',$dateStr,$match)){
-			//Format: mm-dd-yyyy, mm-dd-yy
-			$m = $match[1];
-			$d = $match[2];
-			$y = $match[3];
-		}
-		elseif(preg_match('/^(\D{3,})\.*\s([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
-			//Format: mmm yyyy
-			$mStr = strtolower(substr($match[1],0,3));
-			if(array_key_exists($mStr,$this->monthNames)){
-				$m = $this->monthNames[$mStr];
-			}
-			else{
-				$m = '00';
-			}
-			$y = $match[2];
-		}
-		elseif(preg_match('/([1,2]{1}[0,5-9]{1}\d{2})/',$dateStr,$match)){
-			//Format: yyyy
-			$y = $match[1];
-		}
-		//Clean, configure, return
-		if($y){
-			if(strlen($m) == 1) $m = '0'.$m;
-			if(strlen($d) == 1) $d = '0'.$d;
-			//Check to see if month is valid
-			if($m > 12){
-				$m = '00';
-				$d = '00';
-			}
-			//check to see if day is valid for month
-			if($d > 31){
-				//Bad day for any month
-				$d = '00';
-			}
-			elseif($d == 30 && $m == 2){
-				//Bad feb date
-				$d = '00';
-			}
-			elseif($d == 31 && ($m == 4 || $m == 6 || $m == 9 || $m == 11)){
-				//Bad date, month w/o 31 days
-				$d = '00';
-			}
-			//Do some cleaning
-			if(strlen($y) == 2){
-				if($y < 20) $y = '20'.$y;
-				else $y = '19'.$y;
-			}
-			//Build
-			$retDate = $y.'-'.$m.'-'.$d;
-		}
-		elseif(($timestamp = strtotime($retDate)) !== false){
-			$retDate = date('Y-m-d', $timestamp);
-		}
-		if($t){
-			$retDate .= ' '.$t;
-		}
-		return $retDate;
-	}
-
 	//Setters, getters
 	public function setCollId($collId){
 		if(is_numeric($collId)){
@@ -682,8 +570,8 @@ class SpecProcNlp {
 		if(isset($dwcArr['month']) && !is_numeric($dwcArr['month'])){
 			//Month should be numeric, yet is a sting. Check to see if it is the month name or abbreviation
 			$mStr = strtolower(substr($dwcArr['month'],0,3));
-			if(array_key_exists($mStr,$this->monthNames)){
-				$dwcArr['month'] = $this->monthNames[$mStr];
+			if(array_key_exists($mStr,OccurrenceUtilities::$monthNames)){
+				$dwcArr['month'] = OccurrenceUtilities::$monthNames[$mStr];
 			}
 			else{
 				if(!isset($dwcArr['verbatimeventdate']) || !$dwcArr['verbatimeventdate']){
@@ -702,7 +590,7 @@ class SpecProcNlp {
 			$dwcArr['eventdate'] = $dwcArr['year'].'-'.$dwcArr['month'].'-'.$dwcArr['day'];
 		}
 		if(!isset($dwcArr['eventdate']) && isset($dwcArr['verbatimeventdate'])){
-			$dwcArr['eventdate'] = $this->formatDate($dwcArr['verbatimeventdate']);
+			$dwcArr['eventdate'] = OccurrenceUtilities::formatDate($dwcArr['verbatimeventdate']);
 		}
 
 		//Load data
@@ -729,7 +617,7 @@ class SpecProcNlp {
 					}
 					elseif(strpos($targetFields[$fieldTerm],'date') === 0){
 						//Target field is a date data type
-						$dateValue = $this->formatDate($valueStr);
+						$dateValue = OccurrenceUtilities::formatDate($valueStr);
 						if($dateValue){
 							$valueIn = '"'.$dateValue.'"';
 						}

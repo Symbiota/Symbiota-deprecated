@@ -9,7 +9,7 @@ class OccurrenceEditorManager {
 	protected $conn;
 	protected $occid;
 	private $collId;
-	private $collMap = array();
+	protected $collMap = array();
 	private $occurrenceMap = array();
 	private $occFieldArr = array();
 	private $sqlWhere;

@@ -418,16 +418,17 @@ class OccurrenceManager{
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 			$this->localSearchArr[] = implode(", ",$typestatusArr);
 		}
-		if(array_key_exists("dynsqlid",$this->searchTermsArr)){
-			$dynSqlId = $this->searchTermsArr["dynsqlid"];
+		if(array_key_exists("targetclid",$this->searchTermsArr)){
+			$clid = $this->searchTermsArr["targetclid"];
 			$clSql = ""; 
-			if($dynSqlId){
-				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$dynSqlId.')';
+			if($clid){
+				$sql = 'SELECT dynamicsql, name FROM fmchecklists WHERE (clid = '.$clid.')';
 				$result = $this->conn->query($sql);
 				if($row = $result->fetch_object()){
 					$clSql = $row->dynamicsql;
 					$this->clName = $row->name;
 				}
+				$result->free();
 				if($clSql){
 					$sqlWhere .= "AND (".$clSql.") ";
 					$this->localSearchArr[] = "SQL: ".$clSql;
@@ -1124,10 +1125,9 @@ class OccurrenceManager{
 			}
 			$searchFieldsActivated = true;
 		}
-		if(array_key_exists("dynsqlid",$_REQUEST)){
-			$dynSqlId = $this->conn->real_escape_string($_REQUEST["dynsqlid"]);
-			$searchArr[] = "dynsqlid:".$dynSqlId;
-			$this->searchTermsArr["dynsqlid"] = $dynSqlId;
+		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
+			$searchArr[] = "targetclid:".$_REQUEST["targetclid"];
+			$this->searchTermsArr["targetclid"] = $_REQUEST["targetclid"];
 			$searchFieldsActivated = true;
 		}
 		$latLongArr = Array();
