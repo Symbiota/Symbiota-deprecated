@@ -539,10 +539,9 @@ else{
 											echo '</li>';
 										}
 										if($isEditor == 1 || $isEditor == 2){
-											$imgVars = 'tid='.$occArr['tidinterpreted'].(isset($collMap['institutioncode'])?'&instcode='.urlencode($collMap['institutioncode']):'');
 											?>
 											<li id="imgTab">
-												<a href="includes/imagetab.php?<?php echo $anchorVars.'&'.$imgVars; ?>"
+												<a href="includes/imagetab.php?<?php echo $anchorVars.'&tid='.$occArr['tidinterpreted']; ?>"
 													style="margin:0px 20px 0px 20px;">Images</a>
 											</li>
 											<li id="genTab">

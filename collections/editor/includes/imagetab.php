@@ -7,7 +7,6 @@ header("Content-Type: text/html; charset=".$charset);
 $occId = $_GET['occid'];
 $occIndex = $_GET['occindex'];
 $tid = $_GET['tid'];
-$instCode = $_GET['instcode'];
 $crowdSourceMode = $_GET['csmode'];
 
 $occManager = new OccurrenceEditorImages();
@@ -120,7 +119,6 @@ $imageArr = $occManager->getImageMap();
 				<div style="margin:10px 0px 10px 20px;">
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 					<input type="hidden" name="tid" value="<?php echo $tid; ?>" />
-					<input type="hidden" name="institutioncode" value="<?php echo $instCode; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 					<input type="hidden" name="tabindex" value="2" />
