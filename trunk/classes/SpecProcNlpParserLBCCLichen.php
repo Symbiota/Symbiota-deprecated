@@ -186,6 +186,7 @@ class SpecProcNlpParserLBCCLichen extends SpecProcNlpParserLBCCCommon {
 		if(preg_match($exsiccatiPat, $s)) return true;
 		else if(preg_match("/.*(?:L[1Il!|]|U)[CE]H[CE]N[CE][S5]\\s[CE]X[S5][1Il!|][CE]{1,2}.?A.*/is", $s)) return true;
 		else if(preg_match("/L[1Il!|][CG]H ?EN ?E[S5] EXS[1Il!|][CG]{2}AT[1Il!|].*/is", $s)) return true;
+		else if(preg_match("/L[1Il!|][CG](?:H|II)ENE[S5] EX[S5][1Il!|][CG]{2}AT[1Il!|].*/is", $s)) return true;
 		else if(preg_match("/.*CHENE[S5] EXSI[CG]{2}AT[1Il!|].*/is", $s)) return true;
 		else return false;
 	}
