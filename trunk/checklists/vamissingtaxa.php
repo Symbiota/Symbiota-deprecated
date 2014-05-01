@@ -170,7 +170,7 @@ else{
 						?>
 						<div>
 							<a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&cl='.$clid; ?>','taxawindow');return false;"><?php echo $sn; ?></a>
-							<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid.'&dynsqlid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
+							<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
 								<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />
 							</a>
 						</div>

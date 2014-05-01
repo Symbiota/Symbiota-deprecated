@@ -259,7 +259,7 @@ $clArray = $vManager->getChecklistData();
 						if($occurrenceModIsActive){ 
 							?>
 							<div style="float:right;margin-top:10px;">
-								<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&dynsqlid=".$vManager->getClid()."&targettid=".$tid;?>">
+								<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&targetclid=".$vManager->getClid()."&targettid=".$tid;?>">
 									<img src="../images/link.png"  style="border:0px;" />
 								</a>
 							</div>

@@ -21,6 +21,7 @@ elseif(!($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,
 else{
 	$clManager = new ChecklistVoucherAdmin();
 	$clManager->setClid($clid);
+	//Method returns 1 on success and a string message upon failure
 	echo $clManager->linkVoucher($tid,$occid,1);
 }
 ?>

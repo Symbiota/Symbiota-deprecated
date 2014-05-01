@@ -58,7 +58,6 @@ elseif(array_key_exists('printlist_x',$_POST)){
 	$printMode = 1;
 }
 
-$dynSqlExists = false;
 $isEditor = false;
 if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
 	$isEditor = true;
@@ -83,9 +82,6 @@ $taxaArray = Array();
 if($clValue || $dynClid){
 	$clArray = $clManager->getClMetaData();
 	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
-}
-if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
-	$dynSqlExists = true;
 }
 ?>
 
@@ -261,7 +257,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 					?>
 					<!-- Option box -->
 					<div id="cloptiondiv">
-						<form name='optionform' action='checklist.php' method='post'>
+						<form name='optionform' action='checklist.php' method='post' target="_blank">
 							<fieldset>
 							    <legend><b>Options</b></legend>
 								<!-- Taxon Filter option -->
@@ -328,7 +324,7 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 										<input type="image" name="dllist" value="Download List" src="../images/dl.png" />
 									</div>
 									<div class="button" style='float:right;margin-right:10px;width:13px;height:13px;' title="Print Checklist">
-										<input type="image" name="printlist" value="Print List" src="../images/print.png" formtarget="_blank" />
+										<input type="image" name="printlist" value="Print List" src="../images/print.png" />
 									</div>
 								</div>
 							</fieldset>
@@ -536,10 +532,10 @@ if(array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
 									</a>
 								</span>
 								<?php 
-								if($showVouchers && $dynSqlExists){ 
+								if($showVouchers && array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){ 
 									?>
 									<span class="editspp" style="display:none;">
-										<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&dynsqlid=".$clid."&targettid=".$tid;?>','editorwindow');">
+										<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid;?>','editorwindow');">
 											<img src='../images/link.png' style='width:13px;' title='Link Voucher Specimens' />
 										</a>
 									</span>

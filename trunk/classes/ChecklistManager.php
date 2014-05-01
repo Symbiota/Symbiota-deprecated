@@ -143,24 +143,7 @@ class ChecklistManager {
 
 	//return an array: family => array(TID => sciName)
 	public function getTaxaList($pageNumber = 1,$retLimit = 500){
-		//Get list that shows which taxa have vouchers; note that dynclid list won't have vouchers
 		if(!$this->clid && !$this->dynClid) return;
-		if($this->showVouchers){
-			$clidStr = $this->clid;
-			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
-			}
-			$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
-				'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,"s.n.")) AS collector '.
-				'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
-				'INNER JOIN omcollections c ON o.collid = c.collid '.
-				'WHERE (v.clid IN ('.$clidStr.'))';
-	 		$vResult = $this->conn->query($vSql);
-			while ($row = $vResult->fetch_object()){
-				$this->voucherArr[$row->tid][$row->occid] = $row->collector.' ['.$row->institutioncode.']';
-			}
-			$vResult->close();
-		}
 		//Get species list
 		$familyPrev="";$genusPrev="";$speciesPrev="";$taxonPrev="";
 		$tidReturn = Array();
@@ -224,8 +207,28 @@ class ChecklistManager {
 			unset($this->filterArr);
 			return $this->getTaxaList(1,$retLimit);
 		}
-		if($this->showImages) $this->setImages($tidReturn);
-		if($this->showCommon) $this->setVernaculars($tidReturn);
+		//Get voucher data; note that dynclid list won't have vouchers
+		if($this->taxaList){
+			if($this->showVouchers){
+				$clidStr = $this->clid;
+				if($this->childClidArr){
+					$clidStr .= ','.implode(',',$this->childClidArr);
+				}
+				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
+					'CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,"s.n.")) AS collector '.
+					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+					'INNER JOIN omcollections c ON o.collid = c.collid '.
+					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
+				//echo $vSql; exit;
+		 		$vResult = $this->conn->query($vSql);
+				while ($row = $vResult->fetch_object()){
+					$this->voucherArr[$row->tid][$row->occid] = $row->collector.' ['.$row->institutioncode.']';
+				}
+				$vResult->close();
+			}
+			if($this->showImages) $this->setImages($tidReturn);
+			if($this->showCommon) $this->setVernaculars($tidReturn);
+		}
 		return $this->taxaList;
 	}
 
