@@ -59,26 +59,19 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			});
 		});
 
-		function addVoucherToCl(occid,clid,tid){
-			var vXmlHttp = GetXmlHttpObject();
-			if(vXmlHttp==null){
-		  		alert ("Your browser does not support AJAX!");
-		  		return;
-		  	}
-			var url = "rpc/addvoucher.php" + "?occid=" + occid + "&clid=" + clid + "&tid=" + tid;
-			vXmlHttp.onreadystatechange=function(){
-				if(vXmlHttp.readyState==4 && vXmlHttp.status==200){
-					var rStr = vXmlHttp.responseText;
-					if(rStr == "1"){
-						alert("Success! Voucher added to checklist.");
-					}
-					else{
-						alert(rStr);
-					}
+		function addVoucherToCl(occidIn,clidIn,tidIn){
+			$.ajax({
+				type: "POST",
+				url: "rpc/addvoucher.php",
+				data: { occid: occidIn, clid: clidIn, tid: tidIn }
+			}).done(function( msg ) {
+				if(msg == "1"){
+					alert("Success! Voucher added to checklist.");
 				}
-			};
-			vXmlHttp.open("POST",url,true);
-			vXmlHttp.send(null);
+				else{
+					alert(msg);
+				}
+			});
 		}
 		
 		function toggle(target){
@@ -105,24 +98,6 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 					}
 				}
 			}
-		}
-
-		function GetXmlHttpObject(){
-			var xmlHttp=null;
-			try{
-				// Firefox, Opera 8.0+, Safari, IE 7.x
-		  		xmlHttp=new XMLHttpRequest();
-		  	}
-			catch (e){
-		  		// Internet Explorer
-		  		try{
-		    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-		    	}
-		  		catch(e){
-		    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-		    	}
-		  	}
-			return xmlHttp;
 		}
 
 		function openIndPU(occId,clid){
@@ -294,9 +269,9 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 									</div>
 									<?php 
 								} 
-								if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){ 
+								if($collManager->getClName() && array_key_exists('targettid',$_REQUEST)){
 									?>
-									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("clid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
+									<div style="float:right;cursor:pointer;" onclick="addVoucherToCl(<?php echo $occId.",".$collManager->getSearchTerm("targetclid").",".$_REQUEST["targettid"];?>)" title="Add as <?php echo $collManager->getClName(); ?> Voucher">
 										<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" />
 									</div>
 									<?php 
@@ -340,7 +315,7 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 			            <tr>
 			            	<td colspan='3'>
 					            <b>
-					            	<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("clid")?$collManager->getSearchTerm("clid"):"0"); ?>);">
+					            	<a href="#" onclick="return openIndPU(<?php echo $occId.",".($collManager->getSearchTerm("targetclid")?$collManager->getSearchTerm("targetclid"):"0"); ?>);">
 				            			Full Record Details
 				            		</a>
 				            	</b>

@@ -474,7 +474,6 @@ class ChecklistVoucherAdmin {
 	}
     
 	public function linkVoucher($taxa,$occid){
-		$status = 0;
 		if(!is_numeric($taxa)){
 			$rs = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$this->conn->real_escape_string($taxa).'")');
 			if($r = $rs->fetch_object()){
@@ -489,7 +488,7 @@ class ChecklistVoucherAdmin {
 		else{
 			if($this->conn->errno == 1062){
 				//trigger_error('Specimen already a voucher for checklist ');
-				return 2;
+				return 'Specimen already a voucher for checklist';
 			}
 			else{
 				//trigger_error('Attempting to resolve by adding species to checklist; '.$this->conn->error,E_USER_WARNING);
@@ -501,13 +500,13 @@ class ChecklistVoucherAdmin {
 					else{
 						//echo 'Name added to list, though still unable to link voucher';
 						//trigger_error('Name added to checklist, though still unable to link voucher": '.$this->conn->error,E_USER_WARNING);
-						return 0;
+						return 'Name added to checklist, though unable to link voucher: '.$this->conn->error;
 					}
 				}
 				else{
 					//echo 'Unable to link voucher; unknown error';
 					//trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
-					return 0;
+					return 'Unable to link voucher: '.$this->conn->error;
 				}
 			}
 		}
