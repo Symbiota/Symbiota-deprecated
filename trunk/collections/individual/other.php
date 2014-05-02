@@ -49,7 +49,7 @@ if($symbUid){
 						if($tid){
 							?>
 							<div style='margin:10px;'>
-								<form action="../../checklists/clsppeditor.php" onsubmit="return verifyVoucherForm(this);">
+								<form action="../../checklists/clsppeditor.php" method="post" onsubmit="return verifyVoucherForm(this);">
 									<div>
 										Add as voucher to checklist: 
 										<input name='voccid' type='hidden' value='<?php echo $occid; ?>'>

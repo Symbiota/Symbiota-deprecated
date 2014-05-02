@@ -285,7 +285,7 @@ $clArray = $vManager->getChecklistData();
 									echo ($iArray['notes']?', '.$iArray['notes']:'').($iArray['editornotes']?', '.$iArray['editornotes']:'');
 									?>
 									<a href="#" onclick="toggle('vouch-<?php echo $occid;?>')"><img src="../images/edit.png" /></a> 
-									<form action="clsppeditor.php" method='post' name='delform' style="display:inline;;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">
+									<form action="clsppeditor.php" method='post' name='delform' style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">
 										<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 										<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
 										<input type='hidden' name='oiddel' id='oiddel' value="<?php echo $occid;?>" />
