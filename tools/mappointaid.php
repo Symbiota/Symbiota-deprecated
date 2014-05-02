@@ -12,6 +12,7 @@ $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:0;
 $zoom = array_key_exists("zoom",$_REQUEST)&&$_REQUEST["zoom"]?$_REQUEST["zoom"]:5;
 
 $clManager = new ChecklistAdmin();
+$footprintPoly = null;
 if($clid){
 	$clManager->setClid($clid);
 	$clArray = $clManager->getMetaData();
@@ -40,7 +41,6 @@ else{
 		<title><?php echo $defaultTitle; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
-		</script>
 	    <script type="text/javascript">
 		    var map;
 		    var currentMarker;
