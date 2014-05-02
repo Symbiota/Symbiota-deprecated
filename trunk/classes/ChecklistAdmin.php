@@ -22,7 +22,7 @@ class ChecklistAdmin {
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, ".
-				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
+				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp, c.footprintWKT ".
 				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 	 		$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
@@ -41,6 +41,7 @@ class ChecklistAdmin {
 				$retArr["access"] = $row->access;
 				$retArr["dynamicsql"] = $row->dynamicsql;
 				$retArr["datelastmodified"] = $row->datelastmodified;
+				$retArr["footprintWKT"] = $row->footprintWKT;
 			}
 			$result->free();
 		}
@@ -225,6 +226,39 @@ class ChecklistAdmin {
 			$insertStatus = 'ERROR: unable to add species ('.$this->conn->error;
 		}
 		return $insertStatus;
+	}
+	
+	public function createFootprint($polyCoords){
+		$footPolygon = '';
+		$properties = '';
+		$properties = 'strokeWeight: 0,';
+		$properties .= 'fillOpacity: 0.45,';
+		$properties .= 'editable: true,';
+		$properties .= 'draggable: true,';
+		$properties .= 'map: map});';
+		$coordArr = json_decode($polyCoords, true);
+		if($coordArr){
+			$footPolygon = 'var footPoly = new google.maps.Polygon({';
+			$footPolygon .= 'paths: [';
+			foreach($coordArr as $k => $v){
+				$footPolygon .= 'new google.maps.LatLng('.$v['k'].', '.$v['A'].'),';
+			}
+			$footPolygon .= 'new google.maps.LatLng('.$coordArr[0]['k'].', '.$coordArr[0]['A'].')],';
+			$footPolygon .= $properties;
+			$footPolygon .= "footPoly.type = 'polygon';";
+			$footPolygon .= "google.maps.event.addListener(footPoly, 'click', function() {";
+			$footPolygon .= 'setSelection(footPoly);});';
+			$footPolygon .= "google.maps.event.addListener(footPoly, 'dragend', function() {";
+			$footPolygon .= 'setSelection(footPoly);});';
+			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'insert_at', function() {";
+			$footPolygon .= 'setSelection(footPoly);});';
+			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'remove_at', function() {";
+			$footPolygon .= 'setSelection(footPoly);});';
+			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'set_at', function() {";
+			$footPolygon .= 'setSelection(footPoly);});';
+			$footPolygon .= 'setSelection(footPoly);';
+		}
+		return $footPolygon;
 	}
 	
 	//Point functions
