@@ -258,6 +258,10 @@ $voucherProjects = $clManager->getVoucherProjects();
 							<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
 								<img src="../images/world40.gif" style="width:12px;" />
 							</div>
+							<div id="polybox" style="display:none;clear:both;">
+								<b>Polygon coordinates ready to save.</b>
+								<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value="<?php echo $clArray["footprintWKT"]; ?>" />
+							</div>
 							<div style="clear:both;">
 								Access:<br/>
 								<select name="eclaccess">

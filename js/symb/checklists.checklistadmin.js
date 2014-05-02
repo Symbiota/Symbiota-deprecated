@@ -13,7 +13,7 @@ $(document).ready(function() {
 });
 
 function openMappingAid() {
-	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=ecllatcentroid&longname=ecllongcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
+	mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&clid="+clid+"&latname=ecllatcentroid&longname=ecllongcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
     if(mapWindow.opener == null) mapWindow.opener = self;
 }
 
