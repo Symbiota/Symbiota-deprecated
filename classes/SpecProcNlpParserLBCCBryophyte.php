@@ -715,21 +715,22 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 	protected function countPotentialHabitatWords($pHab) {//echo "\ninput to countPotentialHabitatWords: ".$pHab."\n";
 		//$pHab = preg_quote(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab), '/');
 		$pHab = trim(preg_replace(array("/[\r\n]/m", "/\\s{2,}/m"), " ", $pHab));
-		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "abundant", "aspens?", "marsh", "juniper(?:u?s)?", "p[l1|I!]ant", "humus",
+		$hWords = array("rocks?", "quercus", "(?:hard)?woods?", "aspens?", "juniper(?:u?s)?", "p[l1|I!]ant(?! (?:sciences?|biology|exploration))",
 			"understory", "grass(?:[l1|I!]and|es)?", "meadows?", "(?<!(?:National) )forest(?:ed)?", "ground", "mixed", "(?<!Jessie\\s)sa[l1|I!]ix",
 			"a[l1|I!]ders?", "tundra","abies", "calcareous", "outcrops?", "(?<!\()boulders?(?!\))", "Granit(?:e|ic)", "limestone", "sandstone",
-			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous", "expos(?:ure|ed)",
-			"aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate", "th[uv]ja", "shad(?:y|ed?)",
-			"(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?", "Liriodendron", "Juglans", "A[l1|I!]nus",
-			"f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin", "bog", "swamp", "branches", "acer",
-			"Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus", "ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?",
-			"w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya", "ravine", "Aesculus", "cypress(?:es)?", "Empetrum",
-			"Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?", "Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?",
-			"myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture", "stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter",
-			"scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine", "grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged",
-			"graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry", "regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?",
-			"terraces?", "thicket", "moraines?", "heath(?:er)?", "metamorphic", "vegetation", "quarry", "mats?", "depression",
-			"Ombrotrophic", "rivulets?", "hummock[sy]?", "stand", "chert");
+			"sand[ys]?", "cedars?", "trees?", "shrubs?", "(?:(?:sub)?al)?pine", "soi[l1|I!]s?", "(?:white)?bark", "open", "deciduous",
+			"expos(?:ure|ed)", "aspect", "facing", "pinus", "habitat", "degrees?", "conifer(?:(?:ou)?s)?", "spruces?", "maples?", "substrate",
+			"th[uv]ja", "shad(?:y|ed?)", "(?:[a-z]{2,})?berry", "box elders?", "dry", "damp", "moist", "wet", "firs?", "basalt(?:ic)?",
+			"Liriodendron", "Juglans", "A[l1|I!]nus", "f[l1|I!][0o]{2}d ?p[l1|I!]ain", "gneiss", "crust", "(?:sage|brush|sagebrush)", "pocosin",
+			"bog", "swamp", "branches", "acer", "imbedded", "Picea", "savanna", "Magno[l1|I!]ia", "Rhododendron", "[l1|I!]{2}ex", "Carpinus",
+			"ta[l1|I!]us", "Nyssa", "bottom(?:[l1|I!]ands?)?", "w[l1|I!]{3}[0o]ws?", "riperian", "Fraxinus", "Betu[l1|I!]a", "Persea", "Carya",
+			"ravine", "Aesculus", "cypress(?:es)?", "Empetrum", "Taxodium", "sparse(?:ly)?", "chaparra[l1|I!]", "temperate", "hemlocks?",
+			"Myrica", "[l1|I!]odgepo[l1|I!]e", "Cornus", "trunks?", "myrt[l1|I!]es?", "Gordonia", "Liquidamber", "cottonwoods?", "pasture",
+			"stump", "palmetto", "(?:mica)?schist(?:ose)?", "[l1|I!]itter", "scrub", "spp", "rotten", "logs?", "quartz(?:ite)?", "travertine",
+			"grave[l1|I!](?:[l1|I!]y)?", "duff", "seepage", "submerged", "graminoids", "forbs", "mound", "ferns?", "mahogany", "cherry",
+			"regenerating", "introduced", "(?:Pseudo)?tsuga", "timber(?:line)?", "terraces?", "thicket", "moraines?", "heath(?:er)?",
+			"metamorphic", "vegetation", "quarry", "mats?", "depression", "pebbles?", "Ombrotrophic", "rivulets?", "hummock[sy]?", "stand",
+			"chert", "humus", "marsh", "abundant(?:[l1|I!]y)?", "ecotone", "fen", "pools?");
 		$result = 0;
 		foreach($hWords as $hWord) if(preg_match("/\\b".$hWord."\\b/i", $pHab)) {/*echo "\nhabitat matched: ".$hWord."\n";*/$result++;}
 		return $result/(count(explode(" ", $pHab))*count($hWords));
@@ -739,7 +740,7 @@ class SpecProcNlpParserLBCCBryophyte extends SpecProcNlpParserLBCCCommon {
 	protected function containsVerbatimAttribute($pAtt) {
 		$vaWords = array("atranorin", "fatty acids?", "cortex", "areolate", "medullae?", "podeti(?:a|um)(?! ?\\/)",
 			"(?:(?:a|hy)po|epi)theci(?:a|um)(?! ?(?:\\/|color))", "thall(?:us|i)", "strain", "peristome", "lea(?:ves|f)(?! ?litter)", "cells?",
-			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s)?", "crust(?:ose)?", "corticolous", "saxicolous",
+			"squamul(?:es?|ose)", "soredi(?:a(?:te)?|um)", "fruticose", "fruit(?:icose|s|ing)?", "crust(?:ose)?", "corticolous", "saxicolous",
 			"terricolous", "Synoicous", "chemotype", "terpene", "isidi(?:a(?:te)?|um)", "TLC", "monoicous", "dioicous", "sporangi(?:a|um)",
 			"parietin", "anthraquinone", "pigment(?:s|ed)?", "ostiole", "epiphyt(?:e|ic)", "sorali(?:a|um)", "spor(?:ophyt)?es?", "ovate",
 			"antheridi(?:a|um)", "archegoni(?:a|um)", "androeci(?:a|um)", "gynoeci(?:a|um)", "Autoicous", "Paroicous", "Heteroicous",
