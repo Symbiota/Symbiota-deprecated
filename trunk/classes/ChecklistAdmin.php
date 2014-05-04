@@ -228,39 +228,6 @@ class ChecklistAdmin {
 		return $insertStatus;
 	}
 	
-	public function createFootprint($polyCoords){
-		$footPolygon = '';
-		$properties = '';
-		$properties = 'strokeWeight: 0,';
-		$properties .= 'fillOpacity: 0.45,';
-		$properties .= 'editable: true,';
-		$properties .= 'draggable: true,';
-		$properties .= 'map: map});';
-		$coordArr = json_decode($polyCoords, true);
-		if($coordArr){
-			$footPolygon = 'var footPoly = new google.maps.Polygon({';
-			$footPolygon .= 'paths: [';
-			foreach($coordArr as $k => $v){
-				$footPolygon .= 'new google.maps.LatLng('.$v['k'].', '.$v['A'].'),';
-			}
-			$footPolygon .= 'new google.maps.LatLng('.$coordArr[0]['k'].', '.$coordArr[0]['A'].')],';
-			$footPolygon .= $properties;
-			$footPolygon .= "footPoly.type = 'polygon';";
-			$footPolygon .= "google.maps.event.addListener(footPoly, 'click', function() {";
-			$footPolygon .= 'setSelection(footPoly);});';
-			$footPolygon .= "google.maps.event.addListener(footPoly, 'dragend', function() {";
-			$footPolygon .= 'setSelection(footPoly);});';
-			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'insert_at', function() {";
-			$footPolygon .= 'setSelection(footPoly);});';
-			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'remove_at', function() {";
-			$footPolygon .= 'setSelection(footPoly);});';
-			$footPolygon .= "google.maps.event.addListener(footPoly.getPath(), 'set_at', function() {";
-			$footPolygon .= 'setSelection(footPoly);});';
-			$footPolygon .= 'setSelection(footPoly);';
-		}
-		return $footPolygon;
-	}
-	
 	//Point functions
 	public function addPoint($tid,$lat,$lng,$notes){
 		$statusStr = '';

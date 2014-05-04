@@ -244,23 +244,49 @@ $voucherProjects = $clManager->getVoucherProjects();
 								<input type="text" name="eclnotes" style="width:95%" value="<?php echo $clArray["notes"]; ?>" />
 							</div>
 							<div style="float:left;">
-								Latitude Centroid<br/>
-								<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
+								<div style="float:left;">
+									Latitude Centroid<br/>
+									<input id="latdec" type="text" name="ecllatcentroid" style="width:110px;" value="<?php echo $clArray["latcentroid"]; ?>" />
+								</div>
+								<div style="float:left;margin-left:5px;">
+									Longitude Centroid<br/>
+									<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
+								</div>
+								<div style="float:left;margin-left:5px;">
+									Point Radius (meters)<br/>
+									<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
+								</div>
+								<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
+									<img src="../images/world40.gif" style="width:12px;" />
+								</div>
 							</div>
-							<div style="float:left;margin-left:5px;">
-								Longitude Centroid<br/>
-								<input id="lngdec" type="text" name="ecllongcentroid" style="width:110px;" value="<?php echo $clArray["longcentroid"]; ?>" />
-							</div>
-							<div style="float:left;margin-left:5px;">
-								Point Radius (meters)<br/>
-								<input type="text" name="eclpointradiusmeters" style="width:110px;" value="<?php echo $clArray["pointradiusmeters"]; ?>" />
-							</div>
-							<div style="float:left;margin:25px 0px 0px 10px;cursor:pointer;" onclick="openMappingAid();">
-								<img src="../images/world40.gif" style="width:12px;" />
-							</div>
-							<div id="polybox" style="display:none;clear:both;">
-								<b>Polygon coordinates ready to save.</b>
-								<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value="<?php echo $clArray["footprintWKT"]; ?>" />
+							<div style="float:right;margin-top:8px;margin-right:25px;">
+								<fieldset style="width:175px;">
+									<legend><b>Polygon Footprint</b></legend>
+									<?php
+									if($clArray&&$clArray["footprintWKT"]){
+										?>
+										<div id="polyexistsbox" style="display:block;clear:both;">
+											<b>Footprint polygon saved.</b>
+										</div>
+										<?php
+									}
+									else{
+										?>
+										<div id="polycreatebox" style="display:block;clear:both;">
+											<b>Create footprint polygon.</b>
+										</div>
+										<?php
+									}
+									?>
+									<div id="polysavebox" style="display:none;clear:both;">
+										<b>Polygon coordinates ready to save.</b>
+										<input type="hidden" id="footprintWKT" name="eclfootprintWKT" value='<?php echo $clArray["footprintWKT"]; ?>' />
+									</div>
+									<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
+										<img src="../images/world40.gif" style="width:12px;" />
+									</div>
+								</fieldset>
 							</div>
 							<div style="clear:both;">
 								Access:<br/>
