@@ -41,14 +41,17 @@ else{
 				var lngCenter = <?php echo $lng; ?>;
 				var footPolyArr = [];
 				var footPolyPaths = [];
+				var polyBounds = new google.maps.LatLngBounds();
 				if(opener.document.getElementById("footprintWKT").value != ''){
 					footPolyArr = JSON.parse(opener.document.getElementById("footprintWKT").value);
 				}
 				if(footPolyArr.length > 0){
 					for (i in footPolyArr) {
 						footPolyPaths.push(new google.maps.LatLng(footPolyArr[i].k, footPolyArr[i].A));
+						polyBounds.extend(new google.maps.LatLng(footPolyArr[i].k, footPolyArr[i].A));
 					}
 					footPolyPaths.push(new google.maps.LatLng(footPolyArr[0].k, footPolyArr[0].A));
+					polyBounds.extend(new google.maps.LatLng(footPolyArr[0].k, footPolyArr[0].A));
 				}
 				var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
 		    	var dmOptions = {
@@ -145,6 +148,8 @@ else{
 						setSelection(footPoly);
 					});
 					setSelection(footPoly);
+					map.fitBounds(polyBounds);
+					map.panToBounds(polyBounds);
 				}
 				
 			}
