@@ -450,7 +450,7 @@ class OccurrenceUtilities {
 		if($collid && is_numeric($collid)){
 			$sql .= 'AND o.collid = '.$collid;
 		}
-		$sql .= ' AND o.tidinterpreted = 4058 ';
+		//$sql .= ' AND o.tidinterpreted = 4058 ';
 		//$sql .= ' LIMIT 100';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
