@@ -1,10 +1,21 @@
 <?php
-include_once('GPoint.php');
+include_once($serverRoot.'/config/dbconnection.php');
+include_once($serverRoot.'/classes/GPoint.php');
 
 class OccurrenceUtilities {
 
+	private $conn;
+	
 	static $monthNames = array('jan'=>'01','ene'=>'01','feb'=>'02','mar'=>'03','abr'=>'04','apr'=>'04',
 		'may'=>'05','jun'=>'06','jul'=>'07','ago'=>'08','aug'=>'08','sep'=>'09','oct'=>'10','nov'=>'11','dec'=>'12','dic'=>'12');
+
+ 	public function __construct(){
+ 		$this->conn = MySQLiConnectionFactory::getCon("write");
+ 	}
+ 	
+ 	public function __destruct(){
+		if(!($this->conn === null)) $this->conn->close();
+ 	}
 	
 	/*
 	 * INPUT: String representing a verbatim date 
@@ -430,6 +441,80 @@ class OccurrenceUtilities {
 			}
 		}
 		return $retArr;
+	}
+	
+	public function buildAssociatedTaxaIndex($collid = 0){
+		$sql = 'SELECT o.occid, o.associatedtaxa '.
+			'FROM omoccurrences o LEFT JOIN omoccurassoctaxa a ON o.occid = a.occid '.
+			'WHERE o.associatedtaxa IS NOT NULL AND a.occid IS NULL ';
+		if($collid && is_numeric($collid)){
+			$sql .= 'AND o.collid = '.$collid;
+		}
+		$sql .= ' AND o.tidinterpreted = 4058 ';
+		//$sql .= ' LIMIT 100';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$assocArr = $this->parseAssocSpecies($r->associatedtaxa,$r->occid);
+		}
+		$rs->free();
+		//Populate tid field using taxa table
+		$sql2 = 'UPDATE omoccurassoctaxa a INNER JOIN taxa t ON a.verbatimstr = t.sciname '.
+			'SET a.tid = t.tid '.
+			'WHERE a.tid IS NULL';
+		if(!$this->conn->query($sql2)){
+			echo 'Unable to populate tid field using taxa table<br/>';
+			echo $sql2;
+		}
+		//Populate tid field using taxavernaculars table
+		$sql3 = 'UPDATE omoccurassoctaxa a INNER JOIN taxavernaculars v ON a.verbatimstr = v.vernacularname '.
+			'SET a.tid = v.tid '.
+			'WHERE a.tid IS NULL ';
+		if(!$this->conn->query($sql3)){
+			echo 'Unable to populate tid field using taxavernaculars table<br/>';
+			echo $sql3;
+		}
+		//Populate tid field by linking back to omoccurassoctaxa table
+		//This assumes that tids are correct; in future verificationscore field can be used to select only those that have been verified
+		$sql4 = 'UPDATE omoccurassoctaxa a INNER JOIN omoccurassoctaxa a2 ON a.verbatimstr = a2.verbatimstr '.
+			'SET a.tid = a2.tid '.
+			'WHERE a.tid IS NULL AND a2.tid IS NOT NULL ';
+		if(!$this->conn->query($sql4)){
+			echo 'Unable to populate tid field relinking back to omoccurassoctaxa table<br/>';
+			echo $sql4;
+		}
+		echo '<b>DONE!</b>';
+	}
+	
+	public function parseAssocSpecies($assocSpeciesStr,$occid){
+		$parseArr = array();
+		if($assocSpeciesStr){
+			//Separate associated species
+			$assocSpeciesStr = str_replace(array('&','and',';'),',',$assocSpeciesStr);
+			$assocArr = explode(',',$assocSpeciesStr);
+			//Add to return array
+			foreach($assocArr as $v){
+				$vStr = trim($v,'. ');
+				if(substr($vStr,-3) == ' sp') $vStr = substr($vStr,0,strlen($vStr)-3);
+				$vStr = preg_replace('/\s\s+/', ' ',$vStr);
+				if($vStr){
+					$parseArr[] = $vStr;
+				}
+			}
+			//Database verbatim values
+			$this->databaseAssocSpecies($parseArr,$occid);
+		}
+	}
+
+	private function databaseAssocSpecies($assocArr, $occid){
+		$sql = 'INSERT INTO omoccurassoctaxa(occid, verbatimstr) VALUES';
+		foreach($assocArr as $aStr){
+			$sql .= '('.$occid.',"'.$this->conn->real_escape_string($aStr).'"), ';
+		}
+		$sql = trim($sql,', ');
+		//echo $sql; exit;
+		if(!$this->conn->query($sql)){
+			echo 'ERROR: unable to data assocaited values<br/> SQL: '.$sql.'<br/>';
+		}
 	}
 }
 ?>
