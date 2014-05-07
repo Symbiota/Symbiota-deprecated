@@ -338,14 +338,19 @@ if($isEditor && $formSubmit){
 			<ul>
 				<?php  
 				$titleArr = $exsManager->getTitleArr($searchTerm, $specimenOnly, $imagesOnly, $collId);
-				foreach($titleArr as $k => $titleStr){
-					?>
-					<li>
-						<a href="index.php?ometid=<?php echo $k.'&specimenonly='.$specimenOnly.'&imagesonly='.$imagesOnly.'&collid='.$collId; ?>">
-							<?php echo $titleStr; ?>
-						</a>
-					</li>
-					<?php
+				if($titleArr){
+					foreach($titleArr as $k => $titleStr){
+						?>
+						<li>
+							<a href="index.php?ometid=<?php echo $k.'&specimenonly='.$specimenOnly.'&imagesonly='.$imagesOnly.'&collid='.$collId; ?>">
+								<?php echo $titleStr; ?>
+							</a>
+						</li>
+						<?php
+					}
+				}
+				else{
+					echo '<div style="margin:20px;font-size:120%;">There are no exsiccati matching your request</div>';
 				}
 				?>
 			</ul>

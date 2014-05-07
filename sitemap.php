@@ -395,6 +395,23 @@ $smManager = new SiteMapManager();
 						?>
 					</ul>
 
+					<?php 
+					if(isset($activateExsiccati) && $activateExsiccati){
+						?>
+						<h3>Exsiccati</h3>
+						<div style="margin:10px;">
+							The Exsiccati module is activated for this portal. 
+							The exsiccati index (listed below) can be browsed or searched by everyone. 
+							However, to add or modify exsiccati titles or series, 
+							the user must be an administrator for at least one collection. 
+						</div>
+						<ul>
+							<li><a href="collections/exsiccati/index.php">Exsiccati Index</a></li>
+						</ul>
+						<?php 
+					}
+					?>
+
 					<h3>Collections</h3>
 					<div style="margin:10px;">
 						Tools for managing data specific to a particular collection are available through the collection's profile page. 
