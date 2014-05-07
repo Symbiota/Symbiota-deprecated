@@ -33,6 +33,11 @@ function openMappingAid() {
     if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
+function openMappingPolyAid() {
+	mapWindow=open("../tools/mappolyaid.php?formname=checklistaddform&latname=ncllatcentroid&longname=ncllongcentroid","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+    if(mapWindow.opener == null) mapWindow.opener = self;
+}
+
 function checkEditForm(f){
     var errorText = "";
     if(f.firstname.value.replace(/\s/g, "") == "" ){

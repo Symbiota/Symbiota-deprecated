@@ -236,22 +236,39 @@ if(isset($profile_viewprofileCrumbs)){
 									<b>Notes</b><br/>
 									<input name="nclnotes" type="text" maxlength="500" size="60" />
 								</div>
-								<div style="float:left;margin:3px;">
-									<b>Latitude Centroid</b><br/>
-									<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" style="width:110px;"/>
+								<div style="float:left;">
+									<div style="float:left;margin:3px;">
+										<b>Latitude Centroid</b><br/>
+										<input id="latdec" name="ncllatcentroid" type="text" maxlength="15" style="width:110px;"/>
+									</div>
+									<div style="float:left;margin:3px;">
+										<b>Longitude Centroid</b><br/>
+										<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" style="width:110px;" />
+									</div>
+									<div style="float:left;margin:3px;">
+										<b>Point Radius (meters)</b><br/>
+										<input name="nclpointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
+									</div>
+									<div style="float:left;margin:20px 0px 0px 3px;">
+										<span style="cursor:pointer;" onclick="openMappingAid();">
+											<img src="../images/world40.gif" style="width:12px;" />
+										</span>
+									</div>
 								</div>
-								<div style="float:left;margin:3px;">
-									<b>Longitude Centroid</b><br/>
-									<input id="lngdec" name="ncllongcentroid" type="text" maxlength="15" style="width:110px;" />
-								</div>
-								<div style="float:left;margin:3px;">
-									<b>Point Radius (meters)</b><br/>
-									<input name="nclpointradiusmeters" type="text" maxlength="15" style="width:110px;"/>
-								</div>
-								<div style="float:left;margin:20px 0px 0px 3px;">
-									<span style="cursor:pointer;" onclick="openMappingAid();">
-										<img src="../images/world40.gif" style="width:12px;" />
-									</span>
+								<div style="float:left;margin-top:8px;margin-bottom:8px;">
+									<fieldset style="width:175px;">
+										<legend><b>Polygon Footprint</b></legend>
+										<div id="polycreatebox" style="display:block;clear:both;">
+											<b>Create footprint polygon.</b>
+										</div>
+										<div id="polysavebox" style="display:none;clear:both;">
+											<b>Polygon coordinates ready to save.</b>
+											<input type="hidden" id="footprintWKT" name="nclfootprintWKT" value='' />
+										</div>
+										<div style="float:right;margin:8px 0px 0px 10px;cursor:pointer;" onclick="openMappingPolyAid();">
+											<img src="../images/world40.gif" style="width:12px;" />
+										</div>
+									</fieldset>
 								</div>
 								<div style="clear:both;margin:3px;">
 									<b>Parent Checklist:</b><br/> 
