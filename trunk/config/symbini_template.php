@@ -43,13 +43,15 @@ $mappingBoundaries = '';			//Project bounding box; default map centering; (e.g. 
 $googleAnalyticsKey = '';			//Needed for setting up Google Analytics 
 $dynChecklistRadius = 10;			//Controls size of concentric rings that are sampled when building Dynamic Checklist
 $displayCommonNames = 1;
+$activateExsiccati = 0;
 
 $rightsTerms = array(
 	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
 	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/3.0/',
 	'CC BY-SA (Attribution-ShareAlike)' => 'http://creativecommons.org/licenses/by-sa/3.0/',
 	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/3.0/',
-	'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/'
+
+'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)' => 'http://creativecommons.org/licenses/by-nc-sa/3.0/'
 );
 
 //set terms for reproductiveCondition drop-down menu
