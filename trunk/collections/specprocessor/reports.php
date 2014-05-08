@@ -61,7 +61,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 										$eUrlInner2 = $eUrlInner.'&q_processingstatus='.$ps;
 										$beUrlInner2 = $beUrlInner.'&q_processingstatus='.$ps.'&buoldvalue='.$ps;
 										echo '<span style="margin-left:10px;"><a href="'.$eUrlInner2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
-										echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+										echo '<span style="margin-left:10px;"><a href="'.$beUrlInner2.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
 									}
 									echo '</td>';
 									echo '</tr>';
@@ -70,12 +70,12 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 							}
 							foreach($psArr as $pStatus => $cnt){
 								if($pStatus){
-									$eUrlInner2 = $eUrlInner.'&q_processingstatus='.$pStatus;
-									$beUrlInner2 = $beUrlInner.'&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
+									$eUrlInner3 = $eUrlInner.'&q_processingstatus='.$pStatus;
+									$beUrlInner3 = $beUrlInner.'&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
 								}
 								else{
-									$eUrlInner2 = $eUrlInner.'&q_processingstatus=isnull';
-									$beUrlInner2 = $beUrlInner.'&q_processingstatus=isnull';
+									$eUrlInner3 = $eUrlInner.'&q_processingstatus=isnull';
+									$beUrlInner3 = $beUrlInner.'&q_processingstatus=isnull';
 									$pStatus = 'Not Set';
 								}
 								echo '<tr>';
@@ -84,8 +84,8 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 								echo '<td>';
 								echo $cnt;
 								if($cnt){
-									echo '<span style="margin-left:10px;"><a href="'.$eUrlInner2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
-									echo '<span style="margin-left:10px;"><a href="'.$beUrlInner2.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+									echo '<span style="margin-left:10px;"><a href="'.$eUrlInner3.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+									echo '<span style="margin-left:10px;"><a href="'.$beUrlInner3.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
 								}
 								echo '</td>';
 								echo '</tr>';
