@@ -39,13 +39,14 @@ class TaxonProfileManager {
 	private $con; 
 
  	public function __construct(){
-		global $defaultLang;
+		global $defaultLang,$googleMapKey;
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
  		//Default settings
  		$this->taxAuthId = 1;			//0 = do not resolve taxonomy (no thesaurus); 1 = default taxonomy; > 1 = other taxonomies
 		//$this->projName = "Arizona";
 		$this->language = $defaultLang;
 		$this->googleUrl = 'http://maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain&sensor=false';
+		if($googleMapKey) $this->googleUrl .= '&key='.$googleMapKey;
  	}
 
  	public function __destruct(){
