@@ -48,8 +48,8 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 					if($userStats = $procManager->getUserStats()){
 						$orderArr = array('unprocessed','stage 1','stage 2','stage 3','pending duplicate','pending review','expert required','reviewed','closed','empty status');
 						foreach($userStats as $username => $psArr){
-							$eUrl .= '&q_enteredby='.$username.str_replace(array('&q_enteredby='),'',$urlBase); 
-							$beUrl .= '&q_enteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_enteredby='),'',$urlBase);
+							$eUrlInner = $eUrl.'&q_enteredby='.$username.str_replace(array('&q_enteredby='),'',$urlBase); 
+							$beUrlInner = $beUrl.'&q_enteredby='.$username.'&bufieldname=processingstatus'.str_replace(array('&q_enteredby='),'',$urlBase);
 							foreach($orderArr as $ps){
 								if(array_key_exists($ps,$psArr)){
 									echo '<tr>';
@@ -58,9 +58,9 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 									echo '<td>';
 									echo $psArr[$ps];
 									if($psArr[$ps]){
-										$eUrl .= '&q_processingstatus='.$ps;
-										$beUrl .= '&q_processingstatus='.$ps.'&buoldvalue='.$ps;
-										echo '<span style="margin-left:10px;"><a href="'.$eUrl.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+										$eUrlInner2 = $eUrlInner.'&q_processingstatus='.$ps;
+										$beUrlInner2 = $beUrlInner.'&q_processingstatus='.$ps.'&buoldvalue='.$ps;
+										echo '<span style="margin-left:10px;"><a href="'.$eUrlInner2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
 										echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
 									}
 									echo '</td>';
@@ -70,12 +70,12 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 							}
 							foreach($psArr as $pStatus => $cnt){
 								if($pStatus){
-									$eUrl .= '&q_processingstatus='.$pStatus;
-									$beUrl .= '&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
+									$eUrlInner2 = $eUrlInner.'&q_processingstatus='.$pStatus;
+									$beUrlInner2 = $beUrlInner.'&q_processingstatus='.$pStatus.'&buoldvalue='.$pStatus;
 								}
 								else{
-									$eUrl .= '&q_processingstatus=isnull';
-									$beUrl .= '&q_processingstatus=isnull';
+									$eUrlInner2 = $eUrlInner.'&q_processingstatus=isnull';
+									$beUrlInner2 = $beUrlInner.'&q_processingstatus=isnull';
 									$pStatus = 'Not Set';
 								}
 								echo '<tr>';
@@ -84,8 +84,8 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$
 								echo '<td>';
 								echo $cnt;
 								if($cnt){
-									echo '<span style="margin-left:10px;"><a href="'.$eUrl.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
-									echo '<span style="margin-left:10px;"><a href="'.$beUrl.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
+									echo '<span style="margin-left:10px;"><a href="'.$eUrlInner2.'" target="_blank" title="Edit Records"><img src="../../images/edit.png" style="width:12px;" /></a></span>';
+									echo '<span style="margin-left:10px;"><a href="'.$beUrlInner2.'" target="_blank" title="Batch Edit Records"><span style="font-size:70%;">batch</span><img src="../../images/list.png" style="width:12px;" /></a></span>';
 								}
 								echo '</td>';
 								echo '</tr>';
