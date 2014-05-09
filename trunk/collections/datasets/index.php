@@ -22,7 +22,7 @@ if($symbUid){
 	}
 	if($isEditor){
 		if($action == "Filter Specimen Records"){
-			$occArr = $datasetManager->queryOccurrences();
+			$occArr = $datasetManager->queryOccurrences($_POST);
 		}
 	}
 }
@@ -280,7 +280,7 @@ if($symbUid){
 									<b>Include barcode of Symbiota Identifier</b> 
 								</div>
 								<fieldset style="float:left;margin:10px;width:150px;">
-									<legend><b>Label Columns Per Page</b></legend>
+									<legend><b>Label Rows Per Page</b></legend>
 									<input type="radio" name="rpp" value="1" /> 1<br/>
 									<input type="radio" name="rpp" value="2" checked /> 2<br/>
 									<input type="radio" name="rpp" value="3" /> 3<br/>

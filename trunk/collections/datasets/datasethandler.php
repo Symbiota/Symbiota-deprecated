@@ -9,13 +9,13 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 
 $datasetManager = new SpecDatasetManager();
 $datasetManager->setCollId($collId);
- 
-    if($action == "Print Labels"){
-		$hPrefix = $_POST['lhprefix'];
-		$hMid = $_POST['lhmid'];
-		$hSuffix = $_POST['lhsuffix'];
-		$lFooter = $_POST['lfooter'];
-		$occIdArr = $_POST['occid[]'];
-		header('Location: defaultlabels.php?collid='.$collId.'&lhprefix='.$hPrefix.'&lhmid='.$hMid.'&lhsuffix='.$hSuffix.'&lfooter='.$hFooter.'&occid[]='.$occIdArr);
-    }
+
+if($action == "Print Labels"){
+	$hPrefix = $_POST['lhprefix'];
+	$hMid = $_POST['lhmid'];
+	$hSuffix = $_POST['lhsuffix'];
+	$lFooter = $_POST['lfooter'];
+	$occIdArr = $_POST['occid[]'];
+	header('Location: defaultlabels.php?collid='.$collId.'&lhprefix='.$hPrefix.'&lhmid='.$hMid.'&lhsuffix='.$hSuffix.'&lfooter='.$hFooter.'&occid[]='.$occIdArr);
+}
 ?>

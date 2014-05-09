@@ -22,18 +22,16 @@ $labelManager = new SpecDatasetManager();
 $labelManager->setCollId($collId);
 
 $isEditor = 0;
-$occArr = array();
 if($symbUid){
 	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
 if($action == 'Export to CSV'){
-	$labelManager->exportCsvFile();
+	$labelManager->exportCsvFile($_POST);
 }
 else{
 	?>
-
 	<!DOCTYPE HTML>
 	<html <?php echo ($exportDoc?'xmlns:w="urn:schemas-microsoft-com:office:word"':'') ?>>
 		<head>
@@ -41,8 +39,8 @@ else{
 			if($exportDoc){
 				header('Content-Type: application/msword');
 				header('Content-disposition: attachment; filename='.$paramsArr['un'].'_'.date('Ymd').'_labels.doc');
-			?>
-				<meta charset="<?php echo $charset; ?>">
+				?>
+				<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
 				<xml>
 					<w:WordDocument>
 					<w:View>Print</w:View>
@@ -54,9 +52,6 @@ else{
 			?>
 			<title><?php echo $defaultTitle; ?> Default Labels</title>
 			<style type="text/css">
-				<?php 
-				include_once($serverRoot.'/css/main.css');
-				?>
 				body {font-family:arial,sans-serif;<?php echo ($floatingWidth?'':'width:560pt;') ?>}
 				table {page-break-before:auto;page-break-inside:avoid;}
 				td {font-size:10pt;}
@@ -65,7 +60,6 @@ else{
 				p.printbreak {page-break-after:always;}
 				.lheader {width:100%; text-align:center; font:bold 14pt arial,sans-serif; margin-bottom:10px;}
 				.family {width:100%;text-align:right;}
-				.sciname {font-weight:bold;}
 				.scientificnamediv {font-size:11pt;}
 				.identifiedbydiv {margin-left:15px;}
 				.identificationreferences {margin-left:15px;}
@@ -84,14 +78,18 @@ else{
 				.symbbarcode {width:100%; text-align:center;margin-top:10px}
 				<?php 
 				if($exportDoc) {
-				echo ('@page WordSection1
-					{size:8.5in 11.0in;
-					margin:.25in .25in .25in .25in;
-					mso-header-margin:0;
-					mso-footer-margin:0;
-					mso-paper-source:0;}
-				div.WordSection1
-					{page:WordSection1;}');
+					?>
+					@page WordSection1{
+						size:8.5in 11.0in;
+						margin:.25in .25in .25in .25in;
+						mso-header-margin:0;
+						mso-footer-margin:0;
+						mso-paper-source:0;
+					}
+					div.WordSection1{ 
+						page:WordSection1; 
+					}
+					<?php 
 				}
 				?>
 			</style>
@@ -101,15 +99,15 @@ else{
 				<?php 
 				if($isEditor){
 					if($action){
-						$rs = $labelManager->getLabelRecordSet();
+						$labelArr = $labelManager->getLabelArray($_POST['occid']);
 						$labelCnt = 0;
-						while($r = $rs->fetch_object()){
+						foreach($labelArr as $occid => $occArr){
 							if($barcodeOnly){
-								if($r->catalognumber){
+								if($occArr['catalognumber']){
 									?>
 									<div class="barcodeonly">
-										<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->catalognumber; ?>" /><br/>
-										<?php echo strtoupper($r->catalognumber); ?>
+										<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" /><br/>
+										<?php echo strtoupper($occArr['catalognumber']); ?>
 									</div>
 									<?php 
 								}
@@ -117,20 +115,20 @@ else{
 							else{
 								$midStr = '';
 								if($hMid == 1){
-									$midStr = $r->country;
+									$midStr = $occArr['country'];
 								}
 								elseif($hMid == 2){
-									$midStr = $r->stateprovince;
+									$midStr = $occArr['stateprovince'];
 								}
 								elseif($hMid == 3){
-									$midStr = $r->county;
+									$midStr = $occArr['county'];
 								}
 								elseif($hMid == 4){
-									$midStr = $r->family;
+									$midStr = $occArr['family'];
 								}
-								$headerStr = $hPrefix.$midStr.$hSuffix;
+								$headerStr = $hPrefix.' '.$midStr.' '.$hSuffix;
 								
-								$dupCnt = $_POST['q-'.$r->occid];
+								$dupCnt = $_POST['q-'.$occid];
 								for($i = 0;$i < $dupCnt;$i++){
 									$labelCnt++;
 									if($labelCnt%2) echo '<table><tr>'."\n";
@@ -139,56 +137,57 @@ else{
 										<div class="lheader">
 											<?php echo $headerStr; ?>
 										</div>
-										<?php if($hMid != 4) echo '<div class="family">'.$r->family.'</div>'; ?>
+										<?php if($hMid != 4) echo '<div class="family">'.$occArr['family'].'</div>'; ?>
 										<div class="scientificnamediv">
 											<?php 
-											if($r->identificationqualifier) echo '<span class="identificationqualifier">'.$r->identificationqualifier.'</span> ';
-											$scinameStr = $r->sciname;
-											$scinameStr = str_replace(' subsp. ','</i> subsp. <i>',$scinameStr);
-											$scinameStr = str_replace(' ssp. ','</i> ssp. <i>',$scinameStr);
-											$scinameStr = str_replace(' var. ','</i> var. <i>',$scinameStr);
+											if($occArr['identificationqualifier']) echo '<span class="identificationqualifier">'.$occArr['identificationqualifier'].'</span> ';
+											$scinameStr = $occArr['scientificname'];
+											$parentAuthor = (array_key_exists('parentauthor',$occArr)?' '.$occArr['parentauthor']:'');
+											$scinameStr = str_replace(' subsp. ','</i></b>'.$parentAuthor.' <b>subsp. <i>',$scinameStr);
+											$scinameStr = str_replace(' ssp. ','</i></b>'.$parentAuthor.' <b>ssp. <i>',$scinameStr);
+											$scinameStr = str_replace(' var. ','</i></b>'.$parentAuthor.' <b>var. <i>',$scinameStr);
 											?>
 											<span class="sciname">
-												<i><?php echo $scinameStr; ?></i>
-											</span>&nbsp;&nbsp;
-											<span class="scientificnameauthorship"><?php echo $r->scientificnameauthorship; ?></span>
+												<b><i><?php echo $scinameStr; ?></i></b>
+											</span>
+											<span class="scientificnameauthorship"><?php echo $occArr['scientificnameauthorship']; ?></span>
 										</div>
 										<?php 
-										if($r->identifiedby){
+										if($occArr['identifiedby']){
 											?>
 											<div class="identifiedbydiv">
 												Det by: 
-												<span class="identifiedby"><?php echo $r->identifiedby; ?></span> 
-												<span class="dateidentified"><?php echo $r->dateidentified; ?></span>
+												<span class="identifiedby"><?php echo $occArr['identifiedby']; ?></span> 
+												<span class="dateidentified"><?php echo $occArr['dateidentified']; ?></span>
 											</div>
 											<?php
-											if($r->identificationreferences || $r->identificationremarks){
+											if($occArr['identificationreferences'] || $occArr['identificationremarks']){
 												?>
 												<div class="identificationreferences">
-													<?php echo $r->identificationreferences; ?>
+													<?php echo $occArr['identificationreferences']; ?>
 												</div>
 												<div class="identificationremarks">
-													<?php echo $r->identificationremarks; ?>
+													<?php echo $occArr['identificationremarks']; ?>
 												</div>
 												<?php 
 											}
 										} 
 										?>
 										<div class="loc1div" style="margin-top:10px;">
-											<span class="country"><?php echo $r->country.($r->country?', ':''); ?></span> 
-											<span class="stateprovince"><?php echo $r->stateprovince.($r->stateprovince?', ':''); ?></span>
+											<span class="country"><?php echo $occArr['country'].($occArr['country']?', ':''); ?></span> 
+											<span class="stateprovince"><?php echo $occArr['stateprovince'].($occArr['stateprovince']?', ':''); ?></span>
 											<?php 
-											$countyStr = trim($r->county);
+											$countyStr = trim($occArr['county']);
 											if($countyStr){
-												if(!stripos($r->county,' County') && !stripos($r->county,' Parish')) $countyStr .= ' County';
+												if(!stripos($occArr['county'],' County') && !stripos($occArr['county'],' Parish')) $countyStr .= ' County';
 												$countyStr .= ', ';
 											}
 											?> 
 											<span class="county"><?php echo $countyStr; ?></span> 
-											<span class="municipality"><?php echo $r->municipality.($r->municipality?', ':''); ?></span>
+											<span class="municipality"><?php echo $occArr['municipality'].($occArr['municipality']?', ':''); ?></span>
 											<span class="locality">
 												<?php
-												$locStr = trim($r->locality);
+												$locStr = trim($occArr['locality']);
 												if(substr($locStr,-1) != '.'){
 													$locStr .= '.';
 												}
@@ -197,44 +196,44 @@ else{
 											</span>
 										</div>
 										<?php
-										if($r->decimallatitude || $r->verbatimcoordinates){ 
+										if($occArr['decimallatitude'] || $occArr['verbatimcoordinates']){ 
 											?>
 											<div class="loc2div">
 												<?php 
-												if($r->verbatimcoordinates){ 
+												if($occArr['verbatimcoordinates']){ 
 													?>
 													<span class="verbatimcoordinates">
-														<?php echo $r->verbatimcoordinates; ?>
+														<?php echo $occArr['verbatimcoordinates']; ?>
 													</span>
 													<?php
 												}
 												else{
-													echo '<span class="decimallatitude">'.$r->decimallatitude.'</span>'.($r->decimallatitude>0?'N':'S');
-													echo '<span class="decimallongitude" style="margin-left:10px;">'.$r->decimallongitude.'</span>'.($r->decimallongitude>0?'E':'W').' ';
+													echo '<span class="decimallatitude">'.$occArr['decimallatitude'].'</span>'.($occArr['decimallatitude']>0?'N':'S');
+													echo '<span class="decimallongitude" style="margin-left:10px;">'.$occArr['decimallongitude'].'</span>'.($occArr['decimallongitude']>0?'E':'W').' ';
 												}
-												if($r->coordinateuncertaintyinmeters) echo '<span style="margin-left:10px;">+-'.$r->coordinateuncertaintyinmeters.' meters</span>';
-												if($r->geodeticdatum) echo '<span style="margin-left:10px;">['.$r->geodeticdatum.']</span>'; 
+												if($occArr['coordinateuncertaintyinmeters']) echo '<span style="margin-left:10px;">+-'.$occArr['coordinateuncertaintyinmeters'].' meters</span>';
+												if($occArr['geodeticdatum']) echo '<span style="margin-left:10px;">['.$occArr['geodeticdatum'].']</span>'; 
 												?>
 											</div>
 											<?php
 										}
-										if($r->minimumelevationinmeters){ 
+										if($occArr['minimumelevationinmeters']){ 
 											?>
 											<div class="elevdiv">
 												Elev: 
 												<?php 
-												echo '<span class="minimumelevationinmeters">'.$r->minimumelevationinmeters.'</span>'.
-												($r->maximumelevationinmeters?' - <span class="maximumelevationinmeters">'.$r->maximumelevationinmeters.'<span>':''),'m. ';
-												if($r->verbatimelevation) echo ' ('.$r->verbatimelevation.')'; 
+												echo '<span class="minimumelevationinmeters">'.$occArr['minimumelevationinmeters'].'</span>'.
+												($occArr['maximumelevationinmeters']?' - <span class="maximumelevationinmeters">'.$occArr['maximumelevationinmeters'].'<span>':''),'m. ';
+												if($occArr['verbatimelevation']) echo ' ('.$occArr['verbatimelevation'].')'; 
 												?>
 											</div>
 											<?php
 										}
-										if($r->habitat){
+										if($occArr['habitat']){
 											?>
 											<div class="habitat">
 												<?php
-												$habStr = trim($r->habitat);
+												$habStr = trim($occArr['habitat']);
 												if(substr($habStr,-1) != '.'){
 													$habStr .= '.';
 												} 
@@ -243,11 +242,11 @@ else{
 											</div>
 											<?php 
 										}
-										if($r->substrate){
+										if($occArr['substrate']){
 											?>
 											<div class="substrate">
 												<?php
-												$substrateStr = trim($r->substrate);
+												$substrateStr = trim($occArr['substrate']);
 												if(substr($substrateStr,-1) != '.'){
 													$substrateStr .= '.';
 												} 
@@ -256,61 +255,61 @@ else{
 											</div>
 											<?php 
 										}
-										if($r->verbatimattributes || $r->establishmentmeans){
+										if($occArr['verbatimattributes'] || $occArr['establishmentmeans']){
 											?>
 											<div>
-												<span class="verbatimattributes"><?php echo $r->verbatimattributes; ?></span>
-												<?php echo ($r->verbatimattributes && $r->establishmentmeans?'; ':''); ?>
+												<span class="verbatimattributes"><?php echo $occArr['verbatimattributes']; ?></span>
+												<?php echo ($occArr['verbatimattributes'] && $occArr['establishmentmeans']?'; ':''); ?>
 												<span class="establishmentmeans">
-													<?php echo $r->establishmentmeans; ?>
+													<?php echo $occArr['establishmentmeans']; ?>
 												</span>
 											</div>
 											<?php 
 										}
-										if($r->associatedtaxa){
+										if($occArr['associatedtaxa']){
 											?>
 											<div>
 												Associated species: 
-												<span class="associatedtaxa"><?php echo $r->associatedtaxa; ?></span>
+												<span class="associatedtaxa"><?php echo $occArr['associatedtaxa']; ?></span>
 											</div>
 											<?php 
 										}
-										if($r->occurrenceremarks){
+										if($occArr['occurrenceremarks']){
 											?>
-											<div class="occurrenceremarks"><?php echo $r->occurrenceremarks; ?></div>
+											<div class="occurrenceremarks"><?php echo $occArr['occurrenceremarks']; ?></div>
 											<?php 
 										}
 										?>
 										<div class="collectordiv">
 											<div class="collectordiv1" style="float:left;">
-												<span class="recordedby"><?php echo $r->recordedby; ?></span> 
-												<span class="recordnumber"><?php echo $r->recordnumber; ?></span> 
+												<span class="recordedby"><?php echo $occArr['recordedby']; ?></span> 
+												<span class="recordnumber"><?php echo $occArr['recordnumber']; ?></span> 
 											</div>
 											<div class="collectordiv2" style="float:right;">
-												<span class="eventdate"><?php echo $r->eventdate; ?></span>
+												<span class="eventdate"><?php echo $occArr['eventdate']; ?></span>
 											</div>
 											<?php 
-											if($r->associatedcollectors){
+											if($occArr['associatedcollectors']){
 												?>
 												<div class="associatedcollectors" style="clear:both;margin-left:10px;">
-													With: <?php echo $r->associatedcollectors; ?>
+													With: <?php echo $occArr['associatedcollectors']; ?>
 												</div>
 												<?php 
 											}
 											?>
 										</div>
 										<?php 
-										if($r->othercatalognumbers){
+										if($occArr['othercatalognumbers']){
 											?>
 											<div class="othercatalognumbers" style="clear:both;">
-												<?php echo $r->othercatalognumbers; ?>
+												<?php echo $occArr['othercatalognumbers']; ?>
 											</div>
 											<?php 
 										}
-										if($i == 0 && $useBarcode && $r->catalognumber){
+										if($i == 0 && $useBarcode && $occArr['catalognumber']){
 											?>
 											<div class="cnbarcode" style="clear:both;padding-top:15px;">
-												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->catalognumber; ?>" /><br/>
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occArr['catalognumber']; ?>" /><br/>
 											</div>
 											<?php 
 										}
@@ -321,7 +320,7 @@ else{
 											?>
 											<hr style="border:dashed;" />
 											<div class="symbbarcode" style="padding:10px;">
-												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $r->occid; ?>" /><br/>
+												<img src="getBarcode.php?bcheight=40&bctext=<?php echo $occid; ?>" /><br/>
 											</div>
 											<?php 
 										}
@@ -345,7 +344,6 @@ else{
 						if($labelCnt%2){
 							echo '<td class="righttd"></td></tr></table>'; //If label count is odd, close final labelrowdiv
 						} 
-						$rs->close();
 					}
 				}
 				?>
