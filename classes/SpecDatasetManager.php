@@ -12,10 +12,10 @@ class SpecDatasetManager {
 	private $isAdmin = 0;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+ 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 		$this->occSql = 'SELECT o.occid, o.collid, o.catalognumber, o.othercatalognumbers, '.
-			'o.family, o.sciname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
-			'o.scientificnameauthorship, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
+			'o.family, o.sciname AS scientificname, o.genus, o.specificepithet, o.taxonrank, o.infraspecificepithet, '.
+			'o.scientificnameauthorship, "" AS parentauthor, o.taxonremarks, o.identifiedby, o.dateidentified, o.identificationreferences, '.
 			'o.identificationremarks, o.identificationqualifier, o.typestatus, o.recordedby, o.recordnumber, o.associatedcollectors, '.
 			'DATE_FORMAT(o.eventdate,"%e %M %Y") AS eventdate, o.year, o.month, o.day, DATE_FORMAT(o.eventdate,"%M") AS monthname, '.
 			'o.verbatimeventdate, o.habitat, o.substrate, o.occurrenceremarks, o.associatedtaxa, o.verbatimattributes, '.
@@ -31,30 +31,30 @@ class SpecDatasetManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function queryOccurrences(){
+	public function queryOccurrences($postArr){
 		$retArr = array();
 		if($this->collId){
 			$sqlWhere = '';
 			$sqlOrderBy = '';
-			if($_POST['labelproject']){
-				$sqlWhere .= 'AND (labelproject = "'.trim($_POST['labelproject']).'") ';
+			if($postArr['labelproject']){
+				$sqlWhere .= 'AND (labelproject = "'.trim($postArr['labelproject']).'") ';
 			}
-			if($_POST['recordenteredby']){
-				$sqlWhere .= 'AND (recordenteredby LIKE "'.trim($_POST['recordenteredby']).'%") ';
+			if($postArr['recordenteredby']){
+				$sqlWhere .= 'AND (recordenteredby LIKE "'.trim($postArr['recordenteredby']).'%") ';
 			}
-			if($_POST['datelastmodified']){
-				if($p = strpos($_POST['datelastmodified'],' - ')){
-					$sqlWhere .= 'AND (DATE(datelastmodified) BETWEEN "'.trim(substr($_POST['datelastmodified'],0,$p)).'" AND "'.trim(substr($_POST['datelastmodified'],$p+3)).'") ';
+			if($postArr['datelastmodified']){
+				if($p = strpos($postArr['datelastmodified'],' - ')){
+					$sqlWhere .= 'AND (DATE(datelastmodified) BETWEEN "'.trim(substr($postArr['datelastmodified'],0,$p)).'" AND "'.trim(substr($postArr['datelastmodified'],$p+3)).'") ';
 				}
 				else{
-					$sqlWhere .= 'AND (DATE(datelastmodified) = "'.trim($_POST['datelastmodified']).'") ';
+					$sqlWhere .= 'AND (DATE(datelastmodified) = "'.trim($postArr['datelastmodified']).'") ';
 				}
 				
 				$sqlOrderBy .= ',datelastmodified';
 			}
 			$rnIsNum = false;
-			if($_POST['recordnumber']){
-				$rnArr = explode(',',$_POST['recordnumber']);
+			if($postArr['recordnumber']){
+				$rnArr = explode(',',$postArr['recordnumber']);
 				$rnBetweenFrag = array();
 				$rnInFrag = array();
 				foreach($rnArr as $v){
@@ -85,12 +85,12 @@ class SpecDatasetManager {
 				}
 				$sqlWhere .= 'AND ('.substr($rnWhere,3).') ';
 			}
-			if($_POST['recordedby']){
-				$sqlWhere .= 'AND (recordedby LIKE "%'.trim($_POST['recordedby']).'%") ';
+			if($postArr['recordedby']){
+				$sqlWhere .= 'AND (recordedby LIKE "%'.trim($postArr['recordedby']).'%") ';
 				$sqlOrderBy .= ',(recordnumber'.($rnIsNum?'+1':'').')';
 			}
-			if($_POST['identifier']){
-				$iArr = explode(',',$_POST['identifier']);
+			if($postArr['identifier']){
+				$iArr = explode(',',$postArr['identifier']);
 				$iBetweenFrag = array();
 				$iInFrag = array();
 				foreach($iArr as $v){
@@ -125,7 +125,7 @@ class SpecDatasetManager {
 			if($sqlWhere){
 				$sql = 'SELECT occid, IFNULL(duplicatequantity,1) AS q, CONCAT(recordedby," (",IFNULL(recordnumber,"s.n."),")") AS collector, '.
 					'family, sciname, CONCAT_WS("; ",country, stateProvince, county, locality) AS locality '.
-					'FROM omoccurrences '.($_POST['recordedby']?'use index(Index_collector) ':'').
+					'FROM omoccurrences '.($postArr['recordedby']?'use index(Index_collector) ':'').
 					'WHERE collid = '.$this->collId.' '.$sqlWhere;
 				if($sqlOrderBy) $sql .= 'ORDER BY '.substr($sqlOrderBy,1);
 				$sql .= ' LIMIT 500';
@@ -145,70 +145,80 @@ class SpecDatasetManager {
 		return $retArr;
 	}
 
-	public function getLabelRecordSet(){
-		$rs;
-		if($occidArr = $_POST['occid']){
-			$sql = $this->getLabelSql();
+	public function getLabelArray($occidArr){
+		$retArr = array();
+		if($occidArr){
+			$authorArr = array();
+			$sqlWhere = 'WHERE (occid IN('.implode(',',$occidArr).'))';
+			//Get species authors for infraspecific taxa
+			$sql1 = 'SELECT o.occid, t2.author '.
+				'FROM taxa t INNER JOIN omoccurrences o ON t.tid = o.tidinterpreted '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN taxa t2 ON ts.parenttid = t2.tid '.
+				$sqlWhere.' AND t.rankid > 220 AND ts.taxauthid = 1 ';
+			if($rs1 = $this->conn->query($sql1)){
+				while($row1 = $rs1->fetch_object()){
+					$authorArr[$row1->occid] = $row1->author;
+				}
+				$rs1->free();
+			}
+				
+			//Get occurrence records
+			$sql2 = $this->occSql.' '.$sqlWhere;
 			//echo 'SQL: '.$sql;
-			$rs = $this->conn->query($sql);
+			if($rs2 = $this->conn->query($sql2)){
+				while($row2 = $rs2->fetch_assoc()){
+					$row2 = array_change_key_case($row2);
+					if(array_key_exists($row2['occid'],$authorArr)){
+						$row2['parentauthor'] = $authorArr[$row2['occid']];
+					}
+					$retArr[$row2['occid']] = $row2;
+				}
+				$rs2->free();
+			}
 		}
-		return $rs;
+		return $retArr;
 	}
 	
-	public function exportCsvFile(){
-		$sql = $this->getLabelSql();
-		//echo 'SQL: '.$sql;
-		if($sql){
+	public function exportCsvFile($postArr){
+		$occidArr = $postArr['occid'];
+		if($occidArr){
 	    	$fileName = 'labeloutput_'.time().".csv";
 			header ('Content-Type: text/csv');
-			header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+			header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
 			
-			$rs = $this->conn->query($sql);
-			if($rs){
-				echo "\"occid\",\"catalogNumber\",\"family\",\"scientificName\",\"genus\",\"specificEpithet\",".
-				"\"taxonRank\",\"infraspecificEpithet\",\"scientificNameAuthorship\",\"taxonRemarks\",\"identifiedBy\",".
-				"\"dateIdentified\",\"identificationReferences\",\"identificationRemarks\",\"identificationQualifier\",".
-	 			"\"recordedBy\",\"recordNumber\",\"associatedCollectors\",\"eventDate\",\"year\",\"month\",\"monthName\",\"day\",".
-		 		"\"verbatimEventDate\",\"habitat\",\"substrate\",\"verbatimAttributes\",\"occurrenceRemarks\",".
-	 			"\"associatedTaxa\",\"reproductiveCondition\",\"establishmentMeans\",\"country\",".
-	 			"\"stateProvince\",\"county\",\"municipality\",\"locality\",\"decimalLatitude\",\"decimalLongitude\",".
-		 		"\"geodeticDatum\",\"coordinateUncertaintyInMeters\",\"verbatimCoordinates\",".
-	 			"\"minimumElevationInMeters\",\"maximumElevationInMeters\",\"verbatimElevation\",\"disposition\"\n";
-				
-				while($row = $rs->fetch_assoc()){
-					$dupCnt = $_POST['q-'.$row['occid']];
+			$labelArr = $this->getLabelArray($occidArr);
+			if($labelArr){
+				$headerArr = array("occid","catalogNumber","family","scientificName","genus","specificEpithet",
+					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","taxonRemarks","identifiedBy",
+					"dateIdentified","identificationReferences","identificationRemarks","identificationQualifier",
+		 			"recordedBy","recordNumber","associatedCollectors","eventDate","year","month","monthName","day",
+			 		"verbatimEventDate","habitat","substrate","verbatimAttributes","occurrenceRemarks",
+		 			"associatedTaxa","reproductiveCondition","establishmentMeans","country",
+		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+			 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
+		 			"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
+				echo '"'.implode('","',$headerArr).'"'."\n";
+
+				$headerLcArr = array();
+				foreach($headerArr as $k => $v){
+					$headerLcArr[$k] = strtolower($v);
+				}
+				foreach($labelArr as $occid => $occArr){
+					$dupCnt = $postArr['q-'.$occid];
 					for($i = 0;$i < $dupCnt;$i++){
-						echo $row['occid'].",\"".$row["catalognumber"]."\",\"".
-							$row["family"]."\","."\"".$row["sciname"]."\",\"".$row["genus"]."\",\"".$row["specificepithet"]."\",\"".
-							$row["taxonrank"]."\",\"".$row["infraspecificepithet"]."\",\"".$row["scientificnameauthorship"]."\",\"".
-							$row["taxonremarks"]."\",\"".$row["identifiedby"]."\",\"".$row["dateidentified"]."\",\"".$row["identificationreferences"]."\",\"".
-							$row["identificationremarks"]."\",\"".$row["identificationqualifier"]."\",\"".$row["recordedby"]."\",\"".$row["recordnumber"]."\",\"".
-							$row["associatedcollectors"]."\",\"".$row["eventdate"]."\",".$row["year"].",".$row["month"].",".$row["monthname"].",".$row["day"].",\"".
-							$row["verbatimeventdate"]."\",\"".$row["habitat"]."\",\"".$row["substrate"]."\",\"".
-							$row["verbatimattributes"]."\",\"".
-							$row["occurrenceremarks"]."\",\"".$row["associatedtaxa"]."\",\"".$row["reproductivecondition"]."\",\"".
-							$row["establishmentmeans"]."\",\"".$row["country"]."\",\"".$row["stateprovince"]."\",\"".
-							$row["county"]."\",\"".$row["municipality"]."\",\"".$row["locality"]."\",".$row["decimallatitude"].",".
-							$row["decimallongitude"].",\"".$row["geodeticdatum"]."\",".$row["coordinateuncertaintyinmeters"].",\"".
-							$row["verbatimcoordinates"]."\",".$row["minimumelevationinmeters"].",".$row["maximumelevationinmeters"].",\"".
-							$row["verbatimelevation"]."\",\"".$row["disposition"]."\"\n";
+						foreach($headerLcArr as $k => $colName){
+							if($k) echo ',';
+							echo '"'.str_replace('"','""',$occArr[$colName]).'"';
+						}
+						echo "\n";
 					}
 				}
 			}
 			else{
 				echo "Recordset is empty.\n";
 			}
-	        if($rs) $rs->close();
 		}
-	}
-	
-	private function getLabelSql(){
-		$sql = '';
-		if($occidArr = $_POST['occid']){
-			$sql = $this->occSql.' WHERE occid IN('.implode(',',$occidArr).')';
-			//echo 'SQL: '.$sql;
-		}
-		return $sql;
 	}
 
 	public function getLabelProjects(){

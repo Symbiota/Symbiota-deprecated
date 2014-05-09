@@ -973,21 +973,40 @@ class TaxaLoaderManager{
 	}
 	
 	protected function encodeString($inStr){
- 		global $charset;
- 		$retStr = trim($inStr);
-		$retStr = str_replace("\"","'",$retStr);
- 		if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-				$retStr = utf8_encode($retStr);
-				//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+		global $charset;
+		$retStr = $inStr;
+		//Get rid of curly (smart) quotes
+		$search = array("’", "‘", "`", "”", "“"); 
+		$replace = array("'", "'", "'", '"', '"'); 
+		$inStr= str_replace($search, $replace, $inStr);
+		//Get rid of UTF-8 curly smart quotes and dashes 
+		$badwordchars=array("\xe2\x80\x98", // left single quote
+							"\xe2\x80\x99", // right single quote
+							"\xe2\x80\x9c", // left double quote
+							"\xe2\x80\x9d", // right double quote
+							"\xe2\x80\x94", // em dash
+							"\xe2\x80\xa6" // elipses
+		);
+		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
+		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
+		
+		if($inStr){
+			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+				echo $inStr.': '.mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true);
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+				echo ' => '.$retStr.'<br/>';
 			}
-		}
-		elseif(strtolower($charset) == "iso-8859-1"){
-			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				$retStr = utf8_decode($retStr);
-				//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+			elseif(strtolower($charset) == "iso-8859-1"){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
 			}
-		}
+			
+ 		}
 		return $retStr;
 	}
 }
