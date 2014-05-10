@@ -28,8 +28,7 @@ if($symbUid){
 }
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
@@ -262,6 +261,10 @@ if($symbUid){
 								<div style="margin:4px;">
 									<b>Label Footer:</b> 
 									<input type="text" name="lfooter" value="" style="width:450px" />
+								</div>
+								<div style="margin:4px;">
+									<input type="checkbox" name="speciesauthors" value="1" />
+									<b>Print species authors for infraspecific taxa</b> 
 								</div>
 								<div style="margin:4px;">
 									<input type="checkbox" name="fw" value="1" />
