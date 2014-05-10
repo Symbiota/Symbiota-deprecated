@@ -145,7 +145,7 @@ class SpecDatasetManager {
 		return $retArr;
 	}
 
-	public function getLabelArray($occidArr){
+	public function getLabelArray($occidArr, $speciesAuthors){
 		$retArr = array();
 		if($occidArr){
 			$authorArr = array();
@@ -156,6 +156,10 @@ class SpecDatasetManager {
 				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN taxa t2 ON ts.parenttid = t2.tid '.
 				$sqlWhere.' AND t.rankid > 220 AND ts.taxauthid = 1 ';
+			if(!$speciesAuthors){
+				$sql1 .= 'AND t.unitname2 = t.unitname3 ';
+			}
+			//if()
 			if($rs1 = $this->conn->query($sql1)){
 				while($row1 = $rs1->fetch_object()){
 					$authorArr[$row1->occid] = $row1->author;
@@ -180,14 +184,14 @@ class SpecDatasetManager {
 		return $retArr;
 	}
 	
-	public function exportCsvFile($postArr){
+	public function exportCsvFile($postArr, $speciesAuthors){
 		$occidArr = $postArr['occid'];
 		if($occidArr){
 	    	$fileName = 'labeloutput_'.time().".csv";
 			header ('Content-Type: text/csv');
 			header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
 			
-			$labelArr = $this->getLabelArray($occidArr);
+			$labelArr = $this->getLabelArray($occidArr, $speciesAuthors);
 			if($labelArr){
 				$headerArr = array("occid","catalogNumber","family","scientificName","genus","specificEpithet",
 					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","taxonRemarks","identifiedBy",
@@ -198,7 +202,6 @@ class SpecDatasetManager {
 		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
 			 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
 		 			"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
-				echo '"'.implode('","',$headerArr).'"'."\n";
 
 				$headerLcArr = array();
 				foreach($headerArr as $k => $v){
