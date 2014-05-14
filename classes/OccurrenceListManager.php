@@ -20,14 +20,15 @@ class OccurrenceListManager extends OccurrenceManager{
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere);
 		}
-		$sql = "SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL(o.CatalogNumber,'') AS catalognumber, o.family, o.sciname, o.tidinterpreted, ".
-			"IFNULL(o.scientificNameAuthorship,'') AS author, IFNULL(o.recordedBy,'') AS recordedby, IFNULL(o.recordNumber,'') AS recordnumber, ".
-			"IFNULL(DATE_FORMAT(o.eventDate,'%d %M %Y'),'') AS date1, DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),'%d %M %Y') AS date2, ".
-			"IFNULL(o.country,'') AS country, IFNULL(o.StateProvince,'') AS state, IFNULL(o.county,'') AS county, ".
-			"CONCAT_WS(', ',o.locality,CONCAT(ROUND(o.decimallatitude,5),' ',ROUND(o.decimallongitude,5))) AS locality, ".
-			"IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, o.observeruid ".
-			"FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ";
-		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= "INNER JOIN fmvouchers v ON o.occid = v.occid ";
+		$sql = 'SELECT o.occid, o.CollID, o.institutioncode, o.collectioncode, IFNULL(o.CatalogNumber,"") AS catalognumber, o.family, o.sciname, o.tidinterpreted, '.
+			'IFNULL(o.scientificNameAuthorship,"") AS author, IFNULL(o.recordedBy,"") AS recordedby, IFNULL(o.recordNumber,"") AS recordnumber, '.
+			'CONCAT_WS(" to ",IFNULL(DATE_FORMAT(o.eventDate,"%d %M %Y"),""),DATE_FORMAT(MAKEDATE(o.year,o.endDayOfYear),"%d %M %Y")) AS date, '.
+			'IFNULL(o.country,"") AS country, IFNULL(o.StateProvince,"") AS state, IFNULL(o.county,"") AS county, '.
+			'CONCAT_WS(", ",o.locality,CONCAT(ROUND(o.decimallatitude,5)," ",ROUND(o.decimallongitude,5))) AS locality, '.
+			'IFNULL(o.LocalitySecurity,0) AS LocalitySecurity, o.localitysecurityreason, '.
+			'CONCAT_WS("-",o.minimumElevationInMeters, o.maximumElevationInMeters) AS elev, o.observeruid '.
+			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid ';
+		if(array_key_exists("clid",$this->searchTermsArr)) $sql .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 		$sql .= $sqlWhere;
 		$bottomLimit = ($pageRequest - 1)*$cntPerPage;
 		$sql .= "ORDER BY c.sortseq, c.collectionname ";
@@ -39,8 +40,10 @@ class OccurrenceListManager extends OccurrenceManager{
 		//echo "<div>Spec sql: ".$sql."</div>";
 		$result = $this->conn->query($sql);
 		$canReadRareSpp = false;
-		if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
-			$canReadRareSpp = true;
+		if($userRights){
+			if(array_key_exists("SuperAdmin", $userRights) || array_key_exists("CollAdmin", $userRights) || array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+				$canReadRareSpp = true;
+			}
 		}
 		while($row = $result->fetch_object()){
 			$collIdStr = $row->CollID;
@@ -53,9 +56,6 @@ class OccurrenceListManager extends OccurrenceManager{
 			$returnArr[$collIdStr][$occId]["tid"] = $row->tidinterpreted;
 			$returnArr[$collIdStr][$occId]["author"] = $this->cleanOutStr($row->author);
 			$returnArr[$collIdStr][$occId]["collector"] = $this->cleanOutStr($row->recordedby);
-			$returnArr[$collIdStr][$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
-			$returnArr[$collIdStr][$occId]["date1"] = $row->date1;
-			$returnArr[$collIdStr][$occId]["date2"] = $row->date2;
 			$returnArr[$collIdStr][$occId]["country"] = $row->country;
 			$returnArr[$collIdStr][$occId]["state"] = $row->state;
 			$returnArr[$collIdStr][$occId]["county"] = $row->county;
@@ -65,6 +65,9 @@ class OccurrenceListManager extends OccurrenceManager{
 				|| (array_key_exists("CollEditor", $userRights) && in_array($collIdStr,$userRights["CollEditor"]))
 				|| (array_key_exists("RareSppReader", $userRights) && in_array($collIdStr,$userRights["RareSppReader"]))){
 				$returnArr[$collIdStr][$occId]["locality"] = str_replace('.,',',',$row->locality);
+				$returnArr[$collIdStr][$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
+				$returnArr[$collIdStr][$occId]["date"] = $row->date;
+				$returnArr[$collIdStr][$occId]["elev"] = $row->elev;
 			}
 			else{
 				$securityStr = '<span style="color:red;">Detailed locality information protected. ';

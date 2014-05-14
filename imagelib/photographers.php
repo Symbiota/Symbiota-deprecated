@@ -126,7 +126,11 @@ $pManager = new PhotographerManager();
 							</a>
 						</div>
 						<div>
-							<a href="../taxa/index.php?taxon=<?php echo $imgArr['tid']; ?>"><i><?php echo $imgArr['sciname']; ?></i></a>
+							<?php 
+							if($imgArr['tid']) echo '<a href="../taxa/index.php?taxon='.$imgArr['tid'].'">';
+							echo '<i>'.$imgArr['sciname'].'</i>';
+							if($imgArr['tid']) echo '</a>';
+							?>
 						</div>
 					</div>
 					<?php 

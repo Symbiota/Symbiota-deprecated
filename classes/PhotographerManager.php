@@ -105,11 +105,11 @@ class PhotographerManager{
 				'LIMIT '.$limitStart.', '.$lNum;
 		}
 		else{
-			$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, o.sciname, o.tidinterpreted AS tid '. 
+			$sql = 'SELECT i.imgid, i.thumbnailurl, i.url, IFNULL(o.sciname,"Not Identified") AS sciname, o.tidinterpreted AS tid '. 
 				'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-				'INNER JOIN taxa t ON t.tid = o.tidinterpreted '.
+				'LEFT JOIN taxa t ON t.tid = o.tidinterpreted '.
 				'WHERE o.collid = '.$collId.' '.
-				'ORDER BY t.sciname '.
+				'ORDER BY sciname '.
 				'LIMIT '.$limitStart.', '.$lNum;
 		}
 		//echo "<div>".$sql."</div>";

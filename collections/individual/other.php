@@ -27,24 +27,29 @@ if($symbUid){
 	<div>
 		<?php 	
 		if($vClArr){
-	    	echo '<div style="font-weight:bold;font-size:120%;">Specimen serves as voucher of the following checklists</div>';
-	    	echo '<ul>';
-	    	foreach($vClArr as $id => $clName){
-	    		echo '<li><a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a></li>';
-	    	}
-	    	echo '</ul>';
-	    }
-	    else{
-	    	echo '<div style="margin:10px">Specimen has not been designated as a voucher for a species checklist</div>';
-	    }
+			echo '<div style="font-weight:bold;font-size:120%;">Specimen serves as voucher of the following checklists</div>';
+			echo '<ul>';
+			foreach($vClArr as $id => $clName){
+				echo '<li>';
+				echo '<a href="../../checklists/checklist.php?showvouchers=1&cl='.$id.'" target="_blank">'.$clName.'</a>&nbsp;&nbsp;';
+				if(isset($userRights['ClAdmin']) && in_array($id,$userRights['ClAdmin'])){
+					echo '<a href="index.php?delvouch='.$id.'&occid='.$occid.'" title="Delete voucher link" onclick="return confirm(\"Are you sure you want to remove this voucher link?\")"><img src="../../images/drop.png" style="width:12px;" /></a>';
+				}
+				echo '</li>';
+			}
+			echo '</ul>';
+		}
+		else{
+			echo '<div style="margin:10px">Specimen has not been designated as a voucher for a species checklist</div>';
+		}
 		if($isAdmin || array_key_exists("ClAdmin",$userRights)){
 			?>
 			<div style='margin-top:15px;height:400px;'>
-	    		<?php 
+				<?php 
 				if($clArr = $indManager->getChecklists(array_keys($vClArr))){
-		    		?>
+					?>
 					<fieldset style='margin:20px;'>
-			    		<legend><b>New Voucher Assignment</b></legend>
+						<legend><b>New Voucher Assignment</b></legend>
 						<?php
 						if($tid){
 							?>
@@ -79,12 +84,12 @@ if($symbUid){
 							</div>
 							<?php 
 						}
-			    		else{
-			    			?>
-			    			<div style='margin:20px;'>
-			    				Unable to use this specimen record as a voucher because  
-			    				scientific name counld not be verified in the taxonomic thesaurus (misspelled?)
-			    			</div>
+						else{
+							?>
+							<div style='margin:20px;'>
+								Unable to use this specimen record as a voucher because  
+								scientific name counld not be verified in the taxonomic thesaurus (misspelled?)
+							</div>
 							<?php 
 						}
 						?>

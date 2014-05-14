@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceIndividualManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$occId = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
+$occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collId = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
 $submit = array_key_exists('formsubmit',$_REQUEST)?trim($_REQUEST['formsubmit']):'';
@@ -11,8 +11,8 @@ $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $clid = array_key_exists("clid",$_REQUEST)?trim($_REQUEST["clid"]):0;
 
 $indManager = new OccurrenceIndividualManager();
-if($occId){
-	$indManager->setOccid($occId);
+if($occid){
+	$indManager->setOccid($occid);
 }
 elseif($collId && $pk){
 	$indManager->setCollId($collId);
@@ -20,7 +20,7 @@ elseif($collId && $pk){
 }
 
 $occArr = $indManager->getOccData();
-if(!$occId) $occId = $indManager->getOccid();
+if(!$occid) $occid = $indManager->getOccid();
 $collMetadata = $indManager->getMetadata();
 if(!$collId) $collId = $occArr['collid'];
 
@@ -54,17 +54,33 @@ if($SYMB_UID){
 	}
 	
 	//Form action submitted
+	if(array_key_exists('delvouch',$_GET) && $occid){
+		if(!$indManager->deleteVoucher($occid,$_GET['delvouch'])){
+			$statusStr = $indManager->getErrorMessage();
+		}
+	}
 	if(array_key_exists('commentstr',$_POST)){
-		$indManager->addComment($_POST['commentstr']);
+		if(!$indManager->addComment($_POST['commentstr'])){
+			$statusStr = $indManager->getErrorMessage();
+		}
 	}
 	elseif($submit == "Delete Comment"){
-		$indManager->deleteComment($_POST['comid']);
+		if(!$indManager->deleteComment($_POST['comid'])){
+			$statusStr = $indManager->getErrorMessage();
+		}
 	}
 	elseif(array_key_exists('repcomid',$_GET)){
-		$indManager->reportComment($_GET['repcomid']);
+		if($indManager->reportComment($_GET['repcomid'])){
+			$statusStr = 'Comment reported as inappropriate. Comment will remain unavailable to public until reviewed by an administrator.';
+		}
+		else{
+			$statusStr = $indManager->getErrorMessage();
+		}
 	}
 	elseif(array_key_exists('publiccomid',$_GET)){
-		$indManager->makeCommentPublic($_GET['publiccomid']);
+		if(!$indManager->makeCommentPublic($_GET['publiccomid'])){
+			$statusStr = $indManager->getErrorMessage();
+		}
 	}
 }
 if(!$occArr['localitysecurity']) $displayLocality = true;
@@ -85,7 +101,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<meta name="description" content="<?php echo 'Occurrence author: '.$occArr['recordedby'].','.$occArr['recordnumber']; ?>" />
 	<meta name="keywords" content="<?php echo $occArr['guid']; ?>">
-    <link href="../../css/main.css" type="text/css" rel="stylesheet">
+	<link href="../../css/main.css" type="text/css" rel="stylesheet">
 	<link href="../../css/jquery-ui.css?ver=20130906" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js?ver=20130906" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=20130906" type="text/javascript"></script>
@@ -136,20 +152,20 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 
 		function verifyVoucherForm(f){
 			var clTarget = f.elements["clid"].value; 
-	        if(clTarget == "0"){
-	            window.alert("Please select a checklist");
-	            return false;
-	        }
-            return true;
-	    }
+			if(clTarget == "0"){
+				window.alert("Please select a checklist");
+				return false;
+			}
+			return true;
+		}
 
 		function verifyCommentForm(f){
-	        if(f.commentstr.value.replace(/^\s+|\s+$/g,"")){
-	            return true;
-	        }
+			if(f.commentstr.value.replace(/^\s+|\s+$/g,"")){
+				return true;
+			}
 			alert("Please enter a comment");
-            return false;
-	    }
+			return false;
+		}
 
 		function openIndividual(target) {
 			occWindow=open("index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
@@ -160,21 +176,21 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 		if($displayMap){
 			?>
 			function initializeMap(){
-		    	var mLatLng = new google.maps.LatLng(<?php echo $occArr['decimallatitude'].",".$occArr['decimallongitude']; ?>);
-		    	var dmOptions = {
+				var mLatLng = new google.maps.LatLng(<?php echo $occArr['decimallatitude'].",".$occArr['decimallongitude']; ?>);
+				var dmOptions = {
 					zoom: 8,
 					center: mLatLng,
 					marker: mLatLng,
 					mapTypeId: google.maps.MapTypeId.TERRAIN,
 					scaleControl: true
 				};
-		    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-		    	//Add marker
+				map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
+				//Add marker
 				var marker = new google.maps.Marker({
 					position: mLatLng,
 					map: map
 				});
-	        }
+			}
 			<?php 
 		}
 		?>
@@ -182,57 +198,47 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 </head>
 
 <body>
-	<?php 
-	//$displayLeftMenu = (isset($collections_individual_individualMenu)?$collections_individual_individualMenu:false);
-	//include($serverRoot."/header.php");
-	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<div>
-			<?php 
-			if($statusStr){
-				echo '<hr/>';
-				if(array_key_exists('commentstr',$_REQUEST)){
-					echo '<div style="padding:15px;">';
-					if($isEditor){
-						echo 'Comment add successfully. Once reviewed, comment will be made public.';
-					}
-					echo '</div>';
-				}
-				echo "<hr/>\n";
-			}
+		<?php 
+		if($statusStr){
 			?>
-		</div>
-		<?php
+			<hr />
+			<div style="padding:15px;">
+				<span style="color:red;"><?php echo $statusStr; ?></span>
+			</div>
+			<hr />
+			<?php 
+		}
 		if($occArr){
 			?>
 			<div id="tabs" style="margin:10px;clear:both;">
-			    <ul>
-			        <li><a href="#occurtab"><span>Details</span></a></li>
-			        <?php 
-			        if($displayMap){
-			        	?>
-				        <li><a href="#maptab"><span>Map</span></a></li>
-			        	<?php 
-			        }
+				<ul>
+					<li><a href="#occurtab"><span>Details</span></a></li>
+					<?php 
+					if($displayMap){
+						?>
+						<li><a href="#maptab"><span>Map</span></a></li>
+						<?php 
+					}
 					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>'; 
-			        if($dupeArr){
-				        ?>
+					if($dupeArr){
+						?>
 						<li><a href="#dupestab"><span>Duplicates</span></a></li>
 						<?php
-			        }
+					}
 					?> 
 					<li><a href="#commenttab"><span><?php echo ($commentArr?count($commentArr).' ':''); ?>Comments</span></a></li> 
-					<li><a href="other.php?occid=<?php echo $occId.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Related Resources</span></a></li>
+					<li><a href="other.php?occid=<?php echo $occid.'&tid='.$occArr['tidinterpreted'].'&clid='.$clid.'&collid='.$collId.'&obsuid='.$occArr['observeruid']; ?>"><span>Related Resources</span></a></li>
 					<?php 
 					if($editArr){
-				        ?>
+						?>
 						<li><a href="#edittab"><span>Edit History</span></a></li> 
-			        	<?php 
+						<?php 
 					}
 					if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
 						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) . 						
-	                    (isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
+						(isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
 						(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 						(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'');
 						echo '<li>';
@@ -241,7 +247,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						echo '</li>';
 					}
 					?>
-			    </ul>
+				</ul>
 				<div id="occurtab" style="padding:30px;">
 					<div style="float:left;margin:15px 0px;text-align:center;font-weight:bold;width:120px;">
 						<img border='1' height='50' width='50' src='<?php echo (substr($collMetadata["icon"],0,6)=='images'?'../../':'').$collMetadata['icon']; ?>'/><br/>
@@ -417,20 +423,22 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							<b>Collector:</b> 
 							<?php 
 							echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
-							echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
+							if($displayLocality) echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
 							?>
 						</div>
 						<?php
-						if($occArr['eventdate']){
-							echo '<div><b>Date: </b>'; 
-							echo $occArr['eventdate']; 
-							if($occArr['eventdateend']){
-								echo ' - '.$occArr['eventdateend'];
+						if($displayLocality){
+							if($occArr['eventdate']){
+								echo '<div><b>Date: </b>'; 
+								echo $occArr['eventdate']; 
+								if($occArr['eventdateend']){
+									echo ' - '.$occArr['eventdateend'];
+								}
+								echo '</div>';
 							}
-							echo '</div>';
-						}
-						if($occArr['verbatimeventdate']){
-							echo '<div><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</div>';
+							if($occArr['verbatimeventdate']){
+								echo '<div><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</div>';
+							}
 						}
 						?>
 						<div>
@@ -449,7 +457,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						$localityStr1 = ($occArr['country']?$occArr['country']:'Country Not Recorded').', ';
 						$localityStr1 .= ($occArr['stateprovince']?$occArr['stateprovince']:'State/Province Not Recorded').', ';
 						if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
-                      if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].'.  ';
+					  if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].'.  ';
 						?>
 						<div>
 							<b>Locality:</b>
@@ -692,7 +700,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 								}
 								else{
 									?>
-									See an error? <a href="../../profile/index.php?refurl=../collections/individual/index.php?occid=<?php echo $occId; ?>">Login</a> to edit data
+									See an error? <a href="../../profile/index.php?refurl=../collections/individual/index.php?occid=<?php echo $occid; ?>">Login</a> to edit data
 									<?php
 								}
 								?>
@@ -702,14 +710,14 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						?>
 					</div>
 				</div>
-		        <?php 
-		        if($displayMap){
-		        	?>
+				<?php 
+				if($displayMap){
+					?>
 						<div id="maptab">
 							<div id='map_canvas' style='width:100%;height:600px;'></div>
 						</div>
-		        	<?php 
-		        }
+					<?php 
+				}
 				if($genticArr){
 					?>
 					<div id="genetictab" style="height:300px">
@@ -769,23 +777,25 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 								echo '<div>';
 								echo '<b>'.$comArr['username'].'</b> <span style="color:gray;">posted '.$comArr['initialtimestamp'].'</span>';
 								echo '</div>';
-								if($comArr['reviewstatus'] == 0) echo '<div style="color:red;">Comment not public (available to administrators only)</div>';
-								echo '<div style="margin:10px 0px;">'.$comArr['comment'].'</div>';
+								if($comArr['reviewstatus'] == 0) echo '<div style="color:red;">Comment not public due to pending abuse report (viewable to administrators only)</div>';
+								echo '<div style="margin:10px;">'.$comArr['comment'].'</div>';
 								if($comArr['reviewstatus']){
-									?>
-									<div><a href="index.php?repcomid=<?php echo $comId.'&occid='.$occId; ?>">Report as unappropriate or abusive</a></div>
-									<?php
+									if($SYMB_UID){
+										?>
+										<div><a href="index.php?repcomid=<?php echo $comId.'&occid='.$occid; ?>">Report as inappropriate or abusive</a></div>
+										<?php
+									}
 								}
 								else{
 									?>
-									<div><a href="index.php?publiccomid=<?php echo $comId.'&occid='.$occId; ?>">Make comment public</a></div>
+									<div><a href="index.php?publiccomid=<?php echo $comId.'&occid='.$occid; ?>">Make comment public</a></div>
 									<?php
 								}
-								if($isEditor || $comArr['username'] == $paramsArr['un']){
+								if($isEditor || ($SYMB_UID && $comArr['username'] == $paramsArr['un'])){
 									?>
 									<div style="margin:20px;">
 										<form name="delcommentform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete comment?')">
-											<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+											<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 											<input name="comid" type="hidden" value="<?php echo $comId; ?>" />
 											<input name="tabindex" type="hidden" value="<?php echo ($displayMap?2:1); ?>" />
 											<input name="formsubmit" type="submit" value="Delete Comment" /> 
@@ -811,7 +821,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 							<form name="commentform" action="index.php" method="post" onsubmit="return verifyCommentForm(this);">
 								<textarea name="commentstr" rows="8" style="width:98%;"></textarea>
 								<div style="margin:15px;">
-									<input name="occid" type="hidden" value="<?php echo $occId; ?>" />
+									<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 									<input name="tabindex" type="hidden" value="<?php echo ($displayMap?2:1); ?>" />
 									<input type="submit" name="formsubmit" value="Submit Comment" />
 								</div>
@@ -824,7 +834,7 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 						else{
 							?>
 							<div style="margin:10px;">
-								<a href="../../profile/index.php?refurl=../collections/individual/index.php?tabindex=2&occid=<?php echo $occId; ?>">Login</a> to leave a comment.
+								<a href="../../profile/index.php?refurl=../collections/individual/index.php?tabindex=2&occid=<?php echo $occid; ?>">Login</a> to leave a comment.
 							</div>
 							<?php
 						}
@@ -872,14 +882,14 @@ $editArr = ($isEditor?$indManager->getEditArr():null);
 				?>
 			</div>
 			<?php 
-        }
-        else{
-        	?>
-        	<h2>Unable to locate occurrence record</h2>
-        	<div style="margin:20px">
-        		<div>Checking archive...</div>
-        		<div style="margin:10px">
-		        	<?php
+		}
+		else{
+			?>
+			<h2>Unable to locate occurrence record</h2>
+			<div style="margin:20px">
+				<div>Checking archive...</div>
+				<div style="margin:10px">
+					<?php
 					ob_flush();
 					flush();
 					$rawArchArr = $indManager->checkArchive();

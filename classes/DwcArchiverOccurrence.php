@@ -55,7 +55,8 @@ class DwcArchiverOccurrence{
 			'country','stateprovince','county','recordedby','recordnumber','eventdate','municipality',
 			'decimallatitude','decimallongitude','minimumelevationinmeters','maximumelevationinmeters','datelastmodified','modified');
 		
-		$this->securityArr = array('locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
+		$this->securityArr = array('eventDate','month','day','startDayOfYear','endDayOfYear','verbatimEventDate',
+			'recordNumber','locality','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT',
 			'verbatimCoordinates','georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources',
 			'georeferenceVerificationStatus','habitat','informationWithheld');
@@ -1187,7 +1188,7 @@ class DwcArchiverOccurrence{
 				//Protect sensitive records
 				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
 					foreach($this->securityArr as $v){
-						if(array_key_exists($v,$r)) $r[$v] = '[Redacted]';
+						if(array_key_exists($v,$r) && $r[$v]) $r[$v] = '[Redacted]';
 					}
 				}
 				
