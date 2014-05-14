@@ -1,7 +1,7 @@
 <?php 
 /**
  *  Base class for managers.  Supplies $conn for connection, $id for primary key, and 
- *  $errormessage/getErrorMessage(), along with supporting clean methods cleanOutStr()
+ *  $errorMessage/getErrorMessage(), along with supporting clean methods cleanOutStr()
  *  cleanInStr() and cleanInArray();
  */
 
@@ -10,11 +10,12 @@ include_once($serverRoot.'/config/dbconnection.php');
 class Manager  {
 	protected $conn = null;
 	protected $id = null;
-    protected $errormessage = '';
+    protected $errorMessage = '';
+    protected $warningArr = array();
 
 	public function __construct($id=null,$conType='readonly'){
  		$this->conn = MySQLiConnectionFactory::getCon($conType);
- 		if($id !=null || is_numeric($id)){
+ 		if($id != null || is_numeric($id)){
 	 		$this->id = $id;
  		}
 	}
@@ -22,7 +23,6 @@ class Manager  {
  	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
- 	
 
  	protected function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
@@ -38,16 +38,20 @@ class Manager  {
 		return $newStr;
 	}
 
- 	protected function cleanInArray($arr){
- 		$newArray = Array();
- 		foreach($arr as $key => $value){
- 			$newArray[$this->cleanInStr($key)] = $this->cleanInStr($value);
- 		}
- 		return $newArray;
- 	}
+	protected function cleanInArray($arr){
+		$newArray = Array();
+		foreach($arr as $key => $value){
+			$newArray[$this->cleanInStr($key)] = $this->cleanInStr($value);
+		}
+		return $newArray;
+	}
 
    public function getErrorMessage() { 
-      return $this->errormessage;
+      return $this->errorMessage;
+   }
+   
+   public function getWarningArr(){
+      return $this->warningArr;
    }
  
    /** To enable mysqli_stmt->bind_param using call_user_func_array($array) 
@@ -61,9 +65,7 @@ class Manager  {
           $byrefs[$key] = &$array[$key];
        return $byrefs;
     }
-    return $arr;
+    return $byrefs;
    }
-
 }
-
 ?>

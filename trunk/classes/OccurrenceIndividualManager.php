@@ -1,23 +1,23 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once('Manager.php');
 
-class OccurrenceIndividualManager {
+class OccurrenceIndividualManager extends Manager{
 
-	private $conn;
 	private $occid;
 	private $collid;
 	private $dbpk;
 	private $occArr = array();
 	private $metadataArr = array();
 
- 	public function __construct(){
- 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
- 	}
- 	
- 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+	public function __construct() {
+		parent::__construct();
 	}
-   
+
+	public function __destruct(){
+		parent::__destruct();
+	}
+
 	public function setOccid($occid){
 		if(is_numeric($occid)){
 			$this->occid = $occid;
@@ -37,7 +37,7 @@ class OccurrenceIndividualManager {
 	public function setDbpk($pk){
 		$this->dbpk = $pk;
 	}
-	
+
 	private function setMetadata(){
 		if($this->collid){
 			$sql = 'SELECT institutioncode, collectioncode, collectionname, homepage, individualurl, contact, email, icon, '.
@@ -53,7 +53,7 @@ class OccurrenceIndividualManager {
 			}
 		}
 	}
-	
+
 	public function getMetadata(){
 		return $this->metadataArr;
 	}
@@ -264,59 +264,52 @@ class OccurrenceIndividualManager {
 	}
 
 	public function addComment($commentStr){
-		global $symbUid;
- 		$con = MySQLiConnectionFactory::getCon("write");
-		$statusStr = '';
-		$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
-			'VALUES('.$this->occid.',"'.$this->cleanInStr($commentStr).'",'.$symbUid.',1)';
-		//echo 'sql: '.$sql;
-		if(!$con->query($sql)){
-			$statusStr = 'ERROR adding comment: '.$con->error;
+		$status = false;
+		if(isset($GLOBALS['SYMB_UID']) && $GLOBALS['SYMB_UID']){
+	 		$con = MySQLiConnectionFactory::getCon("write");
+			$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
+				'VALUES('.$this->occid.',"'.$this->cleanInStr($commentStr).'",'.$GLOBALS['SYMB_UID'].',1)';
+			//echo 'sql: '.$sql;
+			if($con->query($sql)){
+				$status = true;
+			}
+			else{
+				$status = false;
+				$this->errorMessage = 'ERROR adding comment: '.$con->error;
+			}
+			$con->close();
 		}
-		$con->close();
-		
-		return $statusStr;
+		return $status;
 	}
 	
 	public function deleteComment($comId){
-		$statusStr = '';
- 		$con = MySQLiConnectionFactory::getCon("write");
+		$status = true;
+		$con = MySQLiConnectionFactory::getCon("write");
 		if(is_numeric($comId)){
 			$sql = 'DELETE FROM omoccurcomments WHERE comid = '.$comId;
 			if(!$con->query($sql)){
-				$statusStr = 'ERROR adding comment: '.$con->error;
+				$status = false;
+				$this->errorMessage = 'ERROR deleting comment: '.$con->error;
 			}
 		}
 		$con->close();
-		return $statusStr;
+		return $status;
 	}
-	
+
 	public function reportComment($repComId){
+		$status = true;
 		if(array_key_exists('adminEmail',$GLOBALS)){
-			//Get comment 
-			$sql = 'SELECT c.comment, u.username, c.initialtimestamp '.
-				'FROM omoccurcomments c INNER JOIN userlogin u ON c.uid = u.uid '.
-				'WHERE c.comid = '.$repComId;
-			$result = $this->conn->query($sql);
-			if($result){
-				if($row = $result->fetch_object()){
-					$retArr['comment'] = $row->comment;
-					$retArr['username'] = $row->username;
-					$retArr['initialtimestamp'] = $row->initialtimestamp;
-				}
-				$result->free();
-			}
-			else{
-				trigger_error('Unable to set comments; '.$this->conn->error,E_USER_WARNING);
-			}
 			//Set Review status to supress
  			$con = MySQLiConnectionFactory::getCon("write");
-			$con->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId);
+			if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 0 WHERE comid = '.$repComId)){
+				$this->errorMessage = 'ERROR changing comment status to needing review, Err msg: '.$this->conn->error;
+				$status = false;
+			}
 			$con->close();
 			
 			//Email to portal admin
 			$emailAddr = $GLOBALS['adminEmail'];
-			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'/collections/individual/index.php?tabindex=2&occid='.$this->occId;
+			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['clientRoot'].'/collections/individual/index.php?tabindex=2&occid='.$this->occid;
 			$subject = $GLOBALS['defaultTitle'].' inappropriate comment reported<br/>';
 			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
 			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
@@ -324,14 +317,27 @@ class OccurrenceIndividualManager {
 				"Content-type: text/html \r\n".
 				"To: ".$emailAddr." \r\n";
 				$headerStr .= "From: Admin <".$emailAddr."> \r\n";
+			if(!mail($emailAddr,$subject,$bodyStr,$headerStr)){
+				$this->errorMessage = 'ERROR sending email to portal manager, error unknown';
+				$status = false;
+			}
 		}
-		mail($emailAddr,$subject,$bodyStr,$headerStr);
+		else{
+			$this->errorMessage = 'ERROR: Portal admin email not defined in central configuration file ';
+			$status = false;
+		}
+		return $status;
 	}
 	
 	public function makeCommentPublic($comId){
- 		$con = MySQLiConnectionFactory::getCon("write");
-		$con->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId);
+		$status = true;
+		$con = MySQLiConnectionFactory::getCon("write");
+		if(!$con->query('UPDATE omoccurcomments SET reviewstatus = 1 WHERE comid = '.$comId)){
+			$this->errorMessage = 'ERROR making comment public, err msg: '.$con->error;
+			$status = false;
+		}
 		$con->close();
+		return $status;
 	}
 
 	public function getGeneticArr(){
@@ -391,15 +397,25 @@ class OccurrenceIndividualManager {
 	}
 	
 	public function getVoucherChecklists(){
+		global $IS_ADMIN, $userRights;
 		$returnArr = Array();
-		$sql = 'SELECT c.name, c.clid, v.notes '.
+		$sql = 'SELECT c.name, c.clid, c.access, v.notes '.
 			'FROM fmchecklists c INNER JOIN fmvouchers v ON c.clid = v.clid '.
-			'WHERE v.occid = '.$this->occid.' ORDER BY c.name';
+			'WHERE v.occid = '.$this->occid.' ';
+		if(array_key_exists("ClAdmin",$userRights)){
+			$sql .= 'AND (c.access = "public" OR c.clid IN('.implode(',',$userRights['ClAdmin']).')) ';
+		}
+		else{
+			$sql .= 'AND (c.access = "public") ';
+		}
+		$sql .= 'ORDER BY c.name';
 		//echo $sql;
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
-				$returnArr[$row->clid] = $row->name;
+				$nameStr = $row->name;
+				if($row->access == 'private') $nameStr .= ' (private status)';
+				$returnArr[$row->clid] = $nameStr;
 			}
 			$result->free();
 		}
@@ -407,6 +423,20 @@ class OccurrenceIndividualManager {
 			trigger_error('Unable to get checklist data; '.$this->conn->error,E_USER_WARNING);
 		}
 		return $returnArr;
+	}
+
+	public function deleteVoucher($occid,$clid){
+		$status = true;
+		if(is_numeric($occid) && is_numeric($clid)){
+			$sql = 'DELETE FROM fmvouchers WHERE (occid = '.$occid.') AND (clid = '.$clid.') ';
+ 			$con = MySQLiConnectionFactory::getCon("write");
+			if(!$con->query($sql)){
+				$this->errorMessage = 'ERROR loading '.$con->error;
+				$status = false;
+			}
+			if(!($con === null)) $con->close();
+		}
+		return $status;
 	}
 
 	public function getChecklists($clidExcludeArr){
@@ -527,29 +557,6 @@ class OccurrenceIndividualManager {
 			}
 		}
 		return $isEditor;
-	}
-
-	private function encodeStrTargeted($inStr,$inCharset,$outCharset){
-		if($inCharset == $outCharset) return $inStr;
-		$retStr = $inStr;
-		if($inCharset == "latin" && $outCharset == 'utf8'){
-			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-				$retStr = utf8_encode($retStr);
-			}
-		}
-		elseif($inCharset == "utf8" && $outCharset == 'latin'){
-			if(mb_detect_encoding($retStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-				$retStr = utf8_decode($retStr);
-			}
-		}
-		return $retStr;
-	}
-	
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
 	}
 }
 ?>

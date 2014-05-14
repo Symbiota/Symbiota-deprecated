@@ -292,10 +292,10 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 								<?php echo $fieldArr["accession"];?>
 							</td>
 							<td>
-								<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".$fieldArr["collnumber"]; ?>
+								<?php echo $fieldArr["collector"]."&nbsp;&nbsp;&nbsp;".(isset($fieldArr["collnumber"])?$fieldArr["collnumber"]:''); ?>
 							</td>
 							<td width='20%'>
-								<?php echo $fieldArr["date1"].($fieldArr["date2"]?" to ".$fieldArr["date2"]:""); ?>
+								<?php if(isset($fieldArr["date"])) echo $fieldArr["date"]; ?>
 							</td>
 						</tr>
 						<tr>
@@ -305,8 +305,8 @@ $occFieldArr = array('occurrenceid','family', 'scientificname', 'sciname',
 				            if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
 				            if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
 				            if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
-				            if($fieldArr["date1"] || $fieldArr["date1"]) $localStr .= $fieldArr["date1"]."-" . $fieldArr["date2"] . "m, ";
-				            if(strlen($localStr) > 2) $localStr = substr($localStr,0, strlen($localStr) - 2);
+				            if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
+				            if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
 				            ?>
 				            <td colspan='3'>
 				            	<?php echo $localStr; ?>

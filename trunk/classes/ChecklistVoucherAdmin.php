@@ -342,12 +342,14 @@ class ChecklistVoucherAdmin {
 			while($row = $rs->fetch_assoc()){
 				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
 				if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($row["collid"],$userRights["RareSppReader"]))){
-					$row["locality"] = "Redacted";
-					$row["decimallatitude"] = "Redacted";
-					$row["decimallongitude"] = "Redacted";
-					$row["minimumelevationinmeters"] = "Redacted";
-					$row["habitat"] = "Redacted";
-					$row["occurrenceremarks"] = "Redacted";
+					if($row['recordnumber']) $row['recordnumber'] = 'Redacted';
+					if($row['eventdate']) $row['eventdate'] = 'Redacted';
+					if($row["locality"]) $row["locality"] = "Redacted";
+					if($row["decimallatitude"]) $row["decimallatitude"] = "Redacted";
+					if($row["decimallongitude"]) $row["decimallongitude"] = "Redacted";
+					if($row["minimumelevationinmeters"]) $row["minimumelevationinmeters"] = "Redacted";
+					if($row["habitat"]) $row["habitat"] = "Redacted";
+					if($row["occurrenceremarks"]) $row["occurrenceremarks"] = "Redacted";
 				}
 				unset($row['localitysecurity']);
 				unset($row['collid']);
@@ -389,7 +391,9 @@ class ChecklistVoucherAdmin {
 			while($r = $rs->fetch_assoc()){
 				$localSecurity = ($r["localitysecurity"]?$r["localitysecurity"]:0); 
 				if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($r["collid"],$userRights["RareSppReader"]))){
-					$r["locality"] = "Locality Redacted";
+					if($r["eventdate"]) $r["eventdate"] = "Redacted";
+					if($r["recordnumber"]) $r["recordnumber"] = "Redacted";
+					if($r["locality"]) $r["locality"] = "Redacted";
 				}
 				unset($r['localitysecurity']);
 				unset($r['collid']);
@@ -437,12 +441,17 @@ class ChecklistVoucherAdmin {
 					if($includeDetails){
 						$localSecurity = ($r["localitysecurity"]?$r["localitysecurity"]:0); 
 						if(!$canReadRareSpp && $localSecurity != 1 && (!array_key_exists("RareSppReader", $userRights) || !in_array($r["collid"],$userRights["RareSppReader"]))){
-							$r["locality"] = "Redacted";
-							$r["decimallatitude"] = "Redacted";
-							$r["decimallongitude"] = "Redacted";
-							$r["minimumelevationinmeters"] = "Redacted";
-							$r["habitat"] = "Redacted";
-							$r["occurrenceremarks"] = "Redacted";
+							if($r["recordnumber"]) $r["recordnumber"] = "Redacted";
+							if($r["eventdate"]) $r["eventdate"] = "Redacted";
+							if($r["day"]) $r["day"] = "Redacted";
+							if($r["startdayofyear"]) $r["startdayofyear"] = "Redacted";
+							if($r["verbatimeventdate"]) $r["verbatimeventdate"] = "Redacted";
+							if($r["locality"]) $r["locality"] = "Redacted";
+							if($r["decimallatitude"]) $r["decimallatitude"] = "Redacted";
+							if($r["decimallongitude"]) $r["decimallongitude"] = "Redacted";
+							if($r["minimumelevationinmeters"]) $r["minimumelevationinmeters"] = "Redacted";
+							if($r["habitat"]) $r["habitat"] = "Redacted";
+							if($r["occurrenceremarks"]) $r["occurrenceremarks"] = "Redacted";
 						}
 						unset($r['localitysecurity']);
 						unset($r['collid']);
