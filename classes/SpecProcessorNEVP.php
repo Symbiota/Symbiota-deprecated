@@ -427,8 +427,8 @@ class OCCURRENCE {
                         } 
                         if ($accesspoint->format=="jpg") { 
                            // Preconstructed derivative JPG file
-                           $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&resize=1250&format=jpeg,quality,100";
-                           $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&resize=150&format=jpeg,quality,75";
+                           $imgWebUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?resize=1250&format=jpeg";
+                           $imgTnUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?thumbnail=225,225";
                            $imgLgUrl = "http://bovary.iplantcollaborative.org/image_service/image/$iPlantID?rotate=guess&format=jpeg,quality,100";
                         } 
                      }
