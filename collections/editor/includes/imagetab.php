@@ -6,7 +6,6 @@ header("Content-Type: text/html; charset=".$charset);
 
 $occId = $_GET['occid'];
 $occIndex = $_GET['occindex'];
-$tid = $_GET['tid'];
 $crowdSourceMode = $_GET['csmode'];
 
 $occManager = new OccurrenceEditorImages();
@@ -14,7 +13,6 @@ $occActionManager = new OccurrenceActionManager();
 
 $occManager->setOccId($occId); 
 $imageArr = $occManager->getImageMap();
-
 ?>
 <div id="imagediv" style="width:795px;">
 	<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
@@ -43,15 +41,10 @@ $imageArr = $occManager->getImageMap();
 							Enter a URL to an image already located on a web server. 
 							If the image is larger than a typical web image, the url will be saved as the large version 
 							and a basic web derivative will be created. 
-							If a large version already exists, it can be entered manually in the second field.   
 						</div>
 						<div>
 							<b>Image URL:</b><br/> 
 							<input type='text' name='imgurl' size='70'/>
-						</div>
-						<div>
-							<b>Large Image URL (optional):</b><br/>
-							<input type='text' name='lgurl' size='70'/>
 						</div>
 						<div style="float:right;text-decoration:underline;font-weight:bold;">
 							<a href="#" onclick="toggle('targetdiv');return false;">
@@ -59,7 +52,7 @@ $imageArr = $occManager->getImageMap();
 							</a>
 						</div>
 						<div>
-							<input type="checkbox" name="copytoserver" value="1" /> Copy to Server
+							<input type="checkbox" name="copytoserver" value="1" /> Copy large image to Server (if left unchecked, source URL will server as large version)
 						</div>
 					</div>
 					<div>
@@ -118,10 +111,9 @@ $imageArr = $occManager->getImageMap();
                     ?>
 				<div style="margin:10px 0px 10px 20px;">
 					<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
-					<input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 					<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 					<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-					<input type="hidden" name="tabindex" value="2" />
+					<input type="hidden" name="tabindex" value="1" />
 					<input type="submit" name="submitaction" value="Submit New Image" />
 				</div>
 			</fieldset>

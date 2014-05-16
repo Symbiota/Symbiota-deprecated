@@ -171,11 +171,21 @@ if($symbUid){
 				$statusStr = $occManager->editImage($_POST);
 			}
 			elseif($action == "Submit New Image"){
-				$statusStr = $occManager->addImage($_POST);
+				if($occManager->addImage($_POST)){
+					$statusStr = 'Image added successfully';
+				}
+				else{
+					$statusStr = $occManager->getErrorStr();
+				}
 			}
 			elseif($action == "Delete Image"){
 				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
-				$statusStr = $occManager->deleteImage($_POST["imgid"], $removeImg);
+				if($occManager->deleteImage($_POST["imgid"], $removeImg)){
+					$statusStr = 'Image deleted successfully';
+				}
+				else{
+					$statusStr = $occManager->getErrorStr();
+				}
 			}
 			elseif($action == "Remap Image"){
 				$statusStr = $occManager->remapImage($_POST["imgid"], $_POST["occid"]);
@@ -541,7 +551,7 @@ else{
 										if($isEditor == 1 || $isEditor == 2){
 											?>
 											<li id="imgTab">
-												<a href="includes/imagetab.php?<?php echo $anchorVars.'&tid='.$occArr['tidinterpreted']; ?>"
+												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
 													style="margin:0px 20px 0px 20px;">Images</a>
 											</li>
 											<li id="genTab">

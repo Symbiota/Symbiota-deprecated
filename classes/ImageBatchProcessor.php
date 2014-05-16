@@ -107,7 +107,7 @@ class ImageBatchProcessor {
 		if($this->dbMetadata){
 			if($this->collProcessedArr){
 				//Update Statistics
-//				$this->updateCollectionStats();
+				$this->updateCollectionStats();
 			}
 			if(!($this->conn === false)) $this->conn->close();
 		}
@@ -572,7 +572,7 @@ class ImageBatchProcessor {
 				if($width && $height){
 					//Get File size
 					$fileSize = 0;
-					if(substr($sourcePath,0,4)=='http') { 
+					if(substr($sourcePath,0,7)=='http://' || substr($sourcePath,0,8)=='https://') { 
 						$x = array_change_key_case(get_headers($sourcePath.$fileName, 1),CASE_LOWER); 
 						if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) { 
 							$fileSize = $x['content-length'][1]; 
@@ -1120,7 +1120,7 @@ class ImageBatchProcessor {
 							}
 							//Get exsiccati number id (omenid)
 							if(array_key_exists('ometid',$recMap) && $recMap['ometid']){
-								$numStr = trim($this->conn->real_escape_string($recMap['exsiccatinumber']));
+								$numStr = trim($this->conn->real_escape_string($recMap['exsiccatinumber'])," #num");
 								$sql = 'SELECT omenid FROM omexsiccatinumbers '.
 									'WHERE ometid = ('.$recMap['ometid'].') AND (exsnumber = "'.$numStr.'")';
 								$rs = $this->conn->query($sql);
@@ -1136,7 +1136,17 @@ class ImageBatchProcessor {
 								}
 							}
 						}
-
+						//If exsiccati info is there, but we can't link to an indexed exsiccati, then lets keep that info and put in occurrenceRemarks 
+						if(array_key_exists('exsiccatititle',$recMap) && $recMap['exsiccatititle'] && (!array_key_exists('ometid',$recMap) || !$recMap['ometid'])){
+							$exsStr = $recMap['exsiccatititle'];
+							if(array_key_exists('exsiccatinumber',$recMap) && $recMap['exsiccatinumber']){
+								$exsStr .= ', '.$recMap['exsiccatinumber'].'; ';
+							}
+							$occRemarks = $recMap['occurrenceremarks'];
+							if($occRemarks) $occRemarks .= '; ';
+							$recMap['occurrenceremarks'] = $occRemarks.$exsStr;
+						}
+						
 						//Load record
 						if($catNum){
 							$occid = 0;

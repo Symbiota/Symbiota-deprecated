@@ -96,7 +96,12 @@ if($editable && $action){
 		$statusStr = $tEditor->editImageSort($imgSortArr);
 	} 
 	elseif($action == "Upload Image"){
-		$statusStr = $tEditor->loadImageData();
+		if($tEditor->loadImage($_POST)){
+			$statusStr = 'Image uploaded successfully';
+		}
+		else{
+			$statusStr = 'ERROR: '.$tEditor->getErrorStr();
+		}
 	}
 }
 ?>
@@ -127,9 +132,9 @@ if($editable && $action){
 			},{ minLength: 3, autoFocus: true }
 			);
 
-			$('#tabs').tabs(
-					{ selected: <?php echo $tabIndex; ?> }
-				);
+			$('#tabs').tabs({ 
+				active: <?php echo $tabIndex; ?> 
+			});
 			
 		});
 
