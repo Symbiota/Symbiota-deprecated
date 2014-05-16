@@ -37,22 +37,41 @@ if (!$testOcc->checkSchema()) {
    echo "[Warning: Ingest of data may fail.  Contact a Symbiota developer.]\n";
 }
 
-/**
- * To record and sumarize the results of processing a GPI batch.xml file. 
- * 
- * @author mole
- *
- */
-if (!class_exists(Result)) {
+if (!class_exists('Result')) {
+   /**
+    * To record and sumarize the results of processing an xml file. 
+    * 
+    * @author mole
+    *
+    */
     class Result {
         public $couldparse = false; // document compliant with expectations
-	    public $success = false; // completed without errors
-	    public $errors = "";     // error messages
+        public $success = false; // completed without errors
+        public $errors = "";     // error messages
         public $recordcount = 0;  // number of core records encountered
-	    public $successcount = 0; // number of records successfully processed
-	    public $failurecount = 0; // number of records with errors in processing
-	    public $insertcount = 0; // number of records successfully inserted
-	    public $updatecount = 0; // number of records successfully updated
+        public $successcount = 0; // number of records successfully processed
+        public $failurecount = 0; // number of records with errors in processing
+        public $insertcount = 0; // number of records successfully inserted
+        public $updatecount = 0; // number of records successfully updated
+        public $imagecount = 0 ;  // number of images records encountered
+        public $imagefailurecount = 0 ;  // number of images with errors in processing
+        public $imageinsertcount = 0 ;  //  number of images inserted
+        public $imageupdatecount = 0 ;  //  number of images updated
+
+        function __construct() {
+           $couldparse = false; // document compliant with expectations
+           $success = false; // completed without errors
+           $errors = "";     // error messages
+           $recordcount = 0;  // number of core records encountered
+           $successcount = 0; // number of records successfully processed
+           $failurecount = 0; // number of records with errors in processing
+           $insertcount = 0; // number of records successfully inserted
+           $updatecount = 0; // number of records successfully updated
+           $imagecount = 0 ;  // number of images records encountered
+           $imagefailurecount = 0 ;  // number of images with errors in processing
+           $imageinsertcount = 0 ;  //  number of images inserted
+           $imageupdatecount = 0 ;  //  number of images updated
+        }
     }
 }
 

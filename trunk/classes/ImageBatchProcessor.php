@@ -462,19 +462,24 @@ class ImageBatchProcessor {
 				}
 				if ($foundSchema>0) { 
 					$this->logOrEcho("Proccessed $pathFrag$fileName, records: $result->recordcount, success: $result->successcount, failures: $result->failurecount, inserts: $result->insertcount, updates: $result->updatecount.");
-					if($this->keepOrig){
-						$oldFile = $this->sourcePathBase.$pathFrag.$fileName;
-						$newFileName = substr($pathFrag,strrpos($pathFrag,'/')).'orig_'.time().'.'.$fileName;
-						if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig_xml')){
-							mkdir($this->targetPathBase.$this->targetPathFrag.'orig_xml');
-						}
-						if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
-							$this->logOrEcho("\tERROR: unable to move (".$fileName.") ");
-						}
-					 } 
-					 else {
-						if(!unlink($oldFile)){
-							$this->logOrEcho("\tERROR: unable to delete file (".$fileName.") ");
+					if ($result->imagefailurecount>0) {
+						$this->logOrEcho("\tERROR: not moving (".$fileName."), image failure count " . $result->imagefailurecount . " greater than zero.");
+					}
+					else {
+						if($this->keepOrig){
+							$oldFile = $this->sourcePathBase.$pathFrag.$fileName;
+							$newFileName = substr($pathFrag,strrpos($pathFrag,'/')).'orig_'.time().'.'.$fileName;
+							if(!file_exists($this->targetPathBase.$this->targetPathFrag.'orig_xml')){
+								mkdir($this->targetPathBase.$this->targetPathFrag.'orig_xml');
+							}
+							if(!rename($oldFile,$this->targetPathBase.$this->targetPathFrag.'orig_xml/'.$newFileName)){
+								$this->logOrEcho("\tERROR: unable to move (".$fileName.") ");
+							}
+						 } 
+						 else {
+							if(!unlink($oldFile)){
+								$this->logOrEcho("\tERROR: unable to delete file (".$fileName.") ");
+							}
 						}
 					}
 				} 

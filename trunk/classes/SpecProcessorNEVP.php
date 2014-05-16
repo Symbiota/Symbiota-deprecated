@@ -47,6 +47,12 @@ if (!$testOcc->checkSchema()) {
 }
 
 if (!class_exists('Result')) {
+   /**
+    * To record and sumarize the results of processing an xml file. 
+    * 
+    * @author mole
+    *
+    */
     class Result {
         public $couldparse = false; // document compliant with expectations
 	    public $success = false; // completed without errors
